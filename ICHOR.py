@@ -2266,9 +2266,9 @@ def calculateErrors():
     if MULTIPLE_ADDITION_MODE == "manifold":
         sampled_training_points = []
         for i in range(len(EPE)):
-            if sample_geometries[EPE[i]].cv_atom not in sampled_training_points:
+            if sample_geometries[EPE[i][0]].cv_atom not in sampled_training_points:
                 MEPE.append(EPE[i])
-                sampled_training_points.append(sample_geometries[EPE[i]].cv_atom)
+                sampled_training_points.append(sample_geometries[EPE[i][0]].cv_atom)
     elif MULTIPLE_ADDITION_MODE == "multiple":
         MEPE = list(EPE)
 
