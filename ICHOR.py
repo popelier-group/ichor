@@ -2269,7 +2269,7 @@ def calculateErrors():
             if sample_geometries[EPE[i]].cv_atom not in sampled_training_points:
                 MEPE.append(EPE[i])
                 sampled_training_points.append(sample_geometries[EPE[i]].cv_atom)
-    elif MULYIPLE_ADDITION_MODE == "multiple":
+    elif MULTIPLE_ADDITION_MODE == "multiple":
         MEPE = list(EPE)
 
     MEPE = MEPE[:min(len(EPE), POINTS_PER_ITERATION)]
