@@ -2548,7 +2548,7 @@ if __name__ == "__main__":
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
-               "3": calculateErrors, "4": runDLPOLYOnLOG, "a": autoRun, "d":CSFTools.del_jobs}
+               "3": calculateErrors, "a": autoRun, "d":CSFTools.del_jobs, "dlpoly": runDLPOLYOnLOG}
 
     while True:
         if len(glob("*.sh.*")) > 0:
@@ -2563,12 +2563,13 @@ if __name__ == "__main__":
         print("[1] Training Set")
         print("[2] Sample Pool")
         print("[3] Calculate Errors")
-        print("[4] Run DLPOLY on Sample Pool using LOG")
         print("")
         print("[a] Auto Run")
         print("")
         print("[b] Backup Data")
         print("[d] Delete Current Running Jobs")
+        print("")
+        print("[dlpoly] Run DLPOLY on Sample Pool using LOG")
         print("")
         print("[0] Exit")
         print("Enter action:")
