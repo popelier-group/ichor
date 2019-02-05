@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bb0bda43-341f-4f79-8d53-96c8e3828886" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ICHOR.py" beforeDir="false" afterPath="$PROJECT_DIR$/ICHOR.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file:$PROJECT_DIR$/../../../../..//$PROJECT_DIR$/ICHOR.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="416">
-              <caret line="1858" column="26" selection-start-line="1858" selection-start-column="26" selection-end-line="1858" selection-end-column="26" />
+            <state relative-caret-position="308">
+              <caret line="2053" column="52" selection-start-line="2053" selection-start-column="52" selection-end-line="2053" selection-end-column="52" />
             </state>
           </provider>
         </entry>
@@ -88,20 +89,20 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1549374778789</updated>
-      <workItem from="1549374781382" duration="39000" />
+      <workItem from="1549374781382" duration="918000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="39000" />
+    <option name="totallyTimeSpent" value="918000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.34336677" visible="true" weight="0.25" />
-      <window_info active="true" id="Structure" order="1" sideWeight="0.6566332" side_tool="true" visible="true" weight="0.25" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.34336677" visible="true" weight="0.25" />
+      <window_info id="Structure" order="1" sideWeight="0.6566332" side_tool="true" visible="true" weight="0.25" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" />
       <window_info anchor="bottom" id="Version Control" />
@@ -128,8 +129,8 @@
   <component name="editorHistoryManager">
     <entry file="file:$PROJECT_DIR$/../../../../..//$PROJECT_DIR$/ICHOR.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="416">
-          <caret line="1858" column="26" selection-start-line="1858" selection-start-column="26" selection-end-line="1858" selection-end-column="26" />
+        <state relative-caret-position="308">
+          <caret line="2053" column="52" selection-start-line="2053" selection-start-column="52" selection-end-line="2053" selection-end-column="52" />
         </state>
       </provider>
     </entry>

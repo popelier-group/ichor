@@ -2049,6 +2049,10 @@ def submitSampleWFNs():
     FileTools.make_clean_directory(aimall_dir)
 
     FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
+
+    if POTENTIAL == "B3LYP":
+        FileTools.add_functional(wfn_dir, POTENTIAL)
+
     FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")
 
     FileTools.remove_files(gjf_dir, ".log")
