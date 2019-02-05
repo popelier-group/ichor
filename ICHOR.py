@@ -1856,12 +1856,8 @@ def submitTrainingWFNs():
 
     checkWFNs(gjf_dir, wfn_dir)
 
-    if len(FileTools.get_files_in(gjf_dir, "*.wfn")) > 0:
-        FileTools.make_clean_directory(wfn_dir)
-        FileTools.make_clean_directory(aimall_dir)
-    else:
-        FileTools.make_directory(wfn_dir)
-        FileTools.make_directory(aimall_dir)
+    FileTools.make_directory(wfn_dir)
+    FileTools.make_clean_directory(aimall_dir)
 
     FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
 
@@ -2043,7 +2039,7 @@ def submitSampleWFNs():
 
     checkWFNs(gjf_dir, wfn_dir)
 
-    FileTools.make_clean_directory(wfn_dir)
+    FileTools.make_directory(wfn_dir)
     FileTools.make_clean_directory(aimall_dir)
 
     FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
