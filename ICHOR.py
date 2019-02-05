@@ -105,10 +105,16 @@ IMPORTANT_FILES = {}
 TRAINING_POINTS = []
 SAMPLE_POINTS = []
 
-# CORE COUNT SETTINGS FOR RUNNING PROGRAMS
+# CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
 GAUSSIAN_CORE_COUNT = 2
 AIMALL_CORE_COUNT = 2
 FEREBUS_CORE_COUNT = 4
+
+# DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
+DLPOLY_NUMBER_OF_STEPS=500 # Number of steps to run simulation for
+DLPOLY_TEMPERATURE = 0 # If set to 0, will perform geom opt but default to 10 K
+DLPOLY_PRINT_EVERY = 1 # Print trajectory and stats every n steps
+DLPOLY_TIMESTEP = 0.001 # in ps
 
 MACHINE = "csf3"
 
@@ -1283,11 +1289,20 @@ class FerebusTools:
 
 class DLPOLYsetup:
 
-    def __init__(self, directory,  atoms, number_of_training_points, number_of_steps=500, write_setup_files=True):
+    def __init__(self, directory,  atoms, number_of_training_points, write_setup_files=True):
         self.directory = directory
-        self.number_of_steps = number_of_steps
         self.atoms = atoms
         self.number_of_training_points = number_of_training_points
+
+        global DLPOLY_NUMBER_OF_STEPS
+        global DLPOLY_TIMESTEP
+        global DLPOLY_TEMPERATURE
+        global DLPOLY_PRINT_EVERY
+
+        self.number_of_steps = DLPOLY_NUMBER_OF_STEPS
+        self.timestep = DLPOLY_TIMESTEP
+        self.temperature = float(DLPOLY_TEMPERATURE)
+        self.print_every = DLPOLY_PRINT_EVERY
 
         if not self.directory.endswith("/"):
             self.directory += "/"
@@ -1305,9 +1320,13 @@ class DLPOLYsetup:
             o.write("# This is a generic CONTROL file. Please adjust to your requirement.\n")
             o.write("# Directives which are commented are some useful options.\n\n")
             o.write("ensemble nvt hoover 0.02\n")
-            o.write("temperature 10.0\n\n")
-            o.write("#perform zero temperature run (really set to 10K)\n")
-            o.write("zero\n")
+            if self.temperature == 0:
+                o.write("temperature 10.0\n\n")
+            else:
+                o.write("temperature %.1f\n\n" % temperature)
+            if self.temperature == 0:
+                o.write("#perform zero temperature run (really set to 10K)\n")
+                o.write("zero\n")
             o.write("# optimise distance 0.000001\n\n")
             o.write("# Cap forces during equilibration, in unit kT/angstrom.\n")
             o.write("# (useful if your system is far from equilibrium)\n")
@@ -1322,8 +1341,7 @@ class DLPOLYsetup:
             o.write("steps %d\n" % self.number_of_steps)
             o.write("equilibration %d\n" % self.number_of_steps)
             o.write("#scale every 2\n")
-            o.write("#timestep 0.001\n")
-            o.write("timestep 0.001\n\n")
+            o.write("timestep %f\n" % self.timestep)
             o.write("cutoff 15.0\n")
             o.write("fflux\n\n")
             o.write("# Need these for bond contraints\n")
@@ -1332,8 +1350,8 @@ class DLPOLYsetup:
             o.write("# Continue MD simulation\n")
             o.write("#restart\n\n")
             o.write("traj 0 1 2\n")
-            o.write("print every 1\n")
-            o.write("stats every 1\n")
+            o.write("print every %d\n" % self.print_every)
+            o.write("stats every %d\n" % self.print_every)
             o.write("job time 10000000\n")
             o.write("close time 20000\n")
             o.write("finish")
@@ -1851,7 +1869,6 @@ def checkWFNs(gjf_dir, wfn_dir):
         print("All wfns complete\n\n")
 
 
-
 def submitTrainingGJFs():
     global FILE_STRUCTURE
 
@@ -2365,7 +2382,50 @@ def calculateErrors():
         print("")
 
 
-def runDLPOLYOnLOG():
+def edit_DLPOLY():
+    global DLPOLY_NUMBER_OF_STEPS
+    global DLPOLY_TIMESTEP
+    global DLPOLY_TEMPERATURE
+    global DLPOLY_PRINT_EVERY
+
+    while True:
+        print("")
+        print("###################")
+        print("# DLPOLY Settings #")
+        print("###################")
+        print("")
+        print("[1] Number Of Steps")
+        print("[2] Timestep")
+        print("[3] Temperature")
+        print("[4] Print Stats Every")
+        print("")
+        print("[p] Show Current Values")
+        print("[w] Write Changed Values To File")
+        print("")
+        print("[b] Go back")
+        print("[0] Exit")
+        ans += input()
+        if "b" in ans.lower():
+            break
+        elif ans == "0":
+            sys.exit()
+        elif ans == "1":
+            DLPOLY_NUMBER_OF_STEPS = int(input("Input Number Of Steps:"))
+        elif ans == "2":
+            DLPOLY_TIMESTEP = float(input("Input Timestep:"))
+        elif ans == "3":
+            DLPOLY_TEMPERATURE = int(input("Input Temperature:"))
+        elif ans == "4":
+            DLPOLY_PRINT_EVERY = int(input("Input Print Frequency:"))
+        else:
+            if ans in options:
+                options[ans]()
+            else:
+                print("%s is not a valid option" % ans)
+
+def run_DLPOLY_on_LOG():
+    global FILE_STRUCTURE
+
     dlpoly_base_dir = FILE_STRUCTURE.get_file_path("dlpoly")
     FileTools.make_clean_directory(dlpoly_base_dir)
 
@@ -2408,44 +2468,71 @@ def runDLPOLYOnLOG():
 
     ans = ""
     while True:
-        ans = input("Would you like to wait for DLPOLY to complete and calculate\n"
-                    "Gaussian Energy from optimised structure?[Y/N]")
+        ans = input("Would you like to wait for DLPOLY to complete? [Y/N]")
+        ans = ans.upper()
 
-        if ans.upper() in  ["Y", "N", "YES", "NO"]:
+        if ans in  ["Y", "N", "YES", "NO"]:
             break
         else:
             print("%s not a valid answer\n" % ans)
-
-    ans = ans.upper()
 
     if ans in ["Y", "YES"]:
         CSFTools.submit_scipt(dlpolysub.name, sync=True)
     else:
         CSFTools.submit_scipt(dlpolysub.name, exit=True)
 
+def submit_DLPOLY_to_gaussian():
+    global FILE_STRUCTURE
+
+    # Setup file locations
+    dlpoly_base_dir = FILE_STRUCTURE.get_file_path("dlpoly")
     dlpoly_gjf_dir = dlpoly_base_dir + "GJF/"
-    os.mkdir(dlpoly_gjf_dir)
+    FileTools.make_directory(dlpoly_gjf_dir)
 
-    for dlpoly_directory in dlpoly_working_directories:
-        coordinates = FileTools.get_last_coordinates(dlpoly_directory + "TRAJECTORY.xyz")
+    trajectory_files = FileTools.get_files_in(dlpoly_base_dir + "*/TRAJECTORY.xyz")
 
-        model_name = dlpoly_directory.rstrip("/").split("/")[-1]
+    for trajectory_file in trajectory_files:
+        coordinates = FileTools.get_last_coordinates(trajectory_file)
+        model_name = trajectory_file.split("/")[-2]
 
+        # e.g DLPOLY/WATER0006/TRAJECTORY.xyz >> DLPOLY/GJF/WATER0006.gjf
         gjf_fname = dlpoly_gjf_dir + model_name + ".gjf"
         gjf = formatGJF(gjf_fname, coordinates=coordinates)
 
     createGaussScript(dlpoly_gjf_dir, name="DLPOLYGaussSub.sh")
-    CSFTools.submit_scipt("DLPOLYGaussSub.sh", sync=True)
 
-    wfns = FileTools.get_files_in(dlpoly_gjf_dir, "*.wfn", sorting="natural")
-    with open(dlpoly_base_dir + "Energies.txt", "w+") as o:
-        for wfn in wfns:
-            with open(wfn, "r") as f:
-                last_line = f.readlines()[-1]
+    ans = ""
+    while True:
+        ans = input("Would you like to wait for DLPOLY to complete? [Y/N]")
+        ans = ans.upper()
+        if ans in  ["Y", "N", "YES", "NO"]:
+            break
+        else:
+            print("%s not a valid answer\n" % ans)
 
-            wfn_energy = re.findall("[+-]?\d+.\d+", last_line)[0]
+    if ans in ["Y", "YES"]:
+        CSFTools.submit_scipt("DLPOLYGaussSub.sh", sync=True)
+        get_DLPOLY_WFN_energies()
+    else:
+        CSFTools.submit_scipt("DLPOLYGaussSub.sh", exit=True)
 
-            o.write("%s\n" % wfn_energy)
+def get_DLPOLY_WFN_energies():
+    global FILE_STRUCTURE
+
+    # Setup file locations
+    dlpoly_base_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+    wfns = FileTools.get_files_in(dlpoly_base_dir, "*/*.wfn", sorting="natural")
+
+    print("\n%d wfns found.\n" % len(wfns))
+    if len(wfns) > 0:
+        with open(dlpoly_base_dir + "Energies.txt", "w+") as o:
+            for wfn in wfns:
+                with open(wfn, "r") as f:
+                    last_line = f.readlines()[-1]
+                wfn_energy = re.findall("[+-]?\d+.\d+", last_line)[0]
+                print("%s >> %s" % (FileTools.get_base(wfn), wfn_energy))
+                o.write("%s\t%s\n" % (FileTools.get_base(wfn), wfn_energy))
+        print("\nWrote All Energies to %s\n" % dlpoly_base_dir + "Energies.txt", "w+"))
 
 
 def autoRun(submit=True):
@@ -2535,7 +2622,9 @@ if __name__ == "__main__":
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
-               "3": calculateErrors, "a": autoRun, "d":CSFTools.del_jobs, "dlpoly": runDLPOLYOnLOG}
+               "3": calculateErrors, "a": autoRun, "d":CSFTools.del_jobs,
+               "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_2": runDLPOLYOnLOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
+               "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": get_DLPOLY_WFN_energies}
 
     while True:
         if len(glob("*.sh.*")) > 0:
@@ -2604,6 +2693,31 @@ if __name__ == "__main__":
                 else:
                     options[num]()
                     num = "2"
+        elif num == "dlpoly":
+            while True:
+                print("")
+                print("###############")
+                print("# DLPOLY Menu #")
+                print("###############")
+                print("")
+                print("[1] Run DLPOLY using MODELs in LOG")
+                print("[2] Run DLPOLY using current MODELs")
+                print("")
+                print("[g] Calculate Gaussian Energies of DLPOLY run")
+                print("")
+                print("[wfn] Get All WFN Energies")
+                print("[edit] Edit DLPOLY Settings")
+                print("")
+                print("[b] Go back")
+                print("[0] Exit")
+                num += "_" + input()
+                if "b" in num.lower():
+                    break
+                elif num == "dlpoly_0":
+                    sys.exit()
+                else:
+                    options[num]()
+                    num = "dlpoly"
         elif num == "0":
             sys.exit()
         else:
