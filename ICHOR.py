@@ -78,7 +78,7 @@ from numpy.core.multiarray import ndarray
  #::##########################################################################::#
  #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
  ################################################################################
- 
+
 """
 
 SYSTEM_NAME = "WATER"
@@ -104,6 +104,11 @@ IMPORTANT_FILES = {}
 
 TRAINING_POINTS = []
 SAMPLE_POINTS = []
+
+# CORE COUNT SETTINGS FOR RUNNING PROGRAMS
+GAUSSIAN_CORE_COUNT = 2
+AIMALL_CORE_COUNT = 2
+FEREBUS_CORE_COUNT = 4
 
 MACHINE = "csf3"
 
@@ -640,7 +645,7 @@ class MODEL:
                 r[j] = self.gaussian_correlation(x_values[i], self.training_data[j])
 
             predictions[i] = self.mu + np.dot(np.matmul(r.T, self.inv_R), (self.kriging_centres - self.mu))
-        
+
         return predictions
 
     def variance(self, x_values):
@@ -1019,7 +1024,7 @@ class FileTools:
                 lines[1] =  "%s   %s\n" % (lines[1].strip(),functional)
             with open(wfn, "w") as f:
                 f.writelines(lines)
-        
+
 
     @staticmethod
     def remove_directory(directory):
@@ -1090,7 +1095,7 @@ class FileTools:
     @staticmethod
     def get_base(fname):
         return fname.split(".")[0].split("/")[-1]
-      
+
     @staticmethod
     def cleanup_aimall_dir(aimall_dir):
         all_directories = FileTools.get_directories(aimall_dir)
@@ -1700,6 +1705,10 @@ def defineGlobals():
 
     global MULTIPLE_ADDITION_MODE
 
+    global GAUSSIAN_CORE_COUNT
+    global AIMALL_CORE_COUNT
+    global FEREBUS_CORE_COUNT
+
     FILE_STRUCTURE = FileTools.setup_file_structure()
     IMPORTANT_FILES = FileTools.setup_important_files()
 
@@ -1725,17 +1734,25 @@ def defineGlobals():
             POTENTIAL = val.upper()
         if key == "BASIS_SET":
             BASIS_SET = val
+        if key == "BASIS_SET":
+            BASIS_SET = val
+        if key == "GAUSSIAN_CORE_COUNT":
+            GAUSSIAN_CORE_COUNT = int(val)
+        if key == "AIMALL_CORE_COUNT":
+            GAUSSIAN_CORE_COUNT = int(val)
+        if key == "FEREBUS_CORE_COUNT":
+            GAUSSIAN_CORE_COUNT = int(val)
 
     # ALF checking
     if not ALF:
         if not alf_reference_file:
             alf_reference_file = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")[0]
         ALF = AtomicLocalFrame(alf_reference_file)
-   
+
     for i in range(len(ALF)):
         for j in range(len(ALF[i])):
             ALF[i][j] = int(ALF[i][j])
-   
+
     if ALF[0][0] == 1:
         for i in range(len(ALF)):
             for j in range(len(ALF[i])):
@@ -1773,11 +1790,13 @@ def readArguments():
 
 def createGaussScript(dir, name="GaussSub.sh", files=None):
     global MACHINE
+    global GAUSSIAN_CORE_COUNT
+
     if not files:
         gjfs = FileTools.get_files_in(dir, "*.gjf")
     else:
         gjfs = files
-    gaussSub = SubmissionScript(name, type="gaussian", cores=2)
+    gaussSub = SubmissionScript(name, type="gaussian", cores=GAUSSIAN_CORE_COUNT)
     if MACHINE == "csf2":
         gaussSub.add_module("apps/binapps/gaussian/g09b01_em64t")
     if MACHINE == "csf3":
@@ -1825,7 +1844,7 @@ def checkWFNs(gjf_dir, wfn_dir):
         for gjf in gjfs:
             if gjf[0] not in wfns:
                 missing_gjfs.append(gjf[1])
-                
+
         createGaussScript(gjf_dir, files=missing_gjfs)
         CSFTools.submit_scipt("GaussSub.sh", exit=True)
     else:
@@ -1849,6 +1868,7 @@ def submitTrainingGJFs():
 def submitTrainingWFNs():
     global FILE_STRUCTURE
     global POTENTIAL
+    global AIMALL_CORE_COUNT
 
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
@@ -1868,7 +1888,7 @@ def submitTrainingWFNs():
 
     FileTools.remove_files(gjf_dir, ".log")
 
-    aimsub = SubmissionScript("AIMSub.sh", type="aimall", cores=2)
+    aimsub = SubmissionScript("AIMSub.sh", type="aimall", cores=AIMALL_CORE_COUNT)
 
     aimsub.add_option(option="-j", value="y")
     aimsub.add_option(option="-o", value="AIMALL.log")
@@ -1892,6 +1912,7 @@ def submitTrainingWFNs():
 def makeTrainingSets():
     global FILE_STRUCTURE
     global AUTO_SUBMISSION_MODE
+    global FEREBUS_CORE_COUNT
 
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
@@ -1901,7 +1922,7 @@ def makeTrainingSets():
     FileTools.make_clean_directory(fereb_dir)
     FileTools.cleanup_aimall_dir(aimall_dir)
 
-    fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=4)
+    fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
 
     if MACHINE == "csf2":
         fereSub.add_module("libs/intel/nag/fortran_mark23_intel")
@@ -1973,7 +1994,7 @@ def makeTrainingSets():
 
                 f.write("%s   %s    " % (features_string, iqa_string) + str(row_count).zfill(4) + "\n")
                 row_count += 1
-        
+
         FerebusTools.write_finput(atom_dir, len(atom_directories), atom, len(gjf_data))
 
         fereSub.add_job(atom_dir)
@@ -2031,6 +2052,7 @@ def submitSampleGJFs():
 
 def submitSampleWFNs():
     global FILE_STRUCTURE
+    global AIMALL_CORE_COUNT
 
     gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
 
@@ -2051,7 +2073,7 @@ def submitSampleWFNs():
 
     FileTools.remove_files(gjf_dir, ".log")
 
-    aimsub = SubmissionScript("AIMSub.sh", type="aimall", cores=2)
+    aimsub = SubmissionScript("AIMSub.sh", type="aimall", cores=AIMALL_CORE_COUNT)
 
     aimsub.add_option(option="-j", value="y")
     aimsub.add_option(option="-o", value="AIMALL.log")
@@ -2269,7 +2291,7 @@ def calculateErrors():
     EPE = []
     for i in range(len(cv_errors)):
         EPE.append((i, calcEPE(cv_errors[i], variance[i], alpha)))
-    
+
     MEPE = []
     EPE = UsefulTools.sorted_tuple(EPE, 1, reverse=True)
     if MULTIPLE_ADDITION_MODE == "manifold":
@@ -2598,4 +2620,3 @@ if __name__ == "__main__":
             sys.exit()
         else:
             options[num]()
-
