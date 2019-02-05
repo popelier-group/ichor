@@ -1815,8 +1815,6 @@ def checkWFNs(gjf_dir, wfn_dir):
 
     all_wfns = wfns_in_gjf_dir + wfns_in_wfn_dir
 
-    print(all_wfns)
-
     if len(all_wfns) != len(gjfs_in_gjf_dir):
         print("WFN(s) missing\n%d GJFs\n%d WFNs\n\n%d WFNs Missing\n\n" % (len(gjfs_in_gjf_dir), len(all_wfns),
                                                                            len(gjfs_in_gjf_dir) - len(all_wfns)))
