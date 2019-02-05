@@ -1809,18 +1809,25 @@ def formatGJF(fname, coordinates=None):
 def checkWFNs(gjf_dir, wfn_dir):
     global FILE_STRUCTURE
 
-    gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
-    wfns = FileTools.get_files_in(wfn_dir, "*.wfn")
+    gjfs_in_gjf_dir = FileTools.get_files_in(gjf_dir, "*.gjf")
+    wfns_in_gjf_dir = FileTools.get_files_in(gjf_dir, "*.wfn")
+    wfns_in_wfn_dir = FileTools.get_files_in(wfn_dir, "*.wfn")
 
-    if len(wfns) != len(gjfs):
+    all_wfns = wfns_in_gjf_dir + wfns_in_wfn_dir
+
+    print(all_wfns)
+
+    if len(all_wfns) != len(gjfs_in_gjf_dir):
+        print("WFN(s) missing\n%d GJFs\n%d WFNs\n\n%d WFNs Missing\n\n" % (len(gjfs_in_gjf_dir), len(all_wfns),
+                                                                           len(gjfs_in_gjf_dir) - len(all_wfns)))
+        gjfs = [(FileTools.get_base(i), i) for i in gjfs_in_gjf_dir]
+        wfns = [FileTools.get_base(i) for i in all_wfns]
+
         missing_gjfs = []
-        print("WFN(s) missing\n%d GJFs\n%d WFNs\n\n%d WFNs Missing\n\n" % (len(gjfs), len(wfns), len(gjfs)-len(wfns)))
-        j = 0
-        for i in range(len(gjfs)):
-            if wfns[j].replace(".wfn", "") != gjfs[i].replace(".gjf", ""):
-                missing_gjfs.append(gjfs[i])
-            else:
-                j+=1
+        for gjf in gjfs:
+            if gjf[0] not in wfns:
+                missing_gjfs.append(gjf[1])
+                
         createGaussScript(gjf_dir, files=missing_gjfs)
         CSFTools.submit_scipt("GaussSub.sh", exit=True)
     else:
