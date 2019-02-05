@@ -1088,6 +1088,10 @@ class FileTools:
         return directories
 
     @staticmethod
+    def get_base(fname):
+        return fname.split(".")[0].split("/")[-1]
+      
+    @staticmethod
     def cleanup_aimall_dir(aimall_dir):
         all_directories = FileTools.get_directories(aimall_dir)
         atom_directories = FileTools.get_atom_directories(aimall_dir)
