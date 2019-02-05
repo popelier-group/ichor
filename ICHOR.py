@@ -2373,7 +2373,7 @@ def calculateErrors():
         Etrue = (e_iqa - predictions[index])**2
 
         with open("ErrorFile.csv", "a") as f:
-            f.write("%s,%.10f,%.10f,%.10f,%.10f\n" % (str(index+1).zfill(4), Etrue, cv_errors[index], variance[index],
+            f.write("%s,%.16f,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), Etrue, cv_errors[index], variance[index],
                                                       alpha))
         print("")
 
