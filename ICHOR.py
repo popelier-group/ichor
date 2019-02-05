@@ -1864,27 +1864,51 @@ def submitTrainingGJFs():
 
     CSFTools.submit_scipt("GaussSub.sh", exit=True)
 
-
-def submitTrainingWFNs():
+def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
     global FILE_STRUCTURE
     global POTENTIAL
     global AIMALL_CORE_COUNT
 
-    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
-    wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
-    aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+    if DirectoryLabel:
+        dir_location_start = ""
 
-    checkWFNs(gjf_dir, wfn_dir)
+        training_set_labels = ["TRAINING_SET", "TRAINING", "TS"]
+        sample_set_labels = ["SAMPLE_POOL", "SAMPLE", "SP"]
+
+        if DirectoryLabel.upper() is in training_set_labels:
+            dir_location_start = "ts"
+        elif DirectoryLabel.upper() is in sample_set_labels:
+            dir_location_start = "sp"
+        else:
+            print("\nUnknown Directory Label: %s" % DirectoryLabel)
+            print("Known Directory Labels:")
+            print("  Training Set:")
+            print(training_set_labels)
+            print("  Sample Pool:")
+            print(sample_set_labels)
+            print("\nChange Your Directory Label or Create Your Own")
+            quit()
+
+        gjf_dir = FILE_STRUCTURE.get_file_path("%s_gjf" % dir_location_start)
+        wfn_dir = FILE_STRUCTURE.get_file_path("%s_wfn" % dir_location_start)
+        aimall_dir = FILE_STRUCTURE.get_file_path("ts%s_aimall" % dir_location_start)
+    elif DirectoryPath:
+        if not DirectoryPath.endswith("/"):
+            DirectoryPath += "/"
+        gjf_dir = DirectoryPath
+        wfn_dir = DirectoryPath + "WFN/"
+        aimall_dir = DirectoryPath + "AIMALL/"
+    else:
+        print("\nPlease Specify A DirectoryLabel or DirectoryPath to WFN files")
+        quit()
 
     FileTools.make_directory(wfn_dir)
     FileTools.make_clean_directory(aimall_dir)
 
     FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
-
     if POTENTIAL == "B3LYP":
         FileTools.add_functional(wfn_dir, POTENTIAL)
-
-    FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")
+    FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")checkWFNs(gjf_dir, wfn_dir)
 
     FileTools.remove_files(gjf_dir, ".log")
 
@@ -1908,6 +1932,9 @@ def submitTrainingWFNs():
 
     CSFTools.submit_scipt(aimsub.name, exit=True)
 
+
+def submitTrainingWFNs():
+    submitWFNs(DirectoryLabel="training_set")
 
 def makeTrainingSets():
     global FILE_STRUCTURE
@@ -2051,47 +2078,7 @@ def submitSampleGJFs():
 
 
 def submitSampleWFNs():
-    global FILE_STRUCTURE
-    global AIMALL_CORE_COUNT
-
-    gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
-
-    wfn_dir = FILE_STRUCTURE.get_file_path("sp_wfn")
-    aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
-
-    checkWFNs(gjf_dir, wfn_dir)
-
-    FileTools.make_directory(wfn_dir)
-    FileTools.make_clean_directory(aimall_dir)
-
-    FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
-
-    if POTENTIAL == "B3LYP":
-        FileTools.add_functional(wfn_dir, POTENTIAL)
-
-    FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")
-
-    FileTools.remove_files(gjf_dir, ".log")
-
-    aimsub = SubmissionScript("AIMSub.sh", type="aimall", cores=AIMALL_CORE_COUNT)
-
-    aimsub.add_option(option="-j", value="y")
-    aimsub.add_option(option="-o", value="AIMALL.log")
-    aimsub.add_option(option="-e", value="AIMALL.err")
-    aimsub.add_option(option="-S", value="/bin/bash")
-
-    aimsub.add_path("~/AIMALL")
-
-    wfns = FileTools.get_files_in(aimall_dir, "*.wfn")
-
-    for i in range(len(wfns)):
-        wfn = wfns[i]
-        job = "%sJOB%d.log" % (aimall_dir, i+1)
-        aimsub.add_job(wfn, options=job)
-
-    aimsub.write_script()
-
-    CSFTools.submit_scipt(aimsub.name, exit=True)
+    submitWFNs(DirectoryLabel="sample_set")
 
 
 def getSampleAIMALLEnergies():
