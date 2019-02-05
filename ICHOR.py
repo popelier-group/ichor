@@ -1856,7 +1856,7 @@ def submitTrainingWFNs():
     wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
     aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
 
-    checkWFNs(gjf_dir, gjf_dir)
+    checkWFNs(gjf_dir, wfn_dir)
 
     if len(FileTools.get_files_in(gjf_dir, "*.wfn")) > 0:
         FileTools.make_clean_directory(wfn_dir)
@@ -2039,10 +2039,11 @@ def submitSampleWFNs():
     global FILE_STRUCTURE
 
     gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
-    checkWFNs(gjf_dir, gjf_dir)
 
     wfn_dir = FILE_STRUCTURE.get_file_path("sp_wfn")
     aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
+
+    checkWFNs(gjf_dir, wfn_dir)
 
     FileTools.make_clean_directory(wfn_dir)
     FileTools.make_clean_directory(aimall_dir)
