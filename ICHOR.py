@@ -875,7 +875,6 @@ class SubmissionScript:
         with open(self.name, "w+") as f:
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
-            f.write("#$ -V\n")
             f.write(self.get_cores_string())
             f.write(self.get_options_string())
             if len(self.jobs) > 1:
