@@ -2731,7 +2731,7 @@ if __name__ == "__main__":
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "3": calculateErrors, "a": autoRun, "d":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
-               "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": get_DLPOLY_WFN_energies}
+               "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY}
 
     while True:
         if len(glob("*.sh.*")) > 0:
