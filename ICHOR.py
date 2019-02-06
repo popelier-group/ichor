@@ -2639,7 +2639,7 @@ def get_DLPOLY_WFN_energies():
                 wfn_energy = re.findall("[+-]?\d+.\d+", last_line)[0]
                 print("%s >> %s" % (FileTools.get_base(wfn), wfn_energy))
                 o.write("%s\t%s\n" % (FileTools.get_base(wfn), wfn_energy))
-        print("\nWrote All Energies to %s\n" % dlpoly_base_dir + "Energies.txt", "w+"))
+        print("\nWrote All Energies to %s\n" % dlpoly_base_dir + "Energies.txt", "w+")
 
 
 def autoRun(submit=True):
