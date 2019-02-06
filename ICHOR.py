@@ -2730,7 +2730,7 @@ if __name__ == "__main__":
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "3": calculateErrors, "a": autoRun, "d":CSFTools.del_jobs,
-               "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_2": runDLPOLYOnLOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
+               "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": get_DLPOLY_WFN_energies}
 
     while True:
