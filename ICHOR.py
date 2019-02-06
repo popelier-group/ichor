@@ -924,8 +924,8 @@ class UsefulTools:
 
     @staticmethod
     def get_ichor_logo():
-        ichor_encoded_string =
-        ['"%s %s%s %s%s%s %s%s%s %s%s\\n" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9," "*5,"R"*17," "*3)',
+        ichor_encoded_string = ['"%s %s%s %s%s%s %s%s%s %s%s\\n" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9,'\
+        '" "*5,"R"*17," "*3)',
         '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s\\n" % ("I",":"*8,"I"," "*5,"C"*3,":"*12,"C","H",":"*7,"H"'\
         '," "*5,"H",":"*7,"H"," "*3,"O"*2,":"*9,"O"*2," "*3,"R",":"*16,"R"," "*2)',
         '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s\\n" % ("I",":"*8,"I"," "*3,"C"*2,":"*15,"C","H",":"*7'\
