@@ -1858,7 +1858,7 @@ def defineGlobals():
         if key == "DLPOLY_NUMBER_OF_STEPS":
             DLPOLY_NUMBER_OF_STEPS = int(val)
         if key == "DLPOLY_TIMESTEP":
-            DLPOLY_TIMESTEP = int(val)
+            DLPOLY_TIMESTEP = float(val)
         if key == "DLPOLY_TEMPERATURE":
             DLPOLY_TEMPERATURE = int(val)
         if key == "DLPOLY_PRINT_EVERY":
