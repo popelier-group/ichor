@@ -2522,7 +2522,7 @@ def edit_DLPOLY():
         elif ans == "4":
             DLPOLY_PRINT_EVERY = int(input("Input Print Frequency:"))
             if DLPOLY_PRINT_EVERY != default_DLPOLY_PRINT_EVERY:
-                CONFIG.add_key_val("DLPOLY_NUMBER_OF_STEPS", DLPOLY_PRINT_EVERY))
+                CONFIG.add_key_val("DLPOLY_NUMBER_OF_STEPS", DLPOLY_PRINT_EVERY)
                 CONFIG.write_key_vals()
         else:
             if ans in options:
