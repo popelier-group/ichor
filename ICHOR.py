@@ -1980,9 +1980,9 @@ def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
         training_set_labels = ["TRAINING_SET", "TRAINING", "TS"]
         sample_set_labels = ["SAMPLE_POOL", "SAMPLE", "SP"]
 
-        if DirectoryLabel.upper() is in training_set_labels:
+        if DirectoryLabel.upper() in training_set_labels:
             dir_location_start = "ts"
-        elif DirectoryLabel.upper() is in sample_set_labels:
+        elif DirectoryLabel.upper() in sample_set_labels:
             dir_location_start = "sp"
         else:
             print("\nUnknown Directory Label: %s" % DirectoryLabel)
