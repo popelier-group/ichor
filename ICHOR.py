@@ -892,35 +892,6 @@ class SubmissionScript:
             modules_string += "module load %s\n" % module
         return modules_string
 
-    # def get_job_submission(self, job_num):
-    #     global FILE_STRUCTURE
-    #
-    #     if self.type == "gaussian":
-    #         return "export PREFERRED_SCDIR=/scratch\n" \
-    #                "$g09root/g09/g09 %s %s\n" % (self.jobs[job_num][0], self.jobs[job_num][1])
-    #     elif self.type == "aimall":
-    #         return "~/AIMAll/aimqb.ish " \
-    #                "-nogui -usetwoe=0 -atom=all -encomp=3 -boaq=gs30 -iasmesh=fine -nproc=2 " \
-    #                "%s >& %s\n" % (self.jobs[job_num][0], self.jobs[job_num][1])
-    #     elif self.type == "ferebus":
-    #         ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
-    #         copy_line = "cp %s %s\n" % (ferebus_loc, self.jobs[job_num][0])
-    #         cd_line = "cd %s\n" % self.jobs[job_num][0]
-    #         while_loop = "while [ ! -f *q11s* ]\n" \
-    #                      "do\n" \
-    #                      "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
-    #                      "done\n"
-    #         return "%s%s%s" % (copy_line, cd_line, while_loop)
-    #     elif self.type == "python":
-    #         return "%s %s %s" % ("python", self.jobs[job_num][0], self.jobs[job_num][1])
-    #     elif self.type == "dlpoly":
-    #         cp_dlpoly_string = "cp %sDLPOLY.Z %s" % (FILE_STRUCTURE.get_file_path("programs"), self.jobs[job_num][0])
-    #         cd_string = "cd %s" % self.jobs[job_num][0]
-    #         execution_string = "export $OMP_NUM_THREADS=%d; ./DLPOLY.Z" % self.cores
-    #         return "%s\n%s\n%s\n" % (cp_dlpoly_string, cd_string, execution_string)
-    #     else:
-    #         return "export $OMP_NUM_THREADS=%d; ./%s %s\n" % (self.cores, self.jobs[job_num][0], self.jobs[job_num][1])
-
     def add_job_string(self, job_num, jobid):
         if jobid == 0:
             return self.get_job_submission(job_num)
@@ -1190,6 +1161,8 @@ class FileTools:
 
     @staticmethod
     def move_file(src, dst):
+        if os.path.isfile(dst):
+            os.remove(dst)
         shutil.move(src, dst)
 
     @staticmethod
@@ -1199,8 +1172,9 @@ class FileTools:
         for item in os.listdir(src):
             if item.endswith(fileType):
                 pathname = os.path.join(src, item)
+                destination = os.path.join(dst, item)
                 if os.path.isfile(pathname):
-                    shutil.move(pathname, dst)
+                    FileTools.move_file(pathname, destination)
 
     @staticmethod
     def get_directories(directory):
