@@ -2495,7 +2495,6 @@ def edit_DLPOLY():
         print("[4] Print Stats Every")
         print("")
         print("[p] Show Current Values")
-        print("[w] Write Changed Values To File")
         print("")
         print("[b] Go back")
         print("[0] Exit")
@@ -2522,8 +2521,15 @@ def edit_DLPOLY():
         elif ans == "4":
             DLPOLY_PRINT_EVERY = int(input("Input Print Frequency:"))
             if DLPOLY_PRINT_EVERY != default_DLPOLY_PRINT_EVERY:
-                CONFIG.add_key_val("DLPOLY_NUMBER_OF_STEPS", DLPOLY_PRINT_EVERY)
+                CONFIG.add_key_val("DLPOLY_PRINT_EVERY", DLPOLY_PRINT_EVERY)
                 CONFIG.write_key_vals()
+        elif ans == "p":
+            print("")
+            print("%s = %d" % ("DLPOLY_NUMBER_OF_STEPS", DLPOLY_NUMBER_OF_STEPS))
+            print("%s = %f" % ("DLPOLY_TIMESTEP       ", DLPOLY_TIMESTEP))
+            print("%s = %f" % ("DLPOLY_TEMPERATURE    ", DLPOLY_TEMPERATURE))
+            print("%s = %d" % ("DLPOLY_PRINT_EVERY    ", DLPOLY_PRINT_EVERY))
+            print("")
         else:
             if ans in options:
                 options[ans]()
