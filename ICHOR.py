@@ -81,6 +81,9 @@ from numpy.core.multiarray import ndarray
 
 """
 
+DEFAULT_CONFIG_FILE = "config.properties"
+CONFIG = None
+
 SYSTEM_NAME = "WATER"
 ALF = []
 
@@ -158,10 +161,11 @@ class ConfigProvider(dict):
 
     """
 
+    global DEFAULT_CONFIG_FILE
     src = None
     prop = re.compile(r"([\w. ]+)\s*=\s*(.*)")
 
-    def __init__(self, source="config.properties"):
+    def __init__(self, source=DEFAULT_CONFIG_FILE):
         self.src = source
         self.loadConfig()
 
@@ -198,6 +202,16 @@ class ConfigProvider(dict):
 
     def cleanup_key(self, key):
         return key.strip().replace(" ", "_").upper()
+
+    def add_key_val(self, key, val):
+        self[key] = val
+
+    def write_key_vals(self):
+        with open(self.src, "w+") as f:
+            f.write(UsefulTools.get_ichor_logo())
+            f.write("\n")
+            for key in self:
+                f.write("%s=%s\n" % (key, self[key]))
 
 
 def sanitize_id(node_id):
@@ -907,6 +921,77 @@ class SubmissionScript:
 
 
 class UsefulTools:
+
+    @staticmethod
+    def get_ichor_logo():
+        ichor_encoded_string =
+        ['"%s %s%s %s%s%s %s%s%s %s%s\\n" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9," "*5,"R"*17," "*3)',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s\\n" % ("I",":"*8,"I"," "*5,"C"*3,":"*12,"C","H",":"*7,"H"'\
+        '," "*5,"H",":"*7,"H"," "*3,"O"*2,":"*9,"O"*2," "*3,"R",":"*16,"R"," "*2)',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s\\n" % ("I",":"*8,"I"," "*3,"C"*2,":"*15,"C","H",":"*7'\
+        ',"H"," "*5,"H",":"*7,"H"," ","O"*2,":"*13,"O"*2," ","R",":"*6,"R"*6,":"*5,"R"," ")',
+        '"%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s\\n" % ("I"*2,":"*6,"I"*2," "*2,"C",":"*5,"C"*8,'\
+        '":"*4,"C","H"*2,":"*6,"H"," "*5,"H",":"*6,"H"*2,"O",":"*7,"O"*3,":"*7,"O","R"*2,":"*5,"R"," "*5,"R",'\
+        '":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,'\
+        '" ","C",":"*5,"C"," "*7,"C"*6," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*6,"O"," "*3,"O",":"*6,"O"'\
+        '," "*2,"R",":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
+        '":"*5,"C"," "*14," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",'\
+        '":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,'\
+        '"C"," "*14," "*2,"H",":"*6,"H"*5,":"*6,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R"*6,'\
+        '":"*5,"R"," ")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,"C",'\
+        '" "*14," "*2,"H",":"*17,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*13,"R"*2," "*2)',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,'\
+        '"C"," "*14," "*2,"H",":"*17,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R"*6,":"*5,"R"," ")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
+        '":"*5,"C"," "*14," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",'\
+        '":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
+        '":"*5,"C"," "*14," "*2,"H",":"*6,"H"*5,":"*6,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R",'\
+        '" "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s\\n" % (" "*2,"I",":"*4,"I"," "*2,'\
+        '" ","C",":"*5,"C"," "*7,"C"*6," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*6,"O"," "*3,"O",":"*6,"O"'\
+        '," "*2,"R",":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s\\n" % ("I"*2,":"*6,"I"*2," "*2,"C",":"*5,"C"*8,'\
+        '":"*4,"C","H"*2,":"*6,"H"," "*5,"H",":"*6,"H"*2,"O",":"*7,"O"*3,":"*7,"O","R"*2,":"*5,"R"," "*5,"R",":"*5,'\
+        '"R")',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s\\n" % ("I",":"*8,"I"," "*3,"C"*2,":"*15,"C","H",'\
+        '":"*7,"H"," "*5,"H",":"*7,"H"," ","O"*2,":"*13,"O"*2," ","R",":"*6,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s\\n" % ("I",":"*8,"I"," "*5,"C"*3,":"*12,"C","H",'\
+        '":"*7,"H"," "*5,"H",":"*7,"H"," "*3,"O"*2,":"*9,"O"*2," "*3,"R",":"*6,"R"," "*5,"R",":"*5,"R")',
+        '"%s %s%s %s%s%s %s%s%s %s%s%s\\n" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9," "*5,"R"*8," "*5,'\
+        '"R"*7)']
+
+        ichor_string = ("{}\n"*23).format(
+                         "#"*109,
+                         "#%s#" % ":"*107,
+                         "#::%s::#" % "#"*103,
+                         "#::#%s#::#" % " "*101,
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[0]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[1]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[2]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[3]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[4]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[5]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[6]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[7]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[8]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[9]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[10]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[11]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[12]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[13]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[14]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[15]),
+                         "#::#%s#::#" % " "*101,
+                         "#::%s::#" % "#"*103,
+                         "#%s#" % ":"*107,
+                         "#"*109
+                         )
+        return ichor_string
 
     @staticmethod
     def sorted_tuple(data, i, reverse=False):
@@ -1727,6 +1812,8 @@ def defineGlobals():
     global AIMALL_CORE_COUNT
     global FEREBUS_CORE_COUNT
 
+    global CONFIG
+
     FILE_STRUCTURE = FileTools.setup_file_structure()
     IMPORTANT_FILES = FileTools.setup_important_files()
 
@@ -1734,6 +1821,7 @@ def defineGlobals():
 
     # config reading
     config = ConfigProvider()
+    CONFIG = config
 
     for key, val in config.items():
         if key == "SYSTEM_NAME":
@@ -2256,7 +2344,6 @@ def calculateErrors():
     global POINTS_PER_ITERATION
     global MULTIPLE_ADDITION_MODE
 
-
     values_dictionary = calculatePredictions(calculate_variance=True, return_models=True, calculate_cv_errors=True,
                                              return_geometries=True)
 
@@ -2388,6 +2475,13 @@ def edit_DLPOLY():
     global DLPOLY_TEMPERATURE
     global DLPOLY_PRINT_EVERY
 
+    global CONFIG
+
+    default_DLPOLY_NUMBER_OF_STEPS = DLPOLY_NUMBER_OF_STEPS
+    default_DLPOLY_TIMESTEP = DLPOLY_TIMESTEP
+    default_DLPOLY_TEMPERATURE = DLPOLY_TEMPERATURE
+    default_DLPOLY_PRINT_EVERY = DLPOLY_PRINT_EVERY
+
     while True:
         print("")
         print("###################")
@@ -2411,12 +2505,24 @@ def edit_DLPOLY():
             sys.exit()
         elif ans == "1":
             DLPOLY_NUMBER_OF_STEPS = int(input("Input Number Of Steps:"))
+            if DLPOLY_NUMBER_OF_STEPS != default_DLPOLY_NUMBER_OF_STEPS:
+                CONFIG.add_key_val("DLPOLY_NUMBER_OF_STEPS", DLPOLY_NUMBER_OF_STEPS)
+                CONFIG.write_key_vals()
         elif ans == "2":
             DLPOLY_TIMESTEP = float(input("Input Timestep:"))
+            if DLPOLY_TIMESTEP != default_DLPOLY_TIMESTEP:
+                CONFIG.add_key_val("DLPOLY_TIMESTEP", DLPOLY_TIMESTEP)
+                CONFIG.write_key_vals()
         elif ans == "3":
             DLPOLY_TEMPERATURE = int(input("Input Temperature:"))
+            if DLPOLY_TEMPERATURE != default_TEMPERATURE:
+                CONFIG.add_key_val("DLPOLY_TEMPERATURE", DLPOLY_TEMPERATURE)
+                CONFIG.write_key_vals()
         elif ans == "4":
             DLPOLY_PRINT_EVERY = int(input("Input Print Frequency:"))
+            if DLPOLY_PRINT_EVERY != default_DLPOLY_PRINT_EVERY:
+                CONFIG.add_key_val("DLPOLY_NUMBER_OF_STEPS", DLPOLY_PRINT_EVERY))
+                CONFIG.write_key_vals()
         else:
             if ans in options:
                 options[ans]()
