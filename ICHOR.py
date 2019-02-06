@@ -2013,7 +2013,8 @@ def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
     FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
     if POTENTIAL == "B3LYP":
         FileTools.add_functional(wfn_dir, POTENTIAL)
-    FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")checkWFNs(gjf_dir, wfn_dir)
+    FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")
+    checkWFNs(gjf_dir, wfn_dir)
 
     FileTools.remove_files(gjf_dir, ".log")
 
