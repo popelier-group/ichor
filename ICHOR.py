@@ -811,7 +811,7 @@ class Job:
     def get_aimall_submission_string(self):
         return "~/AIMAll/aimqb.ish " \
                "-nogui -usetwoe=0 -atom=all -encomp=3 -boaq=gs30 -iasmesh=fine -nproc=2 " \
-               "%s >& %s\n" % (self.job, " ".join(self.options)
+               "%s >& %s\n" % (self.job, " ".join(self.options))
 
     def get_ferebus_submission_string(self):
         global FILE_STRUCTURE
