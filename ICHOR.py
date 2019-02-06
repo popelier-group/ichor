@@ -1800,6 +1800,7 @@ def calcFeats(alf, coordinates):
 def defineGlobals():
     global FILE_STRUCTURE
     global IMPORTANT_FILES
+    global CONFIG
 
     global SYSTEM_NAME
     global ALF
@@ -1812,7 +1813,10 @@ def defineGlobals():
     global AIMALL_CORE_COUNT
     global FEREBUS_CORE_COUNT
 
-    global CONFIG
+    global DLPOLY_NUMBER_OF_STEPS
+    global DLPOLY_TIMESTEP
+    global DLPOLY_TEMPERATURE
+    global DLPOLY_PRINT_EVERY
 
     FILE_STRUCTURE = FileTools.setup_file_structure()
     IMPORTANT_FILES = FileTools.setup_important_files()
@@ -1826,28 +1830,39 @@ def defineGlobals():
     for key, val in config.items():
         if key == "SYSTEM_NAME":
             SYSTEM_NAME = val
-        if key == "POINTS_PER_ITERATION":
-            POINTS_PER_ITERATION = int(val)
+
         if key == "ALF":
             ALF = ast.literal_eval(val)
         if key == "ALF_REFERENCE_FILE":
             alf_reference_file = val
+
+        if key == "POINTS_PER_ITERATION":
+            POINTS_PER_ITERATION = int(val)
         if key == "MAX_ITERATION":
             MAX_ITERATION = int(val)
         if key == "MULTIPLE_ADDITION_MODE":
             MULTIPLE_ADDITION_MODE = val
+
         if key == "POTENTIAL":
             POTENTIAL = val.upper()
         if key == "BASIS_SET":
             BASIS_SET = val
-        if key == "BASIS_SET":
-            BASIS_SET = val
+
         if key == "GAUSSIAN_CORE_COUNT":
             GAUSSIAN_CORE_COUNT = int(val)
         if key == "AIMALL_CORE_COUNT":
-            GAUSSIAN_CORE_COUNT = int(val)
+            AIMALL_CORE_COUNT = int(val)
         if key == "FEREBUS_CORE_COUNT":
-            GAUSSIAN_CORE_COUNT = int(val)
+            FEREBUS_CORE_COUNT = int(val)
+
+        if key == "DLPOLY_NUMBER_OF_STEPS":
+            DLPOLY_NUMBER_OF_STEPS = int(val)
+        if key == "DLPOLY_TIMESTEP":
+            DLPOLY_TIMESTEP = int(val)
+        if key == "DLPOLY_TEMPERATURE":
+            DLPOLY_TEMPERATURE = int(val)
+        if key == "DLPOLY_PRINT_EVERY":
+             DLPOLY_PRINT_EVERY = int(val)
 
     # ALF checking
     if not ALF:
