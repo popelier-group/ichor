@@ -2499,7 +2499,7 @@ def edit_DLPOLY():
         print("")
         print("[b] Go back")
         print("[0] Exit")
-        ans += input()
+        ans = input()
         if "b" in ans.lower():
             break
         elif ans == "0":
