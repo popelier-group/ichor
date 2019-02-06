@@ -788,7 +788,8 @@ class Job:
 
     def __init__(self, job, options=[], type=None, ncores=2):
         self.type = type
-        self.options = options
+        self.job = job
+        self.options = [options] if isinstance(options, str) else options
         self.cores = ncores
         self.submission_string = self.get_submission_string()
 
