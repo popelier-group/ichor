@@ -784,6 +784,54 @@ class GeometryData:
             self.cv_atom = atom
 
 
+class Job:
+
+    def __init__(self, job, options=[], type=None, ncores=2):
+        self.type = type
+        self.options = options
+        self.cores = ncores
+        self.submission_string = self.get_submission_string()
+
+    def get_submission_string(self):
+        if self.type == "gaussian":
+            return self.get_gaussian_submission_string()
+        elif self.type == "aimall":
+            return self.get_aimall_submission_string()
+        elif self.type == "ferebus":
+            return self.get_ferebus_submission_string()
+        elif self.type == "python":
+            return self.get_python_submission_string()
+        else:
+            return self.get_default_submission_string()
+
+    def get_gaussian_submission_string(self):
+        return "export PREFERRED_SCDIR=/scratch\n" \
+               "$g09root/g09/g09 %s %s\n" % (self.job, " ".join(self.options))
+
+    def get_aimall_submission_string(self):
+        return "~/AIMAll/aimqb.ish " \
+               "-nogui -usetwoe=0 -atom=all -encomp=3 -boaq=gs30 -iasmesh=fine -nproc=2 " \
+               "%s >& %s\n" % (self.job, " ".join(self.options)
+
+    def get_ferebus_submission_string(self):
+        global FILE_STRUCTURE
+
+        ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
+        copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
+        cd_line = "cd %s\n" % " ".join(self.options)
+        while_loop = "while [ ! -f *q11s* ]\n" \
+                     "do\n" \
+                     "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
+                     "done\n"
+        return "%s%s%s" % (copy_line, cd_line, while_loop)
+
+    def get_python_submission_string(self):
+        return "python %s %s" % (self.job, " ".join(self.options))
+
+    def get_default_submission_string(self):
+        return "export $OMP_NUM_THREADS=%d; ./%s %s\n" % (self.cores, self.job, " ".join(self.options))
+
+
 class SubmissionScript:
 
     def __init__(self, name, cores=1, type=None):
@@ -814,7 +862,7 @@ class SubmissionScript:
         self.modules.append(module)
 
     def add_job(self, job, options=""):
-        self.jobs.append([job, options])
+        self.jobs.append(Job(job, options=options, type=self.type, ncores=self.cores))
 
     def change_directory(self, d):
         self.dir = d
@@ -843,43 +891,34 @@ class SubmissionScript:
             modules_string += "module load %s\n" % module
         return modules_string
 
-    def get_job_submission(self, job_num):
-        global FILE_STRUCTURE
-        """
-
-        :param job_num: the index for self.jobs[]
-               job_type: the type of job being executed
-        :return: Execution string for the job to be submitted
-
-        You can set the job type by specifying during initialisation or by calling set_type()
-        Add custom types by extending the elif statement below
-        A default submission has been given if no type is specified
-        """
-        if self.type == "gaussian":
-            return "export PREFERRED_SCDIR=/scratch\n" \
-                   "$g09root/g09/g09 %s %s\n" % (self.jobs[job_num][0], self.jobs[job_num][1])
-        elif self.type == "aimall":
-            return "~/AIMAll/aimqb.ish " \
-                   "-nogui -usetwoe=0 -atom=all -encomp=3 -boaq=gs30 -iasmesh=fine -nproc=2 " \
-                   "%s >& %s\n" % (self.jobs[job_num][0], self.jobs[job_num][1])
-        elif self.type == "ferebus":
-            ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
-            copy_line = "cp %s %s\n" % (ferebus_loc, self.jobs[job_num][0])
-            cd_line = "cd %s\n" % self.jobs[job_num][0]
-            while_loop = "while [ ! -f *q11s* ]\n" \
-                         "do\n" \
-                         "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
-                         "done\n"
-            return "%s%s%s" % (copy_line, cd_line, while_loop)
-        elif self.type == "python":
-            return "%s %s %s" % ("python", self.jobs[job_num][0], self.jobs[job_num][1])
-        elif self.type == "dlpoly":
-            cp_dlpoly_string = "cp %sDLPOLY.Z %s" % (FILE_STRUCTURE.get_file_path("programs"), self.jobs[job_num][0])
-            cd_string = "cd %s" % self.jobs[job_num][0]
-            execution_string = "export $OMP_NUM_THREADS=%d; ./DLPOLY.Z" % self.cores
-            return "%s\n%s\n%s\n" % (cp_dlpoly_string, cd_string, execution_string)
-        else:
-            return "export $OMP_NUM_THREADS=%d; ./%s %s\n" % (self.cores, self.jobs[job_num][0], self.jobs[job_num][1])
+    # def get_job_submission(self, job_num):
+    #     global FILE_STRUCTURE
+    #
+    #     if self.type == "gaussian":
+    #         return "export PREFERRED_SCDIR=/scratch\n" \
+    #                "$g09root/g09/g09 %s %s\n" % (self.jobs[job_num][0], self.jobs[job_num][1])
+    #     elif self.type == "aimall":
+    #         return "~/AIMAll/aimqb.ish " \
+    #                "-nogui -usetwoe=0 -atom=all -encomp=3 -boaq=gs30 -iasmesh=fine -nproc=2 " \
+    #                "%s >& %s\n" % (self.jobs[job_num][0], self.jobs[job_num][1])
+    #     elif self.type == "ferebus":
+    #         ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
+    #         copy_line = "cp %s %s\n" % (ferebus_loc, self.jobs[job_num][0])
+    #         cd_line = "cd %s\n" % self.jobs[job_num][0]
+    #         while_loop = "while [ ! -f *q11s* ]\n" \
+    #                      "do\n" \
+    #                      "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
+    #                      "done\n"
+    #         return "%s%s%s" % (copy_line, cd_line, while_loop)
+    #     elif self.type == "python":
+    #         return "%s %s %s" % ("python", self.jobs[job_num][0], self.jobs[job_num][1])
+    #     elif self.type == "dlpoly":
+    #         cp_dlpoly_string = "cp %sDLPOLY.Z %s" % (FILE_STRUCTURE.get_file_path("programs"), self.jobs[job_num][0])
+    #         cd_string = "cd %s" % self.jobs[job_num][0]
+    #         execution_string = "export $OMP_NUM_THREADS=%d; ./DLPOLY.Z" % self.cores
+    #         return "%s\n%s\n%s\n" % (cp_dlpoly_string, cd_string, execution_string)
+    #     else:
+    #         return "export $OMP_NUM_THREADS=%d; ./%s %s\n" % (self.cores, self.jobs[job_num][0], self.jobs[job_num][1])
 
     def add_job_string(self, job_num, jobid):
         if jobid == 0:
@@ -888,12 +927,8 @@ class SubmissionScript:
             job_string = "if [ \"$SGE_TASK_ID\" == \"%d\" ];\n" \
                          "then\n" \
                          "sleep 1\n" % jobid
-
-            # if type(self.dir) == type([]):
-            #     job_string += "%s\n" % self.dir[job_num]
-
             job_string += "%s" \
-                          "fi\n\n" % self.get_job_submission(job_num)
+                          "fi\n\n" % self.jobs[job_num].submission_string
             return job_string
 
     def write_script(self):
