@@ -35,6 +35,7 @@
   -- Classes are defined next
   -- Functions are defined after Classes
   -- Main script is written beneath which calls functions when needed
+  -- Main Menu is at the bottom, this should be easy to extend and is hopefully quite intuitive
 
 """
 
@@ -2760,7 +2761,7 @@ if __name__ == "__main__":
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
-               "3": calculateErrors, "a": autoRun, "d":CSFTools.del_jobs,
+               "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY}
 
@@ -2781,8 +2782,9 @@ if __name__ == "__main__":
         print("[a] Auto Run")
         print("")
         print("[b] Backup Data")
-        print("[d] Delete Current Running Jobs")
+        print("[del] Delete Current Running Jobs")
         print("")
+        print("[analyse] Analysis Tools")
         print("[dlpoly] Run DLPOLY on Sample Pool using LOG")
         print("")
         print("[0] Exit")
