@@ -1198,32 +1198,44 @@ class FileTools:
         return fname.split(".")[0].split("/")[-1]
 
     @staticmethod
-    def cleanup_aimall_dir(aimall_dir):
+    def cleanup_aimall_dir(aimall_dir, split_into_atoms=False):
         all_directories = FileTools.get_directories(aimall_dir)
-        atom_directories = FileTools.get_atom_directories(aimall_dir)
 
-        look_through_directories = sorted([x for x in all_directories if x not in atom_directories])
+        if split_into_atoms:
+            atom_directories = FileTools.get_atom_directories(aimall_dir)
+            look_through_directories = sorted([x for x in all_directories if x not in atom_directories])
 
-        if len(atom_directories) == 0:
-            example_directory = look_through_directories[0]
-            int_files = FileTools.get_files_in(example_directory, "*.int")
-            for int_file in int_files:
-                filename = int_file.split("/")[-1]
-                os.mkdir(aimall_dir + filename.replace(".int", "").upper())
-
-        for directory in look_through_directories:
-            if re.match("\S+_atomicfiles", directory):
-                current_system = directory.split("/")[-1]
-                int_files = FileTools.get_files_in(directory, "*.int")
-
+            if len(atom_directories) == 0:
+                example_directory = look_through_directories[0]
+                int_files = FileTools.get_files_in(example_directory, "*.int")
                 for int_file in int_files:
-                    intFileName = int_file.split("/")[-1]
-                    atom = intFileName.replace(".int", "")
-                    newFileName = aimall_dir + atom.upper() + "/" + current_system.replace("_atomicfiles", "") \
-                                  + "_" + atom + ".int"
-                    shutil.move(int_file, newFileName)
+                    filename = int_file.split("/")[-1]
+                    os.mkdir(aimall_dir + filename.replace(".int", "").upper())
 
-                FileTools.remove_directory(directory)
+            for directory in look_through_directories:
+                if re.match("\S+_atomicfiles", directory):
+                    current_system = directory.split("/")[-1]
+                    int_files = FileTools.get_files_in(directory, "*.int")
+
+                    for int_file in int_files:
+                        intFileName = int_file.split("/")[-1]
+                        atom = intFileName.replace(".int", "")
+                        newFileName = aimall_dir + atom.upper() + "/" + current_system.replace("_atomicfiles", "") \
+                                      + "_" + atom + ".int"
+                        shutil.move(int_file, newFileName)
+
+                    FileTools.remove_directory(directory)
+        else:
+            for directory in all_directories:
+                int_files = FileTools.get_files_in(directory, "*.int")
+                FileTools.remove_files(directory, ".inp")
+
+                directory_base = directory.split("/")[-1]
+                for int_file in int_files:
+                    int_base = FileTools.get_base(int_file)
+                    if not int_base.startswith
+
+
 
         FileTools.remove_files(aimall_dir, ".extout")
         FileTools.remove_files(aimall_dir, ".mgp")
@@ -2021,7 +2033,8 @@ def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
 
         gjf_dir = FILE_STRUCTURE.get_file_path("%s_gjf" % dir_location_start)
         wfn_dir = FILE_STRUCTURE.get_file_path("%s_wfn" % dir_location_start)
-        aimall_dir = FILE_STRUCTURE.get_file_path("ts%s_aimall" % dir_location_start)
+        aimall_dir = FILE_STRUCTURE.get_file_path("%s_aimall" % dir_location_start)
+
     elif DirectoryPath:
         if not DirectoryPath.endswith("/"):
             DirectoryPath += "/"
