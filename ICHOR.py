@@ -113,6 +113,7 @@ SAMPLE_POINTS = []
 GAUSSIAN_CORE_COUNT = 2
 AIMALL_CORE_COUNT = 2
 FEREBUS_CORE_COUNT = 4
+DLPOLY_CORE_COUNT = 1
 
 # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
 DLPOLY_NUMBER_OF_STEPS=500 # Number of steps to run simulation for
@@ -509,6 +510,133 @@ class GJF:
                 f.write("%s.wfn" % self.base)
 
 
+class Atom:
+
+    def __init__(self, atom_type=None, x=None, y=None, z=None):
+        self.atom_type = atom_type.upper()
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+    
+    def coordinate_list(self):
+        return [self.x, self.y, self.y]
+    
+    def coordinate_line(self):
+        return "%s%10f%10f%10f" % (self.atom_type, self.x, self.y, self.z)
+
+
+class Molecule:
+
+    def __init__(self):
+        pass
+
+class GJF_Tools:
+
+    @staticmethod
+    def change_basis_set(gjfs, basis_set, gen_basis_set=None):
+        for gjf in gjfs:
+            gjf.basis_set = basis_set
+            if basis_set.lower() == "gen":
+                gjf.gen_basis_set = gen_basis_set
+
+    @staticmethod
+    def change_potential(gjfs, potential):
+        for gjf in gjfs:
+            gjf.potential = potential
+    
+    @staticmethod
+    def add_keyword(gjfs, keyword):
+        for gjf in gjfs:
+            if keyword not in gjf.keywords:
+                gjf.keywords.append(keyword)
+    
+    @staticmethod
+    def add_keyword(gjfs, keywords):
+        for gjf in gjfs:
+            for keyword in keywords:
+                if keyword not in gjf.keywords:
+                    gjf.keywords.append(keyword)
+
+class GJF_file:
+
+    def __init__(self, fname):
+        self.fname = fname
+
+        self.run_type = None
+        self.startup_options = []
+
+        self.potential = None
+        self.basis_set = None
+
+        self.keywords = []
+
+        self.charge = None
+        self.multiplicity = None
+
+        self.coordinates = []
+
+        self.gen_basis_set = ""
+
+        self.output_wfn = False
+        self.output_wfn_fname = None
+
+        self.parse_gjf()
+    
+    def parse_gjf(self):
+        try:
+            with open(self.fname, "r") as f:
+                for line in f:
+                    if line.startswith("%"):
+                        self.startup_options.append(line.strip())
+
+                    elif line.startswith("#"):
+                        line_split = line.split()
+                        for item in line_split():
+                            if item.lower() == "p":
+                                self.run_type = "energy"
+                            elif item.lower() == "opt":
+                                self.run_type = "optimisation"
+                            elif "/" in item:
+                                item_split = item.split()
+                                self.potential = item_split[0]
+                                self.basis_set = item_split[1]
+                            elif item.lower() == "output=wfn"
+                                self.output_wfn = True
+                            else:
+                                self.keywords.append(item)
+
+                    elif re.match("\s*\d+\s+\d+", line):
+                        item_split = item.lstrip().split()
+                        self.charge = int(item_split[0])
+                        self.multiplicity = int(item_split[1])
+
+                    elif re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
+                        line_split = line.split()
+                        self.coordinates.append(Atom(atom_type=line_split[0], x=line_split[1], y=line_split[2], z=line_split[3]))
+                    
+                    elif ".wfn" in line:
+                        self.output_wfn_fname = line.strip()
+
+                    elif self.basis_set == "gen":
+                        self.gen_basis_set += line
+        except:
+            print("\nError: Cannot Read File %s" % self.fname)
+
+    def write_gjf(self):
+        with open(self.fname, "w") as f:
+            for startup_option in self.startup_options:
+                f.write("%s\n" % startup_option)
+            
+            f.write("#%s %s/%s %s" % (self.run_type, self.potential, self.basis_set, " ".join(self.keywords)))
+            if self.output_wfn: f.write("output=wfn")
+            f.write("\n\n")
+            
+            f.write("%s\n" % self.fname.replace(".gjf", ""))
+            
+            f.write(" %d %d\n" % (self.charge, self.multiplicity))
+            for atom in self.coordinates:
+                f.write("%s%16.8f%16.8f%16.8f\n" % (atom.atom_type, atom.x, atom.y, atom.z))
+
 class INT:
 
     def __init__(self, fname, read_file=True):
@@ -708,50 +836,53 @@ class MODEL:
 
 class Point:
 
-    def __init__(self, fname, point_type="training"):
-        global ALF
+    def __init__(self, name=None, gjf=None, wfn=None, ints=[], point_type=None):
+        
+        self.name = name
+        
+        self.gjf_fname = gjf
+        self.wfn_fname = wfn
+        self.int_list = ints
 
-        self.fname = fname
-        self.base_name = self.get_base()
-        self.number = re.findall("\d+", self.base_name)[0]
-        self.type = point_type.lower()
+        self.type = point_type
 
-        self.aimall_directory = self.determineDirectory("aimall")
+        try:
+            self.gjf = self.GJF_file(self.gjf_fname)
+        except:
+            self.gjf = None
+        
+        # try:
+        #     self.wfn = self.read_wfn_file()
+        # except:
+        #     self.wfn = None
+        
+        try:
+            self.int = self.read_int_files()
+        except:
+            self.int = None
 
-        coordinate_lines = FileTools.get_files_in(self.fname)
-        self.atoms, self.coordinates = FileTools.parse_coordinate_lines(coordinate_lines)
-        self.features = calcFeats(ALF, self.coordinates)
+    def set_gjf_file(self, gjf_fname):
+        self.gjf_fname = gjf_fname
 
-        self.cv_error = 0.0
-        self.variance = 0.0
+        try:
+            self.gjf = self.GJF_file(self.gjf_fname)
+        except:
+            self.gjf = None
+    
+    def read_int_files(self):
+        for int_file in self.int_list:
+            self.read_int_file(int_file)
 
-        self.error = 0.0
-
-        self.INTs = self.read_INTs()
-
-    def get_base(self):
-        return self.fname.split(".")[0]
-
-    def determineDirectory(self, type):
-        return 0
-
-    def read_INTs(self):
-        global SYSTEM_NAME
-        global FILE_STRUCTURE
-
-        INTs = []
-
-        if self.type == "training":
-            aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
-        elif self.type == "sample":
-            aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
-
-        int_files = FileTools.get_files_in("%s*/%s*.int" % (aimall_dir, self.base_name))
-
-        for int_file in int_files:
-            INTs.append(INT(int_file))
-
-        return INTs
+    def add_int_file(self, fname):
+        self.read_int_file(fname)
+        self.int_list.append(fname)
+    
+    def read_int_file(fname):
+        try:
+            int_data = INT(fname)
+            self.int[int_data.atom] = int_data
+        except:
+            print("\nError: Cannot Read File %s" % fname)
 
 
 class GeometryData:
@@ -1077,7 +1208,7 @@ class FileTools:
         coordinates = []
         with open(fname, "r") as f:
             for line in f:
-                if re.match("\s*\w+(\s+[+-]?\D+){3}", line):
+                if re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
                     coordinates.append(line)
                 elif coordinates:
                     break
@@ -1228,15 +1359,15 @@ class FileTools:
                     FileTools.remove_directory(directory)
         else:
             for directory in all_directories:
-                int_files = FileTools.get_files_in(directory, "*.int")
-                FileTools.remove_files(directory, ".inp")
-
-                directory_base = directory.split("/")[-1]
-                for int_file in int_files:
-                    int_base = FileTools.get_base(int_file)
-                    if not int_base.startswith
-
-
+                if re.match("\S+_atomicfiles", directory):
+                    int_files = FileTools.get_files_in(directory, "*.int")
+                    directory_base = directory.split("/")[-1].replace("_atomicfiles", "")
+                    for int_file in int_files:
+                        int_base = FileTools.get_base(int_file)
+                        if not int_base.startswith(directory_base):
+                            new_int_file = "%s/%s_%s.int" % (directory, directory_base, int_base)
+                            FileTools.move_file(int_file, new_int_file)
+                    FileTools.remove_files(directory, ".inp")
 
         FileTools.remove_files(aimall_dir, ".extout")
         FileTools.remove_files(aimall_dir, ".mgp")
@@ -1255,6 +1386,36 @@ class FileTools:
 
         with open(model, "w") as f:
             f.writelines(data)
+
+
+class ReadFiles:
+
+    @staticmethod
+    def GJFs(gjfs):
+        gjf_data = []
+        #gjf_files = FileTools.get_files_in(gjf_dir, "*.gjf")
+        for gjf in gjfs:
+            gjf_name = gjf.split("/")[-1].replace(".gjf", "")
+            gjf_coordinates, atoms = [], []
+
+            atom_counter = 1
+            coordinates = FileTools.get_coordinates(gjf)
+            for coordinate in coordinates:
+                coordinate_split = coordinate.split()
+                atom = coordinate_split[0] + str(atom_counter)
+                atom_coordinates = []
+                for i in range(1, 4):
+                    atom_coordinates.append(float(coordinate_split[i]))
+                atoms.append(atom)
+                gjf_coordinates.append(atom_coordinates)
+                atom_counter += 1
+
+            gjf_data.append(GeometryData(gjf_name, atoms, gjf_coordinates))
+        
+        return gjf_data
+
+    # @staticmethod
+    # def Ints(ints):
 
 
 class CSFTools:
@@ -1556,7 +1717,7 @@ def AtomicLocalFrame(fname):
     atoms = []
     connectivity = []
 
-    class Atom:
+    class ALFAtom:
         global type2mass
         global type2rad
 
@@ -1577,7 +1738,7 @@ def AtomicLocalFrame(fname):
             for line in f:
                 if re.match("\s*\w+\s+([+-]?\d+.\d+){3}", line):
                     l = line.split()
-                    atoms.append(Atom(l[0], [float(l[1]), float(l[2]), float(l[3])], n))
+                    atoms.append(ALFAtom(l[0], [float(l[1]), float(l[2]), float(l[3])], n))
                     n += 1
 
     def get_dist(a, b):
@@ -1890,17 +2051,26 @@ def defineGlobals():
     # ALF checking
     if not ALF:
         if not alf_reference_file:
-            alf_reference_file = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")[0]
-        ALF = AtomicLocalFrame(alf_reference_file)
+            try:
+                alf_reference_file = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")[0]
+            except:
+                try:
+                    alf_reference_file = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("sp_gjf"), "*.gjf")[0]
+                except:
+                    print("\nCould not find a reference gjf to determine the ALF")
+                    print("Please specify reference file or define explicitly")
+        if alf_reference_file:
+            ALF = AtomicLocalFrame(alf_reference_file)
 
-    for i in range(len(ALF)):
-        for j in range(len(ALF[i])):
-            ALF[i][j] = int(ALF[i][j])
-
-    if ALF[0][0] == 1:
+    if ALF:
         for i in range(len(ALF)):
             for j in range(len(ALF[i])):
-                ALF[i][j] -= 1
+                ALF[i][j] = int(ALF[i][j])
+
+        if ALF[0][0] == 1:
+            for i in range(len(ALF)):
+                for j in range(len(ALF[i])):
+                    ALF[i][j] -= 1
 
 
 def readArguments():
@@ -2007,6 +2177,7 @@ def submitTrainingGJFs():
 
     CSFTools.submit_scipt("GaussSub.sh", exit=True)
 
+
 def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
     global FILE_STRUCTURE
     global POTENTIAL
@@ -2081,6 +2252,7 @@ def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
 def submitTrainingWFNs():
     submitWFNs(DirectoryLabel="training_set")
 
+
 def makeTrainingSets():
     global FILE_STRUCTURE
     global AUTO_SUBMISSION_MODE
@@ -2108,25 +2280,8 @@ def makeTrainingSets():
 
     atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
 
-    gjf_data = []
     gjf_files = FileTools.get_files_in(gjf_dir, "*.gjf")
-    for gjf in gjf_files:
-        gjf_name = gjf.split("/")[-1].replace(".gjf", "")
-        gjf_coordinates, atoms = [], []
-
-        atom_counter = 1
-        coordinates = FileTools.get_coordinates(gjf)
-        for coordinate in coordinates:
-            coordinate_split = coordinate.split()
-            atom = coordinate_split[0] + str(atom_counter)
-            atom_coordinates = []
-            for i in range(1,4):
-                atom_coordinates.append(float(coordinate_split[i]))
-            atoms.append(atom)
-            gjf_coordinates.append(atom_coordinates)
-            atom_counter += 1
-
-        gjf_data.append(GeometryData(gjf_name, atoms, gjf_coordinates))
+    gjf_data = ReadFiles.GJFs(gjf_files)
 
     for directory in atom_directories:
         # Setup Ferebus Atom Directories
@@ -2257,7 +2412,7 @@ def getSampleAIMALLEnergies():
         f.write("No.,%s,Total\n" % ",".join(atoms))
         for i in range(len(int_data[0])):
             num = re.findall("\d+", int_data[0][i].name)[0]
-            e_iqa_values = [0]*3
+            e_iqa_values = [0]*len(atoms)
             total_e_iqa = 0.0
             int_i: INT
             for j in range(len(int_data)):
@@ -2575,6 +2730,7 @@ def edit_DLPOLY():
             else:
                 print("%s is not a valid option" % ans)
 
+
 def run_DLPOLY_on_LOG():
     global FILE_STRUCTURE
 
@@ -2633,6 +2789,7 @@ def run_DLPOLY_on_LOG():
     else:
         CSFTools.submit_scipt(dlpolysub.name, exit=True)
 
+
 def submit_DLPOLY_to_gaussian():
     global FILE_STRUCTURE
 
@@ -2667,6 +2824,7 @@ def submit_DLPOLY_to_gaussian():
         get_DLPOLY_WFN_energies()
     else:
         CSFTools.submit_scipt("DLPOLYGaussSub.sh", exit=True)
+
 
 def get_DLPOLY_WFN_energies():
     global FILE_STRUCTURE
@@ -2773,6 +2931,7 @@ if __name__ == "__main__":
         autoRun(submit=False)
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
+            #    "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
@@ -2812,8 +2971,11 @@ if __name__ == "__main__":
                 print("")
                 print("[1] Submit GJFs to Gaussian")
                 print("[2] Submit WFNs to AIMALL")
-                print("[3] Make Models")
+                print("[3] Make IQA Models")
                 print("[4] Move IQA Models")
+                print("")
+                print("[5] Make MPole Models")
+                print("[6] Move MPole Models")
                 print("")
                 print("[b] Go back")
                 print("[0] Exit")
