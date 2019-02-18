@@ -530,6 +530,7 @@ class Molecule:
     def __init__(self):
         pass
 
+
 class GJF_Tools:
 
     @staticmethod
@@ -556,6 +557,7 @@ class GJF_Tools:
             for keyword in keywords:
                 if keyword not in gjf.keywords:
                     gjf.keywords.append(keyword)
+
 
 class GJF_file:
 
@@ -636,6 +638,7 @@ class GJF_file:
             f.write(" %d %d\n" % (self.charge, self.multiplicity))
             for atom in self.coordinates:
                 f.write("%s%16.8f%16.8f%16.8f\n" % (atom.atom_type, atom.x, atom.y, atom.z))
+
 
 class INT:
 
@@ -836,25 +839,22 @@ class MODEL:
 
 class Point:
 
-    def __init__(self, name=None, gjf=None, wfn=None, ints=[], point_type=None):
+    def __init__(self, gjf=None, wfn=None, ints=[]):
         
-        self.name = name
-        
-        self.gjf_fname = gjf
         self.wfn_fname = wfn
         self.int_list = ints
 
-        self.type = point_type
+        self.set_point_name()
 
         try:
-            self.gjf = self.GJF_file(self.gjf_fname)
+            self.gjf = GJF_file(gjf)
         except:
             self.gjf = None
         
-        # try:
-        #     self.wfn = self.read_wfn_file()
-        # except:
-        #     self.wfn = None
+        try:
+            self.wfn = self.read_wfn_file()
+        except:
+            self.wfn = None
         
         try:
             self.int = self.read_int_files()
@@ -862,12 +862,12 @@ class Point:
             self.int = None
 
     def set_gjf_file(self, gjf_fname):
-        self.gjf_fname = gjf_fname
-
         try:
-            self.gjf = self.GJF_file(self.gjf_fname)
+            self.gjf = self.GJF_file(gjf_fname)
         except:
             self.gjf = None
+        
+        self.set_point_name()
     
     def read_int_files(self):
         for int_file in self.int_list:
@@ -883,7 +883,40 @@ class Point:
             self.int[int_data.atom] = int_data
         except:
             print("\nError: Cannot Read File %s" % fname)
+    
+    @staticmethod
+    def get_name(name):
+        return FileTools.get_base(name)
 
+    def set_point_name(self):
+        try:
+            self.name = self.get_name(self.gjf_fname)
+        except:
+            pass
+
+
+class Points:
+
+    def __init__(self, gjf_files=None, wfn_files=None, int_files=None):
+        self.points = []
+
+    def add_point(self, gjf_file=None, wfn_file=None, int_directory=None):
+        point_in_points = False
+        for point in self.points:
+            if gjf_file == point.gjf.fname:
+
+        if not point_in_points
+        self.points.append(Point(gjf=gjf_file, wfn=wfn_file, ints=int_directory))
+
+    def change_basis_set(self, basis_set):
+        for point in self.points:
+            point.gjf.basis_set = basis_set
+            if basis_set.lower() == "gen":
+                point.gjf.gen_basis_set = gen_basis_set
+
+    def change_potential(self, potential):
+        for point in self.points:
+            point.gjf.potential = potential
 
 class GeometryData:
 
@@ -1370,7 +1403,6 @@ class FileTools:
                     FileTools.remove_directory(directory)
         else:
             for directory in all_directories:
-<<<<<<< HEAD
                 if re.match("\S+_atomicfiles", directory):
                     int_files = FileTools.get_files_in(directory, "*.int")
                     directory_base = directory.split("/")[-1].replace("_atomicfiles", "")
@@ -1380,17 +1412,6 @@ class FileTools:
                             new_int_file = "%s/%s_%s.int" % (directory, directory_base, int_base)
                             FileTools.move_file(int_file, new_int_file)
                     FileTools.remove_files(directory, ".inp")
-=======
-                int_files = FileTools.get_files_in(directory, "*.int")
-                FileTools.remove_files(directory, ".inp")
-
-                # directory_base = directory.split("/")[-1]
-                # for int_file in int_files:
-                #     int_base = FileTools.get_base(int_file)
-                #     if not int_base.startswith
-
-
->>>>>>> 6c2ecb3a776d108d132dc241a2e27fb9bac4d1fa
 
         FileTools.remove_files(aimall_dir, ".extout")
         FileTools.remove_files(aimall_dir, ".mgp")
@@ -2203,6 +2224,9 @@ def submitTrainingGJFs():
             formatGJF(gjf)
 
     CSFTools.submit_scipt("GaussSub.sh", exit=True)
+
+
+def newSubmitTrainingGJFs
 
 
 def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
