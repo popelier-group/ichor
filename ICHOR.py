@@ -934,6 +934,8 @@ class Job:
             return self.get_ferebus_submission_string()
         elif self.type == "python":
             return self.get_python_submission_string()
+        elif self.type == "dlpoly":
+            return self.get_dlpoly_submission_string()
         else:
             return self.get_default_submission_string()
 
@@ -951,7 +953,7 @@ class Job:
 
         ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
         copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
-        cd_line = "cd %s\n" % " ".join(self.options)
+        cd_line = "cd %s\n" % self.job
         while_loop = "while [ ! -f *q11s* ]\n" \
                      "do\n" \
                      "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
@@ -960,6 +962,15 @@ class Job:
 
     def get_python_submission_string(self):
         return "python %s %s" % (self.job, " ".join(self.options))
+
+    def get_dlpoly_submission_string(self):
+        global FILE_STRUCTURE
+
+        dlpoly_loc = FILE_STRUCTURE.get_file_path("programs") + "DLPOLY.Z"
+        copy_line = "cp %s %s\n" % (dlpoly_loc, self.job)
+        cd_line = "cd %s\n" % self.job
+        exec_line = "./DLPOLY.Z\n"
+        return "%s%s%s" % (copy_line, cd_line, exec_line)
 
     def get_default_submission_string(self):
         return "export $OMP_NUM_THREADS=%d; ./%s %s\n" % (self.cores, self.job, " ".join(self.options))
@@ -1026,7 +1037,7 @@ class SubmissionScript:
 
     def add_job_string(self, job_num, jobid):
         if jobid == 0:
-            return self.get_job_submission(job_num)
+            return self.jobs[job_num].submission_string
         else:
             job_string = "if [ \"$SGE_TASK_ID\" == \"%d\" ];\n" \
                          "then\n" \
@@ -1229,7 +1240,7 @@ class FileTools:
     def get_last_coordinates(fname):
         coordinates = []
         for line in reversed(list(open(fname))):
-            if re.match("\s*\w+(\s+[+-]?\D+){3}", line):
+            if re.match("\s*\w+(\s+[+-]?\d+.\d+){3}\s*", line):
                 coordinates.append(line)
             elif coordinates:
                 break
@@ -1359,6 +1370,7 @@ class FileTools:
                     FileTools.remove_directory(directory)
         else:
             for directory in all_directories:
+<<<<<<< HEAD
                 if re.match("\S+_atomicfiles", directory):
                     int_files = FileTools.get_files_in(directory, "*.int")
                     directory_base = directory.split("/")[-1].replace("_atomicfiles", "")
@@ -1368,6 +1380,17 @@ class FileTools:
                             new_int_file = "%s/%s_%s.int" % (directory, directory_base, int_base)
                             FileTools.move_file(int_file, new_int_file)
                     FileTools.remove_files(directory, ".inp")
+=======
+                int_files = FileTools.get_files_in(directory, "*.int")
+                FileTools.remove_files(directory, ".inp")
+
+                # directory_base = directory.split("/")[-1]
+                # for int_file in int_files:
+                #     int_base = FileTools.get_base(int_file)
+                #     if not int_base.startswith
+
+
+>>>>>>> 6c2ecb3a776d108d132dc241a2e27fb9bac4d1fa
 
         FileTools.remove_files(aimall_dir, ".extout")
         FileTools.remove_files(aimall_dir, ".mgp")
@@ -1993,6 +2016,9 @@ def defineGlobals():
 
     global MULTIPLE_ADDITION_MODE
 
+    global POTENTIAL
+    global BASIS_SET
+
     global GAUSSIAN_CORE_COUNT
     global AIMALL_CORE_COUNT
     global FEREBUS_CORE_COUNT
@@ -2127,8 +2153,9 @@ def formatGJF(fname, coordinates=None):
 
     gjf = GJF(fname, potential=POTENTIAL, basis_set=BASIS_SET)
 
-    #gjf.add_keywords(["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)", "Density=Current"])
-    #gjf.gen_basis_set("truncated")
+    if BASIS_SET == "gen":
+        gjf.add_keywords(["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)"])
+        gjf.gen_basis_set("truncated")
 
     gjf.add_keywords(["nosymm"])
 
@@ -2162,7 +2189,7 @@ def checkWFNs(gjf_dir, wfn_dir):
         createGaussScript(gjf_dir, files=missing_gjfs)
         CSFTools.submit_scipt("GaussSub.sh", exit=True)
     else:
-        print("All wfns complete\n\n")
+        print("\nAll wfns complete\n")
 
 
 def submitTrainingGJFs():
@@ -2187,7 +2214,7 @@ def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
         dir_location_start = ""
 
         training_set_labels = ["TRAINING_SET", "TRAINING", "TS"]
-        sample_set_labels = ["SAMPLE_POOL", "SAMPLE", "SP"]
+        sample_set_labels = ["SAMPLE_POOL", "SAMPLE", "SP", "SAMPLE_SET"]
 
         if DirectoryLabel.upper() in training_set_labels:
             dir_location_start = "ts"
@@ -2264,7 +2291,7 @@ def makeTrainingSets():
     fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
 
     FileTools.make_clean_directory(fereb_dir)
-    FileTools.cleanup_aimall_dir(aimall_dir)
+    FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=True)
 
     fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
 
@@ -2388,7 +2415,7 @@ def getSampleAIMALLEnergies():
     gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
     aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
 
-    FileTools.cleanup_aimall_dir(aimall_dir)
+    FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=True)
     atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
 
     atoms = []
@@ -2798,7 +2825,7 @@ def submit_DLPOLY_to_gaussian():
     dlpoly_gjf_dir = dlpoly_base_dir + "GJF/"
     FileTools.make_directory(dlpoly_gjf_dir)
 
-    trajectory_files = FileTools.get_files_in(dlpoly_base_dir + "*/TRAJECTORY.xyz")
+    trajectory_files = FileTools.get_files_in(dlpoly_base_dir, "*/TRAJECTORY.xyz")
 
     for trajectory_file in trajectory_files:
         coordinates = FileTools.get_last_coordinates(trajectory_file)
@@ -2917,6 +2944,83 @@ def autoRun(submit=True):
     sys.exit(0)
 
 
+def makeFormattedFiles():
+    global FILE_STRUCTURE
+    global AUTO_SUBMISSION_MODE
+    global FEREBUS_CORE_COUNT
+
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+
+    atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
+
+    gjf_data = []
+    gjf_files = FileTools.get_files_in(gjf_dir, "*.gjf")
+    for gjf in gjf_files:
+        gjf_name = gjf.split("/")[-1].replace(".gjf", "")
+        gjf_coordinates, atoms = [], []
+
+        atom_counter = 1
+        coordinates = FileTools.get_coordinates(gjf)
+        for coordinate in coordinates:
+            coordinate_split = coordinate.split()
+            atom = coordinate_split[0] + str(atom_counter)
+            atom_coordinates = []
+            for i in range(1,4):
+                atom_coordinates.append(float(coordinate_split[i]))
+            atoms.append(atom)
+            gjf_coordinates.append(atom_coordinates)
+            atom_counter += 1
+
+        gjf_data.append(GeometryData(gjf_name, atoms, gjf_coordinates))
+
+    for directory in atom_directories:
+        # Setup Ferebus Atom Directories
+        atom = str(directory.split("/")[-1])
+
+        # Read Data From Int Files
+        int_files = FileTools.get_files_in(directory, "*.int")
+        ints = []
+        for int_file in int_files:
+            ints.append(INT(int_file))
+
+        if not os.path.isdir("Test/"):
+            os.mkdir("Test/")
+
+        training_set_file = "Test/" + atom + "_TRAINING_SET.csv"
+
+        with open(training_set_file, "w+") as f:
+            row_count = 1
+            for gjf_i, int_i in zip(gjf_data, ints):
+                features = gjf_i.get_atom_features(atom)
+                formated_features = ["{0:11.8f}".format(i) for i in features]
+
+                features_string = ",".join(formated_features)
+
+                mpoles = []
+
+                eiqa = str(int_i.IQA_terms["E_IQA(A)"])
+
+                multipole_moments = int_i.multipole_moments
+                mpole_key_vals = multipole_moments.items()
+
+                number_of_mpoles = 25
+
+                mpole_names = [x[0] for x in mpole_key_vals][:number_of_mpoles]
+                mpoles = [str(x[1]) for x in mpole_key_vals][:number_of_mpoles]
+
+                mpole_string = ",".join(mpoles)
+                row_number = str(row_count).zfill(4)
+
+                if row_count == 1:
+                    feature_names = []
+                    for i in range(len(formated_features)):
+                        feature_names.append("f%d" % (i+1))
+                    f.write("No.,%s,%s,IQA\n" % (",".join(feature_names), ",".join(mpole_names)))
+                f.write("%s,%s,%s,%s\n" % (row_number, features_string, mpole_string, eiqa))
+                row_count += 1
+
+
 if __name__ == "__main__":
     defineGlobals()
     readArguments()
@@ -2935,7 +3039,8 @@ if __name__ == "__main__":
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
-               "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY}
+               "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
+               "analyse": makeFormattedFiles}
 
     while True:
         if len(glob("*.sh.*")) > 0:
