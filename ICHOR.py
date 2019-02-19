@@ -839,10 +839,10 @@ class MODEL:
 
 class Point:
 
-    def __init__(self, gjf=None, wfn=None, ints=[]):
+    def __init__(self, gjf=None, wfn=None, int_directory=None):
         
         self.wfn_fname = wfn
-        self.int_list = ints
+        self.int = {}
 
         self.set_point_name()
 
@@ -852,14 +852,9 @@ class Point:
             self.gjf = None
         
         try:
-            self.wfn = self.read_wfn_file()
+            self.read_int_files(int_directory)
         except:
-            self.wfn = None
-        
-        try:
-            self.int = self.read_int_files()
-        except:
-            self.int = None
+            pass
 
     def set_gjf_file(self, gjf_fname):
         try:
@@ -869,8 +864,9 @@ class Point:
         
         self.set_point_name()
     
-    def read_int_files(self):
-        for int_file in self.int_list:
+    def read_int_files(self, int_dir):
+        int_files = FileTools.get_files_in(int_dir, "*.int")
+        for int_file in self.int_files:
             self.read_int_file(int_file)
 
     def add_int_file(self, fname):
@@ -890,10 +886,16 @@ class Point:
 
     def set_point_name(self):
         try:
-            self.name = self.get_name(self.gjf_fname)
+            self.name = self.get_name(self.gjf.name)
         except:
-            pass
-
+            try:
+                self.name = self.get_name(self.wfn_fname)
+            except:
+                try:
+                    for atom, _ in self.int.items():
+                        self.name = self.get_name(self.int[atom].fname)
+                except:
+                    self.name = None
 
 class Points:
 
@@ -901,12 +903,36 @@ class Points:
         self.points = []
 
     def add_point(self, gjf_file=None, wfn_file=None, int_directory=None):
-        point_in_points = False
+        if gjf_file:
+            gjf_name = FileTools.get_base(gjf_file)
+        if wfn_file:
+            wfn_name = FileTools.get_base(wfn_file)
+        if int_directory:
+            int_name = FileTools.get_base(int_directory)
+        
+        names = [gjf_name, wfn_name, int_name]
         for point in self.points:
-            if gjf_file == point.gjf.fname:
-
-        if not point_in_points
-        self.points.append(Point(gjf=gjf_file, wfn=wfn_file, ints=int_directory))
+            if point.name is in names:
+                if gjf_file:
+                    try:
+                        point.gjf = GJF_file(gjf_file)
+                    except:
+                        point.gjf = None
+                
+                if wfn_file:
+                    try:
+                        point.wfn_fname = wfn_file
+                    except:
+                        point.wfn_fname = None
+                
+                if int_directory:
+                    try:
+                        point.int = point.read_int_files(int_directory)
+                    except:
+                        point.int = None
+                break
+        else:
+            self.points.append(Point(gjf=gjf_file, wfn=wfn_file, ints=int_directory))
 
     def change_basis_set(self, basis_set):
         for point in self.points:
@@ -1371,7 +1397,9 @@ class FileTools:
 
     @staticmethod
     def get_base(fname):
-        return fname.split(".")[0].split("/")[-1]
+        if fname.endswith("/"):
+            fname = fname.rstrip("/")
+        return fname.split("_")[0].split(".")[0].split("/")[-1]
 
     @staticmethod
     def cleanup_aimall_dir(aimall_dir, split_into_atoms=False):
