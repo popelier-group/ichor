@@ -1,3 +1,4 @@
+#! python3
 """
 
   #############################################################################################################
@@ -313,7 +314,7 @@ class Tree:
         while self.get_bpointer(pos):
             file_path += [self[self.get_bpointer(pos)].name]
             pos = self.get_bpointer(pos)
-        return "/".join(list(reversed(file_path[:-1]))) + "/"
+        return os.path.join(*list(reversed(file_path[:-1])))
 
     def __update_fpointer(self, position, identifier, mode):
         if position is None:
@@ -585,44 +586,44 @@ class GJF_file:
         self.parse_gjf()
     
     def parse_gjf(self):
-        try:
-            with open(self.fname, "r") as f:
-                for line in f:
-                    if line.startswith("%"):
-                        self.startup_options.append(line.strip())
+        #try:
+        with open(self.fname, "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                print(line)
+                if line.startswith("%"):
+                    self.startup_options.append(line.strip())
+                elif line.startswith("#"):
+                    line_split = line.split()
+                    for item in line_split():
+                        if item.lower() == "p":
+                            self.run_type = "energy"
+                        elif item.lower() == "opt":
+                            self.run_type = "optimisation"
+                        elif "/" in item:
+                            item_split = item.split()
+                            self.potential = item_split[0]
+                            self.basis_set = item_split[1]
+                        elif item.lower() == "output=wfn":
+                            self.output_wfn = True
+                        else:
+                            self.keywords.append(item)
+                elif re.match("\s*\d+\s+\d+", line):
+                    line_split = line.lstrip().split()
+                    self.charge = int(item_split[0])
+                    self.multiplicity = int(item_split[1])
 
-                    elif line.startswith("#"):
-                        line_split = line.split()
-                        for item in line_split():
-                            if item.lower() == "p":
-                                self.run_type = "energy"
-                            elif item.lower() == "opt":
-                                self.run_type = "optimisation"
-                            elif "/" in item:
-                                item_split = item.split()
-                                self.potential = item_split[0]
-                                self.basis_set = item_split[1]
-                            elif item.lower() == "output=wfn"
-                                self.output_wfn = True
-                            else:
-                                self.keywords.append(item)
+                elif re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
+                    line_split = line.split()
+                    self.coordinates.append(Atom(atom_type=line_split[0], x=line_split[1], y=line_split[2], z=line_split[3]))
+                
+                elif ".wfn" in line:
+                    self.output_wfn_fname = line.strip()
 
-                    elif re.match("\s*\d+\s+\d+", line):
-                        item_split = item.lstrip().split()
-                        self.charge = int(item_split[0])
-                        self.multiplicity = int(item_split[1])
-
-                    elif re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
-                        line_split = line.split()
-                        self.coordinates.append(Atom(atom_type=line_split[0], x=line_split[1], y=line_split[2], z=line_split[3]))
-                    
-                    elif ".wfn" in line:
-                        self.output_wfn_fname = line.strip()
-
-                    elif self.basis_set == "gen":
-                        self.gen_basis_set += line
-        except:
-            print("\nError: Cannot Read File %s" % self.fname)
+                elif self.basis_set == "gen":
+                    self.gen_basis_set += line
+        # except:
+        #     print("\nError: Cannot Read File %s" % self.fname)
 
     def write_gjf(self):
         with open(self.fname, "w") as f:
@@ -839,6 +840,8 @@ class MODEL:
 
 class Point:
 
+    name = None
+
     def __init__(self, gjf=None, wfn=None, int_directory=None):
         
         self.wfn_fname = wfn
@@ -855,6 +858,8 @@ class Point:
             self.read_int_files(int_directory)
         except:
             pass
+        
+        self.set_point_name()
 
     def set_gjf_file(self, gjf_fname):
         try:
@@ -903,16 +908,13 @@ class Points:
         self.points = []
 
     def add_point(self, gjf_file=None, wfn_file=None, int_directory=None):
-        if gjf_file:
-            gjf_name = FileTools.get_base(gjf_file)
-        if wfn_file:
-            wfn_name = FileTools.get_base(wfn_file)
-        if int_directory:
-            int_name = FileTools.get_base(int_directory)
+        gjf_name = FileTools.get_base(gjf_file) if gjf_file else None
+        wfn_name = FileTools.get_base(wfn_file) if wfn_file else None
+        int_name = FileTools.get_base(int_directory) if int_directory else None
         
         names = [gjf_name, wfn_name, int_name]
         for point in self.points:
-            if point.name is in names:
+            if point.name in names:
                 if gjf_file:
                     try:
                         point.gjf = GJF_file(gjf_file)
@@ -932,7 +934,7 @@ class Points:
                         point.int = None
                 break
         else:
-            self.points.append(Point(gjf=gjf_file, wfn=wfn_file, ints=int_directory))
+            self.points.append(Point(gjf=gjf_file, wfn=wfn_file, int_directory=int_directory))
 
     def change_basis_set(self, basis_set):
         for point in self.points:
@@ -943,6 +945,9 @@ class Points:
     def change_potential(self, potential):
         for point in self.points:
             point.gjf.potential = potential
+    
+    def len(self):
+        return len(self.points)
 
 class GeometryData:
 
@@ -2254,8 +2259,17 @@ def submitTrainingGJFs():
     CSFTools.submit_scipt("GaussSub.sh", exit=True)
 
 
-def newSubmitTrainingGJFs
+def newSubmitTrainingGJFs():
+    global FILE_STRUCTURE
 
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    training_set = Points()
+    gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
+
+    for gjf in gjfs:
+        training_set.add_point(gjf_file=gjf)
+
+    print(training_set.len())    
 
 def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
     global FILE_STRUCTURE
@@ -3092,7 +3106,8 @@ if __name__ == "__main__":
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
-               "analyse": makeFormattedFiles}
+               "analyse": makeFormattedFiles,
+               "t": newSubmitTrainingGJFs}
 
     while True:
         if len(glob("*.sh.*")) > 0:
@@ -3115,6 +3130,8 @@ if __name__ == "__main__":
         print("")
         print("[analyse] Analysis Tools")
         print("[dlpoly] Run DLPOLY on Sample Pool using LOG")
+        print("")
+        print("[t] Test")
         print("")
         print("[0] Exit")
         print("Enter action:")
