@@ -564,6 +564,7 @@ class GJF_file:
 
     def __init__(self, fname):
         self.fname = fname
+        self.name = fname.split("/")[-1].split(".")[0]
 
         self.run_type = None
         self.startup_options = []
@@ -586,44 +587,43 @@ class GJF_file:
         self.parse_gjf()
     
     def parse_gjf(self):
-        #try:
-        with open(self.fname, "r") as f:
-            lines = f.readlines()
-            for line in lines:
-                print(line)
-                if line.startswith("%"):
-                    self.startup_options.append(line.strip())
-                elif line.startswith("#"):
-                    line_split = line.split()
-                    for item in line_split():
-                        if item.lower() == "p":
-                            self.run_type = "energy"
-                        elif item.lower() == "opt":
-                            self.run_type = "optimisation"
-                        elif "/" in item:
-                            item_split = item.split()
-                            self.potential = item_split[0]
-                            self.basis_set = item_split[1]
-                        elif item.lower() == "output=wfn":
-                            self.output_wfn = True
-                        else:
-                            self.keywords.append(item)
-                elif re.match("\s*\d+\s+\d+", line):
-                    line_split = line.lstrip().split()
-                    self.charge = int(item_split[0])
-                    self.multiplicity = int(item_split[1])
+        try:
+            with open(self.fname, "r") as f:
+                lines = f.readlines()
+                for line in lines:
+                    if line.startswith("%"):
+                        self.startup_options.append(line.strip())
+                    elif line.startswith("#"):
+                        line_split = line.split()
+                        for item in line_split:
+                            if item.lower() == "p":
+                                self.run_type = "energy"
+                            elif item.lower() == "opt":
+                                self.run_type = "optimisation"
+                            elif "/" in item:
+                                item_split = item.split("/")
+                                self.potential = item_split[0]
+                                self.basis_set = item_split[1]
+                            elif item.lower() == "output=wfn":
+                                self.output_wfn = True
+                            else:
+                                self.keywords.append(item)
+                    elif re.match("\s*\d+\s+\d+", line):
+                        line_split = re.findall("\d+", line)
+                        self.charge = int(line_split[0])
+                        self.multiplicity = int(line_split[1])
 
-                elif re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
-                    line_split = line.split()
-                    self.coordinates.append(Atom(atom_type=line_split[0], x=line_split[1], y=line_split[2], z=line_split[3]))
-                
-                elif ".wfn" in line:
-                    self.output_wfn_fname = line.strip()
+                    elif re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
+                        line_split = line.split()
+                        self.coordinates.append(Atom(atom_type=line_split[0], x=line_split[1], y=line_split[2], z=line_split[3]))
+                    
+                    elif ".wfn" in line:
+                        self.output_wfn_fname = line.strip()
 
-                elif self.basis_set == "gen":
-                    self.gen_basis_set += line
-        # except:
-        #     print("\nError: Cannot Read File %s" % self.fname)
+                    elif self.basis_set == "gen":
+                        self.gen_basis_set += line
+        except:
+            print("\nError: Cannot Read File %s" % self.fname)
 
     def write_gjf(self):
         with open(self.fname, "w") as f:
@@ -846,13 +846,7 @@ class Point:
         
         self.wfn_fname = wfn
         self.int = {}
-
-        self.set_point_name()
-
-        try:
-            self.gjf = GJF_file(gjf)
-        except:
-            self.gjf = None
+        self.set_gjf_file(gjf)
         
         try:
             self.read_int_files(int_directory)
@@ -863,11 +857,9 @@ class Point:
 
     def set_gjf_file(self, gjf_fname):
         try:
-            self.gjf = self.GJF_file(gjf_fname)
+            self.gjf = GJF_file(gjf_fname)
         except:
             self.gjf = None
-        
-        self.set_point_name()
     
     def read_int_files(self, int_dir):
         int_files = FileTools.get_files_in(int_dir, "*.int")
@@ -901,6 +893,7 @@ class Point:
                         self.name = self.get_name(self.int[atom].fname)
                 except:
                     self.name = None
+        print(self.gjf.coordinates[0].x)
 
 class Points:
 
@@ -935,6 +928,8 @@ class Points:
                 break
         else:
             self.points.append(Point(gjf=gjf_file, wfn=wfn_file, int_directory=int_directory))
+        
+        #print(len(self.points))
 
     def change_basis_set(self, basis_set):
         for point in self.points:
@@ -2269,7 +2264,7 @@ def newSubmitTrainingGJFs():
     for gjf in gjfs:
         training_set.add_point(gjf_file=gjf)
 
-    print(training_set.len())    
+    print(training_set.len())
 
 def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
     global FILE_STRUCTURE
