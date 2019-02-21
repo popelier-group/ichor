@@ -477,7 +477,7 @@ class GJF:
                  "     0.1020000000D+00  0.1000000000D+01\n" \
                  " ****\n"
         else:
-            bs = "Unkown Basis Function"
+            bs = "Unkown Basis Set\n"
         return bs
 
     def get_header(self):
@@ -564,7 +564,8 @@ class GJF_file:
 
     def __init__(self, fname):
         self.fname = fname
-        self.name = fname.split("/")[-1].split(".")[0]
+        self.output = fname.replace(".gjf", ".log")
+        self.name = Point.get_name(fname)
 
         self.run_type = None
         self.startup_options = []
@@ -589,23 +590,19 @@ class GJF_file:
     def parse_gjf(self):
         try:
             with open(self.fname, "r") as f:
-                lines = f.readlines()
-                for line in lines:
+                for line in f:
                     if line.startswith("%"):
                         self.startup_options.append(line.strip())
                     elif line.startswith("#"):
-                        line_split = line.split()
+                        line_split = line.replace("#", "").split()
                         for item in line_split:
-                            if item.lower() == "p":
-                                self.run_type = "energy"
-                            elif item.lower() == "opt":
-                                self.run_type = "optimisation"
-                            elif "/" in item:
+                            if "/" in item:
                                 item_split = item.split("/")
                                 self.potential = item_split[0]
                                 self.basis_set = item_split[1]
                             elif item.lower() == "output=wfn":
                                 self.output_wfn = True
+                                self.keywords.append(item)
                             else:
                                 self.keywords.append(item)
                     elif re.match("\s*\d+\s+\d+", line):
@@ -616,29 +613,106 @@ class GJF_file:
                     elif re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
                         line_split = line.split()
                         self.coordinates.append(Atom(atom_type=line_split[0], x=line_split[1], y=line_split[2], z=line_split[3]))
-                    
                     elif ".wfn" in line:
                         self.output_wfn_fname = line.strip()
-
                     elif self.basis_set == "gen":
                         self.gen_basis_set += line
         except:
             print("\nError: Cannot Read File %s" % self.fname)
+    
+    def set_gen_basis_set(self, gen_basis_set):
+        self.basis_set = "gen"
+        self.gen_basis_set = self.get_gen_basis_set(gen_basis_set)
+
+    def get_gen_basis_set(self, basis_set):
+        # Need to make a nice commented list of Available Basis Sets, as well as form a way for this not to be hard coded
+        # Could Make option to select between available basis sets
+
+        bs = ""
+        if basis_set == "truncated":
+            bs = "       1  0 \n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.1533000000D+05  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.2299000000D+04  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.5224000000D+03  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.1473000000D+03  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.4755000000D+02  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.1676000000D+02  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.6207000000D+01  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.6882000000D+00  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.1752000000D+01  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.2384000000D+00  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.7376000000D-01  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.3446000000D+02  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.7749000000D+01  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.2280000000D+01  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.7156000000D+00  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.2140000000D+00  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.5974000000D-01  0.1000000000D+01\n" \
+                 " D   1 1.00       0.000000000000\n" \
+                 "     0.2314000000D+01  0.1000000000D+01\n" \
+                 " D   1 1.00       0.000000000000\n" \
+                 "     0.6450000000D+00  0.1000000000D+01\n" \
+                 " D   1 1.00       0.000000000000\n" \
+                 "     0.2140000000D+00  0.1000000000D+01\n" \
+                 " ****\n" \
+                 "     2 3 0\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.3387000000D+02  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.5095000000D+01  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.1159000000D+01  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.3258000000D+00  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.1027000000D+00  0.1000000000D+01\n" \
+                 " S   1 1.00       0.000000000000\n" \
+                 "     0.2526000000D-01  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.1407000000D+01  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.3880000000D+00  0.1000000000D+01\n" \
+                 " P   1 1.00       0.000000000000\n" \
+                 "     0.1020000000D+00  0.1000000000D+01\n" \
+                 " ****\n"
+        else:
+            bs = "Unkown Basis Set\n"
+        return bs
 
     def write_gjf(self):
         with open(self.fname, "w") as f:
             for startup_option in self.startup_options:
                 f.write("%s\n" % startup_option)
             
-            f.write("#%s %s/%s %s" % (self.run_type, self.potential, self.basis_set, " ".join(self.keywords)))
-            if self.output_wfn: f.write("output=wfn")
-            f.write("\n\n")
+            f.write("#%s/%s %s\n\n" % (self.potential, self.basis_set, " ".join(self.keywords)))
             
-            f.write("%s\n" % self.fname.replace(".gjf", ""))
+            f.write("%s\n\n" % self.fname.replace(".gjf", ""))
             
             f.write(" %d %d\n" % (self.charge, self.multiplicity))
             for atom in self.coordinates:
                 f.write("%s%16.8f%16.8f%16.8f\n" % (atom.atom_type, atom.x, atom.y, atom.z))
+            f.write("\n")
+            if self.basis_set.lower() == "gen":
+                f.write(self.gen_basis_set)
+                f.write("\n")
+            f.write("%s" % self.output_wfn_fname)
 
 
 class INT:
@@ -847,7 +921,6 @@ class Point:
         self.wfn_fname = wfn
         self.int = {}
         self.set_gjf_file(gjf)
-        
         try:
             self.read_int_files(int_directory)
         except:
@@ -858,28 +931,41 @@ class Point:
     def set_gjf_file(self, gjf_fname):
         try:
             self.gjf = GJF_file(gjf_fname)
+            self.geometry = self.gjf.coordinates
         except:
             self.gjf = None
     
     def read_int_files(self, int_dir):
         int_files = FileTools.get_files_in(int_dir, "*.int")
-        for int_file in self.int_files:
+        for int_file in int_files:
             self.read_int_file(int_file)
 
     def add_int_file(self, fname):
         self.read_int_file(fname)
-        self.int_list.append(fname)
     
-    def read_int_file(fname):
+    def read_int_file(self, fname):
         try:
             int_data = INT(fname)
             self.int[int_data.atom] = int_data
         except:
             print("\nError: Cannot Read File %s" % fname)
     
+    def calculate_features(self):
+        global ALF
+        self.features = {}
+        try:
+            coordinates = [[atom.x, atom.y, atom.z] for atom in self.gjf.coordinates]
+            self.feats = calcFeats(ALF, coordinates)
+            for i in range(len(self.gjf.coordinates)):
+                self.features["%s%d" % (self.gjf.coordinates[i].atom_type, i+1)] = self.feats[i]
+        except:
+            print("Error calculating features for point: %s" %self.name)
+            self.features = None
+
+    
     @staticmethod
     def get_name(name):
-        return FileTools.get_base(name)
+        return os.path.split(name)[1].split(".")[0].split("_")[0]
 
     def set_point_name(self):
         try:
@@ -893,7 +979,28 @@ class Point:
                         self.name = self.get_name(self.int[atom].fname)
                 except:
                     self.name = None
-        print(self.gjf.coordinates[0].x)
+    
+    def get_training_set_line(self, IQA=True):
+        lines = {}
+        for atom, int_data in self.int.items():
+            features = self.features[atom]
+
+            if IQA:
+                training_data = [int_data.iqa_terms["E_IQA(A)"]]
+            else:
+                training_data = [data[1] for data in int_data.multipole_moments.items[:25]]
+            
+            for i in range(len(iqa_terms), 25):
+                iqa_terms.append("0")
+
+
+            lines[atom] = 
+
+            print(atom)
+            print(iqa_data)
+            print(features)
+            quit()
+
 
 class Points:
 
@@ -928,10 +1035,30 @@ class Points:
                 break
         else:
             self.points.append(Point(gjf=gjf_file, wfn=wfn_file, int_directory=int_directory))
-        
-        #print(len(self.points))
 
-    def change_basis_set(self, basis_set):
+    def make_training_set(self, iqa_models=True):
+        for point in self.points:
+            point.calculate_features()
+            point.get_training_set_line()
+
+    def create_submission_script(self, type=None, name="SubmissionScript.sh", cores=1, submit=False, exit=True, sync=False):
+        attributes = {
+            "gaussian": "gjf",
+            "aimall": "wfn",
+            "ferebus": "training_Set"
+        }
+        
+        submission_script = SubmissionScript(name, type=type)
+        for point in self.points:
+            job = getattr(point, attributes[type])
+            submission_script.add_job(job.fname, options=job.output)
+        
+        submission_script.write_script()
+
+        if submit:
+            CSFTools.submit_scipt("GaussSub.sh", exit=exit, sync=sync)
+
+    def change_basis_set(self, basis_set, gen_basis_set=None):
         for point in self.points:
             point.gjf.basis_set = basis_set
             if basis_set.lower() == "gen":
@@ -941,8 +1068,26 @@ class Points:
         for point in self.points:
             point.gjf.potential = potential
     
-    def len(self):
+    def write_gjfs(self):
+        for point in self.points:
+            point.gjf.write_gjf()
+    
+
+    #List Emulation Stuff
+    def __len__(self):
         return len(self.points)
+    
+    def __getitem__(self, item):
+        return self.points[item]
+    
+    def __delitem__(self, item):
+        del self.points[item]
+    
+    def __iter__(self):
+        return iter(self.points)
+    
+    def __contains__(self, value):
+        return value in self.points
 
 class GeometryData:
 
@@ -1062,7 +1207,8 @@ class SubmissionScript:
             self.options[option] = value
 
     def add_module(self, module):
-        self.modules.append(module)
+        if module not in self.modules:
+            self.modules.append(module)
 
     def add_job(self, job, options=""):
         self.jobs.append(Job(job, options=options, type=self.type, ncores=self.cores))
@@ -1073,6 +1219,22 @@ class SubmissionScript:
     def set_cores(self, cores):
         self.cores = cores
 
+    def set_default_cores(self):
+        global GAUSSIAN_CORE_COUNT
+        global AIMALL_CORE_COUNT
+        global FEREBUS_CORE_COUNT
+
+        core_counts = {
+            "gaussian": GAUSSIAN_CORE_COUNT,
+            "aimall": AIMALL_CORE_COUNT,
+            "ferebus": FEREBUS_CORE_COUNT
+        }
+
+        try:
+            self.cores = core_counts[self.type]
+        except:
+            pass
+
     def add_path(self, path):
         self.path = path
 
@@ -1081,6 +1243,17 @@ class SubmissionScript:
             return ""
         elif self.cores < 16:
             return "#$ -pe smp.pe %d\n" % self.cores
+
+    def load_modules(self):
+        modules = {
+            "gaussian": ["apps/binapps/gaussian/g09d01_em64t"],
+            "ferebus": ["mpi/intel-17.0/openmpi/3.1.3", "libs/intel/nag/fortran_mark26_intel"]
+        }
+        try:
+            for module in modules[self.type]:
+                self.add_module(module)
+        except:
+            pass
 
     def get_options_string(self):
         options_string = ""
@@ -1106,6 +1279,8 @@ class SubmissionScript:
             return job_string
 
     def write_script(self):
+        self.load_modules()
+        self.set_default_cores()
         with open(self.name, "w+") as f:
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
@@ -1435,7 +1610,7 @@ class FileTools:
                     int_files = FileTools.get_files_in(directory, "*.int")
                     directory_base = directory.split("/")[-1].replace("_atomicfiles", "")
                     for int_file in int_files:
-                        int_base = FileTools.get_base(int_file)
+                        int_base = os.path.split(int_file)[1].split(".")[0]
                         if not int_base.startswith(directory_base):
                             new_int_file = "%s/%s_%s.int" % (directory, directory_base, int_base)
                             FileTools.move_file(int_file, new_int_file)
@@ -2244,27 +2419,15 @@ def checkWFNs(gjf_dir, wfn_dir):
 def submitTrainingGJFs():
     global FILE_STRUCTURE
 
-    gjf_directory = FILE_STRUCTURE.get_file_path("ts_gjf")
-    createGaussScript(gjf_directory)
-
-    if FORMAT_GJFS:
-        for gjf in FileTools.get_files_in(gjf_directory, "*.gjf", sorting="natural"):
-            formatGJF(gjf)
-
-    CSFTools.submit_scipt("GaussSub.sh", exit=True)
-
-
-def newSubmitTrainingGJFs():
-    global FILE_STRUCTURE
-
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
-    training_set = Points()
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
-
+    training_set = Points()
     for gjf in gjfs:
         training_set.add_point(gjf_file=gjf)
+    training_set.write_gjfs()
 
-    print(training_set.len())
+    training_set.create_submission_script(type="gaussian", name="GaussSub.sh", submit=True, exit=False)
+
 
 def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
     global FILE_STRUCTURE
@@ -2329,7 +2492,7 @@ def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
 
     for i in range(len(wfns)):
         wfn = wfns[i]
-        job = "%sJOB%d.log" % (aimall_dir, i+1)
+        job = "%s/JOB%d.log" % (aimall_dir, i+1)
         aimsub.add_job(wfn, options=job)
 
     aimsub.write_script()
@@ -2348,79 +2511,82 @@ def makeTrainingSets():
 
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
-
     fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
 
     FileTools.make_clean_directory(fereb_dir)
-    FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=True)
+    FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=False)
 
-    fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
+    gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
+    int_directories = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
 
-    if MACHINE == "csf2":
-        fereSub.add_module("libs/intel/nag/fortran_mark23_intel")
-        fereSub.add_module("compilers/intel/fortran/15.0.3")
-        fereSub.add_module("mpi/intel-14.0/openmpi/1.8.3")
-        fereSub.add_module("compilers/intel/c/14.0.3")
-        fereSub.add_module("mpi/open64-4.5.2.1/openmpi/1.8.3-ib-amd-bd")
-    elif MACHINE == "csf3":
-        fereSub.add_module("mpi/intel-17.0/openmpi/3.1.3")
-        fereSub.add_module("libs/intel/nag/fortran_mark26_intel")
+    training_set = Points()
+    for gjf, int_dir in zip(gjfs, int_directories):
+        training_set.add_point(gjf_file=gjf, int_directory=int_dir)
+    # training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True)
 
-    atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
+    training_set.make_training_set()
 
-    gjf_files = FileTools.get_files_in(gjf_dir, "*.gjf")
-    gjf_data = ReadFiles.GJFs(gjf_files)
 
-    for directory in atom_directories:
-        # Setup Ferebus Atom Directories
-        atom = str(directory.split("/")[-1])
-        atom_dir = fereb_dir + atom + "/"
-        os.mkdir(atom_dir)
+    # fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
+    
+    # fereSub.add_module("mpi/intel-17.0/openmpi/3.1.3")
+    # fereSub.add_module("libs/intel/nag/fortran_mark26_intel")
 
-        # Read Data From Int Files
-        int_files = FileTools.get_files_in(directory, "*.int")
-        ints = []
-        for int_file in int_files:
-            ints.append(INT(int_file))
+    # atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
 
-        training_set_file = atom_dir + atom + "_TRAINING_SET.txt"
-        with open(training_set_file, "w+") as f:
-            row_count = 1
-            for gjf_i, int_i in zip(gjf_data, ints):
-                features = gjf_i.get_atom_features(atom)
-                formated_features = ["{0:11.8f}".format(i) for i in features]
+    # gjf_files = FileTools.get_files_in(gjf_dir, "*.gjf")
+    # gjf_data = ReadFiles.GJFs(gjf_files)
 
-                features_string = "   ".join(formated_features)
+    # for directory in atom_directories:
+    #     # Setup Ferebus Atom Directories
+    #     atom = str(directory.split("/")[-1])
+    #     atom_dir = fereb_dir + atom + "/"
+    #     os.mkdir(atom_dir)
 
-                iqa_terms = []
+    #     # Read Data From Int Files
+    #     int_files = FileTools.get_files_in(directory, "*.int")
+    #     ints = []
+    #     for int_file in int_files:
+    #         ints.append(INT(int_file))
 
-                iqa_terms.append(str(int_i.IQA_terms["T(A)"]))
-                iqa_terms.append(str(int_i.IQA_terms["VC_IQA(A,A')/2"]))
-                iqa_terms.append(str(int_i.IQA_terms["VX_IQA(A,A')/2"]))
-                iqa_terms.append(str(int_i.IQA_terms["E_IQA(A)"]))
-                iqa_terms.append(str(int_i.IQA_terms["E_IQA_Intra(A)"]))
-                iqa_terms.append(str(int_i.IQA_terms["E_IQA_Inter(A)"]))
+    #     training_set_file = atom_dir + atom + "_TRAINING_SET.txt"
+    #     with open(training_set_file, "w+") as f:
+    #         row_count = 1
+    #         for gjf_i, int_i in zip(gjf_data, ints):
+    #             features = gjf_i.get_atom_features(atom)
+    #             formated_features = ["{0:11.8f}".format(i) for i in features]
 
-                for i in range(len(iqa_terms), 25):
-                    iqa_terms.append("0")
+    #             features_string = "   ".join(formated_features)
 
-                iqa_string = "   ".join(iqa_terms)
-                row_number = str(row_count).zfill(4)
+    #             iqa_terms = []
 
-                f.write("%s   %s    " % (features_string, iqa_string) + str(row_count).zfill(4) + "\n")
-                row_count += 1
+    #             iqa_terms.append(str(int_i.IQA_terms["T(A)"]))
+    #             iqa_terms.append(str(int_i.IQA_terms["VC_IQA(A,A')/2"]))
+    #             iqa_terms.append(str(int_i.IQA_terms["VX_IQA(A,A')/2"]))
+    #             iqa_terms.append(str(int_i.IQA_terms["E_IQA(A)"]))
+    #             iqa_terms.append(str(int_i.IQA_terms["E_IQA_Intra(A)"]))
+    #             iqa_terms.append(str(int_i.IQA_terms["E_IQA_Inter(A)"]))
 
-        FerebusTools.write_finput(atom_dir, len(atom_directories), atom, len(gjf_data))
+    #             for i in range(len(iqa_terms), 25):
+    #                 iqa_terms.append("0")
 
-        fereSub.add_job(atom_dir)
+    #             iqa_string = "   ".join(iqa_terms)
+    #             row_number = str(row_count).zfill(4)
 
-    fereSub.write_script()
+    #             f.write("%s   %s    " % (features_string, iqa_string) + str(row_count).zfill(4) + "\n")
+    #             row_count += 1
 
-    if not AUTO_SUBMISSION_MODE:
-        CSFTools.submit_scipt(fereSub.name, sync=True)
-        moveIQAModels()
-    else:
-        sys.exit(0)
+    #     FerebusTools.write_finput(atom_dir, len(atom_directories), atom, len(gjf_data))
+
+    #     fereSub.add_job(atom_dir)
+
+    # fereSub.write_script()
+
+    # if not AUTO_SUBMISSION_MODE:
+    #     CSFTools.submit_scipt(fereSub.name, sync=True)
+    #     moveIQAModels()
+    # else:
+    #     sys.exit(0)
 
 
 def moveIQAModels():
@@ -3101,8 +3267,7 @@ if __name__ == "__main__":
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
-               "analyse": makeFormattedFiles,
-               "t": newSubmitTrainingGJFs}
+               "analyse": makeFormattedFiles}
 
     while True:
         if len(glob("*.sh.*")) > 0:
