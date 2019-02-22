@@ -61,6 +61,7 @@ from operator import itemgetter
 import uuid
 from argparse import ArgumentParser
 from numpy.core.multiarray import ndarray
+import itertools
 
 """
 
@@ -123,6 +124,9 @@ DLPOLY_PRINT_EVERY = 1 # Print trajectory and stats every n steps
 DLPOLY_TIMESTEP = 0.001 # in ps
 
 MACHINE = "csf3"
+
+TRAINING_SET = None
+
 
 """
  ################################################################################
@@ -314,7 +318,7 @@ class Tree:
         while self.get_bpointer(pos):
             file_path += [self[self.get_bpointer(pos)].name]
             pos = self.get_bpointer(pos)
-        return os.path.join(*list(reversed(file_path[:-1])))
+        return os.path.join(*list(reversed(file_path[:-1])), '')
 
     def __update_fpointer(self, position, identifier, mode):
         if position is None:
@@ -1000,8 +1004,10 @@ class Point:
 
 class Points:
 
-    def __init__(self, gjf_files=None, wfn_files=None, int_files=None):
+    def __init__(self, gjf_files=[], wfn_files=[], int_directories=[]):
         self.points = []
+        if gjf_files or wfn_files or int_directories:
+            self.form_set(gjfs=gjf_files, wfns=wfn_files, int_directories=int_directories)
 
     def add_point(self, gjf_file=None, wfn_file=None, int_directory=None):
         gjf_name = FileTools.get_base(gjf_file) if gjf_file else None
@@ -1032,22 +1038,49 @@ class Points:
         else:
             self.points.append(Point(gjf=gjf_file, wfn=wfn_file, int_directory=int_directory))
 
-    def make_training_set(self, IQA=True):
+    def make_training_set(self, IQA=True, writeSet=True, directory=None):
+        if not directory:
+            global FILE_STRUCTURE
+            fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
+
         for point in self.points:
             point.calculate_features()
             point.get_training_set_line(IQA=IQA)
+
+        nproperties = {True: 1, False: 25}
+
+        self.training_set_directories = []
+
+        atoms = self.get_atoms()
+        for atom in atoms:
+            atom_dir = os.path.join(fereb_dir, atom)
+            FileTools.make_clean_directory(atom_dir)
+            FerebusTools.write_finput(atom_dir, len(atoms), atom, len(self.points), nproperties=nproperties[IQA])
+
+            self.training_set_directories.append(atom_dir)
+
+            training_set_file = os.path.join(atom_dir, atom + "_TRAINING_SET.txt")
+            with open(training_set_file, "w+") as f:
+                for i, training_point in enumerate(self.points):
+                    f.write("%s  %s\n" % (training_point.training_set_lines[atom], str(i+1).zfill(4)))
 
     def create_submission_script(self, type=None, name="SubmissionScript.sh", cores=1, submit=False, exit=True, sync=False):
         attributes = {
             "gaussian": "gjf",
             "aimall": "wfn",
-            "ferebus": "training_Set"
-        }
+            "ferebus": "training_set_directories"
+        } 
         
         submission_script = SubmissionScript(name, type=type)
-        for point in self.points:
-            job = getattr(point, attributes[type])
-            submission_script.add_job(job.fname, options=job.output)
+
+        if type == "ferebus":
+            atoms = self.get_atoms()
+            for atom_directory in self.training_set_directories:
+                submission_script.add_job(atom_directory)
+        else:
+            for point in self.points:
+                job = getattr(point, attributes[type])
+                submission_script.add_job(job.fname, options=job.output)
         
         submission_script.write_script()
 
@@ -1076,6 +1109,10 @@ class Points:
     def write_gjfs(self):
         for point in self.points:
             point.gjf.write_gjf()
+    
+    def form_set(self, gjfs=[], wfns=[], int_directories=[]):
+        for gjf, wfn, int_directory in itertools.zip_longest(gjfs, wfns, int_directories):
+            self.add_point(gjf_file=gjf, wfn_file=wfn, int_directory=int_directory)
     
 
     #List Emulation Stuff
@@ -1164,7 +1201,7 @@ class Job:
         ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
         copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
         cd_line = "cd %s\n" % self.job
-        while_loop = "while [ ! -f *q11s* ]\n" \
+        while_loop = "while [ ! -f *q00* ]\n" \
                      "do\n" \
                      "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
                      "done\n"
@@ -2525,17 +2562,10 @@ def makeTrainingSets():
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
     int_directories = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
 
-    training_set = Points()
-    for gjf, int_dir in zip(gjfs, int_directories):
-        training_set.add_point(gjf_file=gjf, int_directory=int_dir)
-    # training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True)
+    training_set = Points(gjf_files=gjfs, int_directories=int_directories)
 
     training_set.make_training_set()
-    atoms = training_set.get_atoms()
-    for atom in atoms:
-        print("\n\n" + atom)
-        for training_point in training_set:
-                print("%s  %s" % (training_point.name, training_point.training_set_lines[atom]))
+    training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=False, exit=True)
 
 
     # fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
@@ -2607,22 +2637,22 @@ def moveIQAModels():
     ferebus_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
     atom_directories = FileTools.get_atom_directories(ferebus_dir)
 
-    q11s_files = []
+    q00_files = []
     for atom_directory in atom_directories:
         if not atom_directory.endswith("/"):
             atom_directory += "/"
-        q11s_locs = FileTools.get_files_in(atom_directory, "*q11s*.txt")
-        if len(q11s_locs) == 1:
-            q11s_files.append(q11s_locs[0])
+        q00_locs = FileTools.get_files_in(atom_directory, "*q00*.txt")
+        if len(q00_locs) == 1:
+            q00_files.append(q00_locs[0])
 
-    if len(q11s_files) == len(atom_directories):
+    if len(q00_files) == len(atom_directories):
         models_dir = FILE_STRUCTURE.get_file_path("ts_models")
         FileTools.make_clean_directory(models_dir)
-        for q11s_file in q11s_files:
-            q11s_name = q11s_file.split("/")[-1]
-            q11s_num = q11s_name.replace(".txt", "").split("_")[-1]
-            model_filename = "%s%s_kriging_IQA_%s.txt" % (models_dir, SYSTEM_NAME, q11s_num)
-            FileTools.copy_file(q11s_file, model_filename)
+        for q00_file in q11s_files:
+            q00_name = q00_file.split("/")[-1]
+            q00_num = q00_name.replace(".txt", "").split("_")[-1]
+            model_filename = "%s%s_kriging_IQA_%s.txt" % (models_dir, SYSTEM_NAME, q00_num)
+            FileTools.copy_file(q00_file, model_filename)
             FileTools.remove_no_noise(model_filename)
     else:
         print("Error: IQA Models not complete.")
