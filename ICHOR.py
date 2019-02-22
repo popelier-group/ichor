@@ -981,25 +981,21 @@ class Point:
                     self.name = None
     
     def get_training_set_line(self, IQA=True):
-        lines = {}
+        self.training_set_lines = {}
         for atom, int_data in self.int.items():
-            features = self.features[atom]
+            features = [str(x) for x in self.features[atom]]
 
             if IQA:
-                training_data = [int_data.iqa_terms["E_IQA(A)"]]
+                training_data = [str(int_data.IQA_terms["E_IQA(A)"])]
             else:
-                training_data = [data[1] for data in int_data.multipole_moments.items[:25]]
+                training_data = [str(data[1]) for data in int_data.multipole_moments.items()][:25]
             
-            for i in range(len(iqa_terms), 25):
-                iqa_terms.append("0")
+            for _ in range(len(training_data), 25):
+                training_data.append("0")
 
+            line = "%s  %s" % ("  ".join(features), "  ".join(training_data))
 
-            lines[atom] = 
-
-            print(atom)
-            print(iqa_data)
-            print(features)
-            quit()
+            self.training_set_lines[atom] = line
 
 
 class Points:
@@ -1036,10 +1032,10 @@ class Points:
         else:
             self.points.append(Point(gjf=gjf_file, wfn=wfn_file, int_directory=int_directory))
 
-    def make_training_set(self, iqa_models=True):
+    def make_training_set(self, IQA=True):
         for point in self.points:
             point.calculate_features()
-            point.get_training_set_line()
+            point.get_training_set_line(IQA=IQA)
 
     def create_submission_script(self, type=None, name="SubmissionScript.sh", cores=1, submit=False, exit=True, sync=False):
         attributes = {
@@ -1057,6 +1053,15 @@ class Points:
 
         if submit:
             CSFTools.submit_scipt("GaussSub.sh", exit=exit, sync=sync)
+
+    def get_atoms(self):
+        return FileTools.natural_sort(list(self.points[0].int.keys()))
+
+    def sort_by(self, attr, reverse=False):
+        self.points.sort(key=lambda x: getattr(x, attr), reverse=reverse)
+    
+    def sort_by_name(self):
+        self.points.sort(key=lambda x: x.name)
 
     def change_basis_set(self, basis_set, gen_basis_set=None):
         for point in self.points:
@@ -1088,6 +1093,7 @@ class Points:
     
     def __contains__(self, value):
         return value in self.points
+
 
 class GeometryData:
 
@@ -2525,6 +2531,11 @@ def makeTrainingSets():
     # training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True)
 
     training_set.make_training_set()
+    atoms = training_set.get_atoms()
+    for atom in atoms:
+        print("\n\n" + atom)
+        for training_point in training_set:
+                print("%s  %s" % (training_point.name, training_point.training_set_lines[atom]))
 
 
     # fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
