@@ -1069,23 +1069,22 @@ class Points:
             "gaussian": "gjf",
             "aimall": "wfn",
             "ferebus": "training_set_directories"
-        } 
-        
-        submission_script = SubmissionScript(name, type=type)
+        }
+
+        self.submission_script = SubmissionScript(name, type=type)
 
         if type == "ferebus":
-            atoms = self.get_atoms()
             for atom_directory in self.training_set_directories:
-                submission_script.add_job(atom_directory)
+                self.submission_script.add_job(atom_directory)
         else:
             for point in self.points:
                 job = getattr(point, attributes[type])
-                submission_script.add_job(job.fname, options=job.output)
-        
-        submission_script.write_script()
+                self.submission_script.add_job(job.fname, options=job.output)
+
+        self.submission_script.write_script()
 
         if submit:
-            CSFTools.submit_scipt("GaussSub.sh", exit=exit, sync=sync)
+            CSFTools.submit_scipt(self.submission_script.name, exit=exit, sync=sync)
 
     def get_atoms(self):
         return FileTools.natural_sort(list(self.points[0].int.keys()))
@@ -1152,11 +1151,14 @@ class GeometryData:
     def set_cv_error(self, cv_error):
         self.cv_error = cv_error
 
-    def get_distance_to(self, reference, atom=-1):
+    def get_distance_to(self, reference, atom=-1, theta=[]):
         feat_sum = 0.0
         for i in range(len(self.features)):
             for j in range(len(self.features[i])):
-                feat_sum += (self.features[i][j] - reference.features[i][j])**2
+                if theta:
+                    feat_sum += theta[i][j] * (self.features[i][j] - reference.features[i][j])**2
+                else:
+                    feat_sum += (self.features[i][j] - reference.features[i][j])**2
         if feat_sum < self.min_distance:
             self.min_distance = feat_sum
             self.cv_error = reference.cv_error
@@ -2155,7 +2157,8 @@ def AtomicLocalFrame(fname):
 
 
 def calcFeats(alf, coordinates):
-    ang2bohr = 1.889725989
+    #ang2bohr = 1.889725989
+    ang2bohr = 1.88971616463
     # ang2bohr = 1.0
 
     def C_1k(coordinates, alf, atm, feature, k):
@@ -2565,7 +2568,12 @@ def makeTrainingSets():
     training_set = Points(gjf_files=gjfs, int_directories=int_directories)
 
     training_set.make_training_set()
-    training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=False, exit=True)
+
+    if not AUTO_SUBMISSION_MODE:
+        training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True, exit=False, sync=True)
+        moveIQAModels()
+    else:
+        sys.exit(0)
 
 
     # fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
@@ -2648,7 +2656,7 @@ def moveIQAModels():
     if len(q00_files) == len(atom_directories):
         models_dir = FILE_STRUCTURE.get_file_path("ts_models")
         FileTools.make_clean_directory(models_dir)
-        for q00_file in q11s_files:
+        for q00_file in q00_files:
             q00_name = q00_file.split("/")[-1]
             q00_num = q00_name.replace(".txt", "").split("_")[-1]
             model_filename = "%s%s_kriging_IQA_%s.txt" % (models_dir, SYSTEM_NAME, q00_num)
@@ -2776,6 +2784,11 @@ def calculatePredictions(calculate_variance=True, return_models=False, calculate
     sample_cv_errors = []
 
     if calculate_cv_errors:
+        thetas = []
+
+        for model in models:
+            thetas.append(model.theta_values)
+
         total_cv_errors = []
         for i in range(len(cv_errors[0])):
             cv_sum = 0.0
@@ -2802,7 +2815,7 @@ def calculatePredictions(calculate_variance=True, return_models=False, calculate
 
         for sample_geometry in sample_geometries:
             for i in range(len(training_geometries)):
-                sample_geometry.get_distance_to(training_geometries[i], atom=i)
+                sample_geometry.get_distance_to(training_geometries[i], atom=i, theta=thetas)
 
         for sample_geometry in sample_geometries:
             sample_cv_errors.append(sample_geometry.cv_error)
@@ -2889,9 +2902,10 @@ def calculateErrors():
 
     training_gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     training_wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
-    training_aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
-    training_atom_directories = FileTools.get_atom_directories(training_aimall_dir)
-    training_atom_directories = FileTools.natural_sort(training_atom_directories)
+    training_int_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+
+    # training_atom_directories = FileTools.get_atom_directories(training_aimall_dir)
+    # training_atom_directories = FileTools.natural_sort(training_atom_directories)
     training_set_size = len(FileTools.get_files_in(training_gjf_dir, "*.gjf", sorting="none"))
 
     log_dir = FILE_STRUCTURE.get_file_path("log")
@@ -2907,13 +2921,15 @@ def calculateErrors():
     sample_wfn_dir = FILE_STRUCTURE.get_file_path("sp_wfn")
     sample_wfns = FileTools.get_files_in(sample_wfn_dir, "*.wfn", sorting="natural")
 
+    sample_int_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
+    sample_ints = FileTools.get_files_in(sample_int_dir, "*_atomicfiles/", sorting="natural")
+
     sample_aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
-    sample_atom_directories = FileTools.get_atom_directories(sample_aimall_dir)
-    sample_atom_directories = FileTools.natural_sort(sample_atom_directories)
+    sample_atom_directories = FileTools.get_directories(sample_aimall_dir)
 
     for i in range(len(MEPE)):
         index = MEPE[i][0]
-        print(index)
+        print(index+1)
 
         sample_gjf = sample_gjfs[index]
         training_gjf = "%s%s%s.gjf" % (training_gjf_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
@@ -2922,6 +2938,11 @@ def calculateErrors():
 
         sample_wfn = sample_wfns[index]
         training_wfn = "%s%s%s.wfn" % (training_wfn_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
+        FileTools.move_file(sample_wfn, training_wfn)
+        print("Moved %s to %s" % (sample_wfn, training_wfn))
+
+        sample_int = sample_ints[index]
+        training_int = "%s%s%s_atomicfiles/" % (training_int_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
         FileTools.move_file(sample_wfn, training_wfn)
         print("Moved %s to %s" % (sample_wfn, training_wfn))
 
@@ -3143,6 +3164,11 @@ def get_DLPOLY_WFN_energies():
 def autoRun(submit=True):
     global MAX_ITERATION
     global STEP
+    global AUTO_SUBMISSION_MODE
+    global FILE_STRUCTURE
+
+    AUTO_SUBMISSION_MODE = True
+    gjf_example = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")[0]
 
     pJID = None
     if submit:
@@ -3163,31 +3189,21 @@ def autoRun(submit=True):
 
             print("Submitted %s\t\tjid:%s" % (pysub.name, pJID))
             jid.write("%s\n" % pJID)
-
-            fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=4)
-
-            if MACHINE == "csf2":
-                fereSub.add_module("libs/intel/nag/fortran_mark23_intel")
-                fereSub.add_module("compilers/intel/fortran/15.0.3")
-                fereSub.add_module("mpi/intel-14.0/openmpi/1.8.3")
-                fereSub.add_module("compilers/intel/c/14.0.3")
-                fereSub.add_module("mpi/open64-4.5.2.1/openmpi/1.8.3-ib-amd-bd")
-            elif MACHINE == "csf3":
-                fereSub.add_module("mpi/intel-17.0/openmpi/3.1.3")
-                fereSub.add_module("libs/intel/nag/fortran_mark26_intel")
-
+            
             fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
-            aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
-            atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
-            for directory in atom_directories:
-                atom_dir = "%s%s/" % (fereb_dir, directory.split("/")[-1])
-                fereSub.add_job(atom_dir)
-            fereSub.write_script()
+            training_set = Points()
+            coords = FileTools.get_coordinates(gjf_example)
+            atom_directories = []
+            for i, line in enumerate(coords):
+                atom = line.split()[0]
+                atom_directories.append("%s%s%d/" % (fereb_dir, atom, i+1))
+            training_set.training_set_directories = atom_directories
+            training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=False)
 
-            pJID = CSFTools.submit_scipt(fereSub.name, hold_jid=pJID, return_jid=True)
+            pJID = CSFTools.submit_scipt(training_set.submission_script.name, hold_jid=pJID, return_jid=True)
             jid.write("%s\n" % pJID)
 
-            print("Submitted %s\t\tjid:%s" % (fereSub.name, pJID))
+            print("Submitted %s\t\tjid:%s" % (training_set.submission_script.name, pJID))
 
             pysub = SubmissionScript("pysub.sge", type="python")
             pysub.add_option(option="-N", value=sys.argv[0])
