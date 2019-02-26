@@ -2942,23 +2942,24 @@ def calculateErrors():
         print("Moved %s to %s" % (sample_wfn, training_wfn))
 
         sample_int = sample_ints[index]
-        training_int = "%s%s%s_atomicfiles/" % (training_int_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
-        FileTools.move_file(sample_wfn, training_wfn)
-        print("Moved %s to %s" % (sample_wfn, training_wfn))
+        training_int_atomicfiles = "%s%s%s_atomicfiles/" % (training_int_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
+        FileTools.move_file(sample_int, training_int_atomicfiles)
+        print("Moved %s to %s" % (sample_int, training_int_atomicfiles))
 
-        print("")
-        for j in range(len(sample_atom_directories)):
-            sample_atom_directory = sample_atom_directories[j]
-            training_atom_directory = training_atom_directories[j]
+        # sample_int_files = FileTools.get_files_in("")
+        # print("")
+        # for j in range(len(sample_atom_directories)):
+        #     sample_atom_directory = sample_atom_directories[j]
+        #     training_atom_directory = training_atom_directories[j]
 
-            atom = sample_atom_directory.split("/")[-1]
+        #     atom = sample_atom_directory.split("/")[-1]
 
-            sample_aimalls = FileTools.get_files_in(sample_atom_directory + "/", "*.int")
-            sample_aimall = sample_aimalls[index]
-            training_aimall = "%s/%s%s_%s.int" % (training_atom_directory, SYSTEM_NAME,
-                                                  str(training_set_size + i + 1).zfill(4), atom.lower())
-            FileTools.move_file(sample_aimall, training_aimall)
-            print("Moved %s to %s" % (sample_aimall, training_aimall))
+        #     sample_aimalls = FileTools.get_files_in(sample_atom_directory + "/", "*.int")
+        #     sample_aimall = sample_aimalls[index]
+        #     training_aimall = "%s/%s%s_%s.int" % (training_atom_directory, SYSTEM_NAME,
+        #                                           str(training_set_size + i + 1).zfill(4), atom.lower())
+        #     FileTools.move_file(sample_aimall, training_aimall)
+        #     print("Moved %s to %s" % (sample_aimall, training_aimall))
 
         with open(IMPORTANT_FILES["sp_aimall_energies"], "r") as f:
             data = f.readlines()
