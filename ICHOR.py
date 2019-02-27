@@ -1619,7 +1619,7 @@ class FileTools:
     def get_base(fname):
         if fname.endswith("/"):
             fname = fname.rstrip("/")
-        return fname.split("_")[0].split(".")[0].split("/")[-1]
+        return os.path.split(fname)[1].split(".")[0].split("_")[0]
 
     @staticmethod
     def cleanup_aimall_dir(aimall_dir, split_into_atoms=False):
@@ -2576,68 +2576,6 @@ def makeTrainingSets():
         sys.exit(0)
 
 
-    # fereSub = SubmissionScript("FERESub.sh", type="ferebus", cores=FEREBUS_CORE_COUNT)
-    
-    # fereSub.add_module("mpi/intel-17.0/openmpi/3.1.3")
-    # fereSub.add_module("libs/intel/nag/fortran_mark26_intel")
-
-    # atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
-
-    # gjf_files = FileTools.get_files_in(gjf_dir, "*.gjf")
-    # gjf_data = ReadFiles.GJFs(gjf_files)
-
-    # for directory in atom_directories:
-    #     # Setup Ferebus Atom Directories
-    #     atom = str(directory.split("/")[-1])
-    #     atom_dir = fereb_dir + atom + "/"
-    #     os.mkdir(atom_dir)
-
-    #     # Read Data From Int Files
-    #     int_files = FileTools.get_files_in(directory, "*.int")
-    #     ints = []
-    #     for int_file in int_files:
-    #         ints.append(INT(int_file))
-
-    #     training_set_file = atom_dir + atom + "_TRAINING_SET.txt"
-    #     with open(training_set_file, "w+") as f:
-    #         row_count = 1
-    #         for gjf_i, int_i in zip(gjf_data, ints):
-    #             features = gjf_i.get_atom_features(atom)
-    #             formated_features = ["{0:11.8f}".format(i) for i in features]
-
-    #             features_string = "   ".join(formated_features)
-
-    #             iqa_terms = []
-
-    #             iqa_terms.append(str(int_i.IQA_terms["T(A)"]))
-    #             iqa_terms.append(str(int_i.IQA_terms["VC_IQA(A,A')/2"]))
-    #             iqa_terms.append(str(int_i.IQA_terms["VX_IQA(A,A')/2"]))
-    #             iqa_terms.append(str(int_i.IQA_terms["E_IQA(A)"]))
-    #             iqa_terms.append(str(int_i.IQA_terms["E_IQA_Intra(A)"]))
-    #             iqa_terms.append(str(int_i.IQA_terms["E_IQA_Inter(A)"]))
-
-    #             for i in range(len(iqa_terms), 25):
-    #                 iqa_terms.append("0")
-
-    #             iqa_string = "   ".join(iqa_terms)
-    #             row_number = str(row_count).zfill(4)
-
-    #             f.write("%s   %s    " % (features_string, iqa_string) + str(row_count).zfill(4) + "\n")
-    #             row_count += 1
-
-    #     FerebusTools.write_finput(atom_dir, len(atom_directories), atom, len(gjf_data))
-
-    #     fereSub.add_job(atom_dir)
-
-    # fereSub.write_script()
-
-    # if not AUTO_SUBMISSION_MODE:
-    #     CSFTools.submit_scipt(fereSub.name, sync=True)
-    #     moveIQAModels()
-    # else:
-    #     sys.exit(0)
-
-
 def moveIQAModels():
     global SYSTEM_NAME
     global FILE_STRUCTURE
@@ -2931,48 +2869,32 @@ def calculateErrors():
         index = MEPE[i][0]
         print(index+1)
 
+        new_base = SYSTEM_NAME + str(training_set_size + i + 1).zfill(4)
+
         sample_gjf = sample_gjfs[index]
-        training_gjf = "%s%s%s.gjf" % (training_gjf_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
+        training_gjf = "%s%s.gjf" % (training_gjf_dir, new_base)
         FileTools.move_file(sample_gjf, training_gjf)
         print("Moved %s to %s" % (sample_gjf, training_gjf))
 
         sample_wfn = sample_wfns[index]
-        training_wfn = "%s%s%s.wfn" % (training_wfn_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
+        training_wfn = "%s%s.wfn" % (training_wfn_dir, new_base)
         FileTools.move_file(sample_wfn, training_wfn)
         print("Moved %s to %s" % (sample_wfn, training_wfn))
 
         sample_int = sample_ints[index]
-        training_int_atomicfiles = "%s%s%s_atomicfiles/" % (training_int_dir, SYSTEM_NAME, str(training_set_size + i + 1).zfill(4))
+        training_int_atomicfiles = "%s%s_atomicfiles/" % (training_int_dir, new_base)
         FileTools.move_file(sample_int, training_int_atomicfiles)
         print("Moved %s to %s" % (sample_int, training_int_atomicfiles))
 
-        # sample_int_files = FileTools.get_files_in("")
-        # print("")
-        # for j in range(len(sample_atom_directories)):
-        #     sample_atom_directory = sample_atom_directories[j]
-        #     training_atom_directory = training_atom_directories[j]
+        training_int_files = FileTools.get_files_in(training_int_atomicfiles, "*.int")
+        e_iqa = 0.0
+        for training_int_file in training_int_files:
+            int_data = INT(training_int_file)
+            e_iqa += int_data.IQA_terms["E_IQA(A)"]
 
-        #     atom = sample_atom_directory.split("/")[-1]
+            int_base = FileTools.get_base(training_int_file)
+            os.rename(training_int_file, training_int_file.replace(int_base, new_base))
 
-        #     sample_aimalls = FileTools.get_files_in(sample_atom_directory + "/", "*.int")
-        #     sample_aimall = sample_aimalls[index]
-        #     training_aimall = "%s/%s%s_%s.int" % (training_atom_directory, SYSTEM_NAME,
-        #                                           str(training_set_size + i + 1).zfill(4), atom.lower())
-        #     FileTools.move_file(sample_aimall, training_aimall)
-        #     print("Moved %s to %s" % (sample_aimall, training_aimall))
-
-        with open(IMPORTANT_FILES["sp_aimall_energies"], "r") as f:
-            data = f.readlines()
-
-        aimall_data = data[index+1]
-        del data[index+1]
-
-        with open(IMPORTANT_FILES["sp_aimall_energies"], "w+") as f:
-            f.writelines(data)
-
-        print("Deleted line %d from AIMALL_Energies.csv" % (index+1))
-
-        e_iqa = float(aimall_data.split(",")[-1])
         Etrue = (e_iqa - predictions[index])**2
 
         with open("ErrorFile.csv", "a") as f:
