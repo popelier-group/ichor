@@ -1104,6 +1104,11 @@ class Points:
             with open(training_set_file, "w+") as f:
                 for i, training_point in enumerate(self.points):
                     f.write("%s  %s\n" % (training_point.training_set_lines[atom], str(i+1).zfill(4)))
+    
+    def predict(self):
+        
+        for point in self.points:
+            point.calculate_features()
 
     def create_submission_script(self, type=None, name="SubmissionScript.sh", cores=1, submit=False, exit=True, sync=False):
         attributes = {
@@ -3332,6 +3337,73 @@ def makeFormattedFiles():
                 row_count += 1
 
 
+def calculate_S_Curves(model_files):
+    models = []
+    for model_file in model_files:
+        model.append(MODEL(model_file))
+    
+    gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjfs")
+    gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
+
+    aim_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
+    int_dirs = FileTools.get_files_in(aim_dir, "*_atomicfiles/")
+
+    test_set = Points(gjf_files=gjfs, int_directories=int_dirs)
+
+    predictions = test_set.predict(models)
+
+    print(predictions)
+
+def IQA_S_Curves(model_location):
+    model_files = FileTools.get_files_in(model_location, "*IQA*.txt")
+
+    if len(model_files) == 0:
+        print("Cannot Find IQA Model Files in %s" % model_location)
+        return
+    
+    calculate_S_Curves(model_files)
+    
+def MPole_S_Curves(model_location):
+    model_files = FileTools.get_files_in(model_location, "*kriging*q*.txt")
+
+    if len(model_files) == 0:
+        print("Cannot Find IQA Model Files in %s" % model_location)
+        return
+    
+    calculate_S_Curves(model_files)
+
+def s_curves():
+    global FILE_STRUCTURE
+
+    current_model = FILE_STRUCTURE.get_file_path("ts_models")
+
+    while True:
+        print("")
+        print("################")
+        print("# S-Curve Menu #")
+        print("################")
+        print("")
+        print("[1] IQA S-Curves")
+        print("[2] MPole S-Curves")
+        print("[3] Both")
+        print("")
+        print("[model] Select Model")
+        print("Current Model: %s" % current_model)
+        print("")
+        print("[b] Back to Main")
+        print("[0] Exit")
+
+        ans = input("Enter Action:")
+
+        if ans == "b":
+            break
+        elif ans == "0":
+            sys.exit(0)
+        elif ans == "1":
+            IQA_S_Curves(current_model)
+
+    
+
 if __name__ == "__main__":
     defineGlobals()
     readArguments()
@@ -3451,6 +3523,26 @@ if __name__ == "__main__":
                 else:
                     options[num]()
                     num = "dlpoly"
+        elif num == "analyse":
+            while True:
+                print("")
+                print("#################")
+                print("# Analysis Menu #")
+                print("#################")
+                print("")
+                print("[1] Make S-Curves")
+                print("")
+                print("[format] Format")
+                print("[b] Go back")
+                print("[0] Exit")
+                num += "_" + input()
+                if "b" in num.lower():
+                    break
+                elif num == "analyse_0":
+                    sys.exit()
+                else:
+                    options[num]()
+                    num = "analyse"
         elif num == "0":
             sys.exit()
         else:
