@@ -571,6 +571,7 @@ class GJF_file:
         self.output = fname.replace(".gjf", ".log")
         self.name = Point.get_name(fname)
 
+        self.title = None
         self.run_type = None
         self.startup_options = []
 
@@ -609,7 +610,7 @@ class GJF_file:
                                 self.keywords.append(item)
                             else:
                                 self.keywords.append(item)
-                    elif re.match("\s*\d+\s+\d+", line):
+                    elif re.match("\s*\d+\s+\d+", line) and not self.charge and not self.multiplicity:
                         line_split = re.findall("\d+", line)
                         self.charge = int(line_split[0])
                         self.multiplicity = int(line_split[1])
@@ -619,11 +620,17 @@ class GJF_file:
                         self.coordinates.append(Atom(atom_type=line_split[0], x=line_split[1], y=line_split[2], z=line_split[3]))
                     elif ".wfn" in line:
                         self.output_wfn_fname = line.strip()
+                    elif not self.title:
+                        self.title = line.strip()
                     elif self.basis_set == "gen":
-                        self.gen_basis_set += line
+                        if line.strip():
+                            self.gen_basis_set += line
         except:
             print("\nError: Cannot Read File %s" % self.fname)
-    
+   
+    def set_default_wfn(self):
+        self.output_wfn_fname = self.fname.replace(".gjf", ".wfn")
+ 
     def set_gen_basis_set(self, gen_basis_set):
         self.basis_set = "gen"
         self.gen_basis_set = self.get_gen_basis_set(gen_basis_set)
@@ -699,6 +706,10 @@ class GJF_file:
         else:
             bs = "Unkown Basis Set\n"
         return bs
+
+    def add_keyword(self, keyword):
+        if keyword not in self.keywords:
+            self.keywords.append(keyword)
 
     def write_gjf(self):
         with open(self.fname, "w") as f:
@@ -1038,6 +1049,36 @@ class Points:
         else:
             self.points.append(Point(gjf=gjf_file, wfn=wfn_file, int_directory=int_directory))
 
+    def format_gjfs(self, potential=None, basis_set=None, charge=None, multiplicity=None, keywords=[]):
+        global POTENTIAL
+        global BASIS_SET
+        
+        for point in self:
+            if potential:
+                point.gjf.potential = potential
+            else:
+                point.gjf.potential = POTENTIAL
+
+            if basis_set:
+                point.gjf.basis_set = basis_set
+            else:
+                point.gjf.basis_set = BASIS_SET
+
+            if charge:
+                point.gjf.charge = charge
+            else:
+                point.gjf.charge = 0
+
+            if multiplicity:
+                point.gjf.multiplicity = multiplicity
+            else:
+                point.gjf.multiplicity = 1
+
+            for keyword in keywords:
+                point.gjf.add_keyword(keyword)
+
+            point.gjf.set_default_wfn()
+
     def make_training_set(self, IQA=True, writeSet=True, directory=None):
         if not directory:
             global FILE_STRUCTURE
@@ -1104,7 +1145,19 @@ class Points:
     def change_potential(self, potential):
         for point in self.points:
             point.gjf.potential = potential
-    
+   
+    def set_charge(self, charge):
+        for point in self.points:
+            point.gjf.charge = charge
+
+    def set_multiplicity(self, multiplicity):
+        for point in self.points:
+            point.gjf.multiplicity = multiplicity
+
+    def add_keyword(self, keyword):
+        for point in self.points:
+            point.gjf.add_keyword(keyword)
+ 
     def write_gjfs(self):
         for point in self.points:
             point.gjf.write_gjf()
@@ -2470,6 +2523,7 @@ def submitTrainingGJFs():
     training_set = Points()
     for gjf in gjfs:
         training_set.add_point(gjf_file=gjf)
+    training_set.format_gjfs()
     training_set.write_gjfs()
 
     training_set.create_submission_script(type="gaussian", name="GaussSub.sh", submit=True, exit=False)
@@ -2576,6 +2630,32 @@ def makeTrainingSets():
         sys.exit(0)
 
 
+def makeMPoleTrainingSets():
+    global FILE_STRUCTURE
+    global AUTO_SUBMISSION_MODE
+    global FEREBUS_CORE_COUNT
+
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+    fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
+
+    FileTools.make_clean_directory(fereb_dir)
+    FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=False)
+
+    gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
+    int_directories = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
+
+    training_set = Points(gjf_files=gjfs, int_directories=int_directories)
+
+    training_set.make_training_set(IQA=False)
+
+    if not AUTO_SUBMISSION_MODE:
+        training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True, exit=False, sync=True)
+        moveMPoleModels()
+    else:
+        sys.exit(0)
+
+
 def moveIQAModels():
     global SYSTEM_NAME
     global FILE_STRUCTURE
@@ -2604,6 +2684,32 @@ def moveIQAModels():
         print("Error: IQA Models not complete.")
         exit(1)
 
+def moveMPoleModels():
+    global SYSTEM_NAME
+    global FILE_STRUCTURE
+
+    ferebus_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
+    atom_directories = FileTools.get_atom_directories(ferebus_dir)
+
+    mpole_files = []
+    for atom_directory in atom_directories:
+        if not atom_directory.endswith("/"):
+            atom_directory += "/"
+        mpole_locs = FileTools.get_files_in(atom_directory, "*kriging*q*.txt")
+        if len(mpole_locs) == 25:
+            mpole_files.append(mpole_locs)
+
+    if len(mpole_files) == len(atom_directories):
+        models_dir = FILE_STRUCTURE.get_file_path("ts_models")
+        FileTools.make_directory(models_dir)
+        for mpole_locs in mpole_files:
+            for mpole_file in mpole_locs:
+                model_filename = models_dir + mpole_file.split("/")[-1]
+                FileTools.copy_file(mpole_file, model_filename)
+                FileTools.remove_no_noise(model_filename)
+    else:
+        print("Error: MPole Models not complete.")
+        exit(1)
 
 def submitSampleGJFs():
     global FILE_STRUCTURE
@@ -2842,8 +2948,6 @@ def calculateErrors():
     training_wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
     training_int_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
 
-    # training_atom_directories = FileTools.get_atom_directories(training_aimall_dir)
-    # training_atom_directories = FileTools.natural_sort(training_atom_directories)
     training_set_size = len(FileTools.get_files_in(training_gjf_dir, "*.gjf", sorting="none"))
 
     log_dir = FILE_STRUCTURE.get_file_path("log")
@@ -3242,7 +3346,7 @@ if __name__ == "__main__":
         autoRun(submit=False)
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
-            #    "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels,
+                "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
