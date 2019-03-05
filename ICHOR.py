@@ -786,6 +786,8 @@ class MODEL:
 
     def __init__(self, fname, read_model=True):
         self.fname = fname
+        self.type = self.fname.split(".")[0].split("_")[-2]
+        self.number = self.fname.split(".")[0].split("_")[-1]
 
         self.nFeats = 0
         self.nTrain = 0
@@ -1105,10 +1107,46 @@ class Points:
                 for i, training_point in enumerate(self.points):
                     f.write("%s  %s\n" % (training_point.training_set_lines[atom], str(i+1).zfill(4)))
     
-    def predict(self):
-        
-        for point in self.points:
+    def predict(self, models):
+        features = []
+        for point in self:
             point.calculate_features()
+            point_features = [x[1] for x in point.features.items()]
+            features.append(point_features)
+
+        x_values = []
+        for i, _ in enumerate(features[0]):
+            x = [j[i] for j in features]
+            x_values.append(x)
+
+        predictions = []
+        for atom, model in enumerate(models):
+            atom = atom % 3
+            predictions.append(model.predict(x_values[atom]))
+        
+        return predictions
+
+    def get_int_data(self, int_data_key):
+        int_data = []
+
+        if "IQA" in int_data_key.upper():
+            attr = "IQA_terms"
+            int_data_key = "E_IQA(A)"
+        else:
+            attr = "multipole_moments"
+            int_data_key = int_data_key.lower()
+
+        for point in self:
+            point_data = [(key, val) for key, val in point.int.items()]
+            point_data = UsefulTools.natural_sorted_tuple(point_data, 0)
+            int_data.append([getattr(data, attr)[int_data_key] for atom, data in point_data])
+
+        int_values = []
+        for i, _ in enumerate(int_data[0]):
+            val = [j[i] for j in int_data]
+            int_values.append(val)
+        
+        return int_values
 
     def create_submission_script(self, type=None, name="SubmissionScript.sh", cores=1, submit=False, exit=True, sync=False):
         attributes = {
@@ -1483,6 +1521,14 @@ class UsefulTools:
     @staticmethod
     def sorted_tuple(data, i, reverse=False):
         return sorted(data, key=lambda tup: tup[i], reverse=reverse)
+    
+    @staticmethod
+    def natural_sorted_tuple(data, i):
+        key = itemgetter(i)
+        """ Sort the given iterable in the way that humans expect."""
+        convert = lambda text: int(text) if text.isdigit() else text
+        alphanum_key = lambda item: [convert(c) for c in re.findall('([0-9]+)', key(item))[-1]]
+        return sorted(data, key = alphanum_key)
 
     @staticmethod
     def get_atoms(file=None):
@@ -3340,9 +3386,9 @@ def makeFormattedFiles():
 def calculate_S_Curves(model_files):
     models = []
     for model_file in model_files:
-        model.append(MODEL(model_file))
+        models.append(MODEL(model_file))
     
-    gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjfs")
+    gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
 
     aim_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
@@ -3352,7 +3398,27 @@ def calculate_S_Curves(model_files):
 
     predictions = test_set.predict(models)
 
-    print(predictions)
+    true_values = []
+    types = []
+    for model in models:
+        if model.type not in types:
+            int_data = test_set.get_int_data(model.type)
+            types.append(model.type)
+            for data in int_data:
+                true_values.append(data)
+    with open("s_curve.csv", "w+") as f:
+        line = ""
+        for model in models:
+            line += "%s_%s_true,%s_%s_pred,%s_%s_diff," % ((model.type, model.number)*3)
+        f.write(line.rstrip(",") + "\n")
+
+        for i in range(len(true_values[0])):
+            line = ""
+            for j in range(len(true_values)):
+                true_value = true_values[j][i]
+                prediction = predictions[j][i]
+                line += "%f,%f,%f," % (true_value, prediction, abs(true_value-prediction))
+            f.write(line.rstrip(",") + "\n")
 
 def IQA_S_Curves(model_location):
     model_files = FileTools.get_files_in(model_location, "*IQA*.txt")
@@ -3365,6 +3431,15 @@ def IQA_S_Curves(model_location):
     
 def MPole_S_Curves(model_location):
     model_files = FileTools.get_files_in(model_location, "*kriging*q*.txt")
+
+    if len(model_files) == 0:
+        print("Cannot Find IQA Model Files in %s" % model_location)
+        return
+    
+    calculate_S_Curves(model_files)
+
+def Both_S_Curves(model_location):
+    model_files = FileTools.get_files_in(model_location, "*kriging*.txt")
 
     if len(model_files) == 0:
         print("Cannot Find IQA Model Files in %s" % model_location)
@@ -3401,6 +3476,10 @@ def s_curves():
             sys.exit(0)
         elif ans == "1":
             IQA_S_Curves(current_model)
+        elif ans == "2":
+            MPole_S_Curves(current_model)
+        elif ans == "3":
+            Both_S_Curves(current_model)
 
     
 
@@ -3423,7 +3502,7 @@ if __name__ == "__main__":
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
-               "analyse": makeFormattedFiles}
+               "s_1": s_curves, "s_format": makeFormattedFiles}
 
     while True:
         if len(glob("*.sh.*")) > 0:
@@ -3444,7 +3523,7 @@ if __name__ == "__main__":
         print("[b] Backup Data")
         print("[del] Delete Current Running Jobs")
         print("")
-        print("[analyse] Analysis Tools")
+        print("[s] Analysis Tools")
         print("[dlpoly] Run DLPOLY on Sample Pool using LOG")
         print("")
         print("[t] Test")
@@ -3523,7 +3602,7 @@ if __name__ == "__main__":
                 else:
                     options[num]()
                     num = "dlpoly"
-        elif num == "analyse":
+        elif num == "s":
             while True:
                 print("")
                 print("#################")
@@ -3533,16 +3612,17 @@ if __name__ == "__main__":
                 print("[1] Make S-Curves")
                 print("")
                 print("[format] Format")
+                print("")
                 print("[b] Go back")
                 print("[0] Exit")
                 num += "_" + input()
                 if "b" in num.lower():
                     break
-                elif num == "analyse_0":
+                elif num == "s_0":
                     sys.exit()
                 else:
                     options[num]()
-                    num = "analyse"
+                    num = "s"
         elif num == "0":
             sys.exit()
         else:
