@@ -62,6 +62,8 @@ import uuid
 from argparse import ArgumentParser
 from numpy.core.multiarray import ndarray
 import itertools
+from tqdm import tqdm
+import tqdm as tq
 
 """
 
@@ -1119,8 +1121,11 @@ class Points:
             x = [j[i] for j in features]
             x_values.append(x)
 
+
+        t = tqdm(models)
         predictions = []
-        for atom, model in enumerate(models):
+        for atom, model in enumerate(t):
+            t.set_description(model.type)
             atom = atom % 3
             predictions.append(model.predict(x_values[atom]))
         
@@ -1206,7 +1211,7 @@ class Points:
             point.gjf.write_gjf()
     
     def form_set(self, gjfs=[], wfns=[], int_directories=[]):
-        for gjf, wfn, int_directory in itertools.zip_longest(gjfs, wfns, int_directories):
+        for gjf, wfn, int_directory in itertools.zip_longest(gjfs, wfns, tqdm(int_directories)):
             self.add_point(gjf_file=gjf, wfn_file=wfn, int_directory=int_directory)
     
 
@@ -2786,8 +2791,10 @@ def getSampleAIMALLEnergies():
     gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
     aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
 
-    FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=True)
+    FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=False)
     atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
+
+    quit()
 
     atoms = []
     int_data = []
@@ -3385,7 +3392,8 @@ def makeFormattedFiles():
 
 def calculate_S_Curves(model_files):
     models = []
-    for model_file in model_files:
+    print("\nReading Models")
+    for model_file in tqdm(model_files):
         models.append(MODEL(model_file))
     
     gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
@@ -3394,13 +3402,19 @@ def calculate_S_Curves(model_files):
     aim_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
     int_dirs = FileTools.get_files_in(aim_dir, "*_atomicfiles/")
 
+    print("\nReading Test Data")
     test_set = Points(gjf_files=gjfs, int_directories=int_dirs)
 
+    print("\nMaking Predictions...")
     predictions = test_set.predict(models)
 
     true_values = []
     types = []
-    for model in models:
+
+    print("\nSorting True Values...")
+    t = tqdm(models)
+    for model in t:
+        t.set_description(model.type)
         if model.type not in types:
             int_data = test_set.get_int_data(model.type)
             types.append(model.type)
@@ -3417,7 +3431,7 @@ def calculate_S_Curves(model_files):
             for j in range(len(true_values)):
                 true_value = true_values[j][i]
                 prediction = predictions[j][i]
-                line += "%f,%f,%f," % (true_value, prediction, abs(true_value-prediction))
+                line += "%.16f,%.16f,%.16f," % (true_value, prediction, abs(true_value-prediction))
             f.write(line.rstrip(",") + "\n")
 
 def IQA_S_Curves(model_location):
