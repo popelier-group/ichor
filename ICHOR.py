@@ -2827,6 +2827,13 @@ def getSampleAIMALLEnergies():
             f.write("%s,%s,%f\n" % (num, ",".join(map(str,e_iqa_values)), total_e_iqa))
 
 
+def normalize(l):
+    min_val = min(l)
+    max_val = max(l)
+    min_max = max_val - min_val 
+    return [(x - min_val)/min_max for x in l]
+
+
 def calculatePredictions(calculate_variance=True, return_models=False, calculate_cv_errors=False,
                          return_geometries=False):
     global ALF
@@ -2984,9 +2991,19 @@ def calculateErrors():
         with open("ErrorFile.csv", "w+") as f:
             f.write("No.,Etrue,Ecv,s2,alpha\n")
 
+
+    NORMALIZE = True
     EPE = []
-    for i in range(len(cv_errors)):
-        EPE.append((i, calcEPE(cv_errors[i], variance[i], alpha)))
+
+    if NORMALIZE:
+        n_cv_errors = normalize(cv_errors)
+        n_variance = normalize(variance)
+    else:
+        n_cv_errors = cv_errors
+        n_variance = variance
+
+    for i in range(len(n_cv_errors)):
+        EPE.append((i, calcEPE(n_cv_errors[i], n_variance[i], alpha)))
 
     MEPE = []
     EPE = UsefulTools.sorted_tuple(EPE, 1, reverse=True)
@@ -3434,6 +3451,7 @@ def calculate_S_Curves(model_files):
                 line += "%.16f,%.16f,%.16f," % (true_value, prediction, abs(true_value-prediction))
             f.write(line.rstrip(",") + "\n")
 
+
 def IQA_S_Curves(model_location):
     model_files = FileTools.get_files_in(model_location, "*IQA*.txt")
 
@@ -3442,7 +3460,8 @@ def IQA_S_Curves(model_location):
         return
     
     calculate_S_Curves(model_files)
-    
+
+
 def MPole_S_Curves(model_location):
     model_files = FileTools.get_files_in(model_location, "*kriging*q*.txt")
 
@@ -3452,6 +3471,7 @@ def MPole_S_Curves(model_location):
     
     calculate_S_Curves(model_files)
 
+
 def Both_S_Curves(model_location):
     model_files = FileTools.get_files_in(model_location, "*kriging*.txt")
 
@@ -3460,6 +3480,7 @@ def Both_S_Curves(model_location):
         return
     
     calculate_S_Curves(model_files)
+
 
 def s_curves():
     global FILE_STRUCTURE
