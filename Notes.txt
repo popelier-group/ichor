@@ -1,0 +1,14 @@
+Add Option in config.properties to edit the default TRAINING_SET / SAMPLE_POOL locations
+Example:
+TRAINING_SET_LOCATION=MY_SET
+In this example we would have a dir 'MY_SET/' which would then contain
+MY_SET
+--GJF
+--WFN
+--AIMALL
+
+Advantage is we could do something like
+TRAINING_SET_LOCATION=
+OR
+TRAINING_SET_LOCATION=cwd
+which then would mean you use the directory you're currently in to run ICHOR (current directory contains your GJF/WFN/AIMALL directories)
