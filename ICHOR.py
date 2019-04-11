@@ -113,6 +113,9 @@ IMPORTANT_FILES = {}
 TRAINING_POINTS = []
 SAMPLE_POINTS = []
 
+KERNEL = "rbf"
+FEREBUS_VERSION = "fortran"
+
 # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
 GAUSSIAN_CORE_COUNT = 2
 AIMALL_CORE_COUNT = 2
@@ -1398,14 +1401,21 @@ class Job:
 
     def get_ferebus_submission_string(self):
         global FILE_STRUCTURE
+        global FEREBUS_VERSION
 
-        ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
-        copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
-        cd_line = "cd %s\n" % self.job
-        while_loop = "while [ ! -f *q00* ]\n" \
-                     "do\n" \
-                     "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
-                     "done\n"
+        if "fort" in FEREBUS_VERSION:
+            ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
+            copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
+            cd_line = "cd %s\n" % self.job
+            while_loop = "while [ ! -f *q00* ]\n" \
+                        "do\n" \
+                        "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
+                        "done\n"
+        elif "py" in FEREBUS_VERSION:
+            ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS.py"
+            copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
+            cd_line = "cd %s\n" % self.job
+            while_loop = "python FEREBUS.py\n"
         return "%s%s%s" % (copy_line, cd_line, while_loop)
 
     def get_python_submission_string(self):
@@ -1467,6 +1477,10 @@ class SubmissionScript:
         global GAUSSIAN_CORE_COUNT
         global AIMALL_CORE_COUNT
         global FEREBUS_CORE_COUNT
+        global FEREBUS_VERSION
+
+        if "py" in FEREBUS_VERSION:
+            FEREBUS_CORE_COUNT = 1
 
         core_counts = {
             "gaussian": GAUSSIAN_CORE_COUNT,
@@ -1489,10 +1503,20 @@ class SubmissionScript:
             return "#$ -pe smp.pe %d\n" % self.cores
 
     def load_modules(self):
+        global FEREBUS_VERSION
+
+        gaussian_modules = ["apps/binapps/gaussian/g09d01_em64t"]
+
+        if "fort" in FEREBUS_VERSION:
+            ferebus_modules = ["mpi/intel-17.0/openmpi/3.1.3", "libs/intel/nag/fortran_mark26_intel"]
+        elif "py" in FEREBUS_VERSION:
+            ferebus_modules = ["apps/anaconda3/5.2.0/bin"]
+
         modules = {
-            "gaussian": ["apps/binapps/gaussian/g09d01_em64t"],
-            "ferebus": ["mpi/intel-17.0/openmpi/3.1.3", "libs/intel/nag/fortran_mark26_intel"]
+            "gaussian": gaussian_modules,
+            "ferebus": ferebus_modules
         }
+
         try:
             for module in modules[self.type]:
                 self.add_module(module)
@@ -1973,6 +1997,9 @@ class FerebusTools:
     def write_finput(directory: str, natoms: int, atom: str, training_set_size: int,
                      predictions: int = 0, nproperties: int = 6, optimization: int = "pso") -> None:
         global SYSTEM_NAME
+        global KERNEL
+        global FEREBUS_VERSION
+
         if not directory.endswith("/"):
             directory += "/"
 
@@ -1987,6 +2014,8 @@ class FerebusTools:
             finput.write("full_training_set %d\n" % training_set_size)
             finput.write("#\n# Prediction number and definition of new predictions\n#\n")
             finput.write("predictions %d\n" % predictions)
+            if "py" in FEREBUS_VERSION:
+                finput.write("kernel %s\n" % KERNEL)
             finput.write(
                 "#\nfeatures_number 0        # if your are kriging only one atom or you don't want to use he standard "
                 "calculation of the number of features based on DOF of your system. Leave 0 otherwise\n#\n")
@@ -2498,6 +2527,9 @@ def defineGlobals():
     global POTENTIAL
     global BASIS_SET
 
+    global KERNEL
+    global FEREBUS_VERSION
+
     global GAUSSIAN_CORE_COUNT
     global AIMALL_CORE_COUNT
     global FEREBUS_CORE_COUNT
@@ -2536,6 +2568,11 @@ def defineGlobals():
             POTENTIAL = val.upper()
         if key == "BASIS_SET":
             BASIS_SET = val
+        
+        if key == "KERNEL":
+            KERNEL = val.lower()
+        if key == "FEREBUS_VERSION":
+            FEREBUS_VERSION = val.lower()
 
         if key == "GAUSSIAN_CORE_COUNT":
             GAUSSIAN_CORE_COUNT = int(val)
