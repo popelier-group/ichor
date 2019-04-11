@@ -113,9 +113,6 @@ IMPORTANT_FILES = {}
 TRAINING_POINTS = []
 SAMPLE_POINTS = []
 
-KERNEL = "rbf"
-FEREBUS_VERSION = "fortran"
-
 # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
 GAUSSIAN_CORE_COUNT = 2
 AIMALL_CORE_COUNT = 2
@@ -639,6 +636,15 @@ class GJF_file:
     def set_gen_basis_set(self, gen_basis_set):
         self.basis_set = "gen"
         self.gen_basis_set = self.get_gen_basis_set(gen_basis_set)
+    
+    def optimise(self):
+        opt_keyword = "opt"
+        if "p" in self.keywords:
+            for i, keyword in enumerate(self.keywords):
+                if keyword == "p":
+                    self.keywords[i] = opt_keyword
+        elif "opt" not in self.keywords:
+            self.keywords.append(opt_keyword)
 
     def get_gen_basis_set(self, basis_set):
         # Need to make a nice commented list of Available Basis Sets, as well as form a way for this not to be hard coded
@@ -716,6 +722,10 @@ class GJF_file:
         if keyword not in self.keywords:
             self.keywords.append(keyword)
 
+    def add_keywords(self, keywords):
+        for keyword in keywords:
+            self.add_keyword(keyword)
+
     def write_gjf(self):
         with open(self.fname, "w") as f:
             for startup_option in self.startup_options:
@@ -730,9 +740,30 @@ class GJF_file:
                 f.write("%s%16.8f%16.8f%16.8f\n" % (atom.atom_type, atom.x, atom.y, atom.z))
             f.write("\n")
             if self.basis_set.lower() == "gen":
-                f.write(self.gen_basis_set)
+                f.write(self.get_gen_basis_set("truncated"))
                 f.write("\n")
             f.write("%s" % self.output_wfn_fname)
+
+
+class WFN:
+
+    def __init__(self, fname, readFile=True):
+        self.fname = fname
+        if self.fname:
+            try:
+                self.energy = self.get_energy()
+            except:
+                pass
+
+    def getLastLine(self, maxLineLength=80):
+        with open(self.fname, "rb") as f:
+            f.seek(-maxLineLength - 1, 2)  # 2 means "from the end of the file"
+            return f.readlines()[-1].decode('utf-8')
+
+    def get_energy(self):
+        last_line = self.getLastLine()
+        energy = float(re.findall("[+-]?\d+.\d+", last_line)[0])
+        return energy
 
 
 class INT:
@@ -882,8 +913,25 @@ class MODEL:
             self.training_data = self.training_data.reshape(self.nTrain, self.nFeats)
 
     def gaussian_correlation(self, xi, xj):
-        correlation = np.sum([self.theta_values[h] * (xi[h] - xj[h])**2
-                           for h in range(self.nFeats)])
+        correlation = 0
+        for h in range(self.nFeats):
+            # Cyclic Problem Correction
+            # 1. Get angle in 0 < a < 2pi range
+            if h % 3 == 0:
+                xi[h] = abs(xi[h]) if xi[h] < 0 else xi[h]
+                xi[h] = xi[h] % math.tau if xi[h] > math.tau else xi[h]
+
+                xj[h] = abs(xj[h]) if xj[h] < 0 else xj[h]
+                xj[h] = xj[h] % math.tau if xj[h] > math.tau else xj[h]
+
+            diff = xi[h] - xj[h]
+
+            # 2. Ensure angle difference is 0 < d < pi
+            if h % 3 == 0:
+                if diff > math.pi:
+                    diff = math.tau - diff
+
+            correlation += self.theta_values[h] * abs(diff)**2
         return np.exp(-correlation)
 
     def predict(self, x_values):
@@ -940,8 +988,9 @@ class Point:
 
     def __init__(self, gjf=None, wfn=None, int_directory=None):
         
-        self.wfn_fname = wfn
+        self.wfn = WFN(wfn)
         self.int = {}
+        self.features = {}
         self.set_gjf_file(gjf)
         try:
             self.read_int_files(int_directory)
@@ -974,15 +1023,15 @@ class Point:
     
     def calculate_features(self):
         global ALF
-        self.features = {}
-        try:
-            coordinates = [[atom.x, atom.y, atom.z] for atom in self.gjf.coordinates]
-            self.feats = calcFeats(ALF, coordinates)
-            for i in range(len(self.gjf.coordinates)):
-                self.features["%s%d" % (self.gjf.coordinates[i].atom_type, i+1)] = self.feats[i]
-        except:
-            print("Error calculating features for point: %s" %self.name)
-            self.features = None
+        if not self.features:
+            try:
+                coordinates = [[atom.x, atom.y, atom.z] for atom in self.gjf.coordinates]
+                self.feats = calcFeats(ALF, coordinates)
+                for i in range(len(self.gjf.coordinates)):
+                    self.features["%s%d" % (self.gjf.coordinates[i].atom_type, i+1)] = self.feats[i]
+            except:
+                print("Error calculating features for point: %s" %self.name)
+                self.features = None
 
     
     @staticmethod
@@ -1043,7 +1092,7 @@ class Points:
                 
                 if wfn_file:
                     try:
-                        point.wfn_fname = wfn_file
+                        point.wfn_fname = WFN(wfn_file)
                     except:
                         point.wfn_fname = None
                 
@@ -1177,6 +1226,15 @@ class Points:
 
         if submit:
             CSFTools.submit_scipt(self.submission_script.name, exit=exit, sync=sync)
+    
+    def get_wfn_energies(self):
+        return [point.wfn.energy for point in self]
+
+    def get_aimall_energeis(self):
+        energies = []
+        for point in self:
+            energies.append([val.IQA_terms["E_IQA(A)"] for key, val in point.int.items()])
+        return energies
 
     def get_atoms(self):
         return FileTools.natural_sort(list(self.points[0].int.keys()))
@@ -1209,6 +1267,10 @@ class Points:
         for point in self.points:
             point.gjf.add_keyword(keyword)
  
+    def add_keywords(self, keywords):
+        for point in self:
+            point.gjf.add_keywords(keywords)
+
     def write_gjfs(self):
         for point in self.points:
             point.gjf.write_gjf()
@@ -1217,6 +1279,39 @@ class Points:
         for gjf, wfn, int_directory in itertools.zip_longest(gjfs, wfns, tqdm(int_directories)):
             self.add_point(gjf_file=gjf, wfn_file=wfn, int_directory=int_directory)
     
+    def to_csv(self, fname, multipoles=True, iqa=True):
+        for point in self:
+            point.calculate_features()
+        atoms = [x[0] for x in list(self[0].features.items())]
+        for atom in atoms:
+            nFeats = len(self[0].features[atom])
+            with open(atom + "_" + fname, "w+") as f:
+                title = "No." 
+                for i in range(nFeats):
+                    title += ",f%d" % (i+1)
+                if multipoles:
+                    moments_list = list(self[0].int[atom].multipole_moments.items())
+                    for moment, _ in moments_list[:25]:
+                        title += ",%s" % moment
+                if iqa:
+                    title += ",IQA"
+                title += "\n"
+                f.write(title)
+
+                for i, point in enumerate(self):
+                    line = str(i+1)
+                    for feature in point.features[atom]:
+                        line += ",%.10f" % feature
+                    if multipoles:
+                        moments_list = list(point.int[atom].multipole_moments.items())
+                        for _, moment in moments_list[:25]:
+                            line += ",%.12f" % moment
+                    if iqa:
+                        line += ",%.12f" % point.int[atom].IQA_terms["E_IQA(A)"]
+                    line += "\n"
+                    f.write(line)
+
+        quit()
 
     #List Emulation Stuff
     def __len__(self):
@@ -1303,21 +1398,14 @@ class Job:
 
     def get_ferebus_submission_string(self):
         global FILE_STRUCTURE
-        global FEREBUS_VERSION
 
-        if "fort" in FEREBUS_VERSION:
-            ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
-            copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
-            cd_line = "cd %s\n" % self.job
-            while_loop = "while [ ! -f *q00* ]\n" \
-                        "do\n" \
-                        "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
-                        "done\n"
-        elif "py" in FEREBUS_VERSION:
-            ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS.py"
-            copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
-            cd_line = "cd %s\n" % self.job
-            while_loop = "python FEREBUS.py\n"
+        ferebus_loc = FILE_STRUCTURE.get_file_path("programs") + "FEREBUS"
+        copy_line = "cp %s %s\n" % (ferebus_loc, self.job)
+        cd_line = "cd %s\n" % self.job
+        while_loop = "while [ ! -f *q00* ]\n" \
+                     "do\n" \
+                     "export OMP_NUM_THREADS=$NSLOTS; ./FEREBUS\n" \
+                     "done\n"
         return "%s%s%s" % (copy_line, cd_line, while_loop)
 
     def get_python_submission_string(self):
@@ -1380,9 +1468,6 @@ class SubmissionScript:
         global AIMALL_CORE_COUNT
         global FEREBUS_CORE_COUNT
 
-        if "py" in FEREBUS_VERSION:
-            FEREBUS_CORE_COUNT = 1
-
         core_counts = {
             "gaussian": GAUSSIAN_CORE_COUNT,
             "aimall": AIMALL_CORE_COUNT,
@@ -1404,20 +1489,10 @@ class SubmissionScript:
             return "#$ -pe smp.pe %d\n" % self.cores
 
     def load_modules(self):
-        global FEREBUS_VERSION
-
-        gaussian_modules = ["apps/binapps/gaussian/g09d01_em64t"]
-
-        if "fort" in FEREBUS_VERSION:
-            ferebus_modules = ["mpi/intel-17.0/openmpi/3.1.3", "libs/intel/nag/fortran_mark26_intel"]
-        elif "py" in FEREBUS_VERSION:
-            ferebus_modules = ["apps/anaconda3/5.2.0/bin"]
-
         modules = {
-            "gaussian": gaussian_modules,
-            "ferebus": ferebus_modules
+            "gaussian": ["apps/binapps/gaussian/g09d01_em64t"],
+            "ferebus": ["mpi/intel-17.0/openmpi/3.1.3", "libs/intel/nag/fortran_mark26_intel"]
         }
-
         try:
             for module in modules[self.type]:
                 self.add_module(module)
@@ -1596,6 +1671,8 @@ class FileTools:
         tree.create_node("LOG", "log", parent="file_locs")
 
         tree.create_node("PROGRAMS", "programs", parent="file_locs")
+
+        tree.create_node("OPT", "opt", parent="file_locs")
 
         return tree
 
@@ -1896,9 +1973,6 @@ class FerebusTools:
     def write_finput(directory: str, natoms: int, atom: str, training_set_size: int,
                      predictions: int = 0, nproperties: int = 6, optimization: int = "pso") -> None:
         global SYSTEM_NAME
-        global KERNEL
-        global FEREBUS_VERSION
-
         if not directory.endswith("/"):
             directory += "/"
 
@@ -1913,8 +1987,6 @@ class FerebusTools:
             finput.write("full_training_set %d\n" % training_set_size)
             finput.write("#\n# Prediction number and definition of new predictions\n#\n")
             finput.write("predictions %d\n" % predictions)
-            if "py" in FEREBUS_VERSION
-                finput.write("kernel %s\n" % KERNEL)
             finput.write(
                 "#\nfeatures_number 0        # if your are kriging only one atom or you don't want to use he standard "
                 "calculation of the number of features based on DOF of your system. Leave 0 otherwise\n#\n")
@@ -2426,9 +2498,6 @@ def defineGlobals():
     global POTENTIAL
     global BASIS_SET
 
-    global KERNEL
-    global FEREBUS_VERSION
-
     global GAUSSIAN_CORE_COUNT
     global AIMALL_CORE_COUNT
     global FEREBUS_CORE_COUNT
@@ -2462,11 +2531,6 @@ def defineGlobals():
             MAX_ITERATION = int(val)
         if key == "MULTIPLE_ADDITION_MODE":
             MULTIPLE_ADDITION_MODE = val
-        
-        if key == "KERNEL":
-            KERNEL = val.lower()
-        if key == "FEREBUS_VERSION":
-            FEREBUS_VERSION = val.lower()
 
         if key == "POTENTIAL":
             POTENTIAL = val.upper()
@@ -2615,7 +2679,7 @@ def submitTrainingGJFs():
     training_set = Points()
     for gjf in gjfs:
         training_set.add_point(gjf_file=gjf)
-    training_set.format_gjfs()
+    training_set.format_gjfs(keywords=["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)"])
     training_set.write_gjfs()
 
     training_set.create_submission_script(type="gaussian", name="GaussSub.sh", submit=True, exit=False)
@@ -2712,7 +2776,6 @@ def makeTrainingSets():
     int_directories = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
 
     training_set = Points(gjf_files=gjfs, int_directories=int_directories)
-
     training_set.make_training_set()
 
     if not AUTO_SUBMISSION_MODE:
@@ -3028,7 +3091,7 @@ def calculateErrors():
             f.write("No.,Etrue,Ecv,s2,alpha\n")
 
 
-    NORMALIZE = True
+    NORMALIZE = False
     EPE = []
 
     if NORMALIZE:
@@ -3443,6 +3506,29 @@ def makeFormattedFiles():
                 row_count += 1
 
 
+def statistics_summary(l, name=None):
+    title_character = "="
+    summary_title = "Statistics Summary"
+    if l:
+        max_len = max(len(name), len(summary_title)) + 2
+    else:
+        max_len = len(summary_title) + 2
+    print("")
+    print(title_character * max_len)
+    print(summary_title.center(max_len, " "))
+    if name:
+        print(("%s" % name).center(max_len, " "))
+    print(title_character * max_len)
+    print("")
+    print("Total Values: %d" % len(l))
+    print("")
+    print("Max Value:    %f" % max(l))
+    print("Min Value:    %f" % min(l))
+    print("Mean:         %f" % np.mean(l))
+    print("Variance:     %f" % np.std(l))
+    print("")
+
+
 def calculate_S_Curves(model_files):
     models = []
     print("\nReading Models")
@@ -3552,7 +3638,160 @@ def s_curves():
         elif ans == "3":
             Both_S_Curves(current_model)
 
+
+def recovery_errors(wfn_dir="", aimall_dir=""):
+    wfns = FileTools.get_files_in(wfn_dir, "*.wfn")
+    atomicfiles = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
+
+    test_set = Points(wfn_files=wfns, int_directories=atomicfiles)
+
+    wfn_energies = test_set.get_wfn_energies()
+    aimall_energies = test_set.get_aimall_energeis()
+    atoms = test_set.get_atoms()
+
+    errors = []
+
+    with open("recovery_errors.csv", "w+") as f:
+        f.write("No.,%s,AIMAll Energy,WFN Energy,Recovery Error / Ha,Recovery Error / kJ mol^-1\n" % ",".join(atoms))
+        for point, atom_energies, wfn_energy in zip(test_set, aimall_energies, wfn_energies):
+            mol_energy = sum(atom_energies)
+            error_ha = abs(mol_energy-wfn_energy)
+            error_kj = error_ha * 2625.5
+            atom_energies = [""] * len(atoms)
+            for atom, aimall_data in point.int.items():
+                atom_energies[atoms.index(atom)] = "%.12f" % aimall_data.IQA_terms["E_IQA(A)"]
+            f.write("%s,%s,%.12f,%.12f,%.12f,%.12f\n" % (point.name, ",".join(atom_energies), mol_energy, wfn_energy,
+                                                        error_ha, error_kj))
+            errors.append(error_kj)
     
+    statistics_summary(errors, name="Recovery Error / kJ mol^-1")
+
+
+def training_recovery_errors():
+    global FILE_STRUCTURE
+    
+    wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
+    aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+
+    recovery_errors(wfn_dir=wfn_dir, aimall_dir=aimall_dir)
+
+def sample_recovery_errors():
+    global FILE_STRUCTURE
+
+    wfn_dir = FILE_STRUCTURE.get_file_path("sp_wfn")
+    aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
+
+    recovery_errors(wfn_dir=wfn_dir, aimall_dir=aimall_dir)
+
+
+def recovery_error_menu():
+    while True:
+        print("")
+        print("#######################")
+        print("# Recovery Error Menu #")
+        print("#######################")
+        print("")
+        print("[1] Training Set Errors")
+        print("[2] Sample Pool Errors")
+        print("")
+        print("[b] Back to Main")
+        print("[0] Exit")
+
+        ans = input("Enter Action:")
+
+        if ans == "b":
+            break
+        elif ans == "0":
+            sys.exit(0)
+        elif ans == "1":
+            training_recovery_errors()
+        elif ans == "2":
+            sample_recovery_errors()
+
+
+def geometry_optimise():
+    global FILE_STRUCTURE
+
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    gjf_file  = FileTools.get_files_in(gjf_dir, "*.gjf")[0]
+
+    opt_dir = FILE_STRUCTURE.get_file_path("opt")
+    FileTools.make_clean_directory(opt_dir)
+    FileTools.copy_file(gjf_file, opt_dir)
+    new_gjf = FileTools.get_files_in(opt_dir, "*.gjf")[0]
+
+    gjf = GJF_file(new_gjf)
+
+    gjf.optimise()
+    gjf.set_default_wfn()
+    gjf.write_gjf()
+
+    script_name = "GaussOpt.sh"
+    createGaussScript(opt_dir, name=script_name)
+    CSFTools.submit_scipt(script_name, exit=True)
+
+
+def setup_directories():
+    global FILE_STRUCTURE
+
+    ts = FILE_STRUCTURE.get_file_path("training_set")
+    sp = FILE_STRUCTURE.get_file_path("sample_pool")
+
+    FileTools.make_clean_directory(ts)
+    FileTools.make_clean_directory(sp)
+
+    ts_gjf = FILE_STRUCTURE.get_file_path("ts_gjf")
+    sp_gjf = FILE_STRUCTURE.get_file_path("sp_gjf")
+
+    FileTools.make_directory(ts_gjf)
+    FileTools.make_directory(sp_gjf)
+
+
+def write_to_csv():
+    global FILE_STRUCTURE
+
+    while True:
+        print("")
+        print("############")
+        print("# CSV Menu #")
+        print("############")
+        print("")
+        print("[1] Training Set")
+        print("[2] Sample Pool")
+        print("")
+        print("[b] Back to Main")
+        print("[0] Exit")
+
+        ans = input("Select Set:")
+
+        if ans == "b":
+            break
+        elif ans == "0":
+            sys.exit(0)
+        elif ans == "1":
+            gjfs = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")
+            ints = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_aimall"), "*_atomicfiles/")
+        elif ans == "2":
+            gjfs = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("sp_gjf"), "*.gjf")
+            ints = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("sp_aimall"), "*_atomicfiles/")
+        
+        csv = input("Enter name of CSV: ")
+        if not csv.endswith(".csv"):
+            csv += ".csv"
+
+        s = Points(gjf_files=gjfs, int_directories=ints)
+        s.to_csv(csv)
+        print("Wrote Set To <ATOM>_%s" % csv)
+
+def test():
+    global FILE_STRUCTURE
+
+    gjfs = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")
+    ints = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_aimall"), "*_atomicfiles/")
+
+    ts = Points(gjf_files=gjfs, int_directories=ints)
+
+    ts.to_csv("ts.csv")
 
 if __name__ == "__main__":
     defineGlobals()
@@ -3573,7 +3812,8 @@ if __name__ == "__main__":
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
-               "s_1": s_curves, "s_format": makeFormattedFiles}
+               "s_1": s_curves, "s_2": recovery_error_menu, "s_format": makeFormattedFiles,
+               "t_opt": geometry_optimise, "t_setup": setup_directories, "t_csv": write_to_csv}
 
     while True:
         if len(glob("*.sh.*")) > 0:
@@ -3597,7 +3837,7 @@ if __name__ == "__main__":
         print("[s] Analysis Tools")
         print("[dlpoly] Run DLPOLY on Sample Pool using LOG")
         print("")
-        print("[t] Test")
+        print("[t] Tools")
         print("")
         print("[0] Exit")
         print("Enter action:")
@@ -3681,8 +3921,30 @@ if __name__ == "__main__":
                 print("#################")
                 print("")
                 print("[1] Make S-Curves")
+                print("[2] Get Recovery Errors")
                 print("")
                 print("[format] Format")
+                print("")
+                print("[b] Go back")
+                print("[0] Exit")
+                num += "_" + input()
+                if "b" in num.lower():
+                    break
+                elif num == "s_0":
+                    sys.exit()
+                else:
+                    options[num]()
+                    num = "s"
+        elif num == "t":
+            while True:
+                print("")
+                print("##############")
+                print("# Tools Menu #")
+                print("##############")
+                print("")
+                print("[opt] Geometry Optimise With Gaussian")
+                print("[csv] Write Set to CSV")
+                print("[setup] Setup TS and SP Directories")
                 print("")
                 print("[b] Go back")
                 print("[0] Exit")
