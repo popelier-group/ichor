@@ -1220,6 +1220,7 @@ class Points:
         if type == "ferebus":
             for atom_directory in self.training_set_directories:
                 self.submission_script.add_job(atom_directory)
+                self.submission_script.add_option(option="-V")
         else:
             for point in self.points:
                 job = getattr(point, attributes[type])
