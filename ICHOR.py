@@ -347,6 +347,17 @@ class Tree:
         return [node.identifier for node in self.nodes if node.identifier is identifier]
 
 
+class Constants:
+
+    PI = math.pi
+    TAU = 2 * math.pi
+    
+    rt3 = math.sqrt(3)
+    rt5 = math.sqrt(5)
+
+    div5_3 = 5.0 / 3.0
+
+
 class GJF:
 
     def __init__(self, name, potential="B3LYP", basis_set="6-31+g(d,p)"):
@@ -824,6 +835,8 @@ class INT:
 class MODEL:
 
     def __init__(self, fname, read_model=True):
+        global KERNEL
+
         self.fname = fname
         self.type = self.fname.split(".")[0].split("_")[-2]
         self.number = self.fname.split(".")[0].split("_")[-1]
@@ -840,6 +853,11 @@ class MODEL:
 
         self.kriging_centres = np.empty(1)
         self.training_data = np.empty(1)
+
+        if "matern52" in KERNEL or "matern5" in KERNEL:
+            self.correlation = self.matern52_correlation
+        else:
+            self.correlation = self.gaussian_correlation
 
         if read_model:
             self.read_model()
@@ -918,31 +936,25 @@ class MODEL:
     def gaussian_correlation(self, xi, xj):
         correlation = 0
         for h in range(self.nFeats):
-            # Cyclic Problem Correction
-            # 1. Get angle in 0 < a < 2pi range
-            if h % 3 == 0:
-                xi[h] = abs(xi[h]) if xi[h] < 0 else xi[h]
-                xi[h] = xi[h] % math.tau if xi[h] > math.tau else xi[h]
-
-                xj[h] = abs(xj[h]) if xj[h] < 0 else xj[h]
-                xj[h] = xj[h] % math.tau if xj[h] > math.tau else xj[h]
-
-            diff = xi[h] - xj[h]
-
-            # 2. Ensure angle difference is 0 < d < pi
-            if h % 3 == 0:
-                if diff > math.pi:
-                    diff = math.tau - diff
-
-            correlation += self.theta_values[h] * abs(diff)**2
+            diff = abs(xi[h] - xj[h])
+            correlation += self.theta_values[h] * diff * diff
         return np.exp(-correlation)
+
+    def matern52_correlation(self, xi, xj):
+        correlation = 0
+        for h in range(self.nFeats):
+            diff = abs(xi[h] - xj[h])
+            theta_diff = self.theta_values[h] * diff
+            theta_diff2 = self.theta_values[h] * diff * diff
+            correlation += (1 + Constants.rt5 *  theta_diff + Constants.div5_3 * theta_diff2) * np.exp(-Constants.rt5 * theta_diff)
+        return correlation
 
     def predict(self, x_values):
         predictions = np.empty(shape=(len(x_values)))
         for i in range(len(x_values)):
             r = np.empty(shape=(self.nTrain))
             for j in range(self.nTrain):
-                r[j] = self.gaussian_correlation(x_values[i], self.training_data[j])
+                r[j] = self.correlation(x_values[i], self.training_data[j])
 
             predictions[i] = self.mu + np.dot(np.matmul(r.T, self.inv_R), (self.kriging_centres - self.mu))
 
@@ -955,7 +967,7 @@ class MODEL:
         for i in range(len(x_values)):
             r = np.empty(shape=(self.nTrain))
             for j in range(self.nTrain):
-                r[j] = self.gaussian_correlation(x_values[i], self.training_data[j])
+                r[j] = self.correlation(x_values[i], self.training_data[j])
 
                 res1 = np.dot(np.matmul(r.T, self.inv_R), r)
                 res2 = np.dot(np.matmul(ones.T, self.inv_R), r)
@@ -1220,7 +1232,7 @@ class Points:
         if type == "ferebus":
             for atom_directory in self.training_set_directories:
                 self.submission_script.add_job(atom_directory)
-                self.submission_script.add_option(option="-V")
+            self.submission_script.add_option(option="-V")
         else:
             for point in self.points:
                 job = getattr(point, attributes[type])
@@ -2114,6 +2126,7 @@ class DLPOLYsetup:
 
     def writeCONTROL(self):
         global SYSTEM_NAME
+        global KERNEL
 
         with open(self.directory + "CONTROL", "w+") as o:
             o.write("Title: %s\n" % SYSTEM_NAME)
@@ -2123,32 +2136,34 @@ class DLPOLYsetup:
             if self.temperature == 0:
                 o.write("temperature 10.0\n\n")
             else:
-                o.write("temperature %.1f\n\n" % temperature)
+                o.write("temperature %.1f\n\n" % self.temperature)
             if self.temperature == 0:
                 o.write("#perform zero temperature run (really set to 10K)\n")
                 o.write("zero\n")
-            o.write("# optimise distance 0.000001\n\n")
+            # o.write("# optimise distance 0.000001\n\n")
             o.write("# Cap forces during equilibration, in unit kT/angstrom.\n")
             o.write("# (useful if your system is far from equilibrium)\n")
             o.write("cap 100.0\n\n")
-            o.write("# Increase array size per domain\n")
-            o.write("# densvar 10 %\n\n")
-            o.write("# Bypass checking restrictions and reporting\n")
-            o.write("#no index\n")
-            o.write("#no strict\n")
-            o.write("#no topolgy\n")
+            # o.write("# Increase array size per domain\n")
+            # o.write("# densvar 10 %\n\n")
+            # o.write("# Bypass checking restrictions and reporting\n")
+            # o.write("#no index\n")
+            # o.write("#no strict\n")
+            # o.write("#no topolgy\n")
             o.write("no vdw\n\n")
             o.write("steps %d\n" % self.number_of_steps)
             o.write("equilibration %d\n" % self.number_of_steps)
-            o.write("#scale every 2\n")
+            # o.write("#scale every 2\n")
             o.write("timestep %f\n" % self.timestep)
             o.write("cutoff 15.0\n")
             o.write("fflux\n\n")
-            o.write("# Need these for bond contraints\n")
-            o.write("#mxshak 100\n")
-            o.write("#shake 1.0e-6\n\n")
+            if KERNEL != "rbf":
+                o.write("fflux_kernel %s" % KERNEL)
+            # o.write("# Need these for bond contraints\n")
+            # o.write("#mxshak 100\n")
+            # o.write("#shake 1.0e-6\n\n")
             o.write("# Continue MD simulation\n")
-            o.write("#restart\n\n")
+            # o.write("#restart\n\n")
             o.write("traj 0 1 2\n")
             o.write("print every %d\n" % self.print_every)
             o.write("stats every %d\n" % self.print_every)
