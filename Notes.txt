@@ -12,3 +12,31 @@ TRAINING_SET_LOCATION=
 OR
 TRAINING_SET_LOCATION=cwd
 which then would mean you use the directory you're currently in to run ICHOR (current directory contains your GJF/WFN/AIMALL directories)
+
+===========================================================================================================================================
+#####################
+# TRAINING SET MENU #
+#####################
+ [1] ...
+ [2] ...
+ [3] ...
+ ...
+
+ Training Set Size : <N Points>
+
+ Have a training set counter underneath the training set menu (could do the same for the sample set)  then have an option to change the
+ number of points we actually use (max is default but can select less (possibly also switch between random and first N points))
+
+ =========================================================================================================================================
+
+To Dos:
+
+=> Make more meaningful CSF queue names (e.g. "METHANE FEREBUS" and "ICHOR: Iter 2") => Will have to look at character limit
+
+=> Need to implement George inside ICHOR 
+
+=> Need to implement calculating AIMALL's every iteration (instead of all at the start)
+
+=> Need to implement a backup system
+
+=> Need to profile CV Error Calculation Code As it is our major bottleneck! (As well as clean it up as it is rubbish)

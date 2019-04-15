@@ -944,7 +944,7 @@ class MODEL:
         correlation = 0
         for h in range(self.nFeats):
             diff = abs(xi[h] - xj[h])
-            theta_diff = self.theta_values[h] * diff
+            theta_diff = np.sqrt(self.theta_values[h]) * diff
             theta_diff2 = self.theta_values[h] * diff * diff
             correlation += (1 + Constants.rt5 *  theta_diff + Constants.div5_3 * theta_diff2) * np.exp(-Constants.rt5 * theta_diff)
         return correlation
