@@ -132,6 +132,8 @@ MACHINE = "csf3"
 
 TRAINING_SET = None
 
+PREDICTION_MODE = "ICHOR"
+
 
 """
  ################################################################################
@@ -836,6 +838,7 @@ class MODEL:
 
     def __init__(self, fname, read_model=True):
         global KERNEL
+        global PREDICTION_MODE
 
         self.fname = fname
         self.type = self.fname.split(".")[0].split("_")[-2]
@@ -858,6 +861,19 @@ class MODEL:
             self.correlation = self.matern52_correlation
         else:
             self.correlation = self.gaussian_correlation
+        
+        if PREDICTION_MODE == "george":
+            self.predict = self.predict_george
+            self.variance = self.variance_george
+        else:
+            self.predict = self.predict_ichor
+            self.variance = self.variance_ichor
+            if "matern52" in KERNEL or "matern5" in KERNEL:
+                self.correlation = self.matern52_correlation
+            else:
+                self.correlation = self.gaussian_correlation
+        
+
 
         if read_model:
             self.read_model()
@@ -949,7 +965,7 @@ class MODEL:
             correlation += (1 + Constants.rt5 *  theta_diff + Constants.div5_3 * theta_diff2) * np.exp(-Constants.rt5 * theta_diff)
         return correlation
 
-    def predict(self, x_values):
+    def predict_ichor(self, x_values):
         predictions = np.empty(shape=(len(x_values)))
         for i in range(len(x_values)):
             r = np.empty(shape=(self.nTrain))
@@ -960,7 +976,7 @@ class MODEL:
 
         return predictions
 
-    def variance(self, x_values):
+    def variance_ichor(self, x_values):
         s_values = np.empty(shape=(len(x_values)))
         ones = np.ones(shape=(self.nTrain))
         res3 = np.dot(np.matmul(ones.T, self.inv_R), ones)
@@ -976,7 +992,40 @@ class MODEL:
 
         return s_values
 
-    def calcCVError(self):
+    def predict_george(self, x_values):
+        global KERNEL
+        import george
+
+        if "matern52" in KERNEL or "matern5" in KERNEL:
+            from george.kernels import Matern52Kernel as Kernel
+        else:
+            from george.kernels import ExpSquaredKernel as Kernel
+
+        thetas = np.array(self.theta_values) / 2
+        kernel = Kernel(thetas, ndim=self.nFeats)
+        gp = george.GP(kernel, mean=self.mu, fit_mean=True, white_noise=np.log(1e-30), fit_white_noise=False)
+        gp.compute()
+        preds = gp.predict(np.array(self.kriging_centres), x_values, return_cov=False, return_var=False)
+        return preds
+
+    def variance_george(self, x_values):
+        global KERNEL
+        import george
+
+        if "matern52" in KERNEL or "matern5" in KERNEL:
+            from george.kernels import Matern52Kernel as Kernel
+            thetas = np.exp(-np.log(self.theta_values))
+        else:
+            from george.kernels import ExpSquaredKernel as Kernel
+            thetas = np.exp(-np.log(2*self.theta_values))
+
+        kernel = Kernel(thetas, ndim=self.nFeats)
+        gp = george.GP(kernel, mean=self.mu, fit_mean=True, white_noise=np.log(1e-30), fit_white_noise=False)
+        gp.compute(self.training_data)
+        _, var = gp.predict(np.array(self.kriging_centres), x_values, return_cov=False, return_var=True)
+        return var
+
+    def __calcCVErrorOld(self):
         cv_errors = []
 
         B = np.empty(self.nTrain)
@@ -995,6 +1044,24 @@ class MODEL:
             cv_errors.append(e_cv)
 
         return cv_errors
+    
+    def calcCVError(self):
+        cv_errors = []
+        
+        F = np.ones((self.nTrain, 1))
+        
+        FTR = np.matmul(F.T, self.inv_R)
+        B = np.matmul(la.inv(np.matmul(FTR, F)), np.matmul(FTR, self.kriging_centres))
+        H = np.matmul(F, np.matmul(la.inv(np.matmul(F.T, F)), F.T))
+        
+        d = (self.kriging_centres - np.matmul(F, B)).reshape((-1, 1))
+        cv_errors = np.empty(self.nTrain)
+        
+        for i in range(self.nTrain):
+            e_cv = np.matmul(self.inv_R[i, :], (d + H[:,i].reshape(-1, 1) * d[i]/(1-H[i,i]))) / self.inv_R[i, i]
+            cv_errors[i] = e_cv**2
+        
+        return list(cv_errors)
 
 
 class Point:
@@ -2589,6 +2656,9 @@ def defineGlobals():
             KERNEL = val.lower()
         if key == "FEREBUS_VERSION":
             FEREBUS_VERSION = val.lower()
+
+        if key == "PREDICTION_MODE":
+            PREDICTION_MODE = val.lower()
 
         if key == "GAUSSIAN_CORE_COUNT":
             GAUSSIAN_CORE_COUNT = int(val)
