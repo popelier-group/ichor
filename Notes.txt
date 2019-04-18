@@ -31,11 +31,11 @@ which then would mean you use the directory you're currently in to run ICHOR (cu
 
 To Dos:
 
+=> Need to implement calculating AIMALL's every iteration (instead of all at the start)
+
 => Make more meaningful CSF queue names (e.g. "METHANE FEREBUS" and "ICHOR: Iter 2") => Will have to look at character limit
 
 => Need to implement George inside ICHOR 
-
-=> Need to implement calculating AIMALL's every iteration (instead of all at the start)
 
 => Need to implement a backup system
 

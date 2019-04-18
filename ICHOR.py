@@ -132,7 +132,8 @@ MACHINE = "csf3"
 
 TRAINING_SET = None
 
-PREDICTION_MODE = "ICHOR"
+NORMALIZE = False
+PREDICTION_MODE = "ichor"
 
 
 """
@@ -1004,7 +1005,7 @@ class MODEL:
         thetas = np.array(self.theta_values) / 2
         kernel = Kernel(thetas, ndim=self.nFeats)
         gp = george.GP(kernel, mean=self.mu, fit_mean=True, white_noise=np.log(1e-30), fit_white_noise=False)
-        gp.compute()
+        gp.compute(self.training_data)
         preds = gp.predict(np.array(self.kriging_centres), x_values, return_cov=False, return_var=False)
         return preds
 
@@ -2622,6 +2623,9 @@ def defineGlobals():
     global DLPOLY_TEMPERATURE
     global DLPOLY_PRINT_EVERY
 
+    global PREDICTION_MODE
+    global NORMALIZE
+
     FILE_STRUCTURE = FileTools.setup_file_structure()
     IMPORTANT_FILES = FileTools.setup_important_files()
 
@@ -2659,6 +2663,8 @@ def defineGlobals():
 
         if key == "PREDICTION_MODE":
             PREDICTION_MODE = val.lower()
+        if key == "NORMALIZE":
+            NORMALIZE = bool(val)
 
         if key == "GAUSSIAN_CORE_COUNT":
             GAUSSIAN_CORE_COUNT = int(val)
