@@ -3219,8 +3219,6 @@ def calculateErrors():
         with open("ErrorFile.csv", "w+") as f:
             f.write("No.,Etrue,Ecv,s2,alpha\n")
 
-
-    NORMALIZE = False
     EPE = []
 
     if NORMALIZE:
