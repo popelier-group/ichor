@@ -997,33 +997,46 @@ class MODEL:
         global KERNEL
         import george
 
+        x_values = np.array(x_values).reshape((-1, self.nFeats))
+
+        x_train = np.array(self.training_data).reshape((self.nTrain, self.nFeats))
+        y_train = np.array(self.kriging_centres).reshape((self.nTrain,))
+
         if "matern52" in KERNEL or "matern5" in KERNEL:
             from george.kernels import Matern52Kernel as Kernel
+            thetas = np.exp(-np.log(np.array(self.theta_values)))
         else:
             from george.kernels import ExpSquaredKernel as Kernel
+            thetas = np.exp(-np.log(2*np.array(self.theta_values)))
 
-        thetas = np.array(self.theta_values) / 2
         kernel = Kernel(thetas, ndim=self.nFeats)
         gp = george.GP(kernel, mean=self.mu, fit_mean=True, white_noise=np.log(1e-30), fit_white_noise=False)
-        gp.compute(self.training_data)
-        preds = gp.predict(np.array(self.kriging_centres), x_values, return_cov=False, return_var=False)
+        gp.compute(x_train)
+        preds = gp.predict(y_train, x_values, return_cov=False, return_var=False)
+        
         return preds
 
     def variance_george(self, x_values):
         global KERNEL
         import george
 
+        x_values = np.array(x_values).reshape((-1, self.nFeats))
+
+        x_train = np.array(self.training_data).reshape((self.nTrain, self.nFeats))
+        y_train = np.array(self.kriging_centres).reshape((self.nTrain,))
+
         if "matern52" in KERNEL or "matern5" in KERNEL:
             from george.kernels import Matern52Kernel as Kernel
-            thetas = np.exp(-np.log(self.theta_values))
+            thetas = np.exp(-np.log(np.array(self.theta_values)))
         else:
             from george.kernels import ExpSquaredKernel as Kernel
-            thetas = np.exp(-np.log(2*self.theta_values))
+            thetas = np.exp(-np.log(2*np.array(self.theta_values)))
 
         kernel = Kernel(thetas, ndim=self.nFeats)
         gp = george.GP(kernel, mean=self.mu, fit_mean=True, white_noise=np.log(1e-30), fit_white_noise=False)
-        gp.compute(self.training_data)
-        _, var = gp.predict(np.array(self.kriging_centres), x_values, return_cov=False, return_var=True)
+        gp.compute(x_train)
+        _, var = gp.predict(y_train, x_values, return_cov=False, return_var=True)
+
         return var
 
     def __calcCVErrorOld(self):
