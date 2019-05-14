@@ -113,6 +113,8 @@ IMPORTANT_FILES = {}
 TRAINING_POINTS = []
 SAMPLE_POINTS = []
 
+TRAINING_POINTS_TO_USE = None
+
 KERNEL = "rbf"
 FEREBUS_VERSION = "fortran"
 
@@ -549,38 +551,38 @@ class Atom:
         return "%s%10f%10f%10f" % (self.atom_type, self.x, self.y, self.z)
 
 
-class Molecule:
+# class Molecule:
 
-    def __init__(self):
-        pass
+#     def __init__(self):
+#         pass
 
 
-class GJF_Tools:
+# class GJF_Tools:
 
-    @staticmethod
-    def change_basis_set(gjfs, basis_set, gen_basis_set=None):
-        for gjf in gjfs:
-            gjf.basis_set = basis_set
-            if basis_set.lower() == "gen":
-                gjf.gen_basis_set = gen_basis_set
+#     @staticmethod
+#     def change_basis_set(gjfs, basis_set, gen_basis_set=None):
+#         for gjf in gjfs:
+#             gjf.basis_set = basis_set
+#             if basis_set.lower() == "gen":
+#                 gjf.gen_basis_set = gen_basis_set
 
-    @staticmethod
-    def change_potential(gjfs, potential):
-        for gjf in gjfs:
-            gjf.potential = potential
+#     @staticmethod
+#     def change_potential(gjfs, potential):
+#         for gjf in gjfs:
+#             gjf.potential = potential
     
-    @staticmethod
-    def add_keyword(gjfs, keyword):
-        for gjf in gjfs:
-            if keyword not in gjf.keywords:
-                gjf.keywords.append(keyword)
+#     @staticmethod
+#     def add_keyword(gjfs, keyword):
+#         for gjf in gjfs:
+#             if keyword not in gjf.keywords:
+#                 gjf.keywords.append(keyword)
     
-    @staticmethod
-    def add_keyword(gjfs, keywords):
-        for gjf in gjfs:
-            for keyword in keywords:
-                if keyword not in gjf.keywords:
-                    gjf.keywords.append(keyword)
+    # @staticmethod
+    # def add_keywords(gjfs, keywords):
+    #     for gjf in gjfs:
+    #         for keyword in keywords:
+    #             if keyword not in gjf.keywords:
+    #                 gjf.keywords.append(keyword)
 
 
 class GJF_file:
@@ -1373,7 +1375,12 @@ class Points:
             point.gjf.write_gjf()
     
     def form_set(self, gjfs=[], wfns=[], int_directories=[]):
-        for gjf, wfn, int_directory in itertools.zip_longest(gjfs, wfns, tqdm(int_directories)):
+        global TRAINING_POINTS_TO_USE
+        gjf_len = min(len(gjfs), TRAINING_POINTS_TO_USE)
+        wfn_len = min(len(wfns), TRAINING_POINTS_TO_USE)
+        aim_len = min(len(int_directories), TRAINING_POINTS_TO_USE)
+        #for gjf, wfn, int_directory in itertools.zip_longest(gjfs, wfns, tqdm(int_directories)):
+        for gjf, wfn, int_directory in itertools.zip_longest(gjfs[:gjf_len], wfns[:wfn_len], tqdm(int_directories[:aim_len])):
             self.add_point(gjf_file=gjf, wfn_file=wfn, int_directory=int_directory)
     
     def to_csv(self, fname, multipoles=True, iqa=True):
@@ -2815,13 +2822,16 @@ def checkWFNs(gjf_dir, wfn_dir):
 
 def submitTrainingGJFs():
     global FILE_STRUCTURE
+    global BASIS_SET
 
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
     training_set = Points()
     for gjf in gjfs:
         training_set.add_point(gjf_file=gjf)
-    training_set.format_gjfs(keywords=["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)"])
+
+    if BASIS_SET == "gen":
+        training_set.format_gjfs(keywords=["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)"])
     training_set.write_gjfs()
 
     training_set.create_submission_script(type="gaussian", name="GaussSub.sh", submit=True, exit=False)
@@ -3007,6 +3017,20 @@ def moveMPoleModels():
     else:
         print("Error: MPole Models not complete.")
         exit(1)
+
+def moveModelsToLog():
+    global SYSTEM_NAME
+    global FILE_STRUCTURE
+    global TRAINING_POINTS_TO_USE
+    
+    model_dir = FILE_STRUCTURE.get_file_path("ts_models")
+    log_dir = FILE_STRUCTURE.get_file_path("log")
+
+    log_loc = log_dir + SYSTEM_NAME + str(TRAINING_POINTS_TO_USE).zfill(4) + "/"
+
+    FileTools.make_clean_directory(log_loc)
+    FileTools.move_files(model_dir, log_loc, ".txt")
+
 
 def submitSampleGJFs():
     global FILE_STRUCTURE
@@ -3497,7 +3521,7 @@ def get_DLPOLY_WFN_energies():
                 with open(wfn, "r") as f:
                     last_line = f.readlines()[-1]
                 wfn_energy = re.findall("[+-]?\d+.\d+", last_line)[0]
-                print("%s >> %s" % (FileTools.get_base(wfn), wfn_energy))
+                print("%d %s" % (int(re.findall("\d+", FileTools.get_base(wfn))[0]), wfn_energy))
                 o.write("%s\t%s\n" % (FileTools.get_base(wfn), wfn_energy))
         print("\nWrote All Energies to %s\n" % dlpoly_base_dir + "Energies.txt", "w+")
 
@@ -3923,6 +3947,40 @@ def write_to_csv():
         s.to_csv(csv)
         print("Wrote Set To <ATOM>_%s" % csv)
 
+def get_ts_size():
+    global FILE_STRUCTURE
+    return len(FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf"))
+
+def set_ts_size():
+    global TRAINING_POINTS_TO_USE
+    TRAINING_POINTS_TO_USE = get_ts_size()
+
+def editTrainingPoints():
+    global TRAINING_POINTS_TO_USE
+    max_ts_size = get_ts_size()
+    while True:
+        print()
+        print("Current training set size: {}".format(TRAINING_POINTS_TO_USE))
+        print("Max training set size: {}".format(max_ts_size))
+        ans = int(input("Enter new training set size: "))
+        if ans > max_ts_size:
+            print("Error: Maximum training set size is {}\n"\
+                  "You inputted {}, please select a lower "\
+                  "number".format(max_ts_size, ans))
+            print()
+        elif ans <= 0:
+            print("Error: Training set size must be a positive, "\
+                  "none 0 integer, please enter a new size")
+            print()
+        else:
+            TRAINING_POINTS_TO_USE = ans
+            break
+            
+
+def get_sp_size():
+    global FILE_STRUCTURE
+    return len(FileTools.get_files_in(FILE_STRUCTURE.get_file_path("sp_gjf"), "*.gjf"))
+
 def test():
     global FILE_STRUCTURE
 
@@ -3946,8 +4004,10 @@ if __name__ == "__main__":
     if AUTO_SUBMISSION_MODE:
         autoRun(submit=False)
 
+    set_ts_size()
+
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
-                "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels,
+                "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels, "1_log": moveModelsToLog, "1_e" : editTrainingPoints,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
@@ -3997,6 +4057,11 @@ if __name__ == "__main__":
                 print("[5] Make MPole Models")
                 print("[6] Move MPole Models")
                 print("")
+                print("[log] Move Models to Log")
+                print("[e]   Edit Number of Points To Use")
+                print("")
+                print("Current Training Set Size: %d" % TRAINING_POINTS_TO_USE)
+                print("")
                 print("[b] Go back")
                 print("[0] Exit")
                 num += "_" + input()
@@ -4017,6 +4082,8 @@ if __name__ == "__main__":
                 print("[1] Submit GJFs to Gaussian")
                 print("[2] Submit WFNs to AIMALL")
                 print("[3] Get AIMALL Energies")
+                print("")
+                print("Current Sample Pool Size: %d" % get_sp_size())
                 print("")
                 print("[b] Go back")
                 print("[0] Exit")
