@@ -1501,7 +1501,7 @@ class Job:
         global ENCOMP
         return "~/AIMAll/aimqb.ish " \
                "-nogui -usetwoe=0 -atom=all -encomp=%d -boaq=gs30 -iasmesh=fine -nproc=2 " \
-               "%s >& %s\n" % (EXNCOMP, self.job, " ".join(self.options))
+               "%s >& %s\n" % (ENCOMP, self.job, " ".join(self.options))
 
     def get_ferebus_submission_string(self):
         global FILE_STRUCTURE
