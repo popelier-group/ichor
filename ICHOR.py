@@ -105,6 +105,8 @@ FORMAT_GJFS = True
 POTENTIAL = "B3LYP"
 BASIS_SET = "6-31+g(d,p)"
 
+ENCOMP = 3
+
 EXIT = False
 
 FILE_STRUCTURE = []
@@ -1496,9 +1498,10 @@ class Job:
                "$g09root/g09/g09 %s %s\n" % (self.job, " ".join(self.options))
 
     def get_aimall_submission_string(self):
+        global ENCOMP
         return "~/AIMAll/aimqb.ish " \
-               "-nogui -usetwoe=0 -atom=all -encomp=3 -boaq=gs30 -iasmesh=fine -nproc=2 " \
-               "%s >& %s\n" % (self.job, " ".join(self.options))
+               "-nogui -usetwoe=0 -atom=all -encomp=%d -boaq=gs30 -iasmesh=fine -nproc=2 " \
+               "%s >& %s\n" % (EXNCOMP, self.job, " ".join(self.options))
 
     def get_ferebus_submission_string(self):
         global FILE_STRUCTURE
@@ -2631,6 +2634,8 @@ def defineGlobals():
     global POTENTIAL
     global BASIS_SET
 
+    global ENCOMP
+
     global KERNEL
     global FEREBUS_VERSION
 
@@ -2675,6 +2680,9 @@ def defineGlobals():
             POTENTIAL = val.upper()
         if key == "BASIS_SET":
             BASIS_SET = val
+        
+        if key == "ENCOMP":
+            ENCOMP = int(val)
         
         if key == "KERNEL":
             KERNEL = val.lower()
