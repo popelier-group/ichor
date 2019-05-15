@@ -551,6 +551,9 @@ class Atom:
     
     def coordinate_line(self):
         return "%s%10f%10f%10f" % (self.atom_type, self.x, self.y, self.z)
+    
+    def __repr__(self):
+        return "%s%10f%10f%10f" % (self.atom_type, self.x, self.y, self.z)
 
 
 # class Molecule:
@@ -648,6 +651,8 @@ class GJF_file:
                     elif self.basis_set == "gen":
                         if line.strip():
                             self.gen_basis_set += line
+            print(self)
+            quit()
         except:
             print("\nError: Cannot Read File %s" % self.fname)
    
@@ -764,6 +769,69 @@ class GJF_file:
                 f.write(self.get_gen_basis_set("truncated"))
                 f.write("\n")
             f.write("%s" % self.output_wfn_fname)
+
+    """
+        self.fname = fname
+        self.output = fname.replace(".gjf", ".log")
+        self.name = Point.get_name(fname)
+
+        self.title = None
+        self.run_type = None
+        self.startup_options = []
+
+        self.potential = None
+        self.basis_set = None
+
+        self.keywords = []
+
+        self.charge = None
+        self.multiplicity = None
+
+        self.coordinates = []
+
+        self.gen_basis_set = ""
+
+        self.output_wfn = False
+        self.output_wfn_fname = None
+    """
+
+    def __str__(self):
+        coordinates = [str(c) for c in self.coordinates]
+        return "FileName:         {}\n"\
+                "Output:          {}\n"\
+                "Name:            {}\n\n"\
+                "Title:           {}\n"\
+                "Run Type:        {}\n"\
+                "StartUp Options: [{}]\n\n"\
+                "Potential:       {}\n"\
+                "Basis Set:       {}\n\n"\
+                "Keywords:        [{}]\n\n"\
+                "Charge:          {}\n"\
+                "Multiplicity:    {}\n"\
+                "Coordinates:\n   {}\n\n"\
+                "GenBasis:        {}\n\n"\
+                "OutputWFN:       {}\n"\
+                "WFN FileName:    {}".format(
+                    self.fname,
+                    self.output,
+                    self.name,
+                    self.title,
+                    self.run_type,
+                    ",".join(self.startup_options)
+                    self.potential,
+                    self.basis_set,
+                    ",".join self.keywords,
+                    self.charge,
+                    self.multiplicity,
+                    "\n".join(coordinates),
+                    self.gen_basis_set,
+                    self.output_wfn,
+                    self.output_wfn_fname
+                )
+                
+
+    def __repr__(self):
+        return str(self)
 
 
 class WFN:
