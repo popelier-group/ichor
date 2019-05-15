@@ -651,8 +651,6 @@ class GJF_file:
                     elif self.basis_set == "gen":
                         if line.strip():
                             self.gen_basis_set += line
-            print(self)
-            quit()
         except:
             print("\nError: Cannot Read File %s" % self.fname)
    
@@ -752,6 +750,11 @@ class GJF_file:
         for keyword in keywords:
             self.add_keyword(keyword)
 
+    def remove_connectivity(self):
+        for i, keyword in self.keywords:
+            if keyword == "geom=connectivity":
+                del self.keywords[i]
+
     def write_gjf(self):
         with open(self.fname, "w") as f:
             for startup_option in self.startup_options:
@@ -769,31 +772,6 @@ class GJF_file:
                 f.write(self.get_gen_basis_set("truncated"))
                 f.write("\n")
             f.write("%s" % self.output_wfn_fname)
-
-    """
-        self.fname = fname
-        self.output = fname.replace(".gjf", ".log")
-        self.name = Point.get_name(fname)
-
-        self.title = None
-        self.run_type = None
-        self.startup_options = []
-
-        self.potential = None
-        self.basis_set = None
-
-        self.keywords = []
-
-        self.charge = None
-        self.multiplicity = None
-
-        self.coordinates = []
-
-        self.gen_basis_set = ""
-
-        self.output_wfn = False
-        self.output_wfn_fname = None
-    """
 
     def __str__(self):
         coordinates = [str(c) for c in self.coordinates]
@@ -817,10 +795,10 @@ class GJF_file:
                     self.name,
                     self.title,
                     self.run_type,
-                    ",".join(self.startup_options)
+                    ",".join(self.startup_options),
                     self.potential,
                     self.basis_set,
-                    ",".join self.keywords,
+                    ",".join(self.keywords),
                     self.charge,
                     self.multiplicity,
                     "\n".join(coordinates),
@@ -1173,7 +1151,7 @@ class Point:
             self.geometry = self.gjf.coordinates
         except:
             self.gjf = None
-    
+
     def read_int_files(self, int_dir):
         int_files = FileTools.get_files_in(int_dir, "*.int")
         for int_file in int_files:
@@ -1273,7 +1251,7 @@ class Points:
         else:
             self.points.append(Point(gjf=gjf_file, wfn=wfn_file, int_directory=int_directory))
 
-    def format_gjfs(self, potential=None, basis_set=None, charge=None, multiplicity=None, keywords=[]):
+    def format_gjfs(self, potential=None, basis_set=None, charge=None, multiplicity=None, keywords=[], remove_connectivity=True):
         global POTENTIAL
         global BASIS_SET
         
@@ -1300,6 +1278,9 @@ class Points:
 
             for keyword in keywords:
                 point.gjf.add_keyword(keyword)
+
+            if remove_connectivity:
+                point.gjf.remove_connectivity()
 
             point.gjf.set_default_wfn()
 
@@ -2899,16 +2880,29 @@ def checkWFNs(gjf_dir, wfn_dir):
 def submitTrainingGJFs():
     global FILE_STRUCTURE
     global BASIS_SET
+    global FORMAT_GJFS
+
+    # gjf_directory = FILE_STRUCTURE.get_file_path("ts_gjf")
+    # createGaussScript(gjf_directory)
+
+    # if FORMAT_GJFS:
+    #     for gjf in FileTools.get_files_in(gjf_directory, "*.gjf", sorting="natural"):
+    #         formatGJF(gjf)
+
+    # CSFTools.submit_scipt("GaussSub.sh", exit=True)
 
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
-    training_set = Points()
-    for gjf in gjfs:
-        training_set.add_point(gjf_file=gjf)
 
-    if BASIS_SET == "gen":
-        training_set.format_gjfs(keywords=["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)"])
-    training_set.write_gjfs()
+    training_set = Points()
+    training_set.form_set(gjf_files=gjfs)
+
+    if FORMAT_GJFS:
+        if BASIS_SET == "gen":
+            training_set.format_gjfs(keywords=["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)"])
+        else:
+            training_set.format_gjfs()
+        training_set.write_gjfs()
 
     training_set.create_submission_script(type="gaussian", name="GaussSub.sh", submit=True, exit=False)
 
@@ -3110,15 +3104,32 @@ def moveModelsToLog():
 
 def submitSampleGJFs():
     global FILE_STRUCTURE
+    global BASIS_SET
+    global FORMAT_GJFS
 
-    gjf_directory = FILE_STRUCTURE.get_file_path("sp_gjf")
-    createGaussScript(gjf_directory)
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
+
+    training_set = Points()
+    training_set.form_set(gjf_files=gjfs)
 
     if FORMAT_GJFS:
-        for gjf in FileTools.get_files_in(gjf_directory, "*.gjf", sorting="natural"):
-            formatGJF(gjf)
+        if BASIS_SET == "gen":
+            training_set.format_gjfs(keywords=["6D", "10F", "guess=huckel", "integral=(uncontractaobasis)"])
+        else:
+            training_set.format_gjfs()
+        training_set.write_gjfs()
 
-    CSFTools.submit_scipt("GaussSub.sh", exit=True)
+    training_set.create_submission_script(type="gaussian", name="GaussSub.sh", submit=True, exit=False)
+
+    # gjf_directory = FILE_STRUCTURE.get_file_path("sp_gjf")
+    # createGaussScript(gjf_directory)
+
+    # if FORMAT_GJFS:
+    #     for gjf in FileTools.get_files_in(gjf_directory, "*.gjf", sorting="natural"):
+    #         formatGJF(gjf)
+
+    # CSFTools.submit_scipt("GaussSub.sh", exit=True)
 
 
 def submitSampleWFNs():
