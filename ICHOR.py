@@ -139,6 +139,8 @@ TRAINING_SET = None
 NORMALIZE = False
 PREDICTION_MODE = "ichor"
 
+PRECALCULATE_AIMALL = True
+
 
 """
  ################################################################################
@@ -1217,10 +1219,10 @@ class Point:
 
 class Points:
 
-    def __init__(self, gjf_files=[], wfn_files=[], int_directories=[]):
+    def __init__(self, gjfs=[], wfns=[], int_directories=[]):
         self.points = []
         if gjf_files or wfn_files or int_directories:
-            self.form_set(gjfs=gjf_files, wfns=wfn_files, int_directories=int_directories)
+            self.form_set(gjfs=gjfs, wfns=wfns, int_directories=int_directories)
 
     def add_point(self, gjf_file=None, wfn_file=None, int_directory=None):
         gjf_name = FileTools.get_base(gjf_file) if gjf_file else None
@@ -1851,6 +1853,8 @@ class FileTools:
 
         tree.create_node("OPT", "opt", parent="file_locs")
 
+        tree.create_node("TEMP", "temp", parent="file_locs")
+
         return tree
 
     @staticmethod
@@ -2101,16 +2105,15 @@ class CSFTools:
     @staticmethod
     def submit_scipt(script, hold_jid=None, sync=False, exit=False, return_jid=False):
         """
+            :param script: fname of script e.g 'GaussSub.sh'
+            :param hold_jid: jid to hold for if applicable
+            :param sync: whether to submit the script to run in the background or wait for the job to finish
+            :param exit: boolean to tell script to exit after submistting script
+            :return: None submits script provided
 
-        :param script: fname of script e.g 'GaussSub.sh'
-        :param hold_jid: jid to hold for if applicable
-        :param sync: whether to submit the script to run in the background or wait for the job to finish
-        :param exit: boolean to tell script to exit after submistting script
-        :return: None submits script provided
-
-        Notes
-        -----
-        Needs refactoring
+            Notes
+            -----
+            Needs refactoring
         """
         if sync:
             job = Popen(["qsub", "-sync", "y", script])
@@ -2700,6 +2703,8 @@ def defineGlobals():
     global PREDICTION_MODE
     global NORMALIZE
 
+    global PRECALCULATE_AIMALL
+
     FILE_STRUCTURE = FileTools.setup_file_structure()
     IMPORTANT_FILES = FileTools.setup_important_files()
 
@@ -2757,7 +2762,10 @@ def defineGlobals():
         if key == "DLPOLY_TEMPERATURE":
             DLPOLY_TEMPERATURE = int(val)
         if key == "DLPOLY_PRINT_EVERY":
-             DLPOLY_PRINT_EVERY = int(val)
+            DLPOLY_PRINT_EVERY = int(val)
+
+        if key == "PRECALCULATE_AIMALL":
+            PRECALCULATE_AIMALL = bool(val)
 
     # ALF checking
     if not ALF:
@@ -2832,6 +2840,33 @@ def createGaussScript(dir, name="GaussSub.sh", files=None):
     gaussSub.write_script()
 
 
+def createAimScript(dir, name="AIMSub.sh", files=None):
+    global AIMALL_CORE_COUNT
+
+    if not files:
+        wfns = FileTools.get_files_in(dir, "*.wfn")
+    else:
+        wfns = files
+
+    aimsub = SubmissionScript(name, type="aimall", cores=AIMALL_CORE_COUNT)
+
+    aimsub.add_option(option="-j", value="y")
+    aimsub.add_option(option="-o", value="AIMALL.log")
+    aimsub.add_option(option="-e", value="AIMALL.err")
+    aimsub.add_option(option="-S", value="/bin/bash")
+
+    aimsub.add_path("~/AIMALL")
+
+    wfns = FileTools.get_files_in(aimall_dir, "*.wfn")
+
+    for i in range(len(wfns))
+        wfn = wfns[i]
+        job = "%s/JOB%d.log" % (dir, i+1)
+        aimsub.add_job(wfn, options=job)
+
+    aimsub.write_script()
+
+
 def formatGJF(fname, coordinates=None):
     global POTENTIAL
     global BASIS_SET
@@ -2894,8 +2929,7 @@ def submitTrainingGJFs():
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
 
-    training_set = Points()
-    training_set.form_set(gjf_files=gjfs)
+    training_set = Points(gjfs=gjfs)
 
     if FORMAT_GJFS:
         if BASIS_SET == "gen":
@@ -2997,7 +3031,7 @@ def makeTrainingSets():
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
     int_directories = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
 
-    training_set = Points(gjf_files=gjfs, int_directories=int_directories)
+    training_set = Points(gjfs=gjfs, int_directories=int_directories)
     training_set.make_training_set()
 
     if not AUTO_SUBMISSION_MODE:
@@ -3022,7 +3056,7 @@ def makeMPoleTrainingSets():
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
     int_directories = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
 
-    training_set = Points(gjf_files=gjfs, int_directories=int_directories)
+    training_set = Points(gjfs=gjfs, int_directories=int_directories)
 
     training_set.make_training_set(IQA=False)
 
@@ -3061,6 +3095,7 @@ def moveIQAModels():
         print("Error: IQA Models not complete.")
         exit(1)
 
+
 def moveMPoleModels():
     global SYSTEM_NAME
     global FILE_STRUCTURE
@@ -3088,6 +3123,7 @@ def moveMPoleModels():
         print("Error: MPole Models not complete.")
         exit(1)
 
+
 def moveModelsToLog():
     global SYSTEM_NAME
     global FILE_STRUCTURE
@@ -3110,8 +3146,7 @@ def submitSampleGJFs():
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
 
-    training_set = Points()
-    training_set.form_set(gjf_files=gjfs)
+    training_set = Points(gjfs=gjfs)
 
     if FORMAT_GJFS:
         if BASIS_SET == "gen":
@@ -3369,11 +3404,14 @@ def calculateErrors():
     MEPE = MEPE[:min(len(EPE), POINTS_PER_ITERATION)]
     MEPE = sorted(MEPE, reverse=True)
 
-    training_gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
-    training_wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
-    training_int_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
-
-    training_set_size = len(FileTools.get_files_in(training_gjf_dir, "*.gjf", sorting="none"))
+    if PRECALCULATE_AIMALL:
+        training_gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+        training_wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
+        training_int_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+        training_set_size = len(FileTools.get_files_in(training_gjf_dir, "*.gjf", sorting="none"))
+    else:
+        training_gjf_dir = FILE_STRUCTURE.get_file_path("temp")
+        training_set_size = 0
 
     log_dir = FILE_STRUCTURE.get_file_path("log")
     if first_iteration:
@@ -3405,31 +3443,41 @@ def calculateErrors():
         FileTools.move_file(sample_gjf, training_gjf)
         print("Moved %s to %s" % (sample_gjf, training_gjf))
 
-        sample_wfn = sample_wfns[index]
-        training_wfn = "%s%s.wfn" % (training_wfn_dir, new_base)
-        FileTools.move_file(sample_wfn, training_wfn)
-        print("Moved %s to %s" % (sample_wfn, training_wfn))
+        if PRECALCULATE_AIMALL:
+            sample_wfn = sample_wfns[index]
+            training_wfn = "%s%s.wfn" % (training_wfn_dir, new_base)
+            FileTools.move_file(sample_wfn, training_wfn)
+            print("Moved %s to %s" % (sample_wfn, training_wfn))
 
-        sample_int = sample_ints[index]
-        training_int_atomicfiles = "%s%s_atomicfiles/" % (training_int_dir, new_base)
-        FileTools.move_file(sample_int, training_int_atomicfiles)
-        print("Moved %s to %s" % (sample_int, training_int_atomicfiles))
+            sample_int = sample_ints[index]
+            training_int_atomicfiles = "%s%s_atomicfiles/" % (training_int_dir, new_base)
+            FileTools.move_file(sample_int, training_int_atomicfiles)
+            print("Moved %s to %s" % (sample_int, training_int_atomicfiles))
 
-        training_int_files = FileTools.get_files_in(training_int_atomicfiles, "*.int")
-        e_iqa = 0.0
-        for training_int_file in training_int_files:
-            int_data = INT(training_int_file)
-            e_iqa += int_data.IQA_terms["E_IQA(A)"]
+            training_int_files = FileTools.get_files_in(training_int_atomicfiles, "*.int")
+            e_iqa = 0.0
+            for training_int_file in training_int_files:
+                int_data = INT(training_int_file)
+                e_iqa += int_data.IQA_terms["E_IQA(A)"]
 
-            int_base = FileTools.get_base(training_int_file)
-            os.rename(training_int_file, training_int_file.replace(int_base, new_base))
+                int_base = FileTools.get_base(training_int_file)
+                os.rename(training_int_file, training_int_file.replace(int_base, new_base))
 
-        Etrue = (e_iqa - predictions[index])**2
+            Etrue = (e_iqa - predictions[index])**2
 
-        with open("ErrorFile.csv", "a") as f:
-            f.write("%s,%.16f,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), Etrue, cv_errors[index], variance[index],
-                                                      alpha))
+            with open("ErrorFile.csv", "a") as f:
+                f.write("%s,%.16f,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), Etrue, cv_errors[index], variance[index],
+                                                        alpha))
+        else:
+            updateTempGJFs()
+            with open("ErrorFile.csv", "a") as f:
+                f.write("%s,%s,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), "REPLACE", cv_errors[index], variance[index],
+                                                        alpha))
         print("")
+
+
+def updateTempGJFs():
+    
 
 
 def edit_DLPOLY():
@@ -3613,6 +3661,94 @@ def get_DLPOLY_WFN_energies():
         print("\nWrote All Energies to %s\n" % dlpoly_base_dir + "Energies.txt", "w+")
 
 
+def submit_python(pJID, iter, mode):
+    pysub = SubmissionScript("pysub.sge", type="python")
+    pysub.add_option(option="-N", value=sys.argv[0])
+    pysub.add_option(option="-S", value="/bin/bash")
+    pysub.add_option(option="-o", value="outputfile.log")
+    pysub.add_option(option="-j", value="y")
+    pysub.add_job(sys.argv[0], "-a -i %d -s %d" % (iter, mode))
+    pysub.write_script()
+
+    if pJID:
+        pJID = CSFTools.submit_scipt(pysub.name, hold_jid=pJID, return_jid=True)
+    else:
+        pJID = CSFTools.submit_scipt(pysub.name, return_jid=True)
+
+    print("Submitted %s\t\tjid:%s" % (pysub.name, pJID))
+    return pJID
+
+
+def submit_ferebus(pJID):
+    fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
+    training_set = Points()
+    coords = FileTools.get_coordinates(gjf_example)
+    atom_directories = []
+    for i, line in enumerate(coords):
+        atom = line.split()[0]
+        atom_directories.append("%s%s%d/" % (fereb_dir, atom, i+1))
+    training_set.training_set_directories = atom_directories
+    training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=False)
+
+    pJID = CSFTools.submit_scipt(training_set.submission_script.name, hold_jid=pJID, return_jid=True)
+    print("Submitted %s\t\tjid:%s" % (training_set.submission_script.name, pJID))
+    return pJID
+
+
+def moveTemp2Train():
+    global FILE_STRUCTURE
+
+    temp_dir = FILE_STRUCTURE.get_file_path("temp")
+
+    gjfs = FileTools.get_files_in(temp_dir, "*.gjf")
+    wfns = FileTools.get_files_in(temp_dir, "*.wfn")
+    """
+        move/rename gjf files
+        move/rename wfn files
+    """
+    int_directories = FileTools.get_files_in(temp_dir, "*_atomicfiles/")
+    """
+        cleanup temp dir
+        rename dirs + ints
+        update ErrorFile
+        move firs + ints
+    """
+
+
+def submit_gjfs(pJID):
+    global POINTS_PER_ITERATION
+    global SYSTEM_NAME
+    global FILE_STRUCTURE
+
+    temp_dir = FILE_STRUCTURE.get_file_path("temp")
+    gjf_files = []
+
+    for i in range(POINTS_PER_ITERATION):
+        gjf_file = temp_dir + SYSTEM_NAME + str(i+1).zfill(4) + ".gjf"
+        gjf_files.append(gjf_file)
+
+    createGaussScript(temp_dir, files=gjf_files)
+    pJID = CSFTools.submit_scipt("GaussSub.sh", return_jid=True, hold_jid=pJID)
+    return pJID
+
+
+def submit_wfns(pJID):
+    global POINTS_PER_ITERATION
+    global SYSTEM_NAME
+    global FILE_STRUCTURE
+
+    temp_dir = FILE_STRUCTURE.get_file_path("temp")
+    wfn_files = []
+
+    for i in range(POINTS_PER_ITERATION):
+        wfn_file = temp_dir + SYSTEM_NAME + str(i+1).zfill(4) + ".wfn"
+        wfn_files.append(wfn_file)
+    
+    createAimScript(temp_dir, files=wfn_files)
+    pJID = CSFTools.submit_scipt("AIMSub.sh", return_jid=True, hold_jid=pJID)
+    return pJID
+
+
 def autoRun(submit=True):
     global MAX_ITERATION
     global STEP
@@ -3624,58 +3760,33 @@ def autoRun(submit=True):
 
     pJID = None
     if submit:
-        jid = open("jid.txt", "w+")
-        for i in range(MAX_ITERATION):
-            pysub = SubmissionScript("pysub.sge", type="python")
-            pysub.add_option(option="-N", value=sys.argv[0])
-            pysub.add_option(option="-S", value="/bin/bash")
-            pysub.add_option(option="-o", value="outputfile.log")
-            pysub.add_option(option="-j", value="y")
-            pysub.add_job(sys.argv[0], "-a -i %d -s %d" % (i, 0))
-            pysub.write_script()
+        with open("jid.txt", "w+") as jid:
+            for i in range(MAX_ITERATION):
+                pJID = submit_python(pJID, i, 0)
+                jid.write("%s\n" % pJID)
+                
+                pJID = submit_ferebus(pJID)
+                jid.write("%s\n" % pJID)
+                
+                pJID = submit_python(pJID, i, 1)
+                jid.write("%s\n" % pJID)
 
-            if pJID:
-                pJID = CSFTools.submit_scipt(pysub.name, hold_jid=pJID, return_jid=True)
-            else:
-                pJID = CSFTools.submit_scipt(pysub.name, return_jid=True)
-
-            print("Submitted %s\t\tjid:%s" % (pysub.name, pJID))
-            jid.write("%s\n" % pJID)
-            
-            fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
-            training_set = Points()
-            coords = FileTools.get_coordinates(gjf_example)
-            atom_directories = []
-            for i, line in enumerate(coords):
-                atom = line.split()[0]
-                atom_directories.append("%s%s%d/" % (fereb_dir, atom, i+1))
-            training_set.training_set_directories = atom_directories
-            training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=False)
-
-            pJID = CSFTools.submit_scipt(training_set.submission_script.name, hold_jid=pJID, return_jid=True)
-            jid.write("%s\n" % pJID)
-
-            print("Submitted %s\t\tjid:%s" % (training_set.submission_script.name, pJID))
-
-            pysub = SubmissionScript("pysub.sge", type="python")
-            pysub.add_option(option="-N", value=sys.argv[0])
-            pysub.add_option(option="-S", value="/bin/bash")
-            pysub.add_option(option="-o", value="outputfile.log")
-            pysub.add_option(option="-j", value="y")
-            pysub.add_job(sys.argv[0], "-a -i %d -s %d" % (i, 1))
-            pysub.write_script()
-
-            pJID = CSFTools.submit_scipt(pysub.name, hold_jid=pJID, return_jid=True)
-            jid.write("%s\n" % pJID)
-
-            print("Submitted %s\t\tjid:%s" % (pysub.name, pJID))
-        jid.close()
+                if not PRECALCULATE_AIMALL:
+                    pJID = submit_gjfs(pJID)
+                    jid.write("%s\n" % pJID)
+                    pJID = submit_wfns(pJID)
+                    jid.write("%s\n" % pJID)
+                    pJID = submit_python(pJID, i, 2)
+                    jid.write("%s\n" % pJID)
     else:
         if STEP == 0:
             makeTrainingSets()
-        else:
+        elif STEP == 1:
             moveIQAModels()
             calculateErrors()
+        elif STEP == 2:
+            moveTemp2Train()
+
 
     sys.exit(0)
 
@@ -3793,7 +3904,7 @@ def calculate_S_Curves(model_files):
     int_dirs = FileTools.get_files_in(aim_dir, "*_atomicfiles/")
 
     print("\nReading Test Data")
-    test_set = Points(gjf_files=gjfs, int_directories=int_dirs)
+    test_set = Points(gjfs=gjfs, int_directories=int_dirs)
 
     print("\nMaking Predictions...")
     predictions = test_set.predict(models)
@@ -3894,7 +4005,7 @@ def recovery_errors(wfn_dir="", aimall_dir=""):
     wfns = FileTools.get_files_in(wfn_dir, "*.wfn")
     atomicfiles = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
 
-    test_set = Points(wfn_files=wfns, int_directories=atomicfiles)
+    test_set = Points(wfns=wfns, int_directories=atomicfiles)
 
     wfn_energies = test_set.get_wfn_energies()
     aimall_energies = test_set.get_aimall_energeis()
@@ -4030,7 +4141,7 @@ def write_to_csv():
         if not csv.endswith(".csv"):
             csv += ".csv"
 
-        s = Points(gjf_files=gjfs, int_directories=ints)
+        s = Points(gjfs=gjfs, int_directories=ints)
         s.to_csv(csv)
         print("Wrote Set To <ATOM>_%s" % csv)
 
@@ -4074,7 +4185,7 @@ def test():
     gjfs = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")
     ints = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_aimall"), "*_atomicfiles/")
 
-    ts = Points(gjf_files=gjfs, int_directories=ints)
+    ts = Points(gjfs=gjfs, int_directories=ints)
 
     ts.to_csv("ts.csv")
 
