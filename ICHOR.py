@@ -1989,6 +1989,47 @@ class FileTools:
                     FileTools.move_file(pathname, destination)
 
     @staticmethod
+    def get_num(f):
+        if f.endswith("/"):
+            f = f [:-1]
+        fname = os.path.basename(f)
+        num_str = re.findall("\d+", fname)[0]
+        return int(num_str)
+
+    @staticmethod
+    def increment_files(files, increment):
+        for f in files:
+            try:
+                num = self.get_num(f) + increment
+                new_f = f.replace(num_str, str(num).zfill(4))
+                self.move_file(f, new_f)
+            except:
+                print("Cannot increment file: {}".format(f))
+
+    @staticmethod
+    def get_fname_base(f):
+        fname = os.path.basename(f)
+        base = fname.split(".")[0]
+        return fname, base
+
+    @staticmethod
+    def update_file(oldf, newf):
+        newfname, newbase = self.get_fname_base(newf)
+        oldfname, oldbase = self.get_fname_base(oldf)
+
+        with open(oldf, "r") as f:
+            data = f.readlines()
+        
+        wtih open(oldf, "w") as f:
+            for i, line in enumerate(data):
+                if oldf in line:
+                    data[i] = line.replace(oldf, newf)
+                elif oldfname in line:
+                    data[i] = line.replace(oldfname, newfname)
+                elif oldbase in line:
+                    data[i] = line.replace(oldbase, newbase)
+
+    @staticmethod
     def get_directories(directory):
         directories = []
         for item in os.listdir(directory):
@@ -3477,7 +3518,14 @@ def calculateErrors():
 
 
 def updateTempGJFs():
-    
+    global FILE_STRUCTURE
+
+    temp_dir = FILE_STRUCTURE.get_file_path("temp")
+    gjfs = FileTools.get_files_in(temp_dir, "*.gjf")
+
+    temp_set = Points(gjfs=gjfs)
+    temp_set.format_gjfs()
+    temp_set.write_gjfs()
 
 
 def edit_DLPOLY():
@@ -3698,15 +3746,22 @@ def submit_ferebus(pJID):
 def moveTemp2Train():
     global FILE_STRUCTURE
 
+    ts_size = get_ts_size()
+
     temp_dir = FILE_STRUCTURE.get_file_path("temp")
 
     gjfs = FileTools.get_files_in(temp_dir, "*.gjf")
     wfns = FileTools.get_files_in(temp_dir, "*.wfn")
-    """
-        move/rename gjf files
-        move/rename wfn files
-    """
+
+    gjfs = FileTools.increment_files(gjfs)
+    wfns = FileTools.increment_files(wfns)
+
+    gjfs = FileTools.get_files_in(temp_dir, "*.gjf")
+    wfns = FileTools.get_files_in(temp_dir, "*.wfn")
+
+    FileTools.cleanup_aimall_dir(temp_dir)
     int_directories = FileTools.get_files_in(temp_dir, "*_atomicfiles/")
+    
     """
         cleanup temp dir
         rename dirs + ints
