@@ -558,40 +558,6 @@ class Atom:
         return "%s%10f%10f%10f" % (self.atom_type, self.x, self.y, self.z)
 
 
-# class Molecule:
-
-#     def __init__(self):
-#         pass
-
-
-# class GJF_Tools:
-
-#     @staticmethod
-#     def change_basis_set(gjfs, basis_set, gen_basis_set=None):
-#         for gjf in gjfs:
-#             gjf.basis_set = basis_set
-#             if basis_set.lower() == "gen":
-#                 gjf.gen_basis_set = gen_basis_set
-
-#     @staticmethod
-#     def change_potential(gjfs, potential):
-#         for gjf in gjfs:
-#             gjf.potential = potential
-    
-#     @staticmethod
-#     def add_keyword(gjfs, keyword):
-#         for gjf in gjfs:
-#             if keyword not in gjf.keywords:
-#                 gjf.keywords.append(keyword)
-    
-    # @staticmethod
-    # def add_keywords(gjfs, keywords):
-    #     for gjf in gjfs:
-    #         for keyword in keywords:
-    #             if keyword not in gjf.keywords:
-    #                 gjf.keywords.append(keyword)
-
-
 class GJF_file:
 
     def __init__(self, fname):
@@ -1935,7 +1901,6 @@ class FileTools:
             with open(wfn, "w") as f:
                 f.writelines(lines)
 
-
     @staticmethod
     def remove_directory(directory):
         if os.path.isdir(directory):
@@ -1998,13 +1963,19 @@ class FileTools:
 
     @staticmethod
     def increment_files(files, increment):
-        for f in files:
+        for i, f in enumerate(files):
             try:
-                num = self.get_num(f) + increment
-                new_f = f.replace(num_str, str(num).zfill(4))
-                self.move_file(f, new_f)
+                if f.endswith("/"):
+                        f = f [:-1]
+                fname = os.path.basename(f)
+                num_str = re.findall("\d+", fname)[0]
+                num = int(num_str) + increment
+                new_f = fname.replace(num_str, str(num).zfill(len(num_str)))
+                FileTools.move_file(f, new_f)
+                files[i] = new_f
             except:
                 print("Cannot increment file: {}".format(f))
+        return files
 
     @staticmethod
     def get_fname_base(f):
@@ -2020,7 +1991,7 @@ class FileTools:
         with open(oldf, "r") as f:
             data = f.readlines()
         
-        wtih open(oldf, "w") as f:
+        with open(oldf, "w") as f:
             for i, line in enumerate(data):
                 if oldf in line:
                     data[i] = line.replace(oldf, newf)
@@ -2900,7 +2871,7 @@ def createAimScript(dir, name="AIMSub.sh", files=None):
 
     wfns = FileTools.get_files_in(aimall_dir, "*.wfn")
 
-    for i in range(len(wfns))
+    for i in range(len(wfns)):
         wfn = wfns[i]
         job = "%s/JOB%d.log" % (dir, i+1)
         aimsub.add_job(wfn, options=job)
@@ -3512,8 +3483,18 @@ def calculateErrors():
         else:
             updateTempGJFs()
             with open("ErrorFile.csv", "a") as f:
-                f.write("%s,%s,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), "REPLACE", cv_errors[index], variance[index],
+                f.write("%s,%s,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), predictions[index], cv_errors[index], variance[index],
                                                         alpha))
+
+            with open("jid.txt", "w") as jid:
+                pJID = submit_gjfs(None)
+                jid.write("{}\n".format(pJID))
+                pJID = submit_wfns(pJID)
+                jid.write("{}\n".format(pJID))
+                pJID = submit_python(pJID, 1, 2)
+                jid.write("{}\n".format(pJID))
+            sys.exit(0)
+
         print("")
 
 
@@ -3745,6 +3726,7 @@ def submit_ferebus(pJID):
 
 def moveTemp2Train():
     global FILE_STRUCTURE
+    global POINTS_PER_ITERATION
 
     ts_size = get_ts_size()
 
@@ -3756,17 +3738,55 @@ def moveTemp2Train():
     gjfs = FileTools.increment_files(gjfs)
     wfns = FileTools.increment_files(wfns)
 
-    gjfs = FileTools.get_files_in(temp_dir, "*.gjf")
-    wfns = FileTools.get_files_in(temp_dir, "*.wfn")
-
     FileTools.cleanup_aimall_dir(temp_dir)
     int_directories = FileTools.get_files_in(temp_dir, "*_atomicfiles/")
+    int_directories = FileTools.increment_files(int_directories)
+
+    for int_directory in int_directories:
+        int_files = FileTools.get_files_in(int_directory, "*.int")
+        FileTools.increment_files(int_files)
     
+    true_values = []
+    points_to_move = Points(int_directories=int_directories)
+    for point in points_to_move:
+        e_iqa = 0.0
+        for atom, int_data in point.int.items():
+            e_iqa += int_data.IQA_terms["E_IQA(A)"]
+        true_values.append(e_iqa)
+    
+    with open("ErrorFile.csv", "r") as f:
+        data = f.readlines()
+
+    i = len(data) - POINTS_PER_ITERATION
+    j = 0
+    while i < len(data):
+        line = data[i]
+        line = line.split(",")
+        line[1] = (true_values[j] - line[1])**2
+        data[i] = ",".join(line) + "\n"
+        i += 1
+        j += 1
+
+    with open("ErrorFiles.csv", "w") as f:
+        f.writelines(data)
+    
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
+    aim_dir = FILE_STRUCTURE.get_file_path("ts_ints")
+
+    FileTools.move_files(temp_dir, gjf_dir, ".gjf")
+    FileTools.move_files(temp_dir, wfn_dir, ".wfn")
+
+    for int_directory in int_directories:
+        FileTools.move_file(int_directory, int_directory.replace(temp_dir, aim_dir))
+
+    # fin?
+
     """
         cleanup temp dir
         rename dirs + ints
         update ErrorFile
-        move firs + ints
+        move dirs + ints
     """
 
 
