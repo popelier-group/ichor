@@ -719,7 +719,7 @@ class GJF_file:
             self.add_keyword(keyword)
 
     def remove_connectivity(self):
-        for i, keyword in self.keywords:
+        for i, keyword in enumerate(self.keywords):
             if keyword == "geom=connectivity":
                 del self.keywords[i]
 
@@ -1187,7 +1187,7 @@ class Points:
 
     def __init__(self, gjfs=[], wfns=[], int_directories=[]):
         self.points = []
-        if gjf_files or wfn_files or int_directories:
+        if gjfs or wfns or int_directories:
             self.form_set(gjfs=gjfs, wfns=wfns, int_directories=int_directories)
 
     def add_point(self, gjf_file=None, wfn_file=None, int_directory=None):
@@ -2777,7 +2777,7 @@ def defineGlobals():
             DLPOLY_PRINT_EVERY = int(val)
 
         if key == "PRECALCULATE_AIMALL":
-            PRECALCULATE_AIMALL = bool(val)
+            PRECALCULATE_AIMALL = val.lower() in ['true', '1', 't', 'y', 'yes', 'yeah']
 
     # ALF checking
     if not ALF:
@@ -2869,7 +2869,7 @@ def createAimScript(dir, name="AIMSub.sh", files=None):
 
     aimsub.add_path("~/AIMALL")
 
-    wfns = FileTools.get_files_in(aimall_dir, "*.wfn")
+    wfns = FileTools.get_files_in(dir, "*.wfn")
 
     for i in range(len(wfns)):
         wfn = wfns[i]
@@ -3354,6 +3354,7 @@ def calculateErrors():
     global SYSTEM_NAME
     global POINTS_PER_ITERATION
     global MULTIPLE_ADDITION_MODE
+    global PRECALCULATE_AIMALL
 
     values_dictionary = calculatePredictions(calculate_variance=True, return_models=True, calculate_cv_errors=True,
                                              return_geometries=True)
@@ -3435,14 +3436,15 @@ def calculateErrors():
     sample_gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
     sample_gjfs = FileTools.get_files_in(sample_gjf_dir, "*.gjf", sorting="natural")
 
-    sample_wfn_dir = FILE_STRUCTURE.get_file_path("sp_wfn")
-    sample_wfns = FileTools.get_files_in(sample_wfn_dir, "*.wfn", sorting="natural")
+    if PRECALCULATE_AIMALL:
+        sample_wfn_dir = FILE_STRUCTURE.get_file_path("sp_wfn")
+        sample_wfns = FileTools.get_files_in(sample_wfn_dir, "*.wfn", sorting="natural")
 
-    sample_int_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
-    sample_ints = FileTools.get_files_in(sample_int_dir, "*_atomicfiles/", sorting="natural")
+        sample_int_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
+        sample_ints = FileTools.get_files_in(sample_int_dir, "*_atomicfiles/", sorting="natural")
 
-    sample_aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
-    sample_atom_directories = FileTools.get_directories(sample_aimall_dir)
+        sample_aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
+        sample_atom_directories = FileTools.get_directories(sample_aimall_dir)
 
     for i in range(len(MEPE)):
         index = MEPE[i][0]
@@ -3481,11 +3483,12 @@ def calculateErrors():
                 f.write("%s,%.16f,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), Etrue, cv_errors[index], variance[index],
                                                         alpha))
         else:
-            updateTempGJFs()
             with open("ErrorFile.csv", "a") as f:
                 f.write("%s,%s,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), predictions[index], cv_errors[index], variance[index],
                                                         alpha))
 
+        if not PRECALCULATE_AIMALL:
+            updateTempGJFs()
             with open("jid.txt", "w") as jid:
                 pJID = submit_gjfs(None)
                 jid.write("{}\n".format(pJID))
@@ -3735,16 +3738,16 @@ def moveTemp2Train():
     gjfs = FileTools.get_files_in(temp_dir, "*.gjf")
     wfns = FileTools.get_files_in(temp_dir, "*.wfn")
 
-    gjfs = FileTools.increment_files(gjfs)
-    wfns = FileTools.increment_files(wfns)
+    gjfs = FileTools.increment_files(gjfs, ts_size)
+    wfns = FileTools.increment_files(wfns, ts_size)
 
     FileTools.cleanup_aimall_dir(temp_dir)
     int_directories = FileTools.get_files_in(temp_dir, "*_atomicfiles/")
-    int_directories = FileTools.increment_files(int_directories)
+    int_directories = FileTools.increment_files(int_directories, ts_size)
 
     for int_directory in int_directories:
         int_files = FileTools.get_files_in(int_directory, "*.int")
-        FileTools.increment_files(int_files)
+        FileTools.increment_files(int_files, ts_size)
     
     true_values = []
     points_to_move = Points(int_directories=int_directories)
@@ -3757,12 +3760,12 @@ def moveTemp2Train():
     with open("ErrorFile.csv", "r") as f:
         data = f.readlines()
 
-    i = len(data) - POINTS_PER_ITERATION
+    i = max(len(data) - POINTS_PER_ITERATION, 1)
     j = 0
     while i < len(data):
         line = data[i]
         line = line.split(",")
-        line[1] = (true_values[j] - line[1])**2
+        line[1] = (true_values[j] - float(line[1])**2
         data[i] = ",".join(line) + "\n"
         i += 1
         j += 1
@@ -4267,6 +4270,7 @@ def test():
 if __name__ == "__main__":
     defineGlobals()
     readArguments()
+    set_ts_size()
 
     if len(glob("*.sh.*")) > 0:
         os.system("rm *.sh.*")
@@ -4276,8 +4280,6 @@ if __name__ == "__main__":
 
     if AUTO_SUBMISSION_MODE:
         autoRun(submit=False)
-
-    set_ts_size()
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                 "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels, "1_log": moveModelsToLog, "1_e" : editTrainingPoints,
