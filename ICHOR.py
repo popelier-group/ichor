@@ -117,8 +117,8 @@ SAMPLE_POINTS = []
 
 TRAINING_POINTS_TO_USE = None
 
-KERNEL = "rbf"
-FEREBUS_VERSION = "fortran"
+KERNEL = "rbf"                # only use rbf for now
+FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
 
 # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
 GAUSSIAN_CORE_COUNT = 2
@@ -127,17 +127,17 @@ FEREBUS_CORE_COUNT = 4
 DLPOLY_CORE_COUNT = 1
 
 # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
-DLPOLY_NUMBER_OF_STEPS=500 # Number of steps to run simulation for
-DLPOLY_TEMPERATURE = 0 # If set to 0, will perform geom opt but default to 10 K
-DLPOLY_PRINT_EVERY = 1 # Print trajectory and stats every n steps
-DLPOLY_TIMESTEP = 0.001 # in ps
+DLPOLY_NUMBER_OF_STEPS=500    # Number of steps to run simulation for
+DLPOLY_TEMPERATURE = 0        # If set to 0, will perform geom opt but default to 10 K
+DLPOLY_PRINT_EVERY = 1        # Print trajectory and stats every n steps
+DLPOLY_TIMESTEP = 0.001       # in ps
 
 MACHINE = "csf3"
 
 TRAINING_SET = None
 
 NORMALIZE = False
-PREDICTION_MODE = "ichor"
+PREDICTION_MODE = "george"    # ichor or george (recommend george)
 
 PRECALCULATE_AIMALL = True
 
@@ -1186,12 +1186,10 @@ class Point:
 class Points:
 
     def __init__(self, gjfs=[], wfns=[], int_directories=[], training_set=False):
+        self.training_set = training_set
         self.points = []
         if gjfs or wfns or int_directories:
-            if training_set:
-                self.form_training_set(gjfs=gjfs, wfns=wfns, int_directories=int_directories)
-            else:
-                self.form_set(gjfs=gjfs, wfns=wfns, int_directories=int_directories)
+            self.form_set(gjfs=gjfs, wfns=wfns, int_directories=int_directories)
 
     def add_point(self, gjf_file=None, wfn_file=None, int_directory=None):
         gjf_name = FileTools.get_base(gjf_file) if gjf_file else None
@@ -1395,16 +1393,16 @@ class Points:
     def write_gjfs(self):
         for point in self.points:
             point.gjf.write_gjf()
-   
-    def form_training_set(self, gjfs=[], wfns=[], int_directories=[]):
-        global TRAINING_POINTS_TO_USE
-        gjf_len = min(len(gjfs), TRAINING_POINTS_TO_USE)
-        wfn_len = min(len(wfns), TRAINING_POINTS_TO_USE)
-        aim_len = min(len(int_directories), TRAINING_POINTS_TO_USE)
-        self.form_set(gjfs=gjfs[:gjf_len], wfns=wfns[:wfn_len], int_directories=int_directories[:aim_len])
- 
+    
     def form_set(self, gjfs=[], wfns=[], int_directories=[]):
-        for gjf, wfn, int_directory in itertools.zip_longest(gjfs, wfns, tqdm(int_directories)):
+        global TRAINING_POINTS_TO_USE
+        if self.training_set:
+            gjf_len = min(len(gjfs), TRAINING_POINTS_TO_USE)
+            wfn_len = min(len(wfns), TRAINING_POINTS_TO_USE)
+            aim_len = min(len(int_directories), TRAINING_POINTS_TO_USE)
+        else:
+            gjf_len = wfn_len = aim_len = None
+        for gjf, wfn, int_directory in itertools.zip_longest(gjfs[:gjf_len], wfns[:wfn_len], tqdm(int_directories[:aim_len])):
             self.add_point(gjf_file=gjf, wfn_file=wfn, int_directory=int_directory)
     
     def to_csv(self, fname, multipoles=True, iqa=True):
@@ -1816,6 +1814,11 @@ class FileTools:
         tree.create_node("WFN", "sp_wfn", parent="sample_pool")
         tree.create_node("AIMALL", "sp_aimall", parent="sample_pool")
 
+        tree.create_node("TEST_SET", "test_set", parent="file_locs")
+        tree.create_node("GJF", "sp_gjf", parent="test_set")
+        tree.create_node("WFN", "sp_wfn", parent="test_set")
+        tree.create_node("AIMALL", "sp_aimall", parent="test_set")
+
         tree.create_node("DLPOLY", "dlpoly", parent="file_locs")
 
         tree.create_node("LOG", "log", parent="file_locs")
@@ -1959,22 +1962,6 @@ class FileTools:
                     FileTools.move_file(pathname, destination)
 
     @staticmethod
-    def move_directory(src, dst):
-        shutil.move(src, dst)
-
-    @staticmethod
-    def move_directories(src, dst, pattern):
-        pattern = pattern.replace("*", "")
-        d = src
-        directories = FileTools.get_directories(src)
-        for directory in directories:
-            if directory.endswith("/"):
-                directory = directory.rstrip("/")
-            d, name = os.path.split(directory)
-            if pattern in name:
-                FileTools.move_directory(directory, os.path.join(dst, name))
-
-    @staticmethod
     def get_num(f):
         if f.endswith("/"):
             f = f [:-1]
@@ -1983,18 +1970,16 @@ class FileTools:
         return int(num_str)
 
     @staticmethod
-    def increment_files(files, increment, move_files=True):
+    def increment_files(files, increment):
         for i, f in enumerate(files):
             try:
                 if f.endswith("/"):
                         f = f [:-1]
-                d = os.path.dirname(f)
                 fname = os.path.basename(f)
                 num_str = re.findall("\d+", fname)[0]
                 num = int(num_str) + increment
-                new_f = os.path.join(d, fname.replace(num_str, str(num).zfill(len(num_str))))
-                if move_files:
-                    FileTools.move_file(f, new_f)
+                new_f = fname.replace(num_str, str(num).zfill(len(num_str)))
+                FileTools.move_file(f, new_f)
                 files[i] = new_f
             except:
                 print("Cannot increment file: {}".format(f))
@@ -2047,7 +2032,7 @@ class FileTools:
         return os.path.split(fname)[1].split(".")[0].split("_")[0]
 
     @staticmethod
-    def cleanup_aimall_dir(aimall_dir, split_into_atoms=False, remove_wfns=True):
+    def cleanup_aimall_dir(aimall_dir, split_into_atoms=False):
         all_directories = FileTools.get_directories(aimall_dir)
 
         if split_into_atoms:
@@ -2091,8 +2076,7 @@ class FileTools:
         FileTools.remove_files(aimall_dir, ".mgpviz")
         FileTools.remove_files(aimall_dir, ".sum")
         FileTools.remove_files(aimall_dir, ".sumviz")
-        if remove_wfns:
-            FileTools.remove_files(aimall_dir, ".wfn")
+        FileTools.remove_files(aimall_dir, ".wfn")
         FileTools.remove_files(aimall_dir, ".log")
 
     @staticmethod
@@ -2815,7 +2799,10 @@ def defineGlobals():
                     print("\nCould not find a reference gjf to determine the ALF")
                     print("Please specify reference file or define explicitly")
         if alf_reference_file:
-            ALF = AtomicLocalFrame(alf_reference_file)
+            try:
+                ALF = AtomicLocalFrame(alf_reference_file)
+            except:
+                print("\nError in ALF calculation, please specify file to calculate ALF")
 
     if ALF:
         for i in range(len(ALF)):
@@ -2893,10 +2880,11 @@ def createAimScript(dir, name="AIMSub.sh", files=None):
 
     aimsub.add_path("~/AIMALL")
 
+    wfns = FileTools.get_files_in(dir, "*.wfn")
 
     for i in range(len(wfns)):
         wfn = wfns[i]
-        job = "%s/JOB%d.log" % (dir.rstrip("/"), i+1)
+        job = "%s/JOB%d.log" % (dir, i+1)
         aimsub.add_job(wfn, options=job)
 
     aimsub.write_script()
@@ -2955,7 +2943,7 @@ def submitTrainingGJFs():
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
 
-    training_set = Points(gjfs=gjfs, training_set=True)
+    training_set = Points(gjfs=gjfs)
 
     if FORMAT_GJFS:
         if BASIS_SET == "gen":
@@ -3169,7 +3157,7 @@ def submitSampleGJFs():
     global BASIS_SET
     global FORMAT_GJFS
 
-    gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
 
     sample_pool = Points(gjfs=gjfs)
@@ -3183,21 +3171,12 @@ def submitSampleGJFs():
 
     sample_pool.create_submission_script(type="gaussian", name="GaussSub.sh", submit=True, exit=False)
 
-    # gjf_directory = FILE_STRUCTURE.get_file_path("sp_gjf")
-    # createGaussScript(gjf_directory)
-
-    # if FORMAT_GJFS:
-    #     for gjf in FileTools.get_files_in(gjf_directory, "*.gjf", sorting="natural"):
-    #         formatGJF(gjf)
-
-    # CSFTools.submit_scipt("GaussSub.sh", exit=True)
-
 
 def submitSampleWFNs():
     submitWFNs(DirectoryLabel="sample_set")
 
 
-def getSampleAIMALLEnergies():
+def cleanupAIMALLDir():
     global FILE_STRUCTURE
     global IMPORTANT_FILES
 
@@ -3205,39 +3184,6 @@ def getSampleAIMALLEnergies():
     aimall_dir = FILE_STRUCTURE.get_file_path("sp_aimall")
 
     FileTools.cleanup_aimall_dir(aimall_dir, split_into_atoms=False)
-    atom_directories = FileTools.natural_sort(FileTools.get_atom_directories(aimall_dir))
-
-    quit()
-
-    atoms = []
-    int_data = []
-    for directory in atom_directories:
-        # Find out atom type
-        atom = str(directory.split("/")[-1])
-
-        # Read Data From Int Files
-        int_files = FileTools.get_files_in(directory, "*.int")
-        ints = []
-        for int_file in int_files:
-            ints.append(INT(int_file))
-
-        atoms.append(atom)
-        int_data.append(ints)
-
-    atoms = FileTools.natural_sort(atoms)
-
-    with open(IMPORTANT_FILES["sp_aimall_energies"], "w+") as f:
-        f.write("No.,%s,Total\n" % ",".join(atoms))
-        for i in range(len(int_data[0])):
-            num = re.findall("\d+", int_data[0][i].name)[0]
-            e_iqa_values = [0]*len(atoms)
-            total_e_iqa = 0.0
-            int_i: INT
-            for j in range(len(int_data)):
-                e_iqa = int_data[j][i].IQA_terms["E_IQA(A)"]
-                total_e_iqa += e_iqa
-                e_iqa_values[atoms.index(int_data[j][i].atom)] = e_iqa
-            f.write("%s,%s,%f\n" % (num, ",".join(map(str,e_iqa_values)), total_e_iqa))
 
 
 def normalize(l):
@@ -3369,7 +3315,6 @@ def calculateErrors():
     global POINTS_PER_ITERATION
     global MULTIPLE_ADDITION_MODE
     global PRECALCULATE_AIMALL
-    global TRAINING_POINTS_TO_USE
 
     values_dictionary = calculatePredictions(calculate_variance=True, return_models=True, calculate_cv_errors=True,
                                              return_geometries=True)
@@ -3439,13 +3384,12 @@ def calculateErrors():
         training_set_size = len(FileTools.get_files_in(training_gjf_dir, "*.gjf", sorting="none"))
     else:
         training_gjf_dir = FILE_STRUCTURE.get_file_path("temp")
-        FileTools.make_clean_directory(training_gjf_dir)
         training_set_size = 0
 
     log_dir = FILE_STRUCTURE.get_file_path("log")
     if first_iteration:
         FileTools.make_clean_directory(log_dir)
-    model_dir = "%s%s%s" % (log_dir, SYSTEM_NAME, str(TRAINING_POINTS_TO_USE).zfill(4))
+    model_dir = "%s%s%s" % (log_dir, SYSTEM_NAME, str(training_set_size).zfill(4))
     os.mkdir(model_dir)
     FileTools.copy_files(FILE_STRUCTURE.get_file_path("ts_models"), model_dir, ".txt")
 
@@ -3503,19 +3447,16 @@ def calculateErrors():
                 f.write("%s,%s,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), predictions[index], cv_errors[index], variance[index],
                                                         alpha))
 
-    if not PRECALCULATE_AIMALL:
-        updateTempGJFs()
-        if not AUTO_SUBMISSION_MODE:
+        if not PRECALCULATE_AIMALL:
+            updateTempGJFs()
             with open("jid.txt", "w") as jid:
                 pJID = submit_gjfs(None)
                 jid.write("{}\n".format(pJID))
-                pJID = submit_python(pJID, 1, 2)
-                jid.write("{}\n".format(pJID))
                 pJID = submit_wfns(pJID)
                 jid.write("{}\n".format(pJID))
-                pJID = submit_python(pJID, 1, 3)
+                pJID = submit_python(pJID, 1, 2)
                 jid.write("{}\n".format(pJID))
-        sys.exit(0)
+            sys.exit(0)
 
         print("")
 
@@ -3730,7 +3671,7 @@ def submit_python(pJID, iter, mode):
     return pJID
 
 
-def submit_ferebus(pJID, gjf_example):
+def submit_ferebus(pJID):
     fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
     training_set = Points()
     coords = FileTools.get_coordinates(gjf_example)
@@ -3744,16 +3685,6 @@ def submit_ferebus(pJID, gjf_example):
     pJID = CSFTools.submit_scipt(training_set.submission_script.name, hold_jid=pJID, return_jid=True)
     print("Submitted %s\t\tjid:%s" % (training_set.submission_script.name, pJID))
     return pJID
-
-
-def checkFunctional():
-    global FILE_STRUCTURE
-    global POTENTIAL
-
-    if POTENTIAL == "B3LYP":
-        wfn_dir = FILE_STRUCTURE.get_file_path("temp")
-        FileTools.add_functional(wfn_dir, POTENTIAL)
-
 
 
 def moveTemp2Train():
@@ -3770,7 +3701,7 @@ def moveTemp2Train():
     gjfs = FileTools.increment_files(gjfs, ts_size)
     wfns = FileTools.increment_files(wfns, ts_size)
 
-    FileTools.cleanup_aimall_dir(temp_dir, remove_wfns=False)
+    FileTools.cleanup_aimall_dir(temp_dir)
     int_directories = FileTools.get_files_in(temp_dir, "*_atomicfiles/")
     int_directories = FileTools.increment_files(int_directories, ts_size)
 
@@ -3785,7 +3716,7 @@ def moveTemp2Train():
         for atom, int_data in point.int.items():
             e_iqa += int_data.IQA_terms["E_IQA(A)"]
         true_values.append(e_iqa)
-
+    
     with open("ErrorFile.csv", "r") as f:
         data = f.readlines()
 
@@ -3793,29 +3724,24 @@ def moveTemp2Train():
     j = 0
     while i < len(data):
         line = data[i]
-        print(line)
         line = line.split(",")
-        line[1] = str((true_values[j] - float(line[1]))**2)
+        line[1] = "{.16f}".format((true_values[j] - float(line[1])**2)
         data[i] = ",".join(line) + "\n"
         i += 1
         j += 1
 
-    with open("ErrorFile.csv", "w") as f:
-        for line in data:
-            f.write(line.rstrip() + "\n")
+    with open("ErrorFiles.csv", "w") as f:
+        f.writelines(data)
     
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
-    aim_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+    aim_dir = FILE_STRUCTURE.get_file_path("ts_ints")
 
     FileTools.move_files(temp_dir, gjf_dir, ".gjf")
     FileTools.move_files(temp_dir, wfn_dir, ".wfn")
 
-    FileTools.move_directories(temp_dir, aim_dir, "_atomicfiles")
-    FileTools.remove_directory(temp_dir)
-
-    #for int_directory in int_directories:
-    #    FileTools.move_file(int_directory, int_directory.replace(temp_dir, aim_dir))
+    for int_directory in int_directories:
+        FileTools.move_file(int_directory, int_directory.replace(temp_dir, aim_dir))
 
     # fin?
 
@@ -3841,7 +3767,6 @@ def submit_gjfs(pJID):
 
     createGaussScript(temp_dir, files=gjf_files)
     pJID = CSFTools.submit_scipt("GaussSub.sh", return_jid=True, hold_jid=pJID)
-    print("Submitted %s\t\tjid:%s" % ("GaussSub.sh", pJID))
     return pJID
 
 
@@ -3859,7 +3784,6 @@ def submit_wfns(pJID):
     
     createAimScript(temp_dir, files=wfn_files)
     pJID = CSFTools.submit_scipt("AIMSub.sh", return_jid=True, hold_jid=pJID)
-    print("Submitted %s\t\tjid:%s" % ("AIMSub.sh", pJID))
     return pJID
 
 
@@ -3879,7 +3803,7 @@ def autoRun(submit=True):
                 pJID = submit_python(pJID, i, 0)
                 jid.write("%s\n" % pJID)
                 
-                pJID = submit_ferebus(pJID, gjf_example)
+                pJID = submit_ferebus(pJID)
                 jid.write("%s\n" % pJID)
                 
                 pJID = submit_python(pJID, i, 1)
@@ -3888,11 +3812,9 @@ def autoRun(submit=True):
                 if not PRECALCULATE_AIMALL:
                     pJID = submit_gjfs(pJID)
                     jid.write("%s\n" % pJID)
-                    pJID = submit_python(pJID, i, 2)
-                    jid.write("%s\n" % pJID)
                     pJID = submit_wfns(pJID)
                     jid.write("%s\n" % pJID)
-                    pJID = submit_python(pJID, i, 3)
+                    pJID = submit_python(pJID, i, 2)
                     jid.write("%s\n" % pJID)
     else:
         if STEP == 0:
@@ -3901,8 +3823,6 @@ def autoRun(submit=True):
             moveIQAModels()
             calculateErrors()
         elif STEP == 2:
-            checkFunctional()
-        elif STEP == 3:
             moveTemp2Train()
 
 
@@ -4323,8 +4243,8 @@ if __name__ == "__main__":
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                 "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels, "1_log": moveModelsToLog, "1_e" : editTrainingPoints,
-               "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
-               "3": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
+               "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": cleanupAIMALLDir,
+               "4": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
                "s_1": s_curves, "s_2": recovery_error_menu, "s_format": makeFormattedFiles,
@@ -4342,7 +4262,8 @@ if __name__ == "__main__":
         print("")
         print("[1] Training Set")
         print("[2] Sample Pool")
-        print("[3] Calculate Errors")
+        print("[3] Test Set")
+        print("[4] Calculate Errors")
         print("")
         print("[a] Auto Run")
         print("")
@@ -4399,6 +4320,29 @@ if __name__ == "__main__":
                 print("[3] Cleanup AIMALL Directory")
                 print("")
                 print("Current Sample Pool Size: %d" % get_sp_size())
+                print("")
+                print("[b] Go back")
+                print("[0] Exit")
+                num += "_" + input()
+                if "b" in num.lower():
+                    break
+                elif num == "2_0":
+                    sys.exit()
+                else:
+                    options[num]()
+                    num = "2"
+        elif num == "3":
+            while True:
+                print("")
+                print("####################")
+                print("# 2. Test Set Menu #")
+                print("####################")
+                print("")
+                print("[1] Submit GJFs to Gaussian")
+                print("[2] Submit WFNs to AIMALL")
+                print("[3] Cleanup AIMALL Directory")
+                print("")
+                print("Current Test Set Size: %d" % get_test_size())
                 print("")
                 print("[b] Go back")
                 print("[0] Exit")
