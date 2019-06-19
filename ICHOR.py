@@ -1862,7 +1862,7 @@ class FileTools:
         coordinates = []
         with open(fname, "r") as f:
             for line in f:
-                if re.match("\s*\w+(\s+[+-]?\d+.\d+){3}", line):
+                if re.match("\s*\w+\s+([+-]?\d+.\d+([Ee]?[+-]?\d+)?\s*){3}", line):
                     coordinates.append(line)
                 elif coordinates:
                     break
@@ -1883,7 +1883,7 @@ class FileTools:
     def get_last_coordinates(fname):
         coordinates = []
         for line in reversed(list(open(fname))):
-            if re.match("\s*\w+(\s+[+-]?\d+.\d+){3}\s*", line):
+            if re.match("\s*\w+\s+([+-]?\d+.\d+([Ee]?[+-]?\d+)?\s*){3}", line):
                 coordinates.append(line)
             elif coordinates:
                 break
@@ -1962,6 +1962,22 @@ class FileTools:
                     FileTools.move_file(pathname, destination)
 
     @staticmethod
+    def move_directory(src, dst):
+        shutil.move(src, dst)
+        
+    @staticmethod
+    def move_directories(src, dst, pattern):
+        pattern = pattern.replace("*", "")
+        d = src
+        directories = FileTools.get_directories(src)
+        for directory in directories:
+            if directory.endswith("/"):
+                directory = directory.rstrip("/")
+            d, name = os.path.split(directory)
+            if pattern in name:
+                FileTools.move_directory(directory, os.path.join(dst, name))
+    
+    @staticmethod
     def get_num(f):
         if f.endswith("/"):
             f = f [:-1]
@@ -1970,16 +1986,18 @@ class FileTools:
         return int(num_str)
 
     @staticmethod
-    def increment_files(files, increment):
+    def increment_files(files, increment, move_files=True):
         for i, f in enumerate(files):
             try:
                 if f.endswith("/"):
                         f = f [:-1]
+                d = os.path.dirname(f)
                 fname = os.path.basename(f)
                 num_str = re.findall("\d+", fname)[0]
                 num = int(num_str) + increment
-                new_f = fname.replace(num_str, str(num).zfill(len(num_str)))
-                FileTools.move_file(f, new_f)
+                new_f = os.path.join(d, fname.replace(num_str, str(num).zfill(len(num_str))))
+                if move_files:
+                    FileTools.move_file(f, new_f)
                 files[i] = new_f
             except:
                 print("Cannot increment file: {}".format(f))
@@ -2032,7 +2050,7 @@ class FileTools:
         return os.path.split(fname)[1].split(".")[0].split("_")[0]
 
     @staticmethod
-    def cleanup_aimall_dir(aimall_dir, split_into_atoms=False):
+    def cleanup_aimall_dir(aimall_dir, split_into_atoms=False, remove_wfns=True):
         all_directories = FileTools.get_directories(aimall_dir)
 
         if split_into_atoms:
@@ -2076,7 +2094,8 @@ class FileTools:
         FileTools.remove_files(aimall_dir, ".mgpviz")
         FileTools.remove_files(aimall_dir, ".sum")
         FileTools.remove_files(aimall_dir, ".sumviz")
-        FileTools.remove_files(aimall_dir, ".wfn")
+        if remove_wfns:
+            FileTools.remove_files(aimall_dir, ".wfn")
         FileTools.remove_files(aimall_dir, ".log")
 
     @staticmethod
@@ -2774,6 +2793,8 @@ def defineGlobals():
             AIMALL_CORE_COUNT = int(val)
         if key == "FEREBUS_CORE_COUNT":
             FEREBUS_CORE_COUNT = int(val)
+        if key == "DLPOLY_CORE_COUNT":
+            DLPOLY_CORE_COUNT = int(val)
 
         if key == "DLPOLY_NUMBER_OF_STEPS":
             DLPOLY_NUMBER_OF_STEPS = int(val)
@@ -2880,11 +2901,11 @@ def createAimScript(dir, name="AIMSub.sh", files=None):
 
     aimsub.add_path("~/AIMALL")
 
-    wfns = FileTools.get_files_in(dir, "*.wfn")
+    # wfns = FileTools.get_files_in(dir, "*.wfn")
 
     for i in range(len(wfns)):
         wfn = wfns[i]
-        job = "%s/JOB%d.log" % (dir, i+1)
+        job = "%s/JOB%d.log" % (dir.rstrip("/"), i+1)
         aimsub.add_job(wfn, options=job)
 
     aimsub.write_script()
@@ -2943,7 +2964,7 @@ def submitTrainingGJFs():
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
 
-    training_set = Points(gjfs=gjfs)
+    training_set = Points(gjfs=gjfs, training_set=True)
 
     if FORMAT_GJFS:
         if BASIS_SET == "gen":
@@ -3157,7 +3178,7 @@ def submitSampleGJFs():
     global BASIS_SET
     global FORMAT_GJFS
 
-    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
     gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
 
     sample_pool = Points(gjfs=gjfs)
@@ -3176,7 +3197,7 @@ def submitSampleWFNs():
     submitWFNs(DirectoryLabel="sample_set")
 
 
-def cleanupAIMALLDir():
+def getSampleAIMALLEnergies():
     global FILE_STRUCTURE
     global IMPORTANT_FILES
 
@@ -3315,6 +3336,7 @@ def calculateErrors():
     global POINTS_PER_ITERATION
     global MULTIPLE_ADDITION_MODE
     global PRECALCULATE_AIMALL
+    global TRAINING_POINTS_TO_USE
 
     values_dictionary = calculatePredictions(calculate_variance=True, return_models=True, calculate_cv_errors=True,
                                              return_geometries=True)
@@ -3384,12 +3406,13 @@ def calculateErrors():
         training_set_size = len(FileTools.get_files_in(training_gjf_dir, "*.gjf", sorting="none"))
     else:
         training_gjf_dir = FILE_STRUCTURE.get_file_path("temp")
+        FileTools.make_clean_directory(training_gjf_dir)
         training_set_size = 0
 
     log_dir = FILE_STRUCTURE.get_file_path("log")
     if first_iteration:
         FileTools.make_clean_directory(log_dir)
-    model_dir = "%s%s%s" % (log_dir, SYSTEM_NAME, str(training_set_size).zfill(4))
+    model_dir = "%s%s%s" % (log_dir, SYSTEM_NAME, str(TRAINING_POINTS_TO_USE).zfill(4))
     os.mkdir(model_dir)
     FileTools.copy_files(FILE_STRUCTURE.get_file_path("ts_models"), model_dir, ".txt")
 
@@ -3447,8 +3470,9 @@ def calculateErrors():
                 f.write("%s,%s,%.16f,%.16f,%.16f\n" % (str(index+1).zfill(4), predictions[index], cv_errors[index], variance[index],
                                                         alpha))
 
-        if not PRECALCULATE_AIMALL:
-            updateTempGJFs()
+    if not PRECALCULATE_AIMALL:
+        updateTempGJFs()
+        if not AUTO_SUBMISSION_MODE:
             with open("jid.txt", "w") as jid:
                 pJID = submit_gjfs(None)
                 jid.write("{}\n".format(pJID))
@@ -3456,9 +3480,9 @@ def calculateErrors():
                 jid.write("{}\n".format(pJID))
                 pJID = submit_python(pJID, 1, 2)
                 jid.write("{}\n".format(pJID))
-            sys.exit(0)
+        sys.exit(0)
 
-        print("")
+    print("")
 
 
 def updateTempGJFs():
@@ -3541,6 +3565,7 @@ def edit_DLPOLY():
 
 def run_DLPOLY_on_LOG():
     global FILE_STRUCTURE
+    global DLPOLY_CORE_COUNT
 
     dlpoly_base_dir = FILE_STRUCTURE.get_file_path("dlpoly")
     FileTools.make_clean_directory(dlpoly_base_dir)
@@ -3554,7 +3579,7 @@ def run_DLPOLY_on_LOG():
 
     atoms = UsefulTools.get_atoms()
 
-    dlpolysub = SubmissionScript("DLPOLYsub.sh", type="dlpoly")
+    dlpolysub = SubmissionScript("DLPOLYsub.sh", type="dlpoly", cores=DLPOLY_CORE_COUNT)
 
     if MACHINE == "csf2":
         dlpolysub.add_module("compilers/gcc/6.3.0")
@@ -3671,7 +3696,7 @@ def submit_python(pJID, iter, mode):
     return pJID
 
 
-def submit_ferebus(pJID):
+def submit_ferebus(pJID, gjf_example):
     fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
     training_set = Points()
     coords = FileTools.get_coordinates(gjf_example)
@@ -3685,6 +3710,14 @@ def submit_ferebus(pJID):
     pJID = CSFTools.submit_scipt(training_set.submission_script.name, hold_jid=pJID, return_jid=True)
     print("Submitted %s\t\tjid:%s" % (training_set.submission_script.name, pJID))
     return pJID
+
+
+def checkFunctional():
+    global FILE_STRUCTURE
+    global POTENTIAL
+    if POTENTIAL == "B3LYP":
+        wfn_dir = FILE_STRUCTURE.get_file_path("temp")
+        FileTools.add_functional(wfn_dir, POTENTIAL)
 
 
 def moveTemp2Train():
@@ -3701,7 +3734,7 @@ def moveTemp2Train():
     gjfs = FileTools.increment_files(gjfs, ts_size)
     wfns = FileTools.increment_files(wfns, ts_size)
 
-    FileTools.cleanup_aimall_dir(temp_dir)
+    FileTools.cleanup_aimall_dir(temp_dir, remove_wfns=False)
     int_directories = FileTools.get_files_in(temp_dir, "*_atomicfiles/")
     int_directories = FileTools.increment_files(int_directories, ts_size)
 
@@ -3725,32 +3758,24 @@ def moveTemp2Train():
     while i < len(data):
         line = data[i]
         line = line.split(",")
-        line[1] = "{.16f}".format((true_values[j] - float(line[1])**2)
+        line[1] = str((true_values[j] - float(line[1]))**2)
         data[i] = ",".join(line) + "\n"
         i += 1
         j += 1
 
-    with open("ErrorFiles.csv", "w") as f:
-        f.writelines(data)
+    with open("ErrorFile.csv", "w") as f:
+        for line in data:
+            f.write(line.rstrip() + "\n")
     
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     wfn_dir = FILE_STRUCTURE.get_file_path("ts_wfn")
-    aim_dir = FILE_STRUCTURE.get_file_path("ts_ints")
+    aim_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
 
     FileTools.move_files(temp_dir, gjf_dir, ".gjf")
     FileTools.move_files(temp_dir, wfn_dir, ".wfn")
+    FileTools.move_directories(temp_dir, aim_dir, "_atomicfiles")
 
-    for int_directory in int_directories:
-        FileTools.move_file(int_directory, int_directory.replace(temp_dir, aim_dir))
-
-    # fin?
-
-    """
-        cleanup temp dir
-        rename dirs + ints
-        update ErrorFile
-        move dirs + ints
-    """
+    FileTools.remove_directory(temp_dir)
 
 
 def submit_gjfs(pJID):
@@ -3767,6 +3792,7 @@ def submit_gjfs(pJID):
 
     createGaussScript(temp_dir, files=gjf_files)
     pJID = CSFTools.submit_scipt("GaussSub.sh", return_jid=True, hold_jid=pJID)
+    print("Submitted %s\t\tjid:%s" % ("GaussSub.sh", pJID))
     return pJID
 
 
@@ -3784,6 +3810,7 @@ def submit_wfns(pJID):
     
     createAimScript(temp_dir, files=wfn_files)
     pJID = CSFTools.submit_scipt("AIMSub.sh", return_jid=True, hold_jid=pJID)
+    print("Submitted %s\t\tjid:%s" % ("AIMSub.sh", pJID))
     return pJID
 
 
@@ -3803,7 +3830,7 @@ def autoRun(submit=True):
                 pJID = submit_python(pJID, i, 0)
                 jid.write("%s\n" % pJID)
                 
-                pJID = submit_ferebus(pJID)
+                pJID = submit_ferebus(pJID, gjf_example)
                 jid.write("%s\n" % pJID)
                 
                 pJID = submit_python(pJID, i, 1)
@@ -3812,9 +3839,11 @@ def autoRun(submit=True):
                 if not PRECALCULATE_AIMALL:
                     pJID = submit_gjfs(pJID)
                     jid.write("%s\n" % pJID)
+                    pJID = submit_python(pJID, i, 2)
+                    jid.write("%s\n" % pJID)
                     pJID = submit_wfns(pJID)
                     jid.write("%s\n" % pJID)
-                    pJID = submit_python(pJID, i, 2)
+                    pJID = submit_python(pJID, i, 3)
                     jid.write("%s\n" % pJID)
     else:
         if STEP == 0:
@@ -3823,6 +3852,8 @@ def autoRun(submit=True):
             moveIQAModels()
             calculateErrors()
         elif STEP == 2:
+            checkFunctional()
+        elif STEP == 3:
             moveTemp2Train()
 
 
@@ -4243,7 +4274,7 @@ if __name__ == "__main__":
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                 "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels, "1_log": moveModelsToLog, "1_e" : editTrainingPoints,
-               "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": cleanupAIMALLDir,
+               "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "4": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
                "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
