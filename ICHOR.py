@@ -3476,9 +3476,11 @@ def calculateErrors():
             with open("jid.txt", "w") as jid:
                 pJID = submit_gjfs(None)
                 jid.write("{}\n".format(pJID))
+                pJID = submit_python(pJID, 1, 2)
+                jid.write("{}\n".format(pJID))
                 pJID = submit_wfns(pJID)
                 jid.write("{}\n".format(pJID))
-                pJID = submit_python(pJID, 1, 2)
+                pJID = submit_python(pJID, 1, 3)
                 jid.write("{}\n".format(pJID))
         sys.exit(0)
 
