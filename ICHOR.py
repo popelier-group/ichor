@@ -1636,9 +1636,12 @@ class SubmissionScript:
         elif "py" in FEREBUS_VERSION:
             ferebus_modules = ["apps/anaconda3/5.2.0/bin"]
 
+        python_modules = ["apps/anaconda3/5.2.0/bin"]
+
         modules = {
             "gaussian": gaussian_modules,
-            "ferebus": ferebus_modules
+            "ferebus": ferebus_modules,
+            "python": python_modules
         }
 
         try:
