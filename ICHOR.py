@@ -107,6 +107,15 @@ BASIS_SET = "6-31+g(d,p)"
 
 ENCOMP = 3
 
+BOAQ = "gs30"
+IASMESH = "fine"
+
+BOAQ_VALUES = ["auto", "gs1", "gs2", "gs3", "gs4", "gs5", "gs6", "gs7", "gs8", "gs9", "gs10",
+                "gs15", "gs20", "gs25", "gs30", "gs35", "gs40", "gs45", "gs50", "gs55", "gs60",
+                "leb23", "leb25", "leb27", "leb29", "leb31", "leb32"]
+
+IASMESH_VALUES = ["sparse", "medium", "fine", "veryfine", "superfine"]
+
 EXIT = False
 
 FILE_STRUCTURE = []
@@ -1296,7 +1305,6 @@ class Points:
         predictions = []
         for atom, model in enumerate(t):
             t.set_description(model.type)
-            atom = atom % 3
             predictions.append(model.predict(x_values[atom]))
         
         return predictions
@@ -1316,10 +1324,7 @@ class Points:
             point_data = UsefulTools.natural_sorted_tuple(point_data, 0)
             int_data.append([getattr(data, attr)[int_data_key] for atom, data in point_data])
 
-        int_values = []
-        for i, _ in enumerate(int_data[0]):
-            val = [j[i] for j in int_data]
-            int_values.append(val)
+        int_values = list(map(list, zip(*int_data)))
         
         return int_values
 
@@ -1519,9 +1524,11 @@ class Job:
 
     def get_aimall_submission_string(self):
         global ENCOMP
+        global BOAQ
+        global IASMESH
         return "~/AIMAll/aimqb.ish " \
-               "-nogui -usetwoe=0 -atom=all -encomp=%d -boaq=gs30 -iasmesh=fine -nproc=2 " \
-               "%s >& %s\n" % (ENCOMP, self.job, " ".join(self.options))
+               "-nogui -usetwoe=0 -atom=all -encomp=%d -boaq=%s -iasmesh=%s -nproc=2 " \
+               "%s >& %s\n" % (ENCOMP, BOAQ, IASMESH, self.job, " ".join(self.options))
 
     def get_ferebus_submission_string(self):
         global FILE_STRUCTURE
@@ -2730,6 +2737,12 @@ def defineGlobals():
 
     global ENCOMP
 
+    global BOAQ
+    global IASMESH
+
+    global BOAQ_VALUES
+    global IASMESH_VALUES
+
     global KERNEL
     global FEREBUS_VERSION
 
@@ -2779,6 +2792,20 @@ def defineGlobals():
         
         if key == "ENCOMP":
             ENCOMP = int(val)
+        if key == "BOAQ":
+            if val.lower() not in BOAQ_VALUES:
+                print("Error: Unknown boaq setting, allowed settings:")
+                print(BOAQ_VALUES)
+                print("Setting boaq to: %s" % BOAQ)
+            else:
+                BOAQ = val.lower()
+        if key == "IASMESH":
+            if val.lower() not in IASMESH_VALUES:
+                print("Error: Unknown iasmesh setting, allowed settings:")
+                print(IASMESH_VALUES)
+                print("Setting iashmesh to: %s" % IASMESH)
+            else:
+                IASMESH = val.lower()
         
         if key == "KERNEL":
             KERNEL = val.lower()
@@ -3416,7 +3443,8 @@ def calculateErrors():
     if first_iteration:
         FileTools.make_clean_directory(log_dir)
     model_dir = "%s%s%s" % (log_dir, SYSTEM_NAME, str(TRAINING_POINTS_TO_USE).zfill(4))
-    os.mkdir(model_dir)
+    if not os.path.isdir(model_dir):
+        os.mkdir(model_dir)
     FileTools.copy_files(FILE_STRUCTURE.get_file_path("ts_models"), model_dir, ".txt")
 
     sample_gjf_dir = FILE_STRUCTURE.get_file_path("sp_gjf")
@@ -4040,6 +4068,40 @@ def Both_S_Curves(model_location):
     calculate_S_Curves(model_files)
 
 
+def choose_log_dir():
+    global FILE_STRUCTURE
+
+    d = None
+
+    log_dirs = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("log"), "*/")
+
+    while True:
+        print("")
+        print("Choose File From Log Directory:")
+        print("")
+        for i, log_dir in enumerate(log_dirs):
+            print("[%d] %s" % (i+1, log_dir))
+        print("")
+        print("[c] Cancel")
+        print("[0] Exit")
+        print("")
+        opt = input("Select Directory: ")
+
+        if opt == "0":
+            sys.exit(0)
+        elif opt.lower() == "c":
+            break
+        else:
+            try:
+                d = log_dirs[int(opt)-1]
+                break
+            except:
+                print("Unknown Input: {}".format(opt))
+
+    return d
+
+
+
 def s_curves():
     global FILE_STRUCTURE
 
@@ -4073,6 +4135,31 @@ def s_curves():
             MPole_S_Curves(current_model)
         elif ans == "3":
             Both_S_Curves(current_model)
+        elif ans.lower() == "model":
+            while True:
+                print("")
+                print("Choose Model Location:")
+                print("")
+                print("[current] Use Current Training Model")
+                print("[log]     Choose Model File From Log")
+                print("")
+                print("[b] Back to Main")
+                print("[0] Exit")
+
+                model_ans = input("Enter Action:")
+
+                if model_ans == "b":
+                    break
+                elif model_ans == "0":
+                    sys.exit(0)
+                elif model_ans.lower() == "current":
+                    current_model = FILE_STRUCTURE.get_file_path("ts_models")
+                    break
+                elif model_ans.lower() == "log":
+                    choose_model = choose_log_dir()
+                    if choose_model:
+                        current_model = choose_model
+                        break
 
 
 def recovery_errors(wfn_dir="", aimall_dir=""):
