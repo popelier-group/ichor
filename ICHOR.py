@@ -107,7 +107,7 @@ BASIS_SET = "6-31+g(d,p)"
 
 ENCOMP = 3
 
-BOAQ = "gs30"
+BOAQ = "gs20"
 IASMESH = "fine"
 
 BOAQ_VALUES = ["auto", "gs1", "gs2", "gs3", "gs4", "gs5", "gs6", "gs7", "gs8", "gs9", "gs10",
