@@ -27,7 +27,7 @@
   #############################################################################################################
 
   Author:  Matthew Burn
-  Version: 0.2
+  Version: 0.3
 
   ICHOR Design Principles:
   -- All within one script, this is up for debate however this script currently requires high portabilty and therefore
@@ -1519,8 +1519,16 @@ class Job:
             return self.get_default_submission_string()
 
     def get_gaussian_submission_string(self):
-        return "export PREFERRED_SCDIR=/scratch\n" \
-               "$g09root/g09/g09 %s %s\n" % (self.job, " ".join(self.options))
+        if "csf" in MACHINE.lower():
+            gauss_string = "export PREFERRED_SCDIR=~/scratch\n" \
+                            "$g09root/g09/g09 %s %s\n" % (self.job, " ".join(self.options))
+        elif "ffluxlab" in MACHINE.lower():
+            gauss_string = "export PREFERRED_SCDIR=~/scratch\n" \
+                            "~/g09/rg09 %s %s\n" % (self.job, " ".join(self.options))
+        else:
+            print("Cannot find location of Gaussian")
+            quit()
+        return gauss_string
 
     def get_aimall_submission_string(self):
         global ENCOMP
@@ -1664,9 +1672,12 @@ class SubmissionScript:
         return options_string
 
     def get_modules_string(self):
+        global MACHINE
+
         modules_string = ""
-        for module in self.modules:
-            modules_string += "module load %s\n" % module
+        if "csf" in MACHINE.lower():
+            for module in self.modules:
+                modules_string += "module load %s\n" % module
         return modules_string
 
     def add_job_string(self, job_num, jobid):
@@ -2308,8 +2319,8 @@ class DLPOLYsetup:
         self.temperature = float(DLPOLY_TEMPERATURE)
         self.print_every = DLPOLY_PRINT_EVERY
 
-        if not self.directory.endswith("/"):
-            self.directory += "/"
+        # if not self.directory.endswith("/"):
+        #     self.directory += "/"
 
         if write_setup_files:
             self.writeCONTROL()
@@ -2320,7 +2331,7 @@ class DLPOLYsetup:
         global SYSTEM_NAME
         global KERNEL
 
-        with open(self.directory + "CONTROL", "w+") as o:
+        with open(os.path.join(self.directory, "CONTROL"), "w+") as o:
             o.write("Title: %s\n" % SYSTEM_NAME)
             o.write("# This is a generic CONTROL file. Please adjust to your requirement.\n")
             o.write("# Directives which are commented are some useful options.\n\n")
@@ -2367,7 +2378,7 @@ class DLPOLYsetup:
         global SYSTEM_NAME
         global ALF
 
-        with open(self.directory + "KRIGING.txt", "w+") as o:
+        with open(os.path.join(self.directory, "KRIGING.txt"), "w+") as o:
             o.write("%s\t\t#prefix of model file names for the considered system\n" % SYSTEM_NAME)
             o.write("%d\t\t#number of atoms in the kriged system\n" % len(self.atoms))
             o.write("3\t\t#number of moments (first 3 are to be IQA energy components xc slf src)\n")
@@ -2393,7 +2404,7 @@ class DLPOLYsetup:
                        "RB": 85.4678,
                        "SR": 87.62, "Y": 88.90584, "ZR": 91.224, "NB": 92.90637, "MO": 95.95}
 
-        with open(self.directory + "FIELD", "w+") as o:
+        with open(os.path.join(self.directory, "FIELD"), "w+") as o:
             o.write("DL_FIELD v3.00\nUnits internal\nMolecular types 1\n")
             o.write("Molecule name %s\n" % SYSTEM_NAME)
             o.write("nummols 1\n")
@@ -2405,7 +2416,7 @@ class DLPOLYsetup:
     def write_gjf_to_config(self, gjf_fname):
         coordinates = FileTools.get_coordinates(gjf_fname)
 
-        config_fname = self.directory + "CONFIG"
+        config_fname = os.path.join(self.directory, "CONFIG")
 
         with open(config_fname, "w+") as f:
             f.write("dlp config file converted from gjf\n")
@@ -3596,6 +3607,39 @@ def edit_DLPOLY():
                 print("%s is not a valid option" % ans)
 
 
+def setup_DLPOLY():
+    atoms = UsefulTools.get_atoms()
+    training_points = get_ts_size()
+
+    # print("Enter directory name for DLPOLY setup: (default = 'DLPOLY_SETUP')")
+    dlpoly_working_dir = input("Enter directory name for DLPOLY setup: (default = 'DLPOLY_SETUP')")
+    if not dlpoly_working_dir:
+        dlpoly_working_dir = "DLPOLY_SETUP"
+    dlpoly_working_model_dir = os.path.join(dlpoly_working_dir, "model_krig")
+    if os.path.isdir(dlpoly_working_dir):
+        print()
+        print(dlpoly_working_dir + " exists.")
+        ans = input("Would you like to empty this directory? [Y/N]")
+        if ans.lower() in ["y", "yes"]:
+            shutil.rmtree(dlpoly_working_dir)
+    
+    if not os.path.isdir(dlpoly_working_dir):
+        os.mkdir(dlpoly_working_dir)
+    if not os.path.isdir(dlpoly_working_model_dir):
+        os.mkdir(dlpoly_working_model_dir)
+
+    dlpoly = DLPOLYsetup("DLPOLY_SETUP", atoms, training_points)
+
+    dlpolysub = SubmissionScript("DLPOLYsub.sh", type="dlpoly", cores=DLPOLY_CORE_COUNT)
+    if MACHINE == "csf2":
+        dlpolysub.add_module("compilers/gcc/6.3.0")
+    elif MACHINE == "csf3":
+        dlpolysub.add_module("compilers/gcc/8.2.0")
+
+    dlpolysub.add_job(dlpoly_working_dir)
+    dlpolysub.write_script()
+
+
 def run_DLPOLY_on_LOG():
     global FILE_STRUCTURE
     global DLPOLY_CORE_COUNT
@@ -3672,7 +3716,7 @@ def submit_DLPOLY_to_gaussian():
 
         # e.g DLPOLY/WATER0006/TRAJECTORY.xyz >> DLPOLY/GJF/WATER0006.gjf
         gjf_fname = dlpoly_gjf_dir + model_name + ".gjf"
-        gjf = formatGJF(gjf_fname, coordinates=coordinates)
+        formatGJF(gjf_fname, coordinates=coordinates)
 
     createGaussScript(dlpoly_gjf_dir, name="DLPOLYGaussSub.sh")
 
@@ -4369,7 +4413,7 @@ if __name__ == "__main__":
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "4": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
-               "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY,
+               "dlpoly_wfn": get_DLPOLY_WFN_energies, "dlpoly_edit": edit_DLPOLY, "dlpoly_s": setup_DLPOLY,
                "s_1": s_curves, "s_2": recovery_error_menu, "s_format": makeFormattedFiles,
                "t_opt": geometry_optimise, "t_setup": setup_directories, "t_csv": write_to_csv}
 
@@ -4488,6 +4532,7 @@ if __name__ == "__main__":
                 print("[2] Run DLPOLY using current MODELs")
                 print("")
                 print("[g] Calculate Gaussian Energies of DLPOLY run")
+                print("[s] Setup DLPOLY Files")
                 print("")
                 print("[wfn] Get All WFN Energies")
                 print("[edit] Edit DLPOLY Settings")
