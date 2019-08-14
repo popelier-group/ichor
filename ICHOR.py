@@ -52,6 +52,7 @@ from subprocess import Popen
 from datetime import date
 from datetime import datetime
 from typing import List, Any, Union
+import platform
 
 import numpy as np
 from numpy import linalg as la
@@ -89,14 +90,14 @@ import tqdm as tq
 DEFAULT_CONFIG_FILE = "config.properties"
 CONFIG = None
 
-SYSTEM_NAME = "WATER"
+SYSTEM_NAME = "SYSTEM"
 ALF = []
 
 AUTO_SUBMISSION_MODE = False
 MAX_ITERATION = 1
 POINTS_PER_ITERATION = 1
 
-MULTIPLE_ADDITION_MODE = "multiple"
+MULTIPLE_ADDITION_MODE = "manifold"
 
 ITERATION = 0
 STEP = 0
@@ -973,6 +974,10 @@ class MODEL:
                     break
 
                 line_i += 1
+            
+            for i, theta in enumerate(self.theta_values):
+                if theta == 0:
+                    self.theta_values[i] = 1e-25
 
             self.inv_R = self.inv_R.reshape(self.nTrain, self.nTrain)
             self.training_data = self.training_data.reshape(self.nTrain, self.nFeats)
@@ -1567,8 +1572,9 @@ class Job:
 
 class SubmissionScript:
 
-    def __init__(self, name, cores=1, type=None):
-        self.name = self.check_name(name)
+    def __init__(self, fname, cores=1, type=None, name=None):
+        self.fname = self.check_name(fname)
+        self.name = name
         self.type = type.lower()
 
         self.cores = cores
@@ -1683,9 +1689,11 @@ class SubmissionScript:
     def write_script(self):
         self.load_modules()
         self.set_default_cores()
-        with open(self.name, "w+") as f:
+        with open(self.fname, "w+") as f:
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
+            if self.name:
+                f.write("#$ -N %s\n" % self.name)
             f.write(self.get_cores_string())
             f.write(self.get_options_string())
             if len(self.jobs) > 1:
@@ -1852,14 +1860,12 @@ class FileTools:
 
     @staticmethod
     def get_files_in(d, filetype, sorting="normal"):
-        if not d.endswith("/"):
-            d += "/"
         if sorting == "normal":
-            return sorted(glob(d + filetype))
+            return sorted(glob(os.path.join(d, filetype)))
         elif sorting == "natural":
-            return FileTools.natural_sort(glob(d + filetype))
+            return FileTools.natural_sort(glob(os.path.join(d, filetype)))
         else:
-            return glob(d + filetype)
+            return glob(os.path.join(d, filetype))
 
     @staticmethod
     def natural_sort(l):
@@ -2721,122 +2727,96 @@ def calcFeats(alf, coordinates):
 
 
 def defineGlobals():
-    global FILE_STRUCTURE
-    global IMPORTANT_FILES
-    global CONFIG
-
-    global SYSTEM_NAME
+    global tqdm
     global ALF
-    global MAX_ITERATION
-    global POINTS_PER_ITERATION
-
-    global MULTIPLE_ADDITION_MODE
-
-    global POTENTIAL
-    global BASIS_SET
-
-    global ENCOMP
-
-    global BOAQ
-    global IASMESH
-
-    global BOAQ_VALUES
-    global IASMESH_VALUES
-
-    global KERNEL
-    global FEREBUS_VERSION
-
-    global GAUSSIAN_CORE_COUNT
-    global AIMALL_CORE_COUNT
-    global FEREBUS_CORE_COUNT
-
-    global DLPOLY_NUMBER_OF_STEPS
-    global DLPOLY_TIMESTEP
-    global DLPOLY_TEMPERATURE
-    global DLPOLY_PRINT_EVERY
-
-    global PREDICTION_MODE
-    global NORMALIZE
-
-    global PRECALCULATE_AIMALL
+    global MACHINE
+    global FILE_STRUCTURE
+    global DEFAULT_CONFIG_FILE
+    global AUTO_SUBMISSION_MODE
 
     FILE_STRUCTURE = FileTools.setup_file_structure()
-    IMPORTANT_FILES = FileTools.setup_important_files()
+
+    if AUTO_SUBMISSION_MODE:
+        from tqdm import tqdm_notebook as tqdm
+
+    machine_name = platform.node()
+    if "csf3." in machine_name:
+        MACHINE = "csf3"
+    elif "csf2." in machine_name:
+        MACHINE = "csf2"
+    elif "ffluxlab" in machine_name:
+        MACHINE = "ffluxlab"
+    else:
+        MACHINE = "local"
+
+    check_settings = {
+                      "BOAQ": "BOAQ_VALUES",
+                      "IASMESH": "IASMESH_VALUES"
+                     }
+
+    default_settings = {}
+    
+    for setting in check_settings.keys():
+        default_settings[setting] = globals()[setting]
+
+    def to_lower(s):
+        return s.lower()
+    
+    def to_upper(s):
+        return s.upper()
+
+    def check_bool(val):
+        return val in ['true', '1', 't', 'y', 'yes', 'yeah']
+
+    def print_globals():
+        for key, val in globals().items():
+            if type(globals()[key]) in data_types.keys() and not key.startswith("_"):
+                print("{:32}: {:16} ({})".format(key, str(val), type(val)))
 
     alf_reference_file = None
 
     # config reading
-    config = ConfigProvider()
+    config = ConfigProvider(source=DEFAULT_CONFIG_FILE)
     CONFIG = config
 
+    data_types = {
+                  int: int, 
+                  str: to_lower, 
+                  list: ast.literal_eval, 
+                  bool: check_bool
+                 }
+
+    local_values = {}
     for key, val in config.items():
-        if key == "SYSTEM_NAME":
-            SYSTEM_NAME = val
+        if key.lower() in locals().keys():
+            if key.lower() == "alf_reference_file":
+                alf_reference_file = str(val)
+            continue
 
-        if key == "ALF":
-            ALF = ast.literal_eval(val)
-        if key == "ALF_REFERENCE_FILE":
-            alf_reference_file = val
+        if not key in globals().keys():
+            print("Unknown setting found in config: " + key)
+        elif type(globals()[key]) in data_types.keys() and not key.startswith("_"):
+            globals()[key] = data_types[type(globals()[key])](val)
 
-        if key == "POINTS_PER_ITERATION":
-            POINTS_PER_ITERATION = int(val)
-        if key == "MAX_ITERATION":
-            MAX_ITERATION = int(val)
-        if key == "MULTIPLE_ADDITION_MODE":
-            MULTIPLE_ADDITION_MODE = val
+    for key, val in locals().items():
+        if key in local_values.keys():
+            print(key)
+            locals()[key] = local_values[key]
+    
+    for setting, allowed_values in check_settings.items():
+        if globals()[setting] not in globals()[allowed_values]:
+            print("Error: Unknown " + setting + " setting")
+            print("Allowed settings:")
+            print(globals()[allowed_values])
+            print("Setting " + setting + " to: %s" % default_settings[setting])
+            globals()[setting] = default_settings[setting]
 
-        if key == "POTENTIAL":
-            POTENTIAL = val.upper()
-        if key == "BASIS_SET":
-            BASIS_SET = val
-        
-        if key == "ENCOMP":
-            ENCOMP = int(val)
-        if key == "BOAQ":
-            if val.lower() not in BOAQ_VALUES:
-                print("Error: Unknown boaq setting, allowed settings:")
-                print(BOAQ_VALUES)
-                print("Setting boaq to: %s" % BOAQ)
-            else:
-                BOAQ = val.lower()
-        if key == "IASMESH":
-            if val.lower() not in IASMESH_VALUES:
-                print("Error: Unknown iasmesh setting, allowed settings:")
-                print(IASMESH_VALUES)
-                print("Setting iashmesh to: %s" % IASMESH)
-            else:
-                IASMESH = val.lower()
-        
-        if key == "KERNEL":
-            KERNEL = val.lower()
-        if key == "FEREBUS_VERSION":
-            FEREBUS_VERSION = val.lower()
+    modify_settings = {
+                       "SYSTEM_NAME": to_upper
+                      }
 
-        if key == "PREDICTION_MODE":
-            PREDICTION_MODE = val.lower()
-        if key == "NORMALIZE":
-            NORMALIZE = bool(val)
-
-        if key == "GAUSSIAN_CORE_COUNT":
-            GAUSSIAN_CORE_COUNT = int(val)
-        if key == "AIMALL_CORE_COUNT":
-            AIMALL_CORE_COUNT = int(val)
-        if key == "FEREBUS_CORE_COUNT":
-            FEREBUS_CORE_COUNT = int(val)
-        if key == "DLPOLY_CORE_COUNT":
-            DLPOLY_CORE_COUNT = int(val)
-
-        if key == "DLPOLY_NUMBER_OF_STEPS":
-            DLPOLY_NUMBER_OF_STEPS = int(val)
-        if key == "DLPOLY_TIMESTEP":
-            DLPOLY_TIMESTEP = float(val)
-        if key == "DLPOLY_TEMPERATURE":
-            DLPOLY_TEMPERATURE = int(val)
-        if key == "DLPOLY_PRINT_EVERY":
-            DLPOLY_PRINT_EVERY = int(val)
-
-        if key == "PRECALCULATE_AIMALL":
-            PRECALCULATE_AIMALL = val.lower() in ['true', '1', 't', 'y', 'yes', 'yeah']
+    for setting, modification in modify_settings.items():
+        globals()[setting] = modification(globals()[setting])
 
     # ALF checking
     if not ALF:
@@ -2870,6 +2850,7 @@ def readArguments():
     global AUTO_SUBMISSION_MODE
     global ITERATION
     global STEP
+    global DEFAULT_CONFIG_FILE
 
     parser = ArgumentParser(description="ICHOR: A kriging training suite")
 
@@ -2881,9 +2862,15 @@ def readArguments():
 
     parser.add_argument("-s", "--step", dest="step", type=int, metavar='N',
                         help="Current ICHOR step during Auto Submission Mode")
+    
+    parser.add_argument("-c", "--config", dest="config_file", type=str,
+                        help="Name of Config File for ICHOR")
 
     args = parser.parse_args()
     argsdict = vars(args)
+
+    if argsdict['config_file']:
+        DEFAULT_CONFIG_FILE = str(argsdict['config_file'])
 
     if argsdict['auto_sub']:
         AUTO_SUBMISSION_MODE = True
@@ -3672,7 +3659,7 @@ def submit_DLPOLY_to_gaussian():
 
         # e.g DLPOLY/WATER0006/TRAJECTORY.xyz >> DLPOLY/GJF/WATER0006.gjf
         gjf_fname = dlpoly_gjf_dir + model_name + ".gjf"
-        gjf = formatGJF(gjf_fname, coordinates=coordinates)
+        formatGJF(gjf_fname, coordinates=coordinates)
 
     createGaussScript(dlpoly_gjf_dir, name="DLPOLYGaussSub.sh")
 
@@ -4101,7 +4088,6 @@ def choose_log_dir():
     return d
 
 
-
 def s_curves():
     global FILE_STRUCTURE
 
@@ -4197,6 +4183,7 @@ def training_recovery_errors():
     aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
 
     recovery_errors(wfn_dir=wfn_dir, aimall_dir=aimall_dir)
+
 
 def sample_recovery_errors():
     global FILE_STRUCTURE
@@ -4306,13 +4293,16 @@ def write_to_csv():
         s.to_csv(csv)
         print("Wrote Set To <ATOM>_%s" % csv)
 
+
 def get_ts_size():
     global FILE_STRUCTURE
     return len(FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf"))
 
+
 def set_ts_size():
     global TRAINING_POINTS_TO_USE
     TRAINING_POINTS_TO_USE = get_ts_size()
+
 
 def editTrainingPoints():
     global TRAINING_POINTS_TO_USE
@@ -4340,6 +4330,7 @@ def get_sp_size():
     global FILE_STRUCTURE
     return len(FileTools.get_files_in(FILE_STRUCTURE.get_file_path("sp_gjf"), "*.gjf"))
 
+
 def test():
     global FILE_STRUCTURE
 
@@ -4351,8 +4342,8 @@ def test():
     ts.to_csv("ts.csv")
 
 if __name__ == "__main__":
-    defineGlobals()
     readArguments()
+    defineGlobals()
     set_ts_size()
 
     if len(glob("*.sh.*")) > 0:
