@@ -142,7 +142,7 @@ DLPOLY_TEMPERATURE = 0        # If set to 0, will perform geom opt but default t
 DLPOLY_PRINT_EVERY = 1        # Print trajectory and stats every n steps
 DLPOLY_TIMESTEP = 0.001       # in ps
 
-MACHINE = "csf3"
+MACHINE = ""
 
 TRAINING_SET = None
 
@@ -733,7 +733,31 @@ class GJF_file:
             if keyword == "geom=connectivity":
                 del self.keywords[i]
 
+    @property
+    def default_startup_options(self):
+        global GAUSSIAN_CORE_COUNT
+        return ["%nproc={}".format(GAUSSIAN_CORE_COUNT), "%mem=1GB"]
+
+    def check_keywords(self):
+        known_keywords = ["nosymm", "p", "opt", "output=wfn"]
+        for i, keyword in enumerate(self.keywords):
+            if keyword.lower() in known_keywords:
+                self.keywords[i] = keyword.lower()
+            else:
+                del self.keywords[i]
+
+    def format(self):
+        self.check_keywords()
+
+        self.title = self.fname.replace(".gjf", "")
+        self.keywords = list(set(self.keywords + ["output=wfn"]))
+        self.potential = self.potential.upper()
+        self.basis_set = self.basis_set.lower()
+        self.startup_options=self.default_startup_options
+        self.output_wfn_fname = self.fname.replace(".gjf", ".wfn")
+
     def write_gjf(self):
+        self.format()
         with open(self.fname, "w") as f:
             for startup_option in self.startup_options:
                 f.write("%s\n" % startup_option)
@@ -1352,7 +1376,6 @@ class Points:
                 self.submission_script.add_job(job.fname, options=job.output)
 
         self.submission_script.write_script()
-
         if submit:
             CSFTools.submit_scipt(self.submission_script.name, exit=exit, sync=sync)
     
@@ -1528,8 +1551,7 @@ class Job:
             gauss_string = "export PREFERRED_SCDIR=~/scratch\n" \
                             "$g09root/g09/g09 %s %s\n" % (self.job, " ".join(self.options))
         elif "ffluxlab" in MACHINE.lower():
-            gauss_string = "export PREFERRED_SCDIR=~/scratch\n" \
-                            "~/g09/rg09 %s %s\n" % (self.job, " ".join(self.options))
+            gauss_string =  "~/g09/rg09 %s %s\n" % (self.job, " ".join(self.options))
         else:
             print("Cannot find location of Gaussian")
             quit()
@@ -1580,9 +1602,9 @@ class Job:
 
 class SubmissionScript:
 
-    def __init__(self, fname, cores=1, type=None, name=None):
-        self.fname = self.check_name(fname)
-        self.name = name
+    def __init__(self, fname, cores=1, type=None, label=None):
+        self.name = self.check_name(fname)
+        self.label = label 
         self.type = type.lower()
 
         self.cores = cores
@@ -1642,13 +1664,19 @@ class SubmissionScript:
         self.path = path
 
     def get_cores_string(self):
-        if self.cores == 1:
-            return ""
-        elif self.cores < 16:
-            return "#$ -pe smp.pe %d\n" % self.cores
+        global MACHINE
+        core_str = ""
+        if self.cores < 16:
+            if "csf" in MACHINE:
+                core_str = "#$ -pe smp.pe %d\n" % self.cores
+            elif "ffluxlab" in MACHINE:
+                core_str = "#$ -pe smp %d\n" % self.cores
+        return core_str
+        
 
     def load_modules(self):
         global FEREBUS_VERSION
+        global MACHINE
 
         gaussian_modules = ["apps/binapps/gaussian/g09d01_em64t"]
 
@@ -1700,11 +1728,11 @@ class SubmissionScript:
     def write_script(self):
         self.load_modules()
         self.set_default_cores()
-        with open(self.fname, "w+") as f:
+        with open(self.name, "w+") as f:
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
-            if self.name:
-                f.write("#$ -N %s\n" % self.name)
+            if self.label:
+                f.write("#$ -N %s\n" % self.label)
             f.write(self.get_cores_string())
             f.write(self.get_options_string())
             if len(self.jobs) > 1:
@@ -2823,7 +2851,8 @@ def defineGlobals():
             globals()[setting] = default_settings[setting]
 
     modify_settings = {
-                       "SYSTEM_NAME": to_upper
+                       "SYSTEM_NAME": to_upper,
+                       "POTENTIAL": to_upper
                       }
 
     for setting, modification in modify_settings.items():
@@ -3098,10 +3127,74 @@ def makeTrainingSets():
     training_set.make_training_set()
 
     if not AUTO_SUBMISSION_MODE:
-        training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True, exit=False, sync=True)
-        moveIQAModels()
+        training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True, exit=True, sync=False)
+        # moveIQAModels()
     else:
         sys.exit(0)
+
+def auto_re_run():
+    global FILE_STRUCTURE
+    global AUTO_SUBMISSION_MODE
+    global FEREBUS_CORE_COUNT
+    global SYSTEM_NAME
+
+    global POINTS_PER_ITERATION
+    global TRAINING_POINTS_TO_USE
+    
+    natoms = len(UsefulTools.get_atoms())
+    nfeats = 3*natoms - 6
+
+    gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
+    aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+
+    if os.path.isdir("TRAINING_SET/LOG"):
+        shutil.rmtree("TRAINING_SET/LOG")
+    os.mkdir("TRAINING_SET/LOG")
+
+    while TRAINING_POINTS_TO_USE > 2*nfeats:
+        dir_name = "TRAINING_SET/LOG/" + SYSTEM_NAME + \
+                        str(TRAINING_POINTS_TO_USE).zfill(4)
+        os.mkdir(dir_name)
+        training_set = Points(gjfs=gjfs, int_directories=int_directories, training_set=True)
+        training_set.make_training_set(directory=dir_name)
+
+        training_set.create_submission_script(type="ferebus", name="FereSub.sh", submit=True, exit=False, sync=False)
+
+        TRAINING_POINTS_TO_USE -= POINTS_PER_ITERATION
+
+
+def auto_move():
+    global SYSTEM_NAME
+    global FILE_STRUCTURE
+
+    for ferebus_dir in sorted(glob("TRAINING_SET/LOG/*/")):
+        atom_directories = FileTools.get_atom_directories(ferebus_dir)
+
+        q00_files = []
+        for atom_directory in atom_directories:
+            if not atom_directory.endswith("/"):
+                atom_directory += "/"
+            q00_locs = FileTools.get_files_in(atom_directory, "*q00*.txt")
+            if len(q00_locs) == 1:
+                q00_files.append(q00_locs[0])
+
+        if len(q00_files) == len(atom_directories):
+            models_dir = ferebus_dir
+            # FileTools.make_clean_directory(models_dir)
+            for q00_file in q00_files:
+                q00_name = q00_file.split("/")[-1]
+                q00_num = q00_name.replace(".txt", "").split("_")[-1]
+                model_filename = "%s%s_kriging_IQA_%s.txt" % (models_dir, SYSTEM_NAME, q00_num)
+                FileTools.copy_file(q00_file, model_filename)
+                FileTools.remove_no_noise(model_filename)
+
+            for atom_directory in atom_directories:
+                shutil.rmtree(atom_directory)
+        else:
+            print(ferebus_dir)
+            print("Error: IQA Models not complete.")
+            exit(1)
+
 
 
 def makeMPoleTrainingSets():
@@ -4401,6 +4494,7 @@ if __name__ == "__main__":
 
     options = {"1_1": submitTrainingGJFs, "1_2": submitTrainingWFNs, "1_3": makeTrainingSets, "1_4": moveIQAModels,
                 "1_5": makeMPoleTrainingSets, "1_6": moveMPoleModels, "1_log": moveModelsToLog, "1_e" : editTrainingPoints,
+                "1_ar": auto_re_run, "1_am": auto_move,
                "2_1": submitSampleGJFs, "2_2": submitSampleWFNs, "2_3": getSampleAIMALLEnergies,
                "4": calculateErrors, "a": autoRun, "del":CSFTools.del_jobs,
                "dlpoly_1": run_DLPOLY_on_LOG, "dlpoly_g": submit_DLPOLY_to_gaussian,
@@ -4412,6 +4506,8 @@ if __name__ == "__main__":
         if len(glob("*.sh.*")) > 0:
             os.system("rm *.sh.*")
 
+        print("")
+        print("Running on %s" % MACHINE)
         print("")
         print("##############################")
         print("#          MAIN MENU         #")
@@ -4453,6 +4549,9 @@ if __name__ == "__main__":
                 print("")
                 print("[log] Move Models to Log")
                 print("[e]   Edit Number of Points To Use")
+                print("")
+                print("[ar]  Auto Re-Run")
+                print("[am]  Auto Move")
                 print("")
                 print("Current Training Set Size: %d" % TRAINING_POINTS_TO_USE)
                 print("")
