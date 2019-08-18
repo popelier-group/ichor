@@ -1295,6 +1295,9 @@ class Points:
         if not directory:
             global FILE_STRUCTURE
             fereb_dir = FILE_STRUCTURE.get_file_path("ts_ferebus")
+        else:
+            fereb_dir = directory
+
 
         for point in self.points:
             point.calculate_features()
@@ -1666,7 +1669,7 @@ class SubmissionScript:
     def get_cores_string(self):
         global MACHINE
         core_str = ""
-        if self.cores < 16:
+        if self.cores < 16 and self.cores > 1:
             if "csf" in MACHINE:
                 core_str = "#$ -pe smp.pe %d\n" % self.cores
             elif "ffluxlab" in MACHINE:
@@ -3146,6 +3149,9 @@ def auto_re_run():
 
     gjf_dir = FILE_STRUCTURE.get_file_path("ts_gjf")
     aimall_dir = FILE_STRUCTURE.get_file_path("ts_aimall")
+
+    gjfs = FileTools.get_files_in(gjf_dir, "*.gjf")
+    int_directories = FileTools.get_files_in(aimall_dir, "*_atomicfiles/")
 
     if os.path.isdir("TRAINING_SET/LOG"):
         shutil.rmtree("TRAINING_SET/LOG")
