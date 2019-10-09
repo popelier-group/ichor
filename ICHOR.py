@@ -1835,11 +1835,9 @@ class UsefulTools:
     
     @staticmethod
     def natural_sorted_tuple(data, i):
-        key = itemgetter(i)
-        """ Sort the given iterable in the way that humans expect."""
-        convert = lambda text: int(text) if text.isdigit() else text
-        alphanum_key = lambda item: [convert(c) for c in re.findall('([0-9]+)', key(item))[-1]]
-        return sorted(data, key = alphanum_key)
+        def naturalize(item):
+            return int(re.findall(r'(\w+?)(\d+)', item)[0][1])
+        return sorted(data, key=lambda tup: naturalize(tup[i]))
 
     @staticmethod
     def get_atoms(file=None):
