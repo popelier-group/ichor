@@ -2012,16 +2012,9 @@ class SGE_Jobs:
     def jids(self):
         return [str(job.jid) for job in self]
 
-    @staticmethod
-    def add_functional(wfn_location, functional):
-        wfns = FileTools.get_files_in(wfn_location, "*.wfn")
-        for wfn in wfns:
-            with open(wfn, "r") as f:
-                lines = f.readlines()
-            if functional.upper() not in lines[1].upper():
-                lines[1] =  "%s   %s\n" % (lines[1].strip(),functional)
-            with open(wfn, "w") as f:
-                f.writelines(lines)
+    @property
+    def names(self):
+        return [str(job.name) for job in self]
 
     def __contains__(self, j):
         return  str(j) in self.jids or str(j) in self.names
@@ -2411,11 +2404,9 @@ class Atoms:
     def empty(self):
         return len(self) == 0
 
-    FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
-    if POTENTIAL.upper() == "B3LYP":
-        FileTools.add_functional(wfn_dir, POTENTIAL)
-    FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")
-    checkWFNs(gjf_dir, wfn_dir)
+    def connect(self, iatom, jatom):
+        iatom.set_bond(jatom)
+        jatom.set_bond(iatom)
 
     @property
     @lru_cache()
@@ -3718,12 +3709,8 @@ class DlpolyTools:
 
         sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
 
-def checkFunctional():
-    global FILE_STRUCTURE
-    global POTENTIAL
-    if POTENTIAL.upper() == "B3LYP".upper():
-        wfn_dir = FILE_STRUCTURE.get_file_path("temp")
-        FileTools.add_functional(wfn_dir, POTENTIAL)
+        atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
+        atoms.finish()
 
         DlpolyTools.write_control(control_file)
         DlpolyTools.write_config(config_file, atoms)

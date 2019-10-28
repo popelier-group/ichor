@@ -2,3 +2,5 @@
 .vscode/
 .DS_Store
 Test/
+*.sh
+*.csv
