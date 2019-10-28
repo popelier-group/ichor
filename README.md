@@ -75,10 +75,45 @@ There are no required fields to run ICHOR, it is reccomended you set a `SYSTEM_N
 ### Menu
 ---
 ![Main-Menu](doc/img/main-menu.png?raw=true "Main Menu")
+
 ICHOR has a problem finder implemented that looks for potential problems when initialising the program. If the problem is expected and not out of the ordinary, an option to disbale displaying these problems will soon be added.
 
 Choosing an option is as simple as selecting the label and pressing enter, some options have sub menus which work in the same way.
 
-#### Training Set
+### Training Set
+---
 ![Training-Set-Menu](doc/img/training-set-menu.png?raw=true "Training Set Menu")
-The training set menu `[1]` is used to work with h
+
+The training set menu `[1]` is used to work with the training points for your model. To initialise the training set, create a `TRAINING_SET` directory and put the points you want to add to the training set as `.gjf` form in this directory.
+
+Once the GJFs are in the `TRAINING_SET` directory, option `[1]` will submit these GJFs to Gaussian to get `.wfn` files, option `[2]` will take these WFNs and submit them to AIMAll to get `.int` files, option `[3]` will take these INT files and create Gaussian Process Regression (GPR) models using FEREBUS. These models will be located in `FEREBUS/MODELS`.
+### Models
+![Model-Menu](doc/img/model-menu.png?raw=true "Model Menu")
+
+Option `[3]` of the training set menu brings you to a model menu. In this menu you can choose which output features you want to use to create your GPR models. Option `[1]` creates IQA models and option `[2]` creates a model for each of the 25 multipole moments used in DL FFLUX.
+### Sample Pool
+---
+![Sample-Set-Menu](doc/img/sample-pool-menu.png?raw=true "Sample pool Menu")
+
+The sample pool is used by adaptive sampling as a set of points to choose from to improve the training set. The sample pool menu functions in the same way as the training set menu without the option to form models from this set. To setup the sample pool, place your points in `.gjf` from into a directory with the name `SAMPLE_POOL`.
+### Adaptive Sampling
+---
+The main purpose of ICHOR is to make adaptive sampling of GOR models easy. It is possible to run adaptive sampling manually by repeating the steps:
+* `[1] [1]`
+    * Run Gaussian on Training GJFs
+* `[1] [2]`
+    * Run AIMAll on Training WFNs
+* `[1] [3] [1]`
+    * Make IQA GPR models
+* `[3]`
+    * Run Adaptive sampling using GPR models and sample pool then add best points to the training set
+
+* Repeat
+
+Alternatively, once you have placed the training set GJFs into the `TRAINING_SET` directory and the sample pool GJFs into the `SAMPLE_POOL` directory, simply using the option `[r]` will automate the adaptive sampling process.
+
+This Auto-Run is controlled using the two values `MAX_ITERATION` and `POINTS_PER_ITERATION` in the config file. `MAX_ITERATION` tells ICHOR how many times to repeat the adaptive sampling process and `POINTS_PER_ITERATION` tells ICHOR how many points to add from the sample pool to the training set each iteration.
+
+For example if I start off with 50 training points and add 10 `POINTS_PER_ITERATION` for 10 `MAX_ITERATION`, I will add 100 points (10x10) to my training set and end up with 150 training points.
+
+A log of all the models produced during the adaptive sampling run can be found in the `LOG` directory, each model will have its own directory under the naming convention of `LOG/SYSTEM_NAME####` where `SYSTEM_NAME` is the same as the `SYSTEM_NAME` specified in the config file and `####` is the number of training points in that model.
