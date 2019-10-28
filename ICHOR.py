@@ -1960,7 +1960,7 @@ class FileTools:
         for wfn in wfns:
             with open(wfn, "r") as f:
                 lines = f.readlines()
-            if functional not in lines[1]:
+            if functional.upper() not in lines[1].upper():
                 lines[1] =  "%s   %s\n" % (lines[1].strip(),functional)
             with open(wfn, "w") as f:
                 f.writelines(lines)
@@ -3077,7 +3077,7 @@ def submitWFNs(DirectoryLabel=None, DirectoryPath=None):
     FileTools.make_clean_directory(aimall_dir)
 
     FileTools.move_files(gjf_dir, wfn_dir, ".wfn")
-    if POTENTIAL == "B3LYP":
+    if POTENTIAL.upper() == "B3LYP":
         FileTools.add_functional(wfn_dir, POTENTIAL)
     FileTools.copy_files(wfn_dir, aimall_dir, ".wfn")
     checkWFNs(gjf_dir, wfn_dir)
@@ -3876,7 +3876,7 @@ def submit_ferebus(pJID, gjf_example):
 def checkFunctional():
     global FILE_STRUCTURE
     global POTENTIAL
-    if POTENTIAL == "B3LYP":
+    if POTENTIAL.upper() == "B3LYP".upper():
         wfn_dir = FILE_STRUCTURE.get_file_path("temp")
         FileTools.add_functional(wfn_dir, POTENTIAL)
 
