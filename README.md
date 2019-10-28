@@ -1,1 +1,72 @@
 # ICHOR
+ICHOR is a program written in python that makes training machine learning models, adaptive sampling and running DL_FFLUX as simple as the press of a button. The idea behind ICHOR is to abstract away the gritty details of running and linking between the programs you use while performing these tasks so if there are features you think are missing or problems that can be made simpler, don't hesitate to create an [issue](https://github.com/popelier-group/ICHOR/issues).
+## Getting Started
+---
+ICHOR has been designed to work on the CSF and FFLUXLAB, I am looking into adding support for local machines in the future but until then, only some features will work. To fully setup ICHOR, 5 applications are need to be setup:
+* Anaconda3 [link](https://www.anaconda.com/distribution/#download-section)
+* Gaussian  [link](https://gaussian.com/glossary/g09/)
+* AIMAll    [link](http://aim.tkgristmill.com/)
+* FEREBUS   [F90](https://github.com/popelier-group/FEREBUS) [Py](https://github.com/popelier-group/pyFEREBUS)
+* DL FFLUX  [source](https://github.com/popelier-group/DL_POLY)
+### Prerequisites
+#### CSF3
+CSF3 provides modules to load programs and set environment variables. ICHOR takes care of these modules when programs are running but the anaconda module is required to run ICHOR initially, this can be loaded using the following:
+```
+module load apps/anaconda3.5.2.0/bin
+```
+If you are a new user, to use Gaussian on the CSF, you are required to sign a form and submit to itservices, instructuctions on how to do this and a link to the paperwork can be found [here](http://ri.itservices.manchester.ac.uk/csf3/software/applications/gaussian/).
+#### FFLUXLAB
+I currently have modules for my user on ffluxlab which I intend to publish for all users once I am happy that they're stable and get the required permissions. Until then, you can download Anaconda3 using this [link](https://repo.anaconda.com/archive/Anaconda3-2019.10-Linux-x86_64.sh). For setting up the other necessary applications, ask [me](https://github.com/MattBurn) and I will help to get you started.
+#### All Machines
+Other than Anaconda and Gaussian, a copy of AIMAll, DL FFLUX and FEREBUS is required. AIMAll can be downloaded from [here](http://aim.tkgristmill.com/), again ask [me](https://github.com/MattBurn) about how to download and install AIMAll. AIMAll must be installed in your home directory `~/AIMAll`. Versions of FEREBUS, FEREBUS.py and DL FFLUX are included in the `PROGRAMS` directory in this repository. These binaries were compiled on CSF and so are only guaranteed to work there, for other machines/versions, you will be required to compile your own and place them in this directory under the same name.
+### Dependencies
+---
+Some programs used by ICHOR have additional dependencies which are listed below. When first downloading and copying these programs to your machine of choice, make sure that the binaries have running permisions by uising `chmod`, for example:
+```
+chmod 777 PROGRAMS/DLPOLY.Z
+```
+#### ICHOR
+ICHOR has been designed with as few dependencies as possible and the dependencies that are there should be available to most machines with anaconda. A list of the dependencies can be found at the top of ICHOR.py under the comment `# Required imports`.
+* numpy (required)
+* scipy (required)
+* tqdm (required)
+* paramiko (optional/experimental)
+#### FEREBUS
+To compile FEREBUS, an intel mpi compiler is required along with the ucx library and intel nag library. Changing where FEREBUS is compiled, the compiler and library versions may require changes of the `Makefile`. The specific compilers and libraries used to compile the verion in `PROGRAMS` are as follows:
+* Intel MPI Compiler 2018.3.022
+* Intel Fortran Compiler 2018.3.022
+* Intel NAG Fortran Mark 23
+* UCX 1.5.1
+#### FEREBUS.py
+FEREBUS.py is a reimplementation of FEREBUS in python (as the name suggests) the repository and documentation of which can be found [here](https://github.com/popelier-group/pyFEREBUS). This repository contains a detailed explanation of all the dependencies required to run FEREBUS.py.
+* george = 0.3.1
+* numpy = 1.16.3
+* pandas = 0.24.2
+* pybind11 = 2.2.4
+* python-dateutil = 2.8.0
+* pytz  = 2019.1
+* scikit-learn = 0.20.3
+* scipy = 1.2.1
+* six = 1.12.0
+#### DL FFLUX
+The version of DL FFLUX used by ICHOR is compiled using the gcc compiler. The specific version of which is not of great concern but the more recent the better. The version in the `PROGRAMS` directory was compiled with gcc 8.2.0.
+## Running ICHOR
+---
+Running ICHOR is as simple as running any python program:
+```
+python ICHOR.py
+```
+A list of command line options can be viewed by using the `-h` flag when running ICHOR. Global variables can be set and changed using a config file, by default this file is `config.properties` however this can be changed by setting the `-c` flag when running ICHOR. A full list of global variables can be found under the `Globals` comment at the top of the ICHOR script.
+### Example config.properties
+ICHOR can read [.properties](https://en.wikipedia.org/wiki/.properties) and [.yaml](https://en.wikipedia.org/wiki/YAML) filetypes, an example of a `config.properties` for water can be seen below:
+```
+SYSTEM_NAME=WATER
+MAX_ITERATION=15
+POINTS_PER_ITERATION=3
+
+ALF=[[1,2,3],[2,1,3],[3,1,2]]
+
+METHOD=B3LYP
+BASIS_SET=6-31+g(d,p)
+```
+There are no required fields to run ICHOR, it is reccomended you set a `SYSTEM_NAME` variable so that when looking through files, it is easy to see what system you're working with. A list of default values are the same as the values set at the top of the ICHOR script. As you can see, no quotes are required for strings, and to make a list (`ALF`), python syntax is used.
