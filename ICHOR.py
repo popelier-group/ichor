@@ -1568,8 +1568,8 @@ class SubmissionTools:
     
     ferebus_modules = {
                        "csf3": {
-                                "fortran": ["mpi/intel/17.0.2", 
-                                            "libs/intel/nag/fortran_mark23_intel", 
+                                "fortran": ["mpi/intel-17.0/openmpi/3.1.3", 
+                                            "libs/intel/nag/fortran_mark26_intel", 
                                             "apps/anaconda3/5.2.0/bin"],
                                 "python": ["apps/anaconda3/5.2.0/bin"]
                                },

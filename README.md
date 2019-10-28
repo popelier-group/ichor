@@ -1,5 +1,6 @@
 # ICHOR
 ICHOR is a program written in python that makes training machine learning models, adaptive sampling and running DL_FFLUX as simple as the press of a button. The idea behind ICHOR is to abstract away the gritty details of running and linking between the programs you use while performing these tasks so if there are features you think are missing or problems that can be made simpler, don't hesitate to create an [issue](https://github.com/popelier-group/ICHOR/issues).
+![ICHOR Diagram](doc/img/ICHOR-diagram.png?raw=true "ICHOR Diagram")
 ## Getting Started
 ---
 ICHOR has been designed to work on the CSF and FFLUXLAB, I am looking into adding support for local machines in the future but until then, only some features will work. To fully setup ICHOR, 5 applications are need to be setup:
@@ -58,6 +59,7 @@ python ICHOR.py
 ```
 A list of command line options can be viewed by using the `-h` flag when running ICHOR. Global variables can be set and changed using a config file, by default this file is `config.properties` however this can be changed by setting the `-c` flag when running ICHOR. A full list of global variables can be found under the `Globals` comment at the top of the ICHOR script.
 ### Example config.properties
+---
 ICHOR can read [.properties](https://en.wikipedia.org/wiki/.properties) and [.yaml](https://en.wikipedia.org/wiki/YAML) filetypes, an example of a `config.properties` for water can be seen below:
 ```
 SYSTEM_NAME=WATER
@@ -70,3 +72,13 @@ METHOD=B3LYP
 BASIS_SET=6-31+g(d,p)
 ```
 There are no required fields to run ICHOR, it is reccomended you set a `SYSTEM_NAME` variable so that when looking through files, it is easy to see what system you're working with. A list of default values are the same as the values set at the top of the ICHOR script. As you can see, no quotes are required for strings, and to make a list (`ALF`), python syntax is used.
+### Menu
+---
+![Main-Menu](doc/img/main-menu.png?raw=true "Main Menu")
+ICHOR has a problem finder implemented that looks for potential problems when initialising the program. If the problem is expected and not out of the ordinary, an option to disbale displaying these problems will soon be added.
+
+Choosing an option is as simple as selecting the label and pressing enter, some options have sub menus which work in the same way.
+
+#### Training Set
+![Training-Set-Menu](doc/img/training-set-menu.png?raw=true "Training Set Menu")
+The training set menu `[1]` is used to work with h
