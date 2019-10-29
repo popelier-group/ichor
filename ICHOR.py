@@ -36,10 +36,6 @@
   -- Functions are defined after Classes
   -- Main script is written beneath which calls functions when needed
   -- Main Menu is at the bottom, this should be easy to extend and is hopefully quite intuitive
-
-  TODOs:
-  -- Remake functionality of old ICHOR
-  -- Make a logging system
 """
 
 #############################################
