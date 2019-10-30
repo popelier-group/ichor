@@ -3895,6 +3895,8 @@ def defineGlobals():
 
         if not key in globals().keys():
             print("Unknown setting found in config: " + key)
+        elif key.lower() == "keywords":
+            globals()[key] = val.split()
         elif type(globals()[key]) in data_types.keys() and not key.startswith("_"):
             globals()[key] = data_types[type(globals()[key])](val)
 
