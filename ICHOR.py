@@ -637,6 +637,7 @@ class FileTools:
 
         tree.create_node("TRAINING_SET", "training_set", parent="file_locs")
         tree.create_node("SAMPLE_POOL", "sample_pool", parent="file_locs")
+        tree.create_node("VALIDATION_SET", "validation_set", parent="file_locs")
         tree.create_node("FEREBUS", "ferebus", parent="file_locs")
         tree.create_node("MODELS", "models", parent="ferebus")
         tree.create_node("LOG", "log", parent="file_locs")
@@ -847,6 +848,12 @@ class UsefulTools:
         return ichor_string
 
     @staticmethod
+    @property
+    def nTrain():
+        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
+        return FileTools.count_points_in(ts_dir)
+
+    @staticmethod
     def natural_sort(l): 
         convert = lambda text: int(text) if text.isdigit() else text.lower() 
         alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
@@ -856,6 +863,10 @@ class UsefulTools:
     def countDigits(n):
         import math
         return math.floor(math.log(n, 10)+1)
+
+    @staticmethod
+    def check_bool(val):
+        return val.lower() in ['true', '1', 't', 'y', 'yes', 'yeah']
 
     @staticmethod
     def print_grid(arr, cols=10, color=None):
@@ -2040,16 +2051,18 @@ class SGE_Jobs:
 
 class AutoTools:
     @staticmethod
-    def submit_ichor_gjfs(jid=None):
+    def submit_ichor_gjfs(jid=None, directory=None):
         global FILE_STRUCTURE
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
-        return AutoTools.submit_ichor("submit_gjfs", ts_dir, submit=True, hold=jid, return_jid=True)
+        if not directory:
+            directory = FILE_STRUCTURE.get_file_path("training_set")
+        return AutoTools.submit_ichor("submit_gjfs", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
-    def submit_ichor_wfns(jid=None):
+    def submit_ichor_wfns(jid=None, directory=None):
         global FILE_STRUCTURE
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
-        return AutoTools.submit_ichor("submit_wfns", ts_dir, submit=True, hold=jid, return_jid=True)
+        if not directory:
+            directory = FILE_STRUCTURE.get_file_path("training_set")
+        return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
     def submit_ichor_models(jid=None):
@@ -2101,6 +2114,16 @@ class AutoTools:
         ts_dir = FILE_STRUCTURE.get_file_path("training_set")
         gjf = Points(ts_dir, read_gjfs=True, first=True)[0]
         return SubmissionTools.make_ferebus_script(gjf.atoms.atoms, submit=True, hold=jid, return_jid=True)
+
+    @staticmethod
+    def submit_aimall(directory=None, jid=None):
+
+        npoints = UsefulTools.nTrain
+
+        jid = AutoTools.submit_ichor_gjfs(jid)
+        jid = AutoTools.submit_gjfs(jid, npoints)
+        jid = AutoTools.submit_ichor_wfns(jid)
+        AutoTools.submit_wfns(jid, npoints)
 
 #========================#
 #      Point Tools       #
@@ -3803,6 +3826,29 @@ class DlpolyTools:
         _, jid = AutoTools.submit_gjfs(jid, npoints=npoints, modify="dlpoly")
         AutoTools.submit_dlpoly_energies(jid)
 
+
+class SetupTools:
+    @staticmethod
+    def directories():
+        global FILE_STRUCTURE
+
+        directories_to_setup = [
+                                "training_set",
+                                "sample_pool",
+                                "validation_set"
+                               ]
+        
+        for directory in directories_to_setup:
+            dir_path = FILE_STRUCTURE.get_file_path(directory)
+            empty = False
+            if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
+                if os.path.isdir(directory):
+                    print()
+                    print(f"{dir_path} exists")
+                    empty = UsefulTools.check_bool(input(f"Would you like to empty {dir_path}? [Y/N]"))
+                FileTools.mkdir(dir_path, empty=empty)
+            print()
+            
 #############################################
 #            Function Definitions           #
 #############################################
@@ -4203,6 +4249,7 @@ def main_menu():
 
     ts_dir = FILE_STRUCTURE.get_file_path("training_set")
     sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
+    vs_dir = FILE_STRUCTURE.get_file_path("validation_set")
     models_dir = FILE_STRUCTURE.get_file_path("models")
 
     #=== Training Set Menu ===#
@@ -4210,13 +4257,25 @@ def main_menu():
     training_set_menu.add_option("1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": ts_dir})
     training_set_menu.add_option("2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": ts_dir}, wait=True)
     training_set_menu.add_option("3", "Make Models", make_models, kwargs={"directory": ts_dir})
+    training_set_menu.add_space()
+    training_set_menu.add_option("r", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": ts_dir})
     training_set_menu.add_final_options()
 
     #=== Sample Set Menu ===#
     sample_pool_menu = Menu(title="Sample Pool Menu")
     sample_pool_menu.add_option("1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": sp_dir})
     sample_pool_menu.add_option("2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": sp_dir})
+    sample_pool_menu.add_space()
+    sample_pool_menu.add_option("r", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": sp_dir})
     sample_pool_menu.add_final_options()
+
+    #=== Validation Set Menu ===#
+    validation_set_menu = Menu(title="Validation Set Menu")
+    validation_set_menu.add_option("1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": vs_dir})
+    validation_set_menu.add_option("2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": vs_dir})
+    validation_set_menu.add_space()
+    validation_set_menu.add_option("r", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": vs_dir})
+    validation_set_menu.add_final_options()
 
     #=== Analysis Menu ===#
     analysis_menu = Menu(title="Analysis Menu")
@@ -4226,7 +4285,7 @@ def main_menu():
 
     #=== Tools Menu ===#
     tools_menu = Menu(title="Tools Menu")
-
+    tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
     tools_menu.add_final_options()
 
     #=== Options Menu ===#
@@ -4244,7 +4303,8 @@ def main_menu():
     main_menu = Menu(title="ICHOR Main Menu", enable_problems=True, message=f"Running on {MACHINE}", auto_clear=True)
     main_menu.add_option("1", "Training Set", training_set_menu.run)
     main_menu.add_option("2", "Sample Pool", sample_pool_menu.run)
-    main_menu.add_option("3", "Calculate Errors", calculate_errors, kwargs={"models_directory": models_dir, 
+    main_menu.add_option("3", "Validation Set", validation_set_menu.run)
+    main_menu.add_option("4", "Calculate Errors", calculate_errors, kwargs={"models_directory": models_dir, 
                                                                             "sample_pool_directory": sp_dir}, wait=True)
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", auto_run)
