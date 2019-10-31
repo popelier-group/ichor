@@ -60,6 +60,7 @@ from glob import glob
 import itertools as it
 from getpass import getpass
 import multiprocessing as mp
+from functools import wraps
 from functools import lru_cache
 from argparse import ArgumentParser
 
@@ -248,7 +249,7 @@ class PATTERNS:
 
 class Menu(object):
     def __init__(self, options=None, title=None, message=None, prompt=">>",
-                 refresh=lambda: None, auto_clear=True, enable_problems=False):
+                 refresh=lambda *args: None, auto_clear=True, enable_problems=False, auto_close=False):
         if options is None:
             options = []
         self.options = None
@@ -260,9 +261,11 @@ class Menu(object):
         self.prompt = None
         self.is_open = None
         self.auto_clear = auto_clear
+        self.auto_close = auto_close
         self.problems_enabled = enable_problems
 
         self.gap_ids = []
+        self.message_ids = []
         self.wait_options = []
         self.close_options = []
         self.hidden_options = []
@@ -308,7 +311,18 @@ class Menu(object):
     def set_refresh(self, refresh):
         if not callable(refresh):
             raise TypeError(refresh, "refresh is not callable")
-        self.refresh = refresh 
+        self.refresh = refresh
+
+    def clear_options(self):
+        self.options = None
+
+        self.gap_ids = []
+        self.message_ids = []
+        self.wait_options = []
+        self.close_options = []
+        self.hidden_options = []
+
+        self.set_options([])
 
     def add_option(self, label, name, handler, kwargs={}, wait=False, auto_close=False, hidden=False):
         if not callable(handler):
@@ -327,21 +341,26 @@ class Menu(object):
         self.gap_ids.append(gap_id)
         self.options[gap_id] = ("", "", {})
 
+    def add_message(self, message, fmt={}):
+        from uuid import uuid4
+        message_id = uuid4()
+        self.message_ids.append(message_id)
+        self.options[message_id] = (message, fmt, {})
+
     # open the menu
     def run(self):
         self.is_open = True
         while self.is_open:
-            self.refresh()
+            self.refresh(self)
             func, wait, close = self.input()
             if func == Menu.CLOSE:
                 func = self.close
             print()
             func()
-            if close:
+            if close or self.auto_close:
                 self.close()
             input("\nContinue...") if wait else None
             
-
     def close(self):
         self.is_open = False
 
@@ -365,7 +384,6 @@ class Menu(object):
                       .replace("\n", "\n" + " " * (max_len + 2))) # fix indentation 
                 print()
 
-
     def add_final_options(self, space=True, back=True, exit=True):
         self.add_space() if space else None
         self.add_option("b", "Go Back", Menu.CLOSE) if back else None
@@ -385,7 +403,9 @@ class Menu(object):
             print()
         for label, option in self.options.items():
             if not label in self.gap_ids:
-                if not label in self.hidden_options:
+                if label in self.message_ids:
+                    print(option[0].format(**option[1]))
+                elif not label in self.hidden_options:
                     print("[" + label + "] " + option[0])
             else:
                 print()
@@ -848,7 +868,6 @@ class UsefulTools:
         return ichor_string
 
     @staticmethod
-    @property
     def nTrain():
         ts_dir = FILE_STRUCTURE.get_file_path("training_set")
         return FileTools.count_points_in(ts_dir)
@@ -926,6 +945,19 @@ class UsefulTools:
             _external_functions[name] = func
             return func
         return run_func
+
+    @staticmethod
+    def add_method(cls, name=None):
+        def decorator(func):
+            @wraps(func) 
+            def wrapper(self, *args, **kwargs): 
+                return func(*args, **kwargs)
+            if not name:
+                name = func.__name__
+            setattr(cls, name, wrapper)
+            # Note we are not binding func, but wrapper which accepts self but does exactly the same as func
+            return func # returning func means func can still be used normally
+        return decorator
 
     @staticmethod
     def get_widths(line, ignore_chars=[]):
@@ -2117,12 +2149,11 @@ class AutoTools:
 
     @staticmethod
     def submit_aimall(directory=None, jid=None):
+        npoints = FileTools.count_points_in(directory)
 
-        npoints = UsefulTools.nTrain
-
-        jid = AutoTools.submit_ichor_gjfs(jid)
-        jid = AutoTools.submit_gjfs(jid, npoints)
-        jid = AutoTools.submit_ichor_wfns(jid)
+        script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory)
+        script, jid = AutoTools.submit_gjfs(jid, npoints)
+        script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory)
         AutoTools.submit_wfns(jid, npoints)
 
 #========================#
@@ -3248,7 +3279,7 @@ class Models:
     def expected_improvement(self, points):
         global POINTS_PER_ITERATION
 
-        best_points = np.flip(np.argsort(self.calc_epe(points)))
+        best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
         points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
         self.write_data(points_to_add, points)
 
@@ -3827,6 +3858,144 @@ class DlpolyTools:
         AutoTools.submit_dlpoly_energies(jid)
 
 
+class S_CurveTools:
+    vs_loc = ""
+    sp_loc = ""
+
+    log_loc = ""
+    model_loc = ""
+
+    validation_set = ""
+    models = ""
+
+    @staticmethod
+    def get_dir():
+        ans = input("Enter Validation Set Directory: ")
+        if not os.path.isdir(ans):
+            print("Invalid Input")
+            print(f"{ans} is not a directory")
+            print()
+        else:
+            return ans
+
+    @staticmethod
+    def set_vs_dir(directory=None):
+        while not directory:
+            directory = S_CurveTools.get_dir()
+        S_CurveTools.validation_set = directory
+    
+    @staticmethod
+    def set_model_dir(directory=None):
+        while not directory:
+            directory = S_CurveTools.get_dir()
+        S_CurveTools.models = directory
+    
+    @staticmethod
+    def set_model_from_log():
+        global SYSTEM_NAME
+        log_menu = Menu(title = "Select Model From Log", auto_close=True)
+        for i, model in enumerate(FileTools.get_files_in(S_CurveTools.log_loc, "*/")):
+            log_menu.add_option(f"{i+1}", model, S_CurveTools.set_model_dir, kwargs={"directory": model})
+        log_menu.add_final_options(exit=False)
+        log_menu.run()
+
+    @staticmethod
+    def refresh_vs_menu(menu):
+        menu.clear_options()
+        menu.add_option("1", f"Validation Set ({S_CurveTools.vs_loc})", S_CurveTools.set_vs_dir, kwargs={"directory": S_CurveTools.vs_loc})
+        menu.add_option("2", f"Sample Pool ({S_CurveTools.sp_loc})", S_CurveTools.set_vs_dir, kwargs={"directory": S_CurveTools.sp_loc})
+        menu.add_option("3", "Custom Directory", S_CurveTools.set_vs_dir)
+        menu.add_space()
+        menu.add_message(f"Validation Set Location: {S_CurveTools.validation_set}")
+        menu.add_final_options(exit=False)
+    
+    @staticmethod
+    def refresh_model_menu(menu):
+        menu.clear_options()
+        menu.add_option("1", f"Current Model ({S_CurveTools.model_loc})", S_CurveTools.set_model_dir, kwargs={"directory": S_CurveTools.model_loc})
+        menu.add_option("2", f"Choose From LOG ({S_CurveTools.log_loc})", S_CurveTools.set_model_from_log)
+        menu.add_option("3", "Custom Directory", S_CurveTools.set_model_dir)
+        menu.add_space()
+        menu.add_message(f"Model Location: {S_CurveTools.models}")
+        menu.add_final_options(exit=False)
+    
+    @staticmethod
+    def refresh_s_curve_menu(menu):
+        vs_menu = Menu(title="Select Validation Set", auto_close=True)
+        vs_menu.set_refresh(S_CurveTools.refresh_vs_menu)
+
+        model_menu = Menu(title="Select Model Location", auto_close=True)
+        model_menu.set_refresh(S_CurveTools.refresh_model_menu)
+
+        menu.clear_options()
+        menu.add_option("1", "Calculate S-Curves", S_CurveTools.caluclate_s_curves)
+        menu.add_space()
+        menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
+        menu.add_option("model", "Select Model Location", model_menu.run)
+        menu.add_space()
+        menu.add_message(f"Validation Set Location: {S_CurveTools.validation_set}")
+        menu.add_message(f"Model Location: {S_CurveTools.models}")
+        menu.add_final_options()
+
+    @staticmethod
+    def caluclate_s_curves():
+        import pandas as pd
+
+        validation_set = Points(S_CurveTools.validation_set, read_gjfs=True, read_ints=True)
+        models = Models(S_CurveTools.models, read_models=True)
+
+        predictions = models.predict(validation_set, atoms=True)
+
+        atom_data = {}
+        for point, prediction in zip(validation_set, predictions):
+            true_values = [0] * len(point.atoms)
+            for atom, int_data in point.ints.items():
+                if not atom in atom_data.keys():
+                    atom_data[atom] = {"true": [], "predicted": [], "error": []}
+                true_value = int_data.eiqa
+                predicted_value = prediction[int_data.num-1]
+                error = (true_value - predicted_value)**2
+                
+                atom_data[atom]["true"].append(true_value)
+                atom_data[atom]["predicted"].append(predicted_value)
+                atom_data[atom]["error"].append(error)
+        
+        percentages = []
+        with pd.ExcelWriter("s_curves.xlsx", engine='xlsxwriter') as writer:
+            errors = {}
+            for atom, data in atom_data.items():
+                errors[atom] = data["error"]
+                df = pd.DataFrame(data)
+                if not percentages:
+                    percentages = [100*(i+1)/len(data["true"]) for i in range(len(data["true"]))]
+                df.sort_values(by="error", inplace=True)
+                df["%"] = percentages
+                df.to_excel(writer, sheet_name=atom)
+            df = pd.DataFrame(errors)
+            df.loc[:,'Total'] = df.sum(axis=1)
+            df.sort_values(by="Total", inplace=True)
+            df["%"] = percentages
+            df.to_excel(writer, sheet_name="Total")
+
+        
+
+    @staticmethod
+    def run():
+        S_CurveTools.vs_loc = FILE_STRUCTURE.get_file_path("validation_set")
+        S_CurveTools.sp_loc = FILE_STRUCTURE.get_file_path("sample_pool")
+
+        S_CurveTools.model_loc = FILE_STRUCTURE.get_file_path("models")
+        S_CurveTools.log_loc = FILE_STRUCTURE.get_file_path("log")
+
+        S_CurveTools.validation_set = S_CurveTools.vs_loc
+        S_CurveTools.models = S_CurveTools.model_loc
+
+        s_curves_menu = Menu(title="S-Curves Menu")
+        # setattr(s_curves_menu, "refresh", S_CurveTools.refresh_s_curve_menu)
+        s_curves_menu.set_refresh(S_CurveTools.refresh_s_curve_menu)
+        s_curves_menu.run()
+
+
 class SetupTools:
     @staticmethod
     def directories():
@@ -3842,9 +4011,9 @@ class SetupTools:
             dir_path = FILE_STRUCTURE.get_file_path(directory)
             empty = False
             if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
-                if os.path.isdir(directory):
+                if os.path.isdir(dir_path):
                     print()
-                    print(f"{dir_path} exists")
+                    print(f"Warning: {dir_path} exists")
                     empty = UsefulTools.check_bool(input(f"Would you like to empty {dir_path}? [Y/N]"))
                 FileTools.mkdir(dir_path, empty=empty)
             print()
@@ -4281,6 +4450,7 @@ def main_menu():
     analysis_menu = Menu(title="Analysis Menu")
     analysis_menu.add_option("dlpoly", "Test models with DLPOLY", dlpoly_analysis)
     analysis_menu.add_option("opt", "Perform Geometry Optimisation on First Point in Sample Pool", opt)
+    analysis_menu.add_option("s", "Create S-Curves", S_CurveTools.run)
     analysis_menu.add_final_options()
 
     #=== Tools Menu ===#
@@ -4323,10 +4493,6 @@ def main_menu():
 if __name__ == "__main__":
     readArguments()
     defineGlobals()
-
-    # logging.info("Started ICHOR")
-
-    # logging.info(_external_functions)
     
     if not _call_external_function is None:
         _call_external_function(*_call_external_function_args)
