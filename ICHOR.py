@@ -51,6 +51,7 @@ import ast
 import math
 import time
 import uuid
+import json
 import shutil
 import hashlib
 import logging
@@ -82,14 +83,14 @@ CONFIG = None
 SYSTEM_NAME = "SYSTEM"
 ALF = []
 
-AUTO_SUBMISSION_MODE = False
+# AUTO_SUBMISSION_MODE = False
 MAX_ITERATION = 1
 POINTS_PER_ITERATION = 1
 
-MULTIPLE_ADDITION_MODE = "manifold"
+# MULTIPLE_ADDITION_MODE = "manifold"
 
-ITERATION = 0
-STEP = 0
+# ITERATION = 0
+# STEP = 0
 
 FORMAT_GJFS = True
 METHOD = "B3LYP"
@@ -101,22 +102,15 @@ ENCOMP = 3
 BOAQ = "gs20"
 IASMESH = "fine"
 
-BOAQ_VALUES = ["auto", "gs1", "gs2", "gs3", "gs4", "gs5", "gs6", "gs7", "gs8",
-               "gs9", "gs10", "gs15", "gs20", "gs25", "gs30", "gs35", "gs40", 
-               "gs45", "gs50", "gs55", "gs60", "leb23", "leb25", "leb27", 
-               "leb29", "leb31", "leb32"]
-
-IASMESH_VALUES = ["sparse", "medium", "fine", "veryfine", "superfine"]
-
-EXIT = False
+# EXIT = False
 
 FILE_STRUCTURE = []
-IMPORTANT_FILES = {}
+# IMPORTANT_FILES = {}
 
-TRAINING_POINTS = []
-SAMPLE_POINTS = []
+# TRAINING_POINTS = []
+# SAMPLE_POINTS = []
 
-TRAINING_POINTS_TO_USE = None
+# TRAINING_POINTS_TO_USE = None
 
 KERNEL = "rbf"                # only use rbf for now
 FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
@@ -139,12 +133,7 @@ MACHINE = ""
 SGE = False
 SUBMITTED = False
 
-TRAINING_SET = None
-
-NORMALIZE = False
 PREDICTION_MODE = "george"    # ichor or george (recommend george)
-
-PRECALCULATE_AIMALL = True
 
 EXTERNAL_MACHINES = {
                         "csf3": "csf3.itservices.manchester.ac.uk",
@@ -162,7 +151,14 @@ SSH_SETTINGS = {
 #:::::::::::::::::::::::::::::::::::::::::::#
 #############################################
 
-GAUSSIAN_METHODS = ['AM1', 'PM3', 'PM3MM', 'PM6', 'PDDG', 'PM7', 'HF', 
+_BOAQ_VALUES = ["auto", "gs1", "gs2", "gs3", "gs4", "gs5", "gs6", "gs7", "gs8",
+               "gs9", "gs10", "gs15", "gs20", "gs25", "gs30", "gs35", "gs40", 
+               "gs45", "gs50", "gs55", "gs60", "leb23", "leb25", "leb27", 
+               "leb29", "leb31", "leb32"]
+
+_IASMESH_VALUES = ["sparse", "medium", "fine", "veryfine", "superfine"]
+
+_GAUSSIAN_METHODS = ['AM1', 'PM3', 'PM3MM', 'PM6', 'PDDG', 'PM7', 'HF', 
                     'CASSCF', 'MP2', 'MP3', 'MP4(SDQ)', 'MP4(SDQ,full)',
                     'MP4(SDTQ)', 'MP5', 'BD', 'CCD', 'CCSD', 'QCISD','BD(T)',
                     'CCSD(T)', 'QCISD(T)', 'BD(TQ)', 'CCSD(TQ)', 'QCISD(TQ)',
@@ -1204,6 +1200,10 @@ class Problem:
 
 class ProblemFinder:
 
+    # PROBLEMS To ADD:
+    # - Fix ALF problem
+    # - Add config setting checks to problems (unknown setting)
+
     def __init__(self):
         self.problems = []
 
@@ -1527,8 +1527,6 @@ class SubmissionScript:
             FileTools.mkdir(data_directory)
             data_file = os.path.join(data_directory, self.type)
             abs_data_file = os.path.abspath(data_file)
-
-            logging.debug(f"Writitng to {data_file}")
 
             with open(data_file, "w") as f:
                 for job in self.jobs:
@@ -2634,7 +2632,7 @@ class Point:
     def get_true_value(self, value_to_get, atoms=False):
         if value_to_get == "iqa":
             eiqa = 0 if not atoms else [0]*len(self.atoms)
-            for int_atom, int_data in self.ints.items():
+            for _, int_data in self.ints.items():
                 if not atoms:
                     eiqa += int_data.eiqa
                 else:
@@ -2765,11 +2763,11 @@ class GJF(Point):
         global METHOD
         global KEYWORDS
         global BASIS_SET
-        global GAUSSIAN_METHODS
+        global _GAUSSIAN_METHODS
         global GAUSSIAN_CORE_COUNT
         global DEFAULT_CONFIG_FILE
 
-        if UsefulTools.in_sensitive(METHOD, GAUSSIAN_METHODS):
+        if UsefulTools.in_sensitive(METHOD, _GAUSSIAN_METHODS):
             self.method = METHOD
         else:
             print("Error: Unknown method {METHOD}")
@@ -3018,7 +3016,7 @@ class Model:
         self.basename = ""
 
         self.system_name = ""
-        self.model_type = ""
+        self.type = ""
         self.atom_number = ""
 
         self.analyse_name()
@@ -3092,7 +3090,7 @@ class Model:
 
         fname_split = os.path.splitext(self.basename)[0].split("_")
         self.system_name = fname_split[0]
-        self.model_type = fname_split[2].lower()
+        self.type = fname_split[2].lower()
         self.atom_number = fname_split[3]
 
     def remove_no_noise(self):
@@ -3251,7 +3249,12 @@ class Models:
         return self[0].nTrain
 
     def get(self, type):
-        [model for model in self if model.model_type == type or type == "all"]
+        if type == "all":
+            return [model for model in self]
+        elif type == "multipoles":
+            return [model for model in self if re.match(r"q\d+(\w+)?", model.type)]
+        else:
+            return [model for model in self if model.type == type]
 
     def read(self):
         for model in self:
@@ -3267,12 +3270,14 @@ class Models:
     def predict(self, points, atoms=False, type="iqa"):
         predictions = []
         for point in points:
-            prediction = 0 if not atoms else [0]*len(self)
+            prediction = 0 if not atoms else {}
             for model in self.get(type):
                 if not atoms:
                     prediction += model.predict(point) 
                 else:
-                    prediction[model.num - 1] = model.predict(point)
+                    if not model.type in prediction.keys():
+                        prediction[model.type] = {}
+                    prediction[model.type][model.num] = model.predict(point)
             predictions.append(prediction)
         return np.array(predictions) if not atoms else predictions
     
@@ -3302,19 +3307,14 @@ class Models:
         alpha_loc = FILE_STRUCTURE.get_file_path("alpha")
         if not os.path.exists(alpha_loc):
             return 0.5
-        
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
 
         alpha = []
-
         with open(alpha_loc, "r") as f:
-            for line in f:
-                if not "," in line:
-                    if int(line) != FileTools.count_points_in(ts_dir):
-                        return 0.5
-                if "," in line:
-                    true_error, cv_error = tuple(line.split(","))
-                    alpha.append(0.99*min(0.5*(float(true_error)/float(cv_error)), 1))
+            data = json.load(f)
+            if data["npoints"] != UsefulTools.nTrain():
+                return 0.5
+            for true_error, cv_error in zip(data["true_errors"], data["cv_errors"]):
+                alpha.append(0.99*min(0.5*(float(true_error)/float(cv_error)), 1))
 
         if len(alpha) == 0:
             return 0.5
@@ -3337,14 +3337,13 @@ class Models:
         cv_errors = self.cross_validation(points)
         predictions = self.predict(points, atoms=True)
 
-        n_points = FileTools.count_points_in(FILE_STRUCTURE.get_file_path("training_set"))
-        FileTools.mkdir(FILE_STRUCTURE.get_file_path("adaptive_sampling"))
+        data = {}
+        data["npoints"] = UsefulTools.nTrain()
+        
+        data["cv_errors"] = [cv_errors[index] for index in indices]
+        data["predictions"] = [predictions[index] for index in indices]
         with open(FILE_STRUCTURE.get_file_path("cv_errors"), "w") as f:
-            f.write(f"{n_points}\n")
-            for index in indices:
-                cv_error = cv_errors[index]
-                prediction = ":".join([str(prediction) for prediction in predictions[index]])
-                f.write(f"{cv_error},{prediction}\n")              
+            json.dump(data, f)         
 
     def expected_improvement(self, points):
         global POINTS_PER_ITERATION
@@ -3426,7 +3425,6 @@ class Points:
             if point.gjf: point.gjf.write()
     
     def submit_gjfs(self, redo=False, submit=True, hold=None, return_jid=False, modify=None):
-        logging.debug("making g09 script")
         return SubmissionTools.make_g09_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, modify=modify)
     
     def submit_wfns(self, redo=False, submit=True, hold=None, return_jid=False, check_wfns=True):
@@ -3493,38 +3491,37 @@ class Points:
         if not os.path.exists(cv_file):
             return
 
-        n_points = -1
+        npoints = -1
         predictions = []
         cv_errors = []
 
         with open(cv_file, "r") as f:
-            for line in f:
-                if not "," in line:
-                    n_points = int(line)
-                else:
-                    line = line.split(",")
-                    cv_errors += [float(line[0])]
-                    predictions += [[float(val) for val in line[1].split(":")]]
-
-        new_points = FileTools.count_points_in(FILE_STRUCTURE.get_file_path("training_set"))
+            data = json.load(f)
+            npoints = data["npoints"]
+            cv_errors = data["cv_errors"]
+            predictions = data["predictions"]
 
         true_values = []
-        for point in self[n_points:]:
+        for point in self[npoints:]:
             true_values += [point.get_true_value("iqa", atoms=True)]
+        
+        with open("test", "w") as f:
+            json.dump(true_values, f)
+        
+        data = {}
+        data["npoints"] = UsefulTools.nTrain()
+        data["cv_errors"] = cv_errors
+        data["true_errors"] = []
+        for prediction, true_value in zip(predictions, true_values):
+            true_error = 0
+            for predicted_atom, predicted_value in prediction["iqa"].items():
+                true_error += (true_value[int(predicted_atom)-1] - predicted_value)**2
+            data["true_errors"].append(true_error)
 
-        n_points = FileTools.count_points_in(FILE_STRUCTURE.get_file_path("training_set"))
         FileTools.mkdir(FILE_STRUCTURE.get_file_path("adaptive_sampling"))
         alpha_file = FILE_STRUCTURE.get_file_path("alpha")
         with open(alpha_file, "w") as f:
-            f.write(f"{n_points}\n")
-            for prediction, true_value, cv_error in zip(predictions, true_values, cv_errors):
-                # if None in [prediction, true_value, cv_error]:
-                #     f.write("1,1\n")
-                # else:
-                true_error = 0
-                for true_atom, predicted_atom in zip(true_value, prediction):
-                    true_error += (true_atom-predicted_atom)**2
-                f.write(f"{true_error},{cv_error}\n")
+            json.dump(data, f)
 
     def make_training_set(self, model_type):
         global FILE_STRUCTURE
@@ -4144,9 +4141,9 @@ def defineGlobals():
         from tqdm import tqdm_notebook as tqdm
 
     check_settings = {
-                      "BOAQ": "BOAQ_VALUES",
-                      "IASMESH": "IASMESH_VALUES",
-                      "METHOD": "GAUSSIAN_METHODS"
+                      "BOAQ": "_BOAQ_VALUES",
+                      "IASMESH": "_IASMESH_VALUES",
+                      "METHOD": "_GAUSSIAN_METHODS"
                      }
 
     default_settings = {}
@@ -4386,7 +4383,6 @@ def auto_run():
                 script_name, jid = func(jid, npoints)
             else:
                 script_name, jid = func(jid)
-            # logging.debug(f"Submitted {script_name}: {jid}")
             print(f"Submitted {script_name}: {jid}")
     
     SUBMITTED = False
@@ -4457,6 +4453,7 @@ def make_models(directory):
 @UsefulTools.externalFunc()
 def calculate_errors(models_directory, sample_pool_directory):
     global FILE_STRUCTURE
+    global SUBMITTED
 
     logging.info("Calculating errors of the Sample Pool")
 
@@ -4464,11 +4461,18 @@ def calculate_errors(models_directory, sample_pool_directory):
     sample_pool = Points(sample_pool_directory, read_gjfs=True)
 
     points = models.expected_improvement(sample_pool)
-    logging.info("Moving points to the Training Set")
-    training_set_directory = FILE_STRUCTURE.get_file_path("training_set")
-    training_set = Points(training_set_directory)
-    training_set.add(points, move=True)
-    training_set.format_gjfs()
+
+    if SUBMITTED:
+        move_points = True
+    else:
+        move_points = UsefulTools.check_bool(input("Would you like to move points to Training Set? [Y/N]"))
+
+    if move_points :
+        logging.info("Moving points to the Training Set")
+        training_set_directory = FILE_STRUCTURE.get_file_path("training_set")
+        training_set = Points(training_set_directory)
+        training_set.add(points, move=True)
+        training_set.format_gjfs()
 
 
 def dlpoly_analysis():
@@ -4571,7 +4575,7 @@ def main_menu():
     main_menu.add_option("2", "Sample Pool", sample_pool_menu.run)
     main_menu.add_option("3", "Validation Set", validation_set_menu.run)
     main_menu.add_option("4", "Calculate Errors", calculate_errors, kwargs={"models_directory": models_dir, 
-                                                                            "sample_pool_directory": sp_dir}, wait=True)
+                                                                            "sample_pool_directory": sp_dir})
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", auto_run)
     main_menu.add_space()
