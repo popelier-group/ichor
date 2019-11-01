@@ -55,12 +55,13 @@ import shutil
 import hashlib
 import logging
 import platform
+import warnings
 import subprocess
 from glob import glob
 import itertools as it
 from getpass import getpass
-import multiprocessing as mp
 from functools import wraps
+import multiprocessing as mp
 from functools import lru_cache
 from argparse import ArgumentParser
 
@@ -247,6 +248,46 @@ class PATTERNS:
     SCIENTIFIC = re.compile(r"[+-]?\d+.\d+([Ee]?[+-]?\d+)?")
 
 
+class TabCompleter:
+    def path_completer(self, text, state):
+        try:
+            import readline
+
+            line = readline.get_line_buffer().split()
+            if '~' in text:
+                text = os.path.expanduser('~')
+            if os.path.isdir(text):
+                text += '/'
+            return [x for x in glob(text + '*')][state]
+        except ImportError:
+            pass
+    
+    def create_list_completer(self, ll):
+        def list_completer(text, state):
+            try:
+                import readline
+
+                line   = readline.get_line_buffer()
+                if not line:
+                    return [c + " " for c in ll][state]
+                else:
+                    return [c + " " for c in ll if c.startswith(line)][state]
+            except ImportError:
+                pass
+
+        self.list_completer = list_completer
+
+    def setup_completer(self, completer):
+        try:
+            import readline
+
+            readline.set_completer_delims("\t")
+            readline.parse_and_bind("tab: complete")
+            readline.set_completer(completer)
+        except ImportError:
+            pass
+
+
 class Menu(object):
     def __init__(self, options=None, title=None, message=None, prompt=">>",
                  refresh=lambda *args: None, auto_clear=True, enable_problems=False, auto_close=False):
@@ -324,6 +365,15 @@ class Menu(object):
 
         self.set_options([])
 
+    def get_options(self, include_hidden=True):
+        options = []
+        for label, option in self.options.items():
+            if not label in self.gap_ids:
+                if not label in self.message_ids:
+                    if not label in self.hidden_options or include_hidden:
+                        options.append(label)
+        return options
+
     def add_option(self, label, name, handler, kwargs={}, wait=False, auto_close=False, hidden=False):
         if not callable(handler):
             raise TypeError(handler, "handler is not callable")
@@ -389,6 +439,12 @@ class Menu(object):
         self.add_option("b", "Go Back", Menu.CLOSE) if back else None
         self.add_option("0", "Exit", quit) if exit else None
 
+    def longest_label(self):
+        lengths = []
+        for option in self.get_options(include_hidden=False):
+            lengths += [len(option)]
+        return max(lengths)
+
     # clear the screen
     # show the options
     def show(self):
@@ -401,12 +457,14 @@ class Menu(object):
         if self.is_message_enabled:
             print(self.message)
             print()
+        label_width = self.longest_label()
         for label, option in self.options.items():
             if not label in self.gap_ids:
                 if label in self.message_ids:
                     print(option[0].format(**option[1]))
                 elif not label in self.hidden_options:
-                    print("[" + label + "] " + option[0])
+                    show_label = "[" + label + "] "
+                    print(f"{show_label:<{label_width+3}s}" + option[0])
             else:
                 print()
         print()
@@ -422,9 +480,14 @@ class Menu(object):
         if len(self.options) == 0:
             return Menu.CLOSE
         self.show()
+
+        t = TabCompleter()
+        t.create_list_completer(self.get_options())
+        t.setup_completer(t.list_completer)
+
         while True:
             try:
-                index = str(input(self.prompt + " "))
+                index = str(input(self.prompt + " ")).strip()
                 option = self.options[index]
                 handler = option[1]
                 if handler == Menu.CLOSE:
@@ -1003,6 +1066,10 @@ class UsefulTools:
     def suppress_tqdm():
         global tqdm
         tqdm = my_tqdm
+
+    @staticmethod
+    def not_implemented():
+        raise NotImplementedError
 
 
 class my_tqdm:
@@ -3025,7 +3092,7 @@ class Model:
 
         fname_split = os.path.splitext(self.basename)[0].split("_")
         self.system_name = fname_split[0]
-        self.model_type = fname_split[2]
+        self.model_type = fname_split[2].lower()
         self.atom_number = fname_split[3]
 
     def remove_no_noise(self):
@@ -3183,6 +3250,9 @@ class Models:
         self[0].read(up_to="Theta")
         return self[0].nTrain
 
+    def get(self, type):
+        [model for model in self if model.model_type == type or type == "all"]
+
     def read(self):
         for model in self:
             model.read()
@@ -3194,11 +3264,11 @@ class Models:
         self._models.append(Model(model_file, read_model=read_model))
     
     @lru_cache()
-    def predict(self, points, atoms=False):
+    def predict(self, points, atoms=False, type="iqa"):
         predictions = []
         for point in points:
             prediction = 0 if not atoms else [0]*len(self)
-            for model in self:
+            for model in self.get(type):
                 if not atoms:
                     prediction += model.predict(point) 
                 else:
@@ -3542,7 +3612,6 @@ class Trajectory:
     def __getitem__(self, i):
         return self._trajectory[i]
 
-
 #############################################
 #               Miscellaneous               #
 #############################################
@@ -3870,6 +3939,9 @@ class S_CurveTools:
 
     @staticmethod
     def get_dir():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+
         ans = input("Enter Validation Set Directory: ")
         if not os.path.isdir(ans):
             print("Invalid Input")
@@ -3977,8 +4049,6 @@ class S_CurveTools:
             df["%"] = percentages
             df.to_excel(writer, sheet_name="Total")
 
-        
-
     @staticmethod
     def run():
         S_CurveTools.vs_loc = FILE_STRUCTURE.get_file_path("validation_set")
@@ -4017,7 +4087,31 @@ class SetupTools:
                     empty = UsefulTools.check_bool(input(f"Would you like to empty {dir_path}? [Y/N]"))
                 FileTools.mkdir(dir_path, empty=empty)
             print()
-            
+
+
+class SettingsTools:
+    @staticmethod
+    def change(var):
+        pass
+
+    @staticmethod
+    def show():
+        data_types = [int, str, list, bool, None]
+
+        settings_menu = Menu(title="Settings Menu")
+        for global_var, global_val in globals().items():
+            if not type(global_val) in data_types or global_var.startswith("_"):
+                continue
+            if global_val is None:
+                global_val = "None"
+            elif isinstance(global_val, list):
+                global_val = "[" + ", ".join([str(val) for val in global_val]) + "]"
+            else:
+                global_val = str(global_val)
+            global_val = "= " + global_val
+            settings_menu.add_option(global_var, global_val, SettingsTools.change, kwargs={"var": global_var})
+        settings_menu.add_final_options()
+        settings_menu.run()
 #############################################
 #            Function Definitions           #
 #############################################
@@ -4456,10 +4550,12 @@ def main_menu():
     #=== Tools Menu ===#
     tools_menu = Menu(title="Tools Menu")
     tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
+    tools_menu.add_option("cp2k", "Setup CP2K run", UsefulTools.not_implemented)
     tools_menu.add_final_options()
 
     #=== Options Menu ===#
     options_menu = Menu(title="Options Menu")
+    options_menu.add_option("settings", "Show and Change ICHOR Settings", SettingsTools.show)
     options_menu.add_option("ssh", "SSH into external machine", ssh)
     options_menu.add_final_options()
 
