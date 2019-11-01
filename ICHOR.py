@@ -83,14 +83,8 @@ CONFIG = None
 SYSTEM_NAME = "SYSTEM"
 ALF = []
 
-# AUTO_SUBMISSION_MODE = False
 MAX_ITERATION = 1
 POINTS_PER_ITERATION = 1
-
-# MULTIPLE_ADDITION_MODE = "manifold"
-
-# ITERATION = 0
-# STEP = 0
 
 FORMAT_GJFS = True
 METHOD = "B3LYP"
@@ -102,15 +96,7 @@ ENCOMP = 3
 BOAQ = "gs20"
 IASMESH = "fine"
 
-# EXIT = False
-
 FILE_STRUCTURE = []
-# IMPORTANT_FILES = {}
-
-# TRAINING_POINTS = []
-# SAMPLE_POINTS = []
-
-# TRAINING_POINTS_TO_USE = None
 
 KERNEL = "rbf"                # only use rbf for now
 FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
@@ -134,6 +120,8 @@ SGE = False
 SUBMITTED = False
 
 PREDICTION_MODE = "george"    # ichor or george (recommend george)
+
+DISABLE_PROBLEMS = False
 
 EXTERNAL_MACHINES = {
                         "csf3": "csf3.itservices.manchester.ac.uk",
@@ -209,6 +197,8 @@ logging.basicConfig(filename='ichor.log',
                     level=logging.DEBUG, 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     datefmt='%d-%m-%Y %I:%M:%S')
+
+_unknown_settings = []
 
 _external_functions = {}
 
@@ -1200,9 +1190,12 @@ class Problem:
 
 class ProblemFinder:
 
+    # DISABLE_PROBLEMS // 
+
     # PROBLEMS To ADD:
-    # - Fix ALF problem
-    # - Add config setting checks to problems (unknown setting)
+    # - Fix ALF problem //
+    # - Add config setting checks to problems (unknown setting) //
+    # - Check SYSTEM_NAME //
 
     def __init__(self):
         self.problems = []
@@ -1228,16 +1221,37 @@ class ProblemFinder:
             if not os.path.isdir(dir_path):
                 self.add(Problem(name="Directory Not Found", 
                                  problem=f"Could not find: {dir_path}",
-                                 solution="[S]etup directory structure or create manually"
+                                 solution="Setup directory structure or create manually"
                                 ))
+
+    @UsefulTools.runFunc(3)
+    def check_system(self):
+        global SYSTEM_NAME
+        if SYSTEM_NAME == "SYSTEM":
+            self.add(Problem(name="SYSTEM_NAME", 
+                             problem="SYSTEM_NAME not been set, defaulted to SYSTEM",
+                             solution="Set 'SYSTEM_NAME' in config file"
+                            ))
+    
+    @UsefulTools.runFunc(4)
+    def check_settings(self):
+        global _unknown_settings
+        for setting in _unknown_settings:
+            self.add(Problem(name=f"Unknown setting found in config", 
+                             problem=f"Unknown setting: {setting}",
+                             solution="See documentation or check [o]ptions [settings] for full list of settings"
+                            ))
 
     def add(self, problem):
         self.problems.append(problem)
 
     def find(self):
-        problems_to_find = UsefulTools.get_functions_to_run(self)
-        for find_problem in problems_to_find:
-            find_problem()
+        global DISABLE_PROBLEMS
+
+        if not DISABLE_PROBLEMS:
+            problems_to_find = UsefulTools.get_functions_to_run(self)
+            for find_problem in problems_to_find:
+                find_problem()
 
     def __getitem__(self, i):
         return self.problems[i]
@@ -4093,7 +4107,7 @@ class SettingsTools:
 
     @staticmethod
     def show():
-        data_types = [int, str, list, bool, None]
+        data_types = [int, str, list, bool]
 
         settings_menu = Menu(title="Settings Menu")
         for global_var, global_val in globals().items():
@@ -4109,6 +4123,7 @@ class SettingsTools:
             settings_menu.add_option(global_var, global_val, SettingsTools.change, kwargs={"var": global_var})
         settings_menu.add_final_options()
         settings_menu.run()
+
 #############################################
 #            Function Definitions           #
 #############################################
@@ -4120,6 +4135,7 @@ def defineGlobals():
     global MACHINE
     global SUBMITTED
     global FILE_STRUCTURE
+    global _unknown_settings
     global DEFAULT_CONFIG_FILE
 
     FILE_STRUCTURE = FileTools.setup_file_structure()
@@ -4200,7 +4216,8 @@ def defineGlobals():
             continue
 
         if not key in globals().keys():
-            print("Unknown setting found in config: " + key)
+            _unknown_settings.append(key)
+            # print("Unknown setting found in config: " + key)
         elif key.lower() == "keywords":
             globals()[key] = val.split()
         elif type(globals()[key]) in data_types.keys() and not key.startswith("_"):
@@ -4213,10 +4230,10 @@ def defineGlobals():
     
     for setting, allowed_values in check_settings.items():
         if globals()[setting] not in globals()[allowed_values]:
-            print("Error: Unknown " + setting + " setting")
-            print("Allowed settings:")
-            print(globals()[allowed_values])
-            print("Setting " + setting + " to: %s" % default_settings[setting])
+            # print("Error: Unknown " + setting + " setting")
+            # print("Allowed settings:")
+            # print(globals()[allowed_values])
+            # print("Setting " + setting + " to: %s" % default_settings[setting])
             globals()[setting] = default_settings[setting]
 
     modify_settings = {
@@ -4231,17 +4248,19 @@ def defineGlobals():
     if not ALF:
         if not alf_reference_file:
             try:
-                alf_reference_file = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("ts_gjf"), "*.gjf")[0]
+                alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("training_set"))
             except:
                 try:
-                    alf_reference_file = FileTools.get_files_in(FILE_STRUCTURE.get_file_path("sp_gjf"), "*.gjf")[0]
+                    alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("sample_pool"))
                 except:
-                    # print("\nCould not find a reference gjf to determine the ALF")
-                    # print("Please specify reference file or define explicitly")
-                    pass
+                    try:
+                        alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("validation_set"))
+                    except:
+                        pass
         if alf_reference_file:
             try:
-                ALF = AtomicLocalFrame(alf_reference_file)
+                GJF(alf_reference_file, read=True)._atoms.calculate_alf()
+                ALF = Atoms.ALF
             except:
                 print("\nError in ALF calculation, please specify file to calculate ALF")
 
@@ -4378,7 +4397,7 @@ def auto_run():
     logging.info("Starting ICHOR Auto Run")
 
     for i in range(MAX_ITERATION):
-        for j, func in enumerate(order):
+        for func in order:
             if i == 0 and "npoints" in func.__code__.co_varnames:
                 script_name, jid = func(jid, npoints)
             else:
@@ -4553,8 +4572,10 @@ def main_menu():
 
     #=== Tools Menu ===#
     tools_menu = Menu(title="Tools Menu")
+    tools_menu.add_option("|convert|", "Convert ICHOR Directory Structure", UsefulTools.not_implemented)
+    tools_menu.add_option("|clean|", "Cleanup Files", UsefulTools.not_implemented)
     tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
-    tools_menu.add_option("cp2k", "Setup CP2K run", UsefulTools.not_implemented)
+    tools_menu.add_option("|cp2k|", "Setup CP2K run", UsefulTools.not_implemented)
     tools_menu.add_final_options()
 
     #=== Options Menu ===#
@@ -4593,7 +4614,7 @@ def main_menu():
 if __name__ == "__main__":
     readArguments()
     defineGlobals()
-    
+
     if not _call_external_function is None:
         _call_external_function(*_call_external_function_args)
         quit()
