@@ -69,6 +69,7 @@ from argparse import ArgumentParser
 # Required imports
 import numpy as np
 from tqdm import tqdm
+from scipy import stats
 from numpy import linalg as la
 from scipy.spatial import distance
 
@@ -922,10 +923,11 @@ class UsefulTools:
         return FileTools.count_points_in(ts_dir)
 
     @staticmethod
-    def natural_sort(l): 
-        convert = lambda text: int(text) if text.isdigit() else text.lower() 
-        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
-        return sorted(l, key = alphanum_key)
+    def natural_sort(iterable, reverse=False):
+        prog = re.compile(r"(\d+)")
+        def alphanum_key(element):
+            return [int(c) if c.isdigit() else c for c in prog.findall(element)]
+        return sorted(iterable, key=alphanum_key, reverse=reverse)
 
     @staticmethod
     def countDigits(n):
@@ -3347,6 +3349,9 @@ class Models:
 
     def write_data(self, indices, points):
         global FILE_STRUCTURE
+        
+        adaptive_sampling = FILE_STRUCTURE.get_file_path("adaptive_sampling")
+        FileTools.mkdir(adaptive_sampling)
 
         cv_errors = self.cross_validation(points)
         predictions = self.predict(points, atoms=True)
@@ -3357,7 +3362,7 @@ class Models:
         data["cv_errors"] = [cv_errors[index] for index in indices]
         data["predictions"] = [predictions[index] for index in indices]
         with open(FILE_STRUCTURE.get_file_path("cv_errors"), "w") as f:
-            json.dump(data, f)         
+            json.dump(data, f)
 
     def expected_improvement(self, points):
         global POINTS_PER_ITERATION
@@ -3558,6 +3563,30 @@ class Points:
         self.update_alpha()
 
         return model_directories
+
+    def calculate_recovery_errors(self):
+        import pandas as pd
+
+        iqa_energies = {}
+        wfn_energies = []
+        for point in self:
+            if not point.wfn.energy == 0:
+                wfn_energies += [point.wfn.energy]
+            for int_atom, int_data in point.ints.items():
+                if not int_atom in iqa_energies.keys():
+                    iqa_energies[int_atom] = []
+                iqa_energies[int_atom] += [int_data.eiqa]
+
+        df = pd.DataFrame(iqa_energies)
+        df.columns = UsefulTools.natural_sort(list(df.columns))
+        df.loc[:,'Total'] = df.sum(axis=1)
+        df["WFN"] = pd.to_numeric(wfn_energies, errors='coerce')
+
+        df["error / Ha"] = (df["Total"] - df["WFN"]).abs()
+        df["error / kJ/mol"] = df["error / Ha"] * 2625.5
+        df.to_csv("recovery_errors.csv")
+
+        return df["error / kJ/mol"]
 
     @property
     def n_gjfs(self):
@@ -4077,6 +4106,42 @@ class S_CurveTools:
         s_curves_menu.run()
 
 
+class AnalysisTools:
+    @staticmethod
+    def calculate_recovery_errors(directory):
+        points = Points(directory, read_wfns=True, read_ints=True)
+        errors = points.calculate_recovery_errors()
+
+        result = stats.describe(errors)
+
+        print()
+        print("#############################")
+        print("# Recovery Error Statistics #")
+        print("#############################")
+        print()
+        print(f"Min:  {result.minmax[0]:.6f} kJ/mol")
+        print(f"Max:  {result.minmax[1]:.6f} kJ/mol")
+        print(f"Mean: {result.mean:.6f} kJ/mol")
+        print(f"Var:  {result.variance:.6f} kJ/mol")
+        print()
+
+
+    @staticmethod
+    def recovery_errors():
+        global FILE_STRUCTURE
+
+        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
+        sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
+        vs_dir = FILE_STRUCTURE.get_file_path("validation_set")
+
+        error_menu = Menu(title="Recovery Error Menu", auto_close=True)
+        error_menu.add_option("1", "Calculate Recovery Errors of Training Set", AnalysisTools.calculate_recovery_errors, kwargs={"directory": ts_dir}, wait=True)
+        error_menu.add_option("2", "Calculate Recovery Errors of Sample Pool", AnalysisTools.calculate_recovery_errors, kwargs={"directory": sp_dir}, wait=True)
+        error_menu.add_option("3", "Calculate Recovery Errors of Validation Set", AnalysisTools.calculate_recovery_errors, kwargs={"directory": vs_dir}, wait=True)
+        error_menu.add_final_options()
+        error_menu.run()
+
+
 class SetupTools:
     @staticmethod
     def directories():
@@ -4264,15 +4329,15 @@ def defineGlobals():
             except:
                 print("\nError in ALF calculation, please specify file to calculate ALF")
 
-    if ALF:
-        for i in range(len(ALF)):
-            for j in range(len(ALF[i])):
-                ALF[i][j] = int(ALF[i][j])
+    # if ALF:
+    #     for i in range(len(ALF)):
+    #         for j in range(len(ALF[i])):
+    #             ALF[i][j] = int(ALF[i][j])
 
-        if ALF[0][0] == 1:
-            for i in range(len(ALF)):
-                for j in range(len(ALF[i])):
-                    ALF[i][j] -= 1
+    #     if ALF[0][0] == 1:
+    #         for i in range(len(ALF)):
+    #             for j in range(len(ALF[i])):
+    #                 ALF[i][j] -= 1
 
 
 def readArguments():
@@ -4568,6 +4633,7 @@ def main_menu():
     analysis_menu.add_option("dlpoly", "Test models with DLPOLY", dlpoly_analysis)
     analysis_menu.add_option("opt", "Perform Geometry Optimisation on First Point in Sample Pool", opt)
     analysis_menu.add_option("s", "Create S-Curves", S_CurveTools.run)
+    analysis_menu.add_option("r", "Calculate Recovery Errors", AnalysisTools.recovery_errors)
     analysis_menu.add_final_options()
 
     #=== Tools Menu ===#
