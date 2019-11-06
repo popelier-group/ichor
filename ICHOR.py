@@ -2178,10 +2178,13 @@ class AutoTools:
         return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
-    def submit_ichor_models(jid=None):
+    def submit_ichor_models(jid=None, directory=None, type=None):
         global FILE_STRUCTURE
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
-        return AutoTools.submit_ichor("_make_models", ts_dir, "iqa", submit=True, hold=jid, return_jid=True)
+        if not directory:
+            directory = FILE_STRUCTURE.get_file_path("training_set")
+        if not type:
+            type = "iqa"
+        return AutoTools.submit_ichor("_make_models", directory, type, submit=True, hold=jid, return_jid=True)
     
     @staticmethod
     def submit_ichor_errors(jid=None):
@@ -2223,9 +2226,10 @@ class AutoTools:
         return points.submit_wfns(redo=False, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
-    def submit_models(jid=None):
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
-        gjf = Points(ts_dir, read_gjfs=True, first=True)[0]
+    def submit_models(jid=None, directory=None):
+        if not directory:
+            directory = FILE_STRUCTURE.get_file_path("training_set")
+        gjf = Points(directory, read_gjfs=True, first=True)[0]
         return SubmissionTools.make_ferebus_script(gjf.atoms.atoms, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
@@ -2236,6 +2240,48 @@ class AutoTools:
         script, jid = AutoTools.submit_gjfs(jid, npoints)
         script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory)
         AutoTools.submit_wfns(jid, npoints)
+    
+    @staticmethod
+    def run_models(directory=None, type=None, jid=None):
+        script_name, jid = AutoTools.submit_ichor_models(jid=jid, directory=directory, type=type)
+        script_name, jid = AutoTools.submit_models(jid=jid, directory=directory)
+
+    @staticmethod
+    def run():
+        global MAX_ITERATION
+        global FILE_STRUCTURE
+        global SUBMITTED
+
+        FileTools.clear_log()
+
+        UsefulTools.suppress_tqdm()
+
+        order = [
+                AutoTools.submit_ichor_gjfs, 
+                AutoTools.submit_gjfs, 
+                AutoTools.submit_ichor_wfns,
+                AutoTools.submit_wfns, 
+                AutoTools.submit_ichor_models, 
+                AutoTools.submit_models,
+                AutoTools.submit_ichor_errors
+                ]
+
+        jid = None
+        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
+        npoints = FileTools.count_points_in(ts_dir)
+
+        logging.info("Starting ICHOR Auto Run")
+
+        for i in range(MAX_ITERATION):
+            for func in order:
+                if i == 0 and "npoints" in func.__code__.co_varnames:
+                    script_name, jid = func(jid, npoints)
+                else:
+                    script_name, jid = func(jid)
+                print(f"Submitted {script_name}: {jid}")
+        
+        SUBMITTED = False
+
 
 #========================#
 #      Point Tools       #
@@ -4436,42 +4482,6 @@ def ssh():
     ssh_menu.run()
 
 
-def auto_run():
-    global MAX_ITERATION
-    global FILE_STRUCTURE
-    global SUBMITTED
-
-    FileTools.clear_log()
-
-    UsefulTools.suppress_tqdm()
-
-    order = [
-             AutoTools.submit_ichor_gjfs, 
-             AutoTools.submit_gjfs, 
-             AutoTools.submit_ichor_wfns,
-             AutoTools.submit_wfns, 
-             AutoTools.submit_ichor_models, 
-             AutoTools.submit_models,
-             AutoTools.submit_ichor_errors
-            ]
-
-    jid = None
-    ts_dir = FILE_STRUCTURE.get_file_path("training_set")
-    npoints = FileTools.count_points_in(ts_dir)
-
-    logging.info("Starting ICHOR Auto Run")
-
-    for i in range(MAX_ITERATION):
-        for func in order:
-            if i == 0 and "npoints" in func.__code__.co_varnames:
-                script_name, jid = func(jid, npoints)
-            else:
-                script_name, jid = func(jid)
-            print(f"Submitted {script_name}: {jid}")
-    
-    SUBMITTED = False
-
-
 @UsefulTools.externalFunc()
 def submit_gjfs(directory, modify=None):
     logging.info("Submitting gjfs to Gaussian")
@@ -4609,7 +4619,8 @@ def main_menu():
     training_set_menu.add_option("2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": ts_dir}, wait=True)
     training_set_menu.add_option("3", "Make Models", make_models, kwargs={"directory": ts_dir})
     training_set_menu.add_space()
-    training_set_menu.add_option("r", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": ts_dir})
+    training_set_menu.add_option("a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": ts_dir})
+    training_set_menu.add_option("m", "Auto Make Models", AutoTools.run_models)
     training_set_menu.add_final_options()
 
     #=== Sample Set Menu ===#
@@ -4617,7 +4628,7 @@ def main_menu():
     sample_pool_menu.add_option("1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": sp_dir})
     sample_pool_menu.add_option("2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": sp_dir})
     sample_pool_menu.add_space()
-    sample_pool_menu.add_option("r", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": sp_dir})
+    sample_pool_menu.add_option("a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": sp_dir})
     sample_pool_menu.add_final_options()
 
     #=== Validation Set Menu ===#
@@ -4625,7 +4636,7 @@ def main_menu():
     validation_set_menu.add_option("1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": vs_dir})
     validation_set_menu.add_option("2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": vs_dir})
     validation_set_menu.add_space()
-    validation_set_menu.add_option("r", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": vs_dir})
+    validation_set_menu.add_option("a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": vs_dir})
     validation_set_menu.add_final_options()
 
     #=== Analysis Menu ===#
@@ -4664,7 +4675,7 @@ def main_menu():
     main_menu.add_option("4", "Calculate Errors", calculate_errors, kwargs={"models_directory": models_dir, 
                                                                             "sample_pool_directory": sp_dir})
     main_menu.add_space()
-    main_menu.add_option("r", "Auto Run", auto_run)
+    main_menu.add_option("r", "Auto Run", AutoTools.run)
     main_menu.add_space()
     main_menu.add_option("a", "Analysis", analysis_menu.run)
     main_menu.add_option("t", "Tools", tools_menu.run)
