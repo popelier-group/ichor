@@ -4696,7 +4696,9 @@ if __name__ == "__main__":
         _call_external_function(*_call_external_function_args)
         quit()
 
-    if len(glob("*.sh.*")) > 0:
-        os.system("rm *.sh.*")
+    shell_scripts = glob("*.sh.*")
+    for shell_script in shell_scripts:
+        if not os.stat(shell_script).st_size:
+            os.remove(shell_script)
 
     main_menu()
