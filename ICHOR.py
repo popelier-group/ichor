@@ -3405,8 +3405,8 @@ class Models:
         data = {}
         data["npoints"] = UsefulTools.nTrain()
         
-        data["cv_errors"] = [cv_errors[index] for index in indices]
-        data["predictions"] = [predictions[index] for index in indices]
+        data["cv_errors"] = [float(cv_errors[index]) for index in indices]
+        data["predictions"] = [float(predictions[index]) for index in indices]
         with open(FILE_STRUCTURE.get_file_path("cv_errors"), "w") as f:
             json.dump(data, f)
 
