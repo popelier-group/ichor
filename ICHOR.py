@@ -116,6 +116,9 @@ DLPOLY_PRINT_EVERY = 1        # Print trajectory and stats every n steps
 DLPOLY_TIMESTEP = 0.001       # in ps
 DLPOLY_LOCATION = "PROGRAMS/DLPOLY.Z"
 
+DLPOLY_CHECK_CONVERGENCE = True
+DLPOLY_CONVERGENCE_CRITERIA = 4
+
 MACHINE = ""
 SGE = False
 SUBMITTED = False
@@ -3849,6 +3852,8 @@ class DlpolyTools:
         global DLPOLY_TEMPERATURE
         global DLPOLY_PRINT_EVERY
         global DLPOLY_NUMBER_OF_STEPS
+        global DLPOLY_CHECK_CONVERGENCE
+        global DLPOLY_CONVERGENCE_CRITERIA
 
         with open(control_file, "w+") as f:
             f.write(f"Title: {SYSTEM_NAME}\n")
@@ -3870,6 +3875,9 @@ class DlpolyTools:
             f.write(f"timestep {DLPOLY_TIMESTEP}\n")
             f.write("cutoff 15.0\n")
             f.write("fflux\n\n")
+            if DLPOLY_TEMPERATURE == 0 and DLPOLY_CHECK_CONVERGENCE:
+                f.write("converge\n")
+                f.write(f"criteria {DLPOLY_CONVERGENCE_CRITERIA}\n")
             if KERNEL.lower() != "rbf":
                 f.write(f"fflux_kernel {KERNEL}")
             f.write("# Continue MD simulation\n")
