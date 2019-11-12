@@ -724,6 +724,7 @@ class FileTools:
         tree.create_node("DATA", "data", parent="file_locs")
         tree.create_node("data", "data_file", parent="data", is_file=True)
         tree.create_node("JOBS", "jobs", parent="data")
+        tree.create_node("jid", "jid", parent="jobs", is_file=True)
         tree.create_node("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
         tree.create_node("alpha", "alpha", parent="adaptive_sampling", is_file=True)
         tree.create_node("cv_errors", "cv_errors", parent="adaptive_sampling", is_file=True)
@@ -1659,6 +1660,7 @@ class Queues:
     def setup_csf3_queues(self, machine):
         queue = self.create_queue(machine)
         queue.add_queue("smp.pe", 2, 32)
+        queue.add_queue("mpi-24-ib.pe", 48, 120)
         self.add_queue(machine, queue)
 
     @UsefulTools.runFunc(2)
@@ -1847,15 +1849,20 @@ class SubmissionTools:
         
 
 class BatchTools:
-    jid_fname = "jid"
-    
+   
+    @staticmethod
+    def _read_jids(jid_file):
+        with open(jid_file, "r") as f:
+            jids = f.readlines()
+        return [jid.strip() for jid in jids]
+        
+
     @staticmethod
     def _cleanup_jids(jid_file):
-        with open(jid_file, "r") as f:
-            data = f.readlines()
+        submitted_jobs = BatchTools._read_jids(jid_file)
         running_jobs = BatchTools.qstat(quiet=True)
         keep_jobs = []
-        for jid in data:
+        for jid in submitted_jobs:
             if jid.strip() in running_jobs:
                 keep_jobs.append(jid.strip())
         with open(jid_file, "w") as f:
@@ -1884,6 +1891,11 @@ class BatchTools:
         jobs = SGE_Jobs()
         job_line = {}
         job = SGE_Job("", "")
+        
+        jid_fname = FILE_STRUCTURE.get_file_path("jid")
+        BatchTools._cleanup_jids(jid_fname)
+        submitted_jobs = BatchTools._read_jids(jid_fname)
+
         for line in output.split("\n"):
             if line.startswith("-") or not line.strip(): continue
             if not headers:
@@ -1893,7 +1905,7 @@ class BatchTools:
                 for header, column in zip(headers, UsefulTools.split_widths(line, widths)):
                     job_line[header] = column.strip()
                 if not job_line["job-ID"] == job.jid:
-                    if job:
+                    if job and job.jid in submitted_jobs:
                         jobs.add_job(job)
                     job = SGE_Job(job_line["name"], job_line["job-ID"])
                 for task in BatchTools.parse_tasks(job_line):
@@ -1912,7 +1924,7 @@ class BatchTools:
 
         data_dir = FILE_STRUCTURE.get_file_path("jobs")
         FileTools.mkdir(data_dir)
-        jid_fname = os.path.join(data_dir, BatchTools.jid_fname)
+        jid_fname = FILE_STRUCTURE.get_file_path("jid")
         jid_file = open(jid_fname, "a")
 
         qsub_cmd = ""
@@ -1938,8 +1950,7 @@ class BatchTools:
 
     @staticmethod
     def qdel():
-        data_dir = FILE_STRUCTURE.get_file_path("jobs")
-        jid_fname = os.path.join(data_dir, BatchTools.jid_fname)
+        jid_fname = FILE_STRUCTURE.get_file_path("jid")
         BatchTools._cleanup_jids(jid_fname)
         with open(jid_fname, "r") as f:
             for jid in f:
@@ -3086,7 +3097,16 @@ class INT(Point):
 
 class Model:
     def __init__(self, fname, read_model=False):
+        global KERNEL
+
         self.fname = fname
+
+        kernels = {
+            "rbf": self.k_rbf,
+            "m52": self.k_m52
+        }
+
+        self.k = kernels[KERNEL.lower()]
 
         self.directory = ""
         self.basename = ""
@@ -3205,7 +3225,14 @@ class Model:
 
         FileTools.copy_file(self.fname, log_model_file)
 
-    def k(self, xi, xj):
+    def k_rbf(self, xi, xj):
+        result = 0
+        for i, j, h in zip(xi, xj, self.hyper_parameters):
+            result += h * (i - j)**2
+        return np.exp(-result)
+    
+    def k_m52(self, xi, xj):
+        return NotImplemented
         result = 0
         for i, j, h in zip(xi, xj, self.hyper_parameters):
             result += h * (i - j)**2
@@ -3353,7 +3380,7 @@ class Models:
                 else:
                     if not model.type in prediction.keys():
                         prediction[model.type] = {}
-                    prediction[model.type][model.num] = model.predict(point)
+                    prediction[model.type][model.num] = float(model.predict(point))
             predictions.append(prediction)
         return np.array(predictions) if not atoms else predictions
     
@@ -3419,7 +3446,7 @@ class Models:
         data = {}
         data["npoints"] = UsefulTools.nTrain()
         
-        data["cv_errors"] = [cv_errors[index] for index in indices]
+        data["cv_errors"] = [float(cv_errors[index]) for index in indices]
         data["predictions"] = [predictions[index] for index in indices]
         with open(FILE_STRUCTURE.get_file_path("cv_errors"), "w") as f:
             json.dump(data, f)
@@ -4870,8 +4897,8 @@ if __name__ == "__main__":
         _call_external_function(*_call_external_function_args)
         quit()
 
-    shell_scripts = glob("*.sh.*")
-    for shell_script in shell_scripts:
+    _shell_scripts = glob("*.sh.*")
+    for shell_script in _shell_scripts:
         if not os.stat(shell_script).st_size:
             os.remove(shell_script)
 
