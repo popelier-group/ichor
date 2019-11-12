@@ -4102,8 +4102,8 @@ class DlpolyTools:
     def get_trajectory_energy(trajectory_dir):
         if not FileTools.end_of_path(trajectory_dir) == "TRAJECTORY":
             trajectory_dir = os.path.join(trajectory_dir, "TRAJECTORY")
-        wfns = Points(trajectory_dir, read_wfns=True)
-        return [wfn.energy for wfn in wfns]
+        points = Points(trajectory_dir, read_wfns=True)
+        return [point.wfn.energy for point in points if point.wfn]
 
     @staticmethod
     @UsefulTools.externalFunc()
@@ -4119,6 +4119,10 @@ class DlpolyTools:
                 model_name = FileTools.end_of_path(model_dir)
                 trajectories[model_name] = DlpolyTools.get_trajectory_energy(trajectory_dir)
         
+        maxlen = max([len(energies) for _, energies in trajectories.items()])
+        for key, energies in trajectories.items():
+            trajectories[key] = energies + [np.NaN] * (maxlen - len(energies))
+
         df = pd.DataFrame(trajectories)
         df.to_csv("TRAJECTORY.csv")
     
@@ -4203,6 +4207,7 @@ class DlpolyTools:
         menu.add_space()
         menu.add_message(f"Use Model: {DlpolyTools.model_loc}")
         menu.add_message(f"Use Every: {DlpolyTools.use_every} Point(s) from Trajectory")
+        menu.add_option("ener", "Get Energies From WFNs", DlpolyTools.get_trajectory_energies, hidden=True)
         menu.add_final_options()
 
     @staticmethod
