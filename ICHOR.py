@@ -1893,7 +1893,6 @@ class BatchTools:
         job = SGE_Job("", "")
         
         jid_fname = FILE_STRUCTURE.get_file_path("jid")
-        BatchTools._cleanup_jids(jid_fname)
         submitted_jobs = BatchTools._read_jids(jid_fname)
 
         for line in output.split("\n"):
