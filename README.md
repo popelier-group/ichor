@@ -82,18 +82,18 @@ Choosing an option is as simple as selecting the label and pressing enter, some 
 
 ### Training Set
 ---
-![Training-Set-Menu](doc/img/training-set-menu.png?raw=true "Training Set Menu")
+![Training-Set-Menu](doc/img/training-set-menu.PNG?raw=true "Training Set Menu")
 
 The training set menu `[1]` is used to work with the training points for your model. To initialise the training set, create a `TRAINING_SET` directory and put the points you want to add to the training set as `.gjf` form in this directory.
 
 Once the GJFs are in the `TRAINING_SET` directory, option `[1]` will submit these GJFs to Gaussian to get `.wfn` files, option `[2]` will take these WFNs and submit them to AIMAll to get `.int` files, option `[3]` will take these INT files and create Gaussian Process Regression (GPR) models using FEREBUS. These models will be located in `FEREBUS/MODELS`.
 ### Models
-![Model-Menu](doc/img/model-menu.png?raw=true "Model Menu")
+![Model-Menu](doc/img/model-menu.PNG?raw=true "Model Menu")
 
 Option `[3]` of the training set menu brings you to a model menu. In this menu you can choose which output features you want to use to create your GPR models. Option `[1]` creates IQA models and option `[2]` creates a model for each of the 25 multipole moments used in DL FFLUX.
 ### Sample Pool
 ---
-![Sample-Set-Menu](doc/img/sample-pool-menu.png?raw=true "Sample pool Menu")
+![Sample-Set-Menu](doc/img/sample-pool-menu.PNG?raw=true "Sample pool Menu")
 
 The sample pool is used by adaptive sampling as a set of points to choose from to improve the training set. The sample pool menu functions in the same way as the training set menu without the option to form models from this set. To setup the sample pool, place your points in `.gjf` from into a directory with the name `SAMPLE_POOL`.
 ### Adaptive Sampling
