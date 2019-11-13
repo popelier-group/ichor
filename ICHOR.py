@@ -273,7 +273,7 @@ class TabCompleter:
 
         self.list_completer = list_completer
 
-    def setup_completer(self, completer):
+    def setup_completer(self, completer, pattern=None):
         try:
             import readline
 
@@ -3743,6 +3743,52 @@ class Trajectory:
     def __getitem__(self, i):
         return self._trajectory[i]
 
+
+class PointTools:
+
+    @staticmethod
+    def select_wfn():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+
+        while True:
+            ans = input("Enter WFN to Convert: ")
+            if not os.path.exists(ans):
+                print("Invalid Input")
+                print(f"{ans} does not exist")
+                print()
+            elif not ans.endswith(".wfn"):
+                print("Invalid Input")
+                print(f"{ans} is not a .wfn file")
+                print()
+            else:
+                return ans
+    
+    @staticmethod
+    def select_gjf():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+
+        ans = input("Enter GJF to Write To: ")
+        if not ans.endswith(".gjf"):
+            ans += ".gjf"
+        return ans
+
+    @staticmethod
+    def wfn_to_gjf():
+        wfn_file = PointTools.select_wfn()
+        wfn = WFN(wfn_file, read=True)
+        atoms = wfn._atoms
+        atoms.to_angstroms()
+
+        gjf_file = PointTools.select_gjf()
+        gjf = GJF(gjf_file)
+        gjf._atoms = atoms
+        gjf.format()
+        gjf.write()
+
+
+
 #############################################
 #               Miscellaneous               #
 #############################################
@@ -4883,6 +4929,7 @@ def main_menu():
     tools_menu.add_option("|clean|", "Cleanup Files", UsefulTools.not_implemented)
     tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
     tools_menu.add_option("|cp2k|", "Setup CP2K run", UsefulTools.not_implemented)
+    tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_final_options()
 
     #=== Options Menu ===#
