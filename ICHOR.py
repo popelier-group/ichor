@@ -3728,8 +3728,6 @@ class Trajectory:
     def __getitem__(self, i):
         return self._trajectory[i]
 
-<<<<<<< Updated upstream
-=======
 
 class PointTools:
 
@@ -3778,7 +3776,6 @@ class PointTools:
 
 
 
->>>>>>> Stashed changes
 #############################################
 #               Miscellaneous               #
 #############################################
