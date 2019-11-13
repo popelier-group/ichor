@@ -117,7 +117,13 @@ DLPOLY_TIMESTEP = 0.001       # in ps
 DLPOLY_LOCATION = "PROGRAMS/DLPOLY.Z"
 
 DLPOLY_CHECK_CONVERGENCE = True
-DLPOLY_CONVERGENCE_CRITERIA = 4
+DLPOLY_CONVERGENCE_CRITERIA = -1
+
+DLPOLY_MAX_ENERGY = -1.0
+DLPOLY_MAX_FORCE = -1.0
+DLPOLY_RMS_FORCE = -1.0
+DLPOLY_MAX_DISP = -1.0
+DLPOLY_RMS_DISP = -1.0
 
 MACHINE = ""
 SGE = False
@@ -267,7 +273,7 @@ class TabCompleter:
 
         self.list_completer = list_completer
 
-    def setup_completer(self, completer):
+    def setup_completer(self, completer, pattern=None):
         try:
             import readline
 
@@ -1301,12 +1307,13 @@ class Job:
                           "aimall": self.aimall_setup,
                           "python": self.python_setup,
                           "dlpoly": self.dlpoly_setup,
-                          "dlpoly_gaussian": self.gaussian_setup,
-                          "opt_gaussian": self.gaussian_setup,
                           None: self.generic_setup
                          }
+        if "gaussian" in self.type:
+            self.gaussian_setup()
+        else:
+            type_interface[self.type]()
         
-        type_interface[self.type]()
 
     def get_outfile(self, outfile):
         if outfile is None:
@@ -1892,7 +1899,6 @@ class BatchTools:
         job = SGE_Job("", "")
         
         jid_fname = FILE_STRUCTURE.get_file_path("jid")
-        BatchTools._cleanup_jids(jid_fname)
         submitted_jobs = BatchTools._read_jids(jid_fname)
 
         for line in output.split("\n"):
@@ -2209,13 +2215,23 @@ class AutoTools:
 
     @staticmethod
     def submit_dlpoly_gjfs(jid=None):
-        global FILE_STRUCTURE
         return AutoTools.submit_ichor("calculate_gaussian_energies", submit=True, hold=jid, return_jid=True)
 
     @staticmethod
     def submit_dlpoly_energies(jid=None):
-        global FILE_STRUCTURE
         return AutoTools.submit_ichor("get_wfn_energies", submit=True, hold=jid, return_jid=True)
+
+    @staticmethod
+    def submit_dlpoly_trajectories(jid=None):
+        return AutoTools.submit_ichor("calculate_trajectories_wfn", submit=True, hold=jid, return_jid=True)
+    
+    @staticmethod
+    def submit_dlpoly_trajectories_energies(jid=None):
+        return AutoTools.submit_ichor("get_trajectory_energies", submit=True, hold=jid, return_jid=True)
+
+    @staticmethod
+    def submit_dlpoly_trajectory_energies(jid=None, directory=None):
+        return AutoTools.submit_ichor("get_trajectory_energy", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
     def submit_ichor(function, *args, submit=False, hold=None, return_jid=False):
@@ -3712,7 +3728,6 @@ class Trajectory:
                     self.add(atoms)
                     atoms = Atoms()
 
-
     def append(self, atoms):
         self._trajectory.append(atoms)
 
@@ -3891,6 +3906,9 @@ class SSH:
 
 
 class DlpolyTools:
+    model_loc = "all"
+    use_every = 1
+
     @staticmethod
     def write_control(control_file):
         global KERNEL
@@ -3900,8 +3918,15 @@ class DlpolyTools:
         global DLPOLY_TEMPERATURE
         global DLPOLY_PRINT_EVERY
         global DLPOLY_NUMBER_OF_STEPS
+
         global DLPOLY_CHECK_CONVERGENCE
         global DLPOLY_CONVERGENCE_CRITERIA
+
+        global DLPOLY_MAX_ENERGY
+        global DLPOLY_MAX_FORCE
+        global DLPOLY_RMS_FORCE
+        global DLPOLY_MAX_DISP
+        global DLPOLY_RMS_DISP
 
         with open(control_file, "w+") as f:
             f.write(f"Title: {SYSTEM_NAME}\n")
@@ -3925,7 +3950,18 @@ class DlpolyTools:
             f.write("fflux\n\n")
             if DLPOLY_TEMPERATURE == 0 and DLPOLY_CHECK_CONVERGENCE:
                 f.write("converge\n")
-                f.write(f"criteria {DLPOLY_CONVERGENCE_CRITERIA}\n")
+                if DLPOLY_CONVERGENCE_CRITERIA > 0:
+                    f.write(f"criteria {DLPOLY_CONVERGENCE_CRITERIA}\n")
+                if DLPOLY_MAX_ENERGY > 0:
+                    f.write(f"max_energy {DLPOLY_MAX_ENERGY}\n")
+                if DLPOLY_MAX_FORCE > 0:
+                    f.write(f"max_force {DLPOLY_MAX_FORCE}\n")
+                if DLPOLY_RMS_FORCE > 0:
+                    f.write(f"rms_force {DLPOLY_RMS_FORCE}\n")
+                if DLPOLY_MAX_DISP > 0:
+                    f.write(f"max_disp {DLPOLY_MAX_DISP}\n")
+                if DLPOLY_RMS_DISP > 0:
+                    f.write(f"rms_disp {DLPOLY_RMS_DISP}\n")
             if KERNEL.lower() != "rbf":
                 f.write(f"fflux_kernel {KERNEL}")
             f.write("# Continue MD simulation\n")
@@ -4095,6 +4131,162 @@ class DlpolyTools:
         _, jid = AutoTools.submit_gjfs(jid, npoints=npoints, modify="dlpoly")
         AutoTools.submit_dlpoly_energies(jid)
 
+    @staticmethod
+    def calculate_trajectory_wfn(trajectory_file, d=None):
+        global SYSTEM_NAME
+
+        if os.path.isdir(trajectory_file):
+            trajectory_file = os.path.join(trajectory_file, "TRAJECTORY.xyz")
+
+        trajectory_dir = os.path.dirname(trajectory_file)
+        trajectory_gjf_dir = os.path.join(trajectory_dir, "TRAJECTORY")
+        FileTools.mkdir(trajectory_gjf_dir, empty=True)
+
+        trajectory = Trajectory(trajectory_file, read=True)
+        for i, timestep in enumerate(trajectory):
+            if i % DlpolyTools.use_every == 0:
+                gjf_fname = SYSTEM_NAME + str(i+1).zfill(4) + ".gjf"
+                gjf_fname = os.path.join(trajectory_gjf_dir, gjf_fname)
+
+                gjf = GJF(gjf_fname)
+                gjf._atoms = timestep
+                gjf.write()
+
+        modify = "trajectory"
+        if not d is None:
+            modify +=  "_" + str(d)
+        return submit_gjfs(trajectory_gjf_dir, modify=modify)
+        
+    @staticmethod
+    def calculate_trajectories_wfn():
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        jid = None
+        for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
+            trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
+            if os.path.exists(trajectory_file):
+                model_name = FileTools.end_of_path(model_dir)
+                _, jid = DlpolyTools.calculate_trajectory_wfn(trajectory_file, d=model_name)
+        return jid
+    
+    @staticmethod
+    @UsefulTools.externalFunc()
+    def get_trajectory_energy(trajectory_dir):
+        if not FileTools.end_of_path(trajectory_dir) == "TRAJECTORY":
+            trajectory_dir = os.path.join(trajectory_dir, "TRAJECTORY")
+        points = Points(trajectory_dir, read_wfns=True)
+        return [point.wfn.energy for point in points if point.wfn]
+
+    @staticmethod
+    @UsefulTools.externalFunc()
+    def get_trajectory_energies():
+        import pandas as pd
+
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+
+        trajectories = {}
+        for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
+            trajectory_dir = os.path.join(model_dir, "TRAJECTORY/")
+            if os.path.exists(trajectory_dir):
+                model_name = FileTools.end_of_path(model_dir)
+                trajectories[model_name] = DlpolyTools.get_trajectory_energy(trajectory_dir)
+        
+        maxlen = max([len(energies) for _, energies in trajectories.items()])
+        for key, energies in trajectories.items():
+            trajectories[key] = energies + [np.NaN] * (maxlen - len(energies))
+
+        df = pd.DataFrame(trajectories)
+        df.to_csv("TRAJECTORY.csv")
+    
+    @staticmethod
+    def auto_traj_analysis():
+        global DLPOLY_NUMBER_OF_STEPS
+
+        if DlpolyTools.model_loc == "all":
+            jid = DlpolyTools.calculate_trajectories_wfn()
+            AutoTools.submit_dlpoly_trajectories_energies(jid)
+        else:
+            jid = DlpolyTools.calculate_trajectory_wfn(DlpolyTools.model_loc)
+            AutoTools.submit_dlpoly_trajectory_energies(jid, directory=DlpolyTools.model_loc)
+    
+    @staticmethod
+    def get_dir():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+
+        ans = input("Enter Directory Containing Trajectoy: ")
+        if not os.path.isdir(ans):
+            print("Invalid Input")
+            print(f"{ans} is not a directory")
+            print()
+        elif not os.path.exists(os.path.join(ans, "TRAJECTORY.xyz")):
+            print("Invalid Input")
+            print(f"{ans} does not contain a TRAJECTORY.xyz file")
+            print()
+        else:
+            return ans
+
+    @staticmethod
+    def _set_model(model=None):
+        if not model:
+            model = DlpolyTools.get_dir()
+        DlpolyTools.model_loc = model
+
+    @staticmethod
+    def choose_model():
+        global FILE_STRUCTURE
+
+        model_menu = Menu(title="Select Model Directory", auto_close=True)
+
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
+        i = 1
+        for model_dir in model_dirs:
+            if os.path.exists(os.path.join(model_dir, "TRAJECTORY.xyz")):
+                model_menu.add_option(str(i), model_dir, DlpolyTools._set_model, kwargs={"model": model_dir})
+                i += 1
+        model_menu.add_space()
+        model_menu.add_option("a", "Use All Model Directories", DlpolyTools._set_model, kwargs={"model": "all"})
+        model_menu.add_option("c", "Custom Directory", DlpolyTools._set_model)
+        model_menu.add_final_options(exit=False)
+        model_menu.run()
+
+    @staticmethod
+    def change_every():
+        every = 0
+        print("Select Value To Use Every nth Point In Trajectory")
+        while True:
+            every = input("Enter Value: ")
+            try:
+                every = int(every)
+                if every > 0:
+                    break
+                else:
+                    print("Error: Value must be a positive integer")
+                    print()
+            except:
+                print(f"Error: Cannot convert {every} to Integer")
+                print()
+        DlpolyTools.use_every = every
+
+    @staticmethod
+    def refresh_traj_menu(menu):
+        menu.clear_options()
+        menu.add_option("run", "Auto Run ", DlpolyTools.auto_traj_analysis)
+        menu.add_space()
+        menu.add_option("model", "Change The Model To Run Analysis On", DlpolyTools.choose_model)
+        menu.add_option("every", "Change Number Of Points To Use", DlpolyTools.change_every)
+        menu.add_space()
+        menu.add_message(f"Use Model: {DlpolyTools.model_loc}")
+        menu.add_message(f"Use Every: {DlpolyTools.use_every} Point(s) from Trajectory")
+        menu.add_option("ener", "Get Energies From WFNs", DlpolyTools.get_trajectory_energies, hidden=True)
+        menu.add_final_options()
+
+    @staticmethod
+    def traj_analysis():
+        traj_menu = Menu(title="Trajectory Analysis Menu")
+        traj_menu.set_refresh(DlpolyTools.refresh_traj_menu)
+        traj_menu.run()
+        
 
 class S_CurveTools:
     vs_loc = ""
@@ -4111,7 +4303,7 @@ class S_CurveTools:
         t = TabCompleter()
         t.setup_completer(t.path_completer)
 
-        ans = input("Enter Validation Set Directory: ")
+        ans = input("Enter Directory: ")
         if not os.path.isdir(ans):
             print("Invalid Input")
             print(f"{ans} is not a directory")
@@ -4301,7 +4493,7 @@ class SettingsTools:
 
     @staticmethod
     def show():
-        data_types = [int, str, list, bool]
+        data_types = [int, str, list, bool, float]
 
         settings_menu = Menu(title="Settings Menu")
         for global_var, global_val in globals().items():
@@ -4397,6 +4589,7 @@ def defineGlobals():
 
     data_types = {
                   int: int, 
+                  float: float,
                   str: check_str, 
                   list: ast.literal_eval, 
                   bool: check_bool
@@ -4470,9 +4663,6 @@ def defineGlobals():
 
 
 def readArguments():
-    global AUTO_SUBMISSION_MODE
-    global ITERATION
-    global STEP
     global DEFAULT_CONFIG_FILE
     
     global _external_functions
@@ -4570,7 +4760,7 @@ def submit_gjfs(directory, modify=None):
     logging.info("Submitting gjfs to Gaussian")
     gjfs = Points(directory, read_gjfs=True)
     gjfs.format_gjfs()
-    gjfs.submit_gjfs(modify=modify)
+    return gjfs.submit_gjfs(modify=modify, return_jid=True)
 
 
 @UsefulTools.externalFunc()
@@ -4660,6 +4850,8 @@ def dlpoly_analysis():
     dlpoly_menu.add_option("g", "Calculate Gaussian Energies", DlpolyTools.calculate_gaussian_energies, wait=True)
     dlpoly_menu.add_option("wfn", "Get WFN Energies", DlpolyTools.get_wfn_energies, wait=True)
     dlpoly_menu.add_space()
+    dlpoly_menu.add_option("traj", "Trajectory Analysis Tools", DlpolyTools.traj_analysis)
+    dlpoly_menu.add_space()
     dlpoly_menu.add_option("r", "Auto Run DLPOLY Analysis", DlpolyTools.auto_run)
     dlpoly_menu.add_final_options()
 
@@ -4736,6 +4928,7 @@ def main_menu():
     tools_menu.add_option("|clean|", "Cleanup Files", UsefulTools.not_implemented)
     tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
     tools_menu.add_option("|cp2k|", "Setup CP2K run", UsefulTools.not_implemented)
+    tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_final_options()
 
     #=== Options Menu ===#
