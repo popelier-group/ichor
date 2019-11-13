@@ -3782,6 +3782,8 @@ class PointTools:
         atoms.to_angstroms()
 
         gjf_file = PointTools.select_gjf()
+        if gjf_file == ".gjf":
+            gjf_file = wfn_file.replace(".wfn", ".gjf")
         gjf = GJF(gjf_file)
         gjf._atoms = atoms
         gjf.format()
