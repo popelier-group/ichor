@@ -117,7 +117,13 @@ DLPOLY_TIMESTEP = 0.001       # in ps
 DLPOLY_LOCATION = "PROGRAMS/DLPOLY.Z"
 
 DLPOLY_CHECK_CONVERGENCE = True
-DLPOLY_CONVERGENCE_CRITERIA = 4
+DLPOLY_CONVERGENCE_CRITERIA = -1
+
+DLPOLY_MAX_ENERGY = -1.0
+DLPOLY_MAX_FORCE = -1.0
+DLPOLY_RMS_FORCE = -1.0
+DLPOLY_MAX_DISP = -1.0
+DLPOLY_RMS_DISP = -1.0
 
 MACHINE = ""
 SGE = False
@@ -3825,8 +3831,15 @@ class DlpolyTools:
         global DLPOLY_TEMPERATURE
         global DLPOLY_PRINT_EVERY
         global DLPOLY_NUMBER_OF_STEPS
+
         global DLPOLY_CHECK_CONVERGENCE
         global DLPOLY_CONVERGENCE_CRITERIA
+
+        global DLPOLY_MAX_ENERGY
+        global DLPOLY_MAX_FORCE
+        global DLPOLY_RMS_FORCE
+        global DLPOLY_MAX_DISP
+        global DLPOLY_RMS_DISP
 
         with open(control_file, "w+") as f:
             f.write(f"Title: {SYSTEM_NAME}\n")
@@ -3850,7 +3863,18 @@ class DlpolyTools:
             f.write("fflux\n\n")
             if DLPOLY_TEMPERATURE == 0 and DLPOLY_CHECK_CONVERGENCE:
                 f.write("converge\n")
-                f.write(f"criteria {DLPOLY_CONVERGENCE_CRITERIA}\n")
+                if DLPOLY_CONVERGENCE_CRITERIA > 0:
+                    f.write(f"criteria {DLPOLY_CONVERGENCE_CRITERIA}\n")
+                if DLPOLY_MAX_ENERGY > 0:
+                    f.write(f"max_energy {DLPOLY_MAX_ENERGY}\n")
+                if DLPOLY_MAX_FORCE > 0:
+                    f.write(f"max_force {DLPOLY_MAX_FORCE}\n")
+                if DLPOLY_RMS_FORCE > 0:
+                    f.write(f"rms_force {DLPOLY_RMS_FORCE}\n")
+                if DLPOLY_MAX_DISP > 0:
+                    f.write(f"max_disp {DLPOLY_MAX_DISP}\n")
+                if DLPOLY_RMS_DISP > 0:
+                    f.write(f"rms_disp {DLPOLY_RMS_DISP}\n")
             if KERNEL.lower() != "rbf":
                 f.write(f"fflux_kernel {KERNEL}")
             f.write("# Continue MD simulation\n")
@@ -4226,7 +4250,7 @@ class SettingsTools:
 
     @staticmethod
     def show():
-        data_types = [int, str, list, bool]
+        data_types = [int, str, list, bool, float]
 
         settings_menu = Menu(title="Settings Menu")
         for global_var, global_val in globals().items():
@@ -4322,6 +4346,7 @@ def defineGlobals():
 
     data_types = {
                   int: int, 
+                  float: float,
                   str: check_str, 
                   list: ast.literal_eval, 
                   bool: check_bool
@@ -4704,8 +4729,8 @@ if __name__ == "__main__":
         _call_external_function(*_call_external_function_args)
         quit()
 
-    shell_scripts = glob("*.sh.*")
-    for shell_script in shell_scripts:
+    _shell_scripts = glob("*.sh.*")
+    for shell_script in _shell_scripts:
         if not os.stat(shell_script).st_size:
             os.remove(shell_script)
 
