@@ -4661,9 +4661,6 @@ def defineGlobals():
 
 
 def readArguments():
-    global AUTO_SUBMISSION_MODE
-    global ITERATION
-    global STEP
     global DEFAULT_CONFIG_FILE
     
     global _external_functions
