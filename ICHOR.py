@@ -4109,10 +4109,8 @@ class DlpolyTools:
             for point in points:
                 if re.findall(r"\d+", point.wfn.basename):
                     point_num = int(re.findall(r"\d+", point.wfn.basename)[0])
-                else:
-                    point_num = 0
-                f.write(f"{point.wfn.basename} {point_num:4d} {point.wfn.energy}\n")
-                print(point.wfn.basename, point_num, point.wfn.energy)
+                    f.write(f"{point.wfn.basename} {point_num:4d} {point.wfn.energy}\n")
+                    print(point.wfn.basename, point_num, point.wfn.energy)
 
     @staticmethod
     def auto_run():
