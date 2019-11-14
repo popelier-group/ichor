@@ -4562,7 +4562,8 @@ def defineGlobals():
     def replace_chars(s):
         chars_to_replace = {
                             "_": "-",
-                            "\"": ""
+                            "\"": "",
+                            "\'": ""
                            }
         for char, replacement in chars_to_replace.items():
             s = s.replace(char, replacement)
