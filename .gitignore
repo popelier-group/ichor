@@ -5,3 +5,4 @@ Test/
 *.sh
 *.csv
 testing.py
+*.xyz
