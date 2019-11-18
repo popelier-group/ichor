@@ -1566,7 +1566,7 @@ class SubmissionScript:
         if self.type is None:
             self.type = "generic"
             
-    def write(self):
+    def write(self, write_data=True):
         global SGE
         global FILE_STRUCTURE
 
@@ -1574,7 +1574,7 @@ class SubmissionScript:
         if len(self.jobs) == 0:
             return
 
-        if SGE:
+        if SGE and write_data:
             data_directory = FILE_STRUCTURE.get_file_path("jobs")
             FileTools.mkdir(data_directory)
             data_file = os.path.join(data_directory, self.type)
@@ -1754,7 +1754,7 @@ class SubmissionTools:
                      }
 
     @staticmethod
-    def make_g09_script(points, directory="", redo=False, submit=True, hold=None, return_jid=False, modify=None):
+    def make_g09_script(points, directory="", redo=False, submit=True, hold=None, return_jid=False, modify=None, write_data=True):
         global MACHINE
         global GAUSSIAN_CORE_COUNT
 
@@ -1776,7 +1776,7 @@ class SubmissionTools:
             if points and (redo or not os.path.exists(points.wfn_fname)):
                 script.add_job(points.fname)
 
-        script.write()
+        script.write(write_data=write_data)
         if submit:
             jid = script.submit(hold=hold, return_jid=return_jid)
             if return_jid:
@@ -1784,7 +1784,7 @@ class SubmissionTools:
         return script.fname
     
     @staticmethod
-    def make_aim_script(points, directory="", check_wfns=True, redo=False, submit=True, hold=None, return_jid=False):
+    def make_aim_script(points, directory="", check_wfns=True, redo=False, submit=True, hold=None, return_jid=False, write_data=True):
         global MACHINE
         global AIMALL_CORE_COUNT
 
@@ -1808,7 +1808,7 @@ class SubmissionTools:
             elif point.gjf and not check_wfns:
                 script.add_job(point.gjf.wfn_fname)
             
-        script.write()
+        script.write(write_data=write_data)
         if submit:
             jid = script.submit(hold=hold, return_jid=return_jid)
             if return_jid:
@@ -1816,7 +1816,7 @@ class SubmissionTools:
         return script.fname
     
     @staticmethod
-    def make_ferebus_script(model_directories, directory="", submit=True, hold=None, return_jid=False):
+    def make_ferebus_script(model_directories, directory="", submit=True, hold=None, return_jid=False, write_data=True):
         global MACHINE
         global FEREBUS_VERSION
         global FEREBUS_CORE_COUNT
@@ -1830,7 +1830,7 @@ class SubmissionTools:
         for model_directory in model_directories:
             script.add_job(model_directory)
             
-        script.write()
+        script.write(write_data=write_data)
         if submit:
             jid = script.submit(hold=hold, return_jid=return_jid)
             if return_jid:
@@ -2263,29 +2263,29 @@ class AutoTools:
         return SubmissionTools.make_python_script(__file__, function=function, args=args, submit=submit, hold=hold, return_jid=return_jid)
 
     @staticmethod
-    def submit_gjfs(jid=None, npoints=None, modify=None):
+    def submit_gjfs(jid=None, npoints=None, modify=None, write_data=True):
         global POINTS_PER_ITERATION
         if npoints is None:
             npoints = POINTS_PER_ITERATION
         points = Points()
         points.make_gjf_template(npoints)
-        return points.submit_gjfs(redo=False, submit=True, hold=jid, return_jid=True, modify=modify)
+        return points.submit_gjfs(redo=False, submit=True, hold=jid, return_jid=True, modify=modify, write_data=write_data)
 
     @staticmethod
-    def submit_wfns(jid=None, npoints=None):
+    def submit_wfns(jid=None, npoints=None, write_data=True):
         global POINTS_PER_ITERATION
         if npoints is None:
             npoints = POINTS_PER_ITERATION
         points = Points()
         points.make_wfn_template(npoints)
-        return points.submit_wfns(redo=False, submit=True, hold=jid, return_jid=True)
+        return points.submit_wfns(redo=False, submit=True, hold=jid, return_jid=True, write_data=write_data)
 
     @staticmethod
-    def submit_models(jid=None, directory=None):
+    def submit_models(jid=None, directory=None, write_data=True):
         if not directory:
             directory = FILE_STRUCTURE.get_file_path("training_set")
         gjf = Points(directory, read_gjfs=True, first=True)[0]
-        return SubmissionTools.make_ferebus_script(gjf.atoms.atoms, submit=True, hold=jid, return_jid=True)
+        return SubmissionTools.make_ferebus_script(gjf.atoms.atoms, submit=True, hold=jid, return_jid=True, write_data=write_data)
 
     @staticmethod
     def submit_aimall(directory=None, jid=None):
@@ -2329,10 +2329,12 @@ class AutoTools:
 
         for i in range(MAX_ITERATION):
             for func in order:
+                args = {"jid": jid}
                 if i == 0 and "npoints" in func.__code__.co_varnames:
-                    script_name, jid = func(jid, npoints)
-                else:
-                    script_name, jid = func(jid)
+                    args["npoints"] = npoints
+                if "write_data" in func.__code__.co_varnames:
+                    args["write_data"] = False
+                script_name, jid = func(jid)
                 print(f"Submitted {script_name}: {jid}")
         
         SUBMITTED = False
@@ -3654,14 +3656,14 @@ class Points:
         for point in self:
             if point.gjf: point.gjf.write()
     
-    def submit_gjfs(self, redo=False, submit=True, hold=None, return_jid=False, modify=None):
-        return SubmissionTools.make_g09_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, modify=modify)
+    def submit_gjfs(self, redo=False, submit=True, hold=None, return_jid=False, modify=None, write_data=True):
+        return SubmissionTools.make_g09_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, modify=modify, write_data=write_data)
     
-    def submit_wfns(self, redo=False, submit=True, hold=None, return_jid=False, check_wfns=True):
-        return SubmissionTools.make_aim_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, check_wfns=check_wfns)
+    def submit_wfns(self, redo=False, submit=True, hold=None, return_jid=False, check_wfns=True, write_data=True):
+        return SubmissionTools.make_aim_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, check_wfns=check_wfns, write_data=write_data)
     
-    def submit_models(self):
-        SubmissionTools.make_ferebus_script(self)
+    def submit_models(self, write_data=True):
+        SubmissionTools.make_ferebus_script(self, write_data=write_data)
 
     def check_functional(self):
         for point in self:
