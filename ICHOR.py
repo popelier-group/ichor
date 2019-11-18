@@ -852,6 +852,31 @@ class FileTools:
                 n_models += 1
         return n_models
 
+    @staticmethod
+    def get_opt(required=False):
+        def no_opt_found():
+            print(f"Error: {opt_dir} not found")
+            print()
+            print("No Optimised Geometry Found")
+            if UsefulTools.check_bool(input("Would you like to calculate the optimum geometry? [Y/N]")):
+                print("Performing Geometry Optimisation")
+                print("Continue Analysis Once Completed")
+                print()
+                opt()
+                print("Exiting...")
+            quit()
+
+        global FILE_STRUCTURE
+        opt_dir = FILE_STRUCTURE.get_file_path("opt")
+        if not os.path.isdir(opt_dir) and required:
+            no_opt_found()
+        opt = Point(opt_dir)
+        opt.find_wfn()
+        if opt.wfn:
+            return opt.wfn
+        elif required:
+            no_opt_found()
+            
 
 class UsefulTools:
 
@@ -2339,19 +2364,36 @@ class Atom:
         self.features = []
 
     def read_input(self, coordinate_line):
-        find_atom = coordinate_line.split()
-        self.atom_type = find_atom[0]
-        coordinate_line = next(re.finditer(r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line)).group()
-        coordinate_line = re.finditer(r"[+-]?\d+.\d+([Ee][+-]?\d+)?", coordinate_line)
-        self.x = float(next(coordinate_line).group())
-        self.y = float(next(coordinate_line).group())
-        self.z = float(next(coordinate_line).group())
+        if isinstance(coordinate_line, str):
+            find_atom = coordinate_line.split()
+            self.atom_type = find_atom[0]
+            coordinate_line = next(re.finditer(r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line)).group()
+            coordinate_line = re.finditer(r"[+-]?\d+.\d+([Ee][+-]?\d+)?", coordinate_line)
+            self.x = float(next(coordinate_line).group())
+            self.y = float(next(coordinate_line).group())
+            self.z = float(next(coordinate_line).group())
+        elif isinstance(coordinate_line, Atom):
+            self = coordinate_line
+        elif isinstance(coordinate_line, (list, tuple)):
+            if len(coordinate_line) == 3:
+                self.atom_type = "H"
+                self.x = float(coordinate_line[0])
+                self.y = float(coordinate_line[1])
+                self.z = float(coordinate_line[2])
+            elif len(coordinate_line) == 4:
+                self.atom_type = coordinate_line[0]
+                self.x = float(coordinate_line[1])
+                self.y = float(coordinate_line[2])
+                self.z = float(coordinate_line[3])
 
-    def dist(self, other):
+    def sq_dist(self, other):
         dist = 0
         for icoord, jcoord in zip(self.coordinates, other.coordinates):
             dist += (icoord - jcoord)**2
-        return np.sqrt(dist)
+        return dist
+
+    def dist(self, other):
+        return np.sqrt(self.sq_dist(other))
 
     def xdiff(self, other):
         return other.x - self.x
@@ -2550,6 +2592,12 @@ class Atom:
     def __hash__(self):
         return hash(str(self.num) + str(self.coordinates_string))
 
+    def __sub__(self, other):
+        self.x -= other.x
+        self.y -= other.y
+        self.z -= other.z
+        return self
+
 
 class Atoms:
     ALF = []
@@ -2557,6 +2605,7 @@ class Atoms:
     def __init__(self, atoms=None):
         self._atoms = []
         self._connectivity = None
+        self._centred = False
 
         if not atoms is None:
             self.add(atoms)
@@ -2573,63 +2622,10 @@ class Atoms:
     def finish(self):
         Atom.counter = it.count(1)
 
-    @property
-    def priority(self):
-        return sum(self.masses)
-
-    @property
-    def max_priority(self):
-        prev_priorities = []
-        while True:
-            priorities = [atom.priority for atom in self]
-            if priorities.count(max(priorities)) == 1 or prev_priorities == priorities:
-                break
-            else:
-                prev_priorities = priorities
-        for atom in self:
-            atom.reset_level()
-        return self[priorities.index(max(priorities))]
-
-    def __len__(self):
-        return len(self._atoms)
-
-    def __delitem__(self, i):
-        del self._atoms[i]
-
-    def __getitem__(self, i):
-        return self._atoms[i]
-    
-    @property
-    def masses(self):
-        return [atom.mass for atom in self]
-
-    @property
-    def atoms(self):
-        return [atom.atom_num for atom in self]
-
-    @property
-    def empty(self):
-        return len(self) == 0
-
     def connect(self, iatom, jatom):
         iatom.set_bond(jatom)
         jatom.set_bond(iatom)
-
-    @property
-    @lru_cache()
-    def connectivity(self):
-        connectivity = np.zeros((len(self), len(self)))
-        for i, iatom in enumerate(self):
-            for j, jatom in enumerate(self):
-                if not iatom == jatom:
-                    max_dist = 1.2 * (iatom.radius + jatom.radius)
-
-                    if iatom.dist(jatom) < max_dist:
-                        connectivity[i][j] = 1
-                        self.connect(iatom, jatom)
-
-        return connectivity
-
+    
     def to_angstroms(self):
         for atom in self:
             atom.to_angstroms()
@@ -2637,24 +2633,6 @@ class Atoms:
     def to_bohr(self):
         for atom in self:
             atom.to_bohr()
-
-    def __str__(self):
-        return "\n".join([str(atom) for atom in self])
-
-    def __repr__(self):
-        return str(self)
-    
-    def __sub__(self, other):
-        # other = sorted(Atoms(other), key=lambda x: x.num, reverse=False)
-        for i, atom in enumerate(self):
-            for jatom in other:
-                if jatom == atom:
-                    del self[i]
-        return self
-    
-    @property
-    def alf(self):
-        return [[iatom.num for iatom in atom.alf] for atom in self]
 
     def calculate_alf(self):
         self.connectivity
@@ -2682,6 +2660,114 @@ class Atoms:
         for atom in self:
             atom.calculate_features(self)
     
+    def centre(self, centre_atom=None):
+        if isinstance(centre_atom, int):
+            centre_atom = self[centre_atom]
+        elif centre_atom is None:
+            centre_atom = self.centroid
+
+        for i, atom in enumerate(self):
+            atom -= centre_atom
+        
+        self._centred = True
+
+    def rotate(self, R):
+        coordinates = R.dot(self.coordinates.T).T
+        for atom, coordinate in zip(self, coordinates):
+            atom.x = coordinate[0]
+            atom.y = coordinate[1]
+            atom.z = coordinate[2]
+
+    def _rmsd(self, other):
+        dist = 0
+        for iatom, jatom in zip(self, other):
+            dist += iatom.sq_dist(jatom)
+        return np.sqrt(dist/len(self))
+
+    def rmsd(self, other):
+        if not self._centred:
+            self.centre()
+        if not other._centred:
+            other.centre()
+
+        P = self.coordinates
+        Q = other.coordinates
+        H = self.coordinates.T.dot(other.coordinates)
+
+        V, S, W = np.linalg.svd(H)
+        d = (np.linalg.det(V) * np.linalg.det(W)) < 0.0
+
+        if d:
+            S[-1] = -S[-1]
+            V[:, -1] = -V[:, -1]
+
+        R = np.dot(V, W)
+        
+        other.rotate(R)
+        return self._rmsd(other)
+      
+    @property
+    def coordinates(self):
+        return np.array([atom.coordinates for atom in self])
+
+    @property
+    def centroid(self):
+        coordinates = self.coordinates.T
+
+        x = np.mean(coordinates[0])
+        y = np.mean(coordinates[1])
+        z = np.mean(coordinates[2])
+
+        return Atom([x, y, z])
+
+    @property
+    def priority(self):
+        return sum(self.masses)
+
+    @property
+    def max_priority(self):
+        prev_priorities = []
+        while True:
+            priorities = [atom.priority for atom in self]
+            if priorities.count(max(priorities)) == 1 or prev_priorities == priorities:
+                break
+            else:
+                prev_priorities = priorities
+        for atom in self:
+            atom.reset_level()
+        return self[priorities.index(max(priorities))]
+
+    @property
+    def masses(self):
+        return [atom.mass for atom in self]
+
+    @property
+    def atoms(self):
+        return [atom.atom_num for atom in self]
+
+    @property
+    def empty(self):
+        return len(self) == 0
+
+    @property
+    @lru_cache()
+    def connectivity(self):
+        connectivity = np.zeros((len(self), len(self)))
+        for i, iatom in enumerate(self):
+            for j, jatom in enumerate(self):
+                if not iatom == jatom:
+                    max_dist = 1.2 * (iatom.radius + jatom.radius)
+
+                    if iatom.dist(jatom) < max_dist:
+                        connectivity[i][j] = 1
+                        self.connect(iatom, jatom)
+
+        return connectivity
+
+    @property
+    def alf(self):
+        return [[iatom.num for iatom in atom.alf] for atom in self]
+
     @property
     def features(self):
         try:
@@ -2690,6 +2776,29 @@ class Atoms:
             self.calculate_features()
             self._features = [atom.features for atom in self]
             return self._features
+
+    def __len__(self):
+        return len(self._atoms)
+
+    def __delitem__(self, i):
+        del self._atoms[i]
+
+    def __getitem__(self, i):
+        return self._atoms[i]
+    
+    def __str__(self):
+        return "\n".join([str(atom) for atom in self])
+
+    def __repr__(self):
+        return str(self)
+    
+    def __sub__(self, other):
+        # other = sorted(Atoms(other), key=lambda x: x.num, reverse=False)
+        for i, atom in enumerate(self):
+            for jatom in other:
+                if jatom == atom:
+                    del self[i]
+        return self
 
 
 class Point:
@@ -2718,6 +2827,11 @@ class Point:
     def features(self):
         return self.atoms.features
     
+    def find_wfn(self):
+        wfns = FileTools.get_files_in(self.directory, "*.wfn")
+        if len(wfns) > 0:
+            self.wfn = WFN(wfns[0], read=True)
+
     def get_directory(self):
         return self.directory
 
@@ -3336,6 +3450,11 @@ class Model:
         dst = os.path.join(dst_dir, self.basename)
         if os.path.exists(dst):
             os.remove(dst)
+        else:
+            try:
+                os.unlink(dst)
+            except:
+                pass
         os.symlink(abs_path, dst)
 
 
@@ -3737,6 +3856,17 @@ class Trajectory:
     def add(self, atoms):
         self.append(atoms)
 
+    def rmsd(self, ref=None):
+        if ref is None:
+            ref = self[0]
+        elif isinstance(ref, int):
+            ref = self[ref]
+
+        rmsd = []
+        for point in self:
+            rmsd += [ref.rmsd(point)]
+        return rmsd
+
     def __len__(self):
         return len(self._trajectory)
     
@@ -3786,8 +3916,6 @@ class PointTools:
         gjf._atoms = atoms
         gjf.format()
         gjf.write()
-
-
 
 #############################################
 #               Miscellaneous               #
@@ -4283,6 +4411,40 @@ class DlpolyTools:
         traj_menu.set_refresh(DlpolyTools.refresh_traj_menu)
         traj_menu.run()
         
+    @staticmethod
+    def check_model_links():
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        log_dir = FILE_STRUCTURE.get_file_path("log")
+
+        model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
+        log_dirs = FileTools.get_files_in(log_dir, "*/")
+
+        for model_dir, log_dir in zip(model_dirs, log_dirs):
+            model_dir = os.path.join(model_dir, "model_krig")
+            DlpolyTools.link_models(model_dir, Models(log_dir))
+
+    @staticmethod
+    def rmsd_analysis():
+        opt_wfn = FileTools.get_opt(required=True)
+        opt_atoms = opt_wfn._atoms
+        opt_atoms.to_angstroms()
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+
+        rmsd = []
+        for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
+            trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
+            if os.path.exists(trajectory_file):
+                models = Models(os.path.join(model_dir, "model_krig"))
+                n_train = models.nTrain
+
+                trajectory = Trajectory(trajectory_file, read=True)
+                rmsd += [(n_train, trajectory[-1].rmsd(opt_atoms))]
+
+        with open("rmsd.csv", "w") as f:
+            for n_train, rmsd_val in rmsd:
+                f.write(f"{n_train},{rmsd_val}\n")
+
+
 
 class S_CurveTools:
     vs_loc = ""
@@ -4846,9 +5008,11 @@ def dlpoly_analysis():
     dlpoly_menu.add_option("g", "Calculate Gaussian Energies", DlpolyTools.calculate_gaussian_energies, wait=True)
     dlpoly_menu.add_option("wfn", "Get WFN Energies", DlpolyTools.get_wfn_energies, wait=True)
     dlpoly_menu.add_space()
+    dlpoly_menu.add_option("rmsd", "Calculate RMSD to Gaussian Minimum", DlpolyTools.rmsd_analysis)
     dlpoly_menu.add_option("traj", "Trajectory Analysis Tools", DlpolyTools.traj_analysis)
     dlpoly_menu.add_space()
     dlpoly_menu.add_option("r", "Auto Run DLPOLY Analysis", DlpolyTools.auto_run)
+    dlpoly_menu.add_option("link", "Check Model Symlinks", DlpolyTools.check_model_links, hidden=True)
     dlpoly_menu.add_final_options()
 
     dlpoly_menu.run()

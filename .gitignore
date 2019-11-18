@@ -6,3 +6,5 @@ Test/
 *.csv
 testing.py
 *.xyz
+wily*
+rmsd*
