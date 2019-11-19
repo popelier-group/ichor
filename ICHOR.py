@@ -50,6 +50,7 @@
   [ ] Move EPE calculation to an independent function so more EI Algorithms can be implemented
   [ ] Include Legacy Conversion Tools
   [ ] Cleanup Training Set Formation Implementation So that any X and y values can be used             /
+  [ ] Implement method of locking functions based on what is currently running (e.g. Auto Run)         /
 """
 
 #############################################
