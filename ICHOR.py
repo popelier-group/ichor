@@ -25,8 +25,8 @@
   #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
   #############################################################################################################
   Author:  Matthew Burn
-  Version: 2.0
-  Date: 30-09-2019
+  Version: 2.1
+  Date: 19-11-2019
 
   ICHOR Design Principles:
   -- All within one script, this is up for debate however this script currently requires high portabilty and therefore
@@ -116,7 +116,7 @@ DLPOLY_PRINT_EVERY = 1        # Print trajectory and stats every n steps
 DLPOLY_TIMESTEP = 0.001       # in ps
 DLPOLY_LOCATION = "PROGRAMS/DLPOLY.Z"
 
-DLPOLY_CHECK_CONVERGENCE = True
+DLPOLY_CHECK_CONVERGENCE = False
 DLPOLY_CONVERGENCE_CRITERIA = -1
 
 DLPOLY_MAX_ENERGY = -1.0
@@ -727,13 +727,19 @@ class FileTools:
         tree.create_node("DLPOLY", "dlpoly", parent="file_locs")
         tree.create_node("GJF", "dlpoly_gjf", parent="dlpoly")
 
-        tree.create_node("DATA", "data", parent="file_locs")
+        tree.create_node(".DATA", "data", parent="file_locs")
         tree.create_node("data", "data_file", parent="data", is_file=True)
+
         tree.create_node("JOBS", "jobs", parent="data")
         tree.create_node("jid", "jid", parent="jobs", is_file=True)
+
         tree.create_node("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
         tree.create_node("alpha", "alpha", parent="adaptive_sampling", is_file=True)
         tree.create_node("cv_errors", "cv_errors", parent="adaptive_sampling", is_file=True)
+
+        tree.create_node("SCRIPTS", "scripts", parent="data")
+        tree.create_node("OUTPUTS", "outputs", parent="scripts")
+        tree.create_node("ERRORS", "errors", parent="scripts")
 
         return tree
 
@@ -1565,10 +1571,28 @@ class SubmissionScript:
         self.check_options()
         if self.type is None:
             self.type = "generic"
-            
+
+    def setup_script_directories(self):
+        global FILE_STRUCTURE
+        script_dir = FILE_STRUCTURE.get_file_path("scripts")
+        output_dir = FILE_STRUCTURE.get_file_path("outputs")
+        errors_dir = FILE_STRUCTURE.get_file_path("errors")
+
+        FileTools.mkdir(script_dir)
+        FileTools.mkdir(output_dir)
+        FileTools.mkdir(errors_dir)
+
+        return script_dir, output_dir, errors_dir
+
     def write(self, write_data=True):
         global SGE
         global FILE_STRUCTURE
+
+        script_dir, output_dir, errors_dir = self.setup_script_directories()
+        
+        self.fname = os.path.join(script_dir, self.fname)
+        output_fname = os.path.join(output_dir, self.type)
+        errors_fname = os.path.join(errors_dir, self.type)
 
         self.check_settings()
         if len(self.jobs) == 0:
@@ -1588,6 +1612,8 @@ class SubmissionScript:
             # Settings / Flags
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
+            f.write(f"#$ -o {output_fname}\n")
+            f.write(f"#$ -e {errors_fname}\n")
             if self.label:
                 f.write(f"#$ -N {self.label}")
             for option, setting in self.options.items():
@@ -1626,7 +1652,9 @@ class SubmissionScript:
                     f.write("\n")
                     f.write("if [ ${inputs[$SGE_TASK_ID-1]} ]\n")
                     f.write("then\n")
-                f.write(f"    {self.jobs[0].submit_sge}\n")
+                job_line = self.jobs[0].submit_sge
+                job_line = "\n    ".join(job_line.split("\n"))
+                f.write(f"    {job_line}\n")
                 if not self.type in ["python"]:
                     f.write("fi\n")
             else:
@@ -4449,7 +4477,6 @@ class DlpolyTools:
         with open("rmsd.csv", "w") as f:
             for n_train, rmsd_val in rmsd:
                 f.write(f"{n_train},{rmsd_val}\n")
-
 
 
 class S_CurveTools:
