@@ -1574,15 +1574,15 @@ class SubmissionScript:
         if len(self.jobs) == 0:
             return
 
-        if SGE and write_data:
+        if SGE:
             data_directory = FILE_STRUCTURE.get_file_path("jobs")
             FileTools.mkdir(data_directory)
             data_file = os.path.join(data_directory, self.type)
             abs_data_file = os.path.abspath(data_file)
-
-            with open(data_file, "w") as f:
-                for job in self.jobs:
-                    f.write(f"{job.data}\n")
+            if write_data:
+                with open(data_file, "w") as f:
+                    for job in self.jobs:
+                        f.write(f"{job.data}\n")
 
         with open(self.fname, "w") as f:
             # Settings / Flags
@@ -2334,8 +2334,15 @@ class AutoTools:
                     args["npoints"] = npoints
                 if "write_data" in func.__code__.co_varnames:
                     args["write_data"] = False
-                script_name, jid = func(jid)
+                script_name, jid = func(**args)
                 print(f"Submitted {script_name}: {jid}")
+        
+        for func in order[:-1]:
+            args = {"jid": jid}
+            if "write_data" in func.__code__.co_varnames:
+                args["write_data"] = False
+            script_name, jid = func(**args)
+            print(f"Submitted {script_name}: {jid}")
         
         SUBMITTED = False
 
@@ -3735,11 +3742,8 @@ class Points:
 
         true_values = []
         for point in self[npoints:]:
-            true_values += [point.get_true_value("iqa", atoms=True)]
-        
-        with open("test", "w") as f:
-            json.dump(true_values, f)
-        
+            true_values += [point.get_true_value("iqa", atoms=True)]     
+      
         data = {}
         data["npoints"] = UsefulTools.nTrain()
         data["cv_errors"] = cv_errors
