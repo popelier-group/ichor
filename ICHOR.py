@@ -36,6 +36,20 @@
   -- Functions are defined after Classes
   -- Main script is written beneath which calls functions when needed
   -- Main Menu is at the bottom, this should be easy to extend and is hopefully quite intuitive
+
+  TODO
+  [x]| Description                                                                                | Priority
+  -----------------------------------------------------------------------------------------------------------
+  [ ] Implement incomplete menu options (indicated with ||)                                         
+  [ ] Add CP2K support                                                                                 /
+  [ ] Merge makeSets into ICHOR                                                                        /
+  [ ] Make SGE Queue names more meaningful ('GaussSub.sh' -> 'WATER G09 1')
+  [ ] Cleanup SubmissionScript Implementation
+  [ ] Implement More Kernels Into ICHOR
+  [ ] Make a Revert System / Backup System
+  [ ] Move EPE calculation to an independent function so more EI Algorithms can be implemented
+  [ ] Include Legacy Conversion Tools
+  [ ] Cleanup Training Set Formation Implementation So that any X and y values can be used             /
 """
 
 #############################################
