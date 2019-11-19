@@ -94,7 +94,7 @@ from scipy.spatial import distance
 
 DEFAULT_CONFIG_FILE = "config.properties"
 
-CONFIG = None
+CONFIG = None # Don't change
 
 SYSTEM_NAME = "SYSTEM"
 ALF = []
@@ -102,7 +102,6 @@ ALF = []
 MAX_ITERATION = 1
 POINTS_PER_ITERATION = 1
 
-FORMAT_GJFS = True
 METHOD = "B3LYP"
 BASIS_SET = "6-31+g(d,p)"
 KEYWORDS = []
@@ -112,7 +111,7 @@ ENCOMP = 3
 BOAQ = "gs20"
 IASMESH = "fine"
 
-FILE_STRUCTURE = []
+FILE_STRUCTURE = [] # Don't change
 
 KERNEL = "rbf"                # only use rbf for now
 FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
@@ -141,13 +140,12 @@ DLPOLY_MAX_DISP = -1.0
 DLPOLY_RMS_DISP = -1.0
 
 MACHINE = ""
-SGE = False
-SUBMITTED = False
-
-PREDICTION_MODE = "george"    # ichor or george (recommend george)
+SGE = False # Don't Change
+SUBMITTED = False # Don't Change
 
 DISABLE_PROBLEMS = False
 
+# Below are only for SSH settings which isn't implemented yet
 EXTERNAL_MACHINES = {
                         "csf3": "csf3.itservices.manchester.ac.uk",
                         "ffluxlab": "ffluxlab.mib.manchester.ac.uk"
