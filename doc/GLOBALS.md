@@ -21,7 +21,7 @@ All other global variables can be set in this config file
 |POINTS_PER_ITERATION|Number of points added per iteration|1|Integer >= 1|
 |METHOD|Quantum chemistry method used by Gaussian|B3LYP|Any Method Implemented in G09|
 |BASIS_SET|Quantum chemistry basis set used by Gaussian|6-31+g(d,p)|Any Basis Set Implemented in G09|
-|KEYOWRDS|List of Keywords that will be used in Gaussian|[ ]|List of keywords inputted as a string separated by spaces e.g.("nosymm 6d 10f")|
+|KEYWORDS|List of Keywords that will be used in Gaussian|[ ]|List of keywords inputted as a string separated by spaces e.g.("nosymm 6d 10f")|
 |ENCOMP|Encomp keyword used by AIMAll (3 -> A,A', 4 -> A,A' + A,B)|3|3 OR 4|
 |BOAQ|BOAQ keyword used by AIMAll|gs20|BOAQ allowed values can be found in _BOAQ_VALUES|
 |IASMESH|IASMESH keyword used by AIMAll|fine|IASMESH allowed values can be found in _IASMESH_VALUES|
