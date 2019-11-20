@@ -3122,7 +3122,10 @@ class INT(Point):
         self.split_fname()
 
         if self.fname and read:
-            self.read()
+            try:
+                self.read_json()
+            except json.decoder.JSONDecodeError:
+                self.read()
     
     @property
     def num(self):
@@ -3146,6 +3149,11 @@ class INT(Point):
             new_name = os.path.join(directory, int_directory, self.atom.lower() + ".int")
             FileTools.move_file(self.fname, new_name)
             self.fname = new_name
+
+    def read_json(self):
+        """ Makes a json file containing integration error, multipole moments, and IQA energies"""
+        pass
+
 
     def read(self):
         with open(self.fname, "r") as f:
@@ -3567,7 +3575,10 @@ class Points:
         self.directory = directory if directory else "."
         if read_gjfs or read_wfns or read_ints:
             FileTools.check_directory(self.directory)
+            start_time = time.time()
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
+            time_taken = time.time() - start_time
+            logging.debug(f"Reading {self.directory} took {time_taken:.2f} seconds")
 
     def read_directory(self, read_gjfs, read_wfns, read_ints, first=False):
         directories = FileTools.get_files_in(self.directory, "*/", sort="natural")
