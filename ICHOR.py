@@ -42,7 +42,7 @@
   -----------------------------------------------------------------------------------------------------------
   [ ] Implement incomplete menu options (indicated with ||)                                         
   [ ] Add CP2K support                                                                                 /
-  [ ] Merge makeSets into ICHOR                                                                        /
+  [x] Merge makeSets into ICHOR                                                                        
   [ ] Make SGE Queue names more meaningful ('GaussSub.sh' -> 'WATER G09 1')
   [ ] Cleanup SubmissionScript Implementation
   [ ] Implement More Kernels Into ICHOR
@@ -71,6 +71,7 @@ import time
 import uuid
 import json
 import shutil
+import random
 import hashlib
 import logging
 import platform
@@ -296,6 +297,14 @@ class TabCompleter:
             readline.set_completer_delims("\t")
             readline.parse_and_bind("tab: complete")
             readline.set_completer(completer)
+        except ImportError:
+            pass
+    
+    def remove_completer(self):
+        try:
+            import readline
+
+            readline.set_completer(None)
         except ImportError:
             pass
 
@@ -892,8 +901,10 @@ class UsefulTools:
         return math.floor(math.log(n, 10)+1)
 
     @staticmethod
-    def check_bool(val):
-        return val.lower() in ['true', '1', 't', 'y', 'yes', 'yeah']
+    def check_bool(val, default=True):
+        options = ['true', '1', 't', 'y', 'yes', 'yeah']
+        if default: options += [""]
+        return val.lower() in options
 
     @staticmethod
     def print_grid(arr, cols=10, color=None):
@@ -1016,6 +1027,13 @@ class UsefulTools:
     def not_implemented():
         raise NotImplementedError
 
+    @staticmethod
+    def prettify_string(string):
+        string = string.replace("_", " ").split()
+        for i, word in enumerate(string):
+            if len(word) > 1:
+                string[i] = word[0].upper() + word[1:].lower()
+        return " ".join(string)
 
 class my_tqdm:
     """
@@ -2794,7 +2812,7 @@ class Point:
     counter = it.count(1)
 
     def __init__(self, directory="", gjf_fname="", wfn_fname="", int_directory="", int_fnames=[], 
-                    read_gjf=False, read_wfn=False, read_ints=False):
+                    read_gjf=False, read_wfn=False, read_ints=False, atoms=None):
         self.num = next(Point.counter)
         self.directory = directory
         self.gjf = GJF(gjf_fname, read=read_gjf)
@@ -2808,6 +2826,9 @@ class Point:
         
         self.fname = ""
 
+        if not atoms is None:
+            self.gjf._atoms = atoms
+
     @property
     def atoms(self):
         return self.gjf._atoms
@@ -2816,6 +2837,14 @@ class Point:
     def features(self):
         return self.atoms.features
     
+    @property
+    def nfeats(self):
+        return len(self.features)
+
+    @property
+    def natoms(self):
+        return len(self.atoms)
+
     def find_wfn(self):
         wfns = FileTools.get_files_in(self.directory, "*.wfn")
         if len(wfns) > 0:
@@ -3561,13 +3590,19 @@ class Models:
 
 
 class Points:
-    def __init__(self, directory="", read_gjfs=False, read_wfns=False, read_ints=False, first=False):
+    def __init__(self, directory="", read_gjfs=False, read_wfns=False, read_ints=False, first=False, read_directory=True):
         self._points = []
 
         self.directory = directory if directory else "."
         if read_gjfs or read_wfns or read_ints:
             FileTools.check_directory(self.directory)
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
+
+        training_set_functions = {
+                                  "min-max": self.get_min_max_features_first_atom,
+                                  "random": self.get_random_points
+                                 }
+        self._get_training_points = training_set_functions["min-max"]
 
     def read_directory(self, read_gjfs, read_wfns, read_ints, first=False):
         directories = FileTools.get_files_in(self.directory, "*/", sort="natural")
@@ -3590,11 +3625,42 @@ class Points:
                         break
                 progressbar.update()
 
+    def read_set(self, files, stay=True):
+        if isinstance(files, str):
+            files = [files]
+        with tqdm(total=len(files), unit=" files", leave=stay) as progressbar:
+            for f in files:
+                progressbar.set_description(desc=f)
+                if os.path.isdir(f):
+                    if "_atomicfiles" in f:
+                        progressbar.update()
+                        continue
+                    self.read_set(FileTools.get_files_in(f, "*", sort="natural"), stay=False)
+                elif f.endswith(".gjf"):
+                    self.read_gjf(f)
+                elif f.endswith(".xyz"):
+                    self.read_xyz(f)
+                elif f == "":
+                    files += FileTools.get_files_in(f, "*", sort="natural")
+                    continue
+                progressbar.update()
+    
+    def read_gjf(self, gjf_file):
+        gjf = GJF(gjf_file, read=True)
+        self.add_point(gjf._atoms)
+
+    def read_xyz(self, xyz_file):
+        trajectory = Trajectory(xyz_file, read=True)
+        for point in trajectory:
+            self.add_point(point)
+
     def add_point(self, point):
         if isinstance(point, dict):
             self._points.append(Point(**point))
         elif isinstance(point, Point):
             self._points.append(point)
+        elif isinstance(point, Atoms):
+            self._points.append(Point(atoms=point))
     
     def add(self, points, move=False):
         for point in points:
@@ -3617,6 +3683,78 @@ class Points:
             points.add_point(self[point])
             del self[point]
         return points
+
+    def renumber(self):
+        Point.counter = it.count(1)
+        for point in self:
+            point.num = next(Point.counter)
+
+    def move_points(self, points):
+        new_set = Points()
+        for point in points:
+            if isinstance(point, int):
+                point = self[point]
+            new_set.add_point(point)
+            del self[point]
+        new_set.renumber()
+        return new_set
+
+    def write_to_directory(self, directory, empty=False):
+        if os.path.isdir(directory) and not empty:
+            print()
+            print(f"{directory} exists.")
+            empty = UsefulTools.check_bool(input(f"Would you like to empty {directory}? [Y/N]"))
+
+        FileTools.mkdir(directory, empty=empty)
+        for point in self:
+            gjf_name = SYSTEM_NAME + str(point.num).zfill(4) + ".gjf"
+            gjf_name = os.path.join(directory, gjf_name)
+            gjf = GJF(gjf_name)
+            gjf._atoms = point.atoms
+            gjf.write()
+        FileTools.check_directory(directory)
+
+    def get_atom_features(self, atom):
+        return self.features[atom]
+
+    def get_atom_feature(self, atom, feature):
+        return [features[feature] for features in self.get_atom_features(atom)]
+
+    def get_min_max_atom_feature(self, atom, feature):
+        features = self.get_atom_feature(atom, feature)
+        
+        min_indx = int(np.argmin(features))
+        max_indx = int(np.argmax(features))
+        
+        return min_indx, max_indx
+
+    def get_min_max_of_atom(self, iatom):
+        points = []
+        for i in range(self.nfeats):
+            imin, imax = self.get_min_max_atom_feature(iatom, i)
+            points += [imin, imax]
+        return points
+    
+    def get_min_max_features_first_atom(self):
+        return self.get_min_max_of_atom(0)
+
+    def get_random_points(self, n_points):
+        return sorted(random.sample(self.range, n_points), reverse=True)
+
+    def get_training_points(self):
+        training_points = self._get_training_points()
+        return self.move_points(training_points)
+
+    def make_random_set(self, n_points):
+        points = self.get_random_points(n_points)
+        return self.move_points(points)
+
+    def make_set(self, n_points, directory):
+        if n_points < 0:
+            points = self.get_training_points()
+        else:
+            points = self.make_random_set(n_points)
+        points.write_to_directory(directory)
 
     def format_gjfs(self):
         for point in self:
@@ -3756,6 +3894,10 @@ class Points:
         return df["error / kJ/mol"]
 
     @property
+    def n_points(self):
+        return len(self._points)
+
+    @property
     def n_gjfs(self):
         n = 0
         for point in self:
@@ -3769,11 +3911,49 @@ class Points:
             n = n + 1 if point.wfn else n
         return n
 
+    @property
+    def nfeats(self):
+        if len(self) > 0:
+            return self[0].nfeats
+        else:
+            return 0
+    
+    @property
+    def natoms(self):
+        if len(self) > 0:
+            return self[0].natoms
+        else:
+            return 0
+
+    @property
+    def range(self):
+        return range(self.n_points)
+
+    @property
+    def features(self):
+        try:
+            return self._features
+        except AttributeError:
+            print("Calculating Features")
+            self._features = [[] for _ in range(self.natoms)]
+            with tqdm(total=self.n_points, unit=" molecules") as progressbar:
+                for point in self:
+                    for i, feature in enumerate(point.features):
+                        self._features[i].append(feature)
+                    progressbar.update()
+            return self._features
+
     def __len__(self):
         return FileTools.count_points_in(self.directory)
     
-    def __delitem__(self, i):
-        del self._points[i]
+    def __delitem__(self, del_point):
+        if isinstance(del_point, (int, np.int64)):
+            del self._points[del_point]
+        elif isinstance(del_point, Point):
+            for i, point in enumerate(self):
+                if point.num == del_point.num:
+                    del self[i]
+                break
 
     def __getitem__(self, i):
         return self._points[i]
@@ -4531,15 +4711,15 @@ class AnalysisTools:
 
 
 class SetupTools:
+    sets = [
+            "training_set",
+            "sample_pool",
+            "validation_set"
+           ]
+
     @staticmethod
-    def directories():
-        directories_to_setup = [
-                                "training_set",
-                                "sample_pool",
-                                "validation_set"
-                               ]
-        
-        for directory in directories_to_setup:
+    def directories():      
+        for directory in SetupTools.sets:
             dir_path = FILE_STRUCTURE[directory]
             empty = False
             if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
@@ -4549,6 +4729,38 @@ class SetupTools:
                     empty = UsefulTools.check_bool(input(f"Would you like to empty {dir_path}? [Y/N]"))
                 FileTools.mkdir(dir_path, empty=empty)
             print()
+    
+    @staticmethod
+    def make_set(set_to_make, points):
+        set_name = UsefulTools.prettify_string(set_to_make)
+        n_points = -1
+        if not set_to_make == "training_set":
+            while True:
+                n_points = int(input(f"Enter number of points for the {set_name}: "))
+                if n_points > 0:
+                    break
+                else:
+                    print("Error: Number of points must be greater than 0")
+        points.make_set(n_points, FILE_STRUCTURE[set_to_make])
+        return points
+        
+
+    @staticmethod
+    def make_sets():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+        set_location = input("Enter XYZ file or Directory containing the Points to use: ")
+        t.remove_completer()
+
+        points = Points()
+        points.read_set(set_location)
+
+        for set_to_make in SetupTools.sets:
+            set_name = UsefulTools.prettify_string(set_to_make)
+            print()
+            ans = input(f"Would you like to make set: {set_name} [Y/N]")
+            if UsefulTools.check_bool(ans):
+                points = SetupTools.make_set(set_to_make, points)
 
 
 class SettingsTools:
@@ -4947,10 +5159,10 @@ def main_menu():
 
     #=== Tools Menu ===#
     tools_menu = Menu(title="Tools Menu")
-    tools_menu.add_option("|convert|", "Convert ICHOR Directory Structure", UsefulTools.not_implemented)
-    tools_menu.add_option("|clean|", "Cleanup Files", UsefulTools.not_implemented)
     tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
+    tools_menu.add_option("make", "Make Sets", SetupTools.make_sets)
     tools_menu.add_option("|cp2k|", "Setup CP2K run", UsefulTools.not_implemented)
+    tools_menu.add_space()
     tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_final_options()
 
