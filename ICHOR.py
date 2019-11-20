@@ -1541,7 +1541,7 @@ class SubmissionScript:
         if self.type is None:
             self.type = "generic"
             
-    def write(self):
+    def write(self, write_data_file=True):
         global SGE
         global FILE_STRUCTURE
 
@@ -1549,7 +1549,7 @@ class SubmissionScript:
         if len(self.jobs) == 0:
             return
 
-        if SGE:
+        if SGE and write_data_file:
             data_directory = FILE_STRUCTURE.get_file_path("jobs")
             FileTools.mkdir(data_directory)
             data_file = os.path.join(data_directory, self.type)
@@ -1729,7 +1729,7 @@ class SubmissionTools:
                      }
 
     @staticmethod
-    def make_g09_script(points, directory="", redo=False, submit=True, hold=None, return_jid=False, modify=None):
+    def make_g09_script(points, directory="", redo=False, submit=True, hold=None, return_jid=False, modify=None, write_data=True):
         global MACHINE
         global GAUSSIAN_CORE_COUNT
 
@@ -1751,7 +1751,7 @@ class SubmissionTools:
             if points and (redo or not os.path.exists(points.wfn_fname)):
                 script.add_job(points.fname)
 
-        script.write()
+        script.write(write_data_file=write_data)
         if submit:
             jid = script.submit(hold=hold, return_jid=return_jid)
             if return_jid:
@@ -2244,7 +2244,7 @@ class AutoTools:
             npoints = POINTS_PER_ITERATION
         points = Points()
         points.make_gjf_template(npoints)
-        return points.submit_gjfs(redo=False, submit=True, hold=jid, return_jid=True, modify=modify)
+        return points.submit_gjfs(redo=False, submit=True, hold=jid, return_jid=True, modify=modify, write_data=False)
 
     @staticmethod
     def submit_wfns(jid=None, npoints=None):
@@ -3535,8 +3535,8 @@ class Points:
         for point in self:
             if point.gjf: point.gjf.write()
     
-    def submit_gjfs(self, redo=False, submit=True, hold=None, return_jid=False, modify=None):
-        return SubmissionTools.make_g09_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, modify=modify)
+    def submit_gjfs(self, redo=False, submit=True, hold=None, return_jid=False, modify=None, write_data=True):
+        return SubmissionTools.make_g09_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, modify=modify, write_data=write_data)
     
     def submit_wfns(self, redo=False, submit=True, hold=None, return_jid=False, check_wfns=True):
         return SubmissionTools.make_aim_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid, check_wfns=check_wfns)
