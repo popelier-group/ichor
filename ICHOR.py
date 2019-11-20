@@ -49,9 +49,11 @@
   [ ] Make a Revert System / Backup System
   [ ] Move EPE calculation to an independent function so more EI Algorithms can be implemented
   [ ] Include Legacy Conversion Tools
-  [ ] Cleanup Training Set Formation Implementation So that any X and y values can be used             /
+  [ ] Cleanup Training Set formation implementation so that any X and y values can be used             /
   [ ] Implement method of locking functions based on what is currently running (e.g. Auto Run)         /
-  [ ] Create a Globals class to cleanup how ICHOR handles global variables
+  [ ] Create a Globals class to cleanup how ICHOR handles global variables                             /
+  [ ] Make 'rewind' option (move added training points back to sample pool)
+  [ ] Make stop auto run flag when an error occurs
 """
 
 #############################################
@@ -631,7 +633,7 @@ class FileTools:
         tree.add("SAMPLE_POOL", "sample_pool")
         tree.add("VALIDATION_SET", "validation_set")
         tree.add("FEREBUS", "ferebus")
-        tree.add("MODELS", "models")
+        tree.add("MODELS", "models", parent="ferebus")
         tree.add("LOG", "log")
         tree.add("PROGRAMS", "programs")
         tree.add("OPT", "opt")
@@ -791,7 +793,12 @@ class FileTools:
             return opt.wfn
         elif required:
             no_opt_found()
-            
+
+    @staticmethod
+    def clear_script_outputs(outputs=True, errors=True):
+        if outputs: FileTools.rmtree(FILE_STRUCTURE["outputs"])
+        if errors: FileTools.rmtree(FILE_STRUCTURE["errors"])
+
 
 class UsefulTools:
 
@@ -1011,23 +1018,115 @@ class UsefulTools:
 
 
 class my_tqdm:
-    def __init__(self, iterator=None, *args, **kwargs):
-        self.iterator = iterator
-    
-    def __next__(self):
-        return next(self.iterator)
-    
-    def update(self):
-        pass
+    """
+    Decorate an iterable object, returning an iterator which acts exactly
+    like the original iterable.
 
-    def set_description(self, desc=None):
-        pass
+    Used to replace tqdm when not writing to std.out, prevents ugly
+    output files, should function identically while doing nothing
+    """
+    def __new__(cls, *args, **kwargs):
+        # Create a new instance
+        instance = object.__new__(cls)
+        return instance
+
+    def __init__(self, iterable=None, desc=None, total=None, leave=True,
+                 file=None, ncols=None, mininterval=0.1, maxinterval=10.0,
+                 miniters=None, ascii=None, disable=False, unit='it',
+                 unit_scale=False, dynamic_ncols=False, smoothing=0.3,
+                 bar_format=None, initial=0, position=None, postfix=None,
+                 unit_divisor=1000, write_bytes=None, lock_args=None,
+                 gui=False, **kwargs):
+                
+        # Store the arguments
+        self.iterable = iterable
+        self.desc = desc or ''
+        self.total = total
+        self.leave = leave
+        self.fp = file
+        self.ncols = ncols
+        self.mininterval = mininterval
+        self.maxinterval = maxinterval
+        self.miniters = miniters
+        self.ascii = ascii
+        self.disable = disable
+        self.unit = unit
+        self.unit_scale = unit_scale
+        self.unit_divisor = unit_divisor
+        self.lock_args = lock_args
+        self.gui = gui
+        self.dynamic_ncols = dynamic_ncols
+        self.bar_format = bar_format
+        self.postfix = None
+
+        # Init the iterations counters
+        self.last_print_n = initial
+        self.n = initial
+
+        self.pos = 0
+
+    def __bool__(self):
+        if self.total is not None:
+            return self.total > 0
+        return bool(self.iterable)
+
+    def __nonzero__(self):
+        return self.__bool__()
+
+    def __len__(self):
+        return 0
 
     def __enter__(self):
         return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
+
+    def __exit__(self, exc_type, exc_value, traceback):
         pass
+
+    def clear(self, nolock=False):
+        pass
+
+    def refresh(self, nolock=False, lock_args=None):
+        pass
+
+    def unpause(self):
+        pass
+
+    def reset(self, total=None):
+        pass
+
+    def set_description(self, desc=None, refresh=True):
+        pass
+
+    def set_description_str(self, desc=None, refresh=True):
+        pass
+
+    def set_postfix(self, ordered_dict=None, refresh=True, **kwargs):
+        pass
+
+    def set_postfix_str(self, s='', refresh=True):
+        pass
+
+    def moveto(self, n):
+        pass
+
+    def update(self):
+        pass
+
+    @property
+    def format_dict(self):
+        pass
+
+    def display(self, msg=None, pos=None):
+        pass
+  
+    def __hash__(self):
+        return id(self)
+
+    def __iter__(self):
+        # Inlining instance variables as locals (speed optimisation)
+        iterable = self.iterable
+        for obj in iterable:
+            yield obj
 
 
 class FerebusTools:
@@ -2191,6 +2290,7 @@ class AutoTools:
         global SUBMITTED
 
         FileTools.clear_log()
+        FileTools.clear_script_outputs()
 
         UsefulTools.suppress_tqdm()
 
@@ -2228,7 +2328,6 @@ class AutoTools:
             print(f"Submitted {script_name}: {jid}")
         
         SUBMITTED = False
-
 
 #========================#
 #      Point Tools       #
@@ -3214,7 +3313,7 @@ class Model:
             self.read(up_to="Number_of_training_points")
 
         nTrain = str(self.nTrain).zfill(4)
-        log_directory = log_directory + f"{self.system_name}{nTrain}"
+        log_directory = os.path.join(log_directory, f"{self.system_name}{nTrain}")
         FileTools.mkdir(log_directory)
         log_model_file = self.get_fname(log_directory)
 
@@ -4506,7 +4605,7 @@ def defineGlobals():
     SUBMITTED = "SGE_O_HOST" in os.environ.keys()
 
     if SUBMITTED:
-        from tqdm import tqdm_notebook as tqdm
+        tqdm = my_tqdm
 
     check_settings = {
                       "BOAQ": "_BOAQ_VALUES",
@@ -4612,16 +4711,6 @@ def defineGlobals():
                 ALF = Atoms.ALF
             except:
                 print("\nError in ALF calculation, please specify file to calculate ALF")
-
-    if ALF:
-        for i in range(len(ALF)):
-            for j in range(len(ALF[i])):
-                ALF[i][j] = int(ALF[i][j])
-
-        if ALF[0][0] == 1:
-            for i in range(len(ALF)):
-                for j in range(len(ALF[i])):
-                    ALF[i][j] -= 1
 
 
 def readArguments():

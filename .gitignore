@@ -4,7 +4,7 @@
 Test/
 *.sh
 *.csv
-testing.py
+testing*.py
 *.xyz
 wily*
 rmsd*
