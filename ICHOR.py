@@ -112,7 +112,7 @@ ENCOMP = 3
 BOAQ = "gs20"
 IASMESH = "fine"
 
-FILE_STRUCTURE = [] # Don't change
+FILE_STRUCTURE = {} # Don't change
 
 KERNEL = "rbf"                # only use rbf for now
 FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
@@ -538,7 +538,6 @@ class ConfigProvider(dict):
        an extra condition to the if statement in loadConfig()
     """
 
-    global DEFAULT_CONFIG_FILE
     src = None
     prop = re.compile(r"([\w. ]+)\s*=\s*(.*)")
 
@@ -591,129 +590,31 @@ class ConfigProvider(dict):
                 f.write("%s=%s\n" % (key, self[key]))
 
 
-def sanitize_id(node_id):
-    return node_id.strip().replace(" ", "")
-
-
-(_ADD, _DELETE, _INSERT) = range(3)
-(_ROOT, _DEPTH, _WIDTH) = range(3)
-
-
 class Node:
-
-    def __init__(self, name, identifier=None, expanded=True, is_file=False):
-        self.__identifier = (str(uuid.uuid1()) if identifier is None else sanitize_id(str(identifier)))
-        self.name = name
-        self.expanded = expanded
-        self.is_file = is_file
-        self.__bpointer = None
-        self.__fpointer = []
-
-    @property
-    def identifier(self):
-        return self.__identifier
-
-    @property
-    def bpointer(self):
-        return self.__bpointer
-
-    @bpointer.setter
-    def bpointer(self, value):
-        if value is not None:
-            self.__bpointer = sanitize_id(value)
-
-    @property
-    def fpointer(self):
-        return self.__fpointer
-
-    def update_fpointer(self, identifier, mode=_ADD):
-        if mode is _ADD:
-            self.__fpointer.append(sanitize_id(identifier))
-        elif mode is _DELETE:
-            self.__fpointer.remove(sanitize_id(identifier))
-        elif mode is _INSERT:
-            self.__fpointer = [sanitize_id(identifier)]
+  def __init__(self, name, parent):
+    self.name = name
+    self.parent = parent
+  
+  def __str__(self):
+    if self.parent is None:
+      return self.name
+    return str(self.parent) + os.sep + self.name
+  
+  def __repr__(self):
+    return str(self)
 
 
 class Tree:
+  def __init__(self):
+    self._dict = {}
 
-    def __init__(self):
-        self.nodes = []
-
-    def get_index(self, position):
-        for index, node in enumerate(self.nodes):
-            if node.identifier == position:
-                break
-        return index
-
-    def create_node(self, name, identifier=None, parent=None, is_file=False):
-        node = Node(name, identifier, is_file=is_file)
-        self.nodes.append(node)
-        self.__update_fpointer(parent, node.identifier, _ADD)
-        node.bpointer = parent
-        return node
-
-    def show(self, position, level=_ROOT):
-        queue = self[position].fpointer
-        if level == _ROOT:
-            print("{0} [{1}]".format(self[position].name, self[position].identifier))
-        else:
-            print("\t"*level, "{0} [{1}]".format(self[position].name, self[position].identifier))
-        if self[position].expanded:
-            level += 1
-            for element in queue:
-                self.show(element, level)  # recursive call
-
-    def expand_tree(self, position, mode=_DEPTH):
-        # Python generator. Loosly based on an algorithm from 'Essential LISP' by
-        # John R. Anderson, Albert T. Corbett, and Brian J. Reiser, page 239-241
-        yield position
-        queue = self[position].fpointer
-        while queue:
-            yield queue[0]
-            expansion = self[queue[0]].fpointer
-            if mode is _DEPTH:
-                queue = expansion + queue[1:]  # depth-first
-            elif mode is _WIDTH:
-                queue = queue[1:] + expansion  # width-first
-
-    def is_branch(self, position):
-        return self[position].fpointer
-
-    def get_bpointer(self, position):
-        return self[position].bpointer
-
-    def get_file_path(self, position):
-        file_path = [self[position].name]
-        pos = position
-        while self.get_bpointer(pos):
-            file_path += [self[self.get_bpointer(pos)].name]
-            pos = self.get_bpointer(pos)
-        file_path = os.path.join(*list(reversed(file_path[:-1])), '')
-        if self[position].is_file:
-            file_path = file_path.rstrip(os.sep)
-        return file_path
-
-    def __update_fpointer(self, position, identifier, mode):
-        if position is None:
-            return
-        else:
-            self[position].update_fpointer(identifier, mode)
-
-    def __update_bpointer(self, position, identifier):
-        self[position].bpointer = identifier
-
-    def __getitem__(self, key):
-        return self.nodes[self.get_index(key)]
-
-    def __setitem__(self, key, item):
-        self.nodes[self.get_index(key)] = item
-
-    def __len__(self):
-        return len(self.nodes)
-
-    def __contains__(self, identifier):
-        return [node.identifier for node in self.nodes if node.identifier is identifier]
+  def add(self, name, id, parent=None):
+    if not parent is None:
+      parent = self[parent]
+    self._dict[id] = Node(name, parent)
+  
+  def __getitem__(self, id):
+    return str(self._dict[id])
 
 
 class FileTools:
@@ -726,34 +627,31 @@ class FileTools:
     def setup_file_structure():
         tree = Tree()
 
-        tree.create_node("ICHOR", "file_locs")
+        tree.add("TRAINING_SET", "training_set")
+        tree.add("SAMPLE_POOL", "sample_pool")
+        tree.add("VALIDATION_SET", "validation_set")
+        tree.add("FEREBUS", "ferebus")
+        tree.add("MODELS", "models")
+        tree.add("LOG", "log")
+        tree.add("PROGRAMS", "programs")
+        tree.add("OPT", "opt")
 
-        tree.create_node("TRAINING_SET", "training_set", parent="file_locs")
-        tree.create_node("SAMPLE_POOL", "sample_pool", parent="file_locs")
-        tree.create_node("VALIDATION_SET", "validation_set", parent="file_locs")
-        tree.create_node("FEREBUS", "ferebus", parent="file_locs")
-        tree.create_node("MODELS", "models", parent="ferebus")
-        tree.create_node("LOG", "log", parent="file_locs")
-        tree.create_node("PROGRAMS", "programs", parent="file_locs")
-        tree.create_node("OPT", "opt", parent="file_locs")
-        tree.create_node("TEMP", "temp", parent="file_locs")
+        tree.add("DLPOLY", "dlpoly")
+        tree.add("GJF", "dlpoly_gjf", parent="dlpoly")
 
-        tree.create_node("DLPOLY", "dlpoly", parent="file_locs")
-        tree.create_node("GJF", "dlpoly_gjf", parent="dlpoly")
+        tree.add(".DATA", "data")
+        tree.add("data", "data_file", parent="data")
 
-        tree.create_node(".DATA", "data", parent="file_locs")
-        tree.create_node("data", "data_file", parent="data", is_file=True)
+        tree.add("JOBS", "jobs", parent="data")
+        tree.add("jid", "jid", parent="jobs")
 
-        tree.create_node("JOBS", "jobs", parent="data")
-        tree.create_node("jid", "jid", parent="jobs", is_file=True)
+        tree.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
+        tree.add("alpha", "alpha", parent="adaptive_sampling")
+        tree.add("cv_errors", "cv_errors", parent="adaptive_sampling")
 
-        tree.create_node("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
-        tree.create_node("alpha", "alpha", parent="adaptive_sampling", is_file=True)
-        tree.create_node("cv_errors", "cv_errors", parent="adaptive_sampling", is_file=True)
-
-        tree.create_node("SCRIPTS", "scripts", parent="data")
-        tree.create_node("OUTPUTS", "outputs", parent="scripts")
-        tree.create_node("ERRORS", "errors", parent="scripts")
+        tree.add("SCRIPTS", "scripts", parent="data")
+        tree.add("OUTPUTS", "outputs", parent="scripts")
+        tree.add("ERRORS", "errors", parent="scripts")
 
         return tree
 
@@ -841,12 +739,10 @@ class FileTools:
 
     @staticmethod
     def write_to_file(data, file=None):
-        global FILE_STRUCTURE
-
         if file is None:
             file = "data_file"
         
-        file = FILE_STRUCTURE.get_file_path(file)
+        file = FILE_STRUCTURE[file]
         FileTools.mkdir(os.path.dirname(file))
 
         with open(file, "w") as f:
@@ -886,8 +782,7 @@ class FileTools:
                 print("Exiting...")
             quit()
 
-        global FILE_STRUCTURE
-        opt_dir = FILE_STRUCTURE.get_file_path("opt")
+        opt_dir = FILE_STRUCTURE["opt"]
         if not os.path.isdir(opt_dir) and required:
             no_opt_found()
         opt = Point(opt_dir)
@@ -974,7 +869,7 @@ class UsefulTools:
 
     @staticmethod
     def nTrain():
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
+        ts_dir = FILE_STRUCTURE["training_set"]
         return FileTools.count_points_in(ts_dir)
 
     @staticmethod
@@ -1139,10 +1034,6 @@ class FerebusTools:
     @staticmethod
     def write_finput(directory, natoms, atom, training_set_size, 
                        predictions=0, nproperties=1, optimization="pso"):
-        global SYSTEM_NAME
-        global KERNEL
-        global FEREBUS_VERSION
-
         finput_fname = os.path.join(directory, "FINPUT.txt")
         atom_num = re.findall("\d+", atom)[0]
 
@@ -1259,8 +1150,6 @@ class ProblemFinder:
 
     @UsefulTools.runFunc(1)
     def check_alf(self):
-        global ALF
-
         if len(ALF) < 1:
             self.add(Problem(name="ALF", 
                              problem="ALF not set due to error in calculation",
@@ -1269,12 +1158,10 @@ class ProblemFinder:
     
     @UsefulTools.runFunc(2)
     def check_directories(self):
-        global FILE_STRUCTURE
-
         dirs_to_check = ["training_set", "sample_pool"]
 
         for dir_name in dirs_to_check:
-            dir_path = FILE_STRUCTURE.get_file_path(dir_name)
+            dir_path = FILE_STRUCTURE[dir_name]
             if not os.path.isdir(dir_path):
                 self.add(Problem(name="Directory Not Found", 
                                  problem=f"Could not find: {dir_path}",
@@ -1283,7 +1170,6 @@ class ProblemFinder:
 
     @UsefulTools.runFunc(3)
     def check_system(self):
-        global SYSTEM_NAME
         if SYSTEM_NAME == "SYSTEM":
             self.add(Problem(name="SYSTEM_NAME", 
                              problem="SYSTEM_NAME not been set, defaulted to SYSTEM",
@@ -1292,7 +1178,6 @@ class ProblemFinder:
     
     @UsefulTools.runFunc(4)
     def check_settings(self):
-        global _unknown_settings
         for setting in _unknown_settings:
             self.add(Problem(name=f"Unknown setting found in config", 
                              problem=f"Unknown setting: {setting}",
@@ -1303,8 +1188,6 @@ class ProblemFinder:
         self.problems.append(problem)
 
     def find(self):
-        global DISABLE_PROBLEMS
-
         if not DISABLE_PROBLEMS:
             problems_to_find = UsefulTools.get_functions_to_run(self)
             for find_problem in problems_to_find:
@@ -1382,7 +1265,6 @@ class Job:
         self.options[option] = value
 
     def gaussian_setup(self):
-        global MACHINE
         self._reset()
 
         if "csf" in MACHINE.lower():
@@ -1394,9 +1276,6 @@ class Job:
             self.run_cmd = "g09"
 
     def ferebus_setup(self):
-        global FEREBUS_LOCATION
-        global FEREBUS_VERSION
-        global _IQA_MODELS
         self._reset()
 
         self.setup = f"pushd {self.infile}\n"
@@ -1413,10 +1292,6 @@ class Job:
         self.outfile_write = ""
 
     def aimall_setup(self):
-        global BOAQ
-        global ENCOMP
-        global IASMESH
-        global AIMALL_CORE_COUNT
         self._reset()
 
         self.run_cmd = "~/AIMAll/aimqb.ish"
@@ -1441,8 +1316,6 @@ class Job:
         self.outfile = ""
     
     def dlpoly_setup(self):
-        global DLPOLY_LOCATION
-
         self._reset()
         self.setup = f"pushd {self.infile}\n"
         self.run_cmd = os.path.abspath(DLPOLY_LOCATION)
@@ -1578,7 +1451,6 @@ class SubmissionScript:
 
     @property
     def queue(self):
-        global MACHINE
         return Queues().get_queue(MACHINE.lower(), self.cores)
 
     def check_settings(self):
@@ -1587,10 +1459,9 @@ class SubmissionScript:
             self.type = "generic"
 
     def setup_script_directories(self):
-        global FILE_STRUCTURE
-        script_dir = FILE_STRUCTURE.get_file_path("scripts")
-        output_dir = FILE_STRUCTURE.get_file_path("outputs")
-        errors_dir = FILE_STRUCTURE.get_file_path("errors")
+        script_dir = FILE_STRUCTURE["scripts"]
+        output_dir = FILE_STRUCTURE["outputs"]
+        errors_dir = FILE_STRUCTURE["errors"]
 
         FileTools.mkdir(script_dir)
         FileTools.mkdir(output_dir)
@@ -1599,9 +1470,6 @@ class SubmissionScript:
         return script_dir, output_dir, errors_dir
 
     def write(self, write_data=True):
-        global SGE
-        global FILE_STRUCTURE
-
         script_dir, output_dir, errors_dir = self.setup_script_directories()
         
         self.fname = os.path.join(script_dir, self.fname)
@@ -1613,7 +1481,7 @@ class SubmissionScript:
             return
 
         if SGE:
-            data_directory = FILE_STRUCTURE.get_file_path("jobs")
+            data_directory = FILE_STRUCTURE["jobs"]
             FileTools.mkdir(data_directory)
             data_file = os.path.join(data_directory, self.type)
             abs_data_file = os.path.abspath(data_file)
@@ -1698,8 +1566,6 @@ class _Queues:
         self.add(_Queue(name, low, high))
     
     def get_queue(self, ncores):
-        global DEFAULT_CONFIG_FILE
-
         for queue in self:
             if ncores >= queue.low and ncores <= queue.high:
                 return queue.name
@@ -1797,9 +1663,6 @@ class SubmissionTools:
 
     @staticmethod
     def make_g09_script(points, directory="", redo=False, submit=True, hold=None, return_jid=False, modify=None, write_data=True):
-        global MACHINE
-        global GAUSSIAN_CORE_COUNT
-
         name = os.path.join(directory, "GaussSub.sh")
 
         job_type = "gaussian"
@@ -1827,9 +1690,6 @@ class SubmissionTools:
     
     @staticmethod
     def make_aim_script(points, directory="", check_wfns=True, redo=False, submit=True, hold=None, return_jid=False, write_data=True):
-        global MACHINE
-        global AIMALL_CORE_COUNT
-
         if check_wfns:
             points.check_wfns()
 
@@ -1859,10 +1719,6 @@ class SubmissionTools:
     
     @staticmethod
     def make_ferebus_script(model_directories, directory="", submit=True, hold=None, return_jid=False, write_data=True):
-        global MACHINE
-        global FEREBUS_VERSION
-        global FEREBUS_CORE_COUNT
-
         name = os.path.join(directory, "FereSub.sh")
         script = SubmissionScript(name=name, type="ferebus", cores=FEREBUS_CORE_COUNT)
 
@@ -1901,9 +1757,6 @@ class SubmissionTools:
 
     @staticmethod
     def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None, return_jid=False):
-        global MACHINE
-        global DLPOLY_CORE_COUNT
-
         name = os.path.join(directory, "DlpolySub.sh")
         script = SubmissionScript(name=name, type="dlpoly", cores=DLPOLY_CORE_COUNT)
 
@@ -1965,7 +1818,7 @@ class BatchTools:
         job_line = {}
         job = SGE_Job("", "")
         
-        jid_fname = FILE_STRUCTURE.get_file_path("jid")
+        jid_fname = FILE_STRUCTURE["jid"]
         submitted_jobs = BatchTools._read_jids(jid_fname)
 
         for line in output.split("\n"):
@@ -1990,13 +1843,9 @@ class BatchTools:
 
     @staticmethod
     def qsub(script, hold=None, return_jid=False):
-        global SGE
-        global SUBMITTED
-        global FILE_STRUCTURE
-
-        data_dir = FILE_STRUCTURE.get_file_path("jobs")
+        data_dir = FILE_STRUCTURE["jobs"]
         FileTools.mkdir(data_dir)
-        jid_fname = FILE_STRUCTURE.get_file_path("jid")
+        jid_fname = FILE_STRUCTURE["jid"]
         jid_file = open(jid_fname, "a")
 
         qsub_cmd = ""
@@ -2022,7 +1871,7 @@ class BatchTools:
 
     @staticmethod
     def qdel():
-        jid_fname = FILE_STRUCTURE.get_file_path("jid")
+        jid_fname = FILE_STRUCTURE["jid"]
         BatchTools._cleanup_jids(jid_fname)
         with open(jid_fname, "r") as f:
             for jid in f:
@@ -2252,32 +2101,28 @@ class SGE_Jobs:
 class AutoTools:
     @staticmethod
     def submit_ichor_gjfs(jid=None, directory=None):
-        global FILE_STRUCTURE
         if not directory:
-            directory = FILE_STRUCTURE.get_file_path("training_set")
+            directory = FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor("submit_gjfs", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
     def submit_ichor_wfns(jid=None, directory=None):
-        global FILE_STRUCTURE
         if not directory:
-            directory = FILE_STRUCTURE.get_file_path("training_set")
+            directory = FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
     def submit_ichor_models(jid=None, directory=None, type=None):
-        global FILE_STRUCTURE
         if not directory:
-            directory = FILE_STRUCTURE.get_file_path("training_set")
+            directory = FILE_STRUCTURE["training_set"]
         if not type:
             type = "iqa"
         return AutoTools.submit_ichor("_make_models", directory, type, submit=True, hold=jid, return_jid=True)
     
     @staticmethod
     def submit_ichor_errors(jid=None):
-        global FILE_STRUCTURE
-        sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
-        model_dir = FILE_STRUCTURE.get_file_path("models")
+        sp_dir = FILE_STRUCTURE["sample_pool"]
+        model_dir = FILE_STRUCTURE["models"]
         return AutoTools.submit_ichor("calculate_errors", model_dir, sp_dir, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
@@ -2306,7 +2151,6 @@ class AutoTools:
 
     @staticmethod
     def submit_gjfs(jid=None, npoints=None, modify=None, write_data=True):
-        global POINTS_PER_ITERATION
         if npoints is None:
             npoints = POINTS_PER_ITERATION
         points = Points()
@@ -2315,7 +2159,6 @@ class AutoTools:
 
     @staticmethod
     def submit_wfns(jid=None, npoints=None, write_data=True):
-        global POINTS_PER_ITERATION
         if npoints is None:
             npoints = POINTS_PER_ITERATION
         points = Points()
@@ -2325,7 +2168,7 @@ class AutoTools:
     @staticmethod
     def submit_models(jid=None, directory=None, write_data=True):
         if not directory:
-            directory = FILE_STRUCTURE.get_file_path("training_set")
+            directory = FILE_STRUCTURE["training_set"]
         gjf = Points(directory, read_gjfs=True, first=True)[0]
         return SubmissionTools.make_ferebus_script(gjf.atoms.atoms, submit=True, hold=jid, return_jid=True, write_data=write_data)
 
@@ -2345,8 +2188,6 @@ class AutoTools:
 
     @staticmethod
     def run():
-        global MAX_ITERATION
-        global FILE_STRUCTURE
         global SUBMITTED
 
         FileTools.clear_log()
@@ -2364,7 +2205,7 @@ class AutoTools:
                 ]
 
         jid = None
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
+        ts_dir = FILE_STRUCTURE["training_set"]
         npoints = FileTools.count_points_in(ts_dir)
 
         logging.info("Starting ICHOR Auto Run")
@@ -2578,12 +2419,10 @@ class Atom:
 
     @property
     def mass(self):
-        global type2mass
         return type2mass[self.atom_type]
     
     @property
     def radius(self):
-        global type2rad
         return type2rad[self.atom_type]
 
     @property
@@ -2908,7 +2747,6 @@ class Point:
             self.system_name = self.point_name.replace(self.point_num, "")
             self.point_num = int(self.point_num)
         except (IndexError, ValueError):
-            global SYSTEM_NAME
             self.point_num = 1
             self.system_name = SYSTEM_NAME
 
@@ -3017,13 +2855,6 @@ class GJF(Point):
         return GJF.jobs[self.job_type]
 
     def format(self):
-        global METHOD
-        global KEYWORDS
-        global BASIS_SET
-        global _GAUSSIAN_METHODS
-        global GAUSSIAN_CORE_COUNT
-        global DEFAULT_CONFIG_FILE
-
         if UsefulTools.in_sensitive(METHOD, _GAUSSIAN_METHODS):
             self.method = METHOD
         else:
@@ -3079,8 +2910,6 @@ class GJF(Point):
 
 
 class WFN(Point):
-    global METHOD
-
     def __init__(self, fname="", read=False):
         self.fname = fname
         self.split_fname()
@@ -3122,8 +2951,6 @@ class WFN(Point):
                     self.virial = line.split()[-1]
 
     def read_header(self):
-        global METHOD
-
         data = re.findall(r"\s\d+\s", self.header)
 
         self.mol_orbitals = int(data[0])
@@ -3267,8 +3094,6 @@ class INT(Point):
 
 class Model:
     def __init__(self, fname, read_model=False):
-        global KERNEL
-
         self.fname = fname
 
         kernels = {
@@ -3382,7 +3207,7 @@ class Model:
         return os.path.join(directory, basename)
     
     def copy_to_log(self):
-        log_directory = FILE_STRUCTURE.get_file_path("log")
+        log_directory = FILE_STRUCTURE["log"]
         FileTools.mkdir(log_directory)
 
         if self.nTrain == 0:
@@ -3580,9 +3405,7 @@ class Models:
         return np.array(cross_validation_errors)
     
     def calc_alpha(self):
-        global FILE_STRUCTURE
-
-        alpha_loc = FILE_STRUCTURE.get_file_path("alpha")
+        alpha_loc = FILE_STRUCTURE["alpha"]
         if not os.path.exists(alpha_loc):
             return 0.5
 
@@ -3610,9 +3433,7 @@ class Models:
         return alpha * cv_errors + (1-alpha) * variances
 
     def write_data(self, indices, points):
-        global FILE_STRUCTURE
-        
-        adaptive_sampling = FILE_STRUCTURE.get_file_path("adaptive_sampling")
+        adaptive_sampling = FILE_STRUCTURE["adaptive_sampling"]
         FileTools.mkdir(adaptive_sampling)
 
         cv_errors = self.cross_validation(points)
@@ -3623,12 +3444,10 @@ class Models:
         
         data["cv_errors"] = [float(cv_errors[index]) for index in indices]
         data["predictions"] = [predictions[index] for index in indices]
-        with open(FILE_STRUCTURE.get_file_path("cv_errors"), "w") as f:
+        with open(FILE_STRUCTURE["cv_errors"], "w") as f:
             json.dump(data, f)
 
     def expected_improvement(self, points):
-        global POINTS_PER_ITERATION
-
         best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
         points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
         self.write_data(points_to_add, points)
@@ -3684,7 +3503,6 @@ class Points:
             if move: self.move(point)
 
     def move(self, point):
-        global SYSTEM_NAME
         old_directory = point.directory
 
         new_index = len(self) + 1
@@ -3719,9 +3537,6 @@ class Points:
             point.wfn.check_functional()
 
     def check_wfns(self):
-        global METHOD
-        global AIMALL_FUNCTIONALS
-
         n_wfns = self.n_wfns
         n_gjfs = self.n_gjfs
         if n_gjfs != n_wfns:
@@ -3743,13 +3558,11 @@ class Points:
             print("All wfns complete.")
 
     def make_gjf_template(self, n_points):
-        global SYSTEM_NAME
         for i in range(n_points):
             gjf_fname = os.path.join(self.directory, SYSTEM_NAME + str(i+1).zfill(4) + ".gjf")
             self.add_point(Point(gjf_fname=gjf_fname))
     
     def make_wfn_template(self, n_points):
-        global SYSTEM_NAME
         for i in range(n_points):
             wfn_fname = os.path.join(self.directory, SYSTEM_NAME + str(i+1).zfill(4) + ".wfn")
             self.add_point(Point(wfn_fname=wfn_fname))
@@ -3766,9 +3579,7 @@ class Points:
         return training_sets, nproperties
 
     def update_alpha(self):
-        global FILE_STRUCTURE
-
-        cv_file = FILE_STRUCTURE.get_file_path("cv_errors")
+        cv_file = FILE_STRUCTURE["cv_errors"]
         if not os.path.exists(cv_file):
             return
 
@@ -3796,19 +3607,17 @@ class Points:
                 true_error += (true_value[int(predicted_atom)-1] - predicted_value)**2
             data["true_errors"].append(true_error)
 
-        FileTools.mkdir(FILE_STRUCTURE.get_file_path("adaptive_sampling"))
-        alpha_file = FILE_STRUCTURE.get_file_path("alpha")
+        FileTools.mkdir(FILE_STRUCTURE["adaptive_sampling"])
+        alpha_file = FILE_STRUCTURE["alpha"]
         with open(alpha_file, "w") as f:
             json.dump(data, f)
 
     def make_training_set(self, model_type):
-        global FILE_STRUCTURE
-
         training_sets, nproperties = self.get_training_sets(model_type)
-        FileTools.mkdir(FILE_STRUCTURE.get_file_path("ferebus"), empty=True)
+        FileTools.mkdir(FILE_STRUCTURE["ferebus"], empty=True)
         model_directories = []
         for atom, training_set in training_sets.items():
-            directory = os.path.join(FILE_STRUCTURE.get_file_path("ferebus"), atom)
+            directory = os.path.join(FILE_STRUCTURE["ferebus"], atom)
             FileTools.mkdir(directory, empty=True)
             training_set_file = os.path.join(directory, atom + "_TRAINING_SET.txt")
             with open(training_set_file, "w") as f:
@@ -3971,7 +3780,6 @@ class PointTools:
 
 class SSH:
     def __init__(self, machine):
-        global EXTERNAL_MACHINES
         try:
             import paramiko
         except ImportError:
@@ -4085,23 +3893,6 @@ class DlpolyTools:
 
     @staticmethod
     def write_control(control_file):
-        global KERNEL
-        global SYSTEM_NAME
-
-        global DLPOLY_TIMESTEP
-        global DLPOLY_TEMPERATURE
-        global DLPOLY_PRINT_EVERY
-        global DLPOLY_NUMBER_OF_STEPS
-
-        global DLPOLY_CHECK_CONVERGENCE
-        global DLPOLY_CONVERGENCE_CRITERIA
-
-        global DLPOLY_MAX_ENERGY
-        global DLPOLY_MAX_FORCE
-        global DLPOLY_RMS_FORCE
-        global DLPOLY_MAX_DISP
-        global DLPOLY_RMS_DISP
-
         with open(control_file, "w+") as f:
             f.write(f"Title: {SYSTEM_NAME}\n")
             f.write("# This is a generic CONTROL file. Please adjust to your requirement.\n")
@@ -4157,9 +3948,6 @@ class DlpolyTools:
 
     @staticmethod
     def write_field(field_file, atoms):
-        global SYSTEM_NAME
-        global dlpoly_weights
-
         with open(field_file, "w") as f:
             f.write("DL_FIELD v3.00\nUnits internal\nMolecular types 1\n")
             f.write(f"Molecule name {SYSTEM_NAME}\n")
@@ -4171,8 +3959,6 @@ class DlpolyTools:
 
     @staticmethod
     def write_kriging(kriging_file, atoms, models):
-        global SYSTEM_NAME
-
         atoms.calculate_alf()
         models.read()
 
@@ -4195,8 +3981,6 @@ class DlpolyTools:
 
     @staticmethod
     def setup_dlpoly_dir(dlpoly_dir, models):
-        global FILE_STRUCTURE
-
         FileTools.mkdir(dlpoly_dir)
 
         control_file = os.path.join(dlpoly_dir, "CONTROL")
@@ -4205,7 +3989,7 @@ class DlpolyTools:
         kriging_file = os.path.join(dlpoly_dir, "KRIGING.txt")
         dlpoly_model_dir = os.path.join(dlpoly_dir, "model_krig")
 
-        sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
+        sp_dir = FILE_STRUCTURE["sample_pool"]
 
         atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
         atoms.finish()
@@ -4218,9 +4002,7 @@ class DlpolyTools:
 
     @staticmethod
     def setup_model(model_directory=None):
-        global FILE_STRUCTURE
-
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
         models = Models(model_directory)
         
         model_dir_name = FileTools.end_of_path(model_directory)
@@ -4231,18 +4013,14 @@ class DlpolyTools:
 
     @staticmethod
     def run_on_model():
-        global FILE_STRUCTURE
-        model_dir = FILE_STRUCTURE.get_file_path("models")
+        model_dir = FILE_STRUCTURE["models"]
 
         dlpoly_directories = [DlpolyTools.setup_model(model_dir)]
         SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True)
 
     @staticmethod
     def run_on_log():
-        global SYSTEM_NAME
-        global FILE_STRUCTURE
-
-        log_dir = FILE_STRUCTURE.get_file_path("log")
+        log_dir = FILE_STRUCTURE["log"]
 
         model_dirs = FileTools.get_files_in(log_dir, SYSTEM_NAME + "*/")
         dlpoly_directories = []
@@ -4255,9 +4033,7 @@ class DlpolyTools:
     @staticmethod
     @UsefulTools.externalFunc()
     def calculate_gaussian_energies():
-        global FILE_STRUCTURE
-
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
         trajectory_files = {}
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
@@ -4276,9 +4052,7 @@ class DlpolyTools:
     @staticmethod
     @UsefulTools.externalFunc()
     def get_wfn_energies():
-        global FILE_STRUCTURE
-
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
         points = Points(dlpoly_dir, read_wfns=True)
         energy_file = os.path.join(dlpoly_dir, "Energies.txt")
         with open(energy_file, "w") as f:
@@ -4290,12 +4064,10 @@ class DlpolyTools:
 
     @staticmethod
     def auto_run():
-        global FILE_STRUCTURE
-
-        FileTools.rmtree(FILE_STRUCTURE.get_file_path("dlpoly"))
+        FileTools.rmtree(FILE_STRUCTURE["dlpoly"])
         FileTools.clear_log()
 
-        log_dir = FILE_STRUCTURE.get_file_path("log")
+        log_dir = FILE_STRUCTURE["log"]
         npoints = FileTools.count_models(log_dir)
 
         _, jid = DlpolyTools.run_on_log()
@@ -4305,8 +4077,6 @@ class DlpolyTools:
 
     @staticmethod
     def calculate_trajectory_wfn(trajectory_file, d=None):
-        global SYSTEM_NAME
-
         if os.path.isdir(trajectory_file):
             trajectory_file = os.path.join(trajectory_file, "TRAJECTORY.xyz")
 
@@ -4331,7 +4101,7 @@ class DlpolyTools:
         
     @staticmethod
     def calculate_trajectories_wfn():
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
         jid = None
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
@@ -4353,7 +4123,7 @@ class DlpolyTools:
     def get_trajectory_energies():
         import pandas as pd
 
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
 
         trajectories = {}
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
@@ -4371,8 +4141,6 @@ class DlpolyTools:
     
     @staticmethod
     def auto_traj_analysis():
-        global DLPOLY_NUMBER_OF_STEPS
-
         if DlpolyTools.model_loc == "all":
             jid = DlpolyTools.calculate_trajectories_wfn()
             AutoTools.submit_dlpoly_trajectories_energies(jid)
@@ -4405,11 +4173,9 @@ class DlpolyTools:
 
     @staticmethod
     def choose_model():
-        global FILE_STRUCTURE
-
         model_menu = Menu(title="Select Model Directory", auto_close=True)
 
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
         model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
         i = 1
         for model_dir in model_dirs:
@@ -4461,8 +4227,8 @@ class DlpolyTools:
         
     @staticmethod
     def check_model_links():
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
-        log_dir = FILE_STRUCTURE.get_file_path("log")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        log_dir = FILE_STRUCTURE["log"]
 
         model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
         log_dirs = FileTools.get_files_in(log_dir, "*/")
@@ -4476,7 +4242,7 @@ class DlpolyTools:
         opt_wfn = FileTools.get_opt(required=True)
         opt_atoms = opt_wfn._atoms
         opt_atoms.to_angstroms()
-        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
 
         rmsd = []
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
@@ -4530,7 +4296,6 @@ class S_CurveTools:
     
     @staticmethod
     def set_model_from_log():
-        global SYSTEM_NAME
         log_menu = Menu(title = "Select Model From Log", auto_close=True)
         for i, model in enumerate(FileTools.get_files_in(S_CurveTools.log_loc, "*/")):
             log_menu.add_option(f"{i+1}", model, S_CurveTools.set_model_dir, kwargs={"directory": model})
@@ -4617,11 +4382,11 @@ class S_CurveTools:
 
     @staticmethod
     def run():
-        S_CurveTools.vs_loc = FILE_STRUCTURE.get_file_path("validation_set")
-        S_CurveTools.sp_loc = FILE_STRUCTURE.get_file_path("sample_pool")
+        S_CurveTools.vs_loc = FILE_STRUCTURE["validation_set"]
+        S_CurveTools.sp_loc = FILE_STRUCTURE["sample_pool"]
 
-        S_CurveTools.model_loc = FILE_STRUCTURE.get_file_path("models")
-        S_CurveTools.log_loc = FILE_STRUCTURE.get_file_path("log")
+        S_CurveTools.model_loc = FILE_STRUCTURE["models"]
+        S_CurveTools.log_loc = FILE_STRUCTURE["log"]
 
         S_CurveTools.validation_set = S_CurveTools.vs_loc
         S_CurveTools.models = S_CurveTools.model_loc
@@ -4654,11 +4419,9 @@ class AnalysisTools:
 
     @staticmethod
     def recovery_errors():
-        global FILE_STRUCTURE
-
-        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
-        sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
-        vs_dir = FILE_STRUCTURE.get_file_path("validation_set")
+        ts_dir = FILE_STRUCTURE["training_set"]
+        sp_dir = FILE_STRUCTURE["sample_pool"]
+        vs_dir = FILE_STRUCTURE["validation_set"]
 
         error_menu = Menu(title="Recovery Error Menu", auto_close=True)
         error_menu.add_option("1", "Calculate Recovery Errors of Training Set", AnalysisTools.calculate_recovery_errors, kwargs={"directory": ts_dir}, wait=True)
@@ -4671,8 +4434,6 @@ class AnalysisTools:
 class SetupTools:
     @staticmethod
     def directories():
-        global FILE_STRUCTURE
-
         directories_to_setup = [
                                 "training_set",
                                 "sample_pool",
@@ -4680,7 +4441,7 @@ class SetupTools:
                                ]
         
         for directory in directories_to_setup:
-            dir_path = FILE_STRUCTURE.get_file_path(directory)
+            dir_path = FILE_STRUCTURE[directory]
             empty = False
             if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
                 if os.path.isdir(dir_path):
@@ -4822,10 +4583,6 @@ def defineGlobals():
     
     for setting, allowed_values in check_settings.items():
         if globals()[setting] not in globals()[allowed_values]:
-            # print("Error: Unknown " + setting + " setting")
-            # print("Allowed settings:")
-            # print(globals()[allowed_values])
-            # print("Setting " + setting + " to: %s" % default_settings[setting])
             globals()[setting] = default_settings[setting]
 
     modify_settings = {
@@ -4840,13 +4597,13 @@ def defineGlobals():
     if not ALF:
         if not alf_reference_file:
             try:
-                alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("training_set"))
+                alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["training_set"])
             except:
                 try:
-                    alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("sample_pool"))
+                    alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["sample_pool"])
                 except:
                     try:
-                        alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("validation_set"))
+                        alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["validation_set"])
                     except:
                         pass
         if alf_reference_file:
@@ -4856,15 +4613,15 @@ def defineGlobals():
             except:
                 print("\nError in ALF calculation, please specify file to calculate ALF")
 
-    # if ALF:
-    #     for i in range(len(ALF)):
-    #         for j in range(len(ALF[i])):
-    #             ALF[i][j] = int(ALF[i][j])
+    if ALF:
+        for i in range(len(ALF)):
+            for j in range(len(ALF[i])):
+                ALF[i][j] = int(ALF[i][j])
 
-    #     if ALF[0][0] == 1:
-    #         for i in range(len(ALF)):
-    #             for j in range(len(ALF[i])):
-    #                 ALF[i][j] -= 1
+        if ALF[0][0] == 1:
+            for i in range(len(ALF)):
+                for j in range(len(ALF[i])):
+                    ALF[i][j] -= 1
 
 
 def readArguments():
@@ -4877,15 +4634,6 @@ def readArguments():
     allowed_functions = ",".join(_external_functions.keys())
 
     parser = ArgumentParser(description="ICHOR: A kriging training suite")
-
-    parser.add_argument("-a", "--auto", dest="auto_sub", action="store_true",
-                        help="Run ICHOR in Auto Submission Mode")
-
-    parser.add_argument("-i", "--iteration", dest="iteration", type=int, metavar='i',
-                        help="Current iteration during Auto Submission Mode")
-
-    parser.add_argument("-s", "--step", dest="step", type=int, metavar='s',
-                        help="Current ICHOR step during Auto Submission Mode")
     
     parser.add_argument("-c", "--config", dest="config_file", type=str,
                         help="Name of Config File for ICHOR")
@@ -4897,16 +4645,7 @@ def readArguments():
 
     if args.config_file:
         DEFAULT_CONFIG_FILE = args.config_file
-
-    if args.auto_sub:
-        AUTO_SUBMISSION_MODE = True
-
-        if args.iteration:
-            ITERATION = args.iteration
-
-        if args.step:
-            STEP = args.step
-    
+   
     if args.func:
         func = args.func[0]
 
@@ -4951,8 +4690,6 @@ def _ssh(machine):
 
 
 def ssh():
-    global EXTERNAL_MACHINES
-
     ssh_menu = Menu(title="SSH Menu")
     for i, machine in enumerate(EXTERNAL_MACHINES.keys()):
         ssh_menu.add_option(f"{i+1}", machine.upper(), _ssh, kwargs={"machine": machine}, auto_close=True)
@@ -4977,9 +4714,8 @@ def submit_wfns(directory):
 
 @UsefulTools.externalFunc()
 def move_models(model_file, IQA=False, copy_to_log=True):
-    global FILE_STRUCTURE
     logging.info("Moving Completed Models")
-    model_directory = FILE_STRUCTURE.get_file_path("models")
+    model_directory = FILE_STRUCTURE["models"]
     FileTools.mkdir(model_directory)
 
     model_files = [model_file]
@@ -5024,9 +4760,6 @@ def make_models(directory):
 
 @UsefulTools.externalFunc()
 def calculate_errors(models_directory, sample_pool_directory):
-    global FILE_STRUCTURE
-    global SUBMITTED
-
     logging.info("Calculating errors of the Sample Pool")
 
     models = Models(models_directory, read_models=True)
@@ -5041,7 +4774,7 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     if move_points :
         logging.info("Moving points to the Training Set")
-        training_set_directory = FILE_STRUCTURE.get_file_path("training_set")
+        training_set_directory = FILE_STRUCTURE["training_set"]
         training_set = Points(training_set_directory)
         training_set.add(points, move=True)
         training_set.format_gjfs()
@@ -5066,13 +4799,10 @@ def dlpoly_analysis():
 
 
 def opt():
-    global SYSTEM_NAME
-    global FILE_STRUCTURE
-
-    sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
+    sp_dir = FILE_STRUCTURE["sample_pool"]
     atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
 
-    opt_dir = FILE_STRUCTURE.get_file_path("opt")
+    opt_dir = FILE_STRUCTURE["opt"]
     FileTools.mkdir(opt_dir)
 
     opt_gjf = GJF(os.path.join(opt_dir, SYSTEM_NAME + "1".zfill(4) + ".gjf"))
@@ -5087,13 +4817,10 @@ def opt():
 #############################################
 
 def main_menu():
-    global FILE_STRUCTURE
-    global MACHINE
-
-    ts_dir = FILE_STRUCTURE.get_file_path("training_set")
-    sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
-    vs_dir = FILE_STRUCTURE.get_file_path("validation_set")
-    models_dir = FILE_STRUCTURE.get_file_path("models")
+    ts_dir = FILE_STRUCTURE["training_set"]
+    sp_dir = FILE_STRUCTURE["sample_pool"]
+    vs_dir = FILE_STRUCTURE["validation_set"]
+    models_dir = FILE_STRUCTURE["models"]
 
     #=== Training Set Menu ===#
     training_set_menu = Menu(title="Training Set Menu")
