@@ -3154,7 +3154,6 @@ class INT(Point):
         """ Makes a json file containing integration error, multipole moments, and IQA energies"""
         pass
 
-
     def read(self):
         with open(self.fname, "r") as f:
             for line in f:
@@ -3194,7 +3193,6 @@ class INT(Point):
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
 
-    
     def __bool__(self):
         return not self.fname == ""
 
