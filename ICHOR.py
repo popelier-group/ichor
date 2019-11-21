@@ -41,10 +41,10 @@
   [x]| Description                                                                                | Priority
   -----------------------------------------------------------------------------------------------------------
   [ ] Implement incomplete menu options (indicated with ||)                                         
-  [ ] Add CP2K support                                                                                 /
+  [ ] Add CP2K support                                                                                 
   [x] Merge makeSets into ICHOR                                                                        
   [ ] Make SGE Queue names more meaningful ('GaussSub.sh' -> 'WATER G09 1')
-  [ ] Cleanup SubmissionScript Implementation
+  [ ] Cleanup SubmissionScript Implementation                                                          /
   [ ] Implement More Kernels Into ICHOR
   [ ] Make a Revert System / Backup System
   [ ] Move EPE calculation to an independent function so more EI Algorithms can be implemented
