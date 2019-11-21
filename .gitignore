@@ -4,10 +4,9 @@
 Test/
 *.sh
 *.csv
-testing*.py
+*testing*.py
 *.xyz
 wily*
 rmsd*
 h2.int
 json_testing.json
-Yulian_testing.py
