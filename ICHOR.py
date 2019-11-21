@@ -111,9 +111,9 @@ BASIS_SET = "6-31+g(d,p)"
 KEYWORDS = []
 
 ENCOMP = 3
-
 BOAQ = "gs20"
 IASMESH = "fine"
+INT_TO_JSON = True
 
 FILE_STRUCTURE = {} # Don't change
 
@@ -1034,6 +1034,16 @@ class UsefulTools:
             if len(word) > 1:
                 string[i] = word[0].upper() + word[1:].lower()
         return " ".join(string)
+
+    @staticmethod
+    def get_time():
+        return time.time()
+
+    @staticmethod
+    def log_time_taken(start_time, message=""):
+        time_taken = UsefulTools.get_time() - start_time
+        logging.debug(f"{message}{time_taken:.2f} s")
+
 
 class my_tqdm:
     """
@@ -3153,30 +3163,16 @@ class INT(Point):
         if self.fname and read:
             self.read()
     
-    @property
-    def num(self):
-        return int(re.findall("\d+", self.atom)[0])
-
-    @property
-    def integration_error(self):
-        return self.integration_results["L"]
-
-    @property
-    def eiqa(self):
-        return self.iqa_data["E_IQA(A)"]
-
-    def move(self, directory):
-        if self:
-            if directory.endswith(os.sep):
-                directory = directory.rstrip(os.sep)
-            point_name = os.path.basename(directory)
-            int_directory = point_name + "_atomicfiles"
-            FileTools.mkdir(int_directory)
-            new_name = os.path.join(directory, int_directory, self.atom.lower() + ".int")
-            FileTools.move_file(self.fname, new_name)
-            self.fname = new_name
-
     def read(self):
+        try:
+            self.read_json()
+        except json.decoder.JSONDecodeError:
+            self.read_int()
+            if INT_TO_JSON:
+                self.backup_int()
+                self.write_json()
+
+    def read_int(self):
         with open(self.fname, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
@@ -3215,7 +3211,47 @@ class INT(Point):
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
 
-    
+    def read_json(self):
+        with open(self.fname, "r") as f:
+            int_data = json.load(f)
+            self.integration_results = int_data["integration"]
+            self.multipoles = int_data["multipoles"]
+            self.iqa_data = int_data["iqa_data"]
+
+    def backup_int(self):
+        FileTools.move_file(self.fname, self.fname + ".bak")
+
+    def write_json(self):
+        int_data = {}
+        int_data["integration"] = self.integration_results
+        int_data["multipoles"] = self.multipoles
+        int_data["iqa_data"] = self.iqa_data
+        with open(self.fname, "w") as f:
+            json.dump(int_data, f)
+
+    @property
+    def num(self):
+        return int(re.findall("\d+", self.atom)[0])
+
+    @property
+    def integration_error(self):
+        return self.integration_results["L"]
+
+    @property
+    def eiqa(self):
+        return self.iqa_data["E_IQA(A)"]
+
+    def move(self, directory):
+        if self:
+            if directory.endswith(os.sep):
+                directory = directory.rstrip(os.sep)
+            point_name = os.path.basename(directory)
+            int_directory = point_name + "_atomicfiles"
+            FileTools.mkdir(int_directory)
+            new_name = os.path.join(directory, int_directory, self.atom.lower() + ".int")
+            FileTools.move_file(self.fname, new_name)
+            self.fname = new_name
+
     def __bool__(self):
         return not self.fname == ""
 
@@ -3596,7 +3632,9 @@ class Points:
         self.directory = directory if directory else "."
         if read_gjfs or read_wfns or read_ints:
             FileTools.check_directory(self.directory)
+            start_time = UsefulTools.get_time()
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
+            UsefulTools.log_time_taken(start_time, message=f"Reading {self.directory} took ")
 
         training_set_functions = {
                                   "min-max": self.get_min_max_features_first_atom,
