@@ -111,9 +111,9 @@ BASIS_SET = "6-31+g(d,p)"
 KEYWORDS = []
 
 ENCOMP = 3
-
 BOAQ = "gs20"
 IASMESH = "fine"
+INT_TO_JSON = True
 
 FILE_STRUCTURE = {} # Don't change
 
@@ -1034,6 +1034,16 @@ class UsefulTools:
             if len(word) > 1:
                 string[i] = word[0].upper() + word[1:].lower()
         return " ".join(string)
+
+    @staticmethod
+    def get_time():
+        return time.time()
+
+    @staticmethod
+    def log_time_taken(start_time, message=""):
+        time_taken = UsefulTools.get_time() - start_time
+        logging.debug(f"{message}{time_taken:.2f} s")
+
 
 class my_tqdm:
     """
@@ -3143,7 +3153,6 @@ class INT(Point):
     def __init__(self, fname="", read=False):
         self.fname = fname
         self.atom = os.path.splitext(os.path.basename(self.fname))[0].upper()
-        self.int_bak = FileTools.move_file(self.fname, self.fname + ".bak")
 
         self.integration_results = {}
         self.multipoles = {}
@@ -3152,14 +3161,19 @@ class INT(Point):
         self.split_fname()
 
         if self.fname and read:
-            try:
-                self.read_json()
-            except json.decoder.JSONDecodeError:
-                self.read_int_bak()
-                self.write_json()
+            self.read()
     
-    def read_int_bak(self):
-        with open(self.int_bak, "r") as f:
+    def read(self):
+        try:
+            self.read_json()
+        except json.decoder.JSONDecodeError:
+            self.read_int()
+            if INT_TO_JSON:
+                self.backup_int()
+                self.write_json()
+
+    def read_int(self):
+        with open(self.fname, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
                     line = next(f)
@@ -3203,6 +3217,9 @@ class INT(Point):
             self.integration_results = int_data["integration"]
             self.multipoles = int_data["multipoles"]
             self.iqa_data = int_data["iqa_data"]
+
+    def backup_int(self):
+        FileTools.move_file(self.fname, self.fname + ".bak")
 
     def write_json(self):
         int_data = {}
@@ -3615,10 +3632,9 @@ class Points:
         self.directory = directory if directory else "."
         if read_gjfs or read_wfns or read_ints:
             FileTools.check_directory(self.directory)
-            start_time = time.time()
+            start_time = UsefulTools.get_time()
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
-            time_taken = time.time() - start_time
-            logging.debug(f"Reading {self.directory} took {time_taken:.2f} seconds")
+            UsefulTools.log_time_taken(start_time, message=f"Reading {self.directory} took ")
 
         training_set_functions = {
                                   "min-max": self.get_min_max_features_first_atom,

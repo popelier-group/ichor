@@ -4,9 +4,9 @@
 Test/
 *.sh
 *.csv
-*testing*.py
+*test*
 *.xyz
 wily*
 rmsd*
-h2.int
-json_testing.json
+*.int
+*.json
