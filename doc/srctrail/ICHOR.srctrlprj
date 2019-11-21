@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<config>
+    <source_groups>
+        <source_group_6e0bca16-3ae8-4c17-81fc-534a167e78d7>
+            <name>Python Source Group</name>
+            <source_extensions>
+                <source_extension>.py</source_extension>
+            </source_extensions>
+            <source_paths>
+                <source_path>ICHOR.py</source_path>
+            </source_paths>
+            <status>enabled</status>
+            <type>Python Source Group</type>
+        </source_group_6e0bca16-3ae8-4c17-81fc-534a167e78d7>
+    </source_groups>
+    <version>8</version>
+</config>
