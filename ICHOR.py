@@ -113,7 +113,7 @@ KEYWORDS = []
 ENCOMP = 3
 BOAQ = "gs20"
 IASMESH = "fine"
-INT_TO_JSON = True
+# INT_TO_JSON = True
 
 FILE_STRUCTURE = {} # Don't change
 
@@ -3168,9 +3168,9 @@ class INT(Point):
             self.read_json()
         except json.decoder.JSONDecodeError:
             self.read_int()
-            if INT_TO_JSON:
-                self.backup_int()
-                self.write_json()
+            # if INT_TO_JSON:
+            self.backup_int()
+            self.write_json()
 
     def read_int(self):
         with open(self.fname, "r") as f:
@@ -3642,25 +3642,28 @@ class Points:
                                  }
         self._get_training_points = training_set_functions["min-max"]
 
+    def _read_directory(d, read_gjfs=False, read_wfns=False, read_ints=False, first=False)
+        point = {"read_gjf": read_gjfs, "read_wfn": read_wfns, "read_ints": read_ints}
+        point["directory"] = d
+        progressbar.set_description(desc=d)
+        for f in FileTools.get_files_in(d, "*", sort="natural"):
+            if os.path.isdir(f):
+                point["int_directory"] = f
+                point["int_fnames"] = FileTools.get_files_in(f, "*.int", sort="natural")
+            elif FileTools.get_filetype(f) == ".gjf":
+                point["gjf_fname"] = f
+            elif FileTools.get_filetype(f) == ".wfn":
+                point["wfn_fname"] = f
+        if "gjf_fname" in point.keys():
+            self.add_point(point)
+            if first:
+                break
+
     def read_directory(self, read_gjfs, read_wfns, read_ints, first=False):
         directories = FileTools.get_files_in(self.directory, "*/", sort="natural")
         with tqdm(total=len(directories), unit=" files", leave=True) as progressbar:
             for d in directories:
-                point = {"read_gjf": read_gjfs, "read_wfn": read_wfns, "read_ints": read_ints}
-                point["directory"] = d
-                progressbar.set_description(desc=d)
-                for f in FileTools.get_files_in(d, "*", sort="natural"):
-                    if os.path.isdir(f):
-                        point["int_directory"] = f
-                        point["int_fnames"] = FileTools.get_files_in(f, "*.int", sort="natural")
-                    elif FileTools.get_filetype(f) == ".gjf":
-                        point["gjf_fname"] = f
-                    elif FileTools.get_filetype(f) == ".wfn":
-                        point["wfn_fname"] = f
-                if "gjf_fname" in point.keys():
-                    self.add_point(point)
-                    if first:
-                        break
+                self._read_directory(d, read_gjfs, read_wfns, read_ints, first) # implement multiprocessing
                 progressbar.update()
 
     def read_set(self, files, stay=True):
