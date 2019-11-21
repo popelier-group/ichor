@@ -3143,6 +3143,7 @@ class INT(Point):
     def __init__(self, fname="", read=False):
         self.fname = fname
         self.atom = os.path.splitext(os.path.basename(self.fname))[0].upper()
+        self.int_bak = FileTools.move_file(self.fname, self.fname + ".bak")
 
         self.integration_results = {}
         self.multipoles = {}
@@ -3154,37 +3155,11 @@ class INT(Point):
             try:
                 self.read_json()
             except json.decoder.JSONDecodeError:
-                self.read()
+                self.read_int_bak()
+                self.write_json()
     
-    @property
-    def num(self):
-        return int(re.findall("\d+", self.atom)[0])
-
-    @property
-    def integration_error(self):
-        return self.integration_results["L"]
-
-    @property
-    def eiqa(self):
-        return self.iqa_data["E_IQA(A)"]
-
-    def move(self, directory):
-        if self:
-            if directory.endswith(os.sep):
-                directory = directory.rstrip(os.sep)
-            point_name = os.path.basename(directory)
-            int_directory = point_name + "_atomicfiles"
-            FileTools.mkdir(int_directory)
-            new_name = os.path.join(directory, int_directory, self.atom.lower() + ".int")
-            FileTools.move_file(self.fname, new_name)
-            self.fname = new_name
-
-    def read_json(self):
-        """ Makes a json file containing integration error, multipole moments, and IQA energies"""
-        pass
-
-    def read(self):
-        with open(self.fname, "r") as f:
+    def read_int_bak(self):
+        with open(self.int_bak, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
                     line = next(f)
@@ -3221,6 +3196,44 @@ class INT(Point):
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
+
+    def read_json(self):
+        with open(self.fname, "r") as f:
+            int_data = json.load(f)
+            self.integration_results = int_data["integration"]
+            self.multipoles = int_data["multipoles"]
+            self.iqa_data = int_data["iqa_data"]
+
+    def write_json(self):
+        int_data = {}
+        int_data["integration"] = self.integration_results
+        int_data["multipoles"] = self.multipoles
+        int_data["iqa_data"] = self.iqa_data
+        with open(self.fname, "w") as f:
+            json.dump(int_data, f)
+
+    @property
+    def num(self):
+        return int(re.findall("\d+", self.atom)[0])
+
+    @property
+    def integration_error(self):
+        return self.integration_results["L"]
+
+    @property
+    def eiqa(self):
+        return self.iqa_data["E_IQA(A)"]
+
+    def move(self, directory):
+        if self:
+            if directory.endswith(os.sep):
+                directory = directory.rstrip(os.sep)
+            point_name = os.path.basename(directory)
+            int_directory = point_name + "_atomicfiles"
+            FileTools.mkdir(int_directory)
+            new_name = os.path.join(directory, int_directory, self.atom.lower() + ".int")
+            FileTools.move_file(self.fname, new_name)
+            self.fname = new_name
 
     def __bool__(self):
         return not self.fname == ""
