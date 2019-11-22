@@ -10,3 +10,4 @@ wily*
 rmsd*
 *.int
 *.json
+*.log
