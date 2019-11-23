@@ -4447,7 +4447,6 @@ class DlpolyTools:
                 f.write(f"{n_train},{rmsd_val}\n")
 
 
-
 class S_CurveTools:
     vs_loc = ""
     sp_loc = ""
