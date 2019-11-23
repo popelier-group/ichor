@@ -41,19 +41,17 @@
   [x]| Description                                                                                | Priority
   -----------------------------------------------------------------------------------------------------------
   [ ] Implement incomplete menu options (indicated with ||)                                         
-  [ ] Add CP2K support                                                                                 
-  [x] Merge makeSets into ICHOR                                                                        
+  [ ] Add CP2K support                                                                                 /
+  [ ] Merge makeSets into ICHOR                                                                        /
   [ ] Make SGE Queue names more meaningful ('GaussSub.sh' -> 'WATER G09 1')
-  [ ] Cleanup SubmissionScript Implementation                                                          /
+  [ ] Cleanup SubmissionScript Implementation
   [ ] Implement More Kernels Into ICHOR
   [ ] Make a Revert System / Backup System
   [ ] Move EPE calculation to an independent function so more EI Algorithms can be implemented
   [ ] Include Legacy Conversion Tools
-  [ ] Cleanup Training Set formation implementation so that any X and y values can be used             /
+  [ ] Cleanup Training Set Formation Implementation So that any X and y values can be used             /
   [ ] Implement method of locking functions based on what is currently running (e.g. Auto Run)         /
-  [ ] Create a Globals class to cleanup how ICHOR handles global variables                             /
-  [ ] Make 'rewind' option (move added training points back to sample pool)
-  [ ] Make stop auto run flag when an error occurs
+  [ ] Create a Globals class to cleanup how ICHOR handles global variables
 """
 
 #############################################
@@ -71,7 +69,6 @@ import time
 import uuid
 import json
 import shutil
-import random
 import hashlib
 import logging
 import platform
@@ -111,11 +108,11 @@ BASIS_SET = "6-31+g(d,p)"
 KEYWORDS = []
 
 ENCOMP = 3
+
 BOAQ = "gs20"
 IASMESH = "fine"
-# INT_TO_JSON = True
 
-FILE_STRUCTURE = {} # Don't change
+FILE_STRUCTURE = [] # Don't change
 
 KERNEL = "rbf"                # only use rbf for now
 FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
@@ -223,7 +220,7 @@ dlpoly_weights =  {"H": 1.007975, "He": 4.002602, "Li": 6.9675, "Be": 9.0121831,
 logging.basicConfig(filename='ichor.log',
                     level=logging.DEBUG, 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
-                    datefmt='%d-%m-%Y %H:%M:%S')
+                    datefmt='%d-%m-%Y %I:%M:%S')
 
 _unknown_settings = []
 
@@ -297,14 +294,6 @@ class TabCompleter:
             readline.set_completer_delims("\t")
             readline.parse_and_bind("tab: complete")
             readline.set_completer(completer)
-        except ImportError:
-            pass
-    
-    def remove_completer(self):
-        try:
-            import readline
-
-            readline.set_completer(None)
         except ImportError:
             pass
 
@@ -549,6 +538,7 @@ class ConfigProvider(dict):
        an extra condition to the if statement in loadConfig()
     """
 
+    global DEFAULT_CONFIG_FILE
     src = None
     prop = re.compile(r"([\w. ]+)\s*=\s*(.*)")
 
@@ -601,31 +591,129 @@ class ConfigProvider(dict):
                 f.write("%s=%s\n" % (key, self[key]))
 
 
+def sanitize_id(node_id):
+    return node_id.strip().replace(" ", "")
+
+
+(_ADD, _DELETE, _INSERT) = range(3)
+(_ROOT, _DEPTH, _WIDTH) = range(3)
+
+
 class Node:
-  def __init__(self, name, parent):
-    self.name = name
-    self.parent = parent
-  
-  def __str__(self):
-    if self.parent is None:
-      return self.name
-    return str(self.parent) + os.sep + self.name
-  
-  def __repr__(self):
-    return str(self)
+
+    def __init__(self, name, identifier=None, expanded=True, is_file=False):
+        self.__identifier = (str(uuid.uuid1()) if identifier is None else sanitize_id(str(identifier)))
+        self.name = name
+        self.expanded = expanded
+        self.is_file = is_file
+        self.__bpointer = None
+        self.__fpointer = []
+
+    @property
+    def identifier(self):
+        return self.__identifier
+
+    @property
+    def bpointer(self):
+        return self.__bpointer
+
+    @bpointer.setter
+    def bpointer(self, value):
+        if value is not None:
+            self.__bpointer = sanitize_id(value)
+
+    @property
+    def fpointer(self):
+        return self.__fpointer
+
+    def update_fpointer(self, identifier, mode=_ADD):
+        if mode is _ADD:
+            self.__fpointer.append(sanitize_id(identifier))
+        elif mode is _DELETE:
+            self.__fpointer.remove(sanitize_id(identifier))
+        elif mode is _INSERT:
+            self.__fpointer = [sanitize_id(identifier)]
 
 
 class Tree:
-  def __init__(self):
-    self._dict = {}
 
-  def add(self, name, id, parent=None):
-    if not parent is None:
-      parent = self[parent]
-    self._dict[id] = Node(name, parent)
-  
-  def __getitem__(self, id):
-    return str(self._dict[id])
+    def __init__(self):
+        self.nodes = []
+
+    def get_index(self, position):
+        for index, node in enumerate(self.nodes):
+            if node.identifier == position:
+                break
+        return index
+
+    def create_node(self, name, identifier=None, parent=None, is_file=False):
+        node = Node(name, identifier, is_file=is_file)
+        self.nodes.append(node)
+        self.__update_fpointer(parent, node.identifier, _ADD)
+        node.bpointer = parent
+        return node
+
+    def show(self, position, level=_ROOT):
+        queue = self[position].fpointer
+        if level == _ROOT:
+            print("{0} [{1}]".format(self[position].name, self[position].identifier))
+        else:
+            print("\t"*level, "{0} [{1}]".format(self[position].name, self[position].identifier))
+        if self[position].expanded:
+            level += 1
+            for element in queue:
+                self.show(element, level)  # recursive call
+
+    def expand_tree(self, position, mode=_DEPTH):
+        # Python generator. Loosly based on an algorithm from 'Essential LISP' by
+        # John R. Anderson, Albert T. Corbett, and Brian J. Reiser, page 239-241
+        yield position
+        queue = self[position].fpointer
+        while queue:
+            yield queue[0]
+            expansion = self[queue[0]].fpointer
+            if mode is _DEPTH:
+                queue = expansion + queue[1:]  # depth-first
+            elif mode is _WIDTH:
+                queue = queue[1:] + expansion  # width-first
+
+    def is_branch(self, position):
+        return self[position].fpointer
+
+    def get_bpointer(self, position):
+        return self[position].bpointer
+
+    def get_file_path(self, position):
+        file_path = [self[position].name]
+        pos = position
+        while self.get_bpointer(pos):
+            file_path += [self[self.get_bpointer(pos)].name]
+            pos = self.get_bpointer(pos)
+        file_path = os.path.join(*list(reversed(file_path[:-1])), '')
+        if self[position].is_file:
+            file_path = file_path.rstrip(os.sep)
+        return file_path
+
+    def __update_fpointer(self, position, identifier, mode):
+        if position is None:
+            return
+        else:
+            self[position].update_fpointer(identifier, mode)
+
+    def __update_bpointer(self, position, identifier):
+        self[position].bpointer = identifier
+
+    def __getitem__(self, key):
+        return self.nodes[self.get_index(key)]
+
+    def __setitem__(self, key, item):
+        self.nodes[self.get_index(key)] = item
+
+    def __len__(self):
+        return len(self.nodes)
+
+    def __contains__(self, identifier):
+        return [node.identifier for node in self.nodes if node.identifier is identifier]
 
 
 class FileTools:
@@ -638,31 +726,34 @@ class FileTools:
     def setup_file_structure():
         tree = Tree()
 
-        tree.add("TRAINING_SET", "training_set")
-        tree.add("SAMPLE_POOL", "sample_pool")
-        tree.add("VALIDATION_SET", "validation_set")
-        tree.add("FEREBUS", "ferebus")
-        tree.add("MODELS", "models", parent="ferebus")
-        tree.add("LOG", "log")
-        tree.add("PROGRAMS", "programs")
-        tree.add("OPT", "opt")
+        tree.create_node("ICHOR", "file_locs")
 
-        tree.add("DLPOLY", "dlpoly")
-        tree.add("GJF", "dlpoly_gjf", parent="dlpoly")
+        tree.create_node("TRAINING_SET", "training_set", parent="file_locs")
+        tree.create_node("SAMPLE_POOL", "sample_pool", parent="file_locs")
+        tree.create_node("VALIDATION_SET", "validation_set", parent="file_locs")
+        tree.create_node("FEREBUS", "ferebus", parent="file_locs")
+        tree.create_node("MODELS", "models", parent="ferebus")
+        tree.create_node("LOG", "log", parent="file_locs")
+        tree.create_node("PROGRAMS", "programs", parent="file_locs")
+        tree.create_node("OPT", "opt", parent="file_locs")
+        tree.create_node("TEMP", "temp", parent="file_locs")
 
-        tree.add(".DATA", "data")
-        tree.add("data", "data_file", parent="data")
+        tree.create_node("DLPOLY", "dlpoly", parent="file_locs")
+        tree.create_node("GJF", "dlpoly_gjf", parent="dlpoly")
 
-        tree.add("JOBS", "jobs", parent="data")
-        tree.add("jid", "jid", parent="jobs")
+        tree.create_node(".DATA", "data", parent="file_locs")
+        tree.create_node("data", "data_file", parent="data", is_file=True)
 
-        tree.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
-        tree.add("alpha", "alpha", parent="adaptive_sampling")
-        tree.add("cv_errors", "cv_errors", parent="adaptive_sampling")
+        tree.create_node("JOBS", "jobs", parent="data")
+        tree.create_node("jid", "jid", parent="jobs", is_file=True)
 
-        tree.add("SCRIPTS", "scripts", parent="data")
-        tree.add("OUTPUTS", "outputs", parent="scripts")
-        tree.add("ERRORS", "errors", parent="scripts")
+        tree.create_node("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
+        tree.create_node("alpha", "alpha", parent="adaptive_sampling", is_file=True)
+        tree.create_node("cv_errors", "cv_errors", parent="adaptive_sampling", is_file=True)
+
+        tree.create_node("SCRIPTS", "scripts", parent="data")
+        tree.create_node("OUTPUTS", "outputs", parent="scripts")
+        tree.create_node("ERRORS", "errors", parent="scripts")
 
         return tree
 
@@ -750,10 +841,12 @@ class FileTools:
 
     @staticmethod
     def write_to_file(data, file=None):
+        global FILE_STRUCTURE
+
         if file is None:
             file = "data_file"
         
-        file = FILE_STRUCTURE[file]
+        file = FILE_STRUCTURE.get_file_path(file)
         FileTools.mkdir(os.path.dirname(file))
 
         with open(file, "w") as f:
@@ -793,7 +886,8 @@ class FileTools:
                 print("Exiting...")
             quit()
 
-        opt_dir = FILE_STRUCTURE["opt"]
+        global FILE_STRUCTURE
+        opt_dir = FILE_STRUCTURE.get_file_path("opt")
         if not os.path.isdir(opt_dir) and required:
             no_opt_found()
         opt = Point(opt_dir)
@@ -802,12 +896,7 @@ class FileTools:
             return opt.wfn
         elif required:
             no_opt_found()
-
-    @staticmethod
-    def clear_script_outputs(outputs=True, errors=True):
-        if outputs: FileTools.rmtree(FILE_STRUCTURE["outputs"])
-        if errors: FileTools.rmtree(FILE_STRUCTURE["errors"])
-
+            
 
 class UsefulTools:
 
@@ -885,7 +974,7 @@ class UsefulTools:
 
     @staticmethod
     def nTrain():
-        ts_dir = FILE_STRUCTURE["training_set"]
+        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
         return FileTools.count_points_in(ts_dir)
 
     @staticmethod
@@ -901,10 +990,8 @@ class UsefulTools:
         return math.floor(math.log(n, 10)+1)
 
     @staticmethod
-    def check_bool(val, default=True):
-        options = ['true', '1', 't', 'y', 'yes', 'yeah']
-        if default: options += [""]
-        return val.lower() in options
+    def check_bool(val):
+        return val.lower() in ['true', '1', 't', 'y', 'yes', 'yeah']
 
     @staticmethod
     def print_grid(arr, cols=10, color=None):
@@ -1027,140 +1114,35 @@ class UsefulTools:
     def not_implemented():
         raise NotImplementedError
 
-    @staticmethod
-    def prettify_string(string):
-        string = string.replace("_", " ").split()
-        for i, word in enumerate(string):
-            if len(word) > 1:
-                string[i] = word[0].upper() + word[1:].lower()
-        return " ".join(string)
-
-    @staticmethod
-    def get_time():
-        return time.time()
-
-    @staticmethod
-    def log_time_taken(start_time, message=""):
-        time_taken = UsefulTools.get_time() - start_time
-        logging.debug(f"{message}{time_taken:.2f} s")
-
 
 class my_tqdm:
-    """
-    Decorate an iterable object, returning an iterator which acts exactly
-    like the original iterable.
-
-    Used to replace tqdm when not writing to std.out, prevents ugly
-    output files, should function identically while doing nothing
-    """
-    def __new__(cls, *args, **kwargs):
-        # Create a new instance
-        instance = object.__new__(cls)
-        return instance
-
-    def __init__(self, iterable=None, desc=None, total=None, leave=True,
-                 file=None, ncols=None, mininterval=0.1, maxinterval=10.0,
-                 miniters=None, ascii=None, disable=False, unit='it',
-                 unit_scale=False, dynamic_ncols=False, smoothing=0.3,
-                 bar_format=None, initial=0, position=None, postfix=None,
-                 unit_divisor=1000, write_bytes=None, lock_args=None,
-                 gui=False, **kwargs):
-                
-        # Store the arguments
-        self.iterable = iterable
-        self.desc = desc or ''
-        self.total = total
-        self.leave = leave
-        self.fp = file
-        self.ncols = ncols
-        self.mininterval = mininterval
-        self.maxinterval = maxinterval
-        self.miniters = miniters
-        self.ascii = ascii
-        self.disable = disable
-        self.unit = unit
-        self.unit_scale = unit_scale
-        self.unit_divisor = unit_divisor
-        self.lock_args = lock_args
-        self.gui = gui
-        self.dynamic_ncols = dynamic_ncols
-        self.bar_format = bar_format
-        self.postfix = None
-
-        # Init the iterations counters
-        self.last_print_n = initial
-        self.n = initial
-
-        self.pos = 0
-
-    def __bool__(self):
-        if self.total is not None:
-            return self.total > 0
-        return bool(self.iterable)
-
-    def __nonzero__(self):
-        return self.__bool__()
-
-    def __len__(self):
-        return 0
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        pass
-
-    def clear(self, nolock=False):
-        pass
-
-    def refresh(self, nolock=False, lock_args=None):
-        pass
-
-    def unpause(self):
-        pass
-
-    def reset(self, total=None):
-        pass
-
-    def set_description(self, desc=None, refresh=True):
-        pass
-
-    def set_description_str(self, desc=None, refresh=True):
-        pass
-
-    def set_postfix(self, ordered_dict=None, refresh=True, **kwargs):
-        pass
-
-    def set_postfix_str(self, s='', refresh=True):
-        pass
-
-    def moveto(self, n):
-        pass
-
+    def __init__(self, iterator=None, *args, **kwargs):
+        self.iterator = iterator
+    
+    def __next__(self):
+        return next(self.iterator)
+    
     def update(self):
         pass
 
-    @property
-    def format_dict(self):
+    def set_description(self, desc=None):
         pass
 
-    def display(self, msg=None, pos=None):
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
         pass
-  
-    def __hash__(self):
-        return id(self)
-
-    def __iter__(self):
-        # Inlining instance variables as locals (speed optimisation)
-        iterable = self.iterable
-        for obj in iterable:
-            yield obj
 
 
 class FerebusTools:
     @staticmethod
     def write_finput(directory, natoms, atom, training_set_size, 
                        predictions=0, nproperties=1, optimization="pso"):
+        global SYSTEM_NAME
+        global KERNEL
+        global FEREBUS_VERSION
+
         finput_fname = os.path.join(directory, "FINPUT.txt")
         atom_num = re.findall("\d+", atom)[0]
 
@@ -1277,6 +1259,8 @@ class ProblemFinder:
 
     @UsefulTools.runFunc(1)
     def check_alf(self):
+        global ALF
+
         if len(ALF) < 1:
             self.add(Problem(name="ALF", 
                              problem="ALF not set due to error in calculation",
@@ -1285,10 +1269,12 @@ class ProblemFinder:
     
     @UsefulTools.runFunc(2)
     def check_directories(self):
+        global FILE_STRUCTURE
+
         dirs_to_check = ["training_set", "sample_pool"]
 
         for dir_name in dirs_to_check:
-            dir_path = FILE_STRUCTURE[dir_name]
+            dir_path = FILE_STRUCTURE.get_file_path(dir_name)
             if not os.path.isdir(dir_path):
                 self.add(Problem(name="Directory Not Found", 
                                  problem=f"Could not find: {dir_path}",
@@ -1297,6 +1283,7 @@ class ProblemFinder:
 
     @UsefulTools.runFunc(3)
     def check_system(self):
+        global SYSTEM_NAME
         if SYSTEM_NAME == "SYSTEM":
             self.add(Problem(name="SYSTEM_NAME", 
                              problem="SYSTEM_NAME not been set, defaulted to SYSTEM",
@@ -1305,6 +1292,7 @@ class ProblemFinder:
     
     @UsefulTools.runFunc(4)
     def check_settings(self):
+        global _unknown_settings
         for setting in _unknown_settings:
             self.add(Problem(name=f"Unknown setting found in config", 
                              problem=f"Unknown setting: {setting}",
@@ -1315,6 +1303,8 @@ class ProblemFinder:
         self.problems.append(problem)
 
     def find(self):
+        global DISABLE_PROBLEMS
+
         if not DISABLE_PROBLEMS:
             problems_to_find = UsefulTools.get_functions_to_run(self)
             for find_problem in problems_to_find:
@@ -1392,6 +1382,7 @@ class Job:
         self.options[option] = value
 
     def gaussian_setup(self):
+        global MACHINE
         self._reset()
 
         if "csf" in MACHINE.lower():
@@ -1403,6 +1394,9 @@ class Job:
             self.run_cmd = "g09"
 
     def ferebus_setup(self):
+        global FEREBUS_LOCATION
+        global FEREBUS_VERSION
+        global _IQA_MODELS
         self._reset()
 
         self.setup = f"pushd {self.infile}\n"
@@ -1419,6 +1413,10 @@ class Job:
         self.outfile_write = ""
 
     def aimall_setup(self):
+        global BOAQ
+        global ENCOMP
+        global IASMESH
+        global AIMALL_CORE_COUNT
         self._reset()
 
         self.run_cmd = "~/AIMAll/aimqb.ish"
@@ -1443,6 +1441,8 @@ class Job:
         self.outfile = ""
     
     def dlpoly_setup(self):
+        global DLPOLY_LOCATION
+
         self._reset()
         self.setup = f"pushd {self.infile}\n"
         self.run_cmd = os.path.abspath(DLPOLY_LOCATION)
@@ -1578,6 +1578,7 @@ class SubmissionScript:
 
     @property
     def queue(self):
+        global MACHINE
         return Queues().get_queue(MACHINE.lower(), self.cores)
 
     def check_settings(self):
@@ -1586,9 +1587,10 @@ class SubmissionScript:
             self.type = "generic"
 
     def setup_script_directories(self):
-        script_dir = FILE_STRUCTURE["scripts"]
-        output_dir = FILE_STRUCTURE["outputs"]
-        errors_dir = FILE_STRUCTURE["errors"]
+        global FILE_STRUCTURE
+        script_dir = FILE_STRUCTURE.get_file_path("scripts")
+        output_dir = FILE_STRUCTURE.get_file_path("outputs")
+        errors_dir = FILE_STRUCTURE.get_file_path("errors")
 
         FileTools.mkdir(script_dir)
         FileTools.mkdir(output_dir)
@@ -1597,6 +1599,9 @@ class SubmissionScript:
         return script_dir, output_dir, errors_dir
 
     def write(self, write_data=True):
+        global SGE
+        global FILE_STRUCTURE
+
         script_dir, output_dir, errors_dir = self.setup_script_directories()
         
         self.fname = os.path.join(script_dir, self.fname)
@@ -1608,7 +1613,7 @@ class SubmissionScript:
             return
 
         if SGE:
-            data_directory = FILE_STRUCTURE["jobs"]
+            data_directory = FILE_STRUCTURE.get_file_path("jobs")
             FileTools.mkdir(data_directory)
             data_file = os.path.join(data_directory, self.type)
             abs_data_file = os.path.abspath(data_file)
@@ -1693,6 +1698,8 @@ class _Queues:
         self.add(_Queue(name, low, high))
     
     def get_queue(self, ncores):
+        global DEFAULT_CONFIG_FILE
+
         for queue in self:
             if ncores >= queue.low and ncores <= queue.high:
                 return queue.name
@@ -1790,6 +1797,9 @@ class SubmissionTools:
 
     @staticmethod
     def make_g09_script(points, directory="", redo=False, submit=True, hold=None, return_jid=False, modify=None, write_data=True):
+        global MACHINE
+        global GAUSSIAN_CORE_COUNT
+
         name = os.path.join(directory, "GaussSub.sh")
 
         job_type = "gaussian"
@@ -1817,6 +1827,9 @@ class SubmissionTools:
     
     @staticmethod
     def make_aim_script(points, directory="", check_wfns=True, redo=False, submit=True, hold=None, return_jid=False, write_data=True):
+        global MACHINE
+        global AIMALL_CORE_COUNT
+
         if check_wfns:
             points.check_wfns()
 
@@ -1846,6 +1859,10 @@ class SubmissionTools:
     
     @staticmethod
     def make_ferebus_script(model_directories, directory="", submit=True, hold=None, return_jid=False, write_data=True):
+        global MACHINE
+        global FEREBUS_VERSION
+        global FEREBUS_CORE_COUNT
+
         name = os.path.join(directory, "FereSub.sh")
         script = SubmissionScript(name=name, type="ferebus", cores=FEREBUS_CORE_COUNT)
 
@@ -1884,6 +1901,9 @@ class SubmissionTools:
 
     @staticmethod
     def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None, return_jid=False):
+        global MACHINE
+        global DLPOLY_CORE_COUNT
+
         name = os.path.join(directory, "DlpolySub.sh")
         script = SubmissionScript(name=name, type="dlpoly", cores=DLPOLY_CORE_COUNT)
 
@@ -1945,7 +1965,7 @@ class BatchTools:
         job_line = {}
         job = SGE_Job("", "")
         
-        jid_fname = FILE_STRUCTURE["jid"]
+        jid_fname = FILE_STRUCTURE.get_file_path("jid")
         submitted_jobs = BatchTools._read_jids(jid_fname)
 
         for line in output.split("\n"):
@@ -1970,9 +1990,13 @@ class BatchTools:
 
     @staticmethod
     def qsub(script, hold=None, return_jid=False):
-        data_dir = FILE_STRUCTURE["jobs"]
+        global SGE
+        global SUBMITTED
+        global FILE_STRUCTURE
+
+        data_dir = FILE_STRUCTURE.get_file_path("jobs")
         FileTools.mkdir(data_dir)
-        jid_fname = FILE_STRUCTURE["jid"]
+        jid_fname = FILE_STRUCTURE.get_file_path("jid")
         jid_file = open(jid_fname, "a")
 
         qsub_cmd = ""
@@ -1998,7 +2022,7 @@ class BatchTools:
 
     @staticmethod
     def qdel():
-        jid_fname = FILE_STRUCTURE["jid"]
+        jid_fname = FILE_STRUCTURE.get_file_path("jid")
         BatchTools._cleanup_jids(jid_fname)
         with open(jid_fname, "r") as f:
             for jid in f:
@@ -2228,28 +2252,32 @@ class SGE_Jobs:
 class AutoTools:
     @staticmethod
     def submit_ichor_gjfs(jid=None, directory=None):
+        global FILE_STRUCTURE
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = FILE_STRUCTURE.get_file_path("training_set")
         return AutoTools.submit_ichor("submit_gjfs", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
     def submit_ichor_wfns(jid=None, directory=None):
+        global FILE_STRUCTURE
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = FILE_STRUCTURE.get_file_path("training_set")
         return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
     def submit_ichor_models(jid=None, directory=None, type=None):
+        global FILE_STRUCTURE
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = FILE_STRUCTURE.get_file_path("training_set")
         if not type:
             type = "iqa"
         return AutoTools.submit_ichor("_make_models", directory, type, submit=True, hold=jid, return_jid=True)
     
     @staticmethod
     def submit_ichor_errors(jid=None):
-        sp_dir = FILE_STRUCTURE["sample_pool"]
-        model_dir = FILE_STRUCTURE["models"]
+        global FILE_STRUCTURE
+        sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
+        model_dir = FILE_STRUCTURE.get_file_path("models")
         return AutoTools.submit_ichor("calculate_errors", model_dir, sp_dir, submit=True, hold=jid, return_jid=True)
 
     @staticmethod
@@ -2278,6 +2306,7 @@ class AutoTools:
 
     @staticmethod
     def submit_gjfs(jid=None, npoints=None, modify=None, write_data=True):
+        global POINTS_PER_ITERATION
         if npoints is None:
             npoints = POINTS_PER_ITERATION
         points = Points()
@@ -2286,6 +2315,7 @@ class AutoTools:
 
     @staticmethod
     def submit_wfns(jid=None, npoints=None, write_data=True):
+        global POINTS_PER_ITERATION
         if npoints is None:
             npoints = POINTS_PER_ITERATION
         points = Points()
@@ -2295,7 +2325,7 @@ class AutoTools:
     @staticmethod
     def submit_models(jid=None, directory=None, write_data=True):
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = FILE_STRUCTURE.get_file_path("training_set")
         gjf = Points(directory, read_gjfs=True, first=True)[0]
         return SubmissionTools.make_ferebus_script(gjf.atoms.atoms, submit=True, hold=jid, return_jid=True, write_data=write_data)
 
@@ -2315,10 +2345,11 @@ class AutoTools:
 
     @staticmethod
     def run():
+        global MAX_ITERATION
+        global FILE_STRUCTURE
         global SUBMITTED
 
         FileTools.clear_log()
-        FileTools.clear_script_outputs()
 
         UsefulTools.suppress_tqdm()
 
@@ -2333,7 +2364,7 @@ class AutoTools:
                 ]
 
         jid = None
-        ts_dir = FILE_STRUCTURE["training_set"]
+        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
         npoints = FileTools.count_points_in(ts_dir)
 
         logging.info("Starting ICHOR Auto Run")
@@ -2356,6 +2387,7 @@ class AutoTools:
             print(f"Submitted {script_name}: {jid}")
         
         SUBMITTED = False
+
 
 #========================#
 #      Point Tools       #
@@ -2546,10 +2578,12 @@ class Atom:
 
     @property
     def mass(self):
+        global type2mass
         return type2mass[self.atom_type]
     
     @property
     def radius(self):
+        global type2rad
         return type2rad[self.atom_type]
 
     @property
@@ -2822,7 +2856,7 @@ class Point:
     counter = it.count(1)
 
     def __init__(self, directory="", gjf_fname="", wfn_fname="", int_directory="", int_fnames=[], 
-                    read_gjf=False, read_wfn=False, read_ints=False, atoms=None):
+                    read_gjf=False, read_wfn=False, read_ints=False):
         self.num = next(Point.counter)
         self.directory = directory
         self.gjf = GJF(gjf_fname, read=read_gjf)
@@ -2836,9 +2870,6 @@ class Point:
         
         self.fname = ""
 
-        if not atoms is None:
-            self.gjf._atoms = atoms
-
     @property
     def atoms(self):
         return self.gjf._atoms
@@ -2847,14 +2878,6 @@ class Point:
     def features(self):
         return self.atoms.features
     
-    @property
-    def nfeats(self):
-        return len(self.features)
-
-    @property
-    def natoms(self):
-        return len(self.atoms)
-
     def find_wfn(self):
         wfns = FileTools.get_files_in(self.directory, "*.wfn")
         if len(wfns) > 0:
@@ -2885,6 +2908,7 @@ class Point:
             self.system_name = self.point_name.replace(self.point_num, "")
             self.point_num = int(self.point_num)
         except (IndexError, ValueError):
+            global SYSTEM_NAME
             self.point_num = 1
             self.system_name = SYSTEM_NAME
 
@@ -2993,6 +3017,13 @@ class GJF(Point):
         return GJF.jobs[self.job_type]
 
     def format(self):
+        global METHOD
+        global KEYWORDS
+        global BASIS_SET
+        global _GAUSSIAN_METHODS
+        global GAUSSIAN_CORE_COUNT
+        global DEFAULT_CONFIG_FILE
+
         if UsefulTools.in_sensitive(METHOD, _GAUSSIAN_METHODS):
             self.method = METHOD
         else:
@@ -3048,6 +3079,8 @@ class GJF(Point):
 
 
 class WFN(Point):
+    global METHOD
+
     def __init__(self, fname="", read=False):
         self.fname = fname
         self.split_fname()
@@ -3089,6 +3122,8 @@ class WFN(Point):
                     self.virial = line.split()[-1]
 
     def read_header(self):
+        global METHOD
+
         data = re.findall(r"\s\d+\s", self.header)
 
         self.mol_orbitals = int(data[0])
@@ -3163,16 +3198,30 @@ class INT(Point):
         if self.fname and read:
             self.read()
     
-    def read(self):
-        try:
-            self.read_json()
-        except json.decoder.JSONDecodeError:
-            self.read_int()
-            # if INT_TO_JSON:
-            self.backup_int()
-            self.write_json()
+    @property
+    def num(self):
+        return int(re.findall("\d+", self.atom)[0])
 
-    def read_int(self):
+    @property
+    def integration_error(self):
+        return self.integration_results["L"]
+
+    @property
+    def eiqa(self):
+        return self.iqa_data["E_IQA(A)"]
+
+    def move(self, directory):
+        if self:
+            if directory.endswith(os.sep):
+                directory = directory.rstrip(os.sep)
+            point_name = os.path.basename(directory)
+            int_directory = point_name + "_atomicfiles"
+            FileTools.mkdir(int_directory)
+            new_name = os.path.join(directory, int_directory, self.atom.lower() + ".int")
+            FileTools.move_file(self.fname, new_name)
+            self.fname = new_name
+
+    def read(self):
         with open(self.fname, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
@@ -3211,53 +3260,15 @@ class INT(Point):
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
 
-    def read_json(self):
-        with open(self.fname, "r") as f:
-            int_data = json.load(f)
-            self.integration_results = int_data["integration"]
-            self.multipoles = int_data["multipoles"]
-            self.iqa_data = int_data["iqa_data"]
-
-    def backup_int(self):
-        FileTools.move_file(self.fname, self.fname + ".bak")
-
-    def write_json(self):
-        int_data = {}
-        int_data["integration"] = self.integration_results
-        int_data["multipoles"] = self.multipoles
-        int_data["iqa_data"] = self.iqa_data
-        with open(self.fname, "w") as f:
-            json.dump(int_data, f)
-
-    @property
-    def num(self):
-        return int(re.findall("\d+", self.atom)[0])
-
-    @property
-    def integration_error(self):
-        return self.integration_results["L"]
-
-    @property
-    def eiqa(self):
-        return self.iqa_data["E_IQA(A)"]
-
-    def move(self, directory):
-        if self:
-            if directory.endswith(os.sep):
-                directory = directory.rstrip(os.sep)
-            point_name = os.path.basename(directory)
-            int_directory = point_name + "_atomicfiles"
-            FileTools.mkdir(int_directory)
-            new_name = os.path.join(directory, int_directory, self.atom.lower() + ".int")
-            FileTools.move_file(self.fname, new_name)
-            self.fname = new_name
-
+    
     def __bool__(self):
         return not self.fname == ""
 
 
 class Model:
     def __init__(self, fname, read_model=False):
+        global KERNEL
+
         self.fname = fname
 
         kernels = {
@@ -3371,14 +3382,14 @@ class Model:
         return os.path.join(directory, basename)
     
     def copy_to_log(self):
-        log_directory = FILE_STRUCTURE["log"]
+        log_directory = FILE_STRUCTURE.get_file_path("log")
         FileTools.mkdir(log_directory)
 
         if self.nTrain == 0:
             self.read(up_to="Number_of_training_points")
 
         nTrain = str(self.nTrain).zfill(4)
-        log_directory = os.path.join(log_directory, f"{self.system_name}{nTrain}")
+        log_directory = log_directory + f"{self.system_name}{nTrain}"
         FileTools.mkdir(log_directory)
         log_model_file = self.get_fname(log_directory)
 
@@ -3569,7 +3580,9 @@ class Models:
         return np.array(cross_validation_errors)
     
     def calc_alpha(self):
-        alpha_loc = FILE_STRUCTURE["alpha"]
+        global FILE_STRUCTURE
+
+        alpha_loc = FILE_STRUCTURE.get_file_path("alpha")
         if not os.path.exists(alpha_loc):
             return 0.5
 
@@ -3597,7 +3610,9 @@ class Models:
         return alpha * cv_errors + (1-alpha) * variances
 
     def write_data(self, indices, points):
-        adaptive_sampling = FILE_STRUCTURE["adaptive_sampling"]
+        global FILE_STRUCTURE
+        
+        adaptive_sampling = FILE_STRUCTURE.get_file_path("adaptive_sampling")
         FileTools.mkdir(adaptive_sampling)
 
         cv_errors = self.cross_validation(points)
@@ -3608,10 +3623,12 @@ class Models:
         
         data["cv_errors"] = [float(cv_errors[index]) for index in indices]
         data["predictions"] = [predictions[index] for index in indices]
-        with open(FILE_STRUCTURE["cv_errors"], "w") as f:
+        with open(FILE_STRUCTURE.get_file_path("cv_errors"), "w") as f:
             json.dump(data, f)
 
     def expected_improvement(self, points):
+        global POINTS_PER_ITERATION
+
         best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
         points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
         self.write_data(points_to_add, points)
@@ -3626,84 +3643,40 @@ class Models:
 
 
 class Points:
-    def __init__(self, directory="", read_gjfs=False, read_wfns=False, read_ints=False, first=False, read_directory=True):
+    def __init__(self, directory="", read_gjfs=False, read_wfns=False, read_ints=False, first=False):
         self._points = []
 
         self.directory = directory if directory else "."
         if read_gjfs or read_wfns or read_ints:
             FileTools.check_directory(self.directory)
-            start_time = UsefulTools.get_time()
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
-            UsefulTools.log_time_taken(start_time, message=f"Reading {self.directory} took ")
-
-        training_set_functions = {
-                                  "min-max": self.get_min_max_features_first_atom,
-                                  "random": self.get_random_points
-                                 }
-        self._get_training_points = training_set_functions["min-max"]
-
-    def _read_directory(self, d, read_gjfs=False, read_wfns=False, read_ints=False, first=False):
-        point = {"read_gjf": read_gjfs, "read_wfn": read_wfns, "read_ints": read_ints}
-        point["directory"] = d
-        progressbar.set_description(desc=d)
-        for f in FileTools.get_files_in(d, "*", sort="natural"):
-            if os.path.isdir(f):
-                point["int_directory"] = f
-                point["int_fnames"] = FileTools.get_files_in(f, "*.int", sort="natural")
-            elif FileTools.get_filetype(f) == ".gjf":
-                point["gjf_fname"] = f
-            elif FileTools.get_filetype(f) == ".wfn":
-                point["wfn_fname"] = f
-        return point
-            
 
     def read_directory(self, read_gjfs, read_wfns, read_ints, first=False):
         directories = FileTools.get_files_in(self.directory, "*/", sort="natural")
         with tqdm(total=len(directories), unit=" files", leave=True) as progressbar:
             for d in directories:
-                point = self._read_directory(d, read_gjfs, read_wfns, read_ints, first) # implement multiprocessing
-                progressbar.update()
+                point = {"read_gjf": read_gjfs, "read_wfn": read_wfns, "read_ints": read_ints}
+                point["directory"] = d
+                progressbar.set_description(desc=d)
+                for f in FileTools.get_files_in(d, "*", sort="natural"):
+                    if os.path.isdir(f):
+                        point["int_directory"] = f
+                        point["int_fnames"] = FileTools.get_files_in(f, "*.int", sort="natural")
+                    elif FileTools.get_filetype(f) == ".gjf":
+                        point["gjf_fname"] = f
+                    elif FileTools.get_filetype(f) == ".wfn":
+                        point["wfn_fname"] = f
                 if "gjf_fname" in point.keys():
                     self.add_point(point)
                     if first:
                         break
-
-    def read_set(self, files, stay=True):
-        if isinstance(files, str):
-            files = [files]
-        with tqdm(total=len(files), unit=" files", leave=stay) as progressbar:
-            for f in files:
-                progressbar.set_description(desc=f)
-                if os.path.isdir(f):
-                    if "_atomicfiles" in f:
-                        progressbar.update()
-                        continue
-                    self.read_set(FileTools.get_files_in(f, "*", sort="natural"), stay=False)
-                elif f.endswith(".gjf"):
-                    self.read_gjf(f)
-                elif f.endswith(".xyz"):
-                    self.read_xyz(f)
-                elif f == "":
-                    files += FileTools.get_files_in(f, "*", sort="natural")
-                    continue
                 progressbar.update()
-    
-    def read_gjf(self, gjf_file):
-        gjf = GJF(gjf_file, read=True)
-        self.add_point(gjf._atoms)
-
-    def read_xyz(self, xyz_file):
-        trajectory = Trajectory(xyz_file, read=True)
-        for point in trajectory:
-            self.add_point(point)
 
     def add_point(self, point):
         if isinstance(point, dict):
             self._points.append(Point(**point))
         elif isinstance(point, Point):
             self._points.append(point)
-        elif isinstance(point, Atoms):
-            self._points.append(Point(atoms=point))
     
     def add(self, points, move=False):
         for point in points:
@@ -3711,6 +3684,7 @@ class Points:
             if move: self.move(point)
 
     def move(self, point):
+        global SYSTEM_NAME
         old_directory = point.directory
 
         new_index = len(self) + 1
@@ -3726,78 +3700,6 @@ class Points:
             points.add_point(self[point])
             del self[point]
         return points
-
-    def renumber(self):
-        Point.counter = it.count(1)
-        for point in self:
-            point.num = next(Point.counter)
-
-    def move_points(self, points):
-        new_set = Points()
-        for point in points:
-            if isinstance(point, int):
-                point = self[point]
-            new_set.add_point(point)
-            del self[point]
-        new_set.renumber()
-        return new_set
-
-    def write_to_directory(self, directory, empty=False):
-        if os.path.isdir(directory) and not empty:
-            print()
-            print(f"{directory} exists.")
-            empty = UsefulTools.check_bool(input(f"Would you like to empty {directory}? [Y/N]"))
-
-        FileTools.mkdir(directory, empty=empty)
-        for point in self:
-            gjf_name = SYSTEM_NAME + str(point.num).zfill(4) + ".gjf"
-            gjf_name = os.path.join(directory, gjf_name)
-            gjf = GJF(gjf_name)
-            gjf._atoms = point.atoms
-            gjf.write()
-        FileTools.check_directory(directory)
-
-    def get_atom_features(self, atom):
-        return self.features[atom]
-
-    def get_atom_feature(self, atom, feature):
-        return [features[feature] for features in self.get_atom_features(atom)]
-
-    def get_min_max_atom_feature(self, atom, feature):
-        features = self.get_atom_feature(atom, feature)
-        
-        min_indx = int(np.argmin(features))
-        max_indx = int(np.argmax(features))
-        
-        return min_indx, max_indx
-
-    def get_min_max_of_atom(self, iatom):
-        points = []
-        for i in range(self.nfeats):
-            imin, imax = self.get_min_max_atom_feature(iatom, i)
-            points += [imin, imax]
-        return points
-    
-    def get_min_max_features_first_atom(self):
-        return self.get_min_max_of_atom(0)
-
-    def get_random_points(self, n_points):
-        return sorted(random.sample(self.range, n_points), reverse=True)
-
-    def get_training_points(self):
-        training_points = self._get_training_points()
-        return self.move_points(training_points)
-
-    def make_random_set(self, n_points):
-        points = self.get_random_points(n_points)
-        return self.move_points(points)
-
-    def make_set(self, n_points, directory):
-        if n_points < 0:
-            points = self.get_training_points()
-        else:
-            points = self.make_random_set(n_points)
-        points.write_to_directory(directory)
 
     def format_gjfs(self):
         for point in self:
@@ -3817,6 +3719,9 @@ class Points:
             point.wfn.check_functional()
 
     def check_wfns(self):
+        global METHOD
+        global AIMALL_FUNCTIONALS
+
         n_wfns = self.n_wfns
         n_gjfs = self.n_gjfs
         if n_gjfs != n_wfns:
@@ -3838,11 +3743,13 @@ class Points:
             print("All wfns complete.")
 
     def make_gjf_template(self, n_points):
+        global SYSTEM_NAME
         for i in range(n_points):
             gjf_fname = os.path.join(self.directory, SYSTEM_NAME + str(i+1).zfill(4) + ".gjf")
             self.add_point(Point(gjf_fname=gjf_fname))
     
     def make_wfn_template(self, n_points):
+        global SYSTEM_NAME
         for i in range(n_points):
             wfn_fname = os.path.join(self.directory, SYSTEM_NAME + str(i+1).zfill(4) + ".wfn")
             self.add_point(Point(wfn_fname=wfn_fname))
@@ -3859,7 +3766,9 @@ class Points:
         return training_sets, nproperties
 
     def update_alpha(self):
-        cv_file = FILE_STRUCTURE["cv_errors"]
+        global FILE_STRUCTURE
+
+        cv_file = FILE_STRUCTURE.get_file_path("cv_errors")
         if not os.path.exists(cv_file):
             return
 
@@ -3887,17 +3796,19 @@ class Points:
                 true_error += (true_value[int(predicted_atom)-1] - predicted_value)**2
             data["true_errors"].append(true_error)
 
-        FileTools.mkdir(FILE_STRUCTURE["adaptive_sampling"])
-        alpha_file = FILE_STRUCTURE["alpha"]
+        FileTools.mkdir(FILE_STRUCTURE.get_file_path("adaptive_sampling"))
+        alpha_file = FILE_STRUCTURE.get_file_path("alpha")
         with open(alpha_file, "w") as f:
             json.dump(data, f)
 
     def make_training_set(self, model_type):
+        global FILE_STRUCTURE
+
         training_sets, nproperties = self.get_training_sets(model_type)
-        FileTools.mkdir(FILE_STRUCTURE["ferebus"], empty=True)
+        FileTools.mkdir(FILE_STRUCTURE.get_file_path("ferebus"), empty=True)
         model_directories = []
         for atom, training_set in training_sets.items():
-            directory = os.path.join(FILE_STRUCTURE["ferebus"], atom)
+            directory = os.path.join(FILE_STRUCTURE.get_file_path("ferebus"), atom)
             FileTools.mkdir(directory, empty=True)
             training_set_file = os.path.join(directory, atom + "_TRAINING_SET.txt")
             with open(training_set_file, "w") as f:
@@ -3937,10 +3848,6 @@ class Points:
         return df["error / kJ/mol"]
 
     @property
-    def n_points(self):
-        return len(self._points)
-
-    @property
     def n_gjfs(self):
         n = 0
         for point in self:
@@ -3954,49 +3861,11 @@ class Points:
             n = n + 1 if point.wfn else n
         return n
 
-    @property
-    def nfeats(self):
-        if len(self) > 0:
-            return self[0].nfeats
-        else:
-            return 0
-    
-    @property
-    def natoms(self):
-        if len(self) > 0:
-            return self[0].natoms
-        else:
-            return 0
-
-    @property
-    def range(self):
-        return range(self.n_points)
-
-    @property
-    def features(self):
-        try:
-            return self._features
-        except AttributeError:
-            print("Calculating Features")
-            self._features = [[] for _ in range(self.natoms)]
-            with tqdm(total=self.n_points, unit=" molecules") as progressbar:
-                for point in self:
-                    for i, feature in enumerate(point.features):
-                        self._features[i].append(feature)
-                    progressbar.update()
-            return self._features
-
     def __len__(self):
         return FileTools.count_points_in(self.directory)
     
-    def __delitem__(self, del_point):
-        if isinstance(del_point, (int, np.int64)):
-            del self._points[del_point]
-        elif isinstance(del_point, Point):
-            for i, point in enumerate(self):
-                if point.num == del_point.num:
-                    del self[i]
-                break
+    def __delitem__(self, i):
+        del self._points[i]
 
     def __getitem__(self, i):
         return self._points[i]
@@ -4102,6 +3971,7 @@ class PointTools:
 
 class SSH:
     def __init__(self, machine):
+        global EXTERNAL_MACHINES
         try:
             import paramiko
         except ImportError:
@@ -4215,6 +4085,23 @@ class DlpolyTools:
 
     @staticmethod
     def write_control(control_file):
+        global KERNEL
+        global SYSTEM_NAME
+
+        global DLPOLY_TIMESTEP
+        global DLPOLY_TEMPERATURE
+        global DLPOLY_PRINT_EVERY
+        global DLPOLY_NUMBER_OF_STEPS
+
+        global DLPOLY_CHECK_CONVERGENCE
+        global DLPOLY_CONVERGENCE_CRITERIA
+
+        global DLPOLY_MAX_ENERGY
+        global DLPOLY_MAX_FORCE
+        global DLPOLY_RMS_FORCE
+        global DLPOLY_MAX_DISP
+        global DLPOLY_RMS_DISP
+
         with open(control_file, "w+") as f:
             f.write(f"Title: {SYSTEM_NAME}\n")
             f.write("# This is a generic CONTROL file. Please adjust to your requirement.\n")
@@ -4270,6 +4157,9 @@ class DlpolyTools:
 
     @staticmethod
     def write_field(field_file, atoms):
+        global SYSTEM_NAME
+        global dlpoly_weights
+
         with open(field_file, "w") as f:
             f.write("DL_FIELD v3.00\nUnits internal\nMolecular types 1\n")
             f.write(f"Molecule name {SYSTEM_NAME}\n")
@@ -4281,6 +4171,8 @@ class DlpolyTools:
 
     @staticmethod
     def write_kriging(kriging_file, atoms, models):
+        global SYSTEM_NAME
+
         atoms.calculate_alf()
         models.read()
 
@@ -4303,6 +4195,8 @@ class DlpolyTools:
 
     @staticmethod
     def setup_dlpoly_dir(dlpoly_dir, models):
+        global FILE_STRUCTURE
+
         FileTools.mkdir(dlpoly_dir)
 
         control_file = os.path.join(dlpoly_dir, "CONTROL")
@@ -4311,7 +4205,7 @@ class DlpolyTools:
         kriging_file = os.path.join(dlpoly_dir, "KRIGING.txt")
         dlpoly_model_dir = os.path.join(dlpoly_dir, "model_krig")
 
-        sp_dir = FILE_STRUCTURE["sample_pool"]
+        sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
 
         atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
         atoms.finish()
@@ -4324,7 +4218,9 @@ class DlpolyTools:
 
     @staticmethod
     def setup_model(model_directory=None):
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        global FILE_STRUCTURE
+
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
         models = Models(model_directory)
         
         model_dir_name = FileTools.end_of_path(model_directory)
@@ -4335,14 +4231,18 @@ class DlpolyTools:
 
     @staticmethod
     def run_on_model():
-        model_dir = FILE_STRUCTURE["models"]
+        global FILE_STRUCTURE
+        model_dir = FILE_STRUCTURE.get_file_path("models")
 
         dlpoly_directories = [DlpolyTools.setup_model(model_dir)]
         SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True)
 
     @staticmethod
     def run_on_log():
-        log_dir = FILE_STRUCTURE["log"]
+        global SYSTEM_NAME
+        global FILE_STRUCTURE
+
+        log_dir = FILE_STRUCTURE.get_file_path("log")
 
         model_dirs = FileTools.get_files_in(log_dir, SYSTEM_NAME + "*/")
         dlpoly_directories = []
@@ -4355,7 +4255,9 @@ class DlpolyTools:
     @staticmethod
     @UsefulTools.externalFunc()
     def calculate_gaussian_energies():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        global FILE_STRUCTURE
+
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
         trajectory_files = {}
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
@@ -4374,7 +4276,9 @@ class DlpolyTools:
     @staticmethod
     @UsefulTools.externalFunc()
     def get_wfn_energies():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        global FILE_STRUCTURE
+
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
         points = Points(dlpoly_dir, read_wfns=True)
         energy_file = os.path.join(dlpoly_dir, "Energies.txt")
         with open(energy_file, "w") as f:
@@ -4386,10 +4290,12 @@ class DlpolyTools:
 
     @staticmethod
     def auto_run():
-        FileTools.rmtree(FILE_STRUCTURE["dlpoly"])
+        global FILE_STRUCTURE
+
+        FileTools.rmtree(FILE_STRUCTURE.get_file_path("dlpoly"))
         FileTools.clear_log()
 
-        log_dir = FILE_STRUCTURE["log"]
+        log_dir = FILE_STRUCTURE.get_file_path("log")
         npoints = FileTools.count_models(log_dir)
 
         _, jid = DlpolyTools.run_on_log()
@@ -4399,6 +4305,8 @@ class DlpolyTools:
 
     @staticmethod
     def calculate_trajectory_wfn(trajectory_file, d=None):
+        global SYSTEM_NAME
+
         if os.path.isdir(trajectory_file):
             trajectory_file = os.path.join(trajectory_file, "TRAJECTORY.xyz")
 
@@ -4423,7 +4331,7 @@ class DlpolyTools:
         
     @staticmethod
     def calculate_trajectories_wfn():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
         jid = None
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
@@ -4445,7 +4353,7 @@ class DlpolyTools:
     def get_trajectory_energies():
         import pandas as pd
 
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
 
         trajectories = {}
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
@@ -4463,6 +4371,8 @@ class DlpolyTools:
     
     @staticmethod
     def auto_traj_analysis():
+        global DLPOLY_NUMBER_OF_STEPS
+
         if DlpolyTools.model_loc == "all":
             jid = DlpolyTools.calculate_trajectories_wfn()
             AutoTools.submit_dlpoly_trajectories_energies(jid)
@@ -4495,9 +4405,11 @@ class DlpolyTools:
 
     @staticmethod
     def choose_model():
+        global FILE_STRUCTURE
+
         model_menu = Menu(title="Select Model Directory", auto_close=True)
 
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
         model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
         i = 1
         for model_dir in model_dirs:
@@ -4549,8 +4461,8 @@ class DlpolyTools:
         
     @staticmethod
     def check_model_links():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
-        log_dir = FILE_STRUCTURE["log"]
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
+        log_dir = FILE_STRUCTURE.get_file_path("log")
 
         model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
         log_dirs = FileTools.get_files_in(log_dir, "*/")
@@ -4564,7 +4476,7 @@ class DlpolyTools:
         opt_wfn = FileTools.get_opt(required=True)
         opt_atoms = opt_wfn._atoms
         opt_atoms.to_angstroms()
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = FILE_STRUCTURE.get_file_path("dlpoly")
 
         rmsd = []
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
@@ -4618,6 +4530,7 @@ class S_CurveTools:
     
     @staticmethod
     def set_model_from_log():
+        global SYSTEM_NAME
         log_menu = Menu(title = "Select Model From Log", auto_close=True)
         for i, model in enumerate(FileTools.get_files_in(S_CurveTools.log_loc, "*/")):
             log_menu.add_option(f"{i+1}", model, S_CurveTools.set_model_dir, kwargs={"directory": model})
@@ -4704,11 +4617,11 @@ class S_CurveTools:
 
     @staticmethod
     def run():
-        S_CurveTools.vs_loc = FILE_STRUCTURE["validation_set"]
-        S_CurveTools.sp_loc = FILE_STRUCTURE["sample_pool"]
+        S_CurveTools.vs_loc = FILE_STRUCTURE.get_file_path("validation_set")
+        S_CurveTools.sp_loc = FILE_STRUCTURE.get_file_path("sample_pool")
 
-        S_CurveTools.model_loc = FILE_STRUCTURE["models"]
-        S_CurveTools.log_loc = FILE_STRUCTURE["log"]
+        S_CurveTools.model_loc = FILE_STRUCTURE.get_file_path("models")
+        S_CurveTools.log_loc = FILE_STRUCTURE.get_file_path("log")
 
         S_CurveTools.validation_set = S_CurveTools.vs_loc
         S_CurveTools.models = S_CurveTools.model_loc
@@ -4741,9 +4654,11 @@ class AnalysisTools:
 
     @staticmethod
     def recovery_errors():
-        ts_dir = FILE_STRUCTURE["training_set"]
-        sp_dir = FILE_STRUCTURE["sample_pool"]
-        vs_dir = FILE_STRUCTURE["validation_set"]
+        global FILE_STRUCTURE
+
+        ts_dir = FILE_STRUCTURE.get_file_path("training_set")
+        sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
+        vs_dir = FILE_STRUCTURE.get_file_path("validation_set")
 
         error_menu = Menu(title="Recovery Error Menu", auto_close=True)
         error_menu.add_option("1", "Calculate Recovery Errors of Training Set", AnalysisTools.calculate_recovery_errors, kwargs={"directory": ts_dir}, wait=True)
@@ -4754,16 +4669,18 @@ class AnalysisTools:
 
 
 class SetupTools:
-    sets = [
-            "training_set",
-            "sample_pool",
-            "validation_set"
-           ]
-
     @staticmethod
-    def directories():      
-        for directory in SetupTools.sets:
-            dir_path = FILE_STRUCTURE[directory]
+    def directories():
+        global FILE_STRUCTURE
+
+        directories_to_setup = [
+                                "training_set",
+                                "sample_pool",
+                                "validation_set"
+                               ]
+        
+        for directory in directories_to_setup:
+            dir_path = FILE_STRUCTURE.get_file_path(directory)
             empty = False
             if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
                 if os.path.isdir(dir_path):
@@ -4772,38 +4689,6 @@ class SetupTools:
                     empty = UsefulTools.check_bool(input(f"Would you like to empty {dir_path}? [Y/N]"))
                 FileTools.mkdir(dir_path, empty=empty)
             print()
-    
-    @staticmethod
-    def make_set(set_to_make, points):
-        set_name = UsefulTools.prettify_string(set_to_make)
-        n_points = -1
-        if not set_to_make == "training_set":
-            while True:
-                n_points = int(input(f"Enter number of points for the {set_name}: "))
-                if n_points > 0:
-                    break
-                else:
-                    print("Error: Number of points must be greater than 0")
-        points.make_set(n_points, FILE_STRUCTURE[set_to_make])
-        return points
-        
-
-    @staticmethod
-    def make_sets():
-        t = TabCompleter()
-        t.setup_completer(t.path_completer)
-        set_location = input("Enter XYZ file or Directory containing the Points to use: ")
-        t.remove_completer()
-
-        points = Points()
-        points.read_set(set_location)
-
-        for set_to_make in SetupTools.sets:
-            set_name = UsefulTools.prettify_string(set_to_make)
-            print()
-            ans = input(f"Would you like to make set: {set_name} [Y/N]")
-            if UsefulTools.check_bool(ans):
-                points = SetupTools.make_set(set_to_make, points)
 
 
 class SettingsTools:
@@ -4860,7 +4745,7 @@ def defineGlobals():
     SUBMITTED = "SGE_O_HOST" in os.environ.keys()
 
     if SUBMITTED:
-        tqdm = my_tqdm
+        from tqdm import tqdm_notebook as tqdm
 
     check_settings = {
                       "BOAQ": "_BOAQ_VALUES",
@@ -4937,6 +4822,10 @@ def defineGlobals():
     
     for setting, allowed_values in check_settings.items():
         if globals()[setting] not in globals()[allowed_values]:
+            # print("Error: Unknown " + setting + " setting")
+            # print("Allowed settings:")
+            # print(globals()[allowed_values])
+            # print("Setting " + setting + " to: %s" % default_settings[setting])
             globals()[setting] = default_settings[setting]
 
     modify_settings = {
@@ -4951,13 +4840,13 @@ def defineGlobals():
     if not ALF:
         if not alf_reference_file:
             try:
-                alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["training_set"])
+                alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("training_set"))
             except:
                 try:
-                    alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["sample_pool"])
+                    alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("sample_pool"))
                 except:
                     try:
-                        alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["validation_set"])
+                        alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE.get_file_path("validation_set"))
                     except:
                         pass
         if alf_reference_file:
@@ -4966,6 +4855,16 @@ def defineGlobals():
                 ALF = Atoms.ALF
             except:
                 print("\nError in ALF calculation, please specify file to calculate ALF")
+
+    # if ALF:
+    #     for i in range(len(ALF)):
+    #         for j in range(len(ALF[i])):
+    #             ALF[i][j] = int(ALF[i][j])
+
+    #     if ALF[0][0] == 1:
+    #         for i in range(len(ALF)):
+    #             for j in range(len(ALF[i])):
+    #                 ALF[i][j] -= 1
 
 
 def readArguments():
@@ -4978,6 +4877,15 @@ def readArguments():
     allowed_functions = ",".join(_external_functions.keys())
 
     parser = ArgumentParser(description="ICHOR: A kriging training suite")
+
+    parser.add_argument("-a", "--auto", dest="auto_sub", action="store_true",
+                        help="Run ICHOR in Auto Submission Mode")
+
+    parser.add_argument("-i", "--iteration", dest="iteration", type=int, metavar='i',
+                        help="Current iteration during Auto Submission Mode")
+
+    parser.add_argument("-s", "--step", dest="step", type=int, metavar='s',
+                        help="Current ICHOR step during Auto Submission Mode")
     
     parser.add_argument("-c", "--config", dest="config_file", type=str,
                         help="Name of Config File for ICHOR")
@@ -4989,7 +4897,16 @@ def readArguments():
 
     if args.config_file:
         DEFAULT_CONFIG_FILE = args.config_file
-   
+
+    if args.auto_sub:
+        AUTO_SUBMISSION_MODE = True
+
+        if args.iteration:
+            ITERATION = args.iteration
+
+        if args.step:
+            STEP = args.step
+    
     if args.func:
         func = args.func[0]
 
@@ -5034,6 +4951,8 @@ def _ssh(machine):
 
 
 def ssh():
+    global EXTERNAL_MACHINES
+
     ssh_menu = Menu(title="SSH Menu")
     for i, machine in enumerate(EXTERNAL_MACHINES.keys()):
         ssh_menu.add_option(f"{i+1}", machine.upper(), _ssh, kwargs={"machine": machine}, auto_close=True)
@@ -5058,8 +4977,9 @@ def submit_wfns(directory):
 
 @UsefulTools.externalFunc()
 def move_models(model_file, IQA=False, copy_to_log=True):
+    global FILE_STRUCTURE
     logging.info("Moving Completed Models")
-    model_directory = FILE_STRUCTURE["models"]
+    model_directory = FILE_STRUCTURE.get_file_path("models")
     FileTools.mkdir(model_directory)
 
     model_files = [model_file]
@@ -5104,6 +5024,9 @@ def make_models(directory):
 
 @UsefulTools.externalFunc()
 def calculate_errors(models_directory, sample_pool_directory):
+    global FILE_STRUCTURE
+    global SUBMITTED
+
     logging.info("Calculating errors of the Sample Pool")
 
     models = Models(models_directory, read_models=True)
@@ -5118,7 +5041,7 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     if move_points :
         logging.info("Moving points to the Training Set")
-        training_set_directory = FILE_STRUCTURE["training_set"]
+        training_set_directory = FILE_STRUCTURE.get_file_path("training_set")
         training_set = Points(training_set_directory)
         training_set.add(points, move=True)
         training_set.format_gjfs()
@@ -5143,10 +5066,13 @@ def dlpoly_analysis():
 
 
 def opt():
-    sp_dir = FILE_STRUCTURE["sample_pool"]
+    global SYSTEM_NAME
+    global FILE_STRUCTURE
+
+    sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
     atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
 
-    opt_dir = FILE_STRUCTURE["opt"]
+    opt_dir = FILE_STRUCTURE.get_file_path("opt")
     FileTools.mkdir(opt_dir)
 
     opt_gjf = GJF(os.path.join(opt_dir, SYSTEM_NAME + "1".zfill(4) + ".gjf"))
@@ -5161,10 +5087,13 @@ def opt():
 #############################################
 
 def main_menu():
-    ts_dir = FILE_STRUCTURE["training_set"]
-    sp_dir = FILE_STRUCTURE["sample_pool"]
-    vs_dir = FILE_STRUCTURE["validation_set"]
-    models_dir = FILE_STRUCTURE["models"]
+    global FILE_STRUCTURE
+    global MACHINE
+
+    ts_dir = FILE_STRUCTURE.get_file_path("training_set")
+    sp_dir = FILE_STRUCTURE.get_file_path("sample_pool")
+    vs_dir = FILE_STRUCTURE.get_file_path("validation_set")
+    models_dir = FILE_STRUCTURE.get_file_path("models")
 
     #=== Training Set Menu ===#
     training_set_menu = Menu(title="Training Set Menu")
@@ -5202,10 +5131,10 @@ def main_menu():
 
     #=== Tools Menu ===#
     tools_menu = Menu(title="Tools Menu")
+    tools_menu.add_option("|convert|", "Convert ICHOR Directory Structure", UsefulTools.not_implemented)
+    tools_menu.add_option("|clean|", "Cleanup Files", UsefulTools.not_implemented)
     tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
-    tools_menu.add_option("make", "Make Sets", SetupTools.make_sets)
     tools_menu.add_option("|cp2k|", "Setup CP2K run", UsefulTools.not_implemented)
-    tools_menu.add_space()
     tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_final_options()
 
