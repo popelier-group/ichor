@@ -3656,7 +3656,6 @@ class Points:
                 point["wfn_fname"] = f
         return point
             
-
     def read_directory(self, read_gjfs, read_wfns, read_ints, first=False):
         directories = FileTools.get_files_in(self.directory, "*/", sort="natural")
         with tqdm(total=len(directories), unit=" files", leave=True) as progressbar:
@@ -4364,10 +4363,11 @@ class DlpolyTools:
                 trajectory_files[model_name] = Trajectory(trajectory_file, read=True)
 
         for model_name, trajectory in trajectory_files.items():
-            gjf_fname = os.path.join(dlpoly_dir, model_name + ".gjf")
-            gjf = GJF(gjf_fname)
-            gjf._atoms = trajectory[-1]
-            gjf.write()
+            if len(trajectory) > 0:
+                gjf_fname = os.path.join(dlpoly_dir, model_name + ".gjf")
+                gjf = GJF(gjf_fname)
+                gjf._atoms = trajectory[-1]
+                gjf.write()
 
         submit_gjfs(dlpoly_dir, modify="dlpoly")
 
@@ -4894,7 +4894,7 @@ def defineGlobals():
         return s
 
     def check_bool(val):
-        return val in ['true', '1', 't', 'y', 'yes', 'yeah']
+        return UsefulTools.check_bool(val)
 
     def print_globals():
         for key, val in globals().items():
