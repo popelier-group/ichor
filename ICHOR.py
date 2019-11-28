@@ -1445,7 +1445,7 @@ class CommandLine:
         self.setup_command()
 
     def setup_datafile(self):
-        # UsefulTools.set_uid()
+        if _UID is None: UsefulTools.set_uid()
         self.datafile = _UID
 
     def setup_command(self):
@@ -1703,7 +1703,7 @@ class FerebusCommand(CommandLine):
         return len(self.directories)
 
 
-def DlpolyCommand(CommandLine):
+class DlpolyCommand(CommandLine):
     def __init__(self):
         self.directories = []
 
@@ -1958,7 +1958,7 @@ class SubmissionTools:
 
     @staticmethod
     def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None):
-        dlpoly_job = FerebusCommand()
+        dlpoly_job = DlpolyCommand()
         for dlpoly_directory in dlpoly_directories:
             dlpoly_job.add(dlpoly_directory)
         
@@ -3106,7 +3106,7 @@ class GJF(Point):
                 f.write(f"{str(atom)}\n")
             f.write(f"\n{self.wfn_fname}")
         
-    def submit(self, modify=None):
+    def submit(self):
         SubmissionTools.make_g09_script(self, redo=True, submit=True)
 
     def __len__(self):
@@ -3874,7 +3874,7 @@ class Points:
         for point in self:
             if point.gjf: point.gjf.write()
     
-    def submit_gjfs(self, redo=False, submit=True, hold=None, return_jid=False):
+    def submit_gjfs(self, redo=False, submit=True, hold=None):
         return SubmissionTools.make_g09_script(self, redo=redo, submit=submit, hold=hold)
     
     def submit_wfns(self, redo=False, submit=True, hold=None):
@@ -4421,7 +4421,7 @@ class DlpolyTools:
             dlpoly_directory = DlpolyTools.setup_model(model_dir)
             dlpoly_directories += [dlpoly_directory]
         
-        return SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True, return_jid=True)
+        return SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True)
 
     @staticmethod
     @UsefulTools.externalFunc()
@@ -4441,7 +4441,7 @@ class DlpolyTools:
                 gjf._atoms = trajectory[-1]
                 gjf.write()
 
-        submit_gjfs(dlpoly_dir, modify="dlpoly")
+        submit_gjfs(dlpoly_dir)
 
     @staticmethod
     @UsefulTools.externalFunc()
@@ -4466,7 +4466,7 @@ class DlpolyTools:
 
         _, jid = DlpolyTools.run_on_log()
         _, jid = AutoTools.submit_dlpoly_gjfs(jid)
-        _, jid = AutoTools.submit_gjfs(jid, npoints=npoints, modify="dlpoly")
+        _, jid = AutoTools.submit_gjfs(jid, npoints=npoints)
         AutoTools.submit_dlpoly_energies(jid)
 
     @staticmethod
@@ -4491,7 +4491,7 @@ class DlpolyTools:
         modify = "trajectory"
         if not d is None:
             modify +=  "_" + str(d)
-        return submit_gjfs(trajectory_gjf_dir, modify=modify)
+        return submit_gjfs(trajectory_gjf_dir)
         
     @staticmethod
     def calculate_trajectories_wfn():
@@ -5230,7 +5230,7 @@ def opt():
     opt_gjf._atoms = atoms
     opt_gjf.job_type="opt"
     opt_gjf.write()
-    opt_gjf.submit(modify="opt")
+    opt_gjf.submit()
 
 
 #############################################
