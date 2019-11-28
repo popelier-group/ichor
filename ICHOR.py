@@ -1369,7 +1369,6 @@ class Job:
         else:
             type_interface[self.type]()
         
-
     def get_outfile(self, outfile):
         if outfile is None:
             return os.path.splitext(self.infile)[0] + ".log"
