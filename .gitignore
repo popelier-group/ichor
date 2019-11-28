@@ -12,3 +12,4 @@ rmsd*
 *.json
 *.log
 *DATA*/
+makeSets.py
