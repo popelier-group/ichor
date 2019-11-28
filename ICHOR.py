@@ -232,6 +232,8 @@ _external_functions = {}
 _call_external_function = None
 _call_external_function_args = []
 
+_data_lock = False
+
 _UID = None
 _IQA_MODELS = False
 
@@ -1510,6 +1512,8 @@ class CommandLine:
         return "\n".join(read_data_file) + "\n"
 
     def _write_data_file(self, fname, data, delimiter=","):
+        if _data_lock:
+            return
         with open(fname, "w") as f:
             for data_line in zip(*data):
                 if isinstance(data_line, (list, tuple)):
@@ -1698,6 +1702,48 @@ class FerebusCommand(CommandLine):
     def __len__(self):
         return len(self.directories)
 
+
+def DlpolyCommand(CommandLine):
+    def __init__(self):
+        self.directories = []
+
+        super().__init__()
+
+        self.setup_datafile()
+        self.ncores = DLPOLY_CORE_COUNT
+
+    def setup_command(self):
+        self.command = os.path.abspath(DLPOLY_LOCATION)
+
+    def add(self, directory):
+        self.directories += [os.path.abspath(directory)]
+    
+    def load_modules(self):
+        self.modules["ffluxlab"] = ["compilers/gcc/8.2.0"]
+        self.modules["csf3"] = ["compilers/gcc/8.2.0"]
+
+    @property
+    def ndata(self):
+        return 1
+    
+    def __repr__(self):
+        if len(self.directories) < 1:
+            return ""
+
+        datafile = ""
+        datafile = self.setup_data_file(self.datafile, self.directories)
+        directory = self.get_variable(0)
+        
+        runcmd = [
+                  f"pushd {directory}",
+                  self.command,
+                  "popd"
+                 ]
+        runcmd = "\n".join(runcmd)
+        return datafile + "\n" + runcmd
+
+    def __len__(self):
+        return len(self.directories)
 
 class PythonCommand(CommandLine):
     def __init__(self, py_file=None):
@@ -1911,22 +1957,20 @@ class SubmissionTools:
         return submission_script.fname, jid
 
     @staticmethod
-    def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None, return_jid=False):
-        script_name = os.path.join(directory, "DlpolySub.sh")
-        # script = SubmissionScript(name=name, type="dlpoly", cores=DLPOLY_CORE_COUNT)
-
-        # for module in SubmissionTools.dlpoly_modules[MACHINE.lower()]:
-        #     script.load(module)
-
-        # for dlpoly_directory in dlpoly_directories:
-        #     script.add_job(dlpoly_directory)
+    def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None):
+        dlpoly_job = FerebusCommand()
+        for dlpoly_directory in dlpoly_directories:
+            dlpoly_job.add(dlpoly_directory)
         
-        # script.write()
-        # if submit:
-        #     jid = script.submit(hold=hold, return_jid=return_jid)
-        #     if return_jid:
-        #         return script.fname, jid
-        # return script.fname
+        script_name = os.path.join(directory, "DlpolySub.sh")
+        submission_script = SubmissionScript(script_name)
+        submission_script.add(dlpoly_job)
+        submission_script.write()
+
+        jid = None
+        if submit:
+            jid = submission_script.submit(hold=hold)
+        return submission_script.fname, jid
         
 
 class BatchTools:
@@ -2342,6 +2386,7 @@ class AutoTools:
     @staticmethod
     def run():
         global SUBMITTED
+        global _data_lock
 
         FileTools.clear_log()
         FileTools.clear_script_outputs()
@@ -2364,14 +2409,13 @@ class AutoTools:
         npoints = FileTools.count_points_in(ts_dir)
 
         logging.info("Starting ICHOR Auto Run")
+        _data_lock = True
 
         for i in range(MAX_ITERATION):
             for func in order:
                 args = {"jid": jid}
                 if i == 0 and "npoints" in func.__code__.co_varnames:
                     args["npoints"] = npoints
-                if "write_data" in func.__code__.co_varnames:
-                    args["write_data"] = False
                 script_name, jid = func(**args)
                 print(f"Submitted {script_name}: {jid}")
         
@@ -2383,6 +2427,7 @@ class AutoTools:
             print(f"Submitted {script_name}: {jid}")
         
         SUBMITTED = False
+        _data_lock = False
 
 #========================#
 #      Point Tools       #
