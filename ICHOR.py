@@ -232,6 +232,7 @@ _external_functions = {}
 _call_external_function = None
 _call_external_function_args = []
 
+_UID = None
 _IQA_MODELS = False
 
 #############################################
@@ -1048,6 +1049,13 @@ class UsefulTools:
     @staticmethod
     def get_uid():
         return str(uuid.uuid4())
+    
+    @staticmethod
+    def set_uid(uid=None):
+        global _UID
+        if SUBMITTED and _UID:
+            return
+        _UID = uid if uid else UsefulTools.get_uid()
 
 
 class my_tqdm:
@@ -1353,7 +1361,7 @@ class Modules:
         if machine in self.machines:
             return self._modules[machine]
         else:
-            return ""
+            return []
     
     def __setitem__(self, machine, module):
         if not machine in self.machines:
@@ -1361,7 +1369,7 @@ class Modules:
         if isinstance(module, str):
             module = [module]
         self._modules[machine] += module
-    
+
     def __repr__(self):
         return repr(self._modules)
 
@@ -1424,6 +1432,8 @@ class CommandLine:
         self.var_names = []
         self.array_names = []
 
+        self.datafile = None
+
         self.setup()
     
     def setup(self):
@@ -1431,6 +1441,10 @@ class CommandLine:
         self.setup_options()
         self.setup_arguments()
         self.setup_command()
+
+    def setup_datafile(self):
+        # UsefulTools.set_uid()
+        self.datafile = _UID
 
     def setup_command(self):
         if hasattr(self, "machine_commands") and MACHINE.lower() in self.machine_commands.keys():
@@ -1507,7 +1521,9 @@ class CommandLine:
         if not os.path.dirname == FILE_STRUCTURE["datafiles"]:
             fname = os.path.join(FILE_STRUCTURE["datafiles"], os.path.basename(fname))
         self._write_data_file(fname, data, delimiter)
-        return self._read_data_file_string(fname, data, delimiter)
+        datafile_string = self._read_data_file_string(fname, data, delimiter)
+        UsefulTools.set_uid() # make new uid after using
+        return datafile_string
 
     @property
     def ndata(self):
@@ -1537,10 +1553,9 @@ class GaussianCommand(CommandLine):
             "ffluxlab": "g09"
         }
 
-        self.datafile = UsefulTools.get_uid()
-
         super().__init__()
 
+        self.setup_datafile()
         self.ncores = GAUSSIAN_CORE_COUNT
 
     @property
@@ -1582,10 +1597,9 @@ class AIMAllCommand(CommandLine):
             "ffluxlab": "aimall"
         }
 
-        self.datafile = UsefulTools.get_uid()
-
         super().__init__()
 
+        self.setup_datafile()
         self.ncores = AIMALL_CORE_COUNT
     
     def add(self, wfn_file, outfile=None):
@@ -1632,10 +1646,10 @@ class AIMAllCommand(CommandLine):
 class FerebusCommand(CommandLine):
     def __init__(self):
         self.directories = []
-        self.datafile = UsefulTools.get_uid()
 
         super().__init__()
 
+        self.setup_datafile()
         self.ncores = FEREBUS_CORE_COUNT
     
     def setup_command(self):
@@ -1670,7 +1684,7 @@ class FerebusCommand(CommandLine):
             return ""
 
         datafile = ""
-        datafile = self.setup_data_file(self.datafile, [self.directories])
+        datafile = self.setup_data_file(self.datafile, self.directories)
         directory = self.get_variable(0)
         
         runcmd = [
@@ -1695,6 +1709,8 @@ class PythonCommand(CommandLine):
         self.default_command = "python"
     
         super().__init__()
+
+        if _UID: self.add_argument("-u", _UID)
     
     def load_modules(self):
         self.modules["csf3"] = ["apps/anaconda3/5.2.0/bin"]
@@ -1708,16 +1724,23 @@ class PythonCommand(CommandLine):
         self.arguments += ["-f", f"{function_name}", *args]
 
     def __repr__(self):
-        runcmd = [self.command, self.py_script, *self.arguments]
+        runcmd = [self.command, self.py_script, " ".join(self.arguments)]
         return " ".join(runcmd)
 
 
 class SubmissionScript:
-    def __init__(self, fname):
+    def __init__(self, fname, directory=None):
         self.fname = fname
         self._commands = []
         self._modules = []
         self.parallel_environments = ParallelEnvironments()
+
+        self.stdout = FILE_STRUCTURE["outputs"]
+        self.stderr = FILE_STRUCTURE["errors"]
+
+        self.directory = directory
+        if not self.directory:
+            self.directory = FILE_STRUCTURE["scripts"]
 
     def add(self, command):
         self._commands.append(command)
@@ -1743,13 +1766,21 @@ class SubmissionScript:
                                                ("", 1, mp.cpu_count())
                                               ]
 
+    def setup_stdout(self):
+        FileTools.mkdir(self.stdout)
+        FileTools.mkdir(self.stderr)
+
     def setup(self):
         self.setup_pe()
         self.load_modules()
+        self.setup_stdout()
     
     def write(self):
         self.setup()
         self.cleanup()
+
+        FileTools.mkdir(self.directory)
+        self.fname = os.path.join(self.directory, self.fname)
 
         njobs = ""
         if self.njobs > 1:
@@ -1760,16 +1791,19 @@ class SubmissionScript:
         with open(self.fname, "w") as f:
             f.write("#!/bin/bash\n")
             f.write("#$ -cwd\n")
+            f.write(f"#$ -o {self.stdout}\n")
+            f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
                 f.write(f"#$ {option}\n")
             if self.ncores > 1:
                 f.write(f"#$ -pe {pe} {self.ncores}\n")
-            f.write(f"#$ -t 1{njobs}\n")
+            if self.njobs > 1:
+                f.write(f"#$ -t 1{njobs}\n")
             f.write("\n")
-            if self.ncores > 1:
-                f.write("export OMP_NUM_THREADS=$NSLOTS\n")
             for module in self._modules:
                 f.write(f"module load {module}\n")
+            if self.ncores > 1:
+                f.write("export OMP_NUM_THREADS=$NSLOTS\n\n")
             f.write("\n")
             for command in self._commands:
                 f.write(f"{repr(command)}\n")
@@ -1847,7 +1881,7 @@ class SubmissionTools:
             ferebus_job.add(model_directory)
             
         move_models = PythonCommand()
-        move_models.run_func("_move_models", ferebus_job.get_variable(0), _IQA_MODELS)
+        move_models.run_func("move_models", ferebus_job.get_variable(0), _IQA_MODELS)
 
         script_name = os.path.join(directory, "FereSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -1864,7 +1898,7 @@ class SubmissionTools:
     def make_python_script(python_script, directory="", function="", args=(), submit=True, hold=None):
         python_job = PythonCommand()
         if function:
-            python_job.run_func(function, args)
+            python_job.run_func(function, *args)
         
         script_name = os.path.join(directory, "PySub.sh")
         submission_script = SubmissionScript(script_name)
@@ -1878,7 +1912,7 @@ class SubmissionTools:
 
     @staticmethod
     def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None, return_jid=False):
-        name = os.path.join(directory, "DlpolySub.sh")
+        script_name = os.path.join(directory, "DlpolySub.sh")
         # script = SubmissionScript(name=name, type="dlpoly", cores=DLPOLY_CORE_COUNT)
 
         # for module in SubmissionTools.dlpoly_modules[MACHINE.lower()]:
@@ -2311,6 +2345,7 @@ class AutoTools:
 
         FileTools.clear_log()
         FileTools.clear_script_outputs()
+        UsefulTools.set_uid()
 
         UsefulTools.suppress_tqdm()
 
@@ -3797,8 +3832,8 @@ class Points:
     def submit_gjfs(self, redo=False, submit=True, hold=None, return_jid=False):
         return SubmissionTools.make_g09_script(self, redo=redo, submit=submit, hold=hold)
     
-    def submit_wfns(self, redo=False, submit=True, hold=None, return_jid=False):
-        return SubmissionTools.make_aim_script(self, redo=redo, submit=submit, hold=hold, return_jid=return_jid)
+    def submit_wfns(self, redo=False, submit=True, hold=None):
+        return SubmissionTools.make_aim_script(self, redo=redo, submit=submit, hold=hold)
     
     def submit_models(self, write_data=True):
         SubmissionTools.make_ferebus_script(self, write_data=write_data)
@@ -4962,6 +4997,7 @@ def defineGlobals():
 
 def readArguments():
     global DEFAULT_CONFIG_FILE
+    global _UID
     
     global _external_functions
     global _call_external_function
@@ -4973,9 +5009,10 @@ def readArguments():
     
     parser.add_argument("-c", "--config", dest="config_file", type=str,
                         help="Name of Config File for ICHOR")
-    
     parser.add_argument("-f", "--func", dest="func", type=str, metavar=("func","arg"), nargs="+",
                         help=f"Call ICHOR function with args, allowed functions: [{allowed_functions}]")
+    parser.add_argument("-u", "--uid", dest="uid", type=str,
+                        help="Unique Identifier For ICHOR Jobs To Write To")
 
     args = parser.parse_args()
 
@@ -4986,19 +5023,22 @@ def readArguments():
         func = args.func[0]
 
         if len(args.func) > 1:
-            args = args.func[1:]
+            func_args = args.func[1:]
         else:
-            args = []
+            func_args = []
 
         if func in _external_functions:
             # UsefulTools.suppress_output()
             _call_external_function = _external_functions[func]
-            _call_external_function_args = args
+            _call_external_function_args = func_args
         else:
             print(f"{func} not in allowed functions:")
             print(f"{allowed_functions}")
             quit()
 
+    if args.uid:
+        _UID = args.uid
+        
 
 def _ssh(machine):
     global SSH_SETTINGS
