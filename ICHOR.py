@@ -3736,10 +3736,11 @@ class Points:
         for point in points:
             if isinstance(point, int):
                 point = self[point]
-            new_set.add_point(point)
-            del self[point]
-        new_set.renumber()
-        return new_set
+            new_set.add_point(point) # add point to new set
+            del self[point] # delete point from current set
+            # append src indx -> dst indx
+        new_set.renumber() # numbers new set from 1, n
+        return new_set # returns set with new points added
 
     def write_to_directory(self, directory, empty=False):
         if os.path.isdir(directory) and not empty:
@@ -3792,6 +3793,7 @@ class Points:
         return self.move_points(points)
 
     def make_set(self, n_points, directory):
+        # append directory to file
         if n_points < 0:
             points = self.get_training_points()
         else:
@@ -3973,6 +3975,8 @@ class Points:
 
     @property
     def features(self):
+        #          iatom   ipoint   ifeat
+        # features[natoms][npoints][nfeatures]
         try:
             return self._features
         except AttributeError:
@@ -4785,8 +4789,7 @@ class SetupTools:
                 else:
                     print("Error: Number of points must be greater than 0")
         points.make_set(n_points, FILE_STRUCTURE[set_to_make])
-        return points
-        
+        return points     
 
     @staticmethod
     def make_sets():
@@ -4794,6 +4797,8 @@ class SetupTools:
         t.setup_completer(t.path_completer)
         set_location = input("Enter XYZ file or Directory containing the Points to use: ")
         t.remove_completer()
+
+        # append data source to file
 
         points = Points()
         points.read_set(set_location)
