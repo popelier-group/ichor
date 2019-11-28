@@ -3645,7 +3645,6 @@ class Points:
     def _read_directory(self, d, read_gjfs=False, read_wfns=False, read_ints=False, first=False):
         point = {"read_gjf": read_gjfs, "read_wfn": read_wfns, "read_ints": read_ints}
         point["directory"] = d
-        progressbar.set_description(desc=d)
         for f in FileTools.get_files_in(d, "*", sort="natural"):
             if os.path.isdir(f):
                 point["int_directory"] = f
@@ -3660,6 +3659,7 @@ class Points:
         directories = FileTools.get_files_in(self.directory, "*/", sort="natural")
         with tqdm(total=len(directories), unit=" files", leave=True) as progressbar:
             for d in directories:
+                progressbar.set_description(desc=d)
                 point = self._read_directory(d, read_gjfs, read_wfns, read_ints, first) # implement multiprocessing
                 progressbar.update()
                 if "gjf_fname" in point.keys():
