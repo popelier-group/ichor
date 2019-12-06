@@ -1745,6 +1745,7 @@ class DlpolyCommand(CommandLine):
     def __len__(self):
         return len(self.directories)
 
+
 class PythonCommand(CommandLine):
     def __init__(self, py_file=None):
         if not py_file:
@@ -1803,13 +1804,13 @@ class SubmissionScript:
 
     def setup_pe(self):
         self.parallel_environments["ffluxlab"] = [
-                                                  ("smp", 1, 64)
+                                                  ("smp", 2, 64)
                                                  ]
         self.parallel_environments["csf3"] = [
                                               ("smp.pe", 2, 32)
                                              ]
         self.parallel_environments["local"] = [
-                                               ("", 1, mp.cpu_count())
+                                               ("", 2, mp.cpu_count())
                                               ]
 
     def setup_stdout(self):
@@ -5332,9 +5333,9 @@ if __name__ == "__main__":
         _call_external_function(*_call_external_function_args)
         quit()
 
-    _shell_scripts = glob("*.sh.*")
-    for shell_script in _shell_scripts:
-        if not os.stat(shell_script).st_size:
-            os.remove(shell_script)
+    # _shell_scripts = glob("*.sh.*")
+    # for shell_script in _shell_scripts:
+    #     if not os.stat(shell_script).st_size:
+    #         os.remove(shell_script)
 
     main_menu()
