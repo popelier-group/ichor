@@ -1465,7 +1465,7 @@ class CommandLine:
         return [f"var{i+1}" for i in range(ndata)]
 
     def get_variable(self, index, var="SGE_TASK_ID-1"):
-        if len(self) > 1:
+        if len(self) > 1 or _data_lock:
             if not self.array_names:
                 self.array_names = self.setup_array_names()
             if isinstance(var, int):
@@ -1473,9 +1473,9 @@ class CommandLine:
             else:
                 return f"${{{self.array_names[index]}[${var}]}}"
         else:
-            if hasattr(self, "directories"): return self.directories[index]
-            if hasattr(self, "infiles"): return self.infiles[index]
-            if hasattr(self, "outfiles"): return self.outfiles[index]
+            if hasattr(self, "directories"): return self.directories[0] # pylint: disable=maybe-no-member
+            if hasattr(self, "infiles"): return self.infiles[0] # pylint: disable=maybe-no-member
+            if hasattr(self, "outfiles"): return self.outfiles[0] # pylint: disable=maybe-no-member
         return ""
 
     def setup_options(self): pass
@@ -1745,6 +1745,7 @@ class DlpolyCommand(CommandLine):
     def __len__(self):
         return len(self.directories)
 
+
 class PythonCommand(CommandLine):
     def __init__(self, py_file=None):
         if not py_file:
@@ -1803,13 +1804,13 @@ class SubmissionScript:
 
     def setup_pe(self):
         self.parallel_environments["ffluxlab"] = [
-                                                  ("smp", 1, 64)
+                                                  ("smp", 2, 64)
                                                  ]
         self.parallel_environments["csf3"] = [
                                               ("smp.pe", 2, 32)
                                              ]
         self.parallel_environments["local"] = [
-                                               ("", 1, mp.cpu_count())
+                                               ("", 2, mp.cpu_count())
                                               ]
 
     def setup_stdout(self):
@@ -1843,7 +1844,7 @@ class SubmissionScript:
                 f.write(f"#$ {option}\n")
             if self.ncores > 1:
                 f.write(f"#$ -pe {pe} {self.ncores}\n")
-            if self.njobs > 1:
+            if self.njobs > 1 or _data_lock:
                 f.write(f"#$ -t 1{njobs}\n")
             f.write("\n")
             for module in self._modules:
@@ -5332,9 +5333,9 @@ if __name__ == "__main__":
         _call_external_function(*_call_external_function_args)
         quit()
 
-    _shell_scripts = glob("*.sh.*")
-    for shell_script in _shell_scripts:
-        if not os.stat(shell_script).st_size:
-            os.remove(shell_script)
+    # _shell_scripts = glob("*.sh.*")
+    # for shell_script in _shell_scripts:
+    #     if not os.stat(shell_script).st_size:
+    #         os.remove(shell_script)
 
     main_menu()
