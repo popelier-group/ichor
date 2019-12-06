@@ -4463,7 +4463,7 @@ class DlpolyTools:
     @staticmethod
     def auto_run():
         FileTools.rmtree(FILE_STRUCTURE["dlpoly"])
-        FileTools.clear_log()
+        # FileTools.clear_log()
 
         log_dir = FILE_STRUCTURE["log"]
         npoints = FileTools.count_models(log_dir)
