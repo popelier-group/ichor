@@ -1465,7 +1465,7 @@ class CommandLine:
         return [f"var{i+1}" for i in range(ndata)]
 
     def get_variable(self, index, var="SGE_TASK_ID-1"):
-        if len(self) > 1:
+        if len(self) > 1 or _data_lock:
             if not self.array_names:
                 self.array_names = self.setup_array_names()
             if isinstance(var, int):
@@ -1473,9 +1473,9 @@ class CommandLine:
             else:
                 return f"${{{self.array_names[index]}[${var}]}}"
         else:
-            if hasattr(self, "directories"): return self.directories[index]
-            if hasattr(self, "infiles"): return self.infiles[index]
-            if hasattr(self, "outfiles"): return self.outfiles[index]
+            if hasattr(self, "directories"): return self.directories[0] # pylint: disable=maybe-no-member
+            if hasattr(self, "infiles"): return self.infiles[0] # pylint: disable=maybe-no-member
+            if hasattr(self, "outfiles"): return self.outfiles[0] # pylint: disable=maybe-no-member
         return ""
 
     def setup_options(self): pass
@@ -1836,7 +1836,7 @@ class SubmissionScript:
         pe = self.parallel_environments[MACHINE][2]
 
         with open(self.fname, "w") as f:
-            f.write("#!/bin/bash\n")
+            f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
             f.write(f"#$ -o {self.stdout}\n")
             f.write(f"#$ -e {self.stderr}\n")
@@ -1844,7 +1844,7 @@ class SubmissionScript:
                 f.write(f"#$ {option}\n")
             if self.ncores > 1:
                 f.write(f"#$ -pe {pe} {self.ncores}\n")
-            if self.njobs > 1:
+            if self.njobs > 1 or _data_lock:
                 f.write(f"#$ -t 1{njobs}\n")
             f.write("\n")
             for module in self._modules:
