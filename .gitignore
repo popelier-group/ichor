@@ -13,3 +13,4 @@ rmsd*
 *.log
 *DATA*/
 makeSets.py
+*.code-workspace
