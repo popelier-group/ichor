@@ -106,6 +106,8 @@ ALF = []
 MAX_ITERATION = 1
 POINTS_PER_ITERATION = 1
 
+EPE_DISTANCE = True
+
 METHOD = "B3LYP"
 BASIS_SET = "6-31+g(d,p)"
 KEYWORDS = []
@@ -113,7 +115,6 @@ KEYWORDS = []
 ENCOMP = 3
 BOAQ = "gs20"
 IASMESH = "fine"
-# INT_TO_JSON = True
 
 FILE_STRUCTURE = {} # Don't change
 
@@ -1473,9 +1474,9 @@ class CommandLine:
             else:
                 return f"${{{self.array_names[index]}[${var}]}}"
         else:
-            if hasattr(self, "directories"): return self.directories[index]
-            if hasattr(self, "infiles"): return self.infiles[index]
-            if hasattr(self, "outfiles"): return self.outfiles[index]
+            if hasattr(self, "directories"): return self.directories[0]
+            if hasattr(self, "infiles") and index == 0: return self.infiles[0]
+            if hasattr(self, "outfiles") and index == 1: return self.outfiles[0]
         return ""
 
     def setup_options(self): pass
@@ -1670,7 +1671,7 @@ class FerebusCommand(CommandLine):
     def load_modules(self):
         if not "py" in FEREBUS_VERSION:
             self.modules["ffluxlab"] = [
-                                        "compilers/intel/19.0.5",
+                                        "mpi/intel/18.0.3",
                                         "libs/intel/nag/fortran_mark23_intel"
                                        ]
             self.modules["csf3"] = [
@@ -1835,8 +1836,9 @@ class SubmissionScript:
         pe = self.parallel_environments[MACHINE][2]
 
         with open(self.fname, "w") as f:
-            f.write("#!/bin/bash -l\n")
+            f.write("#!/bin/bash\n")
             f.write("#$ -cwd\n")
+            f.write("#$ -l h=!compute-0-1\n")
             f.write(f"#$ -o {self.stdout}\n")
             f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
@@ -1885,8 +1887,7 @@ class SubmissionTools:
                 if point.gjf and (redo or not os.path.exists(point.gjf.wfn_fname)):
                     gaussian_job.add(point.gjf.fname)
         elif isinstance(points, GJF):
-            if points and (redo or not os.path.exists(points.wfn_fname)):
-                gaussian_job.add(points.fname)
+            gaussian_job.add(points.fname)
 
         script_name = os.path.join(directory, "GaussSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -3550,9 +3551,13 @@ class Model:
         s2 = self.sigma2 * (1 - res1.item() + (1 + res2.item())**2/res3.item())
         return s2
     
-    def closest_point(self, point):
+    def distance_to_point(self, point):
         point = np.array(point.features[self.i]).reshape((1, -1))
-        return distance.cdist(point, self.X).argmin()
+        return distance.cdist(point, self.X)
+
+
+    def closest_point(self, point):
+        return self.distance_to_point(point).argmin()
 
     def cross_validation_error(self, point):
         return self.cross_validation[self.closest_point(point)]
@@ -3640,6 +3645,21 @@ class Models:
             cross_validation_errors.append(cross_validation_error)
         return np.array(cross_validation_errors)
     
+    def distance_to_point(self, point, points):
+        from scipy.spatial import distance
+        distances = np.zeros(len(points))
+        for atom in range(len(self)):
+                point_features = np.array(point.features[atom]).reshape((1, -1))
+                points_features = points.get_atom_features(atom)
+                distances += distance.cdist(point_features, points_features).flatten()**2
+        return np.sqrt(distances)
+
+    def distances(self, points, added_points):
+        distances = np.zeros(len(points))
+        for added_point in added_points:
+            distances += self.distance_to_point(added_point, points)
+        return distances
+
     def calc_alpha(self):
         alpha_loc = FILE_STRUCTURE["alpha"]
         if not os.path.exists(alpha_loc):
@@ -3658,7 +3678,7 @@ class Models:
         
         return np.mean(alpha)
 
-    def calc_epe(self, points):
+    def calc_epe(self, points, added_points=[]):
         alpha = self.calc_alpha()
 
         logging.debug(f"Alpha: {alpha}")
@@ -3666,7 +3686,16 @@ class Models:
         cv_errors = self.cross_validation(points)
         variances = self.variance(points)
 
-        return alpha * cv_errors + (1-alpha) * variances
+        epe = alpha * cv_errors + (1-alpha) * variances
+
+        if added_points:
+            added_points = [points[i] for i in added_points]
+            _added_points = Points()
+            [_added_points.add_point(point) for point in added_points]
+            distances = self.distances(points, _added_points)
+            epe *= distances
+
+        return epe
 
     def write_data(self, indices, points):
         adaptive_sampling = FILE_STRUCTURE["adaptive_sampling"]
@@ -3684,8 +3713,14 @@ class Models:
             json.dump(data, f)
 
     def expected_improvement(self, points):
-        best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
-        points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
+        if EPE_DISTANCE:
+            points_to_add = []
+            for i in range(POINTS_PER_ITERATION):
+                best_points = np.flip(np.argsort(self.calc_epe(points, added_points=points_to_add)), axis=-1)
+                points_to_add += [best_points[0]]
+        else:
+            best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
+            points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
         self.write_data(points_to_add, points)
 
         return points.get_points(points_to_add)   
@@ -4463,7 +4498,7 @@ class DlpolyTools:
     @staticmethod
     def auto_run():
         FileTools.rmtree(FILE_STRUCTURE["dlpoly"])
-        # FileTools.clear_log()
+#        FileTools.clear_log()
 
         log_dir = FILE_STRUCTURE["log"]
         npoints = FileTools.count_models(log_dir)
