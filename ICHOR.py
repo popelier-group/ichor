@@ -1837,7 +1837,7 @@ class SubmissionScript:
         pe = self.parallel_environments[MACHINE][2]
 
         with open(self.fname, "w") as f:
-            f.write("#!/bin/bash\n")
+            f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
             f.write("#$ -l h=!compute-0-1\n")
             f.write(f"#$ -o {self.stdout}\n")
