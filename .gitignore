@@ -11,3 +11,4 @@ rmsd*
 *.int
 *.json
 *.log
+*DATA*/
