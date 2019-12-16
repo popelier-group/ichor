@@ -12,3 +12,5 @@ rmsd*
 *.json
 *.log
 *DATA*/
+makeSets.py
+*.code-workspace
