@@ -106,7 +106,9 @@ ALF = []
 MAX_ITERATION = 1
 POINTS_PER_ITERATION = 1
 
-EPE_DISTANCE = True
+ADAPTIVE_SAMPLING_METHOD = "eped"
+NORMALISE = False
+STANDARDISE = False
 
 METHOD = "B3LYP"
 BASIS_SET = "6-31+g(d,p)"
@@ -1196,6 +1198,10 @@ class FerebusTools:
             finput.write(
                 "#\nfeatures_number 0        # if your are kriging only one atom or you don't want to use he standard "
                 "calculation of the number of features based on DOF of your system. Leave 0 otherwise\n#\n")
+            if NORMALISE:
+                finput.write("norm\n")
+            elif STANDARDISE:
+                finput.write("stand\n")
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# Optimizers parameters\n#\n")
@@ -3355,6 +3361,14 @@ class Model:
         self.mu = 0
         self.sigma2 = 0
 
+        self.normalise = False
+        self.norm_min = []
+        self.norm_max = []
+
+        self.standardise = False
+        self.stand_mu = []
+        self.stand_var = []
+
         self.hyper_parameters = []
         self.weights = []
 
@@ -3362,6 +3376,34 @@ class Model:
         self.X = []
         if read_model and self.fname:
             self.read()
+            if self.normalise:
+                self.X = self.normalise_data(self.X)
+            elif standardise:
+                self.X = self.standardise_data(self.y)
+
+    def normalise_data(self, data):
+        for i in range(self.nFeats):
+            self.norm_min.append(data[:,i].min(0))
+            self.norm_max.append(data[:,i].max(0))
+            data[:,i] = (data[:,i] - data[:,i].min(0)) / data[:,i].ptp(0)
+        self.norm_min = np.array(self.norm_min)
+        self.norm_max = np.array(self.norm_max)
+        return data
+
+    def normalise_array(self, array):
+        return (array - self.norm_min) / (self.norm_max - self.norm_min)
+    
+    def standardise_data(self, data):
+        for i in range(self.nFeats):
+            self.stand_mu.append(data[:,i].mean(0))
+            self.stand_var.append(data[:,i].std(0))
+            data[:,i] = (data[:,i] - data[:,i].mean(0)) / data[:,i].std(0)
+        self.stand_mu = np.array(self.stand_mu)
+        self.stand_var = np.array(self.stand_var)
+        return data
+    
+    def standardise_array(self, array):
+        return (array - self.stand_mu) / self.stand_var
 
     @property
     def num(self):
@@ -3376,6 +3418,10 @@ class Model:
             return
         with open(self.fname) as f:
             for line in f:
+                if "Kriging results" and "norm" in line:
+                    self.normalise = True
+                if "Kriging results" and "stand" in line:
+                    self.standardise = True
                 if "Feature" in line:
                     self.nFeats = int(line.split()[1])
                 if "Number_of_training_points" in line:
@@ -3537,7 +3583,13 @@ class Model:
             return self._cross_validation
 
     def predict(self, point):
-        r = self.r(point.features[self.i])
+        if self.normalise:
+            features = normalise_array(point.features[self.i])
+        elif self.standardise:
+            features = standardise_array(point.features[self.i])
+        else:
+            features = point.features[self.i]
+        r = self.r(features)
         weights = self.weights.reshape((-1, 1))
         return self.mu + np.matmul(r.T, weights).item()
     
@@ -3551,10 +3603,15 @@ class Model:
         s2 = self.sigma2 * (1 - res1.item() + (1 + res2.item())**2/res3.item())
         return s2
     
+    def variance2(self, point):
+        point = point.features[self.i]
+        kss = self.k(point, point)
+        r = self.r(point)
+        return np.matmul(r.T, np.matmul(self.invR, r))
+    
     def distance_to_point(self, point):
         point = np.array(point.features[self.i]).reshape((1, -1))
         return distance.cdist(point, self.X)
-
 
     def closest_point(self, point):
         return self.distance_to_point(point).argmin()
@@ -3579,6 +3636,18 @@ class Models:
     def __init__(self, directory, read_models=False):
         self._models = []
         self.directory = directory
+
+        expected_improvement_functions = {
+            "epe": self.expected_improvement_epe,
+            "eped": self.expected_improvement_eped,
+            "var": self.expected_improvement_var,
+            "vard": self.expected_improvement_vard,
+            "var2": self.expected_improvement_var2,
+            "vard2": self.expected_improvement_vard2,
+            "rand": self.expected_improvement_rand
+        }
+        self.expected_improvement_function = expected_improvement_functions[ADAPTIVE_SAMPLING_METHOD]
+
         if self.directory:
             self.find_models(read_models)
 
@@ -3696,6 +3765,30 @@ class Models:
             epe *= distances
 
         return epe
+    
+    def calc_var(self, points, added_points=[]):
+        var = self.variance(points)
+
+        if added_points:
+            added_points = [points[i] for i in added_points]
+            _added_points = Points()
+            [_added_points.add_point(point) for point in added_points]
+            distances = self.distances(points, _added_points)
+            var *= distances
+        
+        return var
+    
+    def calc_var2(self, points, added_points=[]):
+        var = self.variance2(points)
+
+        if added_points:
+            added_points = [points[i] for i in added_points]
+            _added_points = Points()
+            [_added_points.add_point(point) for point in added_points]
+            distances = self.distances(points, _added_points)
+            var *= distances
+        
+        return var
 
     def write_data(self, indices, points):
         adaptive_sampling = FILE_STRUCTURE["adaptive_sampling"]
@@ -3712,17 +3805,49 @@ class Models:
         with open(FILE_STRUCTURE["cv_errors"], "w") as f:
             json.dump(data, f)
 
-    def expected_improvement(self, points):
-        if EPE_DISTANCE:
-            points_to_add = []
-            for i in range(POINTS_PER_ITERATION):
-                best_points = np.flip(np.argsort(self.calc_epe(points, added_points=points_to_add)), axis=-1)
-                points_to_add += [best_points[0]]
-        else:
-            best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
-            points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
+    def expected_improvement_epe(self, points):
+        best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
+        points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
         self.write_data(points_to_add, points)
+        return points_to_add
+    
+    def expected_improvement_eped(self, points):
+        points_to_add = []
+        for i in range(POINTS_PER_ITERATION):
+            best_points = np.flip(np.argsort(self.calc_epe(points, added_points=points_to_add)), axis=-1)
+            points_to_add += [best_points[0]]
+        self.write_data(points_to_add, points)
+        return points_to_add
 
+    def expected_improvement_var(self, points):
+        best_points = np.flip(np.argsort(self.calc_var(points)), axis=-1)
+        points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
+        return points_to_add
+    
+    def expected_improvement_vard(self, points):
+        points_to_add = []
+        for i in range(POINTS_PER_ITERATION):
+            best_points = np.flip(np.argsort(self.calc_var(points, added_points=points_to_add)), axis=-1)
+            points_to_add += [best_points[0]]
+        return points_to_add
+    
+    def expected_improvement_var2(self, points):
+        best_points = np.flip(np.argsort(self.calc_var2(points)), axis=-1)
+        points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
+        return points_to_add
+    
+    def expected_improvement_vard2(self, points):
+        points_to_add = []
+        for i in range(POINTS_PER_ITERATION):
+            best_points = np.flip(np.argsort(self.calc_var2(points, added_points=points_to_add)), axis=-1)
+            points_to_add += [best_points[0]]
+        return points_to_add
+    
+    def expected_improvement_rand(self, points):
+        return np.randint(low=0, high=len(points), size=POINTS_PER_ITERATION)
+
+    def expected_improvement(self, points):
+        points_to_add = self.expected_improvement_function(points)
         return points.get_points(points_to_add)   
 
     def __getitem__(self, i):
