@@ -2378,12 +2378,15 @@ class AutoTools:
 
     @staticmethod
     def submit_aimall(directory=None, jid=None):
+        global _data_lock
         npoints = FileTools.count_points_in(directory)
-
+        UsefulTools.set_uid()
+        _data_lock = True
         script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory)
         script, jid = AutoTools.submit_gjfs(jid, npoints)
         script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory)
         AutoTools.submit_wfns(jid, npoints)
+        _data_lock = False
     
     @staticmethod
     def run_models(directory=None, type=None, jid=None):
