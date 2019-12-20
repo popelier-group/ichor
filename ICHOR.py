@@ -1436,6 +1436,7 @@ class CommandLine:
         self.array_names = []
 
         self.datafile = None
+        self.datasources = []
 
         self.setup()
     
@@ -1466,7 +1467,7 @@ class CommandLine:
         return [f"var{i+1}" for i in range(ndata)]
 
     def get_variable(self, index, var="SGE_TASK_ID-1"):
-        if len(self) > 1:
+        if len(self) > 1 or _data_lock:
             if not self.array_names:
                 self.array_names = self.setup_array_names()
             if isinstance(var, int):
@@ -1474,9 +1475,7 @@ class CommandLine:
             else:
                 return f"${{{self.array_names[index]}[${var}]}}"
         else:
-            if hasattr(self, "directories"): return self.directories[0]
-            if hasattr(self, "infiles") and index == 0: return self.infiles[0]
-            if hasattr(self, "outfiles") and index == 1: return self.outfiles[0]
+            return self.datasources[index][0]
         return ""
 
     def setup_options(self): pass
@@ -1489,7 +1488,7 @@ class CommandLine:
         return os.path.splitext(infile)[0] + ".log"
 
     def _read_data_file_string(self, datafile, data, delimiter=","):
-        if len(self) == 1:
+        if len(self) == 1 and not _data_lock:
             return ""
 
         datafile = os.path.abspath(datafile)
@@ -1522,6 +1521,7 @@ class CommandLine:
                 f.write(f"{data_line}\n")
 
     def setup_data_file(self, fname, *data, delimiter=","):
+        self.datasources = data
         FileTools.mkdir(FILE_STRUCTURE["datafiles"])
         if not os.path.dirname == FILE_STRUCTURE["datafiles"]:
             fname = os.path.join(FILE_STRUCTURE["datafiles"], os.path.basename(fname))
@@ -1839,7 +1839,6 @@ class SubmissionScript:
         with open(self.fname, "w") as f:
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
-            f.write("#$ -l h=!compute-0-1\n")
             f.write(f"#$ -o {self.stdout}\n")
             f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
