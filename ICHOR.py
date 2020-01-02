@@ -3381,7 +3381,7 @@ class Model:
             self.read()
             if self.normalise:
                 self.X = self.normalise_data(self.X)
-            elif standardise:
+            elif self.standardise:
                 self.X = self.standardise_data(self.y)
 
     def normalise_data(self, data):
@@ -3608,9 +3608,8 @@ class Model:
     
     def variance2(self, point):
         point = point.features[self.i]
-        kss = self.k(point, point)
         r = self.r(point)
-        return np.matmul(r.T, np.matmul(self.invR, r))
+        return 1 - np.matmul(r.T, np.matmul(self.invR, r))
     
     def distance_to_point(self, point):
         point = np.array(point.features[self.i]).reshape((1, -1))
@@ -3706,6 +3705,16 @@ class Models:
                 variance += model.variance(point)
             variances.append(variance)
         return np.array(variances)
+    
+    @lru_cache()
+    def variance2(self, points):
+        variances = []
+        for point in points:
+            variance = 0
+            for model in self:
+                variance += model.variance2(point)
+            variances.append(variance)
+        return np.array(variances).flatten()
     
     @lru_cache()
     def cross_validation(self, points):
