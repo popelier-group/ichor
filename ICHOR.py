@@ -1458,8 +1458,8 @@ class CommandLine:
 
     def setup_command(self):
         if hasattr(self, "machine_commands") and MACHINE.lower() in self.machine_commands.keys():
-            self.command = self.machine_commands[MACHINE].lower()
-        elif hasattr(self, "default_command"):
+            self.command = self.machine_commands[MACHINE.lower()]
+        elif hasattr(self, "default_command"): 
             self.command = self.default_command
 
     def setup_array_names(self, ndata=None):
