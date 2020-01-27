@@ -1631,11 +1631,13 @@ class AIMAllCommand(CommandLine):
                           "-nogui",
                           "-usetwoe=0",
                           "-atom=all",
-                          "-encomp=3",
-                          "-boaq=gs20",
-                          "-iasmesh=fine",
-                          "-nproc=2"
+                          f"-encomp={ENCOMP}",
+                          f"-boaq={BOAQ}",
+                          f"-iasmesh={IASMESH}",
+                          f"-nproc={self.ncores}",
+                          f"-naat={self.ncores}"
                          ]
+
     
     @property
     def ndata(self):
