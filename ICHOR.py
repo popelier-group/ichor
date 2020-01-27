@@ -130,6 +130,12 @@ AIMALL_CORE_COUNT = 2
 FEREBUS_CORE_COUNT = 4
 DLPOLY_CORE_COUNT = 1
 
+# FEREBUS RUNTIME SETTINGS (PREFIX FEREBUS)
+FEREBUS_SWARM_SIZE = -1 # If negative >> Size dynamically allocated by FEREBUS
+FEREBUS_NUGGET = 1.e-10 # Default value for FEREBUS nugget
+FEREBUS_MIN_THETA = 0.0 # Minimum theta value for initialisation (best to keep 0)
+FEREBUS_MAX_THETA = 1.0 # Maximum theta value for initialisation
+
 # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
 DLPOLY_NUMBER_OF_STEPS = 500    # Number of steps to run simulation for
 DLPOLY_TEMPERATURE = 0        # If set to 0, will perform geom opt but default to 10 K
@@ -1214,10 +1220,11 @@ class FerebusTools:
                          "# P = fixed p) T = fixed Theta (valid only for BFGS)) "
                          "N = nothing (i.e. optimization theta/p)\n")
             finput.write("p_value        2.00      # if no p optimization is used p_value MUST be inserted\n")
-            finput.write("theta_max            1.0        "
+            finput.write(f"theta_max            {FEREBUS_MAX_THETA}          "
                          "# select maximum value of theta for initialization "
                          "(Raise if receiving an error with Theta Values)\n")
-            finput.write("theta_min            0.D0   # select maximum value of theta for initialization\n")
+            finput.write(f"theta_min            {FEREBUS_MIN_THETA}   # select maximum value of theta for initialization\n")
+            finput.write(f"nugget            {FEREBUS_NUGGET}\n")
             finput.write("noise_specifier  n       "
                          "# answer yes (Y) to allow noise optimization, "
                          "no (N) to use no-noise option\n")
@@ -1228,11 +1235,18 @@ class FerebusTools:
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# PSO Specific keywords\n#\n")
+            if FEREBUS_SWARM_SIZE < 0:
+               finput.write("swarm_specifier  D       ")
+            else:
+                finput.write("swarm_specifier  S       ")
             finput.write("swarm_specifier  D       "
                          "# answer dynamic (D) or static "
                          "(S) as option for swarm optimization\n")
-            finput.write("swarm_pop        1440       "
-                         "# if swarm opt is set as 'static' the number of particle must be specified\n")
+            if FEREBUS_SWARM_SIZE < 0:
+               finput.write(f"swarm_pop     1440       ")
+            else:
+                finput.write(f"swarm_pop    {FEREBUS_SWARM_SIZE}       ")
+            finput.write("# if swarm opt is set as 'static' the number of particle must be specified\n")
             finput.write("cognitive_learning   1.49400\n")
             finput.write("inertia_weight   0.72900\n")
             finput.write("social_learning   1.49400\n")
