@@ -5637,10 +5637,10 @@ def main_menu():
 
 
 if __name__ == "__main__":
-    Globals.define()
+    # Globals.define()
 
-    print(globals.DEFAULT_CONFIG_FILE)
-    quit()
+    # print(globals.DEFAULT_CONFIG_FILE)
+    # quit()
 
     readArguments()
     defineGlobals()
