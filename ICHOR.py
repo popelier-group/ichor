@@ -96,6 +96,8 @@ from scipy.spatial import distance
 #                  Globals                  #
 #############################################
 
+globals = None
+
 DEFAULT_CONFIG_FILE = "config.properties"
 
 CONFIG = None # Don't change
@@ -202,7 +204,7 @@ _GAUSSIAN_METHODS = ['AM1', 'PM3', 'PM3MM', 'PM6', 'PDDG', 'PM7', 'HF',
                     'OHSE1PBE', 'wB97XD', 'wB97', 'wB97X', 'LC-wPBE',
                     'CAM-B3LYP', 'HISSbPBE', 'M11', 'N12SX', 'MN12SX', 'LC-']
 
-AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
+_AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
 
 type2mass = {'H': 1.007825, 'He': 4.002603, 'Li': 7.016005, 'Be': 9.012182, 'B': 11.009305, 'C': 12.0,
              'N': 14.003074, 'O': 15.994915, 'F': 18.998403, 'Ne': 19.99244, 'Na': 22.989769, 'Mg': 23.985042,
@@ -249,6 +251,128 @@ _IQA_MODELS = False
 #############################################
 #             Class Definitions             #
 #############################################
+
+class GlobalVariable:
+    def __init__(self, value, type):
+        self.type = type
+        self.modifiers = []
+
+        self.default = None
+        self.set_from_config = False
+
+        self.value = value
+
+    def add_modifier(self, modifier):
+        self.modifiers += [modifier]
+        self.set(self.value)
+
+    def set(self, value):
+        if not "value" in self.__dict__.keys():
+            self.default = value
+        self.__dict__["value"] = self.type(value)
+        for modifier in self.modifiers:
+            self.__dict__["value"] = modifier(self.value)
+        self.type = type(self.value)
+    
+    def __setattr__(self, key, val):
+        if key == "value":
+            self.set(val)
+        else:
+            self.__dict__[key] = val
+    
+    def __getattr__(self, key):
+        if key in self.__dict__.keys():
+            return self.__dict__[key]
+        else:
+            raise AttributeError(key)
+    
+    def __str__(self):
+        return str(self.value)
+    
+    def __repr__(self):
+        return str(self)
+
+    def __add__(self, other):
+        return self.value + other
+    
+    def __radd__(self, other):
+        return self.value + other
+    
+    def __sub__(self, other):
+        return self.value - other
+    
+    def __rsub__(self, other):
+        return other - self.value
+    
+    def __mul__(self, other):
+        return self.value * other
+    
+    def __rmul__(self, other):
+        return self.value * other
+    
+    def __truediv__(self, other):
+        return self.value / other
+    
+    def __rtruediv__(self, other):
+        return other / self.value
+    
+    def __neg__(self):
+        return self.value.__neg__()
+    
+    def __pos__(self):
+        return self.value.__pos__()
+    
+    def __abs__(self):
+        return self.value.__abs__()
+
+    def __invert__(self):
+        return self.value.__invert__()
+    
+    def __getitem__(self, i):
+        return self.value[i]
+    
+    def __delitem__(self, i):
+        del self.value[i]
+    
+    def __len__(self, i):
+        return len(self.value)
+
+class Globals:
+    def __init__(self): pass
+
+    @staticmethod
+    def define():
+        global globals
+        
+        globals = Globals()
+
+        globals.DEFAULT_CONFIG_FILE = "config.properties"
+
+    @property
+    def global_variables(self):
+        global_variables = []
+        for key, val in self.__dict__.items():
+            if isinstance(val, GlobalVariable):
+                global_variables += [key]
+        return global_variables
+
+    def __setattr__(self, name, value):
+        if name in self.global_variables:
+            self.__dict__[name].value = value
+        else:
+            if type(value) in [list, tuple] and isinstance(value[-1], type):
+                if len(value) > 2:
+                    self.__dict__[name] = GlobalVariable(value[:-1], value[-1])
+                else:
+                    self.__dict__[name] = GlobalVariable(value[0], value[-1])
+            else:
+                self.__dict__[name] = GlobalVariable(value, type(value))
+    
+    def __getattr__(self, attr):
+        if attr in self.global_variables:
+            return self.__dict__[attr].value
+        else:
+            return self.__dict__[attr]
 
 class COLORS:
     HEADER = '\033[95m'
@@ -4094,7 +4218,7 @@ class Points:
                 wfns.submit_gjfs()
                 sys.exit(0)
         else:
-            if UsefulTools.in_sensitive(METHOD, AIMALL_FUNCTIONALS): 
+            if UsefulTools.in_sensitive(METHOD, _AIMALL_FUNCTIONALS): 
                 self.check_functional()
             print("All wfns complete.")
 
@@ -5513,6 +5637,11 @@ def main_menu():
 
 
 if __name__ == "__main__":
+    Globals.define()
+
+    print(globals.DEFAULT_CONFIG_FILE)
+    quit()
+
     readArguments()
     defineGlobals()
 
