@@ -254,11 +254,265 @@ class Constants:
     AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
 
 
+class UsefulTools:
+
+    @staticmethod
+    @property
+    def ichor_logo():
+        ichor_encoded_string = ['"%s %s%s %s%s%s %s%s%s %s%s" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9,'\
+        '" "*5,"R"*17," "*3)',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s" % ("I",":"*8,"I"," "*5,"C"*3,":"*12,"C","H",":"*7,"H"'\
+        '," "*5,"H",":"*7,"H"," "*3,"O"*2,":"*9,"O"*2," "*3,"R",":"*16,"R"," "*2)',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s" % ("I",":"*8,"I"," "*3,"C"*2,":"*15,"C","H",":"*7'\
+        ',"H"," "*5,"H",":"*7,"H"," ","O"*2,":"*13,"O"*2," ","R",":"*6,"R"*6,":"*5,"R"," ")',
+        '"%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I"*2,":"*6,"I"*2," "*2,"C",":"*5,"C"*8,'\
+        '":"*4,"C","H"*2,":"*6,"H"," "*5,"H",":"*6,"H"*2,"O",":"*7,"O"*3,":"*7,"O","R"*2,":"*5,"R"," "*5,"R",'\
+        '":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,'\
+        '" ","C",":"*5,"C"," "*7,"C"*6," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*6,"O"," "*3,"O",":"*6,"O"'\
+        '," "*2,"R",":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
+        '":"*5,"C"," "*14," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",'\
+        '":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,'\
+        '"C"," "*14," "*2,"H",":"*6,"H"*5,":"*6,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R"*6,'\
+        '":"*5,"R"," ")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,"C",'\
+        '" "*14," "*2,"H",":"*17,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*13,"R"*2," "*2)',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,'\
+        '"C"," "*14," "*2,"H",":"*17,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R"*6,":"*5,"R"," ")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
+        '":"*5,"C"," "*14," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",'\
+        '":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
+        '":"*5,"C"," "*14," "*2,"H",":"*6,"H"*5,":"*6,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R",'\
+        '" "*5,"R",":"*5,"R")',
+        '"%s%s%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,'\
+        '" ","C",":"*5,"C"," "*7,"C"*6," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*6,"O"," "*3,"O",":"*6,"O"'\
+        '," "*2,"R",":"*4,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I"*2,":"*6,"I"*2," "*2,"C",":"*5,"C"*8,'\
+        '":"*4,"C","H"*2,":"*6,"H"," "*5,"H",":"*6,"H"*2,"O",":"*7,"O"*3,":"*7,"O","R"*2,":"*5,"R"," "*5,"R",":"*5,'\
+        '"R")',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I",":"*8,"I"," "*3,"C"*2,":"*15,"C","H",'\
+        '":"*7,"H"," "*5,"H",":"*7,"H"," ","O"*2,":"*13,"O"*2," ","R",":"*6,"R"," "*5,"R",":"*5,"R")',
+        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I",":"*8,"I"," "*5,"C"*3,":"*12,"C","H",'\
+        '":"*7,"H"," "*5,"H",":"*7,"H"," "*3,"O"*2,":"*9,"O"*2," "*3,"R",":"*6,"R"," "*5,"R",":"*5,"R")',
+        '"%s %s%s %s%s%s %s%s%s %s%s%s" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9," "*5,"R"*8," "*5,'\
+        '"R"*7)']
+
+        ichor_string = ("{}\n"*23).format(
+                         "#"*109,
+                         "#%s#" % (":"*107),
+                         "#::%s::#" % ("#"*103),
+                         "#::#%s#::#" % (" "*101),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[0]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[1]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[2]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[3]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[4]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[5]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[6]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[7]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[8]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[9]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[10]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[11]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[12]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[13]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[14]),
+                         "#::#  %s  #::#" % eval(ichor_encoded_string[15]),
+                         "#::#%s#::#" % (" "*101),
+                         "#::%s::#" % ("#"*103),
+                         "#%s#" % (":"*107),
+                         "#"*109
+                         )
+        return ichor_string
+
+    @staticmethod
+    def nTrain():
+        ts_dir = FILE_STRUCTURE["training_set"]
+        return FileTools.count_points_in(ts_dir)
+
+    @staticmethod
+    def natural_sort(iterable, reverse=False):
+        prog = re.compile(r"(\d+)")
+        def alphanum_key(element):
+            return [int(c) if c.isdigit() else c for c in prog.findall(element)]
+        return sorted(iterable, key=alphanum_key, reverse=reverse)
+
+    @staticmethod
+    def countDigits(n):
+        import math
+        return math.floor(math.log(n, 10)+1)
+
+    @staticmethod
+    def check_bool(val, default=True):
+        if isinstance(val, str):
+            options = ['true', '1', 't', 'y', 'yes', 'yeah']
+            if default: options += [""]
+            return val.lower() in options
+        elif isinstance(val, bool):
+            return val
+
+    @staticmethod
+    def print_grid(arr, cols=10, color=None):
+        import math
+        ncols, _ = shutil.get_terminal_size(fallback=(80, 24))
+        width = math.floor(ncols*0.9/cols)
+        rows = math.ceil(len(arr)/cols)
+        for i in range(rows):
+            row = ""
+            for j in range(cols):
+                indx = cols*i+j
+                if indx >= len(arr): break
+                fname = arr[indx]
+                string = f"{fname:{str(width)}s}"
+                if fname == "scratch":
+                    row += COLORS.OKGREEN + string + COLORS.ENDC
+                else:
+                    if color:
+                        string = color + string + COLORS.ENDC
+                    row += string
+                row = row + "\t" if len(fname) > width else row
+            print(row)
+
+    @staticmethod
+    def in_sensitive(string, array, case=True, whitespace=True):
+        def modify(s):
+            s = s.upper() if case else s
+            s = s.strip().replace(" ", "") if whitespace else s
+            return s
+        return modify(string) in map(modify, array)
+
+    @staticmethod
+    def unpack(s):
+        return " ".join(map(str, s))
+    
+    @staticmethod
+    def runFunc(order):
+        def do_assignment(to_func):
+            to_func.order = order
+            return to_func
+        return do_assignment
+    
+    @staticmethod
+    def get_functions_to_run(obj):
+        return sorted([getattr(obj, field) for field in dir(obj)
+                        if hasattr(getattr(obj, field), "order")],
+                        key = (lambda field: field.order))
+
+    @staticmethod
+    def externalFunc(*args):
+        def run_func(func):
+            global _external_functions
+            if len(args) > 1:
+                name = args[1]
+            else:
+                name = func.__name__
+            _external_functions[name] = func
+            return func
+        return run_func
+
+    @staticmethod
+    def add_method(cls, name=None):
+        def decorator(func):
+            @wraps(func) 
+            def wrapper(self, *args, **kwargs): 
+                return func(*args, **kwargs)
+            if not name:
+                name = func.__name__
+            setattr(cls, name, wrapper)
+            # Note we are not binding func, but wrapper which accepts self but does exactly the same as func
+            return func # returning func means func can still be used normally
+        return decorator
+
+    @staticmethod
+    def get_widths(line, ignore_chars=[]):
+        pc = line[0]
+        widths = [0]
+        found_char = False
+        for i, c in enumerate(line):
+            if c != " ":
+                found_char = True
+            if pc == " " and c != " " and found_char and not c in ignore_chars:
+                widths.append(i-1)
+            pc = c
+        widths.append(len(line))
+        return sorted(list(set(widths)))
+
+    @staticmethod
+    def split_widths(line, widths, strip=False):
+        line_split = []
+        for lower, upper in zip(widths[:-1], widths[1:]):
+            str_slice = line[lower:upper]
+            if strip:
+                str_slice = str_slice.strip()
+            line_split.append(str_slice)
+        return line_split
+
+    @staticmethod
+    def format_list(l, n):
+        if n > len(l):
+            for _ in range(len(l), n):
+                l += [0]
+        return l[:n]
+    
+    @staticmethod
+    def suppress_output():
+        text_trap = io.StringIO()
+        sys.stdout = text_trap
+
+    @staticmethod
+    def tqdm(iterator, *args, **kwargs):
+        return iterator
+
+    @staticmethod
+    def suppress_tqdm():
+        global tqdm
+        tqdm = my_tqdm
+
+    @staticmethod
+    def not_implemented():
+        raise NotImplementedError
+
+    @staticmethod
+    def prettify_string(string):
+        string = string.replace("_", " ").split()
+        for i, word in enumerate(string):
+            if len(word) > 1:
+                string[i] = word[0].upper() + word[1:].lower()
+        return " ".join(string)
+
+    @staticmethod
+    def get_time():
+        return time.time()
+
+    @staticmethod
+    def log_time_taken(start_time, message=""):
+        time_taken = UsefulTools.get_time() - start_time
+        logging.debug(f"{message}{time_taken:.2f} s")
+
+    @staticmethod
+    def get_uid():
+        return str(uuid.uuid4())
+    
+    @staticmethod
+    def set_uid(uid=None):
+        global _UID
+        if SUBMITTED and _UID:
+            return
+        _UID = uid if uid else UsefulTools.get_uid()
+
+
 class GlobalVariable:
+    type_conversions = {
+        bool: UsefulTools.check_bool
+    }
+
     def __init__(self, value, type):
         self.type = type
         self.modifiers = []
-        self.set = False
+        self.set_from_config = False
         self.hidden = False
         self.allowed_values = []
 
@@ -275,10 +529,14 @@ class GlobalVariable:
         if not "value" in self.__dict__.keys():
             self.default = value
         else:
-            self.set = True
-        self.__dict__["value"] = self.type(value)
+            self.set_from_config = True
+
+        convert = GlobalVariable.type_conversions[self.type] if self.type in GlobalVariable.type_conversions.keys() else self.type
+        self.__dict__["value"] = convert(value)
+
         for modifier in self.modifiers:
             self.__dict__["value"] = modifier(self.value)
+
         self.type = type(self.value)
     
     def __setattr__(self, key, val):
@@ -341,6 +599,9 @@ class GlobalVariable:
     def __delitem__(self, i):
         del self.value[i]
     
+    def __bool__(self):
+        return bool(self.value)
+
     def __len__(self, i):
         return len(self.value)
 
@@ -353,6 +614,7 @@ class Globals:
         globals = Globals()
 
         globals.CONFIG_FILE = "config.properties", str
+        globals.ALF_REFERENCE_FILE = "", str # set automatically if not defined
         globals.CONFIG = ConfigProvider # Don't change
 
         globals.SYSTEM_NAME = "SYSTEM", str
@@ -422,40 +684,41 @@ class Globals:
         # Set Allowed Values
         globals.METHOD.allowed_values = Constants.GAUSSIAN_METHODS
         globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
-        globals.IASMESH.allowed_values = Constants.IASMESH_VALUSE
+        globals.IASMESH.allowed_values = Constants.IASMESH_VALUES
 
-        globals.set()
+        globals.init()
 
         return globals
 
-    @classmethod
-    def set(cls):
+    def init(self):
         global tqdm
 
-        cls.FILE_STRUCTURE = FileTools.setup_file_structure()
+        self.FILE_STRUCTURE = FileTools.setup_file_structure()
 
         # Set Machine Name
         machine_name = platform.node()
         if "csf3." in machine_name:
-            cls.MACHINE = "csf3"
+            self.MACHINE = "csf3"
         elif "csf2." in machine_name:
-            cls.MACHINE = "csf2"
+            self.MACHINE = "csf2"
         elif "ffluxlab" in machine_name:
-            cls.MACHINE = "ffluxlab"
+            self.MACHINE = "ffluxlab"
         else:
-            cls.MACHINE = "local"
+            self.MACHINE = "local"
 
         # SGE settings
-        cls.SGE = "SGE_ROOT" in os.environ.keys()
-        cls.SUBMITTED = "SGE_O_HOST" in os.environ.keys()
-        if cls.SUBMITTED: tqdm = my_tqdm
+        self.SGE = "SGE_ROOT" in os.environ.keys()
+        self.SUBMITTED = "SGE_O_HOST" in os.environ.keys()
+        if self.SUBMITTED: tqdm = my_tqdm
 
-        cls.CONFIG = ConfigProvider(source=cls.CONFIG_FILE)
+        self.CONFIG = ConfigProvider(source=self.CONFIG_FILE)
 
-        for key, val in cls.CONFIG.items():
+        for key, val in self.CONFIG.items():
             if key.upper() in cls.config_variables:
-                pass
+                self.set(key.upper(), val)
 
+    def set(self, variable, value):
+        self.__dict__[variable] = value
 
     @property
     def config_variables(self):
@@ -1062,253 +1325,6 @@ class FileTools:
     def clear_script_outputs(outputs=True, errors=True):
         if outputs: FileTools.rmtree(FILE_STRUCTURE["outputs"])
         if errors: FileTools.rmtree(FILE_STRUCTURE["errors"])
-
-
-class UsefulTools:
-
-    @staticmethod
-    @property
-    def ichor_logo():
-        ichor_encoded_string = ['"%s %s%s %s%s%s %s%s%s %s%s" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9,'\
-        '" "*5,"R"*17," "*3)',
-        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s" % ("I",":"*8,"I"," "*5,"C"*3,":"*12,"C","H",":"*7,"H"'\
-        '," "*5,"H",":"*7,"H"," "*3,"O"*2,":"*9,"O"*2," "*3,"R",":"*16,"R"," "*2)',
-        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s" % ("I",":"*8,"I"," "*3,"C"*2,":"*15,"C","H",":"*7'\
-        ',"H"," "*5,"H",":"*7,"H"," ","O"*2,":"*13,"O"*2," ","R",":"*6,"R"*6,":"*5,"R"," ")',
-        '"%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I"*2,":"*6,"I"*2," "*2,"C",":"*5,"C"*8,'\
-        '":"*4,"C","H"*2,":"*6,"H"," "*5,"H",":"*6,"H"*2,"O",":"*7,"O"*3,":"*7,"O","R"*2,":"*5,"R"," "*5,"R",'\
-        '":"*5,"R")',
-        '"%s%s%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,'\
-        '" ","C",":"*5,"C"," "*7,"C"*6," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*6,"O"," "*3,"O",":"*6,"O"'\
-        '," "*2,"R",":"*4,"R"," "*5,"R",":"*5,"R")',
-        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
-        '":"*5,"C"," "*14," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",'\
-        '":"*4,"R"," "*5,"R",":"*5,"R")',
-        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,'\
-        '"C"," "*14," "*2,"H",":"*6,"H"*5,":"*6,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R"*6,'\
-        '":"*5,"R"," ")',
-        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,"C",'\
-        '" "*14," "*2,"H",":"*17,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*13,"R"*2," "*2)',
-        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",":"*5,'\
-        '"C"," "*14," "*2,"H",":"*17,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R"*6,":"*5,"R"," ")',
-        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
-        '":"*5,"C"," "*14," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",'\
-        '":"*4,"R"," "*5,"R",":"*5,"R")',
-        '"%s%s%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,"C",'\
-        '":"*5,"C"," "*14," "*2,"H",":"*6,"H"*5,":"*6,"H"," "*2,"O",":"*5,"O"," "*5,"O",":"*5,"O"," "*2,"R",":"*4,"R",'\
-        '" "*5,"R",":"*5,"R")',
-        '"%s%s%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s%s%s%s" % (" "*2,"I",":"*4,"I"," "*2,'\
-        '" ","C",":"*5,"C"," "*7,"C"*6," "*2,"H",":"*5,"H"," "*5,"H",":"*5,"H"," "*2,"O",":"*6,"O"," "*3,"O",":"*6,"O"'\
-        '," "*2,"R",":"*4,"R"," "*5,"R",":"*5,"R")',
-        '"%s%s%s %s%s%s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I"*2,":"*6,"I"*2," "*2,"C",":"*5,"C"*8,'\
-        '":"*4,"C","H"*2,":"*6,"H"," "*5,"H",":"*6,"H"*2,"O",":"*7,"O"*3,":"*7,"O","R"*2,":"*5,"R"," "*5,"R",":"*5,'\
-        '"R")',
-        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I",":"*8,"I"," "*3,"C"*2,":"*15,"C","H",'\
-        '":"*7,"H"," "*5,"H",":"*7,"H"," ","O"*2,":"*13,"O"*2," ","R",":"*6,"R"," "*5,"R",":"*5,"R")',
-        '"%s%s%s %s%s%s%s %s%s%s%s%s%s%s %s%s%s%s%s %s%s%s%s%s%s%s" % ("I",":"*8,"I"," "*5,"C"*3,":"*12,"C","H",'\
-        '":"*7,"H"," "*5,"H",":"*7,"H"," "*3,"O"*2,":"*9,"O"*2," "*3,"R",":"*6,"R"," "*5,"R",":"*5,"R")',
-        '"%s %s%s %s%s%s %s%s%s %s%s%s" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9," "*5,"R"*8," "*5,'\
-        '"R"*7)']
-
-        ichor_string = ("{}\n"*23).format(
-                         "#"*109,
-                         "#%s#" % (":"*107),
-                         "#::%s::#" % ("#"*103),
-                         "#::#%s#::#" % (" "*101),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[0]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[1]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[2]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[3]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[4]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[5]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[6]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[7]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[8]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[9]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[10]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[11]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[12]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[13]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[14]),
-                         "#::#  %s  #::#" % eval(ichor_encoded_string[15]),
-                         "#::#%s#::#" % (" "*101),
-                         "#::%s::#" % ("#"*103),
-                         "#%s#" % (":"*107),
-                         "#"*109
-                         )
-        return ichor_string
-
-    @staticmethod
-    def nTrain():
-        ts_dir = FILE_STRUCTURE["training_set"]
-        return FileTools.count_points_in(ts_dir)
-
-    @staticmethod
-    def natural_sort(iterable, reverse=False):
-        prog = re.compile(r"(\d+)")
-        def alphanum_key(element):
-            return [int(c) if c.isdigit() else c for c in prog.findall(element)]
-        return sorted(iterable, key=alphanum_key, reverse=reverse)
-
-    @staticmethod
-    def countDigits(n):
-        import math
-        return math.floor(math.log(n, 10)+1)
-
-    @staticmethod
-    def check_bool(val, default=True):
-        options = ['true', '1', 't', 'y', 'yes', 'yeah']
-        if default: options += [""]
-        return val.lower() in options
-
-    @staticmethod
-    def print_grid(arr, cols=10, color=None):
-        import math
-        ncols, _ = shutil.get_terminal_size(fallback=(80, 24))
-        width = math.floor(ncols*0.9/cols)
-        rows = math.ceil(len(arr)/cols)
-        for i in range(rows):
-            row = ""
-            for j in range(cols):
-                indx = cols*i+j
-                if indx >= len(arr): break
-                fname = arr[indx]
-                string = f"{fname:{str(width)}s}"
-                if fname == "scratch":
-                    row += COLORS.OKGREEN + string + COLORS.ENDC
-                else:
-                    if color:
-                        string = color + string + COLORS.ENDC
-                    row += string
-                row = row + "\t" if len(fname) > width else row
-            print(row)
-
-    @staticmethod
-    def in_sensitive(string, array, case=True, whitespace=True):
-        def modify(s):
-            s = s.upper() if case else s
-            s = s.strip().replace(" ", "") if whitespace else s
-            return s
-        return modify(string) in map(modify, array)
-
-    @staticmethod
-    def unpack(s):
-        return " ".join(map(str, s))
-    
-    @staticmethod
-    def runFunc(order):
-        def do_assignment(to_func):
-            to_func.order = order
-            return to_func
-        return do_assignment
-    
-    @staticmethod
-    def get_functions_to_run(obj):
-        return sorted([getattr(obj, field) for field in dir(obj)
-                        if hasattr(getattr(obj, field), "order")],
-                        key = (lambda field: field.order))
-
-    @staticmethod
-    def externalFunc(*args):
-        def run_func(func):
-            global _external_functions
-            if len(args) > 1:
-                name = args[1]
-            else:
-                name = func.__name__
-            _external_functions[name] = func
-            return func
-        return run_func
-
-    @staticmethod
-    def add_method(cls, name=None):
-        def decorator(func):
-            @wraps(func) 
-            def wrapper(self, *args, **kwargs): 
-                return func(*args, **kwargs)
-            if not name:
-                name = func.__name__
-            setattr(cls, name, wrapper)
-            # Note we are not binding func, but wrapper which accepts self but does exactly the same as func
-            return func # returning func means func can still be used normally
-        return decorator
-
-    @staticmethod
-    def get_widths(line, ignore_chars=[]):
-        pc = line[0]
-        widths = [0]
-        found_char = False
-        for i, c in enumerate(line):
-            if c != " ":
-                found_char = True
-            if pc == " " and c != " " and found_char and not c in ignore_chars:
-                widths.append(i-1)
-            pc = c
-        widths.append(len(line))
-        return sorted(list(set(widths)))
-
-    @staticmethod
-    def split_widths(line, widths, strip=False):
-        line_split = []
-        for lower, upper in zip(widths[:-1], widths[1:]):
-            str_slice = line[lower:upper]
-            if strip:
-                str_slice = str_slice.strip()
-            line_split.append(str_slice)
-        return line_split
-
-    @staticmethod
-    def format_list(l, n):
-        if n > len(l):
-            for _ in range(len(l), n):
-                l += [0]
-        return l[:n]
-    
-    @staticmethod
-    def suppress_output():
-        text_trap = io.StringIO()
-        sys.stdout = text_trap
-
-    @staticmethod
-    def tqdm(iterator, *args, **kwargs):
-        return iterator
-
-    @staticmethod
-    def suppress_tqdm():
-        global tqdm
-        tqdm = my_tqdm
-
-    @staticmethod
-    def not_implemented():
-        raise NotImplementedError
-
-    @staticmethod
-    def prettify_string(string):
-        string = string.replace("_", " ").split()
-        for i, word in enumerate(string):
-            if len(word) > 1:
-                string[i] = word[0].upper() + word[1:].lower()
-        return " ".join(string)
-
-    @staticmethod
-    def get_time():
-        return time.time()
-
-    @staticmethod
-    def log_time_taken(start_time, message=""):
-        time_taken = UsefulTools.get_time() - start_time
-        logging.debug(f"{message}{time_taken:.2f} s")
-
-    @staticmethod
-    def get_uid():
-        return str(uuid.uuid4())
-    
-    @staticmethod
-    def set_uid(uid=None):
-        global _UID
-        if SUBMITTED and _UID:
-            return
-        _UID = uid if uid else UsefulTools.get_uid()
 
 
 class my_tqdm:
