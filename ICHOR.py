@@ -177,35 +177,6 @@ SSH_SETTINGS = {
 #:::::::::::::::::::::::::::::::::::::::::::#
 #############################################
 
-_BOAQ_VALUES = ["auto", "gs1", "gs2", "gs3", "gs4", "gs5", "gs6", "gs7", "gs8",
-               "gs9", "gs10", "gs15", "gs20", "gs25", "gs30", "gs35", "gs40", 
-               "gs45", "gs50", "gs55", "gs60", "leb23", "leb25", "leb27", 
-               "leb29", "leb31", "leb32"]
-
-_IASMESH_VALUES = ["sparse", "medium", "fine", "veryfine", "superfine"]
-
-_GAUSSIAN_METHODS = ['AM1', 'PM3', 'PM3MM', 'PM6', 'PDDG', 'PM7', 'HF', 
-                    'CASSCF', 'MP2', 'MP3', 'MP4(SDQ)', 'MP4(SDQ,full)',
-                    'MP4(SDTQ)', 'MP5', 'BD', 'CCD', 'CCSD', 'QCISD','BD(T)',
-                    'CCSD(T)', 'QCISD(T)', 'BD(TQ)', 'CCSD(TQ)', 'QCISD(TQ)',
-                    'EPT', 'CBS', 'GN', 'W1', 'CIS', 'TD', 'EOM', 'ZINDO',
-                    'DFTB', 'CID', 'CISD', 'GVB', 'S', 'XA', 'B', 'PW91',
-                    'mPW', 'G96', 'PBE', 'O', 'TPSS', 'BRx', 'PKZB', 'wPBEh',
-                    'PBEh', 'VWN', 'VWN5', 'LYP', 'PL', 'P86', 'PW91', 'B95',
-                    'PBE', 'TPSS', 'KCIS', 'BRC', 'PKZB', 'VP86', 'V5LYP',
-                    'HFS', 'XAlpha', 'HFB', 'VSXC', 'HCTH', 'HCTH93', 
-                    'HCTH147', 'HCTH407', 'tHCTH', 'M06L', 'B97D', 'B97D3',
-                    'SOGGA11', 'M11L', 'N12', 'MN12L', 'B3LYP', 'B3P86',
-                    'B3PW91', 'B1B95', 'mPW1PW91', 'mPW1LYP', 'mPW1PBE',
-                    'mPW3PBE', 'B98', 'B971', 'B972', 'PBE1PBE', 'B1LYP',
-                    'O3LYP', 'BHandH', 'BHandHLYP', 'BMK', 'M06', 'M06HF',
-                    'M062X', 'tHCTHhyb', 'APFD', 'APF', 'SOGGA11X', 
-                    'PBEh1PBE', 'TPSSh', 'X3LYP', 'HSEH1PBE', 'OHSE2PBE', 
-                    'OHSE1PBE', 'wB97XD', 'wB97', 'wB97X', 'LC-wPBE',
-                    'CAM-B3LYP', 'HISSbPBE', 'M11', 'N12SX', 'MN12SX', 'LC-']
-
-_AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
-
 type2mass = {'H': 1.007825, 'He': 4.002603, 'Li': 7.016005, 'Be': 9.012182, 'B': 11.009305, 'C': 12.0,
              'N': 14.003074, 'O': 15.994915, 'F': 18.998403, 'Ne': 19.99244, 'Na': 22.989769, 'Mg': 23.985042,
              'Al': 26.981539, 'Si': 27.976927, 'P': 30.973762, 'S': 31.972071, 'Cl': 34.968853, 'Ar': 39.962383,
@@ -252,10 +223,44 @@ _IQA_MODELS = False
 #             Class Definitions             #
 #############################################
 
+class Constants:
+    BOAQ_VALUES = ["auto", "gs1", "gs2", "gs3", "gs4", "gs5", "gs6", "gs7", "gs8",
+                   "gs9", "gs10", "gs15", "gs20", "gs25", "gs30", "gs35", "gs40", 
+                   "gs45", "gs50", "gs55", "gs60", "leb23", "leb25", "leb27", 
+                   "leb29", "leb31", "leb32"]
+
+    IASMESH_VALUES = ["sparse", "medium", "fine", "veryfine", "superfine"]
+
+    GAUSSIAN_METHODS = ['AM1', 'PM3', 'PM3MM', 'PM6', 'PDDG', 'PM7', 'HF', 
+                        'CASSCF', 'MP2', 'MP3', 'MP4(SDQ)', 'MP4(SDQ,full)',
+                        'MP4(SDTQ)', 'MP5', 'BD', 'CCD', 'CCSD', 'QCISD','BD(T)',
+                        'CCSD(T)', 'QCISD(T)', 'BD(TQ)', 'CCSD(TQ)', 'QCISD(TQ)',
+                        'EPT', 'CBS', 'GN', 'W1', 'CIS', 'TD', 'EOM', 'ZINDO',
+                        'DFTB', 'CID', 'CISD', 'GVB', 'S', 'XA', 'B', 'PW91',
+                        'mPW', 'G96', 'PBE', 'O', 'TPSS', 'BRx', 'PKZB', 'wPBEh',
+                        'PBEh', 'VWN', 'VWN5', 'LYP', 'PL', 'P86', 'PW91', 'B95',
+                        'PBE', 'TPSS', 'KCIS', 'BRC', 'PKZB', 'VP86', 'V5LYP',
+                        'HFS', 'XAlpha', 'HFB', 'VSXC', 'HCTH', 'HCTH93', 
+                        'HCTH147', 'HCTH407', 'tHCTH', 'M06L', 'B97D', 'B97D3',
+                        'SOGGA11', 'M11L', 'N12', 'MN12L', 'B3LYP', 'B3P86',
+                        'B3PW91', 'B1B95', 'mPW1PW91', 'mPW1LYP', 'mPW1PBE',
+                        'mPW3PBE', 'B98', 'B971', 'B972', 'PBE1PBE', 'B1LYP',
+                        'O3LYP', 'BHandH', 'BHandHLYP', 'BMK', 'M06', 'M06HF',
+                        'M062X', 'tHCTHhyb', 'APFD', 'APF', 'SOGGA11X', 
+                        'PBEh1PBE', 'TPSSh', 'X3LYP', 'HSEH1PBE', 'OHSE2PBE', 
+                        'OHSE1PBE', 'wB97XD', 'wB97', 'wB97X', 'LC-wPBE',
+                        'CAM-B3LYP', 'HISSbPBE', 'M11', 'N12SX', 'MN12SX', 'LC-']
+
+    AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
+
+
 class GlobalVariable:
     def __init__(self, value, type):
         self.type = type
         self.modifiers = []
+        self.set = False
+        self.hidden = False
+        self.allowed_values = []
 
         self.default = None
         self.set_from_config = False
@@ -269,6 +274,8 @@ class GlobalVariable:
     def set(self, value):
         if not "value" in self.__dict__.keys():
             self.default = value
+        else:
+            self.set = True
         self.__dict__["value"] = self.type(value)
         for modifier in self.modifiers:
             self.__dict__["value"] = modifier(self.value)
@@ -337,16 +344,126 @@ class GlobalVariable:
     def __len__(self, i):
         return len(self.value)
 
+
 class Globals:
     def __init__(self): pass
 
     @staticmethod
     def define():
-        global globals
-        
         globals = Globals()
 
-        globals.DEFAULT_CONFIG_FILE = "config.properties"
+        globals.CONFIG_FILE = "config.properties", str
+        globals.CONFIG = ConfigProvider # Don't change
+
+        globals.SYSTEM_NAME = "SYSTEM", str
+        globals.ALF = [], list
+
+        globals.MAX_ITERATION = 1, int
+        globals.POINTS_PER_ITERATION = 1, int
+
+        globals.ADAPTIVE_SAMPLING_METHOD = "epe", str
+        globals.NORMALISE = False, bool
+        globals.STANDARDISE = False, bool
+
+        globals.METHOD = "B3LYP", str
+        globals.BASIS_SET = "6-31+g(d,p)", str
+        globals.KEYWORDS = [], list
+
+        globals.ENCOMP = 3, int
+        globals.BOAQ = "gs20", str
+        globals.IASMESH = "fine", str
+
+        globals.FILE_STRUCTURE = Tree # Don't change
+
+        globals.KERNEL = "rbf", str                # only use rbf for now
+        globals.FEREBUS_VERSION = "python", str    # fortran (FEREBUS) or python (FEREBUS.py)
+        globals.FEREBUS_LOCATION = "PROGRAMS/FEREBUS", str
+
+        # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
+        globals.GAUSSIAN_CORE_COUNT = 2, int
+        globals.AIMALL_CORE_COUNT = 2, int
+        globals.FEREBUS_CORE_COUNT = 4, int
+        globals.DLPOLY_CORE_COUNT = 1, int
+
+        # FEREBUS RUNTIME SETTINGS (PREFIX FEREBUS)
+        globals.FEREBUS_SWARM_SIZE = -1, int # If negative >> Size dynamically allocated by FEREBUS
+        globals.FEREBUS_NUGGET = 1.e-10, int # Default value for FEREBUS nugget
+        globals.FEREBUS_MIN_THETA = 0.0, int # Minimum theta value for initialisation (best to keep 0)
+        globals.FEREBUS_MAX_THETA = 1.0, int # Maximum theta value for initialisation
+
+        # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
+        globals.DLPOLY_NUMBER_OF_STEPS = 500, int    # Number of steps to run simulation for
+        globals.DLPOLY_TEMPERATURE = 0, int          # If set to 0, will perform geom opt but default to 10 K
+        globals.DLPOLY_PRINT_EVERY = 1, int          # Print trajectory and stats every n steps
+        globals.DLPOLY_TIMESTEP = 0.001, float       # in ps
+        globals.DLPOLY_LOCATION = "PROGRAMS/DLPOLY.Z", str
+
+        globals.DLPOLY_CHECK_CONVERGENCE = False, bool
+        globals.DLPOLY_CONVERGENCE_CRITERIA = -1, int
+
+        globals.DLPOLY_MAX_ENERGY = -1.0, int
+        globals.DLPOLY_MAX_FORCE = -1.0, int
+        globals.DLPOLY_RMS_FORCE = -1.0, int
+        globals.DLPOLY_MAX_DISP = -1.0, int
+        globals.DLPOLY_RMS_DISP = -1.0, int
+
+        globals.MACHINE = "", str
+        globals.SGE = False, bool       # Don't Change
+        globals.SUBMITTED = False, bool # Don't Change
+
+        globals.DISABLE_PROBLEMS = False, bool
+
+        # Set Hidden Variables
+        globals.CONFIG.hidden = True
+        globals.FILE_STRUCTURE.hidden = True
+        globals.SGE.hidden = True
+        globals.SUBMITTED.hidden = True
+
+        # Set Allowed Values
+        globals.METHOD.allowed_values = Constants.GAUSSIAN_METHODS
+        globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
+        globals.IASMESH.allowed_values = Constants.IASMESH_VALUSE
+
+        globals.set()
+
+        return globals
+
+    @classmethod
+    def set(cls):
+        global tqdm
+
+        cls.FILE_STRUCTURE = FileTools.setup_file_structure()
+
+        # Set Machine Name
+        machine_name = platform.node()
+        if "csf3." in machine_name:
+            cls.MACHINE = "csf3"
+        elif "csf2." in machine_name:
+            cls.MACHINE = "csf2"
+        elif "ffluxlab" in machine_name:
+            cls.MACHINE = "ffluxlab"
+        else:
+            cls.MACHINE = "local"
+
+        # SGE settings
+        cls.SGE = "SGE_ROOT" in os.environ.keys()
+        cls.SUBMITTED = "SGE_O_HOST" in os.environ.keys()
+        if cls.SUBMITTED: tqdm = my_tqdm
+
+        cls.CONFIG = ConfigProvider(source=cls.CONFIG_FILE)
+
+        for key, val in cls.CONFIG.items():
+            if key.upper() in cls.config_variables:
+                pass
+
+
+    @property
+    def config_variables(self):
+        config_variables = []
+        for key, val in self.__dict__.items():
+            if isinstance(val, GlobalVariable) and not val.hidden:
+                config_variables += [key]
+        return config_variables
 
     @property
     def global_variables(self):
@@ -373,6 +490,7 @@ class Globals:
             return self.__dict__[attr].value
         else:
             return self.__dict__[attr]
+
 
 class COLORS:
     HEADER = '\033[95m'
@@ -4218,7 +4336,7 @@ class Points:
                 wfns.submit_gjfs()
                 sys.exit(0)
         else:
-            if UsefulTools.in_sensitive(METHOD, _AIMALL_FUNCTIONALS): 
+            if UsefulTools.in_sensitive(METHOD, Constants.AIMALL_FUNCTIONALS): 
                 self.check_functional()
             print("All wfns complete.")
 
@@ -5637,7 +5755,7 @@ def main_menu():
 
 
 if __name__ == "__main__":
-    # Globals.define()
+    Globals.define()
 
     # print(globals.DEFAULT_CONFIG_FILE)
     # quit()
