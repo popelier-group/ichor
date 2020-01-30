@@ -138,6 +138,14 @@ FEREBUS_NUGGET = 1.e-10 # Default value for FEREBUS nugget
 FEREBUS_MIN_THETA = 0.0 # Minimum theta value for initialisation (best to keep 0)
 FEREBUS_MAX_THETA = 1.0 # Maximum theta value for initialisation
 
+FEREBUS_COGNITIVE_LEARNING_RATE = 1.49400
+FEREBUS_INERTIA_WEIGHT = 0.72900
+FEREBUS_SOCIAL_LEARNING_RATE = 1.49400
+
+FEREBUS_TOLERANCE = 1.e-8
+FEREBUS_CONVERGENCE = 20
+FEREBUS_MAX_ITERATION = 10000
+
 # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
 DLPOLY_NUMBER_OF_STEPS = 500    # Number of steps to run simulation for
 DLPOLY_TEMPERATURE = 0        # If set to 0, will perform geom opt but default to 10 K
@@ -1353,9 +1361,9 @@ class FerebusTools:
                          "# answer yes (Y) to allow noise optimization, "
                          "no (N) to use no-noise option\n")
             finput.write("noise_value 0.1\n")
-            finput.write("tolerance          1.0D-9 #\n")
-            finput.write("convergence      200      #\n")
-            finput.write("max_iterations   100000     #\n")
+            finput.write(f"tolerance        {FEREBUS_TOLERANCE}#\n")
+            finput.write(f"convergence      {FEREBUS_CONVERGENCE}#\n")
+            finput.write(f"max_iterations   {FEREBUS_MAX_ITERATION}#\n")
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# PSO Specific keywords\n#\n")
@@ -1371,9 +1379,9 @@ class FerebusTools:
             else:
                 finput.write(f"swarm_pop    {FEREBUS_SWARM_SIZE}       ")
             finput.write("# if swarm opt is set as 'static' the number of particle must be specified\n")
-            finput.write("cognitive_learning   1.49400\n")
-            finput.write("inertia_weight   0.72900\n")
-            finput.write("social_learning   1.49400\n")
+            finput.write(f"cognitive_learning   {FEREBUS_COGNITIVE_LEARNING_RATE}\n")
+            finput.write(f"inertia_weight   {FEREBUS_INERTIA_WEIGHT}\n")
+            finput.write(f"social_learning   {FEREBUS_SOCIAL_LEARNING_RATE}\n")
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# DE Specific keyword\n#\n")
