@@ -4901,7 +4901,8 @@ class S_CurveTools:
         model_menu.set_refresh(S_CurveTools.refresh_model_menu)
 
         menu.clear_options()
-        menu.add_option("1", "Calculate S-Curves", S_CurveTools.caluclate_s_curves)
+        menu.add_option("1", "Calculate S-Curves", S_CurveTools.calculate_s_curves)
+        menu.add_option("a", "Auto Calculate S-Curves", S_CurveTools.auto_calculate_s_curves)
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
@@ -4911,7 +4912,7 @@ class S_CurveTools:
         menu.add_final_options()
 
     @staticmethod
-    def caluclate_s_curves():
+    def calculate_s_curves(fname="s_curves.xlsx"):
         import pandas as pd
 
         validation_set = Points(S_CurveTools.validation_set, read_gjfs=True, read_ints=True)
@@ -4926,15 +4927,15 @@ class S_CurveTools:
                 if not atom in atom_data.keys():
                     atom_data[atom] = {"true": [], "predicted": [], "error": []}
                 true_value = int_data.eiqa
-                predicted_value = prediction[int_data.num-1]
-                error = (true_value - predicted_value)**2
+                predicted_value = prediction["iqa"][int_data.num]
+                error = np.abs(true_value - predicted_value) * 2625.5
                 
                 atom_data[atom]["true"].append(true_value)
                 atom_data[atom]["predicted"].append(predicted_value)
                 atom_data[atom]["error"].append(error)
         
         percentages = []
-        with pd.ExcelWriter("s_curves.xlsx", engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(fname, engine='xlsxwriter') as writer:
             errors = {}
             for atom, data in atom_data.items():
                 errors[atom] = data["error"]
@@ -4949,6 +4950,14 @@ class S_CurveTools:
             df.sort_values(by="Total", inplace=True)
             df["%"] = percentages
             df.to_excel(writer, sheet_name="Total")
+
+    def auto_calculate_s_curves():
+        log_dirs = FileTools.get_files_in(S_CurveTools.log_loc, "*/")
+        for log_dir in log_dirs:
+            S_CurveTools.models = log_dir
+            models = Models(log_dir)
+            fname = "s_curves_" + str(models.nTrain).zfill(4) + ".xlsx"
+            S_CurveTools.calculate_s_curves(fname)
 
     @staticmethod
     def run():
