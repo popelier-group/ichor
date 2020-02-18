@@ -96,7 +96,7 @@ from scipy.spatial import distance
 #                  Globals                  #
 #############################################
 
-globals = None
+#globals = None
 
 DEFAULT_CONFIG_FILE = "config.properties"
 
