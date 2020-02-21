@@ -91,6 +91,7 @@ from tqdm import tqdm
 from scipy import stats
 from numpy import linalg as la
 from scipy.spatial import distance
+from scipy.spatial.distance import cdist, pdist, squareform
 
 #############################################
 #                  Globals                  #
@@ -3487,6 +3488,7 @@ class INT(Point):
 
 
 class Model:
+
     def __init__(self, fname, read_model=False):
         self.fname = fname
 
@@ -3668,20 +3670,17 @@ class Model:
         return np.exp(-result)
 
     def r(self, features):
-        r = np.empty((self.nTrain, 1))
-        for i, point in enumerate(self.X):
-            r[i] = self.k(features, point)
-        return r
+        dists = cdist(self.hyper_parameter * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
+        return np.exp(-dists)
 
     @property
     def R(self):
         try:
             return self._R
         except AttributeError:
-            self._R = np.empty((self.nTrain, self.nTrain))
-            for i, xi in enumerate(self.X):
-                for j, xj in enumerate(self.X):
-                    self._R[i][j] = self.k(xi, xj)
+            dists = pdist(self.hyper_parameters * self.X, metric='sqeuclidean')
+            K = np.exp(-dists)
+            self._R = squareform(K)
             return self._R
 
     @property
