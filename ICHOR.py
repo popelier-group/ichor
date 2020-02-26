@@ -90,6 +90,7 @@ import numpy as np
 from tqdm import tqdm
 from scipy import stats
 from numpy import linalg as la
+from sklearn.metrics import pairwise_distances
 from scipy.spatial import distance
 from scipy.spatial.distance import cdist, pdist, squareform
 
@@ -166,6 +167,7 @@ DLPOLY_RMS_DISP = -1.0
 MACHINE = ""
 SGE = False # Don't Change
 SUBMITTED = False # Don't Change
+NPROC = 1 # Don't Change
 
 DISABLE_PROBLEMS = False
 
@@ -3671,7 +3673,10 @@ class Model:
         return np.exp(-result)
 
     def r(self, features):
-        dists = cdist(self.hyper_parameters * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
+        x = self.hyper_parameters * self.X
+        y = self.hyper_parameters * [features]
+        dists = pairwise_distances(x, y, metric="sqeuclidean", n_jobs=NPROC)
+        # dists = cdist(self.hyper_parameters * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
         return np.exp(-dists)
 
     @property
@@ -3679,9 +3684,10 @@ class Model:
         try:
             return self._R
         except AttributeError:
-            dists = pdist(self.hyper_parameters * self.X, metric='sqeuclidean')
-            K = np.exp(-dists)
-            self._R = squareform(K)
+            x = self.hyper_parameters * self.X
+            dists = pairwise_distances(x, metric="sqeuclidean", n_jobs=NPROC)
+            # dists = pdist(self.hyper_parameters * self.X, metric='sqeuclidean')
+            self._R = np.exp(-dists)
             return self._R
 
     @property
@@ -3751,7 +3757,12 @@ class Model:
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
         res3 = np.matmul(self.ones.T, np.matmul(self.invR, self.ones))
 
-        s2 = self.sigma2 * (1 - res1.item() + (1 + res2.item())**2/res3.item())
+        r1 = res1.item()
+        r2 = res2.item()**2
+        r3 = res3.item()
+        s1 = self.sigma2
+        s2 = s1 * (1-r1 + (1+r2)/r3)
+        # s2 = self.sigma2 * (1 - res1.item() + (1 + res2.item())**2/res3.item())
         return s2
     
     def variance2(self, point):
@@ -5258,6 +5269,7 @@ def defineGlobals():
     global FILE_STRUCTURE
     global _unknown_settings
     global DEFAULT_CONFIG_FILE
+    global NPROC
 
     FILE_STRUCTURE = FileTools.setup_file_structure()
 
@@ -5273,6 +5285,9 @@ def defineGlobals():
 
     SGE = "SGE_ROOT" in os.environ.keys()
     SUBMITTED = "SGE_O_HOST" in os.environ.keys()
+
+    if "NSLOTS" in os.environ.keys():
+        NPROC = int(os.environ["NSLOTS"])
 
     if SUBMITTED:
         tqdm = my_tqdm
