@@ -1759,6 +1759,7 @@ class AIMAllCommand(CommandLine):
 
         self.setup_datafile()
         self.ncores = AIMALL_CORE_COUNT
+        self.setup_arguments()
     
     def add(self, wfn_file, outfile=None):
         self.infiles += [wfn_file]
@@ -3670,7 +3671,7 @@ class Model:
         return np.exp(-result)
 
     def r(self, features):
-        dists = cdist(self.hyper_parameter * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
+        dists = cdist(self.hyper_parameters * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
         return np.exp(-dists)
 
     @property
