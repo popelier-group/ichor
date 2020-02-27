@@ -1997,6 +1997,7 @@ class SubmissionScript:
         with open(self.fname, "w") as f:
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
+            f.write("#$ -V\n")
             f.write(f"#$ -o {self.stdout}\n")
             f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
@@ -5218,7 +5219,7 @@ class SetupTools:
     @staticmethod
     def make_sets():
         global SYSTEM_NAME
-        
+
         t = TabCompleter()
         t.setup_completer(t.path_completer)
         set_location = input("Enter XYZ file or Directory containing the Points to use: ")
