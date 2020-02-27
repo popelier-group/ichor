@@ -5217,6 +5217,8 @@ class SetupTools:
 
     @staticmethod
     def make_sets():
+        global SYSTEM_NAME
+        
         t = TabCompleter()
         t.setup_completer(t.path_completer)
         set_location = input("Enter XYZ file or Directory containing the Points to use: ")
