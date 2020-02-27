@@ -4393,7 +4393,10 @@ class Points:
             return self._features
 
     def __len__(self):
-        return FileTools.count_points_in(self.directory)
+        num_points = FileTools.count_points_in(self.directory)
+        if num_points == 0:
+            return len(self._points)
+        return num_points
     
     def __delitem__(self, del_point):
         if isinstance(del_point, (int, np.int64)):
@@ -5219,7 +5222,8 @@ class SetupTools:
         set_location = input("Enter XYZ file or Directory containing the Points to use: ")
         t.remove_completer()
 
-        # append data source to file
+        if SYSTEM_NAME == "SYSTEM":
+            SYSTEM_NAME = input("Enter System Name: ")
 
         points = Points()
         points.read_set(set_location)
