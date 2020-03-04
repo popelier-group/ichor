@@ -3662,8 +3662,16 @@ class Model:
 
     def k_rbf(self, xi, xj):
         result = 0
-        for i, j, h in zip(xi, xj, self.hyper_parameters):
-            result += h * (i - j)**2
+        for n, (i, j, h) in enumerate(zip(xi, xj, self.hyper_parameters)):
+            if (n+1) % 3 == 0:
+                diff = abs(i - j)
+                if (diff > np.pi):
+                    diff = diff - 2*np.pi
+                elif (diff < -np.pi):
+                    diff = 2*pi + diff
+                result += h * diff * diff
+            else:
+                result += h * (i - j)**2
         return np.exp(-result)
     
     def k_m52(self, xi, xj):
@@ -3673,22 +3681,39 @@ class Model:
             result += h * (i - j)**2
         return np.exp(-result)
 
+    # def r(self, features):
+    #     x = self.hyper_parameters * self.X
+    #     y = self.hyper_parameters * [features]
+    #     dists = pairwise_distances(x, y, metric="sqeuclidean", n_jobs=NPROC)
+    #     # dists = cdist(self.hyper_parameters * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
+    #     return np.exp(-dists)
+
+    # @property
+    # def R(self):
+    #     try:
+    #         return self._R
+    #     except AttributeError:
+    #         x = self.hyper_parameters * self.X
+    #         dists = pairwise_distances(x, metric="sqeuclidean", n_jobs=NPROC)
+    #         # dists = pdist(self.hyper_parameters * self.X, metric='sqeuclidean')
+    #         self._R = np.exp(-dists)
+    #         return self._R
+
     def r(self, features):
-        x = self.hyper_parameters * self.X
-        y = self.hyper_parameters * [features]
-        dists = pairwise_distances(x, y, metric="sqeuclidean", n_jobs=NPROC)
-        # dists = cdist(self.hyper_parameters * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
-        return np.exp(-dists)
+        r = np.empty((self.nTrain, 1))
+        for i, point in enumerate(self.X):
+            r[i] = self.k(features, point)
+        return r
 
     @property
     def R(self):
         try:
             return self._R
         except AttributeError:
-            x = self.hyper_parameters * self.X
-            dists = pairwise_distances(x, metric="sqeuclidean", n_jobs=NPROC)
-            # dists = pdist(self.hyper_parameters * self.X, metric='sqeuclidean')
-            self._R = np.exp(-dists)
+            self._R = np.empty((self.nTrain, self.nTrain))
+            for i, xi in enumerate(self.X):
+                for j, xj in enumerate(self.X):
+                    self._R[i][j] = self.k(xi, xj)
             return self._R
 
     @property
