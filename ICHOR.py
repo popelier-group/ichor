@@ -3158,7 +3158,7 @@ class Point:
     def multipole_training_set_line(self):
         training_set = self.__get_features()
         for atom in training_set.keys():
-            training_set[atom]["outputs"] = list(self.ints[atom].multipoles.values())
+            training_set[atom]["outputs"] = list(self.ints[atom].multipoles.values())[:25]
         return training_set
 
     def move(self, new_directory):
