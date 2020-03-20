@@ -5537,7 +5537,7 @@ def move_models(model_file, IQA=False, copy_to_log=True):
         model = Model(model_file)
         model.remove_no_noise()
 
-        if bool(IQA):
+        if UsefulTools.check_bool(IQA):
             model.model_type = "IQA"
         new_model_file = model.get_fname(model_directory)
         FileTools.copy_file(model_file, new_model_file)
