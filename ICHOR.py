@@ -3507,7 +3507,7 @@ class Model:
         self.basename = ""
 
         self.system_name = ""
-        self.type = ""
+        self.model_type = ""
         self.atom_number = ""
 
         self.analyse_name()
@@ -3621,7 +3621,7 @@ class Model:
 
         fname_split = os.path.splitext(self.basename)[0].split("_")
         self.system_name = fname_split[0]
-        self.type = fname_split[2].lower()
+        self.model_type = fname_split[2].lower()
         self.atom_number = fname_split[3]
 
     def remove_no_noise(self):
