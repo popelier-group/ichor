@@ -1821,7 +1821,7 @@ class FerebusCommand(CommandLine):
         if "py" in FEREBUS_VERSION:
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
-        else if "rust" in FEREBUS_VERSION:
+        elif "rust" in FEREBUS_VERSION:
             self.command = os.path.abspath(CERBERUS_LOCATION)
         else:
             self.command = ferebus_loc
