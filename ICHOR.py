@@ -5640,17 +5640,13 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     models = Models(models_directory, read_models=True)
     sample_pool = Points(sample_pool_directory, read_gjfs=True)
-    now = time.time()
     points = models.expected_improvement(sample_pool)
-    print(f"{time.time() - now} s")
 
-    SUBMITTED = True
     if SUBMITTED:
         move_points = True
     else:
         move_points = UsefulTools.check_bool(input("Would you like to move points to Training Set? [Y/N]"))
-    print(points[0].gjf._atoms)
-    move_points = False
+
     if move_points :
         logging.info("Moving points to the Training Set")
         training_set_directory = FILE_STRUCTURE["training_set"]
