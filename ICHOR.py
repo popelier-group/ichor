@@ -3852,9 +3852,9 @@ class Models:
         if type == "all":
             return [model for model in self]
         elif type == "multipoles":
-            return [model for model in self if re.match(r"q\d+(\w+)?", model.type)]
+            return [model for model in self if re.match(r"q\d+(\w+)?", model.model_type)]
         else:
-            return [model for model in self if model.type == type]
+            return [model for model in self if model.model_type == type]
 
     def read(self):
         for model in self:
@@ -3875,9 +3875,9 @@ class Models:
                 if not atoms:
                     prediction += model.predict(point) 
                 else:
-                    if not model.type in prediction.keys():
-                        prediction[model.type] = {}
-                    prediction[model.type][model.num] = float(model.predict(point))
+                    if not model.model_type in prediction.keys():
+                        prediction[model.model_type] = {}
+                    prediction[model.model_type][model.num] = float(model.predict(point))
             predictions.append(prediction)
         return np.array(predictions) if not atoms else predictions
     
