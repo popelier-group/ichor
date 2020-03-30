@@ -127,6 +127,7 @@ FILE_STRUCTURE = {} # Don't change
 KERNEL = "rbf"                # only use rbf for now
 FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
 FEREBUS_LOCATION = "PROGRAMS/FEREBUS"
+CERBERUS_LOCATION = "PROGRAMS/cerberus"
 
 # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
 GAUSSIAN_CORE_COUNT = 2
@@ -1820,6 +1821,8 @@ class FerebusCommand(CommandLine):
         if "py" in FEREBUS_VERSION:
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
+        else if "rust" in FEREBUS_VERSION:
+            self.command = os.path.abspath(CERBERUS_LOCATION)
         else:
             self.command = ferebus_loc
 
@@ -2010,7 +2013,10 @@ class SubmissionScript:
             for module in self._modules:
                 f.write(f"module load {module}\n")
             if self.ncores > 1:
+                if "rust" in FEREBUS_VERSION:
+                    f.write("export RAYON_NUM_THREADS=$NSLOTS\n")
                 f.write("export OMP_NUM_THREADS=$NSLOTS\n\n")
+
             f.write("\n")
             for command in self._commands:
                 f.write(f"{repr(command)}\n")
@@ -3493,6 +3499,8 @@ class INT(Point):
 
 class Model:
 
+    tau = 2*np.pi
+
     def __init__(self, fname, read_model=False):
         self.fname = fname
 
@@ -3531,6 +3539,10 @@ class Model:
 
         self.y = []
         self.X = []
+
+        self.linear_mask = []
+        self.cyclic_mask = []
+
         if read_model and self.fname:
             self.read()
             if self.normalise:
@@ -3615,6 +3627,9 @@ class Model:
                 if not up_to is None and up_to in line:
                     break
 
+        self.linear_mask = [1 if (i+1) % 3 == 0 else 0 for i in range(self.nFeats)]
+        self.cyclic_mask = [not m for m in self.linear_mask]
+
     def analyse_name(self):
         self.directory = os.path.dirname(self.fname)
         self.basename = os.path.basename(self.fname)
@@ -3668,7 +3683,7 @@ class Model:
                 if (diff > np.pi):
                     diff = diff - 2*np.pi
                 elif (diff < -np.pi):
-                    diff = 2*pi + diff
+                    diff = 2*np.pi + diff
                 result += h * diff * diff
             else:
                 result += h * (i - j)**2
@@ -3681,40 +3696,90 @@ class Model:
             result += h * (i - j)**2
         return np.exp(-result)
 
+    @staticmethod
+    def cfunc(x):
+      return Model.tau - x if x > np.pi else x;
+
+    @staticmethod
+    def cyclic_dist(a, b, hyper_parameters):
+        d = np.abs(a - b) % Model.tau; 
+        vf = np.vectorize(Model.cfunc)
+        return (hyper_parameters * vf(d)**2).sum()
+
     # def r(self, features):
-    #     x = self.hyper_parameters * self.X
-    #     y = self.hyper_parameters * [features]
-    #     dists = pairwise_distances(x, y, metric="sqeuclidean", n_jobs=NPROC)
-    #     # dists = cdist(self.hyper_parameters * self.X, self.hyper_parameters * [features], metric='sqeuclidean')
-    #     return np.exp(-dists)
+    #     linear_y = np.sqrt(self.hyper_parameters) * np.ma.masked_array([features], mask=self.linear_mask).filled(0)
+    #     cyclic_y = np.ma.masked_array([features], mask=self.cyclic_mask).filled(0)
 
-    # @property
-    # def R(self):
-    #     try:
-    #         return self._R
-    #     except AttributeError:
-    #         x = self.hyper_parameters * self.X
-    #         dists = pairwise_distances(x, metric="sqeuclidean", n_jobs=NPROC)
-    #         # dists = pdist(self.hyper_parameters * self.X, metric='sqeuclidean')
-    #         self._R = np.exp(-dists)
-    #         return self._R
+    #     linear_mask = linear_mask = np.row_stack([self.linear_mask for _ in range(self.nTrain)])
+    #     linear_x = np.sqrt(self.hyper_parameters) * np.ma.masked_array(self.X, mask=linear_mask).filled(0)
+    #     linear_dists = pairwise_distances(
+    #                                         linear_x, 
+    #                                         linear_y,
+    #                                         metric="sqeuclidean", 
+    #                                         n_jobs=NPROC
+    #                                         )
 
-    def r(self, features):
-        r = np.empty((self.nTrain, 1))
-        for i, point in enumerate(self.X):
-            r[i] = self.k(features, point)
-        return r
+    #     cyclic_mask = np.row_stack([self.cyclic_mask for _ in range(self.nTrain)])
+    #     cyclic_x = np.ma.masked_array(self.X, mask=cyclic_mask).filled(0)
+    #     cyclic_dists = pairwise_distances(
+    #                                         cyclic_x, 
+    #                                         cyclic_y,
+    #                                         metric=Model.cyclic_dist, 
+    #                                         n_jobs=NPROC, 
+    #                                         hyper_parameters=self.hyper_parameters
+    #                                         )
+
+    #     dists = linear_dists + cyclic_dists
+    #     return np.exp(-1. * dists)
 
     @property
     def R(self):
         try:
             return self._R
         except AttributeError:
-            self._R = np.empty((self.nTrain, self.nTrain))
-            for i, xi in enumerate(self.X):
-                for j, xj in enumerate(self.X):
-                    self._R[i][j] = self.k(xi, xj)
+            linear_mask = linear_mask = np.row_stack([self.linear_mask for _ in range(self.nTrain)])
+            linear_x = np.sqrt(self.hyper_parameters) * np.ma.masked_array(self.X, mask=linear_mask).filled(0)
+            linear_dists = pairwise_distances(
+                                              linear_x, 
+                                              metric="sqeuclidean", 
+                                              n_jobs=NPROC
+                                             )
+
+            cyclic_mask = np.row_stack([self.cyclic_mask for _ in range(self.nTrain)])
+            cyclic_x = np.ma.masked_array(self.X, mask=cyclic_mask).filled(0)
+            cyclic_dists = pairwise_distances(
+                                              cyclic_x, 
+                                              metric=Model.cyclic_dist, 
+                                              n_jobs=NPROC, 
+                                              hyper_parameters=self.hyper_parameters
+                                             )
+
+            dists = linear_dists + cyclic_dists
+            
+            self._R = np.exp(-1. * dists)
             return self._R
+
+    def r(self, features):
+        # print(features)
+        r = np.empty((self.nTrain, 1))
+        for i, point in enumerate(self.X):
+            r[i] = self.k(features, point)
+        # np.savetxt("R1.txt", np.array(r))
+        # sys.exit()
+        return r
+
+    # @property
+    # def R(self):
+    #     try:
+    #         return self._R
+    #     except AttributeError:
+    #         self._R = np.empty((self.nTrain, self.nTrain))
+    #         for i, xi in enumerate(self.X):
+    #             for j, xj in enumerate(self.X):
+    #                 self._R[i][j] = self.k(xi, xj)
+    #         # np.savetxt("R1.txt", self._R)
+    #         # sys.exit()
+    #         return self._R
 
     @property
     def invR(self):
@@ -3767,9 +3832,9 @@ class Model:
 
     def predict(self, point):
         if self.normalise:
-            features = normalise_array(point.features[self.i])
+            features = self.normalise_array(point.features[self.i])
         elif self.standardise:
-            features = standardise_array(point.features[self.i])
+            features = self.standardise_array(point.features[self.i])
         else:
             features = point.features[self.i]
         r = self.r(features)
@@ -5575,14 +5640,17 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     models = Models(models_directory, read_models=True)
     sample_pool = Points(sample_pool_directory, read_gjfs=True)
-
+    now = time.time()
     points = models.expected_improvement(sample_pool)
+    print(f"{time.time() - now} s")
 
+    SUBMITTED = True
     if SUBMITTED:
         move_points = True
     else:
         move_points = UsefulTools.check_bool(input("Would you like to move points to Training Set? [Y/N]"))
-
+    print(points[0].gjf._atoms)
+    move_points = False
     if move_points :
         logging.info("Moving points to the Training Set")
         training_set_directory = FILE_STRUCTURE["training_set"]
