@@ -259,7 +259,7 @@ _call_external_function_args = []
 _data_lock = False
 
 _UID = None
-_IQA_MODELS = False
+_IQA_MODELS = True
 
 #############################################
 #             Class Definitions             #
