@@ -5693,7 +5693,9 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     models = Models(models_directory, read_models=True)
     sample_pool = Points(sample_pool_directory, read_gjfs=True)
+    now = time.time()
     points = models.expected_improvement(sample_pool)
+    logging.debug(f"Time taken to calculate points: {time.time()-now}s")
 
     if SUBMITTED:
         move_points = True
