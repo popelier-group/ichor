@@ -88,6 +88,7 @@ from argparse import ArgumentParser
 # Required imports
 import numpy as np
 from tqdm import tqdm
+from numba import jit
 from scipy import stats
 from numpy import linalg as la
 from sklearn.metrics import pairwise_distances
@@ -3496,6 +3497,55 @@ class INT(Point):
     def __bool__(self):
         return not self.fname == ""
 
+@jit(nopython=True)
+def numba_r_rbf(x_star, x, hp):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    r = np.empty((n_train, 1))
+    for i in np.arange(n_train):
+        result = 0.0
+        for j in np.arange(n_feat):
+            xi = x_star[j]
+            xj = x[i][j]
+            xh = hp[j]
+            if (j+1) % 3 == 0:
+                diff = np.abs(xi - xj)
+                if (diff > np.pi):
+                    diff = diff - 2*np.pi
+                elif (diff < -np.pi):
+                    diff = 2*np.pi + diff
+                result += xh * diff * diff
+            else:
+                result += xh * (xi - xj)**2
+        r[i] = np.exp(-result)
+    return r
+
+@jit(nopython=True)
+def numba_R_rbf(x, hp):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    R = np.empty((n_train, n_train))
+    for i in np.arange(n_train):
+        R[i][i] = 1
+        for j in np.arange(i+1, n_train):
+            result = 0.0
+            for k in np.arange(n_feat):
+                xi = x[i][k]
+                xj = x[j][k]
+                xh = hp[k]
+                if (k+1) % 3 == 0:
+                    diff = np.abs(xi - xj)
+                    if (diff > np.pi):
+                        diff = diff - 2*np.pi
+                    elif (diff < -np.pi):
+                        diff = 2*np.pi + diff
+                    result += xh * diff * diff
+                else:
+                    result += xh * (xi - xj)**2
+            result = np.exp(-result)
+            R[i][j] = result
+            R[j][i] = result
+    return R
 
 class Model:
 
@@ -3737,26 +3787,27 @@ class Model:
         try:
             return self._R
         except AttributeError:
-            linear_mask = linear_mask = np.row_stack([self.linear_mask for _ in range(self.nTrain)])
-            linear_x = np.sqrt(self.hyper_parameters) * np.ma.masked_array(self.X, mask=linear_mask).filled(0)
-            linear_dists = pairwise_distances(
-                                              linear_x, 
-                                              metric="sqeuclidean", 
-                                              n_jobs=NPROC
-                                             )
+            # linear_mask = linear_mask = np.row_stack([self.linear_mask for _ in range(self.nTrain)])
+            # linear_x = np.sqrt(self.hyper_parameters) * np.ma.masked_array(self.X, mask=linear_mask).filled(0)
+            # linear_dists = pairwise_distances(
+            #                                   linear_x, 
+            #                                   metric="sqeuclidean", 
+            #                                   n_jobs=NPROC
+            #                                  )
 
-            cyclic_mask = np.row_stack([self.cyclic_mask for _ in range(self.nTrain)])
-            cyclic_x = np.ma.masked_array(self.X, mask=cyclic_mask).filled(0)
-            cyclic_dists = pairwise_distances(
-                                              cyclic_x, 
-                                              metric=Model.cyclic_dist, 
-                                              n_jobs=NPROC, 
-                                              hyper_parameters=self.hyper_parameters
-                                             )
+            # cyclic_mask = np.row_stack([self.cyclic_mask for _ in range(self.nTrain)])
+            # cyclic_x = np.ma.masked_array(self.X, mask=cyclic_mask).filled(0)
+            # cyclic_dists = pairwise_distances(
+            #                                   cyclic_x, 
+            #                                   metric=Model.cyclic_dist, 
+            #                                   n_jobs=NPROC, 
+            #                                   hyper_parameters=self.hyper_parameters
+            #                                  )
 
-            dists = linear_dists + cyclic_dists
+            # dists = linear_dists + cyclic_dists
             
-            self._R = np.exp(-1. * dists)
+            # self._R = np.exp(-1. * dists)
+            self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
             return self._R
 
     def r(self, features):
@@ -3831,18 +3882,20 @@ class Model:
             return self._cross_validation
 
     def predict(self, point):
-        if self.normalise:
-            features = self.normalise_array(point.features[self.i])
-        elif self.standardise:
-            features = self.standardise_array(point.features[self.i])
-        else:
-            features = point.features[self.i]
-        r = self.r(features)
+        # if self.normalise:
+        #     features = self.normalise_array(point.features[self.i])
+        # elif self.standardise:
+        #     features = self.standardise_array(point.features[self.i])
+        # else:
+        #     features = point.features[self.i]
+        # r = self.r(features)
+        r = numba_r_rbf(point.features[self.i], self.X, np.array(self.hyper_parameters))
         weights = self.weights.reshape((-1, 1))
         return self.mu + np.matmul(r.T, weights).item()
     
     def variance(self, point):
-        r = self.r(point.features[self.i])
+        # r = self.r(point.features[self.i])
+        r = numba_r_rbf(point.features[self.i], self.X, np.array(self.hyper_parameters))
 
         res1 = np.matmul(r.T, np.matmul(self.invR, r))
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
