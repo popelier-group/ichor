@@ -4599,6 +4599,17 @@ class Trajectory:
             rmsd += [ref.rmsd(point)]
         return rmsd
 
+    def extend(self, atoms):
+        [self._trajectory.append(Atoms(iatoms)) for iatoms in atoms]
+
+    def write(self, fname=None):
+        if fname is None:
+            fname = self.fname
+        with open(fname, "w") as f:
+            for i, atoms in enumerate(self):
+                f.write(f"    {len(atoms)}\ni = {i}\n")
+                f.write(f"{atoms}\n")
+
     def __len__(self):
         return len(self._trajectory)
     
