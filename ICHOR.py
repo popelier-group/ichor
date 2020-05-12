@@ -4580,7 +4580,10 @@ class Trajectory:
                     atoms = Atoms()
 
     def append(self, atoms):
-        self._trajectory.append(atoms)
+        if isinstance(atoms, Atoms):
+            self._trajectory.append(atoms)
+        else:
+            self._trajectory.append(Atoms(atoms))
 
     def add_point(self, atoms):
         self.append(atoms)
@@ -4600,7 +4603,7 @@ class Trajectory:
         return rmsd
 
     def extend(self, atoms):
-        [self._trajectory.append(Atoms(iatoms)) for iatoms in atoms]
+        [self._trajectory.append(iatoms) for iatoms in atoms]
 
     def write(self, fname=None):
         if fname is None:
