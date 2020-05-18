@@ -249,6 +249,7 @@ logging.basicConfig(filename='ichor.log',
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     datefmt='%d-%m-%Y %H:%M:%S')
 
+_config_read_error = False
 _unknown_settings = []
 
 _external_functions = {}
@@ -716,19 +717,20 @@ class ConfigProvider(dict):
             print("%s:\t%s" % (key, self[key]))
 
     def loadFileData(self):
-        data = ""
+        global _config_read_error
         try:
-            input = open(self.src, 'r')
-            data = input.read()
-            input.close()
+            with open(self.src, 'r') as finput:
+                return finput.read()
         except IOError:
-            pass
+            _config_read_error = True
 
-        return data
+        return ""
 
     def loadPropertiesConfig(self):
-        for (key, val) in self.prop.findall(self.loadFileData()):
-            self[self.cleanup_key(key)] = val
+        for line in self.loadFileData().split("\n"):
+            if not line.strip().startswith("#") and "=" in line:
+                key, val = line.split("=")
+                self[self.cleanup_key(key)] = val.strip()
 
     def loadYamlConfig(self):
         import yaml
@@ -1476,6 +1478,14 @@ class ProblemFinder:
                              solution="Set 'SYSTEM_NAME' in config file"
                             ))
     
+    @UsefulTools.runFunc(4)
+    def check_config_read(self):
+        if _config_read_error:
+            self.add(Problem(name=f"Error in reading config file", 
+                             problem=f"Config file may be missing",
+                             solution="Check config.properties or specified config file"
+                            ))
+
     @UsefulTools.runFunc(4)
     def check_settings(self):
         for setting in _unknown_settings:
@@ -3165,7 +3175,7 @@ class Point:
     def multipole_training_set_line(self):
         training_set = self.__get_features()
         for atom in training_set.keys():
-            training_set[atom]["outputs"] = [self.ints[atom].integration_results["q"]] + 
+            training_set[atom]["outputs"] = [self.ints[atom].integration_results["q"]] + \
                                                 list(self.ints[atom].multipoles.values())[:24]
         return training_set
 
