@@ -704,35 +704,34 @@ class ConfigProvider(dict):
 
     def __init__(self, source=DEFAULT_CONFIG_FILE):
         self.src = source
-        self.loadConfig()
+        self.load_config()
 
-    def loadConfig(self):
+    def load_config(self):
         if self.src.endswith(".properties"):
-            self.loadPropertiesConfig()
+            self.load_properties_config()
         elif self.src.endswith(".yaml"):
-            self.loadYamlConfig()
+            self.load_yaml_config()
 
-    def printKeyVals(self):
+    def print_key_vals(self):
         for key in self:
             print("%s:\t%s" % (key, self[key]))
 
-    def loadFileData(self):
+    def load_file_data(self):
         global _config_read_error
         try:
             with open(self.src, 'r') as finput:
-                return finput.read()
+                return finput.readlines()
         except IOError:
             _config_read_error = True
-
         return ""
 
-    def loadPropertiesConfig(self):
-        for line in self.loadFileData().split("\n"):
+    def load_properties_config(self):
+        for line in self.load_file_data():
             if not line.strip().startswith("#") and "=" in line:
                 key, val = line.split("=")
                 self[self.cleanup_key(key)] = val.strip()
 
-    def loadYamlConfig(self):
+    def load_yaml_config(self):
         import yaml
         entries = yaml.load(self.loadFileData())
         if entries:
