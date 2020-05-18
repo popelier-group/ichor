@@ -699,9 +699,6 @@ class ConfigProvider(dict):
        an extra condition to the if statement in loadConfig()
     """
 
-    src = None
-    prop = re.compile(r"([\w. ]+)\s*=\s*(.*)")
-
     def __init__(self, source=DEFAULT_CONFIG_FILE):
         self.src = source
         self.load_config()
