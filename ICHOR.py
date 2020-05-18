@@ -1834,7 +1834,7 @@ class FerebusCommand(CommandLine):
         if not "py" in FEREBUS_VERSION:
             self.modules["ffluxlab"] = [
                                         "mpi/intel/18.0.3",
-                                        "libs/intel/nag/fortran_mark23_intel"
+                                        "libs/nag/intel/fotran/mark-23"
                                        ]
             self.modules["csf3"] = [
                                     "compilers/intel/17.0.7",
