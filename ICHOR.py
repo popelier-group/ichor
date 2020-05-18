@@ -3504,6 +3504,7 @@ class INT(Point):
     def __bool__(self):
         return not self.fname == ""
 
+
 @jit(nopython=True)
 def numba_r_rbf(x_star, x, hp):
     n_train = x.shape[0]
@@ -3526,6 +3527,7 @@ def numba_r_rbf(x_star, x, hp):
                 result += xh * (xi - xj)**2
         r[i] = np.exp(-result)
     return r
+
 
 @jit(nopython=True)
 def numba_R_rbf(x, hp):
@@ -3553,6 +3555,7 @@ def numba_R_rbf(x, hp):
             R[i][j] = result
             R[j][i] = result
     return R
+
 
 class Model:
 
@@ -5650,7 +5653,6 @@ def opt():
     opt_gjf.write()
     opt_gjf.submit()
 
-
 #############################################
 #                 Main Loop                 #
 #############################################
@@ -5738,22 +5740,11 @@ def main_menu():
 
 
 if __name__ == "__main__":
-    # Globals.define()l
-
-
-    # print(globals.DEFAULT_CONFIG_FILE)
-    # quit()
-
     readArguments()
     defineGlobals()
 
     if not _call_external_function is None:
         _call_external_function(*_call_external_function_args)
         quit()
-
-    # _shell_scripts = glob("*.sh.*")
-    # for shell_script in _shell_scripts:
-    #     if not os.stat(shell_script).st_size:
-    #         os.remove(shell_script)
 
     main_menu()
