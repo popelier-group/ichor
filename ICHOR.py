@@ -3561,13 +3561,6 @@ class Model:
     def __init__(self, fname, read_model=False):
         self.fname = fname
 
-        kernels = {
-            "rbf": self.k_rbf,
-            "m52": self.k_m52
-        }
-
-        self.k = kernels[KERNEL.lower()]
-
         self.directory = ""
         self.basename = ""
 
@@ -3732,112 +3725,16 @@ class Model:
 
         FileTools.copy_file(self.fname, log_model_file)
 
-    def k_rbf(self, xi, xj):
-        result = 0
-        for n, (i, j, h) in enumerate(zip(xi, xj, self.hyper_parameters)):
-            if (n+1) % 3 == 0:
-                diff = abs(i - j)
-                if (diff > np.pi):
-                    diff = diff - 2*np.pi
-                elif (diff < -np.pi):
-                    diff = 2*np.pi + diff
-                result += h * diff * diff
-            else:
-                result += h * (i - j)**2
-        return np.exp(-result)
-    
-    def k_m52(self, xi, xj):
-        return NotImplemented
-        result = 0
-        for i, j, h in zip(xi, xj, self.hyper_parameters):
-            result += h * (i - j)**2
-        return np.exp(-result)
-
-    @staticmethod
-    def cfunc(x):
-      return Model.tau - x if x > np.pi else x;
-
-    @staticmethod
-    def cyclic_dist(a, b, hyper_parameters):
-        d = np.abs(a - b) % Model.tau; 
-        vf = np.vectorize(Model.cfunc)
-        return (hyper_parameters * vf(d)**2).sum()
-
-    # def r(self, features):
-    #     linear_y = np.sqrt(self.hyper_parameters) * np.ma.masked_array([features], mask=self.linear_mask).filled(0)
-    #     cyclic_y = np.ma.masked_array([features], mask=self.cyclic_mask).filled(0)
-
-    #     linear_mask = linear_mask = np.row_stack([self.linear_mask for _ in range(self.nTrain)])
-    #     linear_x = np.sqrt(self.hyper_parameters) * np.ma.masked_array(self.X, mask=linear_mask).filled(0)
-    #     linear_dists = pairwise_distances(
-    #                                         linear_x, 
-    #                                         linear_y,
-    #                                         metric="sqeuclidean", 
-    #                                         n_jobs=NPROC
-    #                                         )
-
-    #     cyclic_mask = np.row_stack([self.cyclic_mask for _ in range(self.nTrain)])
-    #     cyclic_x = np.ma.masked_array(self.X, mask=cyclic_mask).filled(0)
-    #     cyclic_dists = pairwise_distances(
-    #                                         cyclic_x, 
-    #                                         cyclic_y,
-    #                                         metric=Model.cyclic_dist, 
-    #                                         n_jobs=NPROC, 
-    #                                         hyper_parameters=self.hyper_parameters
-    #                                         )
-
-    #     dists = linear_dists + cyclic_dists
-    #     return np.exp(-1. * dists)
-
     @property
     def R(self):
         try:
             return self._R
         except AttributeError:
-            # linear_mask = linear_mask = np.row_stack([self.linear_mask for _ in range(self.nTrain)])
-            # linear_x = np.sqrt(self.hyper_parameters) * np.ma.masked_array(self.X, mask=linear_mask).filled(0)
-            # linear_dists = pairwise_distances(
-            #                                   linear_x, 
-            #                                   metric="sqeuclidean", 
-            #                                   n_jobs=NPROC
-            #                                  )
-
-            # cyclic_mask = np.row_stack([self.cyclic_mask for _ in range(self.nTrain)])
-            # cyclic_x = np.ma.masked_array(self.X, mask=cyclic_mask).filled(0)
-            # cyclic_dists = pairwise_distances(
-            #                                   cyclic_x, 
-            #                                   metric=Model.cyclic_dist, 
-            #                                   n_jobs=NPROC, 
-            #                                   hyper_parameters=self.hyper_parameters
-            #                                  )
-
-            # dists = linear_dists + cyclic_dists
-            
-            # self._R = np.exp(-1. * dists)
             self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
             return self._R
 
     def r(self, features):
-        # print(features)
-        r = np.empty((self.nTrain, 1))
-        for i, point in enumerate(self.X):
-            r[i] = self.k(features, point)
-        # np.savetxt("R1.txt", np.array(r))
-        # sys.exit()
-        return r
-
-    # @property
-    # def R(self):
-    #     try:
-    #         return self._R
-    #     except AttributeError:
-    #         self._R = np.empty((self.nTrain, self.nTrain))
-    #         for i, xi in enumerate(self.X):
-    #             for j, xj in enumerate(self.X):
-    #                 self._R[i][j] = self.k(xi, xj)
-    #         # np.savetxt("R1.txt", self._R)
-    #         # sys.exit()
-    #         return self._R
+        return numba_r_rbf(features, self.X, np.array(self.hyper_parameters))
 
     @property
     def invR(self):
@@ -3889,20 +3786,12 @@ class Model:
             return self._cross_validation
 
     def predict(self, point):
-        # if self.normalise:
-        #     features = self.normalise_array(point.features[self.i])
-        # elif self.standardise:
-        #     features = self.standardise_array(point.features[self.i])
-        # else:
-        #     features = point.features[self.i]
-        # r = self.r(features)
-        r = numba_r_rbf(point.features[self.i], self.X, np.array(self.hyper_parameters))
+        r = self.r(point.features[self.i])
         weights = self.weights.reshape((-1, 1))
         return self.mu + np.matmul(r.T, weights).item()
     
     def variance(self, point):
-        # r = self.r(point.features[self.i])
-        r = numba_r_rbf(point.features[self.i], self.X, np.array(self.hyper_parameters))
+        r = self.r(point.features[self.i])
 
         res1 = np.matmul(r.T, np.matmul(self.invR, r))
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
@@ -3913,12 +3802,11 @@ class Model:
         r3 = res3.item()
         s1 = self.sigma2
         s2 = s1 * (1-r1 + (1+r2)/r3)
-        # s2 = self.sigma2 * (1 - res1.item() + (1 + res2.item())**2/res3.item())
+        
         return s2
     
     def variance2(self, point):
-        point = point.features[self.i]
-        r = self.r(point)
+        r = self.r(point.features[self.i])
         return 1 - np.matmul(r.T, np.matmul(self.invR, r))
     
     def distance_to_point(self, point):
