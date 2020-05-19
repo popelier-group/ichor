@@ -74,6 +74,7 @@ import shutil
 import random
 import hashlib
 import logging
+import inspect
 import platform
 import warnings
 import subprocess
@@ -96,69 +97,9 @@ from scipy.spatial import distance
 #                  Globals                  #
 #############################################
 
-globals = None
+GLOBALS = None
 
 DEFAULT_CONFIG_FILE = "config.properties"
-
-CONFIG = None # Don't change
-
-SYSTEM_NAME = "SYSTEM"
-ALF = []
-
-MAX_ITERATION = 1
-POINTS_PER_ITERATION = 1
-
-ADAPTIVE_SAMPLING_METHOD = "eped"
-NORMALISE = False
-STANDARDISE = False
-
-METHOD = "B3LYP"
-BASIS_SET = "6-31+g(d,p)"
-KEYWORDS = []
-
-ENCOMP = 3
-BOAQ = "gs20"
-IASMESH = "fine"
-
-FILE_STRUCTURE = {} # Don't change
-
-KERNEL = "rbf"                # only use rbf for now
-FEREBUS_VERSION = "python"    # fortran (FEREBUS) or python (FEREBUS.py)
-FEREBUS_LOCATION = "PROGRAMS/FEREBUS"
-
-# CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
-GAUSSIAN_CORE_COUNT = 2
-AIMALL_CORE_COUNT = 2
-FEREBUS_CORE_COUNT = 4
-DLPOLY_CORE_COUNT = 1
-
-# FEREBUS RUNTIME SETTINGS (PREFIX FEREBUS)
-FEREBUS_SWARM_SIZE = -1 # If negative >> Size dynamically allocated by FEREBUS
-FEREBUS_NUGGET = 1.e-10 # Default value for FEREBUS nugget
-FEREBUS_MIN_THETA = 0.0 # Minimum theta value for initialisation (best to keep 0)
-FEREBUS_MAX_THETA = 1.0 # Maximum theta value for initialisation
-
-# DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
-DLPOLY_NUMBER_OF_STEPS = 500    # Number of steps to run simulation for
-DLPOLY_TEMPERATURE = 0        # If set to 0, will perform geom opt but default to 10 K
-DLPOLY_PRINT_EVERY = 1        # Print trajectory and stats every n steps
-DLPOLY_TIMESTEP = 0.001       # in ps
-DLPOLY_LOCATION = "PROGRAMS/DLPOLY.Z"
-
-DLPOLY_CHECK_CONVERGENCE = False
-DLPOLY_CONVERGENCE_CRITERIA = -1
-
-DLPOLY_MAX_ENERGY = -1.0
-DLPOLY_MAX_FORCE = -1.0
-DLPOLY_RMS_FORCE = -1.0
-DLPOLY_MAX_DISP = -1.0
-DLPOLY_RMS_DISP = -1.0
-
-MACHINE = ""
-SGE = False # Don't Change
-SUBMITTED = False # Don't Change
-
-DISABLE_PROBLEMS = False
 
 # Below are only for SSH settings which isn't implemented yet
 EXTERNAL_MACHINES = {
@@ -253,11 +194,13 @@ class Constants:
 
     AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
 
+    FEREBUS_VERSIONS = ["fortran", "python"]
+
 
 class UsefulTools:
-
+    
     @staticmethod
-    @property
+    # @property
     def ichor_logo():
         ichor_encoded_string = ['"%s %s%s %s%s%s %s%s%s %s%s" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9,'\
         '" "*5,"R"*17," "*3)',
@@ -330,7 +273,7 @@ class UsefulTools:
 
     @staticmethod
     def nTrain():
-        ts_dir = FILE_STRUCTURE["training_set"]
+        ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
         return FileTools.count_points_in(ts_dir)
 
     @staticmethod
@@ -499,25 +442,117 @@ class UsefulTools:
     @staticmethod
     def set_uid(uid=None):
         global _UID
-        if SUBMITTED and _UID:
+        if GLOBALS.SUBMITTED and _UID:
             return
         _UID = uid if uid else UsefulTools.get_uid()
+
+    @staticmethod
+    def input_with_prefill(prompt, prefill=''):
+        try:
+            # Readline only available on Unix
+            import readline
+            readline.set_startup_hook(lambda: readline.insert_text(str(prefill)))
+            return input(prompt)
+        except:
+            return input(prompt)
+        finally:
+            try:
+                import readline
+                readline.set_startup_hook()
+            except:
+                pass
+
+
+class GlobalTools:
+    @staticmethod
+    def cleanup_str(s):
+        s = s.replace("\"", "")
+        s = s.replace("\'", "")
+        s = s.strip()
+        return s
+
+    @staticmethod
+    def to_upper(s):
+        return s.upper()
+
+    @staticmethod
+    def to_lower(s):
+        return s.lower()
+
+    @staticmethod
+    def split_keywords(keywords):
+        split_keywords = []
+        if isinstance(keywords, str):
+            keywords = keywords.replace("[", "")
+            keywords = keywords.replace("]", "")
+            if "," in keywords:
+                split_keywords = keywords.split(",")
+            else:
+                split_keywords = keywords.split()
+        elif isinstance(keywords, str):
+            split_keywords = [str(keyword) for keyword in keywords]
+        split_keywords = [GlobalTools.cleanup_str(keyword) for keyword in split_keywords]
+        return split_keywords
+
+    @staticmethod
+    def read_alf(alf):
+        if isinstance(alf, str):
+            alf = ast.literal_eval(alf)
+        if isinstance(alf, list):
+            alf = [[int(i) for i in j] for j in alf]
+        return alf
+
+
+class Arguments:
+    global _external_functions
+    global _call_external_function
+    global _call_external_function_args
+
+    config_file = "config.properties"
+    uid = UsefulTools.get_uid()
+    allowed_functions = ",".join(_external_functions.keys())
+
+    parser = ArgumentParser(description="ICHOR: A kriging training suite")
+        
+    parser.add_argument("-c", "--config", dest="config_file", type=str,
+                        help="Name of Config File for ICHOR")
+    parser.add_argument("-f", "--func", dest="func", type=str, metavar=("func","arg"), nargs="+",
+                        help=f"Call ICHOR function with args, allowed functions: [{allowed_functions}]")
+    parser.add_argument("-u", "--uid", dest="uid", type=str,
+                        help="Unique Identifier For ICHOR Jobs To Write To")
+
+    @staticmethod
+    def read():
+        args = Arguments.parser.parse_args()
+        if args.config_file:
+            Arguments.config_file = args.config_file
+        
+        if args.func:
+            func = args.func[0]
+            func_args = args.func[1:] if len(args.func) > 1 else []
+
+        if args.uid:
+            Arguments.uid = args.uid
 
 
 class GlobalVariable:
     type_conversions = {
-        bool: UsefulTools.check_bool
+        bool: UsefulTools.check_bool,
     }
 
-    def __init__(self, value, type):
+    def __init__(self, name, value, type):
+        self.name = name
+
         self.type = type
         self.modifiers = []
-        self.set_from_config = False
+        self.pre_modifiers = []
+        self.changed = False
         self.hidden = False
         self.allowed_values = []
 
         self.default = None
-        self.set_from_config = False
+        self.changed = False
+        self.in_config = False
 
         self.value = value
 
@@ -525,19 +560,28 @@ class GlobalVariable:
         self.modifiers += [modifier]
         self.set(self.value)
 
+    def add_pre_modifier(self, modifier):
+        self.pre_modifiers += [modifier]
+        self.set(self.value)
+
     def set(self, value):
         if not "value" in self.__dict__.keys():
             self.default = value
         else:
-            self.set_from_config = True
+            self.changed = True
+
+        for modifier in self.pre_modifiers:
+            value = modifier(value)
 
         convert = GlobalVariable.type_conversions[self.type] if self.type in GlobalVariable.type_conversions.keys() else self.type
-        self.__dict__["value"] = convert(value)
+        # Make sure type is the correct type
+        self.__dict__["value"] = value if convert in Globals.types else convert(value)
 
         for modifier in self.modifiers:
-            self.__dict__["value"] = modifier(self.value)
+            self.__dict__["value"] = modifier(self.value)      
 
-        self.type = type(self.value)
+        if not self.type in Globals.types:
+            self.type = type(self.value)
     
     def __setattr__(self, key, val):
         if key == "value":
@@ -545,17 +589,24 @@ class GlobalVariable:
         else:
             self.__dict__[key] = val
     
-    def __getattr__(self, key):
+    def __getattr__(self, key, *args):
         if key in self.__dict__.keys():
             return self.__dict__[key]
         else:
-            raise AttributeError(key)
+            try:
+                attr = getattr(self.value, key)
+                return attr
+            except:
+                raise AttributeError(key)
     
+    def details(self):
+        return f"Value:   {self.value}\nType:    {self.type.__name__}\nHidden:  {self.hidden}\nDefault: {self.default}\nChanged: {self.changed}"
+
     def __str__(self):
         return str(self.value)
     
     def __repr__(self):
-        return str(self)
+        return repr(self.value)
 
     def __add__(self, other):
         return self.value + other
@@ -598,26 +649,39 @@ class GlobalVariable:
     
     def __delitem__(self, i):
         del self.value[i]
-    
+
     def __bool__(self):
         return bool(self.value)
-
-    def __len__(self, i):
+    
+    def __len__(self):
         return len(self.value)
+    
+    def __next__(self):
+        return next(self.value)
+
+    def __iter__(self):
+        return iter(self.value)
+
+    # def items(self):
+    #     return dict.items(self.value)
 
 
 class Globals:
+    types = []
+
     def __init__(self): pass
 
     @staticmethod
     def define():
+        for _, obj in inspect.getmembers(sys.modules[__name__]):
+            if inspect.isclass(obj):
+                Globals.types += [obj]
+
         globals = Globals()
 
-        globals.CONFIG_FILE = "config.properties", str
-        globals.ALF_REFERENCE_FILE = "", str # set automatically if not defined
-        globals.CONFIG = ConfigProvider # Don't change
-
         globals.SYSTEM_NAME = "SYSTEM", str
+
+        globals.ALF_REFERENCE_FILE = "", str # set automatically if not defined
         globals.ALF = [], list
 
         globals.MAX_ITERATION = 1, int
@@ -635,7 +699,7 @@ class Globals:
         globals.BOAQ = "gs20", str
         globals.IASMESH = "fine", str
 
-        globals.FILE_STRUCTURE = Tree # Don't change
+        globals.FILE_STRUCTURE = Tree() # Don't change
 
         globals.KERNEL = "rbf", str                # only use rbf for now
         globals.FEREBUS_VERSION = "python", str    # fortran (FEREBUS) or python (FEREBUS.py)
@@ -648,10 +712,18 @@ class Globals:
         globals.DLPOLY_CORE_COUNT = 1, int
 
         # FEREBUS RUNTIME SETTINGS (PREFIX FEREBUS)
-        globals.FEREBUS_SWARM_SIZE = -1, int # If negative >> Size dynamically allocated by FEREBUS
-        globals.FEREBUS_NUGGET = 1.e-10, int # Default value for FEREBUS nugget
-        globals.FEREBUS_MIN_THETA = 0.0, int # Minimum theta value for initialisation (best to keep 0)
-        globals.FEREBUS_MAX_THETA = 1.0, int # Maximum theta value for initialisation
+        globals.FEREBUS_SWARM_SIZE = -1, int   # If negative >> Size dynamically allocated by FEREBUS
+        globals.FEREBUS_NUGGET = 1.e-10, float # Default value for FEREBUS nugget
+        globals.FEREBUS_MIN_THETA = 0.0, float # Minimum theta value for initialisation (best to keep 0)
+        globals.FEREBUS_MAX_THETA = 1.0, float # Maximum theta value for initialisation
+
+        globals.FEREBUS_COGNITIVE_LEARNING_RATE = 1.49400, float
+        globals.FEREBUS_INERTIA_WEIGHT = 0.72900, float
+        globals.FEREBUS_SOCIAL_LEARNING_RATE = 1.49400, float
+
+        globals.FEREBUS_TOLERANCE = 1.e-8, float
+        globals.FEREBUS_CONVERGENCE = 20, int
+        globals.FEREBUS_MAX_ITERATION = 10000, int
 
         # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
         globals.DLPOLY_NUMBER_OF_STEPS = 500, int    # Number of steps to run simulation for
@@ -663,28 +735,38 @@ class Globals:
         globals.DLPOLY_CHECK_CONVERGENCE = False, bool
         globals.DLPOLY_CONVERGENCE_CRITERIA = -1, int
 
-        globals.DLPOLY_MAX_ENERGY = -1.0, int
-        globals.DLPOLY_MAX_FORCE = -1.0, int
-        globals.DLPOLY_RMS_FORCE = -1.0, int
-        globals.DLPOLY_MAX_DISP = -1.0, int
-        globals.DLPOLY_RMS_DISP = -1.0, int
+        globals.DLPOLY_MAX_ENERGY = -1.0, float
+        globals.DLPOLY_MAX_FORCE = -1.0, float
+        globals.DLPOLY_RMS_FORCE = -1.0, float
+        globals.DLPOLY_MAX_DISP = -1.0, float
+        globals.DLPOLY_RMS_DISP = -1.0, float
 
         globals.MACHINE = "", str
         globals.SGE = False, bool       # Don't Change
         globals.SUBMITTED = False, bool # Don't Change
 
         globals.DISABLE_PROBLEMS = False, bool
+        globals.UID = Arguments.uid
 
         # Set Hidden Variables
-        globals.CONFIG.hidden = True
         globals.FILE_STRUCTURE.hidden = True
         globals.SGE.hidden = True
         globals.SUBMITTED.hidden = True
+        globals.UID.hidden = True
 
         # Set Allowed Values
         globals.METHOD.allowed_values = Constants.GAUSSIAN_METHODS
         globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
         globals.IASMESH.allowed_values = Constants.IASMESH_VALUES
+        globals.FEREBUS_VERSION.allowed_values = Constants.FEREBUS_VERSIONS
+
+        # Set modifiers
+        for global_variable in globals.global_variables:
+            if globals.__dict__[global_variable].type == str:
+                globals.__dict__[global_variable].add_modifier(GlobalTools.cleanup_str)
+        globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
+        globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
+        globals.ALF.add_pre_modifier(GlobalTools.read_alf)
 
         globals.init()
 
@@ -692,6 +774,7 @@ class Globals:
 
     def init(self):
         global tqdm
+        global _unkown_variables
 
         self.FILE_STRUCTURE = FileTools.setup_file_structure()
 
@@ -711,14 +794,69 @@ class Globals:
         self.SUBMITTED = "SGE_O_HOST" in os.environ.keys()
         if self.SUBMITTED: tqdm = my_tqdm
 
-        self.CONFIG = ConfigProvider(source=self.CONFIG_FILE)
+        config = ConfigProvider(source=Arguments.config_file)
 
-        for key, val in self.CONFIG.items():
-            if key.upper() in cls.config_variables:
-                self.set(key.upper(), val)
+        for key, val in config.items():
+            self.set(key, val)
+            if key in self.__dict__.keys():
+                self.__dict__[key].in_config = True
 
-    def set(self, variable, value):
-        self.__dict__[variable] = value
+        if not self.ALF:
+            if not self.ALF_REFERENCE_FILE:
+                try:
+                    self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(self.FILE_STRUCTURE["training_set"])
+                except:
+                    try:
+                        self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(self.FILE_STRUCTURE["sample_pool"])
+                    except:
+                        try:
+                            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(self.FILE_STRUCTURE["validation_set"])
+                        except:
+                            pass
+            if self.ALF_REFERENCE_FILE:
+                try:
+                    GJF(str(self.ALF_REFERENCE_FILE), read=True)._atoms.calculate_alf()
+                    self.ALF = Atoms.ALF
+                except:
+                    print("\nError in ALF calculation, please specify file to calculate ALF")
+
+    def set(self, name, value):
+        name = name.upper()
+        if not name in self.global_variables:
+            _unknown_settings.append(name)
+        else:
+            setattr(self, name, value)
+
+    def items(self, show_hidden=False):
+        items = []
+        for global_variable in self.global_variables:
+            var = self.__dict__[global_variable]
+            if not var.hidden or show_hidden:
+                items += [var]
+        return items
+
+    def save_to_properties_config(self, config_file, global_variables):
+        with open(config_file, 'w') as config:
+            logo = UsefulTools.ichor_logo()
+            config.write(f"{logo}\n\n")
+            for key, val in global_variables.items():
+                config.write(f"{key}={val}\n")
+
+    def save_to_yaml_config(self, config_file, global_variables):
+        import yaml
+        with open(config_file, 'w') as config:
+            yaml.dump(global_variables, config)
+
+    def save_to_config(self, config_file=Arguments.config_file):
+        global_variables = {}
+        for global_variable in self.items():
+            if global_variable.changed or global_variable.in_config:
+                global_variables[global_variable.name] = global_variable.value
+        
+        if config_file.endswith(".properties"):
+            self.save_to_properties_config(config_file, global_variables)
+        elif config_file.endswith(".yaml"):
+            self.save_to_yaml_config(config_file, global_variables)
 
     @property
     def config_variables(self):
@@ -740,13 +878,13 @@ class Globals:
         if name in self.global_variables:
             self.__dict__[name].value = value
         else:
-            if type(value) in [list, tuple] and isinstance(value[-1], type):
+            if type(value) in [list, tuple] and type(value[-1]) in [type, *Globals.types]:
                 if len(value) > 2:
-                    self.__dict__[name] = GlobalVariable(value[:-1], value[-1])
+                    self.__dict__[name] = GlobalVariable(name, value[:-1], value[-1])
                 else:
-                    self.__dict__[name] = GlobalVariable(value[0], value[-1])
+                    self.__dict__[name] = GlobalVariable(name, value[0], value[-1])
             else:
-                self.__dict__[name] = GlobalVariable(value, type(value))
+                self.__dict__[name] = GlobalVariable(name, value, type(value))
     
     def __getattr__(self, attr):
         if attr in self.global_variables:
@@ -1066,39 +1204,36 @@ class ConfigProvider(dict):
        an extra condition to the if statement in loadConfig()
     """
 
-    src = None
-    prop = re.compile(r"([\w. ]+)\s*=\s*(.*)")
-
     def __init__(self, source=DEFAULT_CONFIG_FILE):
         self.src = source
-        self.loadConfig()
+        self.load_config()
 
-    def loadConfig(self):
+    def load_config(self):
         if self.src.endswith(".properties"):
-            self.loadPropertiesConfig()
+            self.load_properties_config()
         elif self.src.endswith(".yaml"):
-            self.loadYamlConfig()
+            self.load_yaml_config()
 
-    def printKeyVals(self):
+    def print_key_vals(self):
         for key in self:
             print("%s:\t%s" % (key, self[key]))
 
-    def loadFileData(self):
-        data = ""
+    def load_file_data(self):
+        global _config_read_error
         try:
-            input = open(self.src, 'r')
-            data = input.read()
-            input.close()
+            with open(self.src, 'r') as finput:
+                return finput.readlines()
         except IOError:
-            pass
+            _config_read_error = True
+        return ""
 
-        return data
+    def load_properties_config(self):
+        for line in self.load_file_data():
+            if not line.strip().startswith("#") and "=" in line:
+                key, val = line.split("=")
+                self[self.cleanup_key(key)] = val.strip()
 
-    def loadPropertiesConfig(self):
-        for (key, val) in self.prop.findall(self.loadFileData()):
-            self[self.cleanup_key(key)] = val
-
-    def loadYamlConfig(self):
+    def load_yaml_config(self):
         import yaml
         entries = yaml.load(self.loadFileData())
         if entries:
@@ -1112,7 +1247,7 @@ class ConfigProvider(dict):
 
     def write_key_vals(self):
         with open(self.src, "w+") as f:
-            f.write(UsefulTools.ichor_logo)
+            f.write(UsefulTools.ichor_logo())
             f.write("\n")
             for key in self:
                 f.write("%s=%s\n" % (key, self[key]))
@@ -1271,7 +1406,7 @@ class FileTools:
         if file is None:
             file = "data_file"
         
-        file = FILE_STRUCTURE[file]
+        file = GLOBALS.FILE_STRUCTURE[file]
         FileTools.mkdir(os.path.dirname(file))
 
         with open(file, "w") as f:
@@ -1311,7 +1446,7 @@ class FileTools:
                 print("Exiting...")
             quit()
 
-        opt_dir = FILE_STRUCTURE["opt"]
+        opt_dir = GLOBALS.FILE_STRUCTURE["opt"]
         if not os.path.isdir(opt_dir) and required:
             no_opt_found()
         opt = Point(opt_dir)
@@ -1323,8 +1458,8 @@ class FileTools:
 
     @staticmethod
     def clear_script_outputs(outputs=True, errors=True):
-        if outputs: FileTools.rmtree(FILE_STRUCTURE["outputs"])
-        if errors: FileTools.rmtree(FILE_STRUCTURE["errors"])
+        if outputs: FileTools.rmtree(GLOBALS.FILE_STRUCTURE["outputs"])
+        if errors: FileTools.rmtree(GLOBALS.FILE_STRUCTURE["errors"])
 
 
 class my_tqdm:
@@ -1449,7 +1584,7 @@ class FerebusTools:
         line_break = "~" * 97
 
         with open(finput_fname, "w+") as finput:
-            finput.write(f"{SYSTEM_NAME}\n")
+            finput.write(f"{GLOBALS.SYSTEM_NAME}\n")
             finput.write(f"natoms {natoms}\n")
             finput.write("starting_properties 1 \n")
             finput.write(f"nproperties {nproperties}\n")
@@ -1457,14 +1592,14 @@ class FerebusTools:
             finput.write(f"full_training_set {training_set_size}\n")
             finput.write("#\n# Prediction number and definition of new predictions\n#\n")
             finput.write(f"predictions {predictions}\n")
-            if "py" in FEREBUS_VERSION:
-                finput.write(f"kernel {KERNEL}\n")
+            if "py" in GLOBALS.FEREBUS_VERSION:
+                finput.write(f"kernel {GLOBALS.KERNEL}\n")
             finput.write(
                 "#\nfeatures_number 0        # if your are kriging only one atom or you don't want to use he standard "
                 "calculation of the number of features based on DOF of your system. Leave 0 otherwise\n#\n")
-            if NORMALISE:
+            if GLOBALS.NORMALISE:
                 finput.write("norm\n")
-            elif STANDARDISE:
+            elif GLOBALS.STANDARDISE:
                 finput.write("stand\n")
             finput.write(f"#\n#{line_break}\n")
 
@@ -1478,11 +1613,11 @@ class FerebusTools:
                          "# P = fixed p) T = fixed Theta (valid only for BFGS)) "
                          "N = nothing (i.e. optimization theta/p)\n")
             finput.write("p_value        2.00      # if no p optimization is used p_value MUST be inserted\n")
-            finput.write(f"theta_max            {FEREBUS_MAX_THETA}          "
+            finput.write(f"theta_max            {GLOBALS.FEREBUS_MAX_THETA}          "
                          "# select maximum value of theta for initialization "
                          "(Raise if receiving an error with Theta Values)\n")
-            finput.write(f"theta_min            {FEREBUS_MIN_THETA}   # select maximum value of theta for initialization\n")
-            finput.write(f"nugget            {FEREBUS_NUGGET}\n")
+            finput.write(f"theta_min            {GLOBALS.FEREBUS_MIN_THETA}   # select maximum value of theta for initialization\n")
+            finput.write(f"nugget            {GLOBALS.FEREBUS_NUGGET}\n")
             finput.write("noise_specifier  n       "
                          "# answer yes (Y) to allow noise optimization, "
                          "no (N) to use no-noise option\n")
@@ -1493,17 +1628,17 @@ class FerebusTools:
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# PSO Specific keywords\n#\n")
-            if FEREBUS_SWARM_SIZE < 0:
+            if GLOBALS.FEREBUS_SWARM_SIZE < 0:
                finput.write("swarm_specifier  D       ")
             else:
                 finput.write("swarm_specifier  S       ")
             finput.write("swarm_specifier  D       "
                          "# answer dynamic (D) or static "
                          "(S) as option for swarm optimization\n")
-            if FEREBUS_SWARM_SIZE < 0:
+            if GLOBALS.FEREBUS_SWARM_SIZE < 0:
                finput.write(f"swarm_pop     1440       ")
             else:
-                finput.write(f"swarm_pop    {FEREBUS_SWARM_SIZE}       ")
+                finput.write(f"swarm_pop    {GLOBALS.FEREBUS_SWARM_SIZE}       ")
             finput.write("# if swarm opt is set as 'static' the number of particle must be specified\n")
             finput.write("cognitive_learning   1.49400\n")
             finput.write("inertia_weight   0.72900\n")
@@ -1571,7 +1706,7 @@ class ProblemFinder:
 
     @UsefulTools.runFunc(1)
     def check_alf(self):
-        if len(ALF) < 1:
+        if len(GLOBALS.ALF) < 1:
             self.add(Problem(name="ALF", 
                              problem="ALF not set due to error in calculation",
                              solution="Set 'ALF_REFERENCE_FILE' or manually set 'ALF' in config file"
@@ -1582,7 +1717,7 @@ class ProblemFinder:
         dirs_to_check = ["training_set", "sample_pool"]
 
         for dir_name in dirs_to_check:
-            dir_path = FILE_STRUCTURE[dir_name]
+            dir_path = GLOBALS.FILE_STRUCTURE[dir_name]
             if not os.path.isdir(dir_path):
                 self.add(Problem(name="Directory Not Found", 
                                  problem=f"Could not find: {dir_path}",
@@ -1591,7 +1726,7 @@ class ProblemFinder:
 
     @UsefulTools.runFunc(3)
     def check_system(self):
-        if SYSTEM_NAME == "SYSTEM":
+        if GLOBALS.SYSTEM_NAME == "SYSTEM":
             self.add(Problem(name="SYSTEM_NAME", 
                              problem="SYSTEM_NAME not been set, defaulted to SYSTEM",
                              solution="Set 'SYSTEM_NAME' in config file"
@@ -1609,7 +1744,7 @@ class ProblemFinder:
         self.problems.append(problem)
 
     def find(self):
-        if not DISABLE_PROBLEMS:
+        if not GLOBALS.DISABLE_PROBLEMS:
             problems_to_find = UsefulTools.get_functions_to_run(self)
             for find_problem in problems_to_find:
                 find_problem()
@@ -1729,8 +1864,8 @@ class CommandLine:
         self.datafile = _UID
 
     def setup_command(self):
-        if hasattr(self, "machine_commands") and MACHINE.lower() in self.machine_commands.keys():
-            self.command = self.machine_commands[MACHINE.lower()]
+        if hasattr(self, "machine_commands") and GLOBALS.MACHINE.lower() in self.machine_commands.keys():
+            self.command = self.machine_commands[GLOBALS.MACHINE.lower()]
         elif hasattr(self, "default_command"): 
             self.command = self.default_command
 
@@ -1800,9 +1935,9 @@ class CommandLine:
 
     def setup_data_file(self, fname, *data, delimiter=","):
         self.datasources = data
-        FileTools.mkdir(FILE_STRUCTURE["datafiles"])
-        if not os.path.dirname == FILE_STRUCTURE["datafiles"]:
-            fname = os.path.join(FILE_STRUCTURE["datafiles"], os.path.basename(fname))
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["datafiles"])
+        if not os.path.dirname == GLOBALS.FILE_STRUCTURE["datafiles"]:
+            fname = os.path.join(GLOBALS.FILE_STRUCTURE["datafiles"], os.path.basename(fname))
         self._write_data_file(fname, data, delimiter)
         datafile_string = self._read_data_file_string(fname, data, delimiter)
         UsefulTools.set_uid() # make new uid after using
@@ -1839,7 +1974,7 @@ class GaussianCommand(CommandLine):
         super().__init__()
 
         self.setup_datafile()
-        self.ncores = GAUSSIAN_CORE_COUNT
+        self.ncores = GLOBALS.GAUSSIAN_CORE_COUNT
 
     @property
     def njobs(self):
@@ -1883,7 +2018,7 @@ class AIMAllCommand(CommandLine):
         super().__init__()
 
         self.setup_datafile()
-        self.ncores = AIMALL_CORE_COUNT
+        self.ncores = GLOBALS.AIMALL_CORE_COUNT
     
     def add(self, wfn_file, outfile=None):
         self.infiles += [wfn_file]
@@ -1903,9 +2038,9 @@ class AIMAllCommand(CommandLine):
                           "-nogui",
                           "-usetwoe=0",
                           "-atom=all",
-                          f"-encomp={ENCOMP}",
-                          f"-boaq={BOAQ}",
-                          f"-iasmesh={IASMESH}",
+                          f"-encomp={GLOBALS.ENCOMP}",
+                          f"-boaq={GLOBALS.BOAQ}",
+                          f"-iasmesh={GLOBALS.IASMESH}",
                           f"-nproc={self.ncores}",
                           f"-naat={self.ncores}"
                          ]
@@ -1935,11 +2070,11 @@ class FerebusCommand(CommandLine):
         super().__init__()
 
         self.setup_datafile()
-        self.ncores = FEREBUS_CORE_COUNT
+        self.ncores = GLOBALS.FEREBUS_CORE_COUNT
     
     def setup_command(self):
-        ferebus_loc = os.path.abspath(FEREBUS_LOCATION)
-        if "py" in FEREBUS_VERSION:
+        ferebus_loc = os.path.abspath(GLOBALS.FEREBUS_LOCATION)
+        if "py" in GLOBALS.FEREBUS_VERSION:
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
         else:
@@ -1949,7 +2084,7 @@ class FerebusCommand(CommandLine):
         self.directories += [os.path.abspath(directory)]
     
     def load_modules(self):
-        if not "py" in FEREBUS_VERSION:
+        if not "py" in GLOBALS.FEREBUS_VERSION:
             self.modules["ffluxlab"] = [
                                         "mpi/intel/18.0.3",
                                         "libs/intel/nag/fortran_mark23_intel"
@@ -1991,10 +2126,10 @@ class DlpolyCommand(CommandLine):
         super().__init__()
 
         self.setup_datafile()
-        self.ncores = DLPOLY_CORE_COUNT
+        self.ncores = GLOBALS.DLPOLY_CORE_COUNT
 
     def setup_command(self):
-        self.command = os.path.abspath(DLPOLY_LOCATION)
+        self.command = os.path.abspath(GLOBALS.DLPOLY_LOCATION)
 
     def add(self, directory):
         self.directories += [os.path.abspath(directory)]
@@ -2063,19 +2198,19 @@ class SubmissionScript:
         self._modules = []
         self.parallel_environments = ParallelEnvironments()
 
-        self.stdout = FILE_STRUCTURE["outputs"]
-        self.stderr = FILE_STRUCTURE["errors"]
+        self.stdout = GLOBALS.FILE_STRUCTURE["outputs"]
+        self.stderr = GLOBALS.FILE_STRUCTURE["errors"]
 
         self.directory = directory
         if not self.directory:
-            self.directory = FILE_STRUCTURE["scripts"]
+            self.directory = GLOBALS.FILE_STRUCTURE["scripts"]
 
     def add(self, command):
         self._commands.append(command)
 
     def load_modules(self):
         for command in self:
-            self._modules += command.modules[MACHINE]
+            self._modules += command.modules[GLOBALS.MACHINE]
         
     def cleanup_modules(self):
         self._modules = list(set(self._modules))
@@ -2114,7 +2249,7 @@ class SubmissionScript:
         if self.njobs > 1:
             njobs = f"-{self.njobs}"
 
-        pe = self.parallel_environments[MACHINE][2]
+        pe = self.parallel_environments[GLOBALS.MACHINE][2]
 
         with open(self.fname, "w") as f:
             f.write("#!/bin/bash -l\n")
@@ -2296,7 +2431,7 @@ class BatchTools:
         job_line = {}
         job = SGE_Job("", "")
         
-        jid_fname = FILE_STRUCTURE["jid"]
+        jid_fname = GLOBALS.FILE_STRUCTURE["jid"]
         submitted_jobs = BatchTools._read_jids(jid_fname)
 
         for line in output.split("\n"):
@@ -2321,13 +2456,13 @@ class BatchTools:
 
     @staticmethod
     def qsub(script, hold=None):
-        data_dir = FILE_STRUCTURE["jobs"]
+        data_dir = GLOBALS.FILE_STRUCTURE["jobs"]
         FileTools.mkdir(data_dir)
-        jid_fname = FILE_STRUCTURE["jid"]
+        jid_fname = GLOBALS.FILE_STRUCTURE["jid"]
         jid_file = open(jid_fname, "a")
 
         qsub_cmd = ""
-        if SGE and not SUBMITTED:
+        if GLOBALS.SGE and not GLOBALS.SUBMITTED:
             qsub_cmd = "qsub "
             if hold:
                 if hold in BatchTools.qstat(quiet=True):
@@ -2336,9 +2471,9 @@ class BatchTools:
             qsub_cmd = "bash "
         qsub_cmd += script
         qsub_cmd = [qsub_cmd]
-        if not SUBMITTED:
+        if not GLOBALS.SUBMITTED:
             output = BatchTools.run_cmd(qsub_cmd)
-            if SGE:
+            if GLOBALS.SGE:
                 jid = re.findall(r"\d+", output)
                 if len(jid) > 0:
                     jid = jid[0]
@@ -2349,7 +2484,7 @@ class BatchTools:
 
     @staticmethod
     def qdel():
-        jid_fname = FILE_STRUCTURE["jid"]
+        jid_fname = GLOBALS.FILE_STRUCTURE["jid"]
         BatchTools._cleanup_jids(jid_fname)
         with open(jid_fname, "r") as f:
             for jid in f:
@@ -2580,27 +2715,27 @@ class AutoTools:
     @staticmethod
     def submit_ichor_gjfs(jid=None, directory=None):
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = GLOBALS.FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor("submit_gjfs", directory, submit=True, hold=jid)
 
     @staticmethod
     def submit_ichor_wfns(jid=None, directory=None):
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = GLOBALS.FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid)
 
     @staticmethod
     def submit_ichor_models(jid=None, directory=None, type=None):
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = GLOBALS.FILE_STRUCTURE["training_set"]
         if not type:
             type = "iqa"
         return AutoTools.submit_ichor("_make_models", directory, type, submit=True, hold=jid)
     
     @staticmethod
     def submit_ichor_errors(jid=None):
-        sp_dir = FILE_STRUCTURE["sample_pool"]
-        model_dir = FILE_STRUCTURE["models"]
+        sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
+        model_dir = GLOBALS.FILE_STRUCTURE["models"]
         return AutoTools.submit_ichor("calculate_errors", model_dir, sp_dir, submit=True, hold=jid)
 
     @staticmethod
@@ -2630,7 +2765,7 @@ class AutoTools:
     @staticmethod
     def submit_gjfs(jid=None, npoints=None):
         if npoints is None:
-            npoints = POINTS_PER_ITERATION
+            npoints = GLOBALS.POINTS_PER_ITERATION
         points = Points()
         points.make_gjf_template(npoints)
         return points.submit_gjfs(redo=False, submit=True, hold=jid)
@@ -2638,7 +2773,7 @@ class AutoTools:
     @staticmethod
     def submit_wfns(jid=None, npoints=None):
         if npoints is None:
-            npoints = POINTS_PER_ITERATION
+            npoints = GLOBALS.POINTS_PER_ITERATION
         points = Points()
         points.make_wfn_template(npoints)
         return points.submit_wfns(redo=False, submit=True, hold=jid)
@@ -2646,7 +2781,7 @@ class AutoTools:
     @staticmethod
     def submit_models(jid=None, directory=None):
         if not directory:
-            directory = FILE_STRUCTURE["training_set"]
+            directory = GLOBALS.FILE_STRUCTURE["training_set"]
         gjf = Points(directory, read_gjfs=True, first=True)[0]
         return SubmissionTools.make_ferebus_script(gjf.atoms.atoms, submit=True, hold=jid)
 
@@ -2669,7 +2804,6 @@ class AutoTools:
 
     @staticmethod
     def run():
-        global SUBMITTED
         global _data_lock
 
         FileTools.clear_log()
@@ -2689,13 +2823,13 @@ class AutoTools:
                 ]
 
         jid = None
-        ts_dir = FILE_STRUCTURE["training_set"]
+        ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
         npoints = FileTools.count_points_in(ts_dir)
 
         logging.info("Starting ICHOR Auto Run")
         _data_lock = True
 
-        for i in range(MAX_ITERATION):
+        for i in range(GLOBALS.MAX_ITERATION):
             for func in order:
                 args = {"jid": jid}
                 if i == 0 and "npoints" in func.__code__.co_varnames:
@@ -2710,7 +2844,7 @@ class AutoTools:
             script_name, jid = func(**args)
             print(f"Submitted {script_name}: {jid}")
         
-        SUBMITTED = False
+        GLOBALS.SUBMITTED = False
         _data_lock = False
 
 #========================#
@@ -3242,7 +3376,7 @@ class Point:
             self.point_num = int(self.point_num)
         except (IndexError, ValueError):
             self.point_num = 1
-            self.system_name = SYSTEM_NAME
+            self.system_name = GLOBALS.SYSTEM_NAME
 
     def __get_features(self):
         training_set = {}
@@ -3349,20 +3483,20 @@ class GJF(Point):
         return GJF.jobs[self.job_type]
 
     def format(self):
-        if UsefulTools.in_sensitive(METHOD, _GAUSSIAN_METHODS):
-            self.method = METHOD
+        if UsefulTools.in_sensitive(GLOBALS.METHOD, Constants.GAUSSIAN_METHODS):
+            self.method = GLOBALS.METHOD
         else:
             print("Error: Unknown method {METHOD}")
-            print("Check method in {DEFAULT_CONFIG_FILE}")
+            print("Check method in {GLOBALS.DEFAULT_CONFIG_FILE}")
             quit()
         
-        self.basis_set = BASIS_SET
+        self.basis_set = GLOBALS.BASIS_SET
 
         required_keywords = ["nosymm", "output=wfn"]
-        self.keywords = list(set(self.keywords + KEYWORDS + required_keywords))
+        self.keywords = list(set(self.keywords + GLOBALS.KEYWORDS + required_keywords))
 
         self.startup_options = [
-                                f"nproc={GAUSSIAN_CORE_COUNT}",
+                                f"nproc={GLOBALS.GAUSSIAN_CORE_COUNT}",
                                 f"mem=1GB"
                                 ]
 
@@ -3455,7 +3589,7 @@ class WFN(Point):
         if split_header[-1] != "NUCLEI":
             self.method = split_header[-1]
         else:
-            self.method = METHOD
+            self.method = GLOBALS.METHOD
 
     @property
     def aimall_complete(self):
@@ -3494,13 +3628,13 @@ class WFN(Point):
         with open(self.fname, "r") as f:
             for i, line in enumerate(f):
                 if i == 1:
-                    if not METHOD.upper() in line.upper():
+                    if not GLOBALS.METHOD.upper() in line.upper():
                         f.seek(0)
                         data = f.readlines()
                     break
         
         if data != []:
-            data[1] = data[1].strip() +  "   " + METHOD + "\n"
+            data[1] = data[1].strip() +  "   " + GLOBALS.METHOD + "\n"
             with open(self.fname, "w") as f:
                 f.writelines(data)
                 
@@ -3621,7 +3755,7 @@ class Model:
             "m52": self.k_m52
         }
 
-        self.k = kernels[KERNEL.lower()]
+        self.k = kernels[GLOBALS.KERNEL.lower()]
 
         self.directory = ""
         self.basename = ""
@@ -3767,7 +3901,7 @@ class Model:
         return os.path.join(directory, basename)
     
     def copy_to_log(self):
-        log_directory = FILE_STRUCTURE["log"]
+        log_directory = GLOBALS.FILE_STRUCTURE["log"]
         FileTools.mkdir(log_directory)
 
         if self.nTrain == 0:
@@ -3922,7 +4056,7 @@ class Models:
             "vard2": self.expected_improvement_vard2,
             "rand": self.expected_improvement_rand
         }
-        self.expected_improvement_function = expected_improvement_functions[ADAPTIVE_SAMPLING_METHOD]
+        self.expected_improvement_function = expected_improvement_functions[GLOBALS.ADAPTIVE_SAMPLING_METHOD]
 
         if self.directory:
             self.find_models(read_models)
@@ -4016,7 +4150,7 @@ class Models:
         return distances
 
     def calc_alpha(self):
-        alpha_loc = FILE_STRUCTURE["alpha"]
+        alpha_loc = GLOBALS.FILE_STRUCTURE["alpha"]
         if not os.path.exists(alpha_loc):
             return 0.5
 
@@ -4077,7 +4211,7 @@ class Models:
         return var
 
     def write_data(self, indices, points):
-        adaptive_sampling = FILE_STRUCTURE["adaptive_sampling"]
+        adaptive_sampling = GLOBALS.FILE_STRUCTURE["adaptive_sampling"]
         FileTools.mkdir(adaptive_sampling)
 
         cv_errors = self.cross_validation(points)
@@ -4088,18 +4222,18 @@ class Models:
         
         data["cv_errors"] = [float(cv_errors[index]) for index in indices]
         data["predictions"] = [predictions[index] for index in indices]
-        with open(FILE_STRUCTURE["cv_errors"], "w") as f:
+        with open(GLOBALS.FILE_STRUCTURE["cv_errors"], "w") as f:
             json.dump(data, f)
 
     def expected_improvement_epe(self, points):
         best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
-        points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
+        points_to_add = best_points[:min(len(points), GLOBALS.POINTS_PER_ITERATION)]
         self.write_data(points_to_add, points)
         return points_to_add
     
     def expected_improvement_eped(self, points):
         points_to_add = []
-        for i in range(POINTS_PER_ITERATION):
+        for i in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(np.argsort(self.calc_epe(points, added_points=points_to_add)), axis=-1)
             points_to_add += [best_points[0]]
         self.write_data(points_to_add, points)
@@ -4107,30 +4241,30 @@ class Models:
 
     def expected_improvement_var(self, points):
         best_points = np.flip(np.argsort(self.calc_var(points)), axis=-1)
-        points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
+        points_to_add = best_points[:min(len(points), GLOBALS.POINTS_PER_ITERATION)]
         return points_to_add
     
     def expected_improvement_vard(self, points):
         points_to_add = []
-        for i in range(POINTS_PER_ITERATION):
+        for i in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(np.argsort(self.calc_var(points, added_points=points_to_add)), axis=-1)
             points_to_add += [best_points[0]]
         return points_to_add
     
     def expected_improvement_var2(self, points):
         best_points = np.flip(np.argsort(self.calc_var2(points)), axis=-1)
-        points_to_add = best_points[:min(len(points), POINTS_PER_ITERATION)]
+        points_to_add = best_points[:min(len(points), GLOBALS.POINTS_PER_ITERATION)]
         return points_to_add
     
     def expected_improvement_vard2(self, points):
         points_to_add = []
-        for i in range(POINTS_PER_ITERATION):
+        for i in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(np.argsort(self.calc_var2(points, added_points=points_to_add)), axis=-1)
             points_to_add += [best_points[0]]
         return points_to_add
     
     def expected_improvement_rand(self, points):
-        return np.randint(low=0, high=len(points), size=POINTS_PER_ITERATION)
+        return np.randint(low=0, high=len(points), size=GLOBALS.POINTS_PER_ITERATION)
 
     def expected_improvement(self, points):
         points_to_add = self.expected_improvement_function(points)
@@ -4231,7 +4365,7 @@ class Points:
         old_directory = point.directory
 
         new_index = len(self) + 1
-        subdirectory = SYSTEM_NAME + str(new_index).zfill(4)
+        subdirectory = GLOBALS.SYSTEM_NAME + str(new_index).zfill(4)
         new_directory = os.path.join(self.directory, subdirectory)
         point.move(new_directory)
 
@@ -4268,7 +4402,7 @@ class Points:
 
         FileTools.mkdir(directory, empty=empty)
         for point in self:
-            gjf_name = SYSTEM_NAME + str(point.num).zfill(4) + ".gjf"
+            gjf_name = GLOBALS.SYSTEM_NAME + str(point.num).zfill(4) + ".gjf"
             gjf_name = os.path.join(directory, gjf_name)
             gjf = GJF(gjf_name)
             gjf._atoms = point.atoms
@@ -4352,18 +4486,18 @@ class Points:
                 wfns.submit_gjfs()
                 sys.exit(0)
         else:
-            if UsefulTools.in_sensitive(METHOD, Constants.AIMALL_FUNCTIONALS): 
+            if UsefulTools.in_sensitive(GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS): 
                 self.check_functional()
             print("All wfns complete.")
 
     def make_gjf_template(self, n_points):
         for i in range(n_points):
-            gjf_fname = os.path.join(self.directory, SYSTEM_NAME + str(i+1).zfill(4) + ".gjf")
+            gjf_fname = os.path.join(self.directory, GLOBALS.SYSTEM_NAME + str(i+1).zfill(4) + ".gjf")
             self.add_point(Point(gjf_fname=gjf_fname))
     
     def make_wfn_template(self, n_points):
         for i in range(n_points):
-            wfn_fname = os.path.join(self.directory, SYSTEM_NAME + str(i+1).zfill(4) + ".wfn")
+            wfn_fname = os.path.join(self.directory, GLOBALS.SYSTEM_NAME + str(i+1).zfill(4) + ".wfn")
             self.add_point(Point(wfn_fname=wfn_fname))
 
     def get_training_sets(self, model_type):
@@ -4378,7 +4512,7 @@ class Points:
         return training_sets, nproperties
 
     def update_alpha(self):
-        cv_file = FILE_STRUCTURE["cv_errors"]
+        cv_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
         if not os.path.exists(cv_file):
             return
 
@@ -4406,17 +4540,17 @@ class Points:
                 true_error += (true_value[int(predicted_atom)-1] - predicted_value)**2
             data["true_errors"].append(true_error)
 
-        FileTools.mkdir(FILE_STRUCTURE["adaptive_sampling"])
-        alpha_file = FILE_STRUCTURE["alpha"]
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["adaptive_sampling"])
+        alpha_file = GLOBALS.FILE_STRUCTURE["alpha"]
         with open(alpha_file, "w") as f:
             json.dump(data, f)
 
     def make_training_set(self, model_type):
         training_sets, nproperties = self.get_training_sets(model_type)
-        FileTools.mkdir(FILE_STRUCTURE["ferebus"], empty=True)
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
         model_directories = []
         for atom, training_set in training_sets.items():
-            directory = os.path.join(FILE_STRUCTURE["ferebus"], atom)
+            directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
             FileTools.mkdir(directory, empty=True)
             training_set_file = os.path.join(directory, atom + "_TRAINING_SET.txt")
             with open(training_set_file, "w") as f:
@@ -4737,45 +4871,45 @@ class DlpolyTools:
     @staticmethod
     def write_control(control_file):
         with open(control_file, "w+") as f:
-            f.write(f"Title: {SYSTEM_NAME}\n")
+            f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
             f.write("# This is a generic CONTROL file. Please adjust to your requirement.\n")
             f.write("# Directives which are commented are some useful options.\n\n")
             f.write("ensemble nvt hoover 0.02\n")
-            if DLPOLY_TEMPERATURE == 0:
+            if GLOBALS.DLPOLY_TEMPERATURE == 0:
                 f.write("temperature 10.0\n\n")
                 f.write("#perform zero temperature run (really set to 10K)\n")
                 f.write("zero\n")
             else:
-                f.write(f"temperature {DLPOLY_TEMPERATURE}\n\n")              
+                f.write(f"temperature {GLOBALS.DLPOLY_TEMPERATURE}\n\n")              
             f.write("# Cap forces during equilibration, in unit kT/angstrom.\n")
             f.write("# (useful if your system is far from equilibrium)\n")
             f.write("cap 100.0\n\n")
             f.write("no vdw\n\n")
-            f.write(f"steps {DLPOLY_NUMBER_OF_STEPS}\n")
-            f.write(f"equilibration {DLPOLY_NUMBER_OF_STEPS}\n")
-            f.write(f"timestep {DLPOLY_TIMESTEP}\n")
+            f.write(f"steps {GLOBALS.DLPOLY_NUMBER_OF_STEPS}\n")
+            f.write(f"equilibration {GLOBALS.DLPOLY_NUMBER_OF_STEPS}\n")
+            f.write(f"timestep {GLOBALS.DLPOLY_TIMESTEP}\n")
             f.write("cutoff 15.0\n")
             f.write("fflux\n\n")
-            if DLPOLY_TEMPERATURE == 0 and DLPOLY_CHECK_CONVERGENCE:
+            if GLOBALS.DLPOLY_TEMPERATURE == 0 and GLOBALS.DLPOLY_CHECK_CONVERGENCE:
                 f.write("converge\n")
-                if DLPOLY_CONVERGENCE_CRITERIA > 0:
-                    f.write(f"criteria {DLPOLY_CONVERGENCE_CRITERIA}\n")
-                if DLPOLY_MAX_ENERGY > 0:
-                    f.write(f"max_energy {DLPOLY_MAX_ENERGY}\n")
-                if DLPOLY_MAX_FORCE > 0:
-                    f.write(f"max_force {DLPOLY_MAX_FORCE}\n")
-                if DLPOLY_RMS_FORCE > 0:
-                    f.write(f"rms_force {DLPOLY_RMS_FORCE}\n")
-                if DLPOLY_MAX_DISP > 0:
-                    f.write(f"max_disp {DLPOLY_MAX_DISP}\n")
-                if DLPOLY_RMS_DISP > 0:
-                    f.write(f"rms_disp {DLPOLY_RMS_DISP}\n")
-            if KERNEL.lower() != "rbf":
-                f.write(f"fflux_kernel {KERNEL}")
+                if GLOBALS.DLPOLY_CONVERGENCE_CRITERIA > 0:
+                    f.write(f"criteria {GLOBALS.DLPOLY_CONVERGENCE_CRITERIA}\n")
+                if GLOBALS.DLPOLY_MAX_ENERGY > 0:
+                    f.write(f"max_energy {GLOBALS.DLPOLY_MAX_ENERGY}\n")
+                if GLOBALS.DLPOLY_MAX_FORCE > 0:
+                    f.write(f"max_force {GLOBALS.DLPOLY_MAX_FORCE}\n")
+                if GLOBALS.DLPOLY_RMS_FORCE > 0:
+                    f.write(f"rms_force {GLOBALS.DLPOLY_RMS_FORCE}\n")
+                if GLOBALS.DLPOLY_MAX_DISP > 0:
+                    f.write(f"max_disp {GLOBALS.DLPOLY_MAX_DISP}\n")
+                if GLOBALS.DLPOLY_RMS_DISP > 0:
+                    f.write(f"rms_disp {GLOBALS.DLPOLY_RMS_DISP}\n")
+            if GLOBALS.KERNEL.lower() != "rbf":
+                f.write(f"fflux_kernel {GLOBALS.KERNEL}")
             f.write("# Continue MD simulation\n")
             f.write("traj 0 1 2\n")
-            f.write(f"print every {DLPOLY_PRINT_EVERY}\n")
-            f.write(f"stats every {DLPOLY_PRINT_EVERY}\n")
+            f.write(f"print every {GLOBALS.DLPOLY_PRINT_EVERY}\n")
+            f.write(f"stats every {GLOBALS.DLPOLY_PRINT_EVERY}\n")
             f.write("job time 10000000\n")
             f.write("close time 20000\n")
             f.write("finish")
@@ -4793,7 +4927,7 @@ class DlpolyTools:
     def write_field(field_file, atoms):
         with open(field_file, "w") as f:
             f.write("DL_FIELD v3.00\nUnits internal\nMolecular types 1\n")
-            f.write(f"Molecule name {SYSTEM_NAME}\n")
+            f.write(f"Molecule name {GLOBALS.SYSTEM_NAME}\n")
             f.write("nummols 1\n")
             f.write(f"atoms {len(atoms)}\n")
             for atom in atoms:
@@ -4806,7 +4940,7 @@ class DlpolyTools:
         models.read()
 
         with open(kriging_file, "w+") as f:
-            f.write(f"{SYSTEM_NAME}\t\t#prefix of model file names for the considered system\n")
+            f.write(f"{GLOBALS.SYSTEM_NAME}\t\t#prefix of model file names for the considered system\n")
             f.write(f"{len(atoms)}\t\t#number of atoms in the kriged system\n")
             f.write("3\t\t#number of moments (first 3 are to be IQA energy components xc slf src)\n")
             f.write(f"{models.nTrain}\t\t#max number of training examples\n")
@@ -4832,7 +4966,7 @@ class DlpolyTools:
         kriging_file = os.path.join(dlpoly_dir, "KRIGING.txt")
         dlpoly_model_dir = os.path.join(dlpoly_dir, "model_krig")
 
-        sp_dir = FILE_STRUCTURE["sample_pool"]
+        sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
 
         atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
         atoms.finish()
@@ -4845,7 +4979,7 @@ class DlpolyTools:
 
     @staticmethod
     def setup_model(model_directory=None):
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
         models = Models(model_directory)
         
         model_dir_name = FileTools.end_of_path(model_directory)
@@ -4856,16 +4990,16 @@ class DlpolyTools:
 
     @staticmethod
     def run_on_model():
-        model_dir = FILE_STRUCTURE["models"]
+        model_dir = GLOBALS.FILE_STRUCTURE["models"]
 
         dlpoly_directories = [DlpolyTools.setup_model(model_dir)]
         SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True)
 
     @staticmethod
     def run_on_log():
-        log_dir = FILE_STRUCTURE["log"]
+        log_dir = GLOBALS.FILE_STRUCTURE["log"]
 
-        model_dirs = FileTools.get_files_in(log_dir, SYSTEM_NAME + "*/")
+        model_dirs = FileTools.get_files_in(log_dir, GLOBALS.SYSTEM_NAME + "*/")
         dlpoly_directories = []
         for model_dir in model_dirs:
             dlpoly_directory = DlpolyTools.setup_model(model_dir)
@@ -4876,7 +5010,7 @@ class DlpolyTools:
     @staticmethod
     @UsefulTools.externalFunc()
     def calculate_gaussian_energies():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
         trajectory_files = {}
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
@@ -4896,7 +5030,7 @@ class DlpolyTools:
     @staticmethod
     @UsefulTools.externalFunc()
     def get_wfn_energies():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
         points = Points(dlpoly_dir, read_wfns=True)
         energy_file = os.path.join(dlpoly_dir, "Energies.txt")
         with open(energy_file, "w") as f:
@@ -4911,7 +5045,7 @@ class DlpolyTools:
         FileTools.rmtree(FILE_STRUCTURE["dlpoly"])
 #        FileTools.clear_log()
 
-        log_dir = FILE_STRUCTURE["log"]
+        log_dir = GLOBALS.FILE_STRUCTURE["log"]
         npoints = FileTools.count_models(log_dir)
 
         _, jid = DlpolyTools.run_on_log()
@@ -4931,7 +5065,7 @@ class DlpolyTools:
         trajectory = Trajectory(trajectory_file, read=True)
         for i, timestep in enumerate(trajectory):
             if i % DlpolyTools.use_every == 0:
-                gjf_fname = SYSTEM_NAME + str(i+1).zfill(4) + ".gjf"
+                gjf_fname = GLOBALS.SYSTEM_NAME + str(i+1).zfill(4) + ".gjf"
                 gjf_fname = os.path.join(trajectory_gjf_dir, gjf_fname)
 
                 gjf = GJF(gjf_fname)
@@ -4945,7 +5079,7 @@ class DlpolyTools:
         
     @staticmethod
     def calculate_trajectories_wfn():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
         jid = None
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
@@ -4967,7 +5101,7 @@ class DlpolyTools:
     def get_trajectory_energies():
         import pandas as pd
 
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
 
         trajectories = {}
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
@@ -5019,7 +5153,7 @@ class DlpolyTools:
     def choose_model():
         model_menu = Menu(title="Select Model Directory", auto_close=True)
 
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
         model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
         i = 1
         for model_dir in model_dirs:
@@ -5071,8 +5205,8 @@ class DlpolyTools:
         
     @staticmethod
     def check_model_links():
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
-        log_dir = FILE_STRUCTURE["log"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
+        log_dir = GLOBALS.FILE_STRUCTURE["log"]
 
         model_dirs = FileTools.get_files_in(dlpoly_dir, "*/")
         log_dirs = FileTools.get_files_in(log_dir, "*/")
@@ -5086,7 +5220,7 @@ class DlpolyTools:
         opt_wfn = FileTools.get_opt(required=True)
         opt_atoms = opt_wfn._atoms
         opt_atoms.to_angstroms()
-        dlpoly_dir = FILE_STRUCTURE["dlpoly"]
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
 
         rmsd = []
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
@@ -5226,11 +5360,11 @@ class S_CurveTools:
 
     @staticmethod
     def run():
-        S_CurveTools.vs_loc = FILE_STRUCTURE["validation_set"]
-        S_CurveTools.sp_loc = FILE_STRUCTURE["sample_pool"]
+        S_CurveTools.vs_loc = GLOBALS.FILE_STRUCTURE["validation_set"]
+        S_CurveTools.sp_loc = GLOBALS.FILE_STRUCTURE["sample_pool"]
 
-        S_CurveTools.model_loc = FILE_STRUCTURE["models"]
-        S_CurveTools.log_loc = FILE_STRUCTURE["log"]
+        S_CurveTools.model_loc = GLOBALS.FILE_STRUCTURE["models"]
+        S_CurveTools.log_loc = GLOBALS.FILE_STRUCTURE["log"]
 
         S_CurveTools.validation_set = S_CurveTools.vs_loc
         S_CurveTools.models = S_CurveTools.model_loc
@@ -5263,9 +5397,9 @@ class AnalysisTools:
 
     @staticmethod
     def recovery_errors():
-        ts_dir = FILE_STRUCTURE["training_set"]
-        sp_dir = FILE_STRUCTURE["sample_pool"]
-        vs_dir = FILE_STRUCTURE["validation_set"]
+        ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
+        sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
+        vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
 
         error_menu = Menu(title="Recovery Error Menu", auto_close=True)
         error_menu.add_option("1", "Calculate Recovery Errors of Training Set", AnalysisTools.calculate_recovery_errors, kwargs={"directory": ts_dir}, wait=True)
@@ -5285,7 +5419,7 @@ class SetupTools:
     @staticmethod
     def directories():      
         for directory in SetupTools.sets:
-            dir_path = FILE_STRUCTURE[directory]
+            dir_path = GLOBALS.FILE_STRUCTURE[directory]
             empty = False
             if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
                 if os.path.isdir(dir_path):
@@ -5306,7 +5440,7 @@ class SetupTools:
                     break
                 else:
                     print("Error: Number of points must be greater than 0")
-        points.make_set(n_points, FILE_STRUCTURE[set_to_make])
+        points.make_set(n_points, GLOBALS.FILE_STRUCTURE[set_to_make])
         return points     
 
     @staticmethod
@@ -5330,165 +5464,95 @@ class SetupTools:
 
 
 class SettingsTools:
+    edit_var = None
+
+    @staticmethod
+    def set_default():
+        GLOBALS.set(SettingsTools.edit_var.name, SettingsTools.edit_var.default)
+
+    @staticmethod
+    def set_value(value):
+        SettingsTools.edit_var.value = value
+
+    @staticmethod
+    def edit_value():
+        print(f"Edit {SettingsTools.edit_var.name}")
+        while True:
+            new_value = UsefulTools.input_with_prefill(">> ", SettingsTools.edit_var.value)
+            try:
+                SettingsTools.edit_var.value = new_value
+                break
+            except:
+                print(f"Value Error: Must be of type {SettingsTools.edit_var.type.__name__}")
+
+    @staticmethod
+    def choose_value():
+        choose_menu = Menu(title=f"{SettingsTools.edit_var.name} Allowed Values", auto_close=True)
+        for i, allowed_value in enumerate(SettingsTools.edit_var.allowed_values):
+            choose_menu.add_option(str(i+1), str(allowed_value), SettingsTools.set_value, kwargs={"value": allowed_value})
+        choose_menu.add_final_options()
+        choose_menu.run()
+
+    @staticmethod
+    def refresh_setting_menu(menu):
+        menu.clear_options()
+        menu.add_message(f"Value:   {SettingsTools.edit_var.value}")
+        menu.add_space()
+        menu.add_message(f"Type:    {SettingsTools.edit_var.type.__name__}")
+        menu.add_message(f"Default: {SettingsTools.edit_var.default}")
+        menu.add_space()
+        # menu.add_message(f"Hidden:  {SettingsTools.edit_var.hidden}")
+        # menu.add_message(f"Changed: {SettingsTools.edit_var.changed}")
+        menu.add_option("e", "Edit value of setting", SettingsTools.edit_value)
+        menu.add_option("d", "Revert to default value", SettingsTools.set_default)
+        if SettingsTools.edit_var.allowed_values:
+            menu.add_option("c", "Choose from allowed values", SettingsTools.choose_value)
+        menu.add_final_options()
+
+    @staticmethod
+    def save_changes():
+        GLOBALS.save_to_config()
+
+    @staticmethod
+    def change_config():
+        filetypes = [".properties", ".yaml"]
+        print(f"Change config file")
+        while True:
+            new_config = UsefulTools.input_with_prefill(">> ", Arguments.config_file)
+            if any([new_config.endswith(filetype) for filetype in filetypes]):
+                Arguments.config_file = new_config
+                break
+            else:
+                print("Error: Unknwon Filetype")
+                print("Known filetypes: {filetypes}")
+    
+    @staticmethod
+    def refresh_settings_menu(menu):
+        menu.clear_options()
+        for global_var in GLOBALS.items():
+            global_var_value = "= " + str(global_var.value)
+            menu.add_option(global_var.name, global_var_value, SettingsTools.change, kwargs={"var": global_var})
+        menu.add_space()
+        menu.add_option("s", f"Save changes to config ({Arguments.config_file})", SettingsTools.save_changes)
+        menu.add_option("c", "Change config file")
+        menu.add_final_options()
+
     @staticmethod
     def change(var):
-        pass
+        SettingsTools.edit_var = var
+        setting_menu = Menu(title=f"Edit {var.name}", auto_close=True)
+        setting_menu.set_refresh(SettingsTools.refresh_setting_menu)
+        setting_menu.run()
 
     @staticmethod
     def show():
-        data_types = [int, str, list, bool, float]
-
         settings_menu = Menu(title="Settings Menu")
-        for global_var, global_val in globals().items():
-            if not type(global_val) in data_types or global_var.startswith("_"):
-                continue
-            if global_val is None:
-                global_val = "None"
-            elif isinstance(global_val, list):
-                global_val = "[" + ", ".join([str(val) for val in global_val]) + "]"
-            else:
-                global_val = str(global_val)
-            global_val = "= " + global_val
-            settings_menu.add_option(global_var, global_val, SettingsTools.change, kwargs={"var": global_var})
-        settings_menu.add_final_options()
+        settings_menu.set_refresh(SettingsTools.refresh_settings_menu)
         settings_menu.run()
 
 #############################################
 #            Function Definitions           #
 #############################################
-
-def defineGlobals():
-    global tqdm
-    global ALF
-    global SGE
-    global MACHINE
-    global SUBMITTED
-    global FILE_STRUCTURE
-    global _unknown_settings
-    global DEFAULT_CONFIG_FILE
-
-    FILE_STRUCTURE = FileTools.setup_file_structure()
-
-    machine_name = platform.node()
-    if "csf3." in machine_name:
-        MACHINE = "csf3"
-    elif "csf2." in machine_name:
-        MACHINE = "csf2"
-    elif "ffluxlab" in machine_name:
-        MACHINE = "ffluxlab"
-    else:
-        MACHINE = "local"
-
-    SGE = "SGE_ROOT" in os.environ.keys()
-    SUBMITTED = "SGE_O_HOST" in os.environ.keys()
-
-    if SUBMITTED:
-        tqdm = my_tqdm
-
-    check_settings = {
-                      "BOAQ": "_BOAQ_VALUES",
-                      "IASMESH": "_IASMESH_VALUES",
-                      "METHOD": "_GAUSSIAN_METHODS"
-                     }
-
-    default_settings = {}
-    
-    for setting in check_settings.keys():
-        default_settings[setting] = globals()[setting]
-
-    def to_lower(s):
-        return s.lower()
-
-    def to_upper(s):
-        return s.upper()
-
-    def replace_chars(s):
-        chars_to_replace = {
-                            "_": "-",
-                            "\"": ""
-                           }
-        for char, replacement in chars_to_replace.items():
-            s = s.replace(char, replacement)
-
-        return s
-
-    def check_str(s):
-        s = replace_chars(s)
-        return s
-
-    def check_bool(val):
-        return UsefulTools.check_bool(val)
-
-    def print_globals():
-        for key, val in globals().items():
-            if type(globals()[key]) in data_types.keys() and not key.startswith("_"):
-                print("{:32}: {:16} ({})".format(key, str(val), type(val)))
-
-    alf_reference_file = None
-
-    # config reading
-    config = ConfigProvider(source=DEFAULT_CONFIG_FILE)
-    CONFIG = config
-
-    data_types = {
-                  int: int, 
-                  float: float,
-                  str: check_str, 
-                  list: ast.literal_eval, 
-                  bool: check_bool
-                 }
-
-    local_values = {}
-    for key, val in config.items():
-        if key.lower() in locals().keys():
-            if key.lower() == "alf_reference_file":
-                alf_reference_file = str(val)
-            continue
-
-        if not key in globals().keys():
-            _unknown_settings.append(key)
-            # print("Unknown setting found in config: " + key)
-        elif key.lower() == "keywords":
-            globals()[key] = val.split()
-        elif type(globals()[key]) in data_types.keys() and not key.startswith("_"):
-            globals()[key] = data_types[type(globals()[key])](val)
-
-    for key, val in locals().items():
-        if key in local_values.keys():
-            print(key)
-            locals()[key] = local_values[key]
-    
-    for setting, allowed_values in check_settings.items():
-        if globals()[setting] not in globals()[allowed_values]:
-            globals()[setting] = default_settings[setting]
-
-    modify_settings = {
-                       "SYSTEM_NAME": to_upper,
-                       "METHOD": to_upper
-                      }
-
-    for setting, modification in modify_settings.items():
-        globals()[setting] = modification(globals()[setting])
-
-    # ALF checking
-    if not ALF:
-        if not alf_reference_file:
-            try:
-                alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["training_set"])
-            except:
-                try:
-                    alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["sample_pool"])
-                except:
-                    try:
-                        alf_reference_file = FileTools.get_first_gjf(FILE_STRUCTURE["validation_set"])
-                    except:
-                        pass
-        if alf_reference_file:
-            try:
-                GJF(alf_reference_file, read=True)._atoms.calculate_alf()
-                ALF = Atoms.ALF
-            except:
-                print("\nError in ALF calculation, please specify file to calculate ALF")
 
 
 def readArguments():
@@ -5587,7 +5651,7 @@ def submit_wfns(directory):
 @UsefulTools.externalFunc()
 def move_models(model_file, IQA=False, copy_to_log=True):
     logging.info("Moving Completed Models")
-    model_directory = FILE_STRUCTURE["models"]
+    model_directory = GLOBALS.FILE_STRUCTURE["models"]
     FileTools.mkdir(model_directory)
 
     model_files = [model_file]
@@ -5639,14 +5703,14 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     points = models.expected_improvement(sample_pool)
 
-    if SUBMITTED:
+    if GLOBALS.SUBMITTED:
         move_points = True
     else:
         move_points = UsefulTools.check_bool(input("Would you like to move points to Training Set? [Y/N]"))
 
     if move_points :
         logging.info("Moving points to the Training Set")
-        training_set_directory = FILE_STRUCTURE["training_set"]
+        training_set_directory = GLOBALS.FILE_STRUCTURE["training_set"]
         training_set = Points(training_set_directory)
         training_set.add(points, move=True)
         training_set.format_gjfs()
@@ -5671,13 +5735,13 @@ def dlpoly_analysis():
 
 
 def opt():
-    sp_dir = FILE_STRUCTURE["sample_pool"]
+    sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
     atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
 
-    opt_dir = FILE_STRUCTURE["opt"]
+    opt_dir = GLOBALS.FILE_STRUCTURE["opt"]
     FileTools.mkdir(opt_dir)
 
-    opt_gjf = GJF(os.path.join(opt_dir, SYSTEM_NAME + "1".zfill(4) + ".gjf"))
+    opt_gjf = GJF(os.path.join(opt_dir, GLOBALS.SYSTEM_NAME + "1".zfill(4) + ".gjf"))
     opt_gjf._atoms = atoms
     opt_gjf.job_type="opt"
     opt_gjf.write()
@@ -5689,10 +5753,10 @@ def opt():
 #############################################
 
 def main_menu():
-    ts_dir = FILE_STRUCTURE["training_set"]
-    sp_dir = FILE_STRUCTURE["sample_pool"]
-    vs_dir = FILE_STRUCTURE["validation_set"]
-    models_dir = FILE_STRUCTURE["models"]
+    ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
+    sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
+    vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
+    models_dir = GLOBALS.FILE_STRUCTURE["models"]
 
     #=== Training Set Menu ===#
     training_set_menu = Menu(title="Training Set Menu")
@@ -5750,7 +5814,7 @@ def main_menu():
     queue_menu.add_final_options()
 
     #=== Main Menu ===#
-    main_menu = Menu(title="ICHOR Main Menu", enable_problems=True, message=f"Running on {MACHINE}", auto_clear=True)
+    main_menu = Menu(title="ICHOR Main Menu", enable_problems=True, message=f"Running on {GLOBALS.MACHINE}", auto_clear=True)
     main_menu.add_option("1", "Training Set", training_set_menu.run)
     main_menu.add_option("2", "Sample Pool", sample_pool_menu.run)
     main_menu.add_option("3", "Validation Set", validation_set_menu.run)
@@ -5769,23 +5833,12 @@ def main_menu():
     main_menu.add_final_options(back=False)
     main_menu.run()
 
-
 if __name__ == "__main__":
-    Globals.define()
-
-    # print(globals.DEFAULT_CONFIG_FILE)
-    # quit()
-
-    readArguments()
-    defineGlobals()
+    Arguments.read()
+    GLOBALS = Globals.define()
 
     if not _call_external_function is None:
         _call_external_function(*_call_external_function_args)
         quit()
-
-    # _shell_scripts = glob("*.sh.*")
-    # for shell_script in _shell_scripts:
-    #     if not os.stat(shell_script).st_size:
-    #         os.remove(shell_script)
 
     main_menu()
