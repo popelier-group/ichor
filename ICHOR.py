@@ -347,12 +347,11 @@ class UsefulTools:
     @staticmethod
     def externalFunc(*args):
         def run_func(func):
-            global _external_functions
             if len(args) > 1:
                 name = args[1]
             else:
                 name = func.__name__
-            _external_functions[name] = func
+            Arguments.external_functions[name] = func
             return func
         return run_func
 
@@ -442,9 +441,9 @@ class UsefulTools:
     @staticmethod
     def set_uid(uid=None):
         global _UID
-        if GLOBALS.SUBMITTED and _UID:
+        if GLOBALS.SUBMITTED and GLOBALS.UID:
             return
-        _UID = uid if uid else UsefulTools.get_uid()
+        GLOBALS.UID = uid if uid else UsefulTools.get_uid()
 
     @staticmethod
     def input_with_prefill(prompt, prefill=''):
@@ -505,31 +504,41 @@ class GlobalTools:
 
 class Arguments:
     global _external_functions
-    global _call_external_function
-    global _call_external_function_args
 
     config_file = "config.properties"
     uid = UsefulTools.get_uid()
-    allowed_functions = ",".join(_external_functions.keys())
 
-    parser = ArgumentParser(description="ICHOR: A kriging training suite")
-        
-    parser.add_argument("-c", "--config", dest="config_file", type=str,
-                        help="Name of Config File for ICHOR")
-    parser.add_argument("-f", "--func", dest="func", type=str, metavar=("func","arg"), nargs="+",
-                        help=f"Call ICHOR function with args, allowed functions: [{allowed_functions}]")
-    parser.add_argument("-u", "--uid", dest="uid", type=str,
-                        help="Unique Identifier For ICHOR Jobs To Write To")
+    external_functions = {} 
+    call_external_function = None
+    call_external_function_args = []
+
 
     @staticmethod
     def read():
-        args = Arguments.parser.parse_args()
+        parser = ArgumentParser(description="ICHOR: A kriging training suite")
+
+        parser.add_argument("-c", "--config", dest="config_file", type=str,
+                                        help="Name of Config File for ICHOR")
+        allowed_functions = ",".join(Arguments.external_functions.keys())
+        parser.add_argument("-f", "--func", dest="func", type=str, metavar=("func","arg"), nargs="+",
+                                        help=f"Call ICHOR function with args, allowed functions: [{allowed_functions}]")
+        parser.add_argument("-u", "--uid", dest="uid", type=str,
+                                        help="Unique Identifier For ICHOR Jobs To Write To")
+
+        args = parser.parse_args()
         if args.config_file:
             Arguments.config_file = args.config_file
         
         if args.func:
             func = args.func[0]
             func_args = args.func[1:] if len(args.func) > 1 else []
+            if func in Arguments.external_functions.keys():
+                Arguments.call_external_function = Arguments.external_functions[func]
+                Arguments.call_external_function_args = func_args
+            else:
+                print(f"{func} not in allowed functions:")
+                print(f"{allowed_functions}")
+                quit()
 
         if args.uid:
             Arguments.uid = args.uid
@@ -602,6 +611,15 @@ class GlobalVariable:
     def details(self):
         return f"Value:   {self.value}\nType:    {self.type.__name__}\nHidden:  {self.hidden}\nDefault: {self.default}\nChanged: {self.changed}"
 
+    def __int__(self):
+        return int(self.value)
+
+    def __float__(self):
+        return float(self.value)
+
+    def __list__(self):
+        return list(self.value)
+
     def __str__(self):
         return str(self.value)
     
@@ -661,6 +679,33 @@ class GlobalVariable:
 
     def __iter__(self):
         return iter(self.value)
+
+    def __index__(self):
+        return self.value.__index__()
+
+    def __hash__(self):
+        return self.value.__hash__()
+   
+    def __lt__(self, other):
+        return self.value.__lt__(other)
+
+    def __le__(self, other):
+        return self.value.__le__(other)
+
+    def __gt__(self, other):
+        return self.value.__gt__(other)
+
+    def __ge__(self, other):
+        return self.value.__ge__(other)
+
+    def __unicode__(self):
+        return self.value.__unicode__()
+
+    def __format__(self, formatstr):
+        return self.value.__format__(formatstr)
+
+    def __sizeof__(self):
+        return self.value.__sizeof__()
 
     # def items(self):
     #     return dict.items(self.value)
@@ -1860,12 +1905,12 @@ class CommandLine:
         self.setup_command()
 
     def setup_datafile(self):
-        if _UID is None: UsefulTools.set_uid()
-        self.datafile = _UID
+        if GLOBALS.UID is None: UsefulTools.set_uid()
+        self.datafile = str(GLOBALS.UID)
 
     def setup_command(self):
-        if hasattr(self, "machine_commands") and GLOBALS.MACHINE.lower() in self.machine_commands.keys():
-            self.command = self.machine_commands[GLOBALS.MACHINE.lower()]
+        if hasattr(self, "machine_commands") and str(GLOBALS.MACHINE).lower() in self.machine_commands.keys():
+            self.command = self.machine_commands[str(GLOBALS.MACHINE).lower()]
         elif hasattr(self, "default_command"): 
             self.command = self.default_command
 
@@ -2019,6 +2064,7 @@ class AIMAllCommand(CommandLine):
 
         self.setup_datafile()
         self.ncores = GLOBALS.AIMALL_CORE_COUNT
+        self.setup_arguments()
     
     def add(self, wfn_file, outfile=None):
         self.infiles += [wfn_file]
@@ -2073,7 +2119,7 @@ class FerebusCommand(CommandLine):
         self.ncores = GLOBALS.FEREBUS_CORE_COUNT
     
     def setup_command(self):
-        ferebus_loc = os.path.abspath(GLOBALS.FEREBUS_LOCATION)
+        ferebus_loc = os.path.abspath(str(GLOBALS.FEREBUS_LOCATION))
         if "py" in GLOBALS.FEREBUS_VERSION:
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
@@ -2129,7 +2175,7 @@ class DlpolyCommand(CommandLine):
         self.ncores = GLOBALS.DLPOLY_CORE_COUNT
 
     def setup_command(self):
-        self.command = os.path.abspath(GLOBALS.DLPOLY_LOCATION)
+        self.command = os.path.abspath(str(GLOBALS.DLPOLY_LOCATION))
 
     def add(self, directory):
         self.directories += [os.path.abspath(directory)]
@@ -2173,7 +2219,7 @@ class PythonCommand(CommandLine):
     
         super().__init__()
 
-        if _UID: self.add_argument("-u", _UID)
+        if GLOBALS.UID: self.add_argument("-u", str(GLOBALS.UID))
     
     def load_modules(self):
         self.modules["csf3"] = ["apps/anaconda3/5.2.0/bin"]
@@ -2210,7 +2256,7 @@ class SubmissionScript:
 
     def load_modules(self):
         for command in self:
-            self._modules += command.modules[GLOBALS.MACHINE]
+            self._modules += command.modules[str(GLOBALS.MACHINE)]
         
     def cleanup_modules(self):
         self._modules = list(set(self._modules))
@@ -2249,7 +2295,7 @@ class SubmissionScript:
         if self.njobs > 1:
             njobs = f"-{self.njobs}"
 
-        pe = self.parallel_environments[GLOBALS.MACHINE][2]
+        pe = self.parallel_environments[str(GLOBALS.MACHINE)][2]
 
         with open(self.fname, "w") as f:
             f.write("#!/bin/bash -l\n")
@@ -3634,7 +3680,7 @@ class WFN(Point):
                     break
         
         if data != []:
-            data[1] = data[1].strip() +  "   " + GLOBALS.METHOD + "\n"
+            data[1] = data[1].strip() +  "   " + str(GLOBALS.METHOD) + "\n"
             with open(self.fname, "w") as f:
                 f.writelines(data)
                 
@@ -4056,7 +4102,7 @@ class Models:
             "vard2": self.expected_improvement_vard2,
             "rand": self.expected_improvement_rand
         }
-        self.expected_improvement_function = expected_improvement_functions[GLOBALS.ADAPTIVE_SAMPLING_METHOD]
+        self.expected_improvement_function = expected_improvement_functions[str(GLOBALS.ADAPTIVE_SAMPLING_METHOD)]
 
         if self.directory:
             self.find_models(read_models)
@@ -5559,10 +5605,6 @@ def readArguments():
     global DEFAULT_CONFIG_FILE
     global _UID
     
-    global _external_functions
-    global _call_external_function
-    global _call_external_function_args
-
     allowed_functions = ",".join(_external_functions.keys())
 
     parser = ArgumentParser(description="ICHOR: A kriging training suite")
@@ -5837,8 +5879,8 @@ if __name__ == "__main__":
     Arguments.read()
     GLOBALS = Globals.define()
 
-    if not _call_external_function is None:
-        _call_external_function(*_call_external_function_args)
+    if not Arguments.call_external_function is None:
+        Arguments.call_external_function(*Arguments.call_external_function_args)
         quit()
 
     main_menu()
