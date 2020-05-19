@@ -89,12 +89,9 @@ from argparse import ArgumentParser
 # Required imports
 import numpy as np
 from tqdm import tqdm
-from numba import jit
 from scipy import stats
 from numpy import linalg as la
-from sklearn.metrics import pairwise_distances
 from scipy.spatial import distance
-from scipy.spatial.distance import cdist, pdist, squareform
 
 #############################################
 #                  Globals                  #
@@ -151,7 +148,6 @@ logging.basicConfig(filename='ichor.log',
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     datefmt='%d-%m-%Y %H:%M:%S')
 
-_config_read_error = False
 _unknown_settings = []
 
 _external_functions = {}
@@ -162,7 +158,7 @@ _call_external_function_args = []
 _data_lock = False
 
 _UID = None
-_IQA_MODELS = True
+_IQA_MODELS = False
 
 #############################################
 #             Class Definitions             #
@@ -1671,9 +1667,9 @@ class FerebusTools:
                          "# answer yes (Y) to allow noise optimization, "
                          "no (N) to use no-noise option\n")
             finput.write("noise_value 0.1\n")
-            finput.write(f"tolerance        {FEREBUS_TOLERANCE}#\n")
-            finput.write(f"convergence      {FEREBUS_CONVERGENCE}#\n")
-            finput.write(f"max_iterations   {FEREBUS_MAX_ITERATION}#\n")
+            finput.write(f"tolerance        {GLOBALS.FEREBUS_TOLERANCE}#\n")
+            finput.write(f"convergence      {GLOBALS.FEREBUS_CONVERGENCE}#\n")
+            finput.write(f"max_iterations   {GLOBALS.FEREBUS_MAX_ITERATION}#\n")
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# PSO Specific keywords\n#\n")
@@ -1689,9 +1685,9 @@ class FerebusTools:
             else:
                 finput.write(f"swarm_pop    {GLOBALS.FEREBUS_SWARM_SIZE}       ")
             finput.write("# if swarm opt is set as 'static' the number of particle must be specified\n")
-            finput.write(f"cognitive_learning   {FEREBUS_COGNITIVE_LEARNING_RATE}\n")
-            finput.write(f"inertia_weight   {FEREBUS_INERTIA_WEIGHT}\n")
-            finput.write(f"social_learning   {FEREBUS_SOCIAL_LEARNING_RATE}\n")
+            finput.write("cognitive_learning   1.49400\n")
+            finput.write("inertia_weight   0.72900\n")
+            finput.write("social_learning   1.49400\n")
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# DE Specific keyword\n#\n")
@@ -1781,14 +1777,6 @@ class ProblemFinder:
                              solution="Set 'SYSTEM_NAME' in config file"
                             ))
     
-    @UsefulTools.runFunc(4)
-    def check_config_read(self):
-        if _config_read_error:
-            self.add(Problem(name=f"Error in reading config file", 
-                             problem=f"Config file may be missing",
-                             solution="Check config.properties or specified config file"
-                            ))
-
     @UsefulTools.runFunc(4)
     def check_settings(self):
         for setting in _unknown_settings:
@@ -2135,8 +2123,6 @@ class FerebusCommand(CommandLine):
         if "py" in GLOBALS.FEREBUS_VERSION:
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
-        elif "rust" in FEREBUS_VERSION:
-            self.command = os.path.abspath(CERBERUS_LOCATION)
         else:
             self.command = ferebus_loc
 
@@ -2147,7 +2133,7 @@ class FerebusCommand(CommandLine):
         if not "py" in GLOBALS.FEREBUS_VERSION:
             self.modules["ffluxlab"] = [
                                         "mpi/intel/18.0.3",
-                                        "libs/nag/intel/fotran/mark-23"
+                                        "libs/intel/nag/fortran_mark23_intel"
                                        ]
             self.modules["csf3"] = [
                                     "compilers/intel/17.0.7",
@@ -2314,7 +2300,6 @@ class SubmissionScript:
         with open(self.fname, "w") as f:
             f.write("#!/bin/bash -l\n")
             f.write("#$ -cwd\n")
-            f.write("#$ -V\n")
             f.write(f"#$ -o {self.stdout}\n")
             f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
@@ -2327,10 +2312,7 @@ class SubmissionScript:
             for module in self._modules:
                 f.write(f"module load {module}\n")
             if self.ncores > 1:
-                if "rust" in FEREBUS_VERSION:
-                    f.write("export RAYON_NUM_THREADS=$NSLOTS\n")
                 f.write("export OMP_NUM_THREADS=$NSLOTS\n\n")
-
             f.write("\n")
             for command in self._commands:
                 f.write(f"{repr(command)}\n")
@@ -3477,8 +3459,7 @@ class Point:
     def multipole_training_set_line(self):
         training_set = self.__get_features()
         for atom in training_set.keys():
-            training_set[atom]["outputs"] = [self.ints[atom].integration_results["q"]] + \
-                                                list(self.ints[atom].multipoles.values())[:24]
+            training_set[atom]["outputs"] = list(self.ints[atom].multipoles.values())
         return training_set
 
     def move(self, new_directory):
@@ -3811,70 +3792,22 @@ class INT(Point):
         return not self.fname == ""
 
 
-@jit(nopython=True)
-def numba_r_rbf(x_star, x, hp):
-    n_train = x.shape[0]
-    n_feat = x.shape[1]
-    r = np.empty((n_train, 1))
-    for i in np.arange(n_train):
-        result = 0.0
-        for j in np.arange(n_feat):
-            xi = x_star[j]
-            xj = x[i][j]
-            xh = hp[j]
-            if (j+1) % 3 == 0:
-                diff = np.abs(xi - xj)
-                if (diff > np.pi):
-                    diff = diff - 2*np.pi
-                elif (diff < -np.pi):
-                    diff = 2*np.pi + diff
-                result += xh * diff * diff
-            else:
-                result += xh * (xi - xj)**2
-        r[i] = np.exp(-result)
-    return r
-
-
-@jit(nopython=True)
-def numba_R_rbf(x, hp):
-    n_train = x.shape[0]
-    n_feat = x.shape[1]
-    R = np.empty((n_train, n_train))
-    for i in np.arange(n_train):
-        R[i][i] = 1
-        for j in np.arange(i+1, n_train):
-            result = 0.0
-            for k in np.arange(n_feat):
-                xi = x[i][k]
-                xj = x[j][k]
-                xh = hp[k]
-                if (k+1) % 3 == 0:
-                    diff = np.abs(xi - xj)
-                    if (diff > np.pi):
-                        diff = diff - 2*np.pi
-                    elif (diff < -np.pi):
-                        diff = 2*np.pi + diff
-                    result += xh * diff * diff
-                else:
-                    result += xh * (xi - xj)**2
-            result = np.exp(-result)
-            R[i][j] = result
-            R[j][i] = result
-    return R
-
-
 class Model:
-
-    tau = 2*np.pi
-
     def __init__(self, fname, read_model=False):
         self.fname = fname
+
+        kernels = {
+            "rbf": self.k_rbf,
+            "m52": self.k_m52
+        }
+
+        self.k = kernels[GLOBALS.KERNEL.lower()]
 
         self.directory = ""
         self.basename = ""
 
         self.system_name = ""
-        self.model_type = ""
+        self.type = ""
         self.atom_number = ""
 
         self.analyse_name()
@@ -3898,10 +3831,6 @@ class Model:
 
         self.y = []
         self.X = []
-
-        self.linear_mask = []
-        self.cyclic_mask = []
-
         if read_model and self.fname:
             self.read()
             if self.normalise:
@@ -3986,16 +3915,13 @@ class Model:
                 if not up_to is None and up_to in line:
                     break
 
-        self.linear_mask = [1 if (i+1) % 3 == 0 else 0 for i in range(self.nFeats)]
-        self.cyclic_mask = [not m for m in self.linear_mask]
-
     def analyse_name(self):
         self.directory = os.path.dirname(self.fname)
         self.basename = os.path.basename(self.fname)
 
         fname_split = os.path.splitext(self.basename)[0].split("_")
         self.system_name = fname_split[0]
-        self.model_type = fname_split[2].lower()
+        self.type = fname_split[2].lower()
         self.atom_number = fname_split[3]
 
     def remove_no_noise(self):
@@ -4034,16 +3960,35 @@ class Model:
 
         FileTools.copy_file(self.fname, log_model_file)
 
+    def k_rbf(self, xi, xj):
+        result = 0
+        for i, j, h in zip(xi, xj, self.hyper_parameters):
+            result += h * (i - j)**2
+        return np.exp(-result)
+    
+    def k_m52(self, xi, xj):
+        return NotImplemented
+        result = 0
+        for i, j, h in zip(xi, xj, self.hyper_parameters):
+            result += h * (i - j)**2
+        return np.exp(-result)
+
+    def r(self, features):
+        r = np.empty((self.nTrain, 1))
+        for i, point in enumerate(self.X):
+            r[i] = self.k(features, point)
+        return r
+
     @property
     def R(self):
         try:
             return self._R
         except AttributeError:
-            self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
+            self._R = np.empty((self.nTrain, self.nTrain))
+            for i, xi in enumerate(self.X):
+                for j, xj in enumerate(self.X):
+                    self._R[i][j] = self.k(xi, xj)
             return self._R
-
-    def r(self, features):
-        return numba_r_rbf(features, self.X, np.array(self.hyper_parameters))
 
     @property
     def invR(self):
@@ -4095,7 +4040,13 @@ class Model:
             return self._cross_validation
 
     def predict(self, point):
-        r = self.r(point.features[self.i])
+        if self.normalise:
+            features = normalise_array(point.features[self.i])
+        elif self.standardise:
+            features = standardise_array(point.features[self.i])
+        else:
+            features = point.features[self.i]
+        r = self.r(features)
         weights = self.weights.reshape((-1, 1))
         return self.mu + np.matmul(r.T, weights).item()
     
@@ -4106,16 +4057,12 @@ class Model:
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
         res3 = np.matmul(self.ones.T, np.matmul(self.invR, self.ones))
 
-        r1 = res1.item()
-        r2 = res2.item()**2
-        r3 = res3.item()
-        s1 = self.sigma2
-        s2 = s1 * (1-r1 + (1+r2)/r3)
-        
+        s2 = self.sigma2 * (1 - res1.item() + (1 + res2.item())**2/res3.item())
         return s2
     
     def variance2(self, point):
-        r = self.r(point.features[self.i])
+        point = point.features[self.i]
+        r = self.r(point)
         return 1 - np.matmul(r.T, np.matmul(self.invR, r))
     
     def distance_to_point(self, point):
@@ -4174,9 +4121,9 @@ class Models:
         if type == "all":
             return [model for model in self]
         elif type == "multipoles":
-            return [model for model in self if re.match(r"q\d+(\w+)?", model.model_type)]
+            return [model for model in self if re.match(r"q\d+(\w+)?", model.type)]
         else:
-            return [model for model in self if model.model_type == type]
+            return [model for model in self if model.type == type]
 
     def read(self):
         for model in self:
@@ -4197,9 +4144,9 @@ class Models:
                 if not atoms:
                     prediction += model.predict(point) 
                 else:
-                    if not model.model_type in prediction.keys():
-                        prediction[model.model_type] = {}
-                    prediction[model.model_type][model.num] = float(model.predict(point))
+                    if not model.type in prediction.keys():
+                        prediction[model.type] = {}
+                    prediction[model.type][model.num] = float(model.predict(point))
             predictions.append(prediction)
         return np.array(predictions) if not atoms else predictions
     
@@ -4741,10 +4688,7 @@ class Points:
             return self._features
 
     def __len__(self):
-        num_points = FileTools.count_points_in(self.directory)
-        if num_points == 0:
-            return len(self._points)
-        return num_points
+        return FileTools.count_points_in(self.directory)
     
     def __delitem__(self, del_point):
         if isinstance(del_point, (int, np.int64)):
@@ -4784,10 +4728,7 @@ class Trajectory:
                     atoms = Atoms()
 
     def append(self, atoms):
-        if isinstance(atoms, Atoms):
-            self._trajectory.append(atoms)
-        else:
-            self._trajectory.append(Atoms(atoms))
+        self._trajectory.append(atoms)
 
     def add_point(self, atoms):
         self.append(atoms)
@@ -4805,17 +4746,6 @@ class Trajectory:
         for point in self:
             rmsd += [ref.rmsd(point)]
         return rmsd
-
-    def extend(self, atoms):
-        [self._trajectory.append(iatoms) for iatoms in atoms]
-
-    def write(self, fname=None):
-        if fname is None:
-            fname = self.fname
-        with open(fname, "w") as f:
-            for i, atoms in enumerate(self):
-                f.write(f"    {len(atoms)}\ni = {i}\n")
-                f.write(f"{atoms}\n")
 
     def __len__(self):
         return len(self._trajectory)
@@ -5425,8 +5355,7 @@ class S_CurveTools:
         model_menu.set_refresh(S_CurveTools.refresh_model_menu)
 
         menu.clear_options()
-        menu.add_option("1", "Calculate S-Curves", S_CurveTools.calculate_s_curves)
-        menu.add_option("a", "Auto Calculate S-Curves", S_CurveTools.auto_calculate_s_curves)
+        menu.add_option("1", "Calculate S-Curves", S_CurveTools.caluclate_s_curves)
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
@@ -5436,7 +5365,7 @@ class S_CurveTools:
         menu.add_final_options()
 
     @staticmethod
-    def calculate_s_curves(fname="s_curves.xlsx"):
+    def caluclate_s_curves():
         import pandas as pd
 
         validation_set = Points(S_CurveTools.validation_set, read_gjfs=True, read_ints=True)
@@ -5451,15 +5380,15 @@ class S_CurveTools:
                 if not atom in atom_data.keys():
                     atom_data[atom] = {"true": [], "predicted": [], "error": []}
                 true_value = int_data.eiqa
-                predicted_value = prediction["iqa"][int_data.num]
-                error = np.abs(true_value - predicted_value) * 2625.5
+                predicted_value = prediction[int_data.num-1]
+                error = (true_value - predicted_value)**2
                 
                 atom_data[atom]["true"].append(true_value)
                 atom_data[atom]["predicted"].append(predicted_value)
                 atom_data[atom]["error"].append(error)
-
+        
         percentages = []
-        with pd.ExcelWriter(fname, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter("s_curves.xlsx", engine='xlsxwriter') as writer:
             errors = {}
             for atom, data in atom_data.items():
                 errors[atom] = data["error"]
@@ -5474,23 +5403,6 @@ class S_CurveTools:
             df.sort_values(by="Total", inplace=True)
             df["%"] = percentages
             df.to_excel(writer, sheet_name="Total")
-
-    def auto_calculate_s_curves():
-        log_dirs = FileTools.get_files_in(S_CurveTools.log_loc, "*/")
-        for log_dir in log_dirs:
-            S_CurveTools.models = log_dir
-            models = Models(log_dir)
-            fname = "s_curves_" + str(models.nTrain).zfill(4) + ".xlsx"
-            S_CurveTools.calculate_s_curves(fname)
-
-    @staticmethod
-    def auto_calculate_s_curves():
-        log_dirs = FileTools.get_files_in(S_CurveTools.log_loc, "*/")
-        for log_dir in log_dirs:
-            S_CurveTools.models = log_dir
-            models = Models(log_dir)
-            fname = "s_curves_" + str(models.nTrain).zfill(4) + ".xlsx"
-            S_CurveTools.calculate_s_curves(fname)
 
     @staticmethod
     def run():
@@ -5579,15 +5491,12 @@ class SetupTools:
 
     @staticmethod
     def make_sets():
-        global SYSTEM_NAME
-
         t = TabCompleter()
         t.setup_completer(t.path_completer)
         set_location = input("Enter XYZ file or Directory containing the Points to use: ")
         t.remove_completer()
 
-        if SYSTEM_NAME == "SYSTEM":
-            SYSTEM_NAME = input("Enter System Name: ")
+        # append data source to file
 
         points = Points()
         points.read_set(set_location)
@@ -5795,7 +5704,7 @@ def move_models(model_file, IQA=False, copy_to_log=True):
         model = Model(model_file)
         model.remove_no_noise()
 
-        if UsefulTools.check_bool(IQA):
+        if bool(IQA):
             model.model_type = "IQA"
         new_model_file = model.get_fname(model_directory)
         FileTools.copy_file(model_file, new_model_file)
@@ -5833,9 +5742,8 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     models = Models(models_directory, read_models=True)
     sample_pool = Points(sample_pool_directory, read_gjfs=True)
-    now = time.time()
+
     points = models.expected_improvement(sample_pool)
-    logging.debug(f"Time taken to calculate points: {time.time()-now}s")
 
     if GLOBALS.SUBMITTED:
         move_points = True
@@ -5880,6 +5788,7 @@ def opt():
     opt_gjf.job_type="opt"
     opt_gjf.write()
     opt_gjf.submit()
+
 
 #############################################
 #                 Main Loop                 #
