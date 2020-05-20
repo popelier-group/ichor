@@ -1265,7 +1265,7 @@ class ConfigProvider(dict):
     def load_properties_config(self):
         for line in self.load_file_data():
             if not line.strip().startswith("#") and "=" in line:
-                key, val = line.split("=")
+                key, val = line.split("=", 1)
                 self[self.cleanup_key(key)] = val.strip()
 
     def load_yaml_config(self):
