@@ -3450,7 +3450,7 @@ class Point:
         training_set = self.__get_features()
         for atom in training_set.keys():
             training_set[atom]["outputs"] = [self.ints[atom].integration_results["q"]] + \
-                                                list(self.ints[atom].multipoles)[1:25]
+                                                list(self.ints[atom].multipoles.values())[1:25]
         return training_set
 
     def move(self, new_directory):
