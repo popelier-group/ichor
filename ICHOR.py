@@ -44,14 +44,13 @@
   [ ] Add CP2K support                                                                                 
   [x] Merge makeSets into ICHOR                                                                        
   [ ] Make SGE Queue names more meaningful ('GaussSub.sh' -> 'WATER G09 1')
-  [ ] Cleanup SubmissionScript Implementation                                                          /
+  [x] Cleanup SubmissionScript Implementation                                                          /
   [ ] Implement More Kernels Into ICHOR
   [ ] Make a Revert System / Backup System
-  [ ] Move EPE calculation to an independent function so more EI Algorithms can be implemented
-  [ ] Include Legacy Conversion Tools
+  [x] Move EPE calculation to an independent function so more EI Algorithms can be implemented
   [ ] Cleanup Training Set formation implementation so that any X and y values can be used             /
   [ ] Implement method of locking functions based on what is currently running (e.g. Auto Run)         /
-  [ ] Create a Globals class to cleanup how ICHOR handles global variables                             /
+  [x] Create a Globals class to cleanup how ICHOR handles global variables                             /
   [ ] Make 'rewind' option (move added training points back to sample pool)
   [ ] Make stop auto run flag when an error occurs
 """
@@ -99,12 +98,10 @@ from scipy.spatial import distance
 
 GLOBALS = None
 
-DEFAULT_CONFIG_FILE = "config.properties"
-
 # Below are only for SSH settings which isn't implemented yet
 EXTERNAL_MACHINES = {
-                        "csf3": "csf3.itservices.manchester.ac.uk",
-                        "ffluxlab": "ffluxlab.mib.manchester.ac.uk"
+                     "csf3": "csf3.itservices.manchester.ac.uk",
+                     "ffluxlab": "ffluxlab.mib.manchester.ac.uk"
                     }
 
 SSH_SETTINGS = {
@@ -118,31 +115,6 @@ SSH_SETTINGS = {
 #:::::::::::::::::::::::::::::::::::::::::::#
 #############################################
 
-type2mass = {'H': 1.007825, 'He': 4.002603, 'Li': 7.016005, 'Be': 9.012182, 'B': 11.009305, 'C': 12.0,
-             'N': 14.003074, 'O': 15.994915, 'F': 18.998403, 'Ne': 19.99244, 'Na': 22.989769, 'Mg': 23.985042,
-             'Al': 26.981539, 'Si': 27.976927, 'P': 30.973762, 'S': 31.972071, 'Cl': 34.968853, 'Ar': 39.962383,
-             'K': 38.963707, 'Ca': 39.962591, 'Sc': 44.955912, 'Ti': 47.947946, 'V': 50.94396, 'Cr': 51.940508,
-             'Mn': 54.938045, 'Fe': 55.9349382, 'Co': 58.933195, 'Ni': 57.935343, 'Cu': 62.929598, 'Zn': 63.929142,
-             'Ga': 68.925574, 'Ge': 73.921178, 'As': 74.921597, 'Se': 79.916521, 'Br': 78.918337, 'Kr': 83.911507}
-
-type2rad = {'H': 0.37, 'He': 0.32, 'Li': 1.34, 'Be': 0.9, 'B': 0.82, 'C': 0.77, 'N': 0.74, 'O': 0.73, 'F': 0.71,
-            'Ne': 0.69, 'Na': 1.54, 'Mg': 1.3, 'Al': 1.18, 'Si': 1.11, 'P': 1.06, 'S': 1.02, 'Cl': 0.99, 'Ar': 0.97,
-            'K': 1.96, 'Ca': 1.74, 'Sc': 1.44, 'Ti': 1.36, 'V': 1.25, 'Cr': 1.27, 'Mn': 1.39, 'Fe': 1.25,
-            'Co': 1.26, 'Ni': 1.21, 'Cu': 1.38, 'Zn': 1.31, 'Ga': 1.26, 'Ge': 1.22, 'As': 1.19, 'Se': 1.16,
-            'Br': 1.14, 'Kr': 1.1}
-
-dlpoly_weights =  {"H": 1.007975, "He": 4.002602, "Li": 6.9675, "Be": 9.0121831, "B": 10.8135, "C": 12.0106,
-                   "N": 14.006855, "O": 15.9994, "F": 18.99840316, "Ne": 20.1797, "Na": 22.98976928, "Mg": 24.3055,
-                   "Al": 26.9815385, "Si": 28.085, "P": 30.973762, "S": 32.0675, "Cl": 35.4515, "Ar": 39.948,
-                   "K": 39.0983, "Ca": 40.078, "Sc": 44.955908, "Ti": 47.867, "V": 50.9415, "Cr": 51.9961,
-                   "Mn": 54.938044, "Fe": 55.845, "Co": 58.933194, "Ni": 58.6934, "Cu": 63.546, "Zn": 65.38,
-                   "Ga": 69.723, "Ge": 72.63, "As": 74.921595, "Se": 78.971, "Br": 79.904, "Kr": 83.798,
-                   "Rb": 85.4678, "Sr": 87.62, "Y": 88.90584, "Zr": 91.224, "Nb": 92.90637, "Mo": 95.95}
-
-#############################################
-#:::::::::::::::::::::::::::::::::::::::::::#
-#############################################
-
 logging.basicConfig(filename='ichor.log',
                     level=logging.DEBUG, 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
@@ -150,14 +122,8 @@ logging.basicConfig(filename='ichor.log',
 
 _unknown_settings = []
 
-_external_functions = {}
-
-_call_external_function = None
-_call_external_function_args = []
-
 _data_lock = False
 
-_UID = None
 _IQA_MODELS = False
 
 #############################################
@@ -196,6 +162,31 @@ class Constants:
 
     FEREBUS_VERSIONS = ["fortran", "python"]
 
+    type2mass = {'H' : 1.007825,  'He': 4.002603,   'Li': 7.016005,  'Be': 9.012182,  'B' : 11.009305, 'C' : 12.0,
+                 'N' : 14.003074, 'O' : 15.994915,  'F' : 18.998403, 'Ne': 19.99244,  'Na': 22.989769, 'Mg': 23.985042,
+                 'Al': 26.981539, 'Si': 27.976927,  'P' : 30.973762, 'S' : 31.972071, 'Cl': 34.968853, 'Ar': 39.962383,
+                 'K' : 38.963707, 'Ca': 39.962591,  'Sc': 44.955912, 'Ti': 47.947946, 'V' : 50.94396,  'Cr': 51.940508,
+                 'Mn': 54.938045, 'Fe': 55.9349382, 'Co': 58.933195, 'Ni': 57.935343, 'Cu': 62.929598, 'Zn': 63.929142,
+                 'Ga': 68.925574, 'Ge': 73.921178,  'As': 74.921597, 'Se': 79.916521, 'Br': 78.918337, 'Kr': 83.911507}
+
+    type2rad = {'H' : 0.37, 'He': 0.32, 'Li': 1.34, 'Be': 0.9,  'B' : 0.82, 'C' : 0.77, 'N' : 0.74, 'O' : 0.73, 'F' : 0.71,
+                'Ne': 0.69, 'Na': 1.54, 'Mg': 1.3, 'Al' : 1.18, 'Si': 1.11, 'P' : 1.06, 'S' : 1.02, 'Cl': 0.99, 'Ar': 0.97,
+                'K' : 1.96, 'Ca': 1.74, 'Sc': 1.44, 'Ti': 1.36, 'V' : 1.25, 'Cr': 1.27, 'Mn': 1.39, 'Fe': 1.25, 'Co': 1.26,
+                'Ni': 1.21, 'Cu': 1.38, 'Zn': 1.31, 'Ga': 1.26, 'Ge': 1.22, 'As': 1.19, 'Se': 1.16, 'Br': 1.14, 'Kr': 1.1}
+
+    dlpoly_weights =  {'H' : 1.007975,   'He': 4.002602, 'Li': 6.9675,      'Be': 9.0121831, 'B' : 10.8135,     'C': 12.0106,
+                       'N' : 14.006855,  'O' : 15.9994,  'F' : 18.99840316, 'Ne': 20.1797,   'Na': 22.98976928, 'Mg': 24.3055,
+                       'Al': 26.9815385, 'Si': 28.085,   'P' : 30.973762,   'S' : 32.0675,   'Cl': 35.4515,     'Ar': 39.948,
+                       'K' : 39.0983,    'Ca': 40.078,   'Sc': 44.955908,   'Ti': 47.867,    'V' : 50.9415,     'Cr': 51.9961,
+                       'Mn': 54.938044,  'Fe': 55.845,   'Co': 58.933194,   'Ni': 58.6934,   'Cu': 63.546,      'Zn': 65.38,
+                       'Ga': 69.723,     'Ge': 72.63,    'As': 74.921595,   'Se': 78.971,    'Br': 79.904,      'Kr': 83.798,
+                       'Rb': 85.4678,    'Sr': 87.62,    'Y' : 88.90584,    'Zr': 91.224,    'Nb': 92.90637,    'Mo': 95.95}
+
+    multipole_names = ['q00',
+                       'q10', 'q11c', 'q11s',
+                       'q20', 'q21c', 'q21s', 'q22c', 'q21s'
+                       'q30', 'q31c', 'q31s', 'q32c', 'q32s', 'q33c', 'q33s',
+                       'q40', 'q41c', 'q41s', 'q42c', 'q42s', 'q43c', 'q43s', 'q44c', 'q44s']
 
 class UsefulTools:
     
@@ -440,7 +431,6 @@ class UsefulTools:
     
     @staticmethod
     def set_uid(uid=None):
-        global _UID
         if GLOBALS.SUBMITTED and GLOBALS.UID:
             return
         GLOBALS.UID = uid if uid else UsefulTools.get_uid()
@@ -503,8 +493,6 @@ class GlobalTools:
 
 
 class Arguments:
-    global _external_functions
-
     config_file = "config.properties"
     uid = UsefulTools.get_uid()
 
@@ -1249,7 +1237,7 @@ class ConfigProvider(dict):
        an extra condition to the if statement in loadConfig()
     """
 
-    def __init__(self, source=DEFAULT_CONFIG_FILE):
+    def __init__(self, source=Arguments.config_file):
         self.src = source
         self.load_config()
 
@@ -3082,11 +3070,11 @@ class Atom:
 
     @property
     def mass(self):
-        return type2mass[self.atom_type]
+        return Constants.type2mass[self.atom_type]
     
     @property
     def radius(self):
-        return type2rad[self.atom_type]
+        return Constants.type2rad[self.atom_type]
 
     @property
     def coordinates(self):
@@ -3432,8 +3420,10 @@ class Point:
         return training_set
 
     def training_set_lines(self, model_type):
-        model_types = {"iqa": self.iqa_training_set_line, 
-                       "multipoles": self.multipole_training_set_line}
+        model_types = {
+                       "iqa": self.iqa_training_set_line, 
+                       "multipoles": self.multipole_training_set_line
+                      }
         
         delimiter = " "
         number_of_outputs = 25
@@ -3459,7 +3449,8 @@ class Point:
     def multipole_training_set_line(self):
         training_set = self.__get_features()
         for atom in training_set.keys():
-            training_set[atom]["outputs"] = list(self.ints[atom].multipoles.values())
+            training_set[atom]["outputs"] = [self.ints[atom].integration_results["q"]] + \
+                                                list(self.ints[atom].multipoles)[1:25]
         return training_set
 
     def move(self, new_directory):
@@ -4977,7 +4968,7 @@ class DlpolyTools:
             f.write("nummols 1\n")
             f.write(f"atoms {len(atoms)}\n")
             for atom in atoms:
-                f.write(f"{atom.type}\t\t{dlpoly_weights[atom.type]:.7f}     0.0   1   0\n")
+                f.write(f"{atom.type}\t\t{Constants.dlpoly_weights[atom.type]:.7f}     0.0   1   0\n")
             f.write("finish\nclose")
 
     @staticmethod
@@ -5089,7 +5080,6 @@ class DlpolyTools:
     @staticmethod
     def auto_run():
         FileTools.rmtree(FILE_STRUCTURE["dlpoly"])
-#        FileTools.clear_log()
 
         log_dir = GLOBALS.FILE_STRUCTURE["log"]
         npoints = FileTools.count_models(log_dir)
@@ -5355,7 +5345,9 @@ class S_CurveTools:
         model_menu.set_refresh(S_CurveTools.refresh_model_menu)
 
         menu.clear_options()
-        menu.add_option("1", "Calculate S-Curves", S_CurveTools.caluclate_s_curves)
+        menu.add_option("1", "Calculate IQA S-Curves", S_CurveTools.caluclate_s_curves, kwargs={"iqa": True})
+        menu.add_option("2", "Calculate MPole S-Curves", S_CurveTools.caluclate_s_curves, kwargs={"mpole": True})
+        menu.add_option("3", "Calculate All S-Curves", S_CurveTools.caluclate_s_curves, kwargs={"iqa": True, "mpole": True})
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
@@ -5365,44 +5357,88 @@ class S_CurveTools:
         menu.add_final_options()
 
     @staticmethod
-    def caluclate_s_curves():
-        import pandas as pd
-
-        validation_set = Points(S_CurveTools.validation_set, read_gjfs=True, read_ints=True)
-        models = Models(S_CurveTools.models, read_models=True)
-
+    def calculate_s_curves_iqa(validation_set, models):
         predictions = models.predict(validation_set, atoms=True)
-
         atom_data = {}
         for point, prediction in zip(validation_set, predictions):
-            true_values = [0] * len(point.atoms)
             for atom, int_data in point.ints.items():
                 if not atom in atom_data.keys():
                     atom_data[atom] = {"true": [], "predicted": [], "error": []}
                 true_value = int_data.eiqa
-                predicted_value = prediction[int_data.num-1]
+                predicted_value = prediction['iqa'][int_data.num]
                 error = (true_value - predicted_value)**2
                 
                 atom_data[atom]["true"].append(true_value)
                 atom_data[atom]["predicted"].append(predicted_value)
                 atom_data[atom]["error"].append(error)
+        return atom_data
+
+    @staticmethod
+    def calculate_s_curves_mpole(validation_set, models):
+        mpole_data = {}
+        for mpole_name in Constants.multipole_names:
+            predictions = models.predict(validation_set, atoms=True, type=mpole_name)
+            if not [mpole_name] in mpole_data.keys():
+                mpole_data[mpole_name] = {}
+            for point, prediction in zip(validation_set, predictions[mpole_name]):
+                for atom, int_data in point.ints.items():
+                    if not atom in mpole_data[mpole_name].keys():
+                        mpole_data[mpole_name][atom] = {"true": [], "predicted": [], "error": []}
+                    true_value = int_data.multipoles[mpole_name] if not mpole_name == "q00" else int_data.integration_results["q"]
+                    predicted_value = prediction[int_data.num]
+                    error = (true_value - predicted_value)**2
+                    
+                    mpole_data[mpole_name][atom]["true"].append(true_value)
+                    mpole_data[mpole_name][atom]["predicted"].append(predicted_value)
+                    mpole_data[mpole_name][atom]["error"].append(error)
+        return mpole_data
+
+    @staticmethod
+    def add_percentage_column(df):
+        percentages = [100*(i+1)/len(df["true"]) for i in range(len(df["true"]))]
+        df["%"] = percentages
+        return df
+
+    @staticmethod
+    def to_df(property, data):
+        import pandas as pd
+        atom_data = {}
+        errors = {}
+        for atom, data in data.items():
+            property_df = pd.DataFrame(data)
+            errors[atom] = data["error"]
+            property_df.sort_values(by="error", inplace=True)
+            property_df = S_CurveTools.add_percentage_column(property_df)
+            atom_data[atom + "_" + property] = property_df
+        errors_df = pd.DataFrame(errors)
+        errors_df.loc[:,'Total'] = errors_df.sum(axis=1)
+        errors_df.sort_values(by="Total", inplace=True)
+        atom_data["Total_" + property] = errors_df
+        return atom_data
+
+    @staticmethod
+    def caluclate_s_curves(iqa=False, mpole=False):
+        import pandas as pd
+
+        validation_set = Points(S_CurveTools.validation_set, read_gjfs=True, read_ints=True)
+        models = Models(S_CurveTools.models, read_models=True)
         
+        atom_data = {}
+        if iqa:
+            iqa_s_curve_data = S_CurveTools.calculate_s_curves_iqa(validation_set, models)
+            atom_data.update(S_CurveTools.to_df("IQA", iqa_s_curve_data))
+        if mpole:
+            mpole_s_curve_data = S_CurveTools.calculate_s_curves_mpole(validation_set, models)
+            for mpole, atom_mpole_data in mpole_s_curve_data.items():
+                atom_data.update(S_CurveTools.to_df(mpole, atom_mpole_data))
+        
+        print(atom_data)
+        quit()
+
         percentages = []
         with pd.ExcelWriter("s_curves.xlsx", engine='xlsxwriter') as writer:
-            errors = {}
-            for atom, data in atom_data.items():
-                errors[atom] = data["error"]
-                df = pd.DataFrame(data)
-                if not percentages:
-                    percentages = [100*(i+1)/len(data["true"]) for i in range(len(data["true"]))]
-                df.sort_values(by="error", inplace=True)
-                df["%"] = percentages
-                df.to_excel(writer, sheet_name=atom)
-            df = pd.DataFrame(errors)
-            df.loc[:,'Total'] = df.sum(axis=1)
-            df.sort_values(by="Total", inplace=True)
-            df["%"] = percentages
-            df.to_excel(writer, sheet_name="Total")
+            for df_name, df in atom_data.items():
+                df.to_excel(writer, sheet_name=df_name)
 
     @staticmethod
     def run():
@@ -5598,49 +5634,7 @@ class SettingsTools:
 
 #############################################
 #            Function Definitions           #
-#############################################
-
-
-def readArguments():
-    global DEFAULT_CONFIG_FILE
-    global _UID
-    
-    allowed_functions = ",".join(_external_functions.keys())
-
-    parser = ArgumentParser(description="ICHOR: A kriging training suite")
-    
-    parser.add_argument("-c", "--config", dest="config_file", type=str,
-                        help="Name of Config File for ICHOR")
-    parser.add_argument("-f", "--func", dest="func", type=str, metavar=("func","arg"), nargs="+",
-                        help=f"Call ICHOR function with args, allowed functions: [{allowed_functions}]")
-    parser.add_argument("-u", "--uid", dest="uid", type=str,
-                        help="Unique Identifier For ICHOR Jobs To Write To")
-
-    args = parser.parse_args()
-
-    if args.config_file:
-        DEFAULT_CONFIG_FILE = args.config_file
-   
-    if args.func:
-        func = args.func[0]
-
-        if len(args.func) > 1:
-            func_args = args.func[1:]
-        else:
-            func_args = []
-
-        if func in _external_functions:
-            # UsefulTools.suppress_output()
-            _call_external_function = _external_functions[func]
-            _call_external_function_args = func_args
-        else:
-            print(f"{func} not in allowed functions:")
-            print(f"{allowed_functions}")
-            quit()
-
-    if args.uid:
-        _UID = args.uid
-        
+#############################################      
 
 def _ssh(machine):
     global SSH_SETTINGS
@@ -5874,6 +5868,7 @@ def main_menu():
 
     main_menu.add_final_options(back=False)
     main_menu.run()
+
 
 if __name__ == "__main__":
     Arguments.read()
