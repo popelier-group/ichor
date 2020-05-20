@@ -124,8 +124,6 @@ _unknown_settings = []
 
 _data_lock = False
 
-_IQA_MODELS = False
-
 #############################################
 #             Class Definitions             #
 #############################################
@@ -187,6 +185,7 @@ class Constants:
                        'q20', 'q21c', 'q21s', 'q22c', 'q21s'
                        'q30', 'q31c', 'q31s', 'q32c', 'q32s', 'q33c', 'q33s',
                        'q40', 'q41c', 'q41s', 'q42c', 'q42s', 'q43c', 'q43s', 'q44c', 'q44s']
+
 
 class UsefulTools:
     
@@ -781,11 +780,14 @@ class Globals:
         globals.DISABLE_PROBLEMS = False, bool
         globals.UID = Arguments.uid
 
+        globals.IQA_MODELS = False, bool
+
         # Set Hidden Variables
         globals.FILE_STRUCTURE.hidden = True
         globals.SGE.hidden = True
         globals.SUBMITTED.hidden = True
         globals.UID.hidden = True
+        globals.IQA_MODELS.hidden = True
 
         # Set Allowed Values
         globals.METHOD.allowed_values = Constants.GAUSSIAN_METHODS
@@ -2377,7 +2379,7 @@ class SubmissionTools:
             ferebus_job.add(model_directory)
             
         move_models = PythonCommand()
-        move_models.run_func("move_models", ferebus_job.get_variable(0), _IQA_MODELS)
+        move_models.run_func("move_models", ferebus_job.get_variable(0), GLOBALS.IQA_MODELS)
 
         script_name = os.path.join(directory, "FereSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -5685,7 +5687,7 @@ def submit_wfns(directory):
 
 
 @UsefulTools.externalFunc()
-def move_models(model_file, IQA=False, copy_to_log=True):
+def move_models(model_file, iqa=False, copy_to_log=True):
     logging.info("Moving Completed Models")
     model_directory = GLOBALS.FILE_STRUCTURE["models"]
     FileTools.mkdir(model_directory)
@@ -5698,7 +5700,7 @@ def move_models(model_file, IQA=False, copy_to_log=True):
         model = Model(model_file)
         model.remove_no_noise()
 
-        if bool(IQA):
+        if UsefulTools.check_bool(iqa):
             model.model_type = "IQA"
         new_model_file = model.get_fname(model_directory)
         FileTools.copy_file(model_file, new_model_file)
@@ -5708,8 +5710,7 @@ def move_models(model_file, IQA=False, copy_to_log=True):
 
 @UsefulTools.externalFunc()
 def _make_models(directory, model_type):
-    global _IQA_MODELS
-    _IQA_MODELS = model_type.lower() == "iqa"
+    GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
 
     logging.info(f"Making {model_type} models")
 
