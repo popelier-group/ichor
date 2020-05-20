@@ -3936,7 +3936,7 @@ class Model:
     def get_fname(self, directory=None):
         if directory is None:
             directory = self.directory
-        basename = f"{self.system_name}_kriging_{self.model_type}_{self.atom_number}.txt"
+        basename = f"{self.system_name}_kriging_{self.type}_{self.atom_number}.txt"
         return os.path.join(directory, basename)
     
     def copy_to_log(self):
@@ -5701,7 +5701,7 @@ def move_models(model_file, iqa=False, copy_to_log=True):
         model.remove_no_noise()
 
         if UsefulTools.check_bool(iqa):
-            model.model_type = "IQA"
+            model.type = "IQA"
         new_model_file = model.get_fname(model_directory)
         FileTools.copy_file(model_file, new_model_file)
 
