@@ -773,6 +773,16 @@ class Globals:
         globals.DLPOLY_MAX_DISP = -1.0, float
         globals.DLPOLY_RMS_DISP = -1.0, float
 
+        # Recovery and Integration Errors
+        globals.WARN_RECOVERY_ERROR      = True, bool
+        globals.RECOVERY_ERROR_THRESHOLD = 0.00038087983, float # Ha (1.0 kJ/mol)
+
+        globals.WARN_INTEGRATION_ERROR      = True, bool
+        globals.INTEGRATION_ERROR_THRESHOLD = 0.001, float # Ha (1.0 kJ/mol)
+        
+        # Activate Warnings when making models
+        globals.LOG_WARNINGS = False # Gets set in _make_models
+
         globals.MACHINE = "", str
         globals.SGE = False, bool       # Don't Change
         globals.SUBMITTED = False, bool # Don't Change
@@ -3364,10 +3374,36 @@ class Point:
             int_file = INT(int_fname, read=read_ints)
             self.ints[int_file.atom] = int_file
         
+        if GLOBALS.LOG_WARNINGS:
+            self.log_warnings
+
         self.fname = ""
 
         if not atoms is None:
             self.gjf._atoms = atoms
+
+    @property
+    def log_warnings(self):
+        if GLOBALS.WARN_RECOVERY_ERROR:
+            n_recovery_error = 0
+            for point in self:
+                recovery_error = point.calculate_recovery_error()
+                if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
+                    logging.warning(f"{point.directory} | Recovery Error: {recovery_error} Ha")
+                    n_recovery_error += 1
+            if n_recovery_error > 0:
+                logging.warning(f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
+        
+        if GLOBALS.WARN_INTEGRATION_ERROR:
+            n_integration_error = 0
+            for point in self:
+                integration_errors = point.get_integration_errors()
+                for atom, integration_error in integration_errors.items():
+                    if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
+                        logging.warning(f"{point.directory} | {atom} | Integration Error: {integration_error} Ha")
+                        n_integration_error += 1
+            if n_integration_error > 0:
+                logging.warning(f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
 
     @property
     def atoms(self):
@@ -3402,6 +3438,17 @@ class Point:
                 else:
                     eiqa[int_data.num - 1] = int_data.eiqa
             return eiqa
+    
+    def calculate_recovery_error(self):
+        wfn_energy = self.wfn.energy
+        iqa_energy = self.get_true_value("iqa")
+        return np.abs(wfn_energy - iqa_energy)
+
+    def get_integration_errors(self):
+        integration_errors = {}
+        for atom, int_data in self.ints.items():
+            integration_errors[atom] = int_data.integration_results["L"]
+        return integration_errors
 
     def split_fname(self):
         self.dirname = os.path.dirname(self.fname)
@@ -5732,11 +5779,12 @@ def move_models(model_file, iqa=False, copy_to_log=True):
 
 @UsefulTools.externalFunc()
 def _make_models(directory, model_type):
+    GLOBALS.LOG_WARNINGS = True
     GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
 
     logging.info(f"Making {model_type} models")
 
-    aims = Points(directory, read_gjfs=True, read_ints=True)
+    aims = Points(directory, read_gjfs=True, read_ints=True, read_wfns=GLOBALS.WARN_RECOVERY_ERROR)
     models = aims.make_training_set(model_type)
     SubmissionTools.make_ferebus_script(models)
 
