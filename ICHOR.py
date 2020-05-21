@@ -3639,8 +3639,8 @@ class WFN(Point):
                 if "CENTRE ASSIGNMENTS" in line:
                     self._atoms.finish
                 if "TOTAL ENERGY" in line:
-                    self.energy = line.split()[3]
-                    self.virial = line.split()[-1]
+                    self.energy = float(line.split()[3])
+                    self.virial = float(line.split()[-1])
 
     def read_header(self):
         data = re.findall(r"\s\d+\s", self.header)
