@@ -4412,7 +4412,6 @@ class Points:
                     continue
                 progressbar.update()
     
-    @property
     def log_warnings(self):
         if GLOBALS.WARN_RECOVERY_ERROR:
             n_recovery_error = 0
