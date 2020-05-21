@@ -3373,38 +3373,12 @@ class Point:
         for int_fname in self.int_fnames:
             int_file = INT(int_fname, read=read_ints)
             self.ints[int_file.atom] = int_file
-        
-        if GLOBALS.LOG_WARNINGS:
-            self.log_warnings
 
         self.fname = ""
 
         if not atoms is None:
             self.gjf._atoms = atoms
-
-    @property
-    def log_warnings(self):
-        if GLOBALS.WARN_RECOVERY_ERROR:
-            n_recovery_error = 0
-            for point in self:
-                recovery_error = point.calculate_recovery_error()
-                if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
-                    logging.warning(f"{point.directory} | Recovery Error: {recovery_error} Ha")
-                    n_recovery_error += 1
-            if n_recovery_error > 0:
-                logging.warning(f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
-        
-        if GLOBALS.WARN_INTEGRATION_ERROR:
-            n_integration_error = 0
-            for point in self:
-                integration_errors = point.get_integration_errors()
-                for atom, integration_error in integration_errors.items():
-                    if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
-                        logging.warning(f"{point.directory} | {atom} | Integration Error: {integration_error} Ha")
-                        n_integration_error += 1
-            if n_integration_error > 0:
-                logging.warning(f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
-
+    
     @property
     def atoms(self):
         return self.gjf._atoms
@@ -4383,6 +4357,8 @@ class Points:
             FileTools.check_directory(self.directory)
             start_time = UsefulTools.get_time()
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
+            if GLOBALS.LOG_WARNINGS:
+                self.log_warnings()
             UsefulTools.log_time_taken(start_time, message=f"Reading {self.directory} took ")
 
         training_set_functions = {
@@ -4436,6 +4412,30 @@ class Points:
                     continue
                 progressbar.update()
     
+    @property
+    def log_warnings(self):
+        if GLOBALS.WARN_RECOVERY_ERROR:
+            n_recovery_error = 0
+            for point in self:
+                recovery_error = point.calculate_recovery_error()
+                if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
+                    logging.warning(f"{point.directory} | Recovery Error: {recovery_error} Ha")
+                    n_recovery_error += 1
+            if n_recovery_error > 0:
+                logging.warning(f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
+        
+        if GLOBALS.WARN_INTEGRATION_ERROR:
+            n_integration_error = 0
+            for point in self:
+                integration_errors = point.get_integration_errors()
+                for atom, integration_error in integration_errors.items():
+                    if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
+                        logging.warning(f"{point.directory} | {atom} | Integration Error: {integration_error} Ha")
+                        n_integration_error += 1
+            if n_integration_error > 0:
+                logging.warning(f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
+
+
     def read_gjf(self, gjf_file):
         gjf = GJF(gjf_file, read=True)
         self.add_point(gjf._atoms)
