@@ -2233,6 +2233,9 @@ class PythonCommand(CommandLine):
         args = [str(arg) for arg in args]
         self.arguments += ["-f", f"{function_name}", *args]
 
+    def set_config(self, config_file):
+        self.arguments += ["-c", config_file]
+
     def __repr__(self):
         runcmd = [self.command, self.py_script, " ".join(self.arguments)]
         return " ".join(runcmd)
@@ -2408,6 +2411,7 @@ class SubmissionTools:
         python_job = PythonCommand()
         if function:
             python_job.run_func(function, *args)
+        python_job.set_config(Arguments.config_file)
         
         script_name = os.path.join(directory, "PySub.sh")
         submission_script = SubmissionScript(script_name)
