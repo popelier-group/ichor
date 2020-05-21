@@ -4355,11 +4355,11 @@ class Points:
         self.directory = directory if directory else "."
         if read_gjfs or read_wfns or read_ints:
             FileTools.check_directory(self.directory)
-            start_time = UsefulTools.get_time()
+            # start_time = UsefulTools.get_time()
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
             if GLOBALS.LOG_WARNINGS:
                 self.log_warnings()
-            UsefulTools.log_time_taken(start_time, message=f"Reading {self.directory} took ")
+            # UsefulTools.log_time_taken(start_time, message=f"Reading {self.directory} took ")
 
         training_set_functions = {
                                   "min-max": self.get_min_max_features_first_atom,
