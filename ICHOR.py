@@ -2775,6 +2775,10 @@ class AutoTools:
         return AutoTools.submit_ichor("calculate_errors", model_dir, sp_dir, submit=True, hold=jid)
 
     @staticmethod
+    def submit_ichor_s_curves(predict_property, validation_set, models, output_file):
+        return AutoTools.submit_ichor("calculate_s_curves", predict_property, validation_set, models, output_file, submit=True, hold=None)
+
+    @staticmethod
     def submit_dlpoly_gjfs(jid=None):
         return AutoTools.submit_ichor("calculate_gaussian_energies", submit=True, hold=jid)
 
@@ -4129,18 +4133,25 @@ class Models:
         self._models.append(Model(model_file, read_model=read_model))
     
     @lru_cache()
-    def predict(self, points, atoms=False, type="iqa"):
+    def predict(self, points, atoms=False, type="iqa", verbose=False):
         predictions = []
-        for point in points:
-            prediction = 0 if not atoms else {}
-            for model in self.get(type):
-                if not atoms:
-                    prediction += model.predict(point) 
-                else:
-                    if not model.type in prediction.keys():
-                        prediction[model.type] = {}
-                    prediction[model.type][model.num] = float(model.predict(point))
-            predictions.append(prediction)
+        models = self.get(type)
+        with tqdm(total=len(points), unit=" points", leave=True, disable=not verbose) as points_progressbar:
+            for point in points:
+                points_progressbar.set_description(point.directory)
+                prediction = 0 if not atoms else {}
+                with tqdm(total=len(models), unit=" models", leave=False, disable=not verbose) as models_progressbar:
+                    for model in self.get(type):
+                        models_progressbar.set_description(model.type)
+                        if not atoms:
+                            prediction += model.predict(point) 
+                        else:
+                            if not model.type in prediction.keys():
+                                prediction[model.type] = {}
+                            prediction[model.type][model.num] = float(model.predict(point))
+                        models_progressbar.update()
+                    predictions.append(prediction)
+                points_progressbar.update()
         return np.array(predictions) if not atoms else predictions
     
     @lru_cache()
@@ -5285,6 +5296,97 @@ class S_CurveTools:
     validation_set = ""
     models = ""
 
+    submit = False
+    output_file = "s_curves.xlsx"
+
+    @staticmethod
+    def _calculate_s_curves(validation_set, models, property):
+        model_data = {}
+        predictions = models.predict(validation_set, atoms=True, type=property, verbose=True)
+        for point, prediction in zip(validation_set, predictions):
+            for model_name, model_prediction in prediction.items():
+                if not model_name in model_data.keys():
+                    model_data[model_name] = {}
+                for atom, int_data in point.ints.items():
+                    if not atom in model_data[model_name].keys():
+                        model_data[model_name][atom] = {"true": [], "predicted": [], "error": []}
+                    if model_name.lower() == "iqa":
+                        true_value = int_data.eiqa
+                    else:
+                        true_value = int_data.multipoles[model_name] if not model_name == "q00" else int_data.integration_results["q"]
+                    predicted_value = model_prediction[int_data.num]
+                    error = np.abs(true_value - predicted_value)
+                    
+                    model_data[model_name][atom]["true"].append(true_value)
+                    model_data[model_name][atom]["predicted"].append(predicted_value)
+                    model_data[model_name][atom]["error"].append(error)
+        return model_data
+
+    @staticmethod
+    def add_percentage_column(df):
+        percentages = [100*(i+1)/len(df) for i in range(len(df))]
+        df["%"] = percentages
+        return df
+
+    @staticmethod
+    def to_df(property, data):
+        import pandas as pd
+        atom_data = {}
+        errors = {}
+        for atom, data in data.items():
+            property_df = pd.DataFrame(data)
+            errors[atom] = data["error"]
+            property_df.sort_values(by="error", inplace=True)
+            property_df = S_CurveTools.add_percentage_column(property_df)
+            atom_data[atom + "_" + property] = property_df
+        errors_df = pd.DataFrame(errors)
+        errors_df.loc[:,'Total'] = errors_df.sum(axis=1)
+        errors_df.sort_values(by="Total", inplace=True)
+        errors_df = S_CurveTools.add_percentage_column(errors_df)
+        atom_data["Total_" + property] = errors_df
+        return atom_data
+
+    @staticmethod
+    @UsefulTools.externalFunc()
+    def calculate_s_curves(predict_property="all", validation_set=None, models=None, output_file=None):
+        import pandas as pd
+
+        if validation_set is None: validation_set = S_CurveTools.validation_set
+        if models is None: models = S_CurveTools.models
+        if output_file is None: output_file = S_CurveTools.output_file
+
+        if S_CurveTools.submit:
+            AutoTools.submit_ichor_s_curves(predict_property, validation_set, models, output_file)
+
+        print("Reading Data")
+        validation_set = Points(validation_set, read_gjfs=True, read_ints=True)
+        models = Models(models, read_models=True)
+        print()
+
+        print("Making Predictions")       
+        atom_data = {}
+        s_curve_data = S_CurveTools._calculate_s_curves(validation_set, models, predict_property)
+        for property, atom_property_data in s_curve_data.items():
+            atom_data.update(S_CurveTools.to_df(property, atom_property_data))
+
+        with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
+            for df_name, df in atom_data.items():
+                df.to_excel(writer, sheet_name=df_name)
+
+    @staticmethod
+    def toggle_submit():
+        S_CurveTools.submit = not S_CurveTools.submit
+
+    @staticmethod
+    def change_output_file():
+        allowed_filetypes = [".xlsx", ".xls"]
+        outfile = UsefulTools.input_with_prefill("Enter Output File: ", S_CurveTools.output_file)
+        if outfile == "":
+            outfile = S_CurveTools.output_file
+        elif not any([outfile.endswith(filetype) for filetype in allowed_filetypes]):
+            outfile += ".xlsx"
+        S_CurveTools.output_file = outfile
+
     @staticmethod
     def get_dir():
         t = TabCompleter()
@@ -5347,100 +5449,21 @@ class S_CurveTools:
         model_menu.set_refresh(S_CurveTools.refresh_model_menu)
 
         menu.clear_options()
-        menu.add_option("1", "Calculate IQA S-Curves", S_CurveTools.caluclate_s_curves, kwargs={"iqa": True})
-        menu.add_option("2", "Calculate MPole S-Curves", S_CurveTools.caluclate_s_curves, kwargs={"mpole": True})
-        menu.add_option("3", "Calculate All S-Curves", S_CurveTools.caluclate_s_curves, kwargs={"iqa": True, "mpole": True})
+        menu.add_option("1", "Calculate IQA S-Curves", S_CurveTools.calculate_s_curves, kwargs={"predict_property": "iqa"})
+        menu.add_option("2", "Calculate MPole S-Curves", S_CurveTools.calculate_s_curves, kwargs={"predict_property": "multipoles"})
+        menu.add_option("3", "Calculate All S-Curves", S_CurveTools.calculate_s_curves, kwargs={"predict_property": "all"})
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
+        menu.add_option("output", "Change Output File", S_CurveTools.change_output_file)
+        menu.add_option("submit", "Toggle Submit To Cluster", S_CurveTools.toggle_submit)
         menu.add_space()
         menu.add_message(f"Validation Set Location: {S_CurveTools.validation_set}")
         menu.add_message(f"Model Location: {S_CurveTools.models}")
+        menu.add_space()
+        menu.add_message(f"Output File: {S_CurveTools.output_file}")
+        menu.add_message(f"Submit To Cluster: {S_CurveTools.submit}")
         menu.add_final_options()
-
-    @staticmethod
-    def calculate_s_curves_iqa(validation_set, models):
-        predictions = models.predict(validation_set, atoms=True)
-        atom_data = {}
-        for point, prediction in zip(validation_set, predictions):
-            for atom, int_data in point.ints.items():
-                if not atom in atom_data.keys():
-                    atom_data[atom] = {"true": [], "predicted": [], "error": []}
-                true_value = int_data.eiqa
-                predicted_value = prediction['iqa'][int_data.num]
-                error = (true_value - predicted_value)**2
-                
-                atom_data[atom]["true"].append(true_value)
-                atom_data[atom]["predicted"].append(predicted_value)
-                atom_data[atom]["error"].append(error)
-        return atom_data
-
-    @staticmethod
-    def calculate_s_curves_mpole(validation_set, models):
-        mpole_data = {}
-        for mpole_name in Constants.multipole_names:
-            predictions = models.predict(validation_set, atoms=True, type=mpole_name)
-            if not [mpole_name] in mpole_data.keys():
-                mpole_data[mpole_name] = {}
-            for point, prediction in zip(validation_set, predictions[mpole_name]):
-                for atom, int_data in point.ints.items():
-                    if not atom in mpole_data[mpole_name].keys():
-                        mpole_data[mpole_name][atom] = {"true": [], "predicted": [], "error": []}
-                    true_value = int_data.multipoles[mpole_name] if not mpole_name == "q00" else int_data.integration_results["q"]
-                    predicted_value = prediction[int_data.num]
-                    error = (true_value - predicted_value)**2
-                    
-                    mpole_data[mpole_name][atom]["true"].append(true_value)
-                    mpole_data[mpole_name][atom]["predicted"].append(predicted_value)
-                    mpole_data[mpole_name][atom]["error"].append(error)
-        return mpole_data
-
-    @staticmethod
-    def add_percentage_column(df):
-        percentages = [100*(i+1)/len(df["true"]) for i in range(len(df["true"]))]
-        df["%"] = percentages
-        return df
-
-    @staticmethod
-    def to_df(property, data):
-        import pandas as pd
-        atom_data = {}
-        errors = {}
-        for atom, data in data.items():
-            property_df = pd.DataFrame(data)
-            errors[atom] = data["error"]
-            property_df.sort_values(by="error", inplace=True)
-            property_df = S_CurveTools.add_percentage_column(property_df)
-            atom_data[atom + "_" + property] = property_df
-        errors_df = pd.DataFrame(errors)
-        errors_df.loc[:,'Total'] = errors_df.sum(axis=1)
-        errors_df.sort_values(by="Total", inplace=True)
-        atom_data["Total_" + property] = errors_df
-        return atom_data
-
-    @staticmethod
-    def caluclate_s_curves(iqa=False, mpole=False):
-        import pandas as pd
-
-        validation_set = Points(S_CurveTools.validation_set, read_gjfs=True, read_ints=True)
-        models = Models(S_CurveTools.models, read_models=True)
-        
-        atom_data = {}
-        if iqa:
-            iqa_s_curve_data = S_CurveTools.calculate_s_curves_iqa(validation_set, models)
-            atom_data.update(S_CurveTools.to_df("IQA", iqa_s_curve_data))
-        if mpole:
-            mpole_s_curve_data = S_CurveTools.calculate_s_curves_mpole(validation_set, models)
-            for mpole, atom_mpole_data in mpole_s_curve_data.items():
-                atom_data.update(S_CurveTools.to_df(mpole, atom_mpole_data))
-        
-        print(atom_data)
-        quit()
-
-        percentages = []
-        with pd.ExcelWriter("s_curves.xlsx", engine='xlsxwriter') as writer:
-            for df_name, df in atom_data.items():
-                df.to_excel(writer, sheet_name=df_name)
 
     @staticmethod
     def run():
@@ -5454,7 +5477,6 @@ class S_CurveTools:
         S_CurveTools.models = S_CurveTools.model_loc
 
         s_curves_menu = Menu(title="S-Curves Menu")
-        # setattr(s_curves_menu, "refresh", S_CurveTools.refresh_s_curve_menu)
         s_curves_menu.set_refresh(S_CurveTools.refresh_s_curve_menu)
         s_curves_menu.run()
 
