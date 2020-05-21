@@ -2133,7 +2133,7 @@ class FerebusCommand(CommandLine):
         if not "py" in GLOBALS.FEREBUS_VERSION:
             self.modules["ffluxlab"] = [
                                         "mpi/intel/18.0.3",
-                                        "libs/intel/nag/fortran_mark23_intel"
+                                        "libs/nag/intel/fortran/mark-23"
                                        ]
             self.modules["csf3"] = [
                                     "compilers/intel/17.0.7",
@@ -3810,16 +3810,61 @@ class INT(Point):
         return not self.fname == ""
 
 
+@jit(nopython=True)
+def numba_r_rbf(x_star, x, hp):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    r = np.empty((n_train, 1))
+    for i in np.arange(n_train):
+        result = 0.0
+        for j in np.arange(n_feat):
+            xi = x_star[j]
+            xj = x[i][j]
+            xh = hp[j]
+            if (j+1) % 3 == 0:
+                diff = np.abs(xi - xj)
+                if (diff > np.pi):
+                    diff = diff - 2*np.pi
+                elif (diff < -np.pi):
+                    diff = 2*np.pi + diff
+                result += xh * diff * diff
+            else:
+                result += xh * (xi - xj)**2
+        r[i] = np.exp(-result)
+    return r
+
+
+@jit(nopython=True)
+def numba_R_rbf(x, hp):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    R = np.empty((n_train, n_train))
+    for i in np.arange(n_train):
+        R[i][i] = 1
+        for j in np.arange(i+1, n_train):
+            result = 0.0
+            for k in np.arange(n_feat):
+                xi = x[i][k]
+                xj = x[j][k]
+                xh = hp[k]
+                if (k+1) % 3 == 0:
+                    diff = np.abs(xi - xj)
+                    if (diff > np.pi):
+                        diff = diff - 2*np.pi
+                    elif (diff < -np.pi):
+                        diff = 2*np.pi + diff
+                    result += xh * diff * diff
+                else:
+                    result += xh * (xi - xj)**2
+            result = np.exp(-result)
+            R[i][j] = result
+            R[j][i] = result
+    return R
+
+
 class Model:
     def __init__(self, fname, read_model=False):
         self.fname = fname
-
-        kernels = {
-            "rbf": self.k_rbf,
-            "m52": self.k_m52
-        }
-
-        self.k = kernels[GLOBALS.KERNEL.lower()]
 
         self.directory = ""
         self.basename = ""
@@ -3978,23 +4023,8 @@ class Model:
 
         FileTools.copy_file(self.fname, log_model_file)
 
-    def k_rbf(self, xi, xj):
-        result = 0
-        for i, j, h in zip(xi, xj, self.hyper_parameters):
-            result += h * (i - j)**2
-        return np.exp(-result)
-    
-    def k_m52(self, xi, xj):
-        return NotImplemented
-        result = 0
-        for i, j, h in zip(xi, xj, self.hyper_parameters):
-            result += h * (i - j)**2
-        return np.exp(-result)
-
     def r(self, features):
-        r = np.empty((self.nTrain, 1))
-        for i, point in enumerate(self.X):
-            r[i] = self.k(features, point)
+        r = numba_r_rbf(features, self.X, np.array(self.hyper_parameters))
         return r
 
     @property
@@ -4002,10 +4032,7 @@ class Model:
         try:
             return self._R
         except AttributeError:
-            self._R = np.empty((self.nTrain, self.nTrain))
-            for i, xi in enumerate(self.X):
-                for j, xj in enumerate(self.X):
-                    self._R[i][j] = self.k(xi, xj)
+            self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
             return self._R
 
     @property
@@ -4737,8 +4764,11 @@ class Points:
                     progressbar.update()
             return self._features
 
-    def __len__(self):
-        return FileTools.count_points_in(self.directory)
+    def __len__(self):	
+        num_points = FileTools.count_points_in(self.directory)	
+        if num_points == 0:	
+            return len(self._points)	
+        return num_points
     
     def __delitem__(self, del_point):
         if isinstance(del_point, (int, np.int64)):
@@ -4777,14 +4807,28 @@ class Trajectory:
                     self.add(atoms)
                     atoms = Atoms()
 
-    def append(self, atoms):
-        self._trajectory.append(atoms)
+    def append(self, atoms):	
+        if isinstance(atoms, Atoms):	
+            self._trajectory.append(atoms)	
+        else:	
+            self._trajectory.append(Atoms(atoms))
 
     def add_point(self, atoms):
         self.append(atoms)
     
     def add(self, atoms):
         self.append(atoms)
+
+    def extend(self, atoms):	
+        [self._trajectory.append(iatoms) for iatoms in atoms]	
+    
+    def write(self, fname=None):	
+        if fname is None:	
+            fname = self.fname	
+        with open(fname, "w") as f:	
+            for i, atoms in enumerate(self):	
+                f.write(f"    {len(atoms)}\ni = {i}\n")	
+                f.write(f"{atoms}\n")
 
     def rmsd(self, ref=None):
         if ref is None:
