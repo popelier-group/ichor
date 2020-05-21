@@ -3637,7 +3637,7 @@ class WFN(Point):
                 if "CHARGE" in line:
                     self._atoms.add(line)
                 if "CENTRE ASSIGNMENTS" in line:
-                    self._atoms.finish
+                    self._atoms.finish()
                 if "TOTAL ENERGY" in line:
                     self.energy = float(line.split()[3])
                     self.virial = float(line.split()[-1])
