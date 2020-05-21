@@ -2863,6 +2863,8 @@ class AutoTools:
 
         UsefulTools.suppress_tqdm()
 
+        GLOBALS.IQA_MODELS = True
+
         order = [
                 AutoTools.submit_ichor_gjfs, 
                 AutoTools.submit_gjfs, 
