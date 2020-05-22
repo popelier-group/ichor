@@ -5737,7 +5737,7 @@ class SettingsTools:
             menu.add_option(global_var.name, global_var_value, SettingsTools.change, kwargs={"var": global_var})
         menu.add_space()
         menu.add_option("s", f"Save changes to config ({Arguments.config_file})", SettingsTools.save_changes)
-        menu.add_option("c", "Change config file")
+        menu.add_option("c", "Change config file", SettingsTools.change_config)
         menu.add_final_options()
 
     @staticmethod
