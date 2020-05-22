@@ -5668,6 +5668,7 @@ class SetupTools:
 
 class SettingsTools:
     edit_var = None
+    show_hidden = False
 
     @staticmethod
     def set_default():
@@ -5730,14 +5731,28 @@ class SettingsTools:
                 print("Known filetypes: {filetypes}")
     
     @staticmethod
+    def toggle_hidden():
+        SettignsTools.show_hidden = not SettingsTools.show_hidden
+
+    @staticmethod
     def refresh_settings_menu(menu):
         menu.clear_options()
-        for global_var in GLOBALS.items():
-            global_var_value = "= " + str(global_var.value)
-            menu.add_option(global_var.name, global_var_value, SettingsTools.change, kwargs={"var": global_var})
+        global_variables = GLOBALS.items(show_hidden=SettingsTools.show_hidden)
+        for global_var in global_variables:
+            if not global_var.hidden:
+                global_var_value = "= " + str(global_var.value)
+                menu.add_option(global_var.name, global_var_value, SettingsTools.change, kwargs={"var": global_var})
         menu.add_space()
+        if SettingsTools.show_hidden:
+            for global_var in global_variables:
+                if global_var.hidden:
+                    global_var_value = str(global_var.value)
+                    menu.add_message(global_var.name + " = " + global_var_value)
+            menu.add_space()
+
         menu.add_option("s", f"Save changes to config ({Arguments.config_file})", SettingsTools.save_changes)
         menu.add_option("c", "Change config file", SettingsTools.change_config)
+        menu.add_option("h", "Show/Hide Hidden Variables", SettingsTools.toggle_hidden)
         menu.add_final_options()
 
     @staticmethod
