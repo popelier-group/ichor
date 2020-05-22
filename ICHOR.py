@@ -2220,7 +2220,7 @@ class PythonCommand(CommandLine):
     
         super().__init__()
 
-        if GLOBALS.UID: self.add_argument("-u", str(GLOBALS.UID))
+        self.add_argument("-u", str(GLOBALS.UID))
     
     def load_modules(self):
         self.modules["csf3"] = ["apps/anaconda3/5.2.0/bin"]
@@ -5732,7 +5732,7 @@ class SettingsTools:
     
     @staticmethod
     def toggle_hidden():
-        SettignsTools.show_hidden = not SettingsTools.show_hidden
+        SettingsTools.show_hidden = not SettingsTools.show_hidden
 
     @staticmethod
     def refresh_settings_menu(menu):
