@@ -121,8 +121,6 @@ logging.basicConfig(filename='ichor.log',
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     datefmt='%d-%m-%Y %H:%M:%S')
 
-_unknown_settings = []
-
 _data_lock = False
 
 #############################################
@@ -302,10 +300,10 @@ class UsefulTools:
                 fname = arr[indx]
                 string = f"{fname:{str(width)}s}"
                 if fname == "scratch":
-                    row += COLORS.OKGREEN + string + COLORS.ENDC
+                    row += Colors.OKGREEN + string + Colors.ENDC
                 else:
                     if color:
-                        string = color + string + COLORS.ENDC
+                        string = color + string + Colors.ENDC
                     row += string
                 row = row + "\t" if len(fname) > width else row
             print(row)
@@ -847,6 +845,8 @@ class Globals:
             self.set(key, val)
             if key in self.__dict__.keys():
                 self.__dict__[key].in_config = True
+            else:
+                ProblemFinder.unknown_settings += [key]
 
         if not self.ALF:
             if not self.ALF_REFERENCE_FILE:
@@ -940,7 +940,7 @@ class Globals:
             return self.__dict__[attr]
 
 
-class COLORS:
+class Colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -952,10 +952,10 @@ class COLORS:
 
     @staticmethod
     def format_blue(s):
-        return COLORS.OKBLUE + s + COLORS.ENDC
+        return Colors.OKBLUE + s + Colors.ENDC
 
 
-class PATTERNS:
+class Patterns:
     COORDINATE_LINE = re.compile(r"\s*\w+(\s*[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}")
 
     AIMALL_LINE = re.compile(r"[<|]?\w+[|>]?\s+=(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?)")
@@ -1737,13 +1737,7 @@ class Problem:
 
 
 class ProblemFinder:
-
-    # DISABLE_PROBLEMS // 
-
-    # PROBLEMS To ADD:
-    # - Fix ALF problem //
-    # - Add config setting checks to problems (unknown setting) //
-    # - Check SYSTEM_NAME //
+    unknown_settings = []
 
     def __init__(self):
         self.problems = []
@@ -1778,7 +1772,7 @@ class ProblemFinder:
     
     @UsefulTools.runFunc(4)
     def check_settings(self):
-        for setting in _unknown_settings:
+        for setting in ProblemFinder.unknown_settings:
             self.add(Problem(name=f"Unknown setting found in config", 
                              problem=f"Unknown setting: {setting}",
                              solution="See documentation or check [o]ptions [settings] for full list of settings"
@@ -2278,9 +2272,6 @@ class SubmissionScript:
         self.load_modules()
         self.setup_stdout()
     
-    def write(self):
-        self.setup()
-        self.cleanup()
     def write(self):
         self.setup()
         self.cleanup()
@@ -3510,7 +3501,7 @@ class GJF(Point):
                 if re.match(r"^\s*\d+\s+\d+$", line):
                     self.charge = int(line.split()[0])
                     self.multiplicity = int(line.split()[1])
-                if re.match(PATTERNS.COORDINATE_LINE, line):
+                if re.match(Patterns.COORDINATE_LINE, line):
                     self._atoms.add(line.strip())
                 if line.endswith(".wfn"):
                     self._atoms.finish()
@@ -3700,7 +3691,7 @@ class INT(Point):
                 if "Results of the basin integration:" in line:
                     line = next(f)
                     while line.strip():
-                        for match in re.finditer(PATTERNS.AIMALL_LINE, line):
+                        for match in re.finditer(Patterns.AIMALL_LINE, line):
                             tokens = match.group().split("=")
                             try:
                                 self.integration_results[tokens[0].strip()] = float(tokens[-1])
