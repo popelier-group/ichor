@@ -321,7 +321,7 @@ class UsefulTools:
         return " ".join(map(str, s))
     
     @staticmethod
-    def runFunc(order):
+    def run_function(order):
         def do_assignment(to_func):
             to_func.order = order
             return to_func
@@ -1742,7 +1742,7 @@ class ProblemFinder:
     def __init__(self):
         self.problems = []
 
-    @UsefulTools.runFunc(1)
+    @UsefulTools.run_function(1)
     def check_alf(self):
         if len(GLOBALS.ALF) < 1:
             self.add(Problem(name="ALF", 
@@ -1750,7 +1750,7 @@ class ProblemFinder:
                              solution="Set 'ALF_REFERENCE_FILE' or manually set 'ALF' in config file"
                             ))
     
-    @UsefulTools.runFunc(2)
+    @UsefulTools.run_function(2)
     def check_directories(self):
         dirs_to_check = ["training_set", "sample_pool"]
 
@@ -1762,7 +1762,7 @@ class ProblemFinder:
                                  solution="Setup directory structure or create manually"
                                 ))
 
-    @UsefulTools.runFunc(3)
+    @UsefulTools.run_function(3)
     def check_system(self):
         if GLOBALS.SYSTEM_NAME == "SYSTEM":
             self.add(Problem(name="SYSTEM_NAME", 
@@ -1770,7 +1770,7 @@ class ProblemFinder:
                              solution="Set 'SYSTEM_NAME' in config file"
                             ))
     
-    @UsefulTools.runFunc(4)
+    @UsefulTools.run_function(4)
     def check_settings(self):
         for setting in ProblemFinder.unknown_settings:
             self.add(Problem(name=f"Unknown setting found in config", 
@@ -1812,10 +1812,7 @@ class Modules:
         return self._modules.keys()
 
     def __getitem__(self, machine):
-        if machine in self.machines:
-            return self._modules[machine]
-        else:
-            return []
+        return self._modules[machine] if machine in self.machines else []
     
     def __setitem__(self, machine, module):
         if machine not in self.machines:
@@ -1835,7 +1832,7 @@ class ParallelEnvironment:
         self.max = max_cores
 
     
-class _ParallelEnvironments:
+class MachineParallelEnvironments:
     def __init__(self):
         self._environments = []
     
@@ -1864,7 +1861,7 @@ class ParallelEnvironments:
     
     def __setitem__(self, machine, environments):
         if machine not in self.machines:
-            self._environments[machine] = _ParallelEnvironments()
+            self._environments[machine] = MachineParallelEnvironments()
 
         if not isinstance(environments, list):
             environments = [environments]
@@ -1911,7 +1908,7 @@ class CommandLine:
         if not ndata:
             ndata = self.ndata
         return [f"arr{i+1}" for i in range(ndata)]
-    
+
     def setup_var_names(self, ndata=None):
         if not ndata:
             ndata = self.ndata
@@ -1948,15 +1945,15 @@ class CommandLine:
         self.var_names = self.setup_var_names(len(data))
 
         read_data_file = [
-                          f"file={datafile}",
-                          ""
-                         ]
+                            f"file={datafile}",
+                            ""
+                            ]
         for array_name in self.array_names:
             read_data_file += [f"{array_name}=()"]
         read_data_file += [
-                           f"while IFS={delimiter} read -r " + " ".join(self.var_names),
-                           "do"
-                          ]
+                            f"while IFS={delimiter} read -r " + " ".join(self.var_names),
+                            "do"
+                            ]
         for array_name, var_name in zip(self.array_names, self.var_names):
             read_data_file += [f"    {array_name}+=(${var_name})"]
         read_data_file += ["done < $file"]
@@ -2070,19 +2067,19 @@ class AIMAllCommand(CommandLine):
         self.options = [
                         "-j y",
                         "-S /bin/bash"
-                       ]
-    
+                        ]
+
     def setup_arguments(self):
         self.arguments = [
-                          "-nogui",
-                          "-usetwoe=0",
-                          "-atom=all",
-                          f"-encomp={GLOBALS.ENCOMP}",
-                          f"-boaq={GLOBALS.BOAQ}",
-                          f"-iasmesh={GLOBALS.IASMESH}",
-                          f"-nproc={self.ncores}",
-                          f"-naat={self.ncores}"
-                         ]
+                            "-nogui",
+                            "-usetwoe=0",
+                            "-atom=all",
+                            f"-encomp={GLOBALS.ENCOMP}",
+                            f"-boaq={GLOBALS.BOAQ}",
+                            f"-iasmesh={GLOBALS.IASMESH}",
+                            f"-nproc={self.ncores}",
+                            f"-naat={self.ncores}"
+                            ]
 
     
     @property
@@ -2304,6 +2301,9 @@ class SubmissionScript:
             f.write("\n")
             for command in self._commands:
                 f.write(f"{repr(command)}\n")
+
+    def submit(self, hold=None):
+        return BatchTools.qsub(self.fname, hold)
 
     @property
     def ncores(self):
