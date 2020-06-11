@@ -2833,7 +2833,7 @@ class AutoTools:
 
         UsefulTools.suppress_tqdm()
 
-        GLOBALS.IQA_MODELS = GLOBALS.OPTIMISE_PROPERTY == "iqa"
+        GLOBALS.IQA_MODELS = str(GLOBALS.OPTIMISE_PROPERTY) == "iqa"
 
         order = [
                 AutoTools.submit_ichor_gjfs, 
@@ -2858,7 +2858,7 @@ class AutoTools:
                 if i == 0 and "npoints" in func.__code__.co_varnames:
                     args["npoints"] = npoints
                 if "type" in func.__code__.co_varnames:
-                    args["type"] = GLOBALS.OPTIMISE_PROPERTY
+                    args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
                 script_name, jid = func(**args)
                 print(f"Submitted {script_name}: {jid}")
         
@@ -3387,6 +3387,14 @@ class Point:
                 else:
                     eiqa[int_data.num - 1] = int_data.eiqa
             return eiqa
+        elif value_to_get == "q00":
+            q00 = 0 if not atoms else [0]*len(self.atoms)
+            for _, int_data in self.ints.items():
+                if not atoms:
+                    q00 += int_data.integration_results["q"]
+                else:
+                    q00[int_data.num - 1] = int_data.integration_results["q"]
+            return q00
         elif value_to_get in Constants.multipole_names:
             mpole = 0 if not atoms else[0]*len(self.atoms)
             for _, int_data in self.ints.items():
@@ -4148,6 +4156,8 @@ class Models:
         elif type == "multipoles":
             return [model for model in self if re.match(r"q\d+(\w+)?", model.type)]
         else:
+            for model in self:
+                print(model.type)
             return [model for model in self if model.type == type]
 
     def read(self):
@@ -4290,7 +4300,7 @@ class Models:
         FileTools.mkdir(adaptive_sampling)
 
         cv_errors = self.cross_validation(points)
-        predictions = self.predict(points, atoms=True)
+        predictions = self.predict(points, atoms=True, type=str(GLOBALS.OPTIMISE_PROPERTY))
 
         data = {'npoints': UsefulTools.nTrain()}
         data["cv_errors"] = [float(cv_errors[index]) for index in indices]
@@ -4628,7 +4638,7 @@ class Points:
 
         true_values = []
         for point in self[npoints:]:
-            true_values += [point.get_true_value(GLOBALS.OPTIMISE_PROPERTY, atoms=True)]     
+            true_values += [point.get_true_value(str(GLOBALS.OPTIMISE_PROPERTY), atoms=True)]     
 
         data = {}
         data["npoints"] = UsefulTools.nTrain()
@@ -4637,7 +4647,7 @@ class Points:
         for prediction, true_value in zip(predictions, true_values):
             true_error = sum(
                 (true_value[int(predicted_atom) - 1] - predicted_value) ** 2
-                for predicted_atom, predicted_value in prediction[GLOBALS.OPTIMISE_PROPERTY].items()
+                for predicted_atom, predicted_value in prediction[str(GLOBALS.OPTIMISE_PROPERTY)].items()
             )
 
             data["true_errors"].append(true_error)
