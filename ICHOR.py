@@ -711,6 +711,8 @@ class Globals:
         globals.MAX_ITERATION = 1, int
         globals.POINTS_PER_ITERATION = 1, int
 
+        globals.OPTIMISE_PROPERTY = "iqa", str
+
         globals.ADAPTIVE_SAMPLING_METHOD = "epe", str
         globals.NORMALISE = False, bool
         globals.STANDARDISE = False, bool
@@ -813,6 +815,7 @@ class Globals:
         globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
         globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
         globals.ALF.add_pre_modifier(GlobalTools.read_alf)
+        globals.OPTIMISE_PROPERTY.add_modifier(GlobalTools.to_lower)
 
         globals.init()
 
@@ -1622,14 +1625,19 @@ class my_tqdm:
 class FerebusTools:
     @staticmethod
     def write_finput(directory, natoms, atom, training_set_size, 
-                       predictions=0, nproperties=1, optimization="pso"):
+                       predictions=0, model_type="iqa", nproperties=1, optimization="pso"):
         finput_fname = os.path.join(directory, "FINPUT.txt")
         atom_num = re.findall("\d+", atom)[0]
+
+        starting_properties = 1
+
+        if model_type.lower() in Constants.multipole_names:
+            starting_properties = Constants.multipole_names.index(model_type.lower()) + 1
 
         with open(finput_fname, "w+") as finput:
             finput.write(f"{GLOBALS.SYSTEM_NAME}\n")
             finput.write(f"natoms {natoms}\n")
-            finput.write("starting_properties 1 \n")
+            finput.write("starting_properties {starting_properties} \n")
             finput.write(f"nproperties {nproperties}\n")
             finput.write("#\n# Training set size and definition of reduced training set size\n#\n")
             finput.write(f"full_training_set {training_set_size}\n")
@@ -4629,6 +4637,10 @@ class Points:
 
     def make_training_set(self, model_type):
         training_sets, nproperties = self.get_training_sets(model_type)
+        
+        if model_type.lower() in Constants.multipole_names:
+            nproperties = 1
+
         FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
         model_directories = []
         for atom, training_set in training_sets.items():
@@ -4640,7 +4652,7 @@ class Points:
                     num = f"{i+1}".zfill(4)
                     f.write(f"{line} {num}\n")
             FerebusTools.write_finput(directory, len(training_sets.keys()), atom, len(training_set),
-                                      nproperties=nproperties)
+                                      model_type=model_type, nproperties=nproperties)
             model_directories.append(directory)
         
         self.update_alpha()
@@ -5759,6 +5771,54 @@ class SettingsTools:
         settings_menu.set_refresh(SettingsTools.refresh_settings_menu)
         settings_menu.run()
 
+
+class MakeModelTools:
+    training_set_directory = ""
+    multipole_model = "all"
+
+    @staticmethod
+    def _make_models(directory, model_type):
+        pass
+
+    @staticmethod
+    def choose_multipole(multipole):
+        MakeModelTools.multipole_model = multipole
+
+    @staticmethod
+    def choose_multipole_model():
+        multipole_menu = Menu(title="Choose Multipole Menu", auto_close=True)
+
+        for multipole_name in Constants.multipole_names:
+            multipole_menu.add_option(f"{multipole_name}", f"{multipole_name} Multipole Moment", MakeModelTools.choose_multipole, kwargs={"multipole": multipole_name})
+
+        multipole_menu.add_space()
+        multipole_menu.add_option("all", "All Multipole Moments", MakeModelTools.choose_multipole, kwargs={"multipole": "all"})
+        multipole_menu.add_final_options()
+
+    @staticmethod
+    def refresh_make_models(menu):
+        model_types = {
+            "IQA": "iqa",
+            "Multipoles": ModelTools.multipole_model
+        }
+
+        menu.clear_options()
+        for i, (model_name, model_type) in enumerate(model_types.items()):
+            menu.add_option(f"{i+1}", model_name, ModelTools._make_models, 
+                                    kwargs={"directory": MakeModelTools.training_set_directory, 
+                                    "model_type": model_type})
+        menu.add_space()
+        menu.add_option("m", "Choose Multipole Model", MakeModelTools.choose_multipole_model)
+        menu.add_space()
+        menu.add_message(f"Multipole Model: {MakeModelTools.multipole_model}")
+        menu.add_final_options()
+
+    def make_models(directory):
+        MakeModelTools.training_set_directory = directory
+        model_menu = Menu(title="Model Menu")
+        model_menu.set_refresh(MakeModelTools.refresh_make_models)
+        model_menu.run()
+
 #############################################
 #            Function Definitions           #
 #############################################      
@@ -5925,7 +5985,7 @@ def main_menu():
     training_set_menu = Menu(title="Training Set Menu")
     training_set_menu.add_option("1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": ts_dir})
     training_set_menu.add_option("2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": ts_dir}, wait=True)
-    training_set_menu.add_option("3", "Make Models", make_models, kwargs={"directory": ts_dir})
+    training_set_menu.add_option("3", "Make Models", MakeModelTools.make_models, kwargs={"directory": ts_dir})
     training_set_menu.add_space()
     training_set_menu.add_option("a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": ts_dir})
     training_set_menu.add_option("m", "Auto Make Models", AutoTools.run_models)
