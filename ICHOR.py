@@ -181,7 +181,7 @@ class Constants:
 
     multipole_names = ['q00',
                        'q10', 'q11c', 'q11s',
-                       'q20', 'q21c', 'q21s', 'q22c', 'q21s'
+                       'q20', 'q21c', 'q21s', 'q22c', 'q21s',
                        'q30', 'q31c', 'q31s', 'q32c', 'q32s', 'q33c', 'q33s',
                        'q40', 'q41c', 'q41s', 'q42c', 'q42s', 'q43c', 'q43s', 'q44c', 'q44s']
 
@@ -1637,7 +1637,7 @@ class FerebusTools:
         with open(finput_fname, "w+") as finput:
             finput.write(f"{GLOBALS.SYSTEM_NAME}\n")
             finput.write(f"natoms {natoms}\n")
-            finput.write("starting_properties {starting_properties} \n")
+            finput.write(f"starting_properties {starting_properties} \n")
             finput.write(f"nproperties {nproperties}\n")
             finput.write("#\n# Training set size and definition of reduced training set size\n#\n")
             finput.write(f"full_training_set {training_set_size}\n")
@@ -2833,7 +2833,7 @@ class AutoTools:
 
         UsefulTools.suppress_tqdm()
 
-        GLOBALS.IQA_MODELS = True
+        GLOBALS.IQA_MODELS = GLOBALS.OPTIMISE_PROPERTY == "iqa"
 
         order = [
                 AutoTools.submit_ichor_gjfs, 
@@ -2857,6 +2857,8 @@ class AutoTools:
                 args = {"jid": jid}
                 if i == 0 and "npoints" in func.__code__.co_varnames:
                     args["npoints"] = npoints
+                if "type" in func.__code__.co_varnames:
+                    args["type"] = GLOBALS.OPTIMISE_PROPERTY
                 script_name, jid = func(**args)
                 print(f"Submitted {script_name}: {jid}")
         
@@ -3385,6 +3387,14 @@ class Point:
                 else:
                     eiqa[int_data.num - 1] = int_data.eiqa
             return eiqa
+        elif value_to_get in Constants.multipole_names:
+            mpole = 0 if not atoms else[0]*len(self.atoms)
+            for _, int_data in self.ints.items():
+                if not atoms:
+                    mpole += int_data.multipoles[value_to_get]
+                else:
+                    mpole[int_data.num - 1] = int_data.multipoles[value_to_get]
+            return mpole
     
     def calculate_recovery_error(self):
         wfn_energy = self.wfn.energy
@@ -3424,6 +3434,9 @@ class Point:
                        "iqa": self.iqa_training_set_line, 
                        "multipoles": self.multipole_training_set_line
                       }
+
+        for multipole_name in Constants.multipole_names:
+            model_types[multipole_name] = self.multipole_training_set_line
         
         delimiter = " "
         number_of_outputs = 25
@@ -4426,7 +4439,6 @@ class Points:
             if n_integration_error > 0:
                 logging.warning(f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
 
-
     def read_gjf(self, gjf_file):
         gjf = GJF(gjf_file, read=True)
         self.add_point(gjf._atoms)
@@ -4616,7 +4628,7 @@ class Points:
 
         true_values = []
         for point in self[npoints:]:
-            true_values += [point.get_true_value("iqa", atoms=True)]     
+            true_values += [point.get_true_value(GLOBALS.OPTIMISE_PROPERTY, atoms=True)]     
 
         data = {}
         data["npoints"] = UsefulTools.nTrain()
@@ -4625,7 +4637,7 @@ class Points:
         for prediction, true_value in zip(predictions, true_values):
             true_error = sum(
                 (true_value[int(predicted_atom) - 1] - predicted_value) ** 2
-                for predicted_atom, predicted_value in prediction["iqa"].items()
+                for predicted_atom, predicted_value in prediction[GLOBALS.OPTIMISE_PROPERTY].items()
             )
 
             data["true_errors"].append(true_error)
@@ -5380,7 +5392,6 @@ class CP2KTools:
         #  - Others?
 
 
-
 class S_CurveTools:
     vs_loc = ""
     sp_loc = ""
@@ -5778,7 +5789,14 @@ class MakeModelTools:
 
     @staticmethod
     def _make_models(directory, model_type):
-        pass
+        GLOBALS.LOG_WARNINGS = True
+        GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
+
+        logging.info(f"Making {model_type} models")
+
+        aims = Points(directory, read_gjfs=True, read_ints=True, read_wfns=GLOBALS.WARN_RECOVERY_ERROR)
+        models = aims.make_training_set(model_type)
+        SubmissionTools.make_ferebus_script(models)
 
     @staticmethod
     def choose_multipole(multipole):
@@ -5794,17 +5812,18 @@ class MakeModelTools:
         multipole_menu.add_space()
         multipole_menu.add_option("all", "All Multipole Moments", MakeModelTools.choose_multipole, kwargs={"multipole": "all"})
         multipole_menu.add_final_options()
+        multipole_menu.run()
 
     @staticmethod
     def refresh_make_models(menu):
         model_types = {
             "IQA": "iqa",
-            "Multipoles": ModelTools.multipole_model
+            "Multipoles": MakeModelTools.multipole_model
         }
 
         menu.clear_options()
         for i, (model_name, model_type) in enumerate(model_types.items()):
-            menu.add_option(f"{i+1}", model_name, ModelTools._make_models, 
+            menu.add_option(f"{i+1}", model_name, MakeModelTools._make_models, 
                                     kwargs={"directory": MakeModelTools.training_set_directory, 
                                     "model_type": model_type})
         menu.add_space()
