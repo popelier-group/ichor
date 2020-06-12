@@ -2866,6 +2866,8 @@ class AutoTools:
             args = {"jid": jid}
             if "write_data" in func.__code__.co_varnames:
                 args["write_data"] = False
+            if "type" in func.__code__.co_varnames:
+                args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
             script_name, jid = func(**args)
             print(f"Submitted {script_name}: {jid}")
         
