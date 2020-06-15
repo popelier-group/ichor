@@ -123,6 +123,14 @@ logging.basicConfig(filename='ichor.log',
 
 _data_lock = False
 
+try:
+    O_BINARY = os.O_BINARY
+except:
+    O_BINARY = 0
+READ_FLAGS = os.O_RDONLY | O_BINARY
+WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | O_BINARY
+BUFFER_SIZE = 128*1024
+
 #############################################
 #             Class Definitions             #
 #############################################
@@ -807,6 +815,7 @@ class Globals:
         globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
         globals.IASMESH.allowed_values = Constants.IASMESH_VALUES
         globals.FEREBUS_VERSION.allowed_values = Constants.FEREBUS_VERSIONS
+        globals.OPTIMISE_PROPERTY.allowed_values = ["iqa"] + Constants.multipole_names
 
         # Set modifiers
         for global_variable in globals.global_variables:
@@ -1330,7 +1339,187 @@ class Tree:
         return str(self._dict[id])
 
 
+import sys, os, time, atexit
+from signal import SIGTERM
+ 
+class Daemon:
+    """
+    A generic daemon class.
+    
+    Usage: subclass the Daemon class and override the run() method
+
+    Credit: Sander Marechal (https://bit.ly/3frF5RK)
+    """
+    def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
+        self.stdin = stdin
+        self.stdout = stdout
+        self.stderr = stderr
+        self.pidfile = pidfile
+    
+    def daemonize(self):
+        """
+        do the UNIX double-fork magic, see Stevens' "Advanced
+        Programming in the UNIX Environment" for details (ISBN 0201563177)
+        http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16
+        """
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # exit first parent
+                sys.exit(0)
+        except OSError as e:
+            sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
+            sys.exit(1)
+    
+        # decouple from parent environment
+        os.chdir("/")
+        os.setsid()
+        os.umask(0)
+
+        # do second fork
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # exit from second parent
+                sys.exit(0)
+        except OSError as e:
+            sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
+            sys.exit(1)
+    
+        # redirect standard file descriptors
+        sys.stdout.flush()
+        sys.stderr.flush()
+        si = open(self.stdin, 'r')
+        so = open(self.stdout, 'a+')
+        se = open(self.stderr, 'a+')
+        os.dup2(si.fileno(), sys.stdin.fileno())
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
+
+        # write pidfile
+        atexit.register(self.delpid)
+        pid = str(os.getpid())
+        with open(self.pidfile,'w+') as pf:
+            pf.write(f"{pid}\n")
+    
+    def delpid(self):
+        os.remove(self.pidfile)
+
+    def start(self):
+        """
+        Start the daemon
+        """
+        # Check for a pidfile to see if the daemon already runs
+        try:
+            with open(self.pidfile,'r') as pf:
+                pid = int(pf.read().strip())
+        except IOError:
+            pid = None
+
+        if pid:
+            message = "pidfile %s already exist. Daemon already running?\n"
+            sys.stderr.write(message % self.pidfile)
+            sys.exit(1)
+        
+        # Start the daemon
+        self.daemonize()
+        self.run()
+
+    def stop(self):
+        """
+        Stop the daemon
+        """
+        # Get the pid from the pidfile
+        try:
+            with open(self.pidfile,'r') as pf:
+                pid = int(pf.read().strip())
+        except IOError:
+            pid = None
+
+        if not pid:
+            message = "pidfile %s does not exist. Daemon not running?\n"
+            sys.stderr.write(message % self.pidfile)
+            return # not an error in a restart
+
+        # Try killing the daemon process       
+        try:
+            while 1:
+                os.kill(pid, SIGTERM)
+                time.sleep(0.1)
+        except OSError as err:
+            err = str(err)
+            if err.find("No such process") > 0:
+                if os.path.exists(self.pidfile):
+                    os.remove(self.pidfile)
+            else:
+                print(str(err))
+                sys.exit(1)
+
+    def restart(self):
+        """
+        Restart the daemon
+        """
+        self.stop()
+        self.start()
+    
+    def run(self): pass
+
+
 class FileTools:
+    class CTError(Exception):
+        def __init__(self, errors):
+            self.errors = errors
+
+    
+
+    @staticmethod
+    def copyfile(src, dst):
+        try:
+            fin = os.open(src, READ_FLAGS)
+            stat = os.fstat(fin)
+            fout = os.open(dst, WRITE_FLAGS, stat.st_mode)
+            for x in iter(lambda: os.read(fin, BUFFER_SIZE), ""):
+                os.write(fout, x)
+        finally:
+            try: os.close(fin)
+            except: pass
+            try: os.close(fout)
+            except: pass
+
+    @staticmethod
+    def copytree(src, dst, symlinks=False, overwrite=True):
+        names = os.listdir(src)
+        if os.path.exists and overwrite:
+            FileTools.mkdir(dst, empty=overwrite)
+        elif os.path.exists and not overwrite:
+            return
+        errors = []
+        for name in names:
+            srcname = os.path.join(src, name)
+            dstname = os.path.join(dst, name)
+            try:
+                if symlinks and os.path.islink(srcname):
+                    linkto = os.readlink(srcname)
+                    os.symlink(linkto, dstname)
+                elif os.path.isdir(srcname):
+                    FileTools.copytree(srcname, dstname, symlinks)
+                else:
+                    shutil.copy2(srcname, dstname)
+                # XXX What about devices, sockets etc.?
+            except OSError as why:
+                errors.append((srcname, dstname, str(why)))
+            # catch the Error from the recursive copytree so that we can
+            # continue with other files
+            except FileTools.CTError as err:
+                errors.extend(err.args[0])
+        try:
+            shutil.copystat(src, dst)
+        except OSError as why:
+            # can't copy file access times on Windows
+            if why.winerror is None:
+                errors.extend((src, dst, str(why)))
+        if errors:
+            raise FileTools.CTError(errors)
     
     @staticmethod
     def clear_log(log_file="ichor.log"):
@@ -1349,6 +1538,7 @@ class FileTools:
         tree.add("PROGRAMS", "programs")
         tree.add("OPT", "opt")
         tree.add("CP2K", "cp2k")
+        tree.add("PROPERTIES", "properties")
 
         tree.add("DLPOLY", "dlpoly")
         tree.add("GJF", "dlpoly_gjf", parent="dlpoly")
@@ -1363,6 +1553,12 @@ class FileTools:
         tree.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
         tree.add("alpha", "alpha", parent="adaptive_sampling")
         tree.add("cv_errors", "cv_errors", parent="adaptive_sampling")
+
+        tree.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
+        tree.add("properties.pid", "properties_pid", parent="properties_daemon")
+        tree.add("properties.out", "properties_stdout", parent="properties_daemon")
+        tree.add("properties.err", "properties_stderr", parent="properties_daemon")
+
 
         tree.add("SCRIPTS", "scripts", parent="data")
         tree.add("OUTPUTS", "outputs", parent="scripts")
@@ -2503,7 +2699,7 @@ class BatchTools:
         data_dir = GLOBALS.FILE_STRUCTURE["jobs"]
         FileTools.mkdir(data_dir)
         jid_fname = GLOBALS.FILE_STRUCTURE["jid"]
-        with open(jid_fname, "a") as jid_file
+        with open(jid_fname, "a") as jid_file:
             qsub_cmd = ""
             if GLOBALS.SGE and not GLOBALS.SUBMITTED:
                 qsub_cmd = "qsub "
@@ -2731,6 +2927,19 @@ class SGE_Jobs:
         return str(self)
 
 
+class PropertiesDaemon(Daemon):
+    def __init__(self):
+        cwd = os.getcwd()
+        pidfile = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_pid"])
+        stdout = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_stdout"])
+        stderr = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_stderr"])
+        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+
+    def run(self):
+        AutoTools.run_properties()
+        self.stop()
+
+
 class AutoTools:
     @staticmethod
     def submit_ichor_gjfs(jid=None, directory=None):
@@ -2876,6 +3085,84 @@ class AutoTools:
         
         GLOBALS.SUBMITTED = False
         _data_lock = False
+
+    @staticmethod
+    def run_properties_daemon():
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties_daemon"], empty=True)
+        properties_daemon = PropertiesDaemon()
+        properties_daemon.start()
+    
+    @staticmethod
+    def stop_properties_daemon():
+        properties_daemon = PropertiesDaemon()
+        properties_daemon.stop()
+
+    @staticmethod
+    def run_properties():
+        print(os.getuid())
+        # make directory
+        print(f'Making {GLOBALS.FILE_STRUCTURE["properties"]}')
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties"], empty=True)
+        print()
+        # make property directories
+        print("Making Property Directories")
+        property_directories = []
+        properties = GLOBALS.OPTIMISE_PROPERTY.allowed_values
+        with tqdm(total=len(properties), unit=" dirs") as progressbar:
+            for property_name in properties:
+                progressbar.set_description(property_name)
+
+                property_directory = os.path.join(GLOBALS.FILE_STRUCTURE["properties"], property_name)
+                FileTools.mkdir(property_directory, empty=False)
+                property_directories.append(property_directory)
+
+                progressbar.update()
+        print()
+        # copy training set
+        print("Copying Training Set")
+        with tqdm(total=len(properties), unit=" dirs") as progressbar:
+            for property_directory in property_directories:
+                progressbar.set_description(property_directory)
+                dst = os.path.join(property_directory, GLOBALS.FILE_STRUCTURE["training_set"])
+                FileTools.copytree(GLOBALS.FILE_STRUCTURE["training_set"], dst)
+                progressbar.update()
+        print()
+        # copy sample pool
+        print("Copying Sample Pool")
+        with tqdm(total=len(properties), unit=" dirs") as progressbar:
+            for property_directory in property_directories:
+                progressbar.set_description(property_directory)
+                dst = os.path.join(property_directory, GLOBALS.FILE_STRUCTURE["sample_pool"])
+                FileTools.copytree(GLOBALS.FILE_STRUCTURE["sample_pool"], dst)
+                progressbar.update()
+        print()
+        # copy ICHOR.py
+        print("Copying ICHOR")
+        with tqdm(total=len(properties), unit=" files") as progressbar:
+            for property_directory in property_directories:
+                progressbar.set_description(property_directory)
+                FileTools.copy_file(os.path.realpath(__file__), property_directory)
+                progressbar.update()
+        print()
+        # copy config.properties
+        print("Copying Config File")
+        with tqdm(total=len(properties), unit=" files") as progressbar:
+            for property_directory in property_directories:
+                progressbar.set_description(property_directory)
+                FileTools.copy_file(Arguments.config_file, property_directory)
+                progressbar.update()
+        print()
+        # copy programs
+        print("Copying Programs")
+        with tqdm(total=len(properties), unit=" files") as progressbar:
+            for property_directory in property_directories:
+                progressbar.set_description(property_directory)
+                dst = os.path.join(property_directory, GLOBALS.FILE_STRUCTURE["programs"])
+                FileTools.copytree(GLOBALS.FILE_STRUCTURE["programs"], dst)
+                progressbar.update()
+        print()
+        # run adaptive sampling
+        print("Submitting Adaptive Sampling Runs")
 
 #========================#
 #      Point Tools       #
@@ -6051,6 +6338,8 @@ def main_menu():
     tools_menu.add_option("make", "Make Sets", SetupTools.make_sets)
     tools_menu.add_option("cp2k", "Setup CP2K run", CP2KTools.cp2k_menu)
     tools_menu.add_space()
+    tools_menu.add_option("stop", "Stop Properties Daemon", AutoTools.stop_properties_daemon, wait=True)
+    tools_menu.add_space()
     tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_final_options()
 
@@ -6075,6 +6364,7 @@ def main_menu():
                                                                             "sample_pool_directory": sp_dir})
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", AutoTools.run)
+    main_menu.add_option("p", "Auto Run Properties", AutoTools.run_properties_daemon, wait=True)
     main_menu.add_space()
     main_menu.add_option("a", "Analysis", analysis_menu.run)
     main_menu.add_option("t", "Tools", tools_menu.run)
