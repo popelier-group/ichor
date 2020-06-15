@@ -2124,11 +2124,11 @@ class FerebusCommand(CommandLine):
             self.modules["ffluxlab"] = [
                                         "mpi/intel/18.0.3",
                                         "libs/nag/intel/fortran/mark-23"
-                                       ]
+                                        ]
             self.modules["csf3"] = [
                                     "compilers/intel/17.0.7",
                                     "libs/intel/nag/fortran_mark23_intel"
-                                   ]
+                                    ]
         self.modules["csf3"] += ["apps/anaconda3/5.2.0/bin"]
     
     @property
@@ -2144,10 +2144,10 @@ class FerebusCommand(CommandLine):
         directory = self.get_variable(0)
         
         runcmd = [
-                  f"pushd {directory}",
-                  self.command,
-                  "popd"
-                 ]
+                    f"pushd {directory}",
+                    self.command,
+                    "popd"
+                    ]
         runcmd = "\n".join(runcmd)
         return datafile + "\n" + runcmd
 
@@ -2287,17 +2287,22 @@ class SubmissionScript:
             f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
                 f.write(f"#$ {option}\n")
-            pe = self.parallel_environments[str(GLOBALS.MACHINE)][2]
 
+            pe = self.parallel_environments[str(GLOBALS.MACHINE)][self.ncores]
             if self.ncores > 1:
                 f.write(f"#$ -pe {pe} {self.ncores}\n")
+
             if self.njobs > 1:
                 f.write(f"#$ -t 1{njobs}\n")
+
             f.write("\n")
+
             for module in self._modules:
                 f.write(f"module load {module}\n")
+
             if self.ncores > 1:
                 f.write("export OMP_NUM_THREADS=$NSLOTS\n\n")
+
             f.write("\n")
             for command in self._commands:
                 f.write(f"{repr(command)}\n")
@@ -2490,27 +2495,25 @@ class BatchTools:
         data_dir = GLOBALS.FILE_STRUCTURE["jobs"]
         FileTools.mkdir(data_dir)
         jid_fname = GLOBALS.FILE_STRUCTURE["jid"]
-        jid_file = open(jid_fname, "a")
-
-        qsub_cmd = ""
-        if GLOBALS.SGE and not GLOBALS.SUBMITTED:
-            qsub_cmd = "qsub "
-            if hold and hold in BatchTools.qstat(quiet=True):
-                qsub_cmd += "-hold_jid " +  str(hold) + " "
-        else:
-            qsub_cmd = "bash "
-        qsub_cmd += script
-        qsub_cmd = [qsub_cmd]
-        if not GLOBALS.SUBMITTED:
-            output = BatchTools.run_cmd(qsub_cmd)
-            if GLOBALS.SGE:
-                jid = re.findall(r"\d+", output)
-                if len(jid) > 0:
-                    jid = jid[0]
-                    jid_file.write(f"{jid}\n")
-                    jid_file.close()
-                    return jid
-        jid_file.close()
+        with open(jid_fname, "a") as jid_file
+            qsub_cmd = ""
+            if GLOBALS.SGE and not GLOBALS.SUBMITTED:
+                qsub_cmd = "qsub "
+                if hold and hold in BatchTools.qstat(quiet=True):
+                    qsub_cmd += "-hold_jid " +  str(hold) + " "
+            else:
+                qsub_cmd = "bash "
+            qsub_cmd += script
+            qsub_cmd = [qsub_cmd]
+            if not GLOBALS.SUBMITTED:
+                output = BatchTools.run_cmd(qsub_cmd)
+                if GLOBALS.SGE:
+                    jid = re.findall(r"\d+", output)
+                    if len(jid) > 0:
+                        jid = jid[0]
+                        jid_file.write(f"{jid}\n")
+                        jid_file.close()
+                        return jid
 
     @staticmethod
     def qdel():
@@ -2575,24 +2578,24 @@ class SGE_Job:
              }
 
     ## SGE QUEUE STATES ###########################################################################################
-    # | Pending       | pending                                        | qw                  |                    #
-    # | Pending       | pending, user hold                             | qw                  |                    #
-    # | Pending       | pending, system hold                           | hqw                 |                    #
-    # | Pending       | pending, user and system hold                  | hqw                 |                    #
-    # | Pending       | pending, user hold, re-queue                   | hRwq                |                    #
-    # | Pending       | pending, system hold, re-queue                 | hRwq                |                    #
-    # | Pending       | pending, user and system hold, re-queue        | hRwq                |                    #
-    # | Pending       | pending, user hold                             | qw                  |                    #
-    # | Pending       | pending, user hold                             | qw                  |                    #
-    # | Running       | running                                        | r                   |                    #
-    # | Running       | transferring                                   | t                   |                    #
-    # | Running       | running, re-submit                             | Rr                  |                    #
-    # | Running       | transferring, re-submit                        | Rt                  |                    #
-    # | Suspended     | obsuspended                                    | s,  ts              |                    #
-    # | Suspended     | queue suspended                                | S, tS               |                    # 
-    # | Suspended     | queue suspended by alarm                       | T, tT               |                    #
-    # | Suspended     | allsuspended withre-submit                     | Rs,Rts,RS, RtS, RT, RtT |                #
-    # | Error         | allpending states with error                   | Eqw, Ehqw, EhRqw        |                #
+    # | Pending       | pending                                        | qw                                     | #
+    # | Pending       | pending, user hold                             | qw                                     | #
+    # | Pending       | pending, system hold                           | hqw                                    | #
+    # | Pending       | pending, user and system hold                  | hqw                                    | #
+    # | Pending       | pending, user hold, re-queue                   | hRwq                                   | #
+    # | Pending       | pending, system hold, re-queue                 | hRwq                                   | #
+    # | Pending       | pending, user and system hold, re-queue        | hRwq                                   | #
+    # | Pending       | pending, user hold                             | qw                                     | #
+    # | Pending       | pending, user hold                             | qw                                     | #
+    # | Running       | running                                        | r                                      | #
+    # | Running       | transferring                                   | t                                      | #
+    # | Running       | running, re-submit                             | Rr                                     | #
+    # | Running       | transferring, re-submit                        | Rt                                     | #
+    # | Suspended     | obsuspended                                    | s,  ts                                 | #
+    # | Suspended     | queue suspended                                | S, tS                                  | # 
+    # | Suspended     | queue suspended by alarm                       | T, tT                                  | #
+    # | Suspended     | allsuspended withre-submit                     | Rs,Rts,RS, RtS, RT, RtT                | #
+    # | Error         | allpending states with error                   | Eqw, Ehqw, EhRqw                       | #
     # | Deleted       | all running and suspended states with deletion | dr,dt,dRr,dRt,ds, dS, dT,dRs, dRS, dRT | #
     ###############################################################################################################
 
@@ -3034,7 +3037,7 @@ class Atom:
         self.x /= Atom.ang2bohr
         self.y /= Atom.ang2bohr
         self.z /= Atom.ang2bohr
-    
+
     def to_bohr(self):
         self.x *= Atom.ang2bohr
         self.y *= Atom.ang2bohr
@@ -3052,7 +3055,7 @@ class Atom:
     @property
     def mass(self):
         return Constants.type2mass[self.atom_type]
-    
+
     @property
     def radius(self):
         return Constants.type2rad[self.atom_type]
@@ -3064,7 +3067,7 @@ class Atom:
     @property
     def atom_num(self):
         return f"{self.atom_type}{self.atom_number}"
-    
+
     @property
     def atom(self):
         return f"{self.atom_type}"
@@ -3072,11 +3075,11 @@ class Atom:
     @property
     def atom_num_coordinates(self):
         return [self.atom_num] + self.coordinates
-    
+
     @property
     def atom_coordinates(self):
         return [self.atom] + self.coordinates
-    
+
     @property
     def coordinates_string(self):
         width = str(16)
@@ -3104,7 +3107,7 @@ class Atom:
 
     def __str__(self):
         return f"{self.atom_type:<3s}{self.coordinates_string}"
-    
+
     def __repr__(self):
         return str(self)
     
@@ -3133,10 +3136,10 @@ class Atoms:
             self.add(atoms)
 
     def add(self, atom):
-        if isinstance(atom, str):
-            self._atoms.append(Atom(atom))
-        elif isinstance(atom, Atom):
+        if isinstance(atom, Atom):
             self._atoms.append(atom)
+        elif isinstance(atom, str):
+            self.add(Atom(atom))
         elif isinstance(atom, (list, Atoms)):
             for a in atom:
                 self.add(a)
@@ -3351,7 +3354,7 @@ class Point:
     @property
     def features(self):
         return self.atoms.features
-    
+
     @property
     def nfeats(self):
         return len(self.features)
@@ -3413,9 +3416,9 @@ class Point:
 
     def training_set_lines(self, model_type):
         model_types = {
-                       "iqa": self.iqa_training_set_line, 
-                       "multipoles": self.multipole_training_set_line
-                      }
+                        "iqa": self.iqa_training_set_line, 
+                        "multipoles": self.multipole_training_set_line
+                        }
         
         delimiter = " "
         number_of_outputs = 25
@@ -3681,7 +3684,6 @@ class INT(Point):
             self.read_json()
         except json.decoder.JSONDecodeError:
             self.read_int()
-            # if INT_TO_JSON:
             self.backup_int()
             self.write_json()
 
@@ -4184,7 +4186,6 @@ class Models:
             cross_validation_error = sum(
                 model.cross_validation_error(point) for model in self
             )
-
             cross_validation_errors.append(cross_validation_error)
         return np.array(cross_validation_errors)
     
@@ -4334,11 +4335,9 @@ class Points:
         self.directory = directory if directory else "."
         if read_gjfs or read_wfns or read_ints:
             FileTools.check_directory(self.directory)
-            # start_time = UsefulTools.get_time()
             self.read_directory(read_gjfs, read_wfns=read_wfns, read_ints=read_ints, first=first)
             if GLOBALS.LOG_WARNINGS:
                 self.log_warnings()
-            # UsefulTools.log_time_taken(start_time, message=f"Reading {self.directory} took ")
 
         training_set_functions = {
                                   "min-max": self.get_min_max_features_first_atom,
@@ -4346,7 +4345,7 @@ class Points:
                                  }
         self._get_training_points = training_set_functions["min-max"]
 
-    def _read_directory(self, d, read_gjfs=False, read_wfns=False, read_ints=False, first=False):
+    def read_point_directory(self, d, read_gjfs=False, read_wfns=False, read_ints=False, first=False):
         point = {
             'read_gjf': read_gjfs,
             'read_wfn': read_wfns,
@@ -4369,7 +4368,7 @@ class Points:
         with tqdm(total=len(directories), unit=" files", leave=True) as progressbar:
             for d in directories:
                 progressbar.set_description(desc=d)
-                point = self._read_directory(d, read_gjfs, read_wfns, read_ints, first) # implement multiprocessing
+                point = self.read_point_directory(d, read_gjfs, read_wfns, read_ints, first) # implement multiprocessing
                 progressbar.update()
                 if "gjf_fname" in point.keys():
                     self.add_point(point)
@@ -4417,7 +4416,6 @@ class Points:
                         n_integration_error += 1
             if n_integration_error > 0:
                 logging.warning(f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision")
-
 
     def read_gjf(self, gjf_file):
         gjf = GJF(gjf_file, read=True)
@@ -5366,7 +5364,6 @@ class CP2KTools:
         #  - Method
         #  - Basis Set
         #  - Others?
-
 
 
 class S_CurveTools:
