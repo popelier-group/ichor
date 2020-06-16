@@ -1372,9 +1372,11 @@ class Daemon:
             sys.exit(1)
     
         # decouple from parent environment
+        cwd = os.getcwd()
         os.chdir("/")
         os.setsid()
         os.umask(0)
+        os.chdir(cwd)
 
         # do second fork
         try:
@@ -3099,7 +3101,7 @@ class AutoTools:
 
     @staticmethod
     def run_properties():
-        print(os.getuid())
+        print()
         # make directory
         print(f'Making {GLOBALS.FILE_STRUCTURE["properties"]}')
         FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties"], empty=True)
