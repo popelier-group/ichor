@@ -69,6 +69,7 @@ import math
 import time
 import uuid
 import json
+import atexit
 import shutil
 import random
 import hashlib
@@ -76,9 +77,12 @@ import logging
 import inspect
 import platform
 import warnings
+import importlib
+import contextlib
 import subprocess
 from glob import glob
 import itertools as it
+from signal import SIGTERM
 from getpass import getpass
 from functools import wraps
 import multiprocessing as mp
@@ -570,7 +574,10 @@ class GlobalVariable:
 
         convert = GlobalVariable.type_conversions[self.type] if self.type in GlobalVariable.type_conversions.keys() else self.type
         # Make sure type is the correct type
-        self.__dict__["value"] = value if convert in Globals.types else convert(value)
+        try:
+            self.__dict__["value"] = value if convert in Globals.types else convert(value)
+        except:
+            self.__dict__["value"] = value
 
         for modifier in self.modifiers:
             self.__dict__["value"] = modifier(self.value)      
@@ -705,7 +712,8 @@ class Globals:
     def define():
         global GLOBALS
         
-        for _, obj in inspect.getmembers(sys.modules[__name__]):
+        name = __name__ if not __name__ == "*" else "__main__"
+        for _, obj in inspect.getmembers(sys.modules[name]):
             if inspect.isclass(obj):
                 Globals.types += [obj]
 
@@ -829,6 +837,7 @@ class Globals:
         globals.init()
 
         GLOBALS = globals
+        return globals
 
     def init(self):
         global tqdm
@@ -1338,9 +1347,6 @@ class Tree:
     def __getitem__(self, id):
         return str(self._dict[id])
 
-
-import sys, os, time, atexit
-from signal import SIGTERM
  
 class Daemon:
     """
@@ -1472,8 +1478,6 @@ class FileTools:
         def __init__(self, errors):
             self.errors = errors
 
-    
-
     @staticmethod
     def copyfile(src, dst):
         try:
@@ -1491,10 +1495,11 @@ class FileTools:
     @staticmethod
     def copytree(src, dst, symlinks=False, overwrite=True):
         names = os.listdir(src)
-        if os.path.exists and overwrite:
-            FileTools.mkdir(dst, empty=overwrite)
-        elif os.path.exists and not overwrite:
-            return
+        if os.path.exists:
+            if overwrite:
+                FileTools.mkdir(dst, empty=overwrite)
+            else:
+                return
         errors = []
         for name in names:
             srcname = os.path.join(src, name)
@@ -1523,6 +1528,16 @@ class FileTools:
         if errors:
             raise FileTools.CTError(errors)
     
+    @staticmethod
+    @contextlib.contextmanager
+    def pushd(new_dir):
+        previous_dir = os.getcwd()
+        os.chdir(new_dir)
+        try:
+            yield
+        finally:
+            os.chdir(previous_dir)
+
     @staticmethod
     def clear_log(log_file="ichor.log"):
         with open(log_file, "w"): pass
@@ -2711,15 +2726,14 @@ class BatchTools:
                 qsub_cmd = "bash "
             qsub_cmd += script
             qsub_cmd = [qsub_cmd]
-            if not GLOBALS.SUBMITTED:
+            if not GLOBALS.SUBMITTED and GLOBALS.SGE:
                 output = BatchTools.run_cmd(qsub_cmd)
-                if GLOBALS.SGE:
-                    jid = re.findall(r"\d+", output)
-                    if len(jid) > 0:
-                        jid = jid[0]
-                        jid_file.write(f"{jid}\n")
-                        jid_file.close()
-                        return jid
+                jid = re.findall(r"\d+", output)
+                if len(jid) > 0:
+                    jid = jid[0]
+                    jid_file.write(f"{jid}\n")
+                    jid_file.close()
+                    return jid
 
     @staticmethod
     def qdel():
@@ -3038,6 +3052,13 @@ class AutoTools:
         script_name, jid = AutoTools.submit_models(jid=jid, directory=directory)
 
     @staticmethod
+    def run_from_extern():
+        global GLOBALS
+        Arguments.read()
+        Globals.define()
+        AutoTools.run()
+
+    @staticmethod
     def run():
         global _data_lock
 
@@ -3101,6 +3122,8 @@ class AutoTools:
 
     @staticmethod
     def run_properties():
+        original_property = GLOBALS.OPTIMISE_PROPERTY
+
         print()
         # make directory
         print(f'Making {GLOBALS.FILE_STRUCTURE["properties"]}')
@@ -3116,14 +3139,14 @@ class AutoTools:
 
                 property_directory = os.path.join(GLOBALS.FILE_STRUCTURE["properties"], property_name)
                 FileTools.mkdir(property_directory, empty=False)
-                property_directories.append(property_directory)
+                property_directories += [(property_name, property_directory)]
 
                 progressbar.update()
         print()
         # copy training set
         print("Copying Training Set")
         with tqdm(total=len(properties), unit=" dirs") as progressbar:
-            for property_directory in property_directories:
+            for _, property_directory in property_directories:
                 progressbar.set_description(property_directory)
                 dst = os.path.join(property_directory, GLOBALS.FILE_STRUCTURE["training_set"])
                 FileTools.copytree(GLOBALS.FILE_STRUCTURE["training_set"], dst)
@@ -3132,7 +3155,7 @@ class AutoTools:
         # copy sample pool
         print("Copying Sample Pool")
         with tqdm(total=len(properties), unit=" dirs") as progressbar:
-            for property_directory in property_directories:
+            for _, property_directory in property_directories:
                 progressbar.set_description(property_directory)
                 dst = os.path.join(property_directory, GLOBALS.FILE_STRUCTURE["sample_pool"])
                 FileTools.copytree(GLOBALS.FILE_STRUCTURE["sample_pool"], dst)
@@ -3141,7 +3164,7 @@ class AutoTools:
         # copy ICHOR.py
         print("Copying ICHOR")
         with tqdm(total=len(properties), unit=" files") as progressbar:
-            for property_directory in property_directories:
+            for _, property_directory in property_directories:
                 progressbar.set_description(property_directory)
                 FileTools.copy_file(os.path.realpath(__file__), property_directory)
                 progressbar.update()
@@ -3149,15 +3172,18 @@ class AutoTools:
         # copy config.properties
         print("Copying Config File")
         with tqdm(total=len(properties), unit=" files") as progressbar:
-            for property_directory in property_directories:
+            for property_name, property_directory in property_directories:
                 progressbar.set_description(property_directory)
-                FileTools.copy_file(Arguments.config_file, property_directory)
+                GLOBALS.OPTIMISE_PROPERTY = property_name
+                with FileTools.pushd(property_directory):
+                    GLOBALS.save_to_config()
+                # FileTools.copy_file(Arguments.config_file, property_directory)
                 progressbar.update()
         print()
         # copy programs
         print("Copying Programs")
         with tqdm(total=len(properties), unit=" files") as progressbar:
-            for property_directory in property_directories:
+            for _, property_directory in property_directories:
                 progressbar.set_description(property_directory)
                 dst = os.path.join(property_directory, GLOBALS.FILE_STRUCTURE["programs"])
                 FileTools.copytree(GLOBALS.FILE_STRUCTURE["programs"], dst)
@@ -3165,6 +3191,15 @@ class AutoTools:
         print()
         # run adaptive sampling
         print("Submitting Adaptive Sampling Runs")
+        importlib.invalidate_caches()
+        for _, property_directory in property_directories:
+            with FileTools.pushd(property_directory):
+                spec = importlib.util.spec_from_file_location("*", __file__)
+                ichor = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(ichor)
+                ichor.AutoTools.run_from_extern()
+
+        GLOBALS.OPTIMISE_PROPERTY = original_property
 
 #========================#
 #      Point Tools       #
