@@ -6390,13 +6390,13 @@ def main_menu():
 
     #=== Properties Menu ===#
     properties_menu = Menu(title="Run Properties Menu", message="Perform adaptive sampling on a per-property basis")
-    properties_menu.add("r", "Auto Run Properties", PropertyTools.run, wait=True)
-    properties_menu.add("d", "Auto Run Properties as Background Process (recommended)", PropertyTools.run_daemon)
+    properties_menu.add_option("r", "Auto Run Properties", PropertyTools.run, wait=True)
+    properties_menu.add_option("d", "Auto Run Properties as Background Process (recommended)", PropertyTools.run_daemon)
     properties_menu.add_space()
-    properties_menu.add("l", "Collate All Models From Log", PropertyTools.collate_log)
+    properties_menu.add_option("l", "Collate All Models From Log", PropertyTools.collate_log)
     properties_menu.add_space()
-    properties_menu.add("c", "Check if Background Process Is Running", PropertyTools.check_daemon, wait=True)
-    properties_menu.add("s", "Stop Execution of Background Process", PropertyTools.stop_daemon, wait=True)
+    properties_menu.add_option("c", "Check if Background Process Is Running", PropertyTools.check_daemon, wait=True)
+    properties_menu.add_option("s", "Stop Execution of Background Process", PropertyTools.stop_daemon, wait=True)
     properties_menu.add_final_options()
 
 
