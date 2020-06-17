@@ -1463,6 +1463,14 @@ class Daemon:
                 print(str(err))
                 sys.exit(1)
 
+    def check(self):
+        try:
+            with open(self.pidfile,'r') as pf:
+                pid = int(pf.read().strip())
+        except IOError:
+            pid = None
+        return not pid is None
+
     def restart(self):
         """
         Restart the daemon
@@ -2943,19 +2951,6 @@ class SGE_Jobs:
         return str(self)
 
 
-class PropertiesDaemon(Daemon):
-    def __init__(self):
-        cwd = os.getcwd()
-        pidfile = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_pid"])
-        stdout = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_stdout"])
-        stderr = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_stderr"])
-        super().__init__(pidfile, stdout=stdout, stderr=stderr)
-
-    def run(self):
-        AutoTools.run_properties()
-        self.stop()
-
-
 class AutoTools:
     @staticmethod
     def submit_ichor_gjfs(jid=None, directory=None):
@@ -3053,7 +3048,6 @@ class AutoTools:
 
     @staticmethod
     def run_from_extern():
-        global GLOBALS
         Arguments.read()
         Globals.define()
         AutoTools.run()
@@ -3109,25 +3103,49 @@ class AutoTools:
         GLOBALS.SUBMITTED = False
         _data_lock = False
 
+    
+class PropertiesDaemon(Daemon):
+    def __init__(self):
+        cwd = os.getcwd()
+        pidfile = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_pid"])
+        stdout = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_stdout"])
+        stderr = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["properties_stderr"])
+        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+
+    def run(self):
+        PropertyTools.run()
+        self.stop()
+
+
+class PropertyTools:
     @staticmethod
-    def run_properties_daemon():
+    def run_daemon():
         FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties_daemon"], empty=True)
         properties_daemon = PropertiesDaemon()
         properties_daemon.start()
     
     @staticmethod
-    def stop_properties_daemon():
+    def stop_daemon():
         properties_daemon = PropertiesDaemon()
         properties_daemon.stop()
 
     @staticmethod
-    def run_properties():
+    def check_daemon():
+        properties_daemon = PropertiesDaemon()
+        is_running = properties_daemon.check()
+        if is_running:
+            print("Run Properties background process is still running")
+        else:
+            print("Run Properties background process has finished")
+
+    @staticmethod
+    def run():
         original_property = GLOBALS.OPTIMISE_PROPERTY
 
         print()
         # make directory
         print(f'Making {GLOBALS.FILE_STRUCTURE["properties"]}')
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties"], empty=True)
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties"], empty=False)
         print()
         # make property directories
         print("Making Property Directories")
@@ -3200,6 +3218,15 @@ class AutoTools:
                 ichor.AutoTools.run_from_extern()
 
         GLOBALS.OPTIMISE_PROPERTY = original_property
+
+    @staticmethod
+    def collate_log():
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["log"], empty=False)
+        for properties_dir in FileTools.get_files_in(GLOBALS.FILE_STRUCTURE["properties"], "*/"):
+            log_dir = os.path.join(properties_dir, GLOBALS.FILE_STRUCTURE["log"])
+            if os.path.exists(log_dir):
+                for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
+                    FileTools.copytree(model_dir, GLOBALS.FILE_STRUCTURE["log"])
 
 #========================#
 #      Point Tools       #
@@ -6361,9 +6388,21 @@ def main_menu():
     validation_set_menu.add_option("a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": vs_dir})
     validation_set_menu.add_final_options()
 
+    #=== Properties Menu ===#
+    properties_menu = Menu(title="Run Properties Menu", message="Perform adaptive sampling on a per-property basis")
+    properties_menu.add("r", "Auto Run Properties", PropertyTools.run, wait=True)
+    properties_menu.add("d", "Auto Run Properties as Background Process (recommended)", PropertyTools.run_daemon)
+    properties_menu.add_space()
+    properties_menu.add("l", "Collate All Models From Log", PropertyTools.collate_log)
+    properties_menu.add_space()
+    properties_menu.add("c", "Check if Background Process Is Running", PropertyTools.check_daemon, wait=True)
+    properties_menu.add("s", "Stop Execution of Background Process", PropertyTools.stop_daemon, wait=True)
+    properties_menu.add_final_options()
+
+
     #=== Analysis Menu ===#
     analysis_menu = Menu(title="Analysis Menu")
-    analysis_menu.add_option("dlpoly", "Test models with DLPOLY", dlpoly_analysis)
+    analysis_menu.add_option("dlpoly", "Test Models with DLPOLY", dlpoly_analysis)
     analysis_menu.add_option("opt", "Perform Geometry Optimisation on First Point in Sample Pool", opt)
     analysis_menu.add_option("s", "Create S-Curves", S_CurveTools.run)
     analysis_menu.add_option("r", "Calculate Recovery Errors", AnalysisTools.recovery_errors)
@@ -6401,7 +6440,6 @@ def main_menu():
                                                                             "sample_pool_directory": sp_dir})
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", AutoTools.run)
-    main_menu.add_option("p", "Auto Run Properties", AutoTools.run_properties_daemon, wait=True)
     main_menu.add_space()
     main_menu.add_option("a", "Analysis", analysis_menu.run)
     main_menu.add_option("t", "Tools", tools_menu.run)
