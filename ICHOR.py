@@ -193,7 +193,7 @@ class Constants:
 
     multipole_names = ['q00',
                        'q10', 'q11c', 'q11s',
-                       'q20', 'q21c', 'q21s', 'q22c', 'q21s',
+                       'q20', 'q21c', 'q21s', 'q22c', 'q22s',
                        'q30', 'q31c', 'q31s', 'q32c', 'q32s', 'q33c', 'q33s',
                        'q40', 'q41c', 'q41s', 'q42c', 'q42s', 'q43c', 'q43s', 'q44c', 'q44s']
 
