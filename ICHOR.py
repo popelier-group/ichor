@@ -3507,6 +3507,7 @@ class Atoms:
         self._atoms = []
         self._connectivity = None
         self._centred = False
+        self.finish()
 
         if atoms is not None:
             self.add(atoms)
