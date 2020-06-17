@@ -1731,6 +1731,19 @@ class FileTools:
         if outputs: FileTools.rmtree(GLOBALS.FILE_STRUCTURE["outputs"])
         if errors: FileTools.rmtree(GLOBALS.FILE_STRUCTURE["errors"])
 
+    @staticmethod
+    def copymodels(src, dst, symlinks=False, ignore=None):
+        for item in os.listdir(src):
+            s = os.path.join(src, item)
+            d = os.path.join(dst, item)
+            try:
+                if os.path.isdir(s):
+                    shutil.copytree(s, d, symlinks, ignore)
+                else:
+                    shutil.copy2(s, d)
+            except:
+                FileTools.copymodels(s, d, symlinks, ignore)
+
 
 class my_tqdm:
     """
@@ -3225,8 +3238,8 @@ class PropertyTools:
         for properties_dir in FileTools.get_files_in(GLOBALS.FILE_STRUCTURE["properties"], "*/"):
             log_dir = os.path.join(properties_dir, GLOBALS.FILE_STRUCTURE["log"])
             if os.path.exists(log_dir):
-                for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
-                    FileTools.copytree(model_dir, GLOBALS.FILE_STRUCTURE["log"])
+                # for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
+                FileTools.copytree(log_dir, GLOBALS.FILE_STRUCTURE["log"])
 
 #========================#
 #      Point Tools       #
@@ -6414,8 +6427,6 @@ def main_menu():
     tools_menu.add_option("make", "Make Sets", SetupTools.make_sets)
     tools_menu.add_option("cp2k", "Setup CP2K run", CP2KTools.cp2k_menu)
     tools_menu.add_space()
-    tools_menu.add_option("stop", "Stop Properties Daemon", AutoTools.stop_properties_daemon, wait=True)
-    tools_menu.add_space()
     tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_final_options()
 
@@ -6440,6 +6451,7 @@ def main_menu():
                                                                             "sample_pool_directory": sp_dir})
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", AutoTools.run)
+    main_menu.add_option("p", "Run Properties", properties_menu.run)
     main_menu.add_space()
     main_menu.add_option("a", "Analysis", analysis_menu.run)
     main_menu.add_option("t", "Tools", tools_menu.run)
