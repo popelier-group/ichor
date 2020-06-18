@@ -1,7 +1,7 @@
 # ICHOR
 ## Machine Learning Suite for the Popellier Group
 
-[![GitHub release](https://img.shields.io/github/release/popelier-group/ICHOR.svg)](https://github.com/popelier-group/ICHOR/releases/)
+[![GitHub release](https://img.shields.io/badge/release-v2.1-blue)](https://github.com/popelier-group/ICHOR/releases/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Website popelier-group.herokuapp.com](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://popelier-group.herokuapp.com/ichor/ichor/)
 
