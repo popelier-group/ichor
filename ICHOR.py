@@ -2179,8 +2179,8 @@ class CommandLine:
 
     def load_modules(self): pass
 
-    def create_outfile(self, infile):
-        return os.path.splitext(infile)[0] + ".log"
+    def create_outfile(self, infile, ext="log"):
+        return os.path.splitext(infile)[0] + f".{ext}"
 
     def _read_data_file_string(self, datafile, data, delimiter=","):
         if len(self) == 1 and not _data_lock:
@@ -2264,7 +2264,7 @@ class GaussianCommand(CommandLine):
 
     def add(self, gjf_file, outfile=None):
         self.infiles += [gjf_file]
-        self.outfiles += [self.create_outfile(gjf_file)] if not outfile else [outfile]
+        self.outfiles += [self.create_outfile(gjf_file, ext="gau")] if not outfile else [outfile]
 
     def load_modules(self):
         self.modules["csf3"] = ["apps/binapps/gaussian/g09d01_em64t"]
@@ -2305,7 +2305,7 @@ class AIMAllCommand(CommandLine):
     
     def add(self, wfn_file, outfile=None):
         self.infiles += [wfn_file]
-        self.outfiles += [self.create_outfile(wfn_file)] if not outfile else [outfile]
+        self.outfiles += [self.create_outfile(wfn_file, ext="aim")] if not outfile else [outfile]
     
     def load_modules(self):
         self.modules["ffluxlab"] = ["apps/aimall/17.11.14"]
