@@ -3,7 +3,7 @@
 
 [![GitHub release](https://img.shields.io/badge/release-v2.1-blue)](https://github.com/popelier-group/ICHOR/releases/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Website popelier-group.herokuapp.com](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://popelier-group.herokuapp.com/ichor/ichor/)
+[![Website popelier-group.herokuapp.com](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://popelier-group.herokuapp.com/docs/ichor/ichor/)
 
 ICHOR is a program written in python that makes training machine learning models, adaptive sampling and running DL_FFLUX as simple as the press of a button. The idea behind ICHOR is to abstract away the gritty details of running and linking between the programs you use while performing these tasks so if there are features you think are missing or problems that can be made simpler, don't hesitate to create an [issue](https://github.com/popelier-group/ICHOR/issues).
 ![ICHOR Diagram](doc/img/ICHOR-diagram.png?raw=true "ICHOR Diagram")
