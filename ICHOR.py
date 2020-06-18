@@ -2687,8 +2687,88 @@ class BatchTools:
                 f.write(f"{jid}\n")
     
     @staticmethod
+    def _environ(context):
+        """Retrieves the environment for a particular SETSHELL context"""
+        if 'BASEDIRSETSHELL' not in os.environ:
+            # It seems that we are in a hostile environment
+            # try to source the Idiap-wide shell
+            idiap_source = "/idiap/resource/software/initfiles/shrc"
+            if os.path.exists(idiap_source):
+            logger.debug("Sourcing: '%s'"%idiap_source)
+            try:
+                command = ['bash', '-c', 'source %s && env' % idiap_source]
+                pi = subprocess.Popen(command, stdout = subprocess.PIPE)
+                # overwrite the default environment
+                for line in pi.stdout:
+                line = str_(line)
+                (key, _, value) = line.partition("=")
+                os.environ[key.strip()] = value.strip()
+            except OSError as e:
+                # occurs when the file is not executable or not found
+                pass
+
+        # in case the BASEDIRSETSHELL environment variable is not set,
+        # we are not at Idiap,
+        # and so we don't have to set any additional variables.
+        if 'BASEDIRSETSHELL' not in os.environ:
+            return dict(os.environ)
+
+        BASEDIRSETSHELL = os.environ['BASEDIRSETSHELL']
+        dosetshell = '%s/setshell/bin/dosetshell' % BASEDIRSETSHELL
+
+        command = [dosetshell, '-s', 'sh', context]
+
+        # First things first, we get the path to the temp file created by dosetshell
+        try:
+            logger.debug("Executing: '%s'", ' '.join(command))
+            p = subprocess.Popen(command, stdout = subprocess.PIPE)
+        except OSError as e:
+            # occurs when the file is not executable or not found
+            raise OSError("Error executing '%s': %s (%d)" % (' '.join(command), e.strerror, e.errno))
+
+        try:
+            source = str_(p.communicate()[0]).strip()
+        except KeyboardInterrupt: # the user CTRL-C'ed
+            os.kill(p.pid, signal.SIGTERM)
+            sys.exit(signal.SIGTERM)
+
+        # We have now the name of the source file, source it and erase it
+        command2 = ['bash', '-c', 'source %s && env' % source]
+
+        try:
+            logger.debug("Executing: '%s'", ' '.join(command2))
+            p2 = subprocess.Popen(command2, stdout = subprocess.PIPE)
+        except OSError as e:
+            # occurs when the file is not executable or not found
+            raise OSError("Error executing '%s': %s (%d)" % (' '.join(command2), e.strerror, e.errno))
+
+        new_environ = dict(os.environ)
+        for line in p2.stdout:
+            line = str_(line)
+            (key, _, value) = line.partition("=")
+            new_environ[key.strip()] = value.strip()
+
+        try:
+            p2.communicate()
+        except KeyboardInterrupt: # the user CTRL-C'ed
+            os.kill(p2.pid, signal.SIGTERM)
+            sys.exit(signal.SIGTERM)
+
+        if os.path.exists(source): os.unlink(source)
+
+        logger.debug("Discovered environment for context '%s':", context)
+        for k in sorted(new_environ.keys()):
+            logger.debug("  %s = %s", k, new_environ[k])
+
+        return new_environ
+
+    @staticmethod
     def run_cmd(cmd):
-        return subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).decode("ascii")
+        E = BatchTools._environ('grid')
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, env=E)
+        (stdout, stderr) = p.communicate()
+        return stdout.decode("ascii").strip()
 
     @staticmethod
     def parse_tasks(job_line):
@@ -2703,7 +2783,7 @@ class BatchTools:
 
     @staticmethod
     def qstat(quiet=False):
-        output = BatchTools.run_cmd("qstat")
+        output = BatchTools.run_cmd(["qstat"])
         headers, widths = [], []
         jobs = SGE_Jobs()
         job_line = {}
@@ -2738,15 +2818,14 @@ class BatchTools:
         FileTools.mkdir(data_dir)
         jid_fname = GLOBALS.FILE_STRUCTURE["jid"]
         with open(jid_fname, "a") as jid_file:
-            qsub_cmd = ""
+            qsub_cmd = []
             if GLOBALS.SGE and not GLOBALS.SUBMITTED:
-                qsub_cmd = "qsub "
+                qsub_cmd += ["qsub"]
                 if hold and hold in BatchTools.qstat(quiet=True):
-                    qsub_cmd += "-hold_jid " +  str(hold) + " "
+                    qsub_cmd += ["-hold_jid", f"{hold}"]
             else:
-                qsub_cmd = "bash "
-            qsub_cmd += script
-            qsub_cmd = [qsub_cmd]
+                qsub_cmd = ["bash"]
+            qsub_cmd += [script]
             if not GLOBALS.SUBMITTED and GLOBALS.SGE:
                 output = BatchTools.run_cmd(qsub_cmd)
                 jid = re.findall(r"\d+", output)
@@ -2764,7 +2843,7 @@ class BatchTools:
             for jid in f:
                 jid = jid.strip()
                 if jid in BatchTools.qstat(quiet=True):
-                    BatchTools.run_cmd([f"qdel {jid}"])
+                    BatchTools.run_cmd(["qdel", f"{jid}"])
                     print(f"Deleted job: {jid}")
 
 
@@ -3223,11 +3302,14 @@ class PropertyTools:
         # run adaptive sampling
         print("Submitting Adaptive Sampling Runs")
         importlib.invalidate_caches()
-        for _, property_directory in property_directories:
+        for property_name, property_directory in property_directories:
             with FileTools.pushd(property_directory):
                 spec = importlib.util.spec_from_file_location("*", __file__)
                 ichor = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(ichor)
+                try:
+                    spec.loader.exec_module(ichor)
+                except:
+                    print(f"Error submitting adaptive sampling for: {property_name}")
                 ichor.AutoTools.run_from_extern()
 
         GLOBALS.OPTIMISE_PROPERTY = original_property
@@ -4525,8 +4607,6 @@ class Models:
         elif type == "multipoles":
             return [model for model in self if re.match(r"q\d+(\w+)?", model.type)]
         else:
-            for model in self:
-                print(model.type)
             return [model for model in self if model.type == type]
 
     def read(self):
