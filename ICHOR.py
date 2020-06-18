@@ -896,7 +896,7 @@ class Globals:
     def set(self, name, value):
         name = name.upper()
         if name not in self.global_variables:
-            _unknown_settings.append(name)
+            ProblemFinder.unknown_settings.append(name)
         else:
             setattr(self, name, value)
 
