@@ -4824,10 +4824,10 @@ class INT(Point):
             self.multipoles = int_data["multipoles"]
             self.iqa_data = int_data["iqa_data"]
 
-        # Check the data was read in correctly
-        if len(self.integration_results.keys()) == 0 or len(self.multipoles.keys()) == 0 or len(self.iqa_data) == 0:
-            self.read_backup = True
-            raise json.decoder.JSONDecodeError
+            # Check the data was read in correctly
+            if len(self.integration_results.keys()) == 0 or len(self.multipoles.keys()) == 0 or len(self.iqa_data) == 0:
+                self.read_backup = True
+                raise json.decoder.JSONDecodeError("Empty Data Fields", f, 0)
 
     def backup_int(self):
         FileTools.move_file(self.fname, self.fname + ".bak")
