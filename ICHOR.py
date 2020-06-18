@@ -4750,6 +4750,8 @@ class INT(Point):
 
         self.split_fname()
 
+        self.read_backup = False
+
         if self.fname and read:
             self.read()
 
@@ -4762,7 +4764,10 @@ class INT(Point):
             self.write_json()
 
     def read_int(self):
-        with open(self.fname, "r") as f:
+        fname = self.fname
+        if self.read_backup:
+            fname += ".bak"
+        with open(fname, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
                     line = next(f)
@@ -4818,6 +4823,11 @@ class INT(Point):
             self.integration_results = int_data["integration"]
             self.multipoles = int_data["multipoles"]
             self.iqa_data = int_data["iqa_data"]
+
+        # Check the data was read in correctly
+        if len(self.integration_results.keys()) == 0 or len(self.multipoles.keys()) == 0 or len(self.iqa_data) == 0:
+            self.read_backup = True
+            raise json.decoder.JSONDecodeError
 
     def backup_int(self):
         FileTools.move_file(self.fname, self.fname + ".bak")
