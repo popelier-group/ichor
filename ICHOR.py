@@ -5634,7 +5634,7 @@ class Points:
 
     def get_points(self, points_to_get):
         points = Points(self.directory)
-        for point in reversed(sorted(points_to_get)):
+        for point in points_to_get.sort(reverse=True):
             points.add_point(self[point])
             del self[point]
         return points
