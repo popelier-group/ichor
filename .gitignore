@@ -8,3 +8,5 @@ testing.py
 *.xyz
 wily*
 rmsd*
+DATA/
+testing*
