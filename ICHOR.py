@@ -2525,7 +2525,7 @@ class SubmissionScript:
         if include_nodes: node_options += [f"({include_nodes})"]
         if exclude_nodes: node_options += [f"!({exclude_nodes})"]
 
-        return "#$ -l " + "&".join(node_options) + "\n" if len(node_options) > 0 else ""
+        return "#$ -l h=" + "&".join(node_options) + "\n" if len(node_options) > 0 else ""
 
 
     def write(self):
