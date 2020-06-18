@@ -4831,6 +4831,8 @@ class INT(Point):
                 raise json.decoder.JSONDecodeError("Empty Data Fields", f.read(), 0)
 
     def backup_int(self):
+        if self.read_backup:
+            return
         FileTools.move_file(self.fname, self.fname + ".bak")
 
     def write_json(self):
