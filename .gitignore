@@ -2,3 +2,6 @@
 .vscode/
 .DS_Store
 Test/
+*.sh
+testing*
+DATA/
