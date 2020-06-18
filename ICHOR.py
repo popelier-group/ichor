@@ -811,6 +811,9 @@ class Globals:
 
         globals.IQA_MODELS = False, bool
 
+        globals.INCLUDE_NODES = [], list
+        globals.EXCLUDE_NODES = [], list
+
         # Set Hidden Variables
         globals.FILE_STRUCTURE.hidden = True
         globals.SGE.hidden = True
@@ -833,6 +836,8 @@ class Globals:
         globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
         globals.ALF.add_pre_modifier(GlobalTools.read_alf)
         globals.OPTIMISE_PROPERTY.add_modifier(GlobalTools.to_lower)
+        globals.INCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
+        globals.EXCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
 
         globals.init()
 
@@ -2511,6 +2516,18 @@ class SubmissionScript:
         self.load_modules()
         self.setup_stdout()
     
+    def node_options(self):
+        node_options = []
+
+        include_nodes = "|".join(GLOBALS.INCLUDE_NODES)
+        exclude_nodes = "|".join(GLOBALS.EXCLUDE_NODES)
+        
+        if include_nodes: node_options += [f"({include_nodes})"]
+        if exclude_nodes: node_options += [f"!({exclude_nodes})"]
+
+        return "#$ -l " + "&".join(node_options) + "\n" if len(node_options) > 0 else ""
+
+
     def write(self):
         self.setup()
         self.cleanup()
@@ -2529,6 +2546,8 @@ class SubmissionScript:
             f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
                 f.write(f"#$ {option}\n")
+
+            f.write(self.node_options())
 
             pe = self.parallel_environments[str(GLOBALS.MACHINE)][self.ncores]
             if self.ncores > 1:
