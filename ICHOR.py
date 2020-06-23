@@ -1084,6 +1084,8 @@ class Globals:
             float,
         )  # Maximum theta value for initialisation
 
+        globals.MAX_NUGGET = 1e-4, float
+
         globals.FEREBUS_COGNITIVE_LEARNING_RATE = 1.49400, float
         globals.FEREBUS_INERTIA_WEIGHT = 0.72900, float
         globals.FEREBUS_SOCIAL_LEARNING_RATE = 1.49400, float
@@ -5105,12 +5107,31 @@ class Model:
             self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
             return self._R
 
+    def add_nugget(self, nugget=1e-12):
+        return self.R + np.eye(self.nTrain) * nugget
+
     @property
     def invR(self):
         try:
             return self._invR
         except AttributeError:
-            self._invR = la.inv(self.R)
+            try:
+                self._invR = la.inv(self.R)
+            except:
+                nugget = GLOBALS.FEREBUS_NUGGET
+                oom = 0
+                while nugget < GLOBALS.MAX_NUGGET:
+                    nugget = GLOBALS.FEREBUS_NUGGET * 10**oom
+                    R = self.add_nugget(nugget)
+                    logging.warning(f"Singular Matrix Encountered: Nugget of {nugget}  used on model {self.fname}:{self.nTrain}")
+                    try:
+                        self._invR = la.inv(R)
+                        break
+                    except la.LinAlgError:
+                        if nugget <= GLOBALS.MAX_NUGGET:
+                            logging.error(f"Could not invert R Matrix of {self.fname}:{self.nTrain}: Singular Matrix Encountered")
+                            sys.exit(1)
+                        oom += 1
             return self._invR
 
     @property
