@@ -3883,7 +3883,7 @@ class PropertyTools:
             )
             if os.path.exists(log_dir):
                 # for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
-                FileTools.copytree(log_dir, GLOBALS.FILE_STRUCTURE["log"])
+                FileTools.copymodels(log_dir, GLOBALS.FILE_STRUCTURE["log"])
 
 
 # ========================#
