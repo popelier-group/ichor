@@ -3888,6 +3888,11 @@ class PropertyTools:
 #      Point Tools       #
 # ========================#
 
+def buildermethod(func):
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
+        return self
+    return wrapper
 
 class Atom:
     ang2bohr = 1.88971616463
@@ -4364,6 +4369,63 @@ class Atoms:
         return self
 
 
+class PointError:
+    class AtomsNotDefined(Exception): pass
+
+    class AtomNotFound(Exception): pass
+
+    class NotGJF(Exception): pass
+
+    class NotWFN(Exception): pass
+
+    class NotINTs(Exception): pass
+
+    class CannotMove(Exception): pass
+
+
+class Point:
+    counter = it.count(1)
+
+    @property
+    def atoms(self):
+        raise PointError.AtomsNotDefined()
+
+    @property
+    def natoms(self):
+        return len(self.atoms)
+
+    def split_fname(self):
+        if not hasattr(self, fname):
+            self.fname = ""
+            return
+
+        self.dirname = os.path.dirname(self.fname)
+        self.basename = os.path.basename(self.fname)
+
+        self.extension = self.basename.split(".")[-1]
+        self.point_name = self.basename.split(".")[0]
+
+        try:
+            self.point_num = re.findall(r"\d+$", self.point_name)[0]
+            self.system_name = self.point_name.replace(self.point_num, "")
+            self.point_num = int(self.point_num)
+        except (IndexError, ValueError):
+            self.point_num = 1
+            self.system_name = GLOBALS.SYSTEM_NAME
+
+    def move(self, directory):
+        raise PointError.CannotMove()
+
+    def __len__(self):
+        return len(self.atoms)
+
+    def __getitem__(self, i):
+        return self.atoms[i]
+
+    def __bool__(self):
+        return self.fname != ""
+
+"""
 class Point:
     counter = it.count(1)
 
@@ -4529,6 +4591,45 @@ class Point:
             int_file.move(new_directory)
 
         self.directory = new_directory
+"""
+
+class Directory(Point):
+    def __init__(self, dirpath):
+        self.path = dirpath
+
+        self.gjf = None
+        self.wfn = None
+        self.ints = None
+
+    @buildermethod
+    def read(self):
+        UsefulTools.not_implemented()
+
+    @buildermethod
+    def add_gjf(self, gjf):
+        if isinstance(gjf, str):
+            gjf = GJF(gjf)
+        if not isinstance(gjf, GJF):
+            raise PointError.NotGJF()
+        self.gjf = gjf
+
+    @buildermethod
+    def add_wfn(self, wfn):
+        if isinstance(wfn, str):
+            wfn = WFN(wfn)
+        if not isinstance(wfn, WFN):
+            raise PointError.NotWFN()
+        self.wfn = wfn
+
+    @buildermethod
+    def add_ints(self, intsdir):
+        if isinstance(intsdir, str):
+            ints = INTs(intsdir)
+        else:
+            ints = intsdir
+        if not isinstance(ints, INTs):
+            raise PointError.NotINTs()
+        self.ints = ints
 
 
 class GJF(Point):
@@ -4555,9 +4656,7 @@ class GJF(Point):
 
         self.split_fname()
 
-        if self.fname and read:
-            self.read()
-
+    @buildermethod
     def read(self):
         with open(self.fname, "r") as f:
             for line in f:
@@ -4578,6 +4677,10 @@ class GJF(Point):
                     self._atoms.finish()
                     self.wfn_fname = line.strip()
 
+    @property
+    def atoms(self):
+        return self._atoms
+    
     @property
     def job(self):
         return GJF.jobs[self.job_type]
@@ -4630,16 +4733,7 @@ class GJF(Point):
 
     def submit(self):
         SubmissionTools.make_g09_script(self, redo=True, submit=True)
-
-    def __len__(self):
-        return len(self._atoms)
-
-    def __getitem__(self, i):
-        return self._atoms[i]
-
-    def __bool__(self):
-        return self.fname != ""
-
+ 
 
 class WFN(Point):
     def __init__(self, fname="", read=False):
@@ -4661,9 +4755,7 @@ class WFN(Point):
 
         self.split_fname()
 
-        if read and self.fname:
-            self.read()
-
+    @buildermethod
     def read(self, only_header=False):
         if not os.path.exists(self.fname):
             return
@@ -4711,9 +4803,6 @@ class WFN(Point):
         )
         return n_ints == self.nuclei
 
-    def __bool__(self):
-        return self.fname != ""
-
     def move(self, directory):
         if self:
             if directory.endswith(os.sep):
@@ -4752,9 +4841,7 @@ class INT(Point):
 
         self.read_backup = False
 
-        if self.fname and read:
-            self.read()
-
+    @buildermethod
     def read(self):
         try:
             self.read_json()
@@ -4763,6 +4850,7 @@ class INT(Point):
             self.backup_int()
             self.write_json()
 
+    @buildermethod
     def read_int(self):
         fname = self.fname
         if self.read_backup:
@@ -4817,6 +4905,7 @@ class INT(Point):
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
 
+    @buildermethod
     def read_json(self):
         with open(self.fname, "r") as f:
             int_data = json.load(f)
@@ -4831,8 +4920,7 @@ class INT(Point):
                 raise json.decoder.JSONDecodeError("Empty Data Fields", f.read(), 0)
 
     def backup_int(self):
-        if self.read_backup:
-            return
+        if self.read_backup: return
         FileTools.move_file(self.fname, self.fname + ".bak")
 
     def write_json(self):
@@ -4870,9 +4958,31 @@ class INT(Point):
             FileTools.move_file(self.fname, new_name)
             self.fname = new_name
 
-    def __bool__(self):
-        return self.fname != ""
 
+class INTs(Point):
+    def __init__(self, ints_directory):
+        self.path = ints_directory
+        self._ints = []
+
+    def read(self):
+        pass
+        # todo!
+
+    def items(self):
+        return [(_int.atom, _int) for _int in self]
+
+    def get_atom(self, atom):
+        for _int in self:
+            if _int.atom == atom:
+                return _int
+        raise PointError.AtomNotFound()
+
+    def __getitem__(self, idx):
+        if isinstance(idx, int):
+            return self._ints[idx]
+        elif isinstance(idx, str):
+            return self.get_atom(idx)
+        raise PointError.AtomNotFound()
 
 @jit(nopython=True)
 def numba_r_rbf(x_star, x, hp):
