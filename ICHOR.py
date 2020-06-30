@@ -452,6 +452,8 @@ class Constants:
         "q44s",
     ]
 
+    ha_to_kj_mol = 2625.5
+
 
 class UsefulTools:
     @staticmethod
@@ -1083,6 +1085,8 @@ class Globals:
             1.0,
             float,
         )  # Maximum theta value for initialisation
+
+        globals.MAX_NUGGET = 1e-4, float
 
         globals.FEREBUS_COGNITIVE_LEARNING_RATE = 1.49400, float
         globals.FEREBUS_INERTIA_WEIGHT = 0.72900, float
@@ -3881,7 +3885,7 @@ class PropertyTools:
             )
             if os.path.exists(log_dir):
                 # for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
-                FileTools.copytree(log_dir, GLOBALS.FILE_STRUCTURE["log"])
+                FileTools.copymodels(log_dir, GLOBALS.FILE_STRUCTURE["log"])
 
 
 # ========================#
@@ -5215,12 +5219,31 @@ class Model:
             self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
             return self._R
 
+    def add_nugget(self, nugget=1e-12):
+        return self.R + np.eye(self.nTrain) * nugget
+
     @property
     def invR(self):
         try:
             return self._invR
         except AttributeError:
-            self._invR = la.inv(self.R)
+            try:
+                self._invR = la.inv(self.R)
+            except:
+                nugget = GLOBALS.FEREBUS_NUGGET
+                oom = 0
+                while nugget < GLOBALS.MAX_NUGGET:
+                    nugget = GLOBALS.FEREBUS_NUGGET * 10**oom
+                    R = self.add_nugget(nugget)
+                    logging.warning(f"Singular Matrix Encountered: Nugget of {nugget}  used on model {self.fname}:{self.nTrain}")
+                    try:
+                        self._invR = la.inv(R)
+                        break
+                    except la.LinAlgError:
+                        if nugget <= GLOBALS.MAX_NUGGET:
+                            logging.error(f"Could not invert R Matrix of {self.fname}:{self.nTrain}: Singular Matrix Encountered")
+                            sys.exit(1)
+                        oom += 1
             return self._invR
 
     @property
@@ -5757,7 +5780,7 @@ class Points:
 
     def get_points(self, points_to_get):
         points = Points(self.directory)
-        for point in points_to_get.sort(reverse=True):
+        for point in reversed(sorted(points_to_get)):
             points.add_point(self[point])
             del self[point]
         return points
@@ -6003,7 +6026,7 @@ class Points:
         df["WFN"] = pd.to_numeric(wfn_energies, errors="coerce")
 
         df["error / Ha"] = (df["Total"] - df["WFN"]).abs()
-        df["error / kJ/mol"] = df["error / Ha"] * 2625.5
+        df["error / kJ/mol"] = df["error / Ha"] * Constants.ha_to_kj_mol
         df.to_csv("recovery_errors.csv")
 
         return df["error / kJ/mol"]
@@ -6810,6 +6833,8 @@ class S_CurveTools:
 
                     predicted_value = model_prediction[int_data.num]
                     error = np.abs(true_value - predicted_value)
+                    if model_name.lower() == "iqa":
+                        error *= Constants.ha_to_kj_mol
 
                     model_data[model_name][atom]["true"].append(true_value)
                     model_data[model_name][atom]["predicted"].append(
