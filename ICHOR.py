@@ -452,6 +452,8 @@ class Constants:
         "q44s",
     ]
 
+    ha_to_kj_mol = 2625.5
+
 
 class UsefulTools:
     @staticmethod
@@ -5914,7 +5916,7 @@ class Points:
         df["WFN"] = pd.to_numeric(wfn_energies, errors="coerce")
 
         df["error / Ha"] = (df["Total"] - df["WFN"]).abs()
-        df["error / kJ/mol"] = df["error / Ha"] * 2625.5
+        df["error / kJ/mol"] = df["error / Ha"] * Constants.ha_to_kj_mol
         df.to_csv("recovery_errors.csv")
 
         return df["error / kJ/mol"]
@@ -6721,6 +6723,8 @@ class S_CurveTools:
 
                     predicted_value = model_prediction[int_data.num]
                     error = np.abs(true_value - predicted_value)
+                    if model_name.lower() == "iqa":
+                        error *= Constants.ha_to_kj_mol
 
                     model_data[model_name][atom]["true"].append(true_value)
                     model_data[model_name][atom]["predicted"].append(
