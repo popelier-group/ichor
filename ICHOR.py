@@ -547,6 +547,17 @@ class UsefulTools:
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
     @staticmethod
+    def natural_sort_path(iterable, reverse=False):
+        prog = re.compile(r"(\d+)")
+
+        def alphanum_key(element):
+            return [
+                int(c) if c.isdigit() else c for c in prog.findall(element.path)
+            ]
+
+        return sorted(iterable, key=alphanum_key, reverse=reverse)
+
+    @staticmethod
     def countDigits(n):
         import math
 
@@ -1240,9 +1251,10 @@ class Globals:
                             pass
             if self.ALF_REFERENCE_FILE:
                 try:
-                    GJF(
-                        str(self.ALF_REFERENCE_FILE), read=True
-                    )._atoms.calculate_alf()
+                    GJF(str(self.ALF_REFERENCE_FILE)) \
+                        .read()                       \
+                        .atoms                        \
+                        .calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
                     print(
@@ -2177,6 +2189,11 @@ class FileTools:
             except:
                 FileTools.copymodels(s, d, symlinks, ignore)
 
+    @staticmethod
+    @lru_cache()
+    def get_extension(path):
+        return os.path.splitext(path)[1]
+
 
 class my_tqdm:
     """
@@ -2318,7 +2335,6 @@ class FerebusTools:
         atom,
         training_set_size,
         predictions=0,
-        model_type="iqa",
         nproperties=1,
         optimization="pso",
     ):
@@ -2326,11 +2342,6 @@ class FerebusTools:
         atom_num = re.findall("\d+", atom)[0]
 
         starting_properties = 1
-
-        if model_type.lower() in Constants.multipole_names:
-            starting_properties = (
-                Constants.multipole_names.index(model_type.lower()) + 1
-            )
 
         with open(finput_fname, "w+") as finput:
             finput.write(f"{GLOBALS.SYSTEM_NAME}\n")
@@ -3131,14 +3142,14 @@ class SubmissionTools:
         points, directory="", redo=False, submit=True, hold=None
     ):
         gaussian_job = GaussianCommand()
-        if isinstance(points, Points):
+        if isinstance(points, Set):
             for point in points:
                 if point.gjf and (
                     redo or not os.path.exists(point.gjf.wfn_fname)
                 ):
-                    gaussian_job.add(point.gjf.fname)
+                    gaussian_job.add(point.gjf.path)
         elif isinstance(points, GJF):
-            gaussian_job.add(points.fname)
+            gaussian_job.add(points.path)
 
         script_name = os.path.join(directory, "GaussSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -3165,9 +3176,9 @@ class SubmissionTools:
         aimall_job = AIMAllCommand()
         for point in points:
             if point.wfn and (redo or not point.wfn.aimall_complete):
-                aimall_job.add(point.wfn.fname)
+                aimall_job.add(point.wfn.path)
             elif point.gjf and not check_wfns:
-                aimall_job.add(point.gjf.wfn_fname)
+                aimall_job.add(point.gjf.wfn.path)
 
         script_name = os.path.join(directory, "AIMSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -3898,6 +3909,7 @@ def buildermethod(func):
         return self
     return wrapper
 
+
 class Atom:
     ang2bohr = 1.88971616463
     counter = it.count(1)
@@ -4348,6 +4360,15 @@ class Atoms:
             self.calculate_features()
             self._features = [atom.features for atom in self]
             return self._features
+    
+    @property
+    def features_dict(self):
+        try:
+            return self._features_dict
+        except AttributeError:
+            self.calculate_features()
+            self._features = {atom.atom_num:atom.features for atom in self}
+            return self._features
 
     def __len__(self):
         return len(self._atoms)
@@ -4382,6 +4403,8 @@ class PointError:
 
     class NotWFN(Exception): pass
 
+    class NotINT(Exception): pass
+
     class NotINTs(Exception): pass
 
     class CannotMove(Exception): pass
@@ -4392,33 +4415,46 @@ class Point:
 
     @property
     def atoms(self):
+        try: return self.gjf.atoms
+        except: pass
+
+        try: return self.wfn.atoms
+        except: pass
+
         raise PointError.AtomsNotDefined()
+
+    @property
+    def features(self):
+        return self.atoms.features
+
+    @property
+    def features_dict(self):
+        return self.atoms.features_dict
+
+    @property
+    def iqa(self):
+        return {_int.atom: _int.iqa for _int in self.ints}
 
     @property
     def natoms(self):
         return len(self.atoms)
 
-    def split_fname(self):
-        if not hasattr(self, fname):
-            self.fname = ""
-            return
-
-        self.dirname = os.path.dirname(self.fname)
-        self.basename = os.path.basename(self.fname)
-
-        self.extension = self.basename.split(".")[-1]
-        self.point_name = self.basename.split(".")[0]
-
-        try:
-            self.point_num = re.findall(r"\d+$", self.point_name)[0]
-            self.system_name = self.point_name.replace(self.point_num, "")
-            self.point_num = int(self.point_num)
-        except (IndexError, ValueError):
-            self.point_num = 1
-            self.system_name = GLOBALS.SYSTEM_NAME
-
     def move(self, directory):
         raise PointError.CannotMove()
+
+    def get_property(self, property_names):
+        properties = {}
+        if not isinstance(property_names, list):
+            property_names = [property_names]
+        for atom, data in self.ints.items():
+            for property_name in property_names:
+                property_ = data.__getattr__(property_name)
+                if not isinstance(property_, dict):
+                    property_ = {property_name: property_}
+                if atom not in properties.keys():
+                    properties[atom] = {}
+                properties[atom].update(property_)
+        return properties
 
     def __len__(self):
         return len(self.atoms)
@@ -4427,7 +4463,7 @@ class Point:
         return self.atoms[i]
 
     def __bool__(self):
-        return self.fname != ""
+        return self.path != ""
 
 """
 class Point:
@@ -4605,9 +4641,28 @@ class Directory(Point):
         self.wfn = None
         self.ints = None
 
+        self.parse()
+
+    def parse(self):
+        self.read_directory(self.path)
+
+    def read_directory(self, path):
+        file_extentsions = {
+            ".gjf": self.add_gjf,
+            ".wfn": self.add_wfn,
+            ".int": self.add_int
+        }
+        with os.scandir(path) as it:
+            for entry in it:
+                if entry.is_file() and FileTools.get_extension(entry) in file_extentsions.keys():
+                    add = file_extentsions[FileTools.get_extension(entry)]
+                    add(entry.path)
+                elif entry.is_dir():
+                    self.read_directory(entry.path)
+
     @buildermethod
     def read(self):
-        UsefulTools.not_implemented()
+        self.read_all()
 
     @buildermethod
     def add_gjf(self, gjf):
@@ -4627,20 +4682,47 @@ class Directory(Point):
 
     @buildermethod
     def add_ints(self, intsdir):
-        if isinstance(intsdir, str):
-            ints = INTs(intsdir)
-        else:
-            ints = intsdir
-        if not isinstance(ints, INTs):
-            raise PointError.NotINTs()
-        self.ints = ints
+        self.read_directory(intsdir)
+    
+    @buildermethod
+    def add_int(self, int_):
+        if self.ints is None:
+            self.ints = INTs()
+        self.ints.add(int_)
+
+    @buildermethod
+    def read_all(self):
+        if self.gjf: self.read_gjf()
+        if self.wfn: self.read_wfn()
+        if self.ints: self.read_ints()
+
+    @buildermethod
+    def read_gjf(self):
+        if self.gjf is None: self.read()
+        # print(self.path)
+        self.gjf.read()
+    
+    @buildermethod
+    def read_wfn(self):
+        self.wfn.read()
+
+    @buildermethod
+    def read_ints(self):
+        self.ints.read()
+
+    def __bool__(self):
+        return any(
+            self.gjf,
+            self.wfn,
+            self.ints
+        )
 
 
 class GJF(Point):
     jobs = {"energy": "p", "opt": "opt", "freq": "freq"}
 
-    def __init__(self, fname="", read=False):
-        self.fname = fname
+    def __init__(self, path):
+        self.path = path
         self._atoms = Atoms()
 
         self.job_type = "energy"  # energy/opt/freq
@@ -4652,17 +4734,17 @@ class GJF(Point):
 
         self.header_line = ""
 
-        self.title = FileTools.get_basename(self.fname, return_extension=False)
-        self.wfn_fname = ""
+        self.title = FileTools.get_basename(self.path)
+        self.wfn = WFN(self.path.replace(".gjf", ".wfn"))
 
         self.startup_options = []
         self.keywords = []
 
-        self.split_fname()
+        super().__init__()
 
     @buildermethod
     def read(self):
-        with open(self.fname, "r") as f:
+        with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("%"):
                     self.startup_options.append(line.strip().replace("%", ""))
@@ -4712,7 +4794,6 @@ class GJF(Point):
         ]
 
         self.header_line = f"#{self.job} {self.method}/{self.basis_set} {UsefulTools.unpack(self.keywords)}\n"
-        self.wfn_fname = self.fname.replace(".gjf", ".wfn")
 
     def move(self, directory):
         if self:
@@ -4720,12 +4801,12 @@ class GJF(Point):
                 directory = directory.rstrip(os.sep)
             point_name = os.path.basename(directory)
             new_name = os.path.join(directory, point_name + ".gjf")
-            FileTools.move_file(self.fname, new_name)
+            FileTools.move_file(self.path, new_name)
             self.fname = new_name
 
     def write(self):
         self.format()
-        with open(self.fname, "w") as f:
+        with open(self.path, "w") as f:
             for startup_option in self.startup_options:
                 f.write(f"%" + startup_option + "\n")
             f.write(f"{self.header_line}\n")
@@ -4733,16 +4814,16 @@ class GJF(Point):
             f.write(f"{self.charge} {self.multiplicity}\n")
             for atom in self._atoms:
                 f.write(f"{str(atom)}\n")
-            f.write(f"\n{self.wfn_fname}")
+            f.write(f"\n{self.wfn.path}")
 
     def submit(self):
         SubmissionTools.make_g09_script(self, redo=True, submit=True)
  
 
 class WFN(Point):
-    def __init__(self, fname="", read=False):
-        self.fname = fname
-        self.split_fname()
+    def __init__(self, path):
+        self.path = path
+        self._atoms = Atoms()
 
         self.title = ""
         self.header = ""
@@ -4752,18 +4833,14 @@ class WFN(Point):
         self.nuclei = 0
         self.method = "HF"
 
-        self._atoms = Atoms()
-
         self.energy = 0
         self.virial = 0
 
-        self.split_fname()
-
     @buildermethod
     def read(self, only_header=False):
-        if not os.path.exists(self.fname):
+        if not os.path.exists(self.path):
             return
-        with open(self.fname, "r") as f:
+        with open(self.path, "r") as f:
             self.title = next(f)
             self.header = next(f)
             self.read_header()
@@ -4790,6 +4867,10 @@ class WFN(Point):
             self.method = split_header[-1]
         else:
             self.method = GLOBALS.METHOD
+
+    @property
+    def atoms(self):
+        return self._atoms.to_angstroms()
 
     @property
     def aimall_complete(self):
@@ -4833,17 +4914,13 @@ class WFN(Point):
 
 
 class INT(Point):
-    def __init__(self, fname="", read=False):
-        self.fname = fname
-        self.atom = os.path.splitext(os.path.basename(self.fname))[0].upper()
+    def __init__(self, path):
+        self.path = path
+        self.atom = os.path.splitext(os.path.basename(self.path))[0].upper()
 
         self.integration_results = {}
         self.multipoles = {}
         self.iqa_data = {}
-
-        self.split_fname()
-
-        self.read_backup = False
 
     @buildermethod
     def read(self):
@@ -4851,15 +4928,14 @@ class INT(Point):
             self.read_json()
         except json.decoder.JSONDecodeError:
             self.read_int()
-            self.backup_int()
-            self.write_json()
+            # Backup only if read correctly
+            if self.integration_results:
+                self.backup_int()
+                self.write_json()
 
     @buildermethod
     def read_int(self):
-        fname = self.fname
-        if self.read_backup:
-            fname += ".bak"
-        with open(fname, "r") as f:
+        with open(self.path, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
                     line = next(f)
@@ -4911,20 +4987,13 @@ class INT(Point):
 
     @buildermethod
     def read_json(self):
-        with open(self.fname, "r") as f:
+        with open(self.path, "r") as f:
             int_data = json.load(f)
             self.integration_results = int_data["integration"]
             self.multipoles = int_data["multipoles"]
             self.iqa_data = int_data["iqa_data"]
 
-        # Check the data was read in correctly
-        if len(self.integration_results.keys()) == 0 or len(self.multipoles.keys()) == 0 or len(self.iqa_data) == 0:
-            self.read_backup = True
-            with open(self.fname, "r") as f:
-                raise json.decoder.JSONDecodeError("Empty Data Fields", f.read(), 0)
-
     def backup_int(self):
-        if self.read_backup: return
         FileTools.move_file(self.fname, self.fname + ".bak")
 
     def write_json(self):
@@ -4948,6 +5017,14 @@ class INT(Point):
     @property
     def eiqa(self):
         return self.iqa_data["E_IQA(A)"]
+    
+    @property
+    def iqa(self):
+        return self.eiqa
+    
+    @property
+    def q(self):
+        return self.integration_results["q"]
 
     def move(self, directory):
         if self:
@@ -4959,18 +5036,42 @@ class INT(Point):
             new_name = os.path.join(
                 directory, int_directory, self.atom.lower() + ".int"
             )
-            FileTools.move_file(self.fname, new_name)
+            FileTools.move_file(self.path, new_name)
             self.fname = new_name
+
+    def __getattr__(self, attr):
+        if attr in Constants.multipole_names:
+            if attr == "q00":
+                return self.q
+            return self.multipoles[attr]
+        else:
+            if attr.lower() in ["iqa", "eiqa"]:
+                return self.iqa
+            elif attr.lower() in ["multipoles"]:
+                return {multipole_name: self.__getattr__(multipole_name) for multipole_name in Constants.multipole_names}
+            return self.__dict__[attr]
 
 
 class INTs(Point):
-    def __init__(self, ints_directory):
-        self.path = ints_directory
-        self._ints = []
+    def __init__(self):
+        self.ints = []
 
     def read(self):
-        pass
-        # todo!
+        for _int in self:
+            _int.read()
+
+    @buildermethod
+    def add(self, int_):
+        if isinstance(int_, str):
+            int_ = INT(int_)
+        if not isinstance(int_, INT):
+            raise PointError.NotINT()
+        self.ints += [int_]
+    
+    @buildermethod
+    def read(self):
+        for atom in self:
+            atom.read()
 
     def items(self):
         return [(_int.atom, _int) for _int in self]
@@ -4981,12 +5082,30 @@ class INTs(Point):
                 return _int
         raise PointError.AtomNotFound()
 
+    def __getattr__(self, attr):
+        if attr in self.__dict__.keys():
+            return self.__dict__[attr]
+        else:
+            return {_int.atom: _int.__getattr__(attr) for _int in self}
+
+    def __bool__(self):
+        return bool(self.ints)
+
     def __getitem__(self, idx):
         if isinstance(idx, int):
-            return self._ints[idx]
+            return self.ints[idx]
         elif isinstance(idx, str):
             return self.get_atom(idx)
         raise PointError.AtomNotFound()
+
+
+class Geometry(Point):
+    def __init__(self, atoms):
+        self._atoms = atoms
+
+    @property
+    def atoms(self):
+        return self._atoms
 
 @jit(nopython=True)
 def numba_r_rbf(x_star, x, hp):
@@ -5622,6 +5741,235 @@ class Models:
         return len(self._models)
 
 
+class PointsError:
+    class NotDirectory(Exception): pass
+
+
+class Points:
+    pass
+
+
+class Set(Points):
+    def __init__(self, path):
+        self.path = path
+        self.points = []
+        self.parse()
+
+    def parse(self):
+        with os.scandir(self.path) as it:
+            for entry in it:
+                if entry.is_file() and FileTools.get_filetype(entry) in [".gjf", ".wfn", ".int"]:
+                    src = entry.path
+                    dst = os.path.join(self.path, FileTools.get_basename(src))
+                    FileTools.mkdir(dst, empty=False)
+                    FileTools.move_file(src, dst)
+                elif entry.is_dir():
+                    self.add_dir(entry.path)
+        self.sort()
+
+    @buildermethod
+    def read(self):
+        for point in self:
+            point.read()
+
+    @buildermethod
+    def add_dir(self, _dir):
+        if isinstance(_dir, str):
+            _dir = Directory(_dir)
+        if not isinstance(_dir, Directory):
+            raise PointsError.NotDirectory()
+        self += _dir
+
+    @buildermethod
+    def read_gjfs(self):
+        for point in self:
+            point.read_gjf()
+    
+    @buildermethod
+    def read_wfns(self):
+        for point in self:
+            point.read_wfn()
+    
+    @buildermethod
+    def read_ints(self):
+        for point in self:
+            point.read_ints()
+
+    @buildermethod
+    def sort(self):
+        self.points = UsefulTools.natural_sort_path(self)
+
+    def format_gjfs(self):
+        for point in self:
+            if point.gjf:
+                point.gjf.write()
+
+    def submit_gjfs(self, redo=False, submit=True, hold=None):
+        return SubmissionTools.make_g09_script(
+            self, redo=redo, submit=submit, hold=hold
+        )
+    
+    def submit_wfns(self, redo=False, submit=True, hold=None):
+        return SubmissionTools.make_aim_script(
+            self, redo=redo, submit=submit, hold=hold
+        )
+
+    def make_training_set(self, model_type):
+        training_sets = {}
+        for point in self:
+            input = point.features_dict
+            output = point.get_property(model_type)
+            for atom in input.keys():
+                if atom not in training_sets.keys():
+                    training_sets[atom] = TrainingSet()
+
+                training_sets[atom] += (
+                    input[atom],
+                    output[atom]
+                )
+
+        # Write FEREBUS input files
+        MAX_PROPERTIES = 25
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
+        model_directories = []
+        for atom, training_set in training_sets.items():
+            directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
+            FileTools.mkdir(directory, empty=True)
+            training_set_file = os.path.join(
+                directory, atom + "_TRAINING_SET.txt"
+            )
+
+            # Write Training Set File
+            with open(training_set_file, "w") as f:
+                for i, (input, output) in enumerate(training_set):
+                    if len(output) > MAX_PROPERTIES:
+                        output = dict(it.islice(output.items(), MAX_PROPERTIES))
+
+                    num = f"{i+1}".zfill(4)
+                    input = " ".join([str(s) for s in input])
+                    output = " ".join([str(s) for s in output.values()])
+                    f.write(f"{input} {output} {num}\n")
+            
+            # Write FINPUT.txt
+            FerebusTools.write_finput(
+                directory,
+                len(training_sets),
+                atom,
+                len(training_set),
+                nproperties=min(training_set.nproperties, MAX_PROPERTIES),
+            )
+            model_directories.append(directory)
+
+        # self.update_alpha()
+        return model_directories
+
+        # training_sets = {}
+
+        # training_sets, nproperties = self.get_training_sets(model_type)
+
+        # if model_type.lower() in Constants.multipole_names:
+        #     nproperties = 1
+
+        # FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
+        # model_directories = []
+        # for atom, training_set in training_sets.items():
+        #     directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
+        #     FileTools.mkdir(directory, empty=True)
+        #     training_set_file = os.path.join(
+        #         directory, atom + "_TRAINING_SET.txt"
+        #     )
+        #     with open(training_set_file, "w") as f:
+        #         for i, line in enumerate(training_set):
+        #             num = f"{i+1}".zfill(4)
+        #             f.write(f"{line} {num}\n")
+        #     FerebusTools.write_finput(
+        #         directory,
+        #         len(training_sets.keys()),
+        #         atom,
+        #         len(training_set),
+        #         model_type=model_type,
+        #         nproperties=nproperties,
+        #     )
+        #     model_directories.append(directory)
+
+        # self.update_alpha()
+
+        # return model_directories
+
+    def __getitem__(self, idx):
+        return self.points[idx]
+    
+    def __iadd__(self, other):
+        if not isinstance(other, list):
+            other = [other]
+        self.points += other
+        return self
+    
+    def __len__(self):
+        return len(self.points)
+    
+    def __or__(self, other):
+        for point in other:
+            self.add(point)
+            self.move(point)
+        return self
+
+    def add(self, point):
+        if isinstance(point, Directory):
+            self += point
+        elif isinstance(point, Atoms):
+            self += Geometry(point)
+
+    def move(self, point):
+        old_directory = point.directory
+
+        new_index = len(self) + 1
+        subdirectory = GLOBALS.SYSTEM_NAME + str(new_index).zfill(4)
+        new_directory = os.path.join(self.directory, subdirectory)
+        point.move(new_directory)
+
+        FileTools.rmtree(old_directory)
+
+
+
+class TrainingSet:
+    def __init__(self, inputs=[], outputs=[]):
+        self.inputs = []
+        self.outputs = []
+
+    def to_list(self, l):
+        return l if isinstance(l, list) else [l]
+    
+    def append(self, input, output):
+        self.inputs.append(self.to_list(input))
+        self.outputs.append(output)
+
+    def __getitem__(self, idx):
+        return (self.inputs[idx], self.outputs[idx])
+
+    def __iadd__(self, other):
+        self.append(
+            other[0],
+            other[1]
+        )
+        return self
+
+    def __repr__(self):
+        repr = ""
+        for input, output in self:
+            input = " ".join([str(i) for i in input])
+            output = str(output)
+            repr += f"{input} | {output}\n"
+        return repr
+
+    @property
+    def nproperties(self):
+        return len(self.outputs[0])
+    
+    def __len__(self):
+        return len(self.inputs)
+
+"""
 class Points:
     def __init__(
         self,
@@ -6100,7 +6448,7 @@ class Points:
 
     def __getitem__(self, i):
         return self._points[i]
-
+"""
 
 class Trajectory:
     def __init__(self, fname, read=False):
@@ -7443,7 +7791,7 @@ def ssh():
 @UsefulTools.external_function()
 def submit_gjfs(directory):
     logging.info("Submitting gjfs to Gaussian")
-    gjfs = Points(directory, read_gjfs=True)
+    gjfs = Set(directory).read_gjfs()
     gjfs.format_gjfs()
     return gjfs.submit_gjfs()
 
@@ -7451,7 +7799,7 @@ def submit_gjfs(directory):
 @UsefulTools.external_function()
 def submit_wfns(directory):
     logging.info("Submitting wfns to AIMAll")
-    wfns = Points(directory, read_gjfs=True, read_wfns=True)
+    wfns = Set(directory).read_gjfs().read_wfns()
     wfns.submit_wfns()
 
 
@@ -7485,13 +7833,8 @@ def _make_models(directory, model_type):
 
     logging.info(f"Making {model_type} models")
 
-    aims = Points(
-        directory,
-        read_gjfs=True,
-        read_ints=True,
-        read_wfns=GLOBALS.WARN_RECOVERY_ERROR,
-    )
-    models = aims.make_training_set(model_type)
+    training_set = Set(directory).read()
+    models = training_set.make_training_set(model_type)
     SubmissionTools.make_ferebus_script(models)
 
 
@@ -7516,7 +7859,7 @@ def calculate_errors(models_directory, sample_pool_directory):
     logging.info("Calculating errors of the Sample Pool")
 
     models = Models(models_directory, read_models=True)
-    sample_pool = Points(sample_pool_directory, read_gjfs=True)
+    sample_pool = Set(sample_pool_directory).read_gjfs()
 
     points = models.expected_improvement(sample_pool)
 
@@ -7529,9 +7872,8 @@ def calculate_errors(models_directory, sample_pool_directory):
 
     if move_points:
         logging.info("Moving points to the Training Set")
-        training_set_directory = GLOBALS.FILE_STRUCTURE["training_set"]
-        training_set = Points(training_set_directory)
-        training_set.add(points, move=True)
+        training_set = Set(GLOBALS.FILE_STRUCTURE["training_set"])
+        training_set = training_set | points
         training_set.format_gjfs()
 
 
