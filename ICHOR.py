@@ -1238,16 +1238,20 @@ class Globals:
                         self.FILE_STRUCTURE["training_set"]
                     )
                 except:
+                    logging.warning("Cannot Find Training Set GJF")
                     try:
                         self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
                             self.FILE_STRUCTURE["sample_pool"]
                         )
                     except:
+                        logging.warning("Cannot Find Sample Pool GJF")
                         try:
                             self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
                                 self.FILE_STRUCTURE["validation_set"]
                             )
                         except:
+                            logging.warning("Cannot Find Validation Set GJF")
+                            logging.error("No ALF_REFERENCE_FILE Defined")
                             pass
             if self.ALF_REFERENCE_FILE:
                 try:
@@ -1257,6 +1261,7 @@ class Globals:
                         .calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
+                    logging.error("Error When Calculating ALF")
                     print(
                         "\nError in ALF calculation, please specify file to calculate ALF"
                     )
@@ -5058,7 +5063,7 @@ class INT(Point):
             intdir = os.path.join(dst, name + "_atomicfiles")
             FileTools.mkdir(intdir)
             new_name = os.path.join(intdir, self.atom.lower() + ".int")
-            
+
             FileTools.move_file(self.path, new_name)
             self.path = new_name
 
