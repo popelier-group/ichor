@@ -4805,6 +4805,7 @@ class GJF(Point):
 
     def format(self):
         if not self.atoms: self.read()
+
         if UsefulTools.in_sensitive(
             GLOBALS.METHOD, Constants.GAUSSIAN_METHODS
         ):
@@ -4827,6 +4828,8 @@ class GJF(Point):
         ]
 
         self.header_line = f"#{self.job} {self.method}/{self.basis_set} {UsefulTools.unpack(self.keywords)}\n"
+
+        self.wfn.path = self.path.replace(".gjf", ".wfn")
 
     def move(self, dst):
         if self:
