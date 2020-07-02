@@ -5000,7 +5000,7 @@ class INT(Point):
             self.iqa_data = int_data["iqa_data"]
 
     def backup_int(self):
-        FileTools.move_file(self.fname, self.fname + ".bak")
+        FileTools.move_file(self.path, self.path + ".bak")
 
     def write_json(self):
         int_data = {
@@ -5009,7 +5009,7 @@ class INT(Point):
             "iqa_data": self.iqa_data,
         }
 
-        with open(self.fname, "w") as f:
+        with open(self.path, "w") as f:
             json.dump(int_data, f)
 
     @property
@@ -5043,7 +5043,7 @@ class INT(Point):
                 directory, int_directory, self.atom.lower() + ".int"
             )
             FileTools.move_file(self.path, new_name)
-            self.fname = new_name
+            self.path = new_name
 
     def __getattr__(self, attr):
         if attr in Constants.multipole_names:
@@ -5968,7 +5968,6 @@ class Set(Points):
         point.move(new_directory)
 
         FileTools.rmtree(old_directory)
-
 
 
 class TrainingSet:
@@ -7702,29 +7701,24 @@ class SettingsTools:
         settings_menu.run()
 
 
-class MakeModelTools:
+class ModelTools:
     training_set_directory = ""
     multipole_model = "all"
 
     @staticmethod
-    def _make_models(directory, model_type):
+    def make_models(directory, model_type):
         GLOBALS.LOG_WARNINGS = True
         GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
 
         logging.info(f"Making {model_type} models")
 
-        aims = Points(
-            directory,
-            read_gjfs=True,
-            read_ints=True,
-            read_wfns=GLOBALS.WARN_RECOVERY_ERROR,
-        )
+        aims = Set(directory).read()
         models = aims.make_training_set(model_type)
         SubmissionTools.make_ferebus_script(models)
 
     @staticmethod
     def choose_multipole(multipole):
-        MakeModelTools.multipole_model = multipole
+        ModelTools.multipole_model = multipole
 
     @staticmethod
     def choose_multipole_model():
@@ -7734,7 +7728,7 @@ class MakeModelTools:
             multipole_menu.add_option(
                 f"{multipole_name}",
                 f"{multipole_name} Multipole Moment",
-                MakeModelTools.choose_multipole,
+                ModelTools.choose_multipole,
                 kwargs={"multipole": multipole_name},
             )
 
@@ -7742,7 +7736,7 @@ class MakeModelTools:
         multipole_menu.add_option(
             "all",
             "All Multipole Moments",
-            MakeModelTools.choose_multipole,
+            ModelTools.choose_multipole,
             kwargs={"multipole": "all"},
         )
         multipole_menu.add_final_options()
@@ -7752,7 +7746,7 @@ class MakeModelTools:
     def refresh_make_models(menu):
         model_types = {
             "IQA": "iqa",
-            "Multipoles": MakeModelTools.multipole_model,
+            "Multipoles": ModelTools.multipole_model,
         }
 
         menu.clear_options()
@@ -7760,9 +7754,9 @@ class MakeModelTools:
             menu.add_option(
                 f"{i+1}",
                 model_name,
-                MakeModelTools._make_models,
+                ModelTools.make_models,
                 kwargs={
-                    "directory": MakeModelTools.training_set_directory,
+                    "directory": ModelTools.training_set_directory,
                     "model_type": model_type,
                 },
             )
@@ -7770,16 +7764,16 @@ class MakeModelTools:
         menu.add_option(
             "m",
             "Choose Multipole Model",
-            MakeModelTools.choose_multipole_model,
+            ModelTools.choose_multipole_model,
         )
         menu.add_space()
-        menu.add_message(f"Multipole Model: {MakeModelTools.multipole_model}")
+        menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
         menu.add_final_options()
 
-    def make_models(directory):
-        MakeModelTools.training_set_directory = directory
+    def make_models_menu(directory):
+        ModelTools.training_set_directory = directory
         model_menu = Menu(title="Model Menu")
-        model_menu.set_refresh(MakeModelTools.refresh_make_models)
+        model_menu.set_refresh(ModelTools.refresh_make_models)
         model_menu.run()
 
 
@@ -7999,7 +7993,7 @@ def main_menu():
     training_set_menu.add_option(
         "3",
         "Make Models",
-        MakeModelTools.make_models,
+        ModelTools.make_models,
         kwargs={"directory": ts_dir},
     )
     training_set_menu.add_space()
