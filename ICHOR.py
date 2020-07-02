@@ -4754,7 +4754,7 @@ class Directory(Point):
 class GJF(Point):
     jobs = {"energy": "p", "opt": "opt", "freq": "freq"}
 
-    def __init__(self, path):
+    def __init__(self, path=None):
         self.path = path
         self._atoms = Atoms()
 
@@ -4777,6 +4777,7 @@ class GJF(Point):
 
     @buildermethod
     def read(self):
+        if not self: return
         with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("%"):
@@ -4858,7 +4859,7 @@ class GJF(Point):
  
 
 class WFN(Point):
-    def __init__(self, path):
+    def __init__(self, path=None):
         self.path = path
         self._atoms = Atoms()
 
@@ -4875,6 +4876,7 @@ class WFN(Point):
 
     @buildermethod
     def read(self, only_header=False):
+        if not self: return
         if not os.path.exists(self.path):
             return
         with open(self.path, "r") as f:
@@ -4934,6 +4936,7 @@ class WFN(Point):
             self.path = new_name
 
     def check_functional(self):
+        if not self: return
         data = []
         with open(self.path, "r") as f:
             for i, line in enumerate(f):
@@ -6017,16 +6020,16 @@ class Set(Points):
         FileTools.rmtree(src)
 
 
-class MockDirectory(Point, Directory):
+class MockDirectory(Directory):
     def __init__(self):
         self.path = ""
 
         self.gjf = GJF("")
         self.wfn = WFN("")
-        self.ints = INTs("")
+        self.ints = INTs()
 
 
-class MockSet(Points, Set):
+class MockSet(Set):
     def __init__(self, npoints=0):
         self.points = [MockDirectory() for _ in range(self.npoints)]
 
