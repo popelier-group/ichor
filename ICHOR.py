@@ -5778,10 +5778,10 @@ class Points:
 
 
 class Set(Points):
-    def __init__(self, path):
+    def __init__(self, path=None):
         self.path = path
         self.points = []
-        self.parse()
+        if self.path: self.parse()
 
     def parse(self):
         with os.scandir(self.path) as it:
@@ -5989,7 +5989,7 @@ class Set(Points):
             self += Geometry(point)
 
     def get(self, points_to_get):
-        points = Set(self.path)
+        points = Set()
         for point in reversed(sorted(points_to_get)):
             points.add(self[point])
             del self[point]
