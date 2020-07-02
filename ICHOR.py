@@ -4446,7 +4446,7 @@ class Point:
     def exists(self):
         return os.path.exists(self.path)
 
-    def move(self, directory):
+    def move(self, dst):
         raise PointError.CannotMove()
 
     def get_property(self, property_names):
@@ -4716,6 +4716,15 @@ class Directory(Point):
     @buildermethod
     def read_ints(self):
         self.ints.read()
+
+    def move(self, dst):
+        FileTools.mkdir(dst)
+
+        self.gjf.move(dst)
+        self.wfn.move(dst)
+        self.ints.move(dst)
+
+        self.path = dst
 
     def __bool__(self):
         return any(
@@ -5090,6 +5099,10 @@ class INTs(Point):
             if _int.atom == atom:
                 return _int
         raise PointError.AtomNotFound()
+
+    def move(self, dst):
+        for _int in self:
+            _int.move(dst)
 
     def __getattr__(self, attr):
         if attr in self.__dict__.keys():
