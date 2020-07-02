@@ -4398,6 +4398,8 @@ class Atoms:
                     del self[i]
         return self
 
+    def __bool__(self):
+        return bool(self.atoms)
 
 class PointError:
     class AtomsNotDefined(Exception): pass
@@ -4802,6 +4804,7 @@ class GJF(Point):
         return GJF.jobs[self.job_type]
 
     def format(self):
+        if not self.atoms: self.read()
         if UsefulTools.in_sensitive(
             GLOBALS.METHOD, Constants.GAUSSIAN_METHODS
         ):
