@@ -4820,14 +4820,14 @@ class GJF(Point):
 
         self.header_line = f"#{self.job} {self.method}/{self.basis_set} {UsefulTools.unpack(self.keywords)}\n"
 
-    def move(self, directory):
+    def move(self, dst):
         if self:
-            if directory.endswith(os.sep):
-                directory = directory.rstrip(os.sep)
-            point_name = os.path.basename(directory)
-            new_name = os.path.join(directory, point_name + ".gjf")
+            if dst.endswith(os.sep): dst = dst.rstrip(os.sep)
+
+            name = os.path.basename(dst)
+            new_name = os.path.join(dst, name + ".gjf")
             FileTools.move_file(self.path, new_name)
-            self.fname = new_name
+            self.path = new_name
 
     def write(self):
         self.format()
@@ -4912,14 +4912,14 @@ class WFN(Point):
         )
         return n_ints == self.nuclei
 
-    def move(self, directory):
+    def move(self, dst):
         if self:
-            if directory.endswith(os.sep):
-                directory = directory.rstrip(os.sep)
-            point_name = os.path.basename(directory)
-            new_name = os.path.join(directory, point_name + ".wfn")
-            FileTools.move_file(self.fname, new_name)
-            self.fname = new_name
+            if dst.endswith(os.sep): dst = dst.rstrip(os.sep)
+
+            name = os.path.basename(dst)
+            new_name = os.path.join(dst, name + ".wfn")
+            FileTools.move_file(self.path, new_name)
+            self.path = new_name
 
     def check_functional(self):
         data = []
@@ -5050,16 +5050,15 @@ class INT(Point):
     def q(self):
         return self.integration_results["q"]
 
-    def move(self, directory):
+    def move(self, dst):
         if self:
-            if directory.endswith(os.sep):
-                directory = directory.rstrip(os.sep)
-            point_name = os.path.basename(directory)
-            int_directory = point_name + "_atomicfiles"
-            FileTools.mkdir(int_directory)
-            new_name = os.path.join(
-                directory, int_directory, self.atom.lower() + ".int"
-            )
+            if dst.endswith(os.sep): dst = dst.rstrip(os.sep)
+
+            name = os.path.basename(dst)
+            intdir = os.path.join(dst, name + "_atomicfiles")
+            FileTools.mkdir(intdir)
+            new_name = os.path.join(intdir, self.atom.lower() + ".int")
+            
             FileTools.move_file(self.path, new_name)
             self.path = new_name
 
@@ -5998,7 +5997,7 @@ class Set(Points):
     def move(self, point):
         src = point.path
 
-        idx = len(self) + 1
+        idx = len(self)
         name = GLOBALS.SYSTEM_NAME + str(idx).zfill(4)
         dst = os.path.join(self.path, name)
         point.move(dst)
