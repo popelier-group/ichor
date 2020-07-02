@@ -4709,7 +4709,7 @@ class Directory(Point):
         try:
             self.gjf.read()
         except AttributeError:
-            log.warn(f"Cannot read GJF in {self.path}")
+            logging.warning(f"Cannot read GJF in {self.path}")
     
     @buildermethod
     def read_wfn(self):
@@ -4717,7 +4717,7 @@ class Directory(Point):
         try:
             self.wfn.read()
         except AttributeError:
-            log.warn(f"Cannot read WFN in {self.path}")
+            logging.warning(f"Cannot read WFN in {self.path}")
 
     @buildermethod
     def read_ints(self):
