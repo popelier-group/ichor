@@ -5933,7 +5933,7 @@ class Set(Points):
             )
             model_directories.append(directory)
 
-        # self.update_alpha()
+        self.update_alpha()
         return model_directories
 
         # training_sets = {}
@@ -5968,6 +5968,48 @@ class Set(Points):
         # self.update_alpha()
 
         # return model_directories
+
+    def update_alpha(self):
+        cv_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
+        if not os.path.exists(cv_file):
+            return
+
+        npoints = -1
+        predictions = []
+        cv_errors = []
+
+        with open(cv_file, "r") as f:
+            data = json.load(f)
+            npoints = data["npoints"]
+            cv_errors = data["cv_errors"]
+            predictions = data["predictions"]
+
+        true_values = []
+        for point in self[npoints:]:
+            true_values += [
+                point.get_true_value(
+                    str(GLOBALS.OPTIMISE_PROPERTY), atoms=True
+                )
+            ]
+
+        data = {}
+        data["npoints"] = UsefulTools.nTrain()
+        data["cv_errors"] = cv_errors
+        data["true_errors"] = []
+        for prediction, true_value in zip(predictions, true_values):
+            true_error = sum(
+                (true_value[int(predicted_atom) - 1] - predicted_value) ** 2
+                for predicted_atom, predicted_value in prediction[
+                    str(GLOBALS.OPTIMISE_PROPERTY)
+                ].items()
+            )
+
+            data["true_errors"].append(true_error)
+
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["adaptive_sampling"])
+        alpha_file = GLOBALS.FILE_STRUCTURE["alpha"]
+        with open(alpha_file, "w") as f:
+            json.dump(data, f)
 
     def __getitem__(self, idx):
         return self.points[idx]
@@ -6032,6 +6074,7 @@ class MockDirectory(Directory):
 class MockSet(Set):
     def __init__(self, npoints=0):
         self.points = [MockDirectory() for _ in range(npoints)]
+
 
 class TrainingSet:
     def __init__(self, inputs=[], outputs=[]):
