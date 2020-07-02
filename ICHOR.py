@@ -5738,7 +5738,7 @@ class Models:
 
     def expected_improvement(self, points):
         points_to_add = self.expected_improvement_function(points)
-        return points.get_points(points_to_add)
+        return points.get(points_to_add)
 
     def __getitem__(self, i):
         return self._models[i]
@@ -5804,10 +5804,6 @@ class Set(Points):
     @buildermethod
     def sort(self):
         self.points = UsefulTools.natural_sort_path(self)
-
-    @property
-    def n_wfns(self):
-        return sum(1 for point in self if point.wfn.exists())
     
     def n(self, attr):
         return sum(1 for point in self if getattr(point, attr).exists())
@@ -5952,12 +5948,22 @@ class Set(Points):
             self.add(point)
             self.move(point)
         return self
+    
+    def __del__(self, idx):
+        del self[idx]
 
     def add(self, point):
         if isinstance(point, Directory):
             self += point
         elif isinstance(point, Atoms):
             self += Geometry(point)
+
+    def get(self, points_to_get):
+        points = Set(self.path)
+        for point in reversed(sorted(points_to_get)):
+            points.add(self[point])
+            del self[point]
+        return points
 
     def move(self, point):
         old_directory = point.directory
@@ -7993,7 +7999,7 @@ def main_menu():
     training_set_menu.add_option(
         "3",
         "Make Models",
-        ModelTools.make_models,
+        ModelTools.make_models_menu,
         kwargs={"directory": ts_dir},
     )
     training_set_menu.add_space()
