@@ -3676,7 +3676,7 @@ class AutoTools:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         gjf = GJF(FileTools.get_first_gjf(directory)).read()
         return SubmissionTools.make_ferebus_script(
-            gjf.atoms, submit=True, hold=jid
+            gjf.atoms.atoms, submit=True, hold=jid
         )
 
     @staticmethod
