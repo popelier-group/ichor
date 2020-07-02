@@ -5812,6 +5812,8 @@ class Set(Points):
     def read_gjfs(self):
         for point in self:
             point.read_gjf()
+            if not point.gjf:
+                del self[point]
     
     @buildermethod
     def read_wfns(self):
