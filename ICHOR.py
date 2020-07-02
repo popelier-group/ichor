@@ -3145,7 +3145,7 @@ class SubmissionTools:
         if isinstance(points, Set):
             for point in points:
                 if point.gjf and (
-                    redo or not os.path.exists(point.gjf.wfn_fname)
+                    redo or not os.path.exists(point.gjf.wfn.path)
                 ):
                     gaussian_job.add(point.gjf.path)
         elif isinstance(points, GJF):
@@ -4439,6 +4439,9 @@ class Point:
     def natoms(self):
         return len(self.atoms)
 
+    def exists(self):
+        return os.path.exists(self.path)
+
     def move(self, directory):
         raise PointError.CannotMove()
 
@@ -4761,7 +4764,7 @@ class GJF(Point):
                     self._atoms.add(line.strip())
                 if line.endswith(".wfn"):
                     self._atoms.finish()
-                    self.wfn_fname = line.strip()
+                    self.wfn.path = line.strip()
 
     @property
     def atoms(self):
@@ -5798,6 +5801,39 @@ class Set(Points):
     @buildermethod
     def sort(self):
         self.points = UsefulTools.natural_sort_path(self)
+
+    @property
+    def n_wfns(self):
+        return sum(1 for point in self if point.wfn.exists())
+    
+    def n(self, attr):
+        return sum(1 for point in self if point.__getattr__(attr).exists())
+
+    def check_functional(self):
+        [point.wfn.check_functional() for point in self]
+
+    def check_wfns(self):
+        n_wfns = self.n("wfn")
+        n_gjfs = self.n("gjf")
+        if n_gjfs != n_wfns:
+            wfns = Points()
+            for point in self:
+                if point.gjf and not point.wfn:
+                    wfns.add_point(point)
+            if n_gjfs > 0:
+                print()
+                print(f"{n_gjfs} GJFs found.")
+                print(f"{n_wfns} WFNs found.")
+                print()
+                print(f"Submitting {n_gjfs - n_wfns} GJFs to Gaussian.")
+                wfns.submit_gjfs()
+                sys.exit(0)
+        else:
+            if UsefulTools.in_sensitive(
+                GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS
+            ):
+                self.check_functional()
+            print("All wfns complete.")
 
     def format_gjfs(self):
         for point in self:
