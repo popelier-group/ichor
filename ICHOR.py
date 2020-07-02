@@ -4723,6 +4723,9 @@ class Directory(Point):
             self.wfn,
             self.ints
         )
+    
+    def __eq__(self, other):
+        return self.path == other.path
 
 
 class GJF(Point):
@@ -5537,7 +5540,7 @@ class Models:
             total=len(points), unit=" points", leave=True, disable=not verbose
         ) as points_progressbar:
             for point in points:
-                points_progressbar.set_description(point.directory)
+                points_progressbar.set_description(point.path)
                 prediction = 0 if not atoms else {}
                 with tqdm(
                     total=len(models),
@@ -5949,8 +5952,14 @@ class Set(Points):
             self.move(point)
         return self
     
-    def __del__(self, idx):
-        del self[idx]
+    def __delitem__(self, idx):
+        if isinstance(idx, (int, np.int64)):
+            del self.points[idx]
+        elif isinstance(idx, Directory):
+            for i, point in enumerate(self):
+                if point == idx:
+                    del self.points[i]
+                break
 
     def add(self, point):
         if isinstance(point, Directory):
