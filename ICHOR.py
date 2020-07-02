@@ -558,7 +558,7 @@ class UsefulTools:
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
     @staticmethod
-    def countDigits(n):
+    def count_digits(n):
         import math
 
         return math.floor(math.log(n, 10) + 1)
@@ -748,6 +748,10 @@ class UsefulTools:
                 readline.set_startup_hook()
             except:
                 pass
+
+    @staticmethod
+    def get_number(s):
+        return int("".join(c for c in s if c.isidigt()))
 
 
 class GlobalTools:
@@ -1580,7 +1584,7 @@ class Menu(object):
         problems = ProblemFinder()
         problems.find()
         if len(problems) > 0:
-            max_len = UsefulTools.countDigits(len(problems))
+            max_len = UsefulTools.count_digits(len(problems))
             s = "s" if len(problems) > 1 else ""
             print(f"Problem{s} Found:")
             print()
@@ -4470,6 +4474,14 @@ class Point:
                     properties[atom] = {}
                 properties[atom].update(property_)
         return properties
+
+    def get_true_value(self, value_to_get, atoms=False):
+        properties = self.get_property(value_to_get)
+        values = [0] * len(self)
+        for atom, data in properties:
+            values[UsefulTools.get_number(atom)] = data[value_to_get]
+        
+        return values if atoms else sum(values)
 
     def __len__(self):
         return len(self.atoms)
