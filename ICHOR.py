@@ -4439,6 +4439,10 @@ class Point:
     def natoms(self):
         return len(self.atoms)
 
+    @property
+    def dirname(self):
+        return os.path.dirname(self.path)
+
     def exists(self):
         return os.path.exists(self.path)
 
@@ -4878,14 +4882,13 @@ class WFN(Point):
     @property
     def aimall_complete(self):
         if not self.title:
-            if os.path.exists(self.fname):
-                self.read()
-            else:
-                return False
+            if self.exists(): self.read()
+            else: return False
+
         aim_directory = self.title.strip() + "_atomicfiles"
         aim_directory = os.path.join(self.dirname, aim_directory)
-        if not os.path.exists(aim_directory):
-            return False
+
+        if not os.path.exists(aim_directory): return False
         n_ints = sum(
             1 for f in os.listdir(aim_directory) if f.endswith(".int")
         )
@@ -4902,7 +4905,7 @@ class WFN(Point):
 
     def check_functional(self):
         data = []
-        with open(self.fname, "r") as f:
+        with open(self.path, "r") as f:
             for i, line in enumerate(f):
                 if i == 1:
                     if GLOBALS.METHOD.upper() not in line.upper():
@@ -4912,7 +4915,7 @@ class WFN(Point):
 
         if data != []:
             data[1] = data[1].strip() + "   " + str(GLOBALS.METHOD) + "\n"
-            with open(self.fname, "w") as f:
+            with open(self.path, "w") as f:
                 f.writelines(data)
 
 
@@ -5807,7 +5810,7 @@ class Set(Points):
         return sum(1 for point in self if point.wfn.exists())
     
     def n(self, attr):
-        return sum(1 for point in self if point.__getattr__(attr).exists())
+        return sum(1 for point in self if getattr(point, attr).exists())
 
     def check_functional(self):
         [point.wfn.check_functional() for point in self]
@@ -5816,10 +5819,10 @@ class Set(Points):
         n_wfns = self.n("wfn")
         n_gjfs = self.n("gjf")
         if n_gjfs != n_wfns:
-            wfns = Points()
+            wfns = Set(self.path)
             for point in self:
                 if point.gjf and not point.wfn:
-                    wfns.add_point(point)
+                    wfns.add(point)
             if n_gjfs > 0:
                 print()
                 print(f"{n_gjfs} GJFs found.")
