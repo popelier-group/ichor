@@ -5975,14 +5975,14 @@ class Set(Points):
         return points
 
     def move(self, point):
-        old_directory = point.directory
+        src = point.path
 
-        new_index = len(self) + 1
-        subdirectory = GLOBALS.SYSTEM_NAME + str(new_index).zfill(4)
-        new_directory = os.path.join(self.directory, subdirectory)
-        point.move(new_directory)
+        idx = len(self) + 1
+        name = GLOBALS.SYSTEM_NAME + str(idx).zfill(4)
+        dst = os.path.join(self.path, name)
+        point.move(dst)
 
-        FileTools.rmtree(old_directory)
+        FileTools.rmtree(src)
 
 
 class TrainingSet:
