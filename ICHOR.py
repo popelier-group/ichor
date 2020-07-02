@@ -4706,12 +4706,18 @@ class Directory(Point):
     @buildermethod
     def read_gjf(self):
         if self.gjf is None: self.read()
-        # print(self.path)
-        self.gjf.read()
+        try:
+            self.gjf.read()
+        except AttributeError:
+            log.warn(f"Cannot read GJF in {self.path}")
     
     @buildermethod
     def read_wfn(self):
-        self.wfn.read()
+        if self.wfn is None: self.read()
+        try:
+            self.wfn.read()
+        except AttributeError:
+            log.warn(f"Cannot read WFN in {self.path}")
 
     @buildermethod
     def read_ints(self):
@@ -4720,9 +4726,9 @@ class Directory(Point):
     def move(self, dst):
         FileTools.mkdir(dst)
 
-        self.gjf.move(dst)
-        self.wfn.move(dst)
-        self.ints.move(dst)
+        if self.gjf: self.gjf.move(dst)
+        if self.wfn: self.wfn.move(dst)
+        if self.ints: self.ints.move(dst)
 
         self.path = dst
 
