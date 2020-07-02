@@ -3151,9 +3151,9 @@ class SubmissionTools:
         gaussian_job = GaussianCommand()
         if isinstance(points, Points):
             for point in points:
-                if point.gjf and (
+                if (point.gjf and (
                     redo or not os.path.exists(point.gjf.wfn.path)
-                ):
+                )) or isinstance(point, MockDirectory):
                     gaussian_job.add(point.gjf.path)
         elif isinstance(points, GJF):
             gaussian_job.add(points.path)
@@ -3182,7 +3182,7 @@ class SubmissionTools:
 
         aimall_job = AIMAllCommand()
         for point in points:
-            if point.wfn and (redo or not point.wfn.aimall_complete):
+            if point.wfn and (redo or not point.wfn.aimall_complete) or isinstance(point, MockDirectory):
                 aimall_job.add(point.wfn.path)
             elif point.gjf and not check_wfns:
                 aimall_job.add(point.gjf.wfn.path)
