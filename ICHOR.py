@@ -3668,7 +3668,7 @@ class AutoTools:
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
-        return points.submit_wfns(redo=False, submit=True, hold=jid)
+        return points.submit_wfns(redo=False, submit=True, hold=jid, check_wfns=False)
 
     @staticmethod
     def submit_models(jid=None, directory=None):
@@ -5882,9 +5882,9 @@ class Set(Points):
             self, redo=redo, submit=submit, hold=hold
         )
     
-    def submit_wfns(self, redo=False, submit=True, hold=None):
+    def submit_wfns(self, redo=False, submit=True, hold=None, check_wfns=True):
         return SubmissionTools.make_aim_script(
-            self, redo=redo, submit=submit, hold=hold
+            self, redo=redo, submit=submit, hold=hold, check_wfns=check_wfns
         )
 
     def make_training_set(self, model_type):
@@ -6031,7 +6031,7 @@ class MockDirectory(Directory):
 
 class MockSet(Set):
     def __init__(self, npoints=0):
-        self.points = [MockDirectory() for _ in range(self.npoints)]
+        self.points = [MockDirectory() for _ in range(npoints)]
 
 class TrainingSet:
     def __init__(self, inputs=[], outputs=[]):
