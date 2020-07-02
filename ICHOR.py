@@ -632,7 +632,7 @@ class UsefulTools:
     @staticmethod
     def external_function(*args):
         def run_func(func):
-            name = args[1] if len(args) > 1 else func.__name__
+            name = args[0] if args else func.__name__
             Arguments.external_functions[name] = func
             return func
 
@@ -840,7 +840,9 @@ class Arguments:
                 Arguments.call_external_function_args = func_args
             else:
                 print(f"{func} not in allowed functions:")
-                print(f"{allowed_functions}")
+                formatted_functions = [str(f) for f in allowed_functions.split(",")]
+                formatted_functions = "- " + "\n- ".join(formatted_functions)
+                print(f"{formatted_functions}")
                 quit()
 
         if args.uid:
@@ -3147,7 +3149,7 @@ class SubmissionTools:
         points, directory="", redo=False, submit=True, hold=None
     ):
         gaussian_job = GaussianCommand()
-        if isinstance(points, Set):
+        if isinstance(points, Points):
             for point in points:
                 if point.gjf and (
                     redo or not os.path.exists(point.gjf.wfn.path)
@@ -3593,7 +3595,7 @@ class AutoTools:
         if not type:
             type = "iqa"
         return AutoTools.submit_ichor(
-            "_make_models", directory, type, submit=True, hold=jid
+            "make_models", directory, type, submit=True, hold=jid
         )
 
     @staticmethod
@@ -3658,31 +3660,30 @@ class AutoTools:
     def submit_gjfs(jid=None, npoints=None):
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
-        points = Points()
-        points.make_gjf_template(npoints)
+        points = MockSet(npoints)
         return points.submit_gjfs(redo=False, submit=True, hold=jid)
 
     @staticmethod
     def submit_wfns(jid=None, npoints=None):
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
-        points = Points()
-        points.make_wfn_template(npoints)
+        points = MockSet(npoints)
         return points.submit_wfns(redo=False, submit=True, hold=jid)
 
     @staticmethod
     def submit_models(jid=None, directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
-        gjf = Points(directory, read_gjfs=True, first=True)[0]
+        gjf = GJF(FileTools.get_first_gjf(directory)).read()
         return SubmissionTools.make_ferebus_script(
-            gjf.atoms.atoms, submit=True, hold=jid
+            gjf.atoms, submit=True, hold=jid
         )
 
     @staticmethod
     def submit_aimall(directory=None, jid=None):
         global _data_lock
-        npoints = FileTools.count_points_in(directory)
+        points = Set(directory)
+        npoints = len(points)
         UsefulTools.set_uid()
         _data_lock = True
         script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory)
@@ -3729,8 +3730,8 @@ class AutoTools:
         ]
 
         jid = None
-        ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
-        npoints = FileTools.count_points_in(ts_dir)
+        training_set = Set(GLOBALS.FILE_STRUCTURE["training_set"])
+        npoints = len(training_set)
 
         logging.info("Starting ICHOR Auto Run")
         _data_lock = True
@@ -3902,7 +3903,6 @@ class PropertyTools:
             if os.path.exists(log_dir):
                 # for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
                 FileTools.copymodels(log_dir, GLOBALS.FILE_STRUCTURE["log"])
-
 
 # ========================#
 #      Point Tools       #
@@ -4400,6 +4400,7 @@ class Atoms:
 
     def __bool__(self):
         return bool(self.atoms)
+
 
 class PointError:
     class AtomsNotDefined(Exception): pass
@@ -6015,6 +6016,19 @@ class Set(Points):
 
         FileTools.rmtree(src)
 
+
+class MockDirectory(Point, Directory):
+    def __init__(self):
+        self.path = ""
+
+        self.gjf = GJF("")
+        self.wfn = WFN("")
+        self.ints = INTs("")
+
+
+class MockSet(Points, Set):
+    def __init__(self, npoints=0):
+        self.points = [MockDirectory() for _ in range(self.npoints)]
 
 class TrainingSet:
     def __init__(self, inputs=[], outputs=[]):
@@ -7752,6 +7766,7 @@ class ModelTools:
     multipole_model = "all"
 
     @staticmethod
+    @UsefulTools.external_function()
     def make_models(directory, model_type):
         GLOBALS.LOG_WARNINGS = True
         GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
@@ -7903,34 +7918,6 @@ def move_models(model_file, iqa=False, copy_to_log=True):
 
         if copy_to_log:
             model.copy_to_log()
-
-
-@UsefulTools.external_function()
-def _make_models(directory, model_type):
-    GLOBALS.LOG_WARNINGS = True
-    GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
-
-    logging.info(f"Making {model_type} models")
-
-    training_set = Set(directory).read()
-    models = training_set.make_training_set(model_type)
-    SubmissionTools.make_ferebus_script(models)
-
-
-def make_models(directory):
-    model_types = ["iqa", "multipoles"]
-
-    model_menu = Menu(title="Model Menu")
-    for i, model_type in enumerate(model_types):
-        model_menu.add_option(
-            f"{i+1}",
-            model_type.upper(),
-            _make_models,
-            kwargs={"directory": directory, "model_type": model_type},
-        )
-    model_menu.add_final_options()
-
-    model_menu.run()
 
 
 @UsefulTools.external_function()
