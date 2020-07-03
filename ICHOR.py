@@ -751,7 +751,7 @@ class UsefulTools:
 
     @staticmethod
     def get_number(s):
-        return int("".join(c for c in s if c.isidigt()))
+        return int("".join(c for c in s if c.isdigit()))
 
 
 class GlobalTools:
@@ -4478,7 +4478,7 @@ class Point:
     def get_true_value(self, value_to_get, atoms=False):
         properties = self.get_property(value_to_get)
         values = [0] * len(self)
-        for atom, data in properties:
+        for atom, data in properties.items():
             values[UsefulTools.get_number(atom)] = data[value_to_get]
         
         return values if atoms else sum(values)
@@ -7971,6 +7971,8 @@ def move_models(model_file, iqa=False, copy_to_log=True):
 
         if UsefulTools.check_bool(iqa):
             model.type = "IQA"
+        else:
+            model.type = str(GLOBALS.OPTIMISE_PROPERTY)
         new_model_file = model.get_fname(model_directory)
         FileTools.copy_file(model_file, new_model_file)
 
