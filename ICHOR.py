@@ -3203,7 +3203,7 @@ class SubmissionTools:
 
     @staticmethod
     def make_ferebus_script(
-        model_directories, directory="", submit=True, hold=None
+        model_directories, directory="", submit=True, hold=None, model_type="iqa"
     ):
         ferebus_job = FerebusCommand()
         for model_directory in model_directories:
@@ -3211,7 +3211,7 @@ class SubmissionTools:
 
         move_models = PythonCommand()
         move_models.run_func(
-            "move_models", ferebus_job.get_variable(0), GLOBALS.IQA_MODELS
+            "move_models", ferebus_job.get_variable(0), model_type
         )
 
         script_name = os.path.join(directory, "FereSub.sh")
@@ -3680,7 +3680,7 @@ class AutoTools:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         gjf = GJF(FileTools.get_first_gjf(directory)).read()
         return SubmissionTools.make_ferebus_script(
-            gjf.atoms.atoms, submit=True, hold=jid
+            gjf.atoms.atoms, submit=True, hold=jid, model_type=str(GLOBALS.OPTIMISE_PROPERTY)
         )
 
     @staticmethod
@@ -4479,7 +4479,7 @@ class Point:
         properties = self.get_property(value_to_get)
         values = [0] * len(self)
         for atom, data in properties.items():
-            values[UsefulTools.get_number(atom)] = data[value_to_get]
+            values[UsefulTools.get_number(atom) - 1] = data[value_to_get]
         
         return values if atoms else sum(values)
 
@@ -7826,6 +7826,8 @@ class ModelTools:
     @staticmethod
     @UsefulTools.external_function()
     def make_models(directory, model_type):
+        if model_type.lower() == "all":
+            model_type = "multipoles"
         GLOBALS.LOG_WARNINGS = True
         GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
 
@@ -7833,7 +7835,7 @@ class ModelTools:
 
         aims = Set(directory).read()
         models = aims.make_training_set(model_type)
-        SubmissionTools.make_ferebus_script(models)
+        SubmissionTools.make_ferebus_script(models, model_type=model_type)
 
     @staticmethod
     def choose_multipole(multipole):
@@ -7889,6 +7891,7 @@ class ModelTools:
         menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
         menu.add_final_options()
 
+    @staticmethod
     def make_models_menu(directory):
         ModelTools.training_set_directory = directory
         model_menu = Menu(title="Model Menu")
@@ -7956,7 +7959,7 @@ def submit_wfns(directory):
 
 
 @UsefulTools.external_function()
-def move_models(model_file, iqa=False, copy_to_log=True):
+def move_models(model_file, model_type="iqa", copy_to_log=True):
     logging.info("Moving Completed Models")
     model_directory = GLOBALS.FILE_STRUCTURE["models"]
     FileTools.mkdir(model_directory)
@@ -7969,10 +7972,10 @@ def move_models(model_file, iqa=False, copy_to_log=True):
         model = Model(model_file)
         model.remove_no_noise()
 
-        if UsefulTools.check_bool(iqa):
+        if model_type.lower() == "iqa":
             model.type = "IQA"
-        else:
-            model.type = str(GLOBALS.OPTIMISE_PROPERTY)
+        elif not model_type.lower() == "multipoles":
+            model.type = str(model_type)
         new_model_file = model.get_fname(model_directory)
         FileTools.copy_file(model_file, new_model_file)
 
