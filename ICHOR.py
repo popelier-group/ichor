@@ -3353,7 +3353,7 @@ class BatchTools:
             qsub_cmd = []
             if GLOBALS.SGE and not GLOBALS.SUBMITTED:
                 qsub_cmd += ["qsub"]
-                if hold and hold in BatchTools.qstat(quiet=True):
+                if hold:
                     qsub_cmd += ["-hold_jid", f"{hold}"]
             else:
                 qsub_cmd = ["bash"]
