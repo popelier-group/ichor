@@ -4483,6 +4483,12 @@ class Point:
         
         return values if atoms else sum(values)
 
+    def calculate_recovery_error(self):
+        return np.abs(self.wfn.energy - self.get_true_value("iqa"))
+    
+    def get_integration_errors(self):
+        return {atom: data.integration_error for atom, data in self.ints.items()}
+
     def __len__(self):
         return len(self.atoms)
 
@@ -5077,6 +5083,9 @@ class INT(Point):
     def q(self):
         return self.integration_results["q"]
 
+    def get_property(self, property_name):
+        return getattr(self, property_name)
+
     def move(self, dst):
         if self:
             if dst.endswith(os.sep): dst = dst.rstrip(os.sep)
@@ -5105,10 +5114,6 @@ class INT(Point):
 class INTs(Point):
     def __init__(self):
         self.ints = []
-
-    def read(self):
-        for _int in self:
-            _int.read()
 
     @buildermethod
     def add(self, int_):
@@ -5686,8 +5691,8 @@ class Models:
 
         if added_points:
             added_points = [points[i] for i in added_points]
-            _added_points = Points()
-            [_added_points.add_point(point) for point in added_points]
+            _added_points = Set()
+            [_added_points.add_dir(point) for point in added_points]
             distances = self.distances(points, _added_points)
             epe *= distances
 
@@ -5698,8 +5703,8 @@ class Models:
 
         if added_points:
             added_points = [points[i] for i in added_points]
-            _added_points = Points()
-            [_added_points.add_point(point) for point in added_points]
+            _added_points = Set()
+            [_added_points.add_dir(point) for point in added_points]
             distances = self.distances(points, _added_points)
             var *= distances
 
@@ -5710,8 +5715,8 @@ class Models:
 
         if added_points:
             added_points = [points[i] for i in added_points]
-            _added_points = Points()
-            [_added_points.add_point(point) for point in added_points]
+            _added_points = Set()
+            [_added_points.add_dir(point) for point in added_points]
             distances = self.distances(points, _added_points)
             var *= distances
 
@@ -5800,7 +5805,46 @@ class PointsError:
 
 
 class Points:
-    pass
+    def log_warnings(self):
+        if GLOBALS.WARN_RECOVERY_ERROR:
+            n_recovery_error = 0
+            for point in self:
+                if point.wfn and point.ints:
+                    recovery_error = point.calculate_recovery_error()
+                    if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
+                        logging.warning(
+                            f"{point.directory} | Recovery Error: {recovery_error * Constants.ha_to_kj_mol} kJ/mol"
+                        )
+                        n_recovery_error += 1
+            if n_recovery_error > 0:
+                logging.warning(
+                    f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD * Constants.ha_to_kj_mol} kJ/mol), consider removing these points or increasing precision"
+                )
+
+        if GLOBALS.WARN_INTEGRATION_ERROR:
+            n_integration_error = 0
+            for point in self:
+                integration_errors = point.get_integration_errors()
+                for atom, integration_error in integration_errors.items():
+                    if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
+                        logging.warning(
+                            f"{point.directory} | {atom} | Integration Error: {integration_error}"
+                        )
+                        n_integration_error += 1
+            if n_integration_error > 0:
+                logging.warning(
+                    f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points or increasing precision"
+                )
+
+    @staticmethod
+    def reader(func):
+        def wrapper(self, *args, **kwargs):
+            result = func()
+            if GLOBALS.LOG_WARNINGS:
+                self.log_warnings()
+            return result
+        return wrapper
+         
 
 
 class Set(Points):
@@ -5823,6 +5867,7 @@ class Set(Points):
         self.sort()
 
     @buildermethod
+    @Points.reader
     def read(self):
         for point in self:
             point.read()
@@ -5836,6 +5881,7 @@ class Set(Points):
         self += _dir
 
     @buildermethod
+    @Points.reader
     def read_gjfs(self):
         for point in self:
             point.read_gjf()
@@ -5843,11 +5889,13 @@ class Set(Points):
                 del self[point]
     
     @buildermethod
+    @Points.reader
     def read_wfns(self):
         for point in self:
             point.read_wfn()
     
     @buildermethod
+    @Points.reader
     def read_ints(self):
         for point in self:
             point.read_ints()
@@ -7028,16 +7076,16 @@ class DlpolyTools:
     @UsefulTools.external_function()
     def get_wfn_energies():
         dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
-        points = Points(dlpoly_dir, read_wfns=True)
+        points = Set(dlpoly_dir).read_wfns()
         energy_file = os.path.join(dlpoly_dir, "Energies.txt")
         with open(energy_file, "w") as f:
             for point in points:
                 if re.findall(r"\d+", point.wfn.basename):
-                    point_num = int(re.findall(r"\d+", point.wfn.basename)[0])
+                    point_num = int(re.findall(r"\d+", point.wfn.path)[-1])
                     f.write(
                         f"{point.wfn.basename} {point_num:4d} {point.wfn.energy}\n"
                     )
-                    print(point.wfn.basename, point_num, point.wfn.energy)
+                    print(point.wfn.path, point_num, point.wfn.energy)
 
     @staticmethod
     def auto_run():
@@ -7093,7 +7141,7 @@ class DlpolyTools:
     def get_trajectory_energy(trajectory_dir):
         if FileTools.end_of_path(trajectory_dir) != "TRAJECTORY":
             trajectory_dir = os.path.join(trajectory_dir, "TRAJECTORY")
-        points = Points(trajectory_dir, read_wfns=True)
+        points = Set(trajectory_dir).read_wfns()
         return [point.wfn.energy for point in points if point.wfn]
 
     @staticmethod
@@ -7327,14 +7375,8 @@ class S_CurveTools:
                             "predicted": [],
                             "error": [],
                         }
-                    if model_name.lower() == "iqa":
-                        true_value = int_data.eiqa
-                    else:
-                        true_value = (
-                            int_data.multipoles[model_name]
-                            if model_name != "q00"
-                            else int_data.integration_results["q"]
-                        )
+                    
+                    true_value = int_data.get_property(model_name)
 
                     predicted_value = model_prediction[int_data.num]
                     error = np.abs(true_value - predicted_value)
@@ -7396,7 +7438,7 @@ class S_CurveTools:
             )
 
         print("Reading Data")
-        validation_set = Points(validation_set, read_gjfs=True, read_ints=True)
+        validation_set = Set(validation_set).read()
         models = Models(models, read_models=True)
         print()
 
@@ -7576,10 +7618,30 @@ class S_CurveTools:
 class AnalysisTools:
     @staticmethod
     def calculate_recovery_errors(directory):
-        points = Points(directory, read_wfns=True, read_ints=True)
-        errors = points.calculate_recovery_errors()
+        import pandas as pd
 
-        result = stats.describe(errors)
+        points = Set(directory).read()
+
+        iqa_energies = {}
+        wfn_energies = []
+        for point in points:
+            if point.wfn.energy != 0:
+                wfn_energies += [point.wfn.energy]
+            for int_atom, int_data in point.ints.items():
+                if int_atom not in iqa_energies.keys():
+                    iqa_energies[int_atom] = []
+                iqa_energies[int_atom] += [int_data.eiqa]
+
+        df = pd.DataFrame(iqa_energies)
+        df.columns = UsefulTools.natural_sort(list(df.columns))
+        df.loc[:, "Total"] = df.sum(axis=1)
+        df["WFN"] = pd.to_numeric(wfn_energies, errors="coerce")
+
+        df["error / Ha"] = (df["Total"] - df["WFN"]).abs()
+        df["error / kJ/mol"] = df["error / Ha"] * Constants.ha_to_kj_mol
+        df.to_csv("recovery_errors.csv")
+
+        result = stats.describe(df["error / kJ/mol"])
 
         print()
         print("#############################")
