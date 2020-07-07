@@ -3374,8 +3374,9 @@ class BatchTools:
         with open(jid_fname, "r") as f:
             for jid in f:
                 jid = jid.strip()
-                if jid in BatchTools.qstat(quiet=True):
-                    BatchTools.run_cmd(["qdel", f"{jid}"])
+                if jid:
+                    try: BatchTools.run_cmd(["qdel", f"{jid}"])
+                    except: pass
                     print(f"Deleted job: {jid}")
 
 
