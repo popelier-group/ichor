@@ -5817,6 +5817,7 @@ class Set(Points):
                     dst = os.path.join(self.path, FileTools.get_basename(src))
                     FileTools.mkdir(dst, empty=False)
                     FileTools.move_file(src, dst)
+                    self.add_dir(dst)
                 elif entry.is_dir():
                     self.add_dir(entry.path)
         self.sort()
