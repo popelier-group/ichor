@@ -5847,7 +5847,6 @@ class Points:
                     f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points or increasing precision"
                 )
 
-    @staticmethod
     def reader(func):
         def wrapper(self, *args, **kwargs):
             result = func()
@@ -5876,8 +5875,8 @@ class Set(Points):
                     self.add_dir(entry.path)
         self.sort()
 
-    @Points.reader
     @buildermethod
+    @Points.reader
     def read(self):
         for point in self:
             point.read()
@@ -5890,22 +5889,22 @@ class Set(Points):
             raise PointsError.NotDirectory()
         self += _dir
 
-    @Points.reader
     @buildermethod
+    @Points.reader
     def read_gjfs(self):
         for point in self:
             point.read_gjf()
             if not point.gjf:
                 del self[point]
     
-    @Points.reader
     @buildermethod
+    @Points.reader
     def read_wfns(self):
         for point in self:
             point.read_wfn()
     
-    @Points.reader
     @buildermethod
+    @Points.reader
     def read_ints(self):
         for point in self:
             point.read_ints()
