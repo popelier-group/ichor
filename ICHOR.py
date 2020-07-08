@@ -7992,7 +7992,7 @@ class ModelTools:
     @UsefulTools.external_function()
     def make_models(directory, model_type, npoints=-1):
         if npoints < 0:
-            ModelTools.init()
+            ModelTools.init(directory)
             npoints = ModelTools.n_training_points
 
         if model_type.lower() == "all":
@@ -8085,14 +8085,14 @@ class ModelTools:
         menu.add_final_options()
 
     @staticmethod
-    def init():
+    def init(directory):
         ModelTools.training_set_directory = directory
         ModelTools.training_set = Set(ModelTools.training_set_directory)
         ModelTools.n_training_points = len(ModelTools.training_set)
 
     @staticmethod
     def make_models_menu(directory):
-        ModelTools.init()
+        ModelTools.init(directory)
 
         model_menu = Menu(title="Model Menu")
         model_menu.set_refresh(ModelTools.refresh_make_models)
