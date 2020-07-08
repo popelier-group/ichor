@@ -8258,6 +8258,8 @@ class TrainingSetTools:
 
     @staticmethod
     def training_set_menu_refresh(training_set_menu):
+        TrainingSetTools.init(GLOBALS.FILE_STRUCTURE["training_set"])
+
         training_set_menu.add_option(
             "1",
             "Submit GJFs to Gaussian",
@@ -8302,14 +8304,12 @@ class TrainingSetTools:
 
 
 def main_menu():
-    ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
     sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
     vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
     models_dir = GLOBALS.FILE_STRUCTURE["models"]
 
     # === Training Set Menu ===#
     training_set_menu = Menu(title="Training Set Menu")
-    TrainingSetTools.init(ts_dir)
     training_set_menu.set_refresh(TrainingSetTools.training_set_menu_refresh)
 
     # === Sample Set Menu ===#
