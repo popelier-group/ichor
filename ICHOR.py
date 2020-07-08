@@ -8250,13 +8250,12 @@ def opt():
     opt_gjf.write()
     opt_gjf.submit()
 
-
 #############################################
 #                 Main Loop                 #
 #############################################
 
-
 def main_menu():
+    ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
     sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
     vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
     models_dir = GLOBALS.FILE_STRUCTURE["models"]
@@ -8267,30 +8266,27 @@ def main_menu():
         "1",
         "Submit GJFs to Gaussian",
         submit_gjfs,
-        kwargs={"directory": TrainingSetTools.training_set_directory},
+        kwargs={"directory": ts_dir},
     )
     training_set_menu.add_option(
         "2",
         "Submit WFNs to AIMAll",
         submit_wfns,
-        kwargs={"directory": TrainingSetTools.training_set_directory},
+        kwargs={"directory": ts_dir},
         wait=True,
     )
     training_set_menu.add_option(
         "3",
         "Make Models",
         ModelTools.make_models_menu,
-        kwargs={
-            "directory": TrainingSetTools.training_set_directory,
-            "npoints": TrainingSetTools.n_training_points,
-        },
+        kwargs={"directory": ts_dir},
     )
     training_set_menu.add_space()
     training_set_menu.add_option(
         "a",
         "Auto Run AIMAll",
         AutoTools.submit_aimall,
-        kwargs={"directory": TrainingSetTools.training_set_directory},
+        kwargs={"directory": ts_dir},
     )
     training_set_menu.add_option(
         "m", "Auto Make Models", AutoTools.run_models
