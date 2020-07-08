@@ -3085,6 +3085,14 @@ class SubmissionScript:
             else ""
         )
 
+    def check_task_id(self):
+        check_task_str = [
+            "if [ \"$SGE_TASK_ID\" = \"undefined\" ]; then",
+            "    SGE_TASK_ID=1",
+            "fi"
+        ]
+        return "\n".join(check_task_str)
+
     def write(self):
         self.setup()
         self.cleanup()
@@ -3112,6 +3120,8 @@ class SubmissionScript:
 
             if self.njobs > 1:
                 f.write(f"#$ -t 1{njobs}\n")
+            else:
+                f.write(f"\n{self.check_task_id()}\n")
 
             f.write("\n")
 
