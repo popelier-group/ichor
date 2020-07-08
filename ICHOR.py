@@ -5857,7 +5857,6 @@ class Points:
         return wrapper
          
 
-
 class Set(Points):
     def __init__(self, path=None):
         self.path = path
@@ -5877,8 +5876,8 @@ class Set(Points):
                     self.add_dir(entry.path)
         self.sort()
 
-    @buildermethod
     @Points.reader
+    @buildermethod
     def read(self):
         for point in self:
             point.read()
@@ -5891,22 +5890,22 @@ class Set(Points):
             raise PointsError.NotDirectory()
         self += _dir
 
-    @buildermethod
     @Points.reader
+    @buildermethod
     def read_gjfs(self):
         for point in self:
             point.read_gjf()
             if not point.gjf:
                 del self[point]
     
-    @buildermethod
     @Points.reader
+    @buildermethod
     def read_wfns(self):
         for point in self:
             point.read_wfn()
     
-    @buildermethod
     @Points.reader
+    @buildermethod
     def read_ints(self):
         for point in self:
             point.read_ints()
