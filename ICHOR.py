@@ -7990,7 +7990,11 @@ class ModelTools:
 
     @staticmethod
     @UsefulTools.external_function()
-    def make_models(directory, model_type, npoints=ModelTools.n_training_points):
+    def make_models(directory, model_type, npoints=-1):
+        if npoints < 0:
+            ModelTools.init()
+            npoints = ModelTools.n_training_points
+
         if model_type.lower() == "all":
             model_type = "multipoles"
         GLOBALS.LOG_WARNINGS = True
@@ -8031,7 +8035,7 @@ class ModelTools:
     @staticmethod
     def change_n_points():
         print(
-            f"Enter Number of Training Points (1 - {len(TrainingSetTools.training_set)})"
+            f"Enter Number of Training Points (1 - {len(ModelTools.training_set)})"
         )
         while True:
             ans = input(">> ")
@@ -8081,10 +8085,14 @@ class ModelTools:
         menu.add_final_options()
 
     @staticmethod
-    def make_models_menu(directory):
+    def init():
         ModelTools.training_set_directory = directory
         ModelTools.training_set = Set(ModelTools.training_set_directory)
         ModelTools.n_training_points = len(ModelTools.training_set)
+
+    @staticmethod
+    def make_models_menu(directory):
+        ModelTools.init()
 
         model_menu = Menu(title="Model Menu")
         model_menu.set_refresh(ModelTools.refresh_make_models)
