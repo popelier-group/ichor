@@ -6034,7 +6034,9 @@ class Set(Points):
             self, redo=redo, submit=submit, hold=hold, check_wfns=check_wfns
         )
 
-    def make_training_set(self, model_type, npoints=len(self)):
+    def make_training_set(self, model_type, npoints=-1):
+        if npoints < 0: npoints = len(self)
+
         training_sets = {}
         for point in self:
             input = point.features_dict
@@ -8229,6 +8231,7 @@ class TrainingSetTools:
     n_training_points = 0
 
     @staticmethod
+    @lru_cache()
     def init(ts_dir):
         TrainingSetTools.training_set_directory = ts_dir
         TrainingSetTools.training_set = Set(
@@ -8256,6 +8259,8 @@ class TrainingSetTools:
 
     @staticmethod
     def training_set_menu_refresh(training_set_menu):
+        TrainingSetTools.init(GLOBALS.FILE_STRUCTURE["training_set"])
+
         training_set_menu.add_option(
             "1",
             "Submit GJFs to Gaussian",
@@ -8294,9 +8299,8 @@ class TrainingSetTools:
         )
         training_set_menu.add_space()
         training_set_menu.add_message(
-            f"Number of Training Points: {len(TrainingSetTools.n_training_points)}"
+            f"Number of Training Points: {TrainingSetTools.n_training_points}"
         )
-        training_set_menu.add_space()
         training_set_menu.add_final_options()
 
 
