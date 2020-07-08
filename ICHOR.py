@@ -5847,9 +5847,9 @@ class Points:
                     f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points or increasing precision"
                 )
 
-    def reader(self, func):
+    def reader(func):
         def wrapper(self, *args, **kwargs):
-            result = func()
+            result = func(self, *args, **kwargs)
             if GLOBALS.LOG_WARNINGS:
                 self.log_warnings()
             return result
