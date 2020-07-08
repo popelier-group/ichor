@@ -7983,6 +7983,9 @@ class SettingsTools:
 
 class ModelTools:
     training_set_directory = ""
+    training_set = Set()
+    n_training_points = 0
+
     multipole_model = "all"
 
     @staticmethod
@@ -8026,6 +8029,24 @@ class ModelTools:
         multipole_menu.run()
 
     @staticmethod
+    def change_n_points():
+        print(
+            f"Enter Number of Training Points (1 - {len(TrainingSetTools.training_set)})"
+        )
+        while True:
+            ans = input(">> ")
+            try:
+                ans = int(ans)
+                if 1 <= ans <= len(ModelTools.training_set):
+                    return ans
+                else:
+                    print(
+                        "Error: Number of points must be in the range 1 - {len(TrainingSetTools.training_set)}"
+                    )
+            except:
+                print("Error: Answer must be an integer")
+
+    @staticmethod
     def refresh_make_models(menu):
         model_types = {
             "IQA": "iqa",
@@ -8041,19 +8062,29 @@ class ModelTools:
                 kwargs={
                     "directory": ModelTools.training_set_directory,
                     "model_type": model_type,
+                    "npoints": ModelTools.n_training_points 
                 },
             )
         menu.add_space()
         menu.add_option(
             "m", "Choose Multipole Model", ModelTools.choose_multipole_model,
         )
+        menu.add_option(
+            "c", "Change Number of Training Points", ModelTools.change_n_points
+        )
         menu.add_space()
         menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
+        menu.add_message(
+            f"Number of Training Points: {ModelTools.n_training_points}"
+        )
         menu.add_final_options()
 
     @staticmethod
     def make_models_menu(directory):
         ModelTools.training_set_directory = directory
+        ModelTools.training_set = Set(ModelTools.training_set_directory)
+        ModelTools.n_training_points = len(ModelTools.training_set)
+
         model_menu = Menu(title="Model Menu")
         model_menu.set_refresh(ModelTools.refresh_make_models)
         model_menu.run()
@@ -8225,84 +8256,6 @@ def opt():
 #############################################
 
 
-class TrainingSetTools:
-    training_set_directory = ""
-    training_set = Set()
-    n_training_points = 0
-
-    @staticmethod
-    def init(ts_dir):
-        TrainingSetTools.training_set_directory = ts_dir
-        TrainingSetTools.training_set = Set(
-            TrainingSetTools.training_set_directory
-        )
-        TrainingSetTools.n_training_points = len(TrainingSetTools.training_set)
-
-    @staticmethod
-    def change_n_points():
-        print(
-            f"Enter Number of Training Points (1 - {len(TrainingSetTools.training_set)})"
-        )
-        while True:
-            ans = input(">> ")
-            try:
-                ans = int(ans)
-                if 1 <= ans <= len(TrainingSetTools.training_set):
-                    return ans
-                else:
-                    print(
-                        "Error: Number of points must be in the range 1 - {len(TrainingSetTools.training_set)}"
-                    )
-            except:
-                print("Error: Answer must be an integer")
-
-    @staticmethod
-    def training_set_menu_refresh(training_set_menu):
-        TrainingSetTools.init(GLOBALS.FILE_STRUCTURE["training_set"])
-
-        training_set_menu.add_option(
-            "1",
-            "Submit GJFs to Gaussian",
-            submit_gjfs,
-            kwargs={"directory": TrainingSetTools.training_set_directory},
-        )
-        training_set_menu.add_option(
-            "2",
-            "Submit WFNs to AIMAll",
-            submit_wfns,
-            kwargs={"directory": TrainingSetTools.training_set_directory},
-            wait=True,
-        )
-        training_set_menu.add_option(
-            "3",
-            "Make Models",
-            ModelTools.make_models_menu,
-            kwargs={
-                "directory": TrainingSetTools.training_set_directory,
-                "npoints": TrainingSetTools.n_training_points,
-            },
-        )
-        training_set_menu.add_space()
-        training_set_menu.add_option(
-            "a",
-            "Auto Run AIMAll",
-            AutoTools.submit_aimall,
-            kwargs={"directory": TrainingSetTools.training_set_directory},
-        )
-        training_set_menu.add_option(
-            "m", "Auto Make Models", AutoTools.run_models
-        )
-        training_set_menu.add_space()
-        training_set_menu.add_option(
-            "c", "Change Number of Training Points", AutoTools.run_models
-        )
-        training_set_menu.add_space()
-        training_set_menu.add_message(
-            f"Number of Training Points: {TrainingSetTools.n_training_points}"
-        )
-        training_set_menu.add_final_options()
-
-
 def main_menu():
     sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
     vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
@@ -8310,7 +8263,40 @@ def main_menu():
 
     # === Training Set Menu ===#
     training_set_menu = Menu(title="Training Set Menu")
-    training_set_menu.set_refresh(TrainingSetTools.training_set_menu_refresh)
+    training_set_menu.add_option(
+        "1",
+        "Submit GJFs to Gaussian",
+        submit_gjfs,
+        kwargs={"directory": TrainingSetTools.training_set_directory},
+    )
+    training_set_menu.add_option(
+        "2",
+        "Submit WFNs to AIMAll",
+        submit_wfns,
+        kwargs={"directory": TrainingSetTools.training_set_directory},
+        wait=True,
+    )
+    training_set_menu.add_option(
+        "3",
+        "Make Models",
+        ModelTools.make_models_menu,
+        kwargs={
+            "directory": TrainingSetTools.training_set_directory,
+            "npoints": TrainingSetTools.n_training_points,
+        },
+    )
+    training_set_menu.add_space()
+    training_set_menu.add_option(
+        "a",
+        "Auto Run AIMAll",
+        AutoTools.submit_aimall,
+        kwargs={"directory": TrainingSetTools.training_set_directory},
+    )
+    training_set_menu.add_option(
+        "m", "Auto Make Models", AutoTools.run_models
+    )
+    training_set_menu.add_space()
+    training_set_menu.add_final_options()
 
     # === Sample Set Menu ===#
     sample_pool_menu = Menu(title="Sample Pool Menu")
