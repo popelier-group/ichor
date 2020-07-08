@@ -7990,7 +7990,7 @@ class ModelTools:
 
     @staticmethod
     @UsefulTools.external_function()
-    def make_models(directory, model_type):
+    def make_models(directory, model_type, npoints=ModelTools.n_training_points):
         if model_type.lower() == "all":
             model_type = "multipoles"
         GLOBALS.LOG_WARNINGS = True
@@ -7999,7 +7999,7 @@ class ModelTools:
         logging.info(f"Making {model_type} models")
 
         aims = Set(directory).read()
-        models = aims.make_training_set(model_type)
+        models = aims.make_training_set(model_type, npoints)
         SubmissionTools.make_ferebus_script(models, model_type=model_type)
 
     @staticmethod
@@ -8038,10 +8038,11 @@ class ModelTools:
             try:
                 ans = int(ans)
                 if 1 <= ans <= len(ModelTools.training_set):
-                    return ans
+                    ModelTools.n_training_points = ans
+                    return
                 else:
                     print(
-                        "Error: Number of points must be in the range 1 - {len(TrainingSetTools.training_set)}"
+                        "Error: Number of points must be in the range 1 - {len(ModelTools.training_set)}"
                     )
             except:
                 print("Error: Answer must be an integer")
