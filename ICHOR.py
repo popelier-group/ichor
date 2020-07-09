@@ -6231,9 +6231,9 @@ class MockSet(Set):
 
 
 class TrainingSet:
-    def __init__(self, inputs=list(), outputs=list()):
-        self.inputs = inputs
-        self.outputs = outputs
+    def __init__(self):
+        self.inputs = []
+        self.outputs = []
 
     def to_list(self, l):
         return l if isinstance(l, list) else [l]
