@@ -5477,9 +5477,9 @@ class Model:
             try:
                 self._invR = la.inv(self.R)
             except:
-                nugget = GLOBALS.FEREBUS_NUGGET
+                nugget = float(GLOBALS.FEREBUS_NUGGET)
                 oom = 0
-                while nugget < GLOBALS.MAX_NUGGET:
+                while nugget < float(GLOBALS.MAX_NUGGET):
                     nugget = GLOBALS.FEREBUS_NUGGET * 10 ** oom
                     R = self.add_nugget(nugget)
                     logging.warning(
@@ -5489,7 +5489,7 @@ class Model:
                         self._invR = la.inv(R)
                         break
                     except la.LinAlgError:
-                        if nugget <= GLOBALS.MAX_NUGGET:
+                        if nugget <= float(GLOBALS.MAX_NUGGET):
                             logging.error(
                                 f"Could not invert R Matrix of {self.fname}:{self.nTrain}: Singular Matrix Encountered"
                             )
