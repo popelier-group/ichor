@@ -6242,6 +6242,7 @@ class TrainingSet:
         self.inputs.append(self.to_list(input))
         self.outputs.append(output)
 
+    @buildermethod
     def _from(self, training_set):
         for training_point in training_set:
             self += training_point
