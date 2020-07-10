@@ -8127,9 +8127,9 @@ class FileRemover:
     def remove_core():
         print("Removing Core Files (.core)\n")
         for entry in os.listdir():
-            if entry.isfile() and entry.endswith(".core"):
-                filesize = Path(entry).stat().st_size
-                print("Deleted: {entry} ({filesize} bytes)")
+            if entry.path.isfile() and entry.endswith(".core"):
+                filesize = entry.path.stat().st_size
+                print(f"Deleted: {entry} ({filesize} bytes)")
                 os.remove(entry)
 
     @staticmethod
@@ -8502,7 +8502,8 @@ def main_menu():
 if __name__ == "__main__":
     Arguments.read()
     Globals.define()
-    # FileRemover.run_daemon()
+    
+    atexit.register(FileRemover.run_daemon)
 
     if Arguments.call_external_function is not None:
         Arguments.call_external_function(
