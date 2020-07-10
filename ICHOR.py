@@ -8502,7 +8502,7 @@ def main_menu():
 if __name__ == "__main__":
     Arguments.read()
     Globals.define()
-    FileRemover.run_daemon()
+    # FileRemover.run_daemon()
 
     if Arguments.call_external_function is not None:
         Arguments.call_external_function(
