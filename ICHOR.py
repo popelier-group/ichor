@@ -1838,10 +1838,10 @@ class Daemon:
         # redirect standard file descriptors
         sys.stdout.flush()
         sys.stderr.flush()
-        si = open(self.stdin, "r")
+        # si = open(self.stdin, "r")
         so = open(self.stdout, "a+")
         se = open(self.stderr, "a+")
-        os.dup2(si.fileno(), sys.stdin.fileno())
+        # os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
 
@@ -8127,8 +8127,8 @@ class FileRemover:
     def remove_core():
         print("Removing Core Files (.core)\n")
         for entry in os.listdir():
-            if entry.path.isfile() and entry.endswith(".core"):
-                filesize = entry.path.stat().st_size
+            if os.path.isfile(entry) and entry.endswith(".core"):
+                filesize = Path(entry).stat().st_size
                 print(f"Deleted: {entry} ({filesize} bytes)")
                 os.remove(entry)
 
@@ -8502,7 +8502,7 @@ def main_menu():
 if __name__ == "__main__":
     Arguments.read()
     Globals.define()
-    
+
     atexit.register(FileRemover.run_daemon)
 
     if Arguments.call_external_function is not None:
