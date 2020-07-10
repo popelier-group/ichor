@@ -82,6 +82,7 @@ import contextlib
 import subprocess
 from glob import glob
 import itertools as it
+from pathlib import Path
 from signal import SIGTERM
 from getpass import getpass
 from functools import wraps
@@ -2034,6 +2035,17 @@ class FileTools:
         )
         tree.add(
             "properties.err", "properties_stderr", parent="properties_daemon"
+        )
+
+        tree.add("FILES_REMOVED", "file_remover_daemon", parent="data")
+        tree.add(
+            "file_remover.pid", "file_remover_pid", parent="file_remover_daemon"
+        )
+        tree.add(
+            "file_remover.out", "file_remover_stdout", parent="file_remover_daemon"
+        )
+        tree.add(
+            "file_remover.err", "file_remover_stderr", parent="file_remover_daemon"
         )
 
         tree.add("SCRIPTS", "scripts", parent="data")
@@ -6272,7 +6284,6 @@ class TrainingSet:
     def __len__(self):
         return len(self.inputs)
 
-
 """
 class Points:
     def __init__(
@@ -6753,7 +6764,6 @@ class Points:
     def __getitem__(self, i):
         return self._points[i]
 """
-
 
 class Trajectory:
     def __init__(self, fname, read=False):
@@ -8100,6 +8110,40 @@ class ModelTools:
         model_menu.run()
 
 
+class FileRemoverDaemon(Daemon):
+    def __init__(self):
+        cwd = os.getcwd()
+        pidfile = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_pid"])
+        stdout = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_stdout"])
+        stderr = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_stderr"])
+        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+    
+    def run(self):
+        FileRemover.run()
+        self.stop()
+
+class FileRemover:
+    @staticmethod
+    def remove_core():
+        print("Removing Core Files (.core)\n")
+        for entry in os.listdir():
+            if entry.isfile() and entry.endswith(".core"):
+                filesize = Path(entry).stat().st_size
+                print("Deleted: {entry} ({filesize} bytes)")
+                os.remove(entry)
+
+    @staticmethod
+    def run():
+        FileRemover.remove_core()
+
+    @staticmethod
+    def run_daemon():
+        FileTools.mkdir(
+            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True
+        )
+        file_remover_daemon = FileRemoverDaemon()
+        file_remover_daemon.start()
+
 #############################################
 #            Function Definitions           #
 #############################################
@@ -8458,6 +8502,7 @@ def main_menu():
 if __name__ == "__main__":
     Arguments.read()
     Globals.define()
+    FileRemover.run_daemon()
 
     if Arguments.call_external_function is not None:
         Arguments.call_external_function(
