@@ -8127,7 +8127,7 @@ class FileRemover:
     def remove_core():
         print("Removing Core Files (.core)\n")
         for entry in os.listdir():
-            if os.path.isfile(entry) and entry.endswith(".core"):
+            if os.path.isfile(entry) and re.match(r"core\.\d+", entry):
                 filesize = Path(entry).stat().st_size
                 print(f"Deleted: {entry} ({filesize} bytes)")
                 os.remove(entry)
