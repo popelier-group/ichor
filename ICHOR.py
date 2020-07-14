@@ -5899,7 +5899,7 @@ class Points:
                     recovery_error = point.calculate_recovery_error()
                     if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
                         logging.warning(
-                            f"{point.directory} | Recovery Error: {recovery_error * Constants.ha_to_kj_mol} kJ/mol"
+                            f"{point.path} | Recovery Error: {recovery_error * Constants.ha_to_kj_mol} kJ/mol"
                         )
                         n_recovery_error += 1
             if n_recovery_error > 0:
@@ -5914,7 +5914,7 @@ class Points:
                 for atom, integration_error in integration_errors.items():
                     if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
                         logging.warning(
-                            f"{point.directory} | {atom} | Integration Error: {integration_error}"
+                            f"{point.path} | {atom} | Integration Error: {integration_error}"
                         )
                         n_integration_error += 1
             if n_integration_error > 0:
@@ -6385,7 +6385,7 @@ class Points:
                 recovery_error = point.calculate_recovery_error()
                 if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
                     logging.warning(
-                        f"{point.directory} | Recovery Error: {recovery_error} Ha"
+                        f"{point.path} | Recovery Error: {recovery_error} Ha"
                     )
                     n_recovery_error += 1
             if n_recovery_error > 0:
@@ -6400,7 +6400,7 @@ class Points:
                 for atom, integration_error in integration_errors.items():
                     if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
                         logging.warning(
-                            f"{point.directory} | {atom} | Integration Error: {integration_error} Ha"
+                            f"{point.path} | {atom} | Integration Error: {integration_error} Ha"
                         )
                         n_integration_error += 1
             if n_integration_error > 0:
