@@ -3740,11 +3740,11 @@ class AutoTools:
         _data_lock = False
 
     @staticmethod
-    def run_models(directory=None, type=None, jid=None):
-        script_name, jid = AutoTools.submit_ichor_models(
-            jid=jid, directory=directory, type=type
+    def run_models(directory=None, type=None, npoints=None, jid=None):
+        _, jid = AutoTools.submit_ichor_models(
+            jid=jid, directory=directory, type=type, npoints=npoints
         )
-        script_name, jid = AutoTools.submit_models(
+        return AutoTools.submit_models(
             jid=jid, directory=directory
         )
 
@@ -8006,8 +8006,7 @@ class ModelTools:
 
     @staticmethod
     def make_models_submit(directory, model_type, npoints):
-        _, jid = AutoTools.submit_ichor_models(directory, model_type, npoints)
-        AutoTools.submit_models(jid=jid)
+        return AutoTools.run_models(directory, model_type, npoints)
 
     @staticmethod
     @UsefulTools.external_function()
