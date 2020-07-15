@@ -5932,6 +5932,7 @@ class Points:
     def add(self, point):
         self += point
 
+    @staticmethod
     def reader(func):
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)
@@ -8005,7 +8006,7 @@ class ModelTools:
 
     @staticmethod
     def make_models_submit(directory, model_type, npoints):
-        jid = AutoTools.submit_ichor_models(directory, model_type, npoints)
+        _, jid = AutoTools.submit_ichor_models(directory, model_type, npoints)
         AutoTools.submit_models(jid=jid)
 
     @staticmethod
@@ -8015,6 +8016,7 @@ class ModelTools:
             ModelTools.make_models_submit(directory, model_type, npoints)
             return
 
+        npoints = int(npoints)
         if npoints < 0:
             ModelTools.init(directory)
             npoints = ModelTools.n_training_points
@@ -8106,7 +8108,7 @@ class ModelTools:
             "c", "Change Number of Training Points", ModelTools.change_n_points
         )
         menu.add_option(
-            "s", "Toggle Submit", ModelTools.submit_model_making
+            "s", "Toggle Submit", ModelTools.toggle_submit
         )
         menu.add_space()
         menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
