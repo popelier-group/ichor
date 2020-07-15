@@ -3629,13 +3629,15 @@ class AutoTools:
         )
 
     @staticmethod
-    def submit_ichor_models(jid=None, directory=None, type=None):
+    def submit_ichor_models(jid=None, directory=None, type=None, npoints=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         if not type:
             type = "iqa"
+        if not npoints:
+            npoints = -1
         return AutoTools.submit_ichor(
-            "make_models", directory, type, submit=True, hold=jid
+            "make_models", directory, type, npoints, submit=True, hold=jid
         )
 
     @staticmethod
@@ -7999,9 +8001,20 @@ class ModelTools:
 
     multipole_model = "all"
 
+    submit = False
+
+    @staticmethod
+    def make_models_submit(directory, model_type, npoints):
+        jid = AutoTools.submit_ichor_models(directory, model_type, npoints)
+        AutoTools.submit_models(jid=jid)
+
     @staticmethod
     @UsefulTools.external_function()
     def make_models(directory, model_type, npoints=-1):
+        if ModelTools.submit:
+            ModelTools.make_models_submit(directory, model_type, npoints)
+            return
+
         if npoints < 0:
             ModelTools.init(directory)
             npoints = ModelTools.n_training_points
@@ -8063,6 +8076,10 @@ class ModelTools:
                 print("Error: Answer must be an integer")
 
     @staticmethod
+    def toggle_submit():
+        ModelTools.submit = not ModelTools.submit
+
+    @staticmethod
     def refresh_make_models(menu):
         model_types = {
             "IQA": "iqa",
@@ -8088,10 +8105,16 @@ class ModelTools:
         menu.add_option(
             "c", "Change Number of Training Points", ModelTools.change_n_points
         )
+        menu.add_option(
+            "s", "Toggle Submit", ModelTools.submit_model_making
+        )
         menu.add_space()
         menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
         menu.add_message(
             f"Number of Training Points: {ModelTools.n_training_points}"
+        )
+        menu.add_message(
+            f"Submit Model Making: {ModelTools.submit}"
         )
         menu.add_final_options()
 
@@ -8121,6 +8144,7 @@ class FileRemoverDaemon(Daemon):
     def run(self):
         FileRemover.run()
         self.stop()
+
 
 class FileRemover:
     @staticmethod
