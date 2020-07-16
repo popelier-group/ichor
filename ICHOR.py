@@ -7120,8 +7120,7 @@ class DlpolyTools:
 
         sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
 
-        atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
-        atoms.finish()
+        atoms = GJF(FileTools.get_first_gjf(sp_dir)).read().atoms
 
         DlpolyTools.write_control(control_file)
         DlpolyTools.write_config(config_file, atoms)
@@ -7193,10 +7192,10 @@ class DlpolyTools:
         energy_file = os.path.join(dlpoly_dir, "Energies.txt")
         with open(energy_file, "w") as f:
             for point in points:
-                if re.findall(r"\d+", point.wfn.basename):
+                if re.findall(r"\d+", point.wfn.path):
                     point_num = int(re.findall(r"\d+", point.wfn.path)[-1])
                     f.write(
-                        f"{point.wfn.basename} {point_num:4d} {point.wfn.energy}\n"
+                        f"{point.wfn.path} {point_num:4d} {point.wfn.energy}\n"
                     )
                     print(point.wfn.path, point_num, point.wfn.energy)
 
@@ -8316,7 +8315,7 @@ def dlpoly_analysis():
 
 def opt():
     sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
-    atoms = GJF(FileTools.get_first_gjf(sp_dir), read=True)._atoms
+    atoms = GJF(FileTools.get_first_gjf(sp_dir)).read().atoms
 
     opt_dir = GLOBALS.FILE_STRUCTURE["opt"]
     FileTools.mkdir(opt_dir)
