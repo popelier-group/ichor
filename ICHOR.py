@@ -6828,6 +6828,14 @@ class Trajectory:
             rmsd += [ref.rmsd(point)]
         return rmsd
 
+    def to_dir(self, root, every=1):
+        for i, geometry in self:
+            if i % every == 0:
+                path = str(GLOBALS.SYSTEM_NAME) + str(i + 1).zfill(4) + ".gjf"
+                gjf = GJF(os.path.join(root, path))
+                gjf._atoms = geometry
+                gjf.write()
+
     def __len__(self):
         return len(self._trajectory)
 
@@ -7359,9 +7367,102 @@ class DlpolyTools:
         DlpolyTools.use_every = every
 
     @staticmethod
+    def get_trajectory_directories():
+        if DlpolyTools.model_loc == "all":
+            dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
+            return FileTools.get_files_in(dlpoly_dir, "*/")
+        else:
+            return [DlpolyTools.model_loc]
+
+    @staticmethod
+    def submit_trajectory_to_gaussian():
+        directories = DlpolyTools.get_trajectory_directories()
+        for directory in directories:
+            traj_file = os.path.join(directory, "TRAJECTORY.xyz")
+            if os.path.isfile(traj_file):
+                directory = os.path.join(directory, "TRAJECTORY")
+                FileTools.mkdir(directory)
+                trajectory = Trajectory(traj_file, read=True)
+                trajectory.to_dir(directory, DlpolyTools.use_every)
+                submit_gjfs(directory)
+    
+    @staticmethod
+    def submit_trajectory_to_aimall():
+        directories = DlpolyTools.get_trajectory_directories()
+        for directory in directories:
+            traj_dir = os.path.join(directory, "TRAJECTORY")
+            if os.path.isdir(traj_dir):
+                submit_wfns(directory)
+
+    @staticmethod
+    def auto_run_trajectory_analysis():
+        directories = DlpolyTools.get_trajectory_directories()
+        for directory in directories:
+            traj_file = os.path.join(directory, "TRAJECTORY.xyz")
+            if os.path.isfile(traj_file):
+                directory = os.path.join(directory, "TRAJECTORY")
+                FileTools.mkdir(directory)
+                trajectory = Trajectory(traj_file, read=True)
+                trajectory.to_dir(directory, DlpolyTools.use_every)
+                AutoTools.submit_aimall(directory)
+        # Look at adding analysis at the end
+        # maybe write to directory and run process after each
+        # job finishes to check whether to run analysis
+
+    @staticmethod
+    @UsefulTools.external_function()
+    def get_trajectory_energy(trajectory_dir):
+        if FileTools.end_of_path(trajectory_dir) != "TRAJECTORY":
+            trajectory_dir = os.path.join(trajectory_dir, "TRAJECTORY")
+        points = Set(trajectory_dir).read_wfns()
+        return [point.wfn.energy for point in points if point.wfn]
+
+    @staticmethod
+    def get_trajectory_gaussian_energies():
+        import pandas as pd
+
+        directories = DlpolyTools.get_trajectory_directories()
+        for directory in directories:
+            traj_dir = os.path.join(directory, "TRAJECTORY")
+            model_name = FileTools.end_of_path(traj_dir)
+            trajectories[model_name] = DlpolyTools.get_trajectory_energy(
+                traj_dir
+            )
+
+            maxlen = max(len(energies) for _, energies in trajectories.items())
+            for key, energies in trajectories.items():
+                trajectories[key] = energies + [np.NaN] * (maxlen - len(energies))
+
+            df = pd.DataFrame(trajectories)
+            df.to_csv("TRAJECTORY.csv")
+
+    @staticmethod
+    def calculate_trajectories_wfn():
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
+        jid = None
+        for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
+            trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
+            if os.path.exists(trajectory_file):
+                model_name = FileTools.end_of_path(model_dir)
+                _, jid = DlpolyTools.calculate_trajectory_wfn(
+                    trajectory_file, d=model_name
+                )
+        return jid
+
+    @staticmethod
+    def get_trajectory_aimall_energies():
+        pass
+
+    @staticmethod
     def refresh_traj_menu(menu):
         menu.clear_options()
-        menu.add_option("run", "Auto Run ", DlpolyTools.auto_traj_analysis)
+        menu.add_option("1", "Submit Trajectory to Gaussian", DlpolyTools.submit_trajectory_to_gaussian)
+        menu.add_option("2", "Submit Trajectory to AIMAll", DlpolyTools.submit_trajectory_to_aimall)
+        menu.add_space()
+        menu.add_option("wfn", "Get WFN Energies", DlpolyTools.get_trajectory_gaussian_energies)
+        menu.add_option("aim", "Get IQA Energies", DlpolyTools.get_trajectory_aimall_energies)
+        menu.add_space()
+        menu.add_option("r", "Auto Run ", DlpolyTools.auto_traj_analysis)
         menu.add_space()
         menu.add_option(
             "model",
@@ -7376,12 +7477,12 @@ class DlpolyTools:
         menu.add_message(
             f"Use Every: {DlpolyTools.use_every} Point(s) from Trajectory"
         )
-        menu.add_option(
-            "ener",
-            "Get Energies From WFNs",
-            DlpolyTools.get_trajectory_energies,
-            hidden=True,
-        )
+        menu.add_space()
+        menu.add_option("pred", "Get all FFLUX Predicted Energies", UsefulTools.not_implemented)
+        menu.add_option("atm", "Get all FFLUX Predicted Atom Energies", UsefulTools.not_implemented)
+        menu.add_option("force", "Get all FFLUX Predicted Atom Forces", UsefulTools.not_implemented)
+        menu.add_space()
+        menu.add_option("a", "Get all FFLUX Outputs", UsefulTools.not_implemented)
         menu.add_final_options()
 
     @staticmethod
@@ -8521,7 +8622,6 @@ def main_menu():
 
     main_menu.add_final_options(back=False)
     main_menu.run()
-
 
 Arguments.read()
 Globals.define()
