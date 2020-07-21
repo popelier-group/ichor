@@ -7192,7 +7192,7 @@ class DlpolyTools:
         energy_file = os.path.join(dlpoly_dir, "Energies.txt")
         with open(energy_file, "w") as f:
             for point in points:
-                if re.findall(r"\d+", point.wfn.path):
+                if point.wfn and re.findall(r"\d+", point.wfn.path):
                     point_num = int(re.findall(r"\d+", point.wfn.path)[-1])
                     f.write(
                         f"{point.wfn.path} {point_num:4d} {point.wfn.energy}\n"
@@ -8523,10 +8523,10 @@ def main_menu():
     main_menu.run()
 
 
-if __name__ == "__main__":
-    Arguments.read()
-    Globals.define()
+Arguments.read()
+Globals.define()
 
+if __name__ == "__main__":
     atexit.register(FileRemover.run_daemon)
 
     if Arguments.call_external_function is not None:
