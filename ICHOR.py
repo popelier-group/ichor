@@ -7260,14 +7260,6 @@ class DlpolyTools:
 
     @staticmethod
     @UsefulTools.external_function()
-    def get_trajectory_energy(trajectory_dir):
-        if FileTools.end_of_path(trajectory_dir) != "TRAJECTORY":
-            trajectory_dir = os.path.join(trajectory_dir, "TRAJECTORY")
-        points = Set(trajectory_dir).read_wfns()
-        return [point.wfn.energy for point in points if point.wfn]
-
-    @staticmethod
-    @UsefulTools.external_function()
     def get_trajectory_energies():
         import pandas as pd
 
@@ -7436,25 +7428,70 @@ class DlpolyTools:
             for key, energies in trajectories.items():
                 trajectories[key] = energies + [np.NaN] * (maxlen - len(energies))
 
-            df = pd.DataFrame(trajectories)
-            df.to_csv("TRAJECTORY.csv")
+        df = pd.DataFrame(trajectories)
+
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
+        df.to_csv(os.path.join(dlpoly_dir, "TRAJECTORY_Energies.csv"))
 
     @staticmethod
-    def calculate_trajectories_wfn():
-        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
-        jid = None
-        for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
-            trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
-            if os.path.exists(trajectory_file):
-                model_name = FileTools.end_of_path(model_dir)
-                _, jid = DlpolyTools.calculate_trajectory_wfn(
-                    trajectory_file, d=model_name
-                )
-        return jid
+    @UsefulTools.external_function()
+    def get_trajectory_aimall_energy(trajectory_dir):
+        if FileTools.end_of_path(trajectory_dir) != "TRAJECTORY":
+            trajectory_dir = os.path.join(trajectory_dir, "TRAJECTORY")
+        points = Set(trajectory_dir).read_ints()
+        data = {}
+        for point in points:
+            if point.ints:
+                for atom, aim in point.ints.items():
+                    if not atom in data.keys():
+                        data[atom] = []
+                    data[atom] += [aim.iqa]
+        return data
 
     @staticmethod
     def get_trajectory_aimall_energies():
-        pass
+        import pandas as pd
+
+        directories = DlpolyTools.get_trajectory_directories()
+        # {
+        #   MODEL001: {
+        #               TIMESTEP001: {
+        #                              ATOM01: -#.###,
+        #                              ATOM02: -#.###,
+        #                              ...
+        #                            },
+        #                            ...
+        #             },
+        #             ...
+        # }
+        #
+        # {
+        #   MODEL001: {
+        #               ATOM01: [
+        #                         -#.###, // TIMESTEP001
+        #                         -#.###, // TIMESTEP001
+        #                         ...
+        #                       ],
+        #                       ...
+        #             },
+        #             ...
+        # }
+
+        trajectories = {}
+        for directory in directories:
+            traj_dir = os.path.join(directory, "TRAJECTORY")
+            model_name = FileTools.end_of_path(directory)
+            trajectories[model_name] = df = pd.DataFrame(
+                DlpolyTools.get_trajectory_aimall_energy(
+                    traj_dir
+                )
+            )
+            
+        dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
+        with pd.ExcelWriter(os.path.join(dlpoly_dir, "TRAJECTORY_ATM_Energies.csv")) as writer:
+            for model_name, df in trajectories.items():
+                df.to_excel(writer, sheet_name=model_name)
+
 
     @staticmethod
     def refresh_traj_menu(menu):
