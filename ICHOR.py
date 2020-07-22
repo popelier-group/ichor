@@ -6831,7 +6831,7 @@ class Trajectory:
         return rmsd
 
     def to_dir(self, root, every=1):
-        for i, geometry in self:
+        for i, geometry in enumerate(self):
             if i % every == 0:
                 path = str(GLOBALS.SYSTEM_NAME) + str(i + 1).zfill(4) + ".gjf"
                 gjf = GJF(os.path.join(root, path))
