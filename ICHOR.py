@@ -3207,7 +3207,10 @@ class SubmissionTools:
         hold=None,
     ):
         if check_wfns:
-            points.check_wfns()
+            result = points.check_wfns()
+            if result is not None:
+                _, jid = AutoTools.submit_ichor_wfns(result[1], directory=points.path)
+                return AutoTools.submit_wfns(jid, len(points))
 
         aimall_job = AIMAllCommand()
         for point in points:
@@ -6006,7 +6009,7 @@ class Set(Points):
         self.points = UsefulTools.natural_sort_path(self)
 
     def n(self, attr):
-        return sum(1 for point in self if getattr(point, attr).exists())
+        return sum(1 for point in self if getattr(point, attr) is not None and getattr(point, attr).exists())
 
     def check_functional(self):
         [point.wfn.check_functional() for point in self]
@@ -6025,14 +6028,13 @@ class Set(Points):
                 print(f"{n_wfns} WFNs found.")
                 print()
                 print(f"Submitting {n_gjfs - n_wfns} GJFs to Gaussian.")
-                wfns.submit_gjfs()
-                sys.exit(0)
+                return wfns.submit_gjfs()
         else:
             if UsefulTools.in_sensitive(
                 GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS
             ):
                 self.check_functional()
-            print("All wfns complete.")
+            print(f"{self.path}: All wfns complete.")
 
     def format_gjfs(self):
         for point in self:
@@ -7392,7 +7394,7 @@ class DlpolyTools:
         for directory in directories:
             traj_dir = os.path.join(directory, "TRAJECTORY")
             if os.path.isdir(traj_dir):
-                submit_wfns(directory)
+                submit_wfns(traj_dir)
 
     @staticmethod
     def auto_run_trajectory_analysis():
@@ -7422,9 +7424,10 @@ class DlpolyTools:
         import pandas as pd
 
         directories = DlpolyTools.get_trajectory_directories()
+        trajectories = {}
         for directory in directories:
             traj_dir = os.path.join(directory, "TRAJECTORY")
-            model_name = FileTools.end_of_path(traj_dir)
+            model_name = FileTools.end_of_path(directory)
             trajectories[model_name] = DlpolyTools.get_trajectory_energy(
                 traj_dir
             )
