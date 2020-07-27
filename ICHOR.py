@@ -7488,7 +7488,7 @@ class DlpolyTools:
             )
             
         dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
-        with pd.ExcelWriter(os.path.join(dlpoly_dir, "TRAJECTORY_ATM_Energies.csv")) as writer:
+        with pd.ExcelWriter(os.path.join(dlpoly_dir, "TRAJECTORY_ATM_Energies.xlsx")) as writer:
             for model_name, df in trajectories.items():
                 df.to_excel(writer, sheet_name=model_name)
 
