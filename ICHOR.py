@@ -541,9 +541,7 @@ class UsefulTools:
         prog = re.compile(r"(\d+)")
 
         def alphanum_key(element):
-            return [
-                int(c) if c.isdigit() else c for c in prog.findall(element)
-            ]
+            return [int(c) if c.isdigit() else c for c in prog.findall(element)]
 
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
@@ -552,10 +550,7 @@ class UsefulTools:
         prog = re.compile(r"(\d+)")
 
         def alphanum_key(element):
-            return [
-                int(c) if c.isdigit() else c
-                for c in prog.findall(element.path)
-            ]
+            return [int(c) if c.isdigit() else c for c in prog.findall(element.path)]
 
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
@@ -737,9 +732,7 @@ class UsefulTools:
             # Readline only available on Unix
             import readline
 
-            readline.set_startup_hook(
-                lambda: readline.insert_text(str(prefill))
-            )
+            readline.set_startup_hook(lambda: readline.insert_text(str(prefill)))
             return input(prompt)
         except:
             return input(prompt)
@@ -840,15 +833,11 @@ class Arguments:
             func = args.func[0]
             func_args = args.func[1:] if len(args.func) > 1 else []
             if func in Arguments.external_functions.keys():
-                Arguments.call_external_function = Arguments.external_functions[
-                    func
-                ]
+                Arguments.call_external_function = Arguments.external_functions[func]
                 Arguments.call_external_function_args = func_args
             else:
                 print(f"{func} not in allowed functions:")
-                formatted_functions = [
-                    str(f) for f in allowed_functions.split(",")
-                ]
+                formatted_functions = [str(f) for f in allowed_functions.split(",")]
                 formatted_functions = "- " + "\n- ".join(formatted_functions)
                 print(f"{formatted_functions}")
                 quit()
@@ -1188,16 +1177,12 @@ class Globals:
         globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
         globals.IASMESH.allowed_values = Constants.IASMESH_VALUES
         globals.FEREBUS_VERSION.allowed_values = Constants.FEREBUS_VERSIONS
-        globals.OPTIMISE_PROPERTY.allowed_values = [
-            "iqa"
-        ] + Constants.multipole_names
+        globals.OPTIMISE_PROPERTY.allowed_values = ["iqa"] + Constants.multipole_names
 
         # Set modifiers
         for global_variable in globals.global_variables:
             if globals.__dict__[global_variable].type == str:
-                globals.__dict__[global_variable].add_modifier(
-                    GlobalTools.cleanup_str
-                )
+                globals.__dict__[global_variable].add_modifier(GlobalTools.cleanup_str)
         globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
         globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
         globals.ALF.add_pre_modifier(GlobalTools.read_alf)
@@ -1265,9 +1250,7 @@ class Globals:
                             pass
             if self.ALF_REFERENCE_FILE:
                 try:
-                    GJF(
-                        str(self.ALF_REFERENCE_FILE)
-                    ).read().atoms.calculate_alf()
+                    GJF(str(self.ALF_REFERENCE_FILE)).read().atoms.calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
                     logging.error("Error When Calculating ALF")
@@ -1339,13 +1322,9 @@ class Globals:
                 *Globals.types,
             ]:
                 if len(value) > 2:
-                    self.__dict__[name] = GlobalVariable(
-                        name, value[:-1], value[-1]
-                    )
+                    self.__dict__[name] = GlobalVariable(name, value[:-1], value[-1])
                 else:
-                    self.__dict__[name] = GlobalVariable(
-                        name, value[0], value[-1]
-                    )
+                    self.__dict__[name] = GlobalVariable(name, value[0], value[-1])
             else:
                 self.__dict__[name] = GlobalVariable(name, value, type(value))
 
@@ -1374,9 +1353,7 @@ class Colors:
 class Patterns:
     COORDINATE_LINE = re.compile(r"\s*\w+(\s*[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}")
 
-    AIMALL_LINE = re.compile(
-        r"[<|]?\w+[|>]?\s+=(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?)"
-    )
+    AIMALL_LINE = re.compile(r"[<|]?\w+[|>]?\s+=(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?)")
     MULTIPOLE_LINE = re.compile(
         r"Q\[\d+,\d+(,\w+)?]\s+=\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?"
     )
@@ -1788,11 +1765,7 @@ class Daemon:
     """
 
     def __init__(
-        self,
-        pidfile,
-        stdin="/dev/null",
-        stdout="/dev/null",
-        stderr="/dev/null",
+        self, pidfile, stdin="/dev/null", stdout="/dev/null", stderr="/dev/null",
     ):
         self.stdin = stdin
         self.stdout = stdout
@@ -1811,9 +1784,7 @@ class Daemon:
                 # exit first parent
                 sys.exit(0)
         except OSError as e:
-            sys.stderr.write(
-                "fork #1 failed: %d (%s)\n" % (e.errno, e.strerror)
-            )
+            sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1)
 
         # decouple from parent environment
@@ -1830,9 +1801,7 @@ class Daemon:
                 # exit from second parent
                 sys.exit(0)
         except OSError as e:
-            sys.stderr.write(
-                "fork #2 failed: %d (%s)\n" % (e.errno, e.strerror)
-            )
+            sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1)
 
         # redirect standard file descriptors
@@ -2027,20 +1996,12 @@ class FileTools:
         tree.add("cv_errors", "cv_errors", parent="adaptive_sampling")
 
         tree.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
-        tree.add(
-            "properties.pid", "properties_pid", parent="properties_daemon"
-        )
-        tree.add(
-            "properties.out", "properties_stdout", parent="properties_daemon"
-        )
-        tree.add(
-            "properties.err", "properties_stderr", parent="properties_daemon"
-        )
+        tree.add("properties.pid", "properties_pid", parent="properties_daemon")
+        tree.add("properties.out", "properties_stdout", parent="properties_daemon")
+        tree.add("properties.err", "properties_stderr", parent="properties_daemon")
 
         tree.add("FILES_REMOVED", "file_remover_daemon", parent="data")
-        tree.add(
-            "file_remover.pid", "file_remover_pid", parent="file_remover_daemon"
-        )
+        tree.add("file_remover.pid", "file_remover_pid", parent="file_remover_daemon")
         tree.add(
             "file_remover.out", "file_remover_stdout", parent="file_remover_daemon"
         )
@@ -2173,9 +2134,7 @@ class FileTools:
             print()
             print("No Optimised Geometry Found")
             if UsefulTools.check_bool(
-                input(
-                    "Would you like to calculate the optimum geometry? [Y/N]"
-                )
+                input("Would you like to calculate the optimum geometry? [Y/N]")
             ):
                 print("Performing Geometry Optimisation")
                 print("Continue Analysis Once Completed")
@@ -2428,9 +2387,7 @@ class FerebusTools:
             finput.write("noise_value 0.1\n")
             finput.write(f"tolerance        {GLOBALS.FEREBUS_TOLERANCE}#\n")
             finput.write(f"convergence      {GLOBALS.FEREBUS_CONVERGENCE}#\n")
-            finput.write(
-                f"max_iterations   {GLOBALS.FEREBUS_MAX_ITERATION}#\n"
-            )
+            finput.write(f"max_iterations   {GLOBALS.FEREBUS_MAX_ITERATION}#\n")
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# PSO Specific keywords\n#\n")
@@ -2446,9 +2403,7 @@ class FerebusTools:
             if GLOBALS.FEREBUS_SWARM_SIZE < 0:
                 finput.write(f"swarm_pop     1440       ")
             else:
-                finput.write(
-                    f"swarm_pop    {GLOBALS.FEREBUS_SWARM_SIZE}       "
-                )
+                finput.write(f"swarm_pop    {GLOBALS.FEREBUS_SWARM_SIZE}       ")
             finput.write(
                 "# if swarm opt is set as 'static' the number of particle must be specified\n"
             )
@@ -2487,9 +2442,7 @@ class FerebusTools:
             finput.write(
                 "iprint 101 # It controls the frequency and type of output generated:\n"
             )
-            finput.write(
-                "#                     iprint<0    no output is generated)\n"
-            )
+            finput.write("#                     iprint<0    no output is generated)\n")
             finput.write(
                 "#                     iprint=0    print only one line at the last iteration)\n"
             )
@@ -2736,9 +2689,7 @@ class CommandLine:
             if not self.array_names:
                 self.array_names = self.setup_array_names()
             if isinstance(var, int):
-                return (
-                    f"${{{self.array_names[index]}[${self.var_names[var]}]}}"
-                )
+                return f"${{{self.array_names[index]}[${self.var_names[var]}]}}"
             else:
                 return f"${{{self.array_names[index]}[${var}]}}"
         else:
@@ -2836,9 +2787,7 @@ class GaussianCommand(CommandLine):
     def add(self, gjf_file, outfile=None):
         self.infiles += [gjf_file]
         self.outfiles += (
-            [self.create_outfile(gjf_file, ext="gau")]
-            if not outfile
-            else [outfile]
+            [self.create_outfile(gjf_file, ext="gau")] if not outfile else [outfile]
         )
 
     def load_modules(self):
@@ -2853,9 +2802,7 @@ class GaussianCommand(CommandLine):
         if len(self.infiles) < 1:
             return ""
 
-        datafile = self.setup_data_file(
-            self.datafile, self.infiles, self.outfiles
-        )
+        datafile = self.setup_data_file(self.datafile, self.infiles, self.outfiles)
         infile = self.get_variable(0)
         outfile = self.get_variable(1)
 
@@ -2883,9 +2830,7 @@ class AIMAllCommand(CommandLine):
     def add(self, wfn_file, outfile=None):
         self.infiles += [wfn_file]
         self.outfiles += (
-            [self.create_outfile(wfn_file, ext="aim")]
-            if not outfile
-            else [outfile]
+            [self.create_outfile(wfn_file, ext="aim")] if not outfile else [outfile]
         )
 
     def load_modules(self):
@@ -2914,9 +2859,7 @@ class AIMAllCommand(CommandLine):
         if len(self.infiles) < 1:
             return ""
 
-        datafile = self.setup_data_file(
-            self.datafile, self.infiles, self.outfiles
-        )
+        datafile = self.setup_data_file(self.datafile, self.infiles, self.outfiles)
         infile = self.get_variable(0)
         outfile = self.get_variable(1)
 
@@ -3094,9 +3037,7 @@ class SubmissionScript:
             node_options += [f"!({exclude_nodes})"]
 
         return (
-            "#$ -l h=" + "&".join(node_options) + "\n"
-            if len(node_options) > 0
-            else ""
+            "#$ -l h=" + "&".join(node_options) + "\n" if len(node_options) > 0 else ""
         )
 
     def check_task_id(self):
@@ -3173,15 +3114,12 @@ class SubmissionScript:
 
 class SubmissionTools:
     @staticmethod
-    def make_g09_script(
-        points, directory="", redo=False, submit=True, hold=None
-    ):
+    def make_g09_script(points, directory="", redo=False, submit=True, hold=None):
         gaussian_job = GaussianCommand()
         if isinstance(points, Points):
             for point in points:
                 if (
-                    point.gjf
-                    and (redo or not os.path.exists(point.gjf.wfn.path))
+                    point.gjf and (redo or not os.path.exists(point.gjf.wfn.path))
                 ) or isinstance(point, MockDirectory):
                     gaussian_job.add(point.gjf.path)
         elif isinstance(points, GJF):
@@ -3199,12 +3137,7 @@ class SubmissionTools:
 
     @staticmethod
     def make_aim_script(
-        points,
-        directory="",
-        check_wfns=True,
-        redo=False,
-        submit=True,
-        hold=None,
+        points, directory="", check_wfns=True, redo=False, submit=True, hold=None,
     ):
         if check_wfns:
             result = points.check_wfns()
@@ -3235,20 +3168,14 @@ class SubmissionTools:
 
     @staticmethod
     def make_ferebus_script(
-        model_directories,
-        directory="",
-        submit=True,
-        hold=None,
-        model_type="iqa",
+        model_directories, directory="", submit=True, hold=None, model_type="iqa",
     ):
         ferebus_job = FerebusCommand()
         for model_directory in model_directories:
             ferebus_job.add(model_directory)
 
         move_models = PythonCommand()
-        move_models.run_func(
-            "move_models", ferebus_job.get_variable(0), model_type
-        )
+        move_models.run_func("move_models", ferebus_job.get_variable(0), model_type)
 
         script_name = os.path.join(directory, "FereSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -3263,12 +3190,7 @@ class SubmissionTools:
 
     @staticmethod
     def make_python_script(
-        python_script,
-        directory="",
-        function="",
-        args=(),
-        submit=True,
-        hold=None,
+        python_script, directory="", function="", args=(), submit=True, hold=None,
     ):
         python_job = PythonCommand()
         if function:
@@ -3285,9 +3207,7 @@ class SubmissionTools:
         return submission_script.fname, jid
 
     @staticmethod
-    def make_dlpoly_script(
-        dlpoly_directories, directory="", submit=True, hold=None
-    ):
+    def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None):
         dlpoly_job = DlpolyCommand()
         for dlpoly_directory in dlpoly_directories:
             dlpoly_job.add(dlpoly_directory)
@@ -3619,17 +3539,13 @@ class AutoTools:
     def submit_ichor_gjfs(jid=None, directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
-        return AutoTools.submit_ichor(
-            "submit_gjfs", directory, submit=True, hold=jid
-        )
+        return AutoTools.submit_ichor("submit_gjfs", directory, submit=True, hold=jid)
 
     @staticmethod
     def submit_ichor_wfns(jid=None, directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
-        return AutoTools.submit_ichor(
-            "submit_wfns", directory, submit=True, hold=jid
-        )
+        return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid)
 
     @staticmethod
     def submit_ichor_models(jid=None, directory=None, type=None, npoints=None):
@@ -3652,9 +3568,7 @@ class AutoTools:
         )
 
     @staticmethod
-    def submit_ichor_s_curves(
-        predict_property, validation_set, models, output_file
-    ):
+    def submit_ichor_s_curves(predict_property, validation_set, models, output_file):
         return AutoTools.submit_ichor(
             "calculate_s_curves",
             predict_property,
@@ -3673,9 +3587,7 @@ class AutoTools:
 
     @staticmethod
     def submit_dlpoly_energies(jid=None):
-        return AutoTools.submit_ichor(
-            "get_wfn_energies", submit=True, hold=jid
-        )
+        return AutoTools.submit_ichor("get_wfn_energies", submit=True, hold=jid)
 
     @staticmethod
     def submit_dlpoly_trajectories(jid=None):
@@ -3685,9 +3597,7 @@ class AutoTools:
 
     @staticmethod
     def submit_dlpoly_trajectories_energies(jid=None):
-        return AutoTools.submit_ichor(
-            "get_trajectory_energies", submit=True, hold=jid
-        )
+        return AutoTools.submit_ichor("get_trajectory_energies", submit=True, hold=jid)
 
     @staticmethod
     def submit_dlpoly_trajectory_energies(jid=None, directory=None):
@@ -3713,9 +3623,7 @@ class AutoTools:
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
-        return points.submit_wfns(
-            redo=False, submit=True, hold=jid, check_wfns=False
-        )
+        return points.submit_wfns(redo=False, submit=True, hold=jid, check_wfns=False)
 
     @staticmethod
     def submit_models(jid=None, directory=None):
@@ -3747,9 +3655,7 @@ class AutoTools:
         _, jid = AutoTools.submit_ichor_models(
             jid=jid, directory=directory, type=type, npoints=npoints
         )
-        return AutoTools.submit_models(
-            jid=jid, directory=directory
-        )
+        return AutoTools.submit_models(jid=jid, directory=directory)
 
     @staticmethod
     def run_from_extern():
@@ -3825,9 +3731,7 @@ class PropertiesDaemon(Daemon):
 class PropertyTools:
     @staticmethod
     def run_daemon():
-        FileTools.mkdir(
-            GLOBALS.FILE_STRUCTURE["properties_daemon"], empty=True
-        )
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties_daemon"], empty=True)
         properties_daemon = PropertiesDaemon()
         properties_daemon.start()
 
@@ -3897,9 +3801,7 @@ class PropertyTools:
         with tqdm(total=len(properties), unit=" files") as progressbar:
             for _, property_directory in property_directories:
                 progressbar.set_description(property_directory)
-                FileTools.copy_file(
-                    os.path.realpath(__file__), property_directory
-                )
+                FileTools.copy_file(os.path.realpath(__file__), property_directory)
                 progressbar.update()
         print()
         # copy config.properties
@@ -3934,9 +3836,7 @@ class PropertyTools:
                 try:
                     spec.loader.exec_module(ichor)
                 except:
-                    print(
-                        f"Error submitting adaptive sampling for: {property_name}"
-                    )
+                    print(f"Error submitting adaptive sampling for: {property_name}")
                 ichor.AutoTools.run_from_extern()
 
         GLOBALS.OPTIMISE_PROPERTY = original_property
@@ -3947,9 +3847,7 @@ class PropertyTools:
         for properties_dir in FileTools.get_files_in(
             GLOBALS.FILE_STRUCTURE["properties"], "*/"
         ):
-            log_dir = os.path.join(
-                properties_dir, GLOBALS.FILE_STRUCTURE["log"]
-            )
+            log_dir = os.path.join(properties_dir, GLOBALS.FILE_STRUCTURE["log"])
             if os.path.exists(log_dir):
                 # for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
                 FileTools.copymodels(log_dir, GLOBALS.FILE_STRUCTURE["log"])
@@ -3995,9 +3893,7 @@ class Atom:
             find_atom = coordinate_line.split()
             self.atom_type = find_atom[0]
             coordinate_line = next(
-                re.finditer(
-                    r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line
-                )
+                re.finditer(r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line)
             ).group()
             coordinate_line = re.finditer(
                 r"[+-]?\d+.\d+([Ee][+-]?\d+)?", coordinate_line
@@ -4085,9 +3981,9 @@ class Atom:
         ydiff2 = self.ydiff(self.xy_plane)
         zdiff2 = self.zdiff(self.xy_plane)
 
-        sigma_fflux = -(
-            xdiff1 * xdiff2 + ydiff1 * ydiff2 + zdiff1 * zdiff2
-        ) / (xdiff1 * xdiff1 + ydiff1 * ydiff1 + zdiff1 * zdiff1)
+        sigma_fflux = -(xdiff1 * xdiff2 + ydiff1 * ydiff2 + zdiff1 * zdiff2) / (
+            xdiff1 * xdiff1 + ydiff1 * ydiff1 + zdiff1 * zdiff1
+        )
 
         y_vec1 = sigma_fflux * xdiff1 + xdiff2
         y_vec2 = sigma_fflux * ydiff1 + ydiff2
@@ -4368,10 +4264,7 @@ class Atoms:
         prev_priorities = []
         while True:
             priorities = [atom.priority for atom in self]
-            if (
-                priorities.count(max(priorities)) == 1
-                or prev_priorities == priorities
-            ):
+            if priorities.count(max(priorities)) == 1 or prev_priorities == priorities:
                 break
             else:
                 prev_priorities = priorities
@@ -4465,6 +4358,9 @@ class PointError:
     class NotGJF(Exception):
         pass
 
+    class NotGau(Exception):
+        pass
+
     class NotWFN(Exception):
         pass
 
@@ -4547,9 +4443,7 @@ class Point:
         return np.abs(self.wfn.energy - self.get_true_value("iqa"))
 
     def get_integration_errors(self):
-        return {
-            atom: data.integration_error for atom, data in self.ints.items()
-        }
+        return {atom: data.integration_error for atom, data in self.ints.items()}
 
     def __len__(self):
         return len(self.atoms)
@@ -4738,6 +4632,8 @@ class Directory(Point):
         self.wfn = None
         self.ints = None
 
+        self.gau = None
+
         self.parse()
 
     def parse(self):
@@ -4748,13 +4644,13 @@ class Directory(Point):
             ".gjf": self.add_gjf,
             ".wfn": self.add_wfn,
             ".int": self.add_int,
+            ".gau": self.add_gau
         }
         with os.scandir(path) as it:
             for entry in it:
                 if (
                     entry.is_file()
-                    and FileTools.get_extension(entry)
-                    in file_extentsions.keys()
+                    and FileTools.get_extension(entry) in file_extentsions.keys()
                 ):
                     add = file_extentsions[FileTools.get_extension(entry)]
                     add(entry.path)
@@ -4792,6 +4688,14 @@ class Directory(Point):
         self.ints.add(int_)
 
     @buildermethod
+    def add_gau(self, gau):
+        if isinstance(gau, str):
+            gau = Gau(gau)
+        if not isinstance(gau, Gau):
+            raise PointError.NotGau()
+        self.gau = gau
+
+    @buildermethod
     def read_all(self):
         if self.gjf:
             self.read_gjf()
@@ -4821,6 +4725,10 @@ class Directory(Point):
     @buildermethod
     def read_ints(self):
         self.ints.read()
+
+    @buildermethod
+    def read_gau(self):
+        self.gau.read()
 
     def move(self, dst):
         FileTools.mkdir(dst)
@@ -4900,9 +4808,7 @@ class GJF(Point):
         if not self.atoms:
             self.read()
 
-        if UsefulTools.in_sensitive(
-            GLOBALS.METHOD, Constants.GAUSSIAN_METHODS
-        ):
+        if UsefulTools.in_sensitive(GLOBALS.METHOD, Constants.GAUSSIAN_METHODS):
             self.method = GLOBALS.METHOD
         else:
             print("Error: Unknown method {METHOD}")
@@ -4912,9 +4818,7 @@ class GJF(Point):
         self.basis_set = GLOBALS.BASIS_SET
 
         required_keywords = ["nosymm", "output=wfn"]
-        self.keywords = list(
-            set(self.keywords + GLOBALS.KEYWORDS + required_keywords)
-        )
+        self.keywords = list(set(self.keywords + GLOBALS.KEYWORDS + required_keywords))
 
         self.startup_options = [
             f"nproc={GLOBALS.GAUSSIAN_CORE_COUNT}",
@@ -5018,9 +4922,7 @@ class WFN(Point):
 
         if not os.path.exists(aim_directory):
             return False
-        n_ints = sum(
-            1 for f in os.listdir(aim_directory) if f.endswith(".int")
-        )
+        n_ints = sum(1 for f in os.listdir(aim_directory) if f.endswith(".int"))
         return n_ints == self.nuclei
 
     def move(self, dst):
@@ -5081,9 +4983,9 @@ class INT(Point):
                         for match in re.finditer(Patterns.AIMALL_LINE, line):
                             tokens = match.group().split("=")
                             try:
-                                self.integration_results[
-                                    tokens[0].strip()
-                                ] = float(tokens[-1])
+                                self.integration_results[tokens[0].strip()] = float(
+                                    tokens[-1]
+                                )
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -5103,9 +5005,7 @@ class INT(Point):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                self.multipoles[multipole.lower()] = float(
-                                    tokens[-1]
-                                )
+                                self.multipoles[multipole.lower()] = float(tokens[-1])
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -5116,9 +5016,7 @@ class INT(Point):
                         if "=" in line:
                             tokens = line.split("=")
                             try:
-                                self.iqa_data[tokens[0].strip()] = float(
-                                    tokens[-1]
-                                )
+                                self.iqa_data[tokens[0].strip()] = float(tokens[-1])
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -5163,6 +5061,10 @@ class INT(Point):
     @property
     def q(self):
         return self.integration_results["q"]
+
+    @property
+    def dipole(self):
+        return np.sqrt(sum([self.q10**2, self.q11c**2, self.q11s**2]))
 
     def get_property(self, property_name):
         return getattr(self, property_name)
@@ -5226,6 +5128,12 @@ class INTs(Point):
         for _int in self:
             _int.move(dst)
 
+    def dipole(self):
+        return [i.dipole for i in self]
+
+    def charge(self):
+        return np.sqrt(sum(i.dipole**2 for i in self))
+
     def __getattr__(self, attr):
         if attr in self.__dict__.keys():
             return self.__dict__[attr]
@@ -5241,6 +5149,28 @@ class INTs(Point):
         elif isinstance(idx, str):
             return self.get_atom(idx)
         raise PointError.AtomNotFound()
+
+
+class Gau(Point):
+    def __init__(self, path=None):
+        self.path = path
+
+        self.charge = None
+        self.dipole = {}
+
+    @buildermethod
+    def read(self):
+        with open(self.path, "r") as f:
+            for line in f:
+                if "Charge=" in line:
+                    self.charge = float(line.split()[1])
+                if "Dipole moment" in line:
+                    line = next(f)
+                    line_split = line.split()
+                    self.dipole["x"] = float(line_split[1])
+                    self.dipole["y"] = float(line_split[3])
+                    self.dipole["z"] = float(line_split[5])
+                    break
 
 
 class Geometry(Point):
@@ -5415,9 +5345,7 @@ class Model:
                     while ";" not in line:
                         self.X.append([float(num) for num in line.split()])
                         line = next(f)
-                    self.X = np.array(self.X).reshape(
-                        (self.nTrain, self.nFeats)
-                    )
+                    self.X = np.array(self.X).reshape((self.nTrain, self.nFeats))
 
                 if up_to is not None and up_to in line:
                     break
@@ -5451,9 +5379,7 @@ class Model:
     def get_fname(self, directory=None):
         if directory is None:
             directory = self.directory
-        basename = (
-            f"{self.system_name}_kriging_{self.type}_{self.atom_number}.txt"
-        )
+        basename = f"{self.system_name}_kriging_{self.type}_{self.atom_number}.txt"
         return os.path.join(directory, basename)
 
     def copy_to_log(self):
@@ -5464,9 +5390,7 @@ class Model:
             self.read(up_to="Number_of_training_points")
 
         nTrain = str(self.nTrain).zfill(4)
-        log_directory = os.path.join(
-            log_directory, f"{self.system_name}{nTrain}"
-        )
+        log_directory = os.path.join(log_directory, f"{self.system_name}{nTrain}")
         FileTools.mkdir(log_directory)
         log_model_file = self.get_fname(log_directory)
 
@@ -5539,11 +5463,7 @@ class Model:
             return self._B
         except AttributeError:
             self._B = np.matmul(
-                (
-                    la.inv(
-                        np.matmul(np.matmul(self.ones.T, self.invR), self.ones)
-                    )
-                ),
+                (la.inv(np.matmul(np.matmul(self.ones.T, self.invR), self.ones))),
                 np.matmul(np.matmul(self.ones.T, self.invR), self.y),
             ).item()
             return self._B
@@ -5560,11 +5480,7 @@ class Model:
                 cve = (
                     np.matmul(
                         self.invR[i, :],
-                        (
-                            d
-                            + (d[i] / self.H[i][i])
-                            * self.H[:][i].reshape((-1, 1))
-                        ),
+                        (d + (d[i] / self.H[i][i]) * self.H[:][i].reshape((-1, 1))),
                     )
                     / self.invR[i][i]
                 )
@@ -5589,9 +5505,7 @@ class Model:
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
         res3 = np.matmul(self.ones.T, np.matmul(self.invR, self.ones))
 
-        return self.sigma2 * (
-            1 - res1.item() + (1 + res2.item()) ** 2 / res3.item()
-        )
+        return self.sigma2 * (1 - res1.item() + (1 + res2.item()) ** 2 / res3.item())
 
     def variance2(self, point):
         point = point.features[self.i]
@@ -5656,9 +5570,7 @@ class Models:
         if type == "all":
             return [model for model in self]
         elif type == "multipoles":
-            return [
-                model for model in self if re.match(r"q\d+(\w+)?", model.type)
-            ]
+            return [model for model in self if re.match(r"q\d+(\w+)?", model.type)]
         else:
             return [model for model in self if model.type == type]
 
@@ -5683,10 +5595,7 @@ class Models:
                 points_progressbar.set_description(point.path)
                 prediction = 0 if not atoms else {}
                 with tqdm(
-                    total=len(models),
-                    unit=" models",
-                    leave=False,
-                    disable=not verbose,
+                    total=len(models), unit=" models", leave=False, disable=not verbose,
                 ) as models_progressbar:
                     for model in self.get(type):
                         models_progressbar.set_description(model.type)
@@ -5736,9 +5645,7 @@ class Models:
         for atom in range(len(self)):
             point_features = np.array(point.features[atom]).reshape((1, -1))
             points_features = points.get_atom_features(atom)
-            distances += (
-                distance.cdist(point_features, points_features).flatten() ** 2
-            )
+            distances += distance.cdist(point_features, points_features).flatten() ** 2
         return np.sqrt(distances)
 
     def distances(self, points, added_points):
@@ -5757,12 +5664,8 @@ class Models:
             data = json.load(f)
             if data["npoints"] != UsefulTools.nTrain():
                 return 0.5
-            for true_error, cv_error in zip(
-                data["true_errors"], data["cv_errors"]
-            ):
-                alpha.append(
-                    0.99 * min(0.5 * (float(true_error) / float(cv_error)), 1)
-                )
+            for true_error, cv_error in zip(data["true_errors"], data["cv_errors"]):
+                alpha.append(0.99 * min(0.5 * (float(true_error) / float(cv_error)), 1))
 
         if not alpha:
             return 0.5
@@ -5829,9 +5732,7 @@ class Models:
 
     def expected_improvement_epe(self, points):
         best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
-        points_to_add = best_points[
-            : min(len(points), GLOBALS.POINTS_PER_ITERATION)
-        ]
+        points_to_add = best_points[: min(len(points), GLOBALS.POINTS_PER_ITERATION)]
         self.write_data(points_to_add, points)
         return points_to_add
 
@@ -5839,8 +5740,7 @@ class Models:
         points_to_add = []
         for _ in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(
-                np.argsort(self.calc_epe(points, added_points=points_to_add)),
-                axis=-1,
+                np.argsort(self.calc_epe(points, added_points=points_to_add)), axis=-1,
             )
             points_to_add += [best_points[0]]
         self.write_data(points_to_add, points)
@@ -5854,8 +5754,7 @@ class Models:
         points_to_add = []
         for _ in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(
-                np.argsort(self.calc_var(points, added_points=points_to_add)),
-                axis=-1,
+                np.argsort(self.calc_var(points, added_points=points_to_add)), axis=-1,
             )
             points_to_add += [best_points[0]]
         return points_to_add
@@ -5868,16 +5767,13 @@ class Models:
         points_to_add = []
         for _ in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(
-                np.argsort(self.calc_var2(points, added_points=points_to_add)),
-                axis=-1,
+                np.argsort(self.calc_var2(points, added_points=points_to_add)), axis=-1,
             )
             points_to_add += [best_points[0]]
         return points_to_add
 
     def expected_improvement_rand(self, points):
-        return np.randint(
-            low=0, high=len(points), size=GLOBALS.POINTS_PER_ITERATION
-        )
+        return np.randint(low=0, high=len(points), size=GLOBALS.POINTS_PER_ITERATION)
 
     def expected_improvement(self, points):
         points_to_add = self.expected_improvement_function(points)
@@ -6005,11 +5901,20 @@ class Set(Points):
             point.read_ints()
 
     @buildermethod
+    def read_gau(self):
+        for point in self:
+            point.read_gau()
+
+    @buildermethod
     def sort(self):
         self.points = UsefulTools.natural_sort_path(self)
 
     def n(self, attr):
-        return sum(1 for point in self if getattr(point, attr) is not None and getattr(point, attr).exists())
+        return sum(
+            1
+            for point in self
+            if getattr(point, attr) is not None and getattr(point, attr).exists()
+        )
 
     def check_functional(self):
         [point.wfn.check_functional() for point in self]
@@ -6030,9 +5935,7 @@ class Set(Points):
                 print(f"Submitting {n_gjfs - n_wfns} GJFs to Gaussian.")
                 return wfns.submit_gjfs()
         else:
-            if UsefulTools.in_sensitive(
-                GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS
-            ):
+            if UsefulTools.in_sensitive(GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS):
                 self.check_functional()
             print(f"{self.path}: All wfns complete.")
 
@@ -6052,7 +5955,8 @@ class Set(Points):
         )
 
     def make_training_set(self, model_type, npoints=-1):
-        if npoints < 0: npoints = len(self)
+        if npoints < 0:
+            npoints = len(self)
 
         training_sets = {}
         for point in self:
@@ -6074,17 +5978,13 @@ class Set(Points):
         for atom, training_set in training_sets.items():
             directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
             FileTools.mkdir(directory, empty=True)
-            training_set_file = os.path.join(
-                directory, atom + "_TRAINING_SET.txt"
-            )
+            training_set_file = os.path.join(directory, atom + "_TRAINING_SET.txt")
 
             # Write Training Set File
             with open(training_set_file, "w") as f:
                 for i, (input, output) in enumerate(training_set):
                     if len(output) > MAX_PROPERTIES:
-                        output = dict(
-                            it.islice(output.items(), MAX_PROPERTIES)
-                        )
+                        output = dict(it.islice(output.items(), MAX_PROPERTIES))
 
                     num = f"{i+1}".zfill(4)
                     input = " ".join([str(s) for s in input])
@@ -6158,9 +6058,7 @@ class Set(Points):
         true_values = []
         for point in self[npoints:]:
             true_values += [
-                point.get_true_value(
-                    str(GLOBALS.OPTIMISE_PROPERTY), atoms=True
-                )
+                point.get_true_value(str(GLOBALS.OPTIMISE_PROPERTY), atoms=True)
             ]
 
         data = {}
@@ -6288,6 +6186,7 @@ class TrainingSet:
 
     def __len__(self):
         return len(self.inputs)
+
 
 """
 class Points:
@@ -6770,6 +6669,7 @@ class Points:
         return self._points[i]
 """
 
+
 class Trajectory:
     def __init__(self, fname, read=False):
         self.fname = fname
@@ -6927,9 +6827,7 @@ class SSH:
                 print()
                 print("Connecting to server")
                 self.ssh.connect(
-                    self.address,
-                    username=self.username,
-                    password=self.password,
+                    self.address, username=self.username, password=self.password,
                 )
                 print("Connected to " + self.address)
                 print()
@@ -7018,9 +6916,7 @@ class DlpolyTools:
             f.write(
                 "# This is a generic CONTROL file. Please adjust to your requirement.\n"
             )
-            f.write(
-                "# Directives which are commented are some useful options.\n\n"
-            )
+            f.write("# Directives which are commented are some useful options.\n\n")
             f.write("ensemble nvt hoover 0.02\n")
             if int(GLOBALS.DLPOLY_TEMPERATURE) == 0:
                 f.write("temperature 10.0\n\n")
@@ -7028,9 +6924,7 @@ class DlpolyTools:
                 f.write("zero\n")
             else:
                 f.write(f"temperature {GLOBALS.DLPOLY_TEMPERATURE}\n\n")
-            f.write(
-                "# Cap forces during equilibration, in unit kT/angstrom.\n"
-            )
+            f.write("# Cap forces during equilibration, in unit kT/angstrom.\n")
             f.write("# (useful if your system is far from equilibrium)\n")
             f.write("cap 100.0\n\n")
             f.write("no vdw\n\n")
@@ -7039,15 +6933,10 @@ class DlpolyTools:
             f.write(f"timestep {GLOBALS.DLPOLY_TIMESTEP}\n")
             f.write("cutoff 15.0\n")
             f.write("fflux\n\n")
-            if (
-                GLOBALS.DLPOLY_TEMPERATURE == 0
-                and GLOBALS.DLPOLY_CHECK_CONVERGENCE
-            ):
+            if GLOBALS.DLPOLY_TEMPERATURE == 0 and GLOBALS.DLPOLY_CHECK_CONVERGENCE:
                 f.write("converge\n")
                 if GLOBALS.DLPOLY_CONVERGENCE_CRITERIA > 0:
-                    f.write(
-                        f"criteria {GLOBALS.DLPOLY_CONVERGENCE_CRITERIA}\n"
-                    )
+                    f.write(f"criteria {GLOBALS.DLPOLY_CONVERGENCE_CRITERIA}\n")
                 if GLOBALS.DLPOLY_MAX_ENERGY > 0:
                     f.write(f"max_energy {GLOBALS.DLPOLY_MAX_ENERGY}\n")
                 if GLOBALS.DLPOLY_MAX_FORCE > 0:
@@ -7105,9 +6994,7 @@ class DlpolyTools:
             )
             f.write(f"{models.nTrain}\t\t#max number of training examples\n")
             for i, atom in enumerate(atoms):
-                f.write(
-                    f"{atom.type} {atom.num} {atom.x_axis.num} {atom.xy_plane.num}"
-                )
+                f.write(f"{atom.type} {atom.num} {atom.x_axis.num} {atom.xy_plane.num}")
                 for j in range(len(atoms)):
                     f.write(" 0") if i == j else f.write(f" {j+1}")
                 f.write("\n")
@@ -7160,17 +7047,13 @@ class DlpolyTools:
     def run_on_log():
         log_dir = GLOBALS.FILE_STRUCTURE["log"]
 
-        model_dirs = FileTools.get_files_in(
-            log_dir, GLOBALS.SYSTEM_NAME + "*/"
-        )
+        model_dirs = FileTools.get_files_in(log_dir, GLOBALS.SYSTEM_NAME + "*/")
         dlpoly_directories = []
         for model_dir in model_dirs:
             dlpoly_directory = DlpolyTools.setup_model(model_dir)
             dlpoly_directories += [dlpoly_directory]
 
-        return SubmissionTools.make_dlpoly_script(
-            dlpoly_directories, submit=True
-        )
+        return SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True)
 
     @staticmethod
     @UsefulTools.external_function()
@@ -7181,9 +7064,7 @@ class DlpolyTools:
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
             if os.path.exists(trajectory_file):
                 model_name = FileTools.end_of_path(model_dir)
-                trajectory_files[model_name] = Trajectory(
-                    trajectory_file, read=True
-                )
+                trajectory_files[model_name] = Trajectory(trajectory_file, read=True)
 
         for model_name, trajectory in trajectory_files.items():
             if len(trajectory) > 0:
@@ -7204,9 +7085,7 @@ class DlpolyTools:
             for point in points:
                 if point.wfn and re.findall(r"\d+", point.wfn.path):
                     point_num = int(re.findall(r"\d+", point.wfn.path)[-1])
-                    f.write(
-                        f"{point.wfn.path} {point_num:4d} {point.wfn.energy}\n"
-                    )
+                    f.write(f"{point.wfn.path} {point_num:4d} {point.wfn.energy}\n")
                     print(point.wfn.path, point_num, point.wfn.energy)
 
     @staticmethod
@@ -7379,7 +7258,7 @@ class DlpolyTools:
                 trajectory = Trajectory(traj_file, read=True)
                 trajectory.to_dir(directory, DlpolyTools.use_every)
                 submit_gjfs(directory)
-    
+
     @staticmethod
     def submit_trajectory_to_aimall():
         directories = DlpolyTools.get_trajectory_directories()
@@ -7420,9 +7299,7 @@ class DlpolyTools:
         for directory in directories:
             traj_dir = os.path.join(directory, "TRAJECTORY")
             model_name = FileTools.end_of_path(directory)
-            trajectories[model_name] = DlpolyTools.get_trajectory_energy(
-                traj_dir
-            )
+            trajectories[model_name] = DlpolyTools.get_trajectory_energy(traj_dir)
 
             maxlen = max(len(energies) for _, energies in trajectories.items())
             for key, energies in trajectories.items():
@@ -7431,7 +7308,7 @@ class DlpolyTools:
         df = pd.DataFrame(trajectories)
 
         dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
-        df.to_csv(os.path.join(dlpoly_dir, "TRAJECTORY_Energies.csv"))
+        df.to_excel(os.path.join(dlpoly_dir, "TRAJECTORY_Energies.xlsx"))
 
     @staticmethod
     @UsefulTools.external_function()
@@ -7482,47 +7359,154 @@ class DlpolyTools:
             traj_dir = os.path.join(directory, "TRAJECTORY")
             model_name = FileTools.end_of_path(directory)
             trajectories[model_name] = df = pd.DataFrame(
-                DlpolyTools.get_trajectory_aimall_energy(
-                    traj_dir
-                )
+                DlpolyTools.get_trajectory_aimall_energy(traj_dir)
             )
-            
+
         dlpoly_dir = GLOBALS.FILE_STRUCTURE["dlpoly"]
-        with pd.ExcelWriter(os.path.join(dlpoly_dir, "TRAJECTORY_ATM_Energies.xlsx")) as writer:
+        with pd.ExcelWriter(
+            os.path.join(dlpoly_dir, "TRAJECTORY_ATM_Energies.xlsx")
+        ) as writer:
             for model_name, df in trajectories.items():
                 df.to_excel(writer, sheet_name=model_name)
 
+    @staticmethod
+    def get_fflux_pred_energies():
+        import pandas as pd
+
+        directories = DlpolyTools.get_trajectory_directories()
+        data = {}
+        for directory in directories:
+            fflux_pred_file = os.path.join(directory, "FFLUX_ENERGY.txt")
+            model = FileTools.end_of_path(directory)
+            if os.path.isfile(fflux_pred_file):
+                energies = []
+                with open(fflux_pred_file, "r") as f:
+                    for line in f:
+                        if "Energy" in line:
+                            try:
+                                energies += [float(line.split()[2])]
+                            except:
+                                print(f"Error parsing energy from line: {line}")
+                data[model] = energies
+        df = pd.DataFrame(data)
+        df.to_excel(
+            os.path.join(str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_Energies.xlsx")
+        )
+
+    @staticmethod
+    def get_fflux_atm_energies():
+        import pandas as pd
+
+        directories = DlpolyTools.get_trajectory_directories()
+        data = {}
+        for directory in directories:
+            fflux_atm_file = os.path.join(directory, "FFLUX_ATM_E.txt")
+            model = FileTools.end_of_path(directory)
+            if os.path.isfile(fflux_atm_file):
+                energies = {}
+                with open(fflux_atm_file, "r") as f:
+                    atoms = [f"{atom}{i+1}" for i, atom in enumerate(f.readline().strip().split())]
+                    for atom in atoms:
+                        energies[atom] = []
+                    for line in f:
+                        if not atoms:
+                            atoms = line.split()
+                        else:
+                            try:
+                                for atom, energy in zip(atoms, line.strip().split()):
+                                    energies[atom] += [float(energy)]
+                            except:
+                                print(f"Error parsing energies from line: {line}")
+                data[model] = pd.DataFrame(energies)
+        with pd.ExcelWriter(
+            os.path.join(
+                str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_ATM_Energies.xlsx"
+            )
+        ) as writer:
+            for model, df in data.items():
+                df.to_excel(writer, sheet_name=model)
+
+    @staticmethod
+    def get_fflux_atm_forces():
+        import pandas as pd
+
+        directories = DlpolyTools.get_trajectory_directories()
+        data = {}
+        for directory in directories:
+            fflux_atm_file = os.path.join(directory, "FFLUX_FORCES.txt")
+            model = FileTools.end_of_path(directory)
+            if os.path.isfile(fflux_atm_file):
+                energies = {}
+                with open(fflux_atm_file, "r") as f:
+                    atoms = [f"{atom}{i + 1}" for i, atom in enumerate(f.readline().strip().split())]
+                    for atom in atoms:
+                        energies[atom] = []
+                    for line in f:
+                        if not atoms:
+                            atoms = line.split()
+                        else:
+                            try:
+                                for atom, energy in zip(atoms, line.strip().split()):
+                                    energies[atom] += [float(energy)]
+                            except:
+                                print(f"Error parsing energies from line: {line}")
+                data[model] = pd.DataFrame(energies)
+        with pd.ExcelWriter(
+                os.path.join(
+                    str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_ATM_Forces.xlsx"
+                )
+        ) as writer:
+            for model, df in data.items():
+                df.to_excel(writer, sheet_name=model)
 
     @staticmethod
     def refresh_traj_menu(menu):
         menu.clear_options()
-        menu.add_option("1", "Submit Trajectory to Gaussian", DlpolyTools.submit_trajectory_to_gaussian)
-        menu.add_option("2", "Submit Trajectory to AIMAll", DlpolyTools.submit_trajectory_to_aimall)
+        menu.add_option(
+            "1",
+            "Submit Trajectory to Gaussian",
+            DlpolyTools.submit_trajectory_to_gaussian,
+        )
+        menu.add_option(
+            "2", "Submit Trajectory to AIMAll", DlpolyTools.submit_trajectory_to_aimall
+        )
         menu.add_space()
-        menu.add_option("wfn", "Get WFN Energies", DlpolyTools.get_trajectory_gaussian_energies)
-        menu.add_option("aim", "Get IQA Energies", DlpolyTools.get_trajectory_aimall_energies)
+        menu.add_option(
+            "wfn", "Get WFN Energies", DlpolyTools.get_trajectory_gaussian_energies
+        )
+        menu.add_option(
+            "aim", "Get IQA Energies", DlpolyTools.get_trajectory_aimall_energies
+        )
         menu.add_space()
         menu.add_option("r", "Auto Run ", DlpolyTools.auto_traj_analysis)
         menu.add_space()
         menu.add_option(
-            "model",
-            "Change The Model To Run Analysis On",
-            DlpolyTools.choose_model,
+            "model", "Change The Model To Run Analysis On", DlpolyTools.choose_model,
         )
         menu.add_option(
             "every", "Change Number Of Points To Use", DlpolyTools.change_every
         )
         menu.add_space()
         menu.add_message(f"Use Model: {DlpolyTools.model_loc}")
-        menu.add_message(
-            f"Use Every: {DlpolyTools.use_every} Point(s) from Trajectory"
+        menu.add_message(f"Use Every: {DlpolyTools.use_every} Point(s) from Trajectory")
+        menu.add_space()
+        menu.add_option(
+            "pred",
+            "Get all FFLUX Predicted Energies",
+            DlpolyTools.get_fflux_pred_energies,
+        )
+        menu.add_option(
+            "atm",
+            "Get all FFLUX Predicted Atom Energies",
+            DlpolyTools.get_fflux_atm_energies,
+        )
+        menu.add_option(
+            "force",
+            "Get all FFLUX Predicted Atom Forces",
+            DlpolyTools.get_fflux_atm_forces,
         )
         menu.add_space()
-        menu.add_option("pred", "Get all FFLUX Predicted Energies", UsefulTools.not_implemented)
-        menu.add_option("atm", "Get all FFLUX Predicted Atom Energies", UsefulTools.not_implemented)
-        menu.add_option("force", "Get all FFLUX Predicted Atom Forces", UsefulTools.not_implemented)
-        menu.add_space()
-        menu.add_option("a", "Get all FFLUX Outputs", UsefulTools.not_implemented)
+        menu.add_option("o", "Get all FFLUX Outputs", UsefulTools.not_implemented)
         menu.add_final_options()
 
     @staticmethod
@@ -7637,9 +7621,7 @@ class S_CurveTools:
                         error *= Constants.ha_to_kj_mol
 
                     model_data[model_name][atom]["true"].append(true_value)
-                    model_data[model_name][atom]["predicted"].append(
-                        predicted_value
-                    )
+                    model_data[model_name][atom]["predicted"].append(predicted_value)
                     model_data[model_name][atom]["error"].append(error)
         return model_data
 
@@ -7671,10 +7653,7 @@ class S_CurveTools:
     @staticmethod
     @UsefulTools.external_function()
     def calculate_s_curves(
-        predict_property="all",
-        validation_set=None,
-        models=None,
-        output_file=None,
+        predict_property="all", validation_set=None, models=None, output_file=None,
     ):
         import pandas as pd
 
@@ -7719,9 +7698,7 @@ class S_CurveTools:
         )
         if outfile == "":
             outfile = S_CurveTools.output_file
-        elif not any(
-            outfile.endswith(filetype) for filetype in allowed_filetypes
-        ):
+        elif not any(outfile.endswith(filetype) for filetype in allowed_filetypes):
             outfile += ".xlsx"
         S_CurveTools.output_file = outfile
 
@@ -7753,9 +7730,7 @@ class S_CurveTools:
     @staticmethod
     def set_model_from_log():
         log_menu = Menu(title="Select Model From Log", auto_close=True)
-        for i, model in enumerate(
-            FileTools.get_files_in(S_CurveTools.log_loc, "*/")
-        ):
+        for i, model in enumerate(FileTools.get_files_in(S_CurveTools.log_loc, "*/")):
             log_menu.add_option(
                 f"{i+1}",
                 model,
@@ -7782,9 +7757,7 @@ class S_CurveTools:
         )
         menu.add_option("3", "Custom Directory", S_CurveTools.set_vs_dir)
         menu.add_space()
-        menu.add_message(
-            f"Validation Set Location: {S_CurveTools.validation_set}"
-        )
+        menu.add_message(f"Validation Set Location: {S_CurveTools.validation_set}")
         menu.add_final_options(exit=False)
 
     @staticmethod
@@ -7836,16 +7809,12 @@ class S_CurveTools:
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
-        menu.add_option(
-            "output", "Change Output File", S_CurveTools.change_output_file
-        )
+        menu.add_option("output", "Change Output File", S_CurveTools.change_output_file)
         menu.add_option(
             "submit", "Toggle Submit To Cluster", S_CurveTools.toggle_submit
         )
         menu.add_space()
-        menu.add_message(
-            f"Validation Set Location: {S_CurveTools.validation_set}"
-        )
+        menu.add_message(f"Validation Set Location: {S_CurveTools.validation_set}")
         menu.add_message(f"Model Location: {S_CurveTools.models}")
         menu.add_space()
         menu.add_message(f"Output File: {S_CurveTools.output_file}")
@@ -7868,9 +7837,11 @@ class S_CurveTools:
         s_curves_menu.run()
 
 
-class AnalysisTools:
+class RecoveryErrorTools:
+    property_ = "iqa"
+
     @staticmethod
-    def calculate_recovery_errors(directory):
+    def calculate_recovery_errors_iqa(directory):
         import pandas as pd
 
         points = Set(directory).read()
@@ -7892,50 +7863,122 @@ class AnalysisTools:
 
         df["error / Ha"] = (df["Total"] - df["WFN"]).abs()
         df["error / kJ/mol"] = df["error / Ha"] * Constants.ha_to_kj_mol
-        df.to_csv("recovery_errors.csv")
+        df.to_xlsx("IQA_Recovery_Errors.xlsx")
 
-        result = stats.describe(df["error / kJ/mol"])
+        return stats.describe(df["error / kJ/mol"]), "kJ/mol"
+
+    @staticmethod
+    def calculate_recovery_errors_charge(directory):
+        import pandas as pd
+
+        points = Set(directory).read_ints().read_gau()
+
+        gaussian_charges = []
+        atom_charges = {}
+        for point in points:
+            if point.gau.charge != None:
+                gaussian_charges += [point.gau.charge]
+            for int_atom, int_data in point.ints.items():
+                if int_atom not in atom_charges.keys():
+                    atom_charges[int_atom] = []
+                atom_charges[int_atom] += [int_data.q]
+
+        df = pd.DataFrame(atom_charges)
+        df.columns = UsefulTools.natural_sort(list(df.columns))
+        df.loc[:, "Total"] = df.sum(axis=1)
+        df["Gaussian"] = pd.to_numeric(gaussian_charges, errors="coerce")
+
+        df["error / electrons"] = (df["Total"] - df["Gaussian"]).abs()
+        df.to_xlsx("Charges_Recovery_Errors.csv")
+
+        return stats.describe(df["error / electrons"]), "electrons"
+
+    @staticmethod
+    def calculate_recovery_errors_dipole(directory):
+        UsefulTools.not_implemented()
+        # import pandas as pd
+
+        # points = Set(directory).read_ints().read_gau()
+
+        # gaussian_dipoles = []
+        # atom_dipoles = {}
+        # for point in points:
+        #     if point.gau.dipole != {}:
+        #         gaussian_charges += [point.gau.charge]
+        #     for int_atom, int_data in point.ints.items():
+        #         if int_atom not in atom_charges.keys():
+        #             atom_charges[int_atom] = []
+        #         atom_charges[int_atom] += [int_data.q]
+        #
+        # df = pd.DataFrame(atom_charges)
+        # df.columns = UsefulTools.natural_sort(list(df.columns))
+        # df.loc[:, "Total"] = df.sum(axis=1)
+        # df["Gaussian"] = pd.to_numeric(gaussian_charges, errors="coerce")
+        #
+        # df["error / electrons"] = (df["Total"] - df["Gaussian"]).abs()
+        # df.to_xlsx("Charges_Recovery_Errors.csv")
+
+        # return stats.describe(df["error / electrons"]), "electrons"
+
+
+    @staticmethod
+    def calculate_recovery_errors(directory):
+        property_function = {
+            "iqa": RecoveryErrorTools.calculate_recovery_errors_iqa,
+            "charge": RecoveryErrorTools.calculate_recovery_errors_charge,
+            "dipole": RecoveryErrorTools.calculate_recovery_errors_dipole
+        }
+
+        result, unit = property_function[RecoveryErrorTools.property_](directory)
 
         print()
         print("#############################")
         print("# Recovery Error Statistics #")
         print("#############################")
         print()
-        print(f"Min:  {result.minmax[0]:.6f} kJ/mol")
-        print(f"Max:  {result.minmax[1]:.6f} kJ/mol")
-        print(f"Mean: {result.mean:.6f} kJ/mol")
-        print(f"Var:  {result.variance:.6f} kJ/mol")
+        print(f"Min:  {result.minmax[0]:.6f} {unit}")
+        print(f"Max:  {result.minmax[1]:.6f} {unit}")
+        print(f"Mean: {result.mean:.6f} {unit}")
+        print(f"Var:  {result.variance:.6f} {unit}")
         print()
 
     @staticmethod
-    def recovery_errors():
+    def recovery_error_menu_refresh(menu):
         ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
         sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
         vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
 
-        error_menu = Menu(title="Recovery Error Menu", auto_close=True)
-        error_menu.add_option(
+        menu.add_option(
             "1",
             "Calculate Recovery Errors of Training Set",
-            AnalysisTools.calculate_recovery_errors,
+            RecoveryErrorTools.calculate_recovery_errors,
             kwargs={"directory": ts_dir},
             wait=True,
         )
-        error_menu.add_option(
+        menu.add_option(
             "2",
             "Calculate Recovery Errors of Sample Pool",
-            AnalysisTools.calculate_recovery_errors,
+            RecoveryErrorTools.calculate_recovery_errors,
             kwargs={"directory": sp_dir},
             wait=True,
         )
-        error_menu.add_option(
+        menu.add_option(
             "3",
             "Calculate Recovery Errors of Validation Set",
-            AnalysisTools.calculate_recovery_errors,
+            RecoveryErrorTools.calculate_recovery_errors,
             kwargs={"directory": vs_dir},
             wait=True,
         )
-        error_menu.add_final_options()
+        menu.add_space()
+        menu.add_option("c", "Change Property to Calculate Recovery Error")
+        menu.add_space()
+        menu.add_message(f"Property to Calculate Recovery Error: {RecoveryErrorTools.property_}")
+        menu.add_final_options()
+
+    @staticmethod
+    def recovery_error_menu():
+        error_menu = Menu(title="Recovery Error Menu", auto_close=True)
+        error_menu.set_refresh(RecoveryErrorTools.recovery_error_menu_refresh)
         error_menu.run()
 
 
@@ -7947,9 +7990,7 @@ class SetupTools:
         for directory in SetupTools.sets:
             dir_path = GLOBALS.FILE_STRUCTURE[directory]
             empty = False
-            if UsefulTools.check_bool(
-                input(f"Setup Directory: {dir_path} [Y/N]")
-            ):
+            if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
                 if os.path.isdir(dir_path):
                     print()
                     print(f"Warning: {dir_path} exists")
@@ -7965,9 +8006,7 @@ class SetupTools:
         n_points = -1
         if set_to_make != "training_set":
             while True:
-                n_points = int(
-                    input(f"Enter number of points for the {set_name}: ")
-                )
+                n_points = int(input(f"Enter number of points for the {set_name}: "))
                 if n_points > 0:
                     break
                 else:
@@ -8003,9 +8042,7 @@ class SettingsTools:
 
     @staticmethod
     def set_default():
-        GLOBALS.set(
-            SettingsTools.edit_var.name, SettingsTools.edit_var.default
-        )
+        GLOBALS.set(SettingsTools.edit_var.name, SettingsTools.edit_var.default)
 
     @staticmethod
     def set_value(value):
@@ -8029,12 +8066,9 @@ class SettingsTools:
     @staticmethod
     def choose_value():
         choose_menu = Menu(
-            title=f"{SettingsTools.edit_var.name} Allowed Values",
-            auto_close=True,
+            title=f"{SettingsTools.edit_var.name} Allowed Values", auto_close=True,
         )
-        for i, allowed_value in enumerate(
-            SettingsTools.edit_var.allowed_values
-        ):
+        for i, allowed_value in enumerate(SettingsTools.edit_var.allowed_values):
             choose_menu.add_option(
                 str(i + 1),
                 str(allowed_value),
@@ -8055,9 +8089,7 @@ class SettingsTools:
         # menu.add_message(f"Hidden:  {SettingsTools.edit_var.hidden}")
         # menu.add_message(f"Changed: {SettingsTools.edit_var.changed}")
         menu.add_option("e", "Edit value of setting", SettingsTools.edit_value)
-        menu.add_option(
-            "d", "Revert to default value", SettingsTools.set_default
-        )
+        menu.add_option("d", "Revert to default value", SettingsTools.set_default)
         if SettingsTools.edit_var.allowed_values:
             menu.add_option(
                 "c", "Choose from allowed values", SettingsTools.choose_value
@@ -8073,9 +8105,7 @@ class SettingsTools:
         filetypes = [".properties", ".yaml"]
         print(f"Change config file")
         while True:
-            new_config = UsefulTools.input_with_prefill(
-                ">> ", Arguments.config_file
-            )
+            new_config = UsefulTools.input_with_prefill(">> ", Arguments.config_file)
             if any(new_config.endswith(filetype) for filetype in filetypes):
                 Arguments.config_file = new_config
                 break
@@ -8105,9 +8135,7 @@ class SettingsTools:
             for global_var in global_variables:
                 if global_var.hidden:
                     global_var_value = str(global_var.value)
-                    menu.add_message(
-                        global_var.name + " = " + global_var_value
-                    )
+                    menu.add_message(global_var.name + " = " + global_var_value)
             menu.add_space()
 
         menu.add_option(
@@ -8116,9 +8144,7 @@ class SettingsTools:
             SettingsTools.save_changes,
         )
         menu.add_option("c", "Change config file", SettingsTools.change_config)
-        menu.add_option(
-            "h", "Show/Hide Hidden Variables", SettingsTools.toggle_hidden
-        )
+        menu.add_option("h", "Show/Hide Hidden Variables", SettingsTools.toggle_hidden)
         menu.add_final_options()
 
     @staticmethod
@@ -8199,9 +8225,7 @@ class ModelTools:
 
     @staticmethod
     def change_n_points():
-        print(
-            f"Enter Number of Training Points (1 - {len(ModelTools.training_set)})"
-        )
+        print(f"Enter Number of Training Points (1 - {len(ModelTools.training_set)})")
         while True:
             ans = input(">> ")
             try:
@@ -8236,7 +8260,7 @@ class ModelTools:
                 kwargs={
                     "directory": ModelTools.training_set_directory,
                     "model_type": model_type,
-                    "npoints": ModelTools.n_training_points 
+                    "npoints": ModelTools.n_training_points,
                 },
             )
         menu.add_space()
@@ -8246,17 +8270,11 @@ class ModelTools:
         menu.add_option(
             "c", "Change Number of Training Points", ModelTools.change_n_points
         )
-        menu.add_option(
-            "s", "Toggle Submit", ModelTools.toggle_submit
-        )
+        menu.add_option("s", "Toggle Submit", ModelTools.toggle_submit)
         menu.add_space()
         menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
-        menu.add_message(
-            f"Number of Training Points: {ModelTools.n_training_points}"
-        )
-        menu.add_message(
-            f"Submit Model Making: {ModelTools.submit}"
-        )
+        menu.add_message(f"Number of Training Points: {ModelTools.n_training_points}")
+        menu.add_message(f"Submit Model Making: {ModelTools.submit}")
         menu.add_final_options()
 
     @staticmethod
@@ -8281,7 +8299,7 @@ class FileRemoverDaemon(Daemon):
         stdout = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_stdout"])
         stderr = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_stderr"])
         super().__init__(pidfile, stdout=stdout, stderr=stderr)
-    
+
     def run(self):
         FileRemover.run()
         self.stop()
@@ -8303,11 +8321,10 @@ class FileRemover:
 
     @staticmethod
     def run_daemon():
-        FileTools.mkdir(
-            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True
-        )
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True)
         file_remover_daemon = FileRemoverDaemon()
         file_remover_daemon.start()
+
 
 #############################################
 #            Function Definitions           #
@@ -8440,14 +8457,9 @@ def dlpoly_analysis():
         "traj", "Trajectory Analysis Tools", DlpolyTools.traj_analysis
     )
     dlpoly_menu.add_space()
+    dlpoly_menu.add_option("r", "Auto Run DLPOLY Analysis", DlpolyTools.auto_run)
     dlpoly_menu.add_option(
-        "r", "Auto Run DLPOLY Analysis", DlpolyTools.auto_run
-    )
-    dlpoly_menu.add_option(
-        "link",
-        "Check Model Symlinks",
-        DlpolyTools.check_model_links,
-        hidden=True,
+        "link", "Check Model Symlinks", DlpolyTools.check_model_links, hidden=True,
     )
     dlpoly_menu.add_final_options()
 
@@ -8461,17 +8473,17 @@ def opt():
     opt_dir = GLOBALS.FILE_STRUCTURE["opt"]
     FileTools.mkdir(opt_dir)
 
-    opt_gjf = GJF(
-        os.path.join(opt_dir, GLOBALS.SYSTEM_NAME + "1".zfill(4) + ".gjf")
-    )
+    opt_gjf = GJF(os.path.join(opt_dir, GLOBALS.SYSTEM_NAME + "1".zfill(4) + ".gjf"))
     opt_gjf._atoms = atoms
     opt_gjf.job_type = "opt"
     opt_gjf.write()
     opt_gjf.submit()
 
+
 #############################################
 #                 Main Loop                 #
 #############################################
+
 
 def main_menu():
     ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
@@ -8482,10 +8494,7 @@ def main_menu():
     # === Training Set Menu ===#
     training_set_menu = Menu(title="Training Set Menu")
     training_set_menu.add_option(
-        "1",
-        "Submit GJFs to Gaussian",
-        submit_gjfs,
-        kwargs={"directory": ts_dir},
+        "1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": ts_dir},
     )
     training_set_menu.add_option(
         "2",
@@ -8495,61 +8504,41 @@ def main_menu():
         wait=True,
     )
     training_set_menu.add_option(
-        "3",
-        "Make Models",
-        ModelTools.make_models_menu,
-        kwargs={"directory": ts_dir},
+        "3", "Make Models", ModelTools.make_models_menu, kwargs={"directory": ts_dir},
     )
     training_set_menu.add_space()
     training_set_menu.add_option(
-        "a",
-        "Auto Run AIMAll",
-        AutoTools.submit_aimall,
-        kwargs={"directory": ts_dir},
+        "a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": ts_dir},
     )
-    training_set_menu.add_option(
-        "m", "Auto Make Models", AutoTools.run_models
-    )
+    training_set_menu.add_option("m", "Auto Make Models", AutoTools.run_models)
     training_set_menu.add_space()
     training_set_menu.add_final_options()
 
     # === Sample Set Menu ===#
     sample_pool_menu = Menu(title="Sample Pool Menu")
     sample_pool_menu.add_option(
-        "1",
-        "Submit GJFs to Gaussian",
-        submit_gjfs,
-        kwargs={"directory": sp_dir},
+        "1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": sp_dir},
     )
     sample_pool_menu.add_option(
         "2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": sp_dir}
     )
     sample_pool_menu.add_space()
     sample_pool_menu.add_option(
-        "a",
-        "Auto Run AIMAll",
-        AutoTools.submit_aimall,
-        kwargs={"directory": sp_dir},
+        "a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": sp_dir},
     )
     sample_pool_menu.add_final_options()
 
     # === Validation Set Menu ===#
     validation_set_menu = Menu(title="Validation Set Menu")
     validation_set_menu.add_option(
-        "1",
-        "Submit GJFs to Gaussian",
-        submit_gjfs,
-        kwargs={"directory": vs_dir},
+        "1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": vs_dir},
     )
     validation_set_menu.add_option(
         "2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": vs_dir}
     )
     validation_set_menu.add_space()
     validation_set_menu.add_option(
-        "a",
-        "Auto Run AIMAll",
-        AutoTools.submit_aimall,
-        kwargs={"directory": vs_dir},
+        "a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": vs_dir},
     )
     validation_set_menu.add_final_options()
 
@@ -8558,9 +8547,7 @@ def main_menu():
         title="Run Properties Menu",
         message="Perform adaptive sampling on a per-property basis",
     )
-    properties_menu.add_option(
-        "r", "Auto Run Properties", PropertyTools.run, wait=True
-    )
+    properties_menu.add_option("r", "Auto Run Properties", PropertyTools.run, wait=True)
     properties_menu.add_option(
         "d",
         "Auto Run Properties as Background Process (recommended)",
@@ -8587,25 +8574,19 @@ def main_menu():
 
     # === Analysis Menu ===#
     analysis_menu = Menu(title="Analysis Menu")
+    analysis_menu.add_option("dlpoly", "Test Models with DLPOLY", dlpoly_analysis)
     analysis_menu.add_option(
-        "dlpoly", "Test Models with DLPOLY", dlpoly_analysis
-    )
-    analysis_menu.add_option(
-        "opt",
-        "Perform Geometry Optimisation on First Point in Sample Pool",
-        opt,
+        "opt", "Perform Geometry Optimisation on First Point in Sample Pool", opt,
     )
     analysis_menu.add_option("s", "Create S-Curves", S_CurveTools.run)
     analysis_menu.add_option(
-        "r", "Calculate Recovery Errors", AnalysisTools.recovery_errors
+        "r", "Calculate Recovery Errors", RecoveryErrorTools.recovery_error_menu
     )
     analysis_menu.add_final_options()
 
     # === Tools Menu ===#
     tools_menu = Menu(title="Tools Menu")
-    tools_menu.add_option(
-        "setup", "Setup ICHOR Directories", SetupTools.directories
-    )
+    tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
     tools_menu.add_option("make", "Make Sets", SetupTools.make_sets)
     tools_menu.add_option("cp2k", "Setup CP2K run", CP2KTools.cp2k_menu)
     tools_menu.add_space()
@@ -8623,9 +8604,7 @@ def main_menu():
     # === Queue Menu ===#
     queue_menu = Menu(title="Queue Menu")
     queue_menu.add_option("stat", "Get qstat", BatchTools.qstat, wait=True)
-    queue_menu.add_option(
-        "del", "Get qdel running jobs", BatchTools.qdel, wait=True
-    )
+    queue_menu.add_option("del", "Get qdel running jobs", BatchTools.qdel, wait=True)
     queue_menu.add_final_options()
 
     # === Main Menu ===#
@@ -8642,10 +8621,7 @@ def main_menu():
         "4",
         "Calculate Errors",
         calculate_errors,
-        kwargs={
-            "models_directory": models_dir,
-            "sample_pool_directory": sp_dir,
-        },
+        kwargs={"models_directory": models_dir, "sample_pool_directory": sp_dir,},
     )
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", AutoTools.run)
@@ -8663,6 +8639,7 @@ def main_menu():
     main_menu.add_final_options(back=False)
     main_menu.run()
 
+
 Arguments.read()
 Globals.define()
 
@@ -8670,9 +8647,7 @@ if __name__ == "__main__":
     atexit.register(FileRemover.run_daemon)
 
     if Arguments.call_external_function is not None:
-        Arguments.call_external_function(
-            *Arguments.call_external_function_args
-        )
+        Arguments.call_external_function(*Arguments.call_external_function_args)
         quit()
 
     main_menu()
