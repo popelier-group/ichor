@@ -3753,49 +3753,58 @@ class PropertyTools:
     def run():
         original_property = GLOBALS.OPTIMISE_PROPERTY
 
-        print()
-        # make directory
-        print(f'Making {GLOBALS.FILE_STRUCTURE["properties"]}')
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties"], empty=False)
-        print()
-        # make property directories
-        print("Making Property Directories")
         property_directories = []
         properties = GLOBALS.OPTIMISE_PROPERTY.allowed_values
-        with tqdm(total=len(properties), unit=" dirs") as progressbar:
+        properties_root = GLOBALS.FILE_STRUCTURE["properties"]
+
+        print()
+        if os.path.exists(properties_root):
+            # make directory
+            print(f'Making {properties_root}')
+            FileTools.mkdir(properties_root, empty=False)
+            print()
+            # make property directories
+            print("Making Property Directories")
+            with tqdm(total=len(properties), unit=" dirs") as progressbar:
+                for property_name in properties:
+                    progressbar.set_description(property_name)
+
+                    property_directory = os.path.join(
+                        properties_root, property_name
+                    )
+                    FileTools.mkdir(property_directory, empty=False)
+                    property_directories += [(property_name, property_directory)]
+
+                    progressbar.update()
+            print()
+            # copy training set
+            print("Copying Training Set")
+            with tqdm(total=len(properties), unit=" dirs") as progressbar:
+                for _, property_directory in property_directories:
+                    progressbar.set_description(property_directory)
+                    dst = os.path.join(
+                        property_directory, GLOBALS.FILE_STRUCTURE["training_set"]
+                    )
+                    FileTools.copytree(GLOBALS.FILE_STRUCTURE["training_set"], dst)
+                    progressbar.update()
+            print()
+            # copy sample pool
+            print("Copying Sample Pool")
+            with tqdm(total=len(properties), unit=" dirs") as progressbar:
+                for _, property_directory in property_directories:
+                    progressbar.set_description(property_directory)
+                    dst = os.path.join(
+                        property_directory, GLOBALS.FILE_STRUCTURE["sample_pool"]
+                    )
+                    FileTools.copytree(GLOBALS.FILE_STRUCTURE["sample_pool"], dst)
+                    progressbar.update()
+            print()
+        else:
             for property_name in properties:
-                progressbar.set_description(property_name)
-
                 property_directory = os.path.join(
-                    GLOBALS.FILE_STRUCTURE["properties"], property_name
+                    properties_root, property_name
                 )
-                FileTools.mkdir(property_directory, empty=False)
                 property_directories += [(property_name, property_directory)]
-
-                progressbar.update()
-        print()
-        # copy training set
-        print("Copying Training Set")
-        with tqdm(total=len(properties), unit=" dirs") as progressbar:
-            for _, property_directory in property_directories:
-                progressbar.set_description(property_directory)
-                dst = os.path.join(
-                    property_directory, GLOBALS.FILE_STRUCTURE["training_set"]
-                )
-                FileTools.copytree(GLOBALS.FILE_STRUCTURE["training_set"], dst)
-                progressbar.update()
-        print()
-        # copy sample pool
-        print("Copying Sample Pool")
-        with tqdm(total=len(properties), unit=" dirs") as progressbar:
-            for _, property_directory in property_directories:
-                progressbar.set_description(property_directory)
-                dst = os.path.join(
-                    property_directory, GLOBALS.FILE_STRUCTURE["sample_pool"]
-                )
-                FileTools.copytree(GLOBALS.FILE_STRUCTURE["sample_pool"], dst)
-                progressbar.update()
-        print()
         # copy ICHOR.py
         print("Copying ICHOR")
         with tqdm(total=len(properties), unit=" files") as progressbar:
