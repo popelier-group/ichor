@@ -121,23 +121,20 @@ SSH_SETTINGS = {
 #:::::::::::::::::::::::::::::::::::::::::::#
 #############################################
 
-TIMING_LEVEL_NUM = 9
-logging.addLevelName(TIMING_LEVEL_NUM, "TIMING")
+
+def setup_logger(name, log_file, level=logging.INFO, formatter=logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', "%d-%m-%Y %H:%M:%S")):
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+
+    new_logger = logging.getLogger(name)
+    new_logger.setLevel(level)
+    new_logger.addHandler(handler)
+
+    return new_logger
 
 
-def timing(self, message, *args, **kws):
-    if self.isEnabledFor(TIMING_LEVEL_NUM):
-        self._log(TIMING_LEVEL_NUM, message, args, **kws)
-
-
-logging.Logger.timing = timing
-
-logging.basicConfig(
-    filename="ichor.log",
-    level=TIMING_LEVEL_NUM,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%d-%m-%Y %H:%M:%S",
-)
+logger = setup_logger("ICHOR", "ichor.log")
+timing_logger = setup_logger("TIMING", "ichor.timing")
 
 _data_lock = False
 
@@ -725,7 +722,7 @@ class UsefulTools:
     @staticmethod
     def log_time_taken(start_time, message=""):
         time_taken = UsefulTools.get_time() - start_time
-        logging.debug(f"{message}{time_taken:.2f} s")
+        logger.debug(f"{message}{time_taken:.2f} s")
 
     @staticmethod
     def get_uid():
@@ -759,6 +756,10 @@ class UsefulTools:
     def get_number(s):
         return int("".join(c for c in s if c.isdigit()))
 
+    @staticmethod
+    @UsefulTools.external_function("log_time")
+    def log_time(*args):
+        timing_logger.info(" | ".join([str(arg) for arg in args]))
 
 class GlobalTools:
     @staticmethod
@@ -1244,27 +1245,27 @@ class Globals:
                         self.FILE_STRUCTURE["training_set"]
                     )
                 except:
-                    logging.warning("Cannot Find Training Set GJF")
+                    logger.warning("Cannot Find Training Set GJF")
                     try:
                         self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
                             self.FILE_STRUCTURE["sample_pool"]
                         )
                     except:
-                        logging.warning("Cannot Find Sample Pool GJF")
+                        logger.warning("Cannot Find Sample Pool GJF")
                         try:
                             self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
                                 self.FILE_STRUCTURE["validation_set"]
                             )
                         except:
-                            logging.warning("Cannot Find Validation Set GJF")
-                            logging.error("No ALF_REFERENCE_FILE Defined")
+                            logger.warning("Cannot Find Validation Set GJF")
+                            logger.error("No ALF_REFERENCE_FILE Defined")
                             pass
             if self.ALF_REFERENCE_FILE:
                 try:
                     GJF(str(self.ALF_REFERENCE_FILE)).read().atoms.calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
-                    logging.error("Error When Calculating ALF")
+                    logger.error("Error When Calculating ALF")
                     print(
                         "\nError in ALF calculation, please specify file to calculate ALF"
                     )
@@ -2648,6 +2649,25 @@ class ParallelEnvironments:
             self._environments[machine] += environment
 
 
+class TimingManager:
+    def __init__(self, submission_script, message=None):
+        self.submission_script = submission_script
+        self.message = message
+
+    def __enter__(self):
+        python_job = PythonCommand()
+        if self.message:
+            python_job.run_func("log_time", f"START:{self.submission_script.name}", self.message)
+        else:
+            python_job.run_func("log_time", f"START:{self.submission_script.name}")
+        self.submission_script.add(python_job)
+
+    def __exit__(self):
+        python_job = PythonCommand()
+        python_job.run_func("log_time", f"FINISH:{self.submission_script.name}")
+        self.submission_script.add(python_job)
+
+
 class CommandLine:
     def __init__(self):
         self.command = ""
@@ -3138,7 +3158,8 @@ class SubmissionTools:
 
         script_name = os.path.join(directory, "GaussSub.sh")
         submission_script = SubmissionScript(script_name)
-        submission_script.add(gaussian_job)
+        with TimingManager(submission_script):
+            submission_script.add(gaussian_job)
         submission_script.write()
 
         jid = None
@@ -3169,7 +3190,8 @@ class SubmissionTools:
 
         script_name = os.path.join(directory, "AIMSub.sh")
         submission_script = SubmissionScript(script_name)
-        submission_script.add(aimall_job)
+        with TimingManager(submission_script):
+            submission_script.add(aimall_job)
         submission_script.write()
 
         jid = None
@@ -3190,8 +3212,9 @@ class SubmissionTools:
 
         script_name = os.path.join(directory, "FereSub.sh")
         submission_script = SubmissionScript(script_name)
-        submission_script.add(ferebus_job)
-        submission_script.add(move_models)
+        with TimingManager(submission_script):
+            submission_script.add(ferebus_job)
+            submission_script.add(move_models)
         submission_script.write()
 
         jid = None
@@ -3209,7 +3232,8 @@ class SubmissionTools:
 
         script_name = os.path.join(directory, "PySub.sh")
         submission_script = SubmissionScript(script_name)
-        submission_script.add(python_job)
+        with TimingManager(submission_script):
+            submission_script.add(python_job, function)
         submission_script.write()
 
         jid = None
@@ -3700,7 +3724,7 @@ class AutoTools:
         training_set = Set(GLOBALS.FILE_STRUCTURE["training_set"])
         npoints = len(training_set)
 
-        logging.info("Starting ICHOR Auto Run")
+        logger.info("Starting ICHOR Auto Run")
         _data_lock = True
 
         for i in range(GLOBALS.MAX_ITERATION):
@@ -4731,7 +4755,7 @@ class Directory(Point):
         try:
             self.gjf.read()
         except AttributeError:
-            logging.warning(f"Cannot read GJF in {self.path}")
+            logger.warning(f"Cannot read GJF in {self.path}")
 
     @buildermethod
     def read_wfn(self):
@@ -4740,7 +4764,7 @@ class Directory(Point):
         try:
             self.wfn.read()
         except AttributeError:
-            logging.warning(f"Cannot read WFN in {self.path}")
+            logger.warning(f"Cannot read WFN in {self.path}")
 
     @buildermethod
     def read_ints(self):
@@ -5443,7 +5467,7 @@ class Model:
                 while nugget < float(GLOBALS.MAX_NUGGET):
                     nugget = GLOBALS.FEREBUS_NUGGET * 10 ** oom
                     R = self.add_nugget(nugget)
-                    logging.warning(
+                    logger.warning(
                         f"Singular Matrix Encountered: Nugget of {nugget}  used on model {self.fname}:{self.nTrain}"
                     )
                     try:
@@ -5451,7 +5475,7 @@ class Model:
                         break
                     except la.LinAlgError:
                         if nugget <= float(GLOBALS.MAX_NUGGET):
-                            logging.error(
+                            logger.error(
                                 f"Could not invert R Matrix of {self.fname}:{self.nTrain}: Singular Matrix Encountered"
                             )
                             sys.exit(1)
@@ -5508,12 +5532,7 @@ class Model:
             return self._cross_validation
 
     def predict(self, point):
-        if self.normalise:
-            features = normalise_array(point.features[self.i])
-        elif self.standardise:
-            features = standardise_array(point.features[self.i])
-        else:
-            features = point.features[self.i]
+        features = point.features[self.i]
         r = self.r(features)
         weights = self.weights.reshape((-1, 1))
         return self.mu + np.matmul(r.T, weights).item()
@@ -5695,7 +5714,7 @@ class Models:
     def calc_epe(self, points, added_points=[]):
         alpha = self.calc_alpha()
 
-        logging.debug(f"Alpha: {alpha}")
+        logger.debug(f"Alpha: {alpha}")
 
         cv_errors = self.cross_validation(points)
         variances = self.variance(points)
@@ -5819,12 +5838,12 @@ class Points:
                 if point.wfn and point.ints:
                     recovery_error = point.calculate_recovery_error()
                     if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
-                        logging.warning(
+                        logger.warning(
                             f"{point.path} | Recovery Error: {recovery_error * Constants.ha_to_kj_mol} kJ/mol"
                         )
                         n_recovery_error += 1
             if n_recovery_error > 0:
-                logging.warning(
+                logger.warning(
                     f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD * Constants.ha_to_kj_mol} kJ/mol), consider removing these points or increasing precision"
                 )
 
@@ -5834,12 +5853,12 @@ class Points:
                 integration_errors = point.get_integration_errors()
                 for atom, integration_error in integration_errors.items():
                     if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
-                        logging.warning(
+                        logger.warning(
                             f"{point.path} | {atom} | Integration Error: {integration_error}"
                         )
                         n_integration_error += 1
             if n_integration_error > 0:
-                logging.warning(
+                logger.warning(
                     f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points or increasing precision"
                 )
 
@@ -6308,12 +6327,12 @@ class Points:
             for point in self:
                 recovery_error = point.calculate_recovery_error()
                 if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
-                    logging.warning(
+                    logger.warning(
                         f"{point.path} | Recovery Error: {recovery_error} Ha"
                     )
                     n_recovery_error += 1
             if n_recovery_error > 0:
-                logging.warning(
+                logger.warning(
                     f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision"
                 )
 
@@ -6323,12 +6342,12 @@ class Points:
                 integration_errors = point.get_integration_errors()
                 for atom, integration_error in integration_errors.items():
                     if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
-                        logging.warning(
+                        logger.warning(
                             f"{point.path} | {atom} | Integration Error: {integration_error} Ha"
                         )
                         n_integration_error += 1
             if n_integration_error > 0:
-                logging.warning(
+                logger.warning(
                     f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision"
                 )
 
@@ -8212,7 +8231,7 @@ class ModelTools:
         GLOBALS.LOG_WARNINGS = True
         GLOBALS.IQA_MODELS = model_type.lower() == "iqa"
 
-        logging.info(f"Making {model_type} models")
+        logger.info(f"Making {model_type} models")
 
         aims = Set(directory).read()
         models = aims.make_training_set(model_type, npoints)
@@ -8393,7 +8412,7 @@ def ssh():
 
 @UsefulTools.external_function()
 def submit_gjfs(directory):
-    logging.info("Submitting gjfs to Gaussian")
+    logger.info("Submitting gjfs to Gaussian")
     gjfs = Set(directory).read_gjfs()
     gjfs.format_gjfs()
     return gjfs.submit_gjfs()
@@ -8401,14 +8420,14 @@ def submit_gjfs(directory):
 
 @UsefulTools.external_function()
 def submit_wfns(directory):
-    logging.info("Submitting wfns to AIMAll")
+    logger.info("Submitting wfns to AIMAll")
     wfns = Set(directory).read_gjfs().read_wfns()
     wfns.submit_wfns()
 
 
 @UsefulTools.external_function()
 def move_models(model_file, model_type="iqa", copy_to_log=True):
-    logging.info("Moving Completed Models")
+    logger.info("Moving Completed Models")
     model_directory = GLOBALS.FILE_STRUCTURE["models"]
     FileTools.mkdir(model_directory)
 
@@ -8433,7 +8452,7 @@ def move_models(model_file, model_type="iqa", copy_to_log=True):
 
 @UsefulTools.external_function()
 def calculate_errors(models_directory, sample_pool_directory):
-    logging.info("Calculating errors of the Sample Pool")
+    logger.info("Calculating errors of the Sample Pool")
 
     models = Models(models_directory, read_models=True)
     sample_pool = Set(sample_pool_directory).read_gjfs()
@@ -8448,7 +8467,7 @@ def calculate_errors(models_directory, sample_pool_directory):
         )
 
     if move_points:
-        logging.info("Moving points to the Training Set")
+        logger.info("Moving points to the Training Set")
         training_set = Set(GLOBALS.FILE_STRUCTURE["training_set"])
         training_set = training_set | points
         training_set.format_gjfs()
