@@ -756,10 +756,10 @@ class UsefulTools:
     def get_number(s):
         return int("".join(c for c in s if c.isdigit()))
 
-    @staticmethod
-    @UsefulTools.external_function("log_time")
-    def log_time(*args):
-        timing_logger.info(" | ".join([str(arg) for arg in args]))
+
+def log_time(*args):
+    timing_logger.info(" | ".join([str(arg) for arg in args]))
+
 
 class GlobalTools:
     @staticmethod
