@@ -757,10 +757,6 @@ class UsefulTools:
         return int("".join(c for c in s if c.isdigit()))
 
 
-def log_time(*args):
-    timing_logger.info(" | ".join([str(arg) for arg in args]))
-
-
 class GlobalTools:
     @staticmethod
     def cleanup_str(s):
@@ -2657,14 +2653,14 @@ class TimingManager:
     def __enter__(self):
         python_job = PythonCommand()
         if self.message:
-            python_job.run_func("log_time", f"START:{self.submission_script.name}", self.message)
+            python_job.run_func("log_time", f"START:{self.submission_script.fname}", self.message)
         else:
-            python_job.run_func("log_time", f"START:{self.submission_script.name}")
+            python_job.run_func("log_time", f"START:{self.submission_script.fname}")
         self.submission_script.add(python_job)
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
         python_job = PythonCommand()
-        python_job.run_func("log_time", f"FINISH:{self.submission_script.name}")
+        python_job.run_func("log_time", f"FINISH:{self.submission_script.fname}")
         self.submission_script.add(python_job)
 
 
@@ -3232,8 +3228,8 @@ class SubmissionTools:
 
         script_name = os.path.join(directory, "PySub.sh")
         submission_script = SubmissionScript(script_name)
-        with TimingManager(submission_script):
-            submission_script.add(python_job, function)
+        with TimingManager(submission_script, function):
+            submission_script.add(python_job)
         submission_script.write()
 
         jid = None
@@ -8408,6 +8404,11 @@ def ssh():
         )
     ssh_menu.add_final_options()
     ssh_menu.run()
+
+
+@UsefulTools.external_function()
+def log_time(*args):
+    timing_logger.info(" | ".join([str(arg) for arg in args]))
 
 
 @UsefulTools.external_function()
