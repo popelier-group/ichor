@@ -121,9 +121,20 @@ SSH_SETTINGS = {
 #:::::::::::::::::::::::::::::::::::::::::::#
 #############################################
 
+TIMING_LEVEL_NUM = 9
+logging.addLevelName(TIMING_LEVEL_NUM, "TIMING")
+
+
+def timing(self, message, *args, **kws):
+    if self.isEnabledFor(TIMING_LEVEL_NUM):
+        self._log(TIMING_LEVEL_NUM, message, args, **kws)
+
+
+logging.Logger.timing = timing
+
 logging.basicConfig(
     filename="ichor.log",
-    level=logging.DEBUG,
+    level=TIMING_LEVEL_NUM,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%d-%m-%Y %H:%M:%S",
 )
@@ -8023,6 +8034,7 @@ class SetupTools:
         points.make_set(n_points, GLOBALS.FILE_STRUCTURE[set_to_make])
         return points
 
+    #! TODO
     @staticmethod
     def make_sets():
         t = TabCompleter()
