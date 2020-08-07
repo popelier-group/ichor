@@ -7090,6 +7090,7 @@ class DlpolyTools:
 
         return SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True)
 
+    # TODO - fix for auto analysis single point
     @staticmethod
     @UsefulTools.external_function()
     def calculate_gaussian_energies():
@@ -7195,6 +7196,7 @@ class DlpolyTools:
         df = pd.DataFrame(trajectories)
         df.to_csv("TRAJECTORY.csv")
 
+    # TODO - fix auto run
     @staticmethod
     def auto_traj_analysis():
         if DlpolyTools.model_loc == "all":
@@ -7630,6 +7632,7 @@ class S_CurveTools:
     submit = False
     output_file = "s_curves.xlsx"
 
+    # TODO - Natural Sort Column Headings
     @staticmethod
     def _calculate_s_curves(validation_set, models, property):
         model_data = {}
@@ -7977,6 +7980,7 @@ class RecoveryErrorTools:
         print(f"Var:  {result.variance:.6f} {unit}")
         print()
 
+    # TODO - Implement switch property
     @staticmethod
     def recovery_error_menu_refresh(menu):
         ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
@@ -8005,7 +8009,7 @@ class RecoveryErrorTools:
             wait=True,
         )
         menu.add_space()
-        menu.add_option("c", "Change Property to Calculate Recovery Error")
+        menu.add_option("c", "Change Property to Calculate Recovery Error", UsefulTools.not_implemented)
         menu.add_space()
         menu.add_message(f"Property to Calculate Recovery Error: {RecoveryErrorTools.property_}")
         menu.add_final_options()
@@ -8049,7 +8053,7 @@ class SetupTools:
         points.make_set(n_points, GLOBALS.FILE_STRUCTURE[set_to_make])
         return points
 
-    #! TODO
+    # TODO - Points -> Set
     @staticmethod
     def make_sets():
         t = TabCompleter()
