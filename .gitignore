@@ -14,3 +14,5 @@ rmsd*
 *DATA*/
 makeSets.py
 *.code-workspace
+FEREBUS/
+__pycache__/
