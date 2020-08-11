@@ -8372,27 +8372,28 @@ class SetTools:
         points = Set(directory).read()
         data = {}
         for point in points:
+            point.atoms.calculate_features()
             for atom in point:
-                atom_name = atom.atom
+                atom_name = atom.atom_num
                 atom_features = atom.features
-                atom_output = point.ints[atom].multipoles
-                atom_output["iqa"] = [point.ints[atom].iqa]
+                outputs = Constants.multipole_names + ["iqa"]
+                atom_output = {output: point.ints[atom_name].get_property(output) for output in outputs}
                 if atom_name not in data.keys():
-                    data[atom] = {}
+                    data[atom_name] = {}
 
                 for i, input in enumerate(atom_features):
                     feature_name = f"f{i+1}"
-                    if feature_name not in data[atom].keys():
-                        data[atom][feature_name] = []
-                    data[atom][feature_name] += [input]
+                    if feature_name not in data[atom_name].keys():
+                        data[atom_name][feature_name] = []
+                    data[atom_name][feature_name] += [input]
 
                 for output_name, output in atom_output.items():
-                    if output_name not in data[atom].keys():
-                        data[atom][output_name] = []
-                    data[atom][output_name] += [input]
+                    if output_name not in data[atom_name].keys():
+                        data[atom_name][output_name] = []
+                    data[atom_name][output_name] += [output]
 
-       import pandas as pd
-       for atom, atom_data in data.items():
+        import pandas as pd
+        for atom, atom_data in data.items():
             df = pd.DataFrame(atom_data)
             directory_name = directory.replace(os.sep, "_").strip("_").upper()
             df.to_csv(f"{atom}_{directory_name}.csv")
@@ -8404,9 +8405,9 @@ class SetTools:
         vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
 
         csv_menu = Menu(title="CSV Menu")
-        csv_menu.add_option("1", "Training Set", SetTools.to_csv, ts_dir)
-        csv_menu.add_option("2", "Sample Pool", SetTools.to_csv, sp_dir)
-        csv_menu.add_option("3", "Validation Set", SetTools.to_csv, vs_dir)
+        csv_menu.add_option("1", "Training Set", SetTools.to_csv, {"directory": ts_dir})
+        csv_menu.add_option("2", "Sample Pool", SetTools.to_csv, {"directory": sp_dir})
+        csv_menu.add_option("3", "Validation Set", SetTools.to_csv, {"directory": vs_dir})
         csv_menu.add_final_options()
 
         csv_menu.run()
