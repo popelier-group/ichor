@@ -8366,6 +8366,51 @@ class FileRemover:
         file_remover_daemon.start()
 
 
+class SetTools:
+    @staticmethod
+    def to_csv(directory):
+        points = Set(directory).read()
+        data = {}
+        for point in points:
+            for atom in point:
+                atom_name = atom.atom
+                atom_features = atom.features
+                atom_output = point.ints[atom].multipoles
+                atom_output["iqa"] = [point.ints[atom].iqa]
+                if atom_name not in data.keys():
+                    data[atom] = {}
+
+                for i, input in enumerate(atom_features):
+                    feature_name = f"f{i+1}"
+                    if feature_name not in data[atom].keys():
+                        data[atom][feature_name] = []
+                    data[atom][feature_name] += [input]
+
+                for output_name, output in atom_output.items():
+                    if output_name not in data[atom].keys():
+                        data[atom][output_name] = []
+                    data[atom][output_name] += [input]
+
+       import pandas as pd
+       for atom, atom_data in data.items():
+            df = pd.DataFrame(atom_data)
+            directory_name = directory.replace(os.sep, "_").strip("_").upper()
+            df.to_csv(f"{atom}_{directory_name}.csv")
+
+    @staticmethod
+    def to_csv_menu():
+        ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
+        sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
+        vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
+
+        csv_menu = Menu(title="CSV Menu")
+        csv_menu.add_option("1", "Training Set", SetTools.to_csv, ts_dir)
+        csv_menu.add_option("2", "Sample Pool", SetTools.to_csv, sp_dir)
+        csv_menu.add_option("3", "Validation Set", SetTools.to_csv, vs_dir)
+        csv_menu.add_final_options()
+
+        csv_menu.run()
+
 #############################################
 #            Function Definitions           #
 #############################################
@@ -8636,6 +8681,7 @@ def main_menu():
     tools_menu.add_option("cp2k", "Setup CP2K run", CP2KTools.cp2k_menu)
     tools_menu.add_space()
     tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
+    tools_menu.add_option("csv", "Produce CSV From Set", SetTools.to_csv_menu)
     tools_menu.add_final_options()
 
     # === Options Menu ===#
