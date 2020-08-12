@@ -6161,6 +6161,7 @@ class Set(Points):
         idx = len(self)
         name = GLOBALS.SYSTEM_NAME + str(idx).zfill(4)
         dst = os.path.join(self.path, name)
+        logger.info(f"Moving {src} -> {dst}")
         point.move(dst)
 
         FileTools.rmtree(src)
