@@ -2348,7 +2348,7 @@ class FerebusTools:
                 "#\n# Prediction number and definition of new predictions\n#\n"
             )
             finput.write(f"predictions {predictions}\n")
-            if "py" in GLOBALS.FEREBUS_VERSION:
+            if "py" in str(GLOBALS.FEREBUS_VERSION):
                 finput.write(f"kernel {GLOBALS.KERNEL}\n")
             finput.write(
                 "#\nfeatures_number 0        # if your are kriging only one atom or you don't want to use he standard "
@@ -2906,7 +2906,7 @@ class FerebusCommand(CommandLine):
 
     def setup_command(self):
         ferebus_loc = os.path.abspath(str(GLOBALS.FEREBUS_LOCATION))
-        if "py" in GLOBALS.FEREBUS_VERSION:
+        if "py" in str(GLOBALS.FEREBUS_VERSION):
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
         else:
@@ -2916,7 +2916,7 @@ class FerebusCommand(CommandLine):
         self.directories += [os.path.abspath(directory)]
 
     def load_modules(self):
-        if "py" not in GLOBALS.FEREBUS_VERSION:
+        if "py" not in str(GLOBALS.FEREBUS_VERSION):
             self.modules["ffluxlab"] = [
                 "mpi/intel/18.0.3",
                 "libs/nag/intel/fortran/mark-23",
@@ -7105,7 +7105,7 @@ class DlpolyTools:
 
         for model_name, trajectory in trajectory_files.items():
             if len(trajectory) > 0:
-                gjf_fname = os.path.join(dlpoly_dir, model_name + ".gjf")
+                gjf_fname = os.path.join(dlpoly_dir, model_name, model_name + ".gjf")
                 gjf = GJF(gjf_fname)
                 gjf._atoms = trajectory[-1]
                 gjf.write()
@@ -7902,7 +7902,7 @@ class RecoveryErrorTools:
 
         df["error / Ha"] = (df["Total"] - df["WFN"]).abs()
         df["error / kJ/mol"] = df["error / Ha"] * Constants.ha_to_kj_mol
-        df.to_xlsx("IQA_Recovery_Errors.xlsx")
+        df.to_excel("IQA_Recovery_Errors.xlsx")
 
         return stats.describe(df["error / kJ/mol"]), "kJ/mol"
 
@@ -7928,7 +7928,7 @@ class RecoveryErrorTools:
         df["Gaussian"] = pd.to_numeric(gaussian_charges, errors="coerce")
 
         df["error / electrons"] = (df["Total"] - df["Gaussian"]).abs()
-        df.to_xlsx("Charges_Recovery_Errors.csv")
+        df.to_excel("Charges_Recovery_Errors.csv")
 
         return stats.describe(df["error / electrons"]), "electrons"
 
