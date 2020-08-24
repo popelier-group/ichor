@@ -5590,6 +5590,8 @@ class Models:
             "vard": self.expected_improvement_vard,
             "var2": self.expected_improvement_var2,
             "vard2": self.expected_improvement_vard2,
+            "sigma": self.expected_improvement_var,
+            "sigmu": self.expected_improvement_sigmu,
             "rand": self.expected_improvement_rand,
         }
         self.expected_improvement_function = expected_improvement_functions[
@@ -5746,6 +5748,11 @@ class Models:
 
         return var
 
+    def calc_sigmu(self, points):
+        sig = np.array(self.variance(points))
+        mu = np.array([sum(model.predict(point) for model in self) for point in points])
+        return sig * np.sqrt(np.abs(mu))
+
     def calc_var2(self, points, added_points=[]):
         var = self.variance2(points)
 
@@ -5791,6 +5798,10 @@ class Models:
 
     def expected_improvement_var(self, points):
         best_points = np.flip(np.argsort(self.calc_var(points)), axis=-1)
+        return best_points[: min(len(points), GLOBALS.POINTS_PER_ITERATION)]
+
+    def expected_improvement_sigmu(self, points):
+        best_points = np.flip(np.argsort(self.calc_sigmu(points)), axis=-1)
         return best_points[: min(len(points), GLOBALS.POINTS_PER_ITERATION)]
 
     def expected_improvement_vard(self, points):
