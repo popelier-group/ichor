@@ -40,19 +40,21 @@
   TODO
   [x]| Description                                                                                | Priority
   -----------------------------------------------------------------------------------------------------------
-  [ ] Implement incomplete menu options (indicated with ||)                                         
-  [ ] Add CP2K support                                                                                 
-  [x] Merge makeSets into ICHOR                                                                        
-  [ ] Make SGE Queue names more meaningful ('GaussSub.sh' -> 'WATER G09 1')
-  [x] Cleanup SubmissionScript Implementation                                                          /
-  [ ] Implement More Kernels Into ICHOR
-  [ ] Make a Revert System / Backup System
-  [x] Move EPE calculation to an independent function so more EI Algorithms can be implemented
-  [ ] Cleanup Training Set formation implementation so that any X and y values can be used             /
-  [ ] Implement method of locking functions based on what is currently running (e.g. Auto Run)         /
-  [x] Create a Globals class to cleanup how ICHOR handles global variables                             /
-  [ ] Make 'rewind' option (move added training points back to sample pool)
-  [ ] Make stop auto run flag when an error occurs
+  [ ] Implement incomplete menu options (indicated with ||)                                       |
+  [ ] Add CP2K support                                                                            |
+  [ ] Merge makeSets into ICHOR                                                                   |    x
+  [ ] Make SGE Queue names more meaningful ('GaussSub.sh' -> 'WATER G09 1')                       |
+  [x] Cleanup SubmissionScript Implementation                                                     |
+  [ ] Implement More Kernels Into ICHOR                                                           |
+  [ ] Make a Revert System / Backup System                                                        |
+  [x] Move EPE calculation to an independent function so more EI Algorithms can be implemented    |
+  [x] Cleanup Training Set formation implementation so that any X and y values can be used        |
+  [ ] Implement method of locking functions based on what is currently running (e.g. Auto Run)    |
+  [x] Create a Globals class to cleanup how ICHOR handles global variables                        |
+  [ ] Make 'rewind' option (move added training points back to sample pool)                       |
+  [ ] Make stop auto run flag when an error occurs                                                |
+  [ ] Convert to pathlib                                                                          |
+  [ ] Add get timing from ichor log and AIMAll log to tools                                       |—
 """
 
 #############################################
@@ -3551,8 +3553,9 @@ class SGE_Jobs:
     def __str__(self):
         s = f"Total Jobs: {self.njobs}\n--"
         for job in self:
-            j = str(job).split("\n")
-            s += "\n  ".join(j)
+            if job.is_running:
+                j = str(job).split("\n")
+                s += "\n  ".join(j)
         s = s.rstrip(" ")
         s += "\n"
         s += f"Running: {self.n_running} job(s)\n"
