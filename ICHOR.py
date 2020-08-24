@@ -1379,8 +1379,13 @@ class TabCompleter:
             if "~" in text:
                 text = os.path.expanduser("~")
             if os.path.isdir(text):
-                text += "/"
-            return [x for x in glob(text + "*")][state]
+                text += os.sep
+
+            files = [x for x in glob(text + "*")]
+            for i, f in enumerate(files):
+                if os.path.isdir(f):
+                    files[i] += os.sep
+            return files[state]
         except ImportError:
             pass
 
