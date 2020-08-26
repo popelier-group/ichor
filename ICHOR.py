@@ -5143,6 +5143,8 @@ class INT(Point):
                     multipole_name: self.__getattr__(multipole_name)
                     for multipole_name in Constants.multipole_names
                 }
+            elif attr.lower() in ["all"]:
+                return self.multipoles | {"iqa": self.iqa}
             return self.__dict__[attr]
 
 
@@ -5827,7 +5829,7 @@ class Models:
         return points_to_add
 
     def expected_improvement_rand(self, points):
-        return np.randint(low=0, high=len(points), size=GLOBALS.POINTS_PER_ITERATION)
+        return np.random.randint(low=0, high=len(points), size=int(GLOBALS.POINTS_PER_ITERATION))
 
     def expected_improvement(self, points):
         points_to_add = self.expected_improvement_function(points)
@@ -7639,7 +7641,40 @@ class CP2KTools:
         #  - Others?
 
 
-class S_CurveTools:
+class AnalysisTools:
+    @staticmethod
+    def get_dir():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+
+        ans = input("Enter Directory: ")
+        if not os.path.isdir(ans):
+            print("Invalid Input")
+            print(f"{ans} is not a directory")
+            print()
+        else:
+            return ans
+
+    @staticmethod
+    def set_dir(directory=None):
+        while not directory:
+            directory = AnalysisTools.get_dir()
+        return directory
+
+    @staticmethod
+    def set_output_file(default="output"):
+        allowed_filetypes = [".xlsx", ".xls"]
+        outfile = UsefulTools.input_with_prefill(
+            "Enter Output File: ", S_CurveTools.output_file
+        )
+        if outfile == "":
+            outfile = default
+        elif not any(outfile.endswith(filetype) for filetype in allowed_filetypes):
+            outfile += ".xlsx"
+        return outfile
+
+
+class S_CurveTools(AnalysisTools):
     vs_loc = ""
     sp_loc = ""
 
@@ -7750,40 +7785,15 @@ class S_CurveTools:
 
     @staticmethod
     def change_output_file():
-        allowed_filetypes = [".xlsx", ".xls"]
-        outfile = UsefulTools.input_with_prefill(
-            "Enter Output File: ", S_CurveTools.output_file
-        )
-        if outfile == "":
-            outfile = S_CurveTools.output_file
-        elif not any(outfile.endswith(filetype) for filetype in allowed_filetypes):
-            outfile += ".xlsx"
-        S_CurveTools.output_file = outfile
-
-    @staticmethod
-    def get_dir():
-        t = TabCompleter()
-        t.setup_completer(t.path_completer)
-
-        ans = input("Enter Directory: ")
-        if not os.path.isdir(ans):
-            print("Invalid Input")
-            print(f"{ans} is not a directory")
-            print()
-        else:
-            return ans
+        S_CurveTools.output_file = AnalysisTools.set_output_file(S_CurveTools.output_file)
 
     @staticmethod
     def set_vs_dir(directory=None):
-        while not directory:
-            directory = S_CurveTools.get_dir()
-        S_CurveTools.validation_set = directory
+        S_CurveTools.validation_set = AnalysisTools.set_dir(directory)
 
     @staticmethod
     def set_model_dir(directory=None):
-        while not directory:
-            directory = S_CurveTools.get_dir()
-        S_CurveTools.models = directory
+        S_CurveTools.models = AnalysisTools.set_dir(directory)
 
     @staticmethod
     def set_model_from_log():
@@ -7825,7 +7835,7 @@ class S_CurveTools:
             "1",
             f"Current Model ({S_CurveTools.model_loc})",
             S_CurveTools.set_model_dir,
-            kwargs={"directory": S_CurveTools.model_loc},
+            kwargs={"directory": str(GLOBALS.FILE_STRUCTURE["models"])},
         )
         menu.add_option(
             "2",
@@ -7854,7 +7864,7 @@ class S_CurveTools:
         )
         menu.add_option(
             "2",
-            "Calculate MPole S-Curves",
+            "Calculate Multipole S-Curves",
             S_CurveTools.calculate_s_curves,
             kwargs={"predict_property": "multipoles"},
         )
@@ -8039,6 +8049,124 @@ class RecoveryErrorTools:
         error_menu = Menu(title="Recovery Error Menu", auto_close=True)
         error_menu.set_refresh(RecoveryErrorTools.recovery_error_menu_refresh)
         error_menu.run()
+
+
+class RMSETools(AnalysisTools):
+    validation_set = str(GLOBALS.FILE_STRUCTURE["validation_set"])
+    models = "all"
+    output_file = "rmse.xlsx"
+    submit = False
+
+    vs_loc = str(GLOBALS.FILE_STRUCTURE["validation_set"])
+    sp_loc = str(GLOBALS.FILE_STRUCTURE["sample_pool"])
+
+    @staticmethod
+    def make_models_list(loc):
+        if loc.lower() == "all":
+            models_loc = [d for d in Path(GLOBALS.FILE_STRUCTURE["log"]).iterdir() if d.is_dir()]
+        else:
+            models_loc = [loc]
+        return [Models(loc, read_models=True) for loc in models_loc]
+
+    @staticmethod
+    def calculate_rmse(type="iqa"):
+        models_list = RMSETools.make_models_list(RMSETools.models)
+        vs = Set(RMSETools.validation_set)
+        for models in models_list:
+            for point in vs:
+                true = getattr(point, type)
+                pred = models.predict(point, atoms=True, type=type, verbose=True)
+
+
+    @staticmethod
+    def toggle_submit():
+        RMSETools.submit = not RMSETools.submit
+
+    @staticmethod
+    def change_output_file():
+        S_CurveTools.output_file = AnalysisTools.set_output_file(S_CurveTools.output_file)
+
+    @staticmethod
+    def set_vs_dir(directory=None):
+        S_CurveTools.validation_set = AnalysisTools.set_dir(directory)
+
+    @staticmethod
+    def set_model_dir(directory=None):
+        S_CurveTools.models = AnalysisTools.set_dir(directory)
+
+    @staticmethod
+    def refresh_vs_menu(menu):
+        menu.clear_options()
+        menu.add_option(
+            "1",
+            f"Validation Set ({RMSETools.vs_loc})",
+            RMSETools.set_vs_dir,
+            kwargs={"directory": RMSETools.vs_loc},
+        )
+        menu.add_option(
+            "2",
+            f"Sample Pool ({RMSETools.sp_loc})",
+            RMSETools.set_vs_dir,
+            kwargs={"directory": RMSETools.sp_loc},
+        )
+        menu.add_option("3", "Custom Directory", RMSETools.set_vs_dir)
+        menu.add_space()
+        menu.add_message(f"Validation Set Location: {RMSETools.validation_set}")
+        menu.add_final_options(exit=False)
+
+    @staticmethod
+    def refresh_model_menu(menu):
+        menu.clear_options()
+        menu.add_option(
+            "1",
+            f"Current Model ({S_CurveTools.model_loc})",
+            RMSETools.set_model_dir,
+            kwargs={"directory": str(GLOBALS.FILE_STRUCTURE["models"])},
+        )
+        menu.add_option(
+            "2",
+            f"Choose From LOG ({S_CurveTools.log_loc})",
+            S_CurveTools.set_model_from_log,
+        )
+        menu.add_option("3", "Custom Directory", RMSETools.set_model_dir)
+        menu.add_space()
+        menu.add_option("a", "All Models from LOG", RMSETools.set_model_dir, kwargs={"directory": "all"})
+        menu.add_space()
+        menu.add_message(f"Model Location: {S_CurveTools.models}")
+        menu.add_final_options(exit=False)
+
+    @staticmethod
+    def refresh_rmse_menu(menu):
+        vs_menu = Menu(title="Select Validation Set", auto_close=True)
+        vs_menu.set_refresh(RMSETools.refresh_vs_menu)
+
+        model_menu = Menu(title="Select Model Location", auto_close=True)
+        model_menu.set_refresh(RMSETools.refresh_model_menu)
+
+        menu.add_option("1", "Calculate RMSE of IQA Model(s)", RMSETools.calculate_rmse, kwargs:{"type": "iqa"})
+        menu.add_option("2", "Calculate RMSE of Multipole Model(s)", RMSETools.calculate_rmse, kwargs:{"type": "multipoles"})
+        menu.add_option("3", "Calculate RMSE of All Model(s)", RMSETools.calculate_rmse, kwargs:{"type": "all"})
+        menu.add_space()
+        menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
+        menu.add_option("model", "Select Model Location", model_menu.run)
+        menu.add_option("output", "Change Output File", RMSETools.change_output_file)
+        # menu.add_option(
+        #     "submit", "Toggle Submit To Cluster", RMSETools.toggle_submit
+        # )
+        menu.add_space()
+        menu.add_message(f"Validation Set Location: {RMSETools.validation_set}")
+        menu.add_message(f"Model Location: {RMSETools.models}")
+        menu.add_space()
+        menu.add_message(f"Output File: {RMSETools.output_file}")
+        # menu.add_message(f"Submit To Cluster: {RMSETools.submit}")
+        menu.add_final_options()
+
+    @staticmethod
+    def rmse_menu():
+        rmse_menu = Menu(title="RMSE Menu")
+        rmse_menu.set_refresh(RMSETools.refresh_rmse_menu)
+        rmse_menu.run()
+
 
 
 class SetupTools:
@@ -8692,6 +8820,9 @@ def main_menu():
     analysis_menu.add_option("s", "Create S-Curves", S_CurveTools.run)
     analysis_menu.add_option(
         "r", "Calculate Recovery Errors", RecoveryErrorTools.recovery_error_menu
+    )
+    analysis_menu.add_option(
+        "rmse", "Calculate RMSE", RMSETools.rmse_menu
     )
     analysis_menu.add_final_options()
 
