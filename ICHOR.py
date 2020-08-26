@@ -8057,8 +8057,8 @@ class RMSETools(AnalysisTools):
     output_file = "rmse.xlsx"
     submit = False
 
-    vs_loc = str(GLOBALS.FILE_STRUCTURE["validation_set"])
-    sp_loc = str(GLOBALS.FILE_STRUCTURE["sample_pool"])
+    vs_loc = ""
+    sp_loc = ""
 
     @staticmethod
     def make_models_list(loc):
@@ -8143,9 +8143,9 @@ class RMSETools(AnalysisTools):
         model_menu = Menu(title="Select Model Location", auto_close=True)
         model_menu.set_refresh(RMSETools.refresh_model_menu)
 
-        menu.add_option("1", "Calculate RMSE of IQA Model(s)", RMSETools.calculate_rmse, kwargs:{"type": "iqa"})
-        menu.add_option("2", "Calculate RMSE of Multipole Model(s)", RMSETools.calculate_rmse, kwargs:{"type": "multipoles"})
-        menu.add_option("3", "Calculate RMSE of All Model(s)", RMSETools.calculate_rmse, kwargs:{"type": "all"})
+        menu.add_option("1", "Calculate RMSE of IQA Model(s)", RMSETools.calculate_rmse, kwargs={"type": "iqa"})
+        menu.add_option("2", "Calculate RMSE of Multipole Model(s)", RMSETools.calculate_rmse, kwargs={"type": "multipoles"})
+        menu.add_option("3", "Calculate RMSE of All Model(s)", RMSETools.calculate_rmse, kwargs={"type": "all"})
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
@@ -8163,6 +8163,9 @@ class RMSETools(AnalysisTools):
 
     @staticmethod
     def rmse_menu():
+        RMSETools.vs_loc = str(GLOBALS.FILE_STRUCTURE["validation_set"])
+        RMSETools.sp_loc = str(GLOBALS.FILE_STRUCTURE["sample_pool"])
+
         rmse_menu = Menu(title="RMSE Menu")
         rmse_menu.set_refresh(RMSETools.refresh_rmse_menu)
         rmse_menu.run()
