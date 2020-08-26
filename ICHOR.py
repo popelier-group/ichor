@@ -565,6 +565,15 @@ class UsefulTools:
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
     @staticmethod
+    def natural_sort_atom(iterable, reverse=False):
+        prog = re.compile(r"(\d+)")
+
+        def alphanum_key(element):
+            return [int(c) if c.isdigit() else c for c in prog.findall(element.atom)]
+
+        return sorted(iterable, key=alphanum_key, reverse=reverse)
+
+    @staticmethod
     def count_digits(n):
         import math
 
@@ -5164,6 +5173,10 @@ class INTs(Point):
     def read(self):
         for atom in self:
             atom.read()
+        self.sort()
+
+    def sort(self):
+        self = UsefulTools.natural_sort_atom(self)
 
     def items(self):
         return [(_int.atom, _int) for _int in self]
@@ -5183,6 +5196,9 @@ class INTs(Point):
 
     def charge(self):
         return np.sqrt(sum(i.dipole**2 for i in self))
+
+    def get(self, prop):
+        return getattr(self, prop)
 
     def __getattr__(self, attr):
         if attr in self.__dict__.keys():
@@ -8052,7 +8068,7 @@ class RecoveryErrorTools:
 
 
 class RMSETools(AnalysisTools):
-    validation_set = str(GLOBALS.FILE_STRUCTURE["validation_set"])
+    validation_set = ""
     models = "all"
     output_file = "rmse.xlsx"
     submit = False
@@ -8071,11 +8087,16 @@ class RMSETools(AnalysisTools):
     @staticmethod
     def calculate_rmse(type="iqa"):
         models_list = RMSETools.make_models_list(RMSETools.models)
-        vs = Set(RMSETools.validation_set)
+        vs = Set(RMSETools.validation_set).read()
         for models in models_list:
-            for point in vs:
-                true = getattr(point, type)
-                pred = models.predict(point, atoms=True, type=type, verbose=True)
+            predictions = models.predict(vs, atoms=True, type=type, verbose=True)
+            for point, pred in zip(vs, predictions):
+                for type, values in pred.items():
+                    for atom, value in values.items():
+                        true = getattr(point.ints[atom - 1], type)
+                        print(point.ints[atom - 1].atom, atom, true, value)
+                    quit()
+
 
 
     @staticmethod
@@ -8165,6 +8186,7 @@ class RMSETools(AnalysisTools):
     def rmse_menu():
         RMSETools.vs_loc = str(GLOBALS.FILE_STRUCTURE["validation_set"])
         RMSETools.sp_loc = str(GLOBALS.FILE_STRUCTURE["sample_pool"])
+        RMSETools.validation_set = RMSETools.vs_loc
 
         rmse_menu = Menu(title="RMSE Menu")
         rmse_menu.set_refresh(RMSETools.refresh_rmse_menu)
