@@ -5176,7 +5176,7 @@ class INTs(Point):
         self.sort()
 
     def sort(self):
-        self = UsefulTools.natural_sort_atom(self)
+        self.ints = UsefulTools.natural_sort_atom(self)
 
     def items(self):
         return [(_int.atom, _int) for _int in self]
@@ -5216,6 +5216,8 @@ class INTs(Point):
             return self.get_atom(idx)
         raise PointError.AtomNotFound()
 
+    def __len__(self):
+        return len(self.ints)
 
 class Gau(Point):
     def __init__(self, path=None):
