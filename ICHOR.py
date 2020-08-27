@@ -8100,29 +8100,47 @@ class RMSETools(AnalysisTools):
                     pred_total = 0.0
                     for atom, pred in values.items():
                         atom_name = point.ints[atom - 1].atom
-                        if not atom_name in rmse_data[models.nTrain].keys():
-                            rmse_data[models.nTrain][atom_name] = {}
-                            rmse_data[models.nTrain][atom_name]["True"] = []
-                            rmse_data[models.nTrain][atom_name]["Predicted"] = []
-                            rmse_data[models.nTrain][atom_name]["Error"] = []
+                        if not atom_name + "_True" in rmse_data[models.nTrain].keys():
+                            rmse_data[models.nTrain][atom_name + "_True"] = []
+                            rmse_data[models.nTrain][atom_name + "_Predicted"] = []
+                            rmse_data[models.nTrain][atom_name + "_Error"] = []
                         true = getattr(point.ints[atom - 1], type)
                         true_total += true
                         pred_total += pred
-                        rmse_data[models.nTrain][atom_name]["True"] += [true]
-                        rmse_data[models.nTrain][atom_name]["Predicted"] += [pred]
-                        rmse_data[models.nTrain][atom_name]["Error"] += [np.abs(true-pred)]
-                    if not "Total" in rmse_data[models.nTrain].keys():
-                        rmse_data[models.nTrain]["Total"] = {}
-                        rmse_data[models.nTrain]["Total"]["True"] = []
-                        rmse_data[models.nTrain]["Total"]["Predicted"] = []
-                        rmse_data[models.nTrain]["Total"]["Error"] = []
-                    rmse_data[models.nTrain]["Total"]["True"] += [true_total]
-                    rmse_data[models.nTrain]["Total"]["Predicted"] += [pred_total]
-                    rmse_data[models.nTrain]["Total"]["Error"] += [np.abs(true_total-pred_total)]
+                        rmse_data[models.nTrain][atom_name + "_True"] += [true]
+                        rmse_data[models.nTrain][atom_name + "_Predicted"] += [pred]
+                        error = np.abs(true - pred) * (Constants.ha_to_kj_mol if type == "iqa" else 1.0)
+                        rmse_data[models.nTrain][atom_name + "_Error"] += [error]
+                    if not "Total_True" in rmse_data[models.nTrain].keys():
+                        rmse_data[models.nTrain]["Total_True"] = []
+                        rmse_data[models.nTrain]["Total_Predicted"] = []
+                        rmse_data[models.nTrain]["Total_Error"] = []
+                    rmse_data[models.nTrain]["Total_True"] += [true_total]
+                    rmse_data[models.nTrain]["Total_Predicted"] += [pred_total]
+                    error = np.abs(true_total - pred_total) * (Constants.ha_to_kj_mol if type == "iqa" else 1.0)
+                    rmse_data[models.nTrain]["Total_Error"] += [error]
 
-        print(rmse_data)
-        quit()
+        rmse_data = {n: d for n, d in sorted(rmse_data.items(), key=lambda item: item[0])}
 
+        def rmse(data):
+            total = sum(x**2 for x in data)
+            return np.sqrt(total/len(data))
+
+        rmse_calc = {}
+        for n_train, data in rmse_data.items():
+            rmse_calc[n_train] = {}
+            for heading, values in data.items():
+                if "_Error" in heading:
+                    rmse_calc[n_train][heading.split("_")[0]] = rmse(values)
+
+        import pandas as pd
+        with pd.ExcelWriter(RMSETools.output_file) as writer:
+            df = pd.DataFrame(rmse_calc)
+            df.T.to_excel(writer, sheet_name="RMSE")
+
+            for n_train, data in rmse_data.items():
+                df = pd.DataFrame(data).sort_values("Total_Error")
+                df.to_excel(writer, sheet_name=f"{n_train} Points")
 
 
     @staticmethod
