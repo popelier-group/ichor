@@ -8090,14 +8090,38 @@ class RMSETools(AnalysisTools):
     def calculate_rmse(type="iqa"):
         models_list = RMSETools.make_models_list(RMSETools.models)
         vs = Set(RMSETools.validation_set).read()
+        rmse_data = {}
         for models in models_list:
             predictions = models.predict(vs, atoms=True, type=type, verbose=True)
-            for point, pred in zip(vs, predictions):
-                for type, values in pred.items():
-                    for atom, value in values.items():
+            rmse_data[models.nTrain] = {}
+            for point, predicted in zip(vs, predictions):
+                for type, values in predicted.items():
+                    true_total = 0.0
+                    pred_total = 0.0
+                    for atom, pred in values.items():
+                        atom_name = point.ints[atom - 1].atom
+                        if not atom_name in rmse_data[models.nTrain].keys():
+                            rmse_data[models.nTrain][atom_name] = {}
+                            rmse_data[models.nTrain][atom_name]["True"] = []
+                            rmse_data[models.nTrain][atom_name]["Predicted"] = []
+                            rmse_data[models.nTrain][atom_name]["Error"] = []
                         true = getattr(point.ints[atom - 1], type)
-                        print(point.ints[atom - 1].atom, atom, true, value)
-                    quit()
+                        true_total += true
+                        pred_total += pred
+                        rmse_data[models.nTrain][atom_name]["True"] += [true]
+                        rmse_data[models.nTrain][atom_name]["Predicted"] += [pred]
+                        rmse_data[models.nTrain][atom_name]["Error"] += [np.abs(true-pred)]
+                    if not "Total" in rmse_data[models.nTrain].keys():
+                        rmse_data[models.nTrain]["Total"] = {}
+                        rmse_data[models.nTrain]["Total"]["True"] = []
+                        rmse_data[models.nTrain]["Total"]["Predicted"] = []
+                        rmse_data[models.nTrain]["Total"]["Error"] = []
+                    rmse_data[models.nTrain]["Total"]["True"] += [true_total]
+                    rmse_data[models.nTrain]["Total"]["Predicted"] += [pred_total]
+                    rmse_data[models.nTrain]["Total"]["Error"] += [np.abs(true_total-pred_total)]
+
+        print(rmse_data)
+        quit()
 
 
 
