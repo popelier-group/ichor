@@ -8149,15 +8149,15 @@ class RMSETools(AnalysisTools):
 
     @staticmethod
     def change_output_file():
-        S_CurveTools.output_file = AnalysisTools.set_output_file(S_CurveTools.output_file)
+        RMSETools.output_file = AnalysisTools.set_output_file(S_CurveTools.output_file)
 
     @staticmethod
     def set_vs_dir(directory=None):
-        S_CurveTools.validation_set = AnalysisTools.set_dir(directory)
+        RMSETools.validation_set = AnalysisTools.set_dir(directory)
 
     @staticmethod
     def set_model_dir(directory=None):
-        S_CurveTools.models = AnalysisTools.set_dir(directory)
+        RMSETools.models = AnalysisTools.set_dir(directory)
 
     @staticmethod
     def refresh_vs_menu(menu):
