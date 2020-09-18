@@ -3806,7 +3806,7 @@ class PropertyTools:
         properties_root = GLOBALS.FILE_STRUCTURE["properties"]
 
         print()
-        if os.path.exists(properties_root):
+        if not os.path.exists(properties_root):
             # make directory
             print(f'Making {properties_root}')
             FileTools.mkdir(properties_root, empty=False)
@@ -3919,7 +3919,6 @@ def buildermethod(func):
     def wrapper(self, *args, **kwargs):
         func(self, *args, **kwargs)
         return self
-
     return wrapper
 
 
@@ -5218,6 +5217,7 @@ class INTs(Point):
 
     def __len__(self):
         return len(self.ints)
+
 
 class Gau(Point):
     def __init__(self, path=None):
@@ -8235,7 +8235,6 @@ class RMSETools(AnalysisTools):
         rmse_menu = Menu(title="RMSE Menu")
         rmse_menu.set_refresh(RMSETools.refresh_rmse_menu)
         rmse_menu.run()
-
 
 
 class SetupTools:
