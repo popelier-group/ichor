@@ -5103,9 +5103,34 @@ class INT(Point):
             self.rotate_multipoles()
 
     def rotate_multipoles(self):
-        print(self.parent)
-        print(self.parent.x_axis)
-        quit()
+        self.rotate_dipole()
+    
+    def rotate_dipole(self):
+        r12 = np.array(self.parent.vec_to(self.parent.x_axis))
+        r13 = np.array(self.parent.vec_to(self.parent.xy_plane))
+
+        modR12 = self.parent.dist(self.parent.x_axis)
+        modR13 = self.parent.dist(self.parent.xy_plane)
+
+        r12 /= modR12
+        r13 /= modR13
+
+        eX = r12
+        eY = r13
+        s = sum(eX * eY)
+
+        for i, (ex, ey) in enumerate(zip(eX, eY)):
+            eY[i] = ey - (s/(modR12*modR13))*ex
+
+        eY /= np.sqrt(sum(eY * eY))
+        eZ = np.cross(eX, eY)
+        C = np.array([eX, eY, eZ])
+        d = np.array([[atom.q11c], [atom.q11s], [atom.q10]])
+        q11s, q11c, q10 = tuple(np.matmul(C, d).flatten())
+
+        self.q10 = q10
+        self.q11s = q11s
+        self.q11c = q11c
 
     @buildermethod
     def read_json(self):
