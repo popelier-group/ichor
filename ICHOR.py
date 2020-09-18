@@ -4391,6 +4391,8 @@ class Atoms:
         del self._atoms[i]
 
     def __getitem__(self, i):
+        if isinstance(i, INT):
+            i = self.atoms.index(i.atom)
         return self._atoms[i]
 
     def __str__(self):
@@ -5202,8 +5204,8 @@ class INTs(Point):
         self.ints += [int_]
 
     @buildermethod
-    def read(self, parent_mol=None):
-        for atom in zip(self):
+    def read(self, parent=None):
+        for atom in self:
             atom.read(parent[atom])
         self.sort()
 
