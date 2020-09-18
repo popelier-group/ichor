@@ -5138,6 +5138,10 @@ class INT(Point):
             FileTools.move_file(self.path, new_name)
             self.path = new_name
 
+    def revert_backup(self):
+        if os.path.exists(self.path + ".bak"):
+            FileTools.move_file(self.path + ".bak", self.path)
+
     def __getattr__(self, attr):
         if attr in Constants.multipole_names:
             if attr == "q00":
@@ -5195,6 +5199,10 @@ class INTs(Point):
 
     def charge(self):
         return np.sqrt(sum(i.dipole**2 for i in self))
+
+    def revert_backup(self):
+        for i in self:
+            i.revert_backup()
 
     def get(self, prop):
         return getattr(self, prop)
@@ -5914,6 +5922,26 @@ class Points:
             return result
 
         return wrapper
+
+    @staticmethod
+    def revert_backup():
+        ts_dir = str(FILE_STRUCTURE["training_set"])
+        sp_dir = str(FILE_STRUCTURE["sample_pool"])
+        vs_dir = str(FILE_STRUCTURE["validation_set"])
+
+        ts, sp, vs = Set(ts_dir), Set(sp_dir), Set(vs_dir)
+
+        for training_point in ts:
+            if training_point.ints:
+                training_point.ints.revert_backup()
+
+        for sample_point in sp:
+            if sample_point.ints:
+                sample_point.ints.revert_backup()
+
+        for validation_point in vs:
+            if validation_point.ints:
+                validation_point.ints.revert_backup()
 
 
 class Set(Points):
@@ -8902,6 +8930,8 @@ def main_menu():
     tools_menu.add_space()
     tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_option("csv", "Produce CSV From Set", SetTools.to_csv_menu)
+    tools_menu.add_space()
+    tools_menu.add_option("bak", "Revert All INT JSON Backup Files", Points.revert_backup)
     tools_menu.add_final_options()
 
     # === Options Menu ===#
