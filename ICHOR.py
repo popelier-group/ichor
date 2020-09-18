@@ -5126,7 +5126,7 @@ class INT(Point):
         eZ = np.cross(eX, eY)
         C = np.array([eX, eY, eZ])
         d = np.array([[self.q11c], [self.q11s], [self.q10]])
-        q11s, q11c, q10 = tuple(np.matmul(C, d).flatten())
+        q11c, q11s, q10 = tuple(np.matmul(C, d).flatten())
 
         self.q10 = q10
         self.q11s = q11s
