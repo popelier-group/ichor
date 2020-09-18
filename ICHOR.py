@@ -3990,6 +3990,13 @@ class Atom:
     def zdiff(self, other):
         return other.z - self.z
 
+    def vec_to(self, other):
+        return [
+            self.xdiff(other),
+            self.ydiff(other),
+            self.zdiff(other)
+        ]
+
     def angle(self, atom1, atom2):
         temp = (
             self.xdiff(atom1) * self.xdiff(atom2)
