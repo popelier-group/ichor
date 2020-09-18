@@ -4219,6 +4219,7 @@ class Atoms:
 
     def finish(self):
         Atom.counter = it.count(1)
+        self.set_alf()
 
     def connect(self, iatom, jatom):
         iatom.set_bond(jatom)
@@ -4789,7 +4790,7 @@ class Directory(Point):
 
     @buildermethod
     def read_ints(self):
-        self.ints.read(self.atoms if self.atoms else None)
+        self.ints.read(self.atoms)
         if self.atoms:
             for atom, int_ in zip(self, self.ints):
                 atom.properties = int_
@@ -5096,6 +5097,7 @@ class INT(Point):
 
     def rotate_multipoles(self):
         print(self.parent)
+        print(self.parent.x_axis)
         quit()
 
     @buildermethod
