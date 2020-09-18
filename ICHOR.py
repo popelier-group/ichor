@@ -5924,24 +5924,34 @@ class Points:
         return wrapper
 
     @staticmethod
-    def revert_backup():
-        ts_dir = str(FILE_STRUCTURE["training_set"])
-        sp_dir = str(FILE_STRUCTURE["sample_pool"])
-        vs_dir = str(FILE_STRUCTURE["validation_set"])
+    def revert_backup(ts_bak=False, sp_bak=False, vs_bak=False):
+        if all(not ts_bak, not sp_bak, not vs_bak):
+            menu = Menu(title="Revert JSON Backup")
+            menu.add_option("1", "Training Set", Points.revert_backup, kwargs={"ts_bak": True})
+            menu.add_option("2", "Sample Pool", Points.revert_backup, kwargs={"sp_bak": True})
+            menu.add_option("3", "Validation Set", Points.revert_backup, kwargs={"vs_bak": True})
+            menu.add_space()
+            menu.add_option("a", "All of the Above", Points.revert_backup, kwargs={"ts_bak": True, "sp_bak": True, "vs_bak": True})
+            menu.add_final_options()
 
-        ts, sp, vs = Set(ts_dir), Set(sp_dir), Set(vs_dir)
 
-        for training_point in ts:
-            if training_point.ints:
-                training_point.ints.revert_backup()
+        if ts_bak:
+            ts = Set(GLOBALS.FILE_STRUCTURE["training_set"])
+            for training_point in ts:
+                if training_point.ints:
+                    training_point.ints.revert_backup()
 
-        for sample_point in sp:
-            if sample_point.ints:
-                sample_point.ints.revert_backup()
+        if sp_bak:
+            sp = Set(GLOBALS.FILE_STRUCTURE["sample_pool"])
+            for sample_point in sp:
+                if sample_point.ints:
+                    sample_point.ints.revert_backup()
 
-        for validation_point in vs:
-            if validation_point.ints:
-                validation_point.ints.revert_backup()
+        if vs_bak:
+            vs = Set(GLOBALS.FILE_STRUCTURE["validation_set"])
+            for validation_point in vs:
+                if validation_point.ints:
+                    validation_point.ints.revert_backup()
 
 
 class Set(Points):
