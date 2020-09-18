@@ -5933,6 +5933,7 @@ class Points:
             menu.add_space()
             menu.add_option("a", "All of the Above", Points.revert_backup, kwargs={"ts_bak": True, "sp_bak": True, "vs_bak": True})
             menu.add_final_options()
+            menu.run()
 
 
         if ts_bak:
