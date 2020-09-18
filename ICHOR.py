@@ -5925,8 +5925,8 @@ class Points:
 
     @staticmethod
     def revert_backup(ts_bak=False, sp_bak=False, vs_bak=False):
-        if not any([ts_bak, sp_bak, vs_bak], auto_close=True):
-            menu = Menu(title="Revert JSON Backup")
+        if not any([ts_bak, sp_bak, vs_bak]):
+            menu = Menu(title="Revert JSON Backup", auto_close=True)
             menu.add_option("1", "Training Set", Points.revert_backup, kwargs={"ts_bak": True})
             menu.add_option("2", "Sample Pool", Points.revert_backup, kwargs={"sp_bak": True})
             menu.add_option("3", "Validation Set", Points.revert_backup, kwargs={"vs_bak": True})
