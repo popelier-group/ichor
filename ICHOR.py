@@ -4787,7 +4787,7 @@ class Directory(Point):
 
     @buildermethod
     def read_ints(self):
-        self.ints.read()
+        self.ints.read(self.atoms if self.atoms else None)
         if self.atoms:
             for atom, int_ in zip(self, self.ints):
                 atom.properties = int_
@@ -5020,9 +5020,11 @@ class WFN(Point):
 
 
 class INT(Point):
-    def __init__(self, path):
+    def __init__(self, path, atom=None):
         self.path = path
         self.atom = os.path.splitext(os.path.basename(self.path))[0].upper()
+
+        self.parent = atom
 
         self.integration_results = {}
         self.multipoles = {}
@@ -5086,6 +5088,12 @@ class INT(Point):
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
+        if self.parent:
+            self.rotate_multipoles()
+
+    def rotate_multipoles(self):
+        print(self.parent)
+        quit()
 
     @buildermethod
     def read_json(self):
@@ -5168,6 +5176,17 @@ class INT(Point):
             elif attr.lower() in ["all"]:
                 return self.multipoles | {"iqa": self.iqa}
             return self.__dict__[attr]
+    
+    def __setattr__(self, attr, val):
+        if attr in Constants.multipole_names:
+            if attr == "q00":
+                self.integration_results["q"] = val
+            self.multipoles[attr] = val
+        else:
+            if attr.lower() in ["iqa", "eiqa"]:
+                self.iqa_data["E_IQA(A)"] = val
+            self.__dict__[attr] = val
+
 
 
 class INTs(Point):
@@ -5183,9 +5202,9 @@ class INTs(Point):
         self.ints += [int_]
 
     @buildermethod
-    def read(self):
-        for atom in self:
-            atom.read()
+    def read(self, parent_mol=None):
+        for atom in zip(self):
+            atom.read(parent[atom])
         self.sort()
 
     def sort(self):
