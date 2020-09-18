@@ -5033,7 +5033,8 @@ class INT(Point):
         self.iqa_data = {}
 
     @buildermethod
-    def read(self):
+    def read(self, atom=None):
+        self.parent = atom
         try:
             self.read_json()
         except json.decoder.JSONDecodeError:
