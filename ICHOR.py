@@ -3943,6 +3943,7 @@ class Atom:
         self.xy_plane = None
 
         self.features = []
+        self.properties = None
 
     def read_input(self, coordinate_line):
         if isinstance(coordinate_line, str):
@@ -4169,6 +4170,12 @@ class Atom:
     @property
     def alf_nums(self):
         return [atom.num for atom in self.alf]
+
+    def __getattr__(self, attr):
+        try:
+            return self.__dict__[attr]
+        except KeyError:
+            return getattr(self.properties, attr)
 
     def __str__(self):
         return f"{self.atom_type:<3s}{self.coordinates_string}"
@@ -4781,6 +4788,9 @@ class Directory(Point):
     @buildermethod
     def read_ints(self):
         self.ints.read()
+        if self.atoms:
+            for atom, int_ in zip(self, self.ints):
+                atom.properties = int_
 
     @buildermethod
     def read_gau(self):
