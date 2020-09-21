@@ -8109,11 +8109,11 @@ class ModelTools:
             ans = input(">> ")
             try:
                 ans = int(ans)
-                if start <= ans <= stop:
+                if 1 <= ans <= stop-start:
                     step = ans
                 else:
                     print(
-                        f"Error: Step Size must be in the range {start} - {stop}"
+                        f"Error: Step Size must be in the range {1} - {stop-start}"
                     )
             except:
                 print("Error: Answer must be an integer")
@@ -8122,8 +8122,10 @@ class ModelTools:
     @staticmethod
     def remake_models(directory):
         start, stop, step = ModelTools.get_start_stop_step()
+        # aims = Set(directory).read()
         for i in range(start, stop, step):
-            pass
+            # models = aims.slice(stop)
+            print(i)
 
 
 
