@@ -3619,15 +3619,17 @@ class AutoTools:
         return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid)
 
     @staticmethod
-    def submit_ichor_models(jid=None, directory=None, type=None, npoints=None):
+    def submit_ichor_models(jid=None, directory=None, type=None, npoints=None, model_directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         if not type:
             type = "iqa"
         if not npoints:
             npoints = -1
+        if not model_directory:
+            model_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
         return AutoTools.submit_ichor(
-            "make_models", directory, type, npoints, submit=True, hold=jid
+            "make_models", directory, type, npoints, model_directory, submit=True, hold=jid
         )
 
     @staticmethod
@@ -3697,7 +3699,7 @@ class AutoTools:
         return points.submit_wfns(redo=False, submit=True, hold=jid, check_wfns=False)
 
     @staticmethod
-    def submit_models(jid=None, directory=None):
+    def submit_models(jid=None, directory=None, model_directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         gjf = GJF(FileTools.get_first_gjf(directory)).read()
@@ -3706,6 +3708,7 @@ class AutoTools:
             submit=True,
             hold=jid,
             model_type=str(GLOBALS.OPTIMISE_PROPERTY),
+            model_directory=model_directory
         )
 
     @staticmethod
@@ -3722,11 +3725,11 @@ class AutoTools:
         _data_lock = False
 
     @staticmethod
-    def run_models(directory=None, type=None, npoints=None, jid=None):
+    def run_models(directory=None, type=None, npoints=None, model_directory=None, jid=None):
         _, jid = AutoTools.submit_ichor_models(
-            jid=jid, directory=directory, type=type, npoints=npoints
+            jid=jid, directory=directory, type=type, npoints=npoints, model_directory=model_directory
         )
-        return AutoTools.submit_models(jid=jid, directory=directory)
+        return AutoTools.submit_models(jid=jid, directory=directory, model_directory=model_directory)
 
     @staticmethod
     def run_from_extern():
@@ -4551,175 +4554,6 @@ class Point:
         return self.path != ""
 
 
-"""
-class Point:
-    counter = it.count(1)
-
-    def __init__(
-        self,
-        directory="",
-        gjf_fname="",
-        wfn_fname="",
-        int_directory="",
-        int_fnames=[],
-        read_gjf=False,
-        read_wfn=False,
-        read_ints=False,
-        atoms=None,
-    ):
-        self.num = next(Point.counter)
-        self.directory = directory
-        self.gjf = GJF(gjf_fname, read=read_gjf)
-        self.wfn = WFN(wfn_fname, read=read_wfn)
-        self.int_directory = int_directory
-        self.int_fnames = int_fnames
-        self.ints = {}
-        for int_fname in self.int_fnames:
-            int_file = INT(int_fname, read=read_ints)
-            self.ints[int_file.atom] = int_file
-
-        self.fname = ""
-
-        if atoms is not None:
-            self.gjf._atoms = atoms
-
-    @property
-    def atoms(self):
-        return self.gjf._atoms
-
-    @property
-    def features(self):
-        return self.atoms.features
-
-    @property
-    def nfeats(self):
-        return len(self.features)
-
-    @property
-    def natoms(self):
-        return len(self.atoms)
-
-    def find_wfn(self):
-        wfns = FileTools.get_files_in(self.directory, "*.wfn")
-        if len(wfns) > 0:
-            self.wfn = WFN(wfns[0], read=True)
-
-    def get_directory(self):
-        return self.directory
-
-    def get_true_value(self, value_to_get, atoms=False):
-        if value_to_get == "iqa":
-            eiqa = 0 if not atoms else [0] * len(self.atoms)
-            for _, int_data in self.ints.items():
-                if not atoms:
-                    eiqa += int_data.eiqa
-                else:
-                    eiqa[int_data.num - 1] = int_data.eiqa
-            return eiqa
-        elif value_to_get == "q00":
-            q00 = 0 if not atoms else [0] * len(self.atoms)
-            for _, int_data in self.ints.items():
-                if not atoms:
-                    q00 += int_data.integration_results["q"]
-                else:
-                    q00[int_data.num - 1] = int_data.integration_results["q"]
-            return q00
-        elif value_to_get in Constants.multipole_names:
-            mpole = 0 if not atoms else [0] * len(self.atoms)
-            for _, int_data in self.ints.items():
-                if not atoms:
-                    mpole += int_data.multipoles[value_to_get]
-                else:
-                    mpole[int_data.num - 1] = int_data.multipoles[value_to_get]
-            return mpole
-
-    def calculate_recovery_error(self):
-        wfn_energy = self.wfn.energy
-        iqa_energy = self.get_true_value("iqa")
-        return np.abs(wfn_energy - iqa_energy)
-
-    def get_integration_errors(self):
-        integration_errors = {}
-        for atom, int_data in self.ints.items():
-            integration_errors[atom] = int_data.integration_results["L"]
-        return integration_errors
-
-    def split_fname(self):
-        self.dirname = os.path.dirname(self.fname)
-        self.basename = os.path.basename(self.fname)
-
-        self.extension = self.basename.split(".")[-1]
-        self.point_name = self.basename.split(".")[0]
-
-        try:
-            self.point_num = re.findall(r"\d+$", self.point_name)[0]
-            self.system_name = self.point_name.replace(self.point_num, "")
-            self.point_num = int(self.point_num)
-        except (IndexError, ValueError):
-            self.point_num = 1
-            self.system_name = GLOBALS.SYSTEM_NAME
-
-    def __get_features(self):
-        training_set = {}
-        self.atoms.features
-        for atom in self.atoms:
-            training_set[atom.atom_num] = {"features": atom.features}
-        return training_set
-
-    def training_set_lines(self, model_type):
-        model_types = {
-            "iqa": self.iqa_training_set_line,
-            "multipoles": self.multipole_training_set_line,
-        }
-
-        for multipole_name in Constants.multipole_names:
-            model_types[multipole_name] = self.multipole_training_set_line
-
-        delimiter = " "
-        number_of_outputs = 25
-
-        point_data = model_types[model_type]()
-        point_lines = {}
-        nproperties = 0
-        for atom, data in point_data.items():
-            features = delimiter.join(
-                [str(feature) for feature in data["features"]]
-            )
-            nproperties = len(data["outputs"])
-            outputs = UsefulTools.format_list(
-                data["outputs"], number_of_outputs
-            )
-            outputs = delimiter.join([str(output) for output in outputs])
-            point_lines[atom] = f"{features} {outputs}"
-
-        return point_lines, nproperties
-
-    def iqa_training_set_line(self):
-        training_set = self.__get_features()
-        for atom in training_set.keys():
-            training_set[atom]["outputs"] = [self.ints[atom].eiqa]
-        return training_set
-
-    def multipole_training_set_line(self):
-        training_set = self.__get_features()
-        for atom in training_set.keys():
-            training_set[atom]["outputs"] = [
-                self.ints[atom].integration_results["q"]
-            ] + list(self.ints[atom].multipoles.values())[1:25]
-        return training_set
-
-    def move(self, new_directory):
-        FileTools.mkdir(new_directory)
-
-        self.gjf.move(new_directory)
-        self.wfn.move(new_directory)
-        for int_file in self.int_fnames:
-            int_file.move(new_directory)
-
-        self.directory = new_directory
-"""
-
-
 class Directory(Point):
     def __init__(self, dirpath):
         self.path = dirpath
@@ -5135,7 +4969,7 @@ class INT(Point):
     def C(self):
         try:
             return self._C
-        except AttributeError:
+        except KeyError:
             r12 = np.array(self.parent.vec_to(self.parent.x_axis))
             r13 = np.array(self.parent.vec_to(self.parent.xy_plane))
 
@@ -6294,7 +6128,7 @@ class Set(Points):
             self, redo=redo, submit=submit, hold=hold, check_wfns=check_wfns
         )
 
-    def make_training_set(self, model_type, npoints=-1):
+    def make_training_set(self, model_type, npoints=-1, directory=None):
         if npoints < 0:
             npoints = len(self)
 
@@ -6313,7 +6147,9 @@ class Set(Points):
 
         # Write FEREBUS input files
         MAX_PROPERTIES = 25
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
+        if directory is None:
+            directory = GLOBALS.FILE_STRUCTURE["ferebus"]
+        FileTools.mkdir(directory, empty=True)
         model_directories = []
         for atom, training_set in training_sets.items():
             directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
@@ -6527,488 +6363,6 @@ class TrainingSet:
 
     def __len__(self):
         return len(self.inputs)
-
-
-"""
-class Points:
-    def __init__(
-        self,
-        directory="",
-        read_gjfs=False,
-        read_wfns=False,
-        read_ints=False,
-        first=False,
-        read_directory=True,
-    ):
-        self._points = []
-
-        self.directory = directory if directory else "."
-        if read_gjfs or read_wfns or read_ints:
-            FileTools.check_directory(self.directory)
-            self.read_directory(
-                read_gjfs,
-                read_wfns=read_wfns,
-                read_ints=read_ints,
-                first=first,
-            )
-            if GLOBALS.LOG_WARNINGS:
-                self.log_warnings()
-
-        training_set_functions = {
-            "min-max": self.get_min_max_features_first_atom,
-            "random": self.get_random_points,
-        }
-        self._get_training_points = training_set_functions["min-max"]
-
-    def read_point_directory(
-        self, d, read_gjfs=False, read_wfns=False, read_ints=False, first=False
-    ):
-        point = {
-            "read_gjf": read_gjfs,
-            "read_wfn": read_wfns,
-            "read_ints": read_ints,
-            "directory": d,
-        }
-
-        for f in FileTools.get_files_in(d, "*", sort="natural"):
-            if os.path.isdir(f):
-                point["int_directory"] = f
-                point["int_fnames"] = FileTools.get_files_in(
-                    f, "*.int", sort="natural"
-                )
-            elif FileTools.get_filetype(f) == ".gjf":
-                point["gjf_fname"] = f
-            elif FileTools.get_filetype(f) == ".wfn":
-                point["wfn_fname"] = f
-        return point
-
-    def read_directory(self, read_gjfs, read_wfns, read_ints, first=False):
-        directories = FileTools.get_files_in(
-            self.directory, "*/", sort="natural"
-        )
-        with tqdm(
-            total=len(directories), unit=" files", leave=True
-        ) as progressbar:
-            for d in directories:
-                progressbar.set_description(desc=d)
-                point = self.read_point_directory(
-                    d, read_gjfs, read_wfns, read_ints, first
-                )  # implement multiprocessing
-                progressbar.update()
-                if "gjf_fname" in point.keys():
-                    self.add_point(point)
-                    if first:
-                        break
-
-    def read_set(self, files, stay=True):
-        if isinstance(files, str):
-            files = [files]
-        with tqdm(total=len(files), unit=" files", leave=stay) as progressbar:
-            for f in files:
-                progressbar.set_description(desc=f)
-                if os.path.isdir(f):
-                    if "_atomicfiles" in f:
-                        progressbar.update()
-                        continue
-                    self.read_set(
-                        FileTools.get_files_in(f, "*", sort="natural"),
-                        stay=False,
-                    )
-                elif f.endswith(".gjf"):
-                    self.read_gjf(f)
-                elif f.endswith(".xyz"):
-                    self.read_xyz(f)
-                elif f == "":
-                    files += FileTools.get_files_in(f, "*", sort="natural")
-                    continue
-                progressbar.update()
-
-    def log_warnings(self):
-        if GLOBALS.WARN_RECOVERY_ERROR:
-            n_recovery_error = 0
-            for point in self:
-                recovery_error = point.calculate_recovery_error()
-                if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
-                    logger.warning(
-                        f"{point.path} | Recovery Error: {recovery_error} Ha"
-                    )
-                    n_recovery_error += 1
-            if n_recovery_error > 0:
-                logger.warning(
-                    f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision"
-                )
-
-        if GLOBALS.WARN_INTEGRATION_ERROR:
-            n_integration_error = 0
-            for point in self:
-                integration_errors = point.get_integration_errors()
-                for atom, integration_error in integration_errors.items():
-                    if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
-                        logger.warning(
-                            f"{point.path} | {atom} | Integration Error: {integration_error} Ha"
-                        )
-                        n_integration_error += 1
-            if n_integration_error > 0:
-                logger.warning(
-                    f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD} Ha), consider removing these points or increasing precision"
-                )
-
-    def read_gjf(self, gjf_file):
-        gjf = GJF(gjf_file, read=True)
-        self.add_point(gjf._atoms)
-
-    def read_xyz(self, xyz_file):
-        trajectory = Trajectory(xyz_file, read=True)
-        for point in trajectory:
-            self.add_point(point)
-
-    def add_point(self, point):
-        if isinstance(point, dict):
-            self._points.append(Point(**point))
-        elif isinstance(point, Point):
-            self._points.append(point)
-        elif isinstance(point, Atoms):
-            self._points.append(Point(atoms=point))
-
-    def add(self, points, move=False):
-        for point in points:
-            self.add_point(point)
-            if move:
-                self.move(point)
-
-    def move(self, point):
-        old_directory = point.directory
-
-        new_index = len(self) + 1
-        subdirectory = GLOBALS.SYSTEM_NAME + str(new_index).zfill(4)
-        new_directory = os.path.join(self.directory, subdirectory)
-        point.move(new_directory)
-
-        FileTools.rmtree(old_directory)
-
-    def get_points(self, points_to_get):
-        points = Points(self.directory)
-        for point in reversed(sorted(points_to_get)):
-            points.add_point(self[point])
-            del self[point]
-        return points
-
-    def renumber(self):
-        Point.counter = it.count(1)
-        for point in self:
-            point.num = next(Point.counter)
-
-    def move_points(self, points):
-        new_set = Points()
-        for point in points:
-            if isinstance(point, int):
-                point = self[point]
-            new_set.add_point(point)  # add point to new set
-            del self[point]  # delete point from current set
-            # append src indx -> dst indx
-        new_set.renumber()  # numbers new set from 1, n
-        return new_set  # returns set with new points added
-
-    def write_to_directory(self, directory, empty=False):
-        if os.path.isdir(directory) and not empty:
-            print()
-            print(f"{directory} exists.")
-            empty = UsefulTools.check_bool(
-                input(f"Would you like to empty {directory}? [Y/N]")
-            )
-
-        FileTools.mkdir(directory, empty=empty)
-        for point in self:
-            gjf_name = GLOBALS.SYSTEM_NAME + str(point.num).zfill(4) + ".gjf"
-            gjf_name = os.path.join(directory, gjf_name)
-            gjf = GJF(gjf_name)
-            gjf._atoms = point.atoms
-            gjf.write()
-        FileTools.check_directory(directory)
-
-    def get_atom_features(self, atom):
-        return self.features[atom]
-
-    def get_atom_feature(self, atom, feature):
-        return [features[feature] for features in self.get_atom_features(atom)]
-
-    def get_min_max_atom_feature(self, atom, feature):
-        features = self.get_atom_feature(atom, feature)
-
-        min_indx = int(np.argmin(features))
-        max_indx = int(np.argmax(features))
-
-        return min_indx, max_indx
-
-    def get_min_max_of_atom(self, iatom):
-        points = []
-        for i in range(self.nfeats):
-            imin, imax = self.get_min_max_atom_feature(iatom, i)
-            points += [imin, imax]
-        return points
-
-    def get_min_max_features_first_atom(self):
-        return self.get_min_max_of_atom(0)
-
-    def get_random_points(self, n_points):
-        return sorted(random.sample(self.range, n_points), reverse=True)
-
-    def get_training_points(self):
-        training_points = self._get_training_points()
-        return self.move_points(training_points)
-
-    def make_random_set(self, n_points):
-        points = self.get_random_points(n_points)
-        return self.move_points(points)
-
-    def make_set(self, n_points, directory):
-        # append directory to file
-        if n_points < 0:
-            points = self.get_training_points()
-        else:
-            points = self.make_random_set(n_points)
-        points.write_to_directory(directory)
-
-    def format_gjfs(self):
-        for point in self:
-            if point.gjf:
-                point.gjf.write()
-
-    def submit_gjfs(self, redo=False, submit=True, hold=None):
-        return SubmissionTools.make_g09_script(
-            self, redo=redo, submit=submit, hold=hold
-        )
-
-    def submit_wfns(self, redo=False, submit=True, hold=None):
-        return SubmissionTools.make_aim_script(
-            self, redo=redo, submit=submit, hold=hold
-        )
-
-    def submit_models(self, write_data=True):
-        SubmissionTools.make_ferebus_script(self, write_data=write_data)
-
-    def check_functional(self):
-        for point in self:
-            point.wfn.check_functional()
-
-    def check_wfns(self):
-        n_wfns = self.n_wfns
-        n_gjfs = self.n_gjfs
-        if n_gjfs != n_wfns:
-            wfns = Points()
-            for point in self:
-                if point.gjf and not point.wfn:
-                    wfns.add_point(point)
-            if n_gjfs > 0:
-                print()
-                print(f"{n_gjfs} GJFs found.")
-                print(f"{n_wfns} WFNs found.")
-                print()
-                print(f"Submitting {n_gjfs - n_wfns} GJFs to Gaussian.")
-                wfns.submit_gjfs()
-                sys.exit(0)
-        else:
-            if UsefulTools.in_sensitive(
-                GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS
-            ):
-                self.check_functional()
-            print("All wfns complete.")
-
-    def make_gjf_template(self, n_points):
-        for i in range(n_points):
-            gjf_fname = os.path.join(
-                self.directory,
-                GLOBALS.SYSTEM_NAME + str(i + 1).zfill(4) + ".gjf",
-            )
-            self.add_point(Point(gjf_fname=gjf_fname))
-
-    def make_wfn_template(self, n_points):
-        for i in range(n_points):
-            wfn_fname = os.path.join(
-                self.directory,
-                GLOBALS.SYSTEM_NAME + str(i + 1).zfill(4) + ".wfn",
-            )
-            self.add_point(Point(wfn_fname=wfn_fname))
-
-    def get_training_sets(self, model_type):
-        training_sets = {}
-        nproperties = 0
-        for point in self:
-            point_data, nproperties = point.training_set_lines(model_type)
-            for atom, line in point_data.items():
-                if atom not in training_sets.keys():
-                    training_sets[atom] = []
-                training_sets[atom].append(line)
-        return training_sets, nproperties
-
-    def update_alpha(self):
-        cv_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
-        if not os.path.exists(cv_file):
-            return
-
-        npoints = -1
-        predictions = []
-        cv_errors = []
-
-        with open(cv_file, "r") as f:
-            data = json.load(f)
-            npoints = data["npoints"]
-            cv_errors = data["cv_errors"]
-            predictions = data["predictions"]
-
-        true_values = []
-        for point in self[npoints:]:
-            true_values += [
-                point.get_true_value(
-                    str(GLOBALS.OPTIMISE_PROPERTY), atoms=True
-                )
-            ]
-
-        data = {}
-        data["npoints"] = UsefulTools.nTrain()
-        data["cv_errors"] = cv_errors
-        data["true_errors"] = []
-        for prediction, true_value in zip(predictions, true_values):
-            true_error = sum(
-                (true_value[int(predicted_atom) - 1] - predicted_value) ** 2
-                for predicted_atom, predicted_value in prediction[
-                    str(GLOBALS.OPTIMISE_PROPERTY)
-                ].items()
-            )
-
-            data["true_errors"].append(true_error)
-
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["adaptive_sampling"])
-        alpha_file = GLOBALS.FILE_STRUCTURE["alpha"]
-        with open(alpha_file, "w") as f:
-            json.dump(data, f)
-
-    def make_training_set(self, model_type):
-        training_sets, nproperties = self.get_training_sets(model_type)
-
-        if model_type.lower() in Constants.multipole_names:
-            nproperties = 1
-
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
-        model_directories = []
-        for atom, training_set in training_sets.items():
-            directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
-            FileTools.mkdir(directory, empty=True)
-            training_set_file = os.path.join(
-                directory, atom + "_TRAINING_SET.txt"
-            )
-            with open(training_set_file, "w") as f:
-                for i, line in enumerate(training_set):
-                    num = f"{i+1}".zfill(4)
-                    f.write(f"{line} {num}\n")
-            FerebusTools.write_finput(
-                directory,
-                len(training_sets.keys()),
-                atom,
-                len(training_set),
-                model_type=model_type,
-                nproperties=nproperties,
-            )
-            model_directories.append(directory)
-
-        self.update_alpha()
-
-        return model_directories
-
-    def calculate_recovery_errors(self):
-        import pandas as pd
-
-        iqa_energies = {}
-        wfn_energies = []
-        for point in self:
-            if point.wfn.energy != 0:
-                wfn_energies += [point.wfn.energy]
-            for int_atom, int_data in point.ints.items():
-                if int_atom not in iqa_energies.keys():
-                    iqa_energies[int_atom] = []
-                iqa_energies[int_atom] += [int_data.eiqa]
-
-        df = pd.DataFrame(iqa_energies)
-        df.columns = UsefulTools.natural_sort(list(df.columns))
-        df.loc[:, "Total"] = df.sum(axis=1)
-        df["WFN"] = pd.to_numeric(wfn_energies, errors="coerce")
-
-        df["error / Ha"] = (df["Total"] - df["WFN"]).abs()
-        df["error / kJ/mol"] = df["error / Ha"] * Constants.ha_to_kj_mol
-        df.to_csv("recovery_errors.csv")
-
-        return df["error / kJ/mol"]
-
-    @property
-    def n_points(self):
-        return len(self._points)
-
-    @property
-    def n_gjfs(self):
-        n = 0
-        for point in self:
-            n = n + 1 if point.gjf else n
-        return n
-
-    @property
-    def n_wfns(self):
-        n = 0
-        for point in self:
-            n = n + 1 if point.wfn else n
-        return n
-
-    @property
-    def nfeats(self):
-        if len(self) > 0:
-            return self[0].nfeats
-        else:
-            return 0
-
-    @property
-    def natoms(self):
-        if len(self) > 0:
-            return self[0].natoms
-        else:
-            return 0
-
-    @property
-    def range(self):
-        return range(self.n_points)
-
-    @property
-    def features(self):
-        #          iatom   ipoint   ifeat
-        # features[natoms][npoints][nfeatures]
-        try:
-            return self._features
-        except AttributeError:
-            print("Calculating Features")
-            self._features = [[] for _ in range(self.natoms)]
-            with tqdm(total=self.n_points, unit=" molecules") as progressbar:
-                for point in self:
-                    for i, feature in enumerate(point.features):
-                        self._features[i].append(feature)
-                    progressbar.update()
-            return self._features
-
-    def __len__(self):
-        num_points = FileTools.count_points_in(self.directory)
-        if num_points == 0:
-            return len(self._points)
-        return num_points
-
-    def __delitem__(self, del_point):
-        if isinstance(del_point, (int, np.int64)):
-            del self._points[del_point]
-        elif isinstance(del_point, Point):
-            for i, point in enumerate(self):
-                if point.num == del_point.num:
-                    del self[i]
-                break
-
-    def __getitem__(self, i):
-        return self._points[i]
-"""
 
 
 class Trajectory:
@@ -8698,7 +8052,7 @@ class ModelTools:
 
     @staticmethod
     @UsefulTools.external_function()
-    def make_models(directory, model_type, npoints=-1):
+    def make_models(directory, model_type, npoints=-1, model_directory=None):
         if ModelTools.submit:
             ModelTools.make_models_submit(directory, model_type, npoints)
             return
@@ -8718,6 +8072,60 @@ class ModelTools:
         aims = Set(directory).read()
         models = aims.make_training_set(model_type, npoints)
         SubmissionTools.make_ferebus_script(models, model_type=model_type)
+
+    @staticmethod
+    def get_start_stop_step():
+        start = 0
+        print(f"Enter Minimum Number of Training Points")
+        while start == 0:
+            ans = input("Enter Starting Number of Points: ")
+            try:
+                ans = int(ans)
+                if ans > 0:
+                    start = ans
+                else:
+                    print("Error: Number of points must be greater than 0")
+            except:
+                print("Error: Answer must be an integer")
+        
+        stop = 0
+        print(f"Enter Maximum Number of Training Points ({start} - {len(ModelTools.training_set)})")
+        while stop == 0:
+            ans = input(">> ")
+            try:
+                ans = int(ans)
+                if start <= ans <= len(ModelTools.training_set):
+                    stop = ans
+                else:
+                    print(
+                        f"Error: Number of points must be in the range {start} - {len(ModelTools.training_set)}"
+                    )
+            except:
+                print("Error: Answer must be an integer")
+        
+        step = 0
+        print(f"Enter Step Size")
+        while step == 0:
+            ans = input(">> ")
+            try:
+                ans = int(ans)
+                if start <= ans <= stop:
+                    step = ans
+                else:
+                    print(
+                        f"Error: Step Size must be in the range {start} - {stop}"
+                    )
+            except:
+                print("Error: Answer must be an integer")
+        return start, stop, step
+
+    @staticmethod
+    def remake_models(directory):
+        start, stop, step = ModelTools.get_start_stop_step()
+        for i in range(start, stop, step):
+            pass
+
+
 
     @staticmethod
     def choose_multipole(multipole):
@@ -8791,6 +8199,12 @@ class ModelTools:
         )
         menu.add_option(
             "c", "Change Number of Training Points", ModelTools.change_n_points
+        )
+        menu.add_option(
+            "r", "Remake All Models", ModelTools.remake_models,
+            kwargs={
+                "directory": ModelTools.training_set_directory,
+            },
         )
         menu.add_option("s", "Toggle Submit", ModelTools.toggle_submit)
         menu.add_space()
