@@ -1299,6 +1299,8 @@ class Globals:
                     print(
                         "\nError in ALF calculation, please specify file to calculate ALF"
                     )
+        else:
+            Atoms.ALF = self.ALF
 
     def set(self, name, value):
         name = name.upper()
@@ -2022,6 +2024,7 @@ class FileTools:
         tree.add("VALIDATION_SET", "validation_set")
         tree.add("FEREBUS", "ferebus")
         tree.add("MODELS", "models", parent="ferebus")
+        tree.add("MODELS", "remake-models")
         tree.add("LOG", "log")
         tree.add("PROGRAMS", "programs")
         tree.add("OPT", "opt")
@@ -3621,17 +3624,17 @@ class AutoTools:
         return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid)
 
     @staticmethod
-    def submit_ichor_models(jid=None, directory=None, type=None, npoints=None, model_directory=None):
+    def submit_ichor_models(jid=None, directory=None, type=None, npoints=None, ferebus_directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         if not type:
             type = "iqa"
         if not npoints:
             npoints = -1
-        if not model_directory:
-            model_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
+        if not ferebus_directory:
+            ferebus_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
         return AutoTools.submit_ichor(
-            "make_models", directory, type, npoints, model_directory, submit=True, hold=jid
+            "make_models", directory, type, npoints, ferebus_directory, submit=True, hold=jid
         )
 
     @staticmethod
@@ -3701,7 +3704,7 @@ class AutoTools:
         return points.submit_wfns(redo=False, submit=True, hold=jid, check_wfns=False)
 
     @staticmethod
-    def submit_models(jid=None, directory=None, model_directory=None):
+    def submit_models(jid=None, directory=None, ferebus_directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         gjf = GJF(FileTools.get_first_gjf(directory)).read()
@@ -3710,7 +3713,7 @@ class AutoTools:
             submit=True,
             hold=jid,
             model_type=str(GLOBALS.OPTIMISE_PROPERTY),
-            ferebus_directory=model_directory
+            ferebus_directory=ferebus_directory
         )
 
     @staticmethod
@@ -3727,11 +3730,11 @@ class AutoTools:
         _data_lock = False
 
     @staticmethod
-    def run_models(directory=None, type=None, npoints=None, model_directory=None, jid=None):
+    def run_models(directory=None, type=None, npoints=None, ferebus_directory=None, jid=None):
         _, jid = AutoTools.submit_ichor_models(
-            jid=jid, directory=directory, type=type, npoints=npoints, model_directory=model_directory
+            jid=jid, directory=directory, type=type, npoints=npoints, ferebus_directory=ferebus_directory
         )
-        return AutoTools.submit_models(jid=jid, directory=directory, model_directory=model_directory)
+        return AutoTools.submit_models(jid=jid, directory=directory, ferebus_directory=ferebus_directory)
 
     @staticmethod
     def run_from_extern():
@@ -8124,7 +8127,7 @@ class ModelTools:
     @staticmethod
     def remake_models(directory):
         start, stop, step = ModelTools.get_start_stop_step()
-        # aims = Set(directory).read()
+        aims = Set(directory).read()
         for i in range(start, stop+1, step):
             # models = aims.slice(stop)
             print(i)
@@ -8205,13 +8208,14 @@ class ModelTools:
         menu.add_option(
             "c", "Change Number of Training Points", ModelTools.change_n_points
         )
+        menu.add_option("s", "Toggle Submit", ModelTools.toggle_submit)
+        menu.add_space()
         menu.add_option(
             "r", "Remake All Models", ModelTools.remake_models,
             kwargs={
                 "directory": ModelTools.training_set_directory,
             },
         )
-        menu.add_option("s", "Toggle Submit", ModelTools.toggle_submit)
         menu.add_space()
         menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
         menu.add_message(f"Number of Training Points: {ModelTools.n_training_points}")
@@ -8378,12 +8382,9 @@ def submit_wfns(directory):
 
 
 @UsefulTools.external_function()
-def move_models(model_file, model_type="iqa", copy_to_log=True, model_directory=None):
+def move_models(model_file, model_type="iqa", copy_to_log=True, ferebus_directory=None):
     logger.info("Moving Completed Models")
-    if model_directory is None:
-        model_directory = os.path.join(str(GLOBALS.FILE_STRUCTURE["ferebus"]), "MODELS")
-    else:
-        model_directory = os.path.join(model_directory, "MODELS")
+    model_directory = os.path.join(ferebus_directory if ferebus_directory else str(GLOBALS.FILE_STRUCTURE["ferebus"]), "MODELS")
     FileTools.mkdir(model_directory)
 
     model_files = [model_file]
