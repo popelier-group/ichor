@@ -3236,14 +3236,16 @@ class SubmissionTools:
 
     @staticmethod
     def make_ferebus_script(
-        model_directories, directory="", submit=True, hold=None, model_type="iqa",
+        model_directories, directory="", submit=True, hold=None, model_type="iqa", ferebus_directory=""
     ):
         ferebus_job = FerebusCommand()
         for model_directory in model_directories:
             ferebus_job.add(model_directory)
 
         move_models = PythonCommand()
-        move_models.run_func("move_models", ferebus_job.get_variable(0), model_type)
+        if ferebus_directory is None:
+            ferebus_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
+        move_models.run_func("move_models", ferebus_job.get_variable(0), model_type, ferebus_directory)
 
         script_name = os.path.join(directory, "FereSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -3708,7 +3710,7 @@ class AutoTools:
             submit=True,
             hold=jid,
             model_type=str(GLOBALS.OPTIMISE_PROPERTY),
-            model_directory=model_directory
+            ferebus_directory=model_directory
         )
 
     @staticmethod
@@ -8123,9 +8125,10 @@ class ModelTools:
     def remake_models(directory):
         start, stop, step = ModelTools.get_start_stop_step()
         # aims = Set(directory).read()
-        for i in range(start, stop, step):
+        for i in range(start, stop+1, step):
             # models = aims.slice(stop)
             print(i)
+        quit()
 
 
 
@@ -8375,9 +8378,12 @@ def submit_wfns(directory):
 
 
 @UsefulTools.external_function()
-def move_models(model_file, model_type="iqa", copy_to_log=True):
+def move_models(model_file, model_type="iqa", copy_to_log=True, model_directory=None):
     logger.info("Moving Completed Models")
-    model_directory = GLOBALS.FILE_STRUCTURE["models"]
+    if model_directory is None:
+        model_directory = os.path.join(str(GLOBALS.FILE_STRUCTURE["ferebus"]), "MODELS")
+    else:
+        model_directory = os.path.join(model_directory, "MODELS")
     FileTools.mkdir(model_directory)
 
     model_files = [model_file]
