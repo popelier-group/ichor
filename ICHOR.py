@@ -4996,18 +4996,18 @@ class INT(Point):
 
     def rotate_dipole(self):
         # Dipole Doesn't Require Cartesian Conversion
-        d = np.array([
-            [self.q11c], # x
-            [self.q11s], # y
-            [self.q10]   # z
-        ])
+        d_x = self.q11c # x
+        d_y = self.q11s # y
+        d_z = self.q10  # z
 
         # Rotate Dipole and Reorder Output
-        q11c, q11s, q10 = tuple(np.matmul(self.C, d).flatten())
+        D_x =  C[0][0]*d_x + C[0][1]*d_y + C[0][2]*d_z 
+        D_y =  C[1][0]*d_x + C[1][1]*d_y + C[1][2]*d_z 
+        D_z =  C[2][0]*d_x + C[2][1]*d_y + C[2][2]*d_z
 
-        self.q10 = q10
-        self.q11c = q11c
-        self.q11s = q11s
+        self.q10 = D_y
+        self.q11c = D_z
+        self.q11s = D_x
 
     def rotate_quadrupole(self):
         # Convert Quadrupole Spherical Moments to Cartesian

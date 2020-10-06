@@ -15,6 +15,20 @@ def indices_to_index_dict(d, *indices):
 
 with open("multipole.txt", "w") as f:
     r = []
+    order = ["x", "y", "z"]
+    for i in range(3):
+        i_ = list(sorted([i]))
+        if not i_ in r:
+            print(i_, r)
+            r.append(i_)
+            idx = indices_to_index(i)
+            d = f"D_{idx} = "
+            for a in range(3):
+                idx = indices_to_index(*sorted([a]))
+                d += f" C[{i}][{a}]*d_{idx} +"
+            f.write(d.rstrip("+") + "\n")
+    f.write("\n")
+    r = []
     order = ["xx", "xy", "xz", "yy", "yz", "zz"]
     for i in range(3):
         for j in range(3):
