@@ -5000,6 +5000,8 @@ class INT(Point):
         d_y = self.q11s # y
         d_z = self.q10  # z
 
+        C = self.C
+
         # Rotate Dipole and Reorder Output
         D_x =  C[0][0]*d_x + C[0][1]*d_y + C[0][2]*d_z 
         D_y =  C[1][0]*d_x + C[1][1]*d_y + C[1][2]*d_z 
