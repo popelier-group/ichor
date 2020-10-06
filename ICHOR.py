@@ -3155,7 +3155,8 @@ class SubmissionScript:
                 f.write(f"module load {module}\n")
 
             if self.ncores > 1:
-                f.write("export OMP_NUM_THREADS=$NSLOTS\n\n")
+                f.write("export OMP_NUM_THREADS=$NSLOTS\n")
+                f.write("export RAYON_NUM_THREADS=$NSLOTS\n\n")
 
             f.write("\n")
             for command in self._commands:
