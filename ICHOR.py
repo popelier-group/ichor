@@ -1144,6 +1144,8 @@ class Globals:
         globals.FEREBUS_INERTIA_WEIGHT = 0.72900, float
         globals.FEREBUS_SOCIAL_LEARNING_RATE = 1.49400, float
 
+        globals.FEREBUS_OPTIMISATION = "pso", str
+
         globals.FEREBUS_TOLERANCE = 1.0e-8, float
         globals.FEREBUS_CONVERGENCE = 20, int
         globals.FEREBUS_MAX_ITERATION = 10000, int
@@ -2370,7 +2372,7 @@ class FerebusTools:
         training_set_size,
         predictions=0,
         nproperties=1,
-        optimization="pso",
+        optimisation="pso",
     ):
         finput_fname = os.path.join(directory, "FINPUT.txt")
         atom_num = re.findall("\d+", atom)[0]
@@ -2408,7 +2410,7 @@ class FerebusTools:
             finput.write("redo_weights n\n")
             finput.write("dynamical_selection n\n")
             finput.write(
-                f"optimization {optimization}          "
+                f"optimization {optimisation}          "
                 "# choose between DE (Differential Evolution) "
                 "and PSO (Particle Swarm Optimization)\n"
             )
@@ -4979,17 +4981,12 @@ class INT(Point):
             r13 = np.array(self.parent.vec_to(self.parent.xy_plane))
 
             modR12 = self.parent.dist(self.parent.x_axis)
-            modR13 = self.parent.dist(self.parent.xy_plane)
 
             r12 /= modR12
-            r13 /= modR13
 
             eX = r12
-            eY = r13
-            s = sum(eX * eY)
-
-            for i, (ex, ey) in enumerate(zip(eX, eY)):
-                eY[i] = ey - (s/(modR12*modR13))*ex
+            s = sum(eX * r13)
+            eY = r13 - s*eX
 
             eY /= np.sqrt(sum(eY * eY))
             eZ = np.cross(eX, eY)
@@ -6179,6 +6176,7 @@ class Set(Points):
                 atom,
                 len(training_set),
                 nproperties=min(training_set.nproperties, MAX_PROPERTIES),
+                optimisation=str(GLOBALS.FEREBUS_OPTIMISATION)
             )
             model_directories.append(directory)
 
