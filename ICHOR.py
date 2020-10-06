@@ -5007,9 +5007,9 @@ class INT(Point):
         D_y =  C[1][0]*d_x + C[1][1]*d_y + C[1][2]*d_z 
         D_z =  C[2][0]*d_x + C[2][1]*d_y + C[2][2]*d_z
 
-        self.q10 = D_y
-        self.q11c = D_z
-        self.q11s = D_x
+        self.q10 = D_z
+        self.q11c = D_x
+        self.q11s = D_y
 
     def rotate_quadrupole(self):
         # Convert Quadrupole Spherical Moments to Cartesian
