@@ -163,6 +163,79 @@ def printq(msg):
 #             Class Definitions             #
 #############################################
 
+class Version:
+    def __init__(self, str_rep=None):
+        self.major = 0
+        self.minor = 0
+        self.patch = 0
+
+        if str_rep:
+            self.parse_from_string(str_rep)
+
+    def parse_from_string(self, str_rep):
+        split_rep = str_rep.split(".")
+        if len(split_rep) > 0:
+            self.major = int(split_rep[0])
+        if len(split_rep) > 1:
+            self.minor = int(split_rep[1])
+        if len(split_rep) > 2:
+            self.patch = int(split_rep[2])
+
+    def __gt__(self, other):
+        if self.major > other.major:
+            return True
+        elif self.major < other.major:
+            return False
+
+        if self.minor > other.minor:
+            return True
+        elif self.minor < other.minor:
+            return False
+        
+        if self.patch > other.patch:
+            return True
+        elif self.patch < other.patch:
+            return False
+        
+        return False
+
+    def __ge__(self, other):
+        return self > other or self == other
+
+    def __lt__(self, other):
+        if self.major < other.major:
+            return True
+        elif self.major > other.major:
+            return False
+
+        if self.minor < other.minor:
+            return True
+        elif self.minor > other.minor:
+            return False
+        
+        if self.patch < other.patch:
+            return True
+        elif self.patch > other.patch:
+            return False
+        
+        return False
+
+    def __le__(self, other):
+        return self < other or self == other
+
+    def __eq__(self, other):
+        return (
+            self.major == other.major
+            and self.minor == other.minor
+            and self.patch == other.patch
+        )
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    def __repr__(self):
+        return str(self)
+
 
 class Constants:
     BOAQ_VALUES = [
@@ -322,6 +395,8 @@ class Constants:
     AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
 
     FEREBUS_TYPES = ["executable", "python"]
+
+    FEREBUS_LEGACY_CUTOFF = Version("6.1.0")
 
     type2mass = {
         "H": 1.007825,
@@ -1091,79 +1166,6 @@ class GlobalVariable:
     # def items(self):
     #     return dict.items(self.value)
 
-
-class Version:
-    def __init__(self, str_rep=None):
-        self.major = 0
-        self.minor = 0
-        self.patch = 0
-
-        if str_rep:
-            self.parse_from_string(str_rep)
-
-    def parse_from_string(self, str_rep):
-        split_rep = str_rep.split(".")
-        if len(split_rep) > 0:
-            self.major = int(split_rep[0])
-        if len(split_rep) > 1:
-            self.minor = int(split_rep[1])
-        if len(split_rep) > 2:
-            self.patch = int(split_rep[2])
-
-    def __gt__(self, other):
-        if self.major > other.major:
-            return True
-        elif self.major < other.major:
-            return False
-
-        if self.minor > other.minor:
-            return True
-        elif self.minor < other.minor:
-            return False
-        
-        if self.patch > other.patch:
-            return True
-        elif self.patch < other.patch:
-            return False
-        
-        return False
-
-    def __ge__(self, other):
-        return self > other or self == other
-
-    def __lt__(self, other):
-        if self.major < other.major:
-            return True
-        elif self.major > other.major:
-            return False
-
-        if self.minor < other.minor:
-            return True
-        elif self.minor > other.minor:
-            return False
-        
-        if self.patch < other.patch:
-            return True
-        elif self.patch > other.patch:
-            return False
-        
-        return False
-
-    def __le__(self, other):
-        return self < other or self == other
-
-    def __eq__(self, other):
-        return (
-            self.major == other.major
-            and self.minor == other.minor
-            and self.patch == other.patch
-        )
-
-    def __str__(self):
-        return f"{self.major}.{self.minor}.{self.patch}"
-
-    def __repr__(self):
-        return str(self)
 
 
 class Globals:
@@ -2690,7 +2692,6 @@ class FerebusTools:
             ftoml.write("[kernels]\n")
             ftoml.write("[kernels.k1]\n")
             ftoml.write(f"type = \"{'rbf'}\"\n")
-
 
 
 class Problem:
@@ -7300,17 +7301,20 @@ def numba_R_rbf(x, hp):
 
 class Model:
     def __init__(self, fname, read_model=False):
-        self.fname = fname
+        self.fname = Path(fname)
 
         self.directory = ""
         self.basename = ""
 
         self.system_name = ""
         self.type = ""
+        self.atom = ""
         self.atom_number = ""
+        self.legacy = False
 
         self.analyse_name()
 
+        # TODO: Convert these to lowercase
         self.nTrain = 0
         self.nFeats = 0
 
@@ -7372,6 +7376,12 @@ class Model:
     def read(self, up_to=None):
         if self.nTrain > 0:
             return
+        if self.legacy:
+            self.read_legacy(up_to)
+        else:
+            self.read_updated(up_to)
+        
+    def read_legacy(up_to):
         with open(self.fname) as f:
             for line in f:
                 if "norm" in line:
@@ -7416,14 +7426,81 @@ class Model:
                 if up_to is not None and up_to in line:
                     break
 
-    def analyse_name(self):
-        self.directory = os.path.dirname(self.fname)
-        self.basename = os.path.basename(self.fname)
+    def read_updated(up_to):
+        with open(self.fname) as f:
+            for line in f:
+                if line.startswith("#"):
+                    continue
 
-        fname_split = os.path.splitext(self.basename)[0].split("_")
-        self.system_name = fname_split[0]
-        self.type = fname_split[2].lower()
-        self.atom_number = fname_split[3]
+                if "name" in line:
+                    self.system_name = line.split()[1]
+                    continue
+                if "property" in line:
+                    self.type = line.split()[1]
+                    continue
+                if "atom" in line:
+                    self.atom = line.split()[1]
+                    continue
+                    
+                if "number_of_features" in line:
+                    self.nFeats = int(line.split()[1])
+                if "number_of_training_points" in line:
+                    self.nTrain = int(line.split()[1])
+
+                if "[mean]" in line:
+                    line = next(f)
+                    line = next(f)
+                    self.mu = float(line.split()[1])
+                
+                if "lengthscale" in line:
+                    self.hyper_parameters = [float(hp) for hp in line.split()[1:]]
+                
+                if "[training_data.x]" in line:
+                    line = next(f)
+                    while line.strip() != "":
+                        self.X.append([float(num) for num in line.split()])
+                        line = next(f)
+
+                if "[training_data.y]" in line:
+                    line = next(f)
+                    while line.strip() != "":
+                        self.y.append(float(line))
+                        line = next(f)
+                
+                if "[weights]" in line:
+                    line = next(f)
+                    while line.strip() != "":
+                        self.weights.append(float(line))
+                        try: line = next(f)
+                        except: pass
+
+                if up_to is not None and up_to in line:
+                    break
+
+        self.X = np.array(self.X)
+        self.y = np.array(self.y).reshape((-1, 1))
+        self.weights = np.array(self.weights)
+
+    def analyse_name(self):
+        self.directory = self.fname.parent
+        self.basename = self.fname.name
+
+        fname_split = self.fname.stem.split("_")
+
+        if self.fname.suffix == ".txt":
+            self.system_name = fname_split[0]
+            self.type = fname_split[2].lower()
+            self.atom_number = fname_split[3]
+            self.legacy = True
+        elif self.fname.suffix == ".model":
+            self.system_name = fname_split[0]
+            self.type = fname_split[1]
+            self.atom = fname_split[2]
+            self.atom_number = re.findall("\d+", self.atom)[0]
+            self.legacy = False
+        else:
+            # TODO: Convert to fatal error
+            printq(f"ERROR: Unknown Model Type {self.fname.suffix}")
 
     def remove_no_noise(self):
         no_noise_line = -1
@@ -7451,16 +7528,14 @@ class Model:
         return os.path.join(directory, basename)
 
     def copy_to_log(self):
-        log_directory = GLOBALS.FILE_STRUCTURE["log"]
+        log_directory = Path(GLOBALS.FILE_STRUCTURE["log"])
         FileTools.mkdir(log_directory)
 
         if self.nTrain == 0:
             self.read(up_to="Number_of_training_points")
 
         nTrain = str(self.nTrain).zfill(4)
-        log_directory = os.path.join(
-            log_directory, f"{self.system_name}{nTrain}"
-        )
+        log_directory /= Path(f"{self.system_name}{nTrain}")
         FileTools.mkdir(log_directory)
         log_model_file = self.get_fname(log_directory)
 
@@ -8202,15 +8277,13 @@ class Set(Points):
 
         for atom, training_set in training_sets.items():
             training_sets[atom] = training_set.slice(min(npoints, len(self)))
-
-        # Change this back to 6.1.0 when finished debugging
-        legacy_cutoff = Version("6.1.0")
+        
 
         model_directories = []
         for atom, training_set in training_sets.items():
             model_directory = os.path.join(directory, atom)
             FileTools.mkdir(model_directory, empty=True)
-            if GLOBALS.FEREBUS_VERSION > legacy_cutoff:
+            if GLOBALS.FEREBUS_VERSION > Constants.FEREBUS_LEGACY_CUTOFF:
                 self.make_updated_training_set(
                     atom, training_set, model_directory, len(training_sets)
                 )
@@ -10236,6 +10309,39 @@ class ModelTools:
         SubmissionTools.make_ferebus_script(models, model_type=model_type)
 
     @staticmethod
+    def move_models_legacy(model_file, model_directory, model_type, copy_to_log):
+        model_files = [model_file]
+        if os.path.isdir(model_file):
+            model_files = FileTools.get_files_in(model_file, "*_kriging_*.txt")
+
+        for model_file in model_files:
+            model = Model(model_file)
+            model.remove_no_noise()
+
+            if model_type.lower() == "iqa":
+                model.type = "IQA"
+            elif not model_type.lower() == "multipoles":
+                model.type = str(model_type)
+            new_model_file = model.get_fname(model_directory)
+            FileTools.copy_file(model_file, new_model_file)
+
+            if copy_to_log:
+                model.copy_to_log()
+    
+    @staticmethod
+    def move_models_updated(model_file, copy_to_log):
+        model_files = [model_file]
+        if os.path.isdir(model_file):
+            model_files = FileTools.get_files_in(model_file, "*.model")
+
+        for model_file in model_files:
+            path = Path(model_file)
+            new_model_file = Path(model_directory) / path.name
+            FileTools.copy_file(model_file, new_model_file)
+            if copy_to_log:
+                model.copy_to_log()
+
+    @staticmethod
     def get_start_stop_step():
         start = 0
         print(f"Enter Minimum Number of Training Points")
@@ -10572,23 +10678,11 @@ def move_models(
     )
     FileTools.mkdir(model_directory)
 
-    model_files = [model_file]
-    if os.path.isdir(model_file):
-        model_files = FileTools.get_files_in(model_file, "*_kriging_*.txt")
-
-    for model_file in model_files:
-        model = Model(model_file)
-        model.remove_no_noise()
-
-        if model_type.lower() == "iqa":
-            model.type = "IQA"
-        elif not model_type.lower() == "multipoles":
-            model.type = str(model_type)
-        new_model_file = model.get_fname(model_directory)
-        FileTools.copy_file(model_file, new_model_file)
-
-        if copy_to_log:
-            model.copy_to_log()
+    if GLOBALS.FEREBUS_VERSION > Constants.FEREBUS_LEGACY_CUTOFF:
+        ModelTools.move_models_updated(model_file, model_directory, copy_to_log)
+    else:
+        ModelTools.move_models_legacy(model_file, model_directory, model_type, copy_to_log)
+    
 
 
 @UsefulTools.external_function()
