@@ -7381,7 +7381,7 @@ class Model:
         else:
             self.read_updated(up_to)
         
-    def read_legacy(up_to):
+    def read_legacy(self, up_to):
         with open(self.fname) as f:
             for line in f:
                 if "norm" in line:
@@ -7426,7 +7426,7 @@ class Model:
                 if up_to is not None and up_to in line:
                     break
 
-    def read_updated(up_to):
+    def read_updated(self, up_to):
         with open(self.fname) as f:
             for line in f:
                 if line.startswith("#"):
