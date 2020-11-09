@@ -8277,7 +8277,6 @@ class Set(Points):
 
         for atom, training_set in training_sets.items():
             training_sets[atom] = training_set.slice(min(npoints, len(self)))
-        
 
         model_directories = []
         for atom, training_set in training_sets.items():
@@ -8294,7 +8293,6 @@ class Set(Points):
             model_directories += [model_directory]
 
         self.update_alpha()
-        quit()
         return model_directories
 
     def slice(self, *args):
