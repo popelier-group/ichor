@@ -310,7 +310,7 @@ class Constants:
 
     AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
 
-    FEREBUS_VERSIONS = ["fortran", "python"]
+    FEREBUS_TYPES = ["executable", "python"]
 
     type2mass = {
         "H": 1.007825,
@@ -829,6 +829,10 @@ class GlobalTools:
             alf = [[int(i) for i in j] for j in alf]
         return alf
 
+    @staticmethod
+    def read_version(strver):
+        return Version(strver)
+
 
 class Arguments:
     config_file = "config.properties"
@@ -1063,6 +1067,46 @@ class GlobalVariable:
     #     return dict.items(self.value)
 
 
+class Version:
+    def __init__(self, str_rep=None):
+        self.major = 0
+        self.minor = 0
+        self.patch = 0
+
+        if str_rep:
+            self.parse_from_string(str_rep)
+
+    def parse_from_string(self, str_rep):
+        split_rep = str_rep.split(".")
+        if len(split_rep) > 0:
+            self.major = int(split_rep[0])
+        if len(split_rep) > 1:
+            self.minor = int(split_rep[1])
+        if len(split_rep) > 2:
+            self.patch = int(split_rep[2])
+
+    def __gt__(self, other):
+        return self.major > other.major and self.minor > other.minor and self.patch > other.patch
+    
+    def __ge__(self, other):
+        return self.major >= other.major and self.minor >= other.minor and self.patch >= other.patch
+
+    def __lt__(self, other):
+        return self.major < other.major and self.minor < other.minor and self.patch < other.patch
+
+    def __le__(self, other):
+        return self.major <= other.major and self.minor <= other.minor and self.patch <= other.patch
+
+    def __eq__(self, other):
+        return self.major == other.major and self.minor == other.minor and self.patch == other.patch
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    def __repr__(self):
+        return str(self)
+
+
 class Globals:
     types = []
 
@@ -1108,10 +1152,8 @@ class Globals:
         globals.FILE_STRUCTURE = Tree()  # Don't change
 
         globals.KERNEL = "rbf", str  # only use rbf for now
-        globals.FEREBUS_VERSION = (
-            "python",
-            str,
-        )  # fortran (FEREBUS) or python (FEREBUS.py)
+        globals.FEREBUS_TYPE = "executable", str
+        globals.FEREBUS_VERSION = "6.1", Version # fortran (FEREBUS) or python (FEREBUS.py)
         globals.FEREBUS_LOCATION = "PROGRAMS/FEREBUS", str
 
         # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
@@ -1220,7 +1262,7 @@ class Globals:
         globals.METHOD.allowed_values = Constants.GAUSSIAN_METHODS
         globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
         globals.IASMESH.allowed_values = Constants.IASMESH_VALUES
-        globals.FEREBUS_VERSION.allowed_values = Constants.FEREBUS_VERSIONS
+        globals.FEREBUS_TYPE.allowed_values = Constants.FEREBUS_TYPES
         globals.OPTIMISE_PROPERTY.allowed_values = ["iqa"] + Constants.multipole_names
 
         # Set modifiers
@@ -1230,7 +1272,8 @@ class Globals:
         globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
         globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
         globals.ALF.add_pre_modifier(GlobalTools.read_alf)
-        globals.OPTIMISE_PROPERTY.add_modifier(GlobalTools.to_lower)
+        globals.FEREBUS_VERSION.add_modifier(GlobalTools.read_version)
+        globals.OPTIMISE_PROPERTY.add_pre_modifier(GlobalTools.to_lower)
         globals.INCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
         globals.EXCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
 
@@ -2392,7 +2435,7 @@ class FerebusTools:
                 "#\n# Prediction number and definition of new predictions\n#\n"
             )
             finput.write(f"predictions {predictions}\n")
-            if "py" in str(GLOBALS.FEREBUS_VERSION):
+            if "py" in str(GLOBALS.FEREBUS_TYPE):
                 finput.write(f"kernel {GLOBALS.KERNEL}\n")
             finput.write(
                 "#\nfeatures_number 0        # if your are kriging only one atom or you don't want to use he standard "
@@ -2950,7 +2993,7 @@ class FerebusCommand(CommandLine):
 
     def setup_command(self):
         ferebus_loc = os.path.abspath(str(GLOBALS.FEREBUS_LOCATION))
-        if "py" in str(GLOBALS.FEREBUS_VERSION):
+        if "py" in str(GLOBALS.FEREBUS_TYPE):
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
         else:
@@ -2960,7 +3003,7 @@ class FerebusCommand(CommandLine):
         self.directories += [os.path.abspath(directory)]
 
     def load_modules(self):
-        if "py" not in str(GLOBALS.FEREBUS_VERSION):
+        if "py" not in str(GLOBALS.FEREBUS_TYPE):
             self.modules["ffluxlab"] = [
                 "mpi/intel/18.0.3",
                 "libs/nag/intel/fortran/mark-23",
@@ -6137,6 +6180,14 @@ class Set(Points):
         if npoints < 0:
             npoints = len(self)
 
+        delimiter = " "
+        header = False
+        if GLOBALS.FEREBUS_VERSION >= Version("7"):
+            delimiter = ","
+            header=True
+            print("here")
+            quit()
+
         training_sets = {}
         for point in self:
             input = point.features_dict
@@ -6168,9 +6219,9 @@ class Set(Points):
                         output = dict(it.islice(output.items(), MAX_PROPERTIES))
 
                     num = f"{i+1}".zfill(4)
-                    input = " ".join([str(s) for s in input])
-                    output = " ".join([str(s) for s in output.values()])
-                    f.write(f"{input} {output} {num}\n")
+                    input = delimiter.join([str(s) for s in input])
+                    output = delimiter.join([str(s) for s in output.values()])
+                    f.write(f"{input}" + delimiter + "{output} {num}\n")
 
             # Write FINPUT.txt
             FerebusTools.write_finput(
@@ -6185,39 +6236,6 @@ class Set(Points):
 
         self.update_alpha()
         return model_directories
-
-        # training_sets = {}
-
-        # training_sets, nproperties = self.get_training_sets(model_type)
-
-        # if model_type.lower() in Constants.multipole_names:
-        #     nproperties = 1
-
-        # FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
-        # model_directories = []
-        # for atom, training_set in training_sets.items():
-        #     directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
-        #     FileTools.mkdir(directory, empty=True)
-        #     training_set_file = os.path.join(
-        #         directory, atom + "_TRAINING_SET.txt"
-        #     )
-        #     with open(training_set_file, "w") as f:
-        #         for i, line in enumerate(training_set):
-        #             num = f"{i+1}".zfill(4)
-        #             f.write(f"{line} {num}\n")
-        #     FerebusTools.write_finput(
-        #         directory,
-        #         len(training_sets.keys()),
-        #         atom,
-        #         len(training_set),
-        #         model_type=model_type,
-        #         nproperties=nproperties,
-        #     )
-        #     model_directories.append(directory)
-
-        # self.update_alpha()
-
-        # return model_directories
 
     def slice(self, *args):
         return Set()._from(it.islice(self, *args))
