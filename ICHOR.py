@@ -10342,6 +10342,7 @@ class ModelTools:
 
         for model_file in model_files:
             path = Path(model_file)
+            model = Model(path)
             new_model_file = Path(model_directory) / path.name
             FileTools.copy_file(model_file, new_model_file)
             if copy_to_log:
