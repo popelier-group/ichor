@@ -7438,7 +7438,7 @@ class Model:
                 if "property" in line:
                     self.type = line.split()[1]
                     continue
-                if "atom" in line:
+                if line.startswith("atom"):
                     self.atom = line.split()[1]
                     continue
                     
@@ -7472,7 +7472,7 @@ class Model:
                     while line.strip() != "":
                         self.weights.append(float(line))
                         try: line = next(f)
-                        except: pass
+                        except: break
 
                 if up_to is not None and up_to in line:
                     break
@@ -7521,18 +7521,26 @@ class Model:
 
     def get_fname(self, directory=None):
         if directory is None:
-            directory = self.directory
-        basename = (
-            f"{self.system_name}_kriging_{self.type}_{self.atom_number}.txt"
-        )
-        return os.path.join(directory, basename)
+            directory = Path(self.directory)
+        if self.legacy:
+            basename = Path(
+                f"{self.system_name}_kriging_{self.type}_{self.atom_number}.txt"
+            )
+        else:
+            basename = Path(
+                f"{self.system_name}_{self.type}_{self.atom}.model"
+            )
+        return directory / basename
 
     def copy_to_log(self):
         log_directory = Path(GLOBALS.FILE_STRUCTURE["log"])
         FileTools.mkdir(log_directory)
 
         if self.nTrain == 0:
-            self.read(up_to="Number_of_training_points")
+            if self.legacy:
+                self.read(up_to="number_of_training_points")
+            else:
+                self.read(up_to="Number_of_training_points")
 
         nTrain = str(self.nTrain).zfill(4)
         log_directory /= Path(f"{self.system_name}{nTrain}")
@@ -10327,7 +10335,7 @@ class ModelTools:
                 model.copy_to_log()
     
     @staticmethod
-    def move_models_updated(model_file, copy_to_log):
+    def move_models_updated(model_file, model_directory, copy_to_log):
         model_files = [model_file]
         if os.path.isdir(model_file):
             model_files = FileTools.get_files_in(model_file, "*.model")
