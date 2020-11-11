@@ -7481,6 +7481,51 @@ class Model:
         self.y = np.array(self.y).reshape((-1, 1))
         self.weights = np.array(self.weights)
 
+    def write(self, directory=None, legacy=False):
+        directory = Path(GLOBALS.FILE_STRUCTURE["models"]) if not directory else Path(directory)
+        if self.legacy or legacy:
+            self.write_legacy(directory)
+        else:
+            self.write_updated(directory)
+
+    def write_legacy(self, directory):
+        atom_num = self.atom_num.zfill(2)
+        fname = Path(f"{self.system_name}_kriging_{self.type}_{self.atom_num}.txt")
+        path = directory / fname
+        with open(path, "w") as f:
+            f.write("Kriging Results and Parameters\n")
+            f.write(";\n")
+            f.write(f"Feature {self.nFeats}\n")
+            f.write(f"Number_of_training_points {self.nTrain}\n")
+            f.write(";\n")
+            f.write(f"Mu {self.mu} Sigma_Squared {self.sigma2}\n")
+            f.write(";\n")
+            f.write("Theta\n")
+            for theta in self.hyper_parameters:
+                f.write(f"{theta}\n")
+            f.write("p\n")
+            for _ in range(len(self.hyper_parameters)):
+                f.write("2.00000000000000\n")
+            f.write(";\n")
+            f.write("Weights\n")
+            for weight in self.weights:
+                f.write(f"{weight}\n")
+            f.write(";\n")
+            f.write("R_matrix\n")
+            f.write("Dimension {self.nTrain}\n")
+            f.write(";\n")
+            f.write("Property_value_Kriging_centers\n")
+            for y in self.y:
+                f.write(f"{y}\n")
+            f.write("training_data\n")
+            for x in self.X:
+                for i in range(0, len(x), 3):
+                    f.write("{x[i]} {x[i+1]} {x[i+2]}\n")
+            f.write(";\n")
+
+    def write_updated(self, directory):
+        UsefulTools.not_implemented()
+
     def analyse_name(self):
         self.directory = self.fname.parent
         self.basename = self.fname.name
@@ -7718,6 +7763,10 @@ class Models:
 
     def find_models(self, read_model=False):
         model_files = FileTools.get_files_in(self.directory, "*_kriging_*.txt")
+        for model_file in tqdm(model_files):
+            self.add(model_file, read_model)
+        
+        model_files = FileTools.get_files_in(self.directory, "*.model")
         for model_file in tqdm(model_files):
             self.add(model_file, read_model)
 
