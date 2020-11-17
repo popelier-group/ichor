@@ -1167,7 +1167,6 @@ class GlobalVariable:
     #     return dict.items(self.value)
 
 
-
 class Globals:
     types = []
 
@@ -1235,12 +1234,12 @@ class Globals:
             1.0e-10,
             float,
         )  # Default value for FEREBUS nugget
-        globals.FEREBUS_MIN_THETA = (
+        globals.FEREBUS_THETA_MIN = (
             0.0,
             float,
         )  # Minimum theta value for initialisation (best to keep 0)
-        globals.FEREBUS_MAX_THETA = (
-            1.0,
+        globals.FEREBUS_THETA_MAX = (
+            3.0,
             float,
         )  # Maximum theta value for initialisation
 
@@ -2679,15 +2678,31 @@ class FerebusTools:
     ):
         ftoml_fname = os.path.join(directory, "ferebus.toml")
         atom_num = re.findall("\d+", atom)[0]
+        alf = GLOBALS.ALF[atom_num-1]
 
         with open(ftoml_fname, "w+") as ftoml:
             ftoml.write("[system]\n")
             ftoml.write(f"name = \"{GLOBALS.SYSTEM_NAME}\"\n")
             ftoml.write(f"natoms = {natoms}\n")
-            ftoml.write(f"atoms = [\"{atom}\"]\n")
+            ftoml.write(f"atoms = [\n" \
+                         "    \{name=\"{atom}\", alf=[{alf[0]}, {alf[1]}, {alf[2]}]\}\n"  \
+                         "]\n"
+                )
+            ftoml.write("\n")
+            ftoml.write("[model]\n")
+            ftoml.write("mean = \"constant\"")
+            ftoml.write("optimiser = \"{GLOBALS.FEREBUS_OPTIMISATION}}\"")
+            ftoml.write("\n")
+            ftoml.write("[optimiser]\n")
+            ftoml.write(f"search_min = {GLOBALS.THETA_MIN}\n")
+            ftoml.write(f"search_max = {GLOBALS.THETA_MAX}\n")
             ftoml.write("\n")
             ftoml.write("[optimiser.pso]\n")
-            ftoml.write(f"tolerance = {1e-8}\n")
+            ftoml.write(f"swarm_size = {GLOBALS.FEREBUS_SWARM_SIZE}\n")
+            ftoml.write(f"iterations = {GLOBALS.FEREBUS_MAX_ITERATIONS}\n")
+            ftoml.write(f"inertia_weight = {GLOBALS.FEREBUS_INERTIA_WEIGHT}\n")
+            ftoml.write(f"cognitive_learning_rate = {GLOBALS.FEREBUS_COGNITIVE_LEARNING_RATE}\n")
+            ftoml.write(f"social_learning_rate = {GLOBALS.FEREBUS_SOCIAL_LEARNING_RATE}\n")
             ftoml.write("\n")
             ftoml.write("[kernels]\n")
             ftoml.write("[kernels.k1]\n")
