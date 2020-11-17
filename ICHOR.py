@@ -1249,6 +1249,7 @@ class Globals:
         globals.FEREBUS_INERTIA_WEIGHT = 0.72900, float
         globals.FEREBUS_SOCIAL_LEARNING_RATE = 1.49400, float
 
+        globals.FEREBUS_MEAN = "constant", str
         globals.FEREBUS_OPTIMISATION = "pso", str
 
         globals.FEREBUS_TOLERANCE = 1.0e-8, float
@@ -2689,8 +2690,8 @@ class FerebusTools:
             ftoml.write("]\n")
             ftoml.write("\n")
             ftoml.write("[model]\n")
-            ftoml.write("mean = \"constant\"\n")
-            ftoml.write("optimiser = \"{GLOBALS.FEREBUS_OPTIMISATION}}\"\n")
+            ftoml.write(f"mean = \"{GLOBALS.FEREBUS_MEAN}\"\n")
+            ftoml.write(f"optimiser = \"{GLOBALS.FEREBUS_OPTIMISATION}\"\n")
             ftoml.write("\n")
             ftoml.write("[optimiser]\n")
             ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
@@ -2698,7 +2699,7 @@ class FerebusTools:
             ftoml.write("\n")
             ftoml.write("[optimiser.pso]\n")
             ftoml.write(f"swarm_size = {GLOBALS.FEREBUS_SWARM_SIZE}\n")
-            ftoml.write(f"iterations = {GLOBALS.FEREBUS_MAX_ITERATIONS}\n")
+            ftoml.write(f"iterations = {GLOBALS.FEREBUS_MAX_ITERATION}\n")
             ftoml.write(f"inertia_weight = {GLOBALS.FEREBUS_INERTIA_WEIGHT}\n")
             ftoml.write(f"cognitive_learning_rate = {GLOBALS.FEREBUS_COGNITIVE_LEARNING_RATE}\n")
             ftoml.write(f"social_learning_rate = {GLOBALS.FEREBUS_SOCIAL_LEARNING_RATE}\n")
