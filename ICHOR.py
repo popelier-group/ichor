@@ -2678,24 +2678,23 @@ class FerebusTools:
     ):
         ftoml_fname = os.path.join(directory, "ferebus.toml")
         atom_num = re.findall("\d+", atom)[0]
-        alf = GLOBALS.ALF[atom_num-1]
+        alf = GLOBALS.ALF[int(atom_num)-1]
 
         with open(ftoml_fname, "w+") as ftoml:
             ftoml.write("[system]\n")
             ftoml.write(f"name = \"{GLOBALS.SYSTEM_NAME}\"\n")
             ftoml.write(f"natoms = {natoms}\n")
-            ftoml.write(f"atoms = [\n" \
-                         "    \{name=\"{atom}\", alf=[{alf[0]}, {alf[1]}, {alf[2]}]\}\n"  \
-                         "]\n"
-                )
+            ftoml.write(f"atoms = [\n")
+            ftoml.write(f"  {{name=\"{atom}\", alf=[{alf[0]}, {alf[1]}, {alf[2]}]}}\n")
+            ftoml.write("]\n")
             ftoml.write("\n")
             ftoml.write("[model]\n")
-            ftoml.write("mean = \"constant\"")
-            ftoml.write("optimiser = \"{GLOBALS.FEREBUS_OPTIMISATION}}\"")
+            ftoml.write("mean = \"constant\"\n")
+            ftoml.write("optimiser = \"{GLOBALS.FEREBUS_OPTIMISATION}}\"\n")
             ftoml.write("\n")
             ftoml.write("[optimiser]\n")
-            ftoml.write(f"search_min = {GLOBALS.THETA_MIN}\n")
-            ftoml.write(f"search_max = {GLOBALS.THETA_MAX}\n")
+            ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
+            ftoml.write(f"search_max = {GLOBALS.FEREBUS_THETA_MAX}\n")
             ftoml.write("\n")
             ftoml.write("[optimiser.pso]\n")
             ftoml.write(f"swarm_size = {GLOBALS.FEREBUS_SWARM_SIZE}\n")
