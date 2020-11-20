@@ -124,7 +124,14 @@ SSH_SETTINGS = {
 #############################################
 
 
-def setup_logger(name, log_file, level=logging.INFO, formatter=logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', "%d-%m-%Y %H:%M:%S")):
+def setup_logger(
+    name,
+    log_file,
+    level=logging.INFO,
+    formatter=logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(message)s", "%d-%m-%Y %H:%M:%S"
+    ),
+):
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
 
@@ -148,9 +155,86 @@ READ_FLAGS = os.O_RDONLY | O_BINARY
 WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | O_BINARY
 BUFFER_SIZE = 128 * 1024
 
+def printq(msg):
+    print(msg)
+    quit()
+
 #############################################
 #             Class Definitions             #
 #############################################
+
+class Version:
+    def __init__(self, str_rep=None):
+        self.major = 0
+        self.minor = 0
+        self.patch = 0
+
+        if str_rep:
+            self.parse_from_string(str_rep)
+
+    def parse_from_string(self, str_rep):
+        split_rep = str_rep.split(".")
+        if len(split_rep) > 0:
+            self.major = int(split_rep[0])
+        if len(split_rep) > 1:
+            self.minor = int(split_rep[1])
+        if len(split_rep) > 2:
+            self.patch = int(split_rep[2])
+
+    def __gt__(self, other):
+        if self.major > other.major:
+            return True
+        elif self.major < other.major:
+            return False
+
+        if self.minor > other.minor:
+            return True
+        elif self.minor < other.minor:
+            return False
+        
+        if self.patch > other.patch:
+            return True
+        elif self.patch < other.patch:
+            return False
+        
+        return False
+
+    def __ge__(self, other):
+        return self > other or self == other
+
+    def __lt__(self, other):
+        if self.major < other.major:
+            return True
+        elif self.major > other.major:
+            return False
+
+        if self.minor < other.minor:
+            return True
+        elif self.minor > other.minor:
+            return False
+        
+        if self.patch < other.patch:
+            return True
+        elif self.patch > other.patch:
+            return False
+        
+        return False
+
+    def __le__(self, other):
+        return self < other or self == other
+
+    def __eq__(self, other):
+        return (
+            self.major == other.major
+            and self.minor == other.minor
+            and self.patch == other.patch
+        )
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    def __repr__(self):
+        return str(self)
 
 
 class Constants:
@@ -310,7 +394,9 @@ class Constants:
 
     AIMALL_FUNCTIONALS = ["MO62X", "B3LYP", "PBE"]
 
-    FEREBUS_VERSIONS = ["fortran", "python"]
+    FEREBUS_TYPES = ["executable", "python"]
+
+    FEREBUS_LEGACY_CUTOFF = Version("6.1.0")
 
     type2mass = {
         "H": 1.007825,
@@ -466,24 +552,24 @@ class Constants:
     ha_to_kj_mol = 2625.5
 
     # Precomputed Roots from fflux_initialisation.f90
-    rt3    = 1.7320508075689
-    rt5    = 2.2360679774998
-    rt6    = 2.4494897427832
-    rt10   = 3.1622776601684
-    rt15   = 3.8729833462074
-    rt35   = 5.9160797830996
-    rt70   = 8.3666002653408
+    rt3 = 1.7320508075689
+    rt5 = 2.2360679774998
+    rt6 = 2.4494897427832
+    rt10 = 3.1622776601684
+    rt15 = 3.8729833462074
+    rt35 = 5.9160797830996
+    rt70 = 8.3666002653408
     rt1_24 = 0.20412414523193
     rt_1_5 = 0.44721359549995
-    rt_1_10= 0.31622776601683
-    rt_1_35= 0.16903085094570
-    rt2_3  = 0.81649658092773
-    rt_2_35= 0.23904572186687 
-    rt3_3  = 0.57735026918962
+    rt_1_10 = 0.31622776601683
+    rt_1_35 = 0.16903085094570
+    rt2_3 = 0.81649658092773
+    rt_2_35 = 0.23904572186687
+    rt3_3 = 0.57735026918962
     rt_3_3 = 1.22474487139158
     rt_3_5 = 0.77459666924148
-    rt3_8  = 0.61237243569579
-    rt5_8  = 0.79056941504209
+    rt3_8 = 0.61237243569579
+    rt5_8 = 0.79056941504209
     rt5_12 = 0.64549722436790
     rt_8_5 = 1.26491106406735
     rt12_3 = 1.15470053837925
@@ -574,7 +660,9 @@ class UsefulTools:
         prog = re.compile(r"(\d+)")
 
         def alphanum_key(element):
-            return [int(c) if c.isdigit() else c for c in prog.findall(element)]
+            return [
+                int(c) if c.isdigit() else c for c in prog.findall(element)
+            ]
 
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
@@ -583,7 +671,10 @@ class UsefulTools:
         prog = re.compile(r"(\d+)")
 
         def alphanum_key(element):
-            return [int(c) if c.isdigit() else c for c in prog.findall(element.path)]
+            return [
+                int(c) if c.isdigit() else c
+                for c in prog.findall(element.path)
+            ]
 
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
@@ -592,7 +683,10 @@ class UsefulTools:
         prog = re.compile(r"(\d+)")
 
         def alphanum_key(element):
-            return [int(c) if c.isdigit() else c for c in prog.findall(element.atom)]
+            return [
+                int(c) if c.isdigit() else c
+                for c in prog.findall(element.atom)
+            ]
 
         return sorted(iterable, key=alphanum_key, reverse=reverse)
 
@@ -774,7 +868,9 @@ class UsefulTools:
             # Readline only available on Unix
             import readline
 
-            readline.set_startup_hook(lambda: readline.insert_text(str(prefill)))
+            readline.set_startup_hook(
+                lambda: readline.insert_text(str(prefill))
+            )
             return input(prompt)
         except:
             return input(prompt)
@@ -829,6 +925,10 @@ class GlobalTools:
             alf = [[int(i) for i in j] for j in alf]
         return alf
 
+    @staticmethod
+    def read_version(strver):
+        return Version(strver)
+
 
 class Arguments:
     config_file = "config.properties"
@@ -875,11 +975,15 @@ class Arguments:
             func = args.func[0]
             func_args = args.func[1:] if len(args.func) > 1 else []
             if func in Arguments.external_functions.keys():
-                Arguments.call_external_function = Arguments.external_functions[func]
+                Arguments.call_external_function = Arguments.external_functions[
+                    func
+                ]
                 Arguments.call_external_function_args = func_args
             else:
                 print(f"{func} not in allowed functions:")
-                formatted_functions = [str(f) for f in allowed_functions.split(",")]
+                formatted_functions = [
+                    str(f) for f in allowed_functions.split(",")
+                ]
                 formatted_functions = "- " + "\n- ".join(formatted_functions)
                 print(f"{formatted_functions}")
                 quit()
@@ -1108,9 +1212,10 @@ class Globals:
         globals.FILE_STRUCTURE = Tree()  # Don't change
 
         globals.KERNEL = "rbf", str  # only use rbf for now
+        globals.FEREBUS_TYPE = "executable", str
         globals.FEREBUS_VERSION = (
-            "python",
-            str,
+            "6.1",
+            Version,
         )  # fortran (FEREBUS) or python (FEREBUS.py)
         globals.FEREBUS_LOCATION = "PROGRAMS/FEREBUS", str
 
@@ -1129,12 +1234,12 @@ class Globals:
             1.0e-10,
             float,
         )  # Default value for FEREBUS nugget
-        globals.FEREBUS_MIN_THETA = (
+        globals.FEREBUS_THETA_MIN = (
             0.0,
             float,
         )  # Minimum theta value for initialisation (best to keep 0)
-        globals.FEREBUS_MAX_THETA = (
-            1.0,
+        globals.FEREBUS_THETA_MAX = (
+            3.0,
             float,
         )  # Maximum theta value for initialisation
 
@@ -1144,6 +1249,7 @@ class Globals:
         globals.FEREBUS_INERTIA_WEIGHT = 0.72900, float
         globals.FEREBUS_SOCIAL_LEARNING_RATE = 1.49400, float
 
+        globals.FEREBUS_MEAN = "constant", str
         globals.FEREBUS_OPTIMISATION = "pso", str
 
         globals.FEREBUS_TOLERANCE = 1.0e-8, float
@@ -1220,17 +1326,22 @@ class Globals:
         globals.METHOD.allowed_values = Constants.GAUSSIAN_METHODS
         globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
         globals.IASMESH.allowed_values = Constants.IASMESH_VALUES
-        globals.FEREBUS_VERSION.allowed_values = Constants.FEREBUS_VERSIONS
-        globals.OPTIMISE_PROPERTY.allowed_values = ["iqa"] + Constants.multipole_names
+        globals.FEREBUS_TYPE.allowed_values = Constants.FEREBUS_TYPES
+        globals.OPTIMISE_PROPERTY.allowed_values = [
+            "iqa"
+        ] + Constants.multipole_names
 
         # Set modifiers
         for global_variable in globals.global_variables:
             if globals.__dict__[global_variable].type == str:
-                globals.__dict__[global_variable].add_modifier(GlobalTools.cleanup_str)
+                globals.__dict__[global_variable].add_modifier(
+                    GlobalTools.cleanup_str
+                )
         globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
         globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
         globals.ALF.add_pre_modifier(GlobalTools.read_alf)
-        globals.OPTIMISE_PROPERTY.add_modifier(GlobalTools.to_lower)
+        globals.FEREBUS_VERSION.add_modifier(GlobalTools.read_version)
+        globals.OPTIMISE_PROPERTY.add_pre_modifier(GlobalTools.to_lower)
         globals.INCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
         globals.EXCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
 
@@ -1294,7 +1405,9 @@ class Globals:
                             pass
             if self.ALF_REFERENCE_FILE:
                 try:
-                    GJF(str(self.ALF_REFERENCE_FILE)).read().atoms.calculate_alf()
+                    GJF(
+                        str(self.ALF_REFERENCE_FILE)
+                    ).read().atoms.calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
                     logger.error("Error When Calculating ALF")
@@ -1368,9 +1481,13 @@ class Globals:
                 *Globals.types,
             ]:
                 if len(value) > 2:
-                    self.__dict__[name] = GlobalVariable(name, value[:-1], value[-1])
+                    self.__dict__[name] = GlobalVariable(
+                        name, value[:-1], value[-1]
+                    )
                 else:
-                    self.__dict__[name] = GlobalVariable(name, value[0], value[-1])
+                    self.__dict__[name] = GlobalVariable(
+                        name, value[0], value[-1]
+                    )
             else:
                 self.__dict__[name] = GlobalVariable(name, value, type(value))
 
@@ -1399,7 +1516,9 @@ class Colors:
 class Patterns:
     COORDINATE_LINE = re.compile(r"\s*\w+(\s*[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}")
 
-    AIMALL_LINE = re.compile(r"[<|]?\w+[|>]?\s+=(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?)")
+    AIMALL_LINE = re.compile(
+        r"[<|]?\w+[|>]?\s+=(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?)"
+    )
     MULTIPOLE_LINE = re.compile(
         r"Q\[\d+,\d+(,\w+)?]\s+=\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?"
     )
@@ -1816,7 +1935,11 @@ class Daemon:
     """
 
     def __init__(
-        self, pidfile, stdin="/dev/null", stdout="/dev/null", stderr="/dev/null",
+        self,
+        pidfile,
+        stdin="/dev/null",
+        stdout="/dev/null",
+        stderr="/dev/null",
     ):
         self.stdin = stdin
         self.stdout = stdout
@@ -1835,7 +1958,9 @@ class Daemon:
                 # exit first parent
                 sys.exit(0)
         except OSError as e:
-            sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
+            sys.stderr.write(
+                "fork #1 failed: %d (%s)\n" % (e.errno, e.strerror)
+            )
             sys.exit(1)
 
         # decouple from parent environment
@@ -1852,7 +1977,9 @@ class Daemon:
                 # exit from second parent
                 sys.exit(0)
         except OSError as e:
-            sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
+            sys.stderr.write(
+                "fork #2 failed: %d (%s)\n" % (e.errno, e.strerror)
+            )
             sys.exit(1)
 
         # redirect standard file descriptors
@@ -2048,17 +2175,31 @@ class FileTools:
         tree.add("cv_errors", "cv_errors", parent="adaptive_sampling")
 
         tree.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
-        tree.add("properties.pid", "properties_pid", parent="properties_daemon")
-        tree.add("properties.out", "properties_stdout", parent="properties_daemon")
-        tree.add("properties.err", "properties_stderr", parent="properties_daemon")
-
-        tree.add("FILES_REMOVED", "file_remover_daemon", parent="data")
-        tree.add("file_remover.pid", "file_remover_pid", parent="file_remover_daemon")
         tree.add(
-            "file_remover.out", "file_remover_stdout", parent="file_remover_daemon"
+            "properties.pid", "properties_pid", parent="properties_daemon"
         )
         tree.add(
-            "file_remover.err", "file_remover_stderr", parent="file_remover_daemon"
+            "properties.out", "properties_stdout", parent="properties_daemon"
+        )
+        tree.add(
+            "properties.err", "properties_stderr", parent="properties_daemon"
+        )
+
+        tree.add("FILES_REMOVED", "file_remover_daemon", parent="data")
+        tree.add(
+            "file_remover.pid",
+            "file_remover_pid",
+            parent="file_remover_daemon",
+        )
+        tree.add(
+            "file_remover.out",
+            "file_remover_stdout",
+            parent="file_remover_daemon",
+        )
+        tree.add(
+            "file_remover.err",
+            "file_remover_stderr",
+            parent="file_remover_daemon",
         )
 
         tree.add("SCRIPTS", "scripts", parent="data")
@@ -2186,7 +2327,9 @@ class FileTools:
             print()
             print("No Optimised Geometry Found")
             if UsefulTools.check_bool(
-                input("Would you like to calculate the optimum geometry? [Y/N]")
+                input(
+                    "Would you like to calculate the optimum geometry? [Y/N]"
+                )
             ):
                 print("Performing Geometry Optimisation")
                 print("Continue Analysis Once Completed")
@@ -2392,7 +2535,7 @@ class FerebusTools:
                 "#\n# Prediction number and definition of new predictions\n#\n"
             )
             finput.write(f"predictions {predictions}\n")
-            if "py" in str(GLOBALS.FEREBUS_VERSION):
+            if "py" in str(GLOBALS.FEREBUS_TYPE):
                 finput.write(f"kernel {GLOBALS.KERNEL}\n")
             finput.write(
                 "#\nfeatures_number 0        # if your are kriging only one atom or you don't want to use he standard "
@@ -2439,7 +2582,9 @@ class FerebusTools:
             finput.write("noise_value 0.1\n")
             finput.write(f"tolerance        {GLOBALS.FEREBUS_TOLERANCE}#\n")
             finput.write(f"convergence      {GLOBALS.FEREBUS_CONVERGENCE}#\n")
-            finput.write(f"max_iterations   {GLOBALS.FEREBUS_MAX_ITERATION}#\n")
+            finput.write(
+                f"max_iterations   {GLOBALS.FEREBUS_MAX_ITERATION}#\n"
+            )
             finput.write(f"#\n#{line_break}\n")
 
             finput.write("# PSO Specific keywords\n#\n")
@@ -2455,7 +2600,9 @@ class FerebusTools:
             if GLOBALS.FEREBUS_SWARM_SIZE < 0:
                 finput.write(f"swarm_pop     1440       ")
             else:
-                finput.write(f"swarm_pop    {GLOBALS.FEREBUS_SWARM_SIZE}       ")
+                finput.write(
+                    f"swarm_pop    {GLOBALS.FEREBUS_SWARM_SIZE}       "
+                )
             finput.write(
                 "# if swarm opt is set as 'static' the number of particle must be specified\n"
             )
@@ -2494,7 +2641,9 @@ class FerebusTools:
             finput.write(
                 "iprint 101 # It controls the frequency and type of output generated:\n"
             )
-            finput.write("#                     iprint<0    no output is generated)\n")
+            finput.write(
+                "#                     iprint<0    no output is generated)\n"
+            )
             finput.write(
                 "#                     iprint=0    print only one line at the last iteration)\n"
             )
@@ -2521,6 +2670,43 @@ class FerebusTools:
                 "# this keyword tells the program than the next lines are the index number and atom type\n"
             )
             finput.write(f"{atom_num}   {atom}\n")
+
+    @staticmethod
+    def write_ftoml(
+        directory,
+        natoms,
+        atom
+    ):
+        ftoml_fname = os.path.join(directory, "ferebus.toml")
+        atom_num = re.findall("\d+", atom)[0]
+        alf = GLOBALS.ALF[int(atom_num)-1]
+
+        with open(ftoml_fname, "w+") as ftoml:
+            ftoml.write("[system]\n")
+            ftoml.write(f"name = \"{GLOBALS.SYSTEM_NAME}\"\n")
+            ftoml.write(f"natoms = {natoms}\n")
+            ftoml.write(f"atoms = [\n")
+            ftoml.write(f"  {{name=\"{atom}\", alf=[{alf[0]}, {alf[1]}, {alf[2]}]}}\n")
+            ftoml.write("]\n")
+            ftoml.write("\n")
+            ftoml.write("[model]\n")
+            ftoml.write(f"mean = \"{GLOBALS.FEREBUS_MEAN}\"\n")
+            ftoml.write(f"optimiser = \"{GLOBALS.FEREBUS_OPTIMISATION}\"\n")
+            ftoml.write("\n")
+            ftoml.write("[optimiser]\n")
+            ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
+            ftoml.write(f"search_max = {GLOBALS.FEREBUS_THETA_MAX}\n")
+            ftoml.write("\n")
+            ftoml.write("[optimiser.pso]\n")
+            ftoml.write(f"swarm_size = {GLOBALS.FEREBUS_SWARM_SIZE}\n")
+            ftoml.write(f"iterations = {GLOBALS.FEREBUS_MAX_ITERATION}\n")
+            ftoml.write(f"inertia_weight = {GLOBALS.FEREBUS_INERTIA_WEIGHT}\n")
+            ftoml.write(f"cognitive_learning_rate = {GLOBALS.FEREBUS_COGNITIVE_LEARNING_RATE}\n")
+            ftoml.write(f"social_learning_rate = {GLOBALS.FEREBUS_SOCIAL_LEARNING_RATE}\n")
+            ftoml.write("\n")
+            ftoml.write("[kernels]\n")
+            ftoml.write("[kernels.k1]\n")
+            ftoml.write(f"type = \"{'rbf'}\"\n")
 
 
 class Problem:
@@ -2616,6 +2802,24 @@ class ProblemFinder:
         return str(self)
 
 
+class DictList(dict):
+    # wrapper around common pattern
+    # x = {}
+    # x[k] = []
+    # x[k] += [v]
+    # replaced by
+    # x = DictList()
+    # x[k] += [v]
+    def __init__(self, list_type=list):
+        self.list_type = list_type
+        self._dict = {}
+
+    def __getitem__(self, key):
+        if key not in self.keys():
+            self.__dict__[key] = self.list_type()
+        return self.__dict__[key]
+
+
 # ========================#
 #     Cluster Tools      #
 # ========================#
@@ -2697,14 +2901,22 @@ class TimingManager:
     def __enter__(self):
         python_job = PythonCommand()
         if self.message:
-            python_job.run_func("log_time", f"START:{self.submission_script.fname}", self.message)
+            python_job.run_func(
+                "log_time",
+                f"START:{self.submission_script.fname}",
+                self.message,
+            )
         else:
-            python_job.run_func("log_time", f"START:{self.submission_script.fname}")
+            python_job.run_func(
+                "log_time", f"START:{self.submission_script.fname}"
+            )
         self.submission_script.add(python_job)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         python_job = PythonCommand()
-        python_job.run_func("log_time", f"FINISH:{self.submission_script.fname}")
+        python_job.run_func(
+            "log_time", f"FINISH:{self.submission_script.fname}"
+        )
         self.submission_script.add(python_job)
 
 
@@ -2760,7 +2972,9 @@ class CommandLine:
             if not self.array_names:
                 self.array_names = self.setup_array_names()
             if isinstance(var, int):
-                return f"${{{self.array_names[index]}[${self.var_names[var]}]}}"
+                return (
+                    f"${{{self.array_names[index]}[${self.var_names[var]}]}}"
+                )
             else:
                 return f"${{{self.array_names[index]}[${var}]}}"
         else:
@@ -2858,7 +3072,9 @@ class GaussianCommand(CommandLine):
     def add(self, gjf_file, outfile=None):
         self.infiles += [gjf_file]
         self.outfiles += (
-            [self.create_outfile(gjf_file, ext="gau")] if not outfile else [outfile]
+            [self.create_outfile(gjf_file, ext="gau")]
+            if not outfile
+            else [outfile]
         )
 
     def load_modules(self):
@@ -2873,7 +3089,9 @@ class GaussianCommand(CommandLine):
         if len(self.infiles) < 1:
             return ""
 
-        datafile = self.setup_data_file(self.datafile, self.infiles, self.outfiles)
+        datafile = self.setup_data_file(
+            self.datafile, self.infiles, self.outfiles
+        )
         infile = self.get_variable(0)
         outfile = self.get_variable(1)
 
@@ -2901,7 +3119,9 @@ class AIMAllCommand(CommandLine):
     def add(self, wfn_file, outfile=None):
         self.infiles += [wfn_file]
         self.outfiles += (
-            [self.create_outfile(wfn_file, ext="aim")] if not outfile else [outfile]
+            [self.create_outfile(wfn_file, ext="aim")]
+            if not outfile
+            else [outfile]
         )
 
     def load_modules(self):
@@ -2930,7 +3150,9 @@ class AIMAllCommand(CommandLine):
         if len(self.infiles) < 1:
             return ""
 
-        datafile = self.setup_data_file(self.datafile, self.infiles, self.outfiles)
+        datafile = self.setup_data_file(
+            self.datafile, self.infiles, self.outfiles
+        )
         infile = self.get_variable(0)
         outfile = self.get_variable(1)
 
@@ -2950,7 +3172,7 @@ class FerebusCommand(CommandLine):
 
     def setup_command(self):
         ferebus_loc = os.path.abspath(str(GLOBALS.FEREBUS_LOCATION))
-        if "py" in str(GLOBALS.FEREBUS_VERSION):
+        if "py" in str(GLOBALS.FEREBUS_TYPE):
             ferebus_loc += ".py" if not ferebus_loc.endswith(".py") else ""
             self.command = "python " + ferebus_loc
         else:
@@ -2960,7 +3182,7 @@ class FerebusCommand(CommandLine):
         self.directories += [os.path.abspath(directory)]
 
     def load_modules(self):
-        if "py" not in str(GLOBALS.FEREBUS_VERSION):
+        if "py" not in str(GLOBALS.FEREBUS_TYPE):
             self.modules["ffluxlab"] = [
                 "mpi/intel/18.0.3",
                 "libs/nag/intel/fortran/mark-23",
@@ -3108,7 +3330,9 @@ class SubmissionScript:
             node_options += [f"!({exclude_nodes})"]
 
         return (
-            "#$ -l h=" + "&".join(node_options) + "\n" if len(node_options) > 0 else ""
+            "#$ -l h=" + "&".join(node_options) + "\n"
+            if len(node_options) > 0
+            else ""
         )
 
     def check_task_id(self):
@@ -3186,12 +3410,15 @@ class SubmissionScript:
 
 class SubmissionTools:
     @staticmethod
-    def make_g09_script(points, directory="", redo=False, submit=True, hold=None):
+    def make_g09_script(
+        points, directory="", redo=False, submit=True, hold=None
+    ):
         gaussian_job = GaussianCommand()
         if isinstance(points, Points):
             for point in points:
                 if (
-                    point.gjf and (redo or not os.path.exists(point.gjf.wfn.path))
+                    point.gjf
+                    and (redo or not os.path.exists(point.gjf.wfn.path))
                 ) or isinstance(point, MockDirectory):
                     gaussian_job.add(point.gjf.path)
         elif isinstance(points, GJF):
@@ -3210,12 +3437,19 @@ class SubmissionTools:
 
     @staticmethod
     def make_aim_script(
-        points, directory="", check_wfns=True, redo=False, submit=True, hold=None,
+        points,
+        directory="",
+        check_wfns=True,
+        redo=False,
+        submit=True,
+        hold=None,
     ):
         if check_wfns:
             result = points.check_wfns()
             if result is not None:
-                _, jid = AutoTools.submit_ichor_wfns(result[1], directory=points.path)
+                _, jid = AutoTools.submit_ichor_wfns(
+                    result[1], directory=points.path
+                )
                 return AutoTools.submit_wfns(jid, len(points))
 
         aimall_job = AIMAllCommand()
@@ -3242,7 +3476,12 @@ class SubmissionTools:
 
     @staticmethod
     def make_ferebus_script(
-        model_directories, directory="", submit=True, hold=None, model_type="iqa", ferebus_directory=""
+        model_directories,
+        directory="",
+        submit=True,
+        hold=None,
+        model_type="iqa",
+        ferebus_directory="",
     ):
         ferebus_job = FerebusCommand()
         for model_directory in model_directories:
@@ -3251,7 +3490,12 @@ class SubmissionTools:
         move_models = PythonCommand()
         if ferebus_directory is None:
             ferebus_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
-        move_models.run_func("move_models", ferebus_job.get_variable(0), model_type, ferebus_directory)
+        move_models.run_func(
+            "move_models",
+            ferebus_job.get_variable(0),
+            model_type,
+            ferebus_directory,
+        )
 
         script_name = os.path.join(directory, "FereSub.sh")
         submission_script = SubmissionScript(script_name)
@@ -3267,7 +3511,12 @@ class SubmissionTools:
 
     @staticmethod
     def make_python_script(
-        python_script, directory="", function="", args=(), submit=True, hold=None,
+        python_script,
+        directory="",
+        function="",
+        args=(),
+        submit=True,
+        hold=None,
     ):
         python_job = PythonCommand()
         if function:
@@ -3285,7 +3534,9 @@ class SubmissionTools:
         return submission_script.fname, jid
 
     @staticmethod
-    def make_dlpoly_script(dlpoly_directories, directory="", submit=True, hold=None):
+    def make_dlpoly_script(
+        dlpoly_directories, directory="", submit=True, hold=None
+    ):
         dlpoly_job = DlpolyCommand()
         for dlpoly_directory in dlpoly_directories:
             dlpoly_job.add(dlpoly_directory)
@@ -3618,16 +3869,26 @@ class AutoTools:
     def submit_ichor_gjfs(jid=None, directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
-        return AutoTools.submit_ichor("submit_gjfs", directory, submit=True, hold=jid)
+        return AutoTools.submit_ichor(
+            "submit_gjfs", directory, submit=True, hold=jid
+        )
 
     @staticmethod
     def submit_ichor_wfns(jid=None, directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
-        return AutoTools.submit_ichor("submit_wfns", directory, submit=True, hold=jid)
+        return AutoTools.submit_ichor(
+            "submit_wfns", directory, submit=True, hold=jid
+        )
 
     @staticmethod
-    def submit_ichor_models(jid=None, directory=None, type=None, npoints=None, ferebus_directory=None):
+    def submit_ichor_models(
+        jid=None,
+        directory=None,
+        type=None,
+        npoints=None,
+        ferebus_directory=None,
+    ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         if not type:
@@ -3637,7 +3898,13 @@ class AutoTools:
         if not ferebus_directory:
             ferebus_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
         return AutoTools.submit_ichor(
-            "make_models", directory, type, npoints, ferebus_directory, submit=True, hold=jid
+            "make_models",
+            directory,
+            type,
+            npoints,
+            ferebus_directory,
+            submit=True,
+            hold=jid,
         )
 
     @staticmethod
@@ -3649,7 +3916,9 @@ class AutoTools:
         )
 
     @staticmethod
-    def submit_ichor_s_curves(predict_property, validation_set, models, output_file):
+    def submit_ichor_s_curves(
+        predict_property, validation_set, models, output_file
+    ):
         return AutoTools.submit_ichor(
             "calculate_s_curves",
             predict_property,
@@ -3668,7 +3937,9 @@ class AutoTools:
 
     @staticmethod
     def submit_dlpoly_energies(jid=None):
-        return AutoTools.submit_ichor("get_wfn_energies", submit=True, hold=jid)
+        return AutoTools.submit_ichor(
+            "get_wfn_energies", submit=True, hold=jid
+        )
 
     @staticmethod
     def submit_dlpoly_trajectories(jid=None):
@@ -3678,7 +3949,9 @@ class AutoTools:
 
     @staticmethod
     def submit_dlpoly_trajectories_energies(jid=None):
-        return AutoTools.submit_ichor("get_trajectory_energies", submit=True, hold=jid)
+        return AutoTools.submit_ichor(
+            "get_trajectory_energies", submit=True, hold=jid
+        )
 
     @staticmethod
     def submit_dlpoly_trajectory_energies(jid=None, directory=None):
@@ -3704,7 +3977,9 @@ class AutoTools:
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
-        return points.submit_wfns(redo=False, submit=True, hold=jid, check_wfns=False)
+        return points.submit_wfns(
+            redo=False, submit=True, hold=jid, check_wfns=False
+        )
 
     @staticmethod
     def submit_models(jid=None, directory=None, ferebus_directory=None):
@@ -3716,7 +3991,7 @@ class AutoTools:
             submit=True,
             hold=jid,
             model_type=str(GLOBALS.OPTIMISE_PROPERTY),
-            ferebus_directory=ferebus_directory
+            ferebus_directory=ferebus_directory,
         )
 
     @staticmethod
@@ -3733,11 +4008,23 @@ class AutoTools:
         _data_lock = False
 
     @staticmethod
-    def run_models(directory=None, type=None, npoints=None, ferebus_directory=None, jid=None):
+    def run_models(
+        directory=None,
+        type=None,
+        npoints=None,
+        ferebus_directory=None,
+        jid=None,
+    ):
         _, jid = AutoTools.submit_ichor_models(
-            jid=jid, directory=directory, type=type, npoints=npoints, ferebus_directory=ferebus_directory
+            jid=jid,
+            directory=directory,
+            type=type,
+            npoints=npoints,
+            ferebus_directory=ferebus_directory,
         )
-        return AutoTools.submit_models(jid=jid, directory=directory, ferebus_directory=ferebus_directory)
+        return AutoTools.submit_models(
+            jid=jid, directory=directory, ferebus_directory=ferebus_directory
+        )
 
     @staticmethod
     def run_from_extern():
@@ -3813,7 +4100,9 @@ class PropertiesDaemon(Daemon):
 class PropertyTools:
     @staticmethod
     def run_daemon():
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["properties_daemon"], empty=True)
+        FileTools.mkdir(
+            GLOBALS.FILE_STRUCTURE["properties_daemon"], empty=True
+        )
         properties_daemon = PropertiesDaemon()
         properties_daemon.start()
 
@@ -3842,7 +4131,7 @@ class PropertyTools:
         print()
         if not os.path.exists(properties_root):
             # make directory
-            print(f'Making {properties_root}')
+            print(f"Making {properties_root}")
             FileTools.mkdir(properties_root, empty=False)
             print()
             # make property directories
@@ -3855,7 +4144,9 @@ class PropertyTools:
                         properties_root, property_name
                     )
                     FileTools.mkdir(property_directory, empty=False)
-                    property_directories += [(property_name, property_directory)]
+                    property_directories += [
+                        (property_name, property_directory)
+                    ]
 
                     progressbar.update()
             print()
@@ -3865,9 +4156,12 @@ class PropertyTools:
                 for _, property_directory in property_directories:
                     progressbar.set_description(property_directory)
                     dst = os.path.join(
-                        property_directory, GLOBALS.FILE_STRUCTURE["training_set"]
+                        property_directory,
+                        GLOBALS.FILE_STRUCTURE["training_set"],
                     )
-                    FileTools.copytree(GLOBALS.FILE_STRUCTURE["training_set"], dst)
+                    FileTools.copytree(
+                        GLOBALS.FILE_STRUCTURE["training_set"], dst
+                    )
                     progressbar.update()
             print()
             # copy sample pool
@@ -3876,9 +4170,12 @@ class PropertyTools:
                 for _, property_directory in property_directories:
                     progressbar.set_description(property_directory)
                     dst = os.path.join(
-                        property_directory, GLOBALS.FILE_STRUCTURE["sample_pool"]
+                        property_directory,
+                        GLOBALS.FILE_STRUCTURE["sample_pool"],
                     )
-                    FileTools.copytree(GLOBALS.FILE_STRUCTURE["sample_pool"], dst)
+                    FileTools.copytree(
+                        GLOBALS.FILE_STRUCTURE["sample_pool"], dst
+                    )
                     progressbar.update()
             print()
         else:
@@ -3892,7 +4189,9 @@ class PropertyTools:
         with tqdm(total=len(properties), unit=" files") as progressbar:
             for _, property_directory in property_directories:
                 progressbar.set_description(property_directory)
-                FileTools.copy_file(os.path.realpath(__file__), property_directory)
+                FileTools.copy_file(
+                    os.path.realpath(__file__), property_directory
+                )
                 progressbar.update()
         print()
         # copy config.properties
@@ -3927,7 +4226,9 @@ class PropertyTools:
                 try:
                     spec.loader.exec_module(ichor)
                 except:
-                    print(f"Error submitting adaptive sampling for: {property_name}")
+                    print(
+                        f"Error submitting adaptive sampling for: {property_name}"
+                    )
                 ichor.AutoTools.run_from_extern()
 
         GLOBALS.OPTIMISE_PROPERTY = original_property
@@ -3938,7 +4239,9 @@ class PropertyTools:
         for properties_dir in FileTools.get_files_in(
             GLOBALS.FILE_STRUCTURE["properties"], "*/"
         ):
-            log_dir = os.path.join(properties_dir, GLOBALS.FILE_STRUCTURE["log"])
+            log_dir = os.path.join(
+                properties_dir, GLOBALS.FILE_STRUCTURE["log"]
+            )
             if os.path.exists(log_dir):
                 # for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
                 FileTools.copymodels(log_dir, GLOBALS.FILE_STRUCTURE["log"])
@@ -3953,6 +4256,7 @@ def buildermethod(func):
     def wrapper(self, *args, **kwargs):
         func(self, *args, **kwargs)
         return self
+
     return wrapper
 
 
@@ -3984,7 +4288,9 @@ class Atom:
             find_atom = coordinate_line.split()
             self.atom_type = find_atom[0]
             coordinate_line = next(
-                re.finditer(r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line)
+                re.finditer(
+                    r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line
+                )
             ).group()
             coordinate_line = re.finditer(
                 r"[+-]?\d+.\d+([Ee][+-]?\d+)?", coordinate_line
@@ -4025,11 +4331,7 @@ class Atom:
         return other.z - self.z
 
     def vec_to(self, other):
-        return [
-            self.xdiff(other),
-            self.ydiff(other),
-            self.zdiff(other)
-        ]
+        return [self.xdiff(other), self.ydiff(other), self.zdiff(other)]
 
     def angle(self, atom1, atom2):
         temp = (
@@ -4079,9 +4381,9 @@ class Atom:
         ydiff2 = self.ydiff(self.xy_plane)
         zdiff2 = self.zdiff(self.xy_plane)
 
-        sigma_fflux = -(xdiff1 * xdiff2 + ydiff1 * ydiff2 + zdiff1 * zdiff2) / (
-            xdiff1 * xdiff1 + ydiff1 * ydiff1 + zdiff1 * zdiff1
-        )
+        sigma_fflux = -(
+            xdiff1 * xdiff2 + ydiff1 * ydiff2 + zdiff1 * zdiff2
+        ) / (xdiff1 * xdiff1 + ydiff1 * ydiff1 + zdiff1 * zdiff1)
 
         y_vec1 = sigma_fflux * xdiff1 + xdiff2
         y_vec2 = sigma_fflux * ydiff1 + ydiff2
@@ -4369,7 +4671,10 @@ class Atoms:
         prev_priorities = []
         while True:
             priorities = [atom.priority for atom in self]
-            if priorities.count(max(priorities)) == 1 or prev_priorities == priorities:
+            if (
+                priorities.count(max(priorities)) == 1
+                or prev_priorities == priorities
+            ):
                 break
             else:
                 prev_priorities = priorities
@@ -4550,7 +4855,9 @@ class Point:
         return np.abs(self.wfn.energy - self.get_true_value("iqa"))
 
     def get_integration_errors(self):
-        return {atom: data.integration_error for atom, data in self.ints.items()}
+        return {
+            atom: data.integration_error for atom, data in self.ints.items()
+        }
 
     def __len__(self):
         return len(self.atoms)
@@ -4582,13 +4889,14 @@ class Directory(Point):
             ".gjf": self.add_gjf,
             ".wfn": self.add_wfn,
             ".int": self.add_int,
-            ".gau": self.add_gau
+            ".gau": self.add_gau,
         }
         with os.scandir(path) as it:
             for entry in it:
                 if (
                     entry.is_file()
-                    and FileTools.get_extension(entry) in file_extentsions.keys()
+                    and FileTools.get_extension(entry)
+                    in file_extentsions.keys()
                 ):
                     add = file_extentsions[FileTools.get_extension(entry)]
                     add(entry.path)
@@ -4749,7 +5057,9 @@ class GJF(Point):
         if not self.atoms:
             self.read()
 
-        if UsefulTools.in_sensitive(GLOBALS.METHOD, Constants.GAUSSIAN_METHODS):
+        if UsefulTools.in_sensitive(
+            GLOBALS.METHOD, Constants.GAUSSIAN_METHODS
+        ):
             self.method = GLOBALS.METHOD
         else:
             print("Error: Unknown method {METHOD}")
@@ -4759,7 +5069,9 @@ class GJF(Point):
         self.basis_set = GLOBALS.BASIS_SET
 
         required_keywords = ["nosymm", "output=wfn"]
-        self.keywords = list(set(self.keywords + GLOBALS.KEYWORDS + required_keywords))
+        self.keywords = list(
+            set(self.keywords + GLOBALS.KEYWORDS + required_keywords)
+        )
 
         self.startup_options = [
             f"nproc={GLOBALS.GAUSSIAN_CORE_COUNT}",
@@ -4863,7 +5175,9 @@ class WFN(Point):
 
         if not os.path.exists(aim_directory):
             return False
-        n_ints = sum(1 for f in os.listdir(aim_directory) if f.endswith(".int"))
+        n_ints = sum(
+            1 for f in os.listdir(aim_directory) if f.endswith(".int")
+        )
         return n_ints == self.nuclei
 
     def move(self, dst):
@@ -4927,9 +5241,9 @@ class INT(Point):
                         for match in re.finditer(Patterns.AIMALL_LINE, line):
                             tokens = match.group().split("=")
                             try:
-                                self.integration_results[tokens[0].strip()] = float(
-                                    tokens[-1]
-                                )
+                                self.integration_results[
+                                    tokens[0].strip()
+                                ] = float(tokens[-1])
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -4949,7 +5263,9 @@ class INT(Point):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                self.multipoles[multipole.lower()] = float(tokens[-1])
+                                self.multipoles[multipole.lower()] = float(
+                                    tokens[-1]
+                                )
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -4960,7 +5276,9 @@ class INT(Point):
                         if "=" in line:
                             tokens = line.split("=")
                             try:
-                                self.iqa_data[tokens[0].strip()] = float(tokens[-1])
+                                self.iqa_data[tokens[0].strip()] = float(
+                                    tokens[-1]
+                                )
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -4987,7 +5305,7 @@ class INT(Point):
 
             eX = r12
             s = sum(eX * r13)
-            eY = r13 - s*eX
+            eY = r13 - s * eX
 
             eY /= np.sqrt(sum(eY * eY))
             eZ = np.cross(eX, eY)
@@ -4996,16 +5314,16 @@ class INT(Point):
 
     def rotate_dipole(self):
         # Dipole Doesn't Require Cartesian Conversion
-        d_x = self.q11c # x
-        d_y = self.q11s # y
+        d_x = self.q11c  # x
+        d_y = self.q11s  # y
         d_z = self.q10  # z
 
         C = self.C
 
         # Rotate Dipole and Reorder Output
-        D_x =  C[0][0]*d_x + C[0][1]*d_y + C[0][2]*d_z 
-        D_y =  C[1][0]*d_x + C[1][1]*d_y + C[1][2]*d_z 
-        D_z =  C[2][0]*d_x + C[2][1]*d_y + C[2][2]*d_z
+        D_x = C[0][0] * d_x + C[0][1] * d_y + C[0][2] * d_z
+        D_y = C[1][0] * d_x + C[1][1] * d_y + C[1][2] * d_z
+        D_z = C[2][0] * d_x + C[2][1] * d_y + C[2][2] * d_z
 
         self.q10 = D_z
         self.q11c = D_x
@@ -5015,12 +5333,22 @@ class INT(Point):
         # Convert Quadrupole Spherical Moments to Cartesian
         # 5   6    7    8    9
         # q20 q21c q21s q22c q22s
-        q_xx = 0.5 * (Constants.rt3*self.q22c - self.q20)  # xx ( 5) [0][0] -> [0] <- [0][0]
-        q_xy = 0.5 * Constants.rt3 * self.q22s             # xy ( 6) [0][1] -> [1] <- [1][0]
-        q_xz = 0.5 * Constants.rt3 * self.q21c             # xz ( 7) [0][2] -> [2] <- [2][0]
-        q_yy = -0.5 * (Constants.rt3*self.q22c + self.q20) # yy ( 8) [1][1] -> [3] <- [1][1]
-        q_yz = 0.5 * Constants.rt3 * self.q21s             # yz ( 9) [1][2] -> [4] <- [2][1]
-        q_zz = self.q20                                    # zz (10) [2][2] -> [5] <- [2][2]
+        q_xx = 0.5 * (
+            Constants.rt3 * self.q22c - self.q20
+        )  # xx ( 5) [0][0] -> [0] <- [0][0]
+        q_xy = (
+            0.5 * Constants.rt3 * self.q22s
+        )  # xy ( 6) [0][1] -> [1] <- [1][0]
+        q_xz = (
+            0.5 * Constants.rt3 * self.q21c
+        )  # xz ( 7) [0][2] -> [2] <- [2][0]
+        q_yy = -0.5 * (
+            Constants.rt3 * self.q22c + self.q20
+        )  # yy ( 8) [1][1] -> [3] <- [1][1]
+        q_yz = (
+            0.5 * Constants.rt3 * self.q21s
+        )  # yz ( 9) [1][2] -> [4] <- [2][1]
+        q_zz = self.q20  # zz (10) [2][2] -> [5] <- [2][2]
 
         # Rotate Quadrupole Tensor
         # | xx xy xz |      00 01 02 11 12 22
@@ -5029,18 +5357,78 @@ class INT(Point):
 
         C = self.C
         #         a  i    b  j           a  i    b  j           a  i    b  j           a  i    b  j           a  i    b  j           a  i    b  j           a  i    b  j            a  i    b  j          a  i    b  j
-        Q_xx =  C[0][0]*C[0][0]*q_xx + C[0][0]*C[0][1]*q_xy + C[0][0]*C[0][2]*q_xz + C[0][1]*C[0][0]*q_xy + C[0][1]*C[0][1]*q_yy + C[0][1]*C[0][2]*q_yz + C[0][2]*C[0][0]*q_xz + C[0][2]*C[0][1]*q_yz + C[0][2]*C[0][2]*q_zz 
-        Q_xy =  C[0][0]*C[1][0]*q_xx + C[0][0]*C[1][1]*q_xy + C[0][0]*C[1][2]*q_xz + C[0][1]*C[1][0]*q_xy + C[0][1]*C[1][1]*q_yy + C[0][1]*C[1][2]*q_yz + C[0][2]*C[1][0]*q_xz + C[0][2]*C[1][1]*q_yz + C[0][2]*C[1][2]*q_zz 
-        Q_xz =  C[0][0]*C[2][0]*q_xx + C[0][0]*C[2][1]*q_xy + C[0][0]*C[2][2]*q_xz + C[0][1]*C[2][0]*q_xy + C[0][1]*C[2][1]*q_yy + C[0][1]*C[2][2]*q_yz + C[0][2]*C[2][0]*q_xz + C[0][2]*C[2][1]*q_yz + C[0][2]*C[2][2]*q_zz 
-        Q_yy =  C[1][0]*C[1][0]*q_xx + C[1][0]*C[1][1]*q_xy + C[1][0]*C[1][2]*q_xz + C[1][1]*C[1][0]*q_xy + C[1][1]*C[1][1]*q_yy + C[1][1]*C[1][2]*q_yz + C[1][2]*C[1][0]*q_xz + C[1][2]*C[1][1]*q_yz + C[1][2]*C[1][2]*q_zz 
-        Q_yz =  C[1][0]*C[2][0]*q_xx + C[1][0]*C[2][1]*q_xy + C[1][0]*C[2][2]*q_xz + C[1][1]*C[2][0]*q_xy + C[1][1]*C[2][1]*q_yy + C[1][1]*C[2][2]*q_yz + C[1][2]*C[2][0]*q_xz + C[1][2]*C[2][1]*q_yz + C[1][2]*C[2][2]*q_zz 
-        Q_zz =  C[2][0]*C[2][0]*q_xx + C[2][0]*C[2][1]*q_xy + C[2][0]*C[2][2]*q_xz + C[2][1]*C[2][0]*q_xy + C[2][1]*C[2][1]*q_yy + C[2][1]*C[2][2]*q_yz + C[2][2]*C[2][0]*q_xz + C[2][2]*C[2][1]*q_yz + C[2][2]*C[2][2]*q_zz 
+        Q_xx = (
+            C[0][0] * C[0][0] * q_xx
+            + C[0][0] * C[0][1] * q_xy
+            + C[0][0] * C[0][2] * q_xz
+            + C[0][1] * C[0][0] * q_xy
+            + C[0][1] * C[0][1] * q_yy
+            + C[0][1] * C[0][2] * q_yz
+            + C[0][2] * C[0][0] * q_xz
+            + C[0][2] * C[0][1] * q_yz
+            + C[0][2] * C[0][2] * q_zz
+        )
+        Q_xy = (
+            C[0][0] * C[1][0] * q_xx
+            + C[0][0] * C[1][1] * q_xy
+            + C[0][0] * C[1][2] * q_xz
+            + C[0][1] * C[1][0] * q_xy
+            + C[0][1] * C[1][1] * q_yy
+            + C[0][1] * C[1][2] * q_yz
+            + C[0][2] * C[1][0] * q_xz
+            + C[0][2] * C[1][1] * q_yz
+            + C[0][2] * C[1][2] * q_zz
+        )
+        Q_xz = (
+            C[0][0] * C[2][0] * q_xx
+            + C[0][0] * C[2][1] * q_xy
+            + C[0][0] * C[2][2] * q_xz
+            + C[0][1] * C[2][0] * q_xy
+            + C[0][1] * C[2][1] * q_yy
+            + C[0][1] * C[2][2] * q_yz
+            + C[0][2] * C[2][0] * q_xz
+            + C[0][2] * C[2][1] * q_yz
+            + C[0][2] * C[2][2] * q_zz
+        )
+        Q_yy = (
+            C[1][0] * C[1][0] * q_xx
+            + C[1][0] * C[1][1] * q_xy
+            + C[1][0] * C[1][2] * q_xz
+            + C[1][1] * C[1][0] * q_xy
+            + C[1][1] * C[1][1] * q_yy
+            + C[1][1] * C[1][2] * q_yz
+            + C[1][2] * C[1][0] * q_xz
+            + C[1][2] * C[1][1] * q_yz
+            + C[1][2] * C[1][2] * q_zz
+        )
+        Q_yz = (
+            C[1][0] * C[2][0] * q_xx
+            + C[1][0] * C[2][1] * q_xy
+            + C[1][0] * C[2][2] * q_xz
+            + C[1][1] * C[2][0] * q_xy
+            + C[1][1] * C[2][1] * q_yy
+            + C[1][1] * C[2][2] * q_yz
+            + C[1][2] * C[2][0] * q_xz
+            + C[1][2] * C[2][1] * q_yz
+            + C[1][2] * C[2][2] * q_zz
+        )
+        Q_zz = (
+            C[2][0] * C[2][0] * q_xx
+            + C[2][0] * C[2][1] * q_xy
+            + C[2][0] * C[2][2] * q_xz
+            + C[2][1] * C[2][0] * q_xy
+            + C[2][1] * C[2][1] * q_yy
+            + C[2][1] * C[2][2] * q_yz
+            + C[2][2] * C[2][0] * q_xz
+            + C[2][2] * C[2][1] * q_yz
+            + C[2][2] * C[2][2] * q_zz
+        )
 
         # Convert Rotated Quadrupole Moments Back to Spherical
-        # The Theory of Intermolecular Forces 2nd Edt: Anthony Stone 
+        # The Theory of Intermolecular Forces 2nd Edt: Anthony Stone
         # https://ebookcentral.proquest.com/lib/manchester/detail.action?docID=3055085
 
-        self.q20  = Q_zz
+        self.q20 = Q_zz
         self.q21c = Constants.rt12_3 * Q_xz
         self.q21s = Constants.rt12_3 * Q_yz
         self.q22c = Constants.rt3_3 * (Q_xx - Q_yy)
@@ -5050,31 +5438,319 @@ class INT(Point):
         # Convert Octupole Spherical Moments to Cartesian
         # 10  11   12   13   14   15   16
         # q30 q31c q31s q32c q32s q33c q33s
-        o_xxx = Constants.rt5_8*self.q33c - Constants.rt3_8*self.q31c     # xxx (11)
-        o_xxy = Constants.rt5_8*self.q33s - Constants.rt1_24*self.q31s    # xxy (12)
-        o_xxz = Constants.rt5_12*self.q32c - 0.5*self.q30                 # xxz (13)
-        o_xyy = -(Constants.rt5_8*self.q33c + Constants.rt1_24*self.q31c) # xyy (14)
-        o_xyz = Constants.rt5_12*self.q32s                                # xyz (15)
-        o_xzz = Constants.rt2_3*self.q31c                                 # xzz (16)
-        o_yyy = -(Constants.rt5_8*self.q33s + Constants.rt3_8*self.q31s)  # yyy (17)
-        o_yyz = -(Constants.rt5_12*self.q32c + 0.5*self.q30)              # yyz (18)
-        o_yzz = Constants.rt2_3*self.q31s                                 # yzz (19)
-        o_zzz = self.q30                                                  # zzz (20)
+        o_xxx = (
+            Constants.rt5_8 * self.q33c - Constants.rt3_8 * self.q31c
+        )  # xxx (11)
+        o_xxy = (
+            Constants.rt5_8 * self.q33s - Constants.rt1_24 * self.q31s
+        )  # xxy (12)
+        o_xxz = Constants.rt5_12 * self.q32c - 0.5 * self.q30  # xxz (13)
+        o_xyy = -(
+            Constants.rt5_8 * self.q33c + Constants.rt1_24 * self.q31c
+        )  # xyy (14)
+        o_xyz = Constants.rt5_12 * self.q32s  # xyz (15)
+        o_xzz = Constants.rt2_3 * self.q31c  # xzz (16)
+        o_yyy = -(
+            Constants.rt5_8 * self.q33s + Constants.rt3_8 * self.q31s
+        )  # yyy (17)
+        o_yyz = -(Constants.rt5_12 * self.q32c + 0.5 * self.q30)  # yyz (18)
+        o_yzz = Constants.rt2_3 * self.q31s  # yzz (19)
+        o_zzz = self.q30  # zzz (20)
 
         C = self.C
 
         #        0   1   2   3   4   5   6   7   8   9
         # Order: xxx xxy xxz xyy xyz xzz yyy yyz yzz zzz
-        O_xxx =  C[0][0]*C[0][0]*C[0][0]*o_xxx + C[0][0]*C[0][0]*C[0][1]*o_xxy + C[0][0]*C[0][0]*C[0][2]*o_xxz + C[0][0]*C[0][1]*C[0][0]*o_xxy + C[0][0]*C[0][1]*C[0][1]*o_xyy + C[0][0]*C[0][1]*C[0][2]*o_xyz + C[0][0]*C[0][2]*C[0][0]*o_xxz + C[0][0]*C[0][2]*C[0][1]*o_xyz + C[0][0]*C[0][2]*C[0][2]*o_xzz + C[0][1]*C[0][0]*C[0][0]*o_xxy + C[0][1]*C[0][0]*C[0][1]*o_xyy + C[0][1]*C[0][0]*C[0][2]*o_xyz + C[0][1]*C[0][1]*C[0][0]*o_xyy + C[0][1]*C[0][1]*C[0][1]*o_yyy + C[0][1]*C[0][1]*C[0][2]*o_yyz + C[0][1]*C[0][2]*C[0][0]*o_xyz + C[0][1]*C[0][2]*C[0][1]*o_yyz + C[0][1]*C[0][2]*C[0][2]*o_yzz + C[0][2]*C[0][0]*C[0][0]*o_xxz + C[0][2]*C[0][0]*C[0][1]*o_xyz + C[0][2]*C[0][0]*C[0][2]*o_xzz + C[0][2]*C[0][1]*C[0][0]*o_xyz + C[0][2]*C[0][1]*C[0][1]*o_yyz + C[0][2]*C[0][1]*C[0][2]*o_yzz + C[0][2]*C[0][2]*C[0][0]*o_xzz + C[0][2]*C[0][2]*C[0][1]*o_yzz + C[0][2]*C[0][2]*C[0][2]*o_zzz 
-        O_xxy =  C[0][0]*C[0][0]*C[1][0]*o_xxx + C[0][0]*C[0][0]*C[1][1]*o_xxy + C[0][0]*C[0][0]*C[1][2]*o_xxz + C[0][0]*C[0][1]*C[1][0]*o_xxy + C[0][0]*C[0][1]*C[1][1]*o_xyy + C[0][0]*C[0][1]*C[1][2]*o_xyz + C[0][0]*C[0][2]*C[1][0]*o_xxz + C[0][0]*C[0][2]*C[1][1]*o_xyz + C[0][0]*C[0][2]*C[1][2]*o_xzz + C[0][1]*C[0][0]*C[1][0]*o_xxy + C[0][1]*C[0][0]*C[1][1]*o_xyy + C[0][1]*C[0][0]*C[1][2]*o_xyz + C[0][1]*C[0][1]*C[1][0]*o_xyy + C[0][1]*C[0][1]*C[1][1]*o_yyy + C[0][1]*C[0][1]*C[1][2]*o_yyz + C[0][1]*C[0][2]*C[1][0]*o_xyz + C[0][1]*C[0][2]*C[1][1]*o_yyz + C[0][1]*C[0][2]*C[1][2]*o_yzz + C[0][2]*C[0][0]*C[1][0]*o_xxz + C[0][2]*C[0][0]*C[1][1]*o_xyz + C[0][2]*C[0][0]*C[1][2]*o_xzz + C[0][2]*C[0][1]*C[1][0]*o_xyz + C[0][2]*C[0][1]*C[1][1]*o_yyz + C[0][2]*C[0][1]*C[1][2]*o_yzz + C[0][2]*C[0][2]*C[1][0]*o_xzz + C[0][2]*C[0][2]*C[1][1]*o_yzz + C[0][2]*C[0][2]*C[1][2]*o_zzz 
-        O_xxz =  C[0][0]*C[0][0]*C[2][0]*o_xxx + C[0][0]*C[0][0]*C[2][1]*o_xxy + C[0][0]*C[0][0]*C[2][2]*o_xxz + C[0][0]*C[0][1]*C[2][0]*o_xxy + C[0][0]*C[0][1]*C[2][1]*o_xyy + C[0][0]*C[0][1]*C[2][2]*o_xyz + C[0][0]*C[0][2]*C[2][0]*o_xxz + C[0][0]*C[0][2]*C[2][1]*o_xyz + C[0][0]*C[0][2]*C[2][2]*o_xzz + C[0][1]*C[0][0]*C[2][0]*o_xxy + C[0][1]*C[0][0]*C[2][1]*o_xyy + C[0][1]*C[0][0]*C[2][2]*o_xyz + C[0][1]*C[0][1]*C[2][0]*o_xyy + C[0][1]*C[0][1]*C[2][1]*o_yyy + C[0][1]*C[0][1]*C[2][2]*o_yyz + C[0][1]*C[0][2]*C[2][0]*o_xyz + C[0][1]*C[0][2]*C[2][1]*o_yyz + C[0][1]*C[0][2]*C[2][2]*o_yzz + C[0][2]*C[0][0]*C[2][0]*o_xxz + C[0][2]*C[0][0]*C[2][1]*o_xyz + C[0][2]*C[0][0]*C[2][2]*o_xzz + C[0][2]*C[0][1]*C[2][0]*o_xyz + C[0][2]*C[0][1]*C[2][1]*o_yyz + C[0][2]*C[0][1]*C[2][2]*o_yzz + C[0][2]*C[0][2]*C[2][0]*o_xzz + C[0][2]*C[0][2]*C[2][1]*o_yzz + C[0][2]*C[0][2]*C[2][2]*o_zzz 
-        O_xyy =  C[0][0]*C[1][0]*C[1][0]*o_xxx + C[0][0]*C[1][0]*C[1][1]*o_xxy + C[0][0]*C[1][0]*C[1][2]*o_xxz + C[0][0]*C[1][1]*C[1][0]*o_xxy + C[0][0]*C[1][1]*C[1][1]*o_xyy + C[0][0]*C[1][1]*C[1][2]*o_xyz + C[0][0]*C[1][2]*C[1][0]*o_xxz + C[0][0]*C[1][2]*C[1][1]*o_xyz + C[0][0]*C[1][2]*C[1][2]*o_xzz + C[0][1]*C[1][0]*C[1][0]*o_xxy + C[0][1]*C[1][0]*C[1][1]*o_xyy + C[0][1]*C[1][0]*C[1][2]*o_xyz + C[0][1]*C[1][1]*C[1][0]*o_xyy + C[0][1]*C[1][1]*C[1][1]*o_yyy + C[0][1]*C[1][1]*C[1][2]*o_yyz + C[0][1]*C[1][2]*C[1][0]*o_xyz + C[0][1]*C[1][2]*C[1][1]*o_yyz + C[0][1]*C[1][2]*C[1][2]*o_yzz + C[0][2]*C[1][0]*C[1][0]*o_xxz + C[0][2]*C[1][0]*C[1][1]*o_xyz + C[0][2]*C[1][0]*C[1][2]*o_xzz + C[0][2]*C[1][1]*C[1][0]*o_xyz + C[0][2]*C[1][1]*C[1][1]*o_yyz + C[0][2]*C[1][1]*C[1][2]*o_yzz + C[0][2]*C[1][2]*C[1][0]*o_xzz + C[0][2]*C[1][2]*C[1][1]*o_yzz + C[0][2]*C[1][2]*C[1][2]*o_zzz 
-        O_xyz =  C[0][0]*C[1][0]*C[2][0]*o_xxx + C[0][0]*C[1][0]*C[2][1]*o_xxy + C[0][0]*C[1][0]*C[2][2]*o_xxz + C[0][0]*C[1][1]*C[2][0]*o_xxy + C[0][0]*C[1][1]*C[2][1]*o_xyy + C[0][0]*C[1][1]*C[2][2]*o_xyz + C[0][0]*C[1][2]*C[2][0]*o_xxz + C[0][0]*C[1][2]*C[2][1]*o_xyz + C[0][0]*C[1][2]*C[2][2]*o_xzz + C[0][1]*C[1][0]*C[2][0]*o_xxy + C[0][1]*C[1][0]*C[2][1]*o_xyy + C[0][1]*C[1][0]*C[2][2]*o_xyz + C[0][1]*C[1][1]*C[2][0]*o_xyy + C[0][1]*C[1][1]*C[2][1]*o_yyy + C[0][1]*C[1][1]*C[2][2]*o_yyz + C[0][1]*C[1][2]*C[2][0]*o_xyz + C[0][1]*C[1][2]*C[2][1]*o_yyz + C[0][1]*C[1][2]*C[2][2]*o_yzz + C[0][2]*C[1][0]*C[2][0]*o_xxz + C[0][2]*C[1][0]*C[2][1]*o_xyz + C[0][2]*C[1][0]*C[2][2]*o_xzz + C[0][2]*C[1][1]*C[2][0]*o_xyz + C[0][2]*C[1][1]*C[2][1]*o_yyz + C[0][2]*C[1][1]*C[2][2]*o_yzz + C[0][2]*C[1][2]*C[2][0]*o_xzz + C[0][2]*C[1][2]*C[2][1]*o_yzz + C[0][2]*C[1][2]*C[2][2]*o_zzz 
-        O_xzz =  C[0][0]*C[2][0]*C[2][0]*o_xxx + C[0][0]*C[2][0]*C[2][1]*o_xxy + C[0][0]*C[2][0]*C[2][2]*o_xxz + C[0][0]*C[2][1]*C[2][0]*o_xxy + C[0][0]*C[2][1]*C[2][1]*o_xyy + C[0][0]*C[2][1]*C[2][2]*o_xyz + C[0][0]*C[2][2]*C[2][0]*o_xxz + C[0][0]*C[2][2]*C[2][1]*o_xyz + C[0][0]*C[2][2]*C[2][2]*o_xzz + C[0][1]*C[2][0]*C[2][0]*o_xxy + C[0][1]*C[2][0]*C[2][1]*o_xyy + C[0][1]*C[2][0]*C[2][2]*o_xyz + C[0][1]*C[2][1]*C[2][0]*o_xyy + C[0][1]*C[2][1]*C[2][1]*o_yyy + C[0][1]*C[2][1]*C[2][2]*o_yyz + C[0][1]*C[2][2]*C[2][0]*o_xyz + C[0][1]*C[2][2]*C[2][1]*o_yyz + C[0][1]*C[2][2]*C[2][2]*o_yzz + C[0][2]*C[2][0]*C[2][0]*o_xxz + C[0][2]*C[2][0]*C[2][1]*o_xyz + C[0][2]*C[2][0]*C[2][2]*o_xzz + C[0][2]*C[2][1]*C[2][0]*o_xyz + C[0][2]*C[2][1]*C[2][1]*o_yyz + C[0][2]*C[2][1]*C[2][2]*o_yzz + C[0][2]*C[2][2]*C[2][0]*o_xzz + C[0][2]*C[2][2]*C[2][1]*o_yzz + C[0][2]*C[2][2]*C[2][2]*o_zzz 
-        O_yyy =  C[1][0]*C[1][0]*C[1][0]*o_xxx + C[1][0]*C[1][0]*C[1][1]*o_xxy + C[1][0]*C[1][0]*C[1][2]*o_xxz + C[1][0]*C[1][1]*C[1][0]*o_xxy + C[1][0]*C[1][1]*C[1][1]*o_xyy + C[1][0]*C[1][1]*C[1][2]*o_xyz + C[1][0]*C[1][2]*C[1][0]*o_xxz + C[1][0]*C[1][2]*C[1][1]*o_xyz + C[1][0]*C[1][2]*C[1][2]*o_xzz + C[1][1]*C[1][0]*C[1][0]*o_xxy + C[1][1]*C[1][0]*C[1][1]*o_xyy + C[1][1]*C[1][0]*C[1][2]*o_xyz + C[1][1]*C[1][1]*C[1][0]*o_xyy + C[1][1]*C[1][1]*C[1][1]*o_yyy + C[1][1]*C[1][1]*C[1][2]*o_yyz + C[1][1]*C[1][2]*C[1][0]*o_xyz + C[1][1]*C[1][2]*C[1][1]*o_yyz + C[1][1]*C[1][2]*C[1][2]*o_yzz + C[1][2]*C[1][0]*C[1][0]*o_xxz + C[1][2]*C[1][0]*C[1][1]*o_xyz + C[1][2]*C[1][0]*C[1][2]*o_xzz + C[1][2]*C[1][1]*C[1][0]*o_xyz + C[1][2]*C[1][1]*C[1][1]*o_yyz + C[1][2]*C[1][1]*C[1][2]*o_yzz + C[1][2]*C[1][2]*C[1][0]*o_xzz + C[1][2]*C[1][2]*C[1][1]*o_yzz + C[1][2]*C[1][2]*C[1][2]*o_zzz 
-        O_yyz =  C[1][0]*C[1][0]*C[2][0]*o_xxx + C[1][0]*C[1][0]*C[2][1]*o_xxy + C[1][0]*C[1][0]*C[2][2]*o_xxz + C[1][0]*C[1][1]*C[2][0]*o_xxy + C[1][0]*C[1][1]*C[2][1]*o_xyy + C[1][0]*C[1][1]*C[2][2]*o_xyz + C[1][0]*C[1][2]*C[2][0]*o_xxz + C[1][0]*C[1][2]*C[2][1]*o_xyz + C[1][0]*C[1][2]*C[2][2]*o_xzz + C[1][1]*C[1][0]*C[2][0]*o_xxy + C[1][1]*C[1][0]*C[2][1]*o_xyy + C[1][1]*C[1][0]*C[2][2]*o_xyz + C[1][1]*C[1][1]*C[2][0]*o_xyy + C[1][1]*C[1][1]*C[2][1]*o_yyy + C[1][1]*C[1][1]*C[2][2]*o_yyz + C[1][1]*C[1][2]*C[2][0]*o_xyz + C[1][1]*C[1][2]*C[2][1]*o_yyz + C[1][1]*C[1][2]*C[2][2]*o_yzz + C[1][2]*C[1][0]*C[2][0]*o_xxz + C[1][2]*C[1][0]*C[2][1]*o_xyz + C[1][2]*C[1][0]*C[2][2]*o_xzz + C[1][2]*C[1][1]*C[2][0]*o_xyz + C[1][2]*C[1][1]*C[2][1]*o_yyz + C[1][2]*C[1][1]*C[2][2]*o_yzz + C[1][2]*C[1][2]*C[2][0]*o_xzz + C[1][2]*C[1][2]*C[2][1]*o_yzz + C[1][2]*C[1][2]*C[2][2]*o_zzz 
-        O_yzz =  C[1][0]*C[2][0]*C[2][0]*o_xxx + C[1][0]*C[2][0]*C[2][1]*o_xxy + C[1][0]*C[2][0]*C[2][2]*o_xxz + C[1][0]*C[2][1]*C[2][0]*o_xxy + C[1][0]*C[2][1]*C[2][1]*o_xyy + C[1][0]*C[2][1]*C[2][2]*o_xyz + C[1][0]*C[2][2]*C[2][0]*o_xxz + C[1][0]*C[2][2]*C[2][1]*o_xyz + C[1][0]*C[2][2]*C[2][2]*o_xzz + C[1][1]*C[2][0]*C[2][0]*o_xxy + C[1][1]*C[2][0]*C[2][1]*o_xyy + C[1][1]*C[2][0]*C[2][2]*o_xyz + C[1][1]*C[2][1]*C[2][0]*o_xyy + C[1][1]*C[2][1]*C[2][1]*o_yyy + C[1][1]*C[2][1]*C[2][2]*o_yyz + C[1][1]*C[2][2]*C[2][0]*o_xyz + C[1][1]*C[2][2]*C[2][1]*o_yyz + C[1][1]*C[2][2]*C[2][2]*o_yzz + C[1][2]*C[2][0]*C[2][0]*o_xxz + C[1][2]*C[2][0]*C[2][1]*o_xyz + C[1][2]*C[2][0]*C[2][2]*o_xzz + C[1][2]*C[2][1]*C[2][0]*o_xyz + C[1][2]*C[2][1]*C[2][1]*o_yyz + C[1][2]*C[2][1]*C[2][2]*o_yzz + C[1][2]*C[2][2]*C[2][0]*o_xzz + C[1][2]*C[2][2]*C[2][1]*o_yzz + C[1][2]*C[2][2]*C[2][2]*o_zzz 
-        O_zzz =  C[2][0]*C[2][0]*C[2][0]*o_xxx + C[2][0]*C[2][0]*C[2][1]*o_xxy + C[2][0]*C[2][0]*C[2][2]*o_xxz + C[2][0]*C[2][1]*C[2][0]*o_xxy + C[2][0]*C[2][1]*C[2][1]*o_xyy + C[2][0]*C[2][1]*C[2][2]*o_xyz + C[2][0]*C[2][2]*C[2][0]*o_xxz + C[2][0]*C[2][2]*C[2][1]*o_xyz + C[2][0]*C[2][2]*C[2][2]*o_xzz + C[2][1]*C[2][0]*C[2][0]*o_xxy + C[2][1]*C[2][0]*C[2][1]*o_xyy + C[2][1]*C[2][0]*C[2][2]*o_xyz + C[2][1]*C[2][1]*C[2][0]*o_xyy + C[2][1]*C[2][1]*C[2][1]*o_yyy + C[2][1]*C[2][1]*C[2][2]*o_yyz + C[2][1]*C[2][2]*C[2][0]*o_xyz + C[2][1]*C[2][2]*C[2][1]*o_yyz + C[2][1]*C[2][2]*C[2][2]*o_yzz + C[2][2]*C[2][0]*C[2][0]*o_xxz + C[2][2]*C[2][0]*C[2][1]*o_xyz + C[2][2]*C[2][0]*C[2][2]*o_xzz + C[2][2]*C[2][1]*C[2][0]*o_xyz + C[2][2]*C[2][1]*C[2][1]*o_yyz + C[2][2]*C[2][1]*C[2][2]*o_yzz + C[2][2]*C[2][2]*C[2][0]*o_xzz + C[2][2]*C[2][2]*C[2][1]*o_yzz + C[2][2]*C[2][2]*C[2][2]*o_zzz 
+        O_xxx = (
+            C[0][0] * C[0][0] * C[0][0] * o_xxx
+            + C[0][0] * C[0][0] * C[0][1] * o_xxy
+            + C[0][0] * C[0][0] * C[0][2] * o_xxz
+            + C[0][0] * C[0][1] * C[0][0] * o_xxy
+            + C[0][0] * C[0][1] * C[0][1] * o_xyy
+            + C[0][0] * C[0][1] * C[0][2] * o_xyz
+            + C[0][0] * C[0][2] * C[0][0] * o_xxz
+            + C[0][0] * C[0][2] * C[0][1] * o_xyz
+            + C[0][0] * C[0][2] * C[0][2] * o_xzz
+            + C[0][1] * C[0][0] * C[0][0] * o_xxy
+            + C[0][1] * C[0][0] * C[0][1] * o_xyy
+            + C[0][1] * C[0][0] * C[0][2] * o_xyz
+            + C[0][1] * C[0][1] * C[0][0] * o_xyy
+            + C[0][1] * C[0][1] * C[0][1] * o_yyy
+            + C[0][1] * C[0][1] * C[0][2] * o_yyz
+            + C[0][1] * C[0][2] * C[0][0] * o_xyz
+            + C[0][1] * C[0][2] * C[0][1] * o_yyz
+            + C[0][1] * C[0][2] * C[0][2] * o_yzz
+            + C[0][2] * C[0][0] * C[0][0] * o_xxz
+            + C[0][2] * C[0][0] * C[0][1] * o_xyz
+            + C[0][2] * C[0][0] * C[0][2] * o_xzz
+            + C[0][2] * C[0][1] * C[0][0] * o_xyz
+            + C[0][2] * C[0][1] * C[0][1] * o_yyz
+            + C[0][2] * C[0][1] * C[0][2] * o_yzz
+            + C[0][2] * C[0][2] * C[0][0] * o_xzz
+            + C[0][2] * C[0][2] * C[0][1] * o_yzz
+            + C[0][2] * C[0][2] * C[0][2] * o_zzz
+        )
+        O_xxy = (
+            C[0][0] * C[0][0] * C[1][0] * o_xxx
+            + C[0][0] * C[0][0] * C[1][1] * o_xxy
+            + C[0][0] * C[0][0] * C[1][2] * o_xxz
+            + C[0][0] * C[0][1] * C[1][0] * o_xxy
+            + C[0][0] * C[0][1] * C[1][1] * o_xyy
+            + C[0][0] * C[0][1] * C[1][2] * o_xyz
+            + C[0][0] * C[0][2] * C[1][0] * o_xxz
+            + C[0][0] * C[0][2] * C[1][1] * o_xyz
+            + C[0][0] * C[0][2] * C[1][2] * o_xzz
+            + C[0][1] * C[0][0] * C[1][0] * o_xxy
+            + C[0][1] * C[0][0] * C[1][1] * o_xyy
+            + C[0][1] * C[0][0] * C[1][2] * o_xyz
+            + C[0][1] * C[0][1] * C[1][0] * o_xyy
+            + C[0][1] * C[0][1] * C[1][1] * o_yyy
+            + C[0][1] * C[0][1] * C[1][2] * o_yyz
+            + C[0][1] * C[0][2] * C[1][0] * o_xyz
+            + C[0][1] * C[0][2] * C[1][1] * o_yyz
+            + C[0][1] * C[0][2] * C[1][2] * o_yzz
+            + C[0][2] * C[0][0] * C[1][0] * o_xxz
+            + C[0][2] * C[0][0] * C[1][1] * o_xyz
+            + C[0][2] * C[0][0] * C[1][2] * o_xzz
+            + C[0][2] * C[0][1] * C[1][0] * o_xyz
+            + C[0][2] * C[0][1] * C[1][1] * o_yyz
+            + C[0][2] * C[0][1] * C[1][2] * o_yzz
+            + C[0][2] * C[0][2] * C[1][0] * o_xzz
+            + C[0][2] * C[0][2] * C[1][1] * o_yzz
+            + C[0][2] * C[0][2] * C[1][2] * o_zzz
+        )
+        O_xxz = (
+            C[0][0] * C[0][0] * C[2][0] * o_xxx
+            + C[0][0] * C[0][0] * C[2][1] * o_xxy
+            + C[0][0] * C[0][0] * C[2][2] * o_xxz
+            + C[0][0] * C[0][1] * C[2][0] * o_xxy
+            + C[0][0] * C[0][1] * C[2][1] * o_xyy
+            + C[0][0] * C[0][1] * C[2][2] * o_xyz
+            + C[0][0] * C[0][2] * C[2][0] * o_xxz
+            + C[0][0] * C[0][2] * C[2][1] * o_xyz
+            + C[0][0] * C[0][2] * C[2][2] * o_xzz
+            + C[0][1] * C[0][0] * C[2][0] * o_xxy
+            + C[0][1] * C[0][0] * C[2][1] * o_xyy
+            + C[0][1] * C[0][0] * C[2][2] * o_xyz
+            + C[0][1] * C[0][1] * C[2][0] * o_xyy
+            + C[0][1] * C[0][1] * C[2][1] * o_yyy
+            + C[0][1] * C[0][1] * C[2][2] * o_yyz
+            + C[0][1] * C[0][2] * C[2][0] * o_xyz
+            + C[0][1] * C[0][2] * C[2][1] * o_yyz
+            + C[0][1] * C[0][2] * C[2][2] * o_yzz
+            + C[0][2] * C[0][0] * C[2][0] * o_xxz
+            + C[0][2] * C[0][0] * C[2][1] * o_xyz
+            + C[0][2] * C[0][0] * C[2][2] * o_xzz
+            + C[0][2] * C[0][1] * C[2][0] * o_xyz
+            + C[0][2] * C[0][1] * C[2][1] * o_yyz
+            + C[0][2] * C[0][1] * C[2][2] * o_yzz
+            + C[0][2] * C[0][2] * C[2][0] * o_xzz
+            + C[0][2] * C[0][2] * C[2][1] * o_yzz
+            + C[0][2] * C[0][2] * C[2][2] * o_zzz
+        )
+        O_xyy = (
+            C[0][0] * C[1][0] * C[1][0] * o_xxx
+            + C[0][0] * C[1][0] * C[1][1] * o_xxy
+            + C[0][0] * C[1][0] * C[1][2] * o_xxz
+            + C[0][0] * C[1][1] * C[1][0] * o_xxy
+            + C[0][0] * C[1][1] * C[1][1] * o_xyy
+            + C[0][0] * C[1][1] * C[1][2] * o_xyz
+            + C[0][0] * C[1][2] * C[1][0] * o_xxz
+            + C[0][0] * C[1][2] * C[1][1] * o_xyz
+            + C[0][0] * C[1][2] * C[1][2] * o_xzz
+            + C[0][1] * C[1][0] * C[1][0] * o_xxy
+            + C[0][1] * C[1][0] * C[1][1] * o_xyy
+            + C[0][1] * C[1][0] * C[1][2] * o_xyz
+            + C[0][1] * C[1][1] * C[1][0] * o_xyy
+            + C[0][1] * C[1][1] * C[1][1] * o_yyy
+            + C[0][1] * C[1][1] * C[1][2] * o_yyz
+            + C[0][1] * C[1][2] * C[1][0] * o_xyz
+            + C[0][1] * C[1][2] * C[1][1] * o_yyz
+            + C[0][1] * C[1][2] * C[1][2] * o_yzz
+            + C[0][2] * C[1][0] * C[1][0] * o_xxz
+            + C[0][2] * C[1][0] * C[1][1] * o_xyz
+            + C[0][2] * C[1][0] * C[1][2] * o_xzz
+            + C[0][2] * C[1][1] * C[1][0] * o_xyz
+            + C[0][2] * C[1][1] * C[1][1] * o_yyz
+            + C[0][2] * C[1][1] * C[1][2] * o_yzz
+            + C[0][2] * C[1][2] * C[1][0] * o_xzz
+            + C[0][2] * C[1][2] * C[1][1] * o_yzz
+            + C[0][2] * C[1][2] * C[1][2] * o_zzz
+        )
+        O_xyz = (
+            C[0][0] * C[1][0] * C[2][0] * o_xxx
+            + C[0][0] * C[1][0] * C[2][1] * o_xxy
+            + C[0][0] * C[1][0] * C[2][2] * o_xxz
+            + C[0][0] * C[1][1] * C[2][0] * o_xxy
+            + C[0][0] * C[1][1] * C[2][1] * o_xyy
+            + C[0][0] * C[1][1] * C[2][2] * o_xyz
+            + C[0][0] * C[1][2] * C[2][0] * o_xxz
+            + C[0][0] * C[1][2] * C[2][1] * o_xyz
+            + C[0][0] * C[1][2] * C[2][2] * o_xzz
+            + C[0][1] * C[1][0] * C[2][0] * o_xxy
+            + C[0][1] * C[1][0] * C[2][1] * o_xyy
+            + C[0][1] * C[1][0] * C[2][2] * o_xyz
+            + C[0][1] * C[1][1] * C[2][0] * o_xyy
+            + C[0][1] * C[1][1] * C[2][1] * o_yyy
+            + C[0][1] * C[1][1] * C[2][2] * o_yyz
+            + C[0][1] * C[1][2] * C[2][0] * o_xyz
+            + C[0][1] * C[1][2] * C[2][1] * o_yyz
+            + C[0][1] * C[1][2] * C[2][2] * o_yzz
+            + C[0][2] * C[1][0] * C[2][0] * o_xxz
+            + C[0][2] * C[1][0] * C[2][1] * o_xyz
+            + C[0][2] * C[1][0] * C[2][2] * o_xzz
+            + C[0][2] * C[1][1] * C[2][0] * o_xyz
+            + C[0][2] * C[1][1] * C[2][1] * o_yyz
+            + C[0][2] * C[1][1] * C[2][2] * o_yzz
+            + C[0][2] * C[1][2] * C[2][0] * o_xzz
+            + C[0][2] * C[1][2] * C[2][1] * o_yzz
+            + C[0][2] * C[1][2] * C[2][2] * o_zzz
+        )
+        O_xzz = (
+            C[0][0] * C[2][0] * C[2][0] * o_xxx
+            + C[0][0] * C[2][0] * C[2][1] * o_xxy
+            + C[0][0] * C[2][0] * C[2][2] * o_xxz
+            + C[0][0] * C[2][1] * C[2][0] * o_xxy
+            + C[0][0] * C[2][1] * C[2][1] * o_xyy
+            + C[0][0] * C[2][1] * C[2][2] * o_xyz
+            + C[0][0] * C[2][2] * C[2][0] * o_xxz
+            + C[0][0] * C[2][2] * C[2][1] * o_xyz
+            + C[0][0] * C[2][2] * C[2][2] * o_xzz
+            + C[0][1] * C[2][0] * C[2][0] * o_xxy
+            + C[0][1] * C[2][0] * C[2][1] * o_xyy
+            + C[0][1] * C[2][0] * C[2][2] * o_xyz
+            + C[0][1] * C[2][1] * C[2][0] * o_xyy
+            + C[0][1] * C[2][1] * C[2][1] * o_yyy
+            + C[0][1] * C[2][1] * C[2][2] * o_yyz
+            + C[0][1] * C[2][2] * C[2][0] * o_xyz
+            + C[0][1] * C[2][2] * C[2][1] * o_yyz
+            + C[0][1] * C[2][2] * C[2][2] * o_yzz
+            + C[0][2] * C[2][0] * C[2][0] * o_xxz
+            + C[0][2] * C[2][0] * C[2][1] * o_xyz
+            + C[0][2] * C[2][0] * C[2][2] * o_xzz
+            + C[0][2] * C[2][1] * C[2][0] * o_xyz
+            + C[0][2] * C[2][1] * C[2][1] * o_yyz
+            + C[0][2] * C[2][1] * C[2][2] * o_yzz
+            + C[0][2] * C[2][2] * C[2][0] * o_xzz
+            + C[0][2] * C[2][2] * C[2][1] * o_yzz
+            + C[0][2] * C[2][2] * C[2][2] * o_zzz
+        )
+        O_yyy = (
+            C[1][0] * C[1][0] * C[1][0] * o_xxx
+            + C[1][0] * C[1][0] * C[1][1] * o_xxy
+            + C[1][0] * C[1][0] * C[1][2] * o_xxz
+            + C[1][0] * C[1][1] * C[1][0] * o_xxy
+            + C[1][0] * C[1][1] * C[1][1] * o_xyy
+            + C[1][0] * C[1][1] * C[1][2] * o_xyz
+            + C[1][0] * C[1][2] * C[1][0] * o_xxz
+            + C[1][0] * C[1][2] * C[1][1] * o_xyz
+            + C[1][0] * C[1][2] * C[1][2] * o_xzz
+            + C[1][1] * C[1][0] * C[1][0] * o_xxy
+            + C[1][1] * C[1][0] * C[1][1] * o_xyy
+            + C[1][1] * C[1][0] * C[1][2] * o_xyz
+            + C[1][1] * C[1][1] * C[1][0] * o_xyy
+            + C[1][1] * C[1][1] * C[1][1] * o_yyy
+            + C[1][1] * C[1][1] * C[1][2] * o_yyz
+            + C[1][1] * C[1][2] * C[1][0] * o_xyz
+            + C[1][1] * C[1][2] * C[1][1] * o_yyz
+            + C[1][1] * C[1][2] * C[1][2] * o_yzz
+            + C[1][2] * C[1][0] * C[1][0] * o_xxz
+            + C[1][2] * C[1][0] * C[1][1] * o_xyz
+            + C[1][2] * C[1][0] * C[1][2] * o_xzz
+            + C[1][2] * C[1][1] * C[1][0] * o_xyz
+            + C[1][2] * C[1][1] * C[1][1] * o_yyz
+            + C[1][2] * C[1][1] * C[1][2] * o_yzz
+            + C[1][2] * C[1][2] * C[1][0] * o_xzz
+            + C[1][2] * C[1][2] * C[1][1] * o_yzz
+            + C[1][2] * C[1][2] * C[1][2] * o_zzz
+        )
+        O_yyz = (
+            C[1][0] * C[1][0] * C[2][0] * o_xxx
+            + C[1][0] * C[1][0] * C[2][1] * o_xxy
+            + C[1][0] * C[1][0] * C[2][2] * o_xxz
+            + C[1][0] * C[1][1] * C[2][0] * o_xxy
+            + C[1][0] * C[1][1] * C[2][1] * o_xyy
+            + C[1][0] * C[1][1] * C[2][2] * o_xyz
+            + C[1][0] * C[1][2] * C[2][0] * o_xxz
+            + C[1][0] * C[1][2] * C[2][1] * o_xyz
+            + C[1][0] * C[1][2] * C[2][2] * o_xzz
+            + C[1][1] * C[1][0] * C[2][0] * o_xxy
+            + C[1][1] * C[1][0] * C[2][1] * o_xyy
+            + C[1][1] * C[1][0] * C[2][2] * o_xyz
+            + C[1][1] * C[1][1] * C[2][0] * o_xyy
+            + C[1][1] * C[1][1] * C[2][1] * o_yyy
+            + C[1][1] * C[1][1] * C[2][2] * o_yyz
+            + C[1][1] * C[1][2] * C[2][0] * o_xyz
+            + C[1][1] * C[1][2] * C[2][1] * o_yyz
+            + C[1][1] * C[1][2] * C[2][2] * o_yzz
+            + C[1][2] * C[1][0] * C[2][0] * o_xxz
+            + C[1][2] * C[1][0] * C[2][1] * o_xyz
+            + C[1][2] * C[1][0] * C[2][2] * o_xzz
+            + C[1][2] * C[1][1] * C[2][0] * o_xyz
+            + C[1][2] * C[1][1] * C[2][1] * o_yyz
+            + C[1][2] * C[1][1] * C[2][2] * o_yzz
+            + C[1][2] * C[1][2] * C[2][0] * o_xzz
+            + C[1][2] * C[1][2] * C[2][1] * o_yzz
+            + C[1][2] * C[1][2] * C[2][2] * o_zzz
+        )
+        O_yzz = (
+            C[1][0] * C[2][0] * C[2][0] * o_xxx
+            + C[1][0] * C[2][0] * C[2][1] * o_xxy
+            + C[1][0] * C[2][0] * C[2][2] * o_xxz
+            + C[1][0] * C[2][1] * C[2][0] * o_xxy
+            + C[1][0] * C[2][1] * C[2][1] * o_xyy
+            + C[1][0] * C[2][1] * C[2][2] * o_xyz
+            + C[1][0] * C[2][2] * C[2][0] * o_xxz
+            + C[1][0] * C[2][2] * C[2][1] * o_xyz
+            + C[1][0] * C[2][2] * C[2][2] * o_xzz
+            + C[1][1] * C[2][0] * C[2][0] * o_xxy
+            + C[1][1] * C[2][0] * C[2][1] * o_xyy
+            + C[1][1] * C[2][0] * C[2][2] * o_xyz
+            + C[1][1] * C[2][1] * C[2][0] * o_xyy
+            + C[1][1] * C[2][1] * C[2][1] * o_yyy
+            + C[1][1] * C[2][1] * C[2][2] * o_yyz
+            + C[1][1] * C[2][2] * C[2][0] * o_xyz
+            + C[1][1] * C[2][2] * C[2][1] * o_yyz
+            + C[1][1] * C[2][2] * C[2][2] * o_yzz
+            + C[1][2] * C[2][0] * C[2][0] * o_xxz
+            + C[1][2] * C[2][0] * C[2][1] * o_xyz
+            + C[1][2] * C[2][0] * C[2][2] * o_xzz
+            + C[1][2] * C[2][1] * C[2][0] * o_xyz
+            + C[1][2] * C[2][1] * C[2][1] * o_yyz
+            + C[1][2] * C[2][1] * C[2][2] * o_yzz
+            + C[1][2] * C[2][2] * C[2][0] * o_xzz
+            + C[1][2] * C[2][2] * C[2][1] * o_yzz
+            + C[1][2] * C[2][2] * C[2][2] * o_zzz
+        )
+        O_zzz = (
+            C[2][0] * C[2][0] * C[2][0] * o_xxx
+            + C[2][0] * C[2][0] * C[2][1] * o_xxy
+            + C[2][0] * C[2][0] * C[2][2] * o_xxz
+            + C[2][0] * C[2][1] * C[2][0] * o_xxy
+            + C[2][0] * C[2][1] * C[2][1] * o_xyy
+            + C[2][0] * C[2][1] * C[2][2] * o_xyz
+            + C[2][0] * C[2][2] * C[2][0] * o_xxz
+            + C[2][0] * C[2][2] * C[2][1] * o_xyz
+            + C[2][0] * C[2][2] * C[2][2] * o_xzz
+            + C[2][1] * C[2][0] * C[2][0] * o_xxy
+            + C[2][1] * C[2][0] * C[2][1] * o_xyy
+            + C[2][1] * C[2][0] * C[2][2] * o_xyz
+            + C[2][1] * C[2][1] * C[2][0] * o_xyy
+            + C[2][1] * C[2][1] * C[2][1] * o_yyy
+            + C[2][1] * C[2][1] * C[2][2] * o_yyz
+            + C[2][1] * C[2][2] * C[2][0] * o_xyz
+            + C[2][1] * C[2][2] * C[2][1] * o_yyz
+            + C[2][1] * C[2][2] * C[2][2] * o_yzz
+            + C[2][2] * C[2][0] * C[2][0] * o_xxz
+            + C[2][2] * C[2][0] * C[2][1] * o_xyz
+            + C[2][2] * C[2][0] * C[2][2] * o_xzz
+            + C[2][2] * C[2][1] * C[2][0] * o_xyz
+            + C[2][2] * C[2][1] * C[2][1] * o_yyz
+            + C[2][2] * C[2][1] * C[2][2] * o_yzz
+            + C[2][2] * C[2][2] * C[2][0] * o_xzz
+            + C[2][2] * C[2][2] * C[2][1] * o_yzz
+            + C[2][2] * C[2][2] * C[2][2] * o_zzz
+        )
 
         # rt_3_3 = sqrt(3/2) rt_3_5 = sqrt(3/5) rt_1_10 = sqrt(1/10)
         self.q30 = O_zzz
@@ -5082,55 +5758,1311 @@ class INT(Point):
         self.q31s = Constants.rt_3_3 * O_yzz
         self.q32c = Constants.rt_3_5 * (O_xxz - O_yyz)
         self.q32s = 2 * Constants.rt_3_5 * O_xyz
-        self.q33c = Constants.rt_1_10 * (O_xxx - 3*O_xyy)
-        self.q33s = Constants.rt_1_10 * (3*O_xxy - O_yyy)
+        self.q33c = Constants.rt_1_10 * (O_xxx - 3 * O_xyy)
+        self.q33s = Constants.rt_1_10 * (3 * O_xxy - O_yyy)
 
     def rotate_hexadecapole(self):
         # Convert Hexadecapole Spherical Moments to Cartesian
         # 17  18   19   20   21   22   23   24   25
         # q40 q41c q41s q42c q42s q43c q43s q44c q44s
-        h_xxxx = 0.375*self.q40 - 0.25*Constants.rt5*self.q42c + 0.125*Constants.rt35*self.q44c # xxxx (21)
-        h_xxxy = 0.125*(Constants.rt35*self.q44s - Constants.rt5*self.q42s)                     # xxxy (22)
-        h_xxxz = 0.0625*(Constants.rt70*self.q43c - 3.0*Constants.rt10*self.q41c)               # xxxz (23)
-        h_xxyy = 0.125*self.q40 - 0.125*Constants.rt35*self.q44c                                # xxyy (24)
-        h_xxyz = 0.0625*(Constants.rt70*self.q43s - Constants.rt10*self.q41s)                   # xxyz (25)
-        h_xxzz = 0.5*(0.5*Constants.rt5*self.q42c - self.q40)                                   # xxzz (26)
-        h_xyyy = -0.125*(Constants.rt5*self.q42s + Constants.rt35*self.q44s)                    # xyyy (27)
-        h_xyyz = -0.0625*(Constants.rt10*self.q41c + Constants.rt70*self.q43c)                  # xyyz (28)
-        h_xyzz = 0.25*Constants.rt5*self.q42s                                                   # xyzz (29)
-        h_xzzz = Constants.rt5_8*self.q41c                                                      # xzzz (30)
-        h_yyyy = 0.375*self.q40 + 0.25*Constants.rt5*self.q42c + 0.125*Constants.rt35*self.q44c # yyyy (31)
-        h_yyyz = -0.0625*(3.0*Constants.rt10*self.q41s + Constants.rt70*self.q43s)              # yyyz (32)
-        h_yyzz = -0.5*(0.5*Constants.rt5*self.q42c + self.q40)                                  # yyzz (33)
-        h_yzzz = Constants.rt5_8*self.q41s                                                      # yzzz (34)
-        h_zzzz = self.q40                                                                       # zzzz (35)
+        h_xxxx = (
+            0.375 * self.q40
+            - 0.25 * Constants.rt5 * self.q42c
+            + 0.125 * Constants.rt35 * self.q44c
+        )  # xxxx (21)
+        h_xxxy = 0.125 * (
+            Constants.rt35 * self.q44s - Constants.rt5 * self.q42s
+        )  # xxxy (22)
+        h_xxxz = 0.0625 * (
+            Constants.rt70 * self.q43c - 3.0 * Constants.rt10 * self.q41c
+        )  # xxxz (23)
+        h_xxyy = (
+            0.125 * self.q40 - 0.125 * Constants.rt35 * self.q44c
+        )  # xxyy (24)
+        h_xxyz = 0.0625 * (
+            Constants.rt70 * self.q43s - Constants.rt10 * self.q41s
+        )  # xxyz (25)
+        h_xxzz = 0.5 * (
+            0.5 * Constants.rt5 * self.q42c - self.q40
+        )  # xxzz (26)
+        h_xyyy = -0.125 * (
+            Constants.rt5 * self.q42s + Constants.rt35 * self.q44s
+        )  # xyyy (27)
+        h_xyyz = -0.0625 * (
+            Constants.rt10 * self.q41c + Constants.rt70 * self.q43c
+        )  # xyyz (28)
+        h_xyzz = 0.25 * Constants.rt5 * self.q42s  # xyzz (29)
+        h_xzzz = Constants.rt5_8 * self.q41c  # xzzz (30)
+        h_yyyy = (
+            0.375 * self.q40
+            + 0.25 * Constants.rt5 * self.q42c
+            + 0.125 * Constants.rt35 * self.q44c
+        )  # yyyy (31)
+        h_yyyz = -0.0625 * (
+            3.0 * Constants.rt10 * self.q41s + Constants.rt70 * self.q43s
+        )  # yyyz (32)
+        h_yyzz = -0.5 * (
+            0.5 * Constants.rt5 * self.q42c + self.q40
+        )  # yyzz (33)
+        h_yzzz = Constants.rt5_8 * self.q41s  # yzzz (34)
+        h_zzzz = self.q40  # zzzz (35)
 
         C = self.C
 
-        H_xxxx =  C[0][0]*C[0][0]*C[0][0]*C[0][0]*h_xxxx + C[0][0]*C[0][0]*C[0][0]*C[0][1]*h_xxxy + C[0][0]*C[0][0]*C[0][0]*C[0][2]*h_xxxz + C[0][0]*C[0][0]*C[0][1]*C[0][0]*h_xxxy + C[0][0]*C[0][0]*C[0][1]*C[0][1]*h_xxyy + C[0][0]*C[0][0]*C[0][1]*C[0][2]*h_xxyz + C[0][0]*C[0][0]*C[0][2]*C[0][0]*h_xxxz + C[0][0]*C[0][0]*C[0][2]*C[0][1]*h_xxyz + C[0][0]*C[0][0]*C[0][2]*C[0][2]*h_xxzz + C[0][0]*C[0][1]*C[0][0]*C[0][0]*h_xxxy + C[0][0]*C[0][1]*C[0][0]*C[0][1]*h_xxyy + C[0][0]*C[0][1]*C[0][0]*C[0][2]*h_xxyz + C[0][0]*C[0][1]*C[0][1]*C[0][0]*h_xxyy + C[0][0]*C[0][1]*C[0][1]*C[0][1]*h_xyyy + C[0][0]*C[0][1]*C[0][1]*C[0][2]*h_xyyz + C[0][0]*C[0][1]*C[0][2]*C[0][0]*h_xxyz + C[0][0]*C[0][1]*C[0][2]*C[0][1]*h_xyyz + C[0][0]*C[0][1]*C[0][2]*C[0][2]*h_xyzz + C[0][0]*C[0][2]*C[0][0]*C[0][0]*h_xxxz + C[0][0]*C[0][2]*C[0][0]*C[0][1]*h_xxyz + C[0][0]*C[0][2]*C[0][0]*C[0][2]*h_xxzz + C[0][0]*C[0][2]*C[0][1]*C[0][0]*h_xxyz + C[0][0]*C[0][2]*C[0][1]*C[0][1]*h_xyyz + C[0][0]*C[0][2]*C[0][1]*C[0][2]*h_xyzz + C[0][0]*C[0][2]*C[0][2]*C[0][0]*h_xxzz + C[0][0]*C[0][2]*C[0][2]*C[0][1]*h_xyzz + C[0][0]*C[0][2]*C[0][2]*C[0][2]*h_xzzz + C[0][1]*C[0][0]*C[0][0]*C[0][0]*h_xxxy + C[0][1]*C[0][0]*C[0][0]*C[0][1]*h_xxyy + C[0][1]*C[0][0]*C[0][0]*C[0][2]*h_xxyz + C[0][1]*C[0][0]*C[0][1]*C[0][0]*h_xxyy + C[0][1]*C[0][0]*C[0][1]*C[0][1]*h_xyyy + C[0][1]*C[0][0]*C[0][1]*C[0][2]*h_xyyz + C[0][1]*C[0][0]*C[0][2]*C[0][0]*h_xxyz + C[0][1]*C[0][0]*C[0][2]*C[0][1]*h_xyyz + C[0][1]*C[0][0]*C[0][2]*C[0][2]*h_xyzz + C[0][1]*C[0][1]*C[0][0]*C[0][0]*h_xxyy + C[0][1]*C[0][1]*C[0][0]*C[0][1]*h_xyyy + C[0][1]*C[0][1]*C[0][0]*C[0][2]*h_xyyz + C[0][1]*C[0][1]*C[0][1]*C[0][0]*h_xyyy + C[0][1]*C[0][1]*C[0][1]*C[0][1]*h_yyyy + C[0][1]*C[0][1]*C[0][1]*C[0][2]*h_yyyz + C[0][1]*C[0][1]*C[0][2]*C[0][0]*h_xyyz + C[0][1]*C[0][1]*C[0][2]*C[0][1]*h_yyyz + C[0][1]*C[0][1]*C[0][2]*C[0][2]*h_yyzz + C[0][1]*C[0][2]*C[0][0]*C[0][0]*h_xxyz + C[0][1]*C[0][2]*C[0][0]*C[0][1]*h_xyyz + C[0][1]*C[0][2]*C[0][0]*C[0][2]*h_xyzz + C[0][1]*C[0][2]*C[0][1]*C[0][0]*h_xyyz + C[0][1]*C[0][2]*C[0][1]*C[0][1]*h_yyyz + C[0][1]*C[0][2]*C[0][1]*C[0][2]*h_yyzz + C[0][1]*C[0][2]*C[0][2]*C[0][0]*h_xyzz + C[0][1]*C[0][2]*C[0][2]*C[0][1]*h_yyzz + C[0][1]*C[0][2]*C[0][2]*C[0][2]*h_yzzz + C[0][2]*C[0][0]*C[0][0]*C[0][0]*h_xxxz + C[0][2]*C[0][0]*C[0][0]*C[0][1]*h_xxyz + C[0][2]*C[0][0]*C[0][0]*C[0][2]*h_xxzz + C[0][2]*C[0][0]*C[0][1]*C[0][0]*h_xxyz + C[0][2]*C[0][0]*C[0][1]*C[0][1]*h_xyyz + C[0][2]*C[0][0]*C[0][1]*C[0][2]*h_xyzz + C[0][2]*C[0][0]*C[0][2]*C[0][0]*h_xxzz + C[0][2]*C[0][0]*C[0][2]*C[0][1]*h_xyzz + C[0][2]*C[0][0]*C[0][2]*C[0][2]*h_xzzz + C[0][2]*C[0][1]*C[0][0]*C[0][0]*h_xxyz + C[0][2]*C[0][1]*C[0][0]*C[0][1]*h_xyyz + C[0][2]*C[0][1]*C[0][0]*C[0][2]*h_xyzz + C[0][2]*C[0][1]*C[0][1]*C[0][0]*h_xyyz + C[0][2]*C[0][1]*C[0][1]*C[0][1]*h_yyyz + C[0][2]*C[0][1]*C[0][1]*C[0][2]*h_yyzz + C[0][2]*C[0][1]*C[0][2]*C[0][0]*h_xyzz + C[0][2]*C[0][1]*C[0][2]*C[0][1]*h_yyzz + C[0][2]*C[0][1]*C[0][2]*C[0][2]*h_yzzz + C[0][2]*C[0][2]*C[0][0]*C[0][0]*h_xxzz + C[0][2]*C[0][2]*C[0][0]*C[0][1]*h_xyzz + C[0][2]*C[0][2]*C[0][0]*C[0][2]*h_xzzz + C[0][2]*C[0][2]*C[0][1]*C[0][0]*h_xyzz + C[0][2]*C[0][2]*C[0][1]*C[0][1]*h_yyzz + C[0][2]*C[0][2]*C[0][1]*C[0][2]*h_yzzz + C[0][2]*C[0][2]*C[0][2]*C[0][0]*h_xzzz + C[0][2]*C[0][2]*C[0][2]*C[0][1]*h_yzzz + C[0][2]*C[0][2]*C[0][2]*C[0][2]*h_zzzz 
-        H_xxxy =  C[0][0]*C[0][0]*C[0][0]*C[1][0]*h_xxxx + C[0][0]*C[0][0]*C[0][0]*C[1][1]*h_xxxy + C[0][0]*C[0][0]*C[0][0]*C[1][2]*h_xxxz + C[0][0]*C[0][0]*C[0][1]*C[1][0]*h_xxxy + C[0][0]*C[0][0]*C[0][1]*C[1][1]*h_xxyy + C[0][0]*C[0][0]*C[0][1]*C[1][2]*h_xxyz + C[0][0]*C[0][0]*C[0][2]*C[1][0]*h_xxxz + C[0][0]*C[0][0]*C[0][2]*C[1][1]*h_xxyz + C[0][0]*C[0][0]*C[0][2]*C[1][2]*h_xxzz + C[0][0]*C[0][1]*C[0][0]*C[1][0]*h_xxxy + C[0][0]*C[0][1]*C[0][0]*C[1][1]*h_xxyy + C[0][0]*C[0][1]*C[0][0]*C[1][2]*h_xxyz + C[0][0]*C[0][1]*C[0][1]*C[1][0]*h_xxyy + C[0][0]*C[0][1]*C[0][1]*C[1][1]*h_xyyy + C[0][0]*C[0][1]*C[0][1]*C[1][2]*h_xyyz + C[0][0]*C[0][1]*C[0][2]*C[1][0]*h_xxyz + C[0][0]*C[0][1]*C[0][2]*C[1][1]*h_xyyz + C[0][0]*C[0][1]*C[0][2]*C[1][2]*h_xyzz + C[0][0]*C[0][2]*C[0][0]*C[1][0]*h_xxxz + C[0][0]*C[0][2]*C[0][0]*C[1][1]*h_xxyz + C[0][0]*C[0][2]*C[0][0]*C[1][2]*h_xxzz + C[0][0]*C[0][2]*C[0][1]*C[1][0]*h_xxyz + C[0][0]*C[0][2]*C[0][1]*C[1][1]*h_xyyz + C[0][0]*C[0][2]*C[0][1]*C[1][2]*h_xyzz + C[0][0]*C[0][2]*C[0][2]*C[1][0]*h_xxzz + C[0][0]*C[0][2]*C[0][2]*C[1][1]*h_xyzz + C[0][0]*C[0][2]*C[0][2]*C[1][2]*h_xzzz + C[0][1]*C[0][0]*C[0][0]*C[1][0]*h_xxxy + C[0][1]*C[0][0]*C[0][0]*C[1][1]*h_xxyy + C[0][1]*C[0][0]*C[0][0]*C[1][2]*h_xxyz + C[0][1]*C[0][0]*C[0][1]*C[1][0]*h_xxyy + C[0][1]*C[0][0]*C[0][1]*C[1][1]*h_xyyy + C[0][1]*C[0][0]*C[0][1]*C[1][2]*h_xyyz + C[0][1]*C[0][0]*C[0][2]*C[1][0]*h_xxyz + C[0][1]*C[0][0]*C[0][2]*C[1][1]*h_xyyz + C[0][1]*C[0][0]*C[0][2]*C[1][2]*h_xyzz + C[0][1]*C[0][1]*C[0][0]*C[1][0]*h_xxyy + C[0][1]*C[0][1]*C[0][0]*C[1][1]*h_xyyy + C[0][1]*C[0][1]*C[0][0]*C[1][2]*h_xyyz + C[0][1]*C[0][1]*C[0][1]*C[1][0]*h_xyyy + C[0][1]*C[0][1]*C[0][1]*C[1][1]*h_yyyy + C[0][1]*C[0][1]*C[0][1]*C[1][2]*h_yyyz + C[0][1]*C[0][1]*C[0][2]*C[1][0]*h_xyyz + C[0][1]*C[0][1]*C[0][2]*C[1][1]*h_yyyz + C[0][1]*C[0][1]*C[0][2]*C[1][2]*h_yyzz + C[0][1]*C[0][2]*C[0][0]*C[1][0]*h_xxyz + C[0][1]*C[0][2]*C[0][0]*C[1][1]*h_xyyz + C[0][1]*C[0][2]*C[0][0]*C[1][2]*h_xyzz + C[0][1]*C[0][2]*C[0][1]*C[1][0]*h_xyyz + C[0][1]*C[0][2]*C[0][1]*C[1][1]*h_yyyz + C[0][1]*C[0][2]*C[0][1]*C[1][2]*h_yyzz + C[0][1]*C[0][2]*C[0][2]*C[1][0]*h_xyzz + C[0][1]*C[0][2]*C[0][2]*C[1][1]*h_yyzz + C[0][1]*C[0][2]*C[0][2]*C[1][2]*h_yzzz + C[0][2]*C[0][0]*C[0][0]*C[1][0]*h_xxxz + C[0][2]*C[0][0]*C[0][0]*C[1][1]*h_xxyz + C[0][2]*C[0][0]*C[0][0]*C[1][2]*h_xxzz + C[0][2]*C[0][0]*C[0][1]*C[1][0]*h_xxyz + C[0][2]*C[0][0]*C[0][1]*C[1][1]*h_xyyz + C[0][2]*C[0][0]*C[0][1]*C[1][2]*h_xyzz + C[0][2]*C[0][0]*C[0][2]*C[1][0]*h_xxzz + C[0][2]*C[0][0]*C[0][2]*C[1][1]*h_xyzz + C[0][2]*C[0][0]*C[0][2]*C[1][2]*h_xzzz + C[0][2]*C[0][1]*C[0][0]*C[1][0]*h_xxyz + C[0][2]*C[0][1]*C[0][0]*C[1][1]*h_xyyz + C[0][2]*C[0][1]*C[0][0]*C[1][2]*h_xyzz + C[0][2]*C[0][1]*C[0][1]*C[1][0]*h_xyyz + C[0][2]*C[0][1]*C[0][1]*C[1][1]*h_yyyz + C[0][2]*C[0][1]*C[0][1]*C[1][2]*h_yyzz + C[0][2]*C[0][1]*C[0][2]*C[1][0]*h_xyzz + C[0][2]*C[0][1]*C[0][2]*C[1][1]*h_yyzz + C[0][2]*C[0][1]*C[0][2]*C[1][2]*h_yzzz + C[0][2]*C[0][2]*C[0][0]*C[1][0]*h_xxzz + C[0][2]*C[0][2]*C[0][0]*C[1][1]*h_xyzz + C[0][2]*C[0][2]*C[0][0]*C[1][2]*h_xzzz + C[0][2]*C[0][2]*C[0][1]*C[1][0]*h_xyzz + C[0][2]*C[0][2]*C[0][1]*C[1][1]*h_yyzz + C[0][2]*C[0][2]*C[0][1]*C[1][2]*h_yzzz + C[0][2]*C[0][2]*C[0][2]*C[1][0]*h_xzzz + C[0][2]*C[0][2]*C[0][2]*C[1][1]*h_yzzz + C[0][2]*C[0][2]*C[0][2]*C[1][2]*h_zzzz 
-        H_xxxz =  C[0][0]*C[0][0]*C[0][0]*C[2][0]*h_xxxx + C[0][0]*C[0][0]*C[0][0]*C[2][1]*h_xxxy + C[0][0]*C[0][0]*C[0][0]*C[2][2]*h_xxxz + C[0][0]*C[0][0]*C[0][1]*C[2][0]*h_xxxy + C[0][0]*C[0][0]*C[0][1]*C[2][1]*h_xxyy + C[0][0]*C[0][0]*C[0][1]*C[2][2]*h_xxyz + C[0][0]*C[0][0]*C[0][2]*C[2][0]*h_xxxz + C[0][0]*C[0][0]*C[0][2]*C[2][1]*h_xxyz + C[0][0]*C[0][0]*C[0][2]*C[2][2]*h_xxzz + C[0][0]*C[0][1]*C[0][0]*C[2][0]*h_xxxy + C[0][0]*C[0][1]*C[0][0]*C[2][1]*h_xxyy + C[0][0]*C[0][1]*C[0][0]*C[2][2]*h_xxyz + C[0][0]*C[0][1]*C[0][1]*C[2][0]*h_xxyy + C[0][0]*C[0][1]*C[0][1]*C[2][1]*h_xyyy + C[0][0]*C[0][1]*C[0][1]*C[2][2]*h_xyyz + C[0][0]*C[0][1]*C[0][2]*C[2][0]*h_xxyz + C[0][0]*C[0][1]*C[0][2]*C[2][1]*h_xyyz + C[0][0]*C[0][1]*C[0][2]*C[2][2]*h_xyzz + C[0][0]*C[0][2]*C[0][0]*C[2][0]*h_xxxz + C[0][0]*C[0][2]*C[0][0]*C[2][1]*h_xxyz + C[0][0]*C[0][2]*C[0][0]*C[2][2]*h_xxzz + C[0][0]*C[0][2]*C[0][1]*C[2][0]*h_xxyz + C[0][0]*C[0][2]*C[0][1]*C[2][1]*h_xyyz + C[0][0]*C[0][2]*C[0][1]*C[2][2]*h_xyzz + C[0][0]*C[0][2]*C[0][2]*C[2][0]*h_xxzz + C[0][0]*C[0][2]*C[0][2]*C[2][1]*h_xyzz + C[0][0]*C[0][2]*C[0][2]*C[2][2]*h_xzzz + C[0][1]*C[0][0]*C[0][0]*C[2][0]*h_xxxy + C[0][1]*C[0][0]*C[0][0]*C[2][1]*h_xxyy + C[0][1]*C[0][0]*C[0][0]*C[2][2]*h_xxyz + C[0][1]*C[0][0]*C[0][1]*C[2][0]*h_xxyy + C[0][1]*C[0][0]*C[0][1]*C[2][1]*h_xyyy + C[0][1]*C[0][0]*C[0][1]*C[2][2]*h_xyyz + C[0][1]*C[0][0]*C[0][2]*C[2][0]*h_xxyz + C[0][1]*C[0][0]*C[0][2]*C[2][1]*h_xyyz + C[0][1]*C[0][0]*C[0][2]*C[2][2]*h_xyzz + C[0][1]*C[0][1]*C[0][0]*C[2][0]*h_xxyy + C[0][1]*C[0][1]*C[0][0]*C[2][1]*h_xyyy + C[0][1]*C[0][1]*C[0][0]*C[2][2]*h_xyyz + C[0][1]*C[0][1]*C[0][1]*C[2][0]*h_xyyy + C[0][1]*C[0][1]*C[0][1]*C[2][1]*h_yyyy + C[0][1]*C[0][1]*C[0][1]*C[2][2]*h_yyyz + C[0][1]*C[0][1]*C[0][2]*C[2][0]*h_xyyz + C[0][1]*C[0][1]*C[0][2]*C[2][1]*h_yyyz + C[0][1]*C[0][1]*C[0][2]*C[2][2]*h_yyzz + C[0][1]*C[0][2]*C[0][0]*C[2][0]*h_xxyz + C[0][1]*C[0][2]*C[0][0]*C[2][1]*h_xyyz + C[0][1]*C[0][2]*C[0][0]*C[2][2]*h_xyzz + C[0][1]*C[0][2]*C[0][1]*C[2][0]*h_xyyz + C[0][1]*C[0][2]*C[0][1]*C[2][1]*h_yyyz + C[0][1]*C[0][2]*C[0][1]*C[2][2]*h_yyzz + C[0][1]*C[0][2]*C[0][2]*C[2][0]*h_xyzz + C[0][1]*C[0][2]*C[0][2]*C[2][1]*h_yyzz + C[0][1]*C[0][2]*C[0][2]*C[2][2]*h_yzzz + C[0][2]*C[0][0]*C[0][0]*C[2][0]*h_xxxz + C[0][2]*C[0][0]*C[0][0]*C[2][1]*h_xxyz + C[0][2]*C[0][0]*C[0][0]*C[2][2]*h_xxzz + C[0][2]*C[0][0]*C[0][1]*C[2][0]*h_xxyz + C[0][2]*C[0][0]*C[0][1]*C[2][1]*h_xyyz + C[0][2]*C[0][0]*C[0][1]*C[2][2]*h_xyzz + C[0][2]*C[0][0]*C[0][2]*C[2][0]*h_xxzz + C[0][2]*C[0][0]*C[0][2]*C[2][1]*h_xyzz + C[0][2]*C[0][0]*C[0][2]*C[2][2]*h_xzzz + C[0][2]*C[0][1]*C[0][0]*C[2][0]*h_xxyz + C[0][2]*C[0][1]*C[0][0]*C[2][1]*h_xyyz + C[0][2]*C[0][1]*C[0][0]*C[2][2]*h_xyzz + C[0][2]*C[0][1]*C[0][1]*C[2][0]*h_xyyz + C[0][2]*C[0][1]*C[0][1]*C[2][1]*h_yyyz + C[0][2]*C[0][1]*C[0][1]*C[2][2]*h_yyzz + C[0][2]*C[0][1]*C[0][2]*C[2][0]*h_xyzz + C[0][2]*C[0][1]*C[0][2]*C[2][1]*h_yyzz + C[0][2]*C[0][1]*C[0][2]*C[2][2]*h_yzzz + C[0][2]*C[0][2]*C[0][0]*C[2][0]*h_xxzz + C[0][2]*C[0][2]*C[0][0]*C[2][1]*h_xyzz + C[0][2]*C[0][2]*C[0][0]*C[2][2]*h_xzzz + C[0][2]*C[0][2]*C[0][1]*C[2][0]*h_xyzz + C[0][2]*C[0][2]*C[0][1]*C[2][1]*h_yyzz + C[0][2]*C[0][2]*C[0][1]*C[2][2]*h_yzzz + C[0][2]*C[0][2]*C[0][2]*C[2][0]*h_xzzz + C[0][2]*C[0][2]*C[0][2]*C[2][1]*h_yzzz + C[0][2]*C[0][2]*C[0][2]*C[2][2]*h_zzzz 
-        H_xxyy =  C[0][0]*C[0][0]*C[1][0]*C[1][0]*h_xxxx + C[0][0]*C[0][0]*C[1][0]*C[1][1]*h_xxxy + C[0][0]*C[0][0]*C[1][0]*C[1][2]*h_xxxz + C[0][0]*C[0][0]*C[1][1]*C[1][0]*h_xxxy + C[0][0]*C[0][0]*C[1][1]*C[1][1]*h_xxyy + C[0][0]*C[0][0]*C[1][1]*C[1][2]*h_xxyz + C[0][0]*C[0][0]*C[1][2]*C[1][0]*h_xxxz + C[0][0]*C[0][0]*C[1][2]*C[1][1]*h_xxyz + C[0][0]*C[0][0]*C[1][2]*C[1][2]*h_xxzz + C[0][0]*C[0][1]*C[1][0]*C[1][0]*h_xxxy + C[0][0]*C[0][1]*C[1][0]*C[1][1]*h_xxyy + C[0][0]*C[0][1]*C[1][0]*C[1][2]*h_xxyz + C[0][0]*C[0][1]*C[1][1]*C[1][0]*h_xxyy + C[0][0]*C[0][1]*C[1][1]*C[1][1]*h_xyyy + C[0][0]*C[0][1]*C[1][1]*C[1][2]*h_xyyz + C[0][0]*C[0][1]*C[1][2]*C[1][0]*h_xxyz + C[0][0]*C[0][1]*C[1][2]*C[1][1]*h_xyyz + C[0][0]*C[0][1]*C[1][2]*C[1][2]*h_xyzz + C[0][0]*C[0][2]*C[1][0]*C[1][0]*h_xxxz + C[0][0]*C[0][2]*C[1][0]*C[1][1]*h_xxyz + C[0][0]*C[0][2]*C[1][0]*C[1][2]*h_xxzz + C[0][0]*C[0][2]*C[1][1]*C[1][0]*h_xxyz + C[0][0]*C[0][2]*C[1][1]*C[1][1]*h_xyyz + C[0][0]*C[0][2]*C[1][1]*C[1][2]*h_xyzz + C[0][0]*C[0][2]*C[1][2]*C[1][0]*h_xxzz + C[0][0]*C[0][2]*C[1][2]*C[1][1]*h_xyzz + C[0][0]*C[0][2]*C[1][2]*C[1][2]*h_xzzz + C[0][1]*C[0][0]*C[1][0]*C[1][0]*h_xxxy + C[0][1]*C[0][0]*C[1][0]*C[1][1]*h_xxyy + C[0][1]*C[0][0]*C[1][0]*C[1][2]*h_xxyz + C[0][1]*C[0][0]*C[1][1]*C[1][0]*h_xxyy + C[0][1]*C[0][0]*C[1][1]*C[1][1]*h_xyyy + C[0][1]*C[0][0]*C[1][1]*C[1][2]*h_xyyz + C[0][1]*C[0][0]*C[1][2]*C[1][0]*h_xxyz + C[0][1]*C[0][0]*C[1][2]*C[1][1]*h_xyyz + C[0][1]*C[0][0]*C[1][2]*C[1][2]*h_xyzz + C[0][1]*C[0][1]*C[1][0]*C[1][0]*h_xxyy + C[0][1]*C[0][1]*C[1][0]*C[1][1]*h_xyyy + C[0][1]*C[0][1]*C[1][0]*C[1][2]*h_xyyz + C[0][1]*C[0][1]*C[1][1]*C[1][0]*h_xyyy + C[0][1]*C[0][1]*C[1][1]*C[1][1]*h_yyyy + C[0][1]*C[0][1]*C[1][1]*C[1][2]*h_yyyz + C[0][1]*C[0][1]*C[1][2]*C[1][0]*h_xyyz + C[0][1]*C[0][1]*C[1][2]*C[1][1]*h_yyyz + C[0][1]*C[0][1]*C[1][2]*C[1][2]*h_yyzz + C[0][1]*C[0][2]*C[1][0]*C[1][0]*h_xxyz + C[0][1]*C[0][2]*C[1][0]*C[1][1]*h_xyyz + C[0][1]*C[0][2]*C[1][0]*C[1][2]*h_xyzz + C[0][1]*C[0][2]*C[1][1]*C[1][0]*h_xyyz + C[0][1]*C[0][2]*C[1][1]*C[1][1]*h_yyyz + C[0][1]*C[0][2]*C[1][1]*C[1][2]*h_yyzz + C[0][1]*C[0][2]*C[1][2]*C[1][0]*h_xyzz + C[0][1]*C[0][2]*C[1][2]*C[1][1]*h_yyzz + C[0][1]*C[0][2]*C[1][2]*C[1][2]*h_yzzz + C[0][2]*C[0][0]*C[1][0]*C[1][0]*h_xxxz + C[0][2]*C[0][0]*C[1][0]*C[1][1]*h_xxyz + C[0][2]*C[0][0]*C[1][0]*C[1][2]*h_xxzz + C[0][2]*C[0][0]*C[1][1]*C[1][0]*h_xxyz + C[0][2]*C[0][0]*C[1][1]*C[1][1]*h_xyyz + C[0][2]*C[0][0]*C[1][1]*C[1][2]*h_xyzz + C[0][2]*C[0][0]*C[1][2]*C[1][0]*h_xxzz + C[0][2]*C[0][0]*C[1][2]*C[1][1]*h_xyzz + C[0][2]*C[0][0]*C[1][2]*C[1][2]*h_xzzz + C[0][2]*C[0][1]*C[1][0]*C[1][0]*h_xxyz + C[0][2]*C[0][1]*C[1][0]*C[1][1]*h_xyyz + C[0][2]*C[0][1]*C[1][0]*C[1][2]*h_xyzz + C[0][2]*C[0][1]*C[1][1]*C[1][0]*h_xyyz + C[0][2]*C[0][1]*C[1][1]*C[1][1]*h_yyyz + C[0][2]*C[0][1]*C[1][1]*C[1][2]*h_yyzz + C[0][2]*C[0][1]*C[1][2]*C[1][0]*h_xyzz + C[0][2]*C[0][1]*C[1][2]*C[1][1]*h_yyzz + C[0][2]*C[0][1]*C[1][2]*C[1][2]*h_yzzz + C[0][2]*C[0][2]*C[1][0]*C[1][0]*h_xxzz + C[0][2]*C[0][2]*C[1][0]*C[1][1]*h_xyzz + C[0][2]*C[0][2]*C[1][0]*C[1][2]*h_xzzz + C[0][2]*C[0][2]*C[1][1]*C[1][0]*h_xyzz + C[0][2]*C[0][2]*C[1][1]*C[1][1]*h_yyzz + C[0][2]*C[0][2]*C[1][1]*C[1][2]*h_yzzz + C[0][2]*C[0][2]*C[1][2]*C[1][0]*h_xzzz + C[0][2]*C[0][2]*C[1][2]*C[1][1]*h_yzzz + C[0][2]*C[0][2]*C[1][2]*C[1][2]*h_zzzz 
-        H_xxyz =  C[0][0]*C[0][0]*C[1][0]*C[2][0]*h_xxxx + C[0][0]*C[0][0]*C[1][0]*C[2][1]*h_xxxy + C[0][0]*C[0][0]*C[1][0]*C[2][2]*h_xxxz + C[0][0]*C[0][0]*C[1][1]*C[2][0]*h_xxxy + C[0][0]*C[0][0]*C[1][1]*C[2][1]*h_xxyy + C[0][0]*C[0][0]*C[1][1]*C[2][2]*h_xxyz + C[0][0]*C[0][0]*C[1][2]*C[2][0]*h_xxxz + C[0][0]*C[0][0]*C[1][2]*C[2][1]*h_xxyz + C[0][0]*C[0][0]*C[1][2]*C[2][2]*h_xxzz + C[0][0]*C[0][1]*C[1][0]*C[2][0]*h_xxxy + C[0][0]*C[0][1]*C[1][0]*C[2][1]*h_xxyy + C[0][0]*C[0][1]*C[1][0]*C[2][2]*h_xxyz + C[0][0]*C[0][1]*C[1][1]*C[2][0]*h_xxyy + C[0][0]*C[0][1]*C[1][1]*C[2][1]*h_xyyy + C[0][0]*C[0][1]*C[1][1]*C[2][2]*h_xyyz + C[0][0]*C[0][1]*C[1][2]*C[2][0]*h_xxyz + C[0][0]*C[0][1]*C[1][2]*C[2][1]*h_xyyz + C[0][0]*C[0][1]*C[1][2]*C[2][2]*h_xyzz + C[0][0]*C[0][2]*C[1][0]*C[2][0]*h_xxxz + C[0][0]*C[0][2]*C[1][0]*C[2][1]*h_xxyz + C[0][0]*C[0][2]*C[1][0]*C[2][2]*h_xxzz + C[0][0]*C[0][2]*C[1][1]*C[2][0]*h_xxyz + C[0][0]*C[0][2]*C[1][1]*C[2][1]*h_xyyz + C[0][0]*C[0][2]*C[1][1]*C[2][2]*h_xyzz + C[0][0]*C[0][2]*C[1][2]*C[2][0]*h_xxzz + C[0][0]*C[0][2]*C[1][2]*C[2][1]*h_xyzz + C[0][0]*C[0][2]*C[1][2]*C[2][2]*h_xzzz + C[0][1]*C[0][0]*C[1][0]*C[2][0]*h_xxxy + C[0][1]*C[0][0]*C[1][0]*C[2][1]*h_xxyy + C[0][1]*C[0][0]*C[1][0]*C[2][2]*h_xxyz + C[0][1]*C[0][0]*C[1][1]*C[2][0]*h_xxyy + C[0][1]*C[0][0]*C[1][1]*C[2][1]*h_xyyy + C[0][1]*C[0][0]*C[1][1]*C[2][2]*h_xyyz + C[0][1]*C[0][0]*C[1][2]*C[2][0]*h_xxyz + C[0][1]*C[0][0]*C[1][2]*C[2][1]*h_xyyz + C[0][1]*C[0][0]*C[1][2]*C[2][2]*h_xyzz + C[0][1]*C[0][1]*C[1][0]*C[2][0]*h_xxyy + C[0][1]*C[0][1]*C[1][0]*C[2][1]*h_xyyy + C[0][1]*C[0][1]*C[1][0]*C[2][2]*h_xyyz + C[0][1]*C[0][1]*C[1][1]*C[2][0]*h_xyyy + C[0][1]*C[0][1]*C[1][1]*C[2][1]*h_yyyy + C[0][1]*C[0][1]*C[1][1]*C[2][2]*h_yyyz + C[0][1]*C[0][1]*C[1][2]*C[2][0]*h_xyyz + C[0][1]*C[0][1]*C[1][2]*C[2][1]*h_yyyz + C[0][1]*C[0][1]*C[1][2]*C[2][2]*h_yyzz + C[0][1]*C[0][2]*C[1][0]*C[2][0]*h_xxyz + C[0][1]*C[0][2]*C[1][0]*C[2][1]*h_xyyz + C[0][1]*C[0][2]*C[1][0]*C[2][2]*h_xyzz + C[0][1]*C[0][2]*C[1][1]*C[2][0]*h_xyyz + C[0][1]*C[0][2]*C[1][1]*C[2][1]*h_yyyz + C[0][1]*C[0][2]*C[1][1]*C[2][2]*h_yyzz + C[0][1]*C[0][2]*C[1][2]*C[2][0]*h_xyzz + C[0][1]*C[0][2]*C[1][2]*C[2][1]*h_yyzz + C[0][1]*C[0][2]*C[1][2]*C[2][2]*h_yzzz + C[0][2]*C[0][0]*C[1][0]*C[2][0]*h_xxxz + C[0][2]*C[0][0]*C[1][0]*C[2][1]*h_xxyz + C[0][2]*C[0][0]*C[1][0]*C[2][2]*h_xxzz + C[0][2]*C[0][0]*C[1][1]*C[2][0]*h_xxyz + C[0][2]*C[0][0]*C[1][1]*C[2][1]*h_xyyz + C[0][2]*C[0][0]*C[1][1]*C[2][2]*h_xyzz + C[0][2]*C[0][0]*C[1][2]*C[2][0]*h_xxzz + C[0][2]*C[0][0]*C[1][2]*C[2][1]*h_xyzz + C[0][2]*C[0][0]*C[1][2]*C[2][2]*h_xzzz + C[0][2]*C[0][1]*C[1][0]*C[2][0]*h_xxyz + C[0][2]*C[0][1]*C[1][0]*C[2][1]*h_xyyz + C[0][2]*C[0][1]*C[1][0]*C[2][2]*h_xyzz + C[0][2]*C[0][1]*C[1][1]*C[2][0]*h_xyyz + C[0][2]*C[0][1]*C[1][1]*C[2][1]*h_yyyz + C[0][2]*C[0][1]*C[1][1]*C[2][2]*h_yyzz + C[0][2]*C[0][1]*C[1][2]*C[2][0]*h_xyzz + C[0][2]*C[0][1]*C[1][2]*C[2][1]*h_yyzz + C[0][2]*C[0][1]*C[1][2]*C[2][2]*h_yzzz + C[0][2]*C[0][2]*C[1][0]*C[2][0]*h_xxzz + C[0][2]*C[0][2]*C[1][0]*C[2][1]*h_xyzz + C[0][2]*C[0][2]*C[1][0]*C[2][2]*h_xzzz + C[0][2]*C[0][2]*C[1][1]*C[2][0]*h_xyzz + C[0][2]*C[0][2]*C[1][1]*C[2][1]*h_yyzz + C[0][2]*C[0][2]*C[1][1]*C[2][2]*h_yzzz + C[0][2]*C[0][2]*C[1][2]*C[2][0]*h_xzzz + C[0][2]*C[0][2]*C[1][2]*C[2][1]*h_yzzz + C[0][2]*C[0][2]*C[1][2]*C[2][2]*h_zzzz 
-        H_xxzz =  C[0][0]*C[0][0]*C[2][0]*C[2][0]*h_xxxx + C[0][0]*C[0][0]*C[2][0]*C[2][1]*h_xxxy + C[0][0]*C[0][0]*C[2][0]*C[2][2]*h_xxxz + C[0][0]*C[0][0]*C[2][1]*C[2][0]*h_xxxy + C[0][0]*C[0][0]*C[2][1]*C[2][1]*h_xxyy + C[0][0]*C[0][0]*C[2][1]*C[2][2]*h_xxyz + C[0][0]*C[0][0]*C[2][2]*C[2][0]*h_xxxz + C[0][0]*C[0][0]*C[2][2]*C[2][1]*h_xxyz + C[0][0]*C[0][0]*C[2][2]*C[2][2]*h_xxzz + C[0][0]*C[0][1]*C[2][0]*C[2][0]*h_xxxy + C[0][0]*C[0][1]*C[2][0]*C[2][1]*h_xxyy + C[0][0]*C[0][1]*C[2][0]*C[2][2]*h_xxyz + C[0][0]*C[0][1]*C[2][1]*C[2][0]*h_xxyy + C[0][0]*C[0][1]*C[2][1]*C[2][1]*h_xyyy + C[0][0]*C[0][1]*C[2][1]*C[2][2]*h_xyyz + C[0][0]*C[0][1]*C[2][2]*C[2][0]*h_xxyz + C[0][0]*C[0][1]*C[2][2]*C[2][1]*h_xyyz + C[0][0]*C[0][1]*C[2][2]*C[2][2]*h_xyzz + C[0][0]*C[0][2]*C[2][0]*C[2][0]*h_xxxz + C[0][0]*C[0][2]*C[2][0]*C[2][1]*h_xxyz + C[0][0]*C[0][2]*C[2][0]*C[2][2]*h_xxzz + C[0][0]*C[0][2]*C[2][1]*C[2][0]*h_xxyz + C[0][0]*C[0][2]*C[2][1]*C[2][1]*h_xyyz + C[0][0]*C[0][2]*C[2][1]*C[2][2]*h_xyzz + C[0][0]*C[0][2]*C[2][2]*C[2][0]*h_xxzz + C[0][0]*C[0][2]*C[2][2]*C[2][1]*h_xyzz + C[0][0]*C[0][2]*C[2][2]*C[2][2]*h_xzzz + C[0][1]*C[0][0]*C[2][0]*C[2][0]*h_xxxy + C[0][1]*C[0][0]*C[2][0]*C[2][1]*h_xxyy + C[0][1]*C[0][0]*C[2][0]*C[2][2]*h_xxyz + C[0][1]*C[0][0]*C[2][1]*C[2][0]*h_xxyy + C[0][1]*C[0][0]*C[2][1]*C[2][1]*h_xyyy + C[0][1]*C[0][0]*C[2][1]*C[2][2]*h_xyyz + C[0][1]*C[0][0]*C[2][2]*C[2][0]*h_xxyz + C[0][1]*C[0][0]*C[2][2]*C[2][1]*h_xyyz + C[0][1]*C[0][0]*C[2][2]*C[2][2]*h_xyzz + C[0][1]*C[0][1]*C[2][0]*C[2][0]*h_xxyy + C[0][1]*C[0][1]*C[2][0]*C[2][1]*h_xyyy + C[0][1]*C[0][1]*C[2][0]*C[2][2]*h_xyyz + C[0][1]*C[0][1]*C[2][1]*C[2][0]*h_xyyy + C[0][1]*C[0][1]*C[2][1]*C[2][1]*h_yyyy + C[0][1]*C[0][1]*C[2][1]*C[2][2]*h_yyyz + C[0][1]*C[0][1]*C[2][2]*C[2][0]*h_xyyz + C[0][1]*C[0][1]*C[2][2]*C[2][1]*h_yyyz + C[0][1]*C[0][1]*C[2][2]*C[2][2]*h_yyzz + C[0][1]*C[0][2]*C[2][0]*C[2][0]*h_xxyz + C[0][1]*C[0][2]*C[2][0]*C[2][1]*h_xyyz + C[0][1]*C[0][2]*C[2][0]*C[2][2]*h_xyzz + C[0][1]*C[0][2]*C[2][1]*C[2][0]*h_xyyz + C[0][1]*C[0][2]*C[2][1]*C[2][1]*h_yyyz + C[0][1]*C[0][2]*C[2][1]*C[2][2]*h_yyzz + C[0][1]*C[0][2]*C[2][2]*C[2][0]*h_xyzz + C[0][1]*C[0][2]*C[2][2]*C[2][1]*h_yyzz + C[0][1]*C[0][2]*C[2][2]*C[2][2]*h_yzzz + C[0][2]*C[0][0]*C[2][0]*C[2][0]*h_xxxz + C[0][2]*C[0][0]*C[2][0]*C[2][1]*h_xxyz + C[0][2]*C[0][0]*C[2][0]*C[2][2]*h_xxzz + C[0][2]*C[0][0]*C[2][1]*C[2][0]*h_xxyz + C[0][2]*C[0][0]*C[2][1]*C[2][1]*h_xyyz + C[0][2]*C[0][0]*C[2][1]*C[2][2]*h_xyzz + C[0][2]*C[0][0]*C[2][2]*C[2][0]*h_xxzz + C[0][2]*C[0][0]*C[2][2]*C[2][1]*h_xyzz + C[0][2]*C[0][0]*C[2][2]*C[2][2]*h_xzzz + C[0][2]*C[0][1]*C[2][0]*C[2][0]*h_xxyz + C[0][2]*C[0][1]*C[2][0]*C[2][1]*h_xyyz + C[0][2]*C[0][1]*C[2][0]*C[2][2]*h_xyzz + C[0][2]*C[0][1]*C[2][1]*C[2][0]*h_xyyz + C[0][2]*C[0][1]*C[2][1]*C[2][1]*h_yyyz + C[0][2]*C[0][1]*C[2][1]*C[2][2]*h_yyzz + C[0][2]*C[0][1]*C[2][2]*C[2][0]*h_xyzz + C[0][2]*C[0][1]*C[2][2]*C[2][1]*h_yyzz + C[0][2]*C[0][1]*C[2][2]*C[2][2]*h_yzzz + C[0][2]*C[0][2]*C[2][0]*C[2][0]*h_xxzz + C[0][2]*C[0][2]*C[2][0]*C[2][1]*h_xyzz + C[0][2]*C[0][2]*C[2][0]*C[2][2]*h_xzzz + C[0][2]*C[0][2]*C[2][1]*C[2][0]*h_xyzz + C[0][2]*C[0][2]*C[2][1]*C[2][1]*h_yyzz + C[0][2]*C[0][2]*C[2][1]*C[2][2]*h_yzzz + C[0][2]*C[0][2]*C[2][2]*C[2][0]*h_xzzz + C[0][2]*C[0][2]*C[2][2]*C[2][1]*h_yzzz + C[0][2]*C[0][2]*C[2][2]*C[2][2]*h_zzzz 
-        H_xyyy =  C[0][0]*C[1][0]*C[1][0]*C[1][0]*h_xxxx + C[0][0]*C[1][0]*C[1][0]*C[1][1]*h_xxxy + C[0][0]*C[1][0]*C[1][0]*C[1][2]*h_xxxz + C[0][0]*C[1][0]*C[1][1]*C[1][0]*h_xxxy + C[0][0]*C[1][0]*C[1][1]*C[1][1]*h_xxyy + C[0][0]*C[1][0]*C[1][1]*C[1][2]*h_xxyz + C[0][0]*C[1][0]*C[1][2]*C[1][0]*h_xxxz + C[0][0]*C[1][0]*C[1][2]*C[1][1]*h_xxyz + C[0][0]*C[1][0]*C[1][2]*C[1][2]*h_xxzz + C[0][0]*C[1][1]*C[1][0]*C[1][0]*h_xxxy + C[0][0]*C[1][1]*C[1][0]*C[1][1]*h_xxyy + C[0][0]*C[1][1]*C[1][0]*C[1][2]*h_xxyz + C[0][0]*C[1][1]*C[1][1]*C[1][0]*h_xxyy + C[0][0]*C[1][1]*C[1][1]*C[1][1]*h_xyyy + C[0][0]*C[1][1]*C[1][1]*C[1][2]*h_xyyz + C[0][0]*C[1][1]*C[1][2]*C[1][0]*h_xxyz + C[0][0]*C[1][1]*C[1][2]*C[1][1]*h_xyyz + C[0][0]*C[1][1]*C[1][2]*C[1][2]*h_xyzz + C[0][0]*C[1][2]*C[1][0]*C[1][0]*h_xxxz + C[0][0]*C[1][2]*C[1][0]*C[1][1]*h_xxyz + C[0][0]*C[1][2]*C[1][0]*C[1][2]*h_xxzz + C[0][0]*C[1][2]*C[1][1]*C[1][0]*h_xxyz + C[0][0]*C[1][2]*C[1][1]*C[1][1]*h_xyyz + C[0][0]*C[1][2]*C[1][1]*C[1][2]*h_xyzz + C[0][0]*C[1][2]*C[1][2]*C[1][0]*h_xxzz + C[0][0]*C[1][2]*C[1][2]*C[1][1]*h_xyzz + C[0][0]*C[1][2]*C[1][2]*C[1][2]*h_xzzz + C[0][1]*C[1][0]*C[1][0]*C[1][0]*h_xxxy + C[0][1]*C[1][0]*C[1][0]*C[1][1]*h_xxyy + C[0][1]*C[1][0]*C[1][0]*C[1][2]*h_xxyz + C[0][1]*C[1][0]*C[1][1]*C[1][0]*h_xxyy + C[0][1]*C[1][0]*C[1][1]*C[1][1]*h_xyyy + C[0][1]*C[1][0]*C[1][1]*C[1][2]*h_xyyz + C[0][1]*C[1][0]*C[1][2]*C[1][0]*h_xxyz + C[0][1]*C[1][0]*C[1][2]*C[1][1]*h_xyyz + C[0][1]*C[1][0]*C[1][2]*C[1][2]*h_xyzz + C[0][1]*C[1][1]*C[1][0]*C[1][0]*h_xxyy + C[0][1]*C[1][1]*C[1][0]*C[1][1]*h_xyyy + C[0][1]*C[1][1]*C[1][0]*C[1][2]*h_xyyz + C[0][1]*C[1][1]*C[1][1]*C[1][0]*h_xyyy + C[0][1]*C[1][1]*C[1][1]*C[1][1]*h_yyyy + C[0][1]*C[1][1]*C[1][1]*C[1][2]*h_yyyz + C[0][1]*C[1][1]*C[1][2]*C[1][0]*h_xyyz + C[0][1]*C[1][1]*C[1][2]*C[1][1]*h_yyyz + C[0][1]*C[1][1]*C[1][2]*C[1][2]*h_yyzz + C[0][1]*C[1][2]*C[1][0]*C[1][0]*h_xxyz + C[0][1]*C[1][2]*C[1][0]*C[1][1]*h_xyyz + C[0][1]*C[1][2]*C[1][0]*C[1][2]*h_xyzz + C[0][1]*C[1][2]*C[1][1]*C[1][0]*h_xyyz + C[0][1]*C[1][2]*C[1][1]*C[1][1]*h_yyyz + C[0][1]*C[1][2]*C[1][1]*C[1][2]*h_yyzz + C[0][1]*C[1][2]*C[1][2]*C[1][0]*h_xyzz + C[0][1]*C[1][2]*C[1][2]*C[1][1]*h_yyzz + C[0][1]*C[1][2]*C[1][2]*C[1][2]*h_yzzz + C[0][2]*C[1][0]*C[1][0]*C[1][0]*h_xxxz + C[0][2]*C[1][0]*C[1][0]*C[1][1]*h_xxyz + C[0][2]*C[1][0]*C[1][0]*C[1][2]*h_xxzz + C[0][2]*C[1][0]*C[1][1]*C[1][0]*h_xxyz + C[0][2]*C[1][0]*C[1][1]*C[1][1]*h_xyyz + C[0][2]*C[1][0]*C[1][1]*C[1][2]*h_xyzz + C[0][2]*C[1][0]*C[1][2]*C[1][0]*h_xxzz + C[0][2]*C[1][0]*C[1][2]*C[1][1]*h_xyzz + C[0][2]*C[1][0]*C[1][2]*C[1][2]*h_xzzz + C[0][2]*C[1][1]*C[1][0]*C[1][0]*h_xxyz + C[0][2]*C[1][1]*C[1][0]*C[1][1]*h_xyyz + C[0][2]*C[1][1]*C[1][0]*C[1][2]*h_xyzz + C[0][2]*C[1][1]*C[1][1]*C[1][0]*h_xyyz + C[0][2]*C[1][1]*C[1][1]*C[1][1]*h_yyyz + C[0][2]*C[1][1]*C[1][1]*C[1][2]*h_yyzz + C[0][2]*C[1][1]*C[1][2]*C[1][0]*h_xyzz + C[0][2]*C[1][1]*C[1][2]*C[1][1]*h_yyzz + C[0][2]*C[1][1]*C[1][2]*C[1][2]*h_yzzz + C[0][2]*C[1][2]*C[1][0]*C[1][0]*h_xxzz + C[0][2]*C[1][2]*C[1][0]*C[1][1]*h_xyzz + C[0][2]*C[1][2]*C[1][0]*C[1][2]*h_xzzz + C[0][2]*C[1][2]*C[1][1]*C[1][0]*h_xyzz + C[0][2]*C[1][2]*C[1][1]*C[1][1]*h_yyzz + C[0][2]*C[1][2]*C[1][1]*C[1][2]*h_yzzz + C[0][2]*C[1][2]*C[1][2]*C[1][0]*h_xzzz + C[0][2]*C[1][2]*C[1][2]*C[1][1]*h_yzzz + C[0][2]*C[1][2]*C[1][2]*C[1][2]*h_zzzz 
-        H_xyyz =  C[0][0]*C[1][0]*C[1][0]*C[2][0]*h_xxxx + C[0][0]*C[1][0]*C[1][0]*C[2][1]*h_xxxy + C[0][0]*C[1][0]*C[1][0]*C[2][2]*h_xxxz + C[0][0]*C[1][0]*C[1][1]*C[2][0]*h_xxxy + C[0][0]*C[1][0]*C[1][1]*C[2][1]*h_xxyy + C[0][0]*C[1][0]*C[1][1]*C[2][2]*h_xxyz + C[0][0]*C[1][0]*C[1][2]*C[2][0]*h_xxxz + C[0][0]*C[1][0]*C[1][2]*C[2][1]*h_xxyz + C[0][0]*C[1][0]*C[1][2]*C[2][2]*h_xxzz + C[0][0]*C[1][1]*C[1][0]*C[2][0]*h_xxxy + C[0][0]*C[1][1]*C[1][0]*C[2][1]*h_xxyy + C[0][0]*C[1][1]*C[1][0]*C[2][2]*h_xxyz + C[0][0]*C[1][1]*C[1][1]*C[2][0]*h_xxyy + C[0][0]*C[1][1]*C[1][1]*C[2][1]*h_xyyy + C[0][0]*C[1][1]*C[1][1]*C[2][2]*h_xyyz + C[0][0]*C[1][1]*C[1][2]*C[2][0]*h_xxyz + C[0][0]*C[1][1]*C[1][2]*C[2][1]*h_xyyz + C[0][0]*C[1][1]*C[1][2]*C[2][2]*h_xyzz + C[0][0]*C[1][2]*C[1][0]*C[2][0]*h_xxxz + C[0][0]*C[1][2]*C[1][0]*C[2][1]*h_xxyz + C[0][0]*C[1][2]*C[1][0]*C[2][2]*h_xxzz + C[0][0]*C[1][2]*C[1][1]*C[2][0]*h_xxyz + C[0][0]*C[1][2]*C[1][1]*C[2][1]*h_xyyz + C[0][0]*C[1][2]*C[1][1]*C[2][2]*h_xyzz + C[0][0]*C[1][2]*C[1][2]*C[2][0]*h_xxzz + C[0][0]*C[1][2]*C[1][2]*C[2][1]*h_xyzz + C[0][0]*C[1][2]*C[1][2]*C[2][2]*h_xzzz + C[0][1]*C[1][0]*C[1][0]*C[2][0]*h_xxxy + C[0][1]*C[1][0]*C[1][0]*C[2][1]*h_xxyy + C[0][1]*C[1][0]*C[1][0]*C[2][2]*h_xxyz + C[0][1]*C[1][0]*C[1][1]*C[2][0]*h_xxyy + C[0][1]*C[1][0]*C[1][1]*C[2][1]*h_xyyy + C[0][1]*C[1][0]*C[1][1]*C[2][2]*h_xyyz + C[0][1]*C[1][0]*C[1][2]*C[2][0]*h_xxyz + C[0][1]*C[1][0]*C[1][2]*C[2][1]*h_xyyz + C[0][1]*C[1][0]*C[1][2]*C[2][2]*h_xyzz + C[0][1]*C[1][1]*C[1][0]*C[2][0]*h_xxyy + C[0][1]*C[1][1]*C[1][0]*C[2][1]*h_xyyy + C[0][1]*C[1][1]*C[1][0]*C[2][2]*h_xyyz + C[0][1]*C[1][1]*C[1][1]*C[2][0]*h_xyyy + C[0][1]*C[1][1]*C[1][1]*C[2][1]*h_yyyy + C[0][1]*C[1][1]*C[1][1]*C[2][2]*h_yyyz + C[0][1]*C[1][1]*C[1][2]*C[2][0]*h_xyyz + C[0][1]*C[1][1]*C[1][2]*C[2][1]*h_yyyz + C[0][1]*C[1][1]*C[1][2]*C[2][2]*h_yyzz + C[0][1]*C[1][2]*C[1][0]*C[2][0]*h_xxyz + C[0][1]*C[1][2]*C[1][0]*C[2][1]*h_xyyz + C[0][1]*C[1][2]*C[1][0]*C[2][2]*h_xyzz + C[0][1]*C[1][2]*C[1][1]*C[2][0]*h_xyyz + C[0][1]*C[1][2]*C[1][1]*C[2][1]*h_yyyz + C[0][1]*C[1][2]*C[1][1]*C[2][2]*h_yyzz + C[0][1]*C[1][2]*C[1][2]*C[2][0]*h_xyzz + C[0][1]*C[1][2]*C[1][2]*C[2][1]*h_yyzz + C[0][1]*C[1][2]*C[1][2]*C[2][2]*h_yzzz + C[0][2]*C[1][0]*C[1][0]*C[2][0]*h_xxxz + C[0][2]*C[1][0]*C[1][0]*C[2][1]*h_xxyz + C[0][2]*C[1][0]*C[1][0]*C[2][2]*h_xxzz + C[0][2]*C[1][0]*C[1][1]*C[2][0]*h_xxyz + C[0][2]*C[1][0]*C[1][1]*C[2][1]*h_xyyz + C[0][2]*C[1][0]*C[1][1]*C[2][2]*h_xyzz + C[0][2]*C[1][0]*C[1][2]*C[2][0]*h_xxzz + C[0][2]*C[1][0]*C[1][2]*C[2][1]*h_xyzz + C[0][2]*C[1][0]*C[1][2]*C[2][2]*h_xzzz + C[0][2]*C[1][1]*C[1][0]*C[2][0]*h_xxyz + C[0][2]*C[1][1]*C[1][0]*C[2][1]*h_xyyz + C[0][2]*C[1][1]*C[1][0]*C[2][2]*h_xyzz + C[0][2]*C[1][1]*C[1][1]*C[2][0]*h_xyyz + C[0][2]*C[1][1]*C[1][1]*C[2][1]*h_yyyz + C[0][2]*C[1][1]*C[1][1]*C[2][2]*h_yyzz + C[0][2]*C[1][1]*C[1][2]*C[2][0]*h_xyzz + C[0][2]*C[1][1]*C[1][2]*C[2][1]*h_yyzz + C[0][2]*C[1][1]*C[1][2]*C[2][2]*h_yzzz + C[0][2]*C[1][2]*C[1][0]*C[2][0]*h_xxzz + C[0][2]*C[1][2]*C[1][0]*C[2][1]*h_xyzz + C[0][2]*C[1][2]*C[1][0]*C[2][2]*h_xzzz + C[0][2]*C[1][2]*C[1][1]*C[2][0]*h_xyzz + C[0][2]*C[1][2]*C[1][1]*C[2][1]*h_yyzz + C[0][2]*C[1][2]*C[1][1]*C[2][2]*h_yzzz + C[0][2]*C[1][2]*C[1][2]*C[2][0]*h_xzzz + C[0][2]*C[1][2]*C[1][2]*C[2][1]*h_yzzz + C[0][2]*C[1][2]*C[1][2]*C[2][2]*h_zzzz 
-        H_xyzz =  C[0][0]*C[1][0]*C[2][0]*C[2][0]*h_xxxx + C[0][0]*C[1][0]*C[2][0]*C[2][1]*h_xxxy + C[0][0]*C[1][0]*C[2][0]*C[2][2]*h_xxxz + C[0][0]*C[1][0]*C[2][1]*C[2][0]*h_xxxy + C[0][0]*C[1][0]*C[2][1]*C[2][1]*h_xxyy + C[0][0]*C[1][0]*C[2][1]*C[2][2]*h_xxyz + C[0][0]*C[1][0]*C[2][2]*C[2][0]*h_xxxz + C[0][0]*C[1][0]*C[2][2]*C[2][1]*h_xxyz + C[0][0]*C[1][0]*C[2][2]*C[2][2]*h_xxzz + C[0][0]*C[1][1]*C[2][0]*C[2][0]*h_xxxy + C[0][0]*C[1][1]*C[2][0]*C[2][1]*h_xxyy + C[0][0]*C[1][1]*C[2][0]*C[2][2]*h_xxyz + C[0][0]*C[1][1]*C[2][1]*C[2][0]*h_xxyy + C[0][0]*C[1][1]*C[2][1]*C[2][1]*h_xyyy + C[0][0]*C[1][1]*C[2][1]*C[2][2]*h_xyyz + C[0][0]*C[1][1]*C[2][2]*C[2][0]*h_xxyz + C[0][0]*C[1][1]*C[2][2]*C[2][1]*h_xyyz + C[0][0]*C[1][1]*C[2][2]*C[2][2]*h_xyzz + C[0][0]*C[1][2]*C[2][0]*C[2][0]*h_xxxz + C[0][0]*C[1][2]*C[2][0]*C[2][1]*h_xxyz + C[0][0]*C[1][2]*C[2][0]*C[2][2]*h_xxzz + C[0][0]*C[1][2]*C[2][1]*C[2][0]*h_xxyz + C[0][0]*C[1][2]*C[2][1]*C[2][1]*h_xyyz + C[0][0]*C[1][2]*C[2][1]*C[2][2]*h_xyzz + C[0][0]*C[1][2]*C[2][2]*C[2][0]*h_xxzz + C[0][0]*C[1][2]*C[2][2]*C[2][1]*h_xyzz + C[0][0]*C[1][2]*C[2][2]*C[2][2]*h_xzzz + C[0][1]*C[1][0]*C[2][0]*C[2][0]*h_xxxy + C[0][1]*C[1][0]*C[2][0]*C[2][1]*h_xxyy + C[0][1]*C[1][0]*C[2][0]*C[2][2]*h_xxyz + C[0][1]*C[1][0]*C[2][1]*C[2][0]*h_xxyy + C[0][1]*C[1][0]*C[2][1]*C[2][1]*h_xyyy + C[0][1]*C[1][0]*C[2][1]*C[2][2]*h_xyyz + C[0][1]*C[1][0]*C[2][2]*C[2][0]*h_xxyz + C[0][1]*C[1][0]*C[2][2]*C[2][1]*h_xyyz + C[0][1]*C[1][0]*C[2][2]*C[2][2]*h_xyzz + C[0][1]*C[1][1]*C[2][0]*C[2][0]*h_xxyy + C[0][1]*C[1][1]*C[2][0]*C[2][1]*h_xyyy + C[0][1]*C[1][1]*C[2][0]*C[2][2]*h_xyyz + C[0][1]*C[1][1]*C[2][1]*C[2][0]*h_xyyy + C[0][1]*C[1][1]*C[2][1]*C[2][1]*h_yyyy + C[0][1]*C[1][1]*C[2][1]*C[2][2]*h_yyyz + C[0][1]*C[1][1]*C[2][2]*C[2][0]*h_xyyz + C[0][1]*C[1][1]*C[2][2]*C[2][1]*h_yyyz + C[0][1]*C[1][1]*C[2][2]*C[2][2]*h_yyzz + C[0][1]*C[1][2]*C[2][0]*C[2][0]*h_xxyz + C[0][1]*C[1][2]*C[2][0]*C[2][1]*h_xyyz + C[0][1]*C[1][2]*C[2][0]*C[2][2]*h_xyzz + C[0][1]*C[1][2]*C[2][1]*C[2][0]*h_xyyz + C[0][1]*C[1][2]*C[2][1]*C[2][1]*h_yyyz + C[0][1]*C[1][2]*C[2][1]*C[2][2]*h_yyzz + C[0][1]*C[1][2]*C[2][2]*C[2][0]*h_xyzz + C[0][1]*C[1][2]*C[2][2]*C[2][1]*h_yyzz + C[0][1]*C[1][2]*C[2][2]*C[2][2]*h_yzzz + C[0][2]*C[1][0]*C[2][0]*C[2][0]*h_xxxz + C[0][2]*C[1][0]*C[2][0]*C[2][1]*h_xxyz + C[0][2]*C[1][0]*C[2][0]*C[2][2]*h_xxzz + C[0][2]*C[1][0]*C[2][1]*C[2][0]*h_xxyz + C[0][2]*C[1][0]*C[2][1]*C[2][1]*h_xyyz + C[0][2]*C[1][0]*C[2][1]*C[2][2]*h_xyzz + C[0][2]*C[1][0]*C[2][2]*C[2][0]*h_xxzz + C[0][2]*C[1][0]*C[2][2]*C[2][1]*h_xyzz + C[0][2]*C[1][0]*C[2][2]*C[2][2]*h_xzzz + C[0][2]*C[1][1]*C[2][0]*C[2][0]*h_xxyz + C[0][2]*C[1][1]*C[2][0]*C[2][1]*h_xyyz + C[0][2]*C[1][1]*C[2][0]*C[2][2]*h_xyzz + C[0][2]*C[1][1]*C[2][1]*C[2][0]*h_xyyz + C[0][2]*C[1][1]*C[2][1]*C[2][1]*h_yyyz + C[0][2]*C[1][1]*C[2][1]*C[2][2]*h_yyzz + C[0][2]*C[1][1]*C[2][2]*C[2][0]*h_xyzz + C[0][2]*C[1][1]*C[2][2]*C[2][1]*h_yyzz + C[0][2]*C[1][1]*C[2][2]*C[2][2]*h_yzzz + C[0][2]*C[1][2]*C[2][0]*C[2][0]*h_xxzz + C[0][2]*C[1][2]*C[2][0]*C[2][1]*h_xyzz + C[0][2]*C[1][2]*C[2][0]*C[2][2]*h_xzzz + C[0][2]*C[1][2]*C[2][1]*C[2][0]*h_xyzz + C[0][2]*C[1][2]*C[2][1]*C[2][1]*h_yyzz + C[0][2]*C[1][2]*C[2][1]*C[2][2]*h_yzzz + C[0][2]*C[1][2]*C[2][2]*C[2][0]*h_xzzz + C[0][2]*C[1][2]*C[2][2]*C[2][1]*h_yzzz + C[0][2]*C[1][2]*C[2][2]*C[2][2]*h_zzzz 
-        H_xzzz =  C[0][0]*C[2][0]*C[2][0]*C[2][0]*h_xxxx + C[0][0]*C[2][0]*C[2][0]*C[2][1]*h_xxxy + C[0][0]*C[2][0]*C[2][0]*C[2][2]*h_xxxz + C[0][0]*C[2][0]*C[2][1]*C[2][0]*h_xxxy + C[0][0]*C[2][0]*C[2][1]*C[2][1]*h_xxyy + C[0][0]*C[2][0]*C[2][1]*C[2][2]*h_xxyz + C[0][0]*C[2][0]*C[2][2]*C[2][0]*h_xxxz + C[0][0]*C[2][0]*C[2][2]*C[2][1]*h_xxyz + C[0][0]*C[2][0]*C[2][2]*C[2][2]*h_xxzz + C[0][0]*C[2][1]*C[2][0]*C[2][0]*h_xxxy + C[0][0]*C[2][1]*C[2][0]*C[2][1]*h_xxyy + C[0][0]*C[2][1]*C[2][0]*C[2][2]*h_xxyz + C[0][0]*C[2][1]*C[2][1]*C[2][0]*h_xxyy + C[0][0]*C[2][1]*C[2][1]*C[2][1]*h_xyyy + C[0][0]*C[2][1]*C[2][1]*C[2][2]*h_xyyz + C[0][0]*C[2][1]*C[2][2]*C[2][0]*h_xxyz + C[0][0]*C[2][1]*C[2][2]*C[2][1]*h_xyyz + C[0][0]*C[2][1]*C[2][2]*C[2][2]*h_xyzz + C[0][0]*C[2][2]*C[2][0]*C[2][0]*h_xxxz + C[0][0]*C[2][2]*C[2][0]*C[2][1]*h_xxyz + C[0][0]*C[2][2]*C[2][0]*C[2][2]*h_xxzz + C[0][0]*C[2][2]*C[2][1]*C[2][0]*h_xxyz + C[0][0]*C[2][2]*C[2][1]*C[2][1]*h_xyyz + C[0][0]*C[2][2]*C[2][1]*C[2][2]*h_xyzz + C[0][0]*C[2][2]*C[2][2]*C[2][0]*h_xxzz + C[0][0]*C[2][2]*C[2][2]*C[2][1]*h_xyzz + C[0][0]*C[2][2]*C[2][2]*C[2][2]*h_xzzz + C[0][1]*C[2][0]*C[2][0]*C[2][0]*h_xxxy + C[0][1]*C[2][0]*C[2][0]*C[2][1]*h_xxyy + C[0][1]*C[2][0]*C[2][0]*C[2][2]*h_xxyz + C[0][1]*C[2][0]*C[2][1]*C[2][0]*h_xxyy + C[0][1]*C[2][0]*C[2][1]*C[2][1]*h_xyyy + C[0][1]*C[2][0]*C[2][1]*C[2][2]*h_xyyz + C[0][1]*C[2][0]*C[2][2]*C[2][0]*h_xxyz + C[0][1]*C[2][0]*C[2][2]*C[2][1]*h_xyyz + C[0][1]*C[2][0]*C[2][2]*C[2][2]*h_xyzz + C[0][1]*C[2][1]*C[2][0]*C[2][0]*h_xxyy + C[0][1]*C[2][1]*C[2][0]*C[2][1]*h_xyyy + C[0][1]*C[2][1]*C[2][0]*C[2][2]*h_xyyz + C[0][1]*C[2][1]*C[2][1]*C[2][0]*h_xyyy + C[0][1]*C[2][1]*C[2][1]*C[2][1]*h_yyyy + C[0][1]*C[2][1]*C[2][1]*C[2][2]*h_yyyz + C[0][1]*C[2][1]*C[2][2]*C[2][0]*h_xyyz + C[0][1]*C[2][1]*C[2][2]*C[2][1]*h_yyyz + C[0][1]*C[2][1]*C[2][2]*C[2][2]*h_yyzz + C[0][1]*C[2][2]*C[2][0]*C[2][0]*h_xxyz + C[0][1]*C[2][2]*C[2][0]*C[2][1]*h_xyyz + C[0][1]*C[2][2]*C[2][0]*C[2][2]*h_xyzz + C[0][1]*C[2][2]*C[2][1]*C[2][0]*h_xyyz + C[0][1]*C[2][2]*C[2][1]*C[2][1]*h_yyyz + C[0][1]*C[2][2]*C[2][1]*C[2][2]*h_yyzz + C[0][1]*C[2][2]*C[2][2]*C[2][0]*h_xyzz + C[0][1]*C[2][2]*C[2][2]*C[2][1]*h_yyzz + C[0][1]*C[2][2]*C[2][2]*C[2][2]*h_yzzz + C[0][2]*C[2][0]*C[2][0]*C[2][0]*h_xxxz + C[0][2]*C[2][0]*C[2][0]*C[2][1]*h_xxyz + C[0][2]*C[2][0]*C[2][0]*C[2][2]*h_xxzz + C[0][2]*C[2][0]*C[2][1]*C[2][0]*h_xxyz + C[0][2]*C[2][0]*C[2][1]*C[2][1]*h_xyyz + C[0][2]*C[2][0]*C[2][1]*C[2][2]*h_xyzz + C[0][2]*C[2][0]*C[2][2]*C[2][0]*h_xxzz + C[0][2]*C[2][0]*C[2][2]*C[2][1]*h_xyzz + C[0][2]*C[2][0]*C[2][2]*C[2][2]*h_xzzz + C[0][2]*C[2][1]*C[2][0]*C[2][0]*h_xxyz + C[0][2]*C[2][1]*C[2][0]*C[2][1]*h_xyyz + C[0][2]*C[2][1]*C[2][0]*C[2][2]*h_xyzz + C[0][2]*C[2][1]*C[2][1]*C[2][0]*h_xyyz + C[0][2]*C[2][1]*C[2][1]*C[2][1]*h_yyyz + C[0][2]*C[2][1]*C[2][1]*C[2][2]*h_yyzz + C[0][2]*C[2][1]*C[2][2]*C[2][0]*h_xyzz + C[0][2]*C[2][1]*C[2][2]*C[2][1]*h_yyzz + C[0][2]*C[2][1]*C[2][2]*C[2][2]*h_yzzz + C[0][2]*C[2][2]*C[2][0]*C[2][0]*h_xxzz + C[0][2]*C[2][2]*C[2][0]*C[2][1]*h_xyzz + C[0][2]*C[2][2]*C[2][0]*C[2][2]*h_xzzz + C[0][2]*C[2][2]*C[2][1]*C[2][0]*h_xyzz + C[0][2]*C[2][2]*C[2][1]*C[2][1]*h_yyzz + C[0][2]*C[2][2]*C[2][1]*C[2][2]*h_yzzz + C[0][2]*C[2][2]*C[2][2]*C[2][0]*h_xzzz + C[0][2]*C[2][2]*C[2][2]*C[2][1]*h_yzzz + C[0][2]*C[2][2]*C[2][2]*C[2][2]*h_zzzz 
-        H_yyyy =  C[1][0]*C[1][0]*C[1][0]*C[1][0]*h_xxxx + C[1][0]*C[1][0]*C[1][0]*C[1][1]*h_xxxy + C[1][0]*C[1][0]*C[1][0]*C[1][2]*h_xxxz + C[1][0]*C[1][0]*C[1][1]*C[1][0]*h_xxxy + C[1][0]*C[1][0]*C[1][1]*C[1][1]*h_xxyy + C[1][0]*C[1][0]*C[1][1]*C[1][2]*h_xxyz + C[1][0]*C[1][0]*C[1][2]*C[1][0]*h_xxxz + C[1][0]*C[1][0]*C[1][2]*C[1][1]*h_xxyz + C[1][0]*C[1][0]*C[1][2]*C[1][2]*h_xxzz + C[1][0]*C[1][1]*C[1][0]*C[1][0]*h_xxxy + C[1][0]*C[1][1]*C[1][0]*C[1][1]*h_xxyy + C[1][0]*C[1][1]*C[1][0]*C[1][2]*h_xxyz + C[1][0]*C[1][1]*C[1][1]*C[1][0]*h_xxyy + C[1][0]*C[1][1]*C[1][1]*C[1][1]*h_xyyy + C[1][0]*C[1][1]*C[1][1]*C[1][2]*h_xyyz + C[1][0]*C[1][1]*C[1][2]*C[1][0]*h_xxyz + C[1][0]*C[1][1]*C[1][2]*C[1][1]*h_xyyz + C[1][0]*C[1][1]*C[1][2]*C[1][2]*h_xyzz + C[1][0]*C[1][2]*C[1][0]*C[1][0]*h_xxxz + C[1][0]*C[1][2]*C[1][0]*C[1][1]*h_xxyz + C[1][0]*C[1][2]*C[1][0]*C[1][2]*h_xxzz + C[1][0]*C[1][2]*C[1][1]*C[1][0]*h_xxyz + C[1][0]*C[1][2]*C[1][1]*C[1][1]*h_xyyz + C[1][0]*C[1][2]*C[1][1]*C[1][2]*h_xyzz + C[1][0]*C[1][2]*C[1][2]*C[1][0]*h_xxzz + C[1][0]*C[1][2]*C[1][2]*C[1][1]*h_xyzz + C[1][0]*C[1][2]*C[1][2]*C[1][2]*h_xzzz + C[1][1]*C[1][0]*C[1][0]*C[1][0]*h_xxxy + C[1][1]*C[1][0]*C[1][0]*C[1][1]*h_xxyy + C[1][1]*C[1][0]*C[1][0]*C[1][2]*h_xxyz + C[1][1]*C[1][0]*C[1][1]*C[1][0]*h_xxyy + C[1][1]*C[1][0]*C[1][1]*C[1][1]*h_xyyy + C[1][1]*C[1][0]*C[1][1]*C[1][2]*h_xyyz + C[1][1]*C[1][0]*C[1][2]*C[1][0]*h_xxyz + C[1][1]*C[1][0]*C[1][2]*C[1][1]*h_xyyz + C[1][1]*C[1][0]*C[1][2]*C[1][2]*h_xyzz + C[1][1]*C[1][1]*C[1][0]*C[1][0]*h_xxyy + C[1][1]*C[1][1]*C[1][0]*C[1][1]*h_xyyy + C[1][1]*C[1][1]*C[1][0]*C[1][2]*h_xyyz + C[1][1]*C[1][1]*C[1][1]*C[1][0]*h_xyyy + C[1][1]*C[1][1]*C[1][1]*C[1][1]*h_yyyy + C[1][1]*C[1][1]*C[1][1]*C[1][2]*h_yyyz + C[1][1]*C[1][1]*C[1][2]*C[1][0]*h_xyyz + C[1][1]*C[1][1]*C[1][2]*C[1][1]*h_yyyz + C[1][1]*C[1][1]*C[1][2]*C[1][2]*h_yyzz + C[1][1]*C[1][2]*C[1][0]*C[1][0]*h_xxyz + C[1][1]*C[1][2]*C[1][0]*C[1][1]*h_xyyz + C[1][1]*C[1][2]*C[1][0]*C[1][2]*h_xyzz + C[1][1]*C[1][2]*C[1][1]*C[1][0]*h_xyyz + C[1][1]*C[1][2]*C[1][1]*C[1][1]*h_yyyz + C[1][1]*C[1][2]*C[1][1]*C[1][2]*h_yyzz + C[1][1]*C[1][2]*C[1][2]*C[1][0]*h_xyzz + C[1][1]*C[1][2]*C[1][2]*C[1][1]*h_yyzz + C[1][1]*C[1][2]*C[1][2]*C[1][2]*h_yzzz + C[1][2]*C[1][0]*C[1][0]*C[1][0]*h_xxxz + C[1][2]*C[1][0]*C[1][0]*C[1][1]*h_xxyz + C[1][2]*C[1][0]*C[1][0]*C[1][2]*h_xxzz + C[1][2]*C[1][0]*C[1][1]*C[1][0]*h_xxyz + C[1][2]*C[1][0]*C[1][1]*C[1][1]*h_xyyz + C[1][2]*C[1][0]*C[1][1]*C[1][2]*h_xyzz + C[1][2]*C[1][0]*C[1][2]*C[1][0]*h_xxzz + C[1][2]*C[1][0]*C[1][2]*C[1][1]*h_xyzz + C[1][2]*C[1][0]*C[1][2]*C[1][2]*h_xzzz + C[1][2]*C[1][1]*C[1][0]*C[1][0]*h_xxyz + C[1][2]*C[1][1]*C[1][0]*C[1][1]*h_xyyz + C[1][2]*C[1][1]*C[1][0]*C[1][2]*h_xyzz + C[1][2]*C[1][1]*C[1][1]*C[1][0]*h_xyyz + C[1][2]*C[1][1]*C[1][1]*C[1][1]*h_yyyz + C[1][2]*C[1][1]*C[1][1]*C[1][2]*h_yyzz + C[1][2]*C[1][1]*C[1][2]*C[1][0]*h_xyzz + C[1][2]*C[1][1]*C[1][2]*C[1][1]*h_yyzz + C[1][2]*C[1][1]*C[1][2]*C[1][2]*h_yzzz + C[1][2]*C[1][2]*C[1][0]*C[1][0]*h_xxzz + C[1][2]*C[1][2]*C[1][0]*C[1][1]*h_xyzz + C[1][2]*C[1][2]*C[1][0]*C[1][2]*h_xzzz + C[1][2]*C[1][2]*C[1][1]*C[1][0]*h_xyzz + C[1][2]*C[1][2]*C[1][1]*C[1][1]*h_yyzz + C[1][2]*C[1][2]*C[1][1]*C[1][2]*h_yzzz + C[1][2]*C[1][2]*C[1][2]*C[1][0]*h_xzzz + C[1][2]*C[1][2]*C[1][2]*C[1][1]*h_yzzz + C[1][2]*C[1][2]*C[1][2]*C[1][2]*h_zzzz 
-        H_yyyz =  C[1][0]*C[1][0]*C[1][0]*C[2][0]*h_xxxx + C[1][0]*C[1][0]*C[1][0]*C[2][1]*h_xxxy + C[1][0]*C[1][0]*C[1][0]*C[2][2]*h_xxxz + C[1][0]*C[1][0]*C[1][1]*C[2][0]*h_xxxy + C[1][0]*C[1][0]*C[1][1]*C[2][1]*h_xxyy + C[1][0]*C[1][0]*C[1][1]*C[2][2]*h_xxyz + C[1][0]*C[1][0]*C[1][2]*C[2][0]*h_xxxz + C[1][0]*C[1][0]*C[1][2]*C[2][1]*h_xxyz + C[1][0]*C[1][0]*C[1][2]*C[2][2]*h_xxzz + C[1][0]*C[1][1]*C[1][0]*C[2][0]*h_xxxy + C[1][0]*C[1][1]*C[1][0]*C[2][1]*h_xxyy + C[1][0]*C[1][1]*C[1][0]*C[2][2]*h_xxyz + C[1][0]*C[1][1]*C[1][1]*C[2][0]*h_xxyy + C[1][0]*C[1][1]*C[1][1]*C[2][1]*h_xyyy + C[1][0]*C[1][1]*C[1][1]*C[2][2]*h_xyyz + C[1][0]*C[1][1]*C[1][2]*C[2][0]*h_xxyz + C[1][0]*C[1][1]*C[1][2]*C[2][1]*h_xyyz + C[1][0]*C[1][1]*C[1][2]*C[2][2]*h_xyzz + C[1][0]*C[1][2]*C[1][0]*C[2][0]*h_xxxz + C[1][0]*C[1][2]*C[1][0]*C[2][1]*h_xxyz + C[1][0]*C[1][2]*C[1][0]*C[2][2]*h_xxzz + C[1][0]*C[1][2]*C[1][1]*C[2][0]*h_xxyz + C[1][0]*C[1][2]*C[1][1]*C[2][1]*h_xyyz + C[1][0]*C[1][2]*C[1][1]*C[2][2]*h_xyzz + C[1][0]*C[1][2]*C[1][2]*C[2][0]*h_xxzz + C[1][0]*C[1][2]*C[1][2]*C[2][1]*h_xyzz + C[1][0]*C[1][2]*C[1][2]*C[2][2]*h_xzzz + C[1][1]*C[1][0]*C[1][0]*C[2][0]*h_xxxy + C[1][1]*C[1][0]*C[1][0]*C[2][1]*h_xxyy + C[1][1]*C[1][0]*C[1][0]*C[2][2]*h_xxyz + C[1][1]*C[1][0]*C[1][1]*C[2][0]*h_xxyy + C[1][1]*C[1][0]*C[1][1]*C[2][1]*h_xyyy + C[1][1]*C[1][0]*C[1][1]*C[2][2]*h_xyyz + C[1][1]*C[1][0]*C[1][2]*C[2][0]*h_xxyz + C[1][1]*C[1][0]*C[1][2]*C[2][1]*h_xyyz + C[1][1]*C[1][0]*C[1][2]*C[2][2]*h_xyzz + C[1][1]*C[1][1]*C[1][0]*C[2][0]*h_xxyy + C[1][1]*C[1][1]*C[1][0]*C[2][1]*h_xyyy + C[1][1]*C[1][1]*C[1][0]*C[2][2]*h_xyyz + C[1][1]*C[1][1]*C[1][1]*C[2][0]*h_xyyy + C[1][1]*C[1][1]*C[1][1]*C[2][1]*h_yyyy + C[1][1]*C[1][1]*C[1][1]*C[2][2]*h_yyyz + C[1][1]*C[1][1]*C[1][2]*C[2][0]*h_xyyz + C[1][1]*C[1][1]*C[1][2]*C[2][1]*h_yyyz + C[1][1]*C[1][1]*C[1][2]*C[2][2]*h_yyzz + C[1][1]*C[1][2]*C[1][0]*C[2][0]*h_xxyz + C[1][1]*C[1][2]*C[1][0]*C[2][1]*h_xyyz + C[1][1]*C[1][2]*C[1][0]*C[2][2]*h_xyzz + C[1][1]*C[1][2]*C[1][1]*C[2][0]*h_xyyz + C[1][1]*C[1][2]*C[1][1]*C[2][1]*h_yyyz + C[1][1]*C[1][2]*C[1][1]*C[2][2]*h_yyzz + C[1][1]*C[1][2]*C[1][2]*C[2][0]*h_xyzz + C[1][1]*C[1][2]*C[1][2]*C[2][1]*h_yyzz + C[1][1]*C[1][2]*C[1][2]*C[2][2]*h_yzzz + C[1][2]*C[1][0]*C[1][0]*C[2][0]*h_xxxz + C[1][2]*C[1][0]*C[1][0]*C[2][1]*h_xxyz + C[1][2]*C[1][0]*C[1][0]*C[2][2]*h_xxzz + C[1][2]*C[1][0]*C[1][1]*C[2][0]*h_xxyz + C[1][2]*C[1][0]*C[1][1]*C[2][1]*h_xyyz + C[1][2]*C[1][0]*C[1][1]*C[2][2]*h_xyzz + C[1][2]*C[1][0]*C[1][2]*C[2][0]*h_xxzz + C[1][2]*C[1][0]*C[1][2]*C[2][1]*h_xyzz + C[1][2]*C[1][0]*C[1][2]*C[2][2]*h_xzzz + C[1][2]*C[1][1]*C[1][0]*C[2][0]*h_xxyz + C[1][2]*C[1][1]*C[1][0]*C[2][1]*h_xyyz + C[1][2]*C[1][1]*C[1][0]*C[2][2]*h_xyzz + C[1][2]*C[1][1]*C[1][1]*C[2][0]*h_xyyz + C[1][2]*C[1][1]*C[1][1]*C[2][1]*h_yyyz + C[1][2]*C[1][1]*C[1][1]*C[2][2]*h_yyzz + C[1][2]*C[1][1]*C[1][2]*C[2][0]*h_xyzz + C[1][2]*C[1][1]*C[1][2]*C[2][1]*h_yyzz + C[1][2]*C[1][1]*C[1][2]*C[2][2]*h_yzzz + C[1][2]*C[1][2]*C[1][0]*C[2][0]*h_xxzz + C[1][2]*C[1][2]*C[1][0]*C[2][1]*h_xyzz + C[1][2]*C[1][2]*C[1][0]*C[2][2]*h_xzzz + C[1][2]*C[1][2]*C[1][1]*C[2][0]*h_xyzz + C[1][2]*C[1][2]*C[1][1]*C[2][1]*h_yyzz + C[1][2]*C[1][2]*C[1][1]*C[2][2]*h_yzzz + C[1][2]*C[1][2]*C[1][2]*C[2][0]*h_xzzz + C[1][2]*C[1][2]*C[1][2]*C[2][1]*h_yzzz + C[1][2]*C[1][2]*C[1][2]*C[2][2]*h_zzzz 
-        H_yyzz =  C[1][0]*C[1][0]*C[2][0]*C[2][0]*h_xxxx + C[1][0]*C[1][0]*C[2][0]*C[2][1]*h_xxxy + C[1][0]*C[1][0]*C[2][0]*C[2][2]*h_xxxz + C[1][0]*C[1][0]*C[2][1]*C[2][0]*h_xxxy + C[1][0]*C[1][0]*C[2][1]*C[2][1]*h_xxyy + C[1][0]*C[1][0]*C[2][1]*C[2][2]*h_xxyz + C[1][0]*C[1][0]*C[2][2]*C[2][0]*h_xxxz + C[1][0]*C[1][0]*C[2][2]*C[2][1]*h_xxyz + C[1][0]*C[1][0]*C[2][2]*C[2][2]*h_xxzz + C[1][0]*C[1][1]*C[2][0]*C[2][0]*h_xxxy + C[1][0]*C[1][1]*C[2][0]*C[2][1]*h_xxyy + C[1][0]*C[1][1]*C[2][0]*C[2][2]*h_xxyz + C[1][0]*C[1][1]*C[2][1]*C[2][0]*h_xxyy + C[1][0]*C[1][1]*C[2][1]*C[2][1]*h_xyyy + C[1][0]*C[1][1]*C[2][1]*C[2][2]*h_xyyz + C[1][0]*C[1][1]*C[2][2]*C[2][0]*h_xxyz + C[1][0]*C[1][1]*C[2][2]*C[2][1]*h_xyyz + C[1][0]*C[1][1]*C[2][2]*C[2][2]*h_xyzz + C[1][0]*C[1][2]*C[2][0]*C[2][0]*h_xxxz + C[1][0]*C[1][2]*C[2][0]*C[2][1]*h_xxyz + C[1][0]*C[1][2]*C[2][0]*C[2][2]*h_xxzz + C[1][0]*C[1][2]*C[2][1]*C[2][0]*h_xxyz + C[1][0]*C[1][2]*C[2][1]*C[2][1]*h_xyyz + C[1][0]*C[1][2]*C[2][1]*C[2][2]*h_xyzz + C[1][0]*C[1][2]*C[2][2]*C[2][0]*h_xxzz + C[1][0]*C[1][2]*C[2][2]*C[2][1]*h_xyzz + C[1][0]*C[1][2]*C[2][2]*C[2][2]*h_xzzz + C[1][1]*C[1][0]*C[2][0]*C[2][0]*h_xxxy + C[1][1]*C[1][0]*C[2][0]*C[2][1]*h_xxyy + C[1][1]*C[1][0]*C[2][0]*C[2][2]*h_xxyz + C[1][1]*C[1][0]*C[2][1]*C[2][0]*h_xxyy + C[1][1]*C[1][0]*C[2][1]*C[2][1]*h_xyyy + C[1][1]*C[1][0]*C[2][1]*C[2][2]*h_xyyz + C[1][1]*C[1][0]*C[2][2]*C[2][0]*h_xxyz + C[1][1]*C[1][0]*C[2][2]*C[2][1]*h_xyyz + C[1][1]*C[1][0]*C[2][2]*C[2][2]*h_xyzz + C[1][1]*C[1][1]*C[2][0]*C[2][0]*h_xxyy + C[1][1]*C[1][1]*C[2][0]*C[2][1]*h_xyyy + C[1][1]*C[1][1]*C[2][0]*C[2][2]*h_xyyz + C[1][1]*C[1][1]*C[2][1]*C[2][0]*h_xyyy + C[1][1]*C[1][1]*C[2][1]*C[2][1]*h_yyyy + C[1][1]*C[1][1]*C[2][1]*C[2][2]*h_yyyz + C[1][1]*C[1][1]*C[2][2]*C[2][0]*h_xyyz + C[1][1]*C[1][1]*C[2][2]*C[2][1]*h_yyyz + C[1][1]*C[1][1]*C[2][2]*C[2][2]*h_yyzz + C[1][1]*C[1][2]*C[2][0]*C[2][0]*h_xxyz + C[1][1]*C[1][2]*C[2][0]*C[2][1]*h_xyyz + C[1][1]*C[1][2]*C[2][0]*C[2][2]*h_xyzz + C[1][1]*C[1][2]*C[2][1]*C[2][0]*h_xyyz + C[1][1]*C[1][2]*C[2][1]*C[2][1]*h_yyyz + C[1][1]*C[1][2]*C[2][1]*C[2][2]*h_yyzz + C[1][1]*C[1][2]*C[2][2]*C[2][0]*h_xyzz + C[1][1]*C[1][2]*C[2][2]*C[2][1]*h_yyzz + C[1][1]*C[1][2]*C[2][2]*C[2][2]*h_yzzz + C[1][2]*C[1][0]*C[2][0]*C[2][0]*h_xxxz + C[1][2]*C[1][0]*C[2][0]*C[2][1]*h_xxyz + C[1][2]*C[1][0]*C[2][0]*C[2][2]*h_xxzz + C[1][2]*C[1][0]*C[2][1]*C[2][0]*h_xxyz + C[1][2]*C[1][0]*C[2][1]*C[2][1]*h_xyyz + C[1][2]*C[1][0]*C[2][1]*C[2][2]*h_xyzz + C[1][2]*C[1][0]*C[2][2]*C[2][0]*h_xxzz + C[1][2]*C[1][0]*C[2][2]*C[2][1]*h_xyzz + C[1][2]*C[1][0]*C[2][2]*C[2][2]*h_xzzz + C[1][2]*C[1][1]*C[2][0]*C[2][0]*h_xxyz + C[1][2]*C[1][1]*C[2][0]*C[2][1]*h_xyyz + C[1][2]*C[1][1]*C[2][0]*C[2][2]*h_xyzz + C[1][2]*C[1][1]*C[2][1]*C[2][0]*h_xyyz + C[1][2]*C[1][1]*C[2][1]*C[2][1]*h_yyyz + C[1][2]*C[1][1]*C[2][1]*C[2][2]*h_yyzz + C[1][2]*C[1][1]*C[2][2]*C[2][0]*h_xyzz + C[1][2]*C[1][1]*C[2][2]*C[2][1]*h_yyzz + C[1][2]*C[1][1]*C[2][2]*C[2][2]*h_yzzz + C[1][2]*C[1][2]*C[2][0]*C[2][0]*h_xxzz + C[1][2]*C[1][2]*C[2][0]*C[2][1]*h_xyzz + C[1][2]*C[1][2]*C[2][0]*C[2][2]*h_xzzz + C[1][2]*C[1][2]*C[2][1]*C[2][0]*h_xyzz + C[1][2]*C[1][2]*C[2][1]*C[2][1]*h_yyzz + C[1][2]*C[1][2]*C[2][1]*C[2][2]*h_yzzz + C[1][2]*C[1][2]*C[2][2]*C[2][0]*h_xzzz + C[1][2]*C[1][2]*C[2][2]*C[2][1]*h_yzzz + C[1][2]*C[1][2]*C[2][2]*C[2][2]*h_zzzz 
-        H_yzzz =  C[1][0]*C[2][0]*C[2][0]*C[2][0]*h_xxxx + C[1][0]*C[2][0]*C[2][0]*C[2][1]*h_xxxy + C[1][0]*C[2][0]*C[2][0]*C[2][2]*h_xxxz + C[1][0]*C[2][0]*C[2][1]*C[2][0]*h_xxxy + C[1][0]*C[2][0]*C[2][1]*C[2][1]*h_xxyy + C[1][0]*C[2][0]*C[2][1]*C[2][2]*h_xxyz + C[1][0]*C[2][0]*C[2][2]*C[2][0]*h_xxxz + C[1][0]*C[2][0]*C[2][2]*C[2][1]*h_xxyz + C[1][0]*C[2][0]*C[2][2]*C[2][2]*h_xxzz + C[1][0]*C[2][1]*C[2][0]*C[2][0]*h_xxxy + C[1][0]*C[2][1]*C[2][0]*C[2][1]*h_xxyy + C[1][0]*C[2][1]*C[2][0]*C[2][2]*h_xxyz + C[1][0]*C[2][1]*C[2][1]*C[2][0]*h_xxyy + C[1][0]*C[2][1]*C[2][1]*C[2][1]*h_xyyy + C[1][0]*C[2][1]*C[2][1]*C[2][2]*h_xyyz + C[1][0]*C[2][1]*C[2][2]*C[2][0]*h_xxyz + C[1][0]*C[2][1]*C[2][2]*C[2][1]*h_xyyz + C[1][0]*C[2][1]*C[2][2]*C[2][2]*h_xyzz + C[1][0]*C[2][2]*C[2][0]*C[2][0]*h_xxxz + C[1][0]*C[2][2]*C[2][0]*C[2][1]*h_xxyz + C[1][0]*C[2][2]*C[2][0]*C[2][2]*h_xxzz + C[1][0]*C[2][2]*C[2][1]*C[2][0]*h_xxyz + C[1][0]*C[2][2]*C[2][1]*C[2][1]*h_xyyz + C[1][0]*C[2][2]*C[2][1]*C[2][2]*h_xyzz + C[1][0]*C[2][2]*C[2][2]*C[2][0]*h_xxzz + C[1][0]*C[2][2]*C[2][2]*C[2][1]*h_xyzz + C[1][0]*C[2][2]*C[2][2]*C[2][2]*h_xzzz + C[1][1]*C[2][0]*C[2][0]*C[2][0]*h_xxxy + C[1][1]*C[2][0]*C[2][0]*C[2][1]*h_xxyy + C[1][1]*C[2][0]*C[2][0]*C[2][2]*h_xxyz + C[1][1]*C[2][0]*C[2][1]*C[2][0]*h_xxyy + C[1][1]*C[2][0]*C[2][1]*C[2][1]*h_xyyy + C[1][1]*C[2][0]*C[2][1]*C[2][2]*h_xyyz + C[1][1]*C[2][0]*C[2][2]*C[2][0]*h_xxyz + C[1][1]*C[2][0]*C[2][2]*C[2][1]*h_xyyz + C[1][1]*C[2][0]*C[2][2]*C[2][2]*h_xyzz + C[1][1]*C[2][1]*C[2][0]*C[2][0]*h_xxyy + C[1][1]*C[2][1]*C[2][0]*C[2][1]*h_xyyy + C[1][1]*C[2][1]*C[2][0]*C[2][2]*h_xyyz + C[1][1]*C[2][1]*C[2][1]*C[2][0]*h_xyyy + C[1][1]*C[2][1]*C[2][1]*C[2][1]*h_yyyy + C[1][1]*C[2][1]*C[2][1]*C[2][2]*h_yyyz + C[1][1]*C[2][1]*C[2][2]*C[2][0]*h_xyyz + C[1][1]*C[2][1]*C[2][2]*C[2][1]*h_yyyz + C[1][1]*C[2][1]*C[2][2]*C[2][2]*h_yyzz + C[1][1]*C[2][2]*C[2][0]*C[2][0]*h_xxyz + C[1][1]*C[2][2]*C[2][0]*C[2][1]*h_xyyz + C[1][1]*C[2][2]*C[2][0]*C[2][2]*h_xyzz + C[1][1]*C[2][2]*C[2][1]*C[2][0]*h_xyyz + C[1][1]*C[2][2]*C[2][1]*C[2][1]*h_yyyz + C[1][1]*C[2][2]*C[2][1]*C[2][2]*h_yyzz + C[1][1]*C[2][2]*C[2][2]*C[2][0]*h_xyzz + C[1][1]*C[2][2]*C[2][2]*C[2][1]*h_yyzz + C[1][1]*C[2][2]*C[2][2]*C[2][2]*h_yzzz + C[1][2]*C[2][0]*C[2][0]*C[2][0]*h_xxxz + C[1][2]*C[2][0]*C[2][0]*C[2][1]*h_xxyz + C[1][2]*C[2][0]*C[2][0]*C[2][2]*h_xxzz + C[1][2]*C[2][0]*C[2][1]*C[2][0]*h_xxyz + C[1][2]*C[2][0]*C[2][1]*C[2][1]*h_xyyz + C[1][2]*C[2][0]*C[2][1]*C[2][2]*h_xyzz + C[1][2]*C[2][0]*C[2][2]*C[2][0]*h_xxzz + C[1][2]*C[2][0]*C[2][2]*C[2][1]*h_xyzz + C[1][2]*C[2][0]*C[2][2]*C[2][2]*h_xzzz + C[1][2]*C[2][1]*C[2][0]*C[2][0]*h_xxyz + C[1][2]*C[2][1]*C[2][0]*C[2][1]*h_xyyz + C[1][2]*C[2][1]*C[2][0]*C[2][2]*h_xyzz + C[1][2]*C[2][1]*C[2][1]*C[2][0]*h_xyyz + C[1][2]*C[2][1]*C[2][1]*C[2][1]*h_yyyz + C[1][2]*C[2][1]*C[2][1]*C[2][2]*h_yyzz + C[1][2]*C[2][1]*C[2][2]*C[2][0]*h_xyzz + C[1][2]*C[2][1]*C[2][2]*C[2][1]*h_yyzz + C[1][2]*C[2][1]*C[2][2]*C[2][2]*h_yzzz + C[1][2]*C[2][2]*C[2][0]*C[2][0]*h_xxzz + C[1][2]*C[2][2]*C[2][0]*C[2][1]*h_xyzz + C[1][2]*C[2][2]*C[2][0]*C[2][2]*h_xzzz + C[1][2]*C[2][2]*C[2][1]*C[2][0]*h_xyzz + C[1][2]*C[2][2]*C[2][1]*C[2][1]*h_yyzz + C[1][2]*C[2][2]*C[2][1]*C[2][2]*h_yzzz + C[1][2]*C[2][2]*C[2][2]*C[2][0]*h_xzzz + C[1][2]*C[2][2]*C[2][2]*C[2][1]*h_yzzz + C[1][2]*C[2][2]*C[2][2]*C[2][2]*h_zzzz 
-        H_zzzz =  C[2][0]*C[2][0]*C[2][0]*C[2][0]*h_xxxx + C[2][0]*C[2][0]*C[2][0]*C[2][1]*h_xxxy + C[2][0]*C[2][0]*C[2][0]*C[2][2]*h_xxxz + C[2][0]*C[2][0]*C[2][1]*C[2][0]*h_xxxy + C[2][0]*C[2][0]*C[2][1]*C[2][1]*h_xxyy + C[2][0]*C[2][0]*C[2][1]*C[2][2]*h_xxyz + C[2][0]*C[2][0]*C[2][2]*C[2][0]*h_xxxz + C[2][0]*C[2][0]*C[2][2]*C[2][1]*h_xxyz + C[2][0]*C[2][0]*C[2][2]*C[2][2]*h_xxzz + C[2][0]*C[2][1]*C[2][0]*C[2][0]*h_xxxy + C[2][0]*C[2][1]*C[2][0]*C[2][1]*h_xxyy + C[2][0]*C[2][1]*C[2][0]*C[2][2]*h_xxyz + C[2][0]*C[2][1]*C[2][1]*C[2][0]*h_xxyy + C[2][0]*C[2][1]*C[2][1]*C[2][1]*h_xyyy + C[2][0]*C[2][1]*C[2][1]*C[2][2]*h_xyyz + C[2][0]*C[2][1]*C[2][2]*C[2][0]*h_xxyz + C[2][0]*C[2][1]*C[2][2]*C[2][1]*h_xyyz + C[2][0]*C[2][1]*C[2][2]*C[2][2]*h_xyzz + C[2][0]*C[2][2]*C[2][0]*C[2][0]*h_xxxz + C[2][0]*C[2][2]*C[2][0]*C[2][1]*h_xxyz + C[2][0]*C[2][2]*C[2][0]*C[2][2]*h_xxzz + C[2][0]*C[2][2]*C[2][1]*C[2][0]*h_xxyz + C[2][0]*C[2][2]*C[2][1]*C[2][1]*h_xyyz + C[2][0]*C[2][2]*C[2][1]*C[2][2]*h_xyzz + C[2][0]*C[2][2]*C[2][2]*C[2][0]*h_xxzz + C[2][0]*C[2][2]*C[2][2]*C[2][1]*h_xyzz + C[2][0]*C[2][2]*C[2][2]*C[2][2]*h_xzzz + C[2][1]*C[2][0]*C[2][0]*C[2][0]*h_xxxy + C[2][1]*C[2][0]*C[2][0]*C[2][1]*h_xxyy + C[2][1]*C[2][0]*C[2][0]*C[2][2]*h_xxyz + C[2][1]*C[2][0]*C[2][1]*C[2][0]*h_xxyy + C[2][1]*C[2][0]*C[2][1]*C[2][1]*h_xyyy + C[2][1]*C[2][0]*C[2][1]*C[2][2]*h_xyyz + C[2][1]*C[2][0]*C[2][2]*C[2][0]*h_xxyz + C[2][1]*C[2][0]*C[2][2]*C[2][1]*h_xyyz + C[2][1]*C[2][0]*C[2][2]*C[2][2]*h_xyzz + C[2][1]*C[2][1]*C[2][0]*C[2][0]*h_xxyy + C[2][1]*C[2][1]*C[2][0]*C[2][1]*h_xyyy + C[2][1]*C[2][1]*C[2][0]*C[2][2]*h_xyyz + C[2][1]*C[2][1]*C[2][1]*C[2][0]*h_xyyy + C[2][1]*C[2][1]*C[2][1]*C[2][1]*h_yyyy + C[2][1]*C[2][1]*C[2][1]*C[2][2]*h_yyyz + C[2][1]*C[2][1]*C[2][2]*C[2][0]*h_xyyz + C[2][1]*C[2][1]*C[2][2]*C[2][1]*h_yyyz + C[2][1]*C[2][1]*C[2][2]*C[2][2]*h_yyzz + C[2][1]*C[2][2]*C[2][0]*C[2][0]*h_xxyz + C[2][1]*C[2][2]*C[2][0]*C[2][1]*h_xyyz + C[2][1]*C[2][2]*C[2][0]*C[2][2]*h_xyzz + C[2][1]*C[2][2]*C[2][1]*C[2][0]*h_xyyz + C[2][1]*C[2][2]*C[2][1]*C[2][1]*h_yyyz + C[2][1]*C[2][2]*C[2][1]*C[2][2]*h_yyzz + C[2][1]*C[2][2]*C[2][2]*C[2][0]*h_xyzz + C[2][1]*C[2][2]*C[2][2]*C[2][1]*h_yyzz + C[2][1]*C[2][2]*C[2][2]*C[2][2]*h_yzzz + C[2][2]*C[2][0]*C[2][0]*C[2][0]*h_xxxz + C[2][2]*C[2][0]*C[2][0]*C[2][1]*h_xxyz + C[2][2]*C[2][0]*C[2][0]*C[2][2]*h_xxzz + C[2][2]*C[2][0]*C[2][1]*C[2][0]*h_xxyz + C[2][2]*C[2][0]*C[2][1]*C[2][1]*h_xyyz + C[2][2]*C[2][0]*C[2][1]*C[2][2]*h_xyzz + C[2][2]*C[2][0]*C[2][2]*C[2][0]*h_xxzz + C[2][2]*C[2][0]*C[2][2]*C[2][1]*h_xyzz + C[2][2]*C[2][0]*C[2][2]*C[2][2]*h_xzzz + C[2][2]*C[2][1]*C[2][0]*C[2][0]*h_xxyz + C[2][2]*C[2][1]*C[2][0]*C[2][1]*h_xyyz + C[2][2]*C[2][1]*C[2][0]*C[2][2]*h_xyzz + C[2][2]*C[2][1]*C[2][1]*C[2][0]*h_xyyz + C[2][2]*C[2][1]*C[2][1]*C[2][1]*h_yyyz + C[2][2]*C[2][1]*C[2][1]*C[2][2]*h_yyzz + C[2][2]*C[2][1]*C[2][2]*C[2][0]*h_xyzz + C[2][2]*C[2][1]*C[2][2]*C[2][1]*h_yyzz + C[2][2]*C[2][1]*C[2][2]*C[2][2]*h_yzzz + C[2][2]*C[2][2]*C[2][0]*C[2][0]*h_xxzz + C[2][2]*C[2][2]*C[2][0]*C[2][1]*h_xyzz + C[2][2]*C[2][2]*C[2][0]*C[2][2]*h_xzzz + C[2][2]*C[2][2]*C[2][1]*C[2][0]*h_xyzz + C[2][2]*C[2][2]*C[2][1]*C[2][1]*h_yyzz + C[2][2]*C[2][2]*C[2][1]*C[2][2]*h_yzzz + C[2][2]*C[2][2]*C[2][2]*C[2][0]*h_xzzz + C[2][2]*C[2][2]*C[2][2]*C[2][1]*h_yzzz + C[2][2]*C[2][2]*C[2][2]*C[2][2]*h_zzzz 
+        H_xxxx = (
+            C[0][0] * C[0][0] * C[0][0] * C[0][0] * h_xxxx
+            + C[0][0] * C[0][0] * C[0][0] * C[0][1] * h_xxxy
+            + C[0][0] * C[0][0] * C[0][0] * C[0][2] * h_xxxz
+            + C[0][0] * C[0][0] * C[0][1] * C[0][0] * h_xxxy
+            + C[0][0] * C[0][0] * C[0][1] * C[0][1] * h_xxyy
+            + C[0][0] * C[0][0] * C[0][1] * C[0][2] * h_xxyz
+            + C[0][0] * C[0][0] * C[0][2] * C[0][0] * h_xxxz
+            + C[0][0] * C[0][0] * C[0][2] * C[0][1] * h_xxyz
+            + C[0][0] * C[0][0] * C[0][2] * C[0][2] * h_xxzz
+            + C[0][0] * C[0][1] * C[0][0] * C[0][0] * h_xxxy
+            + C[0][0] * C[0][1] * C[0][0] * C[0][1] * h_xxyy
+            + C[0][0] * C[0][1] * C[0][0] * C[0][2] * h_xxyz
+            + C[0][0] * C[0][1] * C[0][1] * C[0][0] * h_xxyy
+            + C[0][0] * C[0][1] * C[0][1] * C[0][1] * h_xyyy
+            + C[0][0] * C[0][1] * C[0][1] * C[0][2] * h_xyyz
+            + C[0][0] * C[0][1] * C[0][2] * C[0][0] * h_xxyz
+            + C[0][0] * C[0][1] * C[0][2] * C[0][1] * h_xyyz
+            + C[0][0] * C[0][1] * C[0][2] * C[0][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][0] * C[0][0] * h_xxxz
+            + C[0][0] * C[0][2] * C[0][0] * C[0][1] * h_xxyz
+            + C[0][0] * C[0][2] * C[0][0] * C[0][2] * h_xxzz
+            + C[0][0] * C[0][2] * C[0][1] * C[0][0] * h_xxyz
+            + C[0][0] * C[0][2] * C[0][1] * C[0][1] * h_xyyz
+            + C[0][0] * C[0][2] * C[0][1] * C[0][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][2] * C[0][0] * h_xxzz
+            + C[0][0] * C[0][2] * C[0][2] * C[0][1] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][2] * C[0][2] * h_xzzz
+            + C[0][1] * C[0][0] * C[0][0] * C[0][0] * h_xxxy
+            + C[0][1] * C[0][0] * C[0][0] * C[0][1] * h_xxyy
+            + C[0][1] * C[0][0] * C[0][0] * C[0][2] * h_xxyz
+            + C[0][1] * C[0][0] * C[0][1] * C[0][0] * h_xxyy
+            + C[0][1] * C[0][0] * C[0][1] * C[0][1] * h_xyyy
+            + C[0][1] * C[0][0] * C[0][1] * C[0][2] * h_xyyz
+            + C[0][1] * C[0][0] * C[0][2] * C[0][0] * h_xxyz
+            + C[0][1] * C[0][0] * C[0][2] * C[0][1] * h_xyyz
+            + C[0][1] * C[0][0] * C[0][2] * C[0][2] * h_xyzz
+            + C[0][1] * C[0][1] * C[0][0] * C[0][0] * h_xxyy
+            + C[0][1] * C[0][1] * C[0][0] * C[0][1] * h_xyyy
+            + C[0][1] * C[0][1] * C[0][0] * C[0][2] * h_xyyz
+            + C[0][1] * C[0][1] * C[0][1] * C[0][0] * h_xyyy
+            + C[0][1] * C[0][1] * C[0][1] * C[0][1] * h_yyyy
+            + C[0][1] * C[0][1] * C[0][1] * C[0][2] * h_yyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[0][0] * h_xyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[0][1] * h_yyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[0][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][0] * C[0][0] * h_xxyz
+            + C[0][1] * C[0][2] * C[0][0] * C[0][1] * h_xyyz
+            + C[0][1] * C[0][2] * C[0][0] * C[0][2] * h_xyzz
+            + C[0][1] * C[0][2] * C[0][1] * C[0][0] * h_xyyz
+            + C[0][1] * C[0][2] * C[0][1] * C[0][1] * h_yyyz
+            + C[0][1] * C[0][2] * C[0][1] * C[0][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[0][0] * h_xyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[0][1] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[0][2] * h_yzzz
+            + C[0][2] * C[0][0] * C[0][0] * C[0][0] * h_xxxz
+            + C[0][2] * C[0][0] * C[0][0] * C[0][1] * h_xxyz
+            + C[0][2] * C[0][0] * C[0][0] * C[0][2] * h_xxzz
+            + C[0][2] * C[0][0] * C[0][1] * C[0][0] * h_xxyz
+            + C[0][2] * C[0][0] * C[0][1] * C[0][1] * h_xyyz
+            + C[0][2] * C[0][0] * C[0][1] * C[0][2] * h_xyzz
+            + C[0][2] * C[0][0] * C[0][2] * C[0][0] * h_xxzz
+            + C[0][2] * C[0][0] * C[0][2] * C[0][1] * h_xyzz
+            + C[0][2] * C[0][0] * C[0][2] * C[0][2] * h_xzzz
+            + C[0][2] * C[0][1] * C[0][0] * C[0][0] * h_xxyz
+            + C[0][2] * C[0][1] * C[0][0] * C[0][1] * h_xyyz
+            + C[0][2] * C[0][1] * C[0][0] * C[0][2] * h_xyzz
+            + C[0][2] * C[0][1] * C[0][1] * C[0][0] * h_xyyz
+            + C[0][2] * C[0][1] * C[0][1] * C[0][1] * h_yyyz
+            + C[0][2] * C[0][1] * C[0][1] * C[0][2] * h_yyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[0][0] * h_xyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[0][1] * h_yyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[0][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][0] * C[0][0] * h_xxzz
+            + C[0][2] * C[0][2] * C[0][0] * C[0][1] * h_xyzz
+            + C[0][2] * C[0][2] * C[0][0] * C[0][2] * h_xzzz
+            + C[0][2] * C[0][2] * C[0][1] * C[0][0] * h_xyzz
+            + C[0][2] * C[0][2] * C[0][1] * C[0][1] * h_yyzz
+            + C[0][2] * C[0][2] * C[0][1] * C[0][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[0][0] * h_xzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[0][1] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[0][2] * h_zzzz
+        )
+        H_xxxy = (
+            C[0][0] * C[0][0] * C[0][0] * C[1][0] * h_xxxx
+            + C[0][0] * C[0][0] * C[0][0] * C[1][1] * h_xxxy
+            + C[0][0] * C[0][0] * C[0][0] * C[1][2] * h_xxxz
+            + C[0][0] * C[0][0] * C[0][1] * C[1][0] * h_xxxy
+            + C[0][0] * C[0][0] * C[0][1] * C[1][1] * h_xxyy
+            + C[0][0] * C[0][0] * C[0][1] * C[1][2] * h_xxyz
+            + C[0][0] * C[0][0] * C[0][2] * C[1][0] * h_xxxz
+            + C[0][0] * C[0][0] * C[0][2] * C[1][1] * h_xxyz
+            + C[0][0] * C[0][0] * C[0][2] * C[1][2] * h_xxzz
+            + C[0][0] * C[0][1] * C[0][0] * C[1][0] * h_xxxy
+            + C[0][0] * C[0][1] * C[0][0] * C[1][1] * h_xxyy
+            + C[0][0] * C[0][1] * C[0][0] * C[1][2] * h_xxyz
+            + C[0][0] * C[0][1] * C[0][1] * C[1][0] * h_xxyy
+            + C[0][0] * C[0][1] * C[0][1] * C[1][1] * h_xyyy
+            + C[0][0] * C[0][1] * C[0][1] * C[1][2] * h_xyyz
+            + C[0][0] * C[0][1] * C[0][2] * C[1][0] * h_xxyz
+            + C[0][0] * C[0][1] * C[0][2] * C[1][1] * h_xyyz
+            + C[0][0] * C[0][1] * C[0][2] * C[1][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][0] * C[1][0] * h_xxxz
+            + C[0][0] * C[0][2] * C[0][0] * C[1][1] * h_xxyz
+            + C[0][0] * C[0][2] * C[0][0] * C[1][2] * h_xxzz
+            + C[0][0] * C[0][2] * C[0][1] * C[1][0] * h_xxyz
+            + C[0][0] * C[0][2] * C[0][1] * C[1][1] * h_xyyz
+            + C[0][0] * C[0][2] * C[0][1] * C[1][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][2] * C[1][0] * h_xxzz
+            + C[0][0] * C[0][2] * C[0][2] * C[1][1] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][2] * C[1][2] * h_xzzz
+            + C[0][1] * C[0][0] * C[0][0] * C[1][0] * h_xxxy
+            + C[0][1] * C[0][0] * C[0][0] * C[1][1] * h_xxyy
+            + C[0][1] * C[0][0] * C[0][0] * C[1][2] * h_xxyz
+            + C[0][1] * C[0][0] * C[0][1] * C[1][0] * h_xxyy
+            + C[0][1] * C[0][0] * C[0][1] * C[1][1] * h_xyyy
+            + C[0][1] * C[0][0] * C[0][1] * C[1][2] * h_xyyz
+            + C[0][1] * C[0][0] * C[0][2] * C[1][0] * h_xxyz
+            + C[0][1] * C[0][0] * C[0][2] * C[1][1] * h_xyyz
+            + C[0][1] * C[0][0] * C[0][2] * C[1][2] * h_xyzz
+            + C[0][1] * C[0][1] * C[0][0] * C[1][0] * h_xxyy
+            + C[0][1] * C[0][1] * C[0][0] * C[1][1] * h_xyyy
+            + C[0][1] * C[0][1] * C[0][0] * C[1][2] * h_xyyz
+            + C[0][1] * C[0][1] * C[0][1] * C[1][0] * h_xyyy
+            + C[0][1] * C[0][1] * C[0][1] * C[1][1] * h_yyyy
+            + C[0][1] * C[0][1] * C[0][1] * C[1][2] * h_yyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[1][0] * h_xyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[1][1] * h_yyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[1][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][0] * C[1][0] * h_xxyz
+            + C[0][1] * C[0][2] * C[0][0] * C[1][1] * h_xyyz
+            + C[0][1] * C[0][2] * C[0][0] * C[1][2] * h_xyzz
+            + C[0][1] * C[0][2] * C[0][1] * C[1][0] * h_xyyz
+            + C[0][1] * C[0][2] * C[0][1] * C[1][1] * h_yyyz
+            + C[0][1] * C[0][2] * C[0][1] * C[1][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[1][0] * h_xyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[1][1] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[1][2] * h_yzzz
+            + C[0][2] * C[0][0] * C[0][0] * C[1][0] * h_xxxz
+            + C[0][2] * C[0][0] * C[0][0] * C[1][1] * h_xxyz
+            + C[0][2] * C[0][0] * C[0][0] * C[1][2] * h_xxzz
+            + C[0][2] * C[0][0] * C[0][1] * C[1][0] * h_xxyz
+            + C[0][2] * C[0][0] * C[0][1] * C[1][1] * h_xyyz
+            + C[0][2] * C[0][0] * C[0][1] * C[1][2] * h_xyzz
+            + C[0][2] * C[0][0] * C[0][2] * C[1][0] * h_xxzz
+            + C[0][2] * C[0][0] * C[0][2] * C[1][1] * h_xyzz
+            + C[0][2] * C[0][0] * C[0][2] * C[1][2] * h_xzzz
+            + C[0][2] * C[0][1] * C[0][0] * C[1][0] * h_xxyz
+            + C[0][2] * C[0][1] * C[0][0] * C[1][1] * h_xyyz
+            + C[0][2] * C[0][1] * C[0][0] * C[1][2] * h_xyzz
+            + C[0][2] * C[0][1] * C[0][1] * C[1][0] * h_xyyz
+            + C[0][2] * C[0][1] * C[0][1] * C[1][1] * h_yyyz
+            + C[0][2] * C[0][1] * C[0][1] * C[1][2] * h_yyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[1][0] * h_xyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[1][1] * h_yyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[1][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][0] * C[1][0] * h_xxzz
+            + C[0][2] * C[0][2] * C[0][0] * C[1][1] * h_xyzz
+            + C[0][2] * C[0][2] * C[0][0] * C[1][2] * h_xzzz
+            + C[0][2] * C[0][2] * C[0][1] * C[1][0] * h_xyzz
+            + C[0][2] * C[0][2] * C[0][1] * C[1][1] * h_yyzz
+            + C[0][2] * C[0][2] * C[0][1] * C[1][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[1][0] * h_xzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[1][1] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[1][2] * h_zzzz
+        )
+        H_xxxz = (
+            C[0][0] * C[0][0] * C[0][0] * C[2][0] * h_xxxx
+            + C[0][0] * C[0][0] * C[0][0] * C[2][1] * h_xxxy
+            + C[0][0] * C[0][0] * C[0][0] * C[2][2] * h_xxxz
+            + C[0][0] * C[0][0] * C[0][1] * C[2][0] * h_xxxy
+            + C[0][0] * C[0][0] * C[0][1] * C[2][1] * h_xxyy
+            + C[0][0] * C[0][0] * C[0][1] * C[2][2] * h_xxyz
+            + C[0][0] * C[0][0] * C[0][2] * C[2][0] * h_xxxz
+            + C[0][0] * C[0][0] * C[0][2] * C[2][1] * h_xxyz
+            + C[0][0] * C[0][0] * C[0][2] * C[2][2] * h_xxzz
+            + C[0][0] * C[0][1] * C[0][0] * C[2][0] * h_xxxy
+            + C[0][0] * C[0][1] * C[0][0] * C[2][1] * h_xxyy
+            + C[0][0] * C[0][1] * C[0][0] * C[2][2] * h_xxyz
+            + C[0][0] * C[0][1] * C[0][1] * C[2][0] * h_xxyy
+            + C[0][0] * C[0][1] * C[0][1] * C[2][1] * h_xyyy
+            + C[0][0] * C[0][1] * C[0][1] * C[2][2] * h_xyyz
+            + C[0][0] * C[0][1] * C[0][2] * C[2][0] * h_xxyz
+            + C[0][0] * C[0][1] * C[0][2] * C[2][1] * h_xyyz
+            + C[0][0] * C[0][1] * C[0][2] * C[2][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][0] * C[2][0] * h_xxxz
+            + C[0][0] * C[0][2] * C[0][0] * C[2][1] * h_xxyz
+            + C[0][0] * C[0][2] * C[0][0] * C[2][2] * h_xxzz
+            + C[0][0] * C[0][2] * C[0][1] * C[2][0] * h_xxyz
+            + C[0][0] * C[0][2] * C[0][1] * C[2][1] * h_xyyz
+            + C[0][0] * C[0][2] * C[0][1] * C[2][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][2] * C[2][0] * h_xxzz
+            + C[0][0] * C[0][2] * C[0][2] * C[2][1] * h_xyzz
+            + C[0][0] * C[0][2] * C[0][2] * C[2][2] * h_xzzz
+            + C[0][1] * C[0][0] * C[0][0] * C[2][0] * h_xxxy
+            + C[0][1] * C[0][0] * C[0][0] * C[2][1] * h_xxyy
+            + C[0][1] * C[0][0] * C[0][0] * C[2][2] * h_xxyz
+            + C[0][1] * C[0][0] * C[0][1] * C[2][0] * h_xxyy
+            + C[0][1] * C[0][0] * C[0][1] * C[2][1] * h_xyyy
+            + C[0][1] * C[0][0] * C[0][1] * C[2][2] * h_xyyz
+            + C[0][1] * C[0][0] * C[0][2] * C[2][0] * h_xxyz
+            + C[0][1] * C[0][0] * C[0][2] * C[2][1] * h_xyyz
+            + C[0][1] * C[0][0] * C[0][2] * C[2][2] * h_xyzz
+            + C[0][1] * C[0][1] * C[0][0] * C[2][0] * h_xxyy
+            + C[0][1] * C[0][1] * C[0][0] * C[2][1] * h_xyyy
+            + C[0][1] * C[0][1] * C[0][0] * C[2][2] * h_xyyz
+            + C[0][1] * C[0][1] * C[0][1] * C[2][0] * h_xyyy
+            + C[0][1] * C[0][1] * C[0][1] * C[2][1] * h_yyyy
+            + C[0][1] * C[0][1] * C[0][1] * C[2][2] * h_yyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[2][0] * h_xyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[2][1] * h_yyyz
+            + C[0][1] * C[0][1] * C[0][2] * C[2][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][0] * C[2][0] * h_xxyz
+            + C[0][1] * C[0][2] * C[0][0] * C[2][1] * h_xyyz
+            + C[0][1] * C[0][2] * C[0][0] * C[2][2] * h_xyzz
+            + C[0][1] * C[0][2] * C[0][1] * C[2][0] * h_xyyz
+            + C[0][1] * C[0][2] * C[0][1] * C[2][1] * h_yyyz
+            + C[0][1] * C[0][2] * C[0][1] * C[2][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[2][0] * h_xyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[2][1] * h_yyzz
+            + C[0][1] * C[0][2] * C[0][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][0] * C[0][0] * C[2][0] * h_xxxz
+            + C[0][2] * C[0][0] * C[0][0] * C[2][1] * h_xxyz
+            + C[0][2] * C[0][0] * C[0][0] * C[2][2] * h_xxzz
+            + C[0][2] * C[0][0] * C[0][1] * C[2][0] * h_xxyz
+            + C[0][2] * C[0][0] * C[0][1] * C[2][1] * h_xyyz
+            + C[0][2] * C[0][0] * C[0][1] * C[2][2] * h_xyzz
+            + C[0][2] * C[0][0] * C[0][2] * C[2][0] * h_xxzz
+            + C[0][2] * C[0][0] * C[0][2] * C[2][1] * h_xyzz
+            + C[0][2] * C[0][0] * C[0][2] * C[2][2] * h_xzzz
+            + C[0][2] * C[0][1] * C[0][0] * C[2][0] * h_xxyz
+            + C[0][2] * C[0][1] * C[0][0] * C[2][1] * h_xyyz
+            + C[0][2] * C[0][1] * C[0][0] * C[2][2] * h_xyzz
+            + C[0][2] * C[0][1] * C[0][1] * C[2][0] * h_xyyz
+            + C[0][2] * C[0][1] * C[0][1] * C[2][1] * h_yyyz
+            + C[0][2] * C[0][1] * C[0][1] * C[2][2] * h_yyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[2][0] * h_xyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[2][1] * h_yyzz
+            + C[0][2] * C[0][1] * C[0][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][0] * C[2][0] * h_xxzz
+            + C[0][2] * C[0][2] * C[0][0] * C[2][1] * h_xyzz
+            + C[0][2] * C[0][2] * C[0][0] * C[2][2] * h_xzzz
+            + C[0][2] * C[0][2] * C[0][1] * C[2][0] * h_xyzz
+            + C[0][2] * C[0][2] * C[0][1] * C[2][1] * h_yyzz
+            + C[0][2] * C[0][2] * C[0][1] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[2][0] * h_xzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[2][1] * h_yzzz
+            + C[0][2] * C[0][2] * C[0][2] * C[2][2] * h_zzzz
+        )
+        H_xxyy = (
+            C[0][0] * C[0][0] * C[1][0] * C[1][0] * h_xxxx
+            + C[0][0] * C[0][0] * C[1][0] * C[1][1] * h_xxxy
+            + C[0][0] * C[0][0] * C[1][0] * C[1][2] * h_xxxz
+            + C[0][0] * C[0][0] * C[1][1] * C[1][0] * h_xxxy
+            + C[0][0] * C[0][0] * C[1][1] * C[1][1] * h_xxyy
+            + C[0][0] * C[0][0] * C[1][1] * C[1][2] * h_xxyz
+            + C[0][0] * C[0][0] * C[1][2] * C[1][0] * h_xxxz
+            + C[0][0] * C[0][0] * C[1][2] * C[1][1] * h_xxyz
+            + C[0][0] * C[0][0] * C[1][2] * C[1][2] * h_xxzz
+            + C[0][0] * C[0][1] * C[1][0] * C[1][0] * h_xxxy
+            + C[0][0] * C[0][1] * C[1][0] * C[1][1] * h_xxyy
+            + C[0][0] * C[0][1] * C[1][0] * C[1][2] * h_xxyz
+            + C[0][0] * C[0][1] * C[1][1] * C[1][0] * h_xxyy
+            + C[0][0] * C[0][1] * C[1][1] * C[1][1] * h_xyyy
+            + C[0][0] * C[0][1] * C[1][1] * C[1][2] * h_xyyz
+            + C[0][0] * C[0][1] * C[1][2] * C[1][0] * h_xxyz
+            + C[0][0] * C[0][1] * C[1][2] * C[1][1] * h_xyyz
+            + C[0][0] * C[0][1] * C[1][2] * C[1][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[1][0] * C[1][0] * h_xxxz
+            + C[0][0] * C[0][2] * C[1][0] * C[1][1] * h_xxyz
+            + C[0][0] * C[0][2] * C[1][0] * C[1][2] * h_xxzz
+            + C[0][0] * C[0][2] * C[1][1] * C[1][0] * h_xxyz
+            + C[0][0] * C[0][2] * C[1][1] * C[1][1] * h_xyyz
+            + C[0][0] * C[0][2] * C[1][1] * C[1][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[1][2] * C[1][0] * h_xxzz
+            + C[0][0] * C[0][2] * C[1][2] * C[1][1] * h_xyzz
+            + C[0][0] * C[0][2] * C[1][2] * C[1][2] * h_xzzz
+            + C[0][1] * C[0][0] * C[1][0] * C[1][0] * h_xxxy
+            + C[0][1] * C[0][0] * C[1][0] * C[1][1] * h_xxyy
+            + C[0][1] * C[0][0] * C[1][0] * C[1][2] * h_xxyz
+            + C[0][1] * C[0][0] * C[1][1] * C[1][0] * h_xxyy
+            + C[0][1] * C[0][0] * C[1][1] * C[1][1] * h_xyyy
+            + C[0][1] * C[0][0] * C[1][1] * C[1][2] * h_xyyz
+            + C[0][1] * C[0][0] * C[1][2] * C[1][0] * h_xxyz
+            + C[0][1] * C[0][0] * C[1][2] * C[1][1] * h_xyyz
+            + C[0][1] * C[0][0] * C[1][2] * C[1][2] * h_xyzz
+            + C[0][1] * C[0][1] * C[1][0] * C[1][0] * h_xxyy
+            + C[0][1] * C[0][1] * C[1][0] * C[1][1] * h_xyyy
+            + C[0][1] * C[0][1] * C[1][0] * C[1][2] * h_xyyz
+            + C[0][1] * C[0][1] * C[1][1] * C[1][0] * h_xyyy
+            + C[0][1] * C[0][1] * C[1][1] * C[1][1] * h_yyyy
+            + C[0][1] * C[0][1] * C[1][1] * C[1][2] * h_yyyz
+            + C[0][1] * C[0][1] * C[1][2] * C[1][0] * h_xyyz
+            + C[0][1] * C[0][1] * C[1][2] * C[1][1] * h_yyyz
+            + C[0][1] * C[0][1] * C[1][2] * C[1][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[1][0] * C[1][0] * h_xxyz
+            + C[0][1] * C[0][2] * C[1][0] * C[1][1] * h_xyyz
+            + C[0][1] * C[0][2] * C[1][0] * C[1][2] * h_xyzz
+            + C[0][1] * C[0][2] * C[1][1] * C[1][0] * h_xyyz
+            + C[0][1] * C[0][2] * C[1][1] * C[1][1] * h_yyyz
+            + C[0][1] * C[0][2] * C[1][1] * C[1][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[1][2] * C[1][0] * h_xyzz
+            + C[0][1] * C[0][2] * C[1][2] * C[1][1] * h_yyzz
+            + C[0][1] * C[0][2] * C[1][2] * C[1][2] * h_yzzz
+            + C[0][2] * C[0][0] * C[1][0] * C[1][0] * h_xxxz
+            + C[0][2] * C[0][0] * C[1][0] * C[1][1] * h_xxyz
+            + C[0][2] * C[0][0] * C[1][0] * C[1][2] * h_xxzz
+            + C[0][2] * C[0][0] * C[1][1] * C[1][0] * h_xxyz
+            + C[0][2] * C[0][0] * C[1][1] * C[1][1] * h_xyyz
+            + C[0][2] * C[0][0] * C[1][1] * C[1][2] * h_xyzz
+            + C[0][2] * C[0][0] * C[1][2] * C[1][0] * h_xxzz
+            + C[0][2] * C[0][0] * C[1][2] * C[1][1] * h_xyzz
+            + C[0][2] * C[0][0] * C[1][2] * C[1][2] * h_xzzz
+            + C[0][2] * C[0][1] * C[1][0] * C[1][0] * h_xxyz
+            + C[0][2] * C[0][1] * C[1][0] * C[1][1] * h_xyyz
+            + C[0][2] * C[0][1] * C[1][0] * C[1][2] * h_xyzz
+            + C[0][2] * C[0][1] * C[1][1] * C[1][0] * h_xyyz
+            + C[0][2] * C[0][1] * C[1][1] * C[1][1] * h_yyyz
+            + C[0][2] * C[0][1] * C[1][1] * C[1][2] * h_yyzz
+            + C[0][2] * C[0][1] * C[1][2] * C[1][0] * h_xyzz
+            + C[0][2] * C[0][1] * C[1][2] * C[1][1] * h_yyzz
+            + C[0][2] * C[0][1] * C[1][2] * C[1][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[1][0] * C[1][0] * h_xxzz
+            + C[0][2] * C[0][2] * C[1][0] * C[1][1] * h_xyzz
+            + C[0][2] * C[0][2] * C[1][0] * C[1][2] * h_xzzz
+            + C[0][2] * C[0][2] * C[1][1] * C[1][0] * h_xyzz
+            + C[0][2] * C[0][2] * C[1][1] * C[1][1] * h_yyzz
+            + C[0][2] * C[0][2] * C[1][1] * C[1][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[1][2] * C[1][0] * h_xzzz
+            + C[0][2] * C[0][2] * C[1][2] * C[1][1] * h_yzzz
+            + C[0][2] * C[0][2] * C[1][2] * C[1][2] * h_zzzz
+        )
+        H_xxyz = (
+            C[0][0] * C[0][0] * C[1][0] * C[2][0] * h_xxxx
+            + C[0][0] * C[0][0] * C[1][0] * C[2][1] * h_xxxy
+            + C[0][0] * C[0][0] * C[1][0] * C[2][2] * h_xxxz
+            + C[0][0] * C[0][0] * C[1][1] * C[2][0] * h_xxxy
+            + C[0][0] * C[0][0] * C[1][1] * C[2][1] * h_xxyy
+            + C[0][0] * C[0][0] * C[1][1] * C[2][2] * h_xxyz
+            + C[0][0] * C[0][0] * C[1][2] * C[2][0] * h_xxxz
+            + C[0][0] * C[0][0] * C[1][2] * C[2][1] * h_xxyz
+            + C[0][0] * C[0][0] * C[1][2] * C[2][2] * h_xxzz
+            + C[0][0] * C[0][1] * C[1][0] * C[2][0] * h_xxxy
+            + C[0][0] * C[0][1] * C[1][0] * C[2][1] * h_xxyy
+            + C[0][0] * C[0][1] * C[1][0] * C[2][2] * h_xxyz
+            + C[0][0] * C[0][1] * C[1][1] * C[2][0] * h_xxyy
+            + C[0][0] * C[0][1] * C[1][1] * C[2][1] * h_xyyy
+            + C[0][0] * C[0][1] * C[1][1] * C[2][2] * h_xyyz
+            + C[0][0] * C[0][1] * C[1][2] * C[2][0] * h_xxyz
+            + C[0][0] * C[0][1] * C[1][2] * C[2][1] * h_xyyz
+            + C[0][0] * C[0][1] * C[1][2] * C[2][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[1][0] * C[2][0] * h_xxxz
+            + C[0][0] * C[0][2] * C[1][0] * C[2][1] * h_xxyz
+            + C[0][0] * C[0][2] * C[1][0] * C[2][2] * h_xxzz
+            + C[0][0] * C[0][2] * C[1][1] * C[2][0] * h_xxyz
+            + C[0][0] * C[0][2] * C[1][1] * C[2][1] * h_xyyz
+            + C[0][0] * C[0][2] * C[1][1] * C[2][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[1][2] * C[2][0] * h_xxzz
+            + C[0][0] * C[0][2] * C[1][2] * C[2][1] * h_xyzz
+            + C[0][0] * C[0][2] * C[1][2] * C[2][2] * h_xzzz
+            + C[0][1] * C[0][0] * C[1][0] * C[2][0] * h_xxxy
+            + C[0][1] * C[0][0] * C[1][0] * C[2][1] * h_xxyy
+            + C[0][1] * C[0][0] * C[1][0] * C[2][2] * h_xxyz
+            + C[0][1] * C[0][0] * C[1][1] * C[2][0] * h_xxyy
+            + C[0][1] * C[0][0] * C[1][1] * C[2][1] * h_xyyy
+            + C[0][1] * C[0][0] * C[1][1] * C[2][2] * h_xyyz
+            + C[0][1] * C[0][0] * C[1][2] * C[2][0] * h_xxyz
+            + C[0][1] * C[0][0] * C[1][2] * C[2][1] * h_xyyz
+            + C[0][1] * C[0][0] * C[1][2] * C[2][2] * h_xyzz
+            + C[0][1] * C[0][1] * C[1][0] * C[2][0] * h_xxyy
+            + C[0][1] * C[0][1] * C[1][0] * C[2][1] * h_xyyy
+            + C[0][1] * C[0][1] * C[1][0] * C[2][2] * h_xyyz
+            + C[0][1] * C[0][1] * C[1][1] * C[2][0] * h_xyyy
+            + C[0][1] * C[0][1] * C[1][1] * C[2][1] * h_yyyy
+            + C[0][1] * C[0][1] * C[1][1] * C[2][2] * h_yyyz
+            + C[0][1] * C[0][1] * C[1][2] * C[2][0] * h_xyyz
+            + C[0][1] * C[0][1] * C[1][2] * C[2][1] * h_yyyz
+            + C[0][1] * C[0][1] * C[1][2] * C[2][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[1][0] * C[2][0] * h_xxyz
+            + C[0][1] * C[0][2] * C[1][0] * C[2][1] * h_xyyz
+            + C[0][1] * C[0][2] * C[1][0] * C[2][2] * h_xyzz
+            + C[0][1] * C[0][2] * C[1][1] * C[2][0] * h_xyyz
+            + C[0][1] * C[0][2] * C[1][1] * C[2][1] * h_yyyz
+            + C[0][1] * C[0][2] * C[1][1] * C[2][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[1][2] * C[2][0] * h_xyzz
+            + C[0][1] * C[0][2] * C[1][2] * C[2][1] * h_yyzz
+            + C[0][1] * C[0][2] * C[1][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][0] * C[1][0] * C[2][0] * h_xxxz
+            + C[0][2] * C[0][0] * C[1][0] * C[2][1] * h_xxyz
+            + C[0][2] * C[0][0] * C[1][0] * C[2][2] * h_xxzz
+            + C[0][2] * C[0][0] * C[1][1] * C[2][0] * h_xxyz
+            + C[0][2] * C[0][0] * C[1][1] * C[2][1] * h_xyyz
+            + C[0][2] * C[0][0] * C[1][1] * C[2][2] * h_xyzz
+            + C[0][2] * C[0][0] * C[1][2] * C[2][0] * h_xxzz
+            + C[0][2] * C[0][0] * C[1][2] * C[2][1] * h_xyzz
+            + C[0][2] * C[0][0] * C[1][2] * C[2][2] * h_xzzz
+            + C[0][2] * C[0][1] * C[1][0] * C[2][0] * h_xxyz
+            + C[0][2] * C[0][1] * C[1][0] * C[2][1] * h_xyyz
+            + C[0][2] * C[0][1] * C[1][0] * C[2][2] * h_xyzz
+            + C[0][2] * C[0][1] * C[1][1] * C[2][0] * h_xyyz
+            + C[0][2] * C[0][1] * C[1][1] * C[2][1] * h_yyyz
+            + C[0][2] * C[0][1] * C[1][1] * C[2][2] * h_yyzz
+            + C[0][2] * C[0][1] * C[1][2] * C[2][0] * h_xyzz
+            + C[0][2] * C[0][1] * C[1][2] * C[2][1] * h_yyzz
+            + C[0][2] * C[0][1] * C[1][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[1][0] * C[2][0] * h_xxzz
+            + C[0][2] * C[0][2] * C[1][0] * C[2][1] * h_xyzz
+            + C[0][2] * C[0][2] * C[1][0] * C[2][2] * h_xzzz
+            + C[0][2] * C[0][2] * C[1][1] * C[2][0] * h_xyzz
+            + C[0][2] * C[0][2] * C[1][1] * C[2][1] * h_yyzz
+            + C[0][2] * C[0][2] * C[1][1] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[1][2] * C[2][0] * h_xzzz
+            + C[0][2] * C[0][2] * C[1][2] * C[2][1] * h_yzzz
+            + C[0][2] * C[0][2] * C[1][2] * C[2][2] * h_zzzz
+        )
+        H_xxzz = (
+            C[0][0] * C[0][0] * C[2][0] * C[2][0] * h_xxxx
+            + C[0][0] * C[0][0] * C[2][0] * C[2][1] * h_xxxy
+            + C[0][0] * C[0][0] * C[2][0] * C[2][2] * h_xxxz
+            + C[0][0] * C[0][0] * C[2][1] * C[2][0] * h_xxxy
+            + C[0][0] * C[0][0] * C[2][1] * C[2][1] * h_xxyy
+            + C[0][0] * C[0][0] * C[2][1] * C[2][2] * h_xxyz
+            + C[0][0] * C[0][0] * C[2][2] * C[2][0] * h_xxxz
+            + C[0][0] * C[0][0] * C[2][2] * C[2][1] * h_xxyz
+            + C[0][0] * C[0][0] * C[2][2] * C[2][2] * h_xxzz
+            + C[0][0] * C[0][1] * C[2][0] * C[2][0] * h_xxxy
+            + C[0][0] * C[0][1] * C[2][0] * C[2][1] * h_xxyy
+            + C[0][0] * C[0][1] * C[2][0] * C[2][2] * h_xxyz
+            + C[0][0] * C[0][1] * C[2][1] * C[2][0] * h_xxyy
+            + C[0][0] * C[0][1] * C[2][1] * C[2][1] * h_xyyy
+            + C[0][0] * C[0][1] * C[2][1] * C[2][2] * h_xyyz
+            + C[0][0] * C[0][1] * C[2][2] * C[2][0] * h_xxyz
+            + C[0][0] * C[0][1] * C[2][2] * C[2][1] * h_xyyz
+            + C[0][0] * C[0][1] * C[2][2] * C[2][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[2][0] * C[2][0] * h_xxxz
+            + C[0][0] * C[0][2] * C[2][0] * C[2][1] * h_xxyz
+            + C[0][0] * C[0][2] * C[2][0] * C[2][2] * h_xxzz
+            + C[0][0] * C[0][2] * C[2][1] * C[2][0] * h_xxyz
+            + C[0][0] * C[0][2] * C[2][1] * C[2][1] * h_xyyz
+            + C[0][0] * C[0][2] * C[2][1] * C[2][2] * h_xyzz
+            + C[0][0] * C[0][2] * C[2][2] * C[2][0] * h_xxzz
+            + C[0][0] * C[0][2] * C[2][2] * C[2][1] * h_xyzz
+            + C[0][0] * C[0][2] * C[2][2] * C[2][2] * h_xzzz
+            + C[0][1] * C[0][0] * C[2][0] * C[2][0] * h_xxxy
+            + C[0][1] * C[0][0] * C[2][0] * C[2][1] * h_xxyy
+            + C[0][1] * C[0][0] * C[2][0] * C[2][2] * h_xxyz
+            + C[0][1] * C[0][0] * C[2][1] * C[2][0] * h_xxyy
+            + C[0][1] * C[0][0] * C[2][1] * C[2][1] * h_xyyy
+            + C[0][1] * C[0][0] * C[2][1] * C[2][2] * h_xyyz
+            + C[0][1] * C[0][0] * C[2][2] * C[2][0] * h_xxyz
+            + C[0][1] * C[0][0] * C[2][2] * C[2][1] * h_xyyz
+            + C[0][1] * C[0][0] * C[2][2] * C[2][2] * h_xyzz
+            + C[0][1] * C[0][1] * C[2][0] * C[2][0] * h_xxyy
+            + C[0][1] * C[0][1] * C[2][0] * C[2][1] * h_xyyy
+            + C[0][1] * C[0][1] * C[2][0] * C[2][2] * h_xyyz
+            + C[0][1] * C[0][1] * C[2][1] * C[2][0] * h_xyyy
+            + C[0][1] * C[0][1] * C[2][1] * C[2][1] * h_yyyy
+            + C[0][1] * C[0][1] * C[2][1] * C[2][2] * h_yyyz
+            + C[0][1] * C[0][1] * C[2][2] * C[2][0] * h_xyyz
+            + C[0][1] * C[0][1] * C[2][2] * C[2][1] * h_yyyz
+            + C[0][1] * C[0][1] * C[2][2] * C[2][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[2][0] * C[2][0] * h_xxyz
+            + C[0][1] * C[0][2] * C[2][0] * C[2][1] * h_xyyz
+            + C[0][1] * C[0][2] * C[2][0] * C[2][2] * h_xyzz
+            + C[0][1] * C[0][2] * C[2][1] * C[2][0] * h_xyyz
+            + C[0][1] * C[0][2] * C[2][1] * C[2][1] * h_yyyz
+            + C[0][1] * C[0][2] * C[2][1] * C[2][2] * h_yyzz
+            + C[0][1] * C[0][2] * C[2][2] * C[2][0] * h_xyzz
+            + C[0][1] * C[0][2] * C[2][2] * C[2][1] * h_yyzz
+            + C[0][1] * C[0][2] * C[2][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][0] * C[2][0] * C[2][0] * h_xxxz
+            + C[0][2] * C[0][0] * C[2][0] * C[2][1] * h_xxyz
+            + C[0][2] * C[0][0] * C[2][0] * C[2][2] * h_xxzz
+            + C[0][2] * C[0][0] * C[2][1] * C[2][0] * h_xxyz
+            + C[0][2] * C[0][0] * C[2][1] * C[2][1] * h_xyyz
+            + C[0][2] * C[0][0] * C[2][1] * C[2][2] * h_xyzz
+            + C[0][2] * C[0][0] * C[2][2] * C[2][0] * h_xxzz
+            + C[0][2] * C[0][0] * C[2][2] * C[2][1] * h_xyzz
+            + C[0][2] * C[0][0] * C[2][2] * C[2][2] * h_xzzz
+            + C[0][2] * C[0][1] * C[2][0] * C[2][0] * h_xxyz
+            + C[0][2] * C[0][1] * C[2][0] * C[2][1] * h_xyyz
+            + C[0][2] * C[0][1] * C[2][0] * C[2][2] * h_xyzz
+            + C[0][2] * C[0][1] * C[2][1] * C[2][0] * h_xyyz
+            + C[0][2] * C[0][1] * C[2][1] * C[2][1] * h_yyyz
+            + C[0][2] * C[0][1] * C[2][1] * C[2][2] * h_yyzz
+            + C[0][2] * C[0][1] * C[2][2] * C[2][0] * h_xyzz
+            + C[0][2] * C[0][1] * C[2][2] * C[2][1] * h_yyzz
+            + C[0][2] * C[0][1] * C[2][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[2][0] * C[2][0] * h_xxzz
+            + C[0][2] * C[0][2] * C[2][0] * C[2][1] * h_xyzz
+            + C[0][2] * C[0][2] * C[2][0] * C[2][2] * h_xzzz
+            + C[0][2] * C[0][2] * C[2][1] * C[2][0] * h_xyzz
+            + C[0][2] * C[0][2] * C[2][1] * C[2][1] * h_yyzz
+            + C[0][2] * C[0][2] * C[2][1] * C[2][2] * h_yzzz
+            + C[0][2] * C[0][2] * C[2][2] * C[2][0] * h_xzzz
+            + C[0][2] * C[0][2] * C[2][2] * C[2][1] * h_yzzz
+            + C[0][2] * C[0][2] * C[2][2] * C[2][2] * h_zzzz
+        )
+        H_xyyy = (
+            C[0][0] * C[1][0] * C[1][0] * C[1][0] * h_xxxx
+            + C[0][0] * C[1][0] * C[1][0] * C[1][1] * h_xxxy
+            + C[0][0] * C[1][0] * C[1][0] * C[1][2] * h_xxxz
+            + C[0][0] * C[1][0] * C[1][1] * C[1][0] * h_xxxy
+            + C[0][0] * C[1][0] * C[1][1] * C[1][1] * h_xxyy
+            + C[0][0] * C[1][0] * C[1][1] * C[1][2] * h_xxyz
+            + C[0][0] * C[1][0] * C[1][2] * C[1][0] * h_xxxz
+            + C[0][0] * C[1][0] * C[1][2] * C[1][1] * h_xxyz
+            + C[0][0] * C[1][0] * C[1][2] * C[1][2] * h_xxzz
+            + C[0][0] * C[1][1] * C[1][0] * C[1][0] * h_xxxy
+            + C[0][0] * C[1][1] * C[1][0] * C[1][1] * h_xxyy
+            + C[0][0] * C[1][1] * C[1][0] * C[1][2] * h_xxyz
+            + C[0][0] * C[1][1] * C[1][1] * C[1][0] * h_xxyy
+            + C[0][0] * C[1][1] * C[1][1] * C[1][1] * h_xyyy
+            + C[0][0] * C[1][1] * C[1][1] * C[1][2] * h_xyyz
+            + C[0][0] * C[1][1] * C[1][2] * C[1][0] * h_xxyz
+            + C[0][0] * C[1][1] * C[1][2] * C[1][1] * h_xyyz
+            + C[0][0] * C[1][1] * C[1][2] * C[1][2] * h_xyzz
+            + C[0][0] * C[1][2] * C[1][0] * C[1][0] * h_xxxz
+            + C[0][0] * C[1][2] * C[1][0] * C[1][1] * h_xxyz
+            + C[0][0] * C[1][2] * C[1][0] * C[1][2] * h_xxzz
+            + C[0][0] * C[1][2] * C[1][1] * C[1][0] * h_xxyz
+            + C[0][0] * C[1][2] * C[1][1] * C[1][1] * h_xyyz
+            + C[0][0] * C[1][2] * C[1][1] * C[1][2] * h_xyzz
+            + C[0][0] * C[1][2] * C[1][2] * C[1][0] * h_xxzz
+            + C[0][0] * C[1][2] * C[1][2] * C[1][1] * h_xyzz
+            + C[0][0] * C[1][2] * C[1][2] * C[1][2] * h_xzzz
+            + C[0][1] * C[1][0] * C[1][0] * C[1][0] * h_xxxy
+            + C[0][1] * C[1][0] * C[1][0] * C[1][1] * h_xxyy
+            + C[0][1] * C[1][0] * C[1][0] * C[1][2] * h_xxyz
+            + C[0][1] * C[1][0] * C[1][1] * C[1][0] * h_xxyy
+            + C[0][1] * C[1][0] * C[1][1] * C[1][1] * h_xyyy
+            + C[0][1] * C[1][0] * C[1][1] * C[1][2] * h_xyyz
+            + C[0][1] * C[1][0] * C[1][2] * C[1][0] * h_xxyz
+            + C[0][1] * C[1][0] * C[1][2] * C[1][1] * h_xyyz
+            + C[0][1] * C[1][0] * C[1][2] * C[1][2] * h_xyzz
+            + C[0][1] * C[1][1] * C[1][0] * C[1][0] * h_xxyy
+            + C[0][1] * C[1][1] * C[1][0] * C[1][1] * h_xyyy
+            + C[0][1] * C[1][1] * C[1][0] * C[1][2] * h_xyyz
+            + C[0][1] * C[1][1] * C[1][1] * C[1][0] * h_xyyy
+            + C[0][1] * C[1][1] * C[1][1] * C[1][1] * h_yyyy
+            + C[0][1] * C[1][1] * C[1][1] * C[1][2] * h_yyyz
+            + C[0][1] * C[1][1] * C[1][2] * C[1][0] * h_xyyz
+            + C[0][1] * C[1][1] * C[1][2] * C[1][1] * h_yyyz
+            + C[0][1] * C[1][1] * C[1][2] * C[1][2] * h_yyzz
+            + C[0][1] * C[1][2] * C[1][0] * C[1][0] * h_xxyz
+            + C[0][1] * C[1][2] * C[1][0] * C[1][1] * h_xyyz
+            + C[0][1] * C[1][2] * C[1][0] * C[1][2] * h_xyzz
+            + C[0][1] * C[1][2] * C[1][1] * C[1][0] * h_xyyz
+            + C[0][1] * C[1][2] * C[1][1] * C[1][1] * h_yyyz
+            + C[0][1] * C[1][2] * C[1][1] * C[1][2] * h_yyzz
+            + C[0][1] * C[1][2] * C[1][2] * C[1][0] * h_xyzz
+            + C[0][1] * C[1][2] * C[1][2] * C[1][1] * h_yyzz
+            + C[0][1] * C[1][2] * C[1][2] * C[1][2] * h_yzzz
+            + C[0][2] * C[1][0] * C[1][0] * C[1][0] * h_xxxz
+            + C[0][2] * C[1][0] * C[1][0] * C[1][1] * h_xxyz
+            + C[0][2] * C[1][0] * C[1][0] * C[1][2] * h_xxzz
+            + C[0][2] * C[1][0] * C[1][1] * C[1][0] * h_xxyz
+            + C[0][2] * C[1][0] * C[1][1] * C[1][1] * h_xyyz
+            + C[0][2] * C[1][0] * C[1][1] * C[1][2] * h_xyzz
+            + C[0][2] * C[1][0] * C[1][2] * C[1][0] * h_xxzz
+            + C[0][2] * C[1][0] * C[1][2] * C[1][1] * h_xyzz
+            + C[0][2] * C[1][0] * C[1][2] * C[1][2] * h_xzzz
+            + C[0][2] * C[1][1] * C[1][0] * C[1][0] * h_xxyz
+            + C[0][2] * C[1][1] * C[1][0] * C[1][1] * h_xyyz
+            + C[0][2] * C[1][1] * C[1][0] * C[1][2] * h_xyzz
+            + C[0][2] * C[1][1] * C[1][1] * C[1][0] * h_xyyz
+            + C[0][2] * C[1][1] * C[1][1] * C[1][1] * h_yyyz
+            + C[0][2] * C[1][1] * C[1][1] * C[1][2] * h_yyzz
+            + C[0][2] * C[1][1] * C[1][2] * C[1][0] * h_xyzz
+            + C[0][2] * C[1][1] * C[1][2] * C[1][1] * h_yyzz
+            + C[0][2] * C[1][1] * C[1][2] * C[1][2] * h_yzzz
+            + C[0][2] * C[1][2] * C[1][0] * C[1][0] * h_xxzz
+            + C[0][2] * C[1][2] * C[1][0] * C[1][1] * h_xyzz
+            + C[0][2] * C[1][2] * C[1][0] * C[1][2] * h_xzzz
+            + C[0][2] * C[1][2] * C[1][1] * C[1][0] * h_xyzz
+            + C[0][2] * C[1][2] * C[1][1] * C[1][1] * h_yyzz
+            + C[0][2] * C[1][2] * C[1][1] * C[1][2] * h_yzzz
+            + C[0][2] * C[1][2] * C[1][2] * C[1][0] * h_xzzz
+            + C[0][2] * C[1][2] * C[1][2] * C[1][1] * h_yzzz
+            + C[0][2] * C[1][2] * C[1][2] * C[1][2] * h_zzzz
+        )
+        H_xyyz = (
+            C[0][0] * C[1][0] * C[1][0] * C[2][0] * h_xxxx
+            + C[0][0] * C[1][0] * C[1][0] * C[2][1] * h_xxxy
+            + C[0][0] * C[1][0] * C[1][0] * C[2][2] * h_xxxz
+            + C[0][0] * C[1][0] * C[1][1] * C[2][0] * h_xxxy
+            + C[0][0] * C[1][0] * C[1][1] * C[2][1] * h_xxyy
+            + C[0][0] * C[1][0] * C[1][1] * C[2][2] * h_xxyz
+            + C[0][0] * C[1][0] * C[1][2] * C[2][0] * h_xxxz
+            + C[0][0] * C[1][0] * C[1][2] * C[2][1] * h_xxyz
+            + C[0][0] * C[1][0] * C[1][2] * C[2][2] * h_xxzz
+            + C[0][0] * C[1][1] * C[1][0] * C[2][0] * h_xxxy
+            + C[0][0] * C[1][1] * C[1][0] * C[2][1] * h_xxyy
+            + C[0][0] * C[1][1] * C[1][0] * C[2][2] * h_xxyz
+            + C[0][0] * C[1][1] * C[1][1] * C[2][0] * h_xxyy
+            + C[0][0] * C[1][1] * C[1][1] * C[2][1] * h_xyyy
+            + C[0][0] * C[1][1] * C[1][1] * C[2][2] * h_xyyz
+            + C[0][0] * C[1][1] * C[1][2] * C[2][0] * h_xxyz
+            + C[0][0] * C[1][1] * C[1][2] * C[2][1] * h_xyyz
+            + C[0][0] * C[1][1] * C[1][2] * C[2][2] * h_xyzz
+            + C[0][0] * C[1][2] * C[1][0] * C[2][0] * h_xxxz
+            + C[0][0] * C[1][2] * C[1][0] * C[2][1] * h_xxyz
+            + C[0][0] * C[1][2] * C[1][0] * C[2][2] * h_xxzz
+            + C[0][0] * C[1][2] * C[1][1] * C[2][0] * h_xxyz
+            + C[0][0] * C[1][2] * C[1][1] * C[2][1] * h_xyyz
+            + C[0][0] * C[1][2] * C[1][1] * C[2][2] * h_xyzz
+            + C[0][0] * C[1][2] * C[1][2] * C[2][0] * h_xxzz
+            + C[0][0] * C[1][2] * C[1][2] * C[2][1] * h_xyzz
+            + C[0][0] * C[1][2] * C[1][2] * C[2][2] * h_xzzz
+            + C[0][1] * C[1][0] * C[1][0] * C[2][0] * h_xxxy
+            + C[0][1] * C[1][0] * C[1][0] * C[2][1] * h_xxyy
+            + C[0][1] * C[1][0] * C[1][0] * C[2][2] * h_xxyz
+            + C[0][1] * C[1][0] * C[1][1] * C[2][0] * h_xxyy
+            + C[0][1] * C[1][0] * C[1][1] * C[2][1] * h_xyyy
+            + C[0][1] * C[1][0] * C[1][1] * C[2][2] * h_xyyz
+            + C[0][1] * C[1][0] * C[1][2] * C[2][0] * h_xxyz
+            + C[0][1] * C[1][0] * C[1][2] * C[2][1] * h_xyyz
+            + C[0][1] * C[1][0] * C[1][2] * C[2][2] * h_xyzz
+            + C[0][1] * C[1][1] * C[1][0] * C[2][0] * h_xxyy
+            + C[0][1] * C[1][1] * C[1][0] * C[2][1] * h_xyyy
+            + C[0][1] * C[1][1] * C[1][0] * C[2][2] * h_xyyz
+            + C[0][1] * C[1][1] * C[1][1] * C[2][0] * h_xyyy
+            + C[0][1] * C[1][1] * C[1][1] * C[2][1] * h_yyyy
+            + C[0][1] * C[1][1] * C[1][1] * C[2][2] * h_yyyz
+            + C[0][1] * C[1][1] * C[1][2] * C[2][0] * h_xyyz
+            + C[0][1] * C[1][1] * C[1][2] * C[2][1] * h_yyyz
+            + C[0][1] * C[1][1] * C[1][2] * C[2][2] * h_yyzz
+            + C[0][1] * C[1][2] * C[1][0] * C[2][0] * h_xxyz
+            + C[0][1] * C[1][2] * C[1][0] * C[2][1] * h_xyyz
+            + C[0][1] * C[1][2] * C[1][0] * C[2][2] * h_xyzz
+            + C[0][1] * C[1][2] * C[1][1] * C[2][0] * h_xyyz
+            + C[0][1] * C[1][2] * C[1][1] * C[2][1] * h_yyyz
+            + C[0][1] * C[1][2] * C[1][1] * C[2][2] * h_yyzz
+            + C[0][1] * C[1][2] * C[1][2] * C[2][0] * h_xyzz
+            + C[0][1] * C[1][2] * C[1][2] * C[2][1] * h_yyzz
+            + C[0][1] * C[1][2] * C[1][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[1][0] * C[1][0] * C[2][0] * h_xxxz
+            + C[0][2] * C[1][0] * C[1][0] * C[2][1] * h_xxyz
+            + C[0][2] * C[1][0] * C[1][0] * C[2][2] * h_xxzz
+            + C[0][2] * C[1][0] * C[1][1] * C[2][0] * h_xxyz
+            + C[0][2] * C[1][0] * C[1][1] * C[2][1] * h_xyyz
+            + C[0][2] * C[1][0] * C[1][1] * C[2][2] * h_xyzz
+            + C[0][2] * C[1][0] * C[1][2] * C[2][0] * h_xxzz
+            + C[0][2] * C[1][0] * C[1][2] * C[2][1] * h_xyzz
+            + C[0][2] * C[1][0] * C[1][2] * C[2][2] * h_xzzz
+            + C[0][2] * C[1][1] * C[1][0] * C[2][0] * h_xxyz
+            + C[0][2] * C[1][1] * C[1][0] * C[2][1] * h_xyyz
+            + C[0][2] * C[1][1] * C[1][0] * C[2][2] * h_xyzz
+            + C[0][2] * C[1][1] * C[1][1] * C[2][0] * h_xyyz
+            + C[0][2] * C[1][1] * C[1][1] * C[2][1] * h_yyyz
+            + C[0][2] * C[1][1] * C[1][1] * C[2][2] * h_yyzz
+            + C[0][2] * C[1][1] * C[1][2] * C[2][0] * h_xyzz
+            + C[0][2] * C[1][1] * C[1][2] * C[2][1] * h_yyzz
+            + C[0][2] * C[1][1] * C[1][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[1][2] * C[1][0] * C[2][0] * h_xxzz
+            + C[0][2] * C[1][2] * C[1][0] * C[2][1] * h_xyzz
+            + C[0][2] * C[1][2] * C[1][0] * C[2][2] * h_xzzz
+            + C[0][2] * C[1][2] * C[1][1] * C[2][0] * h_xyzz
+            + C[0][2] * C[1][2] * C[1][1] * C[2][1] * h_yyzz
+            + C[0][2] * C[1][2] * C[1][1] * C[2][2] * h_yzzz
+            + C[0][2] * C[1][2] * C[1][2] * C[2][0] * h_xzzz
+            + C[0][2] * C[1][2] * C[1][2] * C[2][1] * h_yzzz
+            + C[0][2] * C[1][2] * C[1][2] * C[2][2] * h_zzzz
+        )
+        H_xyzz = (
+            C[0][0] * C[1][0] * C[2][0] * C[2][0] * h_xxxx
+            + C[0][0] * C[1][0] * C[2][0] * C[2][1] * h_xxxy
+            + C[0][0] * C[1][0] * C[2][0] * C[2][2] * h_xxxz
+            + C[0][0] * C[1][0] * C[2][1] * C[2][0] * h_xxxy
+            + C[0][0] * C[1][0] * C[2][1] * C[2][1] * h_xxyy
+            + C[0][0] * C[1][0] * C[2][1] * C[2][2] * h_xxyz
+            + C[0][0] * C[1][0] * C[2][2] * C[2][0] * h_xxxz
+            + C[0][0] * C[1][0] * C[2][2] * C[2][1] * h_xxyz
+            + C[0][0] * C[1][0] * C[2][2] * C[2][2] * h_xxzz
+            + C[0][0] * C[1][1] * C[2][0] * C[2][0] * h_xxxy
+            + C[0][0] * C[1][1] * C[2][0] * C[2][1] * h_xxyy
+            + C[0][0] * C[1][1] * C[2][0] * C[2][2] * h_xxyz
+            + C[0][0] * C[1][1] * C[2][1] * C[2][0] * h_xxyy
+            + C[0][0] * C[1][1] * C[2][1] * C[2][1] * h_xyyy
+            + C[0][0] * C[1][1] * C[2][1] * C[2][2] * h_xyyz
+            + C[0][0] * C[1][1] * C[2][2] * C[2][0] * h_xxyz
+            + C[0][0] * C[1][1] * C[2][2] * C[2][1] * h_xyyz
+            + C[0][0] * C[1][1] * C[2][2] * C[2][2] * h_xyzz
+            + C[0][0] * C[1][2] * C[2][0] * C[2][0] * h_xxxz
+            + C[0][0] * C[1][2] * C[2][0] * C[2][1] * h_xxyz
+            + C[0][0] * C[1][2] * C[2][0] * C[2][2] * h_xxzz
+            + C[0][0] * C[1][2] * C[2][1] * C[2][0] * h_xxyz
+            + C[0][0] * C[1][2] * C[2][1] * C[2][1] * h_xyyz
+            + C[0][0] * C[1][2] * C[2][1] * C[2][2] * h_xyzz
+            + C[0][0] * C[1][2] * C[2][2] * C[2][0] * h_xxzz
+            + C[0][0] * C[1][2] * C[2][2] * C[2][1] * h_xyzz
+            + C[0][0] * C[1][2] * C[2][2] * C[2][2] * h_xzzz
+            + C[0][1] * C[1][0] * C[2][0] * C[2][0] * h_xxxy
+            + C[0][1] * C[1][0] * C[2][0] * C[2][1] * h_xxyy
+            + C[0][1] * C[1][0] * C[2][0] * C[2][2] * h_xxyz
+            + C[0][1] * C[1][0] * C[2][1] * C[2][0] * h_xxyy
+            + C[0][1] * C[1][0] * C[2][1] * C[2][1] * h_xyyy
+            + C[0][1] * C[1][0] * C[2][1] * C[2][2] * h_xyyz
+            + C[0][1] * C[1][0] * C[2][2] * C[2][0] * h_xxyz
+            + C[0][1] * C[1][0] * C[2][2] * C[2][1] * h_xyyz
+            + C[0][1] * C[1][0] * C[2][2] * C[2][2] * h_xyzz
+            + C[0][1] * C[1][1] * C[2][0] * C[2][0] * h_xxyy
+            + C[0][1] * C[1][1] * C[2][0] * C[2][1] * h_xyyy
+            + C[0][1] * C[1][1] * C[2][0] * C[2][2] * h_xyyz
+            + C[0][1] * C[1][1] * C[2][1] * C[2][0] * h_xyyy
+            + C[0][1] * C[1][1] * C[2][1] * C[2][1] * h_yyyy
+            + C[0][1] * C[1][1] * C[2][1] * C[2][2] * h_yyyz
+            + C[0][1] * C[1][1] * C[2][2] * C[2][0] * h_xyyz
+            + C[0][1] * C[1][1] * C[2][2] * C[2][1] * h_yyyz
+            + C[0][1] * C[1][1] * C[2][2] * C[2][2] * h_yyzz
+            + C[0][1] * C[1][2] * C[2][0] * C[2][0] * h_xxyz
+            + C[0][1] * C[1][2] * C[2][0] * C[2][1] * h_xyyz
+            + C[0][1] * C[1][2] * C[2][0] * C[2][2] * h_xyzz
+            + C[0][1] * C[1][2] * C[2][1] * C[2][0] * h_xyyz
+            + C[0][1] * C[1][2] * C[2][1] * C[2][1] * h_yyyz
+            + C[0][1] * C[1][2] * C[2][1] * C[2][2] * h_yyzz
+            + C[0][1] * C[1][2] * C[2][2] * C[2][0] * h_xyzz
+            + C[0][1] * C[1][2] * C[2][2] * C[2][1] * h_yyzz
+            + C[0][1] * C[1][2] * C[2][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[1][0] * C[2][0] * C[2][0] * h_xxxz
+            + C[0][2] * C[1][0] * C[2][0] * C[2][1] * h_xxyz
+            + C[0][2] * C[1][0] * C[2][0] * C[2][2] * h_xxzz
+            + C[0][2] * C[1][0] * C[2][1] * C[2][0] * h_xxyz
+            + C[0][2] * C[1][0] * C[2][1] * C[2][1] * h_xyyz
+            + C[0][2] * C[1][0] * C[2][1] * C[2][2] * h_xyzz
+            + C[0][2] * C[1][0] * C[2][2] * C[2][0] * h_xxzz
+            + C[0][2] * C[1][0] * C[2][2] * C[2][1] * h_xyzz
+            + C[0][2] * C[1][0] * C[2][2] * C[2][2] * h_xzzz
+            + C[0][2] * C[1][1] * C[2][0] * C[2][0] * h_xxyz
+            + C[0][2] * C[1][1] * C[2][0] * C[2][1] * h_xyyz
+            + C[0][2] * C[1][1] * C[2][0] * C[2][2] * h_xyzz
+            + C[0][2] * C[1][1] * C[2][1] * C[2][0] * h_xyyz
+            + C[0][2] * C[1][1] * C[2][1] * C[2][1] * h_yyyz
+            + C[0][2] * C[1][1] * C[2][1] * C[2][2] * h_yyzz
+            + C[0][2] * C[1][1] * C[2][2] * C[2][0] * h_xyzz
+            + C[0][2] * C[1][1] * C[2][2] * C[2][1] * h_yyzz
+            + C[0][2] * C[1][1] * C[2][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[1][2] * C[2][0] * C[2][0] * h_xxzz
+            + C[0][2] * C[1][2] * C[2][0] * C[2][1] * h_xyzz
+            + C[0][2] * C[1][2] * C[2][0] * C[2][2] * h_xzzz
+            + C[0][2] * C[1][2] * C[2][1] * C[2][0] * h_xyzz
+            + C[0][2] * C[1][2] * C[2][1] * C[2][1] * h_yyzz
+            + C[0][2] * C[1][2] * C[2][1] * C[2][2] * h_yzzz
+            + C[0][2] * C[1][2] * C[2][2] * C[2][0] * h_xzzz
+            + C[0][2] * C[1][2] * C[2][2] * C[2][1] * h_yzzz
+            + C[0][2] * C[1][2] * C[2][2] * C[2][2] * h_zzzz
+        )
+        H_xzzz = (
+            C[0][0] * C[2][0] * C[2][0] * C[2][0] * h_xxxx
+            + C[0][0] * C[2][0] * C[2][0] * C[2][1] * h_xxxy
+            + C[0][0] * C[2][0] * C[2][0] * C[2][2] * h_xxxz
+            + C[0][0] * C[2][0] * C[2][1] * C[2][0] * h_xxxy
+            + C[0][0] * C[2][0] * C[2][1] * C[2][1] * h_xxyy
+            + C[0][0] * C[2][0] * C[2][1] * C[2][2] * h_xxyz
+            + C[0][0] * C[2][0] * C[2][2] * C[2][0] * h_xxxz
+            + C[0][0] * C[2][0] * C[2][2] * C[2][1] * h_xxyz
+            + C[0][0] * C[2][0] * C[2][2] * C[2][2] * h_xxzz
+            + C[0][0] * C[2][1] * C[2][0] * C[2][0] * h_xxxy
+            + C[0][0] * C[2][1] * C[2][0] * C[2][1] * h_xxyy
+            + C[0][0] * C[2][1] * C[2][0] * C[2][2] * h_xxyz
+            + C[0][0] * C[2][1] * C[2][1] * C[2][0] * h_xxyy
+            + C[0][0] * C[2][1] * C[2][1] * C[2][1] * h_xyyy
+            + C[0][0] * C[2][1] * C[2][1] * C[2][2] * h_xyyz
+            + C[0][0] * C[2][1] * C[2][2] * C[2][0] * h_xxyz
+            + C[0][0] * C[2][1] * C[2][2] * C[2][1] * h_xyyz
+            + C[0][0] * C[2][1] * C[2][2] * C[2][2] * h_xyzz
+            + C[0][0] * C[2][2] * C[2][0] * C[2][0] * h_xxxz
+            + C[0][0] * C[2][2] * C[2][0] * C[2][1] * h_xxyz
+            + C[0][0] * C[2][2] * C[2][0] * C[2][2] * h_xxzz
+            + C[0][0] * C[2][2] * C[2][1] * C[2][0] * h_xxyz
+            + C[0][0] * C[2][2] * C[2][1] * C[2][1] * h_xyyz
+            + C[0][0] * C[2][2] * C[2][1] * C[2][2] * h_xyzz
+            + C[0][0] * C[2][2] * C[2][2] * C[2][0] * h_xxzz
+            + C[0][0] * C[2][2] * C[2][2] * C[2][1] * h_xyzz
+            + C[0][0] * C[2][2] * C[2][2] * C[2][2] * h_xzzz
+            + C[0][1] * C[2][0] * C[2][0] * C[2][0] * h_xxxy
+            + C[0][1] * C[2][0] * C[2][0] * C[2][1] * h_xxyy
+            + C[0][1] * C[2][0] * C[2][0] * C[2][2] * h_xxyz
+            + C[0][1] * C[2][0] * C[2][1] * C[2][0] * h_xxyy
+            + C[0][1] * C[2][0] * C[2][1] * C[2][1] * h_xyyy
+            + C[0][1] * C[2][0] * C[2][1] * C[2][2] * h_xyyz
+            + C[0][1] * C[2][0] * C[2][2] * C[2][0] * h_xxyz
+            + C[0][1] * C[2][0] * C[2][2] * C[2][1] * h_xyyz
+            + C[0][1] * C[2][0] * C[2][2] * C[2][2] * h_xyzz
+            + C[0][1] * C[2][1] * C[2][0] * C[2][0] * h_xxyy
+            + C[0][1] * C[2][1] * C[2][0] * C[2][1] * h_xyyy
+            + C[0][1] * C[2][1] * C[2][0] * C[2][2] * h_xyyz
+            + C[0][1] * C[2][1] * C[2][1] * C[2][0] * h_xyyy
+            + C[0][1] * C[2][1] * C[2][1] * C[2][1] * h_yyyy
+            + C[0][1] * C[2][1] * C[2][1] * C[2][2] * h_yyyz
+            + C[0][1] * C[2][1] * C[2][2] * C[2][0] * h_xyyz
+            + C[0][1] * C[2][1] * C[2][2] * C[2][1] * h_yyyz
+            + C[0][1] * C[2][1] * C[2][2] * C[2][2] * h_yyzz
+            + C[0][1] * C[2][2] * C[2][0] * C[2][0] * h_xxyz
+            + C[0][1] * C[2][2] * C[2][0] * C[2][1] * h_xyyz
+            + C[0][1] * C[2][2] * C[2][0] * C[2][2] * h_xyzz
+            + C[0][1] * C[2][2] * C[2][1] * C[2][0] * h_xyyz
+            + C[0][1] * C[2][2] * C[2][1] * C[2][1] * h_yyyz
+            + C[0][1] * C[2][2] * C[2][1] * C[2][2] * h_yyzz
+            + C[0][1] * C[2][2] * C[2][2] * C[2][0] * h_xyzz
+            + C[0][1] * C[2][2] * C[2][2] * C[2][1] * h_yyzz
+            + C[0][1] * C[2][2] * C[2][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[2][0] * C[2][0] * C[2][0] * h_xxxz
+            + C[0][2] * C[2][0] * C[2][0] * C[2][1] * h_xxyz
+            + C[0][2] * C[2][0] * C[2][0] * C[2][2] * h_xxzz
+            + C[0][2] * C[2][0] * C[2][1] * C[2][0] * h_xxyz
+            + C[0][2] * C[2][0] * C[2][1] * C[2][1] * h_xyyz
+            + C[0][2] * C[2][0] * C[2][1] * C[2][2] * h_xyzz
+            + C[0][2] * C[2][0] * C[2][2] * C[2][0] * h_xxzz
+            + C[0][2] * C[2][0] * C[2][2] * C[2][1] * h_xyzz
+            + C[0][2] * C[2][0] * C[2][2] * C[2][2] * h_xzzz
+            + C[0][2] * C[2][1] * C[2][0] * C[2][0] * h_xxyz
+            + C[0][2] * C[2][1] * C[2][0] * C[2][1] * h_xyyz
+            + C[0][2] * C[2][1] * C[2][0] * C[2][2] * h_xyzz
+            + C[0][2] * C[2][1] * C[2][1] * C[2][0] * h_xyyz
+            + C[0][2] * C[2][1] * C[2][1] * C[2][1] * h_yyyz
+            + C[0][2] * C[2][1] * C[2][1] * C[2][2] * h_yyzz
+            + C[0][2] * C[2][1] * C[2][2] * C[2][0] * h_xyzz
+            + C[0][2] * C[2][1] * C[2][2] * C[2][1] * h_yyzz
+            + C[0][2] * C[2][1] * C[2][2] * C[2][2] * h_yzzz
+            + C[0][2] * C[2][2] * C[2][0] * C[2][0] * h_xxzz
+            + C[0][2] * C[2][2] * C[2][0] * C[2][1] * h_xyzz
+            + C[0][2] * C[2][2] * C[2][0] * C[2][2] * h_xzzz
+            + C[0][2] * C[2][2] * C[2][1] * C[2][0] * h_xyzz
+            + C[0][2] * C[2][2] * C[2][1] * C[2][1] * h_yyzz
+            + C[0][2] * C[2][2] * C[2][1] * C[2][2] * h_yzzz
+            + C[0][2] * C[2][2] * C[2][2] * C[2][0] * h_xzzz
+            + C[0][2] * C[2][2] * C[2][2] * C[2][1] * h_yzzz
+            + C[0][2] * C[2][2] * C[2][2] * C[2][2] * h_zzzz
+        )
+        H_yyyy = (
+            C[1][0] * C[1][0] * C[1][0] * C[1][0] * h_xxxx
+            + C[1][0] * C[1][0] * C[1][0] * C[1][1] * h_xxxy
+            + C[1][0] * C[1][0] * C[1][0] * C[1][2] * h_xxxz
+            + C[1][0] * C[1][0] * C[1][1] * C[1][0] * h_xxxy
+            + C[1][0] * C[1][0] * C[1][1] * C[1][1] * h_xxyy
+            + C[1][0] * C[1][0] * C[1][1] * C[1][2] * h_xxyz
+            + C[1][0] * C[1][0] * C[1][2] * C[1][0] * h_xxxz
+            + C[1][0] * C[1][0] * C[1][2] * C[1][1] * h_xxyz
+            + C[1][0] * C[1][0] * C[1][2] * C[1][2] * h_xxzz
+            + C[1][0] * C[1][1] * C[1][0] * C[1][0] * h_xxxy
+            + C[1][0] * C[1][1] * C[1][0] * C[1][1] * h_xxyy
+            + C[1][0] * C[1][1] * C[1][0] * C[1][2] * h_xxyz
+            + C[1][0] * C[1][1] * C[1][1] * C[1][0] * h_xxyy
+            + C[1][0] * C[1][1] * C[1][1] * C[1][1] * h_xyyy
+            + C[1][0] * C[1][1] * C[1][1] * C[1][2] * h_xyyz
+            + C[1][0] * C[1][1] * C[1][2] * C[1][0] * h_xxyz
+            + C[1][0] * C[1][1] * C[1][2] * C[1][1] * h_xyyz
+            + C[1][0] * C[1][1] * C[1][2] * C[1][2] * h_xyzz
+            + C[1][0] * C[1][2] * C[1][0] * C[1][0] * h_xxxz
+            + C[1][0] * C[1][2] * C[1][0] * C[1][1] * h_xxyz
+            + C[1][0] * C[1][2] * C[1][0] * C[1][2] * h_xxzz
+            + C[1][0] * C[1][2] * C[1][1] * C[1][0] * h_xxyz
+            + C[1][0] * C[1][2] * C[1][1] * C[1][1] * h_xyyz
+            + C[1][0] * C[1][2] * C[1][1] * C[1][2] * h_xyzz
+            + C[1][0] * C[1][2] * C[1][2] * C[1][0] * h_xxzz
+            + C[1][0] * C[1][2] * C[1][2] * C[1][1] * h_xyzz
+            + C[1][0] * C[1][2] * C[1][2] * C[1][2] * h_xzzz
+            + C[1][1] * C[1][0] * C[1][0] * C[1][0] * h_xxxy
+            + C[1][1] * C[1][0] * C[1][0] * C[1][1] * h_xxyy
+            + C[1][1] * C[1][0] * C[1][0] * C[1][2] * h_xxyz
+            + C[1][1] * C[1][0] * C[1][1] * C[1][0] * h_xxyy
+            + C[1][1] * C[1][0] * C[1][1] * C[1][1] * h_xyyy
+            + C[1][1] * C[1][0] * C[1][1] * C[1][2] * h_xyyz
+            + C[1][1] * C[1][0] * C[1][2] * C[1][0] * h_xxyz
+            + C[1][1] * C[1][0] * C[1][2] * C[1][1] * h_xyyz
+            + C[1][1] * C[1][0] * C[1][2] * C[1][2] * h_xyzz
+            + C[1][1] * C[1][1] * C[1][0] * C[1][0] * h_xxyy
+            + C[1][1] * C[1][1] * C[1][0] * C[1][1] * h_xyyy
+            + C[1][1] * C[1][1] * C[1][0] * C[1][2] * h_xyyz
+            + C[1][1] * C[1][1] * C[1][1] * C[1][0] * h_xyyy
+            + C[1][1] * C[1][1] * C[1][1] * C[1][1] * h_yyyy
+            + C[1][1] * C[1][1] * C[1][1] * C[1][2] * h_yyyz
+            + C[1][1] * C[1][1] * C[1][2] * C[1][0] * h_xyyz
+            + C[1][1] * C[1][1] * C[1][2] * C[1][1] * h_yyyz
+            + C[1][1] * C[1][1] * C[1][2] * C[1][2] * h_yyzz
+            + C[1][1] * C[1][2] * C[1][0] * C[1][0] * h_xxyz
+            + C[1][1] * C[1][2] * C[1][0] * C[1][1] * h_xyyz
+            + C[1][1] * C[1][2] * C[1][0] * C[1][2] * h_xyzz
+            + C[1][1] * C[1][2] * C[1][1] * C[1][0] * h_xyyz
+            + C[1][1] * C[1][2] * C[1][1] * C[1][1] * h_yyyz
+            + C[1][1] * C[1][2] * C[1][1] * C[1][2] * h_yyzz
+            + C[1][1] * C[1][2] * C[1][2] * C[1][0] * h_xyzz
+            + C[1][1] * C[1][2] * C[1][2] * C[1][1] * h_yyzz
+            + C[1][1] * C[1][2] * C[1][2] * C[1][2] * h_yzzz
+            + C[1][2] * C[1][0] * C[1][0] * C[1][0] * h_xxxz
+            + C[1][2] * C[1][0] * C[1][0] * C[1][1] * h_xxyz
+            + C[1][2] * C[1][0] * C[1][0] * C[1][2] * h_xxzz
+            + C[1][2] * C[1][0] * C[1][1] * C[1][0] * h_xxyz
+            + C[1][2] * C[1][0] * C[1][1] * C[1][1] * h_xyyz
+            + C[1][2] * C[1][0] * C[1][1] * C[1][2] * h_xyzz
+            + C[1][2] * C[1][0] * C[1][2] * C[1][0] * h_xxzz
+            + C[1][2] * C[1][0] * C[1][2] * C[1][1] * h_xyzz
+            + C[1][2] * C[1][0] * C[1][2] * C[1][2] * h_xzzz
+            + C[1][2] * C[1][1] * C[1][0] * C[1][0] * h_xxyz
+            + C[1][2] * C[1][1] * C[1][0] * C[1][1] * h_xyyz
+            + C[1][2] * C[1][1] * C[1][0] * C[1][2] * h_xyzz
+            + C[1][2] * C[1][1] * C[1][1] * C[1][0] * h_xyyz
+            + C[1][2] * C[1][1] * C[1][1] * C[1][1] * h_yyyz
+            + C[1][2] * C[1][1] * C[1][1] * C[1][2] * h_yyzz
+            + C[1][2] * C[1][1] * C[1][2] * C[1][0] * h_xyzz
+            + C[1][2] * C[1][1] * C[1][2] * C[1][1] * h_yyzz
+            + C[1][2] * C[1][1] * C[1][2] * C[1][2] * h_yzzz
+            + C[1][2] * C[1][2] * C[1][0] * C[1][0] * h_xxzz
+            + C[1][2] * C[1][2] * C[1][0] * C[1][1] * h_xyzz
+            + C[1][2] * C[1][2] * C[1][0] * C[1][2] * h_xzzz
+            + C[1][2] * C[1][2] * C[1][1] * C[1][0] * h_xyzz
+            + C[1][2] * C[1][2] * C[1][1] * C[1][1] * h_yyzz
+            + C[1][2] * C[1][2] * C[1][1] * C[1][2] * h_yzzz
+            + C[1][2] * C[1][2] * C[1][2] * C[1][0] * h_xzzz
+            + C[1][2] * C[1][2] * C[1][2] * C[1][1] * h_yzzz
+            + C[1][2] * C[1][2] * C[1][2] * C[1][2] * h_zzzz
+        )
+        H_yyyz = (
+            C[1][0] * C[1][0] * C[1][0] * C[2][0] * h_xxxx
+            + C[1][0] * C[1][0] * C[1][0] * C[2][1] * h_xxxy
+            + C[1][0] * C[1][0] * C[1][0] * C[2][2] * h_xxxz
+            + C[1][0] * C[1][0] * C[1][1] * C[2][0] * h_xxxy
+            + C[1][0] * C[1][0] * C[1][1] * C[2][1] * h_xxyy
+            + C[1][0] * C[1][0] * C[1][1] * C[2][2] * h_xxyz
+            + C[1][0] * C[1][0] * C[1][2] * C[2][0] * h_xxxz
+            + C[1][0] * C[1][0] * C[1][2] * C[2][1] * h_xxyz
+            + C[1][0] * C[1][0] * C[1][2] * C[2][2] * h_xxzz
+            + C[1][0] * C[1][1] * C[1][0] * C[2][0] * h_xxxy
+            + C[1][0] * C[1][1] * C[1][0] * C[2][1] * h_xxyy
+            + C[1][0] * C[1][1] * C[1][0] * C[2][2] * h_xxyz
+            + C[1][0] * C[1][1] * C[1][1] * C[2][0] * h_xxyy
+            + C[1][0] * C[1][1] * C[1][1] * C[2][1] * h_xyyy
+            + C[1][0] * C[1][1] * C[1][1] * C[2][2] * h_xyyz
+            + C[1][0] * C[1][1] * C[1][2] * C[2][0] * h_xxyz
+            + C[1][0] * C[1][1] * C[1][2] * C[2][1] * h_xyyz
+            + C[1][0] * C[1][1] * C[1][2] * C[2][2] * h_xyzz
+            + C[1][0] * C[1][2] * C[1][0] * C[2][0] * h_xxxz
+            + C[1][0] * C[1][2] * C[1][0] * C[2][1] * h_xxyz
+            + C[1][0] * C[1][2] * C[1][0] * C[2][2] * h_xxzz
+            + C[1][0] * C[1][2] * C[1][1] * C[2][0] * h_xxyz
+            + C[1][0] * C[1][2] * C[1][1] * C[2][1] * h_xyyz
+            + C[1][0] * C[1][2] * C[1][1] * C[2][2] * h_xyzz
+            + C[1][0] * C[1][2] * C[1][2] * C[2][0] * h_xxzz
+            + C[1][0] * C[1][2] * C[1][2] * C[2][1] * h_xyzz
+            + C[1][0] * C[1][2] * C[1][2] * C[2][2] * h_xzzz
+            + C[1][1] * C[1][0] * C[1][0] * C[2][0] * h_xxxy
+            + C[1][1] * C[1][0] * C[1][0] * C[2][1] * h_xxyy
+            + C[1][1] * C[1][0] * C[1][0] * C[2][2] * h_xxyz
+            + C[1][1] * C[1][0] * C[1][1] * C[2][0] * h_xxyy
+            + C[1][1] * C[1][0] * C[1][1] * C[2][1] * h_xyyy
+            + C[1][1] * C[1][0] * C[1][1] * C[2][2] * h_xyyz
+            + C[1][1] * C[1][0] * C[1][2] * C[2][0] * h_xxyz
+            + C[1][1] * C[1][0] * C[1][2] * C[2][1] * h_xyyz
+            + C[1][1] * C[1][0] * C[1][2] * C[2][2] * h_xyzz
+            + C[1][1] * C[1][1] * C[1][0] * C[2][0] * h_xxyy
+            + C[1][1] * C[1][1] * C[1][0] * C[2][1] * h_xyyy
+            + C[1][1] * C[1][1] * C[1][0] * C[2][2] * h_xyyz
+            + C[1][1] * C[1][1] * C[1][1] * C[2][0] * h_xyyy
+            + C[1][1] * C[1][1] * C[1][1] * C[2][1] * h_yyyy
+            + C[1][1] * C[1][1] * C[1][1] * C[2][2] * h_yyyz
+            + C[1][1] * C[1][1] * C[1][2] * C[2][0] * h_xyyz
+            + C[1][1] * C[1][1] * C[1][2] * C[2][1] * h_yyyz
+            + C[1][1] * C[1][1] * C[1][2] * C[2][2] * h_yyzz
+            + C[1][1] * C[1][2] * C[1][0] * C[2][0] * h_xxyz
+            + C[1][1] * C[1][2] * C[1][0] * C[2][1] * h_xyyz
+            + C[1][1] * C[1][2] * C[1][0] * C[2][2] * h_xyzz
+            + C[1][1] * C[1][2] * C[1][1] * C[2][0] * h_xyyz
+            + C[1][1] * C[1][2] * C[1][1] * C[2][1] * h_yyyz
+            + C[1][1] * C[1][2] * C[1][1] * C[2][2] * h_yyzz
+            + C[1][1] * C[1][2] * C[1][2] * C[2][0] * h_xyzz
+            + C[1][1] * C[1][2] * C[1][2] * C[2][1] * h_yyzz
+            + C[1][1] * C[1][2] * C[1][2] * C[2][2] * h_yzzz
+            + C[1][2] * C[1][0] * C[1][0] * C[2][0] * h_xxxz
+            + C[1][2] * C[1][0] * C[1][0] * C[2][1] * h_xxyz
+            + C[1][2] * C[1][0] * C[1][0] * C[2][2] * h_xxzz
+            + C[1][2] * C[1][0] * C[1][1] * C[2][0] * h_xxyz
+            + C[1][2] * C[1][0] * C[1][1] * C[2][1] * h_xyyz
+            + C[1][2] * C[1][0] * C[1][1] * C[2][2] * h_xyzz
+            + C[1][2] * C[1][0] * C[1][2] * C[2][0] * h_xxzz
+            + C[1][2] * C[1][0] * C[1][2] * C[2][1] * h_xyzz
+            + C[1][2] * C[1][0] * C[1][2] * C[2][2] * h_xzzz
+            + C[1][2] * C[1][1] * C[1][0] * C[2][0] * h_xxyz
+            + C[1][2] * C[1][1] * C[1][0] * C[2][1] * h_xyyz
+            + C[1][2] * C[1][1] * C[1][0] * C[2][2] * h_xyzz
+            + C[1][2] * C[1][1] * C[1][1] * C[2][0] * h_xyyz
+            + C[1][2] * C[1][1] * C[1][1] * C[2][1] * h_yyyz
+            + C[1][2] * C[1][1] * C[1][1] * C[2][2] * h_yyzz
+            + C[1][2] * C[1][1] * C[1][2] * C[2][0] * h_xyzz
+            + C[1][2] * C[1][1] * C[1][2] * C[2][1] * h_yyzz
+            + C[1][2] * C[1][1] * C[1][2] * C[2][2] * h_yzzz
+            + C[1][2] * C[1][2] * C[1][0] * C[2][0] * h_xxzz
+            + C[1][2] * C[1][2] * C[1][0] * C[2][1] * h_xyzz
+            + C[1][2] * C[1][2] * C[1][0] * C[2][2] * h_xzzz
+            + C[1][2] * C[1][2] * C[1][1] * C[2][0] * h_xyzz
+            + C[1][2] * C[1][2] * C[1][1] * C[2][1] * h_yyzz
+            + C[1][2] * C[1][2] * C[1][1] * C[2][2] * h_yzzz
+            + C[1][2] * C[1][2] * C[1][2] * C[2][0] * h_xzzz
+            + C[1][2] * C[1][2] * C[1][2] * C[2][1] * h_yzzz
+            + C[1][2] * C[1][2] * C[1][2] * C[2][2] * h_zzzz
+        )
+        H_yyzz = (
+            C[1][0] * C[1][0] * C[2][0] * C[2][0] * h_xxxx
+            + C[1][0] * C[1][0] * C[2][0] * C[2][1] * h_xxxy
+            + C[1][0] * C[1][0] * C[2][0] * C[2][2] * h_xxxz
+            + C[1][0] * C[1][0] * C[2][1] * C[2][0] * h_xxxy
+            + C[1][0] * C[1][0] * C[2][1] * C[2][1] * h_xxyy
+            + C[1][0] * C[1][0] * C[2][1] * C[2][2] * h_xxyz
+            + C[1][0] * C[1][0] * C[2][2] * C[2][0] * h_xxxz
+            + C[1][0] * C[1][0] * C[2][2] * C[2][1] * h_xxyz
+            + C[1][0] * C[1][0] * C[2][2] * C[2][2] * h_xxzz
+            + C[1][0] * C[1][1] * C[2][0] * C[2][0] * h_xxxy
+            + C[1][0] * C[1][1] * C[2][0] * C[2][1] * h_xxyy
+            + C[1][0] * C[1][1] * C[2][0] * C[2][2] * h_xxyz
+            + C[1][0] * C[1][1] * C[2][1] * C[2][0] * h_xxyy
+            + C[1][0] * C[1][1] * C[2][1] * C[2][1] * h_xyyy
+            + C[1][0] * C[1][1] * C[2][1] * C[2][2] * h_xyyz
+            + C[1][0] * C[1][1] * C[2][2] * C[2][0] * h_xxyz
+            + C[1][0] * C[1][1] * C[2][2] * C[2][1] * h_xyyz
+            + C[1][0] * C[1][1] * C[2][2] * C[2][2] * h_xyzz
+            + C[1][0] * C[1][2] * C[2][0] * C[2][0] * h_xxxz
+            + C[1][0] * C[1][2] * C[2][0] * C[2][1] * h_xxyz
+            + C[1][0] * C[1][2] * C[2][0] * C[2][2] * h_xxzz
+            + C[1][0] * C[1][2] * C[2][1] * C[2][0] * h_xxyz
+            + C[1][0] * C[1][2] * C[2][1] * C[2][1] * h_xyyz
+            + C[1][0] * C[1][2] * C[2][1] * C[2][2] * h_xyzz
+            + C[1][0] * C[1][2] * C[2][2] * C[2][0] * h_xxzz
+            + C[1][0] * C[1][2] * C[2][2] * C[2][1] * h_xyzz
+            + C[1][0] * C[1][2] * C[2][2] * C[2][2] * h_xzzz
+            + C[1][1] * C[1][0] * C[2][0] * C[2][0] * h_xxxy
+            + C[1][1] * C[1][0] * C[2][0] * C[2][1] * h_xxyy
+            + C[1][1] * C[1][0] * C[2][0] * C[2][2] * h_xxyz
+            + C[1][1] * C[1][0] * C[2][1] * C[2][0] * h_xxyy
+            + C[1][1] * C[1][0] * C[2][1] * C[2][1] * h_xyyy
+            + C[1][1] * C[1][0] * C[2][1] * C[2][2] * h_xyyz
+            + C[1][1] * C[1][0] * C[2][2] * C[2][0] * h_xxyz
+            + C[1][1] * C[1][0] * C[2][2] * C[2][1] * h_xyyz
+            + C[1][1] * C[1][0] * C[2][2] * C[2][2] * h_xyzz
+            + C[1][1] * C[1][1] * C[2][0] * C[2][0] * h_xxyy
+            + C[1][1] * C[1][1] * C[2][0] * C[2][1] * h_xyyy
+            + C[1][1] * C[1][1] * C[2][0] * C[2][2] * h_xyyz
+            + C[1][1] * C[1][1] * C[2][1] * C[2][0] * h_xyyy
+            + C[1][1] * C[1][1] * C[2][1] * C[2][1] * h_yyyy
+            + C[1][1] * C[1][1] * C[2][1] * C[2][2] * h_yyyz
+            + C[1][1] * C[1][1] * C[2][2] * C[2][0] * h_xyyz
+            + C[1][1] * C[1][1] * C[2][2] * C[2][1] * h_yyyz
+            + C[1][1] * C[1][1] * C[2][2] * C[2][2] * h_yyzz
+            + C[1][1] * C[1][2] * C[2][0] * C[2][0] * h_xxyz
+            + C[1][1] * C[1][2] * C[2][0] * C[2][1] * h_xyyz
+            + C[1][1] * C[1][2] * C[2][0] * C[2][2] * h_xyzz
+            + C[1][1] * C[1][2] * C[2][1] * C[2][0] * h_xyyz
+            + C[1][1] * C[1][2] * C[2][1] * C[2][1] * h_yyyz
+            + C[1][1] * C[1][2] * C[2][1] * C[2][2] * h_yyzz
+            + C[1][1] * C[1][2] * C[2][2] * C[2][0] * h_xyzz
+            + C[1][1] * C[1][2] * C[2][2] * C[2][1] * h_yyzz
+            + C[1][1] * C[1][2] * C[2][2] * C[2][2] * h_yzzz
+            + C[1][2] * C[1][0] * C[2][0] * C[2][0] * h_xxxz
+            + C[1][2] * C[1][0] * C[2][0] * C[2][1] * h_xxyz
+            + C[1][2] * C[1][0] * C[2][0] * C[2][2] * h_xxzz
+            + C[1][2] * C[1][0] * C[2][1] * C[2][0] * h_xxyz
+            + C[1][2] * C[1][0] * C[2][1] * C[2][1] * h_xyyz
+            + C[1][2] * C[1][0] * C[2][1] * C[2][2] * h_xyzz
+            + C[1][2] * C[1][0] * C[2][2] * C[2][0] * h_xxzz
+            + C[1][2] * C[1][0] * C[2][2] * C[2][1] * h_xyzz
+            + C[1][2] * C[1][0] * C[2][2] * C[2][2] * h_xzzz
+            + C[1][2] * C[1][1] * C[2][0] * C[2][0] * h_xxyz
+            + C[1][2] * C[1][1] * C[2][0] * C[2][1] * h_xyyz
+            + C[1][2] * C[1][1] * C[2][0] * C[2][2] * h_xyzz
+            + C[1][2] * C[1][1] * C[2][1] * C[2][0] * h_xyyz
+            + C[1][2] * C[1][1] * C[2][1] * C[2][1] * h_yyyz
+            + C[1][2] * C[1][1] * C[2][1] * C[2][2] * h_yyzz
+            + C[1][2] * C[1][1] * C[2][2] * C[2][0] * h_xyzz
+            + C[1][2] * C[1][1] * C[2][2] * C[2][1] * h_yyzz
+            + C[1][2] * C[1][1] * C[2][2] * C[2][2] * h_yzzz
+            + C[1][2] * C[1][2] * C[2][0] * C[2][0] * h_xxzz
+            + C[1][2] * C[1][2] * C[2][0] * C[2][1] * h_xyzz
+            + C[1][2] * C[1][2] * C[2][0] * C[2][2] * h_xzzz
+            + C[1][2] * C[1][2] * C[2][1] * C[2][0] * h_xyzz
+            + C[1][2] * C[1][2] * C[2][1] * C[2][1] * h_yyzz
+            + C[1][2] * C[1][2] * C[2][1] * C[2][2] * h_yzzz
+            + C[1][2] * C[1][2] * C[2][2] * C[2][0] * h_xzzz
+            + C[1][2] * C[1][2] * C[2][2] * C[2][1] * h_yzzz
+            + C[1][2] * C[1][2] * C[2][2] * C[2][2] * h_zzzz
+        )
+        H_yzzz = (
+            C[1][0] * C[2][0] * C[2][0] * C[2][0] * h_xxxx
+            + C[1][0] * C[2][0] * C[2][0] * C[2][1] * h_xxxy
+            + C[1][0] * C[2][0] * C[2][0] * C[2][2] * h_xxxz
+            + C[1][0] * C[2][0] * C[2][1] * C[2][0] * h_xxxy
+            + C[1][0] * C[2][0] * C[2][1] * C[2][1] * h_xxyy
+            + C[1][0] * C[2][0] * C[2][1] * C[2][2] * h_xxyz
+            + C[1][0] * C[2][0] * C[2][2] * C[2][0] * h_xxxz
+            + C[1][0] * C[2][0] * C[2][2] * C[2][1] * h_xxyz
+            + C[1][0] * C[2][0] * C[2][2] * C[2][2] * h_xxzz
+            + C[1][0] * C[2][1] * C[2][0] * C[2][0] * h_xxxy
+            + C[1][0] * C[2][1] * C[2][0] * C[2][1] * h_xxyy
+            + C[1][0] * C[2][1] * C[2][0] * C[2][2] * h_xxyz
+            + C[1][0] * C[2][1] * C[2][1] * C[2][0] * h_xxyy
+            + C[1][0] * C[2][1] * C[2][1] * C[2][1] * h_xyyy
+            + C[1][0] * C[2][1] * C[2][1] * C[2][2] * h_xyyz
+            + C[1][0] * C[2][1] * C[2][2] * C[2][0] * h_xxyz
+            + C[1][0] * C[2][1] * C[2][2] * C[2][1] * h_xyyz
+            + C[1][0] * C[2][1] * C[2][2] * C[2][2] * h_xyzz
+            + C[1][0] * C[2][2] * C[2][0] * C[2][0] * h_xxxz
+            + C[1][0] * C[2][2] * C[2][0] * C[2][1] * h_xxyz
+            + C[1][0] * C[2][2] * C[2][0] * C[2][2] * h_xxzz
+            + C[1][0] * C[2][2] * C[2][1] * C[2][0] * h_xxyz
+            + C[1][0] * C[2][2] * C[2][1] * C[2][1] * h_xyyz
+            + C[1][0] * C[2][2] * C[2][1] * C[2][2] * h_xyzz
+            + C[1][0] * C[2][2] * C[2][2] * C[2][0] * h_xxzz
+            + C[1][0] * C[2][2] * C[2][2] * C[2][1] * h_xyzz
+            + C[1][0] * C[2][2] * C[2][2] * C[2][2] * h_xzzz
+            + C[1][1] * C[2][0] * C[2][0] * C[2][0] * h_xxxy
+            + C[1][1] * C[2][0] * C[2][0] * C[2][1] * h_xxyy
+            + C[1][1] * C[2][0] * C[2][0] * C[2][2] * h_xxyz
+            + C[1][1] * C[2][0] * C[2][1] * C[2][0] * h_xxyy
+            + C[1][1] * C[2][0] * C[2][1] * C[2][1] * h_xyyy
+            + C[1][1] * C[2][0] * C[2][1] * C[2][2] * h_xyyz
+            + C[1][1] * C[2][0] * C[2][2] * C[2][0] * h_xxyz
+            + C[1][1] * C[2][0] * C[2][2] * C[2][1] * h_xyyz
+            + C[1][1] * C[2][0] * C[2][2] * C[2][2] * h_xyzz
+            + C[1][1] * C[2][1] * C[2][0] * C[2][0] * h_xxyy
+            + C[1][1] * C[2][1] * C[2][0] * C[2][1] * h_xyyy
+            + C[1][1] * C[2][1] * C[2][0] * C[2][2] * h_xyyz
+            + C[1][1] * C[2][1] * C[2][1] * C[2][0] * h_xyyy
+            + C[1][1] * C[2][1] * C[2][1] * C[2][1] * h_yyyy
+            + C[1][1] * C[2][1] * C[2][1] * C[2][2] * h_yyyz
+            + C[1][1] * C[2][1] * C[2][2] * C[2][0] * h_xyyz
+            + C[1][1] * C[2][1] * C[2][2] * C[2][1] * h_yyyz
+            + C[1][1] * C[2][1] * C[2][2] * C[2][2] * h_yyzz
+            + C[1][1] * C[2][2] * C[2][0] * C[2][0] * h_xxyz
+            + C[1][1] * C[2][2] * C[2][0] * C[2][1] * h_xyyz
+            + C[1][1] * C[2][2] * C[2][0] * C[2][2] * h_xyzz
+            + C[1][1] * C[2][2] * C[2][1] * C[2][0] * h_xyyz
+            + C[1][1] * C[2][2] * C[2][1] * C[2][1] * h_yyyz
+            + C[1][1] * C[2][2] * C[2][1] * C[2][2] * h_yyzz
+            + C[1][1] * C[2][2] * C[2][2] * C[2][0] * h_xyzz
+            + C[1][1] * C[2][2] * C[2][2] * C[2][1] * h_yyzz
+            + C[1][1] * C[2][2] * C[2][2] * C[2][2] * h_yzzz
+            + C[1][2] * C[2][0] * C[2][0] * C[2][0] * h_xxxz
+            + C[1][2] * C[2][0] * C[2][0] * C[2][1] * h_xxyz
+            + C[1][2] * C[2][0] * C[2][0] * C[2][2] * h_xxzz
+            + C[1][2] * C[2][0] * C[2][1] * C[2][0] * h_xxyz
+            + C[1][2] * C[2][0] * C[2][1] * C[2][1] * h_xyyz
+            + C[1][2] * C[2][0] * C[2][1] * C[2][2] * h_xyzz
+            + C[1][2] * C[2][0] * C[2][2] * C[2][0] * h_xxzz
+            + C[1][2] * C[2][0] * C[2][2] * C[2][1] * h_xyzz
+            + C[1][2] * C[2][0] * C[2][2] * C[2][2] * h_xzzz
+            + C[1][2] * C[2][1] * C[2][0] * C[2][0] * h_xxyz
+            + C[1][2] * C[2][1] * C[2][0] * C[2][1] * h_xyyz
+            + C[1][2] * C[2][1] * C[2][0] * C[2][2] * h_xyzz
+            + C[1][2] * C[2][1] * C[2][1] * C[2][0] * h_xyyz
+            + C[1][2] * C[2][1] * C[2][1] * C[2][1] * h_yyyz
+            + C[1][2] * C[2][1] * C[2][1] * C[2][2] * h_yyzz
+            + C[1][2] * C[2][1] * C[2][2] * C[2][0] * h_xyzz
+            + C[1][2] * C[2][1] * C[2][2] * C[2][1] * h_yyzz
+            + C[1][2] * C[2][1] * C[2][2] * C[2][2] * h_yzzz
+            + C[1][2] * C[2][2] * C[2][0] * C[2][0] * h_xxzz
+            + C[1][2] * C[2][2] * C[2][0] * C[2][1] * h_xyzz
+            + C[1][2] * C[2][2] * C[2][0] * C[2][2] * h_xzzz
+            + C[1][2] * C[2][2] * C[2][1] * C[2][0] * h_xyzz
+            + C[1][2] * C[2][2] * C[2][1] * C[2][1] * h_yyzz
+            + C[1][2] * C[2][2] * C[2][1] * C[2][2] * h_yzzz
+            + C[1][2] * C[2][2] * C[2][2] * C[2][0] * h_xzzz
+            + C[1][2] * C[2][2] * C[2][2] * C[2][1] * h_yzzz
+            + C[1][2] * C[2][2] * C[2][2] * C[2][2] * h_zzzz
+        )
+        H_zzzz = (
+            C[2][0] * C[2][0] * C[2][0] * C[2][0] * h_xxxx
+            + C[2][0] * C[2][0] * C[2][0] * C[2][1] * h_xxxy
+            + C[2][0] * C[2][0] * C[2][0] * C[2][2] * h_xxxz
+            + C[2][0] * C[2][0] * C[2][1] * C[2][0] * h_xxxy
+            + C[2][0] * C[2][0] * C[2][1] * C[2][1] * h_xxyy
+            + C[2][0] * C[2][0] * C[2][1] * C[2][2] * h_xxyz
+            + C[2][0] * C[2][0] * C[2][2] * C[2][0] * h_xxxz
+            + C[2][0] * C[2][0] * C[2][2] * C[2][1] * h_xxyz
+            + C[2][0] * C[2][0] * C[2][2] * C[2][2] * h_xxzz
+            + C[2][0] * C[2][1] * C[2][0] * C[2][0] * h_xxxy
+            + C[2][0] * C[2][1] * C[2][0] * C[2][1] * h_xxyy
+            + C[2][0] * C[2][1] * C[2][0] * C[2][2] * h_xxyz
+            + C[2][0] * C[2][1] * C[2][1] * C[2][0] * h_xxyy
+            + C[2][0] * C[2][1] * C[2][1] * C[2][1] * h_xyyy
+            + C[2][0] * C[2][1] * C[2][1] * C[2][2] * h_xyyz
+            + C[2][0] * C[2][1] * C[2][2] * C[2][0] * h_xxyz
+            + C[2][0] * C[2][1] * C[2][2] * C[2][1] * h_xyyz
+            + C[2][0] * C[2][1] * C[2][2] * C[2][2] * h_xyzz
+            + C[2][0] * C[2][2] * C[2][0] * C[2][0] * h_xxxz
+            + C[2][0] * C[2][2] * C[2][0] * C[2][1] * h_xxyz
+            + C[2][0] * C[2][2] * C[2][0] * C[2][2] * h_xxzz
+            + C[2][0] * C[2][2] * C[2][1] * C[2][0] * h_xxyz
+            + C[2][0] * C[2][2] * C[2][1] * C[2][1] * h_xyyz
+            + C[2][0] * C[2][2] * C[2][1] * C[2][2] * h_xyzz
+            + C[2][0] * C[2][2] * C[2][2] * C[2][0] * h_xxzz
+            + C[2][0] * C[2][2] * C[2][2] * C[2][1] * h_xyzz
+            + C[2][0] * C[2][2] * C[2][2] * C[2][2] * h_xzzz
+            + C[2][1] * C[2][0] * C[2][0] * C[2][0] * h_xxxy
+            + C[2][1] * C[2][0] * C[2][0] * C[2][1] * h_xxyy
+            + C[2][1] * C[2][0] * C[2][0] * C[2][2] * h_xxyz
+            + C[2][1] * C[2][0] * C[2][1] * C[2][0] * h_xxyy
+            + C[2][1] * C[2][0] * C[2][1] * C[2][1] * h_xyyy
+            + C[2][1] * C[2][0] * C[2][1] * C[2][2] * h_xyyz
+            + C[2][1] * C[2][0] * C[2][2] * C[2][0] * h_xxyz
+            + C[2][1] * C[2][0] * C[2][2] * C[2][1] * h_xyyz
+            + C[2][1] * C[2][0] * C[2][2] * C[2][2] * h_xyzz
+            + C[2][1] * C[2][1] * C[2][0] * C[2][0] * h_xxyy
+            + C[2][1] * C[2][1] * C[2][0] * C[2][1] * h_xyyy
+            + C[2][1] * C[2][1] * C[2][0] * C[2][2] * h_xyyz
+            + C[2][1] * C[2][1] * C[2][1] * C[2][0] * h_xyyy
+            + C[2][1] * C[2][1] * C[2][1] * C[2][1] * h_yyyy
+            + C[2][1] * C[2][1] * C[2][1] * C[2][2] * h_yyyz
+            + C[2][1] * C[2][1] * C[2][2] * C[2][0] * h_xyyz
+            + C[2][1] * C[2][1] * C[2][2] * C[2][1] * h_yyyz
+            + C[2][1] * C[2][1] * C[2][2] * C[2][2] * h_yyzz
+            + C[2][1] * C[2][2] * C[2][0] * C[2][0] * h_xxyz
+            + C[2][1] * C[2][2] * C[2][0] * C[2][1] * h_xyyz
+            + C[2][1] * C[2][2] * C[2][0] * C[2][2] * h_xyzz
+            + C[2][1] * C[2][2] * C[2][1] * C[2][0] * h_xyyz
+            + C[2][1] * C[2][2] * C[2][1] * C[2][1] * h_yyyz
+            + C[2][1] * C[2][2] * C[2][1] * C[2][2] * h_yyzz
+            + C[2][1] * C[2][2] * C[2][2] * C[2][0] * h_xyzz
+            + C[2][1] * C[2][2] * C[2][2] * C[2][1] * h_yyzz
+            + C[2][1] * C[2][2] * C[2][2] * C[2][2] * h_yzzz
+            + C[2][2] * C[2][0] * C[2][0] * C[2][0] * h_xxxz
+            + C[2][2] * C[2][0] * C[2][0] * C[2][1] * h_xxyz
+            + C[2][2] * C[2][0] * C[2][0] * C[2][2] * h_xxzz
+            + C[2][2] * C[2][0] * C[2][1] * C[2][0] * h_xxyz
+            + C[2][2] * C[2][0] * C[2][1] * C[2][1] * h_xyyz
+            + C[2][2] * C[2][0] * C[2][1] * C[2][2] * h_xyzz
+            + C[2][2] * C[2][0] * C[2][2] * C[2][0] * h_xxzz
+            + C[2][2] * C[2][0] * C[2][2] * C[2][1] * h_xyzz
+            + C[2][2] * C[2][0] * C[2][2] * C[2][2] * h_xzzz
+            + C[2][2] * C[2][1] * C[2][0] * C[2][0] * h_xxyz
+            + C[2][2] * C[2][1] * C[2][0] * C[2][1] * h_xyyz
+            + C[2][2] * C[2][1] * C[2][0] * C[2][2] * h_xyzz
+            + C[2][2] * C[2][1] * C[2][1] * C[2][0] * h_xyyz
+            + C[2][2] * C[2][1] * C[2][1] * C[2][1] * h_yyyz
+            + C[2][2] * C[2][1] * C[2][1] * C[2][2] * h_yyzz
+            + C[2][2] * C[2][1] * C[2][2] * C[2][0] * h_xyzz
+            + C[2][2] * C[2][1] * C[2][2] * C[2][1] * h_yyzz
+            + C[2][2] * C[2][1] * C[2][2] * C[2][2] * h_yzzz
+            + C[2][2] * C[2][2] * C[2][0] * C[2][0] * h_xxzz
+            + C[2][2] * C[2][2] * C[2][0] * C[2][1] * h_xyzz
+            + C[2][2] * C[2][2] * C[2][0] * C[2][2] * h_xzzz
+            + C[2][2] * C[2][2] * C[2][1] * C[2][0] * h_xyzz
+            + C[2][2] * C[2][2] * C[2][1] * C[2][1] * h_yyzz
+            + C[2][2] * C[2][2] * C[2][1] * C[2][2] * h_yzzz
+            + C[2][2] * C[2][2] * C[2][2] * C[2][0] * h_xzzz
+            + C[2][2] * C[2][2] * C[2][2] * C[2][1] * h_yzzz
+            + C[2][2] * C[2][2] * C[2][2] * C[2][2] * h_zzzz
+        )
 
         self.q40 = H_zzzz
         self.q41c = Constants.rt_8_5 * H_xzzz
         self.q41s = Constants.rt_8_5 * H_yzzz
         self.q42c = 2 * Constants.rt_1_5 * (H_xxzz - H_yyzz)
         self.q42s = 4 * Constants.rt_1_5 * H_xyzz
-        self.q43c = 2 * Constants.rt_2_35 * (H_xxxz - 3*H_xyyz)
-        self.q43s = 2 * Constants.rt_2_35 * (3*H_xxyz - H_yyyz)
-        self.q44c = Constants.rt_1_35 * (H_xxxx - 6*H_xxyy + H_yyyy)
+        self.q43c = 2 * Constants.rt_2_35 * (H_xxxz - 3 * H_xyyz)
+        self.q43s = 2 * Constants.rt_2_35 * (3 * H_xxyz - H_yyyz)
+        self.q44c = Constants.rt_1_35 * (H_xxxx - 6 * H_xxyy + H_yyyy)
         self.q44s = 4 * Constants.rt_1_35 * (H_xxxy - H_xyyy)
 
     @buildermethod
@@ -5176,10 +7108,13 @@ class INT(Point):
 
     @property
     def dipole(self):
-        return np.sqrt(sum([self.q10**2, self.q11c**2, self.q11s**2]))
+        return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
 
-    def get_property(self, property_name):
-        return getattr(self, property_name)
+    def get_property(self, property_name, as_dict=False):
+        if as_dict:
+            return self.getattr_as_dict(property_name)
+        else:
+            return getattr(self, property_name)
 
     def move(self, dst):
         if self:
@@ -5198,6 +7133,9 @@ class INT(Point):
         if os.path.exists(self.path + ".bak"):
             FileTools.move_file(self.path + ".bak", self.path)
 
+    def getattr_as_dict(self, attr):
+        pass
+
     def __getattr__(self, attr):
         if attr in Constants.multipole_names:
             if attr == "q00":
@@ -5214,7 +7152,7 @@ class INT(Point):
             elif attr.lower() in ["all"]:
                 return self.multipoles | {"iqa": self.iqa}
             return self.__dict__[attr]
-    
+
     def __setattr__(self, attr, val):
         if attr in Constants.multipole_names:
             if attr == "q00":
@@ -5264,7 +7202,7 @@ class INTs(Point):
         return [i.dipole for i in self]
 
     def charge(self):
-        return np.sqrt(sum(i.dipole**2 for i in self))
+        return np.sqrt(sum(i.dipole ** 2 for i in self))
 
     def revert_backup(self):
         for i in self:
@@ -5378,17 +7316,20 @@ def numba_R_rbf(x, hp):
 
 class Model:
     def __init__(self, fname, read_model=False):
-        self.fname = fname
+        self.fname = Path(fname)
 
         self.directory = ""
         self.basename = ""
 
         self.system_name = ""
         self.type = ""
+        self.atom = ""
         self.atom_number = ""
+        self.legacy = False
 
         self.analyse_name()
 
+        # TODO: Convert these to lowercase
         self.nTrain = 0
         self.nFeats = 0
 
@@ -5450,6 +7391,12 @@ class Model:
     def read(self, up_to=None):
         if self.nTrain > 0:
             return
+        if self.legacy:
+            self.read_legacy(up_to)
+        else:
+            self.read_updated(up_to)
+        
+    def read_legacy(self, up_to):
         with open(self.fname) as f:
             for line in f:
                 if "norm" in line:
@@ -5487,19 +7434,133 @@ class Model:
                     while ";" not in line:
                         self.X.append([float(num) for num in line.split()])
                         line = next(f)
-                    self.X = np.array(self.X).reshape((self.nTrain, self.nFeats))
+                    self.X = np.array(self.X).reshape(
+                        (self.nTrain, self.nFeats)
+                    )
 
                 if up_to is not None and up_to in line:
                     break
 
-    def analyse_name(self):
-        self.directory = os.path.dirname(self.fname)
-        self.basename = os.path.basename(self.fname)
+    def read_updated(self, up_to):
+        with open(self.fname) as f:
+            for line in f:
+                if line.startswith("#"):
+                    continue
 
-        fname_split = os.path.splitext(self.basename)[0].split("_")
-        self.system_name = fname_split[0]
-        self.type = fname_split[2].lower()
-        self.atom_number = fname_split[3]
+                if "name" in line:
+                    self.system_name = line.split()[1]
+                    continue
+                if "property" in line:
+                    self.type = line.split()[1]
+                    continue
+                if line.startswith("atom"):
+                    self.atom = line.split()[1]
+                    continue
+                    
+                if "number_of_features" in line:
+                    self.nFeats = int(line.split()[1])
+                if "number_of_training_points" in line:
+                    self.nTrain = int(line.split()[1])
+
+                if "[mean]" in line:
+                    line = next(f)
+                    line = next(f)
+                    self.mu = float(line.split()[1])
+                
+                if "lengthscale" in line:
+                    self.hyper_parameters = [float(hp) for hp in line.split()[1:]]
+                
+                if "[training_data.x]" in line:
+                    line = next(f)
+                    while line.strip() != "":
+                        self.X.append([float(num) for num in line.split()])
+                        line = next(f)
+
+                if "[training_data.y]" in line:
+                    line = next(f)
+                    while line.strip() != "":
+                        self.y.append(float(line))
+                        line = next(f)
+                
+                if "[weights]" in line:
+                    line = next(f)
+                    while line.strip() != "":
+                        self.weights.append(float(line))
+                        try: line = next(f)
+                        except: break
+
+                if up_to is not None and up_to in line:
+                    break
+
+        self.X = np.array(self.X)
+        self.y = np.array(self.y).reshape((-1, 1))
+        self.weights = np.array(self.weights)
+
+    def write(self, directory=None, legacy=False):
+        directory = Path(GLOBALS.FILE_STRUCTURE["models"]) if not directory else Path(directory)
+        if self.legacy or legacy:
+            self.write_legacy(directory)
+        else:
+            self.write_updated(directory)
+
+    def write_legacy(self, directory):
+        atom_num = self.atom_num.zfill(2)
+        fname = Path(f"{self.system_name}_kriging_{self.type}_{self.atom_num}.txt")
+        path = directory / fname
+        with open(path, "w") as f:
+            f.write("Kriging Results and Parameters\n")
+            f.write(";\n")
+            f.write(f"Feature {self.nFeats}\n")
+            f.write(f"Number_of_training_points {self.nTrain}\n")
+            f.write(";\n")
+            f.write(f"Mu {self.mu} Sigma_Squared {self.sigma2}\n")
+            f.write(";\n")
+            f.write("Theta\n")
+            for theta in self.hyper_parameters:
+                f.write(f"{theta}\n")
+            f.write("p\n")
+            for _ in range(len(self.hyper_parameters)):
+                f.write("2.00000000000000\n")
+            f.write(";\n")
+            f.write("Weights\n")
+            for weight in self.weights:
+                f.write(f"{weight}\n")
+            f.write(";\n")
+            f.write("R_matrix\n")
+            f.write("Dimension {self.nTrain}\n")
+            f.write(";\n")
+            f.write("Property_value_Kriging_centers\n")
+            for y in self.y:
+                f.write(f"{y}\n")
+            f.write("training_data\n")
+            for x in self.X:
+                for i in range(0, len(x), 3):
+                    f.write("{x[i]} {x[i+1]} {x[i+2]}\n")
+            f.write(";\n")
+
+    def write_updated(self, directory):
+        UsefulTools.not_implemented()
+
+    def analyse_name(self):
+        self.directory = self.fname.parent
+        self.basename = self.fname.name
+
+        fname_split = self.fname.stem.split("_")
+
+        if self.fname.suffix == ".txt":
+            self.system_name = fname_split[0]
+            self.type = fname_split[2].lower()
+            self.atom_number = fname_split[3]
+            self.legacy = True
+        elif self.fname.suffix == ".model":
+            self.system_name = fname_split[0]
+            self.type = fname_split[1]
+            self.atom = fname_split[2]
+            self.atom_number = re.findall("\d+", self.atom)[0]
+            self.legacy = False
+        else:
+            # TODO: Convert to fatal error
+            printq(f"ERROR: Unknown Model Type {self.fname.suffix}")
 
     def remove_no_noise(self):
         no_noise_line = -1
@@ -5520,19 +7581,29 @@ class Model:
 
     def get_fname(self, directory=None):
         if directory is None:
-            directory = self.directory
-        basename = f"{self.system_name}_kriging_{self.type}_{self.atom_number}.txt"
-        return os.path.join(directory, basename)
+            directory = Path(self.directory)
+        if self.legacy:
+            basename = Path(
+                f"{self.system_name}_kriging_{self.type}_{self.atom_number}.txt"
+            )
+        else:
+            basename = Path(
+                f"{self.system_name}_{self.type}_{self.atom}.model"
+            )
+        return directory / basename
 
     def copy_to_log(self):
-        log_directory = GLOBALS.FILE_STRUCTURE["log"]
+        log_directory = Path(GLOBALS.FILE_STRUCTURE["log"])
         FileTools.mkdir(log_directory)
 
         if self.nTrain == 0:
-            self.read(up_to="Number_of_training_points")
+            if self.legacy:
+                self.read(up_to="number_of_training_points")
+            else:
+                self.read(up_to="Number_of_training_points")
 
         nTrain = str(self.nTrain).zfill(4)
-        log_directory = os.path.join(log_directory, f"{self.system_name}{nTrain}")
+        log_directory /= Path(f"{self.system_name}{nTrain}")
         FileTools.mkdir(log_directory)
         log_model_file = self.get_fname(log_directory)
 
@@ -5605,7 +7676,11 @@ class Model:
             return self._B
         except AttributeError:
             self._B = np.matmul(
-                (la.inv(np.matmul(np.matmul(self.ones.T, self.invR), self.ones))),
+                (
+                    la.inv(
+                        np.matmul(np.matmul(self.ones.T, self.invR), self.ones)
+                    )
+                ),
                 np.matmul(np.matmul(self.ones.T, self.invR), self.y),
             ).item()
             return self._B
@@ -5622,7 +7697,11 @@ class Model:
                 cve = (
                     np.matmul(
                         self.invR[i, :],
-                        (d + (d[i] / self.H[i][i]) * self.H[:][i].reshape((-1, 1))),
+                        (
+                            d
+                            + (d[i] / self.H[i][i])
+                            * self.H[:][i].reshape((-1, 1))
+                        ),
                     )
                     / self.invR[i][i]
                 )
@@ -5642,7 +7721,9 @@ class Model:
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
         res3 = np.matmul(self.ones.T, np.matmul(self.invR, self.ones))
 
-        return self.sigma2 * (1 - res1.item() + (1 + res2.item()) ** 2 / res3.item())
+        return self.sigma2 * (
+            1 - res1.item() + (1 + res2.item()) ** 2 / res3.item()
+        )
 
     def variance2(self, point):
         point = point.features[self.i]
@@ -5699,6 +7780,10 @@ class Models:
         model_files = FileTools.get_files_in(self.directory, "*_kriging_*.txt")
         for model_file in tqdm(model_files):
             self.add(model_file, read_model)
+        
+        model_files = FileTools.get_files_in(self.directory, "*.model")
+        for model_file in tqdm(model_files):
+            self.add(model_file, read_model)
 
     @property
     def nTrain(self):
@@ -5709,7 +7794,9 @@ class Models:
         if type == "all":
             return [model for model in self]
         elif type == "multipoles":
-            return [model for model in self if re.match(r"q\d+(\w+)?", model.type)]
+            return [
+                model for model in self if re.match(r"q\d+(\w+)?", model.type)
+            ]
         else:
             return [model for model in self if model.type == type]
 
@@ -5734,7 +7821,10 @@ class Models:
                 points_progressbar.set_description(point.path)
                 prediction = 0 if not atoms else {}
                 with tqdm(
-                    total=len(models), unit=" models", leave=False, disable=not verbose,
+                    total=len(models),
+                    unit=" models",
+                    leave=False,
+                    disable=not verbose,
                 ) as models_progressbar:
                     for model in self.get(type):
                         models_progressbar.set_description(model.type)
@@ -5784,7 +7874,9 @@ class Models:
         for atom in range(len(self)):
             point_features = np.array(point.features[atom]).reshape((1, -1))
             points_features = points.get_atom_features(atom)
-            distances += distance.cdist(point_features, points_features).flatten() ** 2
+            distances += (
+                distance.cdist(point_features, points_features).flatten() ** 2
+            )
         return np.sqrt(distances)
 
     def distances(self, points, added_points):
@@ -5803,8 +7895,12 @@ class Models:
             data = json.load(f)
             if data["npoints"] != UsefulTools.nTrain():
                 return 0.5
-            for true_error, cv_error in zip(data["true_errors"], data["cv_errors"]):
-                alpha.append(0.99 * min(0.5 * (float(true_error) / float(cv_error)), 1))
+            for true_error, cv_error in zip(
+                data["true_errors"], data["cv_errors"]
+            ):
+                alpha.append(
+                    0.99 * min(0.5 * (float(true_error) / float(cv_error)), 1)
+                )
 
         if not alpha:
             return 0.5
@@ -5844,7 +7940,9 @@ class Models:
 
     def calc_sigmu(self, points):
         sig = np.array(self.variance(points))
-        mu = np.array([sum(model.predict(point) for model in self) for point in points])
+        mu = np.array(
+            [sum(model.predict(point) for model in self) for point in points]
+        )
         return sig * np.sqrt(np.abs(mu))
 
     def calc_var2(self, points, added_points=[]):
@@ -5876,7 +7974,9 @@ class Models:
 
     def expected_improvement_epe(self, points):
         best_points = np.flip(np.argsort(self.calc_epe(points)), axis=-1)
-        points_to_add = best_points[: min(len(points), GLOBALS.POINTS_PER_ITERATION)]
+        points_to_add = best_points[
+            : min(len(points), GLOBALS.POINTS_PER_ITERATION)
+        ]
         self.write_data(points_to_add, points)
         return points_to_add
 
@@ -5884,7 +7984,8 @@ class Models:
         points_to_add = []
         for _ in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(
-                np.argsort(self.calc_epe(points, added_points=points_to_add)), axis=-1,
+                np.argsort(self.calc_epe(points, added_points=points_to_add)),
+                axis=-1,
             )
             points_to_add += [best_points[0]]
         self.write_data(points_to_add, points)
@@ -5902,7 +8003,8 @@ class Models:
         points_to_add = []
         for _ in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(
-                np.argsort(self.calc_var(points, added_points=points_to_add)), axis=-1,
+                np.argsort(self.calc_var(points, added_points=points_to_add)),
+                axis=-1,
             )
             points_to_add += [best_points[0]]
         return points_to_add
@@ -5915,13 +8017,16 @@ class Models:
         points_to_add = []
         for _ in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(
-                np.argsort(self.calc_var2(points, added_points=points_to_add)), axis=-1,
+                np.argsort(self.calc_var2(points, added_points=points_to_add)),
+                axis=-1,
             )
             points_to_add += [best_points[0]]
         return points_to_add
 
     def expected_improvement_rand(self, points):
-        return np.random.randint(low=0, high=len(points), size=int(GLOBALS.POINTS_PER_ITERATION))
+        return np.random.randint(
+            low=0, high=len(points), size=int(GLOBALS.POINTS_PER_ITERATION)
+        )
 
     def expected_improvement(self, points):
         points_to_add = self.expected_improvement_function(points)
@@ -5993,14 +8098,33 @@ class Points:
     def revert_backup(ts_bak=False, sp_bak=False, vs_bak=False):
         if not any([ts_bak, sp_bak, vs_bak]):
             menu = Menu(title="Revert JSON Backup", auto_close=True)
-            menu.add_option("1", "Training Set", Points.revert_backup, kwargs={"ts_bak": True})
-            menu.add_option("2", "Sample Pool", Points.revert_backup, kwargs={"sp_bak": True})
-            menu.add_option("3", "Validation Set", Points.revert_backup, kwargs={"vs_bak": True})
+            menu.add_option(
+                "1",
+                "Training Set",
+                Points.revert_backup,
+                kwargs={"ts_bak": True},
+            )
+            menu.add_option(
+                "2",
+                "Sample Pool",
+                Points.revert_backup,
+                kwargs={"sp_bak": True},
+            )
+            menu.add_option(
+                "3",
+                "Validation Set",
+                Points.revert_backup,
+                kwargs={"vs_bak": True},
+            )
             menu.add_space()
-            menu.add_option("a", "All of the Above", Points.revert_backup, kwargs={"ts_bak": True, "sp_bak": True, "vs_bak": True})
+            menu.add_option(
+                "a",
+                "All of the Above",
+                Points.revert_backup,
+                kwargs={"ts_bak": True, "sp_bak": True, "vs_bak": True},
+            )
             menu.add_final_options()
             menu.run()
-
 
         if ts_bak:
             ts = Set(GLOBALS.FILE_STRUCTURE["training_set"])
@@ -6092,7 +8216,8 @@ class Set(Points):
         return sum(
             1
             for point in self
-            if getattr(point, attr) is not None and getattr(point, attr).exists()
+            if getattr(point, attr) is not None
+            and getattr(point, attr).exists()
         )
 
     def check_functional(self):
@@ -6114,7 +8239,9 @@ class Set(Points):
                 print(f"Submitting {n_gjfs - n_wfns} GJFs to Gaussian.")
                 return wfns.submit_gjfs()
         else:
-            if UsefulTools.in_sensitive(GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS):
+            if UsefulTools.in_sensitive(
+                GLOBALS.METHOD, Constants.AIMALL_FUNCTIONALS
+            ):
                 self.check_functional()
             print(f"{self.path}: All wfns complete.")
 
@@ -6133,91 +8260,112 @@ class Set(Points):
             self, redo=redo, submit=submit, hold=hold, check_wfns=check_wfns
         )
 
+    def make_legacy_training_set(self, atom, training_set, model_directory, natoms):
+        # Write FEREBUS input files
+        delimiter = " "
+        MAX_PROPERTIES = 25
+        
+        training_set_file = os.path.join(
+                model_directory, f"{atom}_TRAINING_SET.txt"
+            )
+
+        # Write Training Set File
+        with open(training_set_file, "w") as f:
+            for i, (input, output) in enumerate(training_set):
+                if len(output) > MAX_PROPERTIES:
+                    # FEREBUS can have a max of 25 outputs, trim down if necessary
+                    output = dict(
+                        it.islice(output.items(), MAX_PROPERTIES)
+                    )
+                elif len(output) < MAX_PROPERTIES:
+                    # FEREBUS requires 25 outputs so fill out the rest of the outputs with 0
+                    for j in range(MAX_PROPERTIES - len(output)):
+                        output[f"property{j}"] = 0
+
+                num = f"{i+1}".zfill(4)
+                input = delimiter.join([str(s) for s in input])
+                output = delimiter.join([str(s) for s in output.values()])
+                f.write(f"{input}{delimiter}{output}{delimiter}{num}\n")
+
+        # Write FINPUT.txt
+        FerebusTools.write_finput(
+            model_directory,
+            natoms,
+            atom,
+            len(training_set),
+            nproperties=min(training_set.nproperties, MAX_PROPERTIES),
+            optimisation=str(GLOBALS.FEREBUS_OPTIMISATION),
+        )
+        
+
+    def make_updated_training_set(self, atom, training_set, model_directory, natoms):
+        # Write FEREBUS input files
+        delimiter = ","
+        
+        training_set_file = os.path.join(
+                model_directory, f"{GLOBALS.SYSTEM_NAME}_{atom}_TRAINING_SET.csv"
+            )
+
+        inputs = DictList()
+        outputs = DictList()
+        for input, output in training_set:
+            for i, inp in enumerate(input):
+                inputs[f"f{i+1}"] += [inp]
+            for i, (label, out) in enumerate(output.items()):
+                outputs[label] += [out]
+
+        # Write Training Set File
+        with open(training_set_file, "w") as f:
+            input_labels = delimiter.join([str(s) for s in inputs.keys()])
+            output_labels = delimiter.join([str(s) for s in outputs.keys()])
+            f.write(f"{input_labels}{delimiter}{output_labels}\n")
+
+            for i in range(len(inputs["f1"])):
+                input = delimiter.join(str(s) for s in [inputs[k][i] for k in inputs.keys()])
+                output = delimiter.join(str(s) for s in [outputs[k][i] for k in outputs.keys()])
+                f.write(f"{input}{delimiter}{output}\n")
+
+        # Write ferebus.toml
+        FerebusTools.write_ftoml(
+            model_directory,
+            natoms,
+            atom,
+        )
+
     def make_training_set(self, model_type, npoints=-1, directory=None):
         if npoints < 0:
             npoints = len(self)
 
-        training_sets = {}
+        if directory is None:
+            directory = GLOBALS.FILE_STRUCTURE["ferebus"]
+        FileTools.mkdir(directory, empty=True)
+
+        training_sets = DictList(TrainingSet)
         for point in self:
             input = point.features_dict
             output = point.get_property(model_type)
             for atom in input.keys():
-                if atom not in training_sets.keys():
-                    training_sets[atom] = TrainingSet()
-
                 training_sets[atom] += (input[atom], output[atom])
 
         for atom, training_set in training_sets.items():
             training_sets[atom] = training_set.slice(min(npoints, len(self)))
 
-        # Write FEREBUS input files
-        MAX_PROPERTIES = 25
-        if directory is None:
-            directory = GLOBALS.FILE_STRUCTURE["ferebus"]
-        FileTools.mkdir(directory, empty=True)
         model_directories = []
         for atom, training_set in training_sets.items():
-            directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
-            FileTools.mkdir(directory, empty=True)
-            training_set_file = os.path.join(directory, atom + "_TRAINING_SET.txt")
-
-            # Write Training Set File
-            with open(training_set_file, "w") as f:
-                for i, (input, output) in enumerate(training_set):
-                    if len(output) > MAX_PROPERTIES:
-                        output = dict(it.islice(output.items(), MAX_PROPERTIES))
-
-                    num = f"{i+1}".zfill(4)
-                    input = " ".join([str(s) for s in input])
-                    output = " ".join([str(s) for s in output.values()])
-                    f.write(f"{input} {output} {num}\n")
-
-            # Write FINPUT.txt
-            FerebusTools.write_finput(
-                directory,
-                len(training_sets),
-                atom,
-                len(training_set),
-                nproperties=min(training_set.nproperties, MAX_PROPERTIES),
-                optimisation=str(GLOBALS.FEREBUS_OPTIMISATION)
-            )
-            model_directories.append(directory)
+            model_directory = os.path.join(directory, atom)
+            FileTools.mkdir(model_directory, empty=True)
+            if GLOBALS.FEREBUS_VERSION > Constants.FEREBUS_LEGACY_CUTOFF:
+                self.make_updated_training_set(
+                    atom, training_set, model_directory, len(training_sets)
+                )
+            else:
+                self.make_legacy_training_set(
+                    atom, training_set, model_directory, len(training_sets)
+                )
+            model_directories += [model_directory]
 
         self.update_alpha()
         return model_directories
-
-        # training_sets = {}
-
-        # training_sets, nproperties = self.get_training_sets(model_type)
-
-        # if model_type.lower() in Constants.multipole_names:
-        #     nproperties = 1
-
-        # FileTools.mkdir(GLOBALS.FILE_STRUCTURE["ferebus"], empty=True)
-        # model_directories = []
-        # for atom, training_set in training_sets.items():
-        #     directory = os.path.join(GLOBALS.FILE_STRUCTURE["ferebus"], atom)
-        #     FileTools.mkdir(directory, empty=True)
-        #     training_set_file = os.path.join(
-        #         directory, atom + "_TRAINING_SET.txt"
-        #     )
-        #     with open(training_set_file, "w") as f:
-        #         for i, line in enumerate(training_set):
-        #             num = f"{i+1}".zfill(4)
-        #             f.write(f"{line} {num}\n")
-        #     FerebusTools.write_finput(
-        #         directory,
-        #         len(training_sets.keys()),
-        #         atom,
-        #         len(training_set),
-        #         model_type=model_type,
-        #         nproperties=nproperties,
-        #     )
-        #     model_directories.append(directory)
-
-        # self.update_alpha()
-
-        # return model_directories
 
     def slice(self, *args):
         return Set()._from(it.islice(self, *args))
@@ -6240,7 +8388,9 @@ class Set(Points):
         true_values = []
         for point in self[npoints:]:
             true_values += [
-                point.get_true_value(str(GLOBALS.OPTIMISE_PROPERTY), atoms=True)
+                point.get_true_value(
+                    str(GLOBALS.OPTIMISE_PROPERTY), atoms=True
+                )
             ]
 
         data = {}
@@ -6334,7 +8484,7 @@ class TrainingSet:
         self.outputs = []
 
     def to_list(self, l):
-        return l if isinstance(l, list) else [l]
+        return l if isinstance(l, list) else list(l)
 
     def append(self, input, output):
         self.inputs.append(self.to_list(input))
@@ -6528,7 +8678,9 @@ class SSH:
                 print()
                 print("Connecting to server")
                 self.ssh.connect(
-                    self.address, username=self.username, password=self.password,
+                    self.address,
+                    username=self.username,
+                    password=self.password,
                 )
                 print("Connected to " + self.address)
                 print()
@@ -6617,7 +8769,9 @@ class DlpolyTools:
             f.write(
                 "# This is a generic CONTROL file. Please adjust to your requirement.\n"
             )
-            f.write("# Directives which are commented are some useful options.\n\n")
+            f.write(
+                "# Directives which are commented are some useful options.\n\n"
+            )
             f.write("ensemble nvt hoover 0.02\n")
             if int(GLOBALS.DLPOLY_TEMPERATURE) == 0:
                 f.write("temperature 10.0\n\n")
@@ -6625,7 +8779,9 @@ class DlpolyTools:
                 f.write("zero\n")
             else:
                 f.write(f"temperature {GLOBALS.DLPOLY_TEMPERATURE}\n\n")
-            f.write("# Cap forces during equilibration, in unit kT/angstrom.\n")
+            f.write(
+                "# Cap forces during equilibration, in unit kT/angstrom.\n"
+            )
             f.write("# (useful if your system is far from equilibrium)\n")
             f.write("cap 100.0\n\n")
             f.write("no vdw\n\n")
@@ -6634,10 +8790,15 @@ class DlpolyTools:
             f.write(f"timestep {GLOBALS.DLPOLY_TIMESTEP}\n")
             f.write("cutoff 15.0\n")
             f.write("fflux\n\n")
-            if GLOBALS.DLPOLY_TEMPERATURE == 0 and GLOBALS.DLPOLY_CHECK_CONVERGENCE:
+            if (
+                GLOBALS.DLPOLY_TEMPERATURE == 0
+                and GLOBALS.DLPOLY_CHECK_CONVERGENCE
+            ):
                 f.write("converge\n")
                 if GLOBALS.DLPOLY_CONVERGENCE_CRITERIA > 0:
-                    f.write(f"criteria {GLOBALS.DLPOLY_CONVERGENCE_CRITERIA}\n")
+                    f.write(
+                        f"criteria {GLOBALS.DLPOLY_CONVERGENCE_CRITERIA}\n"
+                    )
                 if GLOBALS.DLPOLY_MAX_ENERGY > 0:
                     f.write(f"max_energy {GLOBALS.DLPOLY_MAX_ENERGY}\n")
                 if GLOBALS.DLPOLY_MAX_FORCE > 0:
@@ -6695,7 +8856,9 @@ class DlpolyTools:
             )
             f.write(f"{models.nTrain}\t\t#max number of training examples\n")
             for i, atom in enumerate(atoms):
-                f.write(f"{atom.type} {atom.num} {atom.x_axis.num} {atom.xy_plane.num}")
+                f.write(
+                    f"{atom.type} {atom.num} {atom.x_axis.num} {atom.xy_plane.num}"
+                )
                 for j in range(len(atoms)):
                     f.write(" 0") if i == j else f.write(f" {j+1}")
                 f.write("\n")
@@ -6748,13 +8911,17 @@ class DlpolyTools:
     def run_on_log():
         log_dir = GLOBALS.FILE_STRUCTURE["log"]
 
-        model_dirs = FileTools.get_files_in(log_dir, GLOBALS.SYSTEM_NAME + "*/")
+        model_dirs = FileTools.get_files_in(
+            log_dir, GLOBALS.SYSTEM_NAME + "*/"
+        )
         dlpoly_directories = []
         for model_dir in model_dirs:
             dlpoly_directory = DlpolyTools.setup_model(model_dir)
             dlpoly_directories += [dlpoly_directory]
 
-        return SubmissionTools.make_dlpoly_script(dlpoly_directories, submit=True)
+        return SubmissionTools.make_dlpoly_script(
+            dlpoly_directories, submit=True
+        )
 
     # TODO - fix for auto analysis single point
     @staticmethod
@@ -6766,11 +8933,15 @@ class DlpolyTools:
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
             if os.path.exists(trajectory_file):
                 model_name = FileTools.end_of_path(model_dir)
-                trajectory_files[model_name] = Trajectory(trajectory_file, read=True)
+                trajectory_files[model_name] = Trajectory(
+                    trajectory_file, read=True
+                )
 
         for model_name, trajectory in trajectory_files.items():
             if len(trajectory) > 0:
-                gjf_fname = os.path.join(dlpoly_dir, model_name, model_name + ".gjf")
+                gjf_fname = os.path.join(
+                    dlpoly_dir, model_name, model_name + ".gjf"
+                )
                 gjf = GJF(gjf_fname)
                 gjf._atoms = trajectory[-1]
                 gjf.write()
@@ -6787,7 +8958,9 @@ class DlpolyTools:
             for point in points:
                 if point.wfn and re.findall(r"\d+", point.wfn.path):
                     point_num = int(re.findall(r"\d+", point.wfn.path)[-1])
-                    f.write(f"{point.wfn.path} {point_num:4d} {point.wfn.energy}\n")
+                    f.write(
+                        f"{point.wfn.path} {point_num:4d} {point.wfn.energy}\n"
+                    )
                     print(point.wfn.path, point_num, point.wfn.energy)
 
     @staticmethod
@@ -7002,11 +9175,15 @@ class DlpolyTools:
         for directory in directories:
             traj_dir = os.path.join(directory, "TRAJECTORY")
             model_name = FileTools.end_of_path(directory)
-            trajectories[model_name] = DlpolyTools.get_trajectory_energy(traj_dir)
+            trajectories[model_name] = DlpolyTools.get_trajectory_energy(
+                traj_dir
+            )
 
             maxlen = max(len(energies) for _, energies in trajectories.items())
             for key, energies in trajectories.items():
-                trajectories[key] = energies + [np.NaN] * (maxlen - len(energies))
+                trajectories[key] = energies + [np.NaN] * (
+                    maxlen - len(energies)
+                )
 
         df = pd.DataFrame(trajectories)
 
@@ -7089,11 +9266,15 @@ class DlpolyTools:
                             try:
                                 energies += [float(line.split()[2])]
                             except:
-                                print(f"Error parsing energy from line: {line}")
+                                print(
+                                    f"Error parsing energy from line: {line}"
+                                )
                 data[model] = energies
         df = pd.DataFrame(data)
         df.to_excel(
-            os.path.join(str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_Energies.xlsx")
+            os.path.join(
+                str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_Energies.xlsx"
+            )
         )
 
     @staticmethod
@@ -7108,7 +9289,10 @@ class DlpolyTools:
             if os.path.isfile(fflux_atm_file):
                 energies = {}
                 with open(fflux_atm_file, "r") as f:
-                    atoms = [f"{atom}{i+1}" for i, atom in enumerate(f.readline().strip().split())]
+                    atoms = [
+                        f"{atom}{i+1}"
+                        for i, atom in enumerate(f.readline().strip().split())
+                    ]
                     for atom in atoms:
                         energies[atom] = []
                     for line in f:
@@ -7116,14 +9300,19 @@ class DlpolyTools:
                             atoms = line.split()
                         else:
                             try:
-                                for atom, energy in zip(atoms, line.strip().split()):
+                                for atom, energy in zip(
+                                    atoms, line.strip().split()
+                                ):
                                     energies[atom] += [float(energy)]
                             except:
-                                print(f"Error parsing energies from line: {line}")
+                                print(
+                                    f"Error parsing energies from line: {line}"
+                                )
                 data[model] = pd.DataFrame(energies)
         with pd.ExcelWriter(
             os.path.join(
-                str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_ATM_Energies.xlsx"
+                str(GLOBALS.FILE_STRUCTURE["dlpoly"]),
+                "FFLUX_ATM_Energies.xlsx",
             )
         ) as writer:
             for model, df in data.items():
@@ -7141,7 +9330,10 @@ class DlpolyTools:
             if os.path.isfile(fflux_atm_file):
                 energies = {}
                 with open(fflux_atm_file, "r") as f:
-                    atoms = [f"{atom}{i + 1}" for i, atom in enumerate(f.readline().strip().split())]
+                    atoms = [
+                        f"{atom}{i + 1}"
+                        for i, atom in enumerate(f.readline().strip().split())
+                    ]
                     for atom in atoms:
                         energies[atom] = []
                     for line in f:
@@ -7149,15 +9341,19 @@ class DlpolyTools:
                             atoms = line.split()
                         else:
                             try:
-                                for atom, energy in zip(atoms, line.strip().split()):
+                                for atom, energy in zip(
+                                    atoms, line.strip().split()
+                                ):
                                     energies[atom] += [float(energy)]
                             except:
-                                print(f"Error parsing energies from line: {line}")
+                                print(
+                                    f"Error parsing energies from line: {line}"
+                                )
                 data[model] = pd.DataFrame(energies)
         with pd.ExcelWriter(
-                os.path.join(
-                    str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_ATM_Forces.xlsx"
-                )
+            os.path.join(
+                str(GLOBALS.FILE_STRUCTURE["dlpoly"]), "FFLUX_ATM_Forces.xlsx"
+            )
         ) as writer:
             for model, df in data.items():
                 df.to_excel(writer, sheet_name=model)
@@ -7171,27 +9367,37 @@ class DlpolyTools:
             DlpolyTools.submit_trajectory_to_gaussian,
         )
         menu.add_option(
-            "2", "Submit Trajectory to AIMAll", DlpolyTools.submit_trajectory_to_aimall
+            "2",
+            "Submit Trajectory to AIMAll",
+            DlpolyTools.submit_trajectory_to_aimall,
         )
         menu.add_space()
         menu.add_option(
-            "wfn", "Get WFN Energies", DlpolyTools.get_trajectory_gaussian_energies
+            "wfn",
+            "Get WFN Energies",
+            DlpolyTools.get_trajectory_gaussian_energies,
         )
         menu.add_option(
-            "aim", "Get IQA Energies", DlpolyTools.get_trajectory_aimall_energies
+            "aim",
+            "Get IQA Energies",
+            DlpolyTools.get_trajectory_aimall_energies,
         )
         menu.add_space()
         menu.add_option("r", "Auto Run ", DlpolyTools.auto_traj_analysis)
         menu.add_space()
         menu.add_option(
-            "model", "Change The Model To Run Analysis On", DlpolyTools.choose_model,
+            "model",
+            "Change The Model To Run Analysis On",
+            DlpolyTools.choose_model,
         )
         menu.add_option(
             "every", "Change Number Of Points To Use", DlpolyTools.change_every
         )
         menu.add_space()
         menu.add_message(f"Use Model: {DlpolyTools.model_loc}")
-        menu.add_message(f"Use Every: {DlpolyTools.use_every} Point(s) from Trajectory")
+        menu.add_message(
+            f"Use Every: {DlpolyTools.use_every} Point(s) from Trajectory"
+        )
         menu.add_space()
         menu.add_option(
             "pred",
@@ -7209,7 +9415,9 @@ class DlpolyTools:
             DlpolyTools.get_fflux_atm_forces,
         )
         menu.add_space()
-        menu.add_option("o", "Get all FFLUX Outputs", UsefulTools.not_implemented)
+        menu.add_option(
+            "o", "Get all FFLUX Outputs", UsefulTools.not_implemented
+        )
         menu.add_final_options()
 
     @staticmethod
@@ -7313,7 +9521,9 @@ class AnalysisTools:
         )
         if outfile == "":
             outfile = default
-        elif not any(outfile.endswith(filetype) for filetype in allowed_filetypes):
+        elif not any(
+            outfile.endswith(filetype) for filetype in allowed_filetypes
+        ):
             outfile += ".xlsx"
         return outfile
 
@@ -7358,7 +9568,9 @@ class S_CurveTools(AnalysisTools):
                         error *= Constants.ha_to_kj_mol
 
                     model_data[model_name][atom]["true"].append(true_value)
-                    model_data[model_name][atom]["predicted"].append(predicted_value)
+                    model_data[model_name][atom]["predicted"].append(
+                        predicted_value
+                    )
                     model_data[model_name][atom]["error"].append(error)
         return model_data
 
@@ -7390,7 +9602,10 @@ class S_CurveTools(AnalysisTools):
     @staticmethod
     @UsefulTools.external_function()
     def calculate_s_curves(
-        predict_property="all", validation_set=None, models=None, output_file=None,
+        predict_property="all",
+        validation_set=None,
+        models=None,
+        output_file=None,
     ):
         import pandas as pd
 
@@ -7429,7 +9644,9 @@ class S_CurveTools(AnalysisTools):
 
     @staticmethod
     def change_output_file():
-        S_CurveTools.output_file = AnalysisTools.set_output_file(S_CurveTools.output_file)
+        S_CurveTools.output_file = AnalysisTools.set_output_file(
+            S_CurveTools.output_file
+        )
 
     @staticmethod
     def set_vs_dir(directory=None):
@@ -7442,7 +9659,9 @@ class S_CurveTools(AnalysisTools):
     @staticmethod
     def set_model_from_log():
         log_menu = Menu(title="Select Model From Log", auto_close=True)
-        for i, model in enumerate(FileTools.get_files_in(S_CurveTools.log_loc, "*/")):
+        for i, model in enumerate(
+            FileTools.get_files_in(S_CurveTools.log_loc, "*/")
+        ):
             log_menu.add_option(
                 f"{i+1}",
                 model,
@@ -7469,7 +9688,9 @@ class S_CurveTools(AnalysisTools):
         )
         menu.add_option("3", "Custom Directory", S_CurveTools.set_vs_dir)
         menu.add_space()
-        menu.add_message(f"Validation Set Location: {S_CurveTools.validation_set}")
+        menu.add_message(
+            f"Validation Set Location: {S_CurveTools.validation_set}"
+        )
         menu.add_final_options(exit=False)
 
     @staticmethod
@@ -7521,12 +9742,16 @@ class S_CurveTools(AnalysisTools):
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
-        menu.add_option("output", "Change Output File", S_CurveTools.change_output_file)
+        menu.add_option(
+            "output", "Change Output File", S_CurveTools.change_output_file
+        )
         menu.add_option(
             "submit", "Toggle Submit To Cluster", S_CurveTools.toggle_submit
         )
         menu.add_space()
-        menu.add_message(f"Validation Set Location: {S_CurveTools.validation_set}")
+        menu.add_message(
+            f"Validation Set Location: {S_CurveTools.validation_set}"
+        )
         menu.add_message(f"Model Location: {S_CurveTools.models}")
         menu.add_space()
         menu.add_message(f"Output File: {S_CurveTools.output_file}")
@@ -7632,16 +9857,17 @@ class RecoveryErrorTools:
 
         # return stats.describe(df["error / electrons"]), "electrons"
 
-
     @staticmethod
     def calculate_recovery_errors(directory):
         property_function = {
             "iqa": RecoveryErrorTools.calculate_recovery_errors_iqa,
             "charge": RecoveryErrorTools.calculate_recovery_errors_charge,
-            "dipole": RecoveryErrorTools.calculate_recovery_errors_dipole
+            "dipole": RecoveryErrorTools.calculate_recovery_errors_dipole,
         }
 
-        result, unit = property_function[RecoveryErrorTools.property_](directory)
+        result, unit = property_function[RecoveryErrorTools.property_](
+            directory
+        )
 
         print()
         print("#############################")
@@ -7683,9 +9909,15 @@ class RecoveryErrorTools:
             wait=True,
         )
         menu.add_space()
-        menu.add_option("c", "Change Property to Calculate Recovery Error", UsefulTools.not_implemented)
+        menu.add_option(
+            "c",
+            "Change Property to Calculate Recovery Error",
+            UsefulTools.not_implemented,
+        )
         menu.add_space()
-        menu.add_message(f"Property to Calculate Recovery Error: {RecoveryErrorTools.property_}")
+        menu.add_message(
+            f"Property to Calculate Recovery Error: {RecoveryErrorTools.property_}"
+        )
         menu.add_final_options()
 
     @staticmethod
@@ -7707,7 +9939,11 @@ class RMSETools(AnalysisTools):
     @staticmethod
     def make_models_list(loc):
         if loc.lower() == "all":
-            models_loc = [d for d in Path(GLOBALS.FILE_STRUCTURE["log"]).iterdir() if d.is_dir()]
+            models_loc = [
+                d
+                for d in Path(GLOBALS.FILE_STRUCTURE["log"]).iterdir()
+                if d.is_dir()
+            ]
         else:
             models_loc = [loc]
         return [Models(loc, read_models=True) for loc in models_loc]
@@ -7718,7 +9954,9 @@ class RMSETools(AnalysisTools):
         vs = Set(RMSETools.validation_set).read()
         rmse_data = {}
         for models in models_list:
-            predictions = models.predict(vs, atoms=True, type=type, verbose=True)
+            predictions = models.predict(
+                vs, atoms=True, type=type, verbose=True
+            )
             rmse_data[models.nTrain] = {}
             for point, predicted in zip(vs, predictions):
                 for type, values in predicted.items():
@@ -7726,31 +9964,47 @@ class RMSETools(AnalysisTools):
                     pred_total = 0.0
                     for atom, pred in values.items():
                         atom_name = point.ints[atom - 1].atom
-                        if not atom_name + "_True" in rmse_data[models.nTrain].keys():
+                        if (
+                            not atom_name + "_True"
+                            in rmse_data[models.nTrain].keys()
+                        ):
                             rmse_data[models.nTrain][atom_name + "_True"] = []
-                            rmse_data[models.nTrain][atom_name + "_Predicted"] = []
+                            rmse_data[models.nTrain][
+                                atom_name + "_Predicted"
+                            ] = []
                             rmse_data[models.nTrain][atom_name + "_Error"] = []
                         true = getattr(point.ints[atom - 1], type)
                         true_total += true
                         pred_total += pred
                         rmse_data[models.nTrain][atom_name + "_True"] += [true]
-                        rmse_data[models.nTrain][atom_name + "_Predicted"] += [pred]
-                        error = np.abs(true - pred) * (Constants.ha_to_kj_mol if type == "iqa" else 1.0)
-                        rmse_data[models.nTrain][atom_name + "_Error"] += [error]
+                        rmse_data[models.nTrain][atom_name + "_Predicted"] += [
+                            pred
+                        ]
+                        error = np.abs(true - pred) * (
+                            Constants.ha_to_kj_mol if type == "iqa" else 1.0
+                        )
+                        rmse_data[models.nTrain][atom_name + "_Error"] += [
+                            error
+                        ]
                     if not "Total_True" in rmse_data[models.nTrain].keys():
                         rmse_data[models.nTrain]["Total_True"] = []
                         rmse_data[models.nTrain]["Total_Predicted"] = []
                         rmse_data[models.nTrain]["Total_Error"] = []
                     rmse_data[models.nTrain]["Total_True"] += [true_total]
                     rmse_data[models.nTrain]["Total_Predicted"] += [pred_total]
-                    error = np.abs(true_total - pred_total) * (Constants.ha_to_kj_mol if type == "iqa" else 1.0)
+                    error = np.abs(true_total - pred_total) * (
+                        Constants.ha_to_kj_mol if type == "iqa" else 1.0
+                    )
                     rmse_data[models.nTrain]["Total_Error"] += [error]
 
-        rmse_data = {n: d for n, d in sorted(rmse_data.items(), key=lambda item: item[0])}
+        rmse_data = {
+            n: d
+            for n, d in sorted(rmse_data.items(), key=lambda item: item[0])
+        }
 
         def rmse(data):
-            total = sum(x**2 for x in data)
-            return np.sqrt(total/len(data))
+            total = sum(x ** 2 for x in data)
+            return np.sqrt(total / len(data))
 
         rmse_calc = {}
         for n_train, data in rmse_data.items():
@@ -7760,6 +10014,7 @@ class RMSETools(AnalysisTools):
                     rmse_calc[n_train][heading.split("_")[0]] = rmse(values)
 
         import pandas as pd
+
         with pd.ExcelWriter(RMSETools.output_file) as writer:
             df = pd.DataFrame(rmse_calc)
             df.T.to_excel(writer, sheet_name="RMSE")
@@ -7768,14 +10023,15 @@ class RMSETools(AnalysisTools):
                 df = pd.DataFrame(data).sort_values("Total_Error")
                 df.to_excel(writer, sheet_name=f"{n_train} Points")
 
-
     @staticmethod
     def toggle_submit():
         RMSETools.submit = not RMSETools.submit
 
     @staticmethod
     def change_output_file():
-        RMSETools.output_file = AnalysisTools.set_output_file(S_CurveTools.output_file)
+        RMSETools.output_file = AnalysisTools.set_output_file(
+            S_CurveTools.output_file
+        )
 
     @staticmethod
     def set_vs_dir(directory=None):
@@ -7802,7 +10058,9 @@ class RMSETools(AnalysisTools):
         )
         menu.add_option("3", "Custom Directory", RMSETools.set_vs_dir)
         menu.add_space()
-        menu.add_message(f"Validation Set Location: {RMSETools.validation_set}")
+        menu.add_message(
+            f"Validation Set Location: {RMSETools.validation_set}"
+        )
         menu.add_final_options(exit=False)
 
     @staticmethod
@@ -7821,7 +10079,12 @@ class RMSETools(AnalysisTools):
         )
         menu.add_option("3", "Custom Directory", RMSETools.set_model_dir)
         menu.add_space()
-        menu.add_option("a", "All Models from LOG", RMSETools.set_model_dir, kwargs={"directory": "all"})
+        menu.add_option(
+            "a",
+            "All Models from LOG",
+            RMSETools.set_model_dir,
+            kwargs={"directory": "all"},
+        )
         menu.add_space()
         menu.add_message(f"Model Location: {S_CurveTools.models}")
         menu.add_final_options(exit=False)
@@ -7834,18 +10097,37 @@ class RMSETools(AnalysisTools):
         model_menu = Menu(title="Select Model Location", auto_close=True)
         model_menu.set_refresh(RMSETools.refresh_model_menu)
 
-        menu.add_option("1", "Calculate RMSE of IQA Model(s)", RMSETools.calculate_rmse, kwargs={"type": "iqa"})
-        menu.add_option("2", "Calculate RMSE of Multipole Model(s)", RMSETools.calculate_rmse, kwargs={"type": "multipoles"})
-        menu.add_option("3", "Calculate RMSE of All Model(s)", RMSETools.calculate_rmse, kwargs={"type": "all"})
+        menu.add_option(
+            "1",
+            "Calculate RMSE of IQA Model(s)",
+            RMSETools.calculate_rmse,
+            kwargs={"type": "iqa"},
+        )
+        menu.add_option(
+            "2",
+            "Calculate RMSE of Multipole Model(s)",
+            RMSETools.calculate_rmse,
+            kwargs={"type": "multipoles"},
+        )
+        menu.add_option(
+            "3",
+            "Calculate RMSE of All Model(s)",
+            RMSETools.calculate_rmse,
+            kwargs={"type": "all"},
+        )
         menu.add_space()
         menu.add_option("vs", "Select Validation Set Location", vs_menu.run)
         menu.add_option("model", "Select Model Location", model_menu.run)
-        menu.add_option("output", "Change Output File", RMSETools.change_output_file)
+        menu.add_option(
+            "output", "Change Output File", RMSETools.change_output_file
+        )
         # menu.add_option(
         #     "submit", "Toggle Submit To Cluster", RMSETools.toggle_submit
         # )
         menu.add_space()
-        menu.add_message(f"Validation Set Location: {RMSETools.validation_set}")
+        menu.add_message(
+            f"Validation Set Location: {RMSETools.validation_set}"
+        )
         menu.add_message(f"Model Location: {RMSETools.models}")
         menu.add_space()
         menu.add_message(f"Output File: {RMSETools.output_file}")
@@ -7871,7 +10153,9 @@ class SetupTools:
         for directory in SetupTools.sets:
             dir_path = GLOBALS.FILE_STRUCTURE[directory]
             empty = False
-            if UsefulTools.check_bool(input(f"Setup Directory: {dir_path} [Y/N]")):
+            if UsefulTools.check_bool(
+                input(f"Setup Directory: {dir_path} [Y/N]")
+            ):
                 if os.path.isdir(dir_path):
                     print()
                     print(f"Warning: {dir_path} exists")
@@ -7887,7 +10171,9 @@ class SetupTools:
         n_points = -1
         if set_to_make != "training_set":
             while True:
-                n_points = int(input(f"Enter number of points for the {set_name}: "))
+                n_points = int(
+                    input(f"Enter number of points for the {set_name}: ")
+                )
                 if n_points > 0:
                     break
                 else:
@@ -7924,7 +10210,9 @@ class SettingsTools:
 
     @staticmethod
     def set_default():
-        GLOBALS.set(SettingsTools.edit_var.name, SettingsTools.edit_var.default)
+        GLOBALS.set(
+            SettingsTools.edit_var.name, SettingsTools.edit_var.default
+        )
 
     @staticmethod
     def set_value(value):
@@ -7948,9 +10236,12 @@ class SettingsTools:
     @staticmethod
     def choose_value():
         choose_menu = Menu(
-            title=f"{SettingsTools.edit_var.name} Allowed Values", auto_close=True,
+            title=f"{SettingsTools.edit_var.name} Allowed Values",
+            auto_close=True,
         )
-        for i, allowed_value in enumerate(SettingsTools.edit_var.allowed_values):
+        for i, allowed_value in enumerate(
+            SettingsTools.edit_var.allowed_values
+        ):
             choose_menu.add_option(
                 str(i + 1),
                 str(allowed_value),
@@ -7971,7 +10262,9 @@ class SettingsTools:
         # menu.add_message(f"Hidden:  {SettingsTools.edit_var.hidden}")
         # menu.add_message(f"Changed: {SettingsTools.edit_var.changed}")
         menu.add_option("e", "Edit value of setting", SettingsTools.edit_value)
-        menu.add_option("d", "Revert to default value", SettingsTools.set_default)
+        menu.add_option(
+            "d", "Revert to default value", SettingsTools.set_default
+        )
         if SettingsTools.edit_var.allowed_values:
             menu.add_option(
                 "c", "Choose from allowed values", SettingsTools.choose_value
@@ -7987,7 +10280,9 @@ class SettingsTools:
         filetypes = [".properties", ".yaml"]
         print(f"Change config file")
         while True:
-            new_config = UsefulTools.input_with_prefill(">> ", Arguments.config_file)
+            new_config = UsefulTools.input_with_prefill(
+                ">> ", Arguments.config_file
+            )
             if any(new_config.endswith(filetype) for filetype in filetypes):
                 Arguments.config_file = new_config
                 break
@@ -8017,7 +10312,9 @@ class SettingsTools:
             for global_var in global_variables:
                 if global_var.hidden:
                     global_var_value = str(global_var.value)
-                    menu.add_message(global_var.name + " = " + global_var_value)
+                    menu.add_message(
+                        global_var.name + " = " + global_var_value
+                    )
             menu.add_space()
 
         menu.add_option(
@@ -8026,7 +10323,9 @@ class SettingsTools:
             SettingsTools.save_changes,
         )
         menu.add_option("c", "Change config file", SettingsTools.change_config)
-        menu.add_option("h", "Show/Hide Hidden Variables", SettingsTools.toggle_hidden)
+        menu.add_option(
+            "h", "Show/Hide Hidden Variables", SettingsTools.toggle_hidden
+        )
         menu.add_final_options()
 
     @staticmethod
@@ -8080,6 +10379,40 @@ class ModelTools:
         SubmissionTools.make_ferebus_script(models, model_type=model_type)
 
     @staticmethod
+    def move_models_legacy(model_file, model_directory, model_type, copy_to_log):
+        model_files = [model_file]
+        if os.path.isdir(model_file):
+            model_files = FileTools.get_files_in(model_file, "*_kriging_*.txt")
+
+        for model_file in model_files:
+            model = Model(model_file)
+            model.remove_no_noise()
+
+            if model_type.lower() == "iqa":
+                model.type = "IQA"
+            elif not model_type.lower() == "multipoles":
+                model.type = str(model_type)
+            new_model_file = model.get_fname(model_directory)
+            FileTools.copy_file(model_file, new_model_file)
+
+            if copy_to_log:
+                model.copy_to_log()
+    
+    @staticmethod
+    def move_models_updated(model_file, model_directory, copy_to_log):
+        model_files = [model_file]
+        if os.path.isdir(model_file):
+            model_files = FileTools.get_files_in(model_file, "*.model")
+
+        for model_file in model_files:
+            path = Path(model_file)
+            model = Model(path)
+            new_model_file = Path(model_directory) / path.name
+            FileTools.copy_file(model_file, new_model_file)
+            if copy_to_log:
+                model.copy_to_log()
+
+    @staticmethod
     def get_start_stop_step():
         start = 0
         print(f"Enter Minimum Number of Training Points")
@@ -8093,9 +10426,11 @@ class ModelTools:
                     print("Error: Number of points must be greater than 0")
             except:
                 print("Error: Answer must be an integer")
-        
+
         stop = 0
-        print(f"Enter Maximum Number of Training Points ({start} - {len(ModelTools.training_set)})")
+        print(
+            f"Enter Maximum Number of Training Points ({start} - {len(ModelTools.training_set)})"
+        )
         while stop == 0:
             ans = input(">> ")
             try:
@@ -8108,14 +10443,14 @@ class ModelTools:
                     )
             except:
                 print("Error: Answer must be an integer")
-        
+
         step = 0
         print(f"Enter Step Size")
         while step == 0:
             ans = input(">> ")
             try:
                 ans = int(ans)
-                if 1 <= ans <= stop-start:
+                if 1 <= ans <= stop - start:
                     step = ans
                 else:
                     print(
@@ -8129,12 +10464,10 @@ class ModelTools:
     def remake_models(directory):
         start, stop, step = ModelTools.get_start_stop_step()
         aims = Set(directory).read()
-        for i in range(start, stop+1, step):
+        for i in range(start, stop + 1, step):
             # models = aims.slice(stop)
             print(i)
         quit()
-
-
 
     @staticmethod
     def choose_multipole(multipole):
@@ -8164,7 +10497,9 @@ class ModelTools:
 
     @staticmethod
     def change_n_points():
-        print(f"Enter Number of Training Points (1 - {len(ModelTools.training_set)})")
+        print(
+            f"Enter Number of Training Points (1 - {len(ModelTools.training_set)})"
+        )
         while True:
             ans = input(">> ")
             try:
@@ -8212,14 +10547,16 @@ class ModelTools:
         menu.add_option("s", "Toggle Submit", ModelTools.toggle_submit)
         menu.add_space()
         menu.add_option(
-            "r", "Remake All Models", ModelTools.remake_models,
-            kwargs={
-                "directory": ModelTools.training_set_directory,
-            },
+            "r",
+            "Remake All Models",
+            ModelTools.remake_models,
+            kwargs={"directory": ModelTools.training_set_directory,},
         )
         menu.add_space()
         menu.add_message(f"Multipole Model: {ModelTools.multipole_model}")
-        menu.add_message(f"Number of Training Points: {ModelTools.n_training_points}")
+        menu.add_message(
+            f"Number of Training Points: {ModelTools.n_training_points}"
+        )
         menu.add_message(f"Submit Model Making: {ModelTools.submit}")
         menu.add_final_options()
 
@@ -8242,8 +10579,12 @@ class FileRemoverDaemon(Daemon):
     def __init__(self):
         cwd = os.getcwd()
         pidfile = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_pid"])
-        stdout = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_stdout"])
-        stderr = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["file_remover_stderr"])
+        stdout = os.path.join(
+            cwd, GLOBALS.FILE_STRUCTURE["file_remover_stdout"]
+        )
+        stderr = os.path.join(
+            cwd, GLOBALS.FILE_STRUCTURE["file_remover_stderr"]
+        )
         super().__init__(pidfile, stdout=stdout, stderr=stderr)
 
     def run(self):
@@ -8267,7 +10608,9 @@ class FileRemover:
 
     @staticmethod
     def run_daemon():
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True)
+        FileTools.mkdir(
+            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True
+        )
         file_remover_daemon = FileRemoverDaemon()
         file_remover_daemon.start()
 
@@ -8283,7 +10626,10 @@ class SetTools:
                 atom_name = atom.atom_num
                 atom_features = atom.features
                 outputs = Constants.multipole_names + ["iqa"]
-                atom_output = {output: point.ints[atom_name].get_property(output) for output in outputs}
+                atom_output = {
+                    output: point.ints[atom_name].get_property(output)
+                    for output in outputs
+                }
                 if atom_name not in data.keys():
                     data[atom_name] = {}
 
@@ -8299,6 +10645,7 @@ class SetTools:
                     data[atom_name][output_name] += [output]
 
         import pandas as pd
+
         for atom, atom_data in data.items():
             df = pd.DataFrame(atom_data)
             directory_name = directory.replace(os.sep, "_").strip("_").upper()
@@ -8311,12 +10658,19 @@ class SetTools:
         vs_dir = GLOBALS.FILE_STRUCTURE["validation_set"]
 
         csv_menu = Menu(title="CSV Menu")
-        csv_menu.add_option("1", "Training Set", SetTools.to_csv, {"directory": ts_dir})
-        csv_menu.add_option("2", "Sample Pool", SetTools.to_csv, {"directory": sp_dir})
-        csv_menu.add_option("3", "Validation Set", SetTools.to_csv, {"directory": vs_dir})
+        csv_menu.add_option(
+            "1", "Training Set", SetTools.to_csv, {"directory": ts_dir}
+        )
+        csv_menu.add_option(
+            "2", "Sample Pool", SetTools.to_csv, {"directory": sp_dir}
+        )
+        csv_menu.add_option(
+            "3", "Validation Set", SetTools.to_csv, {"directory": vs_dir}
+        )
         csv_menu.add_final_options()
 
         csv_menu.run()
+
 
 #############################################
 #            Function Definitions           #
@@ -8383,28 +10737,23 @@ def submit_wfns(directory):
 
 
 @UsefulTools.external_function()
-def move_models(model_file, model_type="iqa", copy_to_log=True, ferebus_directory=None):
+def move_models(
+    model_file, model_type="iqa", copy_to_log=True, ferebus_directory=None
+):
     logger.info("Moving Completed Models")
-    model_directory = os.path.join(ferebus_directory if ferebus_directory else str(GLOBALS.FILE_STRUCTURE["ferebus"]), "MODELS")
+    model_directory = os.path.join(
+        ferebus_directory
+        if ferebus_directory
+        else str(GLOBALS.FILE_STRUCTURE["ferebus"]),
+        "MODELS",
+    )
     FileTools.mkdir(model_directory)
 
-    model_files = [model_file]
-    if os.path.isdir(model_file):
-        model_files = FileTools.get_files_in(model_file, "*_kriging_*.txt")
-
-    for model_file in model_files:
-        model = Model(model_file)
-        model.remove_no_noise()
-
-        if model_type.lower() == "iqa":
-            model.type = "IQA"
-        elif not model_type.lower() == "multipoles":
-            model.type = str(model_type)
-        new_model_file = model.get_fname(model_directory)
-        FileTools.copy_file(model_file, new_model_file)
-
-        if copy_to_log:
-            model.copy_to_log()
+    if GLOBALS.FEREBUS_VERSION > Constants.FEREBUS_LEGACY_CUTOFF:
+        ModelTools.move_models_updated(model_file, model_directory, copy_to_log)
+    else:
+        ModelTools.move_models_legacy(model_file, model_directory, model_type, copy_to_log)
+    
 
 
 @UsefulTools.external_function()
@@ -8454,9 +10803,14 @@ def dlpoly_analysis():
         "traj", "Trajectory Analysis Tools", DlpolyTools.traj_analysis
     )
     dlpoly_menu.add_space()
-    dlpoly_menu.add_option("r", "Auto Run DLPOLY Analysis", DlpolyTools.auto_run)
     dlpoly_menu.add_option(
-        "link", "Check Model Symlinks", DlpolyTools.check_model_links, hidden=True,
+        "r", "Auto Run DLPOLY Analysis", DlpolyTools.auto_run
+    )
+    dlpoly_menu.add_option(
+        "link",
+        "Check Model Symlinks",
+        DlpolyTools.check_model_links,
+        hidden=True,
     )
     dlpoly_menu.add_final_options()
 
@@ -8470,7 +10824,9 @@ def opt():
     opt_dir = GLOBALS.FILE_STRUCTURE["opt"]
     FileTools.mkdir(opt_dir)
 
-    opt_gjf = GJF(os.path.join(opt_dir, GLOBALS.SYSTEM_NAME + "1".zfill(4) + ".gjf"))
+    opt_gjf = GJF(
+        os.path.join(opt_dir, GLOBALS.SYSTEM_NAME + "1".zfill(4) + ".gjf")
+    )
     opt_gjf._atoms = atoms
     opt_gjf.job_type = "opt"
     opt_gjf.write()
@@ -8491,7 +10847,10 @@ def main_menu():
     # === Training Set Menu ===#
     training_set_menu = Menu(title="Training Set Menu")
     training_set_menu.add_option(
-        "1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": ts_dir},
+        "1",
+        "Submit GJFs to Gaussian",
+        submit_gjfs,
+        kwargs={"directory": ts_dir},
     )
     training_set_menu.add_option(
         "2",
@@ -8501,11 +10860,17 @@ def main_menu():
         wait=True,
     )
     training_set_menu.add_option(
-        "3", "Make Models", ModelTools.make_models_menu, kwargs={"directory": ts_dir},
+        "3",
+        "Make Models",
+        ModelTools.make_models_menu,
+        kwargs={"directory": ts_dir},
     )
     training_set_menu.add_space()
     training_set_menu.add_option(
-        "a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": ts_dir},
+        "a",
+        "Auto Run AIMAll",
+        AutoTools.submit_aimall,
+        kwargs={"directory": ts_dir},
     )
     training_set_menu.add_option("m", "Auto Make Models", AutoTools.run_models)
     training_set_menu.add_space()
@@ -8514,28 +10879,40 @@ def main_menu():
     # === Sample Set Menu ===#
     sample_pool_menu = Menu(title="Sample Pool Menu")
     sample_pool_menu.add_option(
-        "1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": sp_dir},
+        "1",
+        "Submit GJFs to Gaussian",
+        submit_gjfs,
+        kwargs={"directory": sp_dir},
     )
     sample_pool_menu.add_option(
         "2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": sp_dir}
     )
     sample_pool_menu.add_space()
     sample_pool_menu.add_option(
-        "a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": sp_dir},
+        "a",
+        "Auto Run AIMAll",
+        AutoTools.submit_aimall,
+        kwargs={"directory": sp_dir},
     )
     sample_pool_menu.add_final_options()
 
     # === Validation Set Menu ===#
     validation_set_menu = Menu(title="Validation Set Menu")
     validation_set_menu.add_option(
-        "1", "Submit GJFs to Gaussian", submit_gjfs, kwargs={"directory": vs_dir},
+        "1",
+        "Submit GJFs to Gaussian",
+        submit_gjfs,
+        kwargs={"directory": vs_dir},
     )
     validation_set_menu.add_option(
         "2", "Submit WFNs to AIMAll", submit_wfns, kwargs={"directory": vs_dir}
     )
     validation_set_menu.add_space()
     validation_set_menu.add_option(
-        "a", "Auto Run AIMAll", AutoTools.submit_aimall, kwargs={"directory": vs_dir},
+        "a",
+        "Auto Run AIMAll",
+        AutoTools.submit_aimall,
+        kwargs={"directory": vs_dir},
     )
     validation_set_menu.add_final_options()
 
@@ -8544,7 +10921,9 @@ def main_menu():
         title="Run Properties Menu",
         message="Perform adaptive sampling on a per-property basis",
     )
-    properties_menu.add_option("r", "Auto Run Properties", PropertyTools.run, wait=True)
+    properties_menu.add_option(
+        "r", "Auto Run Properties", PropertyTools.run, wait=True
+    )
     properties_menu.add_option(
         "d",
         "Auto Run Properties as Background Process (recommended)",
@@ -8571,29 +10950,37 @@ def main_menu():
 
     # === Analysis Menu ===#
     analysis_menu = Menu(title="Analysis Menu")
-    analysis_menu.add_option("dlpoly", "Test Models with DLPOLY", dlpoly_analysis)
     analysis_menu.add_option(
-        "opt", "Perform Geometry Optimisation on First Point in Sample Pool", opt,
+        "dlpoly", "Test Models with DLPOLY", dlpoly_analysis
+    )
+    analysis_menu.add_option(
+        "opt",
+        "Perform Geometry Optimisation on First Point in Sample Pool",
+        opt,
     )
     analysis_menu.add_option("s", "Create S-Curves", S_CurveTools.run)
     analysis_menu.add_option(
-        "r", "Calculate Recovery Errors", RecoveryErrorTools.recovery_error_menu
+        "r",
+        "Calculate Recovery Errors",
+        RecoveryErrorTools.recovery_error_menu,
     )
-    analysis_menu.add_option(
-        "rmse", "Calculate RMSE", RMSETools.rmse_menu
-    )
+    analysis_menu.add_option("rmse", "Calculate RMSE", RMSETools.rmse_menu)
     analysis_menu.add_final_options()
 
     # === Tools Menu ===#
     tools_menu = Menu(title="Tools Menu")
-    tools_menu.add_option("setup", "Setup ICHOR Directories", SetupTools.directories)
+    tools_menu.add_option(
+        "setup", "Setup ICHOR Directories", SetupTools.directories
+    )
     tools_menu.add_option("make", "Make Sets", SetupTools.make_sets)
     tools_menu.add_option("cp2k", "Setup CP2K run", CP2KTools.cp2k_menu)
     tools_menu.add_space()
     tools_menu.add_option("wfn", "Convert WFN to GJF", PointTools.wfn_to_gjf)
     tools_menu.add_option("csv", "Produce CSV From Set", SetTools.to_csv_menu)
     tools_menu.add_space()
-    tools_menu.add_option("bak", "Revert All INT JSON Backup Files", Points.revert_backup)
+    tools_menu.add_option(
+        "bak", "Revert All INT JSON Backup Files", Points.revert_backup
+    )
     tools_menu.add_final_options()
 
     # === Options Menu ===#
@@ -8607,7 +10994,9 @@ def main_menu():
     # === Queue Menu ===#
     queue_menu = Menu(title="Queue Menu")
     queue_menu.add_option("stat", "Get qstat", BatchTools.qstat, wait=True)
-    queue_menu.add_option("del", "Get qdel running jobs", BatchTools.qdel, wait=True)
+    queue_menu.add_option(
+        "del", "Get qdel running jobs", BatchTools.qdel, wait=True
+    )
     queue_menu.add_final_options()
 
     # === Main Menu ===#
@@ -8624,7 +11013,10 @@ def main_menu():
         "4",
         "Calculate Errors",
         calculate_errors,
-        kwargs={"models_directory": models_dir, "sample_pool_directory": sp_dir,},
+        kwargs={
+            "models_directory": models_dir,
+            "sample_pool_directory": sp_dir,
+        },
     )
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", AutoTools.run)
@@ -8650,7 +11042,9 @@ if __name__ == "__main__":
     atexit.register(FileRemover.run_daemon)
 
     if Arguments.call_external_function is not None:
-        Arguments.call_external_function(*Arguments.call_external_function_args)
+        Arguments.call_external_function(
+            *Arguments.call_external_function_args
+        )
         quit()
 
     main_menu()
