@@ -8153,6 +8153,7 @@ class Set(Points):
             self.parse()
 
     def parse(self):
+        added = []
         with os.scandir(self.path) as it:
             for entry in it:
                 if entry.is_file() and FileTools.get_filetype(entry) in [
@@ -8165,8 +8166,11 @@ class Set(Points):
                     FileTools.mkdir(dst, empty=False)
                     FileTools.move_file(src, dst)
                     self.add_dir(dst)
+                    added += [dst]
                 elif entry.is_dir():
-                    self.add_dir(entry.path)
+                    if not entry.path in added:
+                        self.add_dir(entry.path)
+                        added += [entry.path]
         self.sort()
 
     @buildermethod
