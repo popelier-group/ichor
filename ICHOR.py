@@ -4991,6 +4991,9 @@ class Directory(Point):
 
         self.path = dst
 
+    def __hash__(self):
+        return hash(self.path)
+        
     def __bool__(self):
         return any(self.gjf, self.wfn, self.ints)
 
@@ -10765,6 +10768,12 @@ def calculate_errors(models_directory, sample_pool_directory):
     logger.info("Calculating errors of the Sample Pool")
 
     models = Models(models_directory, read_models=True)
+    n_train = FileTools.count_points_in(GLOBALS.FILE_STRUCTURE["training_set"])
+
+    if n_train != models.nTrain:
+        logger.error(f"Number of points in model ({models.nTrain}) does not match number of training points ({n_train})")
+        logger.warning("Skipping failed iteration, no points added to Training Set")
+        quit()
     sample_pool = Set(sample_pool_directory).read_gjfs()
 
     points = models.expected_improvement(sample_pool)
