@@ -7921,10 +7921,11 @@ class Models:
         epe = alpha * cv_errors + (1 - alpha) * variances
 
         if added_points:
+            mask = np.array([0 if i in added_points else 1 for i in range(len(points))])
             added_points = [points[i] for i in added_points]
             _added_points = Set()
             [_added_points.add_dir(point) for point in added_points]
-            distances = self.distances(points, _added_points)
+            distances = self.distances(points, _added_points) * mask
             epe *= distances
 
         return epe
@@ -8418,6 +8419,32 @@ class Set(Points):
         alpha_file = GLOBALS.FILE_STRUCTURE["alpha"]
         with open(alpha_file, "w") as f:
             json.dump(data, f)
+
+    def get_atom_features(self, atom):
+        return self.features[atom]
+
+    def get_atom_feature(self, atom, feature):
+        return [features[feature] for features in self.get_atom_features(atom)]
+
+    @property
+    def natoms(self):
+        if len(self) > 0:
+            return self[0].natoms
+        else:
+            return 0
+
+    @property
+    def features(self):
+        #          iatom   ipoint   ifeat
+        # features[natoms][npoints][nfeatures]
+        try:
+            return self._features
+        except AttributeError:
+            self._features = [[] for _ in range(self.natoms)]
+            for point in self:
+                for i, feature in enumerate(point.features):
+                    self._features[i].append(feature)
+            return self._features
 
     def __getitem__(self, idx):
         return self.points[idx]
