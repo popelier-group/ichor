@@ -2899,7 +2899,7 @@ class TimingManager:
         self.submission_script = submission_script
         self.message = message
 
-        self.job_id = "$SGE_JOB_ID"
+        self.job_id = "$JOB_ID"
         self.task_id = "$SGE_TASK_ID"
 
     @property
@@ -3902,6 +3902,7 @@ class AutoTools:
         type=None,
         npoints=None,
         ferebus_directory=None,
+        atoms=None
     ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
@@ -3911,12 +3912,15 @@ class AutoTools:
             npoints = -1
         if not ferebus_directory:
             ferebus_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
+        if not atoms:
+            atoms = "all"
         return AutoTools.submit_ichor(
             "make_models",
             directory,
             type,
             npoints,
             ferebus_directory,
+            atoms,
             submit=True,
             hold=jid,
         )
@@ -4087,6 +4091,7 @@ class AutoTools:
                 if "type" in func.__code__.co_varnames:
                     args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
                 if "atoms" in func.__code__.co_varnames:
+                    print("here")
                     args["atoms"] = str(GLOBALS.OPTIMISE_ATOM)
                 script_name, jid = func(**args)
                 print(f"Submitted {script_name}: {jid}")
@@ -8323,7 +8328,7 @@ class Set(Points):
             atom,
         )
 
-    def make_training_set(self, model_type, npoints=-1, directory=None):
+    def make_training_set(self, model_type, npoints=-1, directory=None, atoms="all"):
         if npoints < 0:
             npoints = len(self)
 
@@ -8336,7 +8341,8 @@ class Set(Points):
             input = point.features_dict
             output = point.get_property(model_type)
             for atom in input.keys():
-                training_sets[atom] += (input[atom], output[atom])
+                if atoms == "all" or atom.lower == atoms.lower():
+                    training_sets[atom] += (input[atom], output[atom])
 
         for atom, training_set in training_sets.items():
             training_sets[atom] = training_set.slice(min(npoints, len(self)))
@@ -10392,7 +10398,7 @@ class ModelTools:
         logger.info(f"Making {model_type} models")
 
         aims = Set(directory).read()
-        models = aims.make_training_set(model_type, npoints, atoms)
+        models = aims.make_training_set(model_type, npoints, atoms=atoms)
         SubmissionTools.make_ferebus_script(models, model_type=model_type)
 
     @staticmethod
