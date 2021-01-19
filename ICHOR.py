@@ -1196,6 +1196,7 @@ class Globals:
         globals.POINTS_PER_ITERATION = 1, int
 
         globals.OPTIMISE_PROPERTY = "iqa", str
+        globals.OPTIMISE_ATOM = "all", str
 
         globals.ADAPTIVE_SAMPLING_METHOD = "epe", str
         globals.NORMALISE = False, bool
@@ -2892,30 +2893,62 @@ class ParallelEnvironments:
                 environment = ParallelEnvironment(*parallel_environment)
             self._environments[machine] += environment
 
+class DataLock:
+    __lock = False
+    __count = 0
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def is_locked(cls):
+        return cls.__lock
+
+    @classmethod
+    def unlock(cls):
+        cls.__lock = False
+        cls.__count = 1
+
+    @classmethod
+    def __enter__(cls):
+        cls.__lock = True
+        cls.__count += 1
+
+    @classmethod
+    def __exit__(cls, exc_type, exc_value, exc_traceback):
+        cls.__count -= 1 if cls.__count > 0 else 0
+        cls.__lock = cls.__count != 0
 
 class TimingManager:
     def __init__(self, submission_script, message=None):
         self.submission_script = submission_script
         self.message = message
 
+        self.job_id = "$JOB_ID"
+        self.task_id = "$SGE_TASK_ID"
+
+    @property
+    def identifier(self):
+        return f"{self.submission_script.fname}:{self.job_id}:{self.task_id}"
+
     def __enter__(self):
         python_job = PythonCommand()
         if self.message:
             python_job.run_func(
                 "log_time",
-                f"START:{self.submission_script.fname}",
+                f"START:{self.identifier}",
                 self.message,
             )
         else:
             python_job.run_func(
-                "log_time", f"START:{self.submission_script.fname}"
+                "log_time", f"START:{self.identifier}"
             )
         self.submission_script.add(python_job)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         python_job = PythonCommand()
         python_job.run_func(
-            "log_time", f"FINISH:{self.submission_script.fname}"
+            "log_time", f"FINISH:{self.identifier}"
         )
         self.submission_script.add(python_job)
 
@@ -2967,8 +3000,8 @@ class CommandLine:
             ndata = self.ndata
         return [f"var{i+1}" for i in range(ndata)]
 
-    def get_variable(self, index, var="SGE_TASK_ID-1"):
-        if len(self) > 1 or _data_lock:
+    def get_variable(self, index, var="SGE_TASK_ID-1", force=False):
+        if len(self) > 1 or DataLock.is_locked() or force:
             if not self.array_names:
                 self.array_names = self.setup_array_names()
             if isinstance(var, int):
@@ -2994,7 +3027,7 @@ class CommandLine:
         return os.path.splitext(infile)[0] + f".{ext}"
 
     def _read_data_file_string(self, datafile, data, delimiter=","):
-        if len(self) == 1 and not _data_lock:
+        if len(self) == 1 and not DataLock.is_locked():
             return ""
 
         datafile = os.path.abspath(datafile)
@@ -3015,7 +3048,7 @@ class CommandLine:
         return "\n".join(read_data_file) + "\n"
 
     def _write_data_file(self, fname, data, delimiter=","):
-        if _data_lock:
+        if DataLock.is_locked():
             return
         with open(fname, "w") as f:
             for data_line in zip(*data):
@@ -3100,7 +3133,7 @@ class GaussianCommand(CommandLine):
 
 
 class AIMAllCommand(CommandLine):
-    def __init__(self):
+    def __init__(self, atoms="all"):
         self.infiles = []
         self.outfiles = []
 
@@ -3109,6 +3142,10 @@ class AIMAllCommand(CommandLine):
             "csf3": "~/AIMAll/aimqb.ish",
             "ffluxlab": "aimall",
         }
+
+        if not atoms == "all":
+            atoms = str(UsefulTools.get_number(atoms))
+        self.atoms = atoms
 
         super().__init__()
 
@@ -3134,12 +3171,12 @@ class AIMAllCommand(CommandLine):
         self.arguments = [
             "-nogui",
             "-usetwoe=0",
-            "-atom=all",
+            f"-atoms={self.atoms}",
             f"-encomp={GLOBALS.ENCOMP}",
             f"-boaq={GLOBALS.BOAQ}",
             f"-iasmesh={GLOBALS.IASMESH}",
             f"-nproc={self.ncores}",
-            f"-naat={self.ncores}",
+            f"-naat={self.ncores if self.atoms == 'all' else 1}",
         ]
 
     @property
@@ -3440,6 +3477,7 @@ class SubmissionTools:
         points,
         directory="",
         check_wfns=True,
+        atoms="all",
         redo=False,
         submit=True,
         hold=None,
@@ -3450,13 +3488,17 @@ class SubmissionTools:
                 _, jid = AutoTools.submit_ichor_wfns(
                     result[1], directory=points.path
                 )
-                return AutoTools.submit_wfns(jid, len(points))
+                return AutoTools.submit_wfns(jid, len(points), atoms=atoms)
 
-        aimall_job = AIMAllCommand()
+        print(atoms)
+
+        aimall_job = AIMAllCommand(atoms=atoms)
         for point in points:
+            print(point.wfn.aimall_complete)
+            print(atoms.lower() == "all")
             if (
                 point.wfn
-                and (redo or not point.wfn.aimall_complete)
+                and (redo or not (point.wfn.aimall_complete or point.wfn.check_aimall_atom(atoms)))
                 or isinstance(point, MockDirectory)
             ):
                 aimall_job.add(point.wfn.path)
@@ -3478,6 +3520,7 @@ class SubmissionTools:
     def make_ferebus_script(
         model_directories,
         directory="",
+        atoms="all",
         submit=True,
         hold=None,
         model_type="iqa",
@@ -3486,13 +3529,12 @@ class SubmissionTools:
         ferebus_job = FerebusCommand()
         for model_directory in model_directories:
             ferebus_job.add(model_directory)
-
         move_models = PythonCommand()
         if ferebus_directory is None:
             ferebus_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
         move_models.run_func(
             "move_models",
-            ferebus_job.get_variable(0),
+            ferebus_job.get_variable(0, force=True),
             model_type,
             ferebus_directory,
         )
@@ -3874,11 +3916,11 @@ class AutoTools:
         )
 
     @staticmethod
-    def submit_ichor_wfns(jid=None, directory=None):
+    def submit_ichor_wfns(jid=None, directory=None, atoms="all"):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor(
-            "submit_wfns", directory, submit=True, hold=jid
+            "submit_wfns", directory, atoms, submit=True, hold=jid
         )
 
     @staticmethod
@@ -3888,6 +3930,7 @@ class AutoTools:
         type=None,
         npoints=None,
         ferebus_directory=None,
+        atoms=None
     ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
@@ -3897,12 +3940,15 @@ class AutoTools:
             npoints = -1
         if not ferebus_directory:
             ferebus_directory = str(GLOBALS.FILE_STRUCTURE["ferebus"])
+        if not atoms:
+            atoms = "all"
         return AutoTools.submit_ichor(
             "make_models",
             directory,
             type,
             npoints,
             ferebus_directory,
+            atoms,
             submit=True,
             hold=jid,
         )
@@ -3973,21 +4019,25 @@ class AutoTools:
         return points.submit_gjfs(redo=False, submit=True, hold=jid)
 
     @staticmethod
-    def submit_wfns(jid=None, npoints=None):
+    def submit_wfns(jid=None, npoints=None, atoms="all"):
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
         return points.submit_wfns(
-            redo=False, submit=True, hold=jid, check_wfns=False
+            redo=False, submit=True, hold=jid, check_wfns=False, atoms=atoms
         )
 
     @staticmethod
-    def submit_models(jid=None, directory=None, ferebus_directory=None):
+    def submit_models(jid=None, directory=None, ferebus_directory=None, atoms="all"):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
-        gjf = GJF(FileTools.get_first_gjf(directory)).read()
+        if atoms == "all":
+            gjf = GJF(FileTools.get_first_gjf(directory)).read()
+            atoms = gjf.atoms.atoms
+        elif isinstance(atoms, str):
+            atoms = [atoms]
         return SubmissionTools.make_ferebus_script(
-            gjf.atoms.atoms,
+            atoms,
             submit=True,
             hold=jid,
             model_type=str(GLOBALS.OPTIMISE_PROPERTY),
@@ -3996,16 +4046,14 @@ class AutoTools:
 
     @staticmethod
     def submit_aimall(directory=None, jid=None):
-        global _data_lock
         points = Set(directory)
         npoints = len(points)
         UsefulTools.set_uid()
-        _data_lock = True
-        script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory)
-        script, jid = AutoTools.submit_gjfs(jid, npoints)
-        script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory)
-        AutoTools.submit_wfns(jid, npoints)
-        _data_lock = False
+        with DataLock():
+            script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory)
+            script, jid = AutoTools.submit_gjfs(jid, npoints)
+            script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory)
+            AutoTools.submit_wfns(jid, npoints)
 
     @staticmethod
     def run_models(
@@ -4034,8 +4082,6 @@ class AutoTools:
 
     @staticmethod
     def run():
-        global _data_lock
-
         FileTools.clear_log()
         FileTools.clear_script_outputs()
         UsefulTools.set_uid()
@@ -4059,29 +4105,32 @@ class AutoTools:
         npoints = len(training_set)
 
         logger.info("Starting ICHOR Auto Run")
-        _data_lock = True
 
-        for i in range(GLOBALS.MAX_ITERATION):
-            for func in order:
+        with DataLock():
+            for i in range(GLOBALS.MAX_ITERATION):
+                for func in order:
+                    args = {"jid": jid}
+                    if i == 0 and "npoints" in func.__code__.co_varnames:
+                        args["npoints"] = npoints
+                    if "type" in func.__code__.co_varnames:
+                        args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
+                    if "atoms" in func.__code__.co_varnames:
+                        args["atoms"] = str(GLOBALS.OPTIMISE_ATOM)
+                    script_name, jid = func(**args)
+                    print(f"Submitted {script_name}: {jid}")
+
+            for func in order[:-1]:
                 args = {"jid": jid}
-                if i == 0 and "npoints" in func.__code__.co_varnames:
-                    args["npoints"] = npoints
+                if "write_data" in func.__code__.co_varnames:
+                    args["write_data"] = False
                 if "type" in func.__code__.co_varnames:
                     args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
+                if "atoms" in func.__code__.co_varnames:
+                    args["atoms"] = str(GLOBALS.OPTIMISE_ATOM)
                 script_name, jid = func(**args)
                 print(f"Submitted {script_name}: {jid}")
 
-        for func in order[:-1]:
-            args = {"jid": jid}
-            if "write_data" in func.__code__.co_varnames:
-                args["write_data"] = False
-            if "type" in func.__code__.co_varnames:
-                args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
-            script_name, jid = func(**args)
-            print(f"Submitted {script_name}: {jid}")
-
-        GLOBALS.SUBMITTED = False
-        _data_lock = False
+            GLOBALS.SUBMITTED = False
 
 
 class PropertiesDaemon(Daemon):
@@ -5182,6 +5231,17 @@ class WFN(Point):
             1 for f in os.listdir(aim_directory) if f.endswith(".int")
         )
         return n_ints == self.nuclei
+
+    def check_aimall_atom(self, atom):
+        atom = atom.lower()
+        if atom == "all": return False
+
+        aim_directory = self.title.strip() + "_atomicfiles"
+        aim_directory = os.path.join(self.dirname, aim_directory)
+
+        if not os.path.exists(aim_directory):
+            return False
+        return any(True for f in os.listdir(aim_directory) if Path(f).stem == atom)
 
     def move(self, dst):
         if self:
@@ -7318,7 +7378,7 @@ def numba_R_rbf(x, hp):
 
 
 class Model:
-    def __init__(self, fname, read_model=False):
+    def __init__(self, fname, read=False):
         self.fname = Path(fname)
 
         self.directory = ""
@@ -7352,7 +7412,7 @@ class Model:
 
         self.y = []
         self.X = []
-        if read_model and self.fname:
+        if read and self.fname:
             self.read()
             if self.normalise:
                 self.X = self.normalise_data(self.X)
@@ -7728,11 +7788,6 @@ class Model:
             1 - res1.item() + (1 + res2.item()) ** 2 / res3.item()
         )
 
-    def variance2(self, point):
-        point = point.features[self.i]
-        r = self.r(point)
-        return 1 - np.matmul(r.T, np.matmul(self.invR, r))
-
     def distance_to_point(self, point):
         point = np.array(point.features[self.i]).reshape((1, -1))
         return distance.cdist(point, self.X)
@@ -7757,8 +7812,9 @@ class Model:
 
 
 class Models:
-    def __init__(self, directory, read_models=False):
+    def __init__(self, directory, read=False, atoms="all"):
         self._models = []
+        # TODO: Convert to Pathlib
         self.directory = directory
 
         expected_improvement_functions = {
@@ -7766,8 +7822,6 @@ class Models:
             "eped": self.expected_improvement_eped,
             "var": self.expected_improvement_var,
             "vard": self.expected_improvement_vard,
-            "var2": self.expected_improvement_var2,
-            "vard2": self.expected_improvement_vard2,
             "sigma": self.expected_improvement_var,
             "sigmu": self.expected_improvement_sigmu,
             "rand": self.expected_improvement_rand,
@@ -7777,16 +7831,20 @@ class Models:
         ]
 
         if self.directory:
-            self.find_models(read_models)
+            self.find_models(read, atoms=atoms)
 
-    def find_models(self, read_model=False):
+    def find_models(self, read=False, atoms="all"):
+        # Legacy
         model_files = FileTools.get_files_in(self.directory, "*_kriging_*.txt")
         for model_file in tqdm(model_files):
-            self.add(model_file, read_model)
+            if atoms == "all" or atoms.lower() in Path(model_file).stem.split("_"):
+                self.add(model_file, read)
         
+        # Updated
         model_files = FileTools.get_files_in(self.directory, "*.model")
         for model_file in tqdm(model_files):
-            self.add(model_file, read_model)
+            if atoms == "all" or atoms.lower() in [a.lower() for a in Path(model_file).stem.split("_")]:
+                self.add(model_file, read)
 
     @property
     def nTrain(self):
@@ -7810,8 +7868,8 @@ class Models:
     def read_first(self):
         self[0].read()
 
-    def add(self, model_file, read_model=False):
-        self._models.append(Model(model_file, read_model=read_model))
+    def add(self, model_file, read=False):
+        self._models.append(Model(model_file, read=read))
 
     @lru_cache()
     def predict(self, points, atoms=False, type="iqa", verbose=False):
@@ -7851,14 +7909,6 @@ class Models:
             variance = sum(model.variance(point) for model in self)
             variances.append(variance)
         return np.array(variances)
-
-    @lru_cache()
-    def variance2(self, points):
-        variances = []
-        for point in points:
-            variance = sum(model.variance2(point) for model in self)
-            variances.append(variance)
-        return np.array(variances).flatten()
 
     @lru_cache()
     def cross_validation(self, points):
@@ -7949,18 +7999,6 @@ class Models:
         )
         return sig * np.sqrt(np.abs(mu))
 
-    def calc_var2(self, points, added_points=[]):
-        var = self.variance2(points)
-
-        if added_points:
-            added_points = [points[i] for i in added_points]
-            _added_points = Set()
-            [_added_points.add_dir(point) for point in added_points]
-            distances = self.distances(points, _added_points)
-            var *= distances
-
-        return var
-
     def write_data(self, indices, points):
         adaptive_sampling = GLOBALS.FILE_STRUCTURE["adaptive_sampling"]
         FileTools.mkdir(adaptive_sampling)
@@ -8008,20 +8046,6 @@ class Models:
         for _ in range(GLOBALS.POINTS_PER_ITERATION):
             best_points = np.flip(
                 np.argsort(self.calc_var(points, added_points=points_to_add)),
-                axis=-1,
-            )
-            points_to_add += [best_points[0]]
-        return points_to_add
-
-    def expected_improvement_var2(self, points):
-        best_points = np.flip(np.argsort(self.calc_var2(points)), axis=-1)
-        return best_points[: min(len(points), GLOBALS.POINTS_PER_ITERATION)]
-
-    def expected_improvement_vard2(self, points):
-        points_to_add = []
-        for _ in range(GLOBALS.POINTS_PER_ITERATION):
-            best_points = np.flip(
-                np.argsort(self.calc_var2(points, added_points=points_to_add)),
                 axis=-1,
             )
             points_to_add += [best_points[0]]
@@ -8263,9 +8287,9 @@ class Set(Points):
             self, redo=redo, submit=submit, hold=hold
         )
 
-    def submit_wfns(self, redo=False, submit=True, hold=None, check_wfns=True):
+    def submit_wfns(self, redo=False, submit=True, hold=None, check_wfns=True, atoms="all"):
         return SubmissionTools.make_aim_script(
-            self, redo=redo, submit=submit, hold=hold, check_wfns=check_wfns
+            self, redo=redo, submit=submit, hold=hold, check_wfns=check_wfns, atoms=atoms
         )
 
     def make_legacy_training_set(self, atom, training_set, model_directory, natoms):
@@ -8303,8 +8327,7 @@ class Set(Points):
             len(training_set),
             nproperties=min(training_set.nproperties, MAX_PROPERTIES),
             optimisation=str(GLOBALS.FEREBUS_OPTIMISATION),
-        )
-        
+        ) 
 
     def make_updated_training_set(self, atom, training_set, model_directory, natoms):
         # Write FEREBUS input files
@@ -8340,7 +8363,7 @@ class Set(Points):
             atom,
         )
 
-    def make_training_set(self, model_type, npoints=-1, directory=None):
+    def make_training_set(self, model_type, npoints=-1, directory=None, atoms="all"):
         if npoints < 0:
             npoints = len(self)
 
@@ -8353,7 +8376,8 @@ class Set(Points):
             input = point.features_dict
             output = point.get_property(model_type)
             for atom in input.keys():
-                training_sets[atom] += (input[atom], output[atom])
+                if atoms == "all" or atom.lower() == atoms.lower():
+                    training_sets[atom] += (input[atom], output[atom])
 
         for atom, training_set in training_sets.items():
             training_sets[atom] = training_set.slice(min(npoints, len(self)))
@@ -9657,7 +9681,7 @@ class S_CurveTools(AnalysisTools):
 
         print("Reading Data")
         validation_set = Set(validation_set).read()
-        models = Models(models, read_models=True)
+        models = Models(models, read=True)
         print()
 
         print("Making Predictions")
@@ -9980,7 +10004,7 @@ class RMSETools(AnalysisTools):
             ]
         else:
             models_loc = [loc]
-        return [Models(loc, read_models=True) for loc in models_loc]
+        return [Models(loc, read=True) for loc in models_loc]
 
     @staticmethod
     def calculate_rmse(type="iqa"):
@@ -10391,7 +10415,7 @@ class ModelTools:
 
     @staticmethod
     @UsefulTools.external_function()
-    def make_models(directory, model_type, npoints=-1, model_directory=None):
+    def make_models(directory, model_type, npoints=-1, model_directory=None, atoms="all"):
         if ModelTools.submit:
             ModelTools.make_models_submit(directory, model_type, npoints)
             return
@@ -10409,7 +10433,7 @@ class ModelTools:
         logger.info(f"Making {model_type} models")
 
         aims = Set(directory).read()
-        models = aims.make_training_set(model_type, npoints)
+        models = aims.make_training_set(model_type, npoints, atoms=atoms)
         SubmissionTools.make_ferebus_script(models, model_type=model_type)
 
     @staticmethod
@@ -10764,10 +10788,10 @@ def submit_gjfs(directory):
 
 
 @UsefulTools.external_function()
-def submit_wfns(directory):
+def submit_wfns(directory, atoms="all"):
     logger.info("Submitting wfns to AIMAll")
     wfns = Set(directory).read_gjfs().read_wfns()
-    wfns.submit_wfns()
+    wfns.submit_wfns(atoms=atoms)
 
 
 @UsefulTools.external_function()
@@ -10789,12 +10813,11 @@ def move_models(
         ModelTools.move_models_legacy(model_file, model_directory, model_type, copy_to_log)
     
 
-
 @UsefulTools.external_function()
 def calculate_errors(models_directory, sample_pool_directory):
     logger.info("Calculating errors of the Sample Pool")
 
-    models = Models(models_directory, read_models=True)
+    models = Models(models_directory, read=True, atoms=str(GLOBALS.OPTIMISE_ATOM))
     n_train = FileTools.count_points_in(GLOBALS.FILE_STRUCTURE["training_set"])
 
     if n_train != models.nTrain:
