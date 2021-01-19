@@ -164,13 +164,16 @@ def printq(msg):
 #############################################
 
 class Version:
-    def __init__(self, str_rep=None):
+    def __init__(self, rep=None):
         self.major = 0
         self.minor = 0
         self.patch = 0
 
-        if str_rep:
-            self.parse_from_string(str_rep)
+        if rep:
+            if isinstance(rep, str):
+                self.parse_from_string(rep)
+            elif isinstance(rep, Version):
+                self.parse_from_version(rep)
 
     def parse_from_string(self, str_rep):
         split_rep = str_rep.split(".")
@@ -180,6 +183,11 @@ class Version:
             self.minor = int(split_rep[1])
         if len(split_rep) > 2:
             self.patch = int(split_rep[2])
+
+    def parse_from_version(self, ver_rep):
+        self.major = ver_rep.major
+        self.minor = ver_rep.minor
+        self.patch = ver_rep.patch
 
     def __gt__(self, other):
         if self.major > other.major:
@@ -3493,12 +3501,8 @@ class SubmissionTools:
                 )
                 return AutoTools.submit_wfns(jid, len(points), atoms=atoms)
 
-        print(atoms)
-
         aimall_job = AIMAllCommand(atoms=atoms)
         for point in points:
-            print(point.wfn.aimall_complete)
-            print(atoms.lower() == "all")
             if (
                 point.wfn
                 and (redo or not (point.wfn.aimall_complete or point.wfn.check_aimall_atom(atoms)))
@@ -4359,7 +4363,7 @@ class AtomTools:
                         atoms_root, atom_name
                     )
                     FileTools.mkdir(atom_directory, empty=False)
-                    property_directories += [
+                    atom_directories += [
                         (atom_name, atom_directory)
                     ]
 
@@ -11281,8 +11285,9 @@ def main_menu():
     main_menu.add_space()
     main_menu.add_option("r", "Auto Run", AutoTools.run)
     main_menu.add_option("p", "Run Properties", properties_menu.run)
+    main_menu.add_option("a", "Run Atoms", atoms_menu.run)
     main_menu.add_space()
-    main_menu.add_option("a", "Analysis", analysis_menu.run)
+    main_menu.add_option("n", "Analysis", analysis_menu.run)
     main_menu.add_option("t", "Tools", tools_menu.run)
     main_menu.add_option("o", "Options", options_menu.run)
     main_menu.add_option("q", "Queue", queue_menu.run)
