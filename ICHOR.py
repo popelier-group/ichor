@@ -7736,8 +7736,9 @@ class Model:
             self.write_updated(directory)
 
     def write_legacy(self, directory):
-        atom_num = self.atom_num.zfill(2)
-        fname = Path(f"{self.system_name}_kriging_{self.type}_{self.atom_num}.txt")
+        atom_num = self.atom_number.zfill(2)
+        model_type = self.type.upper() if self.type == "iqa" else self.type
+        fname = Path(f"{self.system_name}_kriging_{model_type}_{atom_num}.txt")
         path = directory / fname
         with open(path, "w") as f:
             f.write("Kriging Results and Parameters\n")
