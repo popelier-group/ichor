@@ -7839,7 +7839,7 @@ class Models:
         for model_file in tqdm(model_files):
             if atoms == "all" or atoms.lower() in Path(model_file).stem.split("_"):
                 self.add(model_file, read)
-        
+
         # Updated
         model_files = FileTools.get_files_in(self.directory, "*.model")
         for model_file in tqdm(model_files):
