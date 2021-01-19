@@ -7967,43 +7967,10 @@ class Model:
     def cross_validation_error(self, point):
         return self.cross_validation[self.closest_point(point)]
 
-    def write_legacy(self, fname):
-        with open(fname, "w") as f:
-            f.write("Kriging results and parameters\n")
-            f.write(";\n")
-            f.write(f"Feature {self.nFeats}\n")
-            f.write(f"Number_of_training_points {self.nTrain}\n")
-            f.write(";\n")
-            f.write(f"Mu {self.mu} Sigma_Squared {self.sigma2}\n")
-            f.write(";\n")
-            f.write("Theta\n")
-            for theta in self.hyper_parameters:
-                f.write(f"{theta}\n")
-            f.write(";\n")
-            f.write("p\n")
-            for _ in range(self.nFeats):
-                f.write("2.000000000\n")
-            f.write(";\n")
-            f.write("Weights\n")
-            for weight in self.weights:
-                f.write(f"{weight}\n")
-            f.write(";\n")
-            f.write("R_matrix\n")
-            f.write(f"Dimension {self.nTrain}\n")
-            f.write(";\n")
-            f.write("Property_value_Kriging_centers\n")
-            for y in self.y:
-                f.write(f"{y[0]}\n")
-            f.write("training_data\n")
-            for i in range(self.nTrain):
-                for j in range(0, self.nFeats, 3):
-                    f.write(f"{self.X[i][j]} {self.X[i][j+1]} {self.X[i][j+2]}\n")
-            f.write(";\n")
-
     def link(self, dst_dir):
-        abs_path = os.path.abspath(self.fname)
-        dst = os.path.join(dst_dir, self.basename)
         if self.legacy:
+            abs_path = os.path.abspath(self.fname)
+            dst = os.path.join(dst_dir, self.basename)
             if os.path.exists(dst):
                 os.remove(dst)
             else:
@@ -8013,7 +7980,7 @@ class Model:
                     pass
             os.symlink(abs_path, dst)
         else:
-            self.write_legacy(dst)
+            self.write_legacy(dst_dir)
 
 
 class Models:
