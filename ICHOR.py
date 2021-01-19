@@ -2160,6 +2160,7 @@ class FileTools:
         tree.add("OPT", "opt")
         tree.add("CP2K", "cp2k")
         tree.add("PROPERTIES", "properties")
+        tree.add("ATOMS", "atoms")
 
         tree.add("DLPOLY", "dlpoly")
         tree.add("GJF", "dlpoly_gjf", parent="dlpoly")
@@ -2893,6 +2894,7 @@ class ParallelEnvironments:
                 environment = ParallelEnvironment(*parallel_environment)
             self._environments[machine] += environment
 
+
 class DataLock:
     __lock = False
     __count = 0
@@ -2918,6 +2920,7 @@ class DataLock:
     def __exit__(cls, exc_type, exc_value, exc_traceback):
         cls.__count -= 1 if cls.__count > 0 else 0
         cls.__lock = cls.__count != 0
+
 
 class TimingManager:
     def __init__(self, submission_script, message=None):
@@ -4290,6 +4293,168 @@ class PropertyTools:
         ):
             log_dir = os.path.join(
                 properties_dir, GLOBALS.FILE_STRUCTURE["log"]
+            )
+            if os.path.exists(log_dir):
+                FileTools.copymodels(log_dir, GLOBALS.FILE_STRUCTURE["log"])
+
+
+class AtomsDaemon(Daemon):
+    def __init__(self):
+        cwd = os.getcwd()
+        pidfile = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["atoms_pid"])
+        stdout = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["atoms_stdout"])
+        stderr = os.path.join(cwd, GLOBALS.FILE_STRUCTURE["atoms_stderr"])
+        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+
+    def run(self):
+        AtomTools.run()
+        self.stop()
+
+
+class AtomTools:
+    @staticmethod
+    def run_daemon():
+        FileTools.mkdir(
+            GLOBALS.FILE_STRUCTURE["atoms_daemon"], empty=True
+        )
+        atoms_daemon = AtomsDaemon()
+        atoms_daemon.start()
+
+    @staticmethod
+    def stop_daemon():
+        atoms_daemon = AtomsDaemon()
+        atoms_daemon.stop()
+
+    @staticmethod
+    def check_daemon():
+        atoms_daemon = AtomsDaemon()
+        is_running = atoms_daemon.check()
+        if is_running:
+            print("Run Atoms background process is still running")
+        else:
+            print("Run Atoms background process has finished")
+
+    @staticmethod
+    def run():
+        original_atom = GLOBALS.OPTIMISE_ATOM
+
+        atom_directories = []
+        gjf_file = FileTools.get_first_gjf(GLOBALS.FILE_STRUCTURE["training_set"])
+        atoms = GJF(gjf_file, read=True).atoms.atoms
+        atoms_root = GLOBALS.FILE_STRUCTURE["atoms"]
+
+        print()
+        if not os.path.exists(atoms_root):
+            # make directory
+            print(f"Making {atoms_root}")
+            FileTools.mkdir(atoms_root, empty=False)
+            print()
+            # make property directories
+            print("Making Atom Directories")
+            with tqdm(total=len(atoms), unit=" dirs") as progressbar:
+                for atom_name in atoms:
+                    progressbar.set_description(atom_name)
+
+                    atom_directory = os.path.join(
+                        atoms_root, atom_name
+                    )
+                    FileTools.mkdir(atom_directory, empty=False)
+                    property_directories += [
+                        (atom_name, atom_directory)
+                    ]
+
+                    progressbar.update()
+            print()
+            # copy training set
+            print("Copying Training Set")
+            with tqdm(total=len(atoms), unit=" dirs") as progressbar:
+                for _, atom_directory in atom_directories:
+                    progressbar.set_description(atom_directory)
+                    dst = os.path.join(
+                        atom_directory,
+                        GLOBALS.FILE_STRUCTURE["training_set"],
+                    )
+                    FileTools.copytree(
+                        GLOBALS.FILE_STRUCTURE["training_set"], dst
+                    )
+                    progressbar.update()
+            print()
+            # copy sample pool
+            print("Copying Sample Pool")
+            with tqdm(total=len(atoms), unit=" dirs") as progressbar:
+                for _, atom_directory in atom_directories:
+                    progressbar.set_description(atom_directory)
+                    dst = os.path.join(
+                        atom_directory,
+                        GLOBALS.FILE_STRUCTURE["sample_pool"],
+                    )
+                    FileTools.copytree(
+                        GLOBALS.FILE_STRUCTURE["sample_pool"], dst
+                    )
+                    progressbar.update()
+            print()
+        else:
+            for atom_name in atoms:
+                atom_directory = os.path.join(
+                    atoms_root, atom_name
+                )
+                atom_directories += [(atom_name, atom_directory)]
+        # copy ICHOR.py
+        print("Copying ICHOR")
+        with tqdm(total=len(atoms), unit=" files") as progressbar:
+            for _, atom_directory in atom_directories:
+                progressbar.set_description(atom_directory)
+                FileTools.copy_file(
+                    os.path.realpath(__file__), atom_directory
+                )
+                progressbar.update()
+        print()
+        # copy config.properties
+        print("Copying Config File")
+        with tqdm(total=len(atoms), unit=" files") as progressbar:
+            for atom_name, atom_directory in atom_directories:
+                progressbar.set_description(atom_directory)
+                GLOBALS.OPTIMISE_ATOM = atom_name
+                with FileTools.pushd(atom_directory):
+                    GLOBALS.save_to_config()
+                progressbar.update()
+        print()
+        # copy programs
+        print("Copying Programs")
+        with tqdm(total=len(atoms), unit=" files") as progressbar:
+            for _, atom_directory in atom_directories:
+                progressbar.set_description(atom_directory)
+                dst = os.path.join(
+                    atom_directory, GLOBALS.FILE_STRUCTURE["programs"]
+                )
+                FileTools.copytree(GLOBALS.FILE_STRUCTURE["programs"], dst)
+                progressbar.update()
+        print()
+        # run adaptive sampling
+        print("Submitting Adaptive Sampling Runs")
+        importlib.invalidate_caches()
+        for atom_name, atom_directory in atom_directories:
+            with FileTools.pushd(atom_directory):
+                spec = importlib.util.spec_from_file_location("*", __file__)
+                ichor = importlib.util.module_from_spec(spec)
+                try:
+                    spec.loader.exec_module(ichor)
+                except:
+                    print(
+                        f"Error submitting adaptive sampling for: {atom_name}"
+                    )
+                ichor.AutoTools.run_from_extern()
+
+        GLOBALS.OPTIMISE_ATOM = original_atom
+
+    @staticmethod
+    def collate_log():
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["log"], empty=False)
+        for atoms_dir in FileTools.get_files_in(
+            GLOBALS.FILE_STRUCTURE["atoms"], "*/"
+        ):
+            log_dir = os.path.join(
+                atoms_dir, GLOBALS.FILE_STRUCTURE["log"]
             )
             if os.path.exists(log_dir):
                 # for model_dir in FileTools.get_files_in(log_dir, f"{str(GLOBALS.SYSTEM_NAME)}*/"):
@@ -11010,6 +11175,38 @@ def main_menu():
         wait=True,
     )
     properties_menu.add_final_options()
+
+    # === Atoms Menu ===#
+    atoms_menu = Menu(
+        title="Run Atoms Menu",
+        message="Perform adaptive sampling on a per-atom basis",
+    )
+    atoms_menu.add_option(
+        "r", "Auto Run Atoms", AtomTools.run, wait=True
+    )
+    atoms_menu.add_option(
+        "d",
+        "Auto Run Atoms as Background Process (recommended)",
+        AtomTools.run_daemon,
+    )
+    atoms_menu.add_space()
+    atoms_menu.add_option(
+        "l", "Collate All Models From Log", AtomTools.collate_log
+    )
+    atoms_menu.add_space()
+    atoms_menu.add_option(
+        "c",
+        "Check if Background Process Is Running",
+        AtomTools.check_daemon,
+        wait=True,
+    )
+    atoms_menu.add_option(
+        "s",
+        "Stop Execution of Background Process",
+        AtomTools.stop_daemon,
+        wait=True,
+    )
+    atoms_menu.add_final_options()
 
     # === Analysis Menu ===#
     analysis_menu = Menu(title="Analysis Menu")
