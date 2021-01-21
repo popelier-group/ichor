@@ -7751,6 +7751,7 @@ class Model:
             f.write("Theta\n")
             for theta in self.hyper_parameters:
                 f.write(f"{theta}\n")
+            f.write(";\n")
             f.write("p\n")
             for _ in range(len(self.hyper_parameters)):
                 f.write("2.00000000000000\n")
@@ -7764,11 +7765,11 @@ class Model:
             f.write(";\n")
             f.write("Property_value_Kriging_centers\n")
             for y in self.y:
-                f.write(f"{y}\n")
+                f.write(f"{y[0]}\n")
             f.write("training_data\n")
             for x in self.X:
                 for i in range(0, len(x), 3):
-                    f.write("{x[i]} {x[i+1]} {x[i+2]}\n")
+                    f.write(f"{x[i]} {x[i+1]} {x[i+2]}\n")
             f.write(";\n")
 
     def write_updated(self, directory):
