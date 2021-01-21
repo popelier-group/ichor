@@ -2328,6 +2328,10 @@ class FileTools:
             1
             for model_dir in FileTools.get_files_in(directory, "*/")
             if len(FileTools.get_files_in(model_dir, "*_kriging_*.txt")) > 0
+        ) + sum(
+            1
+            for model_dir in FileTools.get_files_in(directory, "*/")
+            if len(FileTools.get_files_in(model_dir, "*.model")) > 0
         )
 
     @staticmethod
