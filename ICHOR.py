@@ -7950,7 +7950,7 @@ class Model:
         if isinstance(point, Point):
             features = point.features[self.i]
         else:
-            features = point
+            features = point[self.i]
         r = self.r(features)
         weights = self.weights.reshape((-1, 1))
         return self.mu + np.matmul(r.T, weights).item()
