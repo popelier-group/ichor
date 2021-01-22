@@ -7765,7 +7765,7 @@ class Model:
                 f.write(f"{weight}\n")
             f.write(";\n")
             f.write("R_matrix\n")
-            f.write("Dimension {self.nTrain}\n")
+            f.write(f"Dimension {self.nTrain}\n")
             f.write(";\n")
             f.write("Property_value_Kriging_centers\n")
             for y in self.y:
@@ -7947,7 +7947,10 @@ class Model:
             return self._cross_validation
 
     def predict(self, point):
-        features = point.features[self.i]
+        if isinstance(point, Point):
+            features = point.features[self.i]
+        else:
+            features = point
         r = self.r(features)
         weights = self.weights.reshape((-1, 1))
         return self.mu + np.matmul(r.T, weights).item()
