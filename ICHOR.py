@@ -659,7 +659,7 @@ class UsefulTools:
         return ichor_string
 
     @staticmethod
-    def nTrain():
+    def n_train():
         ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
         return FileTools.count_points_in(ts_dir)
 
@@ -7550,6 +7550,442 @@ def numba_R_rbf(x, hp):
     return R
 
 
+from enum import Enum
+
+class TokenType(Enum):
+    Number = 1
+    Plus = 2
+    Minus = 3
+    Mul = 4
+    Div = 5
+    LParen = 6
+    RParen = 7
+    Id = 8
+    Eof = -1
+
+
+class Token:
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
+
+    def __str__(self):
+        return 'Token({type.name}, {value})'.format(
+            type=self.type,
+            value=repr(self.value)
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Lexer(object):
+    def __init__(self, text):
+        self.text = text
+        self.pos = 0
+        self.current_char = self.text[self.pos]
+
+    def error(self):
+        raise Exception('Invalid character')
+
+    def advance(self):
+        self.pos += 1
+        if self.pos > len(self.text) - 1:
+            self.current_char = None  # Indicates end of input
+        else:
+            self.current_char = self.text[self.pos]
+
+    def skip_whitespace(self):
+        while self.current_char is not None and self.current_char.isspace():
+            self.advance()
+
+    def number(self):
+        result = ''
+        while self.current_char is not None and self.current_char.isdigit():
+            result += self.current_char
+            self.advance()
+        
+        if self.current_char == ".":
+            result += self.current_char
+            self.advance()
+            while self.current_char is not None and self.current_char.isdigit():
+                result += self.current_char
+                self.advance()
+        
+        if self.current_char.lower() == "e":
+            result += self.current_char
+            self.advance()
+            if self.current_char in ["+", "-"]:
+                result += self.current_char
+                self.advance()
+            while self.current_char is not None and self.current_char.isdigit():
+                result += self.current_char
+                self.advance()
+
+        return Token(TokenType.Number, float(result))
+
+    def id(self):
+        result = ''
+        while self.current_char is not None and self.current_char.isalnum():
+            result += self.current_char
+            self.advance()
+
+        return Token(TokenType.Id, result)
+
+    def get_next_token(self):
+        while self.current_char is not None:
+            if self.current_char.isspace():
+                self.skip_whitespace()
+                continue
+
+            if self.current_char.isalpha():
+                return self.id()
+
+            if self.current_char.isdigit():
+                return self.number()
+
+            if self.current_char == '+':
+                self.advance()
+                return Token(TokenType.Plus, '+')
+
+            if self.current_char == '-':
+                self.advance()
+                return Token(TokenType.Minus, '-')
+
+            if self.current_char == '*':
+                self.advance()
+                return Token(TokenType.Mul, '*')
+
+            if self.current_char == '/':
+                self.advance()
+                return Token(TokenType.Div, '/')
+
+            if self.current_char == '(':
+                self.advance()
+                return Token(TokenType.LParen, '(')
+
+            if self.current_char == ')':
+                self.advance()
+                return Token(TokenType.RParen, ')')
+
+            self.error()
+
+        return Token(TokenType.Eof, None)
+
+class AST:
+    pass
+
+class BinOp(AST):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.token = self.op = op
+        self.right = right
+
+
+class Var(AST):
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
+
+
+class UnaryOp(AST):
+    def __init__(self, op, expr):
+        self.token = self.op = op
+        self.expr = expr
+
+
+class Num(AST):
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
+
+
+class Parser:
+    def __init__(self, text):
+        self.lexer = Lexer(text)
+        self.current_token = self.lexer.get_next_token()
+
+    def error(self):
+        raise Exception('invalid syntax')
+
+    def eat(self, token_type):
+        if self.current_token.type == token_type:
+            self.current_token = self.lexer.get_next_token()
+        else:
+            self.error()
+
+    def variable(self):
+        node = Var(self.current_token)
+        self.eat(TokenType.Id)
+        return node
+
+    def factor(self):
+        token = self.current_token
+        if token.type == TokenType.Plus:
+            self.eat(TokenType.Plus)
+            node = UnaryOp(token, self.factor())
+            return node
+        elif token.type == TokenType.Minus:
+            self.eat(TokenType.Minus)
+            node = UnaryOp(token, self.factor())
+            return node
+        elif token.type == TokenType.Number:
+            self.eat(TokenType.Number)
+            return Num(token)
+        elif token.type == TokenType.LParen:
+            self.eat(TokenType.LParen)
+            node = self.expr()
+            self.eat(TokenType.RParen)
+            return node
+        else:
+            node = self.variable()
+            return node
+
+    def term(self):
+        node = self.factor()
+        while self.current_token.type in (TokenType.Mul, TokenType.Div):
+            token = self.current_token
+            if token.type == TokenType.Mul:
+                self.eat(TokenType.Mul)
+            elif token.type == TokenType.Div:
+                self.eat(TokenType.Div)
+            node = BinOp(left=node, op=token, right=self.factor())
+        return node
+
+    def expr(self):
+        node = self.term()
+        while self.current_token.type in (TokenType.Plus, TokenType.Minus):
+            token = self.current_token
+            if token.type == TokenType.Plus:
+                self.eat(TokenType.Plus)
+            elif token.type == TokenType.Minus:
+                self.eat(TokenType.Minus)
+            node = BinOp(left=node, op=token, right=self.term())
+        return node
+
+    def parse(self):
+        return self.expr()
+
+
+class NodeVisitor:
+    def visit(self, node):
+        method_name = 'visit_' + type(node).__name__
+        visitor = getattr(self, method_name, self.generic_visit)
+        return visitor(node)
+
+    def generic_visit(self, node):
+        raise Exception(f'No visit_{type(node).__name__} method')
+
+
+class KernelInterpreter(NodeVisitor):
+    def __init__(self, text, global_scope):
+        self.parser = Parser(text)
+        self.global_scope = global_scope
+
+    def visit_BinOp(self, node):
+        if node.op.type == TokenType.Plus:
+            return self.visit(node.left) + self.visit(node.right)
+        elif node.op.type == TokenType.Minus:
+            # return self.visit(node.left) - self.visit(node.right)
+            # TODO: Convert this to error
+            print("Error: Not implemented minus kernel")
+            quit()
+        elif node.op.type == TokenType.Mul:
+            return self.visit(node.left) * self.visit(node.right)
+        elif node.op.type == TokenType.Div:
+            # return self.visit(node.left) / self.visit(node.right)
+            # TODO: Convert this to error
+            print("Error: Not implemented divide kernel")
+            quit()
+
+    def visit_UnaryOp(self, node):
+        op = node.op.type
+        if op == TokenType.Plust:
+            return self.visit(node.expr)
+        elif op == TokenType.Minus:
+            # return -self.visit(node.expr)
+            # TODO: Convert this to error
+            print("Error: Not implemented minus kernel")
+            quit()
+
+    def visit_Num(self, node):
+        return Constant(node.value)
+
+    def visit_Var(self, node):
+        var_name = node.value
+        val = self.global_scope.get(var_name)
+        if val is None:
+            raise NameError(repr(var_name))
+        else:
+            return val
+
+    def interpret(self):
+        tree = self.parser.parse()
+        return self.visit(tree)
+
+
+class Kernel:
+    @property
+    def params(self):
+        # TODO: Convert this to error
+        print("Error: Params not defined for specified kernel")
+        quit()
+
+    def __add__(self, other):
+        return KernelSum(self, other)
+
+    def __mul__(self, other):
+        return KernelProd(self, other)
+
+
+class KernelSum(Kernel):
+    def __init__(self, k1, k2):
+        self.k1 = k1
+        self.k2 = k2
+
+    @property
+    def params(self):
+        return np.concatenate(self.k1.params, self.k2.params)
+
+    def k(self, xi, xj):
+        return self.k1.k(xi, xj) + self.k2.k(xi, xj)
+    
+    def r(self, xi, x):
+        return self.k1.r(xi, x) + self.k2.r(xi, x)
+
+    def R(self, x):
+        return self.k1.R(x) + self.k2.R(x)
+
+
+class KernelProd(Kernel):
+    def __init__(self, k1, k2):
+        self.k1 = k1
+        self.k2 = k2
+
+    @property
+    def params(self):
+        return np.concatenate(self.k1.params, self.k2.params)
+
+    def k(self, xi, xj):
+        return self.k1.k(xi, xj) * self.k2.k(xi, xj)
+    
+    def r(self, xi, x):
+        return self.k1.r(xi, x) * self.k2.r(xi, x)
+
+    def R(self, x):
+        return self.k1.R(x) * self.k2.R(x)
+
+
+class RBF(Kernel):
+    def __init__(self, lengthscale):
+        self.lengthscale = np.array(lengthscale)
+
+    @property
+    def params(self):
+        return self.lengthscale
+    
+    def k(self, xi, xj):
+        return self._k(self.lengthscale, np.array(xi), np.array(xj))
+
+    def r(self, xi, x):
+        return self._r(self.lengthscale, np.array(xi), np.array(x))
+
+    def R(self, x):
+        return self._R(self.lengthscale, np.array(x))
+
+    @staticmethod
+    @jit(nopython=True)
+    def _k(l, xi, xj):
+        diff = xi - xj
+        return np.exp(-np.sum(l*diff*diff))
+
+    @staticmethod
+    @jit(nopython=True)
+    def _r(l, xi, x):
+        n_train = x.shape[0]
+        n_feat = x.shape[1]
+        r = np.empty((n_train, 1))
+        for j in np.range(n_train):
+            r[j] = RBF._k(l, xi, x[j])
+
+    @staticmethod
+    @jit(nopython=True)
+    def _R(l, x):
+        n_train = x.shape[0]
+        n_feat = x.shape[1]
+        R = np.empty((n_train, n_train))
+        for i in np.range(n_train):
+            R[i,i] = 1.0
+            for j in np.range(n_train):
+                R[i,j] = RBF._k(l, x[i], x[j])
+                R[j,i] = R[i,j]
+
+
+class RBFCyclic(Kernel):
+    def __init__(self, lengthscale):
+        self.lengthscale = np.array(lengthscale)
+    
+    @property
+    def params(self):
+        return self.lengthscale
+    
+    def k(self, xi, xj):
+        return self._k(self.lengthscale, np.array(xi), np.array(xj))
+
+    def r(self, xi, x):
+        return self._r(self.lengthscale, np.array(xi), np.array(x))
+
+    def R(self, x):
+        return self._R(self.lengthscale, np.array(x))
+
+    @staticmethod
+    @jit(nopython=True)
+    def _k(l, xi, xj):
+        diff = xi - xj
+        mask = (np.array(np.range(diff.shape[0]))+1)%3 == 0
+        diff[mask] = (diff[mask] + np.pi) % 2*np.pi - np.pi
+        return np.exp(-np.sum(l*diff*diff))
+
+    @staticmethod
+    @jit(nopython=True)
+    def _r(l, xi, x):
+        n_train = x.shape[0]
+        n_feat = x.shape[1]
+        r = np.empty((n_train, 1))
+        for j in np.range(n_train):
+            r[j] = RBF._k(l, xi, x[j])
+
+    @staticmethod
+    @jit(nopython=True)
+    def _R(l, x):
+        n_train = x.shape[0]
+        n_feat = x.shape[1]
+        R = np.empty((n_train, n_train))
+        for i in np.range(n_train):
+            R[i,i] = 1.0
+            for j in np.range(n_train):
+                R[i,j] = RBF._k(l, x[i], x[j])
+                R[j,i] = R[i,j]
+
+
+class Constant(Kernel):
+    def __init__(self, value):
+        self.value = value
+
+    @property
+    def params(self):
+        return np.array([self.value])
+    
+    def k(self, xi, xj):
+        return self.value
+
+    def r(self, xi, x):
+        return np.full((len(x), 1), self.value)
+
+    def R(self, x):
+        return np.full((len(x), len(x)), self.value)
+
+
 class Model:
     def __init__(self, fname, read=False):
         self.fname = Path(fname)
@@ -7566,8 +8002,8 @@ class Model:
         self.analyse_name()
 
         # TODO: Convert these to lowercase
-        self.nTrain = 0
-        self.nFeats = 0
+        self.n_train = 0
+        self.n_feats = 0
 
         self.mu = 0
         self.sigma2 = 0
@@ -7580,7 +8016,9 @@ class Model:
         self.stand_mu = []
         self.stand_var = []
 
-        self.hyper_parameters = []
+        self.kernel = None
+        self.kernel_list = {}
+
         self.weights = []
 
         self.y = []
@@ -7593,7 +8031,7 @@ class Model:
                 self.X = self.standardise_data(self.y)
 
     def normalise_data(self, data):
-        for i in range(self.nFeats):
+        for i in range(self.n_feats):
             self.norm_min.append(data[:, i].min(0))
             self.norm_max.append(data[:, i].max(0))
             data[:, i] = (data[:, i] - data[:, i].min(0)) / data[:, i].ptp(0)
@@ -7605,7 +8043,7 @@ class Model:
         return (array - self.norm_min) / (self.norm_max - self.norm_min)
 
     def standardise_data(self, data):
-        for i in range(self.nFeats):
+        for i in range(self.n_feats):
             self.stand_mu.append(data[:, i].mean(0))
             self.stand_var.append(data[:, i].std(0))
             data[:, i] = (data[:, i] - data[:, i].mean(0)) / data[:, i].std(0)
@@ -7625,7 +8063,7 @@ class Model:
         return self.num - 1
 
     def read(self, up_to=None):
-        if self.nTrain > 0:
+        if self.n_train > 0:
             return
         if self.legacy:
             self.read_legacy(up_to)
@@ -7640,19 +8078,20 @@ class Model:
                 if "stand" in line:
                     self.standardise = True
                 if "Feature" in line:
-                    self.nFeats = int(line.split()[1])
+                    self.n_feats = int(line.split()[1])
                 if "Number_of_training_points" in line:
-                    self.nTrain = int(line.split()[1])
+                    self.n_train = int(line.split()[1])
                 if "Mu" in line:
                     numbers = line.split()
                     self.mu = float(numbers[1])
                     self.sigma2 = float(numbers[3])
                 if "Theta" in line:
                     line = next(f)
+                    hyper_parameters = []
                     while ";" not in line:
-                        self.hyper_parameters.append(float(line))
+                        hyper_parameters.append(float(line))
                         line = next(f)
-                    self.hyper_parameters = np.array(self.hyper_parameters)
+                    self.kernel = RBFCyclic(np.array(hyper_parameters))
                 if "Weights" in line:
                     line = next(f)
                     while ";" not in line:
@@ -7671,7 +8110,7 @@ class Model:
                         self.X.append([float(num) for num in line.split()])
                         line = next(f)
                     self.X = np.array(self.X).reshape(
-                        (self.nTrain, self.nFeats)
+                        (self.n_train, self.n_feats)
                     )
 
                 if up_to is not None and up_to in line:
@@ -7694,17 +8133,35 @@ class Model:
                     continue
                     
                 if "number_of_features" in line:
-                    self.nFeats = int(line.split()[1])
+                    self.n_feats = int(line.split()[1])
                 if "number_of_training_points" in line:
-                    self.nTrain = int(line.split()[1])
+                    self.n_train = int(line.split()[1])
 
                 if "[mean]" in line:
                     line = next(f)
                     line = next(f)
                     self.mu = float(line.split()[1])
                 
-                if "lengthscale" in line:
-                    self.hyper_parameters = [float(hp) for hp in line.split()[1:]]
+                if line.split()[0] == "composition":
+                    kernel_composition = line.split()[-1]
+
+                if "[kernel." in line:
+                    kernel_name = line.split(".")[-1].rstrip("]")
+                    line = next(f)
+                    kernel_type = line.split()[-1]
+
+                    if kernel_type == "rbf":
+                        line = next(f)
+                        lengthscale = np.array([float(hp) for hp in line.split()[1:]])
+                        self.kernel_list[kernel_name] = RBF(lengthscale)
+                    elif kernel_type == "rbf-cyclic":
+                        line = next(f)
+                        lengthscale = np.array([float(hp) for hp in line.split()[1:]])
+                        self.kernel_list[kernel_name] = RBF(lengthscale)
+                    elif kernel_type == "constant":
+                        line = next(f)
+                        value = float(line.split()[-1])
+                        self.kernel_list[kernel_name] = RBF(value)
                 
                 if "[training_data.x]" in line:
                     line = next(f)
@@ -7730,6 +8187,7 @@ class Model:
 
         self.X = np.array(self.X)
         self.y = np.array(self.y).reshape((-1, 1))
+        self.kernel = KernelInterpreter(kernel_composition, self.kernel_list).interpret()
         self.weights = np.array(self.weights)
 
     def write(self, directory=None, legacy=False):
@@ -7747,17 +8205,17 @@ class Model:
         with open(path, "w") as f:
             f.write("Kriging Results and Parameters\n")
             f.write(";\n")
-            f.write(f"Feature {self.nFeats}\n")
-            f.write(f"Number_of_training_points {self.nTrain}\n")
+            f.write(f"Feature {self.n_feats}\n")
+            f.write(f"Number_of_training_points {self.n_train}\n")
             f.write(";\n")
             f.write(f"Mu {self.mu} Sigma_Squared {self.sigma2}\n")
             f.write(";\n")
             f.write("Theta\n")
-            for theta in self.hyper_parameters:
+            for theta in self.kernel.params:
                 f.write(f"{theta}\n")
             f.write(";\n")
             f.write("p\n")
-            for _ in range(len(self.hyper_parameters)):
+            for _ in range(len(self.kernel.params)):
                 f.write("2.00000000000000\n")
             f.write(";\n")
             f.write("Weights\n")
@@ -7765,7 +8223,7 @@ class Model:
                 f.write(f"{weight}\n")
             f.write(";\n")
             f.write("R_matrix\n")
-            f.write(f"Dimension {self.nTrain}\n")
+            f.write(f"Dimension {self.n_train}\n")
             f.write(";\n")
             f.write("Property_value_Kriging_centers\n")
             for y in self.y:
@@ -7834,32 +8292,34 @@ class Model:
         log_directory = Path(GLOBALS.FILE_STRUCTURE["log"])
         FileTools.mkdir(log_directory)
 
-        if self.nTrain == 0:
+        if self.n_train == 0:
             if self.legacy:
                 self.read(up_to="number_of_training_points")
             else:
                 self.read(up_to="Number_of_training_points")
 
-        nTrain = str(self.nTrain).zfill(4)
-        log_directory /= Path(f"{self.system_name}{nTrain}")
+        n_train = str(self.n_train).zfill(4)
+        log_directory /= Path(f"{self.system_name}{n_train}")
         FileTools.mkdir(log_directory)
         log_model_file = self.get_fname(log_directory)
 
         FileTools.copy_file(self.fname, log_model_file)
 
     def r(self, features):
-        return numba_r_rbf(features, self.X, np.array(self.hyper_parameters))
+        return self.kernel.r(features, self.X)
+        # return numba_r_rbf(features, self.X, np.array(self.hyper_parameters))
 
     @property
     def R(self):
         try:
             return self._R
         except AttributeError:
-            self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
+            self._R = self.kernel.R(self.X)
+            # self._R = numba_R_rbf(self.X, np.array(self.hyper_parameters))
             return self._R
 
     def add_nugget(self, nugget=1e-12):
-        return self.R + np.eye(self.nTrain) * nugget
+        return self.R + np.eye(self.n_train) * nugget
 
     @property
     def invR(self):
@@ -7875,7 +8335,7 @@ class Model:
                     nugget = GLOBALS.FEREBUS_NUGGET * 10 ** oom
                     R = self.add_nugget(nugget)
                     logger.warning(
-                        f"Singular Matrix Encountered: Nugget of {nugget}  used on model {self.fname}:{self.nTrain}"
+                        f"Singular Matrix Encountered: Nugget of {nugget}  used on model {self.fname}:{self.n_train}"
                     )
                     try:
                         self._invR = la.inv(R)
@@ -7883,7 +8343,7 @@ class Model:
                     except la.LinAlgError:
                         if nugget <= float(GLOBALS.MAX_NUGGET):
                             logger.error(
-                                f"Could not invert R Matrix of {self.fname}:{self.nTrain}: Singular Matrix Encountered"
+                                f"Could not invert R Matrix of {self.fname}:{self.n_Train}: Singular Matrix Encountered"
                             )
                             sys.exit(1)
                         oom += 1
@@ -7894,7 +8354,7 @@ class Model:
         try:
             return self._ones
         except AttributeError:
-            self._ones = np.ones((self.nTrain, 1))
+            self._ones = np.ones((self.n_train, 1))
             return self._ones
 
     @property
@@ -7931,7 +8391,7 @@ class Model:
             d = self.y - self.B * self.ones
 
             self._cross_validation = []
-            for i in range(self.nTrain):
+            for i in range(self.n_train):
                 cve = (
                     np.matmul(
                         self.invR[i, :],
@@ -8028,9 +8488,9 @@ class Models:
                 self.add(model_file, read)
 
     @property
-    def nTrain(self):
+    def n_train(self):
         self[0].read(up_to="Theta")
-        return self[0].nTrain
+        return self[0].n_train
 
     def get(self, type):
         if type == "all":
@@ -8127,7 +8587,7 @@ class Models:
         alpha = []
         with open(alpha_loc, "r") as f:
             data = json.load(f)
-            if data["npoints"] != UsefulTools.nTrain():
+            if data["npoints"] != UsefulTools.n_train():
                 return 0.5
             for true_error, cv_error in zip(
                 data["true_errors"], data["cv_errors"]
@@ -8189,7 +8649,7 @@ class Models:
             points, atoms=True, type=str(GLOBALS.OPTIMISE_PROPERTY)
         )
 
-        data = {"npoints": UsefulTools.nTrain()}
+        data = {"npoints": UsefulTools.n_train()}
         data["cv_errors"] = [float(cv_errors[index]) for index in indices]
         data["predictions"] = [predictions[index] for index in indices]
         with open(GLOBALS.FILE_STRUCTURE["cv_errors"], "w") as f:
@@ -8607,7 +9067,7 @@ class Set(Points):
             ]
 
         data = {}
-        data["npoints"] = UsefulTools.nTrain()
+        data["npoints"] = UsefulTools.n_train()
         data["cv_errors"] = cv_errors
         data["true_errors"] = []
         for prediction, true_value in zip(predictions, true_values):
@@ -9093,7 +9553,7 @@ class DlpolyTools:
             f.write(
                 "3\t\t#number of moments (first 3 are to be IQA energy components xc slf src)\n"
             )
-            f.write(f"{models.nTrain}\t\t#max number of training examples\n")
+            f.write(f"{models.n_train}\t\t#max number of training examples\n")
             for i, atom in enumerate(atoms):
                 f.write(
                     f"{atom.type} {atom.num} {atom.x_axis.num} {atom.xy_plane.num}"
@@ -9689,7 +10149,7 @@ class DlpolyTools:
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
             if os.path.exists(trajectory_file):
                 models = Models(os.path.join(model_dir, "model_krig"))
-                n_train = models.nTrain
+                n_train = models.n_train
 
                 trajectory = Trajectory(trajectory_file, read=True)
                 rmsd += [(n_train, trajectory[-1].rmsd(opt_atoms))]
@@ -10196,7 +10656,7 @@ class RMSETools(AnalysisTools):
             predictions = models.predict(
                 vs, atoms=True, type=type, verbose=True
             )
-            rmse_data[models.nTrain] = {}
+            rmse_data[models.n_train] = {}
             for point, predicted in zip(vs, predictions):
                 for type, values in predicted.items():
                     true_total = 0.0
@@ -10205,36 +10665,36 @@ class RMSETools(AnalysisTools):
                         atom_name = point.ints[atom - 1].atom
                         if (
                             not atom_name + "_True"
-                            in rmse_data[models.nTrain].keys()
+                            in rmse_data[models.n_train].keys()
                         ):
-                            rmse_data[models.nTrain][atom_name + "_True"] = []
-                            rmse_data[models.nTrain][
+                            rmse_data[models.n_train][atom_name + "_True"] = []
+                            rmse_data[models.n_train][
                                 atom_name + "_Predicted"
                             ] = []
-                            rmse_data[models.nTrain][atom_name + "_Error"] = []
+                            rmse_data[models.n_train][atom_name + "_Error"] = []
                         true = getattr(point.ints[atom - 1], type)
                         true_total += true
                         pred_total += pred
-                        rmse_data[models.nTrain][atom_name + "_True"] += [true]
-                        rmse_data[models.nTrain][atom_name + "_Predicted"] += [
+                        rmse_data[models.n_train][atom_name + "_True"] += [true]
+                        rmse_data[models.n_train][atom_name + "_Predicted"] += [
                             pred
                         ]
                         error = np.abs(true - pred) * (
                             Constants.ha_to_kj_mol if type == "iqa" else 1.0
                         )
-                        rmse_data[models.nTrain][atom_name + "_Error"] += [
+                        rmse_data[models.n_train][atom_name + "_Error"] += [
                             error
                         ]
-                    if not "Total_True" in rmse_data[models.nTrain].keys():
-                        rmse_data[models.nTrain]["Total_True"] = []
-                        rmse_data[models.nTrain]["Total_Predicted"] = []
-                        rmse_data[models.nTrain]["Total_Error"] = []
-                    rmse_data[models.nTrain]["Total_True"] += [true_total]
-                    rmse_data[models.nTrain]["Total_Predicted"] += [pred_total]
+                    if not "Total_True" in rmse_data[models.n_train].keys():
+                        rmse_data[models.n_train]["Total_True"] = []
+                        rmse_data[models.n_train]["Total_Predicted"] = []
+                        rmse_data[models.n_train]["Total_Error"] = []
+                    rmse_data[models.n_train]["Total_True"] += [true_total]
+                    rmse_data[models.n_train]["Total_Predicted"] += [pred_total]
                     error = np.abs(true_total - pred_total) * (
                         Constants.ha_to_kj_mol if type == "iqa" else 1.0
                     )
-                    rmse_data[models.nTrain]["Total_Error"] += [error]
+                    rmse_data[models.n_train]["Total_Error"] += [error]
 
         rmse_data = {
             n: d
@@ -11001,8 +11461,8 @@ def calculate_errors(models_directory, sample_pool_directory):
     models = Models(models_directory, read=True, atoms=str(GLOBALS.OPTIMISE_ATOM))
     n_train = FileTools.count_points_in(GLOBALS.FILE_STRUCTURE["training_set"])
 
-    if n_train != models.nTrain:
-        logger.error(f"Number of points in model ({models.nTrain}) does not match number of training points ({n_train})")
+    if n_train != models.n_train:
+        logger.error(f"Number of points in model ({models.n_train}) does not match number of training points ({n_train})")
         logger.warning("Skipping failed iteration, no points added to Training Set")
         quit()
     sample_pool = Set(sample_pool_directory).read_gjfs()
