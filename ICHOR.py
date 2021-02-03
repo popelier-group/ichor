@@ -1048,12 +1048,12 @@ class GlobalVariable:
             else self.type
         )
         # Make sure type is the correct type
-        try:
-            self.__dict__["value"] = (
-                value if convert in Globals.types else convert(value)
-            )
-        except:
-            self.__dict__["value"] = value
+        # try:
+        self.__dict__["value"] = (
+            value if convert in Globals.types else convert(value)
+        )
+        # except:
+        #     self.__dict__["value"] = value
 
         for modifier in self.modifiers:
             self.__dict__["value"] = modifier(self.value)
@@ -1395,7 +1395,6 @@ class Globals:
                 ProblemFinder.unknown_settings += [key]
 
         if not self.ALF:
-            if not self.ALF:
             alf_reference_file = self.ALF_REFERENCE_FILE.value
             if not alf_reference_file:
                 alf_reference_file = FileTools.get_first_gjf(
@@ -1460,6 +1459,7 @@ class Globals:
             logo = UsefulTools.ichor_logo()
             config.write(f"{logo}\n\n")
             for key, val in global_variables.items():
+                if str(val) in ["[]", "None"]: continue
                 config.write(f"{key}={val}\n")
 
     def save_to_yaml_config(self, config_file, global_variables):
