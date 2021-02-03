@@ -11058,7 +11058,6 @@ class SetupTools:
             make_validation_set = UsefulTools.check_bool(input(f"Would you like to make set: Validation Set [Y/N]"))
         if make_validation_set:
             SetupTools.make_set("validation_set", points, validation_set_method, n_validation_points)
-        quit()
 
 
 class SettingsTools:
