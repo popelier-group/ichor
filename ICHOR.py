@@ -1427,6 +1427,12 @@ class Globals:
                     print(
                         "\nError in ALF calculation, please specify file to calculate ALF"
                     )
+            else:
+                xyz_files = FileTools.get_files_in(".", "*.xyz")
+                if len(xyz_files) == 1:
+                    traj = Trajectory(xyz_files[0]).read(n=1)
+                    traj[0].atoms.calculate_alf()
+                    self.ALF = Atoms.ALF
         else:
             Atoms.ALF = self.ALF
 
@@ -2757,7 +2763,7 @@ class ProblemFinder:
     def __init__(self):
         self.problems = []
 
-    @UsefulTools.run_function(1)
+    # @UsefulTools.run_function(1)
     def check_alf(self):
         if len(GLOBALS.ALF) < 1:
             self.add(
@@ -2768,7 +2774,7 @@ class ProblemFinder:
                 )
             )
 
-    @UsefulTools.run_function(2)
+    # @UsefulTools.run_function(2)
     def check_directories(self):
         dirs_to_check = ["training_set", "sample_pool"]
 
@@ -4437,7 +4443,6 @@ class AtomTools:
                             GLOBALS.FILE_STRUCTURE["sample_pool"], dst
                         )
                         progressbar.update()
-                print()
             else:
                 xyz_files = FileTools.get_files_in(".", "*.xyz")
                 if len(xyz_files) == 0:
@@ -4449,8 +4454,9 @@ class AtomTools:
                     for _, atom_directory in atom_directories:
                         progressbar.set_description(atom_directory)
                         dst = os.path.join(atom_directory, xyz_files[0])
-                        FileTools.copyfile(xyz_files[0], dst)
+                        FileTools.copy_file(xyz_files[0], dst)
                         progressbar.update()
+            print()
 
         else:
             for atom_name in atoms:
