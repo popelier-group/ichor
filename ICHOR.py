@@ -4378,10 +4378,19 @@ class AtomTools:
         original_atom = GLOBALS.OPTIMISE_ATOM
 
         atom_directories = []
-        gjf_file = FileTools.get_first_gjf(
-            GLOBALS.FILE_STRUCTURE["training_set"]
-        )
-        atoms = GJF(gjf_file, read=True).atoms.atoms
+        try:
+            gjf_file = FileTools.get_first_gjf(
+                GLOBALS.FILE_STRUCTURE["training_set"]
+            )
+            atoms = GJF(gjf_file, read=True).atoms.atoms
+        except:
+            xyz_files = FileTools.get_files_in(".", "*.xyz")
+            if len(xyz_files) == 0:
+                printq("Error: No xyz file or TRAINING_SET found")
+            elif len(xyz_files) > 1:
+                printq("Error: Too many xyz files found")
+            traj = Trajectory(xyz_files[0])
+            atoms = traj[0].atoms
         atoms_root = GLOBALS.FILE_STRUCTURE["atoms"]
 
         print()
@@ -9261,7 +9270,7 @@ class Trajectory(Points):
 
     @buildermethod
     @Points.reader
-    def read(self):
+    def read(self, n=-1):
         with open(self.path, "r") as f:
             atoms = Atoms()
             for line in f:
@@ -9277,6 +9286,8 @@ class Trajectory(Points):
                             atoms.add(line)
                     atoms.finish()
                     self.add(atoms)
+                    if n > 0 and len(self) > n:
+                        break
                     atoms = Atoms()
 
     def append(self, atoms):
