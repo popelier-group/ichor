@@ -4402,32 +4402,47 @@ class AtomTools:
 
                     progressbar.update()
             print()
-            # copy training set
-            print("Copying Training Set")
-            with tqdm(total=len(atoms), unit=" dirs") as progressbar:
-                for _, atom_directory in atom_directories:
-                    progressbar.set_description(atom_directory)
-                    dst = os.path.join(
-                        atom_directory, GLOBALS.FILE_STRUCTURE["training_set"],
-                    )
-                    FileTools.copytree(
-                        GLOBALS.FILE_STRUCTURE["training_set"], dst
-                    )
-                    progressbar.update()
-            print()
-            # copy sample pool
-            print("Copying Sample Pool")
-            with tqdm(total=len(atoms), unit=" dirs") as progressbar:
-                for _, atom_directory in atom_directories:
-                    progressbar.set_description(atom_directory)
-                    dst = os.path.join(
-                        atom_directory, GLOBALS.FILE_STRUCTURE["sample_pool"],
-                    )
-                    FileTools.copytree(
-                        GLOBALS.FILE_STRUCTURE["sample_pool"], dst
-                    )
-                    progressbar.update()
-            print()
+            if FileTools.dir_exists(GLOBALS.FILE_STRUCTURE["training_set"]):
+                # copy training set
+                print("Copying Training Set")
+                with tqdm(total=len(atoms), unit=" dirs") as progressbar:
+                    for _, atom_directory in atom_directories:
+                        progressbar.set_description(atom_directory)
+                        dst = os.path.join(
+                            atom_directory, GLOBALS.FILE_STRUCTURE["training_set"],
+                        )
+                        FileTools.copytree(
+                            GLOBALS.FILE_STRUCTURE["training_set"], dst
+                        )
+                        progressbar.update()
+                print()
+                # copy sample pool
+                print("Copying Sample Pool")
+                with tqdm(total=len(atoms), unit=" dirs") as progressbar:
+                    for _, atom_directory in atom_directories:
+                        progressbar.set_description(atom_directory)
+                        dst = os.path.join(
+                            atom_directory, GLOBALS.FILE_STRUCTURE["sample_pool"],
+                        )
+                        FileTools.copytree(
+                            GLOBALS.FILE_STRUCTURE["sample_pool"], dst
+                        )
+                        progressbar.update()
+                print()
+            else:
+                xyz_files = FileTools.get_files_in(".", "*.xyz")
+                if len(xyz_files) == 0:
+                    printq("Error: No xyz file or TRAINING_SET found")
+                elif len(xyz_files) > 1:
+                    printq("Error: Too many xyz files found")
+                print(f"Copying XYZ File: {xyz_files[0]}")
+                with tqdm(total=len(atoms), unit=" xyz") as progressbar:
+                    for _, atom_directory in atom_directories:
+                        progressbar.set_description(atom_directory)
+                        dst = os.path.join(atom_directory, xyz_files[0])
+                        FileTools.copyfile(xyz_files[0], dst)
+                        progressbar.update()
+
         else:
             for atom_name in atoms:
                 atom_directory = os.path.join(atoms_root, atom_name)
