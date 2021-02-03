@@ -1048,12 +1048,12 @@ class GlobalVariable:
             else self.type
         )
         # Make sure type is the correct type
-        # try:
-        self.__dict__["value"] = (
-            value if convert in Globals.types else convert(value)
-        )
-        # except:
-        #     self.__dict__["value"] = value
+        try:
+            self.__dict__["value"] = (
+                value if convert in Globals.types else convert(value)
+            )
+        except:
+            self.__dict__["value"] = value
 
         for modifier in self.modifiers:
             self.__dict__["value"] = modifier(self.value)
