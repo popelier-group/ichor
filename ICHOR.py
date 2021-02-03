@@ -4389,7 +4389,7 @@ class AtomTools:
                 printq("Error: No xyz file or TRAINING_SET found")
             elif len(xyz_files) > 1:
                 printq("Error: Too many xyz files found")
-            traj = Trajectory(xyz_files[0])
+            traj = Trajectory(xyz_files[0]).read(n=1)
             atoms = traj[0].atoms
         atoms_root = GLOBALS.FILE_STRUCTURE["atoms"]
 
