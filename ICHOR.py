@@ -1395,28 +1395,31 @@ class Globals:
                 ProblemFinder.unknown_settings += [key]
 
         if not self.ALF:
-            if not self.ALF_REFERENCE_FILE:
-                try:
-                    self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                        self.FILE_STRUCTURE["training_set"]
-                    )
-                except:
-                    logger.warning("Cannot Find Training Set GJF")
-                    try:
-                        self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                            self.FILE_STRUCTURE["sample_pool"]
-                        )
-                    except:
-                        logger.warning("Cannot Find Sample Pool GJF")
-                        try:
-                            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                                self.FILE_STRUCTURE["validation_set"]
-                            )
-                        except:
-                            logger.warning("Cannot Find Validation Set GJF")
-                            logger.error("No ALF_REFERENCE_FILE Defined")
-                            pass
-            if self.ALF_REFERENCE_FILE:
+            if not self.ALF:
+            alf_reference_file = self.ALF_REFERENCE_FILE.value
+            if not alf_reference_file:
+                alf_reference_file = FileTools.get_first_gjf(
+                    self.FILE_STRUCTURE["training_set"]
+                )
+
+            if not alf_reference_file:
+                logger.warning("Cannot Find Training Set GJF")
+                alf_reference_file = FileTools.get_first_gjf(
+                    self.FILE_STRUCTURE["sample_pool"]
+                )
+
+            if not alf_reference_file:
+                logger.warning("Cannot Find Sample Pool GJF")
+                alf_reference_file = FileTools.get_first_gjf(
+                    self.FILE_STRUCTURE["validation_set"]
+                )
+
+            if not alf_reference_file:
+                logger.warning("Cannot Find Validation Set GJF")
+                logger.error("No ALF_REFERENCE_FILE Defined")
+
+            if alf_reference_file:
+                self.ALF_REFERENCE_FILE = alf_reference_file
                 try:
                     GJF(
                         str(self.ALF_REFERENCE_FILE)
@@ -1433,6 +1436,7 @@ class Globals:
                     traj = Trajectory(xyz_files[0]).read(n=1)
                     traj[0].atoms.calculate_alf()
                     self.ALF = Atoms.ALF
+            Atoms.ALF = self.ALF
         else:
             Atoms.ALF = self.ALF
 
