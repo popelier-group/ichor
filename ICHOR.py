@@ -1433,7 +1433,7 @@ class Globals:
                 xyz_files = FileTools.get_files_in(".", "*.xyz")
                 if len(xyz_files) == 1:
                     traj = Trajectory(xyz_files[0]).read(n=1)
-                    traj[0].atoms.calculate_alf()
+                    traj[0].calculate_alf()
                     self.ALF = Atoms.ALF
             Atoms.ALF = self.ALF
         else:
@@ -9279,7 +9279,6 @@ class Trajectory(Points):
         self._trajectory = []
 
     @buildermethod
-    @Points.reader
     def read(self, n=-1):
         with open(self.path, "r") as f:
             atoms = Atoms()
