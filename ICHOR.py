@@ -7885,7 +7885,6 @@ class KernelProd(Kernel):
         return self.k1.R(x) * self.k2.R(x)
 
 
-@staticmethod
 @jit(nopython=True)
 def RBF_k(l, xi, xj):
     diff = xi - xj
@@ -7897,7 +7896,7 @@ def RBF_r(l, xi, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
     r = np.empty((n_train, 1))
-    for j in np.range(n_train):
+    for j in range(n_train):
         r[j] = RBF_k(l, xi, x[j])
     return r
 
@@ -7907,9 +7906,9 @@ def RBF_R(l, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
     R = np.empty((n_train, n_train))
-    for i in np.range(n_train):
+    for i in range(n_train):
         R[i, i] = 1.0
-        for j in np.range(n_train):
+        for j in range(n_train):
             R[i, j] = RBF_k(l, x[i], x[j])
             R[j, i] = R[i, j]
     return R
@@ -7936,7 +7935,7 @@ class RBF(Kernel):
 @jit(nopython=True)
 def RBFCyclic_k(l, xi, xj):
     diff = xi - xj
-    mask = (np.array(np.range(diff.shape[0])) + 1) % 3 == 0
+    mask = (np.array(range(diff.shape[0])) + 1) % 3 == 0
     diff[mask] = (diff[mask] + np.pi) % 2 * np.pi - np.pi
     return np.exp(-np.sum(l * diff * diff))
 
@@ -7945,7 +7944,7 @@ def RBFCyclic_r(l, xi, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
     r = np.empty((n_train, 1))
-    for j in np.range(n_train):
+    for j in range(n_train):
         r[j] = RBFCyclic_k(l, xi, x[j])
 
 @jit(nopython=True)
@@ -7953,9 +7952,9 @@ def RBFCyclic_R(l, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
     R = np.empty((n_train, n_train))
-    for i in np.range(n_train):
+    for i in range(n_train):
         R[i, i] = 1.0
-        for j in np.range(n_train):
+        for j in range(n_train):
             R[i, j] = RBFCyclic_k(l, x[i], x[j])
             R[j, i] = R[i, j]
 
