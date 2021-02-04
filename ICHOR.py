@@ -2723,6 +2723,7 @@ class FerebusTools:
             ftoml.write("[model]\n")
             ftoml.write(f'mean = "{GLOBALS.FEREBUS_MEAN}"\n')
             ftoml.write(f'optimiser = "{GLOBALS.FEREBUS_OPTIMISATION}"\n')
+            ftoml.write(f'kernel = "k1"\n')
             ftoml.write("\n")
             ftoml.write("[optimiser]\n")
             ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
@@ -2739,7 +2740,6 @@ class FerebusTools:
                 f"social_learning_rate = {GLOBALS.FEREBUS_SOCIAL_LEARNING_RATE}\n"
             )
             ftoml.write("\n")
-            ftoml.write("[kernels]\n")
             ftoml.write("[kernels.k1]\n")
             ftoml.write(f"type = \"{'rbf'}\"\n")
 
@@ -2856,7 +2856,7 @@ class DictList(dict):
 
 
 # ========================#
-#     Cluster Tools      #
+#     Cluster Tools       #
 # ========================#
 
 
@@ -7885,6 +7885,36 @@ class KernelProd(Kernel):
         return self.k1.R(x) * self.k2.R(x)
 
 
+@staticmethod
+@jit(nopython=True)
+def RBF_k(l, xi, xj):
+    diff = xi - xj
+    return np.exp(-np.sum(l * diff * diff))
+
+
+@jit(nopython=True)
+def RBF_r(l, xi, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    r = np.empty((n_train, 1))
+    for j in np.range(n_train):
+        r[j] = RBF_k(l, xi, x[j])
+    return r
+
+
+@jit(nopython=True)
+def RBF_R(l, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    R = np.empty((n_train, n_train))
+    for i in np.range(n_train):
+        R[i, i] = 1.0
+        for j in np.range(n_train):
+            R[i, j] = RBF_k(l, x[i], x[j])
+            R[j, i] = R[i, j]
+    return R
+
+
 class RBF(Kernel):
     def __init__(self, lengthscale):
         self.lengthscale = np.array(lengthscale)
@@ -7894,40 +7924,40 @@ class RBF(Kernel):
         return self.lengthscale
 
     def k(self, xi, xj):
-        return self._k(self.lengthscale, np.array(xi), np.array(xj))
+        return RBF_k(self.lengthscale, np.array(xi), np.array(xj))
 
     def r(self, xi, x):
-        return self._r(self.lengthscale, np.array(xi), np.array(x))
+        return RBF_r(self.lengthscale, np.array(xi), np.array(x))
 
     def R(self, x):
-        return self._R(self.lengthscale, np.array(x))
+        return RBF_R(self.lengthscale, np.array(x))
 
-    @staticmethod
-    @jit(nopython=True)
-    def _k(l, xi, xj):
-        diff = xi - xj
-        return np.exp(-np.sum(l * diff * diff))
 
-    @staticmethod
-    @jit(nopython=True)
-    def _r(l, xi, x):
-        n_train = x.shape[0]
-        n_feat = x.shape[1]
-        r = np.empty((n_train, 1))
+@jit(nopython=True)
+def RBFCyclic_k(l, xi, xj):
+    diff = xi - xj
+    mask = (np.array(np.range(diff.shape[0])) + 1) % 3 == 0
+    diff[mask] = (diff[mask] + np.pi) % 2 * np.pi - np.pi
+    return np.exp(-np.sum(l * diff * diff))
+
+@jit(nopython=True)
+def RBFCyclic_r(l, xi, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    r = np.empty((n_train, 1))
+    for j in np.range(n_train):
+        r[j] = RBFCyclic_k(l, xi, x[j])
+
+@jit(nopython=True)
+def RBFCyclic_R(l, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    R = np.empty((n_train, n_train))
+    for i in np.range(n_train):
+        R[i, i] = 1.0
         for j in np.range(n_train):
-            r[j] = RBF._k(l, xi, x[j])
-
-    @staticmethod
-    @jit(nopython=True)
-    def _R(l, x):
-        n_train = x.shape[0]
-        n_feat = x.shape[1]
-        R = np.empty((n_train, n_train))
-        for i in np.range(n_train):
-            R[i, i] = 1.0
-            for j in np.range(n_train):
-                R[i, j] = RBF._k(l, x[i], x[j])
-                R[j, i] = R[i, j]
+            R[i, j] = RBFCyclic_k(l, x[i], x[j])
+            R[j, i] = R[i, j]
 
 
 class RBFCyclic(Kernel):
@@ -7939,42 +7969,13 @@ class RBFCyclic(Kernel):
         return self.lengthscale
 
     def k(self, xi, xj):
-        return self._k(self.lengthscale, np.array(xi), np.array(xj))
+        return RBFCyclic_k(self.lengthscale, np.array(xi), np.array(xj))
 
     def r(self, xi, x):
-        return self._r(self.lengthscale, np.array(xi), np.array(x))
+        return RBFCyclic_r(self.lengthscale, np.array(xi), np.array(x))
 
     def R(self, x):
-        return self._R(self.lengthscale, np.array(x))
-
-    @staticmethod
-    @jit(nopython=True)
-    def _k(l, xi, xj):
-        diff = xi - xj
-        mask = (np.array(np.range(diff.shape[0])) + 1) % 3 == 0
-        diff[mask] = (diff[mask] + np.pi) % 2 * np.pi - np.pi
-        return np.exp(-np.sum(l * diff * diff))
-
-    @staticmethod
-    @jit(nopython=True)
-    def _r(l, xi, x):
-        n_train = x.shape[0]
-        n_feat = x.shape[1]
-        r = np.empty((n_train, 1))
-        for j in np.range(n_train):
-            r[j] = RBF._k(l, xi, x[j])
-
-    @staticmethod
-    @jit(nopython=True)
-    def _R(l, x):
-        n_train = x.shape[0]
-        n_feat = x.shape[1]
-        R = np.empty((n_train, n_train))
-        for i in np.range(n_train):
-            R[i, i] = 1.0
-            for j in np.range(n_train):
-                R[i, j] = RBF._k(l, x[i], x[j])
-                R[j, i] = R[i, j]
+        return RBFCyclic_R(self.lengthscale, np.array(x))
 
 
 class Constant(Kernel):
@@ -8151,13 +8152,13 @@ class Model:
                     line = next(f)
                     self.mu = float(line.split()[1])
 
-                if line.split()[0] == "composition":
+                if "composition" in line:
                     kernel_composition = line.split()[-1]
 
                 if "[kernel." in line:
-                    kernel_name = line.split(".")[-1].rstrip("]")
+                    kernel_name = line.split(".")[-1].rstrip().rstrip("]")
                     line = next(f)
-                    kernel_type = line.split()[-1]
+                    kernel_type = line.split()[-1].strip()
 
                     if kernel_type == "rbf":
                         line = next(f)
