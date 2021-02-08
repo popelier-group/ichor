@@ -8174,13 +8174,13 @@ class Model:
                         lengthscale = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
-                        self.kernel_list[kernel_name] = RBF(lengthscale)
+                        self.kernel_list[kernel_name] = RBFCyclic(lengthscale)
                     elif kernel_type == "constant":
                         line = next(f)
                         line = next(f)
                         line = next(f)
                         value = float(line.split()[-1])
-                        self.kernel_list[kernel_name] = RBF(value)
+                        self.kernel_list[kernel_name] = Constant(value)
 
                 if "[training_data.x]" in line:
                     line = next(f)
