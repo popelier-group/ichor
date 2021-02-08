@@ -8161,17 +8161,23 @@ class Model:
 
                     if kernel_type == "rbf":
                         line = next(f)
+                        line = next(f)
+                        line = next(f)
                         lengthscale = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
                         self.kernel_list[kernel_name] = RBF(lengthscale)
-                    elif kernel_type == "rbf-cyclic":
+                    elif kernel_type in ["rbf-cyclic", "rbf-cylic"]: # Due to typo in FEREBUS 7.0
+                        line = next(f)
+                        line = next(f)
                         line = next(f)
                         lengthscale = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
                         self.kernel_list[kernel_name] = RBF(lengthscale)
                     elif kernel_type == "constant":
+                        line = next(f)
+                        line = next(f)
                         line = next(f)
                         value = float(line.split()[-1])
                         self.kernel_list[kernel_name] = RBF(value)
