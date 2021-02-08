@@ -9708,8 +9708,8 @@ class DlpolyTools:
             if os.path.exists(trajectory_file):
                 model_name = FileTools.end_of_path(model_dir)
                 trajectory_files[model_name] = Trajectory(
-                    trajectory_file, read=True
-                )
+                    trajectory_file
+                ).read()
 
         for model_name, trajectory in trajectory_files.items():
             if len(trajectory) > 0:
@@ -9758,7 +9758,7 @@ class DlpolyTools:
         trajectory_gjf_dir = os.path.join(trajectory_dir, "TRAJECTORY")
         FileTools.mkdir(trajectory_gjf_dir, empty=True)
 
-        trajectory = Trajectory(trajectory_file, read=True)
+        trajectory = Trajectory(trajectory_file).read()
         for i, timestep in enumerate(trajectory):
             if i % DlpolyTools.use_every == 0:
                 gjf_fname = GLOBALS.SYSTEM_NAME + str(i + 1).zfill(4) + ".gjf"
@@ -9905,7 +9905,7 @@ class DlpolyTools:
             if os.path.isfile(traj_file):
                 directory = os.path.join(directory, "TRAJECTORY")
                 FileTools.mkdir(directory)
-                trajectory = Trajectory(traj_file, read=True)
+                trajectory = Trajectory(traj_file).read()
                 trajectory.to_dir(directory, DlpolyTools.use_every)
                 submit_gjfs(directory)
 
@@ -9925,7 +9925,7 @@ class DlpolyTools:
             if os.path.isfile(traj_file):
                 directory = os.path.join(directory, "TRAJECTORY")
                 FileTools.mkdir(directory)
-                trajectory = Trajectory(traj_file, read=True)
+                trajectory = Trajectory(traj_file).read()
                 trajectory.to_dir(directory, DlpolyTools.use_every)
                 AutoTools.submit_aimall(directory)
         # Look at adding analysis at the end
@@ -10226,7 +10226,7 @@ class DlpolyTools:
                 models = Models(os.path.join(model_dir, "model_krig"))
                 n_train = models.n_train
 
-                trajectory = Trajectory(trajectory_file, read=True)
+                trajectory = Trajectory(trajectory_file).read()
                 rmsd += [(n_train, trajectory[-1].rmsd(opt_atoms))]
 
         with open("rmsd.csv", "w") as f:
