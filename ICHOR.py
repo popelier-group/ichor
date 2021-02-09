@@ -2724,6 +2724,8 @@ class FerebusTools:
             ftoml.write(f'mean = "{GLOBALS.FEREBUS_MEAN}"\n')
             ftoml.write(f'optimiser = "{GLOBALS.FEREBUS_OPTIMISATION}"\n')
             ftoml.write(f'kernel = "k1"\n')
+            if GLOBALS.STANDARDISE:
+                ftoml.write(f'standardise = true\n')
             ftoml.write("\n")
             ftoml.write("[optimiser]\n")
             ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
@@ -2741,7 +2743,7 @@ class FerebusTools:
             )
             ftoml.write("\n")
             ftoml.write("[kernels.k1]\n")
-            ftoml.write(f"type = \"{'rbf'}\"\n")
+            ftoml.write(f"type = \"{'rbf-cyclic'}\"\n")
 
 
 class Problem:
@@ -3372,7 +3374,7 @@ class SubmissionScript:
         self.cleanup_modules()
 
     def setup_pe(self):
-        self.parallel_environments["ffluxlab"] = [("smp", 2, 64)]
+        self.parallel_environments["ffluxlab"] = [("smp", 2, 44)]
         self.parallel_environments["csf3"] = [("smp.pe", 2, 32)]
         self.parallel_environments["local"] = [("", 2, mp.cpu_count())]
 
@@ -3447,6 +3449,7 @@ class SubmissionScript:
 
             if self.ncores > 1:
                 f.write("export OMP_NUM_THREADS=$NSLOTS\n")
+                f.write("export OMP_PROC_BIND=true\n")
                 f.write("export RAYON_NUM_THREADS=$NSLOTS\n\n")
 
             f.write("\n")
@@ -7885,13 +7888,13 @@ class KernelProd(Kernel):
         return self.k1.R(x) * self.k2.R(x)
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def RBF_k(l, xi, xj):
     diff = xi - xj
     return np.exp(-np.sum(l * diff * diff))
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def RBF_r(l, xi, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
@@ -7901,7 +7904,7 @@ def RBF_r(l, xi, x):
     return r
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def RBF_R(l, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
@@ -7958,23 +7961,86 @@ def RBFCyclic_R(l, x):
             R[i, j] = RBFCyclic_k(l, x[i], x[j])
             R[j, i] = R[i, j]
 
+@jit(nopython=True)
+def RBFCyclic_k(l, xi, xj):
+    diff = xi - xj
+    mask = (np.array(range(diff.shape[0])) + 1) % 3 == 0
+    diff[mask] = (diff[mask] + np.pi/xstd) % 2 * np.pi/xstd - np.pi/xstd
+    return np.exp(-np.sum(l * diff * diff))
+
+@jit(nopython=True)
+def RBFCyclic_r(l, xi, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    r = np.empty((n_train, 1))
+    for j in range(n_train):
+        r[j] = RBFCyclic_k(l, xi, x[j])
+
+@jit(nopython=True)
+def RBFCyclic_R(l, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    R = np.empty((n_train, n_train))
+    for i in range(n_train):
+        R[i, i] = 1.0
+        for j in range(n_train):
+            R[i, j] = RBFCyclic_k(l, x[i], x[j])
+            R[j, i] = R[i, j]
+
+
+@jit(nopython=True)
+def RBFCyclicStandardised_k(l, xstd, xi, xj):
+    diff = xi - xj
+    mask = (np.array(range(diff.shape[0])) + 1) % 3 == 0
+    diff[mask] = (diff[mask] + np.pi) % 2 * np.pi - np.pi
+    return np.exp(-np.sum(l * diff * diff))
+
+@jit(nopython=True)
+def RBFCyclicStandardised_r(l, xstd, xi, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    r = np.empty((n_train, 1))
+    for j in range(n_train):
+        r[j] = RBFCyclicStandardised_k(l, xi, x[j])
+
+@jit(nopython=True)
+def RBFCyclicStandardised_R(l, xstd, x):
+    n_train = x.shape[0]
+    n_feat = x.shape[1]
+    R = np.empty((n_train, n_train))
+    for i in range(n_train):
+        R[i, i] = 1.0
+        for j in range(n_train):
+            R[i, j] = RBFCyclicStandardised_k(l, x[i], x[j])
+            R[j, i] = R[i, j]
+
 
 class RBFCyclic(Kernel):
-    def __init__(self, lengthscale):
+    def __init__(self, lengthscale, xstd=None):
         self.lengthscale = np.array(lengthscale)
+        self.xstd = xstd
 
     @property
     def params(self):
         return self.lengthscale
 
     def k(self, xi, xj):
-        return RBFCyclic_k(self.lengthscale, np.array(xi), np.array(xj))
+        if self.xstd is None:
+            return RBFCyclic_k(self.lengthscale, np.array(xi), np.array(xj))
+        else:
+            return RBFCyclicStandardised_k(self.lengthscale, np.array(self.xstd), np.array(xi), np.array(xj))
 
     def r(self, xi, x):
-        return RBFCyclic_r(self.lengthscale, np.array(xi), np.array(x))
+        if self.xstd is None:
+            return RBFCyclic_r(self.lengthscale, np.array(xi), np.array(x))
+        else:
+            return RBFCyclicStandardised_r(self.lengthscale, np.array(self.xstd), np.array(xi), np.array(x))
 
     def R(self, x):
-        return RBFCyclic_R(self.lengthscale, np.array(x))
+        if self.xstd is None:
+            return RBFCyclic_R(self.lengthscale, np.array(x))
+        else:
+            return RBFCyclicStandardised_R(self.lengthscale, np.array(self.xstd), np.array(x))
 
 
 class Constant(Kernel):
@@ -8022,8 +8088,10 @@ class Model:
         self.norm_max = []
 
         self.standardise = False
-        self.stand_mu = []
-        self.stand_var = []
+        self.xmu = []
+        self.xstd = []
+        self.ymu = []
+        self.ystd = []
 
         self.kernel = None
         self.kernel_list = {}
@@ -8034,10 +8102,10 @@ class Model:
         self.X = []
         if read and self.fname:
             self.read()
-            if self.normalise:
-                self.X = self.normalise_data(self.X)
-            elif self.standardise:
-                self.X = self.standardise_data(self.y)
+            # if self.normalise:
+            #     self.X = self.normalise_data(self.X)
+            # elif self.standardise:
+            #     self.X = self.standardise_data(self.y)
 
     def normalise_data(self, data):
         for i in range(self.n_feats):
@@ -8051,17 +8119,20 @@ class Model:
     def normalise_array(self, array):
         return (array - self.norm_min) / (self.norm_max - self.norm_min)
 
-    def standardise_data(self, data):
-        for i in range(self.n_feats):
-            self.stand_mu.append(data[:, i].mean(0))
-            self.stand_var.append(data[:, i].std(0))
-            data[:, i] = (data[:, i] - data[:, i].mean(0)) / data[:, i].std(0)
-        self.stand_mu = np.array(self.stand_mu)
-        self.stand_var = np.array(self.stand_var)
-        return data
+    # def standardise_data(self, data):
+    #     for i in range(self.n_feats):
+    #         self.stand_mu.append(data[:, i].mean(0))
+    #         self.stand_var.append(data[:, i].std(0))
+    #         data[:, i] = (data[:, i] - data[:, i].mean(0)) / data[:, i].std(0)
+    #     self.stand_mu = np.array(self.stand_mu)
+    #     self.stand_var = np.array(self.stand_var)
+    #     return data
 
-    def standardise_array(self, array):
-        return (array - self.stand_mu) / self.stand_var
+    # def standardise_array(self, array):
+        # return (array - self.stand_mu) / self.stand_var
+
+    def standardise_array(self, array, mu, std):
+        return (array-mu)/std
 
     @property
     def num(self):
@@ -8182,6 +8253,11 @@ class Model:
                         value = float(line.split()[-1])
                         self.kernel_list[kernel_name] = Constant(value)
 
+                if "scaling.x" in line:
+                    scaling = line.split()[-1].strip()
+                    if scaling == "standardise":
+                        self.standardise = True
+
                 if "[training_data.x]" in line:
                     line = next(f)
                     while line.strip() != "":
@@ -8208,6 +8284,20 @@ class Model:
 
         self.X = np.array(self.X)
         self.y = np.array(self.y).reshape((-1, 1))
+
+        if self.standardise:
+            self.xmu = np.mean(self.X, axis=0)
+            self.xstd = np.std(self.X, axis=0)
+            self.ymu = np.mean(self.y, axis=0)
+            self.ystd = np.std(self.y, axis=0)
+
+            self.X = self.standardise_array(self.X, self.xmu, self.xstd)
+            self.y = self.standardise_array(self.y, self.ymu, self.ystd)
+
+            for kernel_name, kernel in self.kernel_list:
+                if isinstance(kernel, (RBFCyclic)):
+                    kernel.xstd = self.xstd
+
         self.kernel = KernelInterpreter(
             kernel_composition, self.kernel_list
         ).interpret()
@@ -8333,7 +8423,10 @@ class Model:
         FileTools.copy_file(self.fname, log_model_file)
 
     def r(self, features):
-        return self.kernel.r(features, self.X)
+        if self.standardise:
+            return self.kernel.r(self.standardise_array(features, self.xmu, self.xstd), self.X)
+        else:
+            return self.kernel.r(features, self.X)
         # return numba_r_rbf(features, self.X, np.array(self.hyper_parameters))
 
     @property
@@ -8440,7 +8533,10 @@ class Model:
             features = point[self.i]
         r = self.r(features)
         weights = self.weights.reshape((-1, 1))
-        return self.mu + np.matmul(r.T, weights).item()
+        prediction = self.mu + np.matmul(r.T, weights).item()
+        if self.standardise:
+            prediction = prediction*self.ystd.item() + self.ymu.item()
+        return prediction
 
     def variance(self, point):
         r = self.r(point.features[self.i])
