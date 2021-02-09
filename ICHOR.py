@@ -7897,7 +7897,6 @@ def RBF_k(l, xi, xj):
 @jit(nopython=True)
 def RBF_r(l, xi, x):
     n_train = x.shape[0]
-    n_feat = x.shape[1]
     r = np.empty((n_train, 1))
     for j in range(n_train):
         r[j] = RBF_k(l, xi, x[j])
@@ -7907,7 +7906,6 @@ def RBF_r(l, xi, x):
 @jit(nopython=True)
 def RBF_R(l, x):
     n_train = x.shape[0]
-    n_feat = x.shape[1]
     R = np.empty((n_train, n_train))
     for i in range(n_train):
         R[i, i] = 1.0
@@ -7945,33 +7943,6 @@ def RBFCyclic_k(l, xi, xj):
 @jit(nopython=True)
 def RBFCyclic_r(l, xi, x):
     n_train = x.shape[0]
-    n_feat = x.shape[1]
-    r = np.empty((n_train, 1))
-    for j in range(n_train):
-        r[j] = RBFCyclic_k(l, xi, x[j])
-
-@jit(nopython=True)
-def RBFCyclic_R(l, x):
-    n_train = x.shape[0]
-    n_feat = x.shape[1]
-    R = np.empty((n_train, n_train))
-    for i in range(n_train):
-        R[i, i] = 1.0
-        for j in range(n_train):
-            R[i, j] = RBFCyclic_k(l, x[i], x[j])
-            R[j, i] = R[i, j]
-
-@jit(nopython=True)
-def RBFCyclic_k(l, xi, xj):
-    diff = xi - xj
-    mask = (np.array(range(diff.shape[0])) + 1) % 3 == 0
-    diff[mask] = (diff[mask] + np.pi/xstd) % 2 * np.pi/xstd - np.pi/xstd
-    return np.exp(-np.sum(l * diff * diff))
-
-@jit(nopython=True)
-def RBFCyclic_r(l, xi, x):
-    n_train = x.shape[0]
-    n_feat = x.shape[1]
     r = np.empty((n_train, 1))
     for j in range(n_train):
         r[j] = RBFCyclic_k(l, xi, x[j])
@@ -7980,7 +7951,6 @@ def RBFCyclic_r(l, xi, x):
 @jit(nopython=True)
 def RBFCyclic_R(l, x):
     n_train = x.shape[0]
-    n_feat = x.shape[1]
     R = np.empty((n_train, n_train))
     for i in range(n_train):
         R[i, i] = 1.0
@@ -7989,26 +7959,25 @@ def RBFCyclic_R(l, x):
             R[j, i] = R[i, j]
     return R
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def RBFCyclicStandardised_k(l, xstd, xi, xj):
     diff = xi - xj
-    mask = (np.array(range(diff.shape[0])) + 1) % 3 == 0
+    # Had to do list comprehension workaround to get numba to compile
+    mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
     diff[mask] = (diff[mask] + np.pi/xstd[mask]) % 2 * np.pi/xstd[mask] - np.pi/xstd[mask]
     return np.exp(-np.sum(l * diff * diff))
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def RBFCyclicStandardised_r(l, xstd, xi, x):
     n_train = x.shape[0]
-    n_feat = x.shape[1]
     r = np.empty((n_train, 1))
     for j in range(n_train):
         r[j] = RBFCyclicStandardised_k(l, xstd, xi, x[j])
     return r
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def RBFCyclicStandardised_R(l, xstd, x):
     n_train = x.shape[0]
-    n_feat = x.shape[1]
     R = np.empty((n_train, n_train))
     for i in range(n_train):
         R[i, i] = 1.0
@@ -8554,6 +8523,8 @@ class Model:
 
     def distance_to_point(self, point):
         point = np.array(point.features[self.i]).reshape((1, -1))
+        if self.standardise:
+            point = self.standardise_array(point, self.xmu, self.xstd)
         return distance.cdist(point, self.X)
 
     def closest_point(self, point):
