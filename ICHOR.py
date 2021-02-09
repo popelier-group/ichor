@@ -7975,6 +7975,7 @@ def RBFCyclic_r(l, xi, x):
     r = np.empty((n_train, 1))
     for j in range(n_train):
         r[j] = RBFCyclic_k(l, xi, x[j])
+    return r
 
 @jit(nopython=True)
 def RBFCyclic_R(l, x):
@@ -7986,23 +7987,25 @@ def RBFCyclic_R(l, x):
         for j in range(n_train):
             R[i, j] = RBFCyclic_k(l, x[i], x[j])
             R[j, i] = R[i, j]
+    return R
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def RBFCyclicStandardised_k(l, xstd, xi, xj):
     diff = xi - xj
     mask = (np.array(range(diff.shape[0])) + 1) % 3 == 0
-    diff[mask] = (diff[mask] + np.pi/xstd) % 2 * np.pi/xstd - np.pi/xstd
+    diff[mask] = (diff[mask] + np.pi/xstd[mask]) % 2 * np.pi/xstd[mask] - np.pi/xstd[mask]
     return np.exp(-np.sum(l * diff * diff))
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def RBFCyclicStandardised_r(l, xstd, xi, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
     r = np.empty((n_train, 1))
     for j in range(n_train):
         r[j] = RBFCyclicStandardised_k(l, xstd, xi, x[j])
+    return r
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def RBFCyclicStandardised_R(l, xstd, x):
     n_train = x.shape[0]
     n_feat = x.shape[1]
@@ -8012,6 +8015,7 @@ def RBFCyclicStandardised_R(l, xstd, x):
         for j in range(n_train):
             R[i, j] = RBFCyclicStandardised_k(l, xstd, x[i], x[j])
             R[j, i] = R[i, j]
+    return R
 
 
 class RBFCyclic(Kernel):
@@ -8293,7 +8297,7 @@ class Model:
             self.X = self.standardise_array(self.X, self.xmu, self.xstd)
             self.y = self.standardise_array(self.y, self.ymu, self.ystd)
 
-            for kernel_name, kernel in self.kernel_list:
+            for kernel_name, kernel in self.kernel_list.items():
                 if isinstance(kernel, (RBFCyclic)):
                     kernel.xstd = self.xstd
 
