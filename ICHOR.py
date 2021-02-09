@@ -8522,9 +8522,10 @@ class Model:
         )
 
     def distance_to_point(self, point):
-        point = np.array(point.features[self.i]).reshape((1, -1))
         if self.standardise:
-            point = self.standardise_array(point, self.xmu, self.xstd)
+            point = np.array(self.standardise_array(point.features[self.i], self.xmu, self.xstd)).reshape((1, -1))
+        else:
+            point = np.array(point.features[self.i]).reshape((1, -1))
         return distance.cdist(point, self.X)
 
     def closest_point(self, point):
