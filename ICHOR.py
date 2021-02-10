@@ -1266,8 +1266,9 @@ class Globals:
         globals.FEREBUS_OPTIMISATION = "pso", str
 
         globals.FEREBUS_TOLERANCE = 1.0e-8, float
+        globals.FEREBUS_STALL_ITERATIONS = 50, int
         globals.FEREBUS_CONVERGENCE = 20, int
-        globals.FEREBUS_MAX_ITERATION = 10000, int
+        globals.FEREBUS_MAX_ITERATION = 1000, int
 
         # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
         globals.DLPOLY_NUMBER_OF_STEPS = (
@@ -2741,6 +2742,11 @@ class FerebusTools:
             ftoml.write(
                 f"social_learning_rate = {GLOBALS.FEREBUS_SOCIAL_LEARNING_RATE}\n"
             )
+            ftoml.write(f'stopping_criteria="relative_change"\n')
+            ftoml.write("\n")
+            ftoml.write(f"[optimiser.pso.relative_change]\n")
+            ftoml.write(f"tolerance={GLOBALS.FEREBUS_TOLERANCE}\n")
+            ftoml.write(f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n")
             ftoml.write("\n")
             ftoml.write("[kernels.k1]\n")
             ftoml.write(f"type = \"{'rbf-cyclic'}\"\n")
