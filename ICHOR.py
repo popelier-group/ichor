@@ -8507,7 +8507,7 @@ class Model:
         weights = self.weights.reshape((-1, 1))
         prediction = self.mu + np.matmul(r.T, weights).item()
         if self.standardise:
-            prediction = prediction*self.ystd.item() + self.ymu.item()
+            prediction = prediction * self.ystd.item() + self.ymu.item()
         return prediction
 
     def variance(self, point):
