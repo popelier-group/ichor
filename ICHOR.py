@@ -3294,6 +3294,7 @@ class AIMAllCommand(CommandLine):
         runcmd = " ".join(runcmd)
 
         cm = CheckManager(check_function="check_aimall_output", check_args=self.get_variable(0))
+        runcmd = cm.check(runcmd)
 
         return datafile + "\n" + runcmd
 
