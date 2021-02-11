@@ -901,7 +901,7 @@ class UsefulTools:
     def print_completed():
         ntasks = 0
         if "ICHOR_DATAFILE" in os.environ.keys():
-            datafile = int(os.environ["ICHOR_DATAFILE"])
+            datafile = os.environ["ICHOR_DATAFILE"]
             with open(datafile, "r") as f:
                 for _ in f:
                     ntasks += 1
@@ -911,8 +911,13 @@ class UsefulTools:
         task_last = 1
         if "SGE_TASK_LAST" in os.environ.keys():
             task_last = int(os.environ["SGE_TASK_LAST"])
-        logger.info(f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}")
-        print("export ICHOR_TASK_COMPLETED=true")
+        if task_last > ntasks and task_id + task_last <= ntasks:
+            logger.info(f"Running Task {task_id} as {task_id+task_last}")
+            task_id += task_last
+            logger.info(f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}")
+            print("export SGE_TASK_ID={task_id}")
+        else:
+            print("export ICHOR_TASK_COMPLETED=true")
 
 
 class GlobalTools:
