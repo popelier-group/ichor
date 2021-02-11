@@ -911,11 +911,11 @@ class UsefulTools:
         task_last = 1
         if "SGE_TASK_LAST" in os.environ.keys():
             task_last = int(os.environ["SGE_TASK_LAST"])
-        if task_last > ntasks and task_id + task_last <= ntasks:
+        if task_last < ntasks and task_id + task_last <= ntasks:
             logger.info(f"Running Task {task_id} as {task_id+task_last}")
             task_id += task_last
             logger.info(f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}")
-            print("export SGE_TASK_ID={task_id}")
+            print(f"export SGE_TASK_ID={task_id}")
         else:
             print("export ICHOR_TASK_COMPLETED=true")
 
@@ -3292,6 +3292,9 @@ class AIMAllCommand(CommandLine):
 
         runcmd = [self.command, *self.arguments, infile, "&>", outfile]
         runcmd = " ".join(runcmd)
+
+        cm = CheckManager(check_function="check_aimall_output", check_args=self.get_variable(0))
+
         return datafile + "\n" + runcmd
 
 
@@ -11770,11 +11773,19 @@ def log_time(*args):
 
 @UsefulTools.external_function()
 def default_check(*args):
-    UsefulToools.print_completed()
+    UsefulTools.print_completed()
 
 @UsefulTools.external_function()
 def check_gaussian_output(gaussian_file):
     if GJF(gaussian_file).wfn.exists():
+        UsefulTools.print_completed()
+
+@UsefulTools.external_function()
+def check_aimall_output(wfn_file):
+    sh_file = wfn_file.replace(".wfn", ".sh")
+    # AIMAll deletes this sh file when it has successfully completed
+    # If this file still exists then something went wrong
+    if not os.path.exists(sh_file):
         UsefulTools.print_completed()
 
 @UsefulTools.external_function()
