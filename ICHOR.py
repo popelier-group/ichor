@@ -899,6 +899,19 @@ class UsefulTools:
 
     @staticmethod
     def print_completed():
+        ntasks = 0
+        if "ICHOR_DATAFILE" in os.environ.keys():
+            datafile = int(os.environ["ICHOR_DATAFILE"])
+            with open(datafile, "r") as f:
+                for _ in f:
+                    ntasks += 1
+        task_id = 1
+        if "SGE_TASK_ID" in os.environ.keys():
+            task_id = int(os.environ["SGE_TASK_ID"])
+        task_last = 1
+        if "SGE_TASK_LAST" in os.environ.keys():
+            task_last = int(os.environ["SGE_TASK_LAST"])
+        logger.info(f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}")
         print("export ICHOR_TASK_COMPLETED=true")
 
 
@@ -3004,6 +3017,7 @@ class CheckManager:
         new_runcmd = ""
         if self.ntimes:
             new_runcmd += 'ICHOR_N_TRIES=0\n'
+        new_runcmd += 'export ICHOR_TASK_COMPLETED=false\n'
         new_runcmd += 'while [ "$ICHOR_TASK_COMPLETED" == false ]\n'
         new_runcmd += 'do\n\n'
 
@@ -3109,7 +3123,7 @@ class CommandLine:
         self.array_names = self.setup_array_names(len(data))
         self.var_names = self.setup_var_names(len(data))
 
-        read_data_file = [f"file={datafile}", ""]
+        read_data_file = [f"export ICHOR_DATAFILE={datafile}", ""]
         for array_name in self.array_names:
             read_data_file += [f"{array_name}=()"]
         read_data_file += [
@@ -3118,7 +3132,7 @@ class CommandLine:
         ]
         for array_name, var_name in zip(self.array_names, self.var_names):
             read_data_file += [f"    {array_name}+=(${var_name})"]
-        read_data_file += ["done < $file"]
+        read_data_file += ["done < $ICHOR_DATAFILE"]
         return "\n".join(read_data_file) + "\n"
 
     def _write_data_file(self, fname, data, delimiter=","):
@@ -3498,8 +3512,6 @@ class SubmissionScript:
                 f.write("export OMP_PROC_BIND=true\n")
                 f.write("export RAYON_NUM_THREADS=$NSLOTS\n\n")
 
-            f.write("\n")
-            f.write("export ICHOR_TASK_COMPLETE=false\n")
             f.write("\n")
             for command in self._commands:
                 f.write(f"{repr(command)}\n")
