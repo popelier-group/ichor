@@ -3459,6 +3459,8 @@ class SubmissionScript:
                 f.write("export RAYON_NUM_THREADS=$NSLOTS\n\n")
 
             f.write("\n")
+            f.write("export ICHOR_TASK_COMPLETE=false\n")
+            f.write("\n")
             for command in self._commands:
                 f.write(f"{repr(command)}\n")
 
@@ -4575,6 +4577,15 @@ class PointError:
 class Point:
     counter = it.count(1)
 
+    def __init__(self):
+        # Flag whether to use point or not
+        # Defaults to true
+        _use = True
+
+    @property
+    def use(self):
+        return self._use
+
     @property
     def atoms(self):
         try:
@@ -4942,6 +4953,7 @@ class Atoms(Point):
         self._connectivity = None
         self._centred = False
         self.finish()
+        super().__init__()
 
         if atoms is not None:
             self.add(atoms)
@@ -5167,6 +5179,8 @@ class Directory(Point):
 
         self.parse()
 
+        super().__init__()
+
     def parse(self):
         self.read_directory(self.path)
 
@@ -5188,6 +5202,14 @@ class Directory(Point):
                     add(entry.path)
                 elif entry.is_dir():
                     self.read_directory(entry.path)
+
+    @property
+    def use(self):
+        return all(
+            not self.gjf or self.gjf.use,
+            not self.wfn or self.wfn.use,
+            not self.ints or self.ints.use
+        )
 
     @buildermethod
     def read(self):
@@ -5412,6 +5434,8 @@ class WFN(Point):
 
         self.energy = 0
         self.virial = 0
+    
+        super().__init__()
 
     @buildermethod
     def read(self, only_header=False):
@@ -5522,6 +5546,8 @@ class INT(Point):
         self.multipoles = {}
         self.iqa_data = {}
 
+        super().__init__()
+
     @buildermethod
     def read(self, atom=None):
         self.parent = atom
@@ -5530,9 +5556,14 @@ class INT(Point):
         except json.decoder.JSONDecodeError:
             self.read_int()
             # Backup only if read correctly
-            if self.integration_results:
+            # E_IQA_Inter(A) Last Line that needs to be parsed, if this is here then the
+            # rest of the values we care about should be
+            if "E_IQA_Inter(A)" in self.iqa_data.keys():
                 self.backup_int()
                 self.write_json()
+            else:
+                # Delete corrupted file so it can be regenerated
+                self.delete()
 
     @buildermethod
     def read_int(self):
@@ -5587,6 +5618,10 @@ class INT(Point):
                         line = next(f)
         if self.parent:
             self.rotate_multipoles()
+
+    def delete(self):
+        Path(self.path).unlink()
+        self._use = False
 
     def rotate_multipoles(self):
         self.rotate_dipole()
@@ -7485,6 +7520,10 @@ class INTs(Point):
             atom.read(parent[atom])
         self.sort()
 
+    @property
+    def use(self):
+        return all(i.use for i in self)
+
     def sort(self):
         self.ints = UsefulTools.natural_sort_atom(self)
 
@@ -7946,6 +7985,7 @@ def RBFCyclic_k(l, xi, xj):
     diff[mask] = (diff[mask] + np.pi) % 2 * np.pi - np.pi
     return np.exp(-np.sum(l * diff * diff))
 
+
 @jit(nopython=True)
 def RBFCyclic_r(l, xi, x):
     n_train = x.shape[0]
@@ -7953,6 +7993,7 @@ def RBFCyclic_r(l, xi, x):
     for j in range(n_train):
         r[j] = RBFCyclic_k(l, xi, x[j])
     return r
+
 
 @jit(nopython=True)
 def RBFCyclic_R(l, x):
@@ -7965,6 +8006,7 @@ def RBFCyclic_R(l, x):
             R[j, i] = R[i, j]
     return R
 
+
 @jit(nopython=True)
 def RBFCyclicStandardised_k(l, xstd, xi, xj):
     diff = xi - xj
@@ -7973,6 +8015,7 @@ def RBFCyclicStandardised_k(l, xstd, xi, xj):
     diff[mask] = (diff[mask] + np.pi/xstd[mask]) % 2 * np.pi/xstd[mask] - np.pi/xstd[mask]
     return np.exp(-np.sum(l * diff * diff))
 
+
 @jit(nopython=True)
 def RBFCyclicStandardised_r(l, xstd, xi, x):
     n_train = x.shape[0]
@@ -7980,6 +8023,7 @@ def RBFCyclicStandardised_r(l, xstd, xi, x):
     for j in range(n_train):
         r[j] = RBFCyclicStandardised_k(l, xstd, xi, x[j])
     return r
+
 
 @jit(nopython=True)
 def RBFCyclicStandardised_R(l, xstd, x):
@@ -9176,11 +9220,12 @@ class Set(Points):
 
         training_sets = DictList(TrainingSet)
         for point in self:
-            input = point.features_dict
-            output = point.get_property(model_type)
-            for atom in input.keys():
-                if atoms == "all" or atom.lower() == atoms.lower():
-                    training_sets[atom] += (input[atom], output[atom])
+            if point.use:
+                input = point.features_dict
+                output = point.get_property(model_type)
+                for atom in input.keys():
+                    if atoms == "all" or atom.lower() == atoms.lower():
+                        training_sets[atom] += (input[atom], output[atom])
 
         for atom, training_set in training_sets.items():
             training_sets[atom] = training_set.slice(min(npoints, len(self)))
