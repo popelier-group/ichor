@@ -4647,7 +4647,10 @@ class Point:
 
     @property
     def use(self):
-        return self._use
+        try:
+            return self._use
+        except:
+            return True
 
     @property
     def atoms(self):
