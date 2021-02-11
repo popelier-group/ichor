@@ -3024,10 +3024,12 @@ class CheckManager:
             new_runcmd += 'ICHOR_N_TRIES=0\n'
         new_runcmd += 'export ICHOR_TASK_COMPLETED=false\n'
         new_runcmd += 'while [ "$ICHOR_TASK_COMPLETED" == false ]\n'
-        new_runcmd += 'do\n\n'
+        new_runcmd += 'do\n'
+        new_runcmd += '\n'
 
         new_runcmd += runcmd
         
+        new_runcmd += '\n'
         if self.ntimes:
             new_runcmd += 'let ICHOR_N_TRIES++\n'
             new_runcmd += f'if [ "$ICHOR_N_TRIES" == {self.ntimes} ]\n'
@@ -3291,7 +3293,7 @@ class AIMAllCommand(CommandLine):
         outfile = self.get_variable(1)
 
         runcmd = [self.command, *self.arguments, infile, "&>", outfile]
-        runcmd = " ".join(runcmd)
+        runcmd = " ".join(runcmd) + "\n"
 
         cm = CheckManager(check_function="check_aimall_output", check_args=self.get_variable(0))
         runcmd = cm.check(runcmd)
