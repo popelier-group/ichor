@@ -2231,6 +2231,17 @@ class FileTools:
             "properties.err", "properties_stderr", parent="properties_daemon"
         )
 
+        tree.add("PROPERTIES", "atoms_daemon", parent="adaptive_sampling")
+        tree.add(
+            "atoms.pid", "atoms_pid", parent="atoms_daemon"
+        )
+        tree.add(
+            "atoms.out", "atoms_stdout", parent="atoms_daemon"
+        )
+        tree.add(
+            "atoms.err", "atoms_stderr", parent="atoms_daemon"
+        )
+
         tree.add("FILES_REMOVED", "file_remover_daemon", parent="data")
         tree.add(
             "file_remover.pid",
