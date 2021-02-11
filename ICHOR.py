@@ -4220,12 +4220,13 @@ class AutoTools:
             SetupTools.make_sets(
                 points_location=xyz_files[0],
                 make_training_set=True,
-                training_set_method="min_max_mean",
+                training_set_method=["min_max_mean", "random"],
+                n_training_points=500,
                 make_sample_pool=True,
-                sample_pool_method="random",
+                sample_pool_method=["random"],
                 n_sample_points=9000,
                 make_validation_set=True,
-                validation_set_method="random",
+                validation_set_method=["random"],
                 n_validation_points=500,
             )
 
@@ -11173,8 +11174,9 @@ class SetupTools:
         return set_points
 
     @staticmethod
-    def make_set_random(points, npoints):
-        return random.sample(points.range, min(len(points.range), npoints))
+    def make_set_random(points, npoints, added_points=[]):
+        rnge = list(set(list(points.range) + added_points))
+        return random.sample(rnge, min(len(rnge), npoints))
 
     # @staticmethod
     # def get_points(points, method=None, *args, **kwargs):
@@ -11207,15 +11209,15 @@ class SetupTools:
                     print("Error: Number of points must be greater than 0")
 
         points_to_add = []
-        if method == "min_max_mean":
+        if "min_max_mean" in method:
             atom = 1
             if not GLOBALS.OPTIMISE_ATOM.lower() == "all":
                 atom = UsefulTools.get_number(GLOBALS.OPTIMISE_ATOM)
             points_to_add += SetupTools.make_set_min_max_mean(points, atom)
-        if method == "min_max":
+        if "min_max" in method:
             points_to_add += SetupTools.make_set_min_max(points)
-        if method == "random":
-            points_to_add += SetupTools.make_set_random(points, npoints)
+        if "random" in method:
+            points_to_add += SetupTools.make_set_random(points, npoints, added_points=points_to_add)
         points_to_add = list(set(points_to_add))
         dstdir = GLOBALS.FILE_STRUCTURE[set_to_make]
         points.to_set(dstdir, points_to_add)
@@ -11226,13 +11228,13 @@ class SetupTools:
     def make_sets(
         points_location=None,
         make_training_set=None,
-        training_set_method="min_max_mean",
+        training_set_method=["min_max_mean"],
         n_training_points=-1,
         make_sample_pool=None,
-        sample_pool_method="random",
+        sample_pool_method=["random"],
         n_sample_points=-1,
         make_validation_set=None,
-        validation_set_method="random",
+        validation_set_method=["random"],
         n_validation_points=-1,
     ):
         if points_location is None:
