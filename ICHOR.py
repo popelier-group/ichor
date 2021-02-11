@@ -2231,7 +2231,7 @@ class FileTools:
             "properties.err", "properties_stderr", parent="properties_daemon"
         )
 
-        tree.add("PROPERTIES", "atoms_daemon", parent="adaptive_sampling")
+        tree.add("ATOMS", "atoms_daemon", parent="adaptive_sampling")
         tree.add(
             "atoms.pid", "atoms_pid", parent="atoms_daemon"
         )
