@@ -589,7 +589,6 @@ class Constants:
 
 class UsefulTools:
     @staticmethod
-    # @property
     def ichor_logo():
         ichor_encoded_string = [
             '"%s %s%s %s%s%s %s%s%s %s%s" % ("I"*10," "*8,"C"*13,"H"*9," "*5,"H"*9," "*5,"O"*9,'
@@ -897,6 +896,10 @@ class UsefulTools:
     @staticmethod
     def get_number(s):
         return int("".join(c for c in s if c.isdigit()))
+
+    @staticmethod
+    def print_completed():
+        print("export ICHOR_TASK_COMPLETED=true")
 
 
 class GlobalTools:
@@ -2991,6 +2994,37 @@ class TimingManager:
         self.submission_script.add(python_job)
 
 
+class CheckManager:
+    def __init__(self, check_function="default_check", check_args=[], ntimes=None):
+        self.check_function = check_function
+        self.check_args = check_args
+        self.ntimes = ntimes
+
+    def check(self, runcmd):
+        new_runcmd = ""
+        if self.ntimes:
+            new_runcmd += 'ICHOR_N_TRIES=0\n'
+        new_runcmd += 'while [ "$ICHOR_TASK_COMPLETED" == false ]\n'
+        new_runcmd += 'do\n\n'
+
+        new_runcmd += runcmd
+        
+        if self.ntimes:
+            new_runcmd += 'let ICHOR_N_TRIES++\n'
+            new_runcmd += f'if [ "$ICHOR_N_TRIES" == {self.ntimes} ]\n'
+            new_runcmd += 'then\n'
+            new_runcmd += 'break\n'
+            new_runcmd += 'fi\n'
+        python_job = PythonCommand()
+        if self.check_args:
+            python_job.run_func(self.check_function, self.check_args)
+        else:
+            python_job.run_func(self.check_function)
+        new_runcmd += f'eval $({repr(python_job)})\n'
+        new_runcmd += 'done\n'
+        return new_runcmd
+
+
 class CommandLine:
     def __init__(self):
         self.command = ""
@@ -3005,6 +3039,8 @@ class CommandLine:
 
         self.datafile = None
         self.datasources = []
+
+        self.check_command = False
 
         self.setup()
 
@@ -3166,7 +3202,11 @@ class GaussianCommand(CommandLine):
         infile = self.get_variable(0)
         outfile = self.get_variable(1)
 
-        runcmd = " ".join([self.command, infile, outfile])
+        runcmd = f"{self.command} {infile} {outfile}\n"
+
+        cm = CheckManager(check_function="check_gaussian_output", check_args=self.get_variable(0))
+        runcmd = cm.check(runcmd)
+
         return datafile + "\n" + runcmd
 
 
@@ -11711,6 +11751,14 @@ def ssh():
 def log_time(*args):
     timing_logger.info(" | ".join([str(arg) for arg in args]))
 
+@UsefulTools.external_function()
+def default_check(*args):
+    UsefulToools.print_completed()
+
+@UsefulTools.external_function()
+def check_gaussian_output(gaussian_file):
+    if GJF(gaussian_file).wfn.exists():
+        UsefulTools.print_completed()
 
 @UsefulTools.external_function()
 def submit_gjfs(directory):
