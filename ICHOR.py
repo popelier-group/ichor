@@ -72,6 +72,9 @@ import math
 import time
 import uuid
 import json
+import enum
+import fcntl
+import queue
 import atexit
 import shutil
 import random
@@ -80,6 +83,7 @@ import logging
 import inspect
 import platform
 import warnings
+import traceback
 import importlib
 import contextlib
 import subprocess
@@ -125,7 +129,489 @@ SSH_SETTINGS = {
 #:::::::::::::::::::::::::::::::::::::::::::#
 #############################################
 
+###############################################################################
+# Code below vendored from portalocker: https://github.com/WoLpH/portalocker/ #
+###############################################################################
 
+if os.name == 'nt':  # pragma: no cover
+    import msvcrt
+
+    LOCK_EX = 0x1  #: exclusive lock
+    LOCK_SH = 0x2  #: shared lock
+    LOCK_NB = 0x4  #: non-blocking
+    LOCK_UN = msvcrt.LK_UNLCK  #: unlock
+
+elif os.name == 'posix':  # pragma: no cover
+    import fcntl
+
+    LOCK_EX = fcntl.LOCK_EX  #: exclusive lock
+    LOCK_SH = fcntl.LOCK_SH  #: shared lock
+    LOCK_NB = fcntl.LOCK_NB  #: non-blocking
+    LOCK_UN = fcntl.LOCK_UN  #: unlock
+
+else:  # pragma: no cover
+    raise RuntimeError('PortaLocker only defined for nt and posix platforms')
+
+
+class LockFlags(enum.IntFlag):
+    EXCLUSIVE = LOCK_EX  #: exclusive lock
+    SHARED = LOCK_SH  #: shared lock
+    NON_BLOCKING = LOCK_NB  #: non-blocking
+    UNBLOCK = LOCK_UN  #: unlock
+
+LOCK_EX = LockFlags.EXCLUSIVE
+
+class BaseLockException(Exception):
+    # Error codes:
+    LOCK_FAILED = 1
+
+    def __init__(self, *args, fh=None, **kwargs):
+        self.fh = fh
+        Exception.__init__(self, *args, **kwargs)
+
+
+class LockException(BaseLockException):
+    pass
+
+
+class AlreadyLocked(BaseLockException):
+    pass
+
+
+class FileToLarge(BaseLockException):
+    pass
+
+# TODO: Include windows locking from:
+# https://github.com/WoLpH/portalocker/blob/develop/portalocker/portalocker.py
+def lock(file_, flags):
+    locking_exceptions = IOError,
+    try:  # pragma: no cover
+        locking_exceptions += BlockingIOError,  # type: ignore
+    except NameError:  # pragma: no cover
+        pass
+
+    try:
+        fcntl.flock(file_.fileno(), flags)
+    except locking_exceptions as exc_value:
+        # The exception code varies on different systems so we'll catch
+        # every IO error
+        raise LockException(exc_value, fh=file_)
+
+def unlock(file_):
+    fcntl.flock(file_.fileno(), LockFlags.UNBLOCK)
+
+###############################################################################
+
+#############################################################
+# Code below vendored from concurrent-log-handler:          #
+# https://github.com/Preston-Landers/concurrent-log-handler #
+#############################################################
+
+def setup_logging_queues():
+    if sys.version_info.major < 3:
+        raise RuntimeError("This feature requires Python 3.")
+
+    queue_listeners = []
+
+    for logger in get_all_logger_names(include_root=True):
+        logger = logging.getLogger(logger)
+        if logger.handlers:
+            log_queue = queue.Queue(-1)  # No limit on size
+
+            queue_handler = logging.handlers.QueueHandler(log_queue)
+            queue_listener = logging.handlers.QueueListener(
+                log_queue, respect_handler_level=True)
+
+            queuify_logger(logger, queue_handler, queue_listener)
+            queue_listeners.append(queue_listener)
+
+    for listener in queue_listeners:
+        listener.start()
+
+    atexit.register(stop_queue_listeners, *queue_listeners)
+    return
+
+def stop_queue_listeners(*listeners):
+    for listener in listeners:
+        try:
+            listener.stop()
+        except:
+            pass
+
+def get_all_logger_names(include_root=False):
+    rv = list(logging.Logger.manager.loggerDict.keys())
+    if include_root:
+        rv.insert(0, '')
+    return rv
+
+def queuify_logger(logger, queue_handler, queue_listener):
+    if isinstance(logger, str):
+        logger = logging.getLogger(logger)
+
+    handlers = [handler for handler in logger.handlers
+                if handler not in queue_listener.handlers]
+
+    if handlers:
+        queue_listener.handlers = \
+            tuple(list(queue_listener.handlers) + handlers)
+
+    del logger.handlers[:]
+    logger.addHandler(queue_handler)
+
+try:
+    import gzip
+except ImportError:
+    gzip = None
+
+try:
+    import pwd
+    import grp
+except ImportError:
+    pwd = grp = None
+
+try:
+    # noinspection PyPackageRequirements,PyCompatibility
+    from secrets import randbits
+except ImportError:
+    import random
+
+    if hasattr(random, "SystemRandom"):  # May not be present in all Python editions
+        # Should be safe to reuse `SystemRandom` - not software state dependant
+        randbits = random.SystemRandom().getrandbits
+    else:
+        def randbits(nb):
+            return random.Random().getrandbits(nb)
+
+
+class ConcurrentRotatingFileHandler(logging.handlers.BaseRotatingHandler):
+    def __init__(
+            self, filename, mode='a', maxBytes=0, backupCount=0,
+            encoding=None, debug=False, delay=None, use_gzip=False,
+            owner=None, chmod=None, umask=None, newline=None, terminator="\n",
+            unicode_error_policy='ignore',
+    ):
+        self.stream = None
+        self.stream_lock = None
+        self.owner = owner
+        self.chmod = chmod
+        self.umask = umask
+        self._set_uid = None
+        self._set_gid = None
+        self.use_gzip = True if gzip and use_gzip else False
+        self._rotateFailed = False
+        self.maxBytes = maxBytes
+        self.backupCount = backupCount
+        self.newline = newline
+
+        self._debug = debug
+        self.use_gzip = True if gzip and use_gzip else False
+        self.gzip_buffer = 8096
+
+        if unicode_error_policy not in ('ignore', 'replace', 'strict'):
+            unicode_error_policy = 'ignore'
+            warnings.warn(
+                "Invalid unicode_error_policy for concurrent_log_handler: "
+                "must be ignore, replace, or strict. Defaulting to ignore.",
+                UserWarning)
+        self.unicode_error_policy = unicode_error_policy
+
+        if delay not in (None, True):
+            warnings.warn(
+                'parameter delay is now ignored and implied as True, '
+                'please remove from your config.',
+                DeprecationWarning)
+
+        # Construct the handler with the given arguments in "delayed" mode
+        # because we will handle opening the file as needed. File name
+        # handling is done by FileHandler since Python 2.5.
+        super(ConcurrentRotatingFileHandler, self).__init__(
+            filename, mode, encoding=encoding, delay=True)
+
+        self.terminator = terminator or "\n"
+
+        if owner and os.chown and pwd and grp:
+            self._set_uid = pwd.getpwnam(self.owner[0]).pw_uid
+            self._set_gid = grp.getgrnam(self.owner[1]).gr_gid
+
+        self.lockFilename = self.getLockFilename()
+        self.is_locked = False
+
+    def getLockFilename(self):
+        """
+        Decide the lock filename. If the logfile is file.log, then we use `.__file.lock` and
+        not `file.log.lock`. This only removes the extension if it's `*.log`.
+
+        :return: the path to the lock file.
+        """
+        if self.baseFilename.endswith(".log"):
+            lock_file = self.baseFilename[:-4]
+        else:
+            lock_file = self.baseFilename
+        lock_file += ".lock"
+        lock_path, lock_name = os.path.split(lock_file)
+        # hide the file on Unix and generally from file completion
+        lock_name = ".__" + lock_name
+        return os.path.join(lock_path, lock_name)
+
+    def _open_lockfile(self):
+        if self.stream_lock and not self.stream_lock.closed:
+            self._console_log("Lockfile already open in this process")
+            return
+        lock_file = self.lockFilename
+        self._console_log(
+            "concurrent-log-handler %s opening %s" % (hash(self), lock_file), stack=False)
+
+        with self._alter_umask():
+            self.stream_lock = open(lock_file, "wb", buffering=0)
+
+        self._do_chown_and_chmod(lock_file)
+
+    def _open(self, mode=None):
+        # Normally we don't hold the stream open. Only do_open does that
+        # which is called from do_write().
+        return None
+
+    def do_open(self, mode=None):
+        """
+        Open the current base file with the (original) mode and encoding.
+        Return the resulting stream.
+
+        Note:  Copied from stdlib.  Added option to override 'mode'
+        """
+        if mode is None:
+            mode = self.mode
+
+        with self._alter_umask():
+            # noinspection PyArgumentList
+            stream = io.open(
+                self.baseFilename, mode=mode, encoding=self.encoding, newline=self.newline)
+
+        self._do_chown_and_chmod(self.baseFilename)
+
+        return stream
+
+    @contextlib.contextmanager
+    def _alter_umask(self):
+        """Temporarily alter umask to custom setting, if applicable"""
+        if self.umask is None:
+            yield  # nothing to do
+        else:
+            prev_umask = os.umask(self.umask)
+            try:
+                yield
+            finally:
+                os.umask(prev_umask)
+
+    def _close(self):
+        """ Close file stream.  Unlike close(), we don't tear anything down, we
+        expect the log to be re-opened after rotation."""
+
+        if self.stream:
+            try:
+                if not self.stream.closed:
+                    # Flushing probably isn't technically necessary, but it feels right
+                    self.stream.flush()
+                    self.stream.close()
+            finally:
+                self.stream = None
+
+    def _console_log(self, msg, stack=False):
+        if not self._debug:
+            return
+        import threading
+        tid = threading.current_thread().name
+        pid = os.getpid()
+        stack_str = ''
+        if stack:
+            stack_str = ":\n" + "".join(traceback.format_stack())
+        asctime = time.asctime()
+        print("[%s %s %s] %s%s" % (tid, pid, asctime, msg, stack_str,))
+
+    def emit(self, record):
+        # noinspection PyBroadException
+        try:
+            msg = self.format(record)
+            try:
+                self._do_lock()
+
+                try:
+                    if self.shouldRollover(record):
+                        self.doRollover()
+                except Exception as e:
+                    self._console_log("Unable to do rollover: %s" % (e,), stack=True)
+                    # Continue on anyway
+
+                self.do_write(msg)
+
+            finally:
+                self._do_unlock()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except Exception:
+            self.handleError(record)
+
+    def flush(self):
+        return
+
+    def do_write(self, msg):
+        self.stream = self.do_open()
+        stream = self.stream
+
+        msg = msg + self.terminator
+        try:
+            stream.write(msg)
+        except UnicodeError:
+            # Try to emit in a form acceptable to the output encoding
+            # The unicode_error_policy determines whether this is lossy.
+            try:
+                encoding = getattr(stream, 'encoding', self.encoding or 'us-ascii')
+                msg_bin = msg.encode(encoding, self.unicode_error_policy)
+                msg = msg_bin.decode(encoding, self.unicode_error_policy)
+                stream.write(msg)
+            except UnicodeError:
+                # self._console_log(str(e))
+                raise
+
+        stream.flush()
+        self._close()
+        return
+
+    def _do_lock(self):
+        if self.is_locked:
+            return   # already locked... recursive?
+        self._open_lockfile()
+        if self.stream_lock:
+            for i in range(10):
+                # noinspection PyBroadException
+                try:
+                    lock(self.stream_lock, LOCK_EX)
+                    self.is_locked = True
+                    break
+                except Exception:
+                    continue
+            else:
+                raise RuntimeError("Cannot acquire lock after 10 attempts")
+        else:
+            self._console_log("No self.stream_lock to lock", stack=True)
+
+    def _do_unlock(self):
+        if self.stream_lock:
+            if self.is_locked:
+                try:
+                    unlock(self.stream_lock)
+                finally:
+                    self.is_locked = False
+                    self.stream_lock.close()
+                    self.stream_lock = None
+        else:
+            self._console_log("No self.stream_lock to unlock", stack=True)
+
+    def close(self):
+        """
+        Close log stream and stream_lock. """
+        self._console_log("In close()", stack=True)
+        try:
+            self._close()
+        finally:
+            super(ConcurrentRotatingFileHandler, self).close()
+
+    def doRollover(self):
+        """
+        Do a rollover, as described in __init__().
+        """
+        self._close()
+        if self.backupCount <= 0:
+            self.stream = self.do_open("w")
+            self._close()
+            return
+
+        tmpname = None
+        while not tmpname or os.path.exists(tmpname):
+            tmpname = "%s.rotate.%08d" % (self.baseFilename, randbits(64))
+        try:
+            os.rename(self.baseFilename, tmpname)
+
+            if self.use_gzip:
+                self.do_gzip(tmpname)
+        except (IOError, OSError):
+            exc_value = sys.exc_info()[1]
+            self._console_log(
+                "rename failed.  File in use? exception=%s" % (exc_value,), stack=True)
+            return
+
+        gzip_ext = ''
+        if self.use_gzip:
+            gzip_ext = '.gz'
+
+        def do_rename(source_fn, dest_fn):
+            self._console_log("Rename %s -> %s" % (source_fn, dest_fn + gzip_ext))
+            if os.path.exists(dest_fn):
+                os.remove(dest_fn)
+            if os.path.exists(dest_fn + gzip_ext):
+                os.remove(dest_fn + gzip_ext)
+            source_gzip = source_fn + gzip_ext
+            if os.path.exists(source_gzip):
+                os.rename(source_gzip, dest_fn + gzip_ext)
+            elif os.path.exists(source_fn):
+                os.rename(source_fn, dest_fn)
+
+        for i in range(self.backupCount - 1, 0, -1):
+            sfn = "%s.%d" % (self.baseFilename, i)
+            dfn = "%s.%d" % (self.baseFilename, i + 1)
+            if os.path.exists(sfn + gzip_ext):
+                do_rename(sfn, dfn)
+        dfn = self.baseFilename + ".1"
+        do_rename(tmpname, dfn)
+
+        if self.use_gzip:
+            logFilename = self.baseFilename + ".1.gz"
+            self._do_chown_and_chmod(logFilename)
+
+        self._console_log("Rotation completed")
+
+    def shouldRollover(self, record):
+        del record  # avoid pychecker warnings
+        return self._shouldRollover()
+
+    def _shouldRollover(self):
+        if self.maxBytes > 0:  # are we rolling over?
+            self.stream = self.do_open()
+            try:
+                self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
+                if self.stream.tell() >= self.maxBytes:
+                    return True
+            finally:
+                self._close()
+        return False
+
+    def do_gzip(self, input_filename):
+        if not gzip:
+            self._console_log("#no gzip available", stack=False)
+            return
+        out_filename = input_filename + ".gz"
+
+        with open(input_filename, "rb") as input_fh:
+            with gzip.open(out_filename, "wb") as gzip_fh:
+                while True:
+                    data = input_fh.read(self.gzip_buffer)
+                    if not data:
+                        break
+                    gzip_fh.write(data)
+
+        os.remove(input_filename)
+        self._console_log("#gzipped: %s" % (out_filename,), stack=False)
+        return
+
+    def _do_chown_and_chmod(self, filename):
+        if self._set_uid and self._set_gid:
+            os.chown(filename, self._set_uid, self._set_gid)
+
+        if self.chmod and os.chmod:
+            os.chmod(filename, self.chmod)
+
+import logging.handlers
+logging.handlers.ConcurrentRotatingFileHandler = ConcurrentRotatingFileHandler
+#############################################################
 
 
 def setup_logger(
@@ -136,7 +622,7 @@ def setup_logger(
         "%(asctime)s - %(levelname)s - %(message)s", "%d-%m-%Y %H:%M:%S"
     ),
 ):
-    handler = logging.FileHandler(log_file)
+    handler = logging.handlers.ConcurrentRotatingFileHandler(log_file)
     handler.setFormatter(formatter)
 
     new_logger = logging.getLogger(name)
