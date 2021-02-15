@@ -97,6 +97,7 @@ from functools import wraps
 import multiprocessing as mp
 from functools import lru_cache
 from argparse import ArgumentParser
+from logging.handlers import BaseRotatingHandler, QueueHandler, QueueListener
 
 # Required imports
 import numpy as np
@@ -219,7 +220,8 @@ def setup_logging_queues():
             log_queue = queue.Queue(-1)  # No limit on size
 
             queue_handler = logging.handlers.QueueHandler(log_queue)
-            queue_listener = logging.handlers.QueueListener(
+            queue_handler = QueueHandler(log_queue)
+            queue_listener = QueueListener(
                 log_queue, respect_handler_level=True)
 
             queuify_logger(logger, queue_handler, queue_listener)
@@ -283,7 +285,7 @@ except ImportError:
             return random.Random().getrandbits(nb)
 
 
-class ConcurrentRotatingFileHandler(logging.handlers.BaseRotatingHandler):
+class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     def __init__(
             self, filename, mode='a', maxBytes=0, backupCount=0,
             encoding=None, debug=False, delay=None, use_gzip=False,
