@@ -219,7 +219,6 @@ def setup_logging_queues():
         if logger.handlers:
             log_queue = queue.Queue(-1)  # No limit on size
 
-            queue_handler = logging.handlers.QueueHandler(log_queue)
             queue_handler = QueueHandler(log_queue)
             queue_listener = QueueListener(
                 log_queue, respect_handler_level=True)
