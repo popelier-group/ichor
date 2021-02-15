@@ -5284,9 +5284,11 @@ class Directory(Point):
     @property
     def use(self):
         return all(
-            not self.gjf or self.gjf.use,
-            not self.wfn or self.wfn.use,
-            not self.ints or self.ints.use
+            [
+                not self.gjf or self.gjf.use,
+                not self.wfn or self.wfn.use,
+                not self.ints or self.ints.use
+            ]
         )
 
     @buildermethod
