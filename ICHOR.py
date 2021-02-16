@@ -8687,28 +8687,26 @@ class Constant(Kernel):
 
 @jit(nopython=True)
 def cyclic_cdist(xa, xb):
-    xa, xb = np.array(xa), np.array(xb)
     xm = xa.shape[0]
     xn = xb.shape[0]
     result = np.empty((xm, xn))
-    for i, xi in enumerate(xa):
-        for j, xj in enumerate(xb):
-            diff = xi - xj
+    for i in range(xm):
+        for j in range(xn):
+            diff = xa[i] - xb[j]
             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
             diff[mask] = (diff[mask] + np.pi) % (2 * np.pi) - np.pi
-            result[i, j] = np.sqrt(sum(diff*diff))
+            result[i, j] = np.sqrt(np.sum(diff*diff))
     return result
 
 
 @jit(nopython=True)
 def standardised_cyclic_cdist(xa, xb, xstd):
-    xa, xb, xstd = np.array(xa), np.array(xb), np.array(xstd)
     xm = xa.shape[0]
     xn = xb.shape[0]
     result = np.empty((xm, xn))
-    for i, xi in enumerate(xa):
-        for j, xj in enumerate(xb):
-            diff = xi - xj
+    for i in range(xm):
+        for j in range(xn):
+            diff = xa[i] - xb[j]
             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
             diff[mask] = (diff[mask] + np.pi/xstd) % (2 * np.pi/xstd) - np.pi/xstd
             result[i, j] = np.sqrt(sum(diff*diff))
@@ -9200,9 +9198,9 @@ class Model:
             point = np.array(point.features[self.i]).reshape((1, -1))
         if self.has_cyclic_kernel:
             if self.standardise:
-                return standardised_cyclic_cdist(point, self.X, self.xstd)
+                return standardised_cyclic_cdist(point, np.array(self.X), np.array(self.xstd))
             else:
-                return cyclic_cdist(point, self.X)
+                return cyclic_cdist(point, np.array(self.X))
         else:
             return distance.cdist(point, self.X)
 
