@@ -4721,14 +4721,14 @@ class AutoTools:
             SetupTools.make_sets(
                 points_location=xyz_files[0],
                 make_training_set=True,
-                training_set_method=globals.TRAINING_SET_METHOD,
-                n_training_points=globals.TRAINING_POINTS,
+                training_set_method=GLOBALS.TRAINING_SET_METHOD,
+                n_training_points=GLOBALS.TRAINING_POINTS,
                 make_sample_pool=True,
-                sample_pool_method=globals.SAMPLE_POOL_METHOD,
-                n_sample_points=globals.SAMPLE_POINTS,
+                sample_pool_method=GLOBALS.SAMPLE_POOL_METHOD,
+                n_sample_points=GLOBALS.SAMPLE_POINTS,
                 make_validation_set=True,
-                validation_set_method=globals.VALIDATION_SET_METHOD,
-                n_validation_points=globals.VALIDATION_POINTS,
+                validation_set_method=GLOBALS.VALIDATION_SET_METHOD,
+                n_validation_points=GLOBALS.VALIDATION_POINTS,
             )
 
         order = [
