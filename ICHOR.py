@@ -8579,7 +8579,8 @@ class RBF(Kernel):
 @jit(nopython=True)
 def RBFCyclic_k(l, xi, xj):
     diff = xi - xj
-    mask = (np.array(range(diff.shape[0])) + 1) % 3 == 0
+    # Had to do list comprehension workaround to get numba to compile
+    mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
     diff[mask] = (diff[mask] + np.pi) % 2 * np.pi - np.pi
     return np.exp(-np.sum(l * diff * diff))
 
