@@ -1417,6 +1417,7 @@ class UsefulTools:
     
     @staticmethod
     def completed_checker(func):
+        @UsefulTools.external_function(func.__name__)
         def wrapper(*args, **kwargs):
             if len(args) == 0:
                 # If there are no arguments passed to the function then there is no task to check
@@ -12309,18 +12310,18 @@ def ssh():
 def log_time(*args):
     timing_logger.info(" | ".join([str(arg) for arg in args]))
 
-@UsefulTools.external_function()
+
 @UsefulTools.completed_checker
 def default_check(*args):
     UsefulTools.print_completed()
 
-@UsefulTools.external_function()
+
 @UsefulTools.completed_checker
 def check_gaussian_output(gaussian_file):
     if GJF(gaussian_file).wfn.exists():
         UsefulTools.print_completed()
 
-@UsefulTools.external_function()
+
 @UsefulTools.completed_checker
 def check_aimall_output(wfn_file):
     sh_file = wfn_file.replace(".wfn", ".sh")
@@ -12328,6 +12329,7 @@ def check_aimall_output(wfn_file):
     # If this file still exists then something went wrong
     if not os.path.exists(sh_file):
         UsefulTools.print_completed()
+
 
 @UsefulTools.external_function()
 def submit_gjfs(directory):
