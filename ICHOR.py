@@ -8584,7 +8584,7 @@ def RBFCyclic_k(l, xi, xj):
     diff = xi - xj
     # Had to do list comprehension workaround to get numba to compile
     mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-    diff[mask] = (diff[mask] + np.pi) % 2 * np.pi - np.pi
+    diff[mask] = (diff[mask] + np.pi) % (2 * np.pi) - np.pi
     return np.exp(-np.sum(l * diff * diff))
 
 
@@ -8614,7 +8614,7 @@ def RBFCyclicStandardised_k(l, xstd, xi, xj):
     diff = xi - xj
     # Had to do list comprehension workaround to get numba to compile
     mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-    diff[mask] = (diff[mask] + np.pi/xstd[mask]) % 2 * np.pi/xstd[mask] - np.pi/xstd[mask]
+    diff[mask] = (diff[mask] + np.pi/xstd[mask]) % (2 * np.pi/xstd[mask]) - np.pi/xstd[mask]
     return np.exp(-np.sum(l * diff * diff))
 
 
