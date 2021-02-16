@@ -12321,6 +12321,8 @@ def default_check(*args):
 def check_gaussian_output(gaussian_file):
     if GJF(gaussian_file).wfn.exists():
         UsefulTools.print_completed()
+    else:
+        logger.error(f"Gaussian Job {gaussian_file} failed to run")
 
 
 @UsefulTools.completed_checker
@@ -12330,6 +12332,8 @@ def check_aimall_output(wfn_file):
     # If this file still exists then something went wrong
     if not os.path.exists(sh_file):
         UsefulTools.print_completed()
+    else:
+        logger.error(f"AIMAll Job {wfn_file} failed to run")
 
 
 @UsefulTools.external_function()
