@@ -1735,6 +1735,14 @@ class Globals:
 
         globals.FILE_STRUCTURE = Tree()  # Don't change
 
+        globals.TRAINING_POINTS = 500, int
+        globals.SAMPLE_POINTS = 9000, int
+        globals.VALIDATION_POINTS = 500, int
+
+        globals.TRAINING_SET_METHOD = ["min_max_mean"], list
+        globals.SAMPLE_POOL_METHOD = ["random"], list
+        globals.VALIDATION_SET_METHOD = ["random"], list
+
         globals.KERNEL = "rbf-cyclic", str  # rbf or rbf-cyclic currently
         globals.FEREBUS_TYPE = "executable", str # executable (FEREBUS) or python (FEREBUS.py)
         globals.FEREBUS_VERSION = (
@@ -1864,6 +1872,9 @@ class Globals:
                 )
         globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
         globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
+        globals.TRAINING_SET_METHOD.add_pre_modifier(GlobalTools.split_keywords)
+        globals.SAMPLE_POOL_METHOD.add_pre_modifier(GlobalTools.split_keywords)
+        globals.VALIDATION_SET_METHOD.add_pre_modifier(GlobalTools.split_keywords)
         globals.ALF.add_pre_modifier(GlobalTools.read_alf)
         globals.FEREBUS_VERSION.add_modifier(GlobalTools.read_version)
         globals.OPTIMISE_PROPERTY.add_pre_modifier(GlobalTools.to_lower)
@@ -4710,14 +4721,14 @@ class AutoTools:
             SetupTools.make_sets(
                 points_location=xyz_files[0],
                 make_training_set=True,
-                training_set_method=["min_max_mean", "random"],
-                n_training_points=500,
+                training_set_method=globals.TRAINING_SET_METHOD,
+                n_training_points=globals.TRAINING_POINTS,
                 make_sample_pool=True,
-                sample_pool_method=["random"],
-                n_sample_points=9000,
+                sample_pool_method=globals.SAMPLE_POOL_METHOD,
+                n_sample_points=globals.SAMPLE_POINTS,
                 make_validation_set=True,
-                validation_set_method=["random"],
-                n_validation_points=500,
+                validation_set_method=globals.VALIDATION_SET_METHOD,
+                n_validation_points=globals.VALIDATION_POINTS,
             )
 
         order = [
