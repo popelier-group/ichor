@@ -9472,7 +9472,7 @@ class Points:
         if GLOBALS.WARN_RECOVERY_ERROR:
             n_recovery_error = 0
             for point in self:
-                if point.wfn and point.ints:
+                if point.wfn and point.ints and point.wfn.natoms == len(self.ints):
                     recovery_error = point.calculate_recovery_error()
                     if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
                         logger.warning(
