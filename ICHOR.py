@@ -12199,7 +12199,7 @@ class FileRemover:
     @staticmethod
     def run_daemon():
         FileTools.mkdir(
-            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True
+            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=False
         )
         file_remover_daemon = FileRemoverDaemon()
         file_remover_daemon.start()
