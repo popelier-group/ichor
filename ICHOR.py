@@ -8685,6 +8685,36 @@ class Constant(Kernel):
         return np.full((len(x), len(x)), self.value)
 
 
+@jit(nopython=True)
+def cyclic_cdist(xa, xb):
+    xa, xb = np.array(xa), np.array(xb)
+    xm = xa.shape[0]
+    xn = xb.shape[0]
+    result = np.empty((xm, xn))
+    for i, xi in enumerate(xa):
+        for j, xj in enumerate(xb):
+            diff = xi - xj
+            mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
+            diff[mask] = (diff[mask] + np.pi) % (2 * np.pi) - np.pi
+            result[i, j] = np.sqrt(sum(diff*diff))
+    return result
+
+
+@jit(nopython=True)
+def standardised_cyclic_cdist(xa, xb, xstd):
+    xa, xb, xstd = np.array(xa), np.array(xb), np.array(xstd)
+    xm = xa.shape[0]
+    xn = xb.shape[0]
+    result = np.empty((xm, xn))
+    for i, xi in enumerate(xa):
+        for j, xj in enumerate(xb):
+            diff = xi - xj
+            mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
+            diff[mask] = (diff[mask] + np.pi/xstd) % (2 * np.pi/xstd) - np.pi/xstd
+            result[i, j] = np.sqrt(sum(diff*diff))
+    return result
+
+
 class Model:
     def __init__(self, fname, read=False):
         self.fname = Path(fname)
@@ -8717,6 +8747,7 @@ class Model:
         self.ymu = []
         self.ystd = []
 
+        self.has_cyclic_kernel = False
         self.kernel = None
         self.kernel_list = {}
 
@@ -8742,18 +8773,6 @@ class Model:
 
     def normalise_array(self, array):
         return (array - self.norm_min) / (self.norm_max - self.norm_min)
-
-    # def standardise_data(self, data):
-    #     for i in range(self.n_feats):
-    #         self.stand_mu.append(data[:, i].mean(0))
-    #         self.stand_var.append(data[:, i].std(0))
-    #         data[:, i] = (data[:, i] - data[:, i].mean(0)) / data[:, i].std(0)
-    #     self.stand_mu = np.array(self.stand_mu)
-    #     self.stand_var = np.array(self.stand_var)
-    #     return data
-
-    # def standardise_array(self, array):
-        # return (array - self.stand_mu) / self.stand_var
 
     def standardise_array(self, array, mu, std):
         return (array-mu)/std
@@ -8870,6 +8889,7 @@ class Model:
                             [float(hp) for hp in line.split()[1:]]
                         )
                         self.kernel_list[kernel_name] = RBFCyclic(lengthscale)
+                        self.has_cyclic_kernel = True
                     elif kernel_type == "constant":
                         line = next(f)
                         line = next(f)
@@ -9178,7 +9198,13 @@ class Model:
             point = np.array(self.standardise_array(point.features[self.i], self.xmu, self.xstd)).reshape((1, -1))
         else:
             point = np.array(point.features[self.i]).reshape((1, -1))
-        return distance.cdist(point, self.X)
+        if self.has_cyclic_kernel:
+            if self.standardise:
+                return standardised_cyclic_cdist(point, self.X, self.xstd)
+            else:
+                return cyclic_cdist(point, self.X)
+        else:
+            return distance.cdist(point, self.X)
 
     def closest_point(self, point):
         return self.distance_to_point(point).argmin()
