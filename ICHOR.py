@@ -1406,7 +1406,8 @@ class UsefulTools:
             task_id = int(os.environ["SGE_TASK_ID"])
         task_last = 1
         if "SGE_TASK_LAST" in os.environ.keys():
-            task_last = int(os.environ["SGE_TASK_LAST"])
+            try: task_last = int(os.environ["SGE_TASK_LAST"])
+            except: pass # In case SGE_TASK_LAST is undefined
         if task_last < ntasks and task_id + task_last <= ntasks:
             logger.info(f"Running Task {task_id} as {task_id+task_last}")
             task_id += task_last
