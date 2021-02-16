@@ -1735,12 +1735,12 @@ class Globals:
 
         globals.FILE_STRUCTURE = Tree()  # Don't change
 
-        globals.KERNEL = "rbf", str  # only use rbf for now
-        globals.FEREBUS_TYPE = "executable", str
+        globals.KERNEL = "rbf-cyclic", str  # rbf or rbf-cyclic currently
+        globals.FEREBUS_TYPE = "executable", str # executable (FEREBUS) or python (FEREBUS.py)
         globals.FEREBUS_VERSION = (
-            "6.1",
+            "7.0",
             Version,
-        )  # fortran (FEREBUS) or python (FEREBUS.py)
+        )
         globals.FEREBUS_LOCATION = "PROGRAMS/FEREBUS", str
 
         # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
@@ -3122,12 +3122,12 @@ class FerebusTools:
                 "p_value        2.00      # if no p optimization is used p_value MUST be inserted\n"
             )
             finput.write(
-                f"theta_max            {GLOBALS.FEREBUS_MAX_THETA}          "
+                f"theta_max            {GLOBALS.FEREBUS_THETA_MAX}          "
                 "# select maximum value of theta for initialization "
                 "(Raise if receiving an error with Theta Values)\n"
             )
             finput.write(
-                f"theta_min            {GLOBALS.FEREBUS_MIN_THETA}   # select maximum value of theta for initialization\n"
+                f"theta_min            {GLOBALS.FEREBUS_THETA_MIN}   # select maximum value of theta for initialization\n"
             )
             finput.write(f"nugget            {GLOBALS.FEREBUS_NUGGET}\n")
             finput.write(
@@ -3271,7 +3271,7 @@ class FerebusTools:
             ftoml.write(f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n")
             ftoml.write("\n")
             ftoml.write("[kernels.k1]\n")
-            ftoml.write(f"type = \"{'rbf-cyclic'}\"\n")
+            ftoml.write(f"type = \"{GLOBALS.KERNEL}\"\n")
 
 
 class Problem:
