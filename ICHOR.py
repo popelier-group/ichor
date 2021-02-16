@@ -1053,7 +1053,9 @@ class Constants:
         "q44s",
     ]
 
-    ha_to_kj_mol = 2625.5
+    # ha_to_kj_mol = 2625.5
+    ha_to_kj_mol = 2625.4996394799 # Taken from https://en.wikipedia.org/wiki/Hartree
+    # The wikipedia article is converted from https://physics.nist.gov/cgi-bin/cuu/Value?hr
 
     # Precomputed Roots from fflux_initialisation.f90
     rt3 = 1.7320508075689
@@ -9472,7 +9474,7 @@ class Points:
         if GLOBALS.WARN_RECOVERY_ERROR:
             n_recovery_error = 0
             for point in self:
-                if point.wfn and point.ints and point.wfn.natoms == len(self.ints):
+                if point.wfn and point.ints and point.wfn.natoms == len(point.ints):
                     recovery_error = point.calculate_recovery_error()
                     if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
                         logger.warning(
