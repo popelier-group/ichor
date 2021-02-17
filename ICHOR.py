@@ -6038,6 +6038,10 @@ class WFN(Point):
     
         super().__init__()
 
+    @property
+    def natoms(self):
+        return self.nuclei
+
     @buildermethod
     def read(self, only_header=False):
         if not self:
@@ -9498,8 +9502,7 @@ class Points:
         if GLOBALS.WARN_RECOVERY_ERROR:
             n_recovery_error = 0
             for point in self:
-                if point.wfn and point.ints:
-                    if point.wfn.natoms != len(point.ints): continue
+                if point.wfn and point.ints and point.wfn.natoms == len(point.ints):
                     recovery_error = point.calculate_recovery_error()
                     if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
                         logger.warning(
