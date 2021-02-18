@@ -980,6 +980,63 @@ class Constants:
         "Kr": 1.1,
     }
 
+    type2valence = {
+        "H": 1,
+        "He": 2,
+        "Li": 3,
+        "Be": 4,
+        "B": 3,
+        "C": 4,
+        "N": 5,
+        "O": 6,
+        "F": 7,
+        "Ne": 8,
+        "Na": 9,
+        "Mg": 10,
+        "Al": 3,
+        "Si": 4,
+        "P": 5,
+        "S": 6,
+        "Cl": 7,
+        "Ar": 8,
+        "K": 9,
+        "Ca": 10,
+        "Sc": 11,
+        "Ti": 12,
+        "V": 13,
+        "Cr": 14,
+        "Mn": 15,
+        "Fe": 16,
+        "Co": 17,
+        "Ni": 18,
+        "Cu": 11,
+        "Zn": 12,
+        "Ga": 13,
+        "Ge": 4,
+        "As": 5,
+        "Se": 6,
+        "Br": 7,
+        "Kr": 8,
+        "Sr": 10,
+        "Y": 11,
+        "Zr": 12,
+        "Mo": 14,
+        "Ru": 16,
+        "Rh": 17,
+        "Pd": 18,
+        "Ag": 11,
+        "In": 13,
+        "Sb": 5,
+        "Te": 6,
+        "I": 7,
+        "Ba": 10,
+        "Ce": 12,
+        "Gd": 18,
+        "W": 14,
+        "Au": 11,
+        "Bi": 5,
+    }
+
     dlpoly_weights = {
         "H": 1.007975,
         "He": 4.002602,
@@ -1835,6 +1892,7 @@ class Globals:
         globals.DLPOLY_RMS_DISP = -1.0, float
 
         # CP2K SETTINGS
+        globals.CP2K_CORE_COUNT = 8
         globals.CP2K_INPUT = "", str
         globals.CP2K_TEMPERATURE = 300, int  # K
         globals.CP2K_STEPS = 10000, int
@@ -2844,10 +2902,14 @@ class FileTools:
             shutil.rmtree(directory)
 
     @staticmethod
-    def mkdir(directory, empty=False):
-        # printq(directory)
+    def mkdir(directory, empty=False, force=True):
         if os.path.isdir(directory) and empty:
-            shutil.rmtree(directory)
+            try:
+                shutil.rmtree(directory)
+            except OSError as err:
+                if force:
+                    print(str(err))
+                    sys.exit(1)
         os.makedirs(directory, exist_ok=True)
 
     @staticmethod
@@ -3947,6 +4009,51 @@ class PythonCommand(CommandLine):
     def __repr__(self):
         runcmd = [self.command, self.py_script, " ".join(self.arguments)]
         return " ".join(runcmd)
+
+
+class CP2KCommand(CommandLine):
+    def __init__(self):
+        self.infiles = []
+
+        self.default_command = "cp2k.sopt"
+
+        super().__init__()
+
+        self.setup_datafile()
+        self.ncores = GLOBALS.CP2K_CORE_COUNT
+
+    def add(self, infile):
+        self.infiles += [os.path.abspath(infile)]
+
+    def load_modules(self):
+        self.modules["ffluxlab"] = [
+            "apps/cp2k/6.1.0",
+        ]
+        self.modules["csf3"] = [
+            "apps/binapps/cp2k/6.1.0"
+        ]
+
+    @property
+    def ndata(self):
+        return 1
+
+    def __repr__(self):
+        if len(self.infiles) < 1:
+            return ""
+
+        datafile = ""
+        datafile = self.setup_data_file(self.datafile, self.infiles)
+        infile = self.get_variable(0)
+
+
+        cmd = self.command + f" {infile}"
+        runcmd = [f"cp2kdir=$(dirname \"infile\")", f"pushd $cp2kdir", cmd, "popd"]
+        runcmd = "\n".join(runcmd)
+        return datafile + "\n" + runcmd
+
+    def __len__(self):
+        return len(self.infiles)
+
 
 
 class SubmissionScript:
@@ -5619,6 +5726,9 @@ class Atoms(Point):
 
         self._centred = True
 
+    def center(self, center_atom=None):
+        self.centre(centre_atom=center_atom)
+
     def rotate(self, R):
         coordinates = R.dot(self.coordinates.T).T
         for atom, coordinate in zip(self, coordinates):
@@ -5736,6 +5846,10 @@ class Atoms(Point):
             self.calculate_features()
             self._features = {atom.atom_num: atom.features for atom in self}
             return self._features
+
+    @property
+    def types(self):
+        return list(set([atom.type for atom in self]))
 
     def __len__(self):
         return len(self._atoms)
@@ -10987,22 +11101,389 @@ class DlpolyTools:
 
 
 class CP2KTools:
+    input_file = "undefined"
+    input_geometry = None
+    input_file_formats = [".xyz", ".gjf"]
+
+    _molecule_diameter = 0
+    box_size = 0
+    n_molecules = 1
+
+    temperature = 300 # K
+    n_iterations = 10000
+
+    _solvers = ["wavelet", "periodic"]
+    solver = "wavelet" # wavelet or periodic
+
+    cutofff = 3
+
+    _methods = ["BLYP", "PBE"]
+    method = "BLYP"
+
+    _basis_sets = ["6-31G*"]
+    basis_set = "6-31G*"
+
+    datafile_location = ""
+
+    @staticmethod
+    def write_files():
+        cp2k_dir = GLOBALS.FILE_STRUCTURE["cp2k"]
+        FileTools.mkdir(cp2k_dir)
+        cp2k_input_file = Path(cp2k_dir) / Path(f"{GLOBALS.SYSTEM_NAME.lower()}.inp")
+        with open(cp2k_input_file, "w") as cp2k_input:
+            cp2k_input.write("&GLOBAL\n")
+            cp2k_input.write("  ! the project name is made part of most output files... useful to keep order\n")
+            cp2k_input.write(f"  PROJECT {GLOBALS.SYSTEM_NAME}\n")
+            cp2k_input.write("  ! various runtypes (energy, geo_opt, etc.) available.\n")
+            cp2k_input.write("  RUN_TYPE MD\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("  IOLEVEL LOW\n")
+            cp2k_input.write("&END GLOBAL\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("&FORCE_EVAL\n")
+            cp2k_input.write("  ! the electronic structure part of CP2K is named Quickstep\n")
+            cp2k_input.write("  METHOD Quickstep\n")
+            cp2k_input.write("  &DFT\n")
+            cp2k_input.write("    ! basis sets and pseudopotential files can be found in cp2k/data\n")
+            cp2k_input.write(f"    BASIS_SET_FILE_NAME {CP2KTools.datafile_location}/BASIS_SET\n")
+            cp2k_input.write(f"    POTENTIAL_FILE_NAME {CP2KTools.datafile_location}/GTH_POTENTIALS\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    ! Charge and multiplicity\n")
+            cp2k_input.write("    CHARGE 0\n") # TODO: Handle Charged Molecules
+            cp2k_input.write("    MULTIPLICITY 1\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    &MGRID\n")
+            cp2k_input.write("      ! PW cutoff ... depends on the element (basis) too small cutoffs lead to the eggbox effect.\n")
+            cp2k_input.write("      ! certain calculations (e.g. geometry optimization, vibrational frequencies,\n")
+            cp2k_input.write("      ! NPT and cell optimizations, need higher cutoffs)\n")
+            cp2k_input.write("      CUTOFF [Ry] 400\n") # TODO: Turn this into variable
+            cp2k_input.write("    &END MGRID\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    &QS\n")
+            cp2k_input.write("      ! use the GPW method (i.e. pseudopotential based calculations with the Gaussian and Plane Waves scheme).\n")
+            cp2k_input.write("      METHOD GPW\n")
+            cp2k_input.write("      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n")
+            cp2k_input.write("      ! sets reasonable values for all other thresholds.\n")
+            cp2k_input.write("      EPS_DEFAULT 1.0E-10\n")
+            cp2k_input.write("      ! used for MD, the method used to generate the initial guess.\n")
+            cp2k_input.write("      EXTRAPOLATION ASPC\n")
+            cp2k_input.write("    &END QS\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    &POISSON\n")
+            cp2k_input.write("      ! PERIODIC XYZ is the default, gas phase systems should have 'NONE' and a wavelet solver\n")
+            if CP2KTools.solver == "periodic":
+                cp2k_input.write("      PERIODIC XYZ\n")
+            else:
+                cp2k_input.write("      PERIODIC NONE\n")
+            cp2k_input.write(f"      POISSON_SOLVER {CP2KTools.solver.upper()}\n")
+            cp2k_input.write("    &END POISSON\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    ! use the OT METHOD for robust and efficient SCF, suitable for all non-metallic systems.\n")
+            cp2k_input.write("    &SCF\n")
+            cp2k_input.write("      SCF_GUESS ATOMIC ! can be used to RESTART an interrupted calculation\n")
+            cp2k_input.write("      MAX_SCF 30\n")
+            cp2k_input.write("      EPS_SCF 1.0E-6 ! accuracy of the SCF procedure typically 1.0E-6 - 1.0E-7\n")
+            cp2k_input.write("      &OT\n")
+            cp2k_input.write("        ! an accurate preconditioner suitable also for larger systems\n")
+            cp2k_input.write("        PRECONDITIONER FULL_SINGLE_INVERSE\n")
+            cp2k_input.write("        ! the most robust choice (DIIS might sometimes be faster, but not as stable).\n")
+            cp2k_input.write("        MINIMIZER DIIS\n")
+            cp2k_input.write("      &END OT\n")
+            cp2k_input.write("      &OUTER_SCF ! repeat the inner SCF cycle 10 times\n")
+            cp2k_input.write("        MAX_SCF 10\n")
+            cp2k_input.write("        EPS_SCF 1.0E-6 ! must match the above\n")
+            cp2k_input.write("      &END\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("      &PRINT\n")
+            cp2k_input.write("        &RESTART OFF\n") # Turned off for optimisation purposes, may be a good idea to have this as toggleable
+            cp2k_input.write("        &END\n")
+            cp2k_input.write("      &END PRINT\n")
+            cp2k_input.write("    &END SCF\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    ! specify the exchange and correlation treatment\n")
+            cp2k_input.write("    &XC\n")
+            cp2k_input.write(f"      &XC_FUNCTIONAL {CP2KTools.method}\n")
+            cp2k_input.write("      &END XC_FUNCTIONAL\n")
+            cp2k_input.write("      ! adding Grimme's D3 correction (by default without C9 terms)\n")
+            cp2k_input.write(f"      &VDW_POTENTIAL {'OFF' if CP2KTools.n_molecules == 1 else ''}\n")
+            cp2k_input.write("        POTENTIAL_TYPE PAIR_POTENTIAL\n")
+            cp2k_input.write("        &PAIR_POTENTIAL\n")
+            cp2k_input.write(f"          PARAMETER_FILE_NAME {CP2KTools.datafile_location}/dftd3.dat\n")
+            cp2k_input.write("          TYPE DFTD3\n")
+            cp2k_input.write(f"          REFERENCE_FUNCTIONAL {CP2KTools.method}\n")
+            cp2k_input.write("          R_CUTOFF [angstrom] 16\n")
+            cp2k_input.write("        &END PAIR_POTENTIAL\n")
+            cp2k_input.write("      &END VDW_POTENTIAL\n")
+            cp2k_input.write("    &END XC\n")
+            cp2k_input.write("  &END DFT\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("  ! description of the system\n")
+            cp2k_input.write("  &SUBSYS\n")
+            cp2k_input.write("    &CELL\n")
+            cp2k_input.write("      ! unit cells that are orthorhombic are more efficient with CP2K\n")
+            cp2k_input.write(f"      ABC [angstrom] {CP2KTools.box_size} {CP2KTools.box_size} {CP2KTools.box_size}}\n")
+            if CP2KTools.solver == "wavelet":
+                cp2k_input.write("      PERIODIC NONE\n")
+            cp2k_input.write("    &END CELL\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    ! atom coordinates can be in the &COORD section,\n")
+            cp2k_input.write("    ! or provided as an external file.\n")
+            cp2k_input.write("    &COORD\n")
+            for atom in CP2KTools.input_geometry:
+                cp2k_input.write(f"      {atom}\n")
+            cp2k_input.write("    &END COORD\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("    ! keep atoms away from box borders,\n")
+            cp2k_input.write("    ! a requirement for the wavelet Poisson solver\n")
+            cp2k_input.write("    &TOPOLOGY\n")
+            cp2k_input.write("      &CENTER_COORDINATES\n")
+            cp2k_input.write("      &END\n")
+            cp2k_input.write("    &END TOPOLOGY\n")
+            cp2k_input.write("\n")
+            for atom_type in CP2KTools.input_geometry.types:
+                cp2k_input.write(f"    &KIND {atom_type.upper()}\n")
+                cp2k_input.write(f"      BASIS_SET {CP2KTools.basis_set}\n")
+                cp2k_input.write(f"      POTENTIAL GTH-{CP2KTools.method}-q{Constants.type2valence[atom_type.upper()]}\n")
+                cp2k_input.write("    &END KIND\n")
+            cp2k_input.write("  &END SUBSYS\n")
+            cp2k_input.write("&END FORCE_EVAL\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("! how to propagate the system, selection via RUN_TYPE in the &GLOBAL section\n")
+            cp2k_input.write("&MOTION\n")
+            cp2k_input.write("  &GEO_OPT\n")
+            cp2k_input.write("    OPTIMIZER LBFGS ! Good choice for 'small' systems (use LBFGS for large systems)\n")
+            cp2k_input.write("    MAX_ITER  100\n")
+            cp2k_input.write("    MAX_DR    [bohr] 0.003 ! adjust target as needed\n")
+            cp2k_input.write("    &BFGS\n")
+            cp2k_input.write("    &END BFGS\n")
+            cp2k_input.write("  &END GEO_OPT\n")
+            cp2k_input.write("  &MD\n")
+            cp2k_input.write("    ENSEMBLE NVT  ! sampling the canonical ensemble, accurate properties might need NVE\n")
+            cp2k_input.write(f"    TEMPERATURE [K] {CP2KTools.temperature}\n")
+            cp2k_input.write("    TIMESTEP [fs] 1.0\n") # TODO: Turn this into user defined variable
+            cp2k_input.write(f"    STEPS {CP2KTools.n_iterations}\n")
+            cp2k_input.write("    &THERMOSTAT\n")
+            cp2k_input.write("      TYPE NOSE\n")
+            cp2k_input.write("      REGION GLOBAL\n")
+            cp2k_input.write("      &NOSE\n")
+            cp2k_input.write("        TIMECON 50.\n")
+            cp2k_input.write("      &END NOSE\n")
+            cp2k_input.write("    &END THERMOSTAT\n")
+            cp2k_input.write("  &END MD\n")
+            cp2k_input.write("\n")
+            cp2k_input.write("  &PRINT\n")
+            cp2k_input.write("    &TRAJECTORY\n")
+            cp2k_input.write("      &EACH\n")
+            cp2k_input.write("        MD 1\n")
+            cp2k_input.write("      &END EACH\n")
+            cp2k_input.write("    &END TRAJECTORY\n")
+            cp2k_input.write("    &VELOCITIES OFF\n")
+            cp2k_input.write("    &END VELOCITIES\n")
+            cp2k_input.write("    &FORCES OFF\n")
+            cp2k_input.write("    &END FORCES\n")
+            cp2k_input.write("    &RESTART OFF\n")
+            cp2k_input.write("    &END RESTART\n")
+            cp2k_input.write("    &RESTART_HISTORY OFF\n")
+            cp2k_input.write("    &END RESTART_HISTORY\n")
+            cp2k_input.write("  &END PRINT\n")
+            cp2k_input.write("&END MOTION\n")
+
     @staticmethod
     def run():
         # run checks
         # write files
+        CP2KTools.write_files()
         # submit
         pass
 
     @staticmethod
-    def refresh_cp2k_menu(cp2k_menu):
-        cp2k_menu.clear_options()
+    def get_possible_inputs():
+        p = Path('.')
+        return [x for x in p.iterdir() if x.suffix in CP2KTools.input_file_formats]
 
-        cp2k_menu.add_option("r", "Run CP2K", CP2KTools.run)
+    @staticmethod
+    def set_box_size(molecule_diameter):
+        if CP2KTools.solver == "wavelet":
+            CP2KTools.box_size = 2*molecule_diameter
+        elif CP2KTools.solver == "periodic":
+            CP2KTools.box_size = molecule_diameter + 2*CP2KTools.cutoff
+
+    def set_cp2k_box_size():
+        while True:
+            print()
+            raw_ans = input("Enter Box Size in Angstoms: ")
+            try:
+                ans = float(raw_ans)
+            except ValueError:
+                print("Error: Box Size must be a number")
+            else:
+                check = True
+                if CP2KTools._molecule_diameter > 0 and ans < CP2KTools._molecule_diameter:
+                    print(f"Warning: Box Size ({ans} Å) is less than the molecule diameter ({CP2KTools._molecule_diameter} Å)")
+                    check = UsefulTools.check_bool(input("Would you like to use this value? ({ans} Å) [y/n]"))
+                if check:
+                    CP2KTools.box_size = ans
+                    break
+
+    @staticmethod
+    def set_input_file(input_file):
+        CP2KTools.input_file = Path(input_file)
+        if CP2KTools.input_file.suffix == ".gjf":
+            CP2KTools.set_geometry(GJF(CP2KTools.input_file).read().atoms)
+        elif CP2KTools.input_file.suffix == ".xyz":
+            CP2KTools.set_geometry(Trajectory(CP2KTools.input_file).read(n=1)[0])
+
+    @staticmethod
+    def set_geometry(geometry):
+        CP2KTools.input_geometry = geometry
+        CP2KTools.input_geometry.center()
+        molecule_radius = 0
+        for atom in CP2KTools.input_geometry:
+            molecule_radius = max([molecule_radius, *np.abs(atom.coordinates)])
+        molecule_diameter = 2*molecule_radius
+        CP2KTools._molecule_diameter = molecule_diameter
+        CP2KTools.set_box_size(molecule_diameter)
+
+    def set_n_molecules():
+        print("Not Implemented Yet")
+        print("Can only do 1 molecule at a time")
+        input("Continue...")
+
+    @staticmethod
+    def select_custom_input_file():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+        while True:
+            inp = Path(input("Enter CP2K input file: "))
+            if inp.suffix in CP2KTools.input_file_formats:
+                CP2KTools.set_input_file(inp)
+                break
+            else:
+                print(f"Error input file must be 1 of the following formats: {CP2KTools.input_file_formats}")
+
+    @staticmethod
+    def select_input_file():
+        possible_inputs = CP2KTools.get_possible_inputs()
+        cp2k_menu = Menu(title="Select CP2K Input File")
+        for i, possible_input in enumerate(possible_inputs):
+            cp2k_menu.add_option(f"{i+1}", f"{possible_input}", CP2KTools.set_input_file, kwargs={"input_file": possible_input}, auto_close=True)
+        cp2k_menu.add_space()
+        cp2k_menu.add_option("c", "Select Custom Input", CP2KTools.select_custom_input_file, auto_close=True)
+        cp2k_menu.add_final_options(exit=False)
+        cp2k_menu.run()
+
+    @staticmethod
+    def refresh_cp2k_input_menu(cp2k_menu):
+        cp2k_menu.clear_options()
+        cp2k_menu.add_option("f", "Select Input File", CP2KTools.select_input_file)
+        cp2k_menu.add_option("b", "Select Box Size", CP2KTools.set_cp2k_box_size)
+        cp2k_menu.add_option("n", "Select Number of Molecules in Box", CP2KTools.set_n_molecules)
+        cp2k_menu.add_space()
+        cp2k_menu.add_message(f"CP2K Input: {CP2KTools.input_file}")
+        cp2k_menu.add_message(f"Box Size: {CP2KTools.box_size} Å")
+        cp2k_menu.add_message(f"Number of Molecules in Box: {CP2KTools.n_molecules}")
         cp2k_menu.add_final_options()
 
     @staticmethod
+    def select_input_menu():
+        cp2k_menu = Menu(title="CP2K Input Menu")
+        cp2k_menu.set_refresh(CP2KTools.refresh_cp2k_input_menu)
+        cp2k_menu.run()
+
+    @staticmethod
+    def set_temperature():
+        while True:
+            ans = input("Enter Temperature in Kelvin: ")
+            try:
+                ans = int(ans)
+            except ValueError:
+                print("Error: Temperature must be integer value")
+            else:
+                if ans > 0:
+                    CP2KTools.temperature = ans
+                    break
+                else:
+                    print("Error: Temperature must be greater than 0")
+    
+    @staticmethod
+    def set_n_iterations():
+        while True:
+            ans = input("Enter Number of Iterations: ")
+            try:
+                ans = int(ans)
+            except ValueError:
+                print("Error: Number of Iterations must be integer value")
+            else:
+                if ans > 0:
+                    CP2KTools.n_iterations = ans
+                    break
+                else:
+                    print("Error: Number of Iterations must be greater than 0")
+
+    @staticmethod
+    def set_method(method):
+        CP2KTools.method = method
+    
+    @staticmethod
+    def select_method():
+        method_menu = Menu(title="CP2K Method Menu", message="Select Method")
+        for i, method in CP2KTools._methods:
+            method_menu.add_option(f"{i+1}", method, CP2KTools.set_method, kwargs={"method": method})
+        method_menu.add_final_options()
+        method_menu.run()
+
+    @staticmethod
+    def set_basis_set(basis_set):
+        CP2KTools.basis_set = basis_set
+    
+    @staticmethod
+    def select_basis_set():
+        basis_set_menu = Menu(title="CP2K Basis Set Menu", message="Select Basis Set")
+        for i, basis_set in CP2KTools._basis_sets:
+            basis_set_menu.add_option(f"{i+1}", basis_set, CP2KTools.set_basis_set, kwargs={"basis_set": basis_set})
+        basis_set_menu.add_final_options()
+        basis_set_menu.run()
+
+    @staticmethod
+    def select_datafile_location():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+        CP2KTools.datafile_location = input("Enter datafile location: ")
+
+
+    @staticmethod
+    def refresh_cp2k_menu(cp2k_menu):
+        cp2k_menu.clear_options()
+        cp2k_menu.add_option("i", "Select Input", CP2KTools.select_input_menu)
+        cp2k_menu.add_option("t", "Select Temperature", CP2KTools.set_temperature)
+        cp2k_menu.add_option("n", "Select Number of Iterations", CP2KTools.set_n_iterations)
+        cp2k_menu.add_space()
+        cp2k_menu.add_option("m", "Select Method", CP2KTools.select_method)
+        cp2k_menu.add_option("b", "Select Basis Set", CP2KTools.select_basis_set)
+        cp2k_menu.add_option("s", "Set Datafiles Location", CP2KTools.select_datafile_location)
+        cp2k_menu.add_space()
+        cp2k_menu.add_option("r", "Run CP2K", CP2KTools.run)
+        cp2k_menu.add_space()
+        cp2k_menu.add_message(f"CP2K Input: {CP2KTools.input_file}")
+        cp2k_menu.add_final_options()
+
+    @staticmethod
+    def find_datafiles():
+        if GLOBALS.MACHINE == "csf3":
+            CP2KTools.datafile_location = "/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"
+        elif GLOBALS.MACHINE == "ffluxlab":
+            CP2KTools.datafile_location = "/home/modules/apps/cp2k/6.1.0/data"
+        else:
+            CP2KTools.datafile_location = "$CP2K_HOME/data"
+
+    @staticmethod
     def cp2k_menu():
+        CP2KTools.find_datafiles()
+        possible_inputs = CP2KTools.get_possible_inputs()
+        if len(possible_inputs) == 1:
+            CP2KTools.set_input_file(possible_inputs[0])
+        else:
+            CP2KTools.select_input_menu()
         # locate data files
         cp2k_menu = Menu(title="CP2K Menu")
         cp2k_menu.set_refresh(CP2KTools.refresh_cp2k_menu)
@@ -12231,7 +12712,7 @@ class FileRemover:
     @staticmethod
     def run_daemon():
         FileTools.mkdir(
-            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=False
+            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True, force=False
         )
         file_remover_daemon = FileRemoverDaemon()
         file_remover_daemon.start()
