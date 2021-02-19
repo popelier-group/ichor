@@ -4046,8 +4046,8 @@ class CP2KCommand(CommandLine):
         infile = self.get_variable(0)
 
 
-        cmd = self.command + f" {infile}"
-        runcmd = [f"cp2kdir=$(dirname \"infile\")", f"pushd $cp2kdir", cmd, "popd"]
+        cmd = self.command + f" -i {infile}"
+        runcmd = [f"cp2kdir=$(dirname \"{infile}\")", f"pushd $cp2kdir", cmd, "popd"]
         runcmd = "\n".join(runcmd)
         return datafile + "\n" + runcmd
 
@@ -4337,6 +4337,25 @@ class SubmissionTools:
         if submit:
             jid = submission_script.submit(hold=hold)
         return submission_script.fname, jid
+
+    @staticmethod
+    def make_cp2k_script(
+        cp2k_input_files, directory="", submit=True, hold=None
+    ):
+        cp2k_job = CP2KCommand()
+        for cp2k_input_file in cp2k_input_files:
+            cp2k_job.add(cp2k_input_file)
+
+        script_name = os.path.join(directory, "CP2KSub.sh")
+        submission_script = SubmissionScript(script_name)
+        submission_script.add(cp2k_job)
+        submission_script.write()
+
+        jid = None
+        if submit:
+            jid = submission_script.submit(hold=hold)
+        return submission_script.fname, jid
+
 
 
 class BatchTools:
@@ -11221,7 +11240,7 @@ class CP2KTools:
             cp2k_input.write("  &SUBSYS\n")
             cp2k_input.write("    &CELL\n")
             cp2k_input.write("      ! unit cells that are orthorhombic are more efficient with CP2K\n")
-            cp2k_input.write(f"      ABC [angstrom] {CP2KTools.box_size} {CP2KTools.box_size} {CP2KTools.box_size}}\n")
+            cp2k_input.write(f"      ABC [angstrom] {CP2KTools.box_size} {CP2KTools.box_size} {CP2KTools.box_size}\n")
             if CP2KTools.solver == "wavelet":
                 cp2k_input.write("      PERIODIC NONE\n")
             cp2k_input.write("    &END CELL\n")
@@ -11288,13 +11307,15 @@ class CP2KTools:
             cp2k_input.write("  &END PRINT\n")
             cp2k_input.write("&END MOTION\n")
 
+        return cp2k_input_file
+
     @staticmethod
     def run():
         # run checks
         # write files
-        CP2KTools.write_files()
+        cp2k_input_file = CP2KTools.write_files()
         # submit
-        pass
+        SubmissionTools.make_cp2k_script([cp2k_input_file], submit=True)
 
     @staticmethod
     def get_possible_inputs():
