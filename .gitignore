@@ -16,3 +16,4 @@ makeSets.py
 *.code-workspace
 FEREBUS/
 __pycache__/
+docs/_*
