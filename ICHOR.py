@@ -5917,7 +5917,7 @@ class Directory(Point):
         self.read_directory(self.path)
 
     def read_directory(self, path):
-        file_extentsions = {
+        file_extensions = {
             ".gjf": self.add_gjf,
             ".wfn": self.add_wfn,
             ".int": self.add_int,
@@ -5928,9 +5928,9 @@ class Directory(Point):
                 if (
                     entry.is_file()
                     and FileTools.get_extension(entry)
-                    in file_extentsions.keys()
+                    in file_extensions.keys()
                 ):
-                    add = file_extentsions[FileTools.get_extension(entry)]
+                    add = file_extensions[FileTools.get_extension(entry)]
                     add(entry.path)
                 elif entry.is_dir():
                     self.read_directory(entry.path)
