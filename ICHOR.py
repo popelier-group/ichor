@@ -1151,6 +1151,7 @@ class DebugCall:
         print(exc_type, exc_val, exc_tb)
         print("<<")
 
+
 class UsefulTools:
     @staticmethod
     def ichor_logo():
@@ -1498,8 +1499,6 @@ class UsefulTools:
             else:
                 func(*args, **kwargs) 
         return wrapper
-
-
 
 
 class Arguments:
@@ -1857,6 +1856,8 @@ class Globals:
     _protected: List[str] = []
     # Variables set in config
     _in_config: List[str] = []
+    # Default values for variables
+    _defaults = {}
 
     # For parsing global variables into type
     _parsers = DictList()
@@ -2026,6 +2027,10 @@ class Globals:
         # Setup Checkers
 
 
+        # Setup Defaults
+        for global_variable in self.global_variables:
+            self._defaults[global_variable] = self.get(global_variable)
+
     @staticmethod
     def define():
         global GLOBALS
@@ -2089,50 +2094,43 @@ class Globals:
             else:
                 ProblemFinder.unknown_settings += [key]
 
-        # if not self.ALF:
-        #     alf_reference_file = self.ALF_REFERENCE_FILE.value
-        #     if not alf_reference_file:
-        #         alf_reference_file = FileTools.get_first_gjf(
-        #             self.FILE_STRUCTURE["training_set"]
-        #         )
+        if not self.ALF:
+            if self.ALF_REFERENCE_FILE:
+                if not os.path.exists(self.ALF_REFERENCE_FILE):
+                    logger.warning(f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative")
+                    self.ALF_REFERENCE_FILE = None
 
-        #     if not alf_reference_file:
-        #         logger.warning("Cannot Find Training Set GJF")
-        #         alf_reference_file = FileTools.get_first_gjf(
-        #             self.FILE_STRUCTURE["sample_pool"]
-        #         )
+            if not self.ALF_REFERENCE_FILE:
+                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+                    self.FILE_STRUCTURE["training_set"]
+                )
 
-        #     if not alf_reference_file:
-        #         logger.warning("Cannot Find Sample Pool GJF")
-        #         alf_reference_file = FileTools.get_first_gjf(
-        #             self.FILE_STRUCTURE["validation_set"]
-        #         )
+            if not self.ALF_REFERENCE_FILE:
+                logger.warning("Cannot Find Training Set GJF")
+                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+                    self.FILE_STRUCTURE["sample_pool"]
+                )
 
-        #     if not alf_reference_file:
-        #         logger.warning("Cannot Find Validation Set GJF")
-        #         logger.error("No ALF_REFERENCE_FILE Defined")
+            if not self.ALF_REFERENCE_FILE:
+                logger.warning("Cannot Find Sample Pool GJF")
+                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+                    self.FILE_STRUCTURE["validation_set"]
+                )
 
-        #     if alf_reference_file:
-        #         self.ALF_REFERENCE_FILE = alf_reference_file
-        #         try:
-        #             GJF(
-        #                 str(self.ALF_REFERENCE_FILE)
-        #             ).read().atoms.calculate_alf()
-        #             self.ALF = Atoms.ALF
-        #         except:
-        #             logger.error("Error When Calculating ALF")
-        #             print(
-        #                 "\nError in ALF calculation, please specify file to calculate ALF"
-        #             )
-        #     else:
-        #         xyz_files = FileTools.get_files_in(".", "*.xyz")
-        #         if len(xyz_files) == 1:
-        #             traj = Trajectory(xyz_files[0]).read(n=1)
-        #             traj[0].calculate_alf()
-        #             self.ALF = Atoms.ALF
-        #     Atoms.ALF = self.ALF
-        # else:
-        #     Atoms.ALF = self.ALF
+            if self.ALF_REFERENCE_FILE:
+                try:
+                    GJF(
+                        str(self.ALF_REFERENCE_FILE)
+                    ).read().atoms.calculate_alf()
+                    self.ALF = Atoms.ALF
+                except:
+                    logger.error(f"Error When Calculating ALF from {self.ALF_REFERENCE_FILE}")
+            else:
+                xyz_files = FileTools.get_files_in(".", "*.xyz")
+                if len(xyz_files) == 1:
+                    traj = Trajectory(xyz_files[0]).read(n=1)
+                    traj[0].calculate_alf()
+                    self.ALF = Atoms.ALF
 
     def set(self, name, value):
         name = name.upper()
@@ -2144,7 +2142,7 @@ class Globals:
             setattr(self, name, value)
 
     def get(self, name):
-        return self.__dict__[name]
+        return getattr(self, name, None)
 
     def items(self, show_protected=False):
         items = []
@@ -2169,9 +2167,9 @@ class Globals:
 
     def save_to_config(self, config_file=Arguments.config_file):
         global_variables = {}
-        for global_variable in self.items():
-            if global_variable.changed or global_variable.in_config:
-                global_variables[global_variable.name] = global_variable.value
+        for global_variable, global_value in self.items():
+            if global_value != self._defaults[global_variable]  or global_variable in self._in_config:
+                global_variables[global_variable] = global_value
 
         if config_file.endswith(".properties"):
             self.save_to_properties_config(config_file, global_variables)
@@ -2207,6 +2205,9 @@ class Globals:
             for check in self._checkers.get(name, []):
                 ok = check(value)
                 if not ok: return
+
+            if name == "ALF":
+                Atoms.ALF = value
 
         super(Globals, self).__setattr__(name, value)
 
@@ -3037,13 +3038,18 @@ class FileTools:
 
     @staticmethod
     def get_first_gjf(directory):
-        for f in FileTools.get_files_in(directory, "*"):
-            if f.endswith(".gjf"):
-                return f
-            elif os.path.isdir(f):
-                f = FileTools.get_first_gjf(f)
-                if f is not None:
-                    return f
+        print(directory)
+        s = Set(directory)
+        for p in s:
+            if p.gjf.exists():
+                return p.gjf.path
+        # for f in FileTools.get_files_in(directory, "*"):
+        #     if f.endswith(".gjf"):
+        #         return f
+        #     elif os.path.isdir(f):
+        #         f = FileTools.get_first_gjf(f)
+        #         if f is not None:
+        #             return f
         return None
 
     @staticmethod
@@ -12402,26 +12408,26 @@ class SettingsTools:
     @staticmethod
     def set_default():
         GLOBALS.set(
-            SettingsTools.edit_var.name, SettingsTools.edit_var.default
+            SettingsTools.edit_var, GLOBALS._defaults[SettingsTools.edit_var]
         )
 
     @staticmethod
     def set_value(value):
-        SettingsTools.edit_var.value = value
+        GLOBALS.set(edit_var, value)
 
     @staticmethod
     def edit_value():
-        print(f"Edit {SettingsTools.edit_var.name}")
+        print(f"Edit {SettingsTools.edit_var}")
         while True:
             new_value = UsefulTools.input_with_prefill(
-                ">> ", SettingsTools.edit_var.value
+                ">> ", GLOBALS.get(SettingsTools.edit_var)
             )
             try:
-                SettingsTools.edit_var.value = new_value
+                GLOBALS.set(SettingsTools.edit_var, new_value)
                 break
             except:
                 print(
-                    f"Value Error: Must be of type {SettingsTools.edit_var.type.__name__}"
+                    f"Value Error: Must be of type {GLOBALS.__annotations__[SettingsTools.edit_var].__name__}"
                 )
 
     @staticmethod
@@ -12445,10 +12451,10 @@ class SettingsTools:
     @staticmethod
     def refresh_setting_menu(menu):
         menu.clear_options()
-        menu.add_message(f"Value:   {SettingsTools.edit_var.value}")
+        menu.add_message(f"Value:   {GLOBALS.get(SettingsTools.edit_var)}")
         menu.add_space()
-        menu.add_message(f"Type:    {SettingsTools.edit_var.type.__name__}")
-        menu.add_message(f"Default: {SettingsTools.edit_var.default}")
+        menu.add_message(f"Type:    {GLOBALS.__annotations__[SettingsTools.edit_var].__name__}")
+        menu.add_message(f"Default: {GLOBALS._defaults[SettingsTools.edit_var]}")
         menu.add_space()
         # menu.add_message(f"Hidden:  {SettingsTools.edit_var.hidden}")
         # menu.add_message(f"Changed: {SettingsTools.edit_var.changed}")
@@ -12456,10 +12462,10 @@ class SettingsTools:
         menu.add_option(
             "d", "Revert to default value", SettingsTools.set_default
         )
-        if SettingsTools.edit_var.allowed_values:
-            menu.add_option(
-                "c", "Choose from allowed values", SettingsTools.choose_value
-            )
+        # if SettingsTools.edit_var.allowed_values:
+        #     menu.add_option(
+        #         "c", "Choose from allowed values", SettingsTools.choose_value
+        #     )
         menu.add_final_options()
 
     @staticmethod
@@ -12521,7 +12527,7 @@ class SettingsTools:
     @staticmethod
     def change(var):
         SettingsTools.edit_var = var
-        setting_menu = Menu(title=f"Edit {var.name}", auto_close=True)
+        setting_menu = Menu(title=f"Edit {var}", auto_close=True)
         setting_menu.set_refresh(SettingsTools.refresh_setting_menu)
         setting_menu.run()
 
