@@ -8845,7 +8845,7 @@ def standardised_cyclic_cdist(xa, xb, xstd):
         for j in range(xn):
             diff = xa[i] - xb[j]
             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-            diff[mask] = (diff[mask] + np.pi/xstd) % (2 * np.pi/xstd) - np.pi/xstd
+            diff[mask] = (diff[mask] + np.pi/xstd[mask]) % (2 * np.pi/xstd[mask]) - np.pi/xstd[mask]
             result[i, j] = np.sqrt(sum(diff*diff))
     return result
 
