@@ -2965,18 +2965,11 @@ class FileTools:
 
     @staticmethod
     def get_first_gjf(directory):
-        print(directory)
-        s = Set(directory)
-        for p in s:
-            if p.gjf.exists():
-                return p.gjf.path
-        # for f in FileTools.get_files_in(directory, "*"):
-        #     if f.endswith(".gjf"):
-        #         return f
-        #     elif os.path.isdir(f):
-        #         f = FileTools.get_first_gjf(f)
-        #         if f is not None:
-        #             return f
+        if Path(directory).exists():
+            s = Set(directory)
+            for p in s:
+                if p.gjf.exists():
+                    return p.gjf.path
         return None
 
     @staticmethod
