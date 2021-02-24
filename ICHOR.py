@@ -1885,6 +1885,8 @@ class Globals:
     EXCLUDE_NODES: List[str] = []
 
     def __init__(self):
+        self.UID = Arguments.uid
+        
         # Set Protected Variables
         self._protected = [
             "FILE_STRUCTURE",
@@ -2051,7 +2053,7 @@ class Globals:
                     self.FILE_STRUCTURE["validation_set"]
                 )
 
-            if self.ALF_REFERENCE_FILE:
+            if self.ALF_REFERENCE_FILE is not None:
                 try:
                     GJF(
                         str(self.ALF_REFERENCE_FILE)
@@ -3409,7 +3411,7 @@ class ProblemFinder:
     def __init__(self):
         self.problems = []
 
-    # @UsefulTools.run_function(1)
+    @UsefulTools.run_function(1)
     def check_alf(self):
         if len(GLOBALS.ALF) < 1:
             self.add(
