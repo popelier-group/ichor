@@ -1689,10 +1689,9 @@ def global_parser(func):
 def global_formatter(func):
     def wrapper(val):
         if func.__annotations__:
-            if type(val) != next(iter(func.__annotations__)):
+            if type(val) != next(iter(func.__annotations__.values())):
                 return val
-            else:
-                return func(val)
+        return func(val)
     return wrapper
 
 
