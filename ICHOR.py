@@ -107,6 +107,9 @@ from scipy import stats
 from numpy import linalg as la
 from scipy.spatial import distance
 
+import typing
+from typing import List
+
 #############################################
 #                  Globals                  #
 #############################################
@@ -702,8 +705,8 @@ WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | O_BINARY
 BUFFER_SIZE = 128 * 1024
 
 
-def printq(msg):
-    print(msg)
+def printq(*msg):
+    print(*msg)
     quit()
 
 
@@ -955,6 +958,11 @@ class Constants:
 
     FEREBUS_LEGACY_CUTOFF = Version("6.5.0")
 
+    KERNELS = [
+        "rbf",
+        "rbf-cyclic"
+    ]
+
     type2mass = {
         "H": 1.007825,
         "He": 4.002603,
@@ -1191,6 +1199,18 @@ class Constants:
     rt5_12 = 0.64549722436790
     rt_8_5 = 1.26491106406735
     rt12_3 = 1.15470053837925
+
+
+class DebugCall:
+    def __init__(self):
+        pass
+
+    def __enter__(self):
+        print(">>")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print(exc_type, exc_val, exc_tb)
+        print("<<")
 
 
 class UsefulTools:
@@ -1547,49 +1567,6 @@ class UsefulTools:
         return wrapper
 
 
-class GlobalTools:
-    @staticmethod
-    def cleanup_str(s):
-        s = s.replace('"', "")
-        s = s.replace("'", "")
-        s = s.strip()
-        return s
-
-    @staticmethod
-    def to_upper(s):
-        return s.upper()
-
-    @staticmethod
-    def to_lower(s):
-        return s.lower()
-
-    @staticmethod
-    def split_keywords(keywords):
-        split_keywords = []
-        if isinstance(keywords, str):
-            keywords = keywords.replace("[", "")
-            keywords = keywords.replace("]", "")
-            split_keywords = (
-                keywords.split(",") if "," in keywords else keywords.split()
-            )
-        split_keywords = [
-            GlobalTools.cleanup_str(keyword) for keyword in split_keywords
-        ]
-        return split_keywords
-
-    @staticmethod
-    def read_alf(alf):
-        if isinstance(alf, str):
-            alf = ast.literal_eval(alf)
-        if isinstance(alf, list):
-            alf = [[int(i) for i in j] for j in alf]
-        return alf
-
-    @staticmethod
-    def read_version(strver):
-        return Version(strver)
-
-
 class Arguments:
     config_file = "config.properties"
     uid = UsefulTools.get_uid()
@@ -1652,378 +1629,361 @@ class Arguments:
             Arguments.uid = args.uid
 
 
-class GlobalVariable:
-    type_conversions = {
-        bool: UsefulTools.check_bool,
-    }
+class DictList(dict):
+    """
+    Wrapper around the common pattern of a dictionary of lists
+    Allows for items of lists to be appended without checking the key
+    exists first
+    x = {}
+    if k not in x.keys():
+        x[k] = []
+    x[k] += [v]
 
-    def __init__(self, name, value, type):
+    Replaced by
+    x = DictList()
+    x[k] += [v]
+    """
+    def __init__(self, list_type=list):
+        self.list_type = list_type
+        self._dict = {}
+
+    def __getitem__(self, key):
+        if key not in self.keys():
+            self.__dict__[key] = self.list_type()
+        return self.__dict__[key]
+
+
+class Node:
+    def __init__(self, name, parent):
         self.name = name
-
-        self.type = type
-        self.modifiers = []
-        self.pre_modifiers = []
-        self.changed = False
-        self.hidden = False
-        self.allowed_values = []
-
-        self.default = None
-        self.changed = False
-        self.in_config = False
-
-        self.value = value
-
-    def add_modifier(self, modifier):
-        self.modifiers += [modifier]
-        self.set(self.value)
-
-    def add_pre_modifier(self, modifier):
-        self.pre_modifiers += [modifier]
-        self.set(self.value)
-
-    def set(self, value):
-        if "value" not in self.__dict__.keys():
-            self.default = value
-        else:
-            self.changed = True
-
-        for modifier in self.pre_modifiers:
-            value = modifier(value)
-
-        convert = (
-            GlobalVariable.type_conversions[self.type]
-            if self.type in GlobalVariable.type_conversions.keys()
-            else self.type
-        )
-        # Make sure type is the correct type
-        try:
-            self.__dict__["value"] = (
-                value if convert in Globals.types else convert(value)
-            )
-        except:
-            self.__dict__["value"] = value
-
-        for modifier in self.modifiers:
-            self.__dict__["value"] = modifier(self.value)
-
-        if self.type not in Globals.types:
-            self.type = type(self.value)
-
-    def __setattr__(self, key, val):
-        if key == "value":
-            self.set(val)
-        else:
-            self.__dict__[key] = val
-
-    def __getattr__(self, key, *args):
-        if key in self.__dict__.keys():
-            return self.__dict__[key]
-        else:
-            try:
-                return getattr(self.value, key)
-            except:
-                raise AttributeError(key)
-
-    def details(self):
-        return f"Value:   {self.value}\nType:    {self.type.__name__}\nHidden:  {self.hidden}\nDefault: {self.default}\nChanged: {self.changed}"
-
-    def __int__(self):
-        return int(self.value)
-
-    def __float__(self):
-        return float(self.value)
-
-    def __list__(self):
-        return list(self.value)
+        self.parent = parent
 
     def __str__(self):
-        return str(self.value)
+        if self.parent is None:
+            return self.name
+        return str(self.parent) + os.sep + self.name
 
     def __repr__(self):
-        return repr(self.value)
+        return str(self)
 
-    def __add__(self, other):
-        return self.value + other
 
-    def __radd__(self, other):
-        return other + self.value
+class Tree:
+    def __init__(self):
+        self._dict = {}
 
-    def __sub__(self, other):
-        return self.value - other
+    def add(self, name, id, parent=None):
+        if parent is not None:
+            parent = self[parent]
+        self._dict[id] = Node(name, parent)
 
-    def __rsub__(self, other):
-        return other - self.value
+    def __getitem__(self, id):
+        return str(self._dict[id])
 
-    def __mul__(self, other):
-        return self.value * other
 
-    def __rmul__(self, other):
-        return self.value * other
+class GlobalTools:
+    @staticmethod
+    def cleanup_str(s):
+        s = s.replace('"', "")
+        s = s.replace("'", "")
+        s = s.strip()
+        return s
 
-    def __truediv__(self, other):
-        return self.value / other
+    @staticmethod
+    def to_upper(s):
+        return s.upper()
 
-    def __rtruediv__(self, other):
-        return other / self.value
+    @staticmethod
+    def to_lower(s):
+        return s.lower()
 
-    def __neg__(self):
-        return self.value.__neg__()
+    @staticmethod
+    def split_keywords(keywords):
+        split_keywords = []
+        if isinstance(keywords, str):
+            keywords = keywords.replace("[", "")
+            keywords = keywords.replace("]", "")
+            split_keywords = (
+                keywords.split(",") if "," in keywords else keywords.split()
+            )
+        split_keywords = [
+            GlobalTools.cleanup_str(keyword) for keyword in split_keywords
+        ]
+        return split_keywords
 
-    def __pos__(self):
-        return self.value.__pos__()
+    @staticmethod
+    def read_alf(alf):
+        if isinstance(alf, str):
+            alf = ast.literal_eval(alf)
+        if isinstance(alf, list):
+            alf = [[int(i) for i in j] for j in alf]
+        return alf
 
-    def __abs__(self):
-        return self.value.__abs__()
+    @staticmethod
+    def read_version(strver):
+        return Version(strver)
 
-    def __invert__(self):
-        return self.value.__invert__()
+    @staticmethod
+    def parse_str(inp):
+        return str(inp)
 
-    def __getitem__(self, i):
-        return self.value[i]
+    @staticmethod
+    def parse_bool(inp):
+        return UsefulTools.check_bool(inp)
 
-    def __delitem__(self, i):
-        del self.value[i]
+    @staticmethod
+    def parse_int(inp):
+        return int(inp)
 
-    def __bool__(self):
-        return bool(self.value)
+    @staticmethod
+    def parse_float(inp):
+        return float(inp)
 
-    def __len__(self):
-        return len(self.value)
+    @staticmethod
+    def check_allowed(val, allowed_values):
+        if not val in allowed_values:
+            raise ValueError(f"Value: {val} not in Allowed Values: {allowed_values}")
 
-    def __next__(self):
-        return next(self.value)
+    @staticmethod
+    def positive(val):
+        if not val > 0:
+            raise ValueError(f"Value: {val} must be > 0")
 
-    def __iter__(self):
-        return iter(self.value)
-
-    def __index__(self):
-        return self.value.__index__()
-
-    def __hash__(self):
-        return self.value.__hash__()
-
-    def __lt__(self, other):
-        return self.value.__lt__(other)
-
-    def __le__(self, other):
-        return self.value.__le__(other)
-
-    def __gt__(self, other):
-        return self.value.__gt__(other)
-
-    def __ge__(self, other):
-        return self.value.__ge__(other)
-
-    def __unicode__(self):
-        return self.value.__unicode__()
-
-    def __format__(self, formatstr):
-        return self.value.__format__(formatstr)
-
-    def __sizeof__(self):
-        return self.value.__sizeof__()
-
-    # def items(self):
-    #     return dict.items(self.value)
+    @staticmethod
+    def positive_or_zero(val):
+        if not val >= 0:
+            raise ValueError(f"Value: {val} must be >= 0")
 
 
 class Globals:
-    types = []
+    _types = []
+
+    # Variables that can't be set from config file
+    _protected: List[str] = []
+    # Variables set in config
+    _in_config: List[str] = []
+    # Default values for variables
+    _defaults = {}
+    # Allowed values for variables
+    _allowed_values = {}
+
+    # For parsing global variables into type
+    _parsers = DictList()
+    # For formatting global variables after parsing
+    _formatters = DictList()
+    # For checking global variables after formatting
+    _checkers = DictList()
+
+    SYSTEM_NAME: str = "SYSTEM"
+    ALF_REFERENCE_FILE: str = "" # set automatically if not defined
+    ALF: List[List[int]] = []
+
+    MAX_ITERATION: int = 1
+    POINTS_PER_ITERATION: int = 1
+
+    OPTIMISE_PROPERTY: str = "iqa"
+    OPTIMISE_ATOM: str = "all"
+
+    ADAPTIVE_SAMPLING_METHOD: str = "epe"
+
+    NORMALISE: bool = False
+    STANDARDISE: bool = False
+
+    METHOD: str = "B3LYP"
+    BASIS_SET: str = "6-31+g(d,p)"
+    KEYWORDS: List[str] = []
+
+    ENCOMP: int = 3
+    BOAQ: str = "gs20"
+    IASMESH: str = "fine"
+
+    FILE_STRUCTURE: Tree = Tree()  # Don't change
+
+    TRAINING_POINTS: int = 500
+    SAMPLE_POINTS: int = 9000
+    VALIDATION_POINTS: int = 500
+
+    TRAINING_SET_METHOD: List[str] = ["min_max_mean"]
+    SAMPLE_POOL_METHOD: List[str] = ["random"]
+    VALIDATION_SET_METHOD: List[str] = ["random"]
+
+    KERNEL: str = "rbf-cyclic"  # rbf or rbf-cyclic currently
+    FEREBUS_TYPE: str = "executable" # executable (FEREBUS) or python (FEREBUS.py)
+    FEREBUS_VERSION: Version = Version("7.0")
+    FEREBUS_LOCATION: str = "PROGRAMS/FEREBUS"
+
+    # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
+    GAUSSIAN_CORE_COUNT: int = 2
+    AIMALL_CORE_COUNT: int = 2
+    FEREBUS_CORE_COUNT: int = 4
+    DLPOLY_CORE_COUNT: int = 1
+    CP2K_CORE_COUNT: int = 8
+
+    FEREBUS_SWARM_SIZE: int = 50 # If negative >> Size dynamically allocated by FEREBUS
+    FEREBUS_NUGGET: float = 1.0e-10 # Default value for FEREBUS nugget
+    FEREBUS_THETA_MIN: float = 0.0 # Minimum theta value for initialisation (best to keep 0)
+    FEREBUS_THETA_MAX: float = 3.0 # Maximum theta value for initialisation
+
+    MAX_NUGGET: float = 1e-4
+
+    FEREBUS_INERTIA_WEIGHT: float = 0.72900
+    FEREBUS_COGNITIVE_LEARNING_RATE: float = 1.49400
+    FEREBUS_SOCIAL_LEARNING_RATE: float = 1.49400
+
+    FEREBUS_MEAN: str = "constant"
+    FEREBUS_OPTIMISATION: str = "pso"
+
+    FEREBUS_TOLERANCE: float = 1.0e-8
+    FEREBUS_STALL_ITERATIONS: int = 50
+    FEREBUS_CONVERGENCE: int = 20
+    FEREBUS_MAX_ITERATION: int = 1000
+
+    # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
+    DLPOLY_NUMBER_OF_STEPS: int = 500 # Number of steps to run simulation for
+    DLPOLY_TEMPERATURE: int = 0 # If set to 0, will perform geom opt but default to 10 K
+    DLPOLY_PRINT_EVERY: int = 1 # Print trajectory and stats every n steps
+    DLPOLY_TIMESTEP: float = 0.001 # in ps
+    DLPOLY_LOCATION: str = "PROGRAMS/DLPOLY.Z"
+
+    DLPOLY_CHECK_CONVERGENCE: bool = False
+    DLPOLY_CONVERGENCE_CRITERIA: int = -1
+
+    DLPOLY_MAX_ENERGY: float = -1.0
+    DLPOLY_MAX_FORCE: float = -1.0
+    DLPOLY_RMS_FORCE: float = -1.0
+    DLPOLY_MAX_DISP: float = -1.0
+    DLPOLY_RMS_DISP: float = -1.0
+
+    # CP2K SETTINGS
+    CP2K_INPUT: str = ""
+    CP2K_TEMPERATURE: int = 300 # K
+    CP2K_STEPS: int = 10000
+    CP2K_TIMESTEP: float = 1.0 # fs
+    CP2K_METHOD: str = "BLYP"
+    CP2K_BASIS_SET: str = "6-31G*"
+    CP2K_DATA_DIR: str = ""
+
+    # Recovery and Integration Errors
+    WARN_RECOVERY_ERROR: bool = True
+    RECOVERY_ERROR_THRESHOLD: float = 1.0/Constants.ha_to_kj_mol # Ha (1.0 kJ/mol)
+
+    WARN_INTEGRATION_ERROR: bool = True
+    INTEGRATION_ERROR_THRESHOLD: float = 0.001
+
+    # Activate Warnings when making models
+    LOG_WARNINGS: bool = False  # Gets set in _make_models
+
+    MACHINE: str = ""
+    SGE: bool = False  # Don't Change
+    SUBMITTED: bool = False  # Don't Change
+
+    DISABLE_PROBLEMS: bool = False
+    UID: str = Arguments.uid
+
+    IQA_MODELS: bool = False
+
+    INCLUDE_NODES: List[str] = []
+    EXCLUDE_NODES: List[str] = []
 
     def __init__(self):
-        pass
+        # Set Protected Variables
+        self._protected = [
+            "FILE_STRUCTURE",
+            "SGE",
+            "SUBMITTED",
+            "UID",
+            "IQA_MODELS",
+            "MACHINE",
+        ]
+
+        # Setup Parsers
+        for global_variable in self.global_variables:
+            global_type = self.__annotations__[global_variable]
+            if global_type is str:
+                self._parsers[global_variable] += [GlobalTools.parse_str]
+            elif global_type is bool:
+                self._parsers[global_variable] += [GlobalTools.parse_bool]
+            elif global_type is int:
+                self._parsers[global_variable] += [GlobalTools.parse_int]
+            elif global_type is float:
+                self._parsers[global_variable] += [GlobalTools.parse_float]
+
+        self._parsers["KEYWORDS"] += [GlobalTools.split_keywords]
+        self._parsers["ALF"] += [GlobalTools.read_alf]
+        self._parsers["FEREBUS_VERSION"] += [GlobalTools.read_version]
+
+        self._parsers["INCLUDE_NODES"] += [GlobalTools.split_keywords]
+        self._parsers["EXCLUDE_NODES"] += [GlobalTools.split_keywords]
+
+        # TODO: Parsers to add
+        # - Training/Sample/Validation Set methods
+        # - Make sure List[int] is parsed correctly
+
+        # Setup Formatters
+        for global_variable in self.global_variables:
+            global_type = self.__annotations__[global_variable]
+            if global_type is str:
+                self._formatters[global_variable] += [GlobalTools.cleanup_str]
+
+        self._formatters["SYSTEM_NAME"] += [GlobalTools.to_upper]
+        self._formatters["OPTIMISE_PROPERTY"] += [GlobalTools.to_lower]
+
+        # Setup Checkers
+        self._allowed_values = {
+            "METHOD": Constants.GAUSSIAN_METHODS,
+            "BOAQ": Constants.BOAQ_VALUES,
+            "IASMESH": Constants.IASMESH_VALUES,
+            "FEREBUS_TYPE": Constants.FEREBUS_TYPES,
+            "OPTIMISE_PROPERTY": ["iqa"] + Constants.multipole_names,
+            "KERNEL": Constants.KERNELS,
+        }
+        
+        # TODO: Checks to add
+        # - Basis Set (not sure how to do this one)
+        # - Optimise Atom, must be done after determining system
+        # - Check FEREBUS Location
+        # - Check DLPOLY Location
+        # - FEREBUS Mean
+        # - FEREBUS Optimiser
+        # - CP2K Method
+        # - CP2K Basis Set
+
+        for variable, allowed_values in self._allowed_values.items():
+            self._checkers[variable] += [lambda val, av=allowed_values: GlobalTools.check_allowed(val, av)]
+
+        self._checkers["MAX_ITERATION"] += [GlobalTools.positive]
+        self._checkers["POINTS_PER_ITERATION"] += [GlobalTools.positive]
+        self._checkers["TRAINING_POINTS"] += [GlobalTools.positive_or_zero]
+        self._checkers["SAMPLE_POINTS"] += [GlobalTools.positive_or_zero]
+        self._checkers["VALIDATION_POINTS"] += [GlobalTools.positive_or_zero]
+
+        self._checkers["FEREBUS_SWARM_SIZE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_NUGGET"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_INERTIA_WEIGHT"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_COGNITIVE_LEARNING_RATE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_SOCIAL_LEARNING_RATE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_TOLERANCE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_STALL_ITERATIONS"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_CONVERGENCE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_MAX_ITERATION"] += [GlobalTools.positive]
+
+        self._checkers["DLPOLY_NUMBER_OF_STEPS"] += [GlobalTools.positive]
+        self._checkers["DLPOLY_TEMPERATURE"] += [GlobalTools.positive_or_zero]
+        self._checkers["DLPOLY_PRINT_EVERY"] += [GlobalTools.positive]
+        self._checkers["DLPOLY_TIMESTEP"] += [GlobalTools.positive]
+
+        self._checkers["CP2K_TEMPERATURE"] += [GlobalTools.positive]
+        self._checkers["CP2K_STEPS"] += [GlobalTools.positive]
+        self._checkers["CP2K_TIMESTEP"] += [GlobalTools.positive]
+
+        # Setup Defaults
+        for global_variable in self.global_variables:
+            self._defaults[global_variable] = self.get(global_variable)
 
     @staticmethod
     def define():
         global GLOBALS
-
-        name = __name__ if not __name__ == "*" else "__main__"
-        for _, obj in inspect.getmembers(sys.modules[name]):
-            if inspect.isclass(obj):
-                Globals.types += [obj]
-
         globals = Globals()
-
-        globals.SYSTEM_NAME = "SYSTEM", str
-
-        globals.ALF_REFERENCE_FILE = (
-            "",
-            str,
-        )  # set automatically if not defined
-        globals.ALF = [], list
-
-        globals.MAX_ITERATION = 1, int
-        globals.POINTS_PER_ITERATION = 1, int
-
-        globals.OPTIMISE_PROPERTY = "iqa", str
-        globals.OPTIMISE_ATOM = "all", str
-
-        globals.ADAPTIVE_SAMPLING_METHOD = "epe", str
-        globals.NORMALISE = False, bool
-        globals.STANDARDISE = False, bool
-
-        globals.METHOD = "B3LYP", str
-        globals.BASIS_SET = "6-31+g(d,p)", str
-        globals.KEYWORDS = [], list
-
-        globals.ENCOMP = 3, int
-        globals.BOAQ = "gs20", str
-        globals.IASMESH = "fine", str
-
-        globals.FILE_STRUCTURE = Tree()  # Don't change
-
-        globals.TRAINING_POINTS = 500, int
-        globals.SAMPLE_POINTS = 9000, int
-        globals.VALIDATION_POINTS = 500, int
-
-        globals.TRAINING_SET_METHOD = ["min_max_mean"], list
-        globals.SAMPLE_POOL_METHOD = ["random"], list
-        globals.VALIDATION_SET_METHOD = ["random"], list
-
-        globals.KERNEL = "rbf-cyclic", str  # rbf or rbf-cyclic currently
-        globals.FEREBUS_TYPE = (
-            "executable",
-            str,
-        )  # executable (FEREBUS) or python (FEREBUS.py)
-        globals.FEREBUS_VERSION = (
-            "7.0",
-            Version,
-        )
-        globals.FEREBUS_LOCATION = "PROGRAMS/FEREBUS", str
-
-        # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
-        globals.GAUSSIAN_CORE_COUNT = 2, int
-        globals.AIMALL_CORE_COUNT = 2, int
-        globals.FEREBUS_CORE_COUNT = 4, int
-        globals.DLPOLY_CORE_COUNT = 1, int
-
-        # FEREBUS RUNTIME SETTINGS (PREFIX FEREBUS)
-        globals.FEREBUS_SWARM_SIZE = (
-            -1,
-            int,
-        )  # If negative >> Size dynamically allocated by FEREBUS
-        globals.FEREBUS_NUGGET = (
-            1.0e-10,
-            float,
-        )  # Default value for FEREBUS nugget
-        globals.FEREBUS_THETA_MIN = (
-            0.0,
-            float,
-        )  # Minimum theta value for initialisation (best to keep 0)
-        globals.FEREBUS_THETA_MAX = (
-            3.0,
-            float,
-        )  # Maximum theta value for initialisation
-
-        globals.MAX_NUGGET = 1e-4, float
-
-        globals.FEREBUS_COGNITIVE_LEARNING_RATE = 1.49400, float
-        globals.FEREBUS_INERTIA_WEIGHT = 0.72900, float
-        globals.FEREBUS_SOCIAL_LEARNING_RATE = 1.49400, float
-
-        globals.FEREBUS_MEAN = "constant", str
-        globals.FEREBUS_OPTIMISATION = "pso", str
-
-        globals.FEREBUS_TOLERANCE = 1.0e-8, float
-        globals.FEREBUS_STALL_ITERATIONS = 50, int
-        globals.FEREBUS_CONVERGENCE = 20, int
-        globals.FEREBUS_MAX_ITERATION = 1000, int
-
-        # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
-        globals.DLPOLY_NUMBER_OF_STEPS = (
-            500,
-            int,
-        )  # Number of steps to run simulation for
-        globals.DLPOLY_TEMPERATURE = (
-            0,
-            int,
-        )  # If set to 0, will perform geom opt but default to 10 K
-        globals.DLPOLY_PRINT_EVERY = (
-            1,
-            int,
-        )  # Print trajectory and stats every n steps
-        globals.DLPOLY_TIMESTEP = 0.001, float  # in ps
-        globals.DLPOLY_LOCATION = "PROGRAMS/DLPOLY.Z", str
-
-        globals.DLPOLY_CHECK_CONVERGENCE = False, bool
-        globals.DLPOLY_CONVERGENCE_CRITERIA = -1, int
-
-        globals.DLPOLY_MAX_ENERGY = -1.0, float
-        globals.DLPOLY_MAX_FORCE = -1.0, float
-        globals.DLPOLY_RMS_FORCE = -1.0, float
-        globals.DLPOLY_MAX_DISP = -1.0, float
-        globals.DLPOLY_RMS_DISP = -1.0, float
-
-        # CP2K SETTINGS
-        globals.CP2K_CORE_COUNT = 8
-        globals.CP2K_INPUT = "", str
-        globals.CP2K_TEMPERATURE = 300, int  # K
-        globals.CP2K_STEPS = 10000, int
-        globals.CP2K_TIMESTEP = 1.0, float  # fs
-        globals.CP2K_METHOD = "BLYP", str
-        globals.CP2K_BASIS_SET = "6-31G*", str
-        globals.CP2K_DATA_DIR = "", str
-
-        # Recovery and Integration Errors
-        globals.WARN_RECOVERY_ERROR = True, bool
-        globals.RECOVERY_ERROR_THRESHOLD = (
-            0.00038087983,
-            float,
-        )  # Ha (1.0 kJ/mol)
-
-        globals.WARN_INTEGRATION_ERROR = True, bool
-        globals.INTEGRATION_ERROR_THRESHOLD = 0.001, float  # Ha (1.0 kJ/mol)
-
-        # Activate Warnings when making models
-        globals.LOG_WARNINGS = False  # Gets set in _make_models
-
-        globals.MACHINE = "", str
-        globals.SGE = False, bool  # Don't Change
-        globals.SUBMITTED = False, bool  # Don't Change
-
-        globals.DISABLE_PROBLEMS = False, bool
-        globals.UID = Arguments.uid
-
-        globals.IQA_MODELS = False, bool
-
-        globals.INCLUDE_NODES = [], list
-        globals.EXCLUDE_NODES = [], list
-
-        # Set Hidden Variables
-        globals.FILE_STRUCTURE.hidden = True
-        globals.SGE.hidden = True
-        globals.SUBMITTED.hidden = True
-        globals.UID.hidden = True
-        globals.IQA_MODELS.hidden = True
-
-        # Set Allowed Values
-        globals.METHOD.allowed_values = Constants.GAUSSIAN_METHODS
-        globals.BOAQ.allowed_values = Constants.BOAQ_VALUES
-        globals.IASMESH.allowed_values = Constants.IASMESH_VALUES
-        globals.FEREBUS_TYPE.allowed_values = Constants.FEREBUS_TYPES
-        globals.OPTIMISE_PROPERTY.allowed_values = [
-            "iqa"
-        ] + Constants.multipole_names
-
-        # Set modifiers
-        for global_variable in globals.global_variables:
-            if globals.__dict__[global_variable].type == str:
-                globals.__dict__[global_variable].add_modifier(
-                    GlobalTools.cleanup_str
-                )
-        globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
-        globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
-        # globals.TRAINING_SET_METHOD.add_pre_modifier(GlobalTools.split_keywords)
-        # globals.SAMPLE_POOL_METHOD.add_pre_modifier(GlobalTools.split_keywords)
-        # globals.VALIDATION_SET_METHOD.add_pre_modifier(GlobalTools.split_keywords)
-        globals.ALF.add_pre_modifier(GlobalTools.read_alf)
-        globals.FEREBUS_VERSION.add_modifier(GlobalTools.read_version)
-        globals.OPTIMISE_PROPERTY.add_pre_modifier(GlobalTools.to_lower)
-        globals.INCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
-        globals.EXCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
-
         globals.init()
-
         GLOBALS = globals
         return globals
 
@@ -2052,70 +2012,70 @@ class Globals:
         config = ConfigProvider(source=Arguments.config_file)
 
         for key, val in config.items():
-            self.set(key, val)
-            if key in self.__dict__.keys():
-                self.__dict__[key].in_config = True
+            if key in self.global_variables:
+                self.set(key, val)
+                self._in_config += [key]
             else:
                 ProblemFinder.unknown_settings += [key]
 
         if not self.ALF:
-            alf_reference_file = self.ALF_REFERENCE_FILE.value
-            if not alf_reference_file:
-                alf_reference_file = FileTools.get_first_gjf(
+            if self.ALF_REFERENCE_FILE:
+                if not os.path.exists(self.ALF_REFERENCE_FILE):
+                    logger.warning(f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative")
+                    self.ALF_REFERENCE_FILE = None
+
+            if not self.ALF_REFERENCE_FILE:
+                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
                     self.FILE_STRUCTURE["training_set"]
                 )
 
-            if not alf_reference_file:
+            if not self.ALF_REFERENCE_FILE:
                 logger.warning("Cannot Find Training Set GJF")
-                alf_reference_file = FileTools.get_first_gjf(
+                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
                     self.FILE_STRUCTURE["sample_pool"]
                 )
 
-            if not alf_reference_file:
+            if not self.ALF_REFERENCE_FILE:
                 logger.warning("Cannot Find Sample Pool GJF")
-                alf_reference_file = FileTools.get_first_gjf(
+                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
                     self.FILE_STRUCTURE["validation_set"]
                 )
 
-            if not alf_reference_file:
-                logger.warning("Cannot Find Validation Set GJF")
-                logger.error("No ALF_REFERENCE_FILE Defined")
-
-            if alf_reference_file:
-                self.ALF_REFERENCE_FILE = alf_reference_file
+            if self.ALF_REFERENCE_FILE:
                 try:
                     GJF(
                         str(self.ALF_REFERENCE_FILE)
                     ).read().atoms.calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
-                    logger.error("Error When Calculating ALF")
-                    print(
-                        "\nError in ALF calculation, please specify file to calculate ALF"
-                    )
+                    logger.error(f"Error When Calculating ALF from {self.ALF_REFERENCE_FILE}")
             else:
                 xyz_files = FileTools.get_files_in(".", "*.xyz")
                 if len(xyz_files) == 1:
                     traj = Trajectory(xyz_files[0]).read(n=1)
                     traj[0].calculate_alf()
                     self.ALF = Atoms.ALF
-            Atoms.ALF = self.ALF
-        else:
-            Atoms.ALF = self.ALF
 
     def set(self, name, value):
         name = name.upper()
         if name not in self.global_variables:
             ProblemFinder.unknown_settings.append(name)
+        elif name in self._protected:
+            ProblemFinder.protected_settings.append(name)
         else:
-            setattr(self, name, value)
+            try:
+                setattr(self, name, value)
+            except ValueError as e:
+                ProblemFinder.incorrect_settings[name] = e
 
-    def items(self, show_hidden=False):
+    def get(self, name):
+        return getattr(self, name, None)
+
+    def items(self, show_protected=False):
         items = []
         for global_variable in self.global_variables:
-            var = self.__dict__[global_variable]
-            if not var.hidden or show_hidden:
-                items += [var]
+            if not global_variable in self._protected or show_protected:
+                items += [(global_variable, getattr(self, global_variable))]
         return items
 
     def save_to_properties_config(self, config_file, global_variables):
@@ -2135,9 +2095,9 @@ class Globals:
 
     def save_to_config(self, config_file=Arguments.config_file):
         global_variables = {}
-        for global_variable in self.items():
-            if global_variable.changed or global_variable.in_config:
-                global_variables[global_variable.name] = global_variable.value
+        for global_variable, global_value in self.items():
+            if global_value != self._defaults[global_variable]  or global_variable in self._in_config:
+                global_variables[global_variable] = global_value
 
         if config_file.endswith(".properties"):
             self.save_to_properties_config(config_file, global_variables)
@@ -2146,44 +2106,33 @@ class Globals:
 
     @property
     def config_variables(self):
-        config_variables = []
-        for key, val in self.__dict__.items():
-            if isinstance(val, GlobalVariable) and not val.hidden:
-                config_variables += [key]
-        return config_variables
+        return [g for g in self.global_variables if g in self._in_config.keys()]
 
     @property
     def global_variables(self):
-        global_variables = []
-        for key, val in self.__dict__.items():
-            if isinstance(val, GlobalVariable):
-                global_variables += [key]
-        return global_variables
+        from optparse import OptionParser
+        try:
+            return self._global_variables
+        except AttributeError:
+            methods = [f[0] for f in inspect.getmembers(Globals, predicate=inspect.isfunction)]
+            properties = [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property))]
+            methods += properties
+            self._global_variables = [key for key in dir(self) if not key.startswith("_") and not key in methods]
+            return self._global_variables
 
     def __setattr__(self, name, value):
-        if name in self.global_variables:
-            self.__dict__[name].value = value
-        else:
-            if type(value) in [list, tuple] and type(value[-1]) in [
-                type,
-                *Globals.types,
-            ]:
-                if len(value) > 2:
-                    self.__dict__[name] = GlobalVariable(
-                        name, value[:-1], value[-1]
-                    )
-                else:
-                    self.__dict__[name] = GlobalVariable(
-                        name, value[0], value[-1]
-                    )
-            else:
-                self.__dict__[name] = GlobalVariable(name, value, type(value))
+        if hasattr(self, "_global_variables") and name in self.global_variables:
+            for parser in self._parsers.get(name, []):
+                value = parser(value)
+            for formatter in self._formatters.get(name, []):
+                value = formatter(value)
+            for check in self._checkers.get(name, []):
+                check(value) # Should raise error if incorrect
 
-    def __getattr__(self, attr):
-        if attr in self.global_variables:
-            return self.__dict__[attr].value
-        else:
-            return self.__dict__[attr]
+            if name == "ALF":
+                Atoms.ALF = value # Make sure Atoms.ALF and GLOBALS.ALF are synced
+
+        super(Globals, self).__setattr__(name, value)
 
 
 class Colors:
@@ -2586,33 +2535,6 @@ class ConfigProvider(dict):
                 f.write("%s=%s\n" % (key, self[key]))
 
 
-class Node:
-    def __init__(self, name, parent):
-        self.name = name
-        self.parent = parent
-
-    def __str__(self):
-        if self.parent is None:
-            return self.name
-        return str(self.parent) + os.sep + self.name
-
-    def __repr__(self):
-        return str(self)
-
-
-class Tree:
-    def __init__(self):
-        self._dict = {}
-
-    def add(self, name, id, parent=None):
-        if parent is not None:
-            parent = self[parent]
-        self._dict[id] = Node(name, parent)
-
-    def __getitem__(self, id):
-        return str(self._dict[id])
-
-
 class Daemon:
     """
     A generic daemon class.
@@ -3006,13 +2928,18 @@ class FileTools:
 
     @staticmethod
     def get_first_gjf(directory):
-        for f in FileTools.get_files_in(directory, "*"):
-            if f.endswith(".gjf"):
-                return f
-            elif os.path.isdir(f):
-                f = FileTools.get_first_gjf(f)
-                if f is not None:
-                    return f
+        print(directory)
+        s = Set(directory)
+        for p in s:
+            if p.gjf.exists():
+                return p.gjf.path
+        # for f in FileTools.get_files_in(directory, "*"):
+        #     if f.endswith(".gjf"):
+        #         return f
+        #     elif os.path.isdir(f):
+        #         f = FileTools.get_first_gjf(f)
+        #         if f is not None:
+        #             return f
         return None
 
     @staticmethod
@@ -3446,6 +3373,8 @@ class Problem:
 
 class ProblemFinder:
     unknown_settings = []
+    protected_settings = []
+    incorrect_settings = {}
 
     def __init__(self):
         self.problems = []
@@ -3498,6 +3427,24 @@ class ProblemFinder:
                 )
             )
 
+        for setting in ProblemFinder.protected_settings:
+            self.add(
+                Problem(
+                    name=f"Tried to modify protected setting in config",
+                    problem=f"Protected setting: {setting}",
+                    solution="This setting cannot be modified in config, remove from config",
+                )
+            )
+    
+        for setting, error in ProblemFinder.incorrect_settings.items():
+            self.add(
+                Problem(
+                    name=f"Setting variable ({setting}) to incorrect value",
+                    problem=f"{error}",
+                    solution="Consult documentation to check allowed values",
+                )
+            )
+
     def add(self, problem):
         self.problems.append(problem)
 
@@ -3518,24 +3465,6 @@ class ProblemFinder:
 
     def __repr__(self):
         return str(self)
-
-
-class DictList(dict):
-    # wrapper around common pattern
-    # x = {}
-    # x[k] = []
-    # x[k] += [v]
-    # replaced by
-    # x = DictList()
-    # x[k] += [v]
-    def __init__(self, list_type=list):
-        self.list_type = list_type
-        self._dict = {}
-
-    def __getitem__(self, key):
-        if key not in self.keys():
-            self.__dict__[key] = self.list_type()
-        return self.__dict__[key]
 
 
 # ========================#
@@ -12579,31 +12508,31 @@ class SetupTools:
 
 class SettingsTools:
     edit_var = None
-    show_hidden = False
+    show_protected = False
 
     @staticmethod
     def set_default():
         GLOBALS.set(
-            SettingsTools.edit_var.name, SettingsTools.edit_var.default
+            SettingsTools.edit_var, GLOBALS._defaults[SettingsTools.edit_var]
         )
 
     @staticmethod
     def set_value(value):
-        SettingsTools.edit_var.value = value
+        GLOBALS.set(edit_var, value)
 
     @staticmethod
     def edit_value():
-        print(f"Edit {SettingsTools.edit_var.name}")
+        print(f"Edit {SettingsTools.edit_var}")
         while True:
             new_value = UsefulTools.input_with_prefill(
-                ">> ", SettingsTools.edit_var.value
+                ">> ", GLOBALS.get(SettingsTools.edit_var)
             )
             try:
-                SettingsTools.edit_var.value = new_value
+                GLOBALS.set(SettingsTools.edit_var, new_value)
                 break
             except:
                 print(
-                    f"Value Error: Must be of type {SettingsTools.edit_var.type.__name__}"
+                    f"Value Error: Must be of type {GLOBALS.__annotations__[SettingsTools.edit_var].__name__}"
                 )
 
     @staticmethod
@@ -12613,7 +12542,7 @@ class SettingsTools:
             auto_close=True,
         )
         for i, allowed_value in enumerate(
-            SettingsTools.edit_var.allowed_values
+            Globals._allowed_values[SettingsTools.edit_var]
         ):
             choose_menu.add_option(
                 str(i + 1),
@@ -12627,18 +12556,18 @@ class SettingsTools:
     @staticmethod
     def refresh_setting_menu(menu):
         menu.clear_options()
-        menu.add_message(f"Value:   {SettingsTools.edit_var.value}")
+        menu.add_message(f"Value:   {GLOBALS.get(SettingsTools.edit_var)}")
         menu.add_space()
-        menu.add_message(f"Type:    {SettingsTools.edit_var.type.__name__}")
-        menu.add_message(f"Default: {SettingsTools.edit_var.default}")
+        menu.add_message(f"Type:    {GLOBALS.__annotations__[SettingsTools.edit_var].__name__}")
+        menu.add_message(f"Default: {GLOBALS._defaults[SettingsTools.edit_var]}")
         menu.add_space()
-        # menu.add_message(f"Hidden:  {SettingsTools.edit_var.hidden}")
-        # menu.add_message(f"Changed: {SettingsTools.edit_var.changed}")
+        menu.add_message(f"Protected:  {SettingsTools.edit_var in Globals._protected}")
+        menu.add_message(f"Changed: {SettingsTools.edit_var != Globals._defaults[SettingsTools.edit_var]}")
         menu.add_option("e", "Edit value of setting", SettingsTools.edit_value)
         menu.add_option(
             "d", "Revert to default value", SettingsTools.set_default
         )
-        if SettingsTools.edit_var.allowed_values:
+        if SettingsTools.edit_var in Globals._allowed_values.keys():
             menu.add_option(
                 "c", "Choose from allowed values", SettingsTools.choose_value
             )
@@ -12664,29 +12593,28 @@ class SettingsTools:
                 print("Known filetypes: {filetypes}")
 
     @staticmethod
-    def toggle_hidden():
-        SettingsTools.show_hidden = not SettingsTools.show_hidden
+    def toggle_protected():
+        SettingsTools.show_protected = not SettingsTools.show_protected
 
     @staticmethod
     def refresh_settings_menu(menu):
         menu.clear_options()
-        global_variables = GLOBALS.items(show_hidden=SettingsTools.show_hidden)
-        for global_var in global_variables:
-            if not global_var.hidden:
-                global_var_value = "= " + str(global_var.value)
+        for global_var, value in GLOBALS.items(show_protected=SettingsTools.show_protected):
+            if not global_var in GLOBALS._protected:
+                global_var_value = "= " + str(value)
                 menu.add_option(
-                    global_var.name,
+                    global_var,
                     global_var_value,
                     SettingsTools.change,
                     kwargs={"var": global_var},
                 )
         menu.add_space()
-        if SettingsTools.show_hidden:
-            for global_var in global_variables:
-                if global_var.hidden:
-                    global_var_value = str(global_var.value)
+        if SettingsTools.show_protected:
+            for global_var, value in GLOBALS.items(show_protected=SettingsTools.show_protected):
+                if global_var in GLOBALS._protected:
+                    global_var_value = str(value)
                     menu.add_message(
-                        global_var.name + " = " + global_var_value
+                        global_var + " = " + global_var_value
                     )
             menu.add_space()
 
@@ -12697,14 +12625,14 @@ class SettingsTools:
         )
         menu.add_option("c", "Change config file", SettingsTools.change_config)
         menu.add_option(
-            "h", "Show/Hide Hidden Variables", SettingsTools.toggle_hidden
+            "p", "Show/Hide Hidden Variables", SettingsTools.toggle_protected
         )
         menu.add_final_options()
 
     @staticmethod
     def change(var):
         SettingsTools.edit_var = var
-        setting_menu = Menu(title=f"Edit {var.name}", auto_close=True)
+        setting_menu = Menu(title=f"Edit {var}", auto_close=True)
         setting_menu.set_refresh(SettingsTools.refresh_setting_menu)
         setting_menu.run()
 
