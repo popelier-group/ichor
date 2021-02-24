@@ -135,7 +135,7 @@ SSH_SETTINGS = {
 # Code below vendored from portalocker: https://github.com/WoLpH/portalocker/ #
 ###############################################################################
 
-if os.name == 'nt':  # pragma: no cover
+if os.name == "nt":  # pragma: no cover
     import msvcrt
 
     LOCK_EX = 0x1  #: exclusive lock
@@ -143,7 +143,7 @@ if os.name == 'nt':  # pragma: no cover
     LOCK_NB = 0x4  #: non-blocking
     LOCK_UN = msvcrt.LK_UNLCK  #: unlock
 
-elif os.name == 'posix':  # pragma: no cover
+elif os.name == "posix":  # pragma: no cover
     import fcntl
 
     LOCK_EX = fcntl.LOCK_EX  #: exclusive lock
@@ -152,7 +152,7 @@ elif os.name == 'posix':  # pragma: no cover
     LOCK_UN = fcntl.LOCK_UN  #: unlock
 
 else:  # pragma: no cover
-    raise RuntimeError('PortaLocker only defined for nt and posix platforms')
+    raise RuntimeError("PortaLocker only defined for nt and posix platforms")
 
 
 class LockFlags(enum.IntFlag):
@@ -161,7 +161,9 @@ class LockFlags(enum.IntFlag):
     NON_BLOCKING = LOCK_NB  #: non-blocking
     UNBLOCK = LOCK_UN  #: unlock
 
+
 LOCK_EX = LockFlags.EXCLUSIVE
+
 
 class BaseLockException(Exception):
     # Error codes:
@@ -183,12 +185,13 @@ class AlreadyLocked(BaseLockException):
 class FileToLarge(BaseLockException):
     pass
 
+
 # TODO: Include windows locking from:
 # https://github.com/WoLpH/portalocker/blob/develop/portalocker/portalocker.py
 def lock(file_, flags):
-    locking_exceptions = IOError,
+    locking_exceptions = (IOError,)
     try:  # pragma: no cover
-        locking_exceptions += BlockingIOError,  # type: ignore
+        locking_exceptions += (BlockingIOError,)  # type: ignore
     except NameError:  # pragma: no cover
         pass
 
@@ -199,8 +202,10 @@ def lock(file_, flags):
         # every IO error
         raise LockException(exc_value, fh=file_)
 
+
 def unlock(file_):
     fcntl.flock(file_.fileno(), LockFlags.UNBLOCK)
+
 
 ###############################################################################
 
@@ -208,6 +213,7 @@ def unlock(file_):
 # Code below vendored from concurrent-log-handler:          #
 # https://github.com/Preston-Landers/concurrent-log-handler #
 #############################################################
+
 
 def setup_logging_queues():
     if sys.version_info.major < 3:
@@ -222,7 +228,8 @@ def setup_logging_queues():
 
             queue_handler = QueueHandler(log_queue)
             queue_listener = QueueListener(
-                log_queue, respect_handler_level=True)
+                log_queue, respect_handler_level=True
+            )
 
             queuify_logger(logger, queue_handler, queue_listener)
             queue_listeners.append(queue_listener)
@@ -233,6 +240,7 @@ def setup_logging_queues():
     atexit.register(stop_queue_listeners, *queue_listeners)
     return
 
+
 def stop_queue_listeners(*listeners):
     for listener in listeners:
         try:
@@ -240,25 +248,32 @@ def stop_queue_listeners(*listeners):
         except:
             pass
 
+
 def get_all_logger_names(include_root=False):
     rv = list(logging.Logger.manager.loggerDict.keys())
     if include_root:
-        rv.insert(0, '')
+        rv.insert(0, "")
     return rv
+
 
 def queuify_logger(logger, queue_handler, queue_listener):
     if isinstance(logger, str):
         logger = logging.getLogger(logger)
 
-    handlers = [handler for handler in logger.handlers
-                if handler not in queue_listener.handlers]
+    handlers = [
+        handler
+        for handler in logger.handlers
+        if handler not in queue_listener.handlers
+    ]
 
     if handlers:
-        queue_listener.handlers = \
-            tuple(list(queue_listener.handlers) + handlers)
+        queue_listener.handlers = tuple(
+            list(queue_listener.handlers) + handlers
+        )
 
     del logger.handlers[:]
     logger.addHandler(queue_handler)
+
 
 try:
     import gzip
@@ -277,20 +292,34 @@ try:
 except ImportError:
     import random
 
-    if hasattr(random, "SystemRandom"):  # May not be present in all Python editions
+    if hasattr(
+        random, "SystemRandom"
+    ):  # May not be present in all Python editions
         # Should be safe to reuse `SystemRandom` - not software state dependant
         randbits = random.SystemRandom().getrandbits
     else:
+
         def randbits(nb):
             return random.Random().getrandbits(nb)
 
 
 class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     def __init__(
-            self, filename, mode='a', maxBytes=0, backupCount=0,
-            encoding=None, debug=False, delay=None, use_gzip=False,
-            owner=None, chmod=None, umask=None, newline=None, terminator="\n",
-            unicode_error_policy='ignore',
+        self,
+        filename,
+        mode="a",
+        maxBytes=0,
+        backupCount=0,
+        encoding=None,
+        debug=False,
+        delay=None,
+        use_gzip=False,
+        owner=None,
+        chmod=None,
+        umask=None,
+        newline=None,
+        terminator="\n",
+        unicode_error_policy="ignore",
     ):
         self.stream = None
         self.stream_lock = None
@@ -309,25 +338,28 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         self.use_gzip = True if gzip and use_gzip else False
         self.gzip_buffer = 8096
 
-        if unicode_error_policy not in ('ignore', 'replace', 'strict'):
-            unicode_error_policy = 'ignore'
+        if unicode_error_policy not in ("ignore", "replace", "strict"):
+            unicode_error_policy = "ignore"
             warnings.warn(
                 "Invalid unicode_error_policy for concurrent_log_handler: "
                 "must be ignore, replace, or strict. Defaulting to ignore.",
-                UserWarning)
+                UserWarning,
+            )
         self.unicode_error_policy = unicode_error_policy
 
         if delay not in (None, True):
             warnings.warn(
-                'parameter delay is now ignored and implied as True, '
-                'please remove from your config.',
-                DeprecationWarning)
+                "parameter delay is now ignored and implied as True, "
+                "please remove from your config.",
+                DeprecationWarning,
+            )
 
         # Construct the handler with the given arguments in "delayed" mode
         # because we will handle opening the file as needed. File name
         # handling is done by FileHandler since Python 2.5.
         super(ConcurrentRotatingFileHandler, self).__init__(
-            filename, mode, encoding=encoding, delay=True)
+            filename, mode, encoding=encoding, delay=True
+        )
 
         self.terminator = terminator or "\n"
 
@@ -361,7 +393,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             return
         lock_file = self.lockFilename
         self._console_log(
-            "concurrent-log-handler %s opening %s" % (hash(self), lock_file), stack=False)
+            "concurrent-log-handler %s opening %s" % (hash(self), lock_file),
+            stack=False,
+        )
 
         with self._alter_umask():
             self.stream_lock = open(lock_file, "wb", buffering=0)
@@ -386,7 +420,11 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         with self._alter_umask():
             # noinspection PyArgumentList
             stream = io.open(
-                self.baseFilename, mode=mode, encoding=self.encoding, newline=self.newline)
+                self.baseFilename,
+                mode=mode,
+                encoding=self.encoding,
+                newline=self.newline,
+            )
 
         self._do_chown_and_chmod(self.baseFilename)
 
@@ -421,9 +459,10 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if not self._debug:
             return
         import threading
+
         tid = threading.current_thread().name
         pid = os.getpid()
-        stack_str = ''
+        stack_str = ""
         if stack:
             stack_str = ":\n" + "".join(traceback.format_stack())
         asctime = time.asctime()
@@ -440,7 +479,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                     if self.shouldRollover(record):
                         self.doRollover()
                 except Exception as e:
-                    self._console_log("Unable to do rollover: %s" % (e,), stack=True)
+                    self._console_log(
+                        "Unable to do rollover: %s" % (e,), stack=True
+                    )
                     # Continue on anyway
 
                 self.do_write(msg)
@@ -466,7 +507,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             # Try to emit in a form acceptable to the output encoding
             # The unicode_error_policy determines whether this is lossy.
             try:
-                encoding = getattr(stream, 'encoding', self.encoding or 'us-ascii')
+                encoding = getattr(
+                    stream, "encoding", self.encoding or "us-ascii"
+                )
                 msg_bin = msg.encode(encoding, self.unicode_error_policy)
                 msg = msg_bin.decode(encoding, self.unicode_error_policy)
                 stream.write(msg)
@@ -480,7 +523,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
 
     def _do_lock(self):
         if self.is_locked:
-            return   # already locked... recursive?
+            return  # already locked... recursive?
         self._open_lockfile()
         if self.stream_lock:
             for i in range(10):
@@ -538,15 +581,19 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         except (IOError, OSError):
             exc_value = sys.exc_info()[1]
             self._console_log(
-                "rename failed.  File in use? exception=%s" % (exc_value,), stack=True)
+                "rename failed.  File in use? exception=%s" % (exc_value,),
+                stack=True,
+            )
             return
 
-        gzip_ext = ''
+        gzip_ext = ""
         if self.use_gzip:
-            gzip_ext = '.gz'
+            gzip_ext = ".gz"
 
         def do_rename(source_fn, dest_fn):
-            self._console_log("Rename %s -> %s" % (source_fn, dest_fn + gzip_ext))
+            self._console_log(
+                "Rename %s -> %s" % (source_fn, dest_fn + gzip_ext)
+            )
             if os.path.exists(dest_fn):
                 os.remove(dest_fn)
             if os.path.exists(dest_fn + gzip_ext):
@@ -579,7 +626,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if self.maxBytes > 0:  # are we rolling over?
             self.stream = self.do_open()
             try:
-                self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
+                self.stream.seek(
+                    0, 2
+                )  # due to non-posix-compliant Windows feature
                 if self.stream.tell() >= self.maxBytes:
                     return True
             finally:
@@ -611,7 +660,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if self.chmod and os.chmod:
             os.chmod(filename, self.chmod)
 
+
 import logging.handlers
+
 logging.handlers.ConcurrentRotatingFileHandler = ConcurrentRotatingFileHandler
 #############################################################
 
@@ -624,7 +675,9 @@ def setup_logger(
         "%(asctime)s - %(levelname)s - %(message)s", "%d-%m-%Y %H:%M:%S"
     ),
 ):
-    handler = logging.handlers.ConcurrentRotatingFileHandler(log_file) # <= Has broken ICHOR before when submitted, use with caution
+    handler = logging.handlers.ConcurrentRotatingFileHandler(
+        log_file
+    )  # <= Has broken ICHOR before when submitted, use with caution
     # handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
 
@@ -1111,7 +1164,9 @@ class Constants:
     ]
 
     # ha_to_kj_mol = 2625.5
-    ha_to_kj_mol = 2625.4996394799 # Taken from https://en.wikipedia.org/wiki/Hartree
+    ha_to_kj_mol = (
+        2625.4996394799  # Taken from https://en.wikipedia.org/wiki/Hartree
+    )
     # The wikipedia article is converted from https://physics.nist.gov/cgi-bin/cuu/Value?hr
 
     # Precomputed Roots from fflux_initialisation.f90
@@ -1465,16 +1520,20 @@ class UsefulTools:
             task_id = int(os.environ["SGE_TASK_ID"])
         task_last = 1
         if "SGE_TASK_LAST" in os.environ.keys():
-            try: task_last = int(os.environ["SGE_TASK_LAST"])
-            except: pass # In case SGE_TASK_LAST is undefined
+            try:
+                task_last = int(os.environ["SGE_TASK_LAST"])
+            except:
+                pass  # In case SGE_TASK_LAST is undefined
         if task_last < ntasks and task_id + task_last <= ntasks:
             logger.info(f"Running Task {task_id} as {task_id+task_last}")
             task_id += task_last
-            logger.info(f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}")
+            logger.info(
+                f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}"
+            )
             print(f"export SGE_TASK_ID={task_id}")
         else:
             print("export ICHOR_TASK_COMPLETED=true")
-    
+
     @staticmethod
     def completed_checker(func):
         @UsefulTools.external_function(func.__name__)
@@ -1483,7 +1542,8 @@ class UsefulTools:
                 # If there are no arguments passed to the function then there is no task to check
                 UsefulTools.print_completed()
             else:
-                func(*args, **kwargs) 
+                func(*args, **kwargs)
+
         return wrapper
 
 
@@ -1821,7 +1881,10 @@ class Globals:
         globals.VALIDATION_SET_METHOD = ["random"], list
 
         globals.KERNEL = "rbf-cyclic", str  # rbf or rbf-cyclic currently
-        globals.FEREBUS_TYPE = "executable", str # executable (FEREBUS) or python (FEREBUS.py)
+        globals.FEREBUS_TYPE = (
+            "executable",
+            str,
+        )  # executable (FEREBUS) or python (FEREBUS.py)
         globals.FEREBUS_VERSION = (
             "7.0",
             Version,
@@ -2060,7 +2123,8 @@ class Globals:
             logo = UsefulTools.ichor_logo()
             config.write(f"{logo}\n\n")
             for key, val in global_variables.items():
-                if str(val) in ["[]", "None"]: continue
+                if str(val) in ["[]", "None"]:
+                    continue
                 config.write(f"{key}={val}\n")
 
     def save_to_yaml_config(self, config_file, global_variables):
@@ -2811,15 +2875,9 @@ class FileTools:
         )
 
         tree.add("ATOMS", "atoms_daemon", parent="adaptive_sampling")
-        tree.add(
-            "atoms.pid", "atoms_pid", parent="atoms_daemon"
-        )
-        tree.add(
-            "atoms.out", "atoms_stdout", parent="atoms_daemon"
-        )
-        tree.add(
-            "atoms.err", "atoms_stderr", parent="atoms_daemon"
-        )
+        tree.add("atoms.pid", "atoms_pid", parent="atoms_daemon")
+        tree.add("atoms.out", "atoms_stdout", parent="atoms_daemon")
+        tree.add("atoms.err", "atoms_stderr", parent="atoms_daemon")
 
         tree.add("FILES_REMOVED", "file_remover_daemon", parent="data")
         tree.add(
@@ -3341,7 +3399,7 @@ class FerebusTools:
             ftoml.write(f'optimiser = "{GLOBALS.FEREBUS_OPTIMISATION}"\n')
             ftoml.write(f'kernel = "k1"\n')
             if GLOBALS.STANDARDISE:
-                ftoml.write(f'standardise = true\n')
+                ftoml.write(f"standardise = true\n")
             ftoml.write("\n")
             ftoml.write("[optimiser]\n")
             ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
@@ -3361,10 +3419,12 @@ class FerebusTools:
             ftoml.write("\n")
             ftoml.write(f"[optimiser.pso.relative_change]\n")
             ftoml.write(f"tolerance={GLOBALS.FEREBUS_TOLERANCE}\n")
-            ftoml.write(f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n")
+            ftoml.write(
+                f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n"
+            )
             ftoml.write("\n")
             ftoml.write("[kernels.k1]\n")
-            ftoml.write(f"type = \"{GLOBALS.KERNEL}\"\n")
+            ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
 
 
 class Problem:
@@ -3607,7 +3667,9 @@ class TimingManager:
 
 
 class CheckManager:
-    def __init__(self, check_function="default_check", check_args=[], ntimes=None):
+    def __init__(
+        self, check_function="default_check", check_args=[], ntimes=None
+    ):
         self.check_function = check_function
         self.check_args = check_args
         self.ntimes = ntimes
@@ -3615,28 +3677,28 @@ class CheckManager:
     def check(self, runcmd):
         new_runcmd = ""
         if self.ntimes:
-            new_runcmd += 'ICHOR_N_TRIES=0\n'
-        new_runcmd += 'export ICHOR_TASK_COMPLETED=false\n'
+            new_runcmd += "ICHOR_N_TRIES=0\n"
+        new_runcmd += "export ICHOR_TASK_COMPLETED=false\n"
         new_runcmd += 'while [ "$ICHOR_TASK_COMPLETED" == false ]\n'
-        new_runcmd += 'do\n'
-        new_runcmd += '\n'
+        new_runcmd += "do\n"
+        new_runcmd += "\n"
 
         new_runcmd += runcmd
-        
-        new_runcmd += '\n'
+
+        new_runcmd += "\n"
         if self.ntimes:
-            new_runcmd += 'let ICHOR_N_TRIES++\n'
+            new_runcmd += "let ICHOR_N_TRIES++\n"
             new_runcmd += f'if [ "$ICHOR_N_TRIES" == {self.ntimes} ]\n'
-            new_runcmd += 'then\n'
-            new_runcmd += 'break\n'
-            new_runcmd += 'fi\n'
+            new_runcmd += "then\n"
+            new_runcmd += "break\n"
+            new_runcmd += "fi\n"
         python_job = PythonCommand()
         if self.check_args:
             python_job.run_func(self.check_function, self.check_args)
         else:
             python_job.run_func(self.check_function)
-        new_runcmd += f'eval $({repr(python_job)})\n'
-        new_runcmd += 'done\n'
+        new_runcmd += f"eval $({repr(python_job)})\n"
+        new_runcmd += "done\n"
         return new_runcmd
 
 
@@ -3819,7 +3881,10 @@ class GaussianCommand(CommandLine):
 
         runcmd = f"{self.command} {infile} {outfile}\n"
 
-        cm = CheckManager(check_function="check_gaussian_output", check_args=self.get_variable(0))
+        cm = CheckManager(
+            check_function="check_gaussian_output",
+            check_args=self.get_variable(0),
+        )
         runcmd = cm.check(runcmd)
 
         return datafile + "\n" + runcmd
@@ -3889,7 +3954,10 @@ class AIMAllCommand(CommandLine):
         runcmd = [self.command, *self.arguments, infile, "&>", outfile]
         runcmd = " ".join(runcmd) + "\n"
 
-        cm = CheckManager(check_function="check_aimall_output", check_args=self.get_variable(0))
+        cm = CheckManager(
+            check_function="check_aimall_output",
+            check_args=self.get_variable(0),
+        )
         runcmd = cm.check(runcmd)
 
         return datafile + "\n" + runcmd
@@ -4029,9 +4097,7 @@ class CP2KCommand(CommandLine):
         self.modules["ffluxlab"] = [
             "apps/cp2k/6.1.0",
         ]
-        self.modules["csf3"] = [
-            "apps/binapps/cp2k/6.1.0"
-        ]
+        self.modules["csf3"] = ["apps/binapps/cp2k/6.1.0"]
 
     @property
     def ndata(self):
@@ -4045,15 +4111,18 @@ class CP2KCommand(CommandLine):
         datafile = self.setup_data_file(self.datafile, self.infiles)
         infile = self.get_variable(0)
 
-
         cmd = self.command + f" -i {infile}"
-        runcmd = [f"cp2kdir=$(dirname \"{infile}\")", f"pushd $cp2kdir", cmd, "popd"]
+        runcmd = [
+            f'cp2kdir=$(dirname "{infile}")',
+            f"pushd $cp2kdir",
+            cmd,
+            "popd",
+        ]
         runcmd = "\n".join(runcmd)
         return datafile + "\n" + runcmd
 
     def __len__(self):
         return len(self.infiles)
-
 
 
 class SubmissionScript:
@@ -4355,7 +4424,6 @@ class SubmissionTools:
         if submit:
             jid = submission_script.submit(hold=hold)
         return submission_script.fname, jid
-
 
 
 class BatchTools:
@@ -5161,7 +5229,8 @@ class AtomTools:
                     for _, atom_directory in atom_directories:
                         progressbar.set_description(atom_directory)
                         dst = os.path.join(
-                            atom_directory, GLOBALS.FILE_STRUCTURE["training_set"],
+                            atom_directory,
+                            GLOBALS.FILE_STRUCTURE["training_set"],
                         )
                         FileTools.copytree(
                             GLOBALS.FILE_STRUCTURE["training_set"], dst
@@ -5174,7 +5243,8 @@ class AtomTools:
                     for _, atom_directory in atom_directories:
                         progressbar.set_description(atom_directory)
                         dst = os.path.join(
-                            atom_directory, GLOBALS.FILE_STRUCTURE["sample_pool"],
+                            atom_directory,
+                            GLOBALS.FILE_STRUCTURE["sample_pool"],
                         )
                         FileTools.copytree(
                             GLOBALS.FILE_STRUCTURE["sample_pool"], dst
@@ -5941,7 +6011,7 @@ class Directory(Point):
             [
                 not self.gjf or self.gjf.use,
                 not self.wfn or self.wfn.use,
-                not self.ints or self.ints.use
+                not self.ints or self.ints.use,
             ]
         )
 
@@ -6168,7 +6238,7 @@ class WFN(Point):
 
         self.energy = 0
         self.virial = 0
-    
+
         super().__init__()
 
     @property
@@ -8751,7 +8821,9 @@ def RBFCyclicStandardised_k(l, xstd, xi, xj):
     diff = xi - xj
     # Had to do list comprehension workaround to get numba to compile
     mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-    diff[mask] = (diff[mask] + np.pi/xstd[mask]) % (2 * np.pi/xstd[mask]) - np.pi/xstd[mask]
+    diff[mask] = (diff[mask] + np.pi / xstd[mask]) % (
+        2 * np.pi / xstd[mask]
+    ) - np.pi / xstd[mask]
     return np.exp(-np.sum(l * diff * diff))
 
 
@@ -8789,19 +8861,31 @@ class RBFCyclic(Kernel):
         if self.xstd is None:
             return RBFCyclic_k(self.lengthscale, np.array(xi), np.array(xj))
         else:
-            return RBFCyclicStandardised_k(self.lengthscale, np.array(self.xstd), np.array(xi), np.array(xj))
+            return RBFCyclicStandardised_k(
+                self.lengthscale,
+                np.array(self.xstd),
+                np.array(xi),
+                np.array(xj),
+            )
 
     def r(self, xi, x):
         if self.xstd is None:
             return RBFCyclic_r(self.lengthscale, np.array(xi), np.array(x))
         else:
-            return RBFCyclicStandardised_r(self.lengthscale, np.array(self.xstd), np.array(xi), np.array(x))
+            return RBFCyclicStandardised_r(
+                self.lengthscale,
+                np.array(self.xstd),
+                np.array(xi),
+                np.array(x),
+            )
 
     def R(self, x):
         if self.xstd is None:
             return RBFCyclic_R(self.lengthscale, np.array(x))
         else:
-            return RBFCyclicStandardised_R(self.lengthscale, np.array(self.xstd), np.array(x))
+            return RBFCyclicStandardised_R(
+                self.lengthscale, np.array(self.xstd), np.array(x)
+            )
 
 
 class Constant(Kernel):
@@ -8832,7 +8916,7 @@ def cyclic_cdist(xa, xb):
             diff = xa[i] - xb[j]
             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
             diff[mask] = (diff[mask] + np.pi) % (2 * np.pi) - np.pi
-            result[i, j] = np.sqrt(np.sum(diff*diff))
+            result[i, j] = np.sqrt(np.sum(diff * diff))
     return result
 
 
@@ -8845,8 +8929,10 @@ def standardised_cyclic_cdist(xa, xb, xstd):
         for j in range(xn):
             diff = xa[i] - xb[j]
             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-            diff[mask] = (diff[mask] + np.pi/xstd[mask]) % (2 * np.pi/xstd[mask]) - np.pi/xstd[mask]
-            result[i, j] = np.sqrt(sum(diff*diff))
+            diff[mask] = (diff[mask] + np.pi / xstd[mask]) % (
+                2 * np.pi / xstd[mask]
+            ) - np.pi / xstd[mask]
+            result[i, j] = np.sqrt(sum(diff * diff))
     return result
 
 
@@ -8910,7 +8996,7 @@ class Model:
         return (array - self.norm_min) / (self.norm_max - self.norm_min)
 
     def standardise_array(self, array, mu, std):
-        return (array-mu)/std
+        return (array - mu) / std
 
     @property
     def num(self):
@@ -9016,7 +9102,10 @@ class Model:
                             [float(hp) for hp in line.split()[1:]]
                         )
                         self.kernel_list[kernel_name] = RBF(lengthscale)
-                    elif kernel_type in ["rbf-cyclic", "rbf-cylic"]: # Due to typo in FEREBUS 7.0
+                    elif kernel_type in [
+                        "rbf-cyclic",
+                        "rbf-cylic",
+                    ]:  # Due to typo in FEREBUS 7.0
                         line = next(f)
                         line = next(f)
                         line = next(f)
@@ -9203,7 +9292,9 @@ class Model:
 
     def r(self, features):
         if self.standardise:
-            return self.kernel.r(self.standardise_array(features, self.xmu, self.xstd), self.X)
+            return self.kernel.r(
+                self.standardise_array(features, self.xmu, self.xstd), self.X
+            )
         else:
             return self.kernel.r(features, self.X)
         # return numba_r_rbf(features, self.X, np.array(self.hyper_parameters))
@@ -9330,12 +9421,18 @@ class Model:
 
     def distance_to_point(self, point):
         if self.standardise:
-            point = np.array(self.standardise_array(point.features[self.i], self.xmu, self.xstd)).reshape((1, -1))
+            point = np.array(
+                self.standardise_array(
+                    point.features[self.i], self.xmu, self.xstd
+                )
+            ).reshape((1, -1))
         else:
             point = np.array(point.features[self.i]).reshape((1, -1))
         if self.has_cyclic_kernel:
             if self.standardise:
-                return standardised_cyclic_cdist(point, np.array(self.X), np.array(self.xstd))
+                return standardised_cyclic_cdist(
+                    point, np.array(self.X), np.array(self.xstd)
+                )
             else:
                 return cyclic_cdist(point, np.array(self.X))
         else:
@@ -9635,7 +9732,11 @@ class Points:
         if GLOBALS.WARN_RECOVERY_ERROR:
             n_recovery_error = 0
             for point in self:
-                if point.wfn and point.ints and point.wfn.natoms == len(point.ints):
+                if (
+                    point.wfn
+                    and point.ints
+                    and point.wfn.natoms == len(point.ints)
+                ):
                     recovery_error = point.calculate_recovery_error()
                     if recovery_error > GLOBALS.RECOVERY_ERROR_THRESHOLD:
                         logger.warning(
@@ -9759,7 +9860,7 @@ class Points:
             return self._features
 
     def get_atom_features(self, atom):
-        return self.features[atom-1]
+        return self.features[atom - 1]
 
     def get_atom_feature(self, atom, feature):
         return [features[feature] for features in self.get_atom_features(atom)]
@@ -11128,11 +11229,11 @@ class CP2KTools:
     box_size = 0
     n_molecules = 1
 
-    temperature = 300 # K
+    temperature = 300  # K
     n_iterations = 10000
 
     _solvers = ["wavelet", "periodic"]
-    solver = "wavelet" # wavelet or periodic
+    solver = "wavelet"  # wavelet or periodic
 
     cutofff = 3
 
@@ -11148,88 +11249,148 @@ class CP2KTools:
     def write_files():
         cp2k_dir = GLOBALS.FILE_STRUCTURE["cp2k"]
         FileTools.mkdir(cp2k_dir)
-        cp2k_input_file = Path(cp2k_dir) / Path(f"{GLOBALS.SYSTEM_NAME.lower()}.inp")
+        cp2k_input_file = Path(cp2k_dir) / Path(
+            f"{GLOBALS.SYSTEM_NAME.lower()}.inp"
+        )
         with open(cp2k_input_file, "w") as cp2k_input:
             cp2k_input.write("&GLOBAL\n")
-            cp2k_input.write("  ! the project name is made part of most output files... useful to keep order\n")
+            cp2k_input.write(
+                "  ! the project name is made part of most output files... useful to keep order\n"
+            )
             cp2k_input.write(f"  PROJECT {GLOBALS.SYSTEM_NAME}\n")
-            cp2k_input.write("  ! various runtypes (energy, geo_opt, etc.) available.\n")
+            cp2k_input.write(
+                "  ! various runtypes (energy, geo_opt, etc.) available.\n"
+            )
             cp2k_input.write("  RUN_TYPE MD\n")
             cp2k_input.write("\n")
             cp2k_input.write("  IOLEVEL LOW\n")
             cp2k_input.write("&END GLOBAL\n")
             cp2k_input.write("\n")
             cp2k_input.write("&FORCE_EVAL\n")
-            cp2k_input.write("  ! the electronic structure part of CP2K is named Quickstep\n")
+            cp2k_input.write(
+                "  ! the electronic structure part of CP2K is named Quickstep\n"
+            )
             cp2k_input.write("  METHOD Quickstep\n")
             cp2k_input.write("  &DFT\n")
-            cp2k_input.write("    ! basis sets and pseudopotential files can be found in cp2k/data\n")
-            cp2k_input.write(f"    BASIS_SET_FILE_NAME {CP2KTools.datafile_location}/BASIS_SET\n")
-            cp2k_input.write(f"    POTENTIAL_FILE_NAME {CP2KTools.datafile_location}/GTH_POTENTIALS\n")
+            cp2k_input.write(
+                "    ! basis sets and pseudopotential files can be found in cp2k/data\n"
+            )
+            cp2k_input.write(
+                f"    BASIS_SET_FILE_NAME {CP2KTools.datafile_location}/BASIS_SET\n"
+            )
+            cp2k_input.write(
+                f"    POTENTIAL_FILE_NAME {CP2KTools.datafile_location}/GTH_POTENTIALS\n"
+            )
             cp2k_input.write("\n")
             cp2k_input.write("    ! Charge and multiplicity\n")
-            cp2k_input.write("    CHARGE 0\n") # TODO: Handle Charged Molecules
+            cp2k_input.write(
+                "    CHARGE 0\n"
+            )  # TODO: Handle Charged Molecules
             cp2k_input.write("    MULTIPLICITY 1\n")
             cp2k_input.write("\n")
             cp2k_input.write("    &MGRID\n")
-            cp2k_input.write("      ! PW cutoff ... depends on the element (basis) too small cutoffs lead to the eggbox effect.\n")
-            cp2k_input.write("      ! certain calculations (e.g. geometry optimization, vibrational frequencies,\n")
-            cp2k_input.write("      ! NPT and cell optimizations, need higher cutoffs)\n")
-            cp2k_input.write("      CUTOFF [Ry] 400\n") # TODO: Turn this into variable
+            cp2k_input.write(
+                "      ! PW cutoff ... depends on the element (basis) too small cutoffs lead to the eggbox effect.\n"
+            )
+            cp2k_input.write(
+                "      ! certain calculations (e.g. geometry optimization, vibrational frequencies,\n"
+            )
+            cp2k_input.write(
+                "      ! NPT and cell optimizations, need higher cutoffs)\n"
+            )
+            cp2k_input.write(
+                "      CUTOFF [Ry] 400\n"
+            )  # TODO: Turn this into variable
             cp2k_input.write("    &END MGRID\n")
             cp2k_input.write("\n")
             cp2k_input.write("    &QS\n")
-            cp2k_input.write("      ! use the GPW method (i.e. pseudopotential based calculations with the Gaussian and Plane Waves scheme).\n")
+            cp2k_input.write(
+                "      ! use the GPW method (i.e. pseudopotential based calculations with the Gaussian and Plane Waves scheme).\n"
+            )
             cp2k_input.write("      METHOD GPW\n")
-            cp2k_input.write("      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n")
-            cp2k_input.write("      ! sets reasonable values for all other thresholds.\n")
+            cp2k_input.write(
+                "      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n"
+            )
+            cp2k_input.write(
+                "      ! sets reasonable values for all other thresholds.\n"
+            )
             cp2k_input.write("      EPS_DEFAULT 1.0E-10\n")
-            cp2k_input.write("      ! used for MD, the method used to generate the initial guess.\n")
+            cp2k_input.write(
+                "      ! used for MD, the method used to generate the initial guess.\n"
+            )
             cp2k_input.write("      EXTRAPOLATION ASPC\n")
             cp2k_input.write("    &END QS\n")
             cp2k_input.write("\n")
             cp2k_input.write("    &POISSON\n")
-            cp2k_input.write("      ! PERIODIC XYZ is the default, gas phase systems should have 'NONE' and a wavelet solver\n")
+            cp2k_input.write(
+                "      ! PERIODIC XYZ is the default, gas phase systems should have 'NONE' and a wavelet solver\n"
+            )
             if CP2KTools.solver == "periodic":
                 cp2k_input.write("      PERIODIC XYZ\n")
             else:
                 cp2k_input.write("      PERIODIC NONE\n")
-            cp2k_input.write(f"      POISSON_SOLVER {CP2KTools.solver.upper()}\n")
+            cp2k_input.write(
+                f"      POISSON_SOLVER {CP2KTools.solver.upper()}\n"
+            )
             cp2k_input.write("    &END POISSON\n")
             cp2k_input.write("\n")
-            cp2k_input.write("    ! use the OT METHOD for robust and efficient SCF, suitable for all non-metallic systems.\n")
+            cp2k_input.write(
+                "    ! use the OT METHOD for robust and efficient SCF, suitable for all non-metallic systems.\n"
+            )
             cp2k_input.write("    &SCF\n")
-            cp2k_input.write("      SCF_GUESS ATOMIC ! can be used to RESTART an interrupted calculation\n")
+            cp2k_input.write(
+                "      SCF_GUESS ATOMIC ! can be used to RESTART an interrupted calculation\n"
+            )
             cp2k_input.write("      MAX_SCF 30\n")
-            cp2k_input.write("      EPS_SCF 1.0E-6 ! accuracy of the SCF procedure typically 1.0E-6 - 1.0E-7\n")
+            cp2k_input.write(
+                "      EPS_SCF 1.0E-6 ! accuracy of the SCF procedure typically 1.0E-6 - 1.0E-7\n"
+            )
             cp2k_input.write("      &OT\n")
-            cp2k_input.write("        ! an accurate preconditioner suitable also for larger systems\n")
+            cp2k_input.write(
+                "        ! an accurate preconditioner suitable also for larger systems\n"
+            )
             cp2k_input.write("        PRECONDITIONER FULL_SINGLE_INVERSE\n")
-            cp2k_input.write("        ! the most robust choice (DIIS might sometimes be faster, but not as stable).\n")
+            cp2k_input.write(
+                "        ! the most robust choice (DIIS might sometimes be faster, but not as stable).\n"
+            )
             cp2k_input.write("        MINIMIZER DIIS\n")
             cp2k_input.write("      &END OT\n")
-            cp2k_input.write("      &OUTER_SCF ! repeat the inner SCF cycle 10 times\n")
+            cp2k_input.write(
+                "      &OUTER_SCF ! repeat the inner SCF cycle 10 times\n"
+            )
             cp2k_input.write("        MAX_SCF 10\n")
             cp2k_input.write("        EPS_SCF 1.0E-6 ! must match the above\n")
             cp2k_input.write("      &END\n")
             cp2k_input.write("\n")
             cp2k_input.write("      &PRINT\n")
-            cp2k_input.write("        &RESTART OFF\n") # Turned off for optimisation purposes, may be a good idea to have this as toggleable
+            cp2k_input.write(
+                "        &RESTART OFF\n"
+            )  # Turned off for optimisation purposes, may be a good idea to have this as toggleable
             cp2k_input.write("        &END\n")
             cp2k_input.write("      &END PRINT\n")
             cp2k_input.write("    &END SCF\n")
             cp2k_input.write("\n")
-            cp2k_input.write("    ! specify the exchange and correlation treatment\n")
+            cp2k_input.write(
+                "    ! specify the exchange and correlation treatment\n"
+            )
             cp2k_input.write("    &XC\n")
             cp2k_input.write(f"      &XC_FUNCTIONAL {CP2KTools.method}\n")
             cp2k_input.write("      &END XC_FUNCTIONAL\n")
-            cp2k_input.write("      ! adding Grimme's D3 correction (by default without C9 terms)\n")
-            cp2k_input.write(f"      &VDW_POTENTIAL {'OFF' if CP2KTools.n_molecules == 1 else ''}\n")
+            cp2k_input.write(
+                "      ! adding Grimme's D3 correction (by default without C9 terms)\n"
+            )
+            cp2k_input.write(
+                f"      &VDW_POTENTIAL {'OFF' if CP2KTools.n_molecules == 1 else ''}\n"
+            )
             cp2k_input.write("        POTENTIAL_TYPE PAIR_POTENTIAL\n")
             cp2k_input.write("        &PAIR_POTENTIAL\n")
-            cp2k_input.write(f"          PARAMETER_FILE_NAME {CP2KTools.datafile_location}/dftd3.dat\n")
+            cp2k_input.write(
+                f"          PARAMETER_FILE_NAME {CP2KTools.datafile_location}/dftd3.dat\n"
+            )
             cp2k_input.write("          TYPE DFTD3\n")
-            cp2k_input.write(f"          REFERENCE_FUNCTIONAL {CP2KTools.method}\n")
+            cp2k_input.write(
+                f"          REFERENCE_FUNCTIONAL {CP2KTools.method}\n"
+            )
             cp2k_input.write("          R_CUTOFF [angstrom] 16\n")
             cp2k_input.write("        &END PAIR_POTENTIAL\n")
             cp2k_input.write("      &END VDW_POTENTIAL\n")
@@ -11239,13 +11400,19 @@ class CP2KTools:
             cp2k_input.write("  ! description of the system\n")
             cp2k_input.write("  &SUBSYS\n")
             cp2k_input.write("    &CELL\n")
-            cp2k_input.write("      ! unit cells that are orthorhombic are more efficient with CP2K\n")
-            cp2k_input.write(f"      ABC [angstrom] {CP2KTools.box_size} {CP2KTools.box_size} {CP2KTools.box_size}\n")
+            cp2k_input.write(
+                "      ! unit cells that are orthorhombic are more efficient with CP2K\n"
+            )
+            cp2k_input.write(
+                f"      ABC [angstrom] {CP2KTools.box_size} {CP2KTools.box_size} {CP2KTools.box_size}\n"
+            )
             if CP2KTools.solver == "wavelet":
                 cp2k_input.write("      PERIODIC NONE\n")
             cp2k_input.write("    &END CELL\n")
             cp2k_input.write("\n")
-            cp2k_input.write("    ! atom coordinates can be in the &COORD section,\n")
+            cp2k_input.write(
+                "    ! atom coordinates can be in the &COORD section,\n"
+            )
             cp2k_input.write("    ! or provided as an external file.\n")
             cp2k_input.write("    &COORD\n")
             for atom in CP2KTools.input_geometry:
@@ -11253,7 +11420,9 @@ class CP2KTools:
             cp2k_input.write("    &END COORD\n")
             cp2k_input.write("\n")
             cp2k_input.write("    ! keep atoms away from box borders,\n")
-            cp2k_input.write("    ! a requirement for the wavelet Poisson solver\n")
+            cp2k_input.write(
+                "    ! a requirement for the wavelet Poisson solver\n"
+            )
             cp2k_input.write("    &TOPOLOGY\n")
             cp2k_input.write("      &CENTER_COORDINATES\n")
             cp2k_input.write("      &END\n")
@@ -11262,24 +11431,36 @@ class CP2KTools:
             for atom_type in CP2KTools.input_geometry.types:
                 cp2k_input.write(f"    &KIND {atom_type.upper()}\n")
                 cp2k_input.write(f"      BASIS_SET {CP2KTools.basis_set}\n")
-                cp2k_input.write(f"      POTENTIAL GTH-{CP2KTools.method}-q{Constants.type2valence[atom_type.upper()]}\n")
+                cp2k_input.write(
+                    f"      POTENTIAL GTH-{CP2KTools.method}-q{Constants.type2valence[atom_type.upper()]}\n"
+                )
                 cp2k_input.write("    &END KIND\n")
             cp2k_input.write("  &END SUBSYS\n")
             cp2k_input.write("&END FORCE_EVAL\n")
             cp2k_input.write("\n")
-            cp2k_input.write("! how to propagate the system, selection via RUN_TYPE in the &GLOBAL section\n")
+            cp2k_input.write(
+                "! how to propagate the system, selection via RUN_TYPE in the &GLOBAL section\n"
+            )
             cp2k_input.write("&MOTION\n")
             cp2k_input.write("  &GEO_OPT\n")
-            cp2k_input.write("    OPTIMIZER LBFGS ! Good choice for 'small' systems (use LBFGS for large systems)\n")
+            cp2k_input.write(
+                "    OPTIMIZER LBFGS ! Good choice for 'small' systems (use LBFGS for large systems)\n"
+            )
             cp2k_input.write("    MAX_ITER  100\n")
-            cp2k_input.write("    MAX_DR    [bohr] 0.003 ! adjust target as needed\n")
+            cp2k_input.write(
+                "    MAX_DR    [bohr] 0.003 ! adjust target as needed\n"
+            )
             cp2k_input.write("    &BFGS\n")
             cp2k_input.write("    &END BFGS\n")
             cp2k_input.write("  &END GEO_OPT\n")
             cp2k_input.write("  &MD\n")
-            cp2k_input.write("    ENSEMBLE NVT  ! sampling the canonical ensemble, accurate properties might need NVE\n")
+            cp2k_input.write(
+                "    ENSEMBLE NVT  ! sampling the canonical ensemble, accurate properties might need NVE\n"
+            )
             cp2k_input.write(f"    TEMPERATURE [K] {CP2KTools.temperature}\n")
-            cp2k_input.write("    TIMESTEP [fs] 1.0\n") # TODO: Turn this into user defined variable
+            cp2k_input.write(
+                "    TIMESTEP [fs] 1.0\n"
+            )  # TODO: Turn this into user defined variable
             cp2k_input.write(f"    STEPS {CP2KTools.n_iterations}\n")
             cp2k_input.write("    &THERMOSTAT\n")
             cp2k_input.write("      TYPE NOSE\n")
@@ -11319,15 +11500,17 @@ class CP2KTools:
 
     @staticmethod
     def get_possible_inputs():
-        p = Path('.')
-        return [x for x in p.iterdir() if x.suffix in CP2KTools.input_file_formats]
+        p = Path(".")
+        return [
+            x for x in p.iterdir() if x.suffix in CP2KTools.input_file_formats
+        ]
 
     @staticmethod
     def set_box_size(molecule_diameter):
         if CP2KTools.solver == "wavelet":
-            CP2KTools.box_size = 2*molecule_diameter
+            CP2KTools.box_size = 2 * molecule_diameter
         elif CP2KTools.solver == "periodic":
-            CP2KTools.box_size = molecule_diameter + 2*CP2KTools.cutoff
+            CP2KTools.box_size = molecule_diameter + 2 * CP2KTools.cutoff
 
     def set_cp2k_box_size():
         while True:
@@ -11339,9 +11522,18 @@ class CP2KTools:
                 print("Error: Box Size must be a number")
             else:
                 check = True
-                if CP2KTools._molecule_diameter > 0 and ans < CP2KTools._molecule_diameter:
-                    print(f"Warning: Box Size ({ans} Å) is less than the molecule diameter ({CP2KTools._molecule_diameter} Å)")
-                    check = UsefulTools.check_bool(input("Would you like to use this value? ({ans} Å) [y/n]"))
+                if (
+                    CP2KTools._molecule_diameter > 0
+                    and ans < CP2KTools._molecule_diameter
+                ):
+                    print(
+                        f"Warning: Box Size ({ans} Å) is less than the molecule diameter ({CP2KTools._molecule_diameter} Å)"
+                    )
+                    check = UsefulTools.check_bool(
+                        input(
+                            "Would you like to use this value? ({ans} Å) [y/n]"
+                        )
+                    )
                 if check:
                     CP2KTools.box_size = ans
                     break
@@ -11352,7 +11544,9 @@ class CP2KTools:
         if CP2KTools.input_file.suffix == ".gjf":
             CP2KTools.set_geometry(GJF(CP2KTools.input_file).read().atoms)
         elif CP2KTools.input_file.suffix == ".xyz":
-            CP2KTools.set_geometry(Trajectory(CP2KTools.input_file).read(n=1)[0])
+            CP2KTools.set_geometry(
+                Trajectory(CP2KTools.input_file).read(n=1)[0]
+            )
 
     @staticmethod
     def set_geometry(geometry):
@@ -11361,7 +11555,7 @@ class CP2KTools:
         molecule_radius = 0
         for atom in CP2KTools.input_geometry:
             molecule_radius = max([molecule_radius, *np.abs(atom.coordinates)])
-        molecule_diameter = 2*molecule_radius
+        molecule_diameter = 2 * molecule_radius
         CP2KTools._molecule_diameter = molecule_diameter
         CP2KTools.set_box_size(molecule_diameter)
 
@@ -11380,29 +11574,50 @@ class CP2KTools:
                 CP2KTools.set_input_file(inp)
                 break
             else:
-                print(f"Error input file must be 1 of the following formats: {CP2KTools.input_file_formats}")
+                print(
+                    f"Error input file must be 1 of the following formats: {CP2KTools.input_file_formats}"
+                )
 
     @staticmethod
     def select_input_file():
         possible_inputs = CP2KTools.get_possible_inputs()
         cp2k_menu = Menu(title="Select CP2K Input File")
         for i, possible_input in enumerate(possible_inputs):
-            cp2k_menu.add_option(f"{i+1}", f"{possible_input}", CP2KTools.set_input_file, kwargs={"input_file": possible_input}, auto_close=True)
+            cp2k_menu.add_option(
+                f"{i+1}",
+                f"{possible_input}",
+                CP2KTools.set_input_file,
+                kwargs={"input_file": possible_input},
+                auto_close=True,
+            )
         cp2k_menu.add_space()
-        cp2k_menu.add_option("c", "Select Custom Input", CP2KTools.select_custom_input_file, auto_close=True)
+        cp2k_menu.add_option(
+            "c",
+            "Select Custom Input",
+            CP2KTools.select_custom_input_file,
+            auto_close=True,
+        )
         cp2k_menu.add_final_options(exit=False)
         cp2k_menu.run()
 
     @staticmethod
     def refresh_cp2k_input_menu(cp2k_menu):
         cp2k_menu.clear_options()
-        cp2k_menu.add_option("f", "Select Input File", CP2KTools.select_input_file)
-        cp2k_menu.add_option("b", "Select Box Size", CP2KTools.set_cp2k_box_size)
-        cp2k_menu.add_option("n", "Select Number of Molecules in Box", CP2KTools.set_n_molecules)
+        cp2k_menu.add_option(
+            "f", "Select Input File", CP2KTools.select_input_file
+        )
+        cp2k_menu.add_option(
+            "b", "Select Box Size", CP2KTools.set_cp2k_box_size
+        )
+        cp2k_menu.add_option(
+            "n", "Select Number of Molecules in Box", CP2KTools.set_n_molecules
+        )
         cp2k_menu.add_space()
         cp2k_menu.add_message(f"CP2K Input: {CP2KTools.input_file}")
         cp2k_menu.add_message(f"Box Size: {CP2KTools.box_size} Å")
-        cp2k_menu.add_message(f"Number of Molecules in Box: {CP2KTools.n_molecules}")
+        cp2k_menu.add_message(
+            f"Number of Molecules in Box: {CP2KTools.n_molecules}"
+        )
         cp2k_menu.add_final_options()
 
     @staticmethod
@@ -11425,7 +11640,7 @@ class CP2KTools:
                     break
                 else:
                     print("Error: Temperature must be greater than 0")
-    
+
     @staticmethod
     def set_n_iterations():
         while True:
@@ -11444,24 +11659,36 @@ class CP2KTools:
     @staticmethod
     def set_method(method):
         CP2KTools.method = method
-    
+
     @staticmethod
     def select_method():
         method_menu = Menu(title="CP2K Method Menu", message="Select Method")
         for i, method in CP2KTools._methods:
-            method_menu.add_option(f"{i+1}", method, CP2KTools.set_method, kwargs={"method": method})
+            method_menu.add_option(
+                f"{i+1}",
+                method,
+                CP2KTools.set_method,
+                kwargs={"method": method},
+            )
         method_menu.add_final_options()
         method_menu.run()
 
     @staticmethod
     def set_basis_set(basis_set):
         CP2KTools.basis_set = basis_set
-    
+
     @staticmethod
     def select_basis_set():
-        basis_set_menu = Menu(title="CP2K Basis Set Menu", message="Select Basis Set")
+        basis_set_menu = Menu(
+            title="CP2K Basis Set Menu", message="Select Basis Set"
+        )
         for i, basis_set in CP2KTools._basis_sets:
-            basis_set_menu.add_option(f"{i+1}", basis_set, CP2KTools.set_basis_set, kwargs={"basis_set": basis_set})
+            basis_set_menu.add_option(
+                f"{i+1}",
+                basis_set,
+                CP2KTools.set_basis_set,
+                kwargs={"basis_set": basis_set},
+            )
         basis_set_menu.add_final_options()
         basis_set_menu.run()
 
@@ -11471,17 +11698,24 @@ class CP2KTools:
         t.setup_completer(t.path_completer)
         CP2KTools.datafile_location = input("Enter datafile location: ")
 
-
     @staticmethod
     def refresh_cp2k_menu(cp2k_menu):
         cp2k_menu.clear_options()
         cp2k_menu.add_option("i", "Select Input", CP2KTools.select_input_menu)
-        cp2k_menu.add_option("t", "Select Temperature", CP2KTools.set_temperature)
-        cp2k_menu.add_option("n", "Select Number of Iterations", CP2KTools.set_n_iterations)
+        cp2k_menu.add_option(
+            "t", "Select Temperature", CP2KTools.set_temperature
+        )
+        cp2k_menu.add_option(
+            "n", "Select Number of Iterations", CP2KTools.set_n_iterations
+        )
         cp2k_menu.add_space()
         cp2k_menu.add_option("m", "Select Method", CP2KTools.select_method)
-        cp2k_menu.add_option("b", "Select Basis Set", CP2KTools.select_basis_set)
-        cp2k_menu.add_option("s", "Set Datafiles Location", CP2KTools.select_datafile_location)
+        cp2k_menu.add_option(
+            "b", "Select Basis Set", CP2KTools.select_basis_set
+        )
+        cp2k_menu.add_option(
+            "s", "Set Datafiles Location", CP2KTools.select_datafile_location
+        )
         cp2k_menu.add_space()
         cp2k_menu.add_option("r", "Run CP2K", CP2KTools.run)
         cp2k_menu.add_space()
@@ -11491,7 +11725,9 @@ class CP2KTools:
     @staticmethod
     def find_datafiles():
         if GLOBALS.MACHINE == "csf3":
-            CP2KTools.datafile_location = "/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"
+            CP2KTools.datafile_location = (
+                "/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"
+            )
         elif GLOBALS.MACHINE == "ffluxlab":
             CP2KTools.datafile_location = "/home/modules/apps/cp2k/6.1.0/data"
         else:
@@ -12271,7 +12507,9 @@ class SetupTools:
         if "min_max" in method:
             points_to_add += SetupTools.make_set_min_max(points)
         if "random" in method:
-            points_to_add += SetupTools.make_set_random(points, npoints, added_points=points_to_add)
+            points_to_add += SetupTools.make_set_random(
+                points, npoints, added_points=points_to_add
+            )
         points_to_add = list(set(points_to_add))
         dstdir = GLOBALS.FILE_STRUCTURE[set_to_make]
         points.to_set(dstdir, points_to_add)
@@ -12307,21 +12545,36 @@ class SetupTools:
 
         if make_training_set is None:
             print()
-            make_training_set = UsefulTools.check_bool(input(f"Would you like to make set: Training Set [Y/N]"))
+            make_training_set = UsefulTools.check_bool(
+                input(f"Would you like to make set: Training Set [Y/N]")
+            )
         if make_training_set:
-            SetupTools.make_set("training_set", points, training_set_method, n_training_points)
+            SetupTools.make_set(
+                "training_set", points, training_set_method, n_training_points
+            )
 
         if make_sample_pool is None:
             print()
-            make_sample_pool = UsefulTools.check_bool(input(f"Would you like to make set: Sample Pool [Y/N]"))
+            make_sample_pool = UsefulTools.check_bool(
+                input(f"Would you like to make set: Sample Pool [Y/N]")
+            )
         if make_sample_pool:
-            SetupTools.make_set("sample_pool", points, sample_pool_method, n_sample_points)
+            SetupTools.make_set(
+                "sample_pool", points, sample_pool_method, n_sample_points
+            )
 
         if make_validation_set is None:
             print()
-            make_validation_set = UsefulTools.check_bool(input(f"Would you like to make set: Validation Set [Y/N]"))
+            make_validation_set = UsefulTools.check_bool(
+                input(f"Would you like to make set: Validation Set [Y/N]")
+            )
         if make_validation_set:
-            SetupTools.make_set("validation_set", points, validation_set_method, n_validation_points)
+            SetupTools.make_set(
+                "validation_set",
+                points,
+                validation_set_method,
+                n_validation_points,
+            )
 
 
 class SettingsTools:
@@ -12733,7 +12986,9 @@ class FileRemover:
     @staticmethod
     def run_daemon():
         FileTools.mkdir(
-            GLOBALS.FILE_STRUCTURE["file_remover_daemon"], empty=True, force=False
+            GLOBALS.FILE_STRUCTURE["file_remover_daemon"],
+            empty=True,
+            force=False,
         )
         file_remover_daemon = FileRemoverDaemon()
         file_remover_daemon.start()
