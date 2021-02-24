@@ -1678,7 +1678,6 @@ class Tree:
         return str(self._dict[id])
 
 
-@staticmethod
 def global_parser(func):
     def wrapper(val):
         if val is None:
@@ -1687,20 +1686,33 @@ def global_parser(func):
             return func(val)
     return wrapper
 
+def global_formatter(func):
+    def wrapper(val):
+        if func.__annotations__:
+            if type(val) != next(iter(func.__annotations__)):
+                return val
+            else:
+                return func(val)
+    return wrapper
+
+
 class GlobalTools:
     @staticmethod
-    def cleanup_str(s):
+    @global_formatter
+    def cleanup_str(s: str) -> str:
         s = s.replace('"', "")
         s = s.replace("'", "")
         s = s.strip()
         return s
 
     @staticmethod
-    def to_upper(s):
+    @global_formatter
+    def to_upper(s: str) -> str:
         return s.upper()
 
     @staticmethod
-    def to_lower(s):
+    @global_formatter
+    def to_lower(s: str) -> str:
         return s.lower()
 
     @staticmethod
@@ -1748,7 +1760,7 @@ class GlobalTools:
         return int(inp)
 
     @staticmethod
-    @GlobalTools.global_parser
+    @global_parser
     def parse_float(inp):
         return float(inp)
 
