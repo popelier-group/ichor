@@ -958,10 +958,7 @@ class Constants:
 
     FEREBUS_LEGACY_CUTOFF = Version("6.5.0")
 
-    KERNELS = [
-        "rbf",
-        "rbf-cyclic"
-    ]
+    KERNELS = ["rbf", "rbf-cyclic"]
 
     type2mass = {
         "H": 1.007825,
@@ -1643,6 +1640,7 @@ class DictList(dict):
     x = DictList()
     x[k] += [v]
     """
+
     def __init__(self, list_type=list):
         self.list_type = list_type
         self._dict = {}
@@ -1741,7 +1739,9 @@ class GlobalTools:
     @staticmethod
     def check_allowed(val, allowed_values):
         if not val in allowed_values:
-            raise ValueError(f"Value: {val} not in Allowed Values: {allowed_values}")
+            raise ValueError(
+                f"Value: {val} not in Allowed Values: {allowed_values}"
+            )
 
     @staticmethod
     def positive(val):
@@ -1774,7 +1774,7 @@ class Globals:
     _checkers = DictList()
 
     SYSTEM_NAME: str = "SYSTEM"
-    ALF_REFERENCE_FILE: str = "" # set automatically if not defined
+    ALF_REFERENCE_FILE: str = ""  # set automatically if not defined
     ALF: List[List[int]] = []
 
     MAX_ITERATION: int = 1
@@ -1807,7 +1807,7 @@ class Globals:
     VALIDATION_SET_METHOD: List[str] = ["random"]
 
     KERNEL: str = "rbf-cyclic"  # rbf or rbf-cyclic currently
-    FEREBUS_TYPE: str = "executable" # executable (FEREBUS) or python (FEREBUS.py)
+    FEREBUS_TYPE: str = "executable"  # executable (FEREBUS) or python (FEREBUS.py)
     FEREBUS_VERSION: Version = Version("7.0")
     FEREBUS_LOCATION: str = "PROGRAMS/FEREBUS"
 
@@ -1818,10 +1818,10 @@ class Globals:
     DLPOLY_CORE_COUNT: int = 1
     CP2K_CORE_COUNT: int = 8
 
-    FEREBUS_SWARM_SIZE: int = 50 # If negative >> Size dynamically allocated by FEREBUS
-    FEREBUS_NUGGET: float = 1.0e-10 # Default value for FEREBUS nugget
-    FEREBUS_THETA_MIN: float = 0.0 # Minimum theta value for initialisation (best to keep 0)
-    FEREBUS_THETA_MAX: float = 3.0 # Maximum theta value for initialisation
+    FEREBUS_SWARM_SIZE: int = 50  # If negative >> Size dynamically allocated by FEREBUS
+    FEREBUS_NUGGET: float = 1.0e-10  # Default value for FEREBUS nugget
+    FEREBUS_THETA_MIN: float = 0.0  # Minimum theta value for initialisation (best to keep 0)
+    FEREBUS_THETA_MAX: float = 3.0  # Maximum theta value for initialisation
 
     MAX_NUGGET: float = 1e-4
 
@@ -1838,10 +1838,10 @@ class Globals:
     FEREBUS_MAX_ITERATION: int = 1000
 
     # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
-    DLPOLY_NUMBER_OF_STEPS: int = 500 # Number of steps to run simulation for
-    DLPOLY_TEMPERATURE: int = 0 # If set to 0, will perform geom opt but default to 10 K
-    DLPOLY_PRINT_EVERY: int = 1 # Print trajectory and stats every n steps
-    DLPOLY_TIMESTEP: float = 0.001 # in ps
+    DLPOLY_NUMBER_OF_STEPS: int = 500  # Number of steps to run simulation for
+    DLPOLY_TEMPERATURE: int = 0  # If set to 0, will perform geom opt but default to 10 K
+    DLPOLY_PRINT_EVERY: int = 1  # Print trajectory and stats every n steps
+    DLPOLY_TIMESTEP: float = 0.001  # in ps
     DLPOLY_LOCATION: str = "PROGRAMS/DLPOLY.Z"
 
     DLPOLY_CHECK_CONVERGENCE: bool = False
@@ -1855,16 +1855,16 @@ class Globals:
 
     # CP2K SETTINGS
     CP2K_INPUT: str = ""
-    CP2K_TEMPERATURE: int = 300 # K
+    CP2K_TEMPERATURE: int = 300  # K
     CP2K_STEPS: int = 10000
-    CP2K_TIMESTEP: float = 1.0 # fs
+    CP2K_TIMESTEP: float = 1.0  # fs
     CP2K_METHOD: str = "BLYP"
     CP2K_BASIS_SET: str = "6-31G*"
     CP2K_DATA_DIR: str = ""
 
     # Recovery and Integration Errors
     WARN_RECOVERY_ERROR: bool = True
-    RECOVERY_ERROR_THRESHOLD: float = 1.0/Constants.ha_to_kj_mol # Ha (1.0 kJ/mol)
+    RECOVERY_ERROR_THRESHOLD: float = 1.0 / Constants.ha_to_kj_mol  # Ha (1.0 kJ/mol)
 
     WARN_INTEGRATION_ERROR: bool = True
     INTEGRATION_ERROR_THRESHOLD: float = 0.001
@@ -1936,7 +1936,7 @@ class Globals:
             "OPTIMISE_PROPERTY": ["iqa"] + Constants.multipole_names,
             "KERNEL": Constants.KERNELS,
         }
-        
+
         # TODO: Checks to add
         # - Basis Set (not sure how to do this one)
         # - Optimise Atom, must be done after determining system
@@ -1948,7 +1948,11 @@ class Globals:
         # - CP2K Basis Set
 
         for variable, allowed_values in self._allowed_values.items():
-            self._checkers[variable] += [lambda val, av=allowed_values: GlobalTools.check_allowed(val, av)]
+            self._checkers[variable] += [
+                lambda val, av=allowed_values: GlobalTools.check_allowed(
+                    val, av
+                )
+            ]
 
         self._checkers["MAX_ITERATION"] += [GlobalTools.positive]
         self._checkers["POINTS_PER_ITERATION"] += [GlobalTools.positive]
@@ -1959,8 +1963,12 @@ class Globals:
         self._checkers["FEREBUS_SWARM_SIZE"] += [GlobalTools.positive]
         self._checkers["FEREBUS_NUGGET"] += [GlobalTools.positive]
         self._checkers["FEREBUS_INERTIA_WEIGHT"] += [GlobalTools.positive]
-        self._checkers["FEREBUS_COGNITIVE_LEARNING_RATE"] += [GlobalTools.positive]
-        self._checkers["FEREBUS_SOCIAL_LEARNING_RATE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_COGNITIVE_LEARNING_RATE"] += [
+            GlobalTools.positive
+        ]
+        self._checkers["FEREBUS_SOCIAL_LEARNING_RATE"] += [
+            GlobalTools.positive
+        ]
         self._checkers["FEREBUS_TOLERANCE"] += [GlobalTools.positive]
         self._checkers["FEREBUS_STALL_ITERATIONS"] += [GlobalTools.positive]
         self._checkers["FEREBUS_CONVERGENCE"] += [GlobalTools.positive]
@@ -2021,7 +2029,9 @@ class Globals:
         if not self.ALF:
             if self.ALF_REFERENCE_FILE:
                 if not os.path.exists(self.ALF_REFERENCE_FILE):
-                    logger.warning(f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative")
+                    logger.warning(
+                        f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative"
+                    )
                     self.ALF_REFERENCE_FILE = None
 
             if not self.ALF_REFERENCE_FILE:
@@ -2048,7 +2058,9 @@ class Globals:
                     ).read().atoms.calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
-                    logger.error(f"Error When Calculating ALF from {self.ALF_REFERENCE_FILE}")
+                    logger.error(
+                        f"Error When Calculating ALF from {self.ALF_REFERENCE_FILE}"
+                    )
             else:
                 xyz_files = FileTools.get_files_in(".", "*.xyz")
                 if len(xyz_files) == 1:
@@ -2096,7 +2108,10 @@ class Globals:
     def save_to_config(self, config_file=Arguments.config_file):
         global_variables = {}
         for global_variable, global_value in self.items():
-            if global_value != self._defaults[global_variable]  or global_variable in self._in_config:
+            if (
+                global_value != self._defaults[global_variable]
+                or global_variable in self._in_config
+            ):
                 global_variables[global_variable] = global_value
 
         if config_file.endswith(".properties"):
@@ -2106,31 +2121,53 @@ class Globals:
 
     @property
     def config_variables(self):
-        return [g for g in self.global_variables if g in self._in_config.keys()]
+        return [
+            g for g in self.global_variables if g in self._in_config.keys()
+        ]
 
     @property
     def global_variables(self):
         from optparse import OptionParser
+
         try:
             return self._global_variables
         except AttributeError:
-            methods = [f[0] for f in inspect.getmembers(Globals, predicate=inspect.isfunction)]
-            properties = [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property))]
+            methods = [
+                f[0]
+                for f in inspect.getmembers(
+                    Globals, predicate=inspect.isfunction
+                )
+            ]
+            properties = [
+                p[0]
+                for p in inspect.getmembers(
+                    Globals, lambda o: isinstance(o, property)
+                )
+            ]
             methods += properties
-            self._global_variables = [key for key in dir(self) if not key.startswith("_") and not key in methods]
+            self._global_variables = [
+                key
+                for key in dir(self)
+                if not key.startswith("_") and not key in methods
+            ]
             return self._global_variables
 
     def __setattr__(self, name, value):
-        if hasattr(self, "_global_variables") and name in self.global_variables:
+        if (
+            hasattr(self, "_global_variables")
+            and name in self.global_variables
+        ):
             for parser in self._parsers.get(name, []):
                 value = parser(value)
             for formatter in self._formatters.get(name, []):
                 value = formatter(value)
             for check in self._checkers.get(name, []):
-                check(value) # Should raise error if incorrect
+                check(value)  # Should raise error if incorrect
 
             if name == "ALF":
-                Atoms.ALF = value # Make sure Atoms.ALF and GLOBALS.ALF are synced
+                Atoms.ALF = (
+                    value  # Make sure Atoms.ALF and GLOBALS.ALF are synced
+                )
 
         super(Globals, self).__setattr__(name, value)
 
@@ -3435,7 +3472,7 @@ class ProblemFinder:
                     solution="This setting cannot be modified in config, remove from config",
                 )
             )
-    
+
         for setting, error in ProblemFinder.incorrect_settings.items():
             self.add(
                 Problem(
@@ -12558,11 +12595,19 @@ class SettingsTools:
         menu.clear_options()
         menu.add_message(f"Value:   {GLOBALS.get(SettingsTools.edit_var)}")
         menu.add_space()
-        menu.add_message(f"Type:    {GLOBALS.__annotations__[SettingsTools.edit_var].__name__}")
-        menu.add_message(f"Default: {GLOBALS._defaults[SettingsTools.edit_var]}")
+        menu.add_message(
+            f"Type:    {GLOBALS.__annotations__[SettingsTools.edit_var].__name__}"
+        )
+        menu.add_message(
+            f"Default: {GLOBALS._defaults[SettingsTools.edit_var]}"
+        )
         menu.add_space()
-        menu.add_message(f"Protected:  {SettingsTools.edit_var in Globals._protected}")
-        menu.add_message(f"Changed: {SettingsTools.edit_var != Globals._defaults[SettingsTools.edit_var]}")
+        menu.add_message(
+            f"Protected:  {SettingsTools.edit_var in Globals._protected}"
+        )
+        menu.add_message(
+            f"Changed: {SettingsTools.edit_var != Globals._defaults[SettingsTools.edit_var]}"
+        )
         menu.add_option("e", "Edit value of setting", SettingsTools.edit_value)
         menu.add_option(
             "d", "Revert to default value", SettingsTools.set_default
@@ -12599,7 +12644,9 @@ class SettingsTools:
     @staticmethod
     def refresh_settings_menu(menu):
         menu.clear_options()
-        for global_var, value in GLOBALS.items(show_protected=SettingsTools.show_protected):
+        for global_var, value in GLOBALS.items(
+            show_protected=SettingsTools.show_protected
+        ):
             if not global_var in GLOBALS._protected:
                 global_var_value = "= " + str(value)
                 menu.add_option(
@@ -12610,12 +12657,12 @@ class SettingsTools:
                 )
         menu.add_space()
         if SettingsTools.show_protected:
-            for global_var, value in GLOBALS.items(show_protected=SettingsTools.show_protected):
+            for global_var, value in GLOBALS.items(
+                show_protected=SettingsTools.show_protected
+            ):
                 if global_var in GLOBALS._protected:
                     global_var_value = str(value)
-                    menu.add_message(
-                        global_var + " = " + global_var_value
-                    )
+                    menu.add_message(global_var + " = " + global_var_value)
             menu.add_space()
 
         menu.add_option(
