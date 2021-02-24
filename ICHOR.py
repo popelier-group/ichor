@@ -108,6 +108,7 @@ from numpy import linalg as la
 from scipy.spatial import distance
 
 import typing
+from typing import List
 
 #############################################
 #                  Globals                  #
@@ -904,6 +905,11 @@ class Constants:
 
     FEREBUS_LEGACY_CUTOFF = Version("6.5.0")
 
+    KERNELS = [
+        "rbf",
+        "rbf-cyclic"
+    ]
+
     type2mass = {
         "H": 1.007825,
         "He": 4.002603,
@@ -1563,181 +1569,6 @@ class Arguments:
             Arguments.uid = args.uid
 
 
-class GlobalVariable:
-    type_conversions = {
-        bool: UsefulTools.check_bool,
-    }
-
-    def __init__(self, name, value, type):
-        self.name = name
-
-        self.type = type
-        self.modifiers = []
-        self.pre_modifiers = []
-        self.changed = False
-        self.hidden = False
-        self.allowed_values = []
-
-        self.default = None
-        self.changed = False
-        self.in_config = False
-
-        self.value = value
-
-    def add_modifier(self, modifier):
-        self.modifiers += [modifier]
-        self.set(self.value)
-
-    def add_pre_modifier(self, modifier):
-        self.pre_modifiers += [modifier]
-        self.set(self.value)
-
-    def set(self, value):
-        if "value" not in self.__dict__.keys():
-            self.default = value
-        else:
-            self.changed = True
-
-        for modifier in self.pre_modifiers:
-            value = modifier(value)
-
-        convert = (
-            GlobalVariable.type_conversions[self.type]
-            if self.type in GlobalVariable.type_conversions.keys()
-            else self.type
-        )
-        # Make sure type is the correct type
-        try:
-            self.__dict__["value"] = (
-                value if convert in Globals.types else convert(value)
-            )
-        except:
-            self.__dict__["value"] = value
-
-        for modifier in self.modifiers:
-            self.__dict__["value"] = modifier(self.value)
-
-        if self.type not in Globals.types:
-            self.type = type(self.value)
-
-    def __setattr__(self, key, val):
-        if key == "value":
-            self.set(val)
-        else:
-            self.__dict__[key] = val
-
-    def __getattr__(self, key, *args):
-        if key in self.__dict__.keys():
-            return self.__dict__[key]
-        else:
-            try:
-                return getattr(self.value, key)
-            except:
-                raise AttributeError(key)
-
-    def details(self):
-        return f"Value:   {self.value}\nType:    {self.type.__name__}\nHidden:  {self.hidden}\nDefault: {self.default}\nChanged: {self.changed}"
-
-    def __int__(self):
-        return int(self.value)
-
-    def __float__(self):
-        return float(self.value)
-
-    def __list__(self):
-        return list(self.value)
-
-    def __str__(self):
-        return str(self.value)
-
-    def __repr__(self):
-        return repr(self.value)
-
-    def __add__(self, other):
-        return self.value + other
-
-    def __radd__(self, other):
-        return other + self.value
-
-    def __sub__(self, other):
-        return self.value - other
-
-    def __rsub__(self, other):
-        return other - self.value
-
-    def __mul__(self, other):
-        return self.value * other
-
-    def __rmul__(self, other):
-        return self.value * other
-
-    def __truediv__(self, other):
-        return self.value / other
-
-    def __rtruediv__(self, other):
-        return other / self.value
-
-    def __neg__(self):
-        return self.value.__neg__()
-
-    def __pos__(self):
-        return self.value.__pos__()
-
-    def __abs__(self):
-        return self.value.__abs__()
-
-    def __invert__(self):
-        return self.value.__invert__()
-
-    def __getitem__(self, i):
-        return self.value[i]
-
-    def __delitem__(self, i):
-        del self.value[i]
-
-    def __bool__(self):
-        return bool(self.value)
-
-    def __len__(self):
-        return len(self.value)
-
-    def __next__(self):
-        return next(self.value)
-
-    def __iter__(self):
-        return iter(self.value)
-
-    def __index__(self):
-        return self.value.__index__()
-
-    def __hash__(self):
-        return self.value.__hash__()
-
-    def __lt__(self, other):
-        return self.value.__lt__(other)
-
-    def __le__(self, other):
-        return self.value.__le__(other)
-
-    def __gt__(self, other):
-        return self.value.__gt__(other)
-
-    def __ge__(self, other):
-        return self.value.__ge__(other)
-
-    def __unicode__(self):
-        return self.value.__unicode__()
-
-    def __format__(self, formatstr):
-        return self.value.__format__(formatstr)
-
-    def __sizeof__(self):
-        return self.value.__sizeof__()
-
-    # def items(self):
-    #     return dict.items(self.value)
-
-
 class DictList(dict):
     """
     Wrapper around the common pattern of a dictionary of lists
@@ -1847,8 +1678,22 @@ class GlobalTools:
     def parse_float(inp):
         return float(inp)
 
+    @staticmethod
+    def check_allowed(val, allowed_values):
+        if not val in allowed_values:
+            raise ValueError(f"Value: {val} not in Allowed Values: {allowed_values}")
 
-from typing import List
+    @staticmethod
+    def positive(val):
+        if not val > 0:
+            raise ValueError(f"Value: {val} must be > 0")
+
+    @staticmethod
+    def positive_or_zero(val):
+        if not val >= 0:
+            raise ValueError(f"Value: {val} must be >= 0")
+
+
 class Globals:
     _types = []
 
@@ -1858,6 +1703,8 @@ class Globals:
     _in_config: List[str] = []
     # Default values for variables
     _defaults = {}
+    # Allowed values for variables
+    _allowed_values = {}
 
     # For parsing global variables into type
     _parsers = DictList()
@@ -1978,8 +1825,6 @@ class Globals:
     EXCLUDE_NODES: List[str] = []
 
     def __init__(self):
-        global_variables = self.global_variables
-
         # Set Protected Variables
         self._protected = [
             "FILE_STRUCTURE",
@@ -1989,15 +1834,6 @@ class Globals:
             "IQA_MODELS",
             "MACHINE",
         ]
-
-        # Set Allowed Values
-        self._allowed_variables = {
-            "METHOD": Constants.GAUSSIAN_METHODS,
-            "BOAQ": Constants.BOAQ_VALUES,
-            "IASMESH": Constants.IASMESH_VALUES,
-            "FEREBUS_TYPE": Constants.FEREBUS_TYPES,
-            "OPTIMISE_PROPERTY":  ["iqa"] + Constants.multipole_names,
-        }
 
         # Setup Parsers
         for global_variable in self.global_variables:
@@ -2015,6 +1851,13 @@ class Globals:
         self._parsers["ALF"] += [GlobalTools.read_alf]
         self._parsers["FEREBUS_VERSION"] += [GlobalTools.read_version]
 
+        self._parsers["INCLUDE_NODES"] += [GlobalTools.split_keywords]
+        self._parsers["EXCLUDE_NODES"] += [GlobalTools.split_keywords]
+
+        # TODO: Parsers to add
+        # - Training/Sample/Validation Set methods
+        # - Make sure List[int] is parsed correctly
+
         # Setup Formatters
         for global_variable in self.global_variables:
             global_type = self.__annotations__[global_variable]
@@ -2025,7 +1868,52 @@ class Globals:
         self._formatters["OPTIMISE_PROPERTY"] += [GlobalTools.to_lower]
 
         # Setup Checkers
+        self._allowed_values = {
+            "METHOD": Constants.GAUSSIAN_METHODS,
+            "BOAQ": Constants.BOAQ_VALUES,
+            "IASMESH": Constants.IASMESH_VALUES,
+            "FEREBUS_TYPE": Constants.FEREBUS_TYPES,
+            "OPTIMISE_PROPERTY": ["iqa"] + Constants.multipole_names,
+            "KERNEL": Constants.KERNELS,
+        }
+        
+        # TODO: Checks to add
+        # - Basis Set (not sure how to do this one)
+        # - Optimise Atom, must be done after determining system
+        # - Check FEREBUS Location
+        # - Check DLPOLY Location
+        # - FEREBUS Mean
+        # - FEREBUS Optimiser
+        # - CP2K Method
+        # - CP2K Basis Set
 
+        for variable, allowed_values in self._allowed_values.items():
+            self._checkers[variable] += [lambda val, av=allowed_values: GlobalTools.check_allowed(val, av)]
+
+        self._checkers["MAX_ITERATION"] += [GlobalTools.positive]
+        self._checkers["POINTS_PER_ITERATION"] += [GlobalTools.positive]
+        self._checkers["TRAINING_POINTS"] += [GlobalTools.positive_or_zero]
+        self._checkers["SAMPLE_POINTS"] += [GlobalTools.positive_or_zero]
+        self._checkers["VALIDATION_POINTS"] += [GlobalTools.positive_or_zero]
+
+        self._checkers["FEREBUS_SWARM_SIZE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_NUGGET"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_INERTIA_WEIGHT"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_COGNITIVE_LEARNING_RATE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_SOCIAL_LEARNING_RATE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_TOLERANCE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_STALL_ITERATIONS"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_CONVERGENCE"] += [GlobalTools.positive]
+        self._checkers["FEREBUS_MAX_ITERATION"] += [GlobalTools.positive]
+
+        self._checkers["DLPOLY_NUMBER_OF_STEPS"] += [GlobalTools.positive]
+        self._checkers["DLPOLY_TEMPERATURE"] += [GlobalTools.positive_or_zero]
+        self._checkers["DLPOLY_PRINT_EVERY"] += [GlobalTools.positive]
+        self._checkers["DLPOLY_TIMESTEP"] += [GlobalTools.positive]
+
+        self._checkers["CP2K_TEMPERATURE"] += [GlobalTools.positive]
+        self._checkers["CP2K_STEPS"] += [GlobalTools.positive]
+        self._checkers["CP2K_TIMESTEP"] += [GlobalTools.positive]
 
         # Setup Defaults
         for global_variable in self.global_variables:
@@ -2034,32 +1922,8 @@ class Globals:
     @staticmethod
     def define():
         global GLOBALS
-
         globals = Globals()
-        # name = __name__ if not __name__ == "*" else "__main__"
-        # for _, obj in inspect.getmembers(sys.modules[name]):
-        #     if inspect.isclass(obj):
-        #         Globals.types += [obj]
-
-        # # Set modifiers
-        # for global_variable in globals.global_variables:
-        #     if globals.__dict__[global_variable].type == str:
-        #         globals.__dict__[global_variable].add_modifier(
-        #             GlobalTools.cleanup_str
-        #         )
-        # globals.SYSTEM_NAME.add_modifier(GlobalTools.to_upper)
-        # globals.KEYWORDS.add_pre_modifier(GlobalTools.split_keywords)
-        # # globals.TRAINING_SET_METHOD.add_pre_modifier(GlobalTools.split_keywords)
-        # # globals.SAMPLE_POOL_METHOD.add_pre_modifier(GlobalTools.split_keywords)
-        # # globals.VALIDATION_SET_METHOD.add_pre_modifier(GlobalTools.split_keywords)
-        # globals.ALF.add_pre_modifier(GlobalTools.read_alf)
-        # globals.FEREBUS_VERSION.add_modifier(GlobalTools.read_version)
-        # globals.OPTIMISE_PROPERTY.add_pre_modifier(GlobalTools.to_lower)
-        # globals.INCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
-        # globals.EXCLUDE_NODES.add_pre_modifier(GlobalTools.split_keywords)
-
         globals.init()
-
         GLOBALS = globals
         return globals
 
@@ -2139,7 +2003,10 @@ class Globals:
         elif name in self._protected:
             ProblemFinder.protected_settings.append(name)
         else:
-            setattr(self, name, value)
+            try:
+                setattr(self, name, value)
+            except ValueError as e:
+                ProblemFinder.incorrect_settings[name] = e
 
     def get(self, name):
         return getattr(self, name, None)
@@ -2178,11 +2045,7 @@ class Globals:
 
     @property
     def config_variables(self):
-        config_variables = []
-        for key, val in self.__dict__.items():
-            if isinstance(val, GlobalVariable) and not val.hidden:
-                config_variables += [key]
-        return config_variables
+        return [g for g in self.global_variables if g in self._in_config.keys()]
 
     @property
     def global_variables(self):
@@ -2203,40 +2066,12 @@ class Globals:
             for formatter in self._formatters.get(name, []):
                 value = formatter(value)
             for check in self._checkers.get(name, []):
-                ok = check(value)
-                if not ok: return
+                check(value) # Should raise error if incorrect
 
             if name == "ALF":
-                Atoms.ALF = value
+                Atoms.ALF = value # Make sure Atoms.ALF and GLOBALS.ALF are synced
 
         super(Globals, self).__setattr__(name, value)
-
-    # def __setattr__(self, name, value):
-    #     print(name, value)
-    #     self.__dict__[name] = value
-    #     if name in self.global_variables:
-    #         self.__dict__[name].value = value
-    #     else:
-    #         if type(value) in [list, tuple] and type(value[-1]) in [
-    #             type,
-    #             *Globals.types,
-    #         ]:
-    #             if len(value) > 2:
-    #                 self.__dict__[name] = GlobalVariable(
-    #                     name, value[:-1], value[-1]
-    #                 )
-    #             else:
-    #                 self.__dict__[name] = GlobalVariable(
-    #                     name, value[0], value[-1]
-    #                 )
-    #         else:
-    #             self.__dict__[name] = GlobalVariable(name, value, type(value))
-
-    # def __getattr__(self, attr):
-    #     if attr in self.global_variables:
-    #         return self.__dict__[attr].value
-    #     else:
-    #         return self.__dict__[attr]
 
 
 class Colors:
@@ -3481,6 +3316,8 @@ class Problem:
 
 class ProblemFinder:
     unknown_settings = []
+    protected_settings = []
+    incorrect_settings = {}
 
     def __init__(self):
         self.problems = []
@@ -3530,6 +3367,24 @@ class ProblemFinder:
                     name=f"Unknown setting found in config",
                     problem=f"Unknown setting: {setting}",
                     solution="See documentation or check [o]ptions [settings] for full list of settings",
+                )
+            )
+
+        for setting in ProblemFinder.protected_settings:
+            self.add(
+                Problem(
+                    name=f"Tried to modify protected setting in config",
+                    problem=f"Protected setting: {setting}",
+                    solution="This setting cannot be modified in config, remove from config",
+                )
+            )
+    
+        for setting, error in ProblemFinder.incorrect_settings.items():
+            self.add(
+                Problem(
+                    name=f"Setting variable ({setting}) to incorrect value",
+                    problem=f"{error}",
+                    solution="Consult documentation to check allowed values",
                 )
             )
 
@@ -12437,7 +12292,7 @@ class SettingsTools:
             auto_close=True,
         )
         for i, allowed_value in enumerate(
-            SettingsTools.edit_var.allowed_values
+            Globals._allowed_values[SettingsTools.edit_var]
         ):
             choose_menu.add_option(
                 str(i + 1),
@@ -12456,16 +12311,16 @@ class SettingsTools:
         menu.add_message(f"Type:    {GLOBALS.__annotations__[SettingsTools.edit_var].__name__}")
         menu.add_message(f"Default: {GLOBALS._defaults[SettingsTools.edit_var]}")
         menu.add_space()
-        # menu.add_message(f"Hidden:  {SettingsTools.edit_var.hidden}")
-        # menu.add_message(f"Changed: {SettingsTools.edit_var.changed}")
+        menu.add_message(f"Protected:  {SettingsTools.edit_var in Globals._protected}")
+        menu.add_message(f"Changed: {SettingsTools.edit_var != Globals._defaults[SettingsTools.edit_var]}")
         menu.add_option("e", "Edit value of setting", SettingsTools.edit_value)
         menu.add_option(
             "d", "Revert to default value", SettingsTools.set_default
         )
-        # if SettingsTools.edit_var.allowed_values:
-        #     menu.add_option(
-        #         "c", "Choose from allowed values", SettingsTools.choose_value
-        #     )
+        if SettingsTools.edit_var in Globals._allowed_values.keys():
+            menu.add_option(
+                "c", "Choose from allowed values", SettingsTools.choose_value
+            )
         menu.add_final_options()
 
     @staticmethod
