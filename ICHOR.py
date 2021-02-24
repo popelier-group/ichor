@@ -1680,6 +1680,15 @@ class Tree:
 
 class GlobalTools:
     @staticmethod
+    def global_parser(func):
+        def wrapper(val):
+            if val is None:
+                return val
+            else:
+                return func(val)
+        return wrapper
+
+    @staticmethod
     def cleanup_str(s):
         s = s.replace('"', "")
         s = s.replace("'", "")
@@ -1695,6 +1704,7 @@ class GlobalTools:
         return s.lower()
 
     @staticmethod
+    @GlobalTools.global_parser
     def split_keywords(keywords):
         split_keywords = []
         if isinstance(keywords, str):
@@ -1709,6 +1719,7 @@ class GlobalTools:
         return split_keywords
 
     @staticmethod
+    @GlobalTools.global_parser
     def read_alf(alf):
         if isinstance(alf, str):
             alf = ast.literal_eval(alf)
@@ -1717,22 +1728,27 @@ class GlobalTools:
         return alf
 
     @staticmethod
+    @GlobalTools.global_parser
     def read_version(strver):
         return Version(strver)
 
     @staticmethod
+    @GlobalTools.global_parser
     def parse_str(inp):
         return str(inp)
 
     @staticmethod
+    @GlobalTools.global_parser
     def parse_bool(inp):
         return UsefulTools.check_bool(inp)
 
     @staticmethod
+    @GlobalTools.global_parser
     def parse_int(inp):
         return int(inp)
 
     @staticmethod
+    @GlobalTools.global_parser
     def parse_float(inp):
         return float(inp)
 
@@ -1886,7 +1902,7 @@ class Globals:
 
     def __init__(self):
         self.UID = Arguments.uid
-        
+
         # Set Protected Variables
         self._protected = [
             "FILE_STRUCTURE",
