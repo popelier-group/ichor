@@ -1686,6 +1686,7 @@ def global_parser(func):
             return func(val)
     return wrapper
 
+
 def global_formatter(func):
     def wrapper(val):
         if func.__annotations__:
@@ -8920,7 +8921,7 @@ def standardised_cyclic_cdist(xa, xb, xstd):
             diff[mask] = (diff[mask] + np.pi / xstd[mask]) % (
                 2 * np.pi / xstd[mask]
             ) - np.pi / xstd[mask]
-            result[i, j] = np.sqrt(sum(diff * diff))
+            result[i, j] = np.sqrt(np.sum(diff * diff))
     return result
 
 
