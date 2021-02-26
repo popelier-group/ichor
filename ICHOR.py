@@ -12405,23 +12405,6 @@ class RMSETools(AnalysisTools):
 
 
 class SetupTools:
-    # @staticmethod
-    # def directories():
-    #     for directory in SetupTools.sets:
-    #         dir_path = GLOBALS.FILE_STRUCTURE[directory]
-    #         empty = False
-    #         if UsefulTools.check_bool(
-    #             input(f"Setup Directory: {dir_path} [Y/N]")
-    #         ):
-    #             if os.path.isdir(dir_path):
-    #                 print()
-    #                 print(f"Warning: {dir_path} exists")
-    #                 empty = UsefulTools.check_bool(
-    #                     input(f"Would you like to empty {dir_path}? [Y/N]")
-    #                 )
-    #             FileTools.mkdir(dir_path, empty=empty)
-    #         print()
-
     @staticmethod
     def make_set_min_max(points, atom=1):
         set_points = []
@@ -12457,22 +12440,6 @@ class SetupTools:
         rnge = list(set(list(points.range) + added_points))
         return random.sample(rnge, min(len(rnge), npoints))
 
-    # @staticmethod
-    # def get_points(points, method=None, *args, **kwargs):
-    #     methods = {
-    #         "min_max": SetupTools.make_set_min_max,
-    #         "min_max_mean": SetupTools.make_set_min_max_mean,
-    #         "random": SetupTools.make_set_random,
-    #     }
-
-    #     if method is None:
-    #         method = "min_max_mean"
-
-    #     points_to_add = methods[method](points, *args, **kwargs)
-
-    #     points_to_add = list(set(points_to_add))
-    #     return points_to_add
-
     @staticmethod
     def make_set(set_to_make, points, method, npoints):
         set_name = UsefulTools.prettify_string(set_to_make)
@@ -12503,7 +12470,6 @@ class SetupTools:
         dstdir = GLOBALS.FILE_STRUCTURE[set_to_make]
         points.to_set(dstdir, points_to_add)
 
-    # TODO - Points -> Set
     @staticmethod
     @UsefulTools.external_function()
     def make_sets(
