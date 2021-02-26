@@ -1678,6 +1678,80 @@ class Tree:
         return str(self._dict[id])
 
 
+class FileStructure(Tree):
+    def __init__(self):
+        super().__init__()
+
+        self.add("TRAINING_SET", "training_set")
+        self.add("SAMPLE_POOL", "sample_pool")
+        self.add("VALIDATION_SET", "validation_set")
+        self.add("FEREBUS", "ferebus")
+        self.add("MODELS", "models", parent="ferebus")
+        self.add("MODELS", "remake-models")
+        self.add("LOG", "log")
+        self.add("PROGRAMS", "programs")
+        self.add("OPT", "opt")
+        self.add("CP2K", "cp2k")
+        self.add("PROPERTIES", "properties")
+        self.add("ATOMS", "atoms")
+
+        self.add("DLPOLY", "dlpoly")
+        self.add("GJF", "dlpoly_gjf", parent="dlpoly")
+
+        self.add(".DATA", "data")
+        self.add("data", "data_file", parent="data")
+
+        self.add("JOBS", "jobs", parent="data")
+        self.add("jid", "jid", parent="jobs")
+        self.add("DATAFILES", "datafiles", parent="jobs")
+
+        self.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
+        self.add("alpha", "alpha", parent="adaptive_sampling")
+        self.add("cv_errors", "cv_errors", parent="adaptive_sampling")
+
+        self.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
+        self.add(
+            "properties.pid", "properties_pid", parent="properties_daemon"
+        )
+        self.add(
+            "properties.out", "properties_stdout", parent="properties_daemon"
+        )
+        self.add(
+            "properties.err", "properties_stderr", parent="properties_daemon"
+        )
+
+        self.add("ATOMS", "atoms_daemon", parent="adaptive_sampling")
+        self.add("atoms.pid", "atoms_pid", parent="atoms_daemon")
+        self.add("atoms.out", "atoms_stdout", parent="atoms_daemon")
+        self.add("atoms.err", "atoms_stderr", parent="atoms_daemon")
+
+        self.add("counter", "counter", parent="adaptive_sampling")
+
+        self.add("FILES_REMOVED", "file_remover_daemon", parent="data")
+        self.add(
+            "file_remover.pid",
+            "file_remover_pid",
+            parent="file_remover_daemon",
+        )
+        self.add(
+            "file_remover.out",
+            "file_remover_stdout",
+            parent="file_remover_daemon",
+        )
+        self.add(
+            "file_remover.err",
+            "file_remover_stderr",
+            parent="file_remover_daemon",
+        )
+
+        self.add("SCRIPTS", "scripts", parent="data")
+        self.add("OUTPUTS", "outputs", parent="scripts")
+        self.add("ERRORS", "errors", parent="scripts")
+
+    def modify(self, node_name, node_value):
+        self._dict[node_name].name = node_value
+
+
 def global_parser(func):
     def wrapper(val):
         if val is None:
@@ -1824,7 +1898,7 @@ class Globals:
     BOAQ: str = "gs20"
     IASMESH: str = "fine"
 
-    FILE_STRUCTURE: Tree = Tree()  # Don't change
+    FILE_STRUCTURE: FileStructure = FileStructure()  # Don't change
 
     TRAINING_POINTS: int = 500
     SAMPLE_POINTS: int = 9000
@@ -1908,6 +1982,8 @@ class Globals:
     UID: str = Arguments.uid
 
     IQA_MODELS: bool = False
+
+    DROP_N_COMPUTE: bool = False
 
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
@@ -2028,7 +2104,7 @@ class Globals:
     def init(self):
         global tqdm
 
-        self.FILE_STRUCTURE = FileTools.setup_file_structure()
+        # self.FILE_STRUCTURE = FileTools.setup_file_structure()
 
         # Set Machine Name
         machine_name = platform.node()
@@ -2040,6 +2116,11 @@ class Globals:
             self.MACHINE = "ffluxlab"
         else:
             self.MACHINE = "local"
+
+        # Uncomment this when drop-n-compute is activated
+        # # Add to list of drop-n-compute-services as they're added
+        # if self.MACHINE in ["csf3"]:
+        #     self.DROP_N_COMPUTE = True
 
         # SGE settings
         self.SGE = "SGE_ROOT" in os.environ.keys()
@@ -4784,6 +4865,29 @@ class AutoTools:
         )
 
     @staticmethod
+    def submit_ichor_make_sets(jid=None):
+        xyz_files = FileTools.get_files_in(".", "*.xyz")
+        if len(xyz_files) == 0:
+            printq("Error: No xyz file or TRAINING_SET found")
+        elif len(xyz_files) > 1:
+            printq("Error: Too many xyz files found")
+        return AutoTools.submit_ichor(
+            "make_sets",
+            xyz_files[0],                  # points_location
+            True,                          # make_training_set
+            GLOBALS.TRAINING_SET_METHOD,   # training_set_method
+            GLOBALS.TRAINING_POINTS,       # n_training_points
+            True,                          # make_sample_pool
+            GLOBALS.SAMPLE_POOL_METHOD,    # sample_pool_method
+            GLOBALS.SAMPLE_POINTS,         # n_sample_points
+            True,                          # make_validation_set
+            GLOBALS.VALIDATION_SET_METHOD, # validation_set_method
+            GLOBALS.VALIDATION_POINTS,     # n_validation_points
+            submit=True, 
+            hold=jid
+        )
+
+    @staticmethod
     def submit_ichor_s_curves(
         predict_property, validation_set, models, output_file
     ):
@@ -4909,30 +5013,19 @@ class AutoTools:
         FileTools.clear_log()
         FileTools.clear_script_outputs()
         UsefulTools.set_uid()
-
         UsefulTools.suppress_tqdm()
 
         GLOBALS.IQA_MODELS = str(GLOBALS.OPTIMISE_PROPERTY) == "iqa"
+        ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
 
-        if not FileTools.dir_exists(GLOBALS.FILE_STRUCTURE["training_set"]):
-            print("Making Sets")
-            xyz_files = FileTools.get_files_in(".", "*.xyz")
-            if len(xyz_files) == 0:
-                printq("Error: No xyz file or TRAINING_SET found")
-            elif len(xyz_files) > 1:
-                printq("Error: Too many xyz files found")
-            SetupTools.make_sets(
-                points_location=xyz_files[0],
-                make_training_set=True,
-                training_set_method=GLOBALS.TRAINING_SET_METHOD,
-                n_training_points=GLOBALS.TRAINING_POINTS,
-                make_sample_pool=True,
-                sample_pool_method=GLOBALS.SAMPLE_POOL_METHOD,
-                n_sample_points=GLOBALS.SAMPLE_POINTS,
-                make_validation_set=True,
-                validation_set_method=GLOBALS.VALIDATION_SET_METHOD,
-                n_validation_points=GLOBALS.VALIDATION_POINTS,
-            )
+        jid = None
+
+        if not FileTools.dir_exists(ts_dir):
+            script_name, jid = AutoTools.submit_ichor_make_sets()
+            npoints = SetupTools.get_npoints(GLOBALS.TRAINING_SET_METHOD)
+        else:
+            training_set = Set(ts_dir)
+            npoints = len(training_set)
 
         order = [
             AutoTools.submit_ichor_gjfs,
@@ -4944,12 +5037,7 @@ class AutoTools:
             AutoTools.submit_ichor_errors,
         ]
 
-        jid = None
-        training_set = Set(GLOBALS.FILE_STRUCTURE["training_set"])
-        npoints = len(training_set)
-
         logger.info("Starting ICHOR Auto Run")
-
         with DataLock():
             for i in range(GLOBALS.MAX_ITERATION):
                 for func in order:
@@ -12469,6 +12557,20 @@ class SetupTools:
         points_to_add = list(set(points_to_add))
         dstdir = GLOBALS.FILE_STRUCTURE[set_to_make]
         points.to_set(dstdir, points_to_add)
+
+    @staticmethod
+    def get_npoints(methods, npoints):
+        max_points = 0
+        if "min_max_mean" in methods:
+            # 3 x nfeats 3(3N-6)
+            max_points += 3*(3*len(GLOBALS.ALF)-6)
+        if "min_max" in methods:
+            # 2 x nfeats 2(3N-6)
+            max_points += 3*(3*len(GLOBALS.ALF)-6)
+        if "random" in methods:
+            # generates npoints random points
+            max_points += npoints
+        return max_points
 
     @staticmethod
     @UsefulTools.external_function()
