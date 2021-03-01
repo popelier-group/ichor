@@ -2522,6 +2522,8 @@ class Globals:
     ALF: List[List[int]] = []
     ATOMS: Atoms = None
 
+    CWD: str = os.getcwd()
+
     MAX_ITERATION: int = 1
     POINTS_PER_ITERATION: int = 1
 
@@ -4937,7 +4939,7 @@ class SubmissionScript:
 
         with open(self.fname, "w") as f:
             f.write("#!/bin/bash -l\n")
-            f.write("#$ -cwd\n")
+            f.write(f"#$ -wd {GLOBALS.CWD}\n")
             f.write(f"#$ -o {self.stdout}\n")
             f.write(f"#$ -e {self.stderr}\n")
             for option in self.options:
