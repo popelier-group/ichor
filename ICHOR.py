@@ -1564,6 +1564,38 @@ class UsefulTools:
         return wrapper
 
 
+class TypeTools:
+    @staticmethod
+    def to_int(inp):
+        return int(inp)
+
+    @staticmethod
+    def to_float(inp):
+        return float(inp)
+
+    @staticmethod
+    def to_str(inp):
+        return str(inp)
+
+    @staticmethod
+    def to_bool(inp):
+        return UsefulTools.check_bool(inp)
+
+    @staticmethod
+    def to_str_list(inp):
+        inp = inp.replace("[", "").replace("]", "")
+        def cleanup_str(s):
+            return s.replace("\"", "").replace("'", "")
+        return [cleanup_str(s) for s in inp.split(",")]
+
+    conversions = {
+        int: to_int,
+        float: to_float,
+        str: to_str,
+        List[str]: to_str_list,
+    }
+
+
 class Arguments:
     config_file = "config.properties"
     uid = UsefulTools.get_uid()
@@ -5022,7 +5054,7 @@ class AutoTools:
 
         if not FileTools.dir_exists(ts_dir):
             script_name, jid = AutoTools.submit_ichor_make_sets()
-            npoints = SetupTools.get_npoints(GLOBALS.TRAINING_SET_METHOD)
+            npoints = SetupTools.get_npoints(GLOBALS.TRAINING_SET_METHOD, GLOBALS.TRAINING_POINTS)
         else:
             training_set = Set(ts_dir)
             npoints = len(training_set)
@@ -12575,16 +12607,16 @@ class SetupTools:
     @staticmethod
     @UsefulTools.external_function()
     def make_sets(
-        points_location=None,
-        make_training_set=None,
-        training_set_method=["min_max_mean"],
-        n_training_points=-1,
-        make_sample_pool=None,
-        sample_pool_method=["random"],
-        n_sample_points=-1,
-        make_validation_set=None,
-        validation_set_method=["random"],
-        n_validation_points=-1,
+        points_location: str = None,
+        make_training_set: bool = None,
+        training_set_method: List[str] = ["min_max_mean"],
+        n_training_points: int = -1,
+        make_sample_pool: bool = None,
+        sample_pool_method: List[str] = ["random"],
+        n_sample_points: int = -1,
+        make_validation_set: bool = None,
+        validation_set_method: List[str] = ["random"],
+        n_validation_points: int = -1,
     ):
         if points_location is None:
             t = TabCompleter()
@@ -13554,6 +13586,10 @@ if __name__ == "__main__":
     atexit.register(FileRemover.run_daemon)
 
     if Arguments.call_external_function is not None:
+        if hasattr(Arguments.call_external_function, "__annotations__"):
+            if len(Arguments.call_external_function_args) <= len(Arguments.call_external_function.__annotations__):
+                for i, (var_name, var_type) in enumerate(Arguments.call_external_function.__annotations__.items()):
+                    Arguments.call_external_function_args[i] = TypeTools.conversions[var_type](Arguments.call_external_function_args[i])
         Arguments.call_external_function(
             *Arguments.call_external_function_args
         )
