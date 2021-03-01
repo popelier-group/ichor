@@ -4864,8 +4864,8 @@ class SubmissionScript:
         self._modules = []
         self.parallel_environments = ParallelEnvironments()
 
-        self.stdout = GLOBALS.FILE_STRUCTURE["outputs"]
-        self.stderr = GLOBALS.FILE_STRUCTURE["errors"]
+        self.stdout = os.path.abspath(GLOBALS.FILE_STRUCTURE["outputs"])
+        self.stderr = os.path.abspath(GLOBALS.FILE_STRUCTURE["errors"])
 
         self.directory = directory
         if not self.directory:
