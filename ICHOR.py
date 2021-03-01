@@ -1744,6 +1744,7 @@ class FileStructure(Tree):
         self.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
         self.add("alpha", "alpha", parent="adaptive_sampling")
         self.add("cv_errors", "cv_errors", parent="adaptive_sampling")
+        self.add("counter", "counter", parent="adaptive_sampling")
 
         self.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
         self.add(
@@ -5674,6 +5675,10 @@ class AutoTools:
         AutoTools.run()
 
     @staticmethod
+    def setup_counter():
+
+
+    @staticmethod
     def run():
         FileTools.clear_log()
         FileTools.clear_script_outputs()
@@ -5684,6 +5689,20 @@ class AutoTools:
         ts_dir = GLOBALS.FILE_STRUCTURE["training_set"]
 
         jid = None
+
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["adaptive_sampling"])
+        counter_loc = GLOBALS.FILE_STRUCTURE["counter"]
+        if os.path.exists(counter_loc):
+            with open(counter_loc, "r") as f:
+                counter = int(f.readline())
+            if counter > 0:
+                # TODO: Convert this to fatal error
+                print("Error: ICHOR may already be running?")
+                print(f"If this is a mistake delete file {counter_loc} and rerun")
+                quit()
+
+        with open(counter_loc, "w") as f:
+            f.write("0")
 
         if not FileTools.dir_exists(ts_dir):
             if not GLOBALS.ATOMS:
@@ -13330,6 +13349,16 @@ def calculate_errors(models_directory, sample_pool_directory):
         training_set = Set(GLOBALS.FILE_STRUCTURE["training_set"])
         training_set = training_set | points
         training_set.format_gjfs()
+
+    if os.path.exists(GLOBALS.FILE_STRUCTURE["counter"]):
+        with open(GLOBALS.FILE_STRUCTURE["counter"], "r") as f:
+            counter = int(f.readline())
+
+        counter += 1
+
+        if counter <= MAX_ITERATION:
+            with open(GLOBALS.FILE_STRUCTURE["counter"], "w") as f:
+                f.write(f"{counter}")
 
 
 def dlpoly_analysis():
