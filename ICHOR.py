@@ -1788,6 +1788,609 @@ class FileStructure(Tree):
         self._dict[node_name].name = node_value
 
 
+class Point:
+    counter = it.count(1)
+
+    def __init__(self):
+        # Flag whether to use point or not
+        # Defaults to true
+        _use = True
+
+    @property
+    def use(self):
+        try:
+            return self._use
+        except:
+            return True
+
+    @property
+    def atoms(self):
+        try:
+            return self.gjf.atoms
+        except:
+            pass
+
+        try:
+            return self.wfn.atoms
+        except:
+            pass
+
+        raise PointError.AtomsNotDefined()
+
+    @property
+    def features(self):
+        return self.atoms.features
+
+    @property
+    def features_dict(self):
+        return self.atoms.features_dict
+
+    @property
+    def iqa(self):
+        return {_int.atom: _int.iqa for _int in self.ints}
+
+    @property
+    def natoms(self):
+        return len(self.atoms)
+
+    @property
+    def dirname(self):
+        return os.path.dirname(self.path)
+
+    def exists(self):
+        return os.path.exists(self.path)
+
+    def move(self, dst):
+        raise PointError.CannotMove()
+
+    def get_property(self, property_names):
+        properties = {}
+        if not isinstance(property_names, list):
+            property_names = [property_names]
+        for atom, data in self.ints.items():
+            for property_name in property_names:
+                property_ = data.__getattr__(property_name)
+                if not isinstance(property_, dict):
+                    property_ = {property_name: property_}
+                if atom not in properties.keys():
+                    properties[atom] = {}
+                properties[atom].update(property_)
+        return properties
+
+    def get_true_value(self, value_to_get, atoms=False):
+        properties = self.get_property(value_to_get)
+        values = [0] * len(self)
+        for atom, data in properties.items():
+            values[UsefulTools.get_number(atom) - 1] = data[value_to_get]
+
+        return values if atoms else sum(values)
+
+    def calculate_recovery_error(self):
+        return np.abs(self.wfn.energy - self.get_true_value("iqa"))
+
+    def get_integration_errors(self):
+        return {
+            atom: data.integration_error for atom, data in self.ints.items()
+        }
+
+    def __len__(self):
+        return len(self.atoms)
+
+    def __getitem__(self, i):
+        return self.atoms[i]
+
+    def __bool__(self):
+        return self.path != ""
+
+
+class Atom:
+    ang2bohr = 1.88971616463
+    counter = it.count(1)
+
+    def __init__(self, coordinate_line):
+        self.atom_type = ""
+        self.atom_number = next(Atom.counter)
+
+        self.x = 0
+        self.y = 0
+        self.z = 0
+
+        self.read_input(coordinate_line)
+
+        self._bonds = []
+        self.__level = it.count(0)
+
+        self.x_axis = None
+        self.xy_plane = None
+
+        self.features = []
+        self.properties = None
+
+    def read_input(self, coordinate_line):
+        if isinstance(coordinate_line, str):
+            find_atom = coordinate_line.split()
+            self.atom_type = find_atom[0]
+            coordinate_line = next(
+                re.finditer(
+                    r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line
+                )
+            ).group()
+            coordinate_line = re.finditer(
+                r"[+-]?\d+.\d+([Ee][+-]?\d+)?", coordinate_line
+            )
+            self.x = float(next(coordinate_line).group())
+            self.y = float(next(coordinate_line).group())
+            self.z = float(next(coordinate_line).group())
+        elif isinstance(coordinate_line, Atom):
+            self = coordinate_line
+        elif isinstance(coordinate_line, (list, tuple)):
+            if len(coordinate_line) == 3:
+                self.atom_type = "H"
+                self.x = float(coordinate_line[0])
+                self.y = float(coordinate_line[1])
+                self.z = float(coordinate_line[2])
+            elif len(coordinate_line) == 4:
+                self.atom_type = coordinate_line[0]
+                self.x = float(coordinate_line[1])
+                self.y = float(coordinate_line[2])
+                self.z = float(coordinate_line[3])
+
+    def sq_dist(self, other):
+        return sum(
+            (icoord - jcoord) ** 2
+            for icoord, jcoord in zip(self.coordinates, other.coordinates)
+        )
+
+    def dist(self, other):
+        return np.sqrt(self.sq_dist(other))
+
+    def xdiff(self, other):
+        return other.x - self.x
+
+    def ydiff(self, other):
+        return other.y - self.y
+
+    def zdiff(self, other):
+        return other.z - self.z
+
+    def vec_to(self, other):
+        return [self.xdiff(other), self.ydiff(other), self.zdiff(other)]
+
+    def angle(self, atom1, atom2):
+        temp = (
+            self.xdiff(atom1) * self.xdiff(atom2)
+            + self.ydiff(atom1) * self.ydiff(atom2)
+            + self.zdiff(atom1) * self.zdiff(atom2)
+        )
+        return math.acos((temp / (self.dist(atom1) * self.dist(atom2))))
+
+    def set_bond(self, jatom):
+        if jatom not in self._bonds:
+            self._bonds.append(jatom)
+
+    def get_priorty(self, level):
+        atoms = Atoms(self)
+        for _ in range(level):
+            atoms_to_add = []
+            for atom in atoms:
+                for bonded_atom in atom.bonds:
+                    if bonded_atom not in atoms:
+                        atoms_to_add.append(bonded_atom)
+            atoms.add(atoms_to_add)
+        return atoms.priority
+
+    def reset_level(self):
+        self.__level = it.count(0)
+
+    def add_alf_atom(self, atom):
+        if self.x_axis is None:
+            self.x_axis = atom
+        else:
+            self.xy_plane = atom
+
+    def C_1k(self):
+        return [
+            self.xdiff(self.x_axis) / self.dist(self.x_axis),
+            self.ydiff(self.x_axis) / self.dist(self.x_axis),
+            self.zdiff(self.x_axis) / self.dist(self.x_axis),
+        ]
+
+    def C_2k(self):
+        xdiff1 = self.xdiff(self.x_axis)
+        ydiff1 = self.ydiff(self.x_axis)
+        zdiff1 = self.zdiff(self.x_axis)
+
+        xdiff2 = self.xdiff(self.xy_plane)
+        ydiff2 = self.ydiff(self.xy_plane)
+        zdiff2 = self.zdiff(self.xy_plane)
+
+        sigma_fflux = -(
+            xdiff1 * xdiff2 + ydiff1 * ydiff2 + zdiff1 * zdiff2
+        ) / (xdiff1 * xdiff1 + ydiff1 * ydiff1 + zdiff1 * zdiff1)
+
+        y_vec1 = sigma_fflux * xdiff1 + xdiff2
+        y_vec2 = sigma_fflux * ydiff1 + ydiff2
+        y_vec3 = sigma_fflux * zdiff1 + zdiff2
+
+        yy = math.sqrt(y_vec1 * y_vec1 + y_vec2 * y_vec2 + y_vec3 * y_vec3)
+
+        y_vec1 /= yy
+        y_vec2 /= yy
+        y_vec3 /= yy
+
+        return [y_vec1, y_vec2, y_vec3]
+
+    def C_3k(self, C_1k, C_2k):
+        xx3 = C_1k[1] * C_2k[2] - C_1k[2] * C_2k[1]
+        yy3 = C_1k[2] * C_2k[0] - C_1k[0] * C_2k[2]
+        zz3 = C_1k[0] * C_2k[1] - C_1k[1] * C_2k[0]
+
+        return [xx3, yy3, zz3]
+
+    def calculate_features(self, atoms, unit="bohr"):
+        ang2bohr = Atom.ang2bohr
+        if "ang" in unit.lower():
+            ang2bohr = 1.0
+
+        x_bond = self.dist(self.x_axis)
+        xy_bond = self.dist(self.xy_plane)
+        angle = self.angle(self.x_axis, self.xy_plane)
+
+        self.features += [x_bond * ang2bohr]
+        self.features += [xy_bond * ang2bohr]
+        self.features += [angle]
+
+        for jatom in atoms:
+            if jatom.num in self.alf_nums:
+                continue
+            self.features += [self.dist(jatom) * ang2bohr]
+
+            C_1k = self.C_1k()
+            C_2k = self.C_2k()
+            C_3k = self.C_3k(C_1k, C_2k)
+
+            xdiff = self.xdiff(jatom)
+            ydiff = self.ydiff(jatom)
+            zdiff = self.zdiff(jatom)
+
+            zeta1 = C_1k[0] * xdiff + C_1k[1] * ydiff + C_1k[2] * zdiff
+            zeta2 = C_2k[0] * xdiff + C_2k[1] * ydiff + C_2k[2] * zdiff
+            zeta3 = C_3k[0] * xdiff + C_3k[1] * ydiff + C_3k[2] * zdiff
+
+            # Calculate Theta
+            self.features += [math.acos(zeta3 / self.dist(jatom))]
+
+            # Calculate Phi
+            self.features += [math.atan2(zeta2, zeta1)]
+
+    def to_angstroms(self):
+        self.x /= Atom.ang2bohr
+        self.y /= Atom.ang2bohr
+        self.z /= Atom.ang2bohr
+
+    def to_bohr(self):
+        self.x *= Atom.ang2bohr
+        self.y *= Atom.ang2bohr
+        self.z *= Atom.ang2bohr
+
+    @property
+    def priority(self):
+        level = next(self.__level)
+        return self.get_priorty(level)
+
+    @property
+    def bonds(self):
+        return Atoms(self._bonds)
+
+    @property
+    def mass(self):
+        return Constants.type2mass[self.atom_type]
+
+    @property
+    def radius(self):
+        return Constants.type2rad[self.atom_type]
+
+    @property
+    def coordinates(self):
+        return [self.x, self.y, self.z]
+
+    @property
+    def atom_num(self):
+        return f"{self.atom_type}{self.atom_number}"
+
+    @property
+    def atom(self):
+        return f"{self.atom_type}"
+
+    @property
+    def atom_num_coordinates(self):
+        return [self.atom_num] + self.coordinates
+
+    @property
+    def atom_coordinates(self):
+        return [self.atom] + self.coordinates
+
+    @property
+    def coordinates_string(self):
+        width = str(16)
+        precision = str(8)
+        return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
+
+    @property
+    def num(self):
+        return self.atom_number
+
+    @property
+    def type(self):
+        return self.atom_type
+
+    @property
+    def alf(self):
+        alf = [self]
+        if self.x_axis is not None:
+            alf.append(self.x_axis)
+        if self.xy_plane is not None:
+            alf.append(self.xy_plane)
+        return alf
+
+    @property
+    def alf_nums(self):
+        return [atom.num for atom in self.alf]
+
+    def __getattr__(self, attr):
+        try:
+            return self.__dict__[attr]
+        except KeyError:
+            return getattr(self.properties, attr)
+
+    def __str__(self):
+        return f"{self.atom_type:<3s}{self.coordinates_string}"
+
+    def __repr__(self):
+        return str(self)
+
+    def __eq__(self, other):
+        return self.atom_num == other.atom_num
+
+    def __hash__(self):
+        return hash(str(self.num) + str(self.coordinates_string))
+
+    def __sub__(self, other):
+        self.x -= other.x
+        self.y -= other.y
+        self.z -= other.z
+        return self
+
+
+class Atoms(Point):
+    ALF = []
+
+    def __init__(self, atoms=None):
+        self._atoms = []
+        self._connectivity = None
+        self._centred = False
+        self.finish()
+        super().__init__()
+
+        if atoms is not None:
+            self.add(atoms)
+
+    def add(self, atom):
+        if isinstance(atom, Atom):
+            self._atoms.append(atom)
+        elif isinstance(atom, str):
+            self.add(Atom(atom))
+        elif isinstance(atom, (list, Atoms)):
+            for a in atom:
+                self.add(a)
+
+    def finish(self):
+        Atom.counter = it.count(1)
+        self.set_alf()
+
+    def connect(self, iatom, jatom):
+        iatom.set_bond(jatom)
+        jatom.set_bond(iatom)
+
+    def to_angstroms(self):
+        for atom in self:
+            atom.to_angstroms()
+
+    def to_bohr(self):
+        for atom in self:
+            atom.to_bohr()
+
+    def calculate_alf(self):
+        self.connectivity
+        for iatom in self:
+            for _ in range(2):
+                queue = iatom.bonds - iatom.alf
+                if queue.empty:
+                    for atom in iatom.bonds:
+                        queue.add(atom.bonds)
+                    queue -= iatom.alf
+                iatom.add_alf_atom(queue.max_priority)
+        Atoms.ALF = self.alf
+        self.set_alf()
+
+    def set_alf(self):
+        # self._atoms = sorted(self._atoms, key=lambda x: x.num)
+        for atom, atom_alf in zip(self, Atoms.ALF):
+            atom.x_axis = self[atom_alf[1] - 1]
+            atom.xy_plane = self[atom_alf[2] - 1]
+
+    def calculate_features(self):
+        if not Atoms.ALF:
+            self.calculate_alf()
+        self.set_alf()
+        for atom in self:
+            atom.calculate_features(self)
+
+    def centre(self, centre_atom=None):
+        if isinstance(centre_atom, int):
+            centre_atom = self[centre_atom]
+        elif centre_atom is None:
+            centre_atom = self.centroid
+
+        for i, atom in enumerate(self):
+            atom -= centre_atom
+
+        self._centred = True
+
+    def center(self, center_atom=None):
+        self.centre(centre_atom=center_atom)
+
+    def rotate(self, R):
+        coordinates = R.dot(self.coordinates.T).T
+        for atom, coordinate in zip(self, coordinates):
+            atom.x = coordinate[0]
+            atom.y = coordinate[1]
+            atom.z = coordinate[2]
+
+    def _rmsd(self, other):
+        dist = 0
+        for iatom, jatom in zip(self, other):
+            dist += iatom.sq_dist(jatom)
+        return np.sqrt(dist / len(self))
+
+    def rmsd(self, other):
+        if not self._centred:
+            self.centre()
+        if not other._centred:
+            other.centre()
+
+        P = self.coordinates
+        Q = other.coordinates
+        H = self.coordinates.T.dot(other.coordinates)
+
+        V, S, W = np.linalg.svd(H)
+        d = (np.linalg.det(V) * np.linalg.det(W)) < 0.0
+
+        if d:
+            S[-1] = -S[-1]
+            V[:, -1] = -V[:, -1]
+
+        R = np.dot(V, W)
+
+        other.rotate(R)
+        return self._rmsd(other)
+
+    @property
+    def coordinates(self):
+        return np.array([atom.coordinates for atom in self])
+
+    @property
+    def centroid(self):
+        coordinates = self.coordinates.T
+
+        x = np.mean(coordinates[0])
+        y = np.mean(coordinates[1])
+        z = np.mean(coordinates[2])
+
+        return Atom([x, y, z])
+
+    @property
+    def priority(self):
+        return sum(self.masses)
+
+    @property
+    def max_priority(self):
+        prev_priorities = []
+        while True:
+            priorities = [atom.priority for atom in self]
+            if (
+                priorities.count(max(priorities)) == 1
+                or prev_priorities == priorities
+            ):
+                break
+            else:
+                prev_priorities = priorities
+        for atom in self:
+            atom.reset_level()
+        return self[priorities.index(max(priorities))]
+
+    @property
+    def masses(self):
+        return [atom.mass for atom in self]
+
+    @property
+    def atoms(self):
+        return [atom.atom_num for atom in self]
+
+    @property
+    def empty(self):
+        return len(self) == 0
+
+    @property
+    @lru_cache()
+    def connectivity(self):
+        connectivity = np.zeros((len(self), len(self)))
+        for i, iatom in enumerate(self):
+            for j, jatom in enumerate(self):
+                if iatom != jatom:
+                    max_dist = 1.2 * (iatom.radius + jatom.radius)
+
+                    if iatom.dist(jatom) < max_dist:
+                        connectivity[i][j] = 1
+                        self.connect(iatom, jatom)
+
+        return connectivity
+
+    @property
+    def alf(self):
+        return [[iatom.num for iatom in atom.alf] for atom in self]
+
+    @property
+    def features(self):
+        try:
+            return self._features
+        except AttributeError:
+            self.calculate_features()
+            self._features = [atom.features for atom in self]
+            return self._features
+
+    @property
+    def features_dict(self):
+        try:
+            return self._features_dict
+        except AttributeError:
+            self.calculate_features()
+            self._features = {atom.atom_num: atom.features for atom in self}
+            return self._features
+
+    @property
+    def types(self):
+        return list(set([atom.type for atom in self]))
+
+    def __len__(self):
+        return len(self._atoms)
+
+    def __delitem__(self, i):
+        del self._atoms[i]
+
+    def __getitem__(self, i):
+        if isinstance(i, INT):
+            i = self.atoms.index(i.atom)
+        return self._atoms[i]
+
+    def __str__(self):
+        return "\n".join([str(atom) for atom in self])
+
+    def __repr__(self):
+        return str(self)
+
+    def __sub__(self, other):
+        # other = sorted(Atoms(other), key=lambda x: x.num, reverse=False)
+        for i, atom in enumerate(self):
+            for jatom in other:
+                if jatom == atom:
+                    del self[i]
+        return self
+
+    def __bool__(self):
+        return bool(self.atoms)
+
+
 def global_parser(func):
     def wrapper(val):
         if val is None:
@@ -1916,6 +2519,7 @@ class Globals:
     SYSTEM_NAME: str = "SYSTEM"
     ALF_REFERENCE_FILE: str = ""  # set automatically if not defined
     ALF: List[List[int]] = []
+    ATOMS: Atoms = None
 
     MAX_ITERATION: int = 1
     POINTS_PER_ITERATION: int = 1
@@ -2037,6 +2641,7 @@ class Globals:
             "UID",
             "IQA_MODELS",
             "MACHINE",
+            "ATOMS",
         ]
 
         # Setup Parsers
@@ -2175,47 +2780,53 @@ class Globals:
             else:
                 ProblemFinder.unknown_settings += [key]
 
+        if self.ALF_REFERENCE_FILE:
+            if not os.path.exists(self.ALF_REFERENCE_FILE):
+                logger.warning(
+                    f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative"
+                )
+                self.ALF_REFERENCE_FILE = None
+
+        if not self.ALF_REFERENCE_FILE:
+            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+                self.FILE_STRUCTURE["training_set"]
+            )
+
+        if not self.ALF_REFERENCE_FILE:
+            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+                self.FILE_STRUCTURE["sample_pool"]
+            )
+
+        if not self.ALF_REFERENCE_FILE:
+            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+                self.FILE_STRUCTURE["validation_set"]
+            )
+
+        if not self.ALF_REFERENCE_FILE:
+            xyz_files = FileTools.get_files_in(".", "*.xyz")
+            if len(xyz_files) > 0:
+                self.ALF_REFERENCE_FILE = xyz_files[0]
+
+        if self.ALF_REFERENCE_FILE:
+            filetype = Path(self.ALF_REFERENCE_FILE).suffix
+            if filetype == ".gjf":
+                self.ATOMS = GJF(
+                    str(self.ALF_REFERENCE_FILE)
+                ).read().atoms
+            elif filetype == ".xyz":
+                if len(xyz_files) == 1:
+                    self.ATOMS = Trajectory(xyz_files[0]).read(n=1)[0]
+            else:
+                logger.error(f"Unknown ALF_REFRENCE_FILE_TYPE: {filetype}")
+
         if not self.ALF:
-            if self.ALF_REFERENCE_FILE:
-                if not os.path.exists(self.ALF_REFERENCE_FILE):
-                    logger.warning(
-                        f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative"
-                    )
-                    self.ALF_REFERENCE_FILE = None
-
-            if not self.ALF_REFERENCE_FILE:
-                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                    self.FILE_STRUCTURE["training_set"]
-                )
-
-            if not self.ALF_REFERENCE_FILE:
-                logger.warning("Cannot Find Training Set GJF")
-                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                    self.FILE_STRUCTURE["sample_pool"]
-                )
-
-            if not self.ALF_REFERENCE_FILE:
-                logger.warning("Cannot Find Sample Pool GJF")
-                self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                    self.FILE_STRUCTURE["validation_set"]
-                )
-
-            if self.ALF_REFERENCE_FILE is not None:
+            if self.ATOMS:
                 try:
-                    GJF(
-                        str(self.ALF_REFERENCE_FILE)
-                    ).read().atoms.calculate_alf()
+                    self.ATOMS.calculate_alf()
                     self.ALF = Atoms.ALF
                 except:
-                    logger.error(
-                        f"Error When Calculating ALF from {self.ALF_REFERENCE_FILE}"
-                    )
-            else:
-                xyz_files = FileTools.get_files_in(".", "*.xyz")
-                if len(xyz_files) == 1:
-                    traj = Trajectory(xyz_files[0]).read(n=1)
-                    traj[0].calculate_alf()
-                    self.ALF = Atoms.ALF
+                    logger.error("Error in ALF Calculation")
+
 
     def set(self, name, value):
         name = name.upper()
@@ -3555,6 +4166,8 @@ class ProblemFinder:
     protected_settings = []
     incorrect_settings = {}
 
+    _no_reference_file = False
+
     def __init__(self):
         self.problems = []
 
@@ -3566,6 +4179,17 @@ class ProblemFinder:
                     name="ALF",
                     problem="ALF not set due to error in calculation",
                     solution="Set 'ALF_REFERENCE_FILE' or manually set 'ALF' in config file",
+                )
+            )
+
+    @UsefulTools.run_function(1.1)
+    def check_atoms(self):
+        if not self.ATOMS:
+            self.add(
+                Problem(
+                    name="ATOMS",
+                    problem="ATOMS not set due to missing reference file",
+                    solution="Set 'ALF_REFERENCE_FILE' in config file",
                 )
             )
 
@@ -4998,8 +5622,11 @@ class AutoTools:
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         if atoms == "all":
-            gjf = GJF(FileTools.get_first_gjf(directory)).read()
-            atoms = gjf.atoms.atoms
+            if not GLOBALS.ATOMS:
+                gjf = GJF(FileTools.get_first_gjf(directory)).read()
+                atoms = gjf.atoms.atoms
+            else:
+                atoms = GLOBALS.ATOMS.atoms
         elif isinstance(atoms, str):
             atoms = [atoms]
         return SubmissionTools.make_ferebus_script(
@@ -5059,6 +5686,11 @@ class AutoTools:
         jid = None
 
         if not FileTools.dir_exists(ts_dir):
+            if not GLOBALS.ATOMS:
+                # TODO: Convert this to error
+                print("Error: Need a reference structure to start Auto Run")
+                print("Specify reference file in config")
+                quit()
             script_name, jid = AutoTools.submit_ichor_make_sets()
             npoints = SetupTools.get_npoints(
                 GLOBALS.TRAINING_SET_METHOD, GLOBALS.TRAINING_POINTS
@@ -5481,609 +6113,6 @@ class PointError:
 
     class CannotMove(Exception):
         pass
-
-
-class Point:
-    counter = it.count(1)
-
-    def __init__(self):
-        # Flag whether to use point or not
-        # Defaults to true
-        _use = True
-
-    @property
-    def use(self):
-        try:
-            return self._use
-        except:
-            return True
-
-    @property
-    def atoms(self):
-        try:
-            return self.gjf.atoms
-        except:
-            pass
-
-        try:
-            return self.wfn.atoms
-        except:
-            pass
-
-        raise PointError.AtomsNotDefined()
-
-    @property
-    def features(self):
-        return self.atoms.features
-
-    @property
-    def features_dict(self):
-        return self.atoms.features_dict
-
-    @property
-    def iqa(self):
-        return {_int.atom: _int.iqa for _int in self.ints}
-
-    @property
-    def natoms(self):
-        return len(self.atoms)
-
-    @property
-    def dirname(self):
-        return os.path.dirname(self.path)
-
-    def exists(self):
-        return os.path.exists(self.path)
-
-    def move(self, dst):
-        raise PointError.CannotMove()
-
-    def get_property(self, property_names):
-        properties = {}
-        if not isinstance(property_names, list):
-            property_names = [property_names]
-        for atom, data in self.ints.items():
-            for property_name in property_names:
-                property_ = data.__getattr__(property_name)
-                if not isinstance(property_, dict):
-                    property_ = {property_name: property_}
-                if atom not in properties.keys():
-                    properties[atom] = {}
-                properties[atom].update(property_)
-        return properties
-
-    def get_true_value(self, value_to_get, atoms=False):
-        properties = self.get_property(value_to_get)
-        values = [0] * len(self)
-        for atom, data in properties.items():
-            values[UsefulTools.get_number(atom) - 1] = data[value_to_get]
-
-        return values if atoms else sum(values)
-
-    def calculate_recovery_error(self):
-        return np.abs(self.wfn.energy - self.get_true_value("iqa"))
-
-    def get_integration_errors(self):
-        return {
-            atom: data.integration_error for atom, data in self.ints.items()
-        }
-
-    def __len__(self):
-        return len(self.atoms)
-
-    def __getitem__(self, i):
-        return self.atoms[i]
-
-    def __bool__(self):
-        return self.path != ""
-
-
-class Atom:
-    ang2bohr = 1.88971616463
-    counter = it.count(1)
-
-    def __init__(self, coordinate_line):
-        self.atom_type = ""
-        self.atom_number = next(Atom.counter)
-
-        self.x = 0
-        self.y = 0
-        self.z = 0
-
-        self.read_input(coordinate_line)
-
-        self._bonds = []
-        self.__level = it.count(0)
-
-        self.x_axis = None
-        self.xy_plane = None
-
-        self.features = []
-        self.properties = None
-
-    def read_input(self, coordinate_line):
-        if isinstance(coordinate_line, str):
-            find_atom = coordinate_line.split()
-            self.atom_type = find_atom[0]
-            coordinate_line = next(
-                re.finditer(
-                    r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line
-                )
-            ).group()
-            coordinate_line = re.finditer(
-                r"[+-]?\d+.\d+([Ee][+-]?\d+)?", coordinate_line
-            )
-            self.x = float(next(coordinate_line).group())
-            self.y = float(next(coordinate_line).group())
-            self.z = float(next(coordinate_line).group())
-        elif isinstance(coordinate_line, Atom):
-            self = coordinate_line
-        elif isinstance(coordinate_line, (list, tuple)):
-            if len(coordinate_line) == 3:
-                self.atom_type = "H"
-                self.x = float(coordinate_line[0])
-                self.y = float(coordinate_line[1])
-                self.z = float(coordinate_line[2])
-            elif len(coordinate_line) == 4:
-                self.atom_type = coordinate_line[0]
-                self.x = float(coordinate_line[1])
-                self.y = float(coordinate_line[2])
-                self.z = float(coordinate_line[3])
-
-    def sq_dist(self, other):
-        return sum(
-            (icoord - jcoord) ** 2
-            for icoord, jcoord in zip(self.coordinates, other.coordinates)
-        )
-
-    def dist(self, other):
-        return np.sqrt(self.sq_dist(other))
-
-    def xdiff(self, other):
-        return other.x - self.x
-
-    def ydiff(self, other):
-        return other.y - self.y
-
-    def zdiff(self, other):
-        return other.z - self.z
-
-    def vec_to(self, other):
-        return [self.xdiff(other), self.ydiff(other), self.zdiff(other)]
-
-    def angle(self, atom1, atom2):
-        temp = (
-            self.xdiff(atom1) * self.xdiff(atom2)
-            + self.ydiff(atom1) * self.ydiff(atom2)
-            + self.zdiff(atom1) * self.zdiff(atom2)
-        )
-        return math.acos((temp / (self.dist(atom1) * self.dist(atom2))))
-
-    def set_bond(self, jatom):
-        if jatom not in self._bonds:
-            self._bonds.append(jatom)
-
-    def get_priorty(self, level):
-        atoms = Atoms(self)
-        for _ in range(level):
-            atoms_to_add = []
-            for atom in atoms:
-                for bonded_atom in atom.bonds:
-                    if bonded_atom not in atoms:
-                        atoms_to_add.append(bonded_atom)
-            atoms.add(atoms_to_add)
-        return atoms.priority
-
-    def reset_level(self):
-        self.__level = it.count(0)
-
-    def add_alf_atom(self, atom):
-        if self.x_axis is None:
-            self.x_axis = atom
-        else:
-            self.xy_plane = atom
-
-    def C_1k(self):
-        return [
-            self.xdiff(self.x_axis) / self.dist(self.x_axis),
-            self.ydiff(self.x_axis) / self.dist(self.x_axis),
-            self.zdiff(self.x_axis) / self.dist(self.x_axis),
-        ]
-
-    def C_2k(self):
-        xdiff1 = self.xdiff(self.x_axis)
-        ydiff1 = self.ydiff(self.x_axis)
-        zdiff1 = self.zdiff(self.x_axis)
-
-        xdiff2 = self.xdiff(self.xy_plane)
-        ydiff2 = self.ydiff(self.xy_plane)
-        zdiff2 = self.zdiff(self.xy_plane)
-
-        sigma_fflux = -(
-            xdiff1 * xdiff2 + ydiff1 * ydiff2 + zdiff1 * zdiff2
-        ) / (xdiff1 * xdiff1 + ydiff1 * ydiff1 + zdiff1 * zdiff1)
-
-        y_vec1 = sigma_fflux * xdiff1 + xdiff2
-        y_vec2 = sigma_fflux * ydiff1 + ydiff2
-        y_vec3 = sigma_fflux * zdiff1 + zdiff2
-
-        yy = math.sqrt(y_vec1 * y_vec1 + y_vec2 * y_vec2 + y_vec3 * y_vec3)
-
-        y_vec1 /= yy
-        y_vec2 /= yy
-        y_vec3 /= yy
-
-        return [y_vec1, y_vec2, y_vec3]
-
-    def C_3k(self, C_1k, C_2k):
-        xx3 = C_1k[1] * C_2k[2] - C_1k[2] * C_2k[1]
-        yy3 = C_1k[2] * C_2k[0] - C_1k[0] * C_2k[2]
-        zz3 = C_1k[0] * C_2k[1] - C_1k[1] * C_2k[0]
-
-        return [xx3, yy3, zz3]
-
-    def calculate_features(self, atoms, unit="bohr"):
-        ang2bohr = Atom.ang2bohr
-        if "ang" in unit.lower():
-            ang2bohr = 1.0
-
-        x_bond = self.dist(self.x_axis)
-        xy_bond = self.dist(self.xy_plane)
-        angle = self.angle(self.x_axis, self.xy_plane)
-
-        self.features += [x_bond * ang2bohr]
-        self.features += [xy_bond * ang2bohr]
-        self.features += [angle]
-
-        for jatom in atoms:
-            if jatom.num in self.alf_nums:
-                continue
-            self.features += [self.dist(jatom) * ang2bohr]
-
-            C_1k = self.C_1k()
-            C_2k = self.C_2k()
-            C_3k = self.C_3k(C_1k, C_2k)
-
-            xdiff = self.xdiff(jatom)
-            ydiff = self.ydiff(jatom)
-            zdiff = self.zdiff(jatom)
-
-            zeta1 = C_1k[0] * xdiff + C_1k[1] * ydiff + C_1k[2] * zdiff
-            zeta2 = C_2k[0] * xdiff + C_2k[1] * ydiff + C_2k[2] * zdiff
-            zeta3 = C_3k[0] * xdiff + C_3k[1] * ydiff + C_3k[2] * zdiff
-
-            # Calculate Theta
-            self.features += [math.acos(zeta3 / self.dist(jatom))]
-
-            # Calculate Phi
-            self.features += [math.atan2(zeta2, zeta1)]
-
-    def to_angstroms(self):
-        self.x /= Atom.ang2bohr
-        self.y /= Atom.ang2bohr
-        self.z /= Atom.ang2bohr
-
-    def to_bohr(self):
-        self.x *= Atom.ang2bohr
-        self.y *= Atom.ang2bohr
-        self.z *= Atom.ang2bohr
-
-    @property
-    def priority(self):
-        level = next(self.__level)
-        return self.get_priorty(level)
-
-    @property
-    def bonds(self):
-        return Atoms(self._bonds)
-
-    @property
-    def mass(self):
-        return Constants.type2mass[self.atom_type]
-
-    @property
-    def radius(self):
-        return Constants.type2rad[self.atom_type]
-
-    @property
-    def coordinates(self):
-        return [self.x, self.y, self.z]
-
-    @property
-    def atom_num(self):
-        return f"{self.atom_type}{self.atom_number}"
-
-    @property
-    def atom(self):
-        return f"{self.atom_type}"
-
-    @property
-    def atom_num_coordinates(self):
-        return [self.atom_num] + self.coordinates
-
-    @property
-    def atom_coordinates(self):
-        return [self.atom] + self.coordinates
-
-    @property
-    def coordinates_string(self):
-        width = str(16)
-        precision = str(8)
-        return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
-
-    @property
-    def num(self):
-        return self.atom_number
-
-    @property
-    def type(self):
-        return self.atom_type
-
-    @property
-    def alf(self):
-        alf = [self]
-        if self.x_axis is not None:
-            alf.append(self.x_axis)
-        if self.xy_plane is not None:
-            alf.append(self.xy_plane)
-        return alf
-
-    @property
-    def alf_nums(self):
-        return [atom.num for atom in self.alf]
-
-    def __getattr__(self, attr):
-        try:
-            return self.__dict__[attr]
-        except KeyError:
-            return getattr(self.properties, attr)
-
-    def __str__(self):
-        return f"{self.atom_type:<3s}{self.coordinates_string}"
-
-    def __repr__(self):
-        return str(self)
-
-    def __eq__(self, other):
-        return self.atom_num == other.atom_num
-
-    def __hash__(self):
-        return hash(str(self.num) + str(self.coordinates_string))
-
-    def __sub__(self, other):
-        self.x -= other.x
-        self.y -= other.y
-        self.z -= other.z
-        return self
-
-
-class Atoms(Point):
-    ALF = []
-
-    def __init__(self, atoms=None):
-        self._atoms = []
-        self._connectivity = None
-        self._centred = False
-        self.finish()
-        super().__init__()
-
-        if atoms is not None:
-            self.add(atoms)
-
-    def add(self, atom):
-        if isinstance(atom, Atom):
-            self._atoms.append(atom)
-        elif isinstance(atom, str):
-            self.add(Atom(atom))
-        elif isinstance(atom, (list, Atoms)):
-            for a in atom:
-                self.add(a)
-
-    def finish(self):
-        Atom.counter = it.count(1)
-        self.set_alf()
-
-    def connect(self, iatom, jatom):
-        iatom.set_bond(jatom)
-        jatom.set_bond(iatom)
-
-    def to_angstroms(self):
-        for atom in self:
-            atom.to_angstroms()
-
-    def to_bohr(self):
-        for atom in self:
-            atom.to_bohr()
-
-    def calculate_alf(self):
-        self.connectivity
-        for iatom in self:
-            for _ in range(2):
-                queue = iatom.bonds - iatom.alf
-                if queue.empty:
-                    for atom in iatom.bonds:
-                        queue.add(atom.bonds)
-                    queue -= iatom.alf
-                iatom.add_alf_atom(queue.max_priority)
-        Atoms.ALF = self.alf
-        self.set_alf()
-
-    def set_alf(self):
-        # self._atoms = sorted(self._atoms, key=lambda x: x.num)
-        for atom, atom_alf in zip(self, Atoms.ALF):
-            atom.x_axis = self[atom_alf[1] - 1]
-            atom.xy_plane = self[atom_alf[2] - 1]
-
-    def calculate_features(self):
-        if not Atoms.ALF:
-            self.calculate_alf()
-        self.set_alf()
-        for atom in self:
-            atom.calculate_features(self)
-
-    def centre(self, centre_atom=None):
-        if isinstance(centre_atom, int):
-            centre_atom = self[centre_atom]
-        elif centre_atom is None:
-            centre_atom = self.centroid
-
-        for i, atom in enumerate(self):
-            atom -= centre_atom
-
-        self._centred = True
-
-    def center(self, center_atom=None):
-        self.centre(centre_atom=center_atom)
-
-    def rotate(self, R):
-        coordinates = R.dot(self.coordinates.T).T
-        for atom, coordinate in zip(self, coordinates):
-            atom.x = coordinate[0]
-            atom.y = coordinate[1]
-            atom.z = coordinate[2]
-
-    def _rmsd(self, other):
-        dist = 0
-        for iatom, jatom in zip(self, other):
-            dist += iatom.sq_dist(jatom)
-        return np.sqrt(dist / len(self))
-
-    def rmsd(self, other):
-        if not self._centred:
-            self.centre()
-        if not other._centred:
-            other.centre()
-
-        P = self.coordinates
-        Q = other.coordinates
-        H = self.coordinates.T.dot(other.coordinates)
-
-        V, S, W = np.linalg.svd(H)
-        d = (np.linalg.det(V) * np.linalg.det(W)) < 0.0
-
-        if d:
-            S[-1] = -S[-1]
-            V[:, -1] = -V[:, -1]
-
-        R = np.dot(V, W)
-
-        other.rotate(R)
-        return self._rmsd(other)
-
-    @property
-    def coordinates(self):
-        return np.array([atom.coordinates for atom in self])
-
-    @property
-    def centroid(self):
-        coordinates = self.coordinates.T
-
-        x = np.mean(coordinates[0])
-        y = np.mean(coordinates[1])
-        z = np.mean(coordinates[2])
-
-        return Atom([x, y, z])
-
-    @property
-    def priority(self):
-        return sum(self.masses)
-
-    @property
-    def max_priority(self):
-        prev_priorities = []
-        while True:
-            priorities = [atom.priority for atom in self]
-            if (
-                priorities.count(max(priorities)) == 1
-                or prev_priorities == priorities
-            ):
-                break
-            else:
-                prev_priorities = priorities
-        for atom in self:
-            atom.reset_level()
-        return self[priorities.index(max(priorities))]
-
-    @property
-    def masses(self):
-        return [atom.mass for atom in self]
-
-    @property
-    def atoms(self):
-        return [atom.atom_num for atom in self]
-
-    @property
-    def empty(self):
-        return len(self) == 0
-
-    @property
-    @lru_cache()
-    def connectivity(self):
-        connectivity = np.zeros((len(self), len(self)))
-        for i, iatom in enumerate(self):
-            for j, jatom in enumerate(self):
-                if iatom != jatom:
-                    max_dist = 1.2 * (iatom.radius + jatom.radius)
-
-                    if iatom.dist(jatom) < max_dist:
-                        connectivity[i][j] = 1
-                        self.connect(iatom, jatom)
-
-        return connectivity
-
-    @property
-    def alf(self):
-        return [[iatom.num for iatom in atom.alf] for atom in self]
-
-    @property
-    def features(self):
-        try:
-            return self._features
-        except AttributeError:
-            self.calculate_features()
-            self._features = [atom.features for atom in self]
-            return self._features
-
-    @property
-    def features_dict(self):
-        try:
-            return self._features_dict
-        except AttributeError:
-            self.calculate_features()
-            self._features = {atom.atom_num: atom.features for atom in self}
-            return self._features
-
-    @property
-    def types(self):
-        return list(set([atom.type for atom in self]))
-
-    def __len__(self):
-        return len(self._atoms)
-
-    def __delitem__(self, i):
-        del self._atoms[i]
-
-    def __getitem__(self, i):
-        if isinstance(i, INT):
-            i = self.atoms.index(i.atom)
-        return self._atoms[i]
-
-    def __str__(self):
-        return "\n".join([str(atom) for atom in self])
-
-    def __repr__(self):
-        return str(self)
-
-    def __sub__(self, other):
-        # other = sorted(Atoms(other), key=lambda x: x.num, reverse=False)
-        for i, atom in enumerate(self):
-            for jatom in other:
-                if jatom == atom:
-                    del self[i]
-        return self
-
-    def __bool__(self):
-        return bool(self.atoms)
 
 
 class Directory(Point):
