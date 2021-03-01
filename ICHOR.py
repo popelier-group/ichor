@@ -1584,16 +1584,20 @@ class TypeTools:
     @staticmethod
     def to_str_list(inp):
         inp = inp.replace("[", "").replace("]", "")
+
         def cleanup_str(s):
-            return s.replace("\"", "").replace("'", "")
+            return s.replace('"', "").replace("'", "")
+
         return [cleanup_str(s) for s in inp.split(",")]
 
-    conversions = {
-        int: to_int,
-        float: to_float,
-        str: to_str,
-        List[str]: to_str_list,
-    }
+
+TypeTools.conversions = {
+    int: TypeTools.to_int,
+    float: TypeTools.to_float,
+    str: TypeTools.to_str,
+    bool: TypeTools.to_bool,
+    List[str]: TypeTools.to_str_list,
+}
 
 
 class Arguments:
@@ -1790,6 +1794,7 @@ def global_parser(func):
             return val
         else:
             return func(val)
+
     return wrapper
 
 
@@ -1799,6 +1804,7 @@ def global_formatter(func):
             if type(val) != next(iter(func.__annotations__.values())):
                 return val
         return func(val)
+
     return wrapper
 
 
@@ -4905,18 +4911,18 @@ class AutoTools:
             printq("Error: Too many xyz files found")
         return AutoTools.submit_ichor(
             "make_sets",
-            xyz_files[0],                  # points_location
-            True,                          # make_training_set
-            GLOBALS.TRAINING_SET_METHOD,   # training_set_method
-            GLOBALS.TRAINING_POINTS,       # n_training_points
-            True,                          # make_sample_pool
-            GLOBALS.SAMPLE_POOL_METHOD,    # sample_pool_method
-            GLOBALS.SAMPLE_POINTS,         # n_sample_points
-            True,                          # make_validation_set
-            GLOBALS.VALIDATION_SET_METHOD, # validation_set_method
-            GLOBALS.VALIDATION_POINTS,     # n_validation_points
-            submit=True, 
-            hold=jid
+            xyz_files[0],  # points_location
+            True,  # make_training_set
+            GLOBALS.TRAINING_SET_METHOD,  # training_set_method
+            GLOBALS.TRAINING_POINTS,  # n_training_points
+            True,  # make_sample_pool
+            GLOBALS.SAMPLE_POOL_METHOD,  # sample_pool_method
+            GLOBALS.SAMPLE_POINTS,  # n_sample_points
+            True,  # make_validation_set
+            GLOBALS.VALIDATION_SET_METHOD,  #  validation_set_method
+            GLOBALS.VALIDATION_POINTS,  # n_validation_points
+            submit=True,
+            hold=jid,
         )
 
     @staticmethod
@@ -5054,7 +5060,9 @@ class AutoTools:
 
         if not FileTools.dir_exists(ts_dir):
             script_name, jid = AutoTools.submit_ichor_make_sets()
-            npoints = SetupTools.get_npoints(GLOBALS.TRAINING_SET_METHOD, GLOBALS.TRAINING_POINTS)
+            npoints = SetupTools.get_npoints(
+                GLOBALS.TRAINING_SET_METHOD, GLOBALS.TRAINING_POINTS
+            )
         else:
             training_set = Set(ts_dir)
             npoints = len(training_set)
@@ -12595,10 +12603,10 @@ class SetupTools:
         max_points = 0
         if "min_max_mean" in methods:
             # 3 x nfeats 3(3N-6)
-            max_points += 3*(3*len(GLOBALS.ALF)-6)
+            max_points += 3 * (3 * len(GLOBALS.ALF) - 6)
         if "min_max" in methods:
             # 2 x nfeats 2(3N-6)
-            max_points += 3*(3*len(GLOBALS.ALF)-6)
+            max_points += 3 * (3 * len(GLOBALS.ALF) - 6)
         if "random" in methods:
             # generates npoints random points
             max_points += npoints
@@ -13586,10 +13594,20 @@ if __name__ == "__main__":
     atexit.register(FileRemover.run_daemon)
 
     if Arguments.call_external_function is not None:
+        # Type Checking For External Functions
         if hasattr(Arguments.call_external_function, "__annotations__"):
-            if len(Arguments.call_external_function_args) <= len(Arguments.call_external_function.__annotations__):
-                for i, (var_name, var_type) in enumerate(Arguments.call_external_function.__annotations__.items()):
-                    Arguments.call_external_function_args[i] = TypeTools.conversions[var_type](Arguments.call_external_function_args[i])
+            if len(Arguments.call_external_function_args) <= len(
+                Arguments.call_external_function.__annotations__
+            ):
+                for i, (var_name, var_type) in enumerate(
+                    Arguments.call_external_function.__annotations__.items()
+                ):
+                    if var_type in TypeTools.conversions.keys():
+                        Arguments.call_external_function_args[
+                            i
+                        ] = TypeTools.conversions[var_type](
+                            Arguments.call_external_function_args[i]
+                        )
         Arguments.call_external_function(
             *Arguments.call_external_function_args
         )
