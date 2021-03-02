@@ -2817,8 +2817,7 @@ class Globals:
                     str(self.ALF_REFERENCE_FILE)
                 ).read().atoms
             elif filetype == ".xyz":
-                if len(xyz_files) == 1:
-                    self.ATOMS = Trajectory(xyz_files[0]).read(n=1)[0]
+                self.ATOMS = Trajectory(self.ALF_REFERENCE_FILE).read(n=1)[0]
             else:
                 logger.error(f"Unknown ALF_REFRENCE_FILE_TYPE: {filetype}")
 
