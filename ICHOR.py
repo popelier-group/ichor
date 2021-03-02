@@ -10440,7 +10440,7 @@ class Trajectory(Points):
             for line in f:
                 if not line.strip():
                     continue
-                elif re.match(r"^\s+\d+$", line):
+                elif re.match(r"^\s*\d+$", line):
                     natoms = int(line)
                     while len(atoms) < natoms:
                         line = next(f)
