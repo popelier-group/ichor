@@ -4187,7 +4187,7 @@ class ProblemFinder:
 
     @UsefulTools.run_function(1.1)
     def check_atoms(self):
-        if not self.ATOMS:
+        if not GLOBALS.ATOMS:
             self.add(
                 Problem(
                     name="ATOMS",
@@ -5675,10 +5675,6 @@ class AutoTools:
         Arguments.read()
         Globals.define()
         AutoTools.run()
-
-    @staticmethod
-    def setup_counter():
-
 
     @staticmethod
     def run():
