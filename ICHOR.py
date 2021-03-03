@@ -13448,6 +13448,8 @@ def calculate_errors(models_directory, sample_pool_directory):
     if GLOBALS.SUBMITTED:
         move_points = True
     else:
+        for point in points:
+            print(point.path)
         move_points = UsefulTools.check_bool(
             input("Would you like to move points to Training Set? [Y/N]")
         )
