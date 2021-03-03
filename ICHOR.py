@@ -9687,7 +9687,8 @@ class Model:
         return self.distance_to_point(point).argmin()
 
     def cross_validation_error(self, point):
-        return self.cross_validation[self.closest_point(point)]
+        closest_point = self.closest_point(point)
+        return self.cross_validation[closest_point], closest_point
 
     def link(self, dst_dir):
         if self.legacy:
@@ -9714,6 +9715,7 @@ class Models:
         expected_improvement_functions = {
             "epe": self.expected_improvement_epe,
             "eped": self.expected_improvement_eped,
+            "epev": self.expected_improvement_epev,
             "var": self.expected_improvement_var,
             "vard": self.expected_improvement_vard,
             "sigma": self.expected_improvement_var,
@@ -9811,12 +9813,12 @@ class Models:
     @lru_cache()
     def cross_validation(self, points):
         cross_validation_errors = []
+        voronoi = []
         for point in points:
-            cross_validation_error = sum(
-                model.cross_validation_error(point) for model in self
-            )
-            cross_validation_errors.append(cross_validation_error)
-        return np.array(cross_validation_errors)
+            cv_errors = [model.cross_validation_error(point) for model in self]
+            cross_validation_errors += [sum(cv[0] for cv in cv_errors)]
+            voronoi += [[cv[1] for cv in cv_errors]]
+        return np.array(cross_validation_errors), voronoi
 
     def distance_to_point(self, point, points):
         from scipy.spatial import distance
@@ -9858,12 +9860,12 @@ class Models:
 
         return np.mean(alpha)
 
-    def calc_epe(self, points, added_points=[]):
+    def calc_epe(self, points, added_points=[], return_voronoi=False):
         alpha = self.calc_alpha()
 
         logger.debug(f"Alpha: {alpha}")
 
-        cv_errors = self.cross_validation(points)
+        cv_errors, voronoi = self.cross_validation(points)
         variances = self.variance(points)
 
         epe = alpha * cv_errors + (1 - alpha) * variances
@@ -9878,6 +9880,8 @@ class Models:
             distances = self.distances(points, _added_points) * mask
             epe *= distances
 
+        if return_voronoi:
+            return epe, voronoi
         return epe
 
     def calc_var(self, points, added_points=[]):
@@ -9930,6 +9934,23 @@ class Models:
                 axis=-1,
             )
             points_to_add += [best_points[0]]
+        self.write_data(points_to_add, points)
+        return points_to_add
+
+    def expected_improvement_epev(self, points):
+        epe, voronoi = self.calc_epe(points, return_voronoi=True)
+
+        best_points = np.flip(np.argsort(epe), axis=-1)
+        voronoi = [voronoi[i] for i in best_points]
+
+        sampled_voronois = []
+        points_to_add = []
+        for point, voronoi in zip(best_points, voronoi):
+            if voronoi not in sampled_voronois:
+                points_to_add += [point]
+                sampled_voronois += [voronoi]
+            if len(points_to_add) == GLOBALS.POINTS_PER_ITERATION:
+                break
         self.write_data(points_to_add, points)
         return points_to_add
 
