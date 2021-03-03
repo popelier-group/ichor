@@ -1782,6 +1782,7 @@ class FileStructure(Tree):
         )
 
         self.add("SCRIPTS", "scripts", parent="data")
+        self.add("TEMP", "tmp_scripts", parent="scripts")
         self.add("OUTPUTS", "outputs", parent="scripts")
         self.add("ERRORS", "errors", parent="scripts")
 
@@ -2629,6 +2630,7 @@ class Globals:
     IQA_MODELS: bool = False
 
     DROP_N_COMPUTE: bool = False
+    DROP_N_COMPUTE_LOCATION: str = ""
 
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
@@ -2783,6 +2785,11 @@ class Globals:
             else:
                 ProblemFinder.unknown_settings += [key]
 
+        if self.DROP_N_COMPUTE and not self.DROP_N_COMPUTE_LOCATION:
+            if self.MACHINE == "csf3":
+                self.DROP_N_COMPUTE_LOCATION = str(Path.home()/"DROP_N_COMPUTE")
+        FileTools.mkdir(self.DROP_N_COMPUTE_LOCATION)
+
         if self.ALF_REFERENCE_FILE:
             if not os.path.exists(self.ALF_REFERENCE_FILE):
                 logger.warning(
@@ -2828,7 +2835,6 @@ class Globals:
                     self.ALF = Atoms.ALF
                 except:
                     logger.error("Error in ALF Calculation")
-
 
     def set(self, name, value):
         name = name.upper()
@@ -4870,7 +4876,7 @@ class SubmissionScript:
         self.stderr = os.path.abspath(GLOBALS.FILE_STRUCTURE["errors"])
 
         self.directory = directory
-        if not self.directory:
+        if self.directory is None:
             self.directory = GLOBALS.FILE_STRUCTURE["scripts"]
 
     def add(self, command):
@@ -4994,7 +5000,7 @@ class SubmissionScript:
 class SubmissionTools:
     @staticmethod
     def make_g09_script(
-        points, directory="", redo=False, submit=True, hold=None
+        points, script_directory=None, redo=False, submit=True, hold=None, script_name=None
     ):
         gaussian_job = GaussianCommand()
         if isinstance(points, Points):
@@ -5007,8 +5013,10 @@ class SubmissionTools:
         elif isinstance(points, GJF):
             gaussian_job.add(points.path)
 
-        script_name = os.path.join(directory, "GaussSub.sh")
-        submission_script = SubmissionScript(script_name)
+        if script_name is None:
+            script_name = "GaussSub.sh"
+
+        submission_script = SubmissionScript(script_name, script_directory)
         with TimingManager(submission_script):
             submission_script.add(gaussian_job)
         submission_script.write()
@@ -5021,12 +5029,13 @@ class SubmissionTools:
     @staticmethod
     def make_aim_script(
         points,
-        directory="",
+        script_directory=None,
         check_wfns=True,
         atoms="all",
         redo=False,
         submit=True,
         hold=None,
+        script_name=None,
     ):
         if check_wfns:
             result = points.check_wfns()
@@ -5053,8 +5062,10 @@ class SubmissionTools:
             elif point.gjf and not check_wfns:
                 aimall_job.add(point.gjf.wfn.path)
 
-        script_name = os.path.join(directory, "AIMSub.sh")
-        submission_script = SubmissionScript(script_name)
+        if script_name is None:
+            script_name = "AIMSub.sh"
+
+        submission_script = SubmissionScript(script_name, script_directory)
         with TimingManager(submission_script):
             submission_script.add(aimall_job)
         submission_script.write()
@@ -5067,12 +5078,13 @@ class SubmissionTools:
     @staticmethod
     def make_ferebus_script(
         model_directories,
-        directory="",
+        script_directory=None,
         atoms="all",
         submit=True,
         hold=None,
         model_type="iqa",
         ferebus_directory="",
+        script_name=None,
     ):
         ferebus_job = FerebusCommand()
         for model_directory in model_directories:
@@ -5087,8 +5099,10 @@ class SubmissionTools:
             ferebus_directory,
         )
 
-        script_name = os.path.join(directory, "FereSub.sh")
-        submission_script = SubmissionScript(script_name)
+        if script_name is None:
+            script_name = "FereSub.sh"
+
+        submission_script = SubmissionScript(script_name, script_directory)
         with TimingManager(submission_script):
             submission_script.add(ferebus_job)
             submission_script.add(move_models)
@@ -5102,18 +5116,21 @@ class SubmissionTools:
     @staticmethod
     def make_python_script(
         python_script,
-        directory="",
+        script_directory=None,
         function="",
         args=(),
         submit=True,
         hold=None,
+        script_name=None,
     ):
         python_job = PythonCommand()
         if function:
             python_job.run_func(function, *args)
 
-        script_name = os.path.join(directory, "PySub.sh")
-        submission_script = SubmissionScript(script_name)
+        if script_name is None:
+            script_name = "PySub.sh"
+
+        submission_script = SubmissionScript(script_name, script_directory)
         with TimingManager(submission_script, function):
             submission_script.add(python_job)
         submission_script.write()
@@ -5125,14 +5142,16 @@ class SubmissionTools:
 
     @staticmethod
     def make_dlpoly_script(
-        dlpoly_directories, directory="", submit=True, hold=None
+        dlpoly_directories, script_directory=None, submit=True, hold=None, script_name=None
     ):
         dlpoly_job = DlpolyCommand()
         for dlpoly_directory in dlpoly_directories:
             dlpoly_job.add(dlpoly_directory)
 
-        script_name = os.path.join(directory, "DlpolySub.sh")
-        submission_script = SubmissionScript(script_name)
+        if script_name is None:
+            script_name = "DlpolySub.sh"
+
+        submission_script = SubmissionScript(script_name, script_directory)
         submission_script.add(dlpoly_job)
         submission_script.write()
 
@@ -5143,14 +5162,16 @@ class SubmissionTools:
 
     @staticmethod
     def make_cp2k_script(
-        cp2k_input_files, directory="", submit=True, hold=None
+        cp2k_input_files, script_directory=None, submit=True, hold=None, script_name=None
     ):
         cp2k_job = CP2KCommand()
         for cp2k_input_file in cp2k_input_files:
             cp2k_job.add(cp2k_input_file)
 
-        script_name = os.path.join(directory, "CP2KSub.sh")
-        submission_script = SubmissionScript(script_name)
+        if script_name is None:
+            script_name = "CP2KSub.sh"
+
+        submission_script = SubmissionScript(script_name, script_directory)
         submission_script.add(cp2k_job)
         submission_script.write()
 
@@ -5474,19 +5495,19 @@ class SGE_Jobs:
 
 class AutoTools:
     @staticmethod
-    def submit_ichor_gjfs(jid=None, directory=None):
+    def submit_ichor_gjfs(jid=None, directory=None, script_name=None, script_directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor(
-            "submit_gjfs", directory, submit=True, hold=jid
+            "submit_gjfs", directory, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_ichor_wfns(jid=None, directory=None, atoms="all"):
+    def submit_ichor_wfns(jid=None, directory=None, atoms="all", script_name=None, script_directory=None):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor(
-            "submit_wfns", directory, atoms, submit=True, hold=jid
+            "submit_wfns", directory, atoms, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
@@ -5497,6 +5518,8 @@ class AutoTools:
         npoints=None,
         ferebus_directory=None,
         atoms=None,
+        script_name=None,
+        script_directory=None,
     ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
@@ -5517,19 +5540,21 @@ class AutoTools:
             atoms,
             submit=True,
             hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_ichor_errors(jid=None):
+    def submit_ichor_errors(jid=None, script_name=None, script_directory=None):
         sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
         model_dir = GLOBALS.FILE_STRUCTURE["models"]
         # FEREBUS/MODELS
         return AutoTools.submit_ichor(
-            "calculate_errors", model_dir, sp_dir, submit=True, hold=jid
+            "calculate_errors", model_dir, sp_dir, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_ichor_make_sets(jid=None):
+    def submit_ichor_make_sets(jid=None, script_name=None, script_directory=None):
         xyz_files = FileTools.get_files_in(".", "*.xyz")
         if len(xyz_files) == 0:
             printq("Error: No xyz file or TRAINING_SET found")
@@ -5549,11 +5574,13 @@ class AutoTools:
             GLOBALS.VALIDATION_POINTS,  # n_validation_points
             submit=True,
             hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
     def submit_ichor_s_curves(
-        predict_property, validation_set, models, output_file
+        predict_property, validation_set, models, output_file, script_name=None, script_directory=None
     ):
         return AutoTools.submit_ichor(
             "calculate_s_curves",
@@ -5563,63 +5590,65 @@ class AutoTools:
             output_file,
             submit=True,
             hold=None,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_dlpoly_gjfs(jid=None):
+    def submit_dlpoly_gjfs(jid=None, script_name=None, script_directory=None):
         return AutoTools.submit_ichor(
-            "calculate_gaussian_energies", submit=True, hold=jid
+            "calculate_gaussian_energies", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_dlpoly_energies(jid=None):
+    def submit_dlpoly_energies(jid=None, script_name=None, script_directory=None):
         return AutoTools.submit_ichor(
-            "get_wfn_energies", submit=True, hold=jid
+            "get_wfn_energies", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_dlpoly_trajectories(jid=None):
+    def submit_dlpoly_trajectories(jid=None, script_name=None, script_directory=None):
         return AutoTools.submit_ichor(
-            "calculate_trajectories_wfn", submit=True, hold=jid
+            "calculate_trajectories_wfn", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_dlpoly_trajectories_energies(jid=None):
+    def submit_dlpoly_trajectories_energies(jid=None, script_name=None, script_directory=None):
         return AutoTools.submit_ichor(
-            "get_trajectory_energies", submit=True, hold=jid
+            "get_trajectory_energies", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_dlpoly_trajectory_energies(jid=None, directory=None):
+    def submit_dlpoly_trajectory_energies(jid=None, directory=None, script_name=None, script_directory=None):
         return AutoTools.submit_ichor(
-            "get_trajectory_energy", directory, submit=True, hold=jid
+            "get_trajectory_energy", directory, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_ichor(function, *args, submit=False, hold=None):
+    def submit_ichor(function, *args, submit=False, hold=None, script_name=None, script_directory=None):
         return SubmissionTools.make_python_script(
-            __file__, function=function, args=args, submit=submit, hold=hold
+            __file__, function=function, args=args, submit=submit, hold=hold, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
-    def submit_gjfs(jid=None, npoints=None):
+    def submit_gjfs(jid=None, npoints=None, script_name=None, script_directory=None):
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
-        return points.submit_gjfs(redo=False, submit=True, hold=jid)
+        return points.submit_gjfs(redo=False, submit=True, hold=jid, script_name=script_name, script_directory=script_directory)
 
     @staticmethod
-    def submit_wfns(jid=None, npoints=None, atoms="all"):
+    def submit_wfns(jid=None, npoints=None, atoms="all", script_name=None, script_directory=None):
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
         return points.submit_wfns(
-            redo=False, submit=True, hold=jid, check_wfns=False, atoms=atoms
+            redo=False, submit=True, hold=jid, check_wfns=False, atoms=atoms, script_name=script_name, script_directory=script_directory
         )
 
     @staticmethod
     def submit_models(
-        jid=None, directory=None, ferebus_directory=None, atoms="all"
+        jid=None, directory=None, ferebus_directory=None, atoms="all", script_name=None, script_directory=None
     ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
@@ -5637,18 +5666,20 @@ class AutoTools:
             hold=jid,
             model_type=str(GLOBALS.OPTIMISE_PROPERTY),
             ferebus_directory=ferebus_directory,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_aimall(directory=None, jid=None):
+    def submit_aimall(directory=None, jid=None, script_directory=None):
         points = Set(directory)
         npoints = len(points)
         UsefulTools.set_uid()
         with DataLock():
-            script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory)
-            script, jid = AutoTools.submit_gjfs(jid, npoints)
-            script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory)
-            AutoTools.submit_wfns(jid, npoints)
+            script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory, script_directory=script_directory)
+            script, jid = AutoTools.submit_gjfs(jid, npoints, script_directory=script_directory)
+            script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory, script_directory=script_directory)
+            AutoTools.submit_wfns(jid, npoints, script_directory=script_directory)
 
     @staticmethod
     def run_models(
@@ -5657,6 +5688,7 @@ class AutoTools:
         npoints=None,
         ferebus_directory=None,
         jid=None,
+        script_directory=None
     ):
         _, jid = AutoTools.submit_ichor_models(
             jid=jid,
@@ -5666,7 +5698,7 @@ class AutoTools:
             ferebus_directory=ferebus_directory,
         )
         return AutoTools.submit_models(
-            jid=jid, directory=directory, ferebus_directory=ferebus_directory
+            jid=jid, directory=directory, ferebus_directory=ferebus_directory, script_directory=script_directory
         )
 
     @staticmethod
@@ -5674,6 +5706,54 @@ class AutoTools:
         Arguments.read()
         Globals.define()
         AutoTools.run()
+
+    @staticmethod
+    def run_next_iter():
+        # TODO: Refactor to remove repetition
+        order = [
+            AutoTools.submit_ichor_gjfs,
+            AutoTools.submit_gjfs,
+            AutoTools.submit_ichor_wfns,
+            AutoTools.submit_wfns,
+            AutoTools.submit_ichor_models,
+            AutoTools.submit_models,
+            AutoTools.submit_ichor_errors,
+        ]
+
+        script_names = [
+            f"PySub.{GLOBALS.UID}.sh.1",
+            f"GaussSub.{GLOBALS.UID}.sh.hold_1.2",
+            f"PySub.{GLOBALS.UID}.sh.hold_2.3",
+            f"AIMSub.{GLOBALS.UID}.sh.hold_3.4",
+            f"PySub.{GLOBALS.UID}.sh.hold_4.5",
+            f"FereSub.{GLOBALS.UID}.sh.hold_5.6",
+            f"PySub.{GLOBALS.UID}.sh.hold_6.7",
+        ]
+
+        with open(GLOBALS.FILE_STRUCTURE["counter"], "r") as f:
+            counter = int(f.readline())
+
+        if counter == GLOBALS.MAX_ITERATION:
+            # Don't add point on final iteration
+            order = order[:-1]
+
+        submitted_scripts = []
+        with DataLock():
+            for func, script_name in zip(order, script_names):
+                args = {"script_name": script_name, "script_directory": GLOBALS.FILE_STRUCTURE["tmp_scripts"]}
+                if "type" in func.__code__.co_varnames:
+                    args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
+                if "atoms" in func.__code__.co_varnames:
+                    args["atoms"] = str(GLOBALS.OPTIMISE_ATOM)
+                script_name, jid = func(**args)
+                submitted_scripts += [script_name]
+                print(f"Submitted {script_name}: {jid}")
+
+        if not os.path.exists(GLOBALS.DROP_N_COMPUTE_LOCATION):
+            FileTools.mkdir(GLOBALS.DROP_N_COMPUTE_LOCATION)
+
+        for script in submitted_scripts:
+            FileTools.move_file(script, GLOBALS.DROP_N_COMPUTE_LOCATION)
 
     @staticmethod
     def run():
@@ -5738,6 +5818,9 @@ class AutoTools:
                         args["atoms"] = str(GLOBALS.OPTIMISE_ATOM)
                     script_name, jid = func(**args)
                     print(f"Submitted {script_name}: {jid}")
+                if GLOBALS.DROP_N_COMPUTE:
+                    # only need to submit first iteration if using drop_n_compute
+                    return
 
             for func in order[:-1]:
                 args = {"jid": jid}
@@ -10142,13 +10225,13 @@ class Set(Points):
             if point.gjf:
                 point.gjf.write()
 
-    def submit_gjfs(self, redo=False, submit=True, hold=None):
+    def submit_gjfs(self, redo=False, submit=True, hold=None, script_name=None, script_directory=None):
         return SubmissionTools.make_g09_script(
-            self, redo=redo, submit=submit, hold=hold
+            self, redo=redo, submit=submit, hold=hold, script_name=script_name, script_directory=script_directory
         )
 
     def submit_wfns(
-        self, redo=False, submit=True, hold=None, check_wfns=True, atoms="all"
+        self, redo=False, submit=True, hold=None, check_wfns=True, atoms="all", script_name=None, script_directory=None
     ):
         return SubmissionTools.make_aim_script(
             self,
@@ -10157,6 +10240,8 @@ class Set(Points):
             hold=hold,
             check_wfns=check_wfns,
             atoms=atoms,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     def make_legacy_training_set(
@@ -13353,9 +13438,12 @@ def calculate_errors(models_directory, sample_pool_directory):
 
         counter += 1
 
-        if counter <= MAX_ITERATION:
+        if counter <= GLOBALS.MAX_ITERATION:
             with open(GLOBALS.FILE_STRUCTURE["counter"], "w") as f:
                 f.write(f"{counter}")
+
+            if GLOBALS.SUBMITTED and GLOBALS.DROP_N_COMPUTE:
+                AutoTools.run_next_iter()
 
 
 def dlpoly_analysis():
