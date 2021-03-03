@@ -9811,14 +9811,18 @@ class Models:
         return np.array(variances)
 
     @lru_cache()
-    def cross_validation(self, points):
+    def cross_validation(self, points, return_voronoi=False):
         cross_validation_errors = []
         voronoi = []
         for point in points:
             cv_errors = [model.cross_validation_error(point) for model in self]
             cross_validation_errors += [sum(cv[0] for cv in cv_errors)]
             voronoi += [[cv[1] for cv in cv_errors]]
-        return np.array(cross_validation_errors), voronoi
+        cross_validation_errors = np.array(cross_validation_errors)
+        if return_voronoi:
+            return cross_validation_errors, voronoi
+        else:
+            return cross_validation_errors
 
     def distance_to_point(self, point, points):
         from scipy.spatial import distance
@@ -9865,7 +9869,7 @@ class Models:
 
         logger.debug(f"Alpha: {alpha}")
 
-        cv_errors, voronoi = self.cross_validation(points)
+        cv_errors, voronoi = self.cross_validation(points, return_voronoi=True)
         variances = self.variance(points)
 
         epe = alpha * cv_errors + (1 - alpha) * variances
