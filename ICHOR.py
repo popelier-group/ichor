@@ -2788,7 +2788,8 @@ class Globals:
         if self.DROP_N_COMPUTE and not self.DROP_N_COMPUTE_LOCATION:
             if self.MACHINE == "csf3":
                 self.DROP_N_COMPUTE_LOCATION = str(Path.home()/"DROP_N_COMPUTE")
-        FileTools.mkdir(self.DROP_N_COMPUTE_LOCATION)
+        if self.DROP_N_COMPUTE_LOCATION:
+            FileTools.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
         if self.ALF_REFERENCE_FILE:
             if not os.path.exists(self.ALF_REFERENCE_FILE):
