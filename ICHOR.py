@@ -10631,7 +10631,7 @@ class Trajectory(Points):
 
 class DlpolyHistory(Trajectory):
     @buildermethod
-    def read(self, n=-1, write_to_traj=True):
+    def read(self, n=-1):
         with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("timestep"):
@@ -10646,13 +10646,15 @@ class DlpolyHistory(Trajectory):
                         atom_type = line.split()[0]
                         line = next(f) # Coordinate Line
                         atoms.add(f"{atom_type} {line}")
-        if write_to_traj:
-            self.write()
+                    self.add(atoms)
 
     def write(self, fname=None):
         if fname is None:
             fname = self.path.parent / Path("TRAJECTORY.xyz")
         super().write(fname=fname)
+
+    def write_to_trajectory(self):
+        self.write()
 
 
 class PointTools:
@@ -10990,11 +10992,17 @@ class DlpolyTools:
         trajectory_files = {}
         for model_dir in FileTools.get_files_in(dlpoly_dir, "*/"):
             trajectory_file = os.path.join(model_dir, "TRAJECTORY.xyz")
+            if not os.path.exists(trajectory_file):
+                history_file = os.path.join(model_dir, "HISTORY")
+                if os.path.exists(history_file):
+                    history_file = DlpolyHistory(history_file).read()
+                    history_file.write_to_trajectory()
             if os.path.exists(trajectory_file):
                 model_name = FileTools.end_of_path(model_dir)
                 trajectory_files[model_name] = Trajectory(
                     trajectory_file
                 ).read()
+
 
         for model_name, trajectory in trajectory_files.items():
             if len(trajectory) > 0:
