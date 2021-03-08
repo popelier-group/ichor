@@ -2669,6 +2669,11 @@ class Globals:
     EXCLUDE_NODES: List[str] = []
 
     def __init__(self):
+        # check types
+        for global_variable in self.global_variables:
+            if global_variable not in self.__annotations__.keys():
+                self.__annotations__[global_variable] = type(self.get(global_variable))
+
         self.UID = Arguments.uid
 
         # Set Protected Variables
@@ -2697,6 +2702,7 @@ class Globals:
         self._parsers["KEYWORDS"] += [GlobalTools.split_keywords]
         self._parsers["ALF"] += [GlobalTools.read_alf]
         self._parsers["FEREBUS_VERSION"] += [GlobalTools.read_version]
+        self._parsers["DLPOLY_VERSION"] += [GlobalTools.read_version]
 
         self._parsers["INCLUDE_NODES"] += [GlobalTools.split_keywords]
         self._parsers["EXCLUDE_NODES"] += [GlobalTools.split_keywords]
