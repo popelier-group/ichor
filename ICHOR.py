@@ -1975,13 +1975,15 @@ class Atom:
         if jatom not in self._bonds:
             self._bonds.append(jatom)
         
-    def set_angle(self, jatom, katom):
+    def set_angle(self, jatom):
         # jatom--self--katom
-        pass
+        if jatom not in self._angles:
+            self._angles += [jatom]
 
-    def set_dihedral(self, jatom, katom, latom):
+    def set_dihedral(self, jatom):
         # jatom--self--katom--latom
-        pass
+        if jatom not in self._dihedrals:
+            self._dihedrals += [jatom]
 
     def get_priorty(self, level):
         atoms = Atoms(self)
@@ -2098,6 +2100,14 @@ class Atom:
         return Atoms(self._bonds)
 
     @property
+    def bond_list(self):
+        return [atom.atom_number-1 for atom in self._bonds]
+
+    @property
+    def angle_list(self):
+        return [atom.atom_number-1 for atom in self._angles]
+
+    @property
     def mass(self):
         return Constants.type2mass[self.atom_type]
 
@@ -2156,7 +2166,10 @@ class Atom:
         try:
             return self.__dict__[attr]
         except KeyError:
-            return getattr(self.properties, attr)
+            try:
+                return getattr(self.properties, attr)
+            except AttributeError:
+                raise AttributeError(f"Cannot find attribute '{attr}'")
 
     def __str__(self):
         return f"{self.atom_type:<3s}{self.coordinates_string}"
@@ -2165,7 +2178,12 @@ class Atom:
         return str(self)
 
     def __eq__(self, other):
-        return self.atom_num == other.atom_num
+        if type(other) == Atom:
+            return self.atom_num == other.atom_num
+        elif type(other) == int:
+            return self.atom_num == other
+        else:
+            raise ValueError(f"Cannot compare type({type(other)}) with type({type(self)})")
 
     def __hash__(self):
         return hash(str(self.num) + str(self.coordinates_string))
@@ -2233,24 +2251,6 @@ class Atoms(Point):
         for atom, atom_alf in zip(self, Atoms.ALF):
             atom.x_axis = self[atom_alf[1] - 1]
             atom.xy_plane = self[atom_alf[2] - 1]
-
-    def set_connectivity(self):
-        bonds = np.array(self.connectivity)
-        angles = np.matmul(bonds, bonds)
-        dihedrals = np.matmul(angles, bonds)
-
-        connectivity = np.zeros(bonds.shape, dtype=int)
-        for i in range(bonds.shape[0]):
-            for j in range(i+1, bonds.shape[1]):
-                if bonds[i,j] == 1:
-                    connectivity[i,j] = 1
-                elif angles[i,j] == 1:
-                    connectivity[i,j] = 2
-                elif dihedrals[i,j] == 1:
-                    connectivity[i,j] = 3
-        connectivity += connectivity.T # Reflect U triangle to L triangle
-
-
 
     def calculate_features(self):
         if not Atoms.ALF:
@@ -2422,6 +2422,65 @@ class Atoms(Point):
 
     def __bool__(self):
         return bool(self.atoms)
+
+
+class System(Atoms):
+    _bonds = []
+    _angles = []
+    _dihedrals = []
+
+    def __init__(self, atoms):
+        super().__init__(atoms)
+
+        bonds = np.array(self.connectivity)
+        angles = np.matmul(bonds, bonds)
+        dihedrals = np.matmul(angles, bonds)
+
+        bond_list = []
+        angle_list = []
+        dihedral_list = []
+        for i in range(bonds.shape[0]):
+            for j in range(i+1, bonds.shape[1]):
+                if bonds[i,j] == 1:
+                    bond_list += [(i,j)]
+                elif angles[i,j] == 1:
+                    angle_list += [(i,j)]
+                elif dihedrals[i,j] == 1:
+                    dihedral_list += [(i,j)]
+
+        for i, j in bond_list:
+            self[i].set_bond(self[j])
+            self[j].set_bond(self[i])
+            self._bonds.append((i, j))
+
+        for i, j in angle_list:
+            for k in list(set(self[i].bond_list) & set(self[j].bond_list)):
+                self[i].set_angle(self[j])
+                self[j].set_angle(self[i])
+                self._angles.append((i, k, j))
+
+        for i, j in dihedral_list:
+            iatoms = list(set(self[i].bond_list) & set(self[j].angle_list))
+            jatoms = list(set(self[j].bond_list) & set(self[i].angle_list))
+            for k in iatoms:
+                for l in jatoms:
+                    if k in self[l].bond_list:
+                        self[i].set_dihedral(self[j])
+                        self[j].set_dihedral(self[i])
+                        self._dihedrals.append((i, k, l, j))
+                        break
+            
+    @property
+    def bonds(self):
+        return [(i+1, j+1) for i, j in self._bonds]
+
+    @property
+    def angles(self):
+        return [(i+1, j+1, k+1) for i, j, k in self._angles]
+
+    @property
+    def dihedrals(self):
+        return [(i+1, j+1, k+1, l+1) for i, j, k, l in self._dihedrals]
 
 
 def global_parser(func):
@@ -11046,6 +11105,8 @@ class DlpolyTools:
 
     @staticmethod
     def write_field_updated(field_file, atoms):
+        sys = System(atoms)
+
         with open(field_file, "w") as f:
             f.write("DL_FIELD v3.00\n")
             f.write("Units kJ/mol\n")
@@ -11058,7 +11119,19 @@ class DlpolyTools:
                     #  Atom Type      Atomic Mass                               Charge Repeats Frozen(0=NotFrozen)
                     f"{atom.type}\t\t{Constants.dlpoly_weights[atom.type]:.7f}     0.0   1   0\n"
                 )
-            f.write("finish\nclose")
+            f.write(f"BONDS {len(sys.bonds)}\n")
+            for i, j in sys.bonds:
+                f.write(f"harm {i} {j} 0.0 0.0\n")
+            if len(sys.angles) > 0:
+                f.write(f"ANGLES {len(sys.angles)}\n")
+                for i, j, k in sys.angles:
+                    f.write(f"harm {i} {j} {k} 0.0 0.0\n")
+            if len(sys.dihedrals) > 0:
+                f.write(f"DIHEDRALS {len(sys.dihedrals)}\n")
+                for i, j, k, l in sys.dihedrals:
+                    f.write(f"harm {i} {j} {k} {l} 0.0 0.0\n")
+            f.write("finish\n")
+            f.write("close\n")
 
     @staticmethod
     def link_models_updated(model_dir, models):
@@ -11074,14 +11147,22 @@ class DlpolyTools:
         kriging_file = os.path.join(dlpoly_dir, "KRIGING.txt")
         dlpoly_model_dir = os.path.join(dlpoly_dir, "model_krig")
 
-        DlpolyTools.write_control(control_file)
-        DlpolyTools.write_config(config_file, atoms)
-        DlpolyTools.write_field(field_file, atoms)
-        DlpolyTools.write_kriging(kriging_file, atoms, models)
-        DlpolyTools.link_models(dlpoly_model_dir, models)
+        DlpolyTools.write_control_legacy(control_file)
+        DlpolyTools.write_config_legacy(config_file, atoms)
+        DlpolyTools.write_field_legacy(field_file, atoms)
+        DlpolyTools.write_kriging_legacy(kriging_file, atoms, models)
+        DlpolyTools.link_models_legacy(dlpoly_model_dir, models)
 
-    def write_files_updated():
-        pass
+    def write_files_updated(dlpoly_dir, atoms, models):
+        control_file = os.path.join(dlpoly_dir, "CONTROL")
+        config_file = os.path.join(dlpoly_dir, "CONFIG")
+        field_file = os.path.join(dlpoly_dir, "FIELD")
+        dlpoly_model_dir = os.path.join(dlpoly_dir, "model_krig")
+
+        DlpolyTools.write_control_updated(control_file)
+        DlpolyTools.write_config_updated(config_file, atoms)
+        DlpolyTools.write_field_updated(field_file, atoms)
+        DlpolyTools.link_models_updated(dlpoly_model_dir, models)
 
     @staticmethod
     def write_files(dlpoly_dir, atoms, models):
