@@ -10067,7 +10067,7 @@ class Points:
             for point in self:
                 integration_errors = point.get_integration_errors()
                 for atom, integration_error in integration_errors.items():
-                    if integration_error > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
+                    if np.abs(integration_error) > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
                         logger.warning(
                             f"{point.path} | {atom} | Integration Error: {integration_error}"
                         )
