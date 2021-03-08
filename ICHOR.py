@@ -960,6 +960,8 @@ class Constants:
 
     KERNELS = ["rbf", "rbf-cyclic"]
 
+    DLPOLY_LEGACY_CUTOFF = Version("4.08")
+
     type2mass = {
         "H": 1.007825,
         "He": 4.002603,
@@ -1900,6 +1902,8 @@ class Atom:
         self.read_input(coordinate_line)
 
         self._bonds = []
+        self._angles = []
+        self._dihedrals = []
         self.__level = it.count(0)
 
         self.x_axis = None
@@ -1967,8 +1971,17 @@ class Atom:
         return math.acos((temp / (self.dist(atom1) * self.dist(atom2))))
 
     def set_bond(self, jatom):
+        # self--jatom
         if jatom not in self._bonds:
             self._bonds.append(jatom)
+        
+    def set_angle(self, jatom, katom):
+        # jatom--self--katom
+        pass
+
+    def set_dihedral(self, jatom, katom, latom):
+        # jatom--self--katom--latom
+        pass
 
     def get_priorty(self, level):
         atoms = Atoms(self)
@@ -2220,6 +2233,22 @@ class Atoms(Point):
         for atom, atom_alf in zip(self, Atoms.ALF):
             atom.x_axis = self[atom_alf[1] - 1]
             atom.xy_plane = self[atom_alf[2] - 1]
+
+    def set_connectivity(self):
+        bonds = np.array(self.connectivity)
+        angles = np.matmul(bonds, bonds)
+        dihedrals = np.matmul(angles, bonds)
+
+        connectivity = np.zeros(bonds.shape, dtype=int)
+        for i in range(bonds.shape[0]):
+            for j in range(i+1, bonds.shape[1]):
+                if bonds[i,j] == 1:
+                    connectivity[i,j] = 1
+                elif angles[i,j] == 1:
+                    connectivity[i,j] = 2
+                elif dihedrals[i,j] == 1:
+                    connectivity[i,j] = 3
+        connectivity += connectivity.T # Reflect U triangle to L triangle
 
     def calculate_features(self):
         if not Atoms.ALF:
@@ -2586,6 +2615,8 @@ class Globals:
     FEREBUS_MAX_ITERATION: int = 1000
 
     # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
+    DLPOLY_VERSION = Version("4.09")
+
     DLPOLY_NUMBER_OF_STEPS: int = 500  # Number of steps to run simulation for
     DLPOLY_TEMPERATURE: int = 0  # If set to 0, will perform geom opt but default to 10 K
     DLPOLY_PRINT_EVERY: int = 1  # Print trajectory and stats every n steps
@@ -4113,7 +4144,7 @@ class FerebusTools:
         with open(ftoml_fname, "w+") as ftoml:
             ftoml.write("[system]\n")
             ftoml.write(f'name = "{GLOBALS.SYSTEM_NAME}"\n')
-            ftoml.write(f"natoms = {natoms}\n")
+            ftoml.write(f"natoms = {len(GLOBALS.ALF)}\n")
             ftoml.write(f"atoms = [\n")
             ftoml.write(
                 f'  {{name="{atom}", alf=[{alf[0]}, {alf[1]}, {alf[2]}]}}\n'
@@ -4772,8 +4803,12 @@ class DlpolyCommand(CommandLine):
         self.directories += [os.path.abspath(directory)]
 
     def load_modules(self):
-        self.modules["ffluxlab"] = ["compilers/gcc/8.2.0"]
-        self.modules["csf3"] = ["compilers/gcc/8.2.0"]
+        if GLOBALS.DLPOLY_VERSION < Constants.DLPOLY_LEGACY_CUTOFF:
+            self.modules["ffluxlab"] = ["compilers/gcc/8.2.0"]
+            self.modules["csf3"] = ["compilers/gcc/8.2.0"]
+        else:
+            self.modules["ffluxlab"] = ["compilers/intel/18.0.3"]
+            self.modules["csf3"] = ["compilers/intel/18.0.3"]
 
     @property
     def ndata(self):
@@ -9691,8 +9726,10 @@ class Model:
         closest_point = self.closest_point(point)
         return self.cross_validation[closest_point], closest_point
 
-    def link(self, dst_dir):
-        if self.legacy:
+    def link(self, dst_dir, convert_to_legacy=False):
+        if not self.legacy and convert_to_legacy:
+            self.write_legacy(dst_dir)
+        else:
             abs_path = os.path.abspath(self.fname)
             dst = os.path.join(dst_dir, self.basename)
             if os.path.exists(dst):
@@ -9703,8 +9740,6 @@ class Model:
                 except:
                     pass
             os.symlink(abs_path, dst)
-        else:
-            self.write_legacy(dst_dir)
 
 
 class Models:
@@ -10824,7 +10859,7 @@ class DlpolyTools:
     use_every = 1
 
     @staticmethod
-    def write_control(control_file):
+    def write_control_legacy(control_file):
         with open(control_file, "w+") as f:
             f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
             f.write(
@@ -10881,7 +10916,7 @@ class DlpolyTools:
             f.write("finish")
 
     @staticmethod
-    def write_config(config_file, atoms):
+    def write_config_legacy(config_file, atoms):
         with open(config_file, "w+") as f:
             f.write("DL_POLY CONFIG file converted using ICHOR\n")
             f.write("\t0\t0\n")
@@ -10890,7 +10925,7 @@ class DlpolyTools:
                 f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
 
     @staticmethod
-    def write_field(field_file, atoms):
+    def write_field_legacy(field_file, atoms):
         with open(field_file, "w") as f:
             f.write("DL_FIELD v3.00\nUnits internal\nMolecular types 1\n")
             f.write(f"Molecule name {GLOBALS.SYSTEM_NAME}\n")
@@ -10903,7 +10938,7 @@ class DlpolyTools:
             f.write("finish\nclose")
 
     @staticmethod
-    def write_kriging(kriging_file, atoms, models):
+    def write_kriging_legacy(kriging_file, atoms, models):
         atoms.calculate_alf()
         models.read()
 
@@ -10925,30 +10960,134 @@ class DlpolyTools:
                 f.write("\n")
 
     @staticmethod
-    def link_models(model_dir, models):
+    def link_models_legacy(model_dir, models):
+        FileTools.mkdir(model_dir)
+        for model in models:
+            model.link(model_dir, convert_to_legacy=True)
+
+    @staticmethod
+    def write_control_updated(control_file):
+        with open(control_file, "w+") as f:
+            f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
+            f.write("# This is a generic CONTROL file. Please adjust to your requirement.\n")
+            f.write("# Directives which are commented are some useful options.\n")
+            f.write("\n")
+            f.write("ensemble nvt hoover 0.04\n")
+            if int(GLOBALS.DLPOLY_TEMPERATURE) == 0:
+                f.write("temperature 0\n")
+                f.write("\n")
+                f.write("#perform zero temperature run (really set to 10K)\n")
+                f.write("zero\n")
+                f.write("\n")
+            else:
+                f.write(f"temperature {GLOBALS.DLPOLY_TEMPERATURE}\n")
+                f.write("\n")
+            f.write(
+                "# Cap forces during equilibration, in unit kT/angstrom.\n"
+            )
+            f.write("# (useful if your system is far from equilibrium)\n")
+            f.write("# cap 100.0\n")
+            f.write("\n")
+            f.write("# Bypass checking restrictions and reporting\n")
+            f.write("# no index\n")
+            f.write("# no strict\n")
+            f.write("# no topolgy\n")
+            f.write("# no vdw\n")
+            f.write("\n")
+            f.write(f"timestep {GLOBALS.DLPOLY_TIMESTEP}\n")
+            f.write(f"steps {GLOBALS.DLPOLY_NUMBER_OF_STEPS}\n")
+            f.write(f"# equilibration {GLOBALS.DLPOLY_NUMBER_OF_STEPS}\n")
+            f.write("scale 100\n")
+            f.write("\n")
+            f.write("cutoff 15.0\n")
+            f.write("fflux\n")
+            f.write("spme precision 1d-6\n")
+            f.write("cutoff  0.5\n")
+            f.write("rvdw    0.5\n")
+            f.write("vdw direct\n")
+            f.write("vdw shift\n")
+            f.write("fflux ewald L1\n")
+            f.write("\n")
+            f.write("# Need these for bond contraints\n")
+            f.write("# mxshak 100\n")
+            f.write("# shake 1.0e-6\n")
+            f.write("\n")
+            f.write("# Continue MD simulation\n")
+            f.write("# restart\n")
+            f.write("\n")
+            f.write("dump  1000\n")
+            f.write("traj 0 1 0\n")
+            f.write("print every 1\n")
+            f.write("stats every 1\n")
+            f.write("fflux print 0 1\n")
+            f.write("job time 10000000\n")
+            f.write("close time 20000\n")
+            f.write("finish\n")
+
+    @staticmethod
+    def write_config_updated(config_file, atoms):
+        with open(config_file, "w+") as f:
+            f.write("Frame :         1\n")
+            f.write("\t0\t1\n") # PBC Solution to temporary problem
+            f.write("25.0 0.0 0.0\n")
+            f.write("0.0 25.0 0.0\n")
+            f.write("0.0 0.0 25.0\n")
+            for atom in atoms:
+                f.write(f"{atom.type}  {atom.num}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.num}\n")
+                f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
+
+    @staticmethod
+    def write_field_updated(field_file, atoms):
+        with open(field_file, "w") as f:
+            f.write("DL_FIELD v3.00\n")
+            f.write("Units kJ/mol\n")
+            f.write("Molecular types 1\n")
+            f.write(f"{GLOBALS.SYSTEM_NAME}\n")
+            f.write("nummols 1\n")
+            f.write(f"atoms {len(atoms)}\n")
+            for atom in atoms:
+                f.write(
+                    #  Atom Type      Atomic Mass                               Charge Repeats Frozen(0=NotFrozen)
+                    f"{atom.type}\t\t{Constants.dlpoly_weights[atom.type]:.7f}     0.0   1   0\n"
+                )
+            f.write("finish\nclose")
+
+    @staticmethod
+    def link_models_updated(model_dir, models):
         FileTools.mkdir(model_dir)
         for model in models:
             model.link(model_dir)
 
     @staticmethod
-    def setup_dlpoly_dir(dlpoly_dir, models):
-        FileTools.mkdir(dlpoly_dir)
-
+    def write_files_legacy(dlpoly_dir, atoms, models):
         control_file = os.path.join(dlpoly_dir, "CONTROL")
         config_file = os.path.join(dlpoly_dir, "CONFIG")
         field_file = os.path.join(dlpoly_dir, "FIELD")
         kriging_file = os.path.join(dlpoly_dir, "KRIGING.txt")
         dlpoly_model_dir = os.path.join(dlpoly_dir, "model_krig")
 
-        sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
-
-        atoms = GJF(FileTools.get_first_gjf(sp_dir)).read().atoms
-
         DlpolyTools.write_control(control_file)
         DlpolyTools.write_config(config_file, atoms)
         DlpolyTools.write_field(field_file, atoms)
         DlpolyTools.write_kriging(kriging_file, atoms, models)
         DlpolyTools.link_models(dlpoly_model_dir, models)
+
+    def write_files_updated():
+        pass
+
+    @staticmethod
+    def write_files(dlpoly_dir, atoms, models):
+        if GLOBALS.DLPOLY_VERSION < Constants.DLPOLY_LEGACY_CUTOFF:
+            DlpolyTools.write_files_legacy(dlpoly_dir, atoms, models)
+        else:
+            DlpolyTools.write_files_updated(dlpoly_dir, atoms, models)
+
+    @staticmethod
+    def setup_dlpoly_dir(dlpoly_dir, models):
+        FileTools.mkdir(dlpoly_dir)
+        sp_dir = GLOBALS.FILE_STRUCTURE["sample_pool"]
+        atoms = GJF(FileTools.get_first_gjf(sp_dir)).read().atoms
+        DlpolyTools.write_files(dlpoly_dir, atoms, models)
 
     @staticmethod
     def setup_model(model_directory=None):
@@ -11914,7 +12053,7 @@ class CP2KTools:
             "f", "Select Input File", CP2KTools.select_input_file
         )
         cp2k_menu.add_option(
-            "b", "Select Box Size", CP2KTools.set_cp2k_box_size
+            "s", "Select Box Size", CP2KTools.set_cp2k_box_size
         )
         cp2k_menu.add_option(
             "n", "Select Number of Molecules in Box", CP2KTools.set_n_molecules
