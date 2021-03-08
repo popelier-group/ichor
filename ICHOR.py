@@ -2250,6 +2250,8 @@ class Atoms(Point):
                     connectivity[i,j] = 3
         connectivity += connectivity.T # Reflect U triangle to L triangle
 
+
+
     def calculate_features(self):
         if not Atoms.ALF:
             self.calculate_alf()
@@ -2615,7 +2617,7 @@ class Globals:
     FEREBUS_MAX_ITERATION: int = 1000
 
     # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
-    DLPOLY_VERSION = Version("4.09")
+    DLPOLY_VERSION: Version = Version("4.09")
 
     DLPOLY_NUMBER_OF_STEPS: int = 500  # Number of steps to run simulation for
     DLPOLY_TEMPERATURE: int = 0  # If set to 0, will perform geom opt but default to 10 K
