@@ -1853,7 +1853,7 @@ class Point:
             property_names = [property_names]
         for atom, data in self.ints.items():
             for property_name in property_names:
-                property_ = data.__getattr__(property_name)
+                property_ = data.get_property(property_name)
                 if not isinstance(property_, dict):
                     property_ = {property_name: property_}
                 if atom not in properties.keys():
@@ -1865,7 +1865,10 @@ class Point:
         properties = self.get_property(value_to_get)
         values = [0] * len(self)
         for atom, data in properties.items():
-            values[UsefulTools.get_number(atom) - 1] = data[value_to_get]
+            try:
+                values[UsefulTools.get_number(atom) - 1] = data[value_to_get]
+            except KeyError:
+                raise PointError.IntPropertyMissing(self, atom, value_to_get)
 
         return values if atoms else sum(values)
 
@@ -6510,6 +6513,19 @@ class PointError:
     class CannotMove(Exception):
         pass
 
+    class IntMissing(Exception):
+        def __init__(self, point, atom, property):
+            error_msg = f"Cannot find output {property} for atom {atom} of point {point.path}"
+            error_msg += f"\n{' '*21}{atom} int file missing for {point.path}"
+            super().__init__(error_msg)
+
+    class IntPropertyMissing(Exception):
+        def __init__(self, point, atom, property):
+            error_msg = f"Cannot find output {property} for atom {atom} of point {point.path}"
+            error_msg += f"\n{' '*29}Check int file {point.path} for property {property}"
+            super().__init__(error_msg)
+            
+
 
 class Directory(Point):
     def __init__(self, dirpath):
@@ -8799,10 +8815,13 @@ class INT(Point):
         return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
 
     def get_property(self, property_name, as_dict=False):
-        if as_dict:
-            return self.getattr_as_dict(property_name)
-        else:
-            return getattr(self, property_name)
+        try:
+            if as_dict:
+                return self.getattr_as_dict(property_name)
+            else:
+                return getattr(self, property_name)
+        except KeyError:
+            raise PointError.IntPropertyMissing(self, self.atom, property_name)
 
     def move(self, dst):
         if self:
@@ -8840,6 +8859,7 @@ class INT(Point):
             elif attr.lower() in ["all"]:
                 return self.multipoles | {"iqa": self.iqa}
             return self.__dict__[attr]
+    
 
     def __setattr__(self, attr, val):
         if attr in Constants.multipole_names:
@@ -8902,6 +8922,9 @@ class INTs(Point):
 
     def get(self, prop):
         return getattr(self, prop)
+
+    def keys(self):
+        return [i.atom for i in self.ints]
 
     def __getattr__(self, attr):
         if attr in self.__dict__.keys():
@@ -10293,7 +10316,6 @@ class PointsError:
     class NotDirectory(Exception):
         pass
 
-
 class Points:
     def log_warnings(self):
         if GLOBALS.WARN_RECOVERY_ERROR:
@@ -10682,7 +10704,10 @@ class Set(Points):
                 output = point.get_property(model_type)
                 for atom in input.keys():
                     if atoms == "all" or atom.lower() == atoms.lower():
-                        training_sets[atom] += (input[atom], output[atom])
+                        try:
+                            training_sets[atom] += (input[atom], output[atom])
+                        except KeyError:
+                            raise PointError.IntMissing(point, atom, model_type)
 
         for atom, training_set in training_sets.items():
             training_sets[atom] = training_set.slice(min(npoints, len(self)))
