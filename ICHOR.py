@@ -10310,6 +10310,7 @@ class Points:
                             f"{point.path} | Recovery Error: {recovery_error * Constants.ha_to_kj_mol} kJ/mol"
                         )
                         n_recovery_error += 1
+                    
             if n_recovery_error > 0:
                 logger.warning(
                     f"{n_recovery_error} points are above the recovery error threshold ({GLOBALS.RECOVERY_ERROR_THRESHOLD * Constants.ha_to_kj_mol} kJ/mol), consider removing these points or increasing precision"
@@ -10318,16 +10319,17 @@ class Points:
         if GLOBALS.WARN_INTEGRATION_ERROR:
             n_integration_error = 0
             for point in self:
-                integration_errors = point.get_integration_errors()
-                for atom, integration_error in integration_errors.items():
-                    if (
-                        np.abs(integration_error)
-                        > GLOBALS.INTEGRATION_ERROR_THRESHOLD
-                    ):
-                        logger.warning(
-                            f"{point.path} | {atom} | Integration Error: {integration_error}"
-                        )
-                        n_integration_error += 1
+                if point.ints:
+                    integration_errors = point.get_integration_errors()
+                    for atom, integration_error in integration_errors.items():
+                        if (
+                            np.abs(integration_error)
+                            > GLOBALS.INTEGRATION_ERROR_THRESHOLD
+                        ):
+                            logger.warning(
+                                f"{point.path} | {atom} | Integration Error: {integration_error}"
+                            )
+                            n_integration_error += 1
             if n_integration_error > 0:
                 logger.warning(
                     f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points or increasing precision"
