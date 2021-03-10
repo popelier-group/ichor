@@ -1974,7 +1974,7 @@ class Atom:
         # self--jatom
         if jatom not in self._bonds:
             self._bonds.append(jatom)
-        
+
     def set_angle(self, jatom):
         # jatom--self--katom
         if jatom not in self._angles:
@@ -2101,11 +2101,11 @@ class Atom:
 
     @property
     def bond_list(self):
-        return [atom.atom_number-1 for atom in self._bonds]
+        return [atom.atom_number - 1 for atom in self._bonds]
 
     @property
     def angle_list(self):
-        return [atom.atom_number-1 for atom in self._angles]
+        return [atom.atom_number - 1 for atom in self._angles]
 
     @property
     def mass(self):
@@ -2183,7 +2183,9 @@ class Atom:
         elif type(other) == int:
             return self.atom_num == other
         else:
-            raise ValueError(f"Cannot compare type({type(other)}) with type({type(self)})")
+            raise ValueError(
+                f"Cannot compare type({type(other)}) with type({type(self)})"
+            )
 
     def __hash__(self):
         return hash(str(self.num) + str(self.coordinates_string))
@@ -2425,12 +2427,12 @@ class Atoms(Point):
 
 
 class System(Atoms):
-    _bonds = []
-    _angles = []
-    _dihedrals = []
-
     def __init__(self, atoms):
         super().__init__(atoms)
+
+        self._bonds = []
+        self._angles = []
+        self._dihedrals = []
 
         bonds = np.array(self.connectivity)
         angles = np.matmul(bonds, bonds)
@@ -2440,13 +2442,13 @@ class System(Atoms):
         angle_list = []
         dihedral_list = []
         for i in range(bonds.shape[0]):
-            for j in range(i+1, bonds.shape[1]):
-                if bonds[i,j] == 1:
-                    bond_list += [(i,j)]
-                elif angles[i,j] == 1:
-                    angle_list += [(i,j)]
-                elif dihedrals[i,j] == 1:
-                    dihedral_list += [(i,j)]
+            for j in range(i + 1, bonds.shape[1]):
+                if bonds[i, j] == 1:
+                    bond_list += [(i, j)]
+                elif angles[i, j] == 1:
+                    angle_list += [(i, j)]
+                elif dihedrals[i, j] == 1:
+                    dihedral_list += [(i, j)]
 
         for i, j in bond_list:
             self[i].set_bond(self[j])
@@ -2469,18 +2471,80 @@ class System(Atoms):
                         self[j].set_dihedral(self[i])
                         self._dihedrals.append((i, k, l, j))
                         break
-            
+
     @property
     def bonds(self):
-        return [(i+1, j+1) for i, j in self._bonds]
+        return [(i + 1, j + 1) for i, j in self._bonds]
 
     @property
     def angles(self):
-        return [(i+1, j+1, k+1) for i, j, k in self._angles]
+        return [(i + 1, j + 1, k + 1) for i, j, k in self._angles]
 
     @property
     def dihedrals(self):
-        return [(i+1, j+1, k+1, l+1) for i, j, k, l in self._dihedrals]
+        return [(i + 1, j + 1, k + 1, l + 1) for i, j, k, l in self._dihedrals]
+
+    def calculate_bond(self, atoms, i, j):
+        return atoms[i].dist(atoms[j])
+
+    def calculate_angle(self, atoms, i, j, k):
+        return math.degrees(atoms[j].angle(atoms[i], atoms[k]))
+
+    def calculate_dihedral(self, atoms, i, j, k, l):
+        b1 = np.array(atoms[j].vec_to(atoms[i]))
+        b2 = np.array(atoms[k].vec_to(atoms[j]))
+        b3 = np.array(atoms[l].vec_to(atoms[k]))
+
+        v1 = np.cross(b1, b2)
+        v2 = np.cross(b2, b3)
+
+        n1 = v1 / np.linalg.norm(v1)
+        n2 = v2 / np.linalg.norm(v2)
+
+        m1 = np.cross(n1, b2 / np.linalg.norm(b2))
+
+        x = np.dot(n1, n2)
+        y = np.dot(m1, n2)
+
+        return (
+            np.degrees(np.arctan2(y, x)) + 180
+        ) % 360  # - 180 # <- Uncomment to get angle from -180 to +180
+
+    def bond_headings(self):
+        return [
+            f"{self[i].atom_num}-{self[j].atom_num}" for i, j in self._bonds
+        ]
+
+    def angle_headings(self):
+        return [
+            f"{self[i].atom_num}-{self[j].atom_num}-{self[k].atom_num}"
+            for i, j, k in self._angles
+        ]
+
+    def dihedral_headings(self):
+        return [
+            f"{self[i].atom_num}-{self[j].atom_num}-{self[k].atom_num}-{self[l].atom_num}"
+            for i, j, k, l in self._dihedrals
+        ]
+
+    def headings(self):
+        return (
+            self.bond_headings(),
+            self.angle_headings(),
+            self.dihedral_headings(),
+        )
+
+    def calculate_geometry(self, atoms):
+        bonds = [self.calculate_bond(atoms, i, j) for i, j in self._bonds]
+        angles = [
+            self.calculate_angle(atoms, i, j, k) for i, j, k in self._angles
+        ]
+        dihedrals = [
+            self.calculate_dihedral(atoms, i, j, k, l)
+            for i, j, k, l in self._dihedrals
+        ]
+
+        return bonds, angles, dihedrals
 
 
 def global_parser(func):
@@ -2731,7 +2795,9 @@ class Globals:
         # check types
         for global_variable in self.global_variables:
             if global_variable not in self.__annotations__.keys():
-                self.__annotations__[global_variable] = type(self.get(global_variable))
+                self.__annotations__[global_variable] = type(
+                    self.get(global_variable)
+                )
 
         self.UID = Arguments.uid
 
@@ -2885,7 +2951,9 @@ class Globals:
 
         if self.DROP_N_COMPUTE and not self.DROP_N_COMPUTE_LOCATION:
             if self.MACHINE == "csf3":
-                self.DROP_N_COMPUTE_LOCATION = str(Path.home()/"DROP_N_COMPUTE")
+                self.DROP_N_COMPUTE_LOCATION = str(
+                    Path.home() / "DROP_N_COMPUTE"
+                )
         if self.DROP_N_COMPUTE_LOCATION:
             FileTools.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
@@ -2919,9 +2987,7 @@ class Globals:
         if self.ALF_REFERENCE_FILE:
             filetype = Path(self.ALF_REFERENCE_FILE).suffix
             if filetype == ".gjf":
-                self.ATOMS = GJF(
-                    str(self.ALF_REFERENCE_FILE)
-                ).read().atoms
+                self.ATOMS = GJF(str(self.ALF_REFERENCE_FILE)).read().atoms
             elif filetype == ".xyz":
                 self.ATOMS = Trajectory(self.ALF_REFERENCE_FILE).read(n=1)[0]
             else:
@@ -5103,7 +5169,12 @@ class SubmissionScript:
 class SubmissionTools:
     @staticmethod
     def make_g09_script(
-        points, script_directory=None, redo=False, submit=True, hold=None, script_name=None
+        points,
+        script_directory=None,
+        redo=False,
+        submit=True,
+        hold=None,
+        script_name=None,
     ):
         gaussian_job = GaussianCommand()
         if isinstance(points, Points):
@@ -5245,7 +5316,11 @@ class SubmissionTools:
 
     @staticmethod
     def make_dlpoly_script(
-        dlpoly_directories, script_directory=None, submit=True, hold=None, script_name=None
+        dlpoly_directories,
+        script_directory=None,
+        submit=True,
+        hold=None,
+        script_name=None,
     ):
         dlpoly_job = DlpolyCommand()
         for dlpoly_directory in dlpoly_directories:
@@ -5265,7 +5340,11 @@ class SubmissionTools:
 
     @staticmethod
     def make_cp2k_script(
-        cp2k_input_files, script_directory=None, submit=True, hold=None, script_name=None
+        cp2k_input_files,
+        script_directory=None,
+        submit=True,
+        hold=None,
+        script_name=None,
     ):
         cp2k_job = CP2KCommand()
         for cp2k_input_file in cp2k_input_files:
@@ -5598,19 +5677,38 @@ class SGE_Jobs:
 
 class AutoTools:
     @staticmethod
-    def submit_ichor_gjfs(jid=None, directory=None, script_name=None, script_directory=None):
+    def submit_ichor_gjfs(
+        jid=None, directory=None, script_name=None, script_directory=None
+    ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor(
-            "submit_gjfs", directory, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "submit_gjfs",
+            directory,
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_ichor_wfns(jid=None, directory=None, atoms="all", script_name=None, script_directory=None):
+    def submit_ichor_wfns(
+        jid=None,
+        directory=None,
+        atoms="all",
+        script_name=None,
+        script_directory=None,
+    ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
         return AutoTools.submit_ichor(
-            "submit_wfns", directory, atoms, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "submit_wfns",
+            directory,
+            atoms,
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
@@ -5653,11 +5751,19 @@ class AutoTools:
         model_dir = GLOBALS.FILE_STRUCTURE["models"]
         # FEREBUS/MODELS
         return AutoTools.submit_ichor(
-            "calculate_errors", model_dir, sp_dir, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "calculate_errors",
+            model_dir,
+            sp_dir,
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_ichor_make_sets(jid=None, script_name=None, script_directory=None):
+    def submit_ichor_make_sets(
+        jid=None, script_name=None, script_directory=None
+    ):
         xyz_files = FileTools.get_files_in(".", "*.xyz")
         if len(xyz_files) == 0:
             printq("Error: No xyz file or TRAINING_SET found")
@@ -5683,7 +5789,12 @@ class AutoTools:
 
     @staticmethod
     def submit_ichor_s_curves(
-        predict_property, validation_set, models, output_file, script_name=None, script_directory=None
+        predict_property,
+        validation_set,
+        models,
+        output_file,
+        script_name=None,
+        script_directory=None,
     ):
         return AutoTools.submit_ichor(
             "calculate_s_curves",
@@ -5700,58 +5811,125 @@ class AutoTools:
     @staticmethod
     def submit_dlpoly_gjfs(jid=None, script_name=None, script_directory=None):
         return AutoTools.submit_ichor(
-            "calculate_gaussian_energies", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "calculate_gaussian_energies",
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_dlpoly_energies(jid=None, script_name=None, script_directory=None):
+    def submit_dlpoly_energies(
+        jid=None, script_name=None, script_directory=None
+    ):
         return AutoTools.submit_ichor(
-            "get_wfn_energies", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "get_wfn_energies",
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_dlpoly_trajectories(jid=None, script_name=None, script_directory=None):
+    def submit_dlpoly_trajectories(
+        jid=None, script_name=None, script_directory=None
+    ):
         return AutoTools.submit_ichor(
-            "calculate_trajectories_wfn", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "calculate_trajectories_wfn",
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_dlpoly_trajectories_energies(jid=None, script_name=None, script_directory=None):
+    def submit_dlpoly_trajectories_energies(
+        jid=None, script_name=None, script_directory=None
+    ):
         return AutoTools.submit_ichor(
-            "get_trajectory_energies", submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "get_trajectory_energies",
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_dlpoly_trajectory_energies(jid=None, directory=None, script_name=None, script_directory=None):
+    def submit_dlpoly_trajectory_energies(
+        jid=None, directory=None, script_name=None, script_directory=None
+    ):
         return AutoTools.submit_ichor(
-            "get_trajectory_energy", directory, submit=True, hold=jid, script_name=script_name, script_directory=script_directory
+            "get_trajectory_energy",
+            directory,
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_ichor(function, *args, submit=False, hold=None, script_name=None, script_directory=None):
+    def submit_ichor(
+        function,
+        *args,
+        submit=False,
+        hold=None,
+        script_name=None,
+        script_directory=None,
+    ):
         return SubmissionTools.make_python_script(
-            __file__, function=function, args=args, submit=submit, hold=hold, script_name=script_name, script_directory=script_directory
+            __file__,
+            function=function,
+            args=args,
+            submit=submit,
+            hold=hold,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
-    def submit_gjfs(jid=None, npoints=None, script_name=None, script_directory=None):
+    def submit_gjfs(
+        jid=None, npoints=None, script_name=None, script_directory=None
+    ):
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
-        return points.submit_gjfs(redo=False, submit=True, hold=jid, script_name=script_name, script_directory=script_directory)
+        return points.submit_gjfs(
+            redo=False,
+            submit=True,
+            hold=jid,
+            script_name=script_name,
+            script_directory=script_directory,
+        )
 
     @staticmethod
-    def submit_wfns(jid=None, npoints=None, atoms="all", script_name=None, script_directory=None):
+    def submit_wfns(
+        jid=None,
+        npoints=None,
+        atoms="all",
+        script_name=None,
+        script_directory=None,
+    ):
         if npoints is None:
             npoints = GLOBALS.POINTS_PER_ITERATION
         points = MockSet(npoints)
         return points.submit_wfns(
-            redo=False, submit=True, hold=jid, check_wfns=False, atoms=atoms, script_name=script_name, script_directory=script_directory
+            redo=False,
+            submit=True,
+            hold=jid,
+            check_wfns=False,
+            atoms=atoms,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     @staticmethod
     def submit_models(
-        jid=None, directory=None, ferebus_directory=None, atoms="all", script_name=None, script_directory=None
+        jid=None,
+        directory=None,
+        ferebus_directory=None,
+        atoms="all",
+        script_name=None,
+        script_directory=None,
     ):
         if not directory:
             directory = GLOBALS.FILE_STRUCTURE["training_set"]
@@ -5779,10 +5957,18 @@ class AutoTools:
         npoints = len(points)
         UsefulTools.set_uid()
         with DataLock():
-            script, jid = AutoTools.submit_ichor_gjfs(jid, directory=directory, script_directory=script_directory)
-            script, jid = AutoTools.submit_gjfs(jid, npoints, script_directory=script_directory)
-            script, jid = AutoTools.submit_ichor_wfns(jid, directory=directory, script_directory=script_directory)
-            AutoTools.submit_wfns(jid, npoints, script_directory=script_directory)
+            script, jid = AutoTools.submit_ichor_gjfs(
+                jid, directory=directory, script_directory=script_directory
+            )
+            script, jid = AutoTools.submit_gjfs(
+                jid, npoints, script_directory=script_directory
+            )
+            script, jid = AutoTools.submit_ichor_wfns(
+                jid, directory=directory, script_directory=script_directory
+            )
+            AutoTools.submit_wfns(
+                jid, npoints, script_directory=script_directory
+            )
 
     @staticmethod
     def run_models(
@@ -5791,7 +5977,7 @@ class AutoTools:
         npoints=None,
         ferebus_directory=None,
         jid=None,
-        script_directory=None
+        script_directory=None,
     ):
         _, jid = AutoTools.submit_ichor_models(
             jid=jid,
@@ -5801,7 +5987,10 @@ class AutoTools:
             ferebus_directory=ferebus_directory,
         )
         return AutoTools.submit_models(
-            jid=jid, directory=directory, ferebus_directory=ferebus_directory, script_directory=script_directory
+            jid=jid,
+            directory=directory,
+            ferebus_directory=ferebus_directory,
+            script_directory=script_directory,
         )
 
     @staticmethod
@@ -5843,7 +6032,10 @@ class AutoTools:
         submitted_scripts = []
         with DataLock():
             for func, script_name in zip(order, script_names):
-                args = {"script_name": script_name, "script_directory": GLOBALS.FILE_STRUCTURE["tmp_scripts"]}
+                args = {
+                    "script_name": script_name,
+                    "script_directory": GLOBALS.FILE_STRUCTURE["tmp_scripts"],
+                }
                 if "type" in func.__code__.co_varnames:
                     args["type"] = str(GLOBALS.OPTIMISE_PROPERTY)
                 if "atoms" in func.__code__.co_varnames:
@@ -5878,7 +6070,9 @@ class AutoTools:
             if counter > 0:
                 # TODO: Convert this to fatal error
                 print("Error: ICHOR may already be running?")
-                print(f"If this is a mistake delete file {counter_loc} and rerun")
+                print(
+                    f"If this is a mistake delete file {counter_loc} and rerun"
+                )
                 quit()
 
         with open(counter_loc, "w") as f:
@@ -10126,7 +10320,10 @@ class Points:
             for point in self:
                 integration_errors = point.get_integration_errors()
                 for atom, integration_error in integration_errors.items():
-                    if np.abs(integration_error) > GLOBALS.INTEGRATION_ERROR_THRESHOLD:
+                    if (
+                        np.abs(integration_error)
+                        > GLOBALS.INTEGRATION_ERROR_THRESHOLD
+                    ):
                         logger.warning(
                             f"{point.path} | {atom} | Integration Error: {integration_error}"
                         )
@@ -10353,13 +10550,32 @@ class Set(Points):
             if point.gjf:
                 point.gjf.write()
 
-    def submit_gjfs(self, redo=False, submit=True, hold=None, script_name=None, script_directory=None):
+    def submit_gjfs(
+        self,
+        redo=False,
+        submit=True,
+        hold=None,
+        script_name=None,
+        script_directory=None,
+    ):
         return SubmissionTools.make_g09_script(
-            self, redo=redo, submit=submit, hold=hold, script_name=script_name, script_directory=script_directory
+            self,
+            redo=redo,
+            submit=submit,
+            hold=hold,
+            script_name=script_name,
+            script_directory=script_directory,
         )
 
     def submit_wfns(
-        self, redo=False, submit=True, hold=None, check_wfns=True, atoms="all", script_name=None, script_directory=None
+        self,
+        redo=False,
+        submit=True,
+        hold=None,
+        check_wfns=True,
+        atoms="all",
+        script_name=None,
+        script_directory=None,
     ):
         return SubmissionTools.make_aim_script(
             self,
@@ -10738,15 +10954,15 @@ class DlpolyHistory(Trajectory):
             for line in f:
                 if line.startswith("timestep"):
                     natoms = int(line.split()[2])
-                    line = next(f) # x unit vector
-                    line = next(f) # y unit vector
-                    line = next(f) # z unit vector
+                    line = next(f)  # x unit vector
+                    line = next(f)  # y unit vector
+                    line = next(f)  # z unit vector
 
                     atoms = Atoms()
                     while len(atoms) < natoms:
-                        line = next(f) # Atom Line
+                        line = next(f)  # Atom Line
                         atom_type = line.split()[0]
-                        line = next(f) # Coordinate Line
+                        line = next(f)  # Coordinate Line
                         atoms.add(f"{atom_type} {line}")
                     self.add(atoms)
 
@@ -11036,8 +11252,12 @@ class DlpolyTools:
     def write_control_updated(control_file):
         with open(control_file, "w+") as f:
             f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
-            f.write("# This is a generic CONTROL file. Please adjust to your requirement.\n")
-            f.write("# Directives which are commented are some useful options.\n")
+            f.write(
+                "# This is a generic CONTROL file. Please adjust to your requirement.\n"
+            )
+            f.write(
+                "# Directives which are commented are some useful options.\n"
+            )
             f.write("\n")
             f.write("ensemble nvt hoover 0.04\n")
             if int(GLOBALS.DLPOLY_TEMPERATURE) == 0:
@@ -11095,12 +11315,14 @@ class DlpolyTools:
     def write_config_updated(config_file, atoms):
         with open(config_file, "w+") as f:
             f.write("Frame :         1\n")
-            f.write("\t0\t1\n") # PBC Solution to temporary problem
+            f.write("\t0\t1\n")  # PBC Solution to temporary problem
             f.write("25.0 0.0 0.0\n")
             f.write("0.0 25.0 0.0\n")
             f.write("0.0 0.0 25.0\n")
             for atom in atoms:
-                f.write(f"{atom.type}  {atom.num}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.num}\n")
+                f.write(
+                    f"{atom.type}  {atom.num}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.num}\n"
+                )
                 f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
 
     @staticmethod
@@ -11230,7 +11452,6 @@ class DlpolyTools:
                 trajectory_files[model_name] = Trajectory(
                     trajectory_file
                 ).read()
-
 
         for model_name, trajectory in trajectory_files.items():
             if len(trajectory) > 0:
@@ -12726,6 +12947,133 @@ class RecoveryErrorTools:
         error_menu.run()
 
 
+class GeometryTools(AnalysisTools):
+    input_loc = ""
+    output_loc = "geometry.xlsx"
+
+    @staticmethod
+    def write_to_excel(writer, sheet_name, data, create_summary=False):
+        import pandas as pd
+
+        if len(data) > 0:
+            df = pd.DataFrame(data)
+            df.to_excel(writer, sheet_name=sheet_name)
+
+            if create_summary:
+                summary = {}
+                for heading, values in data.items():
+                    summary[heading] = {
+                        "min": np.min(values),
+                        "avg": np.mean(values),
+                        "max": np.max(values),
+                    }
+                summary_df = pd.DataFrame(summary).reindex(
+                    index=["min", "avg", "max"]
+                )
+                summary_df.to_excel(writer, sheet_name=f"{sheet_name}_Summary")
+
+    @staticmethod
+    def calculate_molecular_geometries(input_loc):
+        if input_loc.is_dir():
+            points = [p.atoms for p in Set(input_loc).read_gjfs()]
+        elif input_loc.suffix == ".xyz":
+            points = [a for a in Trajectory(input_loc).read()]
+
+        sys = System(points[0])
+
+        bonds = DictList()
+        angles = DictList()
+        dihedrals = DictList()
+
+        bond_headings, angle_headings, dihedral_headings = sys.headings()
+        for point in points:
+            (
+                bond_values,
+                angle_values,
+                dihedral_values,
+            ) = sys.calculate_geometry(point)
+            for heading, value in zip(bond_headings, bond_values):
+                bonds[heading] += [value]
+            for heading, value in zip(angle_headings, angle_values):
+                angles[heading] += [value]
+            for heading, value in zip(dihedral_headings, dihedral_values):
+                dihedrals[heading] += [value]
+
+        modified_dihedrals = DictList()
+        for dihedral, values in dihedrals.items():
+            modified_dihedrals[dihedral] += [values[0]]
+            for value in values[1:]:
+                diff = value - modified_dihedrals[dihedral][-1]
+                diff = (diff + 180) % 360 - 180
+                modified_dihedrals[dihedral] += [
+                    modified_dihedrals[dihedral][-1] + diff
+                ]
+
+        import pandas as pd
+
+        with pd.ExcelWriter(GeometryTools.output_loc) as writer:
+            GeometryTools.write_to_excel(
+                writer, "Bonds", bonds, create_summary=True
+            )
+            GeometryTools.write_to_excel(
+                writer, "Angles", angles, create_summary=True
+            )
+            GeometryTools.write_to_excel(writer, "Dihedrals", dihedrals)
+            GeometryTools.write_to_excel(
+                writer, "Modified Dihedrals", modified_dihedrals
+            )
+
+    @staticmethod
+    def select_input_location():
+        t = TabCompleter()
+        t.setup_completer(t.path_completer)
+
+        while True:
+            ans = input("Enter Input Location: ")
+            p = Path(ans)
+            if p.is_dir() or p.suffix in [".xyz"]:
+                GeometryTools.input_loc = p
+                break
+            else:
+                print("Invalid Input")
+                print(f"{ans} is not a directory or xyz file")
+                print()
+
+    @staticmethod
+    def select_output_location():
+        GeometryTools.output_loc = AnalysisTools.set_output_file(
+            default="geometry"
+        )
+
+    @staticmethod
+    def geometry_menu_refresh(menu):
+        menu.clear_options()
+        menu.add_option(
+            "1",
+            "Calculate Molecular Geometries",
+            GeometryTools.calculate_molecular_geometries,
+            kwargs={"input_loc": GeometryTools.input_loc},
+        )
+        menu.add_space()
+        menu.add_option(
+            "i", "Select Input Location", GeometryTools.select_input_location
+        )
+        menu.add_option(
+            "o", "Select Output Location", GeometryTools.select_output_location
+        )
+        menu.add_space()
+        menu.add_message(f"Input Location: {GeometryTools.input_loc}")
+        menu.add_message(f"Output Location: {GeometryTools.output_loc}")
+        menu.add_final_options()
+
+    @staticmethod
+    def geometry_menu():
+        GeometryTools.input_loc = Path(GLOBALS.FILE_STRUCTURE["training_set"])
+        geometry_menu = Menu(title="Geometry Tools Menu")
+        geometry_menu.set_refresh(GeometryTools.geometry_menu_refresh)
+        geometry_menu.run()
+
+
 class RMSETools(AnalysisTools):
     validation_set = ""
     models = "all"
@@ -13950,6 +14298,9 @@ def main_menu():
         "r",
         "Calculate Recovery Errors",
         RecoveryErrorTools.recovery_error_menu,
+    )
+    analysis_menu.add_option(
+        "g", "Calculate Molecular Geometries", GeometryTools.geometry_menu
     )
     analysis_menu.add_option("rmse", "Calculate RMSE", RMSETools.rmse_menu)
     analysis_menu.add_final_options()
