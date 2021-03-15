@@ -10316,6 +10316,7 @@ class PointsError:
     class NotDirectory(Exception):
         pass
 
+
 class Points:
     def log_warnings(self):
         if GLOBALS.WARN_RECOVERY_ERROR:
@@ -12667,6 +12668,8 @@ class S_CurveTools(AnalysisTools):
             AutoTools.submit_ichor_s_curves(
                 predict_property, validation_set, models, output_file
             )
+
+        GLOBALS.LOG_WARNINGS = True
 
         print("Reading Data")
         validation_set = Set(validation_set).read()
