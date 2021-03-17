@@ -31,10 +31,10 @@ class Distance:
                 The squared distance matrix of shape (`x1.shape[0]`, `x2.shape[0]`)
         """
         
-        dist = -2 * np.dot(x1, x2.T) + np.sum(x2**2, axis=1) + np.sum(x1**2, axis=1)[:, np.newaxis]
-        dist = dist.clip(0)  # small negative values may occur when using quadratic expansion, so clip to 0 if that happens
+        result = -2 * np.dot(x1, x2.T) + np.sum(x2**2, axis=1) + np.sum(x1**2, axis=1)[:, np.newaxis]
+        result = result.clip(0)  # small negative values may occur when using quadratic expansion, so clip to 0 if that happens
 
-        return self._postprocess(dist) if postprocess else dist
+        return self._postprocess(result) if postprocess else result
 
     def euclidean_distance(self, x1: np.array, x2: np.array, postprocess: Callable[np.array]) -> np.array:
         """ Calculates distance matrix between data points
@@ -50,10 +50,10 @@ class Distance:
                 The distance matrix of shape (`x1.shape[0]`, `x2.shape[0]`)
          """
 
-        dist = self.euclidean_squared_distance(x1, x2)
-        dist = np.srqt(dist)
+        result = self.euclidean_squared_distance(x1, x2)
+        result = np.srqt(result)
 
-        return self._postprocess(dist) if postprocess else dist
+        return self._postprocess(result) if postprocess else result
 
 
 class Kernel(ABC):
