@@ -1,6 +1,7 @@
 import ast
 from functools import wraps
 from typing import Any, List, Union, cast
+from uuid import UUID
 
 from ichor.common.types import Version
 from ichor.common.types.bool import check_bool
@@ -40,6 +41,11 @@ def read_alf(alf: Union[str, List[List[int]]]):
 @parser
 def read_version(ver: str) -> Version:
     return Version(ver)
+
+
+@parser
+def read_uid(uid: str) -> UUID:
+    return UUID(uid)
 
 
 @parser

@@ -1,14 +1,21 @@
 import os
 import platform
+import inspect
 from pathlib import Path
 from typing import List
+from uuid import UUID
 
-from ichor import constants
-from ichor.common.types import DictList, Version
-from ichor.file_structure import FileStructure
-from ichor.globals import checkers, formatters, parsers
-from ichor.globals.machine import Machine
-from ichor.logging import logger
+from .. import constants
+from ..common.types import DictList, Version
+from ..common import files
+from ..file_structure import FileStructure
+from ..logging import logger
+from ..problem_finder import ProblemFinder
+from . import checkers, formatters, parsers
+from .machine import Machine
+from ..arguments import Arguments
+from ..atoms import Atoms
+from .config_provider import ConfigProvider
 
 
 class Globals:
@@ -139,7 +146,7 @@ class Globals:
     SUBMITTED: bool = False  # Don't Change
 
     DISABLE_PROBLEMS: bool = False
-    UID: str = Arguments.uid
+    UID: UUID = Arguments.uid
 
     IQA_MODELS: bool = False
 
@@ -189,6 +196,8 @@ class Globals:
 
         self._parsers["INCLUDE_NODES"] += [parsers.split_keywords]
         self._parsers["EXCLUDE_NODES"] += [parsers.split_keywords]
+
+        self._parsers["UID"] += [parsers.read_uid]
 
         # TODO: Parsers to add
         # - Training/Sample/Validation Set methods
@@ -300,51 +309,51 @@ class Globals:
                     Path.home() / "DROP_N_COMPUTE"
                 )
         if self.DROP_N_COMPUTE_LOCATION:
-            FileTools.mkdir(self.DROP_N_COMPUTE_LOCATION)
+            files.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
-        if self.ALF_REFERENCE_FILE:
-            if not os.path.exists(self.ALF_REFERENCE_FILE):
-                logger.warning(
-                    f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative"
-                )
-                self.ALF_REFERENCE_FILE = None
-
-        if not self.ALF_REFERENCE_FILE:
-            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                self.FILE_STRUCTURE["training_set"]
-            )
-
-        if not self.ALF_REFERENCE_FILE:
-            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                self.FILE_STRUCTURE["sample_pool"]
-            )
-
-        if not self.ALF_REFERENCE_FILE:
-            self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-                self.FILE_STRUCTURE["validation_set"]
-            )
-
-        if not self.ALF_REFERENCE_FILE:
-            xyz_files = FileTools.get_files_in(".", "*.xyz")
-            if len(xyz_files) > 0:
-                self.ALF_REFERENCE_FILE = xyz_files[0]
-
-        if self.ALF_REFERENCE_FILE:
-            filetype = Path(self.ALF_REFERENCE_FILE).suffix
-            if filetype == ".gjf":
-                self.ATOMS = GJF(str(self.ALF_REFERENCE_FILE)).read().atoms
-            elif filetype == ".xyz":
-                self.ATOMS = Trajectory(self.ALF_REFERENCE_FILE).read(n=1)[0]
-            else:
-                logger.error(f"Unknown ALF_REFRENCE_FILE_TYPE: {filetype}")
-
-        if not self.ALF:
-            if self.ATOMS:
-                try:
-                    self.ATOMS.calculate_alf()
-                    self.ALF = Atoms.ALF
-                except:
-                    logger.error("Error in ALF Calculation")
+        # if self.ALF_REFERENCE_FILE:
+        #     if not os.path.exists(self.ALF_REFERENCE_FILE):
+        #         logger.warning(
+        #             f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative"
+        #         )
+        #         self.ALF_REFERENCE_FILE = None
+        #
+        # if not self.ALF_REFERENCE_FILE:
+        #     self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+        #         self.FILE_STRUCTURE["training_set"]
+        #     )
+        #
+        # if not self.ALF_REFERENCE_FILE:
+        #     self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+        #         self.FILE_STRUCTURE["sample_pool"]
+        #     )
+        #
+        # if not self.ALF_REFERENCE_FILE:
+        #     self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
+        #         self.FILE_STRUCTURE["validation_set"]
+        #     )
+        #
+        # if not self.ALF_REFERENCE_FILE:
+        #     xyz_files = FileTools.get_files_in(".", "*.xyz")
+        #     if len(xyz_files) > 0:
+        #         self.ALF_REFERENCE_FILE = xyz_files[0]
+        #
+        # if self.ALF_REFERENCE_FILE:
+        #     filetype = Path(self.ALF_REFERENCE_FILE).suffix
+        #     if filetype == ".gjf":
+        #         self.ATOMS = GJF(str(self.ALF_REFERENCE_FILE)).read().atoms
+        #     elif filetype == ".xyz":
+        #         self.ATOMS = Trajectory(self.ALF_REFERENCE_FILE).read(n=1)[0]
+        #     else:
+        #         logger.error(f"Unknown ALF_REFRENCE_FILE_TYPE: {filetype}")
+        #
+        # if not self.ALF:
+        #     if self.ATOMS:
+        #         try:
+        #             self.ATOMS.calculate_alf()
+        #             self.ALF = Atoms.ALF
+        #         except:
+        #             logger.error("Error in ALF Calculation")
 
     def set(self, name, value):
         name = name.upper()
@@ -370,8 +379,7 @@ class Globals:
 
     def save_to_properties_config(self, config_file, global_variables):
         with open(config_file, "w") as config:
-            logo = UsefulTools.ichor_logo()
-            config.write(f"{logo}\n\n")
+            config.write(f"{constants.ichor_logo}\n\n")
             for key, val in global_variables.items():
                 if str(val) in ["[]", "None"]:
                     continue

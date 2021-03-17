@@ -1,3 +1,6 @@
+from .common.functools import get_functions_to_run, run_function
+import os
+
 class Problem:
     def __init__(self, name="", problem="", solution=""):
         self.name = name
@@ -25,8 +28,9 @@ class ProblemFinder:
     def __init__(self):
         self.problems = []
 
-    @UsefulTools.run_function(1)
+    @run_function(1)
     def check_alf(self):
+        from .globals import GLOBALS
         if len(GLOBALS.ALF) < 1:
             self.add(
                 Problem(
@@ -36,8 +40,9 @@ class ProblemFinder:
                 )
             )
 
-    @UsefulTools.run_function(1.1)
+    @run_function(1.1)
     def check_atoms(self):
+        from .globals import GLOBALS
         if not GLOBALS.ATOMS:
             self.add(
                 Problem(
@@ -47,8 +52,9 @@ class ProblemFinder:
                 )
             )
 
-    # @UsefulTools.run_function(2)
+    # @run_function(2)
     def check_directories(self):
+        from .globals import GLOBALS
         dirs_to_check = ["training_set", "sample_pool"]
 
         for dir_name in dirs_to_check:
@@ -62,8 +68,9 @@ class ProblemFinder:
                     )
                 )
 
-    @UsefulTools.run_function(3)
+    @run_function(3)
     def check_system(self):
+        from .globals import GLOBALS
         if GLOBALS.SYSTEM_NAME == "SYSTEM":
             self.add(
                 Problem(
@@ -73,7 +80,7 @@ class ProblemFinder:
                 )
             )
 
-    @UsefulTools.run_function(4)
+    @run_function(4)
     def check_settings(self):
         for setting in ProblemFinder.unknown_settings:
             self.add(
@@ -106,6 +113,7 @@ class ProblemFinder:
         self.problems.append(problem)
 
     def find(self):
+        from .globals import GLOBALS
         if not GLOBALS.DISABLE_PROBLEMS:
             problems_to_find = UsefulTools.get_functions_to_run(self)
             for find_problem in problems_to_find:
@@ -122,3 +130,4 @@ class ProblemFinder:
 
     def __repr__(self):
         return str(self)
+

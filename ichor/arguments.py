@@ -1,9 +1,12 @@
 from argparse import ArgumentParser
+from .common.uid import get_uid
+
+from uuid import UUID
 
 
 class Arguments:
-    config_file = "config.properties"
-    uid = UsefulTools.get_uid()
+    config_file: str = "config.properties"
+    uid: UUID = get_uid()
 
     external_functions = {}
     call_external_function = None
