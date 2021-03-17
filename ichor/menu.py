@@ -1,23 +1,22 @@
-from ichor.tab_completer import ListCompleter
-from ichor.problem_finder import ProblemFinder
-
-from uuid import uuid4
 import sys
-
 from typing import Callable, List
+from uuid import uuid4
+
+from ichor.problem_finder import ProblemFinder
+from ichor.tab_completer import ListCompleter
 
 
 class Menu(object):
     def __init__(
-            self,
-            title: str = None,
-            options: List = None,
-            message: str = None,
-            prompt: str = ">>",
-            refresh: Callable = lambda *args: None,
-            auto_clear: bool = True,
-            enable_problems: bool = False,
-            auto_close: bool = False,
+        self,
+        title: str = None,
+        options: List = None,
+        message: str = None,
+        prompt: str = ">>",
+        refresh: Callable = lambda *args: None,
+        auto_clear: bool = True,
+        enable_problems: bool = False,
+        auto_close: bool = False,
     ):
         self.title = title
         self.options = None
@@ -92,19 +91,19 @@ class Menu(object):
             label
             for label, option in self.options.items()
             if label not in self.gap_ids
-               and label not in self.message_ids
-               and (label not in self.hidden_options or include_hidden)
+            and label not in self.message_ids
+            and (label not in self.hidden_options or include_hidden)
         ]
 
     def add_option(
-            self,
-            label,
-            name,
-            handler,
-            kwargs=None,
-            wait=False,
-            auto_close=False,
-            hidden=False,
+        self,
+        label,
+        name,
+        handler,
+        kwargs=None,
+        wait=False,
+        auto_close=False,
+        hidden=False,
     ):
         if kwargs is None:
             kwargs = {}

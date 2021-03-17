@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 import os
+from abc import ABC, abstractmethod
 from glob import glob
 from pathlib import Path
 
@@ -42,16 +42,22 @@ class ListCompleter(TabCompleter):
             if not line:
                 return [c + " " for c in self.list_completions][state]
             else:
-                return [c + " " for c in self.list_completions if c.startswith(line)][state]
+                return [
+                    c + " "
+                    for c in self.list_completions
+                    if c.startswith(line)
+                ][state]
 
 
 class PathCompleter(TabCompleter):
     def completer(self, text, state):
         if readline:
             p = Path(text)
-            if "~" in text: p = p.expanduser()
+            if "~" in text:
+                p = p.expanduser()
             p = f"{p}{os.sep if p.is_dir() else ''}"  # Add trailing slash if p is a directory
-            if p == f".{os.sep}": p = ""  # No point in showing ./
+            if p == f".{os.sep}":
+                p = ""  # No point in showing ./
 
             files = [x for x in glob(p + "*")]
             for i, f in enumerate(files):

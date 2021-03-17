@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+
 class Arguments:
     config_file = "config.properties"
     uid = UsefulTools.get_uid()
@@ -19,7 +20,9 @@ class Arguments:
             type=str,
             help="Name of Config File for ICHOR",
         )
-        allowed_functions = "\n".join(f"- {func}" for func in Arguments.external_functions.keys())
+        allowed_functions = "\n".join(
+            f"- {func}" for func in Arguments.external_functions.keys()
+        )
         parser.add_argument(
             "-f",
             "--func",
