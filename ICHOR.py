@@ -715,6 +715,7 @@ def printq(*msg):
 #############################################
 
 
+# Moved to ichor/common/types/version.py
 class Version:
     def __init__(self, rep=None):
         self.major = 0
@@ -797,6 +798,7 @@ class Version:
         return str(self)
 
 
+# Moved to ichor/constants.py
 class Constants:
     BOAQ_VALUES = [
         "auto",
@@ -1332,6 +1334,7 @@ class UsefulTools:
 
         return math.floor(math.log(n, 10) + 1)
 
+    # Moved to ichor/common/types/bool.py
     @staticmethod
     def check_bool(val, default=True):
         if isinstance(val, str):
@@ -1664,6 +1667,7 @@ class Arguments:
             Arguments.uid = args.uid
 
 
+# Moved to ichor/common/types/dict_list.py
 class DictList(dict):
     """
     Wrapper around the common pattern of a dictionary of lists
@@ -1689,6 +1693,7 @@ class DictList(dict):
         return self.__dict__[key]
 
 
+# Moved to ichor/file_strcture/node.py
 class Node:
     def __init__(self, name, parent):
         self.name = name
@@ -1703,6 +1708,7 @@ class Node:
         return str(self)
 
 
+# Moved to ichor/file_strcture/tree.py
 class Tree:
     def __init__(self):
         self._dict = {}
@@ -1716,6 +1722,7 @@ class Tree:
         return str(self._dict[id])
 
 
+# Moved to ichor/file_strcture/__init__.py
 class FileStructure(Tree):
     def __init__(self):
         super().__init__()
@@ -2550,27 +2557,28 @@ class System(Atoms):
         return bonds, angles, dihedrals
 
 
+# Moved to ichor/globals/parsers.py
 def global_parser(func):
     def wrapper(val):
         if val is None:
             return val
         else:
             return func(val)
-
     return wrapper
 
 
+# Moved to ichor/globals/formatters.py
 def global_formatter(func):
     def wrapper(val):
         if func.__annotations__:
             if type(val) != next(iter(func.__annotations__.values())):
                 return val
         return func(val)
-
     return wrapper
 
 
 class GlobalTools:
+    # Moved to ichor/common/types/str.py
     @staticmethod
     @global_formatter
     def cleanup_str(s: str) -> str:
@@ -2589,6 +2597,7 @@ class GlobalTools:
     def to_lower(s: str) -> str:
         return s.lower()
 
+    # Moved to ichor/globals/parsers.py
     @staticmethod
     @global_parser
     def split_keywords(keywords):
@@ -2604,6 +2613,7 @@ class GlobalTools:
         ]
         return split_keywords
 
+    # Moved to ichor/globals/parsers.py
     @staticmethod
     @global_parser
     def read_alf(alf):
@@ -2613,26 +2623,31 @@ class GlobalTools:
             alf = [[int(i) for i in j] for j in alf]
         return alf
 
+    # Moved to ichor/globals/parsers.py
     @staticmethod
     @global_parser
     def read_version(strver):
         return Version(strver)
 
+    # Moved to ichor/globals/parsers.py
     @staticmethod
     @global_parser
     def parse_str(inp):
         return str(inp)
 
+    # Moved to ichor/globals/parsers.py
     @staticmethod
     @global_parser
     def parse_bool(inp):
         return UsefulTools.check_bool(inp)
 
+    # Moved to ichor/globals/parsers.py
     @staticmethod
     @global_parser
     def parse_int(inp):
         return int(inp)
 
+    # Moved to ichor/globals/parsers.py
     @staticmethod
     @global_parser
     def parse_float(inp):
@@ -2656,6 +2671,7 @@ class GlobalTools:
             raise ValueError(f"Value: {val} must be >= 0")
 
 
+# Moved to ichor/globals/globals.py
 class Globals:
     _types = []
 

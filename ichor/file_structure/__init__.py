@@ -1,10 +1,7 @@
-from ichor.file_structure.tree import FileTree
 from ichor.file_structure.node import FileNode
+from ichor.file_structure.tree import FileTree
 
-
-__all__ = [
-    "FileStructure"
-]
+__all__ = ["FileStructure"]
 
 
 class FileStructure(FileTree):

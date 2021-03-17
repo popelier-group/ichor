@@ -1,6 +1,3 @@
-from ichor.tab_completer import PathCompleter, ListCompleter
+from ichor.tab_completer import ListCompleter, PathCompleter
 
-__all__ = [
-    "PathCompleter",
-    "ListCompleter"
-]
+__all__ = ["PathCompleter", "ListCompleter"]
