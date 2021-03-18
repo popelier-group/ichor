@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
-from .common.uid import get_uid
+from ichor.common.uid import get_uid
+from ichor.common.functools import run_once
 
 from uuid import UUID
 
@@ -13,6 +14,7 @@ class Arguments:
     call_external_function_args = []
 
     @staticmethod
+    @run_once
     def read():
         parser = ArgumentParser(description="ICHOR: A kriging training suite")
 

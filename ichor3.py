@@ -1,3 +1,7 @@
+from ichor.arguments import Arguments
 from ichor.globals import GLOBALS
 
-print(GLOBALS.UID)
+Arguments.read()
+Arguments.read()
+
+print(GLOBALS.MACHINE)

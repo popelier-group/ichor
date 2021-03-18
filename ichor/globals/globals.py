@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 from uuid import UUID
 
+from ichor.common.functools import run_once
 from .. import constants
 from ..common.types import DictList, Version
 from ..common import files
@@ -269,6 +270,7 @@ class Globals:
             self._defaults[global_variable] = self.get(global_variable)
 
     @staticmethod
+    @run_once
     def define():
         globals_instance = Globals()
         globals_instance.init()
