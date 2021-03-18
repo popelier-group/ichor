@@ -1,8 +1,7 @@
 import numpy as np
-from numba import jit
-from .kernel import Kernel
+from ichor.models.kernels.kernel import Kernel
 
-@jit(nopython=True)
+
 def RBF_k(l, xi, xj):
     diff = xi - xj
     return np.exp(-np.sum(l * diff * diff))
@@ -32,8 +31,9 @@ def RBF_R(l, x):
 class RBF(Kernel):
     """Implements Radial Basis Function (RBF) kernel used to calculate covariance matrix"""
 
-    def __init__(self, lengthscale):
-        self.lengthscale = np.array(lengthscale)
+    def __init__(self, lengthscale: np.array):
+        
+        self.lengthscale = lengthscale
 
     @property
     def params(self):

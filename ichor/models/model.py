@@ -471,6 +471,7 @@ class Model:
 
     def predict(self, point):
         # TODO: ntrain x nfeats matrix, make multiple predictions at once
+        # TODO: return var flag?
         if isinstance(point, Point):
             features = point.features[self.i] #self.i = index of features
         else:
