@@ -3,5 +3,5 @@ from .globals import Globals
 
 __all__ = ["GLOBALS"]
 
-Arguments.read()
-GLOBALS = Globals.define()
+with Arguments():
+    GLOBALS = Globals.define()

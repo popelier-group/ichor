@@ -1,3 +1,4 @@
-from ichor.tab_completer import ListCompleter, PathCompleter
+from ICHOR import GLOBALS
+from ichor.globals import GLOBALS
 
-__all__ = ["PathCompleter", "ListCompleter"]
+__all__ = ["GLOBALS"]

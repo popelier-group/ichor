@@ -5,6 +5,14 @@ from ichor.common.functools import run_once
 from uuid import UUID
 
 
+def import_external_functions():
+    # Place functions to run externally in here
+    # from ichor.debugging import printq
+
+    Arguments.external_functions = locals()
+
+
+
 class Arguments:
     config_file: str = "config.properties"
     uid: UUID = get_uid()
@@ -16,6 +24,8 @@ class Arguments:
     @staticmethod
     @run_once
     def read():
+        import_external_functions()
+
         parser = ArgumentParser(description="ICHOR: A kriging training suite")
 
         parser.add_argument(
@@ -68,3 +78,10 @@ class Arguments:
 
         if args.uid:
             Arguments.uid = args.uid
+
+    def __enter__(self):
+        Arguments.read()
+
+    def __exit__(self, type, value, traceback):
+        if Arguments.call_external_function:
+            Arguments.call_external_function(*Arguments.call_external_function_args)

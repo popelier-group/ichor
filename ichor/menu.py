@@ -1,9 +1,11 @@
 import sys
+import os
 from typing import Callable, List
 from uuid import uuid4
 
 from ichor.problem_finder import ProblemFinder
 from ichor.tab_completer import ListCompleter
+from ichor.common.types.int import count_digits
 
 
 class Menu(object):
@@ -238,3 +240,9 @@ class Menu(object):
 
     def CLOSE(self):
         pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.run()

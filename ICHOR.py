@@ -133,6 +133,7 @@ SSH_SETTINGS = {
 #:::::::::::::::::::::::::::::::::::::::::::#
 #############################################
 
+# Moved to ichor/logging/portalocker
 # Below code has previously broken IHCOR, may need looking at in future
 ###############################################################################
 # Code below vendored from portalocker: https://github.com/WoLpH/portalocker/ #
@@ -212,6 +213,7 @@ def unlock(file_):
 
 ###############################################################################
 
+# Moved to ichor/logging/concurrent_log_handler
 #############################################################
 # Code below vendored from concurrent-log-handler:          #
 # https://github.com/Preston-Landers/concurrent-log-handler #
@@ -705,6 +707,7 @@ WRITE_FLAGS = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | O_BINARY
 BUFFER_SIZE = 128 * 1024
 
 
+# Moved to ichor/debugging.py
 def printq(*msg):
     print(*msg)
     quit()
@@ -1215,6 +1218,7 @@ class DebugCall:
 
 
 class UsefulTools:
+    # Moved to ichor/constants.py
     @staticmethod
     def ichor_logo():
         ichor_encoded_string = [
@@ -1491,10 +1495,12 @@ class UsefulTools:
         time_taken = UsefulTools.get_time() - start_time
         logger.debug(f"{message}{time_taken:.2f} s")
 
+    # Moved to ichor/common/uid.py
     @staticmethod
     def get_uid():
         return str(uuid.uuid4())
 
+    # Moved to ichor/common/uid.py
     @staticmethod
     def set_uid(uid=None):
         if GLOBALS.SUBMITTED and GLOBALS.UID:
@@ -1605,6 +1611,7 @@ TypeTools.conversions = {
 }
 
 
+# Moved to ichor/arguments.py
 class Arguments:
     config_file = "config.properties"
     uid = UsefulTools.get_uid()
