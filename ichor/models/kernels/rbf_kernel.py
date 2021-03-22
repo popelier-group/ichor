@@ -30,8 +30,8 @@ class RBFKernel(Kernel):
 
         # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
         # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1 
-        x1 = x1 * - self._lengthscale
-        x2 = x2 * - self._lengthscale
+        x1 = x1 / self._lengthscale
+        x2 = x2 / self._lengthscale
 
         dist = Distance.squared_euclidean_distance(x1, x2)
 
