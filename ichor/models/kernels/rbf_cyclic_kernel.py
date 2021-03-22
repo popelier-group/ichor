@@ -4,6 +4,9 @@ from ichor.models.kernels.distance import Distance
 
 
 class RBFCyclicKernel(Kernel):
+
+    # TODO: figure out a good way to say if training data is standardized, normalized, etc. because this kernel is affected by data preprocessing
+
     """Implemtation of Radial Basis Function (RBF) kernel with cyclic feature correction for phi angle feature
     
     .. note::
@@ -33,6 +36,15 @@ class RBFCyclicKernel(Kernel):
     """
 
     def __init__(self, lengthscale: np.ndarray):
+
+        """
+        Args:
+            :param: `lengthscale` np.ndarray of shape ndimensions (1D array):
+                array of lengthscales. We are using a separate lengthscale for each feature(dimension).
+            :param: optional, `train_x_std` np.ndarray of shape ndimensions (1D array):
+                if training/test data is standardized, then `train_x_std` has to be provided. This array contains the standard
+                deviations for each feature, calculated from the training set points.
+        """
         
         self._lengthscale = lengthscale
 
@@ -54,21 +66,32 @@ class RBFCyclicKernel(Kernel):
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
 
-        # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
-        # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1 
-        x1 = x1 * - self._lengthscale
-        x2 = x2 * - self._lengthscale
+        # work with distance matrices for each dimension(feature) and check which phi matrices if corrections are needed
+        # after distance matrices for each dimension are computed(and corrected where needed), divide by lengthscale and square
+        dist_corrected = np.zeros((x1.shape[0], x2.shape[0]))
 
-        dist = Distance.squared_euclidean_distance(x1, x2)
+        for dim_idx, (x1_one_dimension, x2_one_dimension) in enumerate(zip(x1.T, x2.T)):
 
-        return np.exp(dist)
+            res = Distance.euclidean_distance(x1_one_dimension, x2_one_dimension)
+
+            if ((dim_idx+1) > 3) and ((dim_idx+1) % 3 == 0):  # if phi feature
+
+                res = np.where((res > (np.pi/self.train_x_std[dim_idx])), (2*np.pi/self.train_x_std[dim_idx] - res), res)
+
+            res = res / self._lengthscale[dim_idx]
+            res = np.power(res, 2)
+
+            # accumulate corrected matrix for each feature(dimension) to get the total (corrected) distance between points
+            dist_corrected = dist_corrected + res
+
+        return np.exp(-0.5 * dist_corrected)
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
         """ helper method to return x_test, x_train cyclic RBF covariance matrix K(X*, X)"""
 
         return self.k(x_test, x_train)
 
-    def R(self, x_train: np.ndarray) -> np.ndarray:
+    def R(self, x_train: np.ndarray, *args) -> np.ndarray:
         """ helper method to return symmetric square matrix x_train, x_train cyclic RBF covariance matrix K(X, X)"""
 
         return self.k(x_train, x_train)

@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 class Kernel(ABC):
     """ Base class for all kernels that implements dunder methods for addition or multiplication of separate kernels"""
 
+    # TODO: figure out a good way to say if training data is standardized, normalized, etc. because kernels can be affected (for example cyclic RBF is affected)
+
     @property
     def params(self):
         # TODO: Convert this to error

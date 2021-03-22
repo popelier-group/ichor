@@ -4,7 +4,9 @@ from ichor.models.kernels.distance import Distance
 
 
 class RBFKernel(Kernel):
-    """Implemtation of Radial Basis Function (RBF) kernel"""
+    """Implemtation of Radial Basis Function (RBF) kernel
+    When each dimension has a separate lengthscale, this is also called the RBF-ARD kernel
+    """
 
     def __init__(self, lengthscale: np.ndarray):
         
@@ -35,7 +37,7 @@ class RBFKernel(Kernel):
 
         dist = Distance.squared_euclidean_distance(x1, x2)
 
-        return np.exp(dist)
+        return np.exp(-0.5 * dist)
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
         """ helper method to return x_test, x_train RBF covariance matrix K(X*, X)"""
