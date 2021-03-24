@@ -20,7 +20,7 @@ class WFN(Geometry, GeometryData, File):
         self.method: str = "HF"
 
     @buildermethod
-    def read(self, only_header=False):
+    def _read_file(self, only_header=False):
         with open(self.path, "r") as f:
             next(f)
             self.header = next(f)

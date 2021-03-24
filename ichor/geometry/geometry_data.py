@@ -15,18 +15,18 @@ class GeometryData:
         except AttributeError:
             raise PropertyNotFound(f"Property {item} not found")
 
+    def __getitem__(self, item):
+        try:
+            return self.data[item]
+        except KeyError:
+            raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
+
     def __getattr__(self, item):
         try:
             return super().__getattribute__(item)
         except AttributeError:
-            try:
-                return getattr(self.data, item)
-            except AttributeError:
-                for var, inst in self.__dict__.items():
-                    if isinstance(inst, dict):
-                        try:
-                            if item in inst.keys():
-                                return inst[item]
-                        except AttributeError:
-                            pass
-            raise AttributeError("tmp error")
+            for var, inst in self.__dict__.items():
+                if isinstance(inst, (dict, ClassDict)):
+                    if item in inst.keys():
+                        return inst[item]
+            raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")

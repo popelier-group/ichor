@@ -1,6 +1,4 @@
-from ichor.points import PointsDirectory, PointDirectory
+from ichor.points import PointsDirectory
 
 p = PointsDirectory("Test/TRAINING_SET")
-print(p[0].gjf.atoms)
-
-# print(p)
+print(p.atoms)

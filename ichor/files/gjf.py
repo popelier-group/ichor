@@ -39,7 +39,7 @@ class GJF(Geometry, File):
         return ".gjf"
 
     @buildermethod
-    def read(self):
+    def _read_file(self):
         with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("%"):

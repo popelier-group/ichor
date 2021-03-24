@@ -17,8 +17,8 @@ class INT(GeometryData, File):
 
         self.parent = atom
 
-        self.integration_results = GeometryData()
-        self.multipoles = GeometryData()
+        self.integration_data = GeometryData()
+        self.multipoles_data = GeometryData()
         self.iqa_data = GeometryData()
 
     @property
@@ -30,7 +30,7 @@ class INT(GeometryData, File):
         return ".int"
 
     @buildermethod
-    def read(self, atom=None):
+    def _read_file(self, atom=None):
         self.parent = atom
         try:
             self.read_json()
@@ -56,7 +56,7 @@ class INT(GeometryData, File):
                         for match in re.finditer(patterns.AIMALL_LINE, line):
                             tokens = match.group().split("=")
                             try:
-                                self.integration_results[
+                                self.integration_data[
                                     tokens[0].strip()
                                 ] = float(tokens[-1])
                             except ValueError:
@@ -78,7 +78,7 @@ class INT(GeometryData, File):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                self.multipoles[multipole.lower()] = float(
+                                self.multipoles_data[multipole.lower()] = float(
                                     tokens[-1]
                                 )
                             except ValueError:
@@ -336,8 +336,8 @@ class INT(GeometryData, File):
     def read_json(self):
         with open(self.path, "r") as f:
             int_data = json.load(f)
-            self.integration_results = int_data["integration"]
-            self.multipoles = int_data["multipoles"]
+            self.integration_data = int_data["integration"]
+            self.multipoles_data = int_data["multipoles"]
             self.iqa_data = int_data["iqa_data"]
 
     @property
@@ -349,8 +349,8 @@ class INT(GeometryData, File):
 
     def write_json(self):
         int_data = {
-            "integration": self.integration_results,
-            "multipoles": self.multipoles,
+            "integration": self.integration_data,
+            "multipoles": self.multipoles_data,
             "iqa_data": self.iqa_data,
         }
 
@@ -363,7 +363,7 @@ class INT(GeometryData, File):
 
     @property
     def integration_error(self):
-        return self.integration_results["L"]
+        return self.integration_data["L"]
 
     @property
     def eiqa(self):
@@ -374,8 +374,12 @@ class INT(GeometryData, File):
         return self.eiqa
 
     @property
+    def multipoles(self):
+        return {multipole: self.multipoles_data[multipole] for multipole in constants.multipole_names}
+
+    @property
     def q(self):
-        return self.integration_results["q"]
+        return self.integration_data["q"]
 
     @property
     def q00(self):
@@ -385,68 +389,8 @@ class INT(GeometryData, File):
     def dipole(self):
         return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
 
-    # def get_property(self, property_name, as_dict=False):
-    #     try:
-    #         if as_dict:
-    #             return self.getattr_as_dict(property_name)
-    #         else:
-    #             return getattr(self, property_name)
-    #     except KeyError as e:
-    #         # raise PointError.IntPropertyMissing(self, self.atom, property_name)
-    #         raise e # TODO: Create Proper Error
-
-    # def move(self, dst):
-    #     if self:
-    #         if dst.endswith(os.sep):
-    #             dst = dst.rstrip(os.sep)
-    #
-    #         name = os.path.basename(dst)
-    #         intdir = os.path.join(dst, name + "_atomicfiles")
-    #         FileTools.mkdir(intdir)
-    #         new_name = os.path.join(intdir, self.atom.lower() + ".int")
-    #
-    #         FileTools.move_file(self.path, new_name)
-    #         self.path = new_name
-
     def revert_backup(self):
         move(self.backup_path, self.path)
 
     def getattr_as_dict(self, attr):
         pass
-
-    # def __getattr__(self, item):
-    #     if item == "q00":
-    #         print(type(self.multipoles))
-    #     try:
-    #         return super().__getattr__(item)
-    #     except AttributeError:
-    #         raise AttributeError(
-    #             f"'{self.path}' instance of '{self.__class__.__name__}' object has no attribute '{item}'"
-    #         )
-
-    # def __getattr__(self, attr):
-    #     if attr in constants.multipole_names:
-    #         if attr == "q00":
-    #             return self.q
-    #         return self.multipoles[attr]
-    #     else:
-    #         if attr.lower() in ["iqa", "eiqa"]:
-    #             return self.iqa
-    #         elif attr.lower() in ["multipoles"]:
-    #             return {
-    #                 multipole_name: self.__getattr__(multipole_name)
-    #                 for multipole_name in constants.multipole_names
-    #             }
-    #         elif attr.lower() in ["all"]:
-    #             return self.multipoles | {"iqa": self.iqa}
-    #         return self.__dict__[attr]
-
-    # def __setattr__(self, attr, val):
-    #     if attr in constants.multipole_names:
-    #         if attr == "q00":
-    #             self.integration_results["q"] = val
-    #         self.multipoles[attr] = val
-    #     else:
-    #         if attr.lower() in ["iqa", "eiqa"]:
-    #             self.iqa_data["E_IQA(A)"] = val
-    #         self.__dict__[attr] = val

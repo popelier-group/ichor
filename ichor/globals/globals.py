@@ -7,17 +7,16 @@ from uuid import UUID
 
 from ichor.common.functools import run_once
 
-from .. import constants
-from ..arguments import Arguments
-from ..atoms import Atoms
-from ..common import io
-from ..common.types import DictList, Version
-from ..file_structure import FileStructure
-from ..logging import logger
-from ..problem_finder import ProblemFinder
-from . import checkers, formatters, parsers
-from .config_provider import ConfigProvider
-from .machine import Machine
+from ichor import constants
+from ichor.arguments import Arguments
+from ichor.atoms import Atoms
+from ichor.common import io
+from ichor.common.types import DictList, Version
+from ichor.file_structure import FileStructure
+from ichor.problem_finder import ProblemFinder
+from ichor.globals import checkers, formatters, parsers
+from ichor.globals.config_provider import ConfigProvider
+from ichor.globals.machine import Machine
 
 
 class Globals:

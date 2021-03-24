@@ -4,7 +4,7 @@ from typing import Any, List, Union, cast
 from uuid import UUID
 
 from ichor.common.types import Version
-from ichor.common.types.bool import check_bool
+from ichor.common.bool import check_bool
 from ichor.globals.formatters import cleanup_str
 from ichor.typing import F
 

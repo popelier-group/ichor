@@ -18,3 +18,14 @@ class PointDirectory(Point, Directory):
     @classproperty
     def dirpattern(self) -> re.Pattern:
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
+
+    def __getattr__(self, item):
+        if item in self.__dict__.keys():
+            return self.__dict__[item]
+        try:
+            return getattr(self.ints, item)
+        except AttributeError:
+            raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
+
+    def __repr__(self):
+        return str(self.path)

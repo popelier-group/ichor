@@ -3,14 +3,28 @@ from abc import ABC, abstractmethod
 from ichor.common.io import move
 from ichor.files.path_object import PathObject
 from ichor.common.functools import classproperty
+from enum import Enum
+
+
+class FileState(Enum):
+    Unread = 1
+    Reading = 2
+    Read = 3
 
 
 class File(PathObject, ABC):
     def __init__(self, path):
         super().__init__(path)
+        self.state = FileState.Unread
+
+    def read(self) -> None:
+        if self.state is FileState.Unread:
+            self.state = FileState.Reading
+            self._read_file()
+            self.state = FileState.Read
 
     @abstractmethod
-    def read(self) -> None:
+    def _read_file(self):
         pass
 
     @classproperty
@@ -27,3 +41,11 @@ class File(PathObject, ABC):
         if dst.is_dir():
             dst /= self.path.name
         move(self.path, dst)
+
+    def __getattribute__(self, item):
+        try:
+            if not super().__getattribute__(item) and self.state is not FileState.Reading:
+                self.read()
+        except AttributeError:
+            self.read()
+        return super().__getattribute__(item)

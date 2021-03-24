@@ -3,13 +3,15 @@ import re
 from ichor.common.functools import classproperty, buildermethod
 
 from ichor.files.path_object import PathObject
-from ichor.files.file import File
+from ichor.files.file import File, FileState
+from ichor.atoms import AtomsNotFoundError
 
 
 class Directory(PathObject, ABC):
     def __init__(self, path):
         super().__init__(path)
         self.parse()
+        self.state = FileState.Unread
 
     def parse(self) -> None:
         filetypes = {}
@@ -47,10 +49,13 @@ class Directory(PathObject, ABC):
 
     @buildermethod
     def read(self) -> 'Directory':
-        for var in vars(self):
-            inst = getattr(self, var)
-            if isinstance(inst, (File, Directory)):
-                inst.read()
+        if self.state is FileState.Unread:
+            self.state = FileState.Reading
+            for var in vars(self):
+                inst = getattr(self, var)
+                if isinstance(inst, (File, Directory)):
+                    inst.read()
+            self.state = FileState.Read
 
     @classproperty
     @abstractmethod
@@ -62,3 +67,11 @@ class Directory(PathObject, ABC):
 
     def __iter__(self):
         return self.path.iterdir()
+
+    def __getattribute__(self, item):
+        try:
+            if not super().__getattribute__(item) and self.state is not FileState.Reading:
+                self.read()
+        except AttributeError:
+            self.read()
+        return super().__getattribute__(item)
