@@ -1,50 +1,51 @@
 import numpy as np
 
 from ichor.models.kernels.kernel import Kernel
+from ichor.models.kernels.distance import Distance
 
 
-def RBF_k(l, xi, xj):
-    diff = xi - xj
-    return np.exp(-np.sum(l * diff * diff))
+class RBFKernel(Kernel):
+    """Implemtation of Radial Basis Function (RBF) kernel
+    When each dimension has a separate lengthscale, this is also called the RBF-ARD kernel
+    """
 
-
-@jit(nopython=True)
-def RBF_r(l, xi, x):
-    n_train = x.shape[0]
-    r = np.empty((n_train, 1))
-    for j in range(n_train):
-        r[j] = RBF_k(l, xi, x[j])
-    return r
-
-
-@jit(nopython=True)
-def RBF_R(l, x):
-    n_train = x.shape[0]
-    R = np.empty((n_train, n_train))
-    for i in range(n_train):
-        R[i, i] = 1.0
-        for j in range(n_train):
-            R[i, j] = RBF_k(l, x[i], x[j])
-            R[j, i] = R[i, j]
-    return R
-
-
-class RBF(Kernel):
-    """Implements Radial Basis Function (RBF) kernel used to calculate covariance matrix"""
-
-    def __init__(self, lengthscale: np.array):
-
-        self.lengthscale = lengthscale
+    def __init__(self, lengthscale: np.ndarray):
+        
+        self._lengthscale = lengthscale
 
     @property
     def params(self):
-        return self.lengthscale
+        return self._lengthscale
 
-    def k(self, xi, xj):
-        return RBF_k(self.lengthscale, np.array(xi), np.array(xj))
+    def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
+        """ Calcualtes RBF covariance matrix from two sets of points
 
-    def r(self, xi, x):
-        return RBF_r(self.lengthscale, np.array(xi), np.array(x))
+        Args:
+            :param: `x1` np.ndarray of shape n x ndimensions:
+                First matrix of n points
+            :param: `x2` np.ndarray of shape m x ndimensions:
+                Second marix of m points, can be identical to the first matrix `x1`
 
-    def R(self, x):
-        return RBF_R(self.lengthscale, np.array(x))
+        Returns:
+            :type: `np.ndarray`
+                The RBF covariance matrix matrix of shape (n, m)
+        """
+
+        # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
+        # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1 
+        x1 = x1 / self._lengthscale
+        x2 = x2 / self._lengthscale
+
+        dist = Distance.squared_euclidean_distance(x1, x2)
+
+        return np.exp(-0.5 * dist)
+
+    def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
+        """ helper method to return x_test, x_train RBF covariance matrix K(X*, X)"""
+
+        return self.k(x_test, x_train)
+
+    def R(self, x_train: np.ndarray) -> np.ndarray:
+        """ helper method to return symmetric square matrix x_train, x_train RBF covariance matrix K(X, X)"""
+
+        return self.k(x_train, x_train)
