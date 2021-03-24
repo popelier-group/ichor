@@ -1,11 +1,11 @@
-import sys
 import os
+import sys
 from typing import Callable, List
 from uuid import uuid4
 
+from ichor.common.types.int import count_digits
 from ichor.problem_finder import ProblemFinder
 from ichor.tab_completer import ListCompleter
-from ichor.common.types.int import count_digits
 
 
 class Menu(object):

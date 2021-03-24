@@ -1,5 +1,5 @@
-from .atoms import Atoms
 from .atom import Atom
+from .atoms import Atoms
 
 __all__ = [
     "Atom",

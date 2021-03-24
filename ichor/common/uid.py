@@ -1,4 +1,4 @@
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
 
 def get_uid() -> UUID:
@@ -7,6 +7,7 @@ def get_uid() -> UUID:
 
 def set_uid(uid=None):
     from ..globals import GLOBALS
+
     if GLOBALS.SUBMITTED and GLOBALS.UID:
         return
     GLOBALS.UID = uid if uid else get_uid()

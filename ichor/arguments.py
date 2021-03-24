@@ -1,16 +1,15 @@
 from argparse import ArgumentParser
-from ichor.common.uid import get_uid
-from ichor.common.functools import run_once
-
 from uuid import UUID
+
+from ichor.common.functools import run_once
+from ichor.common.uid import get_uid
 
 
 def import_external_functions():
     # Place functions to run externally in here
-    # from ichor.debugging import printq
+    from ichor.main.submit_gjfs import submit_gjfs
 
     Arguments.external_functions = locals()
-
 
 
 class Arguments:
@@ -84,4 +83,6 @@ class Arguments:
 
     def __exit__(self, type, value, traceback):
         if Arguments.call_external_function:
-            Arguments.call_external_function(*Arguments.call_external_function_args)
+            Arguments.call_external_function(
+                *Arguments.call_external_function_args
+            )

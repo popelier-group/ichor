@@ -1,4 +1,5 @@
 import numpy as np
+
 from ichor.models.kernels.kernel import Kernel
 
 
@@ -32,7 +33,7 @@ class RBF(Kernel):
     """Implements Radial Basis Function (RBF) kernel used to calculate covariance matrix"""
 
     def __init__(self, lengthscale: np.array):
-        
+
         self.lengthscale = lengthscale
 
     @property

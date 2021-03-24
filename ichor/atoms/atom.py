@@ -1,6 +1,7 @@
-import numpy as np
 import itertools as it
 import re
+
+import numpy as np
 
 from .. import constants
 
@@ -105,6 +106,7 @@ class Atom:
 
     def get_priorty(self, level):
         from .atoms import Atoms
+
         atoms = Atoms(self)
         for _ in range(level):
             atoms_to_add = []
@@ -217,6 +219,7 @@ class Atom:
     @property
     def bonds(self):
         from .atoms import Atoms
+
         return Atoms(self._bonds)
 
     @property

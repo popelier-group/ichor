@@ -1,15 +1,17 @@
-import numpy as np
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 
+import numpy as np
+
 
 class Distance:
-
     def __init__(self, postprocess: Callable[np.array]):
 
         self._postprocess = postprocess
 
-    def euclidean_squared_distance(self, x1: np.array, x2: np.array, postprocess: Callable[np.array]) -> np.array:
+    def euclidean_squared_distance(
+        self, x1: np.array, x2: np.array, postprocess: Callable[np.array]
+    ) -> np.array:
         """ Calculates squared distance matrix between data points, uses array broadcasting and distance trick
 
         .. note::
@@ -30,13 +32,21 @@ class Distance:
             :type: `np.array`
                 The squared distance matrix of shape (`x1.shape[0]`, `x2.shape[0]`)
         """
-        
-        result = -2 * np.dot(x1, x2.T) + np.sum(x2**2, axis=1) + np.sum(x1**2, axis=1)[:, np.newaxis]
-        result = result.clip(0)  # small negative values may occur when using quadratic expansion, so clip to 0 if that happens
+
+        result = (
+            -2 * np.dot(x1, x2.T)
+            + np.sum(x2 ** 2, axis=1)
+            + np.sum(x1 ** 2, axis=1)[:, np.newaxis]
+        )
+        result = result.clip(
+            0
+        )  # small negative values may occur when using quadratic expansion, so clip to 0 if that happens
 
         return self._postprocess(result) if postprocess else result
 
-    def euclidean_distance(self, x1: np.array, x2: np.array, postprocess: Callable[np.array]) -> np.array:
+    def euclidean_distance(
+        self, x1: np.array, x2: np.array, postprocess: Callable[np.array]
+    ) -> np.array:
         """ Calculates distance matrix between data points
 
         Args:

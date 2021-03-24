@@ -1,6 +1,8 @@
 import random
 from typing import Dict, List
 
+import numpy as np
+
 from ichor.common.types import Version
 
 ichor_logo_1 = (
@@ -432,25 +434,24 @@ ha_to_kj_mol: float = (
 )
 # The wikipedia article is converted from https://physics.nist.gov/cgi-bin/cuu/Value?hr
 
-# Precomputed Roots from fflux_initialisation.f90
-rt3: float = 1.7320508075689  # sqrt(3)
-rt5: float = 2.2360679774998  # sqrt(5)
-rt6: float = 2.4494897427832  # sqrt(6)
-rt10: float = 3.1622776601684  # sqrt(10)
-rt15: float = 3.8729833462074  # sqrt(15)
-rt35: float = 5.9160797830996  # sqrt(35)
-rt70: float = 8.3666002653408  # sqrt(70)
-rt1_24: float = 0.20412414523193  # sqrt(1/24)
-rt_1_5: float = 0.44721359549995  # sqrt(1/5)
-rt_1_10: float = 0.31622776601683  # sqrt(1/10)
-rt_1_35: float = 0.16903085094570  # sqrt(1/35)
-rt2_3: float = 0.81649658092773  # sqrt(2)/3
-rt_2_35: float = 0.23904572186687  # sqrt(2/35)
-rt3_3: float = 0.57735026918962  # sqrt(3)/3
-rt_3_3: float = 1.22474487139158  # sqrt(3/2) # TODO: Fix this name
-rt_3_5: float = 0.77459666924148  # sqrt(3/5)
-rt3_8: float = 0.61237243569579  # sqrt(3/8)
-rt5_8: float = 0.79056941504209  # sqrt(5/8)
-rt5_12: float = 0.64549722436790  # sqrt(5/12)
-rt_8_5: float = 1.26491106406735  # sqrt(8/5)
-rt12_3: float = 1.15470053837925  # sqrt(12)/3
+rt3: float = np.sqrt(3)
+rt5: float = np.sqrt(5)
+rt6: float = np.sqrt(6)
+rt10: float = np.sqrt(10)
+rt15: float = np.sqrt(15)
+rt35: float = np.sqrt(35)
+rt70: float = np.sqrt(70)
+rt1_24: float = np.sqrt(1 / 24)
+rt_1_5: float = np.sqrt(1 / 5)
+rt_1_10: float = np.sqrt(1 / 10)
+rt_1_35: float = np.sqrt(1 / 35)
+rt2_3: float = np.sqrt(2 / 3)
+rt_2_35: float = np.sqrt(2 / 35)
+rt3_3: float = np.sqrt(3) / 3
+rt_3_3: float = np.sqrt(3) / 2
+rt_3_5: float = np.sqrt(3 / 5)
+rt3_8: float = np.sqrt(3 / 8)
+rt5_8: float = np.sqrt(5 / 8)
+rt5_12: float = np.sqrt(5 / 12)
+rt_8_5: float = np.sqrt(8 / 5)
+rt12_3: float = np.sqrt(12) / 3

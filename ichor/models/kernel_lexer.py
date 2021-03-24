@@ -1,5 +1,6 @@
 from abc import ABC
 
+
 class TokenType(Enum):
     Number = 1
     Plus = 2
@@ -10,6 +11,7 @@ class TokenType(Enum):
     RParen = 7
     Id = 8
     Eof = -1
+
 
 class Token:
     def __init__(self, type, value):

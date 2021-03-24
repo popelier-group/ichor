@@ -1,10 +1,13 @@
 from functools import wraps
+from typing import Any, Sequence
+
+from ichor.typing import F
 
 
-def run_function(order):
-    def decorator(func):
+def run_function(order: int) -> F:
+    def decorator(func: F) -> F:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             func.order = order
             return func(*args, **kwargs)
 
@@ -13,7 +16,7 @@ def run_function(order):
     return decorator
 
 
-def get_functions_to_run(obj):
+def get_functions_to_run(obj: Any) -> Sequence[F]:
     return sorted(
         [
             getattr(obj, field)

@@ -1,5 +1,7 @@
-from .common.functools import get_functions_to_run, run_function
 import os
+
+from .common.functools import get_functions_to_run, run_function
+
 
 class Problem:
     def __init__(self, name="", problem="", solution=""):
@@ -31,6 +33,7 @@ class ProblemFinder:
     @run_function(1)
     def check_alf(self):
         from .globals import GLOBALS
+
         if len(GLOBALS.ALF) < 1:
             self.add(
                 Problem(
@@ -43,6 +46,7 @@ class ProblemFinder:
     @run_function(1.1)
     def check_atoms(self):
         from .globals import GLOBALS
+
         if not GLOBALS.ATOMS:
             self.add(
                 Problem(
@@ -55,6 +59,7 @@ class ProblemFinder:
     # @run_function(2)
     def check_directories(self):
         from .globals import GLOBALS
+
         dirs_to_check = ["training_set", "sample_pool"]
 
         for dir_name in dirs_to_check:
@@ -71,6 +76,7 @@ class ProblemFinder:
     @run_function(3)
     def check_system(self):
         from .globals import GLOBALS
+
         if GLOBALS.SYSTEM_NAME == "SYSTEM":
             self.add(
                 Problem(
@@ -114,6 +120,7 @@ class ProblemFinder:
 
     def find(self):
         from .globals import GLOBALS
+
         if not GLOBALS.DISABLE_PROBLEMS:
             problems_to_find = UsefulTools.get_functions_to_run(self)
             for find_problem in problems_to_find:
@@ -130,4 +137,3 @@ class ProblemFinder:
 
     def __repr__(self):
         return str(self)
-

@@ -3211,6 +3211,7 @@ class TabCompleter:
             pass
 
 
+# Moved to ichor/menu.py
 class Menu(object):
     def __init__(
         self,
@@ -3456,6 +3457,7 @@ class Menu(object):
         pass
 
 
+# Moved to ichor/globals/config_provider.py
 class ConfigProvider(dict):
     """
     Class to read in a config file and create a dictionary of key, val pairs
@@ -3531,6 +3533,7 @@ class ConfigProvider(dict):
                 f.write("%s=%s\n" % (key, self[key]))
 
 
+# Moved to ichor/common/daemon.py
 class Daemon:
     """
     A generic daemon class.
@@ -3997,6 +4000,7 @@ class FileTools:
         return os.path.splitext(path)[1]
 
 
+# Moved to ichor/common/types/dummy_tqdm.py
 class my_tqdm:
     """
     Decorate an iterable object, returning an iterator which acts exactly
@@ -6930,6 +6934,7 @@ class INT(Point):
         self.atom = os.path.splitext(os.path.basename(self.path))[0].upper()
 
         self.parent = atom
+        printq(self.C)
 
         self.integration_results = {}
         self.multipoles = {}
@@ -7046,6 +7051,7 @@ class INT(Point):
         d_z = self.q10  # z
 
         C = self.C
+        printq(C)
 
         # Rotate Dipole and Reorder Output
         D_x = C[0][0] * d_x + C[0][1] * d_y + C[0][2] * d_z

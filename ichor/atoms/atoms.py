@@ -1,7 +1,9 @@
-from .atom import Atom
 import itertools as it
+from functools import lru_cache
+
 import numpy as np
-from  functools import lru_cache
+
+from .atom import Atom
 
 
 class Atoms:

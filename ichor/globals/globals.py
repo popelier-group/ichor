@@ -1,22 +1,23 @@
+import inspect
 import os
 import platform
-import inspect
 from pathlib import Path
 from typing import List
 from uuid import UUID
 
 from ichor.common.functools import run_once
+
 from .. import constants
+from ..arguments import Arguments
+from ..atoms import Atoms
+from ..common import io
 from ..common.types import DictList, Version
-from ..common import files
 from ..file_structure import FileStructure
 from ..logging import logger
 from ..problem_finder import ProblemFinder
 from . import checkers, formatters, parsers
-from .machine import Machine
-from ..arguments import Arguments
-from ..atoms import Atoms
 from .config_provider import ConfigProvider
+from .machine import Machine
 
 
 class Globals:
@@ -311,7 +312,7 @@ class Globals:
                     Path.home() / "DROP_N_COMPUTE"
                 )
         if self.DROP_N_COMPUTE_LOCATION:
-            files.mkdir(self.DROP_N_COMPUTE_LOCATION)
+            io.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
         # if self.ALF_REFERENCE_FILE:
         #     if not os.path.exists(self.ALF_REFERENCE_FILE):

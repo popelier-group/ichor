@@ -1,5 +1,6 @@
-from ..constants import ichor_logo
 from ..arguments import Arguments
+from ..constants import ichor_logo
+
 
 class ConfigProvider(dict):
     """

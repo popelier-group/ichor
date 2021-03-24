@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import numpy as np
 
 
@@ -29,7 +30,9 @@ class Model:
 
         self.normalise = False
         self.norm_min = []
-        self.norm_max = [] # convert to numpy arrays when initialized, use type annotations
+        self.norm_max = (
+            []
+        )  # convert to numpy arrays when initialized, use type annotations
 
         # self.training_dataset = Dataset()
 
@@ -473,7 +476,7 @@ class Model:
         # TODO: ntrain x nfeats matrix, make multiple predictions at once
         # TODO: return var flag?
         if isinstance(point, Point):
-            features = point.features[self.i] #self.i = index of features
+            features = point.features[self.i]  # self.i = index of features
         else:
             features = point[self.i]
         r = self.r(features)
