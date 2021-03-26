@@ -1176,6 +1176,8 @@ class Constants:
     )
     # The wikipedia article is converted from https://physics.nist.gov/cgi-bin/cuu/Value?hr
 
+    bohr2ang = 0.529177210903 # Converted from https://physics.nist.gov/cgi-bin/cuu/Value?bohrrada0
+
     # Precomputed Roots from fflux_initialisation.f90
     rt3 = 1.7320508075689
     rt5 = 2.2360679774998
@@ -1891,7 +1893,7 @@ class Point:
 
 
 class Atom:
-    ang2bohr = 1.88971616463
+    ang2bohr = 1/Constants.bohr2ang
     counter = it.count(1)
 
     def __init__(self, coordinate_line):
@@ -9356,7 +9358,7 @@ def RBFCyclic_k(l, xi, xj):
     diff = xi - xj
     # Had to do list comprehension workaround to get numba to compile
     mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-    diff[mask] = (diff[mask] + np.pi) % (2 * np.pi) - np.pi
+    diff[mask] = (np.abs(diff[mask]) + np.pi) % (2 * np.pi) - np.pi
     return np.exp(-np.sum(l * diff * diff))
 
 
@@ -9480,7 +9482,7 @@ def cyclic_cdist(xa, xb):
         for j in range(xn):
             diff = xa[i] - xb[j]
             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-            diff[mask] = (diff[mask] + np.pi) % (2 * np.pi) - np.pi
+            diff[mask] = (np.abs(diff[mask]) + np.pi) % (2 * np.pi) - np.pi
             result[i, j] = np.sqrt(np.sum(diff * diff))
     return result
 
