@@ -1,4 +1,5 @@
 from abc import ABC
+
 from ichor.atoms import AtomsNotFoundError
 from ichor.geometry import Geometry
 

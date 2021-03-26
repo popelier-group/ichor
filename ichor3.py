@@ -1,4 +1,4 @@
-from ichor.points import PointsDirectory
+from ichor.modules.ferebus import FerebusModules
+from ichor.globals import Machine
 
-p = PointsDirectory("Test/TRAINING_SET")
-print(p.atoms)
+print(FerebusModules[Machine.ffluxlab])

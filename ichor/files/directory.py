@@ -1,10 +1,10 @@
-from abc import ABC, abstractmethod
 import re
-from ichor.common.functools import classproperty, buildermethod
+from abc import ABC, abstractmethod
 
-from ichor.files.path_object import PathObject
-from ichor.files.file import File, FileState
 from ichor.atoms import AtomsNotFoundError
+from ichor.common.functools import buildermethod, classproperty
+from ichor.files.file import File, FileState
+from ichor.files.path_object import PathObject
 
 
 class Directory(PathObject, ABC):
@@ -48,7 +48,7 @@ class Directory(PathObject, ABC):
         #             raise e
 
     @buildermethod
-    def read(self) -> 'Directory':
+    def read(self) -> "Directory":
         if self.state is FileState.Unread:
             self.state = FileState.Reading
             for var in vars(self):
@@ -70,7 +70,10 @@ class Directory(PathObject, ABC):
 
     def __getattribute__(self, item):
         try:
-            if not super().__getattribute__(item) and self.state is not FileState.Reading:
+            if (
+                not super().__getattribute__(item)
+                and self.state is not FileState.Reading
+            ):
                 self.read()
         except AttributeError:
             self.read()

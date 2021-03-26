@@ -1,7 +1,7 @@
 import numpy as np
 
-from ichor.models.kernels.kernel import Kernel
 from ichor.models.kernels.distance import Distance
+from ichor.models.kernels.kernel import Kernel
 
 
 class RBFKernel(Kernel):
@@ -10,7 +10,7 @@ class RBFKernel(Kernel):
     """
 
     def __init__(self, lengthscale: np.ndarray):
-        
+
         self._lengthscale = lengthscale
 
     @property
@@ -32,7 +32,7 @@ class RBFKernel(Kernel):
         """
 
         # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
-        # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1 
+        # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1
         x1 = x1 / self._lengthscale
         x2 = x2 / self._lengthscale
 

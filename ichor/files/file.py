@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 
+from ichor.common.functools import buildermethod, classproperty
 from ichor.common.io import move
 from ichor.files.path_object import PathObject
-from ichor.common.functools import classproperty
-from enum import Enum
 
 
 class FileState(Enum):
@@ -17,6 +17,7 @@ class File(PathObject, ABC):
         super().__init__(path)
         self.state = FileState.Unread
 
+    @buildermethod
     def read(self) -> None:
         if self.state is FileState.Unread:
             self.state = FileState.Reading
@@ -44,7 +45,10 @@ class File(PathObject, ABC):
 
     def __getattribute__(self, item):
         try:
-            if not super().__getattribute__(item) and self.state is not FileState.Reading:
+            if (
+                not super().__getattribute__(item)
+                and self.state is not FileState.Reading
+            ):
                 self.read()
         except AttributeError:
             self.read()

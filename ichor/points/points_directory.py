@@ -1,7 +1,7 @@
-from ichor.files import Directory
-from ichor.points.points import Points
-from ichor.points.point_directory import PointDirectory
 from ichor.common.functools import buildermethod
+from ichor.files import Directory
+from ichor.points.point_directory import PointDirectory
+from ichor.points.points import Points
 
 
 class PointsDirectory(Points, Directory):
@@ -16,7 +16,7 @@ class PointsDirectory(Points, Directory):
         self.sort(key=lambda x: x.path.name)
 
     @buildermethod
-    def read(self) -> 'PointsDirectory':
+    def read(self) -> "PointsDirectory":
         for point in self:
             point.read()
 

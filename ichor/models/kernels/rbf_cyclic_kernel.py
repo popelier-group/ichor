@@ -1,6 +1,7 @@
 import numpy as np
-from ichor.models.kernels.kernel import Kernel
+
 from ichor.models.kernels.distance import Distance
+from ichor.models.kernels.kernel import Kernel
 
 
 class RBFCyclicKernel(Kernel):
@@ -45,7 +46,7 @@ class RBFCyclicKernel(Kernel):
                 if training/test data is standardized, then `train_x_std` has to be provided. This array contains the standard
                 deviations for each feature, calculated from the training set points.
         """
-        
+
         self._lengthscale = lengthscale
 
     @property
@@ -70,13 +71,23 @@ class RBFCyclicKernel(Kernel):
         # after distance matrices for each dimension are computed(and corrected where needed), divide by lengthscale and square
         dist_corrected = np.zeros((x1.shape[0], x2.shape[0]))
 
-        for dim_idx, (x1_one_dimension, x2_one_dimension) in enumerate(zip(x1.T, x2.T)):
+        for dim_idx, (x1_one_dimension, x2_one_dimension) in enumerate(
+            zip(x1.T, x2.T)
+        ):
 
-            res = Distance.euclidean_distance(x1_one_dimension, x2_one_dimension)
+            res = Distance.euclidean_distance(
+                x1_one_dimension, x2_one_dimension
+            )
 
-            if ((dim_idx+1) > 3) and ((dim_idx+1) % 3 == 0):  # if phi feature
+            if ((dim_idx + 1) > 3) and (
+                (dim_idx + 1) % 3 == 0
+            ):  # if phi feature
 
-                res = np.where((res > (np.pi/self.train_x_std[dim_idx])), (2*np.pi/self.train_x_std[dim_idx] - res), res)
+                res = np.where(
+                    (res > (np.pi / self.train_x_std[dim_idx])),
+                    (2 * np.pi / self.train_x_std[dim_idx] - res),
+                    res,
+                )
 
             res = res / self._lengthscale[dim_idx]
             res = np.power(res, 2)

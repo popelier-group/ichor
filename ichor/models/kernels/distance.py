@@ -2,9 +2,10 @@ import numpy as np
 
 
 class Distance:
-
     @staticmethod
-    def squared_euclidean_distance(x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
+    def squared_euclidean_distance(
+        x1: np.ndarray, x2: np.ndarray
+    ) -> np.ndarray:
         """ Calculates squared distance matrix between data points, uses array broadcasting and distance trick
 
         .. note::
@@ -25,9 +26,15 @@ class Distance:
             :type: `np.ndarray`
                 The squared distance matrix of shape (`x1.shape[0]`, `x2.shape[0]`)
         """
-        
-        result = -2 * np.dot(x1, x2.T) + np.sum(x2**2, axis=1) + np.sum(x1**2, axis=1)[:, np.newaxis]
-        result = result.clip(0)  # small negative values may occur when using quadratic expansion, so clip to 0 if that happens
+
+        result = (
+            -2 * np.dot(x1, x2.T)
+            + np.sum(x2 ** 2, axis=1)
+            + np.sum(x1 ** 2, axis=1)[:, np.newaxis]
+        )
+        result = result.clip(
+            0
+        )  # small negative values may occur when using quadratic expansion, so clip to 0 if that happens
 
         return result
 

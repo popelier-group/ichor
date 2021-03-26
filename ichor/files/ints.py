@@ -1,7 +1,9 @@
+import re
+
+from ichor.common.functools import buildermethod, classproperty
+from ichor.common.sorting import natsort
 from ichor.files.directory import Directory
 from ichor.files.int import INT
-from ichor.common.functools import buildermethod, classproperty
-import re
 
 
 class INTs(Directory, dict):
@@ -16,6 +18,7 @@ class INTs(Directory, dict):
         self.sort()
 
     def sort(self):
+        # TODO: natural sort keys
         pass
 
     @classproperty
@@ -30,7 +33,11 @@ class INTs(Directory, dict):
     def __getattr__(self, item):
         if item not in self.__dict__.keys():
             try:
-                return {atom: getattr(int_, item) for atom, int_ in self.items()}
+                return {
+                    atom: getattr(int_, item) for atom, int_ in self.items()
+                }
             except AttributeError:
-                raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
+                raise AttributeError(
+                    f"'{self.__class__}' object has no attribute '{item}'"
+                )
         return self.__dict__[item]

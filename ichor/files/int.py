@@ -3,11 +3,11 @@ import re
 
 import numpy as np
 
-from ichor.geometry import GeometryData
 from ichor import constants, patterns
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.io import move
 from ichor.files.file import File
+from ichor.geometry import GeometryData
 
 
 class INT(GeometryData, File):
@@ -78,9 +78,9 @@ class INT(GeometryData, File):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                self.multipoles_data[multipole.lower()] = float(
-                                    tokens[-1]
-                                )
+                                self.multipoles_data[
+                                    multipole.lower()
+                                ] = float(tokens[-1])
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -375,7 +375,10 @@ class INT(GeometryData, File):
 
     @property
     def multipoles(self):
-        return {multipole: self.multipoles_data[multipole] for multipole in constants.multipole_names}
+        return {
+            multipole: self.multipoles_data[multipole]
+            for multipole in constants.multipole_names
+        }
 
     @property
     def q(self):

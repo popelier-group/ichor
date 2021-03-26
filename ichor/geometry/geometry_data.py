@@ -19,14 +19,23 @@ class GeometryData:
         try:
             return self.data[item]
         except KeyError:
-            raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
+            raise AttributeError(
+                f"'{self.__class__}' object has no attribute '{item}'"
+            )
 
     def __getattr__(self, item):
         try:
             return super().__getattribute__(item)
         except AttributeError:
-            for var, inst in self.__dict__.items():
-                if isinstance(inst, (dict, ClassDict)):
-                    if item in inst.keys():
-                        return inst[item]
-            raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
+            try:
+                for var, inst in self.__dict__.items():
+                    if isinstance(inst, (dict, ClassDict)):
+                        if item in inst.keys():
+                            return inst[item]
+                raise AttributeError(
+                    f"'{self.__class__}' object has no attribute '{item}'"
+                )
+            except KeyError:
+                raise AttributeError(
+                    f"'{self.__class__}' object has no attribute '{item}'"
+                )

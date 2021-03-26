@@ -1,10 +1,11 @@
-from ichor.points.point import Point
-from ichor.files import Directory, GJF, WFN, INTs
-from typing import Optional
-import re
 import os
-from ichor.globals import GLOBALS
+import re
+from typing import Optional
+
 from ichor.common.functools import classproperty
+from ichor.files import GJF, WFN, Directory, INTs
+from ichor.globals import GLOBALS
+from ichor.points.point import Point
 
 
 class PointDirectory(Point, Directory):
@@ -25,7 +26,13 @@ class PointDirectory(Point, Directory):
         try:
             return getattr(self.ints, item)
         except AttributeError:
-            raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
+            # raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
+            try:
+                return getattr(self.wfn, item)
+            except AttributeError:
+                raise AttributeError(
+                    f"'{self.__class__}' object has no attribute '{item}'"
+                )
 
     def __repr__(self):
         return str(self.path)
