@@ -15,7 +15,6 @@ class DictList(dict):
 
     def __init__(self, list_type=list):
         self.list_type = list_type
-        self._dict = {}
 
     def __getitem__(self, key):
         if key not in self.keys():

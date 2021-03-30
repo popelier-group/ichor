@@ -76,7 +76,7 @@ class Globals:
     KERNEL: str = "rbf-cyclic"  # rbf or rbf-cyclic currently
     FEREBUS_TYPE: str = "executable"  # executable (FEREBUS) or python (FEREBUS.py)
     FEREBUS_VERSION: Version = Version("7.0")
-    FEREBUS_LOCATION: str = "PROGRAMS/FEREBUS"
+    FEREBUS_LOCATION: Path = Path("PROGRAMS/FEREBUS")
 
     # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
     GAUSSIAN_CORE_COUNT: int = 2
@@ -111,7 +111,7 @@ class Globals:
     DLPOLY_TEMPERATURE: int = 0  # If set to 0, will perform geom opt but default to 10 K
     DLPOLY_PRINT_EVERY: int = 1  # Print trajectory and stats every n steps
     DLPOLY_TIMESTEP: float = 0.001  # in ps
-    DLPOLY_LOCATION: str = "PROGRAMS/DLPOLY.Z"
+    DLPOLY_LOCATION: Path = Path("PROGRAMS/DLPOLY.Z")
 
     DLPOLY_CHECK_CONVERGENCE: bool = False
     DLPOLY_CONVERGENCE_CRITERIA: int = -1
@@ -188,6 +188,8 @@ class Globals:
                 self._parsers[global_variable] += [parsers.parse_int]
             elif global_type is float:
                 self._parsers[global_variable] += [parsers.parse_float]
+            elif global_type is Path:
+                self._parsers[global_variable] += [parsers.read_path]
 
         self._parsers["KEYWORDS"] += [parsers.split_keywords]
         self._parsers["ALF"] += [parsers.read_alf]

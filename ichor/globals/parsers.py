@@ -1,5 +1,6 @@
 import ast
 from functools import wraps
+from pathlib import Path
 from typing import Any, List, Union, cast
 from uuid import UUID
 
@@ -46,6 +47,11 @@ def read_version(ver: str) -> Version:
 @parser
 def read_uid(uid: str) -> UUID:
     return UUID(uid)
+
+
+@parser
+def read_path(path: str) -> Path:
+    return Path(path)
 
 
 @parser

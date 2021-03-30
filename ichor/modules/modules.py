@@ -3,3 +3,9 @@ class Modules(dict):
         if item not in self.keys():
             return []
         return super().__getitem__(item)
+
+    def __setitem__(self, key, value):
+        if key in self.keys():
+            self[key] += value
+        else:
+            super().__setitem__(key, value)
