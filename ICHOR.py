@@ -9995,15 +9995,15 @@ class Model:
             ).reshape((1, -1))
         else:
             point = np.array(point.features[self.i]).reshape((1, -1))
-        if self.has_cyclic_kernel:
-            if self.standardise:
-                return standardised_cyclic_cdist(
-                    point, np.array(self.X), np.array(self.xstd)
-                )
-            else:
-                return cyclic_cdist(point, np.array(self.X))
-        else:
-            return distance.cdist(point, self.X)
+        # if self.has_cyclic_kernel:
+        #     if self.standardise:
+        #         return standardised_cyclic_cdist(
+        #             point, np.array(self.X), np.array(self.xstd)
+        #         )
+        #     else:
+        #         return cyclic_cdist(point, np.array(self.X))
+        # else:
+        return distance.cdist(point, self.X)
 
     def closest_point(self, point):
         return self.distance_to_point(point).argmin()
