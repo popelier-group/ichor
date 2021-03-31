@@ -42,7 +42,7 @@ class Globals:
     ALF: List[List[int]] = []
     ATOMS: Atoms = None
 
-    CWD: str = os.getcwd()
+    CWD: Path = Path(os.getcwd())
 
     MAX_ITERATION: int = 1
     POINTS_PER_ITERATION: int = 1

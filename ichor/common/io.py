@@ -18,7 +18,7 @@ def convert_to_path(func: F) -> F:
                 zip_longest(annotations, args)
             ):
                 if annotation and arg:
-                    if type_ is Path:
+                    if type_ is Path and not isinstance(arg, Path):
                         args[i] = Path(arg)
             for kw, arg in kwargs.items():
                 if kw in func.__annotations__.keys():

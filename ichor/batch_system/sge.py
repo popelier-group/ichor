@@ -5,6 +5,7 @@ from pathlib import Path
 from ichor.batch_system.batch_system import BatchSystem, JobID
 from ichor.common.functools import classproperty
 from ichor.common.io import convert_to_path
+from ichor.globals import GLOBALS
 
 
 class SunGridEngine(BatchSystem):
@@ -15,7 +16,7 @@ class SunGridEngine(BatchSystem):
     def submit_script_command(self) -> str:
         return "qsub"
 
-    @classproperty
+    @classmethod
     def parse_job_id(cls, stdout) -> JobID:
         return JobID(re.findall(r"\d+", stdout)[0])
 
@@ -32,13 +33,17 @@ class SunGridEngine(BatchSystem):
         return "qstat"
 
     @classmethod
-    @convert_to_path
     def change_working_directory(cls, path: Path) -> str:
         return f"-wd {path}"
 
     @classmethod
     def parallel_environment(cls, ncores: int) -> str:
+        from ichor.batch_system import PARALLEL_ENVIRONMENT
+        return f"-pe {PARALLEL_ENVIRONMENT[GLOBALS.MACHINE][ncores]} {ncores}"
 
+    @classmethod
+    def array_job(cls, njobs: int) -> str:
+        return f"-t 1-{njobs}"
 
     @classproperty
     def JobID(self) -> str:

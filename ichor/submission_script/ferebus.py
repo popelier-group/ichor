@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Tuple
+from ichor.modules import FerebusModules, Modules
+from typing import List
 
 from ichor.common.functools import classproperty
 from ichor.globals import GLOBALS
@@ -11,9 +12,13 @@ class FerebusCommand(CommandLine):
     def __init__(self, ferebus_directory: Path):
         self.ferebus_directory = ferebus_directory
 
+    @property
+    def data(self) -> List[str]:
+        return [str(self.ferebus_directory.absolute())]
+
     @classproperty
-    def data(self) -> Tuple[str]:
-        return (str(self.ferebus_directory.absolute),)
+    def modules(self) -> Modules:
+        return FerebusModules
 
     @classproperty
     def command(self) -> str:
@@ -27,8 +32,8 @@ class FerebusCommand(CommandLine):
     def ncores(self) -> int:
         return GLOBALS.FEREBUS_CORE_COUNT
 
-    def repr(self) -> str:
-        cmd = f"pushd {self.batch_index(0)}\n"
+    def repr(self, variables: List[str]) -> str:
+        cmd = f"pushd {variables[0]}\n"
         cmd += f"  {self.command}\n"
         cmd += "popd\n"
         return cmd

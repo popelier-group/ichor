@@ -6,8 +6,7 @@ def get_uid() -> UUID:
 
 
 def set_uid(uid=None):
-    from ..globals import GLOBALS
-
+    from ichor.globals import GLOBALS
     if GLOBALS.SUBMITTED and GLOBALS.UID:
         return
-    GLOBALS.UID = uid if uid else get_uid()
+    GLOBALS.UID = uid or get_uid()

@@ -28,7 +28,7 @@ class BatchSystem(ABC):
 
     @classmethod
     @abstractmethod
-    def parse_job_id(cls, stdout) -> JobID:
+    def parse_job_id(cls, stdout: str) -> JobID:
         pass
 
     @classmethod
@@ -58,7 +58,6 @@ class BatchSystem(ABC):
         pass
 
     @classmethod
-    @convert_to_path
     @abstractmethod
     def change_working_directory(cls, path: Path) -> str:
         pass
@@ -66,6 +65,11 @@ class BatchSystem(ABC):
     @classmethod
     @abstractmethod
     def parallel_environment(cls, ncores: int) -> str:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def array_job(cls, njobs: int) -> str:
         pass
 
     @classproperty
