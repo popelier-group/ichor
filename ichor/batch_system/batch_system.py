@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import NewType, Optional
 from pathlib import Path
+from typing import NewType, Optional
 
 from ichor.common.functools import classproperty
-from ichor.common.os import run_cmd
 from ichor.common.io import convert_to_path
+from ichor.common.os import run_cmd
 
 JobID = NewType("JobID", str)
 

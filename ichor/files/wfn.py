@@ -3,7 +3,6 @@ import re
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
 from ichor.geometry import Geometry, GeometryData
-from ichor.globals import GLOBALS
 
 
 class WFN(Geometry, GeometryData, File):
@@ -42,6 +41,8 @@ class WFN(Geometry, GeometryData, File):
         return ".wfn"
 
     def read_header(self):
+        from ichor.globals import GLOBALS
+
         data = re.findall(r"\s\d+\s", self.header)
 
         self.mol_orbitals = int(data[0])
@@ -58,7 +59,9 @@ class WFN(Geometry, GeometryData, File):
     def title(self):
         return self.path.stem
 
-    def check_functional(self):
+    def check_header(self):
+        from ichor.globals import GLOBALS
+
         data = []
         with open(self.path, "r") as f:
             for i, line in enumerate(f):

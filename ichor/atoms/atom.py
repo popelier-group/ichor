@@ -3,7 +3,7 @@ import re
 
 import numpy as np
 
-from .. import constants
+from ichor import constants
 
 
 class Atom:
@@ -11,9 +11,11 @@ class Atom:
     counter = it.count(1)
 
     def __init__(self, coordinate_line):
+        # def __init__(self, type, x, y, z):
         self.atom_type = ""
         self.atom_number = next(Atom.counter)
 
+        self.position = np.empty(3)
         self.x = 0
         self.y = 0
         self.z = 0
@@ -25,8 +27,8 @@ class Atom:
         self._dihedrals = []
         self.__level = it.count(0)
 
-        self.x_axis = None
-        self.xy_plane = None
+        self.x_axis: Atom = None
+        self.xy_plane: Atom = None
 
         self.features = []
         self.properties = None

@@ -201,14 +201,14 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         self.umask = umask
         self._set_uid = None
         self._set_gid = None
-        self.use_gzip = True if gzip and use_gzip else False
+        self.use_gzip = bool(gzip and use_gzip)
         self._rotateFailed = False
         self.maxBytes = maxBytes
         self.backupCount = backupCount
         self.newline = newline
 
         self._debug = debug
-        self.use_gzip = True if gzip and use_gzip else False
+        self.use_gzip = bool(gzip and use_gzip)
         self.gzip_buffer = 8096
 
         if unicode_error_policy not in ("ignore", "replace", "strict"):
@@ -437,7 +437,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             return  # already locked... recursive?
         self._open_lockfile()
         if self.stream_lock:
-            for i in range(10):
+            for _ in range(10):
                 # noinspection PyBroadException
                 try:
                     lock(self.stream_lock, LOCK_EX)

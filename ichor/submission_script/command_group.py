@@ -1,7 +1,8 @@
-from ichor.submission_script.command_line import CommandLine
-from ichor.common.functools import classproperty
 from typing import List, Tuple
+
+from ichor.common.functools import classproperty
 from ichor.modules import Modules
+from ichor.submission_script.command_line import CommandLine
 
 
 class CommandGroup(CommandLine, list):

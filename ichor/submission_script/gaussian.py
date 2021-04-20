@@ -1,10 +1,9 @@
 from pathlib import Path
-from ichor.modules import GaussianModules, Modules
 from typing import List, Optional
 
 from ichor.common.functools import classproperty
-from ichor.globals import GLOBALS
 from ichor.globals import Machine
+from ichor.modules import GaussianModules, Modules
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
@@ -23,16 +22,20 @@ class GaussianCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
+        from ichor.globals import GLOBALS
         if GLOBALS.MACHINE is Machine.csf3:
             return "$g09root/g09/g09"
         elif GLOBALS.MACHINE is Machine.ffluxlab:
             return "g09"
         elif GLOBALS.MACHINE is Machine.local:
             return "g09_test"
-        raise SubmissionError(f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'")
+        raise SubmissionError(
+            f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'"
+        )
 
     @classproperty
     def ncores(self) -> int:
+        from ichor.globals import GLOBALS
         return GLOBALS.GAUSSIAN_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:

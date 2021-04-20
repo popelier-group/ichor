@@ -1,7 +1,8 @@
+import multiprocessing as mp
+
+from ichor.batch_system.parallel_environment import ParallelEnvironments
 from ichor.batch_system.sge import SunGridEngine
 from ichor.globals import Machine
-from ichor.batch_system.parallel_environment import ParallelEnvironments
-import multiprocessing as mp
 
 __all__ = ["BATCH_SYSTEM", "PARALLEL_ENVIRONMENT"]
 

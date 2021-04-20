@@ -1,5 +1,6 @@
 import itertools as it
 from functools import lru_cache
+from typing import List, Union
 
 import numpy as np
 
@@ -7,7 +8,7 @@ from .atom import Atom
 
 
 class Atoms:
-    ALF = []
+    ALF: List[List[str]] = []
 
     def __init__(self, atoms=None):
         self._atoms = []
@@ -79,9 +80,6 @@ class Atoms:
             atom -= centre_atom
 
         self._centred = True
-
-    def center(self, center_atom=None):
-        self.centre(centre_atom=center_atom)
 
     def rotate(self, R):
         coordinates = R.dot(self.coordinates.T).T
@@ -183,6 +181,9 @@ class Atoms:
     def alf(self):
         return [[iatom.num for iatom in atom.alf] for atom in self]
 
+    def i(self, atom_name):
+        return [atom.atom_num for atom in self].index(atom_name)
+
     @property
     def features(self):
         try:
@@ -211,11 +212,17 @@ class Atoms:
     def __delitem__(self, i):
         del self._atoms[i]
 
-    def __getitem__(self, i):
+    def __getitem__(self, i: Union[int, str]):
         # TODO: fix this
         # if isinstance(i, INT):
         #     i = self.atoms.index(i.atom)
-        return self._atoms[i]
+        if isinstance(i, int):
+            return self._atoms[i]
+        elif isinstance(i, str):
+            for atom in self:
+                if i == atom.atom_num:
+                    return atom
+            raise KeyError(f"Atom '{i}' Not Found")
 
     def __str__(self):
         return "\n".join([str(atom) for atom in self])

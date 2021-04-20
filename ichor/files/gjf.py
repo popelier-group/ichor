@@ -6,7 +6,6 @@ from ichor import patterns
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
 from ichor.geometry import Geometry
-from ichor.globals import GLOBALS
 
 
 class GaussianJobType(Enum):
@@ -67,6 +66,8 @@ class GJF(Geometry, File):
         return self.path.with_suffix(".wfn")
 
     def format(self):
+        from ichor.globals import GLOBALS
+
         if not self.atoms:
             self.read()
 

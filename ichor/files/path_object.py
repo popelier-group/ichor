@@ -14,6 +14,7 @@ class PathObject(ABC):
                 and not self.path.is_dir()
             ):
                 raise TypeError(f"{self.path} is not a directory")
+
             from ichor.files.file import File
 
             if File in self.__class__.__bases__ and not self.path.is_file():

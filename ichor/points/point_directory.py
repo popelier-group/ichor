@@ -4,7 +4,6 @@ from typing import Optional
 
 from ichor.common.functools import classproperty
 from ichor.files import GJF, WFN, Directory, INTs
-from ichor.globals import GLOBALS
 from ichor.points.point import Point
 
 
@@ -18,6 +17,7 @@ class PointDirectory(Point, Directory):
 
     @classproperty
     def dirpattern(self) -> re.Pattern:
+        from ichor.globals import GLOBALS
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
 
     def __getattr__(self, item):

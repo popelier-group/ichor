@@ -18,6 +18,9 @@ class Menu(object):
         auto_clear: bool = True,
         enable_problems: bool = False,
         auto_close: bool = False,
+        space=False,
+        back=False,
+        exit=False,
     ):
         self.title = title
         self.options = None
@@ -40,6 +43,10 @@ class Menu(object):
         self.wait_options = []
         self.close_options = []
         self.hidden_options = []
+
+        self.space = space
+        self.back = back
+        self.exit = exit
 
     def set_options(self, options):
         original = self.options
@@ -177,16 +184,20 @@ class Menu(object):
             self.add_option("0", "Exit", sys.exit)
 
     def longest_label(self):
-        lengths = []
-        for option in self.get_options(include_hidden=False):
-            lengths += [len(option)]
+        lengths = [
+            len(option) for option in self.get_options(include_hidden=False)
+        ]
         return max(lengths)
+
+    @classmethod
+    def clear_screen(cls):
+        os.system("cls" if os.name == "nt" else "clear")
 
     # clear the screen
     # show the options
     def show(self):
         if self.auto_clear:
-            os.system("cls" if os.name == "nt" else "clear")
+            self.clear_screen()
         if self.problems_enabled:
             self.print_problems()
         if self.is_title_enabled:
@@ -243,5 +254,7 @@ class Menu(object):
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if any([self.space, self.back, self.exit]):
+            self.add_final_options(self.space, self.back, self.exit)
         self.run()

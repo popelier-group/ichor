@@ -136,7 +136,7 @@ class Daemon(ABC):
                 pid = int(pf.read().strip())
         except IOError:
             pid = None
-        return not pid is None
+        return pid is not None
 
     def restart(self):
         """
