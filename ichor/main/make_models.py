@@ -3,6 +3,7 @@ from ichor.points import PointsDirectory
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
 from ichor.common.io import mkdir
+from ichor.common.str import get_digits
 
 from enum import Enum
 from ichor import constants
@@ -181,13 +182,9 @@ def make_models(directory: Path, atoms: Optional[List[str]] = None, ntrain: Opti
 
 
 def _make_models():
-    from ichor.globals import GLOBALS
-
     ferebus_directories = []
 
     for atom in atom_models:
-        ferebus_directory = GLOBALS.FILE_STRUCTURE["ferebus"] / atom
-        mkdir(ferebus_directory, empty=True)
         training_data = []
         for point in _model_data:
             # features = point.features[atom]
@@ -195,9 +192,73 @@ def _make_models():
             properties = {ty.value: getattr(point, ty.value)[atom] for ty in model_types}
             training_data += [(features, properties)]
 
-        print(training_data)
-        quit()
-        write_training_set(training_data, ferebus_directory)
+        ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
 
+def write_training_set(atom, training_data):
+    from ichor.globals import GLOBALS
+    ferebus_directory = GLOBALS.FILE_STRUCTURE["ferebus"] / atom
+    mkdir(ferebus_directory, empty=True)
 
+    ntrain = len(training_data)
+
+    training_set_file = ferebus_directory / f"{GLOBALS.SYSTEM_NAME}_{atom}_TRAINING_SET.csv"
+    write_ftoml(ferebus_directory, atom)
+    with open(training_set_file, "w") as ts:
+        if ntrain > 0:
+            inputs, outputs = training_data[0]
+            input_headers = [f"f{i+1}" for i in range(len(inputs))]
+            output_headers = [f"{output}" for output in outputs.keys()]
+            ts.write(f",{','.join(input_headers)},{','.join(output_headers)}\n")
+            for i, (inputs, outputs) in enumerate(training_data):
+                ts.write(f"{i},{','.join(map(str, inputs))},{','.join(map(str, outputs.values()))}\n")
+
+    return ferebus_directory
+
+
+def write_ftoml(ferebus_directory, atom):
+    from ichor.globals import GLOBALS
+    ftoml_file = ferebus_directory / "ferebus.toml"
+    alf = GLOBALS.ALF[get_digits(atom) - 1]
+
+    with open(ftoml_file, "w") as ftoml:
+        ftoml.write("[system]\n")
+        ftoml.write(f'name = "{GLOBALS.SYSTEM_NAME}"\n')
+        ftoml.write(f"natoms = {len(GLOBALS.ALF)}\n")
+        ftoml.write(f"atoms = [\n")
+        ftoml.write(
+            f'  {{name="{atom}", alf=[{alf[0]}, {alf[1]}, {alf[2]}]}}\n'
+        )
+        ftoml.write("]\n")
+        ftoml.write("\n")
+        ftoml.write("[model]\n")
+        ftoml.write(f'mean = "{GLOBALS.FEREBUS_MEAN}"\n')
+        ftoml.write(f'optimiser = "{GLOBALS.FEREBUS_OPTIMISATION}"\n')
+        ftoml.write(f'kernel = "k1"\n')
+        if GLOBALS.STANDARDISE:
+            ftoml.write(f"standardise = true\n")
+        ftoml.write("\n")
+        ftoml.write("[optimiser]\n")
+        ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
+        ftoml.write(f"search_max = {GLOBALS.FEREBUS_THETA_MAX}\n")
+        ftoml.write("\n")
+        ftoml.write("[optimiser.pso]\n")
+        ftoml.write(f"swarm_size = {GLOBALS.FEREBUS_SWARM_SIZE}\n")
+        ftoml.write(f"iterations = {GLOBALS.FEREBUS_MAX_ITERATION}\n")
+        ftoml.write(f"inertia_weight = {GLOBALS.FEREBUS_INERTIA_WEIGHT}\n")
+        ftoml.write(
+            f"cognitive_learning_rate = {GLOBALS.FEREBUS_COGNITIVE_LEARNING_RATE}\n"
+        )
+        ftoml.write(
+            f"social_learning_rate = {GLOBALS.FEREBUS_SOCIAL_LEARNING_RATE}\n"
+        )
+        ftoml.write(f'stopping_criteria="relative_change"\n')
+        ftoml.write("\n")
+        ftoml.write(f"[optimiser.pso.relative_change]\n")
+        ftoml.write(f"tolerance={GLOBALS.FEREBUS_TOLERANCE}\n")
+        ftoml.write(
+            f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n"
+        )
+        ftoml.write("\n")
+        ftoml.write("[kernels.k1]\n")
+        ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
