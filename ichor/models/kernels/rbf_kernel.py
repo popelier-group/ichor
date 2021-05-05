@@ -18,7 +18,8 @@ class RBFKernel(Kernel):
         return self._lengthscale
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
-        """ Calcualtes RBF covariance matrix from two sets of points
+        """
+        Calcualtes RBF covariance matrix from two sets of points
 
         Args:
             :param: `x1` np.ndarray of shape n x ndimensions:
@@ -28,7 +29,7 @@ class RBFKernel(Kernel):
 
         Returns:
             :type: `np.ndarray`
-                The RBF covariance matrix matrix of shape (n, m)
+                The RBF covariance matrix of shape (n, m)
         """
 
         # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix

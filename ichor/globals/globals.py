@@ -7,7 +7,7 @@ from uuid import UUID
 
 from ichor import constants
 from ichor.arguments import Arguments
-from ichor.atoms import Atoms
+from ichor.atoms.atoms import Atoms
 from ichor.common import io
 from ichor.common.functools import run_once
 from ichor.common.types import DictList, Version

@@ -1,5 +1,5 @@
-from .atom import Atom
-from .atoms import Atoms
+from ichor.atoms.atom import Atom
+from ichor.atoms.atoms import Atoms
 
 __all__ = [
     "Atom",

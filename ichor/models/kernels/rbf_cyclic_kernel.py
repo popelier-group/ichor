@@ -54,7 +54,7 @@ class RBFCyclicKernel(Kernel):
         return self._lengthscale
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
-        """ Calcualtes cyclic RBF covariance matrix from two sets of points
+        """Calcualtes cyclic RBF covariance matrix from two sets of points
 
         Args:
             :param: `x1` np.ndarray of shape n x ndimensions:
