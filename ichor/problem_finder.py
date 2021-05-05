@@ -133,7 +133,7 @@ class ProblemFinder:
         return len(self.problems)
 
     def __str__(self):
-        return "\n\n".join([str(problem) for problem in self.problems])
+        return "\n\n".join(str(problem) for problem in self.problems)
 
     def __repr__(self):
         return str(self)

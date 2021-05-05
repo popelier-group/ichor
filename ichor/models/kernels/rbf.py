@@ -4,7 +4,7 @@ from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
 
 
-class RBFKernel(Kernel):
+class RBF(Kernel):
     """Implemtation of Radial Basis Function (RBF) kernel
     When each dimension has a separate lengthscale, this is also called the RBF-ARD kernel
     """
@@ -34,19 +34,16 @@ class RBFKernel(Kernel):
 
         # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
         # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1
-        x1 = x1 / self._lengthscale
-        x2 = x2 / self._lengthscale
+        # x1 = x1 / self._lengthscale
+        # x2 = x2 / self._lengthscale
+        #
+        # dist = Distance.squared_euclidean_distance(x1, x2)
+        # return np.exp(-0.5 * dist)
 
-        dist = Distance.squared_euclidean_distance(x1, x2)
+        dist = np.empty((x1.shape[0], x2.shape[0], x1.shape[1]))
+        for i, xi in enumerate(x1):
+            for j, xj in enumerate(x2):
+                diff = xi - xj
+                dist[i, j, :] = diff*diff
 
-        return np.exp(-0.5 * dist)
-
-    def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
-        """ helper method to return x_test, x_train RBF covariance matrix K(X*, X)"""
-
-        return self.k(x_test, x_train)
-
-    def R(self, x_train: np.ndarray) -> np.ndarray:
-        """ helper method to return symmetric square matrix x_train, x_train RBF covariance matrix K(X, X)"""
-
-        return self.k(x_train, x_train)
+        return np.exp(-0.5 * np.sum(dist/self._lengthscale, axis=2))

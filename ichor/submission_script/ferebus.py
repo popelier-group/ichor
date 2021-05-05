@@ -1,10 +1,9 @@
 from pathlib import Path
-from ichor.modules import FerebusModules, Modules
 from typing import List
 
 from ichor.common.functools import classproperty
-from ichor.globals import GLOBALS
 from ichor.logging import logger
+from ichor.modules import FerebusModules, Modules
 from ichor.submission_script.command_line import CommandLine
 
 
@@ -22,6 +21,7 @@ class FerebusCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
+        from ichor.globals import GLOBALS
         if not GLOBALS.FEREBUS_LOCATION.is_file():
             logger.warning(
                 f"Cannot find FEREBUS location ({GLOBALS.FEREBUS_LOCATION})"
@@ -30,6 +30,7 @@ class FerebusCommand(CommandLine):
 
     @classproperty
     def ncores(self) -> int:
+        from ichor.globals import GLOBALS
         return GLOBALS.FEREBUS_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:

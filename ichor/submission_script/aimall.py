@@ -1,11 +1,9 @@
 from pathlib import Path
-from typing import Tuple
-from ichor.modules import AIMAllModules, Modules
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from ichor.common.functools import classproperty
-from ichor.globals import GLOBALS
 from ichor.globals import Machine
+from ichor.modules import AIMAllModules, Modules
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
@@ -17,7 +15,10 @@ class AIMAllCommand(CommandLine):
 
     @property
     def data(self) -> List[str]:
-        return [str(self.wfn_file.absolute()), str(self.aimall_output.absolute())]
+        return [
+            str(self.wfn_file.absolute()),
+            str(self.aimall_output.absolute()),
+        ]
 
     @classproperty
     def modules(self) -> Modules:
@@ -25,23 +26,24 @@ class AIMAllCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
+        from ichor.globals import GLOBALS
         if GLOBALS.MACHINE is Machine.csf3:
             return "~/AIMAll/aimqb.ish"
         elif GLOBALS.MACHINE is Machine.ffluxlab:
             return "aimall"
         elif GLOBALS.MACHINE is Machine.local:
             return "aimall_test"
-        raise SubmissionError(f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'")
+        raise SubmissionError(
+            f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'"
+        )
 
     @classproperty
     def options(self) -> List[str]:
-        return [
-            "-j y",
-            "-S /bin/bash"
-        ]
+        return ["-j y", "-S /bin/bash"]
 
     @property
     def arguments(self) -> List[str]:
+        from ichor.globals import GLOBALS
         return [
             "-nogui",
             "-usetwoe=0",
@@ -53,9 +55,9 @@ class AIMAllCommand(CommandLine):
             f"-naat={self.ncores if self.atoms == 'all' else 1}",
         ]
 
-
     @classproperty
     def ncores(self) -> int:
+        from ichor.globals import GLOBALS
         return GLOBALS.AIMALL_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:

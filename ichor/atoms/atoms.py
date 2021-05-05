@@ -100,9 +100,6 @@ class Atoms(list):
 
         self._centred = True
 
-    def center(self, center_atom=None):
-        self.centre(centre_atom=center_atom)
-
     def rotate(self, R):
         """Perform a rotation in 3D space with a matrix R. This rotates all atoms in the system the same amount.
         This method also changes the coordinates of the Atom instances held in the Atoms instance."""

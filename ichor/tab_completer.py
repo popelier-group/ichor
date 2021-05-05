@@ -51,16 +51,17 @@ class ListCompleter(TabCompleter):
 
 class PathCompleter(TabCompleter):
     def completer(self, text, state):
-        if readline:
-            p = Path(text)
-            if "~" in text:
-                p = p.expanduser()
-            p = f"{p}{os.sep if p.is_dir() else ''}"  # Add trailing slash if p is a directory
-            if p == f".{os.sep}":
-                p = ""  # No point in showing ./
+        if not readline:
+            return
+        p = Path(text)
+        if "~" in text:
+            p = p.expanduser()
+        p = f"{p}{os.sep if p.is_dir() else ''}"  # Add trailing slash if p is a directory
+        if p == f".{os.sep}":
+            p = ""  # No point in showing ./
 
-            files = [x for x in glob(p + "*")]
-            for i, f in enumerate(files):
-                if Path(f).is_dir():
-                    files[i] += os.sep
-            return files[state]
+        files = [x for x in glob(p + "*")]
+        for i, f in enumerate(files):
+            if Path(f).is_dir():
+                files[i] += os.sep
+        return files[state]

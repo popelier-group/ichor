@@ -151,7 +151,7 @@ class Globals:
     IQA_MODELS: bool = False
 
     DROP_N_COMPUTE: bool = False
-    DROP_N_COMPUTE_LOCATION: str = ""
+    DROP_N_COMPUTE_LOCATION: Path = ""
 
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
@@ -306,57 +306,14 @@ class Globals:
             else:
                 ProblemFinder.unknown_settings += [key]
 
-        if self.DROP_N_COMPUTE and not self.DROP_N_COMPUTE_LOCATION:
-            if self.MACHINE == "csf3":
-                self.DROP_N_COMPUTE_LOCATION = str(
-                    Path.home() / "DROP_N_COMPUTE"
-                )
+        if (
+            self.DROP_N_COMPUTE
+            and not self.DROP_N_COMPUTE_LOCATION
+            and self.MACHINE == "csf3"
+        ):
+            self.DROP_N_COMPUTE_LOCATION = Path.home() / "DropCompute"
         if self.DROP_N_COMPUTE_LOCATION:
             io.mkdir(self.DROP_N_COMPUTE_LOCATION)
-
-        # if self.ALF_REFERENCE_FILE:
-        #     if not os.path.exists(self.ALF_REFERENCE_FILE):
-        #         logger.warning(
-        #             f"{self.ALF_REFERENCE_FILE} does not exist, looking for alternative"
-        #         )
-        #         self.ALF_REFERENCE_FILE = None
-        #
-        # if not self.ALF_REFERENCE_FILE:
-        #     self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-        #         self.FILE_STRUCTURE["training_set"]
-        #     )
-        #
-        # if not self.ALF_REFERENCE_FILE:
-        #     self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-        #         self.FILE_STRUCTURE["sample_pool"]
-        #     )
-        #
-        # if not self.ALF_REFERENCE_FILE:
-        #     self.ALF_REFERENCE_FILE = FileTools.get_first_gjf(
-        #         self.FILE_STRUCTURE["validation_set"]
-        #     )
-        #
-        # if not self.ALF_REFERENCE_FILE:
-        #     xyz_files = FileTools.get_files_in(".", "*.xyz")
-        #     if len(xyz_files) > 0:
-        #         self.ALF_REFERENCE_FILE = xyz_files[0]
-        #
-        # if self.ALF_REFERENCE_FILE:
-        #     filetype = Path(self.ALF_REFERENCE_FILE).suffix
-        #     if filetype == ".gjf":
-        #         self.ATOMS = GJF(str(self.ALF_REFERENCE_FILE)).read().atoms
-        #     elif filetype == ".xyz":
-        #         self.ATOMS = Trajectory(self.ALF_REFERENCE_FILE).read(n=1)[0]
-        #     else:
-        #         logger.error(f"Unknown ALF_REFRENCE_FILE_TYPE: {filetype}")
-        #
-        # if not self.ALF:
-        #     if self.ATOMS:
-        #         try:
-        #             self.ATOMS.calculate_alf()
-        #             self.ALF = Atoms.ALF
-        #         except:
-        #             logger.error("Error in ALF Calculation")
 
     def set(self, name, value):
         name = name.upper()
@@ -374,11 +331,11 @@ class Globals:
         return getattr(self, name, None)
 
     def items(self, show_protected=False):
-        items = []
-        for global_variable in self.global_variables:
-            if not global_variable in self._protected or show_protected:
-                items += [(global_variable, getattr(self, global_variable))]
-        return items
+        return [
+            (global_variable, getattr(self, global_variable))
+            for global_variable in self.global_variables
+            if global_variable not in self._protected or show_protected
+        ]
 
     def save_to_properties_config(self, config_file, global_variables):
         with open(config_file, "w") as config:
@@ -395,13 +352,14 @@ class Globals:
             yaml.dump(global_variables, config)
 
     def save_to_config(self, config_file=Arguments.config_file):
-        global_variables = {}
-        for global_variable, global_value in self.items():
+        global_variables = {
+            global_variable: global_value
+            for global_variable, global_value in self.items()
             if (
                 global_value != self._defaults[global_variable]
                 or global_variable in self._in_config
-            ):
-                global_variables[global_variable] = global_value
+            )
+        }
 
         if config_file.endswith(".properties"):
             self.save_to_properties_config(config_file, global_variables)
@@ -437,8 +395,9 @@ class Globals:
             self._global_variables = [
                 key
                 for key in dir(self)
-                if not key.startswith("_") and not key in methods
+                if not key.startswith("_") and key not in methods
             ]
+
             return self._global_variables
 
     def __setattr__(self, name, value):

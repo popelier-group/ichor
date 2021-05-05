@@ -7,7 +7,6 @@ from ichor.calculators.feature_calculator import ALFFeatureCalculator
 
 
 class Atom:
-
     """
     The Atom class is used for ONE atom in ONE timestep.
 

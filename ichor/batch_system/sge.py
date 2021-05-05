@@ -5,7 +5,6 @@ from pathlib import Path
 from ichor.batch_system.batch_system import BatchSystem, JobID
 from ichor.common.functools import classproperty
 from ichor.common.io import convert_to_path
-from ichor.globals import GLOBALS
 
 
 class SunGridEngine(BatchSystem):
@@ -39,6 +38,8 @@ class SunGridEngine(BatchSystem):
     @classmethod
     def parallel_environment(cls, ncores: int) -> str:
         from ichor.batch_system import PARALLEL_ENVIRONMENT
+        from ichor.globals import GLOBALS
+
         return f"-pe {PARALLEL_ENVIRONMENT[GLOBALS.MACHINE][ncores]} {ncores}"
 
     @classmethod

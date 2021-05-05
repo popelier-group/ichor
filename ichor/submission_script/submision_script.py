@@ -1,11 +1,11 @@
-from ichor.files.path_object import PathObject
+from pathlib import Path
+from typing import List
+
+from ichor.batch_system import BATCH_SYSTEM
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
-from ichor.batch_system import BATCH_SYSTEM
-from ichor.globals import GLOBALS
 from ichor.common.uid import set_uid
-from typing import List
-from pathlib import Path
+from ichor.files.path_object import PathObject
 from ichor.submission_script.command_group import CommandGroup
 
 
@@ -27,6 +27,8 @@ class SubmissionScript(PathObject):
 
     @property
     def default_options(self):
+        from ichor.globals import GLOBALS
+
         return [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
             BATCH_SYSTEM.parallel_environment(self.ncores),
@@ -41,6 +43,8 @@ class SubmissionScript(PathObject):
 
     @property
     def modules(self) -> List[str]:
+        from ichor.globals import GLOBALS
+
         modules = []
         for command in self.grouped_commands:
             modules += command.modules[GLOBALS.MACHINE]
@@ -96,9 +100,13 @@ class SubmissionScript(PathObject):
 
         datafile_str = f"{self.datafile_var}={datafile.absolute()}"
 
-        read_datafile_str = "".join(f"{self.arr(i)}=()\n" for i in range(ndata))
-        read_datafile_str += f"while IFS={self.separator} read -r " \
-                             f"{' '.join(self.var(i) for i in range(ndata))}\n"
+        read_datafile_str = "".join(
+            f"{self.arr(i)}=()\n" for i in range(ndata)
+        )
+        read_datafile_str += (
+            f"while IFS={self.separator} read -r "
+            f"{' '.join(self.var(i) for i in range(ndata))}\n"
+        )
         read_datafile_str += "do\n"
         for i in range(ndata):
             read_datafile_str += f"    {self.arr(i)}+=(${self.var(i)})\n"
@@ -106,7 +114,9 @@ class SubmissionScript(PathObject):
 
         return f"{datafile_str}\n{read_datafile_str}"
 
-    def setup_datafile(self, datafile: Path, data: List[List[str]]) -> (List[str], str):
+    def setup_datafile(
+        self, datafile: Path, data: List[List[str]]
+    ) -> (List[str], str):
         self.write_datafile(datafile, data)
         datafile_str = self.read_datafile_str(datafile, data)
         datafile_variables = [self.array_index(i) for i in range(len(data[0]))]
@@ -114,16 +124,22 @@ class SubmissionScript(PathObject):
         return datafile_variables, datafile_str
 
     def write(self):
+        from ichor.globals import GLOBALS
+
         mkdir(self.path.parent)
 
         with open(self.path, "w") as f:
-            njobs = max(len(command_group) for command_group in self.grouped_commands)
+            njobs = max(
+                len(command_group) for command_group in self.grouped_commands
+            )
 
             f.write("#!/bin/bash -l\n")
             for option in self.options:
                 f.write(f"#{BATCH_SYSTEM.OptionCmd} {option}\n")
             if len(self.commands) > 1:
-                f.write(f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n")
+                f.write(
+                    f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
+                )
             for module in self.modules:
                 f.write(f"module load {module}\n")
 
@@ -133,8 +149,18 @@ class SubmissionScript(PathObject):
                     datafile = GLOBALS.FILE_STRUCTURE["datafiles"] / Path(
                         str(GLOBALS.UID)
                     )
-                    command_group_data = [command.data for command in command_group]
-                    datafile_vars, datafile_str = self.setup_datafile(datafile, command_group_data)
+                    command_group_data = [
+                        command.data for command in command_group
+                    ]
+                    datafile_vars, datafile_str = self.setup_datafile(
+                        datafile, command_group_data
+                    )
                     command_variables += datafile_vars
                     f.write(f"{datafile_str}\n")
                 f.write(f"{command_group.repr(command_variables)}\n")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.write()

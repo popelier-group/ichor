@@ -46,7 +46,7 @@ class File(PathObject, ABC):
     def __getattribute__(self, item):
         try:
             if (
-                not super().__getattribute__(item)
+                super().__getattribute__(item) is None
                 and self.state is not FileState.Reading
             ):
                 self.read()

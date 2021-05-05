@@ -13,7 +13,10 @@ from ichor.typing import F
 def parser(func: F) -> F:
     @wraps(func)
     def wrapper(val: Any) -> Any:
-        if val is None or ('return' in func.__annotations__ and isinstance(val, func.__annotations__['return'])):
+        if val is None or (
+            "return" in func.__annotations__
+            and isinstance(val, func.__annotations__["return"])
+        ):
             return val
         return func(val)
 
