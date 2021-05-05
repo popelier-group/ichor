@@ -1,9 +1,7 @@
 import itertools as it
-from functools import lru_cache
 import numpy as np
 from ichor.atoms.atom import Atom
-from typing import Union
-from ichor.feature_calculator import AtomicLocalFrameFeatureCalculator
+from ichor.calculators.connectivity_calculator import ConnectivityCalculator
 
 
 class Atoms(list):
@@ -119,8 +117,6 @@ class Atoms(list):
         if not other._centred:
             other.centre()
 
-        P = self.coordinates
-        Q = other.coordinates
         H = self.coordinates.T.dot(other.coordinates)
 
         V, S, W = np.linalg.svd(H)
@@ -201,7 +197,8 @@ class Atoms(list):
 
     def __delitem__(self, i):
         """deletes an instance of Atom from the self._atoms list (index i) if del is called on an Atoms instance
-        e.g. del atoms[0], where atoms is an Atoms instance will delete the 0th element. del atoms["C1"] will delete the Atom instance with the name attribute of 'C1'."""
+        e.g. del atoms[0], where atoms is an Atoms instance will delete the 0th element.
+        del atoms["C1"] will delete the Atom instance with the name attribute of 'C1'."""
 
         if not (isinstance(i, int) or isinstance(i, str)):
 

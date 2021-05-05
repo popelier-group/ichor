@@ -234,15 +234,6 @@ class Atom:
         return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
 
     @property
-    def alf(self):
-        alf = [self]
-        if self.x_axis is not None:
-            alf.append(self.x_axis)
-        if self.xy_plane is not None:
-            alf.append(self.xy_plane)
-        return alf
-
-    @property
     def alf_nums(self):
         return [atom.num for atom in self.alf]
 
