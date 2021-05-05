@@ -4,7 +4,7 @@ from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
 
 
-class RBFCyclicKernel(Kernel):
+class RBFCyclic(Kernel):
 
     # TODO: figure out a good way to say if training data is standardized, normalized, etc. because this kernel is affected by data preprocessing
 
@@ -71,23 +71,11 @@ class RBFCyclicKernel(Kernel):
         # after distance matrices for each dimension are computed(and corrected where needed), divide by lengthscale and square
         dist_corrected = np.zeros((x1.shape[0], x2.shape[0]))
 
-        for dim_idx, (x1_one_dimension, x2_one_dimension) in enumerate(
-            zip(x1.T, x2.T)
-        ):
+        for dim_idx, (x1_one_dimension, x2_one_dimension) in enumerate(zip(x1.T, x2.T)):
+            res = Distance.euclidean_distance(x1_one_dimension, x2_one_dimension)
 
-            res = Distance.euclidean_distance(
-                x1_one_dimension, x2_one_dimension
-            )
-
-            if ((dim_idx + 1) > 3) and (
-                (dim_idx + 1) % 3 == 0
-            ):  # if phi feature
-
-                res = np.where(
-                    (res > (np.pi / self.train_x_std[dim_idx])),
-                    (2 * np.pi / self.train_x_std[dim_idx] - res),
-                    res,
-                )
+            if dim_idx > 2 and (dim_idx + 1) % 3 == 0:  # if phi feature
+                res = np.where((res > np.pi), (2.0 * np.pi - res), res)
 
             res = res / self._lengthscale[dim_idx]
             res = np.power(res, 2)
@@ -96,13 +84,3 @@ class RBFCyclicKernel(Kernel):
             dist_corrected = dist_corrected + res
 
         return np.exp(-0.5 * dist_corrected)
-
-    def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
-        """ helper method to return x_test, x_train cyclic RBF covariance matrix K(X*, X)"""
-
-        return self.k(x_test, x_train)
-
-    def R(self, x_train: np.ndarray, *args) -> np.ndarray:
-        """ helper method to return symmetric square matrix x_train, x_train cyclic RBF covariance matrix K(X, X)"""
-
-        return self.k(x_train, x_train)

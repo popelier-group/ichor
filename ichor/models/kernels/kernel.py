@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import numpy as np
 
 
 class Kernel(ABC):
@@ -13,19 +14,27 @@ class Kernel(ABC):
         quit()
 
     @abstractmethod
-    def k(self):
-        """ abstract method for calculating covariance matrix between two sets of vectors, needs to be implemented by child classes"""
-        pass
+    def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
+        """ Calcualtes covariance matrix from two sets of points
 
-    @abstractmethod
-    def r(self):
-        """ abstract method for calculating test-train covariance matrix K(X*, X) """
-        pass
+        Args:
+            :param: `x1` np.ndarray of shape n x ndimensions:
+                First matrix of n points
+            :param: `x2` np.ndarray of shape m x ndimensions:
+                Second marix of m points, can be identical to the first matrix `x1`
 
-    @abstractmethod
-    def R(self):
-        """ abstract method for calculating train-train covariance matrix K(X, X) which is a symmetric square matrix """
-        pass
+        Returns:
+            :type: `np.ndarray`
+                The RBF covariance matrix matrix of shape (n, m)
+        """
+
+    def r(self, x_train: np.ndarray, x_test: np.ndarray) -> np.ndarray:
+        """ helper method to return x_test, x_train covariance matrix K(X*, X)"""
+        return self.k(x_test, x_train)
+
+    def R(self, x_train: np.ndarray) -> np.ndarray:
+        """ helper method to return symmetric square matrix x_train, x_train covariance matrix K(X, X)"""
+        return self.k(x_train, x_train)
 
     def __add__(self, other):
         return KernelSum(self, other)
