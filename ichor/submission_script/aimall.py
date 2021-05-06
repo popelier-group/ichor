@@ -27,6 +27,7 @@ class AIMAllCommand(CommandLine):
     @classproperty
     def command(self) -> str:
         from ichor.globals import GLOBALS
+
         if GLOBALS.MACHINE is Machine.csf3:
             return "~/AIMAll/aimqb.ish"
         elif GLOBALS.MACHINE is Machine.ffluxlab:
@@ -44,6 +45,7 @@ class AIMAllCommand(CommandLine):
     @property
     def arguments(self) -> List[str]:
         from ichor.globals import GLOBALS
+
         return [
             "-nogui",
             "-usetwoe=0",
@@ -58,6 +60,7 @@ class AIMAllCommand(CommandLine):
     @classproperty
     def ncores(self) -> int:
         from ichor.globals import GLOBALS
+
         return GLOBALS.AIMALL_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:

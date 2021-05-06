@@ -14,4 +14,4 @@ def decode(binary_str: bytes) -> str:
 
 
 def get_digits(str_in: str) -> int:
-    return int(''.join(c for c in str_in if c.isdigit()))
+    return int("".join(c for c in str_in if c.isdigit()))

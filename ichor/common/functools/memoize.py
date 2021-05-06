@@ -17,7 +17,9 @@ def cache(method=None, name=None, ignore_args=False):
 
 def add_to_cache(obj, name, val, *args, **kwargs):
     """Add a result to the cache of an object (honoring calling args)."""
-    return _add_to_cache(obj, name, val, *args, kwargs_pkl=pickle.dumps(kwargs))
+    return _add_to_cache(
+        obj, name, val, *args, kwargs_pkl=pickle.dumps(kwargs)
+    )
 
 
 def get_from_cache(obj, name, *args, **kwargs):
@@ -30,7 +32,9 @@ def pop_from_cache(obj, name, *args, **kwargs):
     try:
         return obj._memoize_cache.pop((name, args, pickle.dumps(kwargs)))
     except (KeyError, AttributeError):
-        raise CachingError("Object does not have item {} stored in cache.".format(name))
+        raise CachingError(
+            "Object does not have item {} stored in cache.".format(name)
+        )
 
 
 def pop_from_cache_ignore_args(obj, name):
@@ -38,7 +42,9 @@ def pop_from_cache_ignore_args(obj, name):
     try:
         return obj._memoize_cache.pop(name)
     except (KeyError, AttributeError):
-        raise CachingError("Object does not have item {} stored in cache.".format(name))
+        raise CachingError(
+            "Object does not have item {} stored in cache.".format(name)
+        )
 
 
 def clear_cache_hook(module, *args, **kwargs):
@@ -57,7 +63,13 @@ def _cached(method=None, name=None):
         cache_name = name if name is not None else method
         kwargs_pkl = pickle.dumps(kwargs)
         if not _is_in_cache(self, cache_name, *args, kwargs_pkl=kwargs_pkl):
-            return _add_to_cache(self, cache_name, method(self, *args, **kwargs), *args, kwargs_pkl=kwargs_pkl)
+            return _add_to_cache(
+                self,
+                cache_name,
+                method(self, *args, **kwargs),
+                *args,
+                kwargs_pkl=kwargs_pkl
+            )
         return _get_from_cache(self, cache_name, *args, kwargs_pkl=kwargs_pkl)
 
     return g
@@ -74,7 +86,9 @@ def _cached_ignore_args(method=None, name=None):
     def g(self, *args, **kwargs):
         cache_name = name if name is not None else method
         if not _is_in_cache_ignore_args(self, cache_name):
-            return _add_to_cache_ignore_args(self, cache_name, method(self, *args, **kwargs))
+            return _add_to_cache_ignore_args(
+                self, cache_name, method(self, *args, **kwargs)
+            )
         return _get_from_cache_ignore_args(self, cache_name)
 
     return g
@@ -93,11 +107,16 @@ def _get_from_cache(obj, name, *args, kwargs_pkl):
     try:
         return obj._memoize_cache[(name, args, kwargs_pkl)]
     except (AttributeError, KeyError):
-        raise CachingError("Object does not have item {} stored in cache.".format(name))
+        raise CachingError(
+            "Object does not have item {} stored in cache.".format(name)
+        )
 
 
 def _is_in_cache(obj, name, *args, kwargs_pkl):
-    return hasattr(obj, "_memoize_cache") and (name, args, kwargs_pkl) in obj._memoize_cache
+    return (
+        hasattr(obj, "_memoize_cache")
+        and (name, args, kwargs_pkl) in obj._memoize_cache
+    )
 
 
 def _add_to_cache_ignore_args(obj, name, val):
@@ -113,7 +132,9 @@ def _get_from_cache_ignore_args(obj, name):
     try:
         return obj._memoize_cache[name]
     except (AttributeError, KeyError):
-        raise CachingError("Object does not have item {} stored in cache.".format(name))
+        raise CachingError(
+            "Object does not have item {} stored in cache.".format(name)
+        )
 
 
 def _is_in_cache_ignore_args(obj, name):
@@ -121,5 +142,7 @@ def _is_in_cache_ignore_args(obj, name):
 
 
 def _is_in_cache_ignore_all_args(obj, name):
-    """ checks if item is in cache by name. """
-    return hasattr(obj, "_memoize_cache") and name in [x[0] for x in obj._memoize_cache.keys()]
+    """checks if item is in cache by name."""
+    return hasattr(obj, "_memoize_cache") and name in [
+        x[0] for x in obj._memoize_cache.keys()
+    ]

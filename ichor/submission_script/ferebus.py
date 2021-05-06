@@ -22,6 +22,7 @@ class FerebusCommand(CommandLine):
     @classproperty
     def command(self) -> str:
         from ichor.globals import GLOBALS
+
         if not GLOBALS.FEREBUS_LOCATION.is_file():
             logger.warning(
                 f"Cannot find FEREBUS location ({GLOBALS.FEREBUS_LOCATION})"
@@ -31,6 +32,7 @@ class FerebusCommand(CommandLine):
     @classproperty
     def ncores(self) -> int:
         from ichor.globals import GLOBALS
+
         return GLOBALS.FEREBUS_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:

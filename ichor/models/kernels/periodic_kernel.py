@@ -59,11 +59,11 @@ class PeriodicKernel(Kernel):
         return np.exp(dist)
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
-        """ helper method to return x_test, x_train Periodic covariance matrix K(X*, X)"""
+        """helper method to return x_test, x_train Periodic covariance matrix K(X*, X)"""
 
         return self.k(x_test, x_train)
 
     def R(self, x_train: np.ndarray) -> np.ndarray:
-        """ helper method to return symmetric square matrix x_train, x_train Periodic covariance matrix K(X, X)"""
+        """helper method to return symmetric square matrix x_train, x_train Periodic covariance matrix K(X, X)"""
 
         return self.k(x_train, x_train)

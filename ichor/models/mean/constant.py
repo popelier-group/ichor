@@ -1,5 +1,6 @@
-from ichor.models.mean.mean import Mean
 import numpy as np
+
+from ichor.models.mean.mean import Mean
 
 
 class ConstantMean(Mean):

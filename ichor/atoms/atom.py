@@ -1,9 +1,11 @@
 import itertools as it
-import re
+from typing import Optional
+
 import numpy as np
+
 from ichor import constants
-from typing import Union
 from ichor.calculators.feature_calculator import ALFFeatureCalculator
+from ichor.units import AtomicDistance
 
 
 class Atom:
@@ -16,64 +18,38 @@ class Atom:
 
     _counter = it.count(1)
 
-    def __init__(self, coordinate_line, parent=None):
-
-        self._atom_type = None  # to be read in from coordinate line
-        self._atom_number = next(
+    def __init__(
+        self,
+        ty: str,
+        x: float,
+        y: float,
+        z: float,
+        parent: Optional["Atoms"] = None,
+        units: AtomicDistance = AtomicDistance.Angstroms,
+    ):
+        self.type = ty  # to be read in from coordinate line
+        self.index = next(
             Atom._counter
         )  # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
         self._parent = parent  # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
 
-        self._x = None
-        self._y = None
-        self._z = None
+        self.coordinates = np.array([x, y, z])
 
-        self.read_input(coordinate_line)
+        self.units = units
 
-        self._coordinates = np.array([self._x, self._x, self._x])
         self._properties = None
-
-    def read_input(self, coordinate_line: Union[str, list, tuple]):
-        """
-        Reads in ONE line in the trajectory file contanining ONE atom's x, y, z position and stores this
-        atom's x, y, z coordinates, as well as other information like atom type and others
-        """
-
-        if isinstance(coordinate_line, str):
-            find_atom = coordinate_line.split()
-            self._atom_type = find_atom[0]
-            coordinate_line = next(
-                re.finditer(
-                    r"(\s*[+-]?\d+.\d+([Ee][+-]?\d+)?){3}", coordinate_line
-                )
-            ).group()
-            coordinate_line = re.finditer(
-                r"[+-]?\d+.\d+([Ee][+-]?\d+)?", coordinate_line
-            )
-            self._x = float(next(coordinate_line).group())
-            self._y = float(next(coordinate_line).group())
-            self._z = float(next(coordinate_line).group())
-        elif isinstance(coordinate_line, Atom):
-            self = coordinate_line
-        elif isinstance(coordinate_line, (list, tuple)):
-            if len(coordinate_line) == 3:
-                self._atom_type = "H"
-                self._x = float(coordinate_line[0])
-                self._y = float(coordinate_line[1])
-                self._z = float(coordinate_line[2])
-            elif len(coordinate_line) == 4:
-                self._atom_type = coordinate_line[0]
-                self._x = float(coordinate_line[1])
-                self._y = float(coordinate_line[2])
-                self._z = float(coordinate_line[3])
 
     def to_angstroms(self):
         """Convert the coordiantes to Angstroms"""
-        self._coordinates /= constants.ang2bohr
+        if self.units != AtomicDistance.Angstroms:
+            self.coordinates *= constants.bohr2ang
+            self.units = AtomicDistance.Angstroms
 
     def to_bohr(self):
         """Convert the coordiantes to Bohr"""
-        self._coordinates *= constants.ang2bohr
+        if self.units != AtomicDistance.Bohr:
+            self.coordinates *= constants.ang2bohr
+            self.units = AtomicDistance.Bohr
 
     @property
     def name(self) -> str:
@@ -83,9 +59,21 @@ class Atom:
         return f"{self.atom_type}{self._atom_number}"
 
     @property
+    def x(self) -> np.float64:
+        return self.coordinates[0]
+
+    @property
+    def y(self) -> np.float64:
+        return self.coordinates[1]
+
+    @property
+    def z(self) -> np.float64:
+        return self.coordinates[2]
+
+    @property
     def atom_type(self) -> str:
         """Returns the type (i.e. element) of the Atom instance."""
-        return self._atom_type
+        return self.type
 
     @property
     def atom_number(self) -> int:
@@ -105,33 +93,13 @@ class Atom:
 
     @property
     def mass(self) -> float:
-        """ Returns the mass of the atom"""
+        """Returns the mass of the atom"""
         return round(constants.type2mass[self.atom_type], 6)
 
     @property
     def radius(self):
-        """ Returns the Van der Waals radius of the given Atom instance."""
+        """Returns the Van der Waals radius of the given Atom instance."""
         return round(constants.type2rad[self._atom_type], 2)
-
-    @property
-    def coordinates(self) -> np.ndarray:
-        """Returns the x,y,z coordinates of the Atom instance in an np array."""
-        return self.coordinates
-
-    @property
-    def x(self) -> np.float64:
-        """Returns the x coordinate of the Atom instance."""
-        return self._coordinates[0]
-
-    @property
-    def y(self) -> np.float64:
-        """Returns the y coordinate of the Atom instance."""
-        return self._coordinates[1]
-
-    @property
-    def z(self) -> np.float64:
-        """Returns the z coordinate of the Atom instance."""
-        return self._coordinates[2]
 
     @property
     def connectivity(self) -> np.ndarray:
@@ -159,11 +127,10 @@ class Atom:
             )
 
         connectivity_matrix_row = self.connectivity
-        bonded_atoms = [
+        return [
             self._parent[connected_atom]
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
-        return bonded_atoms
 
     @property
     def bonded_atoms_names(self) -> list:
@@ -179,11 +146,10 @@ class Atom:
             )
 
         connectivity_matrix_row = self.connectivity
-        bonded_atoms_names = [
+        return [
             self._parent[connected_atom].name
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
-        return bonded_atoms_names
 
     @property
     def bonded_atoms_indeces(self) -> list:
@@ -199,11 +165,10 @@ class Atom:
             )
 
         connectivity_matrix_row = self.connectivity
-        bonded_atoms_indeces = [
+        return [
             self._parent[connected_atom].index
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
-        return bonded_atoms_indeces
 
     @property
     def alf(self) -> np.ndarray:
@@ -239,12 +204,11 @@ class Atom:
 
     def __getattr__(self, attr):
         try:
-            return self.__dict__[attr]
-        except KeyError:
-            try:
-                return getattr(self.properties, attr)
-            except AttributeError:
-                raise AttributeError(f"Cannot find attribute '{attr}'")
+            return getattr(self.properties, attr)
+        except AttributeError:
+            raise AttributeError(
+                f"Atom '{self.name}' has no attribute '{attr}'"
+            )
 
     def __str__(self):
         return f"{self._atom_type:<3s}{self.coordinates_string}"
@@ -266,39 +230,5 @@ class Atom:
         return hash(str(self.num) + str(self.coordinates_string))
 
     def __sub__(self, other):
-        self._coordinates - other._coordinates
+        self.coordinates -= other.coordinates
         return self
-
-    # @property
-    # def bonds(self):
-    #     from ichor.atoms.atoms import Atoms
-
-    #     return Atoms(self._bonds)
-
-    # @property
-    # def bond_list(self):
-    #     return [atom.atom_number - 1 for atom in self._bonds]
-
-    # @property
-    # def angle_list(self):
-    #     return [atom.atom_number - 1 for atom in self._angles]
-
-    # @property
-    # def mass(self):
-    #     return constants.type2mass[self._atom_type]
-
-    # @property
-    # def coordinates(self):
-    #     return self._coordinates
-
-    # @property
-    # def atom_num(self):
-    #     return f"{self._atom_type}{self.atom_number}"
-
-    # @property
-    # def atom_num_coordinates(self):
-    #     return [self.atom_num] + self.coordinates
-
-    # @property
-    # def atom_coordinates(self):
-    #     return [self.atom] + self.coordinates

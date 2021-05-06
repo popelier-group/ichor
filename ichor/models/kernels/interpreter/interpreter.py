@@ -1,6 +1,7 @@
-from ichor.models.kernels.interpreter.parser import Parser
-from ichor.models.kernels import Kernel
 from typing import Dict
+
+from ichor.models.kernels import Kernel
+from ichor.models.kernels.interpreter.parser import Parser
 
 
 class KernelInterpreter:

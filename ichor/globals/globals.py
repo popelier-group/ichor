@@ -74,7 +74,9 @@ class Globals:
     VALIDATION_SET_METHOD: List[str] = ["random"]
 
     KERNEL: str = "rbf-cyclic"  # rbf or rbf-cyclic currently
-    FEREBUS_TYPE: str = "executable"  # executable (FEREBUS) or python (FEREBUS.py)
+    FEREBUS_TYPE: str = (
+        "executable"  # executable (FEREBUS) or python (FEREBUS.py)
+    )
     FEREBUS_VERSION: Version = Version("7.0")
     FEREBUS_LOCATION: Path = Path("PROGRAMS/FEREBUS")
 
@@ -85,9 +87,13 @@ class Globals:
     DLPOLY_CORE_COUNT: int = 1
     CP2K_CORE_COUNT: int = 8
 
-    FEREBUS_SWARM_SIZE: int = 50  # If negative >> Size dynamically allocated by FEREBUS
+    FEREBUS_SWARM_SIZE: int = (
+        50  # If negative >> Size dynamically allocated by FEREBUS
+    )
     FEREBUS_NUGGET: float = 1.0e-10  # Default value for FEREBUS nugget
-    FEREBUS_THETA_MIN: float = 0.0  # Minimum theta value for initialisation (best to keep 0)
+    FEREBUS_THETA_MIN: float = (
+        0.0  # Minimum theta value for initialisation (best to keep 0)
+    )
     FEREBUS_THETA_MAX: float = 3.0  # Maximum theta value for initialisation
 
     MAX_NUGGET: float = 1e-4
@@ -108,7 +114,9 @@ class Globals:
     DLPOLY_VERSION: Version = Version("4.09")
 
     DLPOLY_NUMBER_OF_STEPS: int = 500  # Number of steps to run simulation for
-    DLPOLY_TEMPERATURE: int = 0  # If set to 0, will perform geom opt but default to 10 K
+    DLPOLY_TEMPERATURE: int = (
+        0  # If set to 0, will perform geom opt but default to 10 K
+    )
     DLPOLY_PRINT_EVERY: int = 1  # Print trajectory and stats every n steps
     DLPOLY_TIMESTEP: float = 0.001  # in ps
     DLPOLY_LOCATION: Path = Path("PROGRAMS/DLPOLY.Z")
@@ -133,7 +141,9 @@ class Globals:
 
     # Recovery and Integration Errors
     WARN_RECOVERY_ERROR: bool = True
-    RECOVERY_ERROR_THRESHOLD: float = 1.0 / constants.ha_to_kj_mol  # Ha (1.0 kJ/mol)
+    RECOVERY_ERROR_THRESHOLD: float = (
+        1.0 / constants.ha_to_kj_mol
+    )  # Ha (1.0 kJ/mol)
 
     WARN_INTEGRATION_ERROR: bool = True
     INTEGRATION_ERROR_THRESHOLD: float = 0.001

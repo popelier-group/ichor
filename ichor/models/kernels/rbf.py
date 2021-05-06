@@ -44,6 +44,6 @@ class RBF(Kernel):
         for i, xi in enumerate(x1):
             for j, xj in enumerate(x2):
                 diff = xi - xj
-                dist[i, j, :] = diff*diff
+                dist[i, j, :] = diff * diff
 
-        return np.exp(-0.5 * np.sum(dist/self._lengthscale, axis=2))
+        return np.exp(-0.5 * np.sum(dist / self._lengthscale, axis=2))

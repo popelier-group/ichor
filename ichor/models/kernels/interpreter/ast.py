@@ -1,13 +1,16 @@
 from abc import ABC
-from ichor.models.kernels.interpreter.token_type import TokenType
 from typing import Dict
-from ichor.models.kernels.kernel import Kernel
+
 from ichor.models.kernels.constant import Constant
+from ichor.models.kernels.interpreter.token_type import TokenType
+from ichor.models.kernels.kernel import Kernel
 
 
 class ASTNode(ABC):
     def visit(self, global_state: Dict[str, Kernel]) -> Kernel:
-        raise NotImplementedError(f"No visit method implemented for '{type(self).__name__}'")
+        raise NotImplementedError(
+            f"No visit method implemented for '{type(self).__name__}'"
+        )
 
 
 class BinOp(ASTNode):
@@ -18,11 +21,15 @@ class BinOp(ASTNode):
 
     def visit(self, global_state: Dict[str, Kernel]) -> Kernel:
         if self.op.type == TokenType.Plus:
-            return self.left.visit(global_state) + self.right.visit(global_state)
+            return self.left.visit(global_state) + self.right.visit(
+                global_state
+            )
         elif self.op.type == TokenType.Minus:
             raise NotImplementedError("Error: Not implemented minus kernel")
         elif self.op.type == TokenType.Mul:
-            return self.left.visit(global_state) * self.right.visit(global_state)
+            return self.left.visit(global_state) * self.right.visit(
+                global_state
+            )
         elif self.op.type == TokenType.Div:
             raise NotImplementedError("Error: Not implemented divide kernel")
 

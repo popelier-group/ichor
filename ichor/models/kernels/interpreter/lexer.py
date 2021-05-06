@@ -1,5 +1,5 @@
-from ichor.models.kernels.interpreter.token_type import TokenType
 from ichor.models.kernels.interpreter.token import Token
+from ichor.models.kernels.interpreter.token_type import TokenType
 
 
 class Lexer(object):

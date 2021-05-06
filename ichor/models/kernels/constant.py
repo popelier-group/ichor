@@ -5,7 +5,7 @@ from .kernel import Kernel
 
 class Constant(Kernel):
 
-    """ Implements constant kernel, which scales by a constant factor when used in a kernel product or
+    """Implements constant kernel, which scales by a constant factor when used in a kernel product or
     modifies the mean of the Gaussian process when used in a kernel sum"""
 
     def __init__(self, value):

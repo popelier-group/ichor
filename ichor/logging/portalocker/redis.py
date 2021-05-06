@@ -70,7 +70,9 @@ class RedisLock(utils.LockBase):
     pubsub: typing.Optional[client.PubSub] = None
     close_connection: bool
 
-    DEFAULT_REDIS_KWARGS = dict(health_check_interval=10,)
+    DEFAULT_REDIS_KWARGS = dict(
+        health_check_interval=10,
+    )
 
     def __init__(
         self,
@@ -192,7 +194,10 @@ class RedisLock(utils.LockBase):
         connection.publish(
             self.channel,
             json.dumps(
-                dict(response_channel=response_channel, message="ping",)
+                dict(
+                    response_channel=response_channel,
+                    message="ping",
+                )
             ),
         )
 

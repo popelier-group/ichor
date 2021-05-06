@@ -1,9 +1,9 @@
-from ichor.files import File
-from ichor.models.mean import Mean, ConstantMean, ZeroMean
-from ichor.models.kernels import Kernel, RBF, RBFCyclic
-from ichor.models.kernels.interpreter import KernelInterpreter
-
 import numpy as np
+
+from ichor.files import File
+from ichor.models.kernels import RBF, Kernel, RBFCyclic
+from ichor.models.kernels.interpreter import KernelInterpreter
+from ichor.models.mean import ConstantMean, Mean, ZeroMean
 
 
 class Model(File):
@@ -69,7 +69,7 @@ class Model(File):
                             [float(hp) for hp in line.split()[1:]]
                         )
                         # TODO: Change theta from FEREBUS to lengthscale to match label
-                        lengthscale = 1/(2.0*lengthscale)
+                        lengthscale = 1 / (2.0 * lengthscale)
                         kernel_list[kernel_name] = RBF(lengthscale)
                     elif kernel_type in [
                         "rbf-cyclic",
@@ -111,7 +111,6 @@ class Model(File):
                     self.weights = np.array(weights)
 
         self.k = KernelInterpreter(kernel_composition, kernel_list).interpret()
-
 
     def filetype(self) -> str:
         return ".model"

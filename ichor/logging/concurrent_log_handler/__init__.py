@@ -316,7 +316,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 os.umask(prev_umask)
 
     def _close(self):
-        """ Close file stream.  Unlike close(), we don't tear anything down, we
+        """Close file stream.  Unlike close(), we don't tear anything down, we
         expect the log to be re-opened after rotation."""
 
         if self.stream:
@@ -339,7 +339,16 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if stack:
             stack_str = ":\n" + "".join(traceback.format_stack())
         asctime = time.asctime()
-        print("[%s %s %s] %s%s" % (tid, pid, asctime, msg, stack_str,))
+        print(
+            "[%s %s %s] %s%s"
+            % (
+                tid,
+                pid,
+                asctime,
+                msg,
+                stack_str,
+            )
+        )
 
     def emit(self, record):
         """
@@ -464,7 +473,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
 
     def close(self):
         """
-        Close log stream and stream_lock. """
+        Close log stream and stream_lock."""
         self._console_log("In close()", stack=True)
         try:
             self._close()

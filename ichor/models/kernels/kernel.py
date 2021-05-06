@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
+
 import numpy as np
 
 
 class Kernel(ABC):
-    """ Base class for all kernels that implements dunder methods for addition or multiplication of separate kernels"""
+    """Base class for all kernels that implements dunder methods for addition or multiplication of separate kernels"""
 
     # TODO: figure out a good way to say if training data is standardized, normalized, etc. because kernels can be affected (for example cyclic RBF is affected)
 
@@ -15,7 +16,7 @@ class Kernel(ABC):
 
     @abstractmethod
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
-        """ Calcualtes covariance matrix from two sets of points
+        """Calcualtes covariance matrix from two sets of points
 
         Args:
             :param: `x1` np.ndarray of shape n x ndimensions:
@@ -29,11 +30,11 @@ class Kernel(ABC):
         """
 
     def r(self, x_train: np.ndarray, x_test: np.ndarray) -> np.ndarray:
-        """ helper method to return x_test, x_train covariance matrix K(X*, X)"""
+        """helper method to return x_test, x_train covariance matrix K(X*, X)"""
         return self.k(x_test, x_train)
 
     def R(self, x_train: np.ndarray) -> np.ndarray:
-        """ helper method to return symmetric square matrix x_train, x_train covariance matrix K(X, X)"""
+        """helper method to return symmetric square matrix x_train, x_train covariance matrix K(X, X)"""
         return self.k(x_train, x_train)
 
     def __add__(self, other):
@@ -44,7 +45,7 @@ class Kernel(ABC):
 
 
 class KernelSum(Kernel):
-    """ Kernel addition implementation"""
+    """Kernel addition implementation"""
 
     def __init__(self, k1: Kernel, k2: Kernel):
         self.k1 = k1
@@ -65,7 +66,7 @@ class KernelSum(Kernel):
 
 
 class KernelProd(Kernel):
-    """ Kernel multiplication implementation"""
+    """Kernel multiplication implementation"""
 
     def __init__(self, k1, k2):
         self.k1 = k1

@@ -1,5 +1,8 @@
 import itertools as it
+from typing import Sequence, Optional, Union
+
 import numpy as np
+
 from ichor.atoms.atom import Atom
 from ichor.calculators.connectivity_calculator import ConnectivityCalculator
 
@@ -14,25 +17,19 @@ class Atoms(list):
     of the Atoms instances will hold 6 instances of the Atom class.
     """
 
-    def __init__(self, atoms=None):
-
+    def __init__(self, atoms: Optional[Sequence[Atom]] = None):
+        super().__init__()
         self._centred = False
         Atom._counter = it.count(1)
         if atoms is not None:
             self.add(atoms)
 
-    def add(self, atom):
+    def add(self, atom: Atom):
         """
         Add Atom instances for each atom in the timestep to the self._atoms list.
         Each coordinate line in the trajectory file (for one timestep) is added as a separate Atom instance.
         """
-        if isinstance(atom, Atom):
-            self.append(atom)
-        elif isinstance(atom, str):
-            self.add(Atom(atom))
-        elif isinstance(atom, (list, Atoms)):
-            for a in atom:
-                self.add(a)
+        self.append(atom)
 
     @property
     def natoms(self) -> int:
@@ -50,17 +47,17 @@ class Atoms(list):
 
     @property
     def types(self) -> list:
-        """ Returns the atom elements for atoms, removes duplicates"""
-        return list(set([atom.type for atom in self]))
+        """Returns the atom elements for atoms, removes duplicates"""
+        return list({atom.type for atom in self})
 
     @property
     def types_extended(self) -> list:
-        """ Returns the atom elements for all atoms, includes duplicates."""
-        return list([atom.type for atom in self])
+        """Returns the atom elements for all atoms, includes duplicates."""
+        return [atom.type for atom in self]
 
     @property
     def coordinates(self) -> np.ndarray:
-        """ Returns an array that contains the coordiantes for each Atom isntance held in the Atoms instance. """
+        """Returns an array that contains the coordiantes for each Atom isntance held in the Atoms instance."""
         return np.array([atom.coordinates for atom in self])
 
     @property
@@ -106,9 +103,7 @@ class Atoms(list):
             atom._coordinates = R.dot(atom._coordinates.T).T
 
     def _rmsd(self, other):
-        dist = 0
-        for iatom, jatom in zip(self, other):
-            dist += iatom.sq_dist(jatom)
+        dist = sum(iatom.sq_dist(jatom) for iatom, jatom in zip(self, other))
         return np.sqrt(dist / len(self))
 
     def rmsd(self, other):
@@ -178,7 +173,7 @@ class Atoms(list):
         return {atom.name: atom.features for atom in self}
 
     def __len__(self) -> int:
-        """ returns the length of `self._atoms` if len() is called on an Atoms instance"""
+        """returns the length of `self._atoms` if len() is called on an Atoms instance"""
         return len(self._atoms)
 
     def __getitem__(self, item) -> Atom:
@@ -195,12 +190,12 @@ class Atoms(list):
             raise KeyError(f"'{item}' does not exist")
         return super().__getitem__(item)
 
-    def __delitem__(self, i):
+    def __delitem__(self, i: Union[int, str]):
         """deletes an instance of Atom from the self._atoms list (index i) if del is called on an Atoms instance
         e.g. del atoms[0], where atoms is an Atoms instance will delete the 0th element.
         del atoms["C1"] will delete the Atom instance with the name attribute of 'C1'."""
 
-        if not (isinstance(i, int) or isinstance(i, str)):
+        if not isinstance(i, (int, str)):
 
             raise TypeError(
                 f"Index {i} has to be of type int. Currently index is type {type(i)}"
@@ -210,7 +205,7 @@ class Atoms(list):
             del self[i]
 
     def __str__(self):
-        return "\n".join([str(atom) for atom in self])
+        return "\n".join(str(atom) for atom in self)
 
     def __repr__(self):
         return str(self)

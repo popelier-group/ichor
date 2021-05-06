@@ -6,7 +6,7 @@ class Distance:
     def squared_euclidean_distance(
         x1: np.ndarray, x2: np.ndarray
     ) -> np.ndarray:
-        """ Calculates squared distance matrix between data points, uses array broadcasting and distance trick
+        """Calculates squared distance matrix between data points, uses array broadcasting and distance trick
 
         .. note::
             See the following websites for how array broadcasting and the distance trick work:
@@ -40,7 +40,7 @@ class Distance:
 
     @staticmethod
     def euclidean_distance(x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
-        """ Calculates distance matrix between data points
+        """Calculates distance matrix between data points
 
         Args:
             :param: `x1` np.ndarray of shape n x ndimensions:
@@ -51,7 +51,7 @@ class Distance:
         Returns:
             :type: `np.ndarray`
                 The distance matrix of shape (n, m)
-         """
+        """
 
         result = Distance.squared_euclidean_distance(x1, x2)
         result = np.sqrt(result)

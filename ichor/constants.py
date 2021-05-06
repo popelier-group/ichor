@@ -434,6 +434,9 @@ ha_to_kj_mol: float = (
 )
 # The wikipedia article is converted from https://physics.nist.gov/cgi-bin/cuu/Value?hr
 
+bohr2ang = 0.529177210903  # Converted from https://physics.nist.gov/cgi-bin/cuu/Value?bohrrada0
+ang2bohr = 1.0 / bohr2ang
+
 rt3: float = np.sqrt(3)
 rt5: float = np.sqrt(5)
 rt6: float = np.sqrt(6)

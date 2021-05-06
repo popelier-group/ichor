@@ -1,7 +1,7 @@
 from ichor.logging import logger
 from ichor.points import PointsDirectory
-from ichor.submission_script.submision_script import SubmissionScript
 from ichor.submission_script.gaussian import GaussianCommand
+from ichor.submission_script.submision_script import SubmissionScript
 
 
 def submit_gjfs(directory):
@@ -13,4 +13,5 @@ def submit_gjfs(directory):
     submission_script.write()
 
     from ichor.batch_system import BATCH_SYSTEM
+
     BATCH_SYSTEM.submit_script(submission_script.path)

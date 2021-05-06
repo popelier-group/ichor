@@ -1,9 +1,9 @@
+from ichor import constants
+from ichor.globals import GLOBALS
 from ichor.logging import logger
 from ichor.points import PointsDirectory
-from ichor.submission_script.submision_script import SubmissionScript
 from ichor.submission_script.aimall import AIMAllCommand
-from ichor.globals import GLOBALS
-from ichor import constants
+from ichor.submission_script.submision_script import SubmissionScript
 
 
 def submit_wfns(directory):
@@ -17,4 +17,5 @@ def submit_wfns(directory):
     submission_script.write()
 
     from ichor.batch_system import BATCH_SYSTEM
+
     BATCH_SYSTEM.submit_script(submission_script.path)

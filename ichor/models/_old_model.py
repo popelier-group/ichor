@@ -5,7 +5,7 @@ import numpy as np
 
 class Model:
 
-    """ one model file (grouped by the Models class)"""
+    """one model file (grouped by the Models class)"""
 
     def __init__(self, fname, read=False):
         self.fname = Path(fname)

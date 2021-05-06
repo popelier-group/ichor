@@ -1,5 +1,7 @@
-import numpy as np
 import itertools as it
+
+import numpy as np
+
 from ichor.calculators.feature_calculator_abc import FeatureCalculator
 
 
@@ -38,7 +40,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             return sum([a.mass for a in atoms])
 
         def _get_priority(atom, level):
-            """ Returns the priority of atoms on a given level."""
+            """Returns the priority of atoms on a given level."""
             atoms = [atom]
             for _ in range(level):
                 atoms_to_add = []

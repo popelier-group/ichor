@@ -23,6 +23,7 @@ class GaussianCommand(CommandLine):
     @classproperty
     def command(self) -> str:
         from ichor.globals import GLOBALS
+
         if GLOBALS.MACHINE is Machine.csf3:
             return "$g09root/g09/g09"
         elif GLOBALS.MACHINE is Machine.ffluxlab:
@@ -36,6 +37,7 @@ class GaussianCommand(CommandLine):
     @classproperty
     def ncores(self) -> int:
         from ichor.globals import GLOBALS
+
         return GLOBALS.GAUSSIAN_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:

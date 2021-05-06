@@ -71,8 +71,12 @@ class RBFCyclic(Kernel):
         # after distance matrices for each dimension are computed(and corrected where needed), divide by lengthscale and square
         dist_corrected = np.zeros((x1.shape[0], x2.shape[0]))
 
-        for dim_idx, (x1_one_dimension, x2_one_dimension) in enumerate(zip(x1.T, x2.T)):
-            res = Distance.euclidean_distance(x1_one_dimension, x2_one_dimension)
+        for dim_idx, (x1_one_dimension, x2_one_dimension) in enumerate(
+            zip(x1.T, x2.T)
+        ):
+            res = Distance.euclidean_distance(
+                x1_one_dimension, x2_one_dimension
+            )
 
             if dim_idx > 2 and (dim_idx + 1) % 3 == 0:  # if phi feature
                 res = np.where((res > np.pi), (2.0 * np.pi - res), res)

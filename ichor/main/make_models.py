@@ -1,16 +1,14 @@
-from pathlib import Path
-from ichor.points import PointsDirectory
-from ichor.menu import Menu
-from ichor.tab_completer import ListCompleter
-from ichor.common.io import mkdir
-from ichor.common.str import get_digits
-
 from enum import Enum
-from ichor import constants
+from pathlib import Path
 from typing import List, Optional
 
+from ichor import constants
+from ichor.common.io import mkdir
+from ichor.common.str import get_digits
 from ichor.debugging import printq
-
+from ichor.menu import Menu
+from ichor.points import PointsDirectory
+from ichor.tab_completer import ListCompleter
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -47,7 +45,7 @@ class ModelType(Enum):
     q44s = "q44s"
 
     @classmethod
-    def to_str(cls, ty: 'ModelType'):
+    def to_str(cls, ty: "ModelType"):
         return ty.value
 
 
@@ -82,10 +80,14 @@ def select_model_type():
     while True:
         Menu.clear_screen()
         print("Select Models To Create")
-        model_type_list = list(map(ModelType.to_str, ModelType)) + ["multipoles"]
+        model_type_list = list(map(ModelType.to_str, ModelType)) + [
+            "multipoles"
+        ]
         with ListCompleter(model_type_list):
             for ty in ModelType:
-                print(f"[{'x' if ty in model_types else ' '}] {ModelType.to_str(ty)}")
+                print(
+                    f"[{'x' if ty in model_types else ' '}] {ModelType.to_str(ty)}"
+                )
             print()
             ans = input(">> ")
             ans = ans.strip().lower()
@@ -110,7 +112,9 @@ def select_number_of_training_points():
         try:
             ans = int(ans)
             if not 1 <= ans <= len(_model_data):
-                print(f"Error: Answer must be between 1 and {len(_model_data)}")
+                print(
+                    f"Error: Answer must be between 1 and {len(_model_data)}"
+                )
             else:
                 n_training_points = ans
                 break
@@ -149,10 +153,16 @@ def make_models_menu_refresh(menu):
     menu.add_option("1", "Make Models", _make_models)
     menu.add_space()
     menu.add_option("t", "Select Model Type", select_model_type)
-    menu.add_option("n", "Select Number of Training Points", select_number_of_training_points)
+    menu.add_option(
+        "n",
+        "Select Number of Training Points",
+        select_number_of_training_points,
+    )
     menu.add_option("a", "Select Atoms", select_atoms)
     menu.add_space()
-    menu.add_message(f"Model Type(s): {', '.join(map(ModelType.to_str, model_types))}")
+    menu.add_message(
+        f"Model Type(s): {', '.join(map(ModelType.to_str, model_types))}"
+    )
     menu.add_message(f"Number of Training Points: {n_training_points}")
     menu.add_message(f"Atoms: {', '.join(atom_models)}")
     menu.add_final_options()
@@ -164,7 +174,12 @@ def make_models_menu(directory: Path):
         pass
 
 
-def make_models(directory: Path, atoms: Optional[List[str]] = None, ntrain: Optional[int] = None, types: Optional[List[str]] = None):
+def make_models(
+    directory: Path,
+    atoms: Optional[List[str]] = None,
+    ntrain: Optional[int] = None,
+    types: Optional[List[str]] = None,
+):
     global model_data_location
     global _model_data
     global n_training_points
@@ -189,35 +204,46 @@ def _make_models():
         for point in _model_data:
             # features = point.features[atom]
             features = point.features[point.atoms.i(atom)]
-            properties = {ty.value: getattr(point, ty.value)[atom] for ty in model_types}
+            properties = {
+                ty.value: getattr(point, ty.value)[atom] for ty in model_types
+            }
             training_data += [(features, properties)]
 
         ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
 
+
 def write_training_set(atom, training_data):
     from ichor.globals import GLOBALS
+
     ferebus_directory = GLOBALS.FILE_STRUCTURE["ferebus"] / atom
     mkdir(ferebus_directory, empty=True)
 
     ntrain = len(training_data)
 
-    training_set_file = ferebus_directory / f"{GLOBALS.SYSTEM_NAME}_{atom}_TRAINING_SET.csv"
+    training_set_file = (
+        ferebus_directory / f"{GLOBALS.SYSTEM_NAME}_{atom}_TRAINING_SET.csv"
+    )
     write_ftoml(ferebus_directory, atom)
     with open(training_set_file, "w") as ts:
         if ntrain > 0:
             inputs, outputs = training_data[0]
             input_headers = [f"f{i+1}" for i in range(len(inputs))]
             output_headers = [f"{output}" for output in outputs.keys()]
-            ts.write(f",{','.join(input_headers)},{','.join(output_headers)}\n")
+            ts.write(
+                f",{','.join(input_headers)},{','.join(output_headers)}\n"
+            )
             for i, (inputs, outputs) in enumerate(training_data):
-                ts.write(f"{i},{','.join(map(str, inputs))},{','.join(map(str, outputs.values()))}\n")
+                ts.write(
+                    f"{i},{','.join(map(str, inputs))},{','.join(map(str, outputs.values()))}\n"
+                )
 
     return ferebus_directory
 
 
 def write_ftoml(ferebus_directory, atom):
     from ichor.globals import GLOBALS
+
     ftoml_file = ferebus_directory / "ferebus.toml"
     alf = GLOBALS.ALF[get_digits(atom) - 1]
 
@@ -256,9 +282,7 @@ def write_ftoml(ferebus_directory, atom):
         ftoml.write("\n")
         ftoml.write(f"[optimiser.pso.relative_change]\n")
         ftoml.write(f"tolerance={GLOBALS.FEREBUS_TOLERANCE}\n")
-        ftoml.write(
-            f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n"
-        )
+        ftoml.write(f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n")
         ftoml.write("\n")
         ftoml.write("[kernels.k1]\n")
         ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
