@@ -1,5 +1,5 @@
+from ichor.atoms import Atom, Atoms
 from ichor.files.trajectory import Trajectory
-from ichor.atoms import Atoms, Atom
 
 
 class DlpolyHistory(Trajectory):

@@ -17,6 +17,7 @@ class ListOfAtoms(list):
         if isinstance(item, int):
             return super().__getitem__(item)
         elif isinstance(item, str):
+
             class AtomView(self.__class__):
                 def __init__(self, parent, atom):
                     self.__dict__ = parent.__dict__.copy()
@@ -34,10 +35,14 @@ class ListOfAtoms(list):
                     try:
                         return getattr(self[0], item)
                     except (AttributeError, IndexError):
-                        raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{item}'")
+                        raise AttributeError(
+                            f"'{self.__class__.__name__}' has no attribute '{item}'"
+                        )
 
             if hasattr(self, "_is_atom_view"):
                 return self
 
             return AtomView(self, item)
-        raise TypeError(f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}")
+        raise TypeError(
+            f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
+        )

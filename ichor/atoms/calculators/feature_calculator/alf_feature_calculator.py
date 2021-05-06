@@ -6,8 +6,8 @@ from ichor.atoms.calculators.feature_calculator import FeatureCalculator
 from ichor.constants import ang2bohr
 from ichor.units import AtomicDistance
 
-
 feature_unit = AtomicDistance.Bohr
+
 
 class ALFFeatureCalculator(FeatureCalculator):
     _alf = None
@@ -197,9 +197,13 @@ class ALFFeatureCalculator(FeatureCalculator):
         x_axis_atom = cls.calculate_x_axis_atom(atom)
         xy_plane_atom = cls.calculate_xy_plane_atom(atom)
 
-        unit_conversion = 1.0 if feature_unit is AtomicDistance.Angstroms else ang2bohr
+        unit_conversion = (
+            1.0 if feature_unit is AtomicDistance.Angstroms else ang2bohr
+        )
 
-        x_axis_vect = unit_conversion * (x_axis_atom.coordinates - atom.coordinates)
+        x_axis_vect = unit_conversion * (
+            x_axis_atom.coordinates - atom.coordinates
+        )
         xy_plane_vect = unit_conversion * (
             xy_plane_atom.coordinates - atom.coordinates
         )
@@ -230,7 +234,9 @@ class ALFFeatureCalculator(FeatureCalculator):
                 ):
                     continue
 
-                r_vect = unit_conversion * (jatom.coordinates - atom.coordinates)
+                r_vect = unit_conversion * (
+                    jatom.coordinates - atom.coordinates
+                )
                 r_vect_norm = np.linalg.norm(r_vect)
                 feature_array[i_feat] = r_vect_norm
 

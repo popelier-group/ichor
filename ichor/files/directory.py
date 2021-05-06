@@ -37,7 +37,7 @@ class Directory(PathObject, ABC):
                         break
 
     @buildermethod
-    def read(self) -> 'Directory':
+    def read(self) -> "Directory":
         if self.state is FileState.Unread:
             self.state = FileState.Reading
             for var in vars(self):

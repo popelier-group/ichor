@@ -62,9 +62,9 @@ class Arguments:
             func = args.func[0]
             func_args = args.func[1:] if len(args.func) > 1 else []
             if func in Arguments.external_functions.keys():
-                Arguments.call_external_function = (
-                    Arguments.external_functions[func]
-                )
+                Arguments.call_external_function = Arguments.external_functions[
+                    func
+                ]
                 Arguments.call_external_function_args = func_args
             else:
                 print(f"{func} not in allowed functions:")

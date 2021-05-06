@@ -1,11 +1,11 @@
 import numpy as np
 
+from ichor.common.functools import classproperty
+from ichor.common.str import get_digits
 from ichor.files import File
 from ichor.models.kernels import RBF, Kernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
-from ichor.common.functools import classproperty
-from ichor.common.str import get_digits
 
 
 class Model(File):
@@ -144,4 +144,6 @@ class Model(File):
         return self.mean.value(x) + np.matmul(r, self.weights)
 
     def __repr__(self):
-        return f"Model(system={self.system}, atom={self.atom}, type={self.type})"
+        return (
+            f"Model(system={self.system}, atom={self.atom}, type={self.type})"
+        )

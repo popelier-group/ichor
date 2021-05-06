@@ -11,7 +11,7 @@ class RBF(Kernel):
 
     def __init__(self, lengthscale: np.ndarray):
 
-        self._lengthscale = 1.0/lengthscale
+        self._lengthscale = 1.0 / lengthscale
 
     @property
     def params(self):

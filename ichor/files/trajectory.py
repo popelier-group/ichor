@@ -4,10 +4,10 @@ from typing import List
 
 import numpy as np
 
-from ichor.atoms import Atoms, Atom, ListOfAtoms
+from ichor.atoms import Atom, Atoms, ListOfAtoms
+from ichor.common.io import mkdir
 from ichor.files import GJF
 from ichor.files.file import File, FileState
-from ichor.common.io import mkdir
 
 
 class Trajectory(ListOfAtoms, File):
@@ -29,7 +29,9 @@ class Trajectory(ListOfAtoms, File):
                             r"\s*\w+(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}", line
                         ):
                             atom_type, x, y, z = line.split()
-                            atoms.add(Atom(atom_type, float(x), float(y), float(z)))
+                            atoms.add(
+                                Atom(atom_type, float(x), float(y), float(z))
+                            )
                     self.add(atoms)
                     atoms = Atoms()
 
@@ -85,6 +87,7 @@ class Trajectory(ListOfAtoms, File):
 
     def to_dir(self, root: Path, every: int = 1):
         from ichor.globals import GLOBALS
+
         for i, geometry in enumerate(self):
             if i % every == 0:
                 path = Path(
@@ -112,4 +115,3 @@ class Trajectory(ListOfAtoms, File):
         if self.state is not FileState.Read:
             self.read()
         return super().__len__()
-

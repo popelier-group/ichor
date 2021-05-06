@@ -1,11 +1,11 @@
+import re
+from typing import Dict, Union
+
 import numpy as np
 
+from ichor.atoms import Atoms, ListOfAtoms
 from ichor.files import Directory, FileState
 from ichor.models.model import Model
-import re
-from ichor.atoms import Atoms, ListOfAtoms
-
-from typing import Union, Dict
 
 
 class Models(Directory, list):
@@ -21,9 +21,12 @@ class Models(Directory, list):
     @property
     def dirpattern(self) -> re.Pattern:
         from ichor.globals import GLOBALS
+
         return re.compile(f"{GLOBALS.SYSTEM_NAME}\d+/")
 
-    def predict(self, x: Union[Atoms, np.ndarray]) -> Dict[str, Dict[str, np.ndarray]]:
+    def predict(
+        self, x: Union[Atoms, np.ndarray]
+    ) -> Dict[str, Dict[str, np.ndarray]]:
         if isinstance(x, Atoms):
             return self._predict_from_atoms(x)
         elif isinstance(x, ListOfAtoms):
@@ -32,13 +35,31 @@ class Models(Directory, list):
             return self._predict_from_array(x)
         raise TypeError(f"Cannot predict values from type '{type(x)}'")
 
-    def _predict_from_atoms(self, x: Atoms) -> Dict[str, Dict[str, np.ndarray]]:
-        return {atom.name: {model.type: model.predict(atom.features) for model in self[atom.name]} for atom in x}
+    def _predict_from_atoms(
+        self, x: Atoms
+    ) -> Dict[str, Dict[str, np.ndarray]]:
+        return {
+            atom.name: {
+                model.type: model.predict(atom.features)
+                for model in self[atom.name]
+            }
+            for atom in x
+        }
 
-    def _predict_from_list_of_atoms(self, x: ListOfAtoms) -> Dict[str, Dict[str, np.ndarray]]:
-        return {atom_list.name: {model.type: model.predict(atom_list.features) for model in self[atom_list.name]} for atom_list in x.iteratoms()}
+    def _predict_from_list_of_atoms(
+        self, x: ListOfAtoms
+    ) -> Dict[str, Dict[str, np.ndarray]]:
+        return {
+            atom_list.name: {
+                model.type: model.predict(atom_list.features)
+                for model in self[atom_list.name]
+            }
+            for atom_list in x.iteratoms()
+        }
 
-    def _predict_from_array(self, x: np.ndarray) -> Dict[str, Dict[str, np.ndarray]]:
+    def _predict_from_array(
+        self, x: np.ndarray
+    ) -> Dict[str, Dict[str, np.ndarray]]:
         pass
 
     def __getitem__(self, args):

@@ -222,7 +222,7 @@ class Atom:
     def __repr__(self):
         return str(self)
 
-    def __eq__(self, other: Union['Atom', int]):
+    def __eq__(self, other: Union["Atom", int]):
         if type(other) == Atom:
             return self.index == other.index
         elif type(other) == int:
