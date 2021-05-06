@@ -7,6 +7,10 @@ from ichor.atoms.atom import Atom
 from ichor.atoms.calculators import ConnectivityCalculator
 
 
+class AtomNotFound(Exception):
+    pass
+
+
 class Atoms(list):
     """
     The Atoms class handles ONE timestep in the trajectory. It is mainly used to group together
@@ -148,6 +152,10 @@ class Atoms(list):
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
         """
         return np.array([atom.alf for atom in self])
+
+    @property
+    def atoms(self):
+        return [atom.name for atom in self]
 
     @property
     def features(self) -> np.ndarray:

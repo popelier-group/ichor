@@ -4,15 +4,15 @@ from typing import List
 
 import numpy as np
 
-from ichor.atoms import Atoms, Atom
+from ichor.atoms import Atoms, Atom, ListOfAtoms
 from ichor.files import GJF
 from ichor.files.file import File, FileState
 from ichor.common.io import mkdir
 
 
-class Trajectory(list, File):
+class Trajectory(ListOfAtoms, File):
     def __init__(self, path: Path):
-        list.__init__(self)
+        ListOfAtoms.__init__(self)
         File.__init__(self, path)
 
     def _read_file(self):
@@ -102,4 +102,14 @@ class Trajectory(list, File):
         if self.state is not FileState.Read:
             self.read()
         return super().__getitem__(item)
+
+    def __iter__(self):
+        if self.state is not FileState.Read:
+            self.read()
+        return super().__iter__()
+
+    def __len__(self):
+        if self.state is not FileState.Read:
+            self.read()
+        return super().__len__()
 

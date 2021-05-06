@@ -1,7 +1,6 @@
 import re
 from abc import ABC, abstractmethod
 
-from ichor.atoms import AtomsNotFoundError
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File, FileState
 from ichor.files.path_object import PathObject
@@ -37,18 +36,8 @@ class Directory(PathObject, ABC):
                         setattr(self, var, dirtype(f))
                         break
 
-        # # Following code sets files not found but optional to None, not sure if this is a good idea
-        # for f in {**filetypes, **dirtypes}.keys():
-        #     try:
-        #         _ = getattr(self, f)
-        #     except AttributeError as e:
-        #         if hasattr(self.__annotations__[f], "__args__"):
-        #             setattr(self, f, None)
-        #         else:
-        #             raise e
-
     @buildermethod
-    def read(self) -> "Directory":
+    def read(self) -> 'Directory':
         if self.state is FileState.Unread:
             self.state = FileState.Reading
             for var in vars(self):
@@ -71,7 +60,7 @@ class Directory(PathObject, ABC):
     def __getattribute__(self, item):
         try:
             if (
-                not super().__getattribute__(item)
+                super().__getattribute__(item) is None
                 and self.state is not FileState.Reading
             ):
                 self.read()

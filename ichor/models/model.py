@@ -4,12 +4,14 @@ from ichor.files import File
 from ichor.models.kernels import RBF, Kernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
+from ichor.common.functools import classproperty
+from ichor.common.str import get_digits
 
 
 class Model(File):
     system: str
     atom: str
-    property: str
+    type: str
 
     nfeats: int
     ntrain: int
@@ -37,7 +39,7 @@ class Model(File):
                     self.system = line.split()[1]
                     continue
                 if "property" in line:
-                    self.property = line.split()[1]
+                    self.type = line.split()[1]
                     continue
                 if line.startswith("atom"):
                     self.atom = line.split()[1]
@@ -69,7 +71,7 @@ class Model(File):
                             [float(hp) for hp in line.split()[1:]]
                         )
                         # TODO: Change theta from FEREBUS to lengthscale to match label
-                        lengthscale = 1 / (2.0 * lengthscale)
+                        lengthscale = np.sqrt(1 / (2.0 * lengthscale))
                         kernel_list[kernel_name] = RBF(lengthscale)
                     elif kernel_type in [
                         "rbf-cyclic",
@@ -112,11 +114,20 @@ class Model(File):
 
         self.k = KernelInterpreter(kernel_composition, kernel_list).interpret()
 
+    @classproperty
     def filetype(self) -> str:
         return ".model"
 
     def write(self) -> None:
         pass
+
+    @property
+    def atom_num(self) -> int:
+        return get_digits(self.atom)
+
+    @property
+    def i(self) -> int:
+        return self.atom_num - 1
 
     def r(self, x: np.ndarray) -> np.ndarray:
         if len(x.shape) == 1:
@@ -131,3 +142,6 @@ class Model(File):
             x = x[np.newaxis, :]
         r = self.k.r(self.x, x)
         return self.mean.value(x) + np.matmul(r, self.weights)
+
+    def __repr__(self):
+        return f"Model(system={self.system}, atom={self.atom}, type={self.type})"
