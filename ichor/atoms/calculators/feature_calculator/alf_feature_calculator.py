@@ -2,13 +2,15 @@ import itertools as it
 
 import numpy as np
 
-from ichor.calculators.feature_calculator_abc import FeatureCalculator
+from ichor.atoms.calculators.feature_calculator import FeatureCalculator
+from ichor.constants import ang2bohr
+from ichor.units import AtomicDistance
 
+
+feature_unit = AtomicDistance.Bohr
 
 class ALFFeatureCalculator(FeatureCalculator):
-
     _alf = None
-    ang2bohr = 1.88971616463
 
     @classmethod
     def calculate_alf(cls, atom) -> list:
@@ -82,7 +84,6 @@ class ALFFeatureCalculator(FeatureCalculator):
             """Returns a list consisting of the x-axis and xy-plane Atom instances, which
             correspond to the atoms of first and second highest priorty as determined by the
             Cahn-Ingold-Prelog rules."""
-
             alf = []
             # we need to get 2 atoms - one for x-axis and one for xy-plane
             for _ in range(2):
@@ -97,7 +98,6 @@ class ALFFeatureCalculator(FeatureCalculator):
                     queue = [a for a in queue if a not in alf]
                 max_priority_atom = _max_priority(queue)
                 alf.append(max_priority_atom)
-
             return alf
 
         # add the atom of interest to the x_axis and xy_plane atoms, thus this returns a list of 3 Atom instances.
@@ -116,7 +116,6 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `Atom` instance
                 The Atom instance which corresponds to the x-axis atom
         """
-
         return cls.calculate_alf(atom)[1]
 
     @classmethod
@@ -132,7 +131,6 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `Atom` instance
                 The Atom instance which corresponds to the xy-plane atom
         """
-
         return cls.calculate_alf(atom)[2]
 
     @classmethod
@@ -150,14 +148,12 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `np.ndarray`
                 A 3x3 numpy array which is the C rotation matrix.
         """
-
         c_matrix = np.empty((3, 3))
 
         x_axis_atom = cls.calculate_x_axis_atom(atom)
         xy_plane_atom = cls.calculate_xy_plane_atom(atom)
 
         # first row
-
         row1 = (x_axis_atom.coordinates - atom.coordinates) / np.linalg.norm(
             x_axis_atom.coordinates - atom.coordinates
         )
@@ -184,7 +180,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         return c_matrix
 
     @classmethod
-    def calculate_features(cls, atom, unit="bohr"):
+    def calculate_features(cls, atom):
         """Calculates the features for the given central atom.
 
         Args:
@@ -196,18 +192,15 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `np.ndarray`
                 A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of.
         """
-
-        feature_array = np.empty(3 * len(atom._parent) - 6)
+        feature_array = np.empty(3 * len(atom.parent) - 6)
 
         x_axis_atom = cls.calculate_x_axis_atom(atom)
         xy_plane_atom = cls.calculate_xy_plane_atom(atom)
 
-        ang2bohr = cls.ang2bohr
-        if "ang" in unit.lower():
-            ang2bohr = 1.0
+        unit_conversion = 1.0 if feature_unit is AtomicDistance.Angstroms else ang2bohr
 
-        x_axis_vect = ang2bohr * (x_axis_atom.coordinates - atom.coordinates)
-        xy_plane_vect = ang2bohr * (
+        x_axis_vect = unit_conversion * (x_axis_atom.coordinates - atom.coordinates)
+        xy_plane_vect = unit_conversion * (
             xy_plane_atom.coordinates - atom.coordinates
         )
 
@@ -228,20 +221,16 @@ class ALFFeatureCalculator(FeatureCalculator):
         # theta is between 0 and pi (not cyclic), phi is between 0 and 2pi (cyclic)
 
         if len(atom._parent) > 3:
-
             i_feat = 3
-
             for jatom in atom._parent:
-
                 if (
                     (jatom is x_axis_atom)
                     or (jatom is xy_plane_atom)
                     or (jatom is atom)
                 ):
-
                     continue
 
-                r_vect = ang2bohr * (jatom.coordinates - atom.coordinates)
+                r_vect = unit_conversion * (jatom.coordinates - atom.coordinates)
                 r_vect_norm = np.linalg.norm(r_vect)
                 feature_array[i_feat] = r_vect_norm
 
@@ -255,5 +244,4 @@ class ALFFeatureCalculator(FeatureCalculator):
                 feature_array[i_feat] = np.arctan2(zeta[1], zeta[0])
 
                 i_feat += 1
-
         return feature_array

@@ -4,7 +4,7 @@ from typing import Sequence, Optional, Union
 import numpy as np
 
 from ichor.atoms.atom import Atom
-from ichor.calculators.connectivity_calculator import ConnectivityCalculator
+from ichor.atoms.calculators import ConnectivityCalculator
 
 
 class Atoms(list):
@@ -29,6 +29,7 @@ class Atoms(list):
         Add Atom instances for each atom in the timestep to the self._atoms list.
         Each coordinate line in the trajectory file (for one timestep) is added as a separate Atom instance.
         """
+        atom._parent = self
         self.append(atom)
 
     @property
@@ -171,10 +172,6 @@ class Atoms(list):
         """
 
         return {atom.name: atom.features for atom in self}
-
-    def __len__(self) -> int:
-        """returns the length of `self._atoms` if len() is called on an Atoms instance"""
-        return len(self._atoms)
 
     def __getitem__(self, item) -> Atom:
         """Dunder method used to index the Atoms isinstance.

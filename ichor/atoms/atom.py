@@ -1,10 +1,10 @@
 import itertools as it
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 
 from ichor import constants
-from ichor.calculators.feature_calculator import ALFFeatureCalculator
+from ichor.atoms.calculators import ALFFeatureCalculator
 from ichor.units import AtomicDistance
 
 
@@ -52,11 +52,17 @@ class Atom:
             self.units = AtomicDistance.Bohr
 
     @property
+    def parent(self):
+        if self._parent is None:
+            raise TypeError(f"'parent' is not defined for '{self.name}'")
+        return self._parent
+
+    @property
     def name(self) -> str:
         """Returns the name of the Atom instance, which is later used to distinguish atoms when making GPR models.
         The number in the name starts at 1 (inclusive).
         e.g. O1"""
-        return f"{self.atom_type}{self._atom_number}"
+        return f"{self.type}{self.index}"
 
     @property
     def x(self) -> np.float64:
@@ -79,7 +85,7 @@ class Atom:
     def atom_number(self) -> int:
         """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
         This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
-        return self._atom_number
+        return self.index
 
     @property
     def num(self):
@@ -87,9 +93,9 @@ class Atom:
         return self.atom_number
 
     @property
-    def index(self) -> int:
+    def i(self) -> int:
         """Returns the index of the atom, if used in any arrays/list in Python."""
-        return self.atom_number - 1
+        return self.index - 1
 
     @property
     def mass(self) -> float:
@@ -99,19 +105,19 @@ class Atom:
     @property
     def radius(self):
         """Returns the Van der Waals radius of the given Atom instance."""
-        return round(constants.type2rad[self._atom_type], 2)
+        return round(constants.type2rad[self.type], 2)
 
     @property
     def connectivity(self) -> np.ndarray:
         """Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom instances that are held in an Atoms instance.
         This is only one row of the full connectivity matrix of the Atoms instance that is self._parent."""
 
-        if not self._parent:
-            raise TypeError(
-                "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-            )
+        # if not self._parent:
+        #     raise TypeError(
+        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
+        #     )
 
-        return self._parent.connectivity[self.index]
+        return self.parent.connectivity[self.i]
 
     @property
     def bonded_atoms(self) -> list:
@@ -121,14 +127,14 @@ class Atom:
             :type: `list` of `Atom` instances
         """
 
-        if not self._parent:
-            raise TypeError(
-                "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-            )
+        # if not self._parent:
+        #     raise TypeError(
+        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
+        #     )
 
         connectivity_matrix_row = self.connectivity
         return [
-            self._parent[connected_atom]
+            self.parent[connected_atom]
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
 
@@ -140,14 +146,14 @@ class Atom:
             :type: `list` of `str`
         """
 
-        if not self._parent:
-            raise TypeError(
-                "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-            )
+        # if not self._parent:
+        #     raise TypeError(
+        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
+        #     )
 
         connectivity_matrix_row = self.connectivity
         return [
-            self._parent[connected_atom].name
+            self.parent[connected_atom].name
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
 
@@ -159,14 +165,14 @@ class Atom:
             :type: `list` of `int`, coresponding to the Atom instances indeces, as used in python lists (starting at 0).
         """
 
-        if not self._parent:
-            raise TypeError(
-                "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-            )
+        # if not self._parent:
+        #     raise TypeError(
+        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
+        #     )
 
         connectivity_matrix_row = self.connectivity
         return [
-            self._parent[connected_atom].index
+            self.parent[connected_atom].i
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
 
@@ -180,10 +186,10 @@ class Atom:
         [0,1,2] contains the indeces for the central atom, x-axis atom, and xy-plane atom. These indeces start at 0 to index Python objects correctly.
         """
 
-        if not self._parent:
-            raise TypeError(
-                "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-            )
+        # if not self._parent:
+        #     raise TypeError(
+        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
+        #     )
 
         return ALFFeatureCalculator.calculate_alf(self)
 
@@ -202,25 +208,25 @@ class Atom:
     def alf_nums(self):
         return [atom.num for atom in self.alf]
 
-    def __getattr__(self, attr):
-        try:
-            return getattr(self.properties, attr)
-        except AttributeError:
-            raise AttributeError(
-                f"Atom '{self.name}' has no attribute '{attr}'"
-            )
+    # def __getattr__(self, attr):
+    #     try:
+    #         return getattr(self._properties, attr)
+    #     except AttributeError:
+    #         raise AttributeError(
+    #             f"Atom '{self.name}' has no attribute '{attr}'"
+    #         )
 
     def __str__(self):
-        return f"{self._atom_type:<3s}{self.coordinates_string}"
+        return f"{self.type:<3s}{self.coordinates_string}"
 
     def __repr__(self):
         return str(self)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Union['Atom', int]):
         if type(other) == Atom:
-            return self.atom_num == other.atom_num
+            return self.index == other.index
         elif type(other) == int:
-            return self.atom_num == other
+            return self.index == other
         else:
             raise ValueError(
                 f"Cannot compare type({type(other)}) with type({type(self)})"

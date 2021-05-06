@@ -3,6 +3,8 @@ import re
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
 from ichor.geometry import Geometry, GeometryData
+from ichor.atoms import Atom
+from ichor.units import AtomicDistance
 
 
 class WFN(Geometry, GeometryData, File):
@@ -28,9 +30,10 @@ class WFN(Geometry, GeometryData, File):
                 return
             for line in f:
                 if "CHARGE" in line:
-                    self.atoms.add(line)
+                    line_split = line.split()
+                    atom_type, x, y, z = line_split[0], float(line_split[4]), float(line_split[5]), float(line_split[6])
+                    self.atoms.add(Atom(atom_type, x, y, z, units=AtomicDistance.Bohr))
                 if "CENTRE ASSIGNMENTS" in line:
-                    self.atoms.finish()
                     self.atoms.to_angstroms()
                 if "TOTAL ENERGY" in line:
                     self.data.energy = float(line.split()[3])

@@ -6,8 +6,7 @@ import numpy as np
 
 from ichor.atoms import Atoms, Atom
 from ichor.files import GJF
-from ichor.globals import GLOBALS
-from ichor.files.file import File
+from ichor.files.file import File, FileState
 from ichor.common.io import mkdir
 
 
@@ -30,7 +29,7 @@ class Trajectory(list, File):
                             r"\s*\w+(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}", line
                         ):
                             atom_type, x, y, z = line.split()
-                            atoms.add(Atom(atom_type, x, y, z))
+                            atoms.add(Atom(atom_type, float(x), float(y), float(z)))
                     self.add(atoms)
                     atoms = Atoms()
 
@@ -48,7 +47,6 @@ class Trajectory(list, File):
 
     def extend(self, atoms):
         """extend the current trajectory by another list of atoms (could be another trajectory list)"""
-
         if isinstance(atoms, Atoms):
             self.extend(atoms)
         else:
@@ -71,6 +69,8 @@ class Trajectory(list, File):
         return [ref.rmsd(point) for point in self]
 
     def to_set(self, root: Path, indices: List[int]):
+        from ichor.globals import GLOBALS
+
         mkdir(root, empty=True)
         root = Path(root)
         indices.sort(reverse=True)
@@ -84,6 +84,7 @@ class Trajectory(list, File):
             del self[i]
 
     def to_dir(self, root: Path, every: int = 1):
+        from ichor.globals import GLOBALS
         for i, geometry in enumerate(self):
             if i % every == 0:
                 path = Path(
@@ -96,3 +97,9 @@ class Trajectory(list, File):
     @property
     def features(self) -> np.ndarray:
         return np.array([atoms.features for atoms in self])
+
+    def __getitem__(self, item):
+        if self.state is not FileState.Read:
+            self.read()
+        return super().__getitem__(item)
+

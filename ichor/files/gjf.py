@@ -6,6 +6,7 @@ from ichor import patterns
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
 from ichor.geometry import Geometry
+from ichor.atoms import Atom
 
 
 class GaussianJobType(Enum):
@@ -53,9 +54,9 @@ class GJF(Geometry, File):
                     self.charge = int(line.split()[0])
                     self.multiplicity = int(line.split()[1])
                 if re.match(patterns.COORDINATE_LINE, line):
-                    self.atoms.add(line.strip())
-                if line.endswith(".wfn"):
-                    self.atoms.finish()
+                    line_split = line.strip().split()
+                    atom_type, x, y, z = line_split[0], float(line_split[1]), float(line_split[2]), float(line_split[3])
+                    self.atoms.add(Atom(atom_type, x, y, z))
 
     @property
     def title(self):
