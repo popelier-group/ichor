@@ -84,7 +84,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             """Returns a list consisting of the x-axis and xy-plane Atom instances, which
             correspond to the atoms of first and second highest priorty as determined by the
             Cahn-Ingold-Prelog rules."""
-            alf = []
+            alf = [atom]
             # we need to get 2 atoms - one for x-axis and one for xy-plane
             for _ in range(2):
                 queue = [a for a in atom.bonded_atoms if a not in alf]
@@ -92,7 +92,7 @@ class ALFFeatureCalculator(FeatureCalculator):
                 if len(queue) == 0:
                     queue = list(
                         it.chain.from_iterable(
-                            [a.bonded_atoms for a in atom.bonded_atoms]
+                            a.bonded_atoms for a in atom.bonded_atoms
                         )
                     )
                     queue = [a for a in queue if a not in alf]
@@ -101,7 +101,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             return alf
 
         # add the atom of interest to the x_axis and xy_plane atoms, thus this returns a list of 3 Atom instances.
-        return [atom] + _calculate_alf(atom)
+        return _calculate_alf(atom)
 
     @classmethod
     def calculate_x_axis_atom(cls, atom):

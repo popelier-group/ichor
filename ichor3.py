@@ -7,4 +7,4 @@ if __name__ == '__main__':
     t = Trajectory("WATER-3000.xyz")
     print(t[0])
 
-    print(t[0].features)
+    print(t[0]["H2"].features)
