@@ -27,11 +27,13 @@ class Atom:
         parent: Optional["Atoms"] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
-        self.type = ty  # to be read in from coordinate line
-        self.index = next(
-            Atom._counter
-        )  # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
-        self._parent = parent  # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
+        # to be read in from coordinate line
+        # element of atom
+        self.type = ty
+        # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
+        self.index = next(Atom._counter)
+        # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
+        self._parent = parent
 
         self.coordinates = np.array([x, y, z])
 
@@ -111,12 +113,6 @@ class Atom:
     def connectivity(self) -> np.ndarray:
         """Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom instances that are held in an Atoms instance.
         This is only one row of the full connectivity matrix of the Atoms instance that is self._parent."""
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         return self.parent.connectivity[self.i]
 
     @property
@@ -126,12 +122,6 @@ class Atom:
         Returns:
             :type: `list` of `Atom` instances
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom]
@@ -145,12 +135,6 @@ class Atom:
         Returns:
             :type: `list` of `str`
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom].name
@@ -164,12 +148,6 @@ class Atom:
         Returns:
             :type: `list` of `int`, coresponding to the Atom instances indeces, as used in python lists (starting at 0).
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom].i
@@ -185,12 +163,6 @@ class Atom:
 
         [0,1,2] contains the indeces for the central atom, x-axis atom, and xy-plane atom. These indeces start at 0 to index Python objects correctly.
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         return ALFFeatureCalculator.calculate_alf(self)
 
     @property
