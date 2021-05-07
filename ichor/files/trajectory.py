@@ -6,7 +6,7 @@ import numpy as np
 
 from ichor.atoms import Atom, Atoms, ListOfAtoms
 from ichor.common.io import mkdir
-from ichor.files import GJF
+from ichor.files.gjf import GJF
 from ichor.files.file import File, FileState
 
 

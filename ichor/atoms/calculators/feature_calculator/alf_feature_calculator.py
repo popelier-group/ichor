@@ -2,7 +2,7 @@ import itertools as it
 
 import numpy as np
 
-from ichor.atoms.calculators.feature_calculator import FeatureCalculator
+from ichor.atoms.calculators.feature_calculator.feature_calculator import FeatureCalculator
 from ichor.constants import ang2bohr
 from ichor.units import AtomicDistance
 
