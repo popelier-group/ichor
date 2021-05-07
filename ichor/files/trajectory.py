@@ -11,6 +11,8 @@ from ichor.files.file import File, FileState
 
 
 class Trajectory(ListOfAtoms, File):
+    """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
+    atoms."""
     def __init__(self, path: Path):
         ListOfAtoms.__init__(self)
         File.__init__(self, path)
@@ -41,7 +43,6 @@ class Trajectory(ListOfAtoms, File):
 
     def add(self, atoms):
         """Add a list of Atoms (corresponding to one timestep) to the end of the trajectory list"""
-
         if isinstance(atoms, Atoms):
             self.append(atoms)
         else:
@@ -55,6 +56,8 @@ class Trajectory(ListOfAtoms, File):
             self.extend(Atoms(atoms))
 
     def write(self, fname=None):
+        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
+        for that timestep."""
         if fname is None:
             fname = self.path
         with open(fname, "w") as f:
@@ -71,6 +74,8 @@ class Trajectory(ListOfAtoms, File):
         return [ref.rmsd(point) for point in self]
 
     def to_set(self, root: Path, indices: List[int]):
+        """Converts the geometries in the timesteps to gjf files which then can be passed into Gaussian
+        to calculate .wfn files."""
         from ichor.globals import GLOBALS
 
         mkdir(root, empty=True)
@@ -99,7 +104,12 @@ class Trajectory(ListOfAtoms, File):
 
     @property
     def features(self) -> np.ndarray:
-        return np.array([atoms.features for atoms in self])
+        """
+        Returns:
+        :type: `np.ndarray`
+        the features for every atom in every timestep. Shape `n_timesteps` x `n_atoms` x `n_features`)
+        """
+        return np.array([timestep.features for timestep in self])
 
     def __getitem__(self, item):
         if self.state is not FileState.Read:

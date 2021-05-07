@@ -2,11 +2,15 @@ from typing import Union
 
 
 class ListOfAtoms(list):
+    """Used to focus only on how one atom moves in a trajectory, so the usercan do something
+     like trajectory['C1'] where trajectory is an instance of class Trajectory. This way the
+    user can also do trajectory['C1'].features, trajectory['C1'].coordinates, etc."""
     def __init__(self):
         list.__init__(self)
 
     @property
     def atoms(self):
+        """Returns the names of the atoms that are in the first timestep."""
         return [atom.name for atom in self[0]] if len(self) > 0 else []
 
     def iteratoms(self):
@@ -14,6 +18,7 @@ class ListOfAtoms(list):
             yield self[atom]
 
     def __getitem__(self, item: Union[int, str]):
+        """Used when indexing a trajectory by an integer or string"""
         if isinstance(item, int):
             return super().__getitem__(item)
         elif isinstance(item, str):
