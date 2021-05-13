@@ -11,6 +11,8 @@ from ichor.files.file import File, FileState
 
 
 class Trajectory(ListOfAtoms, File):
+    #TODO: get something like trajectory["C1"][2] working, currently it is not
+    #TODO: I think Trajectory should return another Trajectory instance when indexed or sliced.
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
     atoms."""
     def __init__(self, path: Path):
@@ -106,22 +108,42 @@ class Trajectory(ListOfAtoms, File):
     def features(self) -> np.ndarray:
         """
         Returns:
-        :type: `np.ndarray`
-        the features for every atom in every timestep. Shape `n_timesteps` x `n_atoms` x `n_features`)
+            :type: `np.ndarray`
+            A 3D array of features for every atom in every timestep. Shape `n_timesteps` x `n_atoms` x `n_features`)
+            If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
+            If the trajectory instance is indexed by str, the array has shape `n_atoms` x `n_features`.
+            If the trajectory instance is indexed by slice, the array has shape `slice`, `n_atoms` x `n_features`.
         """
         return np.array([timestep.features for timestep in self])
 
+    @property
+    def coordinates(self) -> np.ndarray:
+        """
+        Returns:
+            :type: `np.ndarray`
+            the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
+        """
+        return np.array([timestep.coordinates for timestep in self])
+
     def __getitem__(self, item):
+        # TODO: Implement isinstance(item, slice) if needed
+        """ Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
+        remember that indeces in Python start at 0, so trajectory[2] is the 3rd timestep.
+        You can use something like (np.array([traj[i].features for i in range(2)]).shape) to features of a slice of
+        a trajectory as slice is not implemented in __getitem__"""
         if self.state is not FileState.Read:
             self.read()
+
         return super().__getitem__(item)
 
     def __iter__(self):
+        """ Used to iterate over timesteps (Atoms instances) in places such as for loops"""
         if self.state is not FileState.Read:
             self.read()
         return super().__iter__()
 
     def __len__(self):
+        """ Returns the number of timesteps in the Trajectory instance"""
         if self.state is not FileState.Read:
             self.read()
         return super().__len__()

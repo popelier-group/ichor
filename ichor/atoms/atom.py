@@ -111,8 +111,11 @@ class Atom:
 
     @property
     def connectivity(self) -> np.ndarray:
-        """Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom instances that are held in an Atoms instance.
-        This is only one row of the full connectivity matrix of the Atoms instance that is self._parent."""
+        """
+        Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
+        instances that are held in an Atoms instance.
+        This is only one row of the full connectivity matrix of the Atoms instance that is self._parent.
+        """
         return self.parent.connectivity[self.i]
 
     @property
@@ -142,7 +145,7 @@ class Atom:
         ]
 
     @property
-    def bonded_atoms_indeces(self) -> list:
+    def bonded_atoms_i(self) -> list:
         """Returns a list of Atom indeces to which this Atom instance is connected
 
         Returns:
@@ -166,6 +169,12 @@ class Atom:
         return ALFFeatureCalculator.calculate_alf(self)
 
     @property
+    def alf_i(self):
+        """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
+        THere indeces are what are used in python lists (as they start at 0)."""
+        return [atom.i for atom in self.alf]
+
+    @property
     def features(self) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
         return ALFFeatureCalculator.calculate_features(self)
@@ -176,28 +185,20 @@ class Atom:
         precision = str(8)
         return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
 
-    @property
-    def alf_nums(self):
-        return [atom.num for atom in self.alf]
-
-    # def __getattr__(self, attr):
-    #     try:
-    #         return getattr(self._properties, attr)
-    #     except AttributeError:
-    #         raise AttributeError(
-    #             f"Atom '{self.name}' has no attribute '{attr}'"
-    #         )
-
     def __str__(self):
-        return f"{self.type:<3s}{self.coordinates_string}"
+        """ Print out the atom name (containing atom type and index as used in model making), as well as
+        coordinates of the atom
+        """
+        return f"{self.name:<3s}{self.coordinates_string}"
 
     def __repr__(self):
         return str(self)
 
     def __eq__(self, other: Union["Atom", int]):
-        if type(other) == Atom:
+        """Check if """
+        if isinstance(other, Atom):
             return self.index == other.index
-        elif type(other) == int:
+        elif isinstance(other, int):
             return self.index == other
         else:
             raise ValueError(

@@ -68,7 +68,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             prev_priorities = []
             level = it.count(0)
             while True:
-                next_lvl = next(level)
+                next_lvl = next(level)  # starts at 0
                 priorities = [_get_priority(atom, next_lvl) for atom in atoms]
                 if (
                     priorities.count(max(priorities)) == 1
@@ -87,14 +87,16 @@ class ALFFeatureCalculator(FeatureCalculator):
             alf = [atom]
             # we need to get 2 atoms - one for x-axis and one for xy-plane
             for _ in range(2):
+                # make a list of atoms to which the central atom is bonded to that are not in alf
                 queue = [a for a in atom.bonded_atoms if a not in alf]
-                # if queue is empty, then we add the bonded atoms of the atoms the atom of interest is connected to
+                # if queue is empty, then we add the bonded atoms of the atoms that the atom of interest is connected to
                 if len(queue) == 0:
                     queue = list(
                         it.chain.from_iterable(
                             a.bonded_atoms for a in atom.bonded_atoms
                         )
                     )
+                    # again remove atoms if they are already in alf
                     queue = [a for a in queue if a not in alf]
                 max_priority_atom = _max_priority(queue)
                 alf.append(max_priority_atom)
