@@ -26,10 +26,14 @@ class Atom:
         parent: Optional["Atoms"] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
-        self.type = ty  # to be read in from coordinate line
-        self._index = index  # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
-        self._parent = parent  # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
-
+        # to be read in from coordinate line
+        # element of atom
+        self.type = ty
+        # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
+        self.index = next(Atom._counter)
+        # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
+        self._parent = parent
+        
         self.coordinates = np.array([x, y, z])
 
         self.units = units
@@ -118,14 +122,11 @@ class Atom:
 
     @property
     def connectivity(self) -> np.ndarray:
-        """Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom instances that are held in an Atoms instance.
-        This is only one row of the full connectivity matrix of the Atoms instance that is self._parent."""
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
+        """
+        Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
+        instances that are held in an Atoms instance.
+        This is only one row of the full connectivity matrix of the Atoms instance that is self._parent.
+        """
         return self.parent.connectivity[self.i]
 
     @property
@@ -135,12 +136,6 @@ class Atom:
         Returns:
             :type: `list` of `Atom` instances
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom]
@@ -154,12 +149,6 @@ class Atom:
         Returns:
             :type: `list` of `str`
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom].name
@@ -167,18 +156,12 @@ class Atom:
         ]
 
     @property
-    def bonded_atoms_indeces(self) -> list:
+    def bonded_atoms_i(self) -> list:
         """Returns a list of Atom indeces to which this Atom instance is connected
 
         Returns:
             :type: `list` of `int`, coresponding to the Atom instances indeces, as used in python lists (starting at 0).
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom].i
@@ -194,13 +177,13 @@ class Atom:
 
         [0,1,2] contains the indeces for the central atom, x-axis atom, and xy-plane atom. These indeces start at 0 to index Python objects correctly.
         """
-
-        # if not self._parent:
-        #     raise TypeError(
-        #         "Parent not defined. Atom needs to know about Atoms to calculate connectivity."
-        #     )
-
         return ALFFeatureCalculator.calculate_alf(self)
+
+    @property
+    def alf_i(self):
+        """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
+        THere indeces are what are used in python lists (as they start at 0)."""
+        return [atom.i for atom in self.alf]
 
     @property
     def features(self) -> np.ndarray:
@@ -216,32 +199,20 @@ class Atom:
         precision = str(8)
         return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
 
-    @property
-    def alf_nums(self):
-        return [atom.num for atom in self.alf]
-
-    # def __getattr__(self, attr):
-    #     try:
-    #         attr = getattr(self._properties, attr)
-    #         if isinstance(attr, dict):
-    #             return attr[self.name]
-    #         else:
-    #             return attr
-    #     except AttributeError:
-    #         raise AttributeError(
-    #             f"Atom '{self.name}' has no attribute '{attr}'"
-    #         )
-
     def __str__(self):
-        return f"{self.type:<3s}{self.coordinates_string}"
+        """ Print out the atom name (containing atom type and index as used in model making), as well as
+        coordinates of the atom
+        """
+        return f"{self.name:<3s}{self.coordinates_string}"
 
     def __repr__(self):
         return str(self)
 
     def __eq__(self, other: Union["Atom", int]):
-        if type(other) == Atom:
+        """Check if """
+        if isinstance(other, Atom):
             return self.index == other.index
-        elif type(other) == int:
+        elif isinstance(other, int):
             return self.index == other
         else:
             raise ValueError(
