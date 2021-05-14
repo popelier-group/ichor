@@ -1,4 +1,5 @@
 from typing import Union
+import numpy as np
 
 
 class ListOfAtoms(list):
@@ -6,11 +7,15 @@ class ListOfAtoms(list):
         list.__init__(self)
 
     @property
-    def atoms(self):
-        return [atom.name for atom in self[0]] if len(self) > 0 else []
+    def atom_names(self):
+        return self[0].atom_names if len(self) > 0 else []
+
+    @property
+    def features(self):
+        return np.array([i.features for i in self])
 
     def iteratoms(self):
-        for atom in self.atoms:
+        for atom in self.atom_names:
             yield self[atom]
 
     def __getitem__(self, item: Union[int, str]):
@@ -20,24 +25,32 @@ class ListOfAtoms(list):
 
             class AtomView(self.__class__):
                 def __init__(self, parent, atom):
-                    self.__dict__ = parent.__dict__.copy()
                     list.__init__(self)
+                    self.__dict__ = parent.__dict__.copy()
                     self._atom = atom
                     self._is_atom_view = True
+                    self._super = parent
+
                     for element in parent:
-                        self.append(element[atom])
+                        a = element[atom]
+                        a._properties = element
+                        self.append(a)
 
                 @property
-                def atoms(self):
+                def name(self):
+                    return self._atom
+
+                @property
+                def atom_names(self):
                     return [self._atom]
 
-                def __getattr__(self, item):
-                    try:
-                        return getattr(self[0], item)
-                    except (AttributeError, IndexError):
-                        raise AttributeError(
-                            f"'{self.__class__.__name__}' has no attribute '{item}'"
-                        )
+                # def __getattr__(self, item):
+                #     try:
+                #         return getattr(self._super[self._atom], item)
+                #     except (AttributeError, IndexError):
+                #         raise AttributeError(
+                #             f"'{self._super.__class__.__name__}' has no attribute '{item}'"
+                #         )
 
             if hasattr(self, "_is_atom_view"):
                 return self

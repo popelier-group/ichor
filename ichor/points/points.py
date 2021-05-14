@@ -1,9 +1,13 @@
 from abc import ABC
 
+from ichor.atoms import ListOfAtoms
 
-class Points(ABC, list):
+
+class Points(ABC, ListOfAtoms):
     def __getattr__(self, item):
-        if item in self.__dict__:
-            return self.__dict__[item]
-        else:
+        try:
             return [getattr(point, item) for point in self]
+        except AttributeError:
+            raise AttributeError(
+                f"'{self.__class__.__name__}' has no attribute '{item}'"
+            )

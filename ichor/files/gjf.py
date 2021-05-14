@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List
 
 from ichor import patterns
-from ichor.atoms import Atom
+from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
 from ichor.geometry import Geometry
@@ -40,6 +40,7 @@ class GJF(Geometry, File):
 
     @buildermethod
     def _read_file(self):
+        self.atoms = Atoms()
         with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("%"):

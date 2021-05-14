@@ -8,9 +8,9 @@ from ichor.files.path_object import PathObject
 
 class Directory(PathObject, ABC):
     def __init__(self, path):
-        super().__init__(path)
+        PathObject.__init__(self, path)
         self.parse()
-        self.state = FileState.Unread
+        self.parsed = True
 
     def parse(self) -> None:
         filetypes = {}
@@ -57,13 +57,17 @@ class Directory(PathObject, ABC):
     def __iter__(self):
         return self.path.iterdir()
 
-    def __getattribute__(self, item):
-        try:
-            if (
-                super().__getattribute__(item) is None
-                and self.state is not FileState.Reading
-            ):
-                self.read()
-        except AttributeError:
-            self.read()
-        return super().__getattribute__(item)
+    # def __getattribute__(self, item):
+    #     if (
+    #         object.__getattribute__(self, item) is None
+    #         and self.state is FileState.Unread
+    #     ):
+    #         self.read()
+    #     return object.__getattribute__(self, item)
+    #
+    # def __getattr__(self, item):
+    #     if not item in self.__dict__.keys() and self.state is not FileState.Read:
+    #         self.read()
+    #     if item not in self.__dict__.keys():
+    #         raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{item}'")
+    #     return self.__dict__[item]

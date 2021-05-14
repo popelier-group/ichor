@@ -1,6 +1,6 @@
 import re
 
-from ichor.atoms import Atom
+from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
 from ichor.geometry import Geometry, GeometryData
@@ -22,6 +22,7 @@ class WFN(Geometry, GeometryData, File):
 
     @buildermethod
     def _read_file(self, only_header=False):
+        self.atoms = Atoms()
         with open(self.path, "r") as f:
             next(f)
             self.header = next(f)

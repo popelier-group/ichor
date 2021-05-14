@@ -8,8 +8,8 @@ from ichor.files.int import INT
 
 class INTs(Directory, dict):
     def __init__(self, path):
+        dict.__init__(self)
         Directory.__init__(self, path)
-        self.parse()
 
     def parse(self) -> None:
         for f in self:

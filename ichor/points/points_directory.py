@@ -1,5 +1,5 @@
 from ichor.common.functools import buildermethod
-from ichor.files import Directory
+from ichor.files import Directory, FileState
 from ichor.points.point_directory import PointDirectory
 from ichor.points.points import Points
 

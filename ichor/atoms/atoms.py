@@ -24,7 +24,7 @@ class Atoms(list):
     def __init__(self, atoms: Optional[Sequence[Atom]] = None):
         super().__init__()
         self._centred = False
-        Atom._counter = it.count(1)
+        self._counter = it.count(1)
         if atoms is not None:
             self.add(atoms)
 
@@ -34,6 +34,7 @@ class Atoms(list):
         Each coordinate line in the trajectory file (for one timestep) is added as a separate Atom instance.
         """
         atom._parent = self
+        atom.index = next(self._counter)
         self.append(atom)
 
     @property
@@ -158,6 +159,10 @@ class Atoms(list):
         return [atom.name for atom in self]
 
     @property
+    def atom_names(self):
+        return [atom.name for atom in self]
+
+    @property
     def features(self) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
@@ -192,7 +197,7 @@ class Atoms(list):
             for atom in self:
                 if item == atom.name:
                     return atom
-            raise KeyError(f"'{item}' does not exist")
+            raise KeyError(f"Atom '{item}' does not exist")
         return super().__getitem__(item)
 
     def __delitem__(self, i: Union[int, str]):

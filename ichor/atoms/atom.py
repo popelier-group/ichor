@@ -16,21 +16,18 @@ class Atom:
     the we will have 6000 Atom instances in total.
     """
 
-    _counter = it.count(1)
-
     def __init__(
         self,
         ty: str,
         x: float,
         y: float,
         z: float,
+        index: Optional[int] = None,
         parent: Optional["Atoms"] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
         self.type = ty  # to be read in from coordinate line
-        self.index = next(
-            Atom._counter
-        )  # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
+        self._index = index  # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
         self._parent = parent  # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
 
         self.coordinates = np.array([x, y, z])
@@ -52,10 +49,22 @@ class Atom:
             self.units = AtomicDistance.Bohr
 
     @property
-    def parent(self):
+    def parent(self) -> "Atoms":
         if self._parent is None:
             raise TypeError(f"'parent' is not defined for '{self.name}'")
         return self._parent
+
+    @property
+    def index(self) -> int:
+        if self._index is None:
+            raise TypeError(
+                f"'index' is not defined for instance of '{self.type} ({self.x} {self.y} {self.z})'"
+            )
+        return self._index
+
+    @index.setter
+    def index(self, index: int) -> None:
+        self._index = index
 
     @property
     def name(self) -> str:
@@ -196,6 +205,9 @@ class Atom:
     @property
     def features(self) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
+        # print("here")
+        # print(ALFFeatureCalculator.calculate_features(self))
+        # quit()
         return ALFFeatureCalculator.calculate_features(self)
 
     @property
@@ -210,7 +222,11 @@ class Atom:
 
     # def __getattr__(self, attr):
     #     try:
-    #         return getattr(self._properties, attr)
+    #         attr = getattr(self._properties, attr)
+    #         if isinstance(attr, dict):
+    #             return attr[self.name]
+    #         else:
+    #             return attr
     #     except AttributeError:
     #         raise AttributeError(
     #             f"Atom '{self.name}' has no attribute '{attr}'"

@@ -77,7 +77,6 @@ class ALFFeatureCalculator(FeatureCalculator):
                     break
                 else:
                     prev_priorities = priorities
-            level = it.count(0)
             return atoms[priorities.index(max(priorities))]
 
         def _calculate_alf(atom) -> list:
@@ -101,7 +100,11 @@ class ALFFeatureCalculator(FeatureCalculator):
             return alf
 
         # add the atom of interest to the x_axis and xy_plane atoms, thus this returns a list of 3 Atom instances.
-        return _calculate_alf(atom)
+        if cls._alf is None:
+            cls._alf = [None for _ in range(len(atom.parent))]
+        if cls._alf[atom.index - 1] is None:
+            cls._alf[atom.index - 1] = [a.index-1 for a in _calculate_alf(atom)]
+        return cls._alf[atom.index - 1]
 
     @classmethod
     def calculate_x_axis_atom(cls, atom):
@@ -116,7 +119,10 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `Atom` instance
                 The Atom instance which corresponds to the x-axis atom
         """
-        return cls.calculate_alf(atom)[1]
+        # print(cls.calculate_alf(atom))
+        # print(cls._alf)
+        # quit()
+        return atom.parent[cls.calculate_alf(atom)[1]]
 
     @classmethod
     def calculate_xy_plane_atom(cls, atom):
@@ -131,7 +137,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `Atom` instance
                 The Atom instance which corresponds to the xy-plane atom
         """
-        return cls.calculate_alf(atom)[2]
+        return atom.parent[cls.calculate_alf(atom)[2]]
 
     @classmethod
     def calculate_c_matrix(cls, atom) -> np.ndarray:
@@ -194,12 +200,16 @@ class ALFFeatureCalculator(FeatureCalculator):
         """
         feature_array = np.empty(3 * len(atom.parent) - 6)
 
-        x_axis_atom = cls.calculate_x_axis_atom(atom)
-        xy_plane_atom = cls.calculate_xy_plane_atom(atom)
-
+        # Feature calculation assumes units are in angstroms
+        atom.to_angstroms()
+        atom.parent.to_angstroms()
         unit_conversion = (
             1.0 if feature_unit is AtomicDistance.Angstroms else ang2bohr
         )
+
+        x_axis_atom = cls.calculate_x_axis_atom(atom)
+        xy_plane_atom = cls.calculate_xy_plane_atom(atom)
+
 
         x_axis_vect = unit_conversion * (
             x_axis_atom.coordinates - atom.coordinates

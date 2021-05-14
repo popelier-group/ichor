@@ -2,15 +2,17 @@ import os
 import re
 from typing import Optional
 
+from ichor.atoms import AtomsNotFoundError
 from ichor.common.functools import classproperty
 from ichor.files import GJF, WFN, Directory, INTs
+from ichor.geometry import AtomData
 from ichor.points.point import Point
 
 
 class PointDirectory(Point, Directory):
-    gjf: Optional[GJF]
-    wfn: Optional[WFN]
-    ints: Optional[INTs]
+    gjf: Optional[GJF] = None
+    wfn: Optional[WFN] = None
+    ints: Optional[INTs] = None
 
     def __init__(self, path):
         Directory.__init__(self, path)
@@ -21,19 +23,30 @@ class PointDirectory(Point, Directory):
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
 
+    @property
+    def atoms(self):
+        if self.gjf.exists():
+            return self.gjf.atoms
+        elif self.wfn.exists():
+            return self.wfn.atoms
+        raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
+
+    def get_atom_data(self, atom) -> AtomData:
+        return AtomData(self.atoms[atom], self.ints[atom])
+
     def __getattr__(self, item):
-        if item in self.__dict__.keys():
-            return self.__dict__[item]
         try:
             return getattr(self.ints, item)
         except AttributeError:
-            # raise AttributeError(f"'{self.__class__}' object has no attribute '{item}'")
             try:
-                return getattr(self.wfn, item)
+                return getattr(self.gjf, item)
             except AttributeError:
-                raise AttributeError(
-                    f"'{self.__class__}' object has no attribute '{item}'"
-                )
+                try:
+                    return getattr(self.wfn, item)
+                except AttributeError:
+                    raise AttributeError(
+                        f"'{self.path}' instance of '{self.__class__.__name__}' object has no attribute '{item}'"
+                    )
 
     def __repr__(self):
         return str(self.path)
