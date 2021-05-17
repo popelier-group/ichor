@@ -1,15 +1,28 @@
 import re
-from typing import Dict, Union, List
+from typing import Dict, Union
 
 import numpy as np
 
 from ichor.atoms import Atoms, ListOfAtoms
-from ichor.files import Directory, FileState
+from ichor.files import Directory
 from ichor.models.model import Model
+from ichor.models.result import ModelsResult
 
+from ichor.common.sorting.natsort import natsorted, ignore_alpha
+
+from ichor.typing import F
+from functools import wraps
 
 class DimensionError(ValueError):
     pass
+
+
+def x_to_features(func: F) -> F:
+    @wraps(func)
+    def wrapper(self, x, *args, **kwargs):
+        features = self.get_features_dict(x)
+        return func(self, features, *args, **kwargs)
+    return wrapper
 
 
 class Models(Directory, list):
@@ -25,85 +38,64 @@ class Models(Directory, list):
     @property
     def dirpattern(self) -> re.Pattern:
         from ichor.globals import GLOBALS
+        return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")
 
-        return re.compile(f"{GLOBALS.SYSTEM_NAME}\d+/")
-
-    @property
-    def atoms(self) -> List[str]:
-        return list(set(model.atom for model in self))
-
-    @property
-    def types(self) -> List[str]:
-        return list(set(model.type for model in self))
-
-    def predict(
-        self, x: Union[Atoms, np.ndarray]
-    ) -> Dict[str, Dict[str, np.ndarray]]:
+    def get_features_dict(self, x) -> Dict[str, np.ndarray]:
         if isinstance(x, Atoms):
-            return self._predict_from_atoms(x)
+            return self._features_from_atoms(x)
         elif isinstance(x, ListOfAtoms):
             if len(self) < len(x):
-                return self._predict_from_list_of_atoms_models(x)
+                return self._features_from_list_of_atoms_models(x)
             else:
-                return self._predict_from_list_of_atoms(x)
+                return self._features_from_list_of_atoms(x)
         elif isinstance(x, np.ndarray):
-            return self._predict_from_array(x)
+            return self._features_from_array(x)
+        elif isinstance(x, dict):
+            return x
         raise TypeError(f"Cannot predict values from type '{type(x)}'")
 
-    def _predict_from_atoms(
+    def _features_from_atoms(
         self, x: Atoms
-    ) -> Dict[str, Dict[str, np.ndarray]]:
-        return {
-            atom.name: {
-                model.type: model.predict(atom.features)
-                for model in self[atom.name]
-            }
-            for atom in x
-        }
+    ) -> Dict[str, np.ndarray]:
+        return {atom.name: atom.features for atom in x}
 
-    def _predict_from_list_of_atoms(
+    def _features_from_list_of_atoms(
         self, x: ListOfAtoms
-    ) -> Dict[str, Dict[str, np.ndarray]]:
-        return {
-            atom_list.name: {
-                model.type: model.predict(atom_list.features)
-                for model in self[atom_list.name]
-            }
-            for atom_list in x.iteratoms()
-        }
+    ) -> Dict[str, np.ndarray]:
+        return {atom.name: atom.features for atom in x.iteratoms()}
 
-    def _predict_from_list_of_atoms_models(
+    def _features_from_list_of_atoms_models(
         self, x: ListOfAtoms
-    ) -> Dict[str, Dict[str, np.ndarray]]:
-        return {
-            atom: {
-                model.type: model.predict(x[atom].features)
-                for model in self[atom]
-            }
-            for atom in self.atoms
-        }
+    ) -> Dict[str, np.ndarray]:
+        return {atom: x[atom].features for atom in self.atoms}
 
-    def _predict_from_array(
-        self, x: np.ndarray
-    ) -> Dict[str, Dict[str, np.ndarray]]:
+    def _features_from_array(self, x: np.ndarray):
         if x.ndim == 2:
-            return {
-                atom: {
-                    model.type: model.predict(x)
-                    for model in self[atom]
-                }
-                for atom in self.atoms
-            }
+            return {atom: x for atom in self.atoms}
         elif x.ndim == 3:
-            return {
-                atom: {
-                    model.type: model.predict(x[model.i])
-                    for model in self[atom]
-                }
-                for atom, xi in zip(self.atoms, x)
-            }
+            return {atom: x[i] for i, atom in enumerate(self.atoms)}
         else:
             raise DimensionError(f"'x' is of incorrect dimensions ({x.ndim}) 'x' must be either 2D or 3D")
+
+    @x_to_features
+    def predict(self, x) -> Dict[str, Dict[str, np.ndarray]]:
+        return ModelsResult({
+            atom: {
+                model.type: model.predict(features)
+                for model in self[atom]
+            }
+            for atom, features in x.items()
+        })
+
+    @x_to_features
+    def variance(self, x) -> Dict[str, Dict[str, np.ndarray]]:
+        return ModelsResult({
+            atom: {
+                model.type: model.variance(features)
+                for model in self[atom]
+            }
+            for atom, features in x.items()
+        })
 
     def __getitem__(self, args):
         if isinstance(args, (str, tuple)):
@@ -119,7 +111,7 @@ class Models(Directory, list):
 
     @property
     def atoms(self):
-        return list({model.atom for model in self})
+        return natsorted(list({model.atom for model in self}), key=ignore_alpha)
 
     @property
     def types(self):

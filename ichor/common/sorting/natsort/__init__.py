@@ -6,8 +6,21 @@ from .natsort import (as_ascii, as_utf8, decoder, humansorted,
                       numeric_regex_chooser, order_by_index, os_sort_key,
                       os_sort_keygen, os_sorted, realsorted)
 from .utils import chain_functions
+import re
 
 __version__ = "7.1.1"
+
+
+int_finder = re.compile(rf"(\D+)({numeric_regex_chooser(ns.INT | ns.SIGNED)})")
+
+
+def get_int(matchobj):
+    return matchobj.group(2)
+
+
+def ignore_alpha(x):
+    return int_finder.sub(get_int, x)
+
 
 __all__ = [
     "natsort_key",
@@ -28,6 +41,7 @@ __all__ = [
     "os_sort_key",
     "os_sort_keygen",
     "os_sorted",
+    "ignore_alpha",
 ]
 
 # Add the ns keys to this namespace for convenience.

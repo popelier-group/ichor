@@ -6,6 +6,17 @@ from ichor.files import File
 from ichor.models.kernels import RBF, Kernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
+from ichor.typing import F
+from functools import wraps
+
+
+def check_x_2d(func: F) -> F:
+    @wraps(func)
+    def wrapper(self, x, *args, **kwargs):
+        if x.ndim == 1:
+            x = x[np.newaxis, :]
+        return func(self, x, *args, **kwargs)
+    return wrapper
 
 
 class Model(File):
@@ -129,19 +140,37 @@ class Model(File):
     def i(self) -> int:
         return self.atom_num - 1
 
+    @check_x_2d
     def r(self, x: np.ndarray) -> np.ndarray:
-        if len(x.shape) == 1:
-            x = x[np.newaxis, :]
         return self.k.r(self.x, x)
 
+    @property
     def R(self) -> np.ndarray:
         return self.k.R(self.x)
 
+    @property
+    def invR(self) -> np.ndarray:
+        return np.linalg.inv(self.R)
+
+    @check_x_2d
     def predict(self, x: np.ndarray) -> np.ndarray:
-        if len(x.shape) == 1:
-            x = x[np.newaxis, :]
         r = self.k.r(self.x, x)
         return self.mean.value(x) + np.matmul(r, self.weights)
+
+    @check_x_2d
+    def variance(self, x: np.ndarray) -> np.ndarray:
+        r = self.k.r(self.x, x)
+        invR = self.invR
+        ones = np.ones((self.ntrain, 1))
+        variance = np.empty(len(x))
+        # TODO: Remove loop
+        for i, ri in enumerate(r):
+            variance[i] = 1.0 - np.matmul(np.matmul(ri.T, invR), ri) + \
+                           (np.matmul(np.matmul(ones.T, invR), ri)**2) / \
+                           np.matmul(np.matmul(ones.T, invR), ones)
+        return variance
+
+
 
     def __repr__(self):
         return (
