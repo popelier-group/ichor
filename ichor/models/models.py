@@ -1,11 +1,15 @@
 import re
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 import numpy as np
 
 from ichor.atoms import Atoms, ListOfAtoms
 from ichor.files import Directory, FileState
 from ichor.models.model import Model
+
+
+class DimensionError(ValueError):
+    pass
 
 
 class Models(Directory, list):
@@ -24,13 +28,24 @@ class Models(Directory, list):
 
         return re.compile(f"{GLOBALS.SYSTEM_NAME}\d+/")
 
+    @property
+    def atoms(self) -> List[str]:
+        return list(set(model.atom for model in self))
+
+    @property
+    def types(self) -> List[str]:
+        return list(set(model.type for model in self))
+
     def predict(
         self, x: Union[Atoms, np.ndarray]
     ) -> Dict[str, Dict[str, np.ndarray]]:
         if isinstance(x, Atoms):
             return self._predict_from_atoms(x)
         elif isinstance(x, ListOfAtoms):
-            return self._predict_from_list_of_atoms(x)
+            if len(self) < len(x):
+                return self._predict_from_list_of_atoms_models(x)
+            else:
+                return self._predict_from_list_of_atoms(x)
         elif isinstance(x, np.ndarray):
             return self._predict_from_array(x)
         raise TypeError(f"Cannot predict values from type '{type(x)}'")
@@ -57,10 +72,38 @@ class Models(Directory, list):
             for atom_list in x.iteratoms()
         }
 
+    def _predict_from_list_of_atoms_models(
+        self, x: ListOfAtoms
+    ) -> Dict[str, Dict[str, np.ndarray]]:
+        return {
+            atom: {
+                model.type: model.predict(x[atom].features)
+                for model in self[atom]
+            }
+            for atom in self.atoms
+        }
+
     def _predict_from_array(
         self, x: np.ndarray
     ) -> Dict[str, Dict[str, np.ndarray]]:
-        pass
+        if x.ndim == 2:
+            return {
+                atom: {
+                    model.type: model.predict(x)
+                    for model in self[atom]
+                }
+                for atom in self.atoms
+            }
+        elif x.ndim == 3:
+            return {
+                atom: {
+                    model.type: model.predict(x[model.i])
+                    for model in self[atom]
+                }
+                for atom, xi in zip(self.atoms, x)
+            }
+        else:
+            raise DimensionError(f"'x' is of incorrect dimensions ({x.ndim}) 'x' must be either 2D or 3D")
 
     def __getitem__(self, args):
         if isinstance(args, (str, tuple)):

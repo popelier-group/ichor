@@ -30,7 +30,7 @@ class Atom:
         # element of atom
         self.type = ty
         # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
-        self.index = next(Atom._counter)
+        self.index = index
         # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
         self._parent = parent
         

@@ -12,15 +12,15 @@ if __name__ == '__main__':
 
     tr = Trajectory("WATER-3000.xyz")
     # print(tr["O1"].features)
-    print(m.predict(tr))
+    # print(m.predict(tr))
 
     sp = PointsDirectory("TRAINING_SET")
-    # print(tr[0]["O1"].features)
-    # print(sp["H2"].features)
 
-    print(m.predict(sp["O1"]))
-    print(sp.features)
-    print(sp["O1"].iqa)
+    # print(sp.features)
+    # print(sp["O1"].features)
+    print(m.predict(sp.features)["O1"])
+    print(m["O1"].predict(sp))
+
     # print(m.predict(sp))
     # print(len(sp))
 

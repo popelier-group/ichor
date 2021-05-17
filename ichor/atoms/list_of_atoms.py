@@ -15,7 +15,10 @@ class ListOfAtoms(list):
 
     @property
     def features(self):
-        return np.array([i.features for i in self])
+        features = np.array([i.features for i in self])
+        if features.ndim == 3:
+            features = np.transpose(features, (1, 0, 2))
+        return features
 
     def iteratoms(self):
         for atom in self.atom_names:
