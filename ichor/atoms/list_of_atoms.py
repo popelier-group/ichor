@@ -26,7 +26,7 @@ class ListOfAtoms(list):
 
     def __getitem__(self, item: Union[int, str]):
         """Used when indexing a trajectory by an integer or string"""
-        if isinstance(item, int):
+        if isinstance(item, (int, np.int64)):
             return super().__getitem__(item)
         elif isinstance(item, str):
 

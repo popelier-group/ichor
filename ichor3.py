@@ -12,8 +12,10 @@ if __name__ == '__main__':
     m = Models("LOG/WATER0059/")
 
     tr = Trajectory("WATER-3000.xyz")
-    sp = PointsDirectory("TRAINING_SET")
+    sp = PointsDirectory("SAMPLE_POOL")
 
     asm = MEPE(m)
     epe = asm(sp)
     print(epe)
+    for p in epe:
+        print(sp[p].path)

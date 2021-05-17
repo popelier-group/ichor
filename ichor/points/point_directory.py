@@ -32,7 +32,10 @@ class PointDirectory(Point, Directory):
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
     def get_atom_data(self, atom) -> AtomData:
-        return AtomData(self.atoms[atom], self.ints[atom])
+        if self.ints:
+            return AtomData(self.atoms[atom], self.ints[atom])
+        else:
+            return AtomData(self.atoms[atom])
 
     def __getattr__(self, item):
         try:
