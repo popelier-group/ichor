@@ -1,4 +1,5 @@
 from typing import Union
+
 import numpy as np
 
 
@@ -6,6 +7,7 @@ class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the usercan do something
      like trajectory['C1'] where trajectory is an instance of class Trajectory. This way the
     user can also do trajectory['C1'].features, trajectory['C1'].coordinates, etc."""
+
     def __init__(self):
         list.__init__(self)
 
@@ -51,18 +53,23 @@ class ListOfAtoms(list):
                 def atom_names(self):
                     return [self._atom]
 
-                # def __getattr__(self, item):
-                #     try:
-                #         return getattr(self._super[self._atom], item)
-                #     except (AttributeError, IndexError):
-                #         raise AttributeError(
-                #             f"'{self._super.__class__.__name__}' has no attribute '{item}'"
-                #         )
-
             if hasattr(self, "_is_atom_view"):
                 return self
-
             return AtomView(self, item)
+        elif isinstance(item, slice):
+
+            class AtomSlice(self.__class__):
+                def __init__(self, parent, sl):
+                    self.__dict__ = parent.__dict__.copy()
+                    self._is_atom_slice = True
+                    list.__init__(self)
+                    setattr(parent, "get_slice", True)
+                    self.extend(parent[sl])
+                    delattr(parent, "get_slice")
+
+            if hasattr(self, "get_slice"):
+                return super().__getitem__(item)
+            return AtomSlice(self, item)
         raise TypeError(
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )

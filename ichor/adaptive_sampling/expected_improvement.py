@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import List
+
 from ichor.atoms import ListOfAtoms
 from ichor.models import Models
-from typing import List
 
 
 class ExpectedImprovement(ABC):

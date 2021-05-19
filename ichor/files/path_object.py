@@ -1,4 +1,5 @@
-from abc import ABC
+import shutil
+from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 
@@ -32,6 +33,10 @@ class PathObject(ABC, object):
 
     def exists(self) -> bool:
         return self.path.exists()
+
+    @abstractmethod
+    def move(self, dst) -> None:
+        pass
 
     def __getattribute__(self, item):
         if not called_from_hasattr() and (

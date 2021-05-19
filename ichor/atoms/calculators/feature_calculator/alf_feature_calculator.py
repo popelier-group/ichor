@@ -2,7 +2,8 @@ import itertools as it
 
 import numpy as np
 
-from ichor.atoms.calculators.feature_calculator.feature_calculator import FeatureCalculator
+from ichor.atoms.calculators.feature_calculator.feature_calculator import \
+    FeatureCalculator
 from ichor.constants import ang2bohr
 from ichor.units import AtomicDistance
 
@@ -105,7 +106,9 @@ class ALFFeatureCalculator(FeatureCalculator):
         if cls._alf is None:
             cls._alf = [None for _ in range(len(atom.parent))]
         if cls._alf[atom.index - 1] is None:
-            cls._alf[atom.index - 1] = [a.index-1 for a in _calculate_alf(atom)]
+            cls._alf[atom.index - 1] = [
+                a.index - 1 for a in _calculate_alf(atom)
+            ]
         return cls._alf[atom.index - 1]
 
     @classmethod
@@ -211,7 +214,6 @@ class ALFFeatureCalculator(FeatureCalculator):
 
         x_axis_atom = cls.calculate_x_axis_atom(atom)
         xy_plane_atom = cls.calculate_xy_plane_atom(atom)
-
 
         x_axis_vect = unit_conversion * (
             x_axis_atom.coordinates - atom.coordinates

@@ -1,3 +1,5 @@
+from functools import wraps
+
 import numpy as np
 
 from ichor.common.functools import classproperty
@@ -7,7 +9,6 @@ from ichor.models.kernels import RBF, Kernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
 from ichor.typing import F
-from functools import wraps
 
 
 def check_x_2d(func: F) -> F:
@@ -16,6 +17,7 @@ def check_x_2d(func: F) -> F:
         if x.ndim == 1:
             x = x[np.newaxis, :]
         return func(self, x, *args, **kwargs)
+
     return wrapper
 
 
@@ -163,14 +165,13 @@ class Model(File):
         invR = self.invR
         ones = np.ones((self.ntrain, 1))
         variance = np.empty(len(x))
+        res3 = np.matmul(np.matmul(ones.T, invR), ones)
         # TODO: Remove loop
         for i, ri in enumerate(r):
-            variance[i] = 1.0 - np.matmul(np.matmul(ri.T, invR), ri) + \
-                           (np.matmul(np.matmul(ones.T, invR), ri)**2) / \
-                           np.matmul(np.matmul(ones.T, invR), ones)
+            res1 = np.matmul(np.matmul(ri.T, invR), ri)
+            res2 = (1.0 - np.matmul(np.matmul(ones.T, invR), ri)) ** 2
+            variance[i] = 1.0 - res1 + res2 / res3
         return variance
-
-
 
     def __repr__(self):
         return (

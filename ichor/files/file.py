@@ -1,3 +1,4 @@
+import shutil
 from abc import ABC, abstractmethod
 
 from ichor.common.functools import buildermethod, classproperty
@@ -18,6 +19,13 @@ class File(PathObject, ABC):
 
     @abstractmethod
     def _read_file(self):
+        pass
+
+    def move(self, dst):
+        self.path.replace(dst)
+        self.path = dst
+
+    def move_formatted(self, dst):
         pass
 
     @classproperty

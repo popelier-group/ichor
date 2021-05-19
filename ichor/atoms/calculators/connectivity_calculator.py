@@ -33,7 +33,9 @@ class ConnectivityCalculator:
                     if iatom != jatom:
                         max_dist = 1.2 * (iatom.radius + jatom.radius)
                         if (
-                            np.linalg.norm(iatom.coordinates - jatom.coordinates)
+                            np.linalg.norm(
+                                iatom.coordinates - jatom.coordinates
+                            )
                             < max_dist
                         ):
                             connectivity[i, j] = 1

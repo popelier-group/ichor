@@ -6,16 +6,16 @@ import numpy as np
 
 from ichor.atoms import Atom, Atoms, ListOfAtoms
 from ichor.common.io import mkdir
-from ichor.files.gjf import GJF
 from ichor.files.file import File, FileState
 from ichor.files.gjf import GJF
 
 
 class Trajectory(ListOfAtoms, File):
-    #TODO: get something like trajectory["C1"][2] working, currently it is not
-    #TODO: I think Trajectory should return another Trajectory instance when indexed or sliced.
+    # TODO: get something like trajectory["C1"][2] working, currently it is not
+    # TODO: I think Trajectory should return another Trajectory instance when indexed or sliced.
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
     atoms."""
+
     def __init__(self, path: Path):
         ListOfAtoms.__init__(self)
         File.__init__(self, path)

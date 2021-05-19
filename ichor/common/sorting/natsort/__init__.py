@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from .natsort import (as_ascii, as_utf8, decoder, humansorted,
                       index_humansorted, index_natsorted, index_realsorted,
                       natsort_key, natsort_keygen, natsorted, ns,
                       numeric_regex_chooser, order_by_index, os_sort_key,
                       os_sort_keygen, os_sorted, realsorted)
 from .utils import chain_functions
-import re
 
 __version__ = "7.1.1"
 

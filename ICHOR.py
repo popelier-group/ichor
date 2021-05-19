@@ -10009,9 +10009,9 @@ class Model:
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
         res3 = np.matmul(self.ones.T, np.matmul(self.invR, self.ones))
 
-        return self.sigma2 * (
-            1 - res1.item() + (1 + res2.item()) ** 2 / res3.item()
-        )
+        print(r[0], res1, res2, res3)
+
+        return 1 - res1.item() + ((1 - res2.item()) ** 2) / res3.item()
 
     def distance_to_point(self, point):
         if self.standardise:
@@ -10157,6 +10157,8 @@ class Models:
         for point in points:
             variance = sum(model.variance(point) for model in self)
             variances.append(variance)
+        print(variances)
+        quit()
         return np.array(variances)
 
     @lru_cache()
@@ -14102,14 +14104,14 @@ def calculate_errors(models_directory, sample_pool_directory):
     )
     n_train = FileTools.count_points_in(GLOBALS.FILE_STRUCTURE["training_set"])
 
-    if n_train != models.n_train:
-        logger.error(
-            f"Number of points in model ({models.n_train}) does not match number of training points ({n_train})"
-        )
-        logger.warning(
-            "Skipping failed iteration, no points added to Training Set"
-        )
-        quit()
+    # if n_train != models.n_train:
+    #     logger.error(
+    #         f"Number of points in model ({models.n_train}) does not match number of training points ({n_train})"
+    #     )
+    #     logger.warning(
+    #         "Skipping failed iteration, no points added to Training Set"
+    #     )
+    #     quit()
     sample_pool = Set(sample_pool_directory).read_gjfs()
 
     points = models.expected_improvement(sample_pool)

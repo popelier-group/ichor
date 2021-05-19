@@ -1,7 +1,9 @@
 import re
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from ichor.common.functools import buildermethod, classproperty
+from ichor.common.io import mkdir
 from ichor.files.file import File, FileState
 from ichor.files.path_object import PathObject
 
@@ -36,6 +38,27 @@ class Directory(PathObject, ABC):
                         setattr(self, var, dirtype(f))
                         break
 
+    def move(self, dst):
+        self.path.replace(dst)
+        self.path = dst
+        for f in self.path.iterdir():
+            if f.is_file():
+                fdst = self.path / f"{self.path.name}{f.suffix}"
+                f.replace(fdst)
+            else:
+                if "_atomicfiles" in f.name:
+                    from ichor.globals import GLOBALS
+
+                    ddst = Path(
+                        re.sub(
+                            rf"{GLOBALS.SYSTEM_NAME}\d+_atomicfiles",
+                            f"{self.path.name}_atomicfiles",
+                            str(f),
+                        )
+                    )
+                    ddst = self.path / ddst.name
+                    f.replace(ddst)
+
     @buildermethod
     def read(self) -> "Directory":
         if self.state is FileState.Unread:
@@ -52,7 +75,7 @@ class Directory(PathObject, ABC):
         pass
 
     def iterdir(self):
-        return iter(self)
+        return self.path.iterdir()
 
     def __iter__(self):
         return self.path.iterdir()
