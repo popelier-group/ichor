@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from ichor.common.functools import buildermethod, classproperty
-from ichor.common.io import mkdir
 from ichor.files.file import File, FileState
 from ichor.files.path_object import PathObject
 
@@ -79,18 +78,3 @@ class Directory(PathObject, ABC):
 
     def __iter__(self):
         return self.path.iterdir()
-
-    # def __getattribute__(self, item):
-    #     if (
-    #         object.__getattribute__(self, item) is None
-    #         and self.state is FileState.Unread
-    #     ):
-    #         self.read()
-    #     return object.__getattribute__(self, item)
-    #
-    # def __getattr__(self, item):
-    #     if not item in self.__dict__.keys() and self.state is not FileState.Read:
-    #         self.read()
-    #     if item not in self.__dict__.keys():
-    #         raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{item}'")
-    #     return self.__dict__[item]

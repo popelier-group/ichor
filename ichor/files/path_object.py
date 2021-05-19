@@ -63,10 +63,3 @@ class PathObject(ABC, object):
                 self.read()
                 return self.__getitem__(item)
             raise KeyError(f"No '{item}' item found for '{self.path}'")
-
-    # def __getattr__(self, item):
-    #     if not item in self.__dict__.keys() and self.state is not FileState.Read:
-    #         self.read()
-    #     if item not in self.__dict__.keys():
-    #         raise AttributeError(f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}'")
-    #     return self.__dict__[item]

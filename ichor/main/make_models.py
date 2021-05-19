@@ -5,7 +5,6 @@ from typing import List, Optional
 from ichor import constants
 from ichor.common.io import mkdir
 from ichor.common.str import get_digits
-from ichor.debugging import printq
 from ichor.menu import Menu
 from ichor.points import PointsDirectory
 from ichor.tab_completer import ListCompleter
@@ -202,7 +201,7 @@ def _make_models():
     for atom in atom_models:
         training_data = []
         for point in _model_data:
-            # features = point.features[atom]
+            # TODO: Clean This Up Using New `ListOfAtoms`
             features = point.features[point.atoms.i(atom)]
             properties = {
                 ty.value: getattr(point, ty.value)[atom] for ty in model_types

@@ -12,7 +12,3 @@ FerebusModules[Machine.csf3] = [
 FerebusModules[Machine.ffluxlab] = [
     "compilers/intel/20.0.1",
 ]
-
-FerebusModules[Machine.local] = [
-    "compilers/intel/test/module",
-]

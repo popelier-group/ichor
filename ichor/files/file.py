@@ -42,14 +42,3 @@ class File(PathObject, ABC):
         if dst.is_dir():
             dst /= self.path.name
         move(self.path, dst)
-
-    # def __getattribute__(self, item):
-    #     try:
-    #         if (
-    #             super().__getattribute__(item) is None
-    #             and self.state is not FileState.Reading
-    #         ):
-    #             self.read()
-    #     except AttributeError:
-    #         self.read()
-    #     return super().__getattribute__(item)

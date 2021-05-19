@@ -26,6 +26,7 @@ def points_directory_menu(path):
 
 def main_menu() -> None:
     from ichor.globals import GLOBALS
+    from ichor.main.adaptive_sampling import adaptive_sampling
 
     with Menu("ICHOR Main Menu", space=True, back=True, exit=True) as menu:
         menu.add_option(
@@ -45,4 +46,13 @@ def main_menu() -> None:
             "Validation Set Menu",
             points_directory_menu,
             kwargs={"path": GLOBALS.FILE_STRUCTURE["validation_set"]},
+        )
+        menu.add_option(
+            "4",
+            "Adaptive Sampling",
+            adaptive_sampling,
+            kwargs={
+                "model_directory": GLOBALS.FILE_STRUCTURE["models"],
+                "sample_pool_directory": GLOBALS.FILE_STRUCTURE["sample_pool"],
+            },
         )
