@@ -21,6 +21,9 @@ class JobID:
 
         self.instance = instance or str(GLOBALS.UID)
 
+    def __repr__(self) -> str:
+        return f"JobID(Script: {self.script}, Id: {self.id}, Instance: {self.instance})"
+
 
 class BatchSystem(ABC):
     @staticmethod

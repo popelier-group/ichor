@@ -16,6 +16,7 @@ __all__ = [
     "submit_wfns",
     "make_models",
     "adaptive_sampling",
+    "auto_run",
 ]
 
 
@@ -102,6 +103,7 @@ def next_iter(wait_for_job: Optional[JobID], state: IterState = IterState.Standa
     job_id = wait_for_job
     for iter_step in func_order:
         job_id = iter_step.run(job_id, state)
+        print(f"Submitted: {job_id}")
     return job_id
 
 
@@ -113,5 +115,6 @@ def auto_run():
     iterations += [IterState.Last]
 
     job_id = None
-    for iter_state in iterations:
+    for i, iter_state in enumerate(iterations):
+        print(f"Submitting Iter: {i+1}")
         job_id = next_iter(job_id, iter_state)

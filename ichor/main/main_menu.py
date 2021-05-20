@@ -27,6 +27,7 @@ def points_directory_menu(path):
 def main_menu() -> None:
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
+    from ichor.auto_run import auto_run
 
     with Menu("ICHOR Main Menu", space=True, back=True, exit=True) as menu:
         menu.add_option(
@@ -55,4 +56,10 @@ def main_menu() -> None:
                 "model_directory": GLOBALS.FILE_STRUCTURE["models"],
                 "sample_pool_directory": GLOBALS.FILE_STRUCTURE["sample_pool"],
             },
+        )
+        menu.add_space()
+        menu.add_option(
+            "r",
+            "Auto Run",
+            auto_run,
         )
