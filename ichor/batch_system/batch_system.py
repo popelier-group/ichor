@@ -1,12 +1,25 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import NewType, Optional
+from typing import Optional, Union
 
 from ichor.common.functools import classproperty
 from ichor.common.io import convert_to_path
 from ichor.common.os import run_cmd
 
-JobID = NewType("JobID", str)
+
+class JobID:
+    script: str
+    id: str
+    instance: str
+
+    def __init__(
+        self, script: Union[str, Path], id: str, instance: Optional[str] = None
+    ):
+        self.script = str(script)
+        self.id = str(id)
+        from ichor.globals import GLOBALS
+
+        self.instance = instance or str(GLOBALS.UID)
 
 
 class BatchSystem(ABC):
@@ -16,7 +29,9 @@ class BatchSystem(ABC):
         pass
 
     @classmethod
-    def submit_script(cls, job_script, hold: Optional[JobID] = None) -> JobID:
+    def submit_script(
+        cls, job_script: Path, hold: Optional[JobID] = None
+    ) -> JobID:
         cmd = [
             cls.submit_script_command,
         ]
@@ -24,11 +39,12 @@ class BatchSystem(ABC):
             cmd += [cls.hold_job(hold)]
         cmd += [job_script]
         stdout, _ = run_cmd(cmd)
-        return stdout
+        job_id = cls.parse_job_id(stdout)
+        return JobID(job_script, job_id)
 
     @classmethod
     @abstractmethod
-    def parse_job_id(cls, stdout: str) -> JobID:
+    def parse_job_id(cls, stdout: str) -> str:
         pass
 
     @classmethod

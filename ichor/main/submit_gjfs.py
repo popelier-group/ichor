@@ -11,7 +11,4 @@ def submit_gjfs(directory):
     for point in points:
         submission_script.add_command(GaussianCommand(point.gjf.path))
     submission_script.write()
-
-    from ichor.batch_system import BATCH_SYSTEM
-
-    BATCH_SYSTEM.submit_script(submission_script.path)
+    submission_script.submit()

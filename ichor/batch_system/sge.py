@@ -16,8 +16,8 @@ class SunGridEngine(BatchSystem):
         return "qsub"
 
     @classmethod
-    def parse_job_id(cls, stdout) -> JobID:
-        return JobID(re.findall(r"\d+", stdout)[0])
+    def parse_job_id(cls, stdout) -> str:
+        return re.findall(r"\d+", stdout)[0]
 
     @classmethod
     def hold_job(cls, job_id: JobID):

@@ -21,7 +21,7 @@ class CommandLine(ABC):
 
     @classproperty
     def data(self) -> List[str]:
-        return ()
+        return []
 
     @classproperty
     def modules(self) -> Modules:

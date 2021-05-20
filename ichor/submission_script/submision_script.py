@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
-from ichor.batch_system import BATCH_SYSTEM
+from ichor.batch_system import BATCH_SYSTEM, JobID
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
 from ichor.common.uid import set_uid
@@ -158,6 +158,12 @@ class SubmissionScript(PathObject):
                     command_variables += datafile_vars
                     f.write(f"{datafile_str}\n")
                 f.write(f"{command_group.repr(command_variables)}\n")
+
+    def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
+        from ichor.globals import GLOBALS
+
+        if not GLOBALS.SUBMITTED:
+            return BATCH_SYSTEM.submit_script(self.path, hold)
 
     def __enter__(self):
         return self

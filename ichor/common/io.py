@@ -44,3 +44,7 @@ def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
 @convert_to_path
 def move(src: Path, dst: Path) -> None:
     src.replace(dst)
+
+
+def cp(src: Path, dst: Path) -> None:
+    shutil.copy2(src, dst)

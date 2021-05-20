@@ -3,10 +3,13 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor import constants
-from ichor.common.io import mkdir
+from ichor.batch_system import JobID
+from ichor.common.io import mkdir, cp
 from ichor.common.str import get_digits
 from ichor.menu import Menu
 from ichor.points import PointsDirectory
+from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
+                                     SubmissionScript)
 from ichor.tab_completer import ListCompleter
 
 model_data_location: Path = Path()
@@ -178,7 +181,8 @@ def make_models(
     atoms: Optional[List[str]] = None,
     ntrain: Optional[int] = None,
     types: Optional[List[str]] = None,
-):
+    hold: Optional[JobID] = None,
+) -> Optional[JobID]:
     global model_data_location
     global _model_data
     global n_training_points
@@ -192,10 +196,24 @@ def make_models(
     model_types = types or [ModelType.iqa]
     atom_models = atoms or [atom.atom_num for atom in _model_data[0].atoms]
 
-    _make_models()
+    return _make_models(hold=hold)
 
 
-def _make_models():
+def move_models():
+    from ichor.globals import GLOBALS
+
+    mkdir()
+
+    model_dir = [model for model in GLOBALS.FILE_STRUCTURE["models"].iterdir() if model.suffix == ".model"]
+
+    for d in GLOBALS.FILE_STRUCTURE["ferebus"].iterdir():
+        if d.is_dir() and d != GLOBALS.FILE_STRUCTURE["models"]:
+            for f in d.iterdir():
+                if f.suffix == ".model" and f.name not in model_dir:
+                    cp(f, GLOBALS.FILE_STRUCTURE["models"])
+
+
+def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
     ferebus_directories = []
 
     for atom in atom_models:
@@ -211,8 +229,21 @@ def _make_models():
         ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
 
+    return make_ferebus_scrpt(ferebus_directories, hold=hold)
 
-def write_training_set(atom, training_data):
+
+def make_ferebus_scrpt(
+    ferebus_directories: List[Path], hold: Optional[JobID] = None
+) -> Optional[JobID]:
+    script_name = SCRIPT_NAMES["ferebus"]
+    ferebus_script = SubmissionScript(script_name)
+    for ferebus_directory in ferebus_directories:
+        ferebus_script.add_command(FerebusCommand(ferebus_directory))
+    ferebus_script.write()
+    return ferebus_script.submit(hold=hold)
+
+
+def write_training_set(atom, training_data) -> Path:
     from ichor.globals import GLOBALS
 
     ferebus_directory = GLOBALS.FILE_STRUCTURE["ferebus"] / atom

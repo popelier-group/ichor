@@ -44,7 +44,7 @@ class Globals:
 
     CWD: Path = Path(os.getcwd())
 
-    MAX_ITERATION: int = 1
+    N_ITERATIONS: int = 1
     POINTS_PER_ITERATION: int = 1
 
     OPTIMISE_PROPERTY: str = "iqa"

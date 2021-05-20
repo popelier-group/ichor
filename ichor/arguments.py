@@ -8,6 +8,9 @@ from ichor.common.uid import get_uid
 def import_external_functions():
     # Place functions to run externally in here
     from ichor.main.submit_gjfs import submit_gjfs
+    from ichor.main.submit_wfns import submit_wfns
+    from ichor.main.make_models import make_models, move_models
+    from ichor.main.adaptive_sampling import adaptive_sampling
 
     Arguments.external_functions = locals()
 
