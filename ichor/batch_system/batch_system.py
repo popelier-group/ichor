@@ -38,14 +38,12 @@ class BatchSystem(ABC):
             cls.submit_script_command,
         ]
         if hold:
-            cmd += [cls.hold_job(hold)]
+            cmd += cls.hold_job(hold)
         cmd += [job_script]
         from ichor.globals import GLOBALS, Machine
 
-        stdout, _ = (
-            run_cmd(cmd) if GLOBALS.MACHINE is not Machine.local else "1234",
-            "",
-        )
+        stdout, stderr = run_cmd(cmd)
+        print(stdout, stderr)
         job_id = cls.parse_job_id(stdout)
         return JobID(job_script, job_id)
 
@@ -83,6 +81,16 @@ class BatchSystem(ABC):
     @classmethod
     @abstractmethod
     def change_working_directory(cls, path: Path) -> str:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def output_directory(cls, path: Path) -> str:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def error_directory(cls, path: Path) -> str:
         pass
 
     @classmethod

@@ -21,7 +21,7 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def hold_job(cls, job_id: JobID):
-        return f"-hold_jib {job_id}"
+        return ["-hold_jid", f"{job_id.id}"]
 
     @classproperty
     def delete_job_command(self) -> str:
@@ -34,6 +34,14 @@ class SunGridEngine(BatchSystem):
     @classmethod
     def change_working_directory(cls, path: Path) -> str:
         return f"-wd {path}"
+    
+    @classmethod
+    def output_directory(cls, path: Path) -> str:
+        return f"-o {path}"
+    
+    @classmethod
+    def error_directory(cls, path: Path) -> str:
+        return f"-e {path}"
 
     @classmethod
     def parallel_environment(cls, ncores: int) -> str:

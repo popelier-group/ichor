@@ -13,7 +13,7 @@ class TimingManager:
 
     @property
     def identifier(self):
-        return f"{self.submission_script.path}:{self.job_id}:{self.task_id}"
+        return f"{self.submission_script.path.name}:{self.job_id}:{self.task_id}"
 
     def __enter__(self):
         python_job = ICHORCommand()

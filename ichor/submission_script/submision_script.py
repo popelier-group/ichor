@@ -10,8 +10,8 @@ from ichor.submission_script.data_lock import DataLock
 
 
 class SubmissionScript:
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, path: Path):
+        self.path = Path(path)
         self.commands = []
 
     @classproperty
@@ -29,8 +29,13 @@ class SubmissionScript:
     def default_options(self) -> List[str]:
         from ichor.globals import GLOBALS
 
+        mkdir(GLOBALS.FILE_STRUCTURE["outputs"])
+        mkdir(GLOBALS.FILE_STRUCTURE["errors"])
+
         options = [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
+            BATCH_SYSTEM.output_directory(GLOBALS.FILE_STRUCTURE["outputs"].resolve()),
+            BATCH_SYSTEM.error_directory(GLOBALS.FILE_STRUCTURE["errors"].resolve()),
         ]
 
         if self.ncores > 1:
@@ -150,7 +155,7 @@ class SubmissionScript:
 
             if self.ncores > 1:
                 f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
-                f.write(f"export OMP_PROC_BIND=true")
+                f.write(f"export OMP_PROC_BIND=true\n")
 
             for module in self.modules:
                 f.write(f"module load {module}\n")
