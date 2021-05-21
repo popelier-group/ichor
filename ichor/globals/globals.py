@@ -329,10 +329,14 @@ class Globals:
             from ichor.files import GJF
 
             for d in self.FILE_STRUCTURE["training_set"].iterdir():
-                for f in d.iterdir():
-                    if f.suffix == ".gjf":
-                        self.ATOMS = GJF(f).atoms
-                        break
+                if d.is_dir():
+                    for f in d.iterdir():
+                        if f.suffix == ".gjf":
+                            self.ATOMS = GJF(f).atoms
+                            break
+                elif d.is_file() and d.suffix == ".gjf":
+                    self.ATOMS = GJF(f).atoms
+                    break
         else:
             from ichor.files import Trajectory
 
