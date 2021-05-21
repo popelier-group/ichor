@@ -335,7 +335,7 @@ class Globals:
                             self.ATOMS = GJF(f).atoms
                             break
                 elif d.is_file() and d.suffix == ".gjf":
-                    self.ATOMS = GJF(f).atoms
+                    self.ATOMS = GJF(d).atoms
                     break
         else:
             from ichor.files import Trajectory
