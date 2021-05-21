@@ -1,16 +1,22 @@
+import sys
 from argparse import ArgumentParser
+from ast import literal_eval
+from pathlib import Path
+from typing import Any, Callable, List, Sequence, Tuple
 from uuid import UUID
 
+from ichor.common.bool import check_bool
 from ichor.common.functools import run_once
 from ichor.common.uid import get_uid
 
 
 def import_external_functions():
     # Place functions to run externally in here
+    from ichor.main.adaptive_sampling import adaptive_sampling
+    from ichor.main.make_models import make_models, move_models
     from ichor.main.submit_gjfs import submit_gjfs
     from ichor.main.submit_wfns import submit_wfns
-    from ichor.main.make_models import make_models, move_models
-    from ichor.main.adaptive_sampling import adaptive_sampling
+    from ichor.logging import log_time
 
     Arguments.external_functions = locals()
 
@@ -37,8 +43,8 @@ class Arguments:
             type=str,
             help="Name of Config File for ICHOR",
         )
-        allowed_functions = "\n".join(
-            f"- {func}" for func in Arguments.external_functions.keys()
+        allowed_functions = ", ".join(
+            map(str, Arguments.external_functions.keys())
         )
         parser.add_argument(
             "-f",
@@ -68,15 +74,17 @@ class Arguments:
                 Arguments.call_external_function = Arguments.external_functions[
                     func
                 ]
-                Arguments.call_external_function_args = func_args
+                Arguments.call_external_function_args = parse_args(
+                    func=Arguments.call_external_function, args=func_args
+                )
             else:
                 print(f"{func} not in allowed functions:")
                 formatted_functions = [
                     str(f) for f in allowed_functions.split(",")
                 ]
-                formatted_functions = "- " + "\n- ".join(formatted_functions)
+                formatted_functions = ", ".join(formatted_functions)
                 print(f"{formatted_functions}")
-                quit()
+                sys.exit(0)
 
         if args.uid:
             Arguments.uid = args.uid
@@ -89,3 +97,65 @@ class Arguments:
             Arguments.call_external_function(
                 *Arguments.call_external_function_args
             )
+            sys.exit(0)
+
+
+def parse_args(func: Callable, args: List[str]) -> List[Any]:
+    """
+    Takes in func and returns properly parsed arguments
+    Argument types are retrieved from type annotations and can be one of the following:
+    - str
+    - int
+    - float
+    - bool
+    - List
+    - None
+    - Path
+    - Optional
+    - Union
+    """
+
+    if not func.__annotations__:
+        return args
+
+    for i, arg_type in enumerate(func.__annotations__.values()):
+        args[i] = parse_arg(args[i], arg_type)
+
+    return args
+
+
+def parse_arg(arg, arg_type) -> Any:
+    if arg_type is str:
+        return str(arg)
+    elif arg_type is Path:
+        return Path(arg)
+    elif arg_type is int:
+        return int(arg)
+    elif arg_type is float:
+        return float(arg)
+    elif arg_type is bool:
+        return check_bool(arg)
+    elif hasattr(arg_type, "__args__"):
+        # From typing (Optional, List)
+        if len(arg_type.__args__) == 2 and isinstance(
+            arg_type.__args__[-1], type(None)
+        ):
+            # Optional argument
+            if arg == "None":
+                return None
+            else:
+                return parse_arg(arg, arg_type.__args__[0])
+        elif isinstance(arg_type, (type(Sequence), type(List), type(Tuple))):
+            # Sequence of type arg_type.__args__[0]
+            return [
+                parse_arg(a, arg_type.__args__[0]) for a in literal_eval(arg)
+            ]
+        else:
+            # Union
+            for at in arg_type.__args__:
+                try:
+                    return parse_arg(arg, at)
+                except TypeError:
+                    pass
+
+    raise TypeError(f"Cannot parse argument '{arg}' of type '{arg_type}'")

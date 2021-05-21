@@ -5,13 +5,13 @@ from ichor.batch_system import BATCH_SYSTEM, JobID
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
 from ichor.common.uid import set_uid
-from ichor.files.path_object import PathObject
 from ichor.submission_script.command_group import CommandGroup
+from ichor.submission_script.data_lock import DataLock
 
 
-class SubmissionScript(PathObject):
+class SubmissionScript:
     def __init__(self, path):
-        super().__init__(path)
+        self.path = path
         self.commands = []
 
     @classproperty
@@ -26,13 +26,17 @@ class SubmissionScript(PathObject):
         return max(command.ncores for command in self.grouped_commands)
 
     @property
-    def default_options(self):
+    def default_options(self) -> List[str]:
         from ichor.globals import GLOBALS
 
-        return [
+        options = [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
-            BATCH_SYSTEM.parallel_environment(self.ncores),
         ]
+
+        if self.ncores > 1:
+            options += [BATCH_SYSTEM.parallel_environment(self.ncores)]
+
+        return options
 
     @property
     def options(self) -> List[str]:
@@ -55,7 +59,7 @@ class SubmissionScript(PathObject):
         command_group = CommandGroup()
         command_type = None
         for command in self.commands:
-            if type(command) != command_type:
+            if type(command) != command_type or not command.group:
                 if command_group:
                     commands += [command_group]
                     command_group = CommandGroup()
@@ -83,17 +87,18 @@ class SubmissionScript(PathObject):
 
     @classmethod
     def array_index(cls, n):
-        return f"${{{cls.arr(n)}[{BATCH_SYSTEM.TaskID}-1]}}"
+        return f"${{{cls.arr(n)}[${BATCH_SYSTEM.TaskID}-1]}}"
 
     @classmethod
     def var(cls, n):
         return f"var{n + 1}"
 
     def write_datafile(self, datafile: Path, data: List[List[str]]) -> None:
-        mkdir(datafile.parent)
-        with open(datafile, "w") as f:
-            for cmd_data in data:
-                f.write(f"{self.separator.join(map(str, cmd_data))}\n")
+        if not DataLock.locked:
+            mkdir(datafile.parent)
+            with open(datafile, "w") as f:
+                for cmd_data in data:
+                    f.write(f"{self.separator.join(map(str, cmd_data))}\n")
 
     def read_datafile_str(self, datafile: Path, data: List[List[str]]) -> str:
         ndata = len(data[0])
@@ -140,6 +145,13 @@ class SubmissionScript(PathObject):
                 f.write(
                     f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
                 )
+            else:
+                f.write(f"{BATCH_SYSTEM.TaskID}=1\n")
+
+            if self.ncores > 1:
+                f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
+                f.write(f"export OMP_PROC_BIND=true")
+
             for module in self.modules:
                 f.write(f"module load {module}\n")
 

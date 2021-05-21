@@ -16,6 +16,10 @@ class CommandLine(ABC):
         pass
 
     @classproperty
+    def group(self) -> bool:
+        return True
+
+    @classproperty
     def ncores(self) -> int:
         return 1
 

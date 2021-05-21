@@ -19,5 +19,5 @@ class PythonCommand(CommandLine):
     def command(self) -> str:
         return "python"
 
-    def __repr__(self) -> str:
+    def repr(self, variables=None) -> str:
         return f"{self.command} {self.script} {' '.join(self.args)}"

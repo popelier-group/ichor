@@ -1,6 +1,5 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
-from ichor.common.functools import classproperty
 from ichor.modules import Modules
 from ichor.submission_script.command_line import CommandLine
 
@@ -30,5 +29,5 @@ class CommandGroup(CommandLine, list):
     def options(self) -> List[str]:
         return self[0].options
 
-    def repr(self, variables: List[str]) -> str:
+    def repr(self, variables: Optional[List[str]] = None) -> str:
         return self[0].repr(variables)

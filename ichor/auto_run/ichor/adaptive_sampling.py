@@ -4,7 +4,7 @@ from typing import Optional
 from ichor.batch_system import JobID
 from ichor.globals import GLOBALS
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript)
+                                     SubmissionScript, TimingManager)
 
 
 def adaptive_sampling(
@@ -19,6 +19,7 @@ def adaptive_sampling(
     ichor_command.run_function(
         "adaptive_sampling", str(model_directory), str(sample_pool_directory)
     )
-    submission_script.add_command(ichor_command)
+    with TimingManager(submission_script, message="Adaptive Sampling"):
+        submission_script.add_command(ichor_command)
     submission_script.write()
     return submission_script.submit(hold=hold)

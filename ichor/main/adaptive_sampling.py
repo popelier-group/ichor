@@ -1,16 +1,24 @@
 from pathlib import Path
+from typing import Optional
 
 from ichor.adaptive_sampling import AdaptiveSamplingMethod
-from ichor.globals import GLOBALS
 from ichor.logging import logger
 from ichor.models import Models
 from ichor.points import PointsDirectory
 
 
 def adaptive_sampling(
-    model_directory: Path = GLOBALS.FILE_STRUCTURE["models"],
-    sample_pool_directory: Path = GLOBALS.FILE_STRUCTURE["sample_pool"],
+    model_directory: Optional[Path] = None,
+    sample_pool_directory: Optional[Path] = None,
 ):
+    from ichor.globals import GLOBALS
+
+    if model_directory is None:
+        model_directory = GLOBALS.FILE_STRUCTURE["models"]
+
+    if sample_pool_directory is None:
+        sample_pool_directory = GLOBALS.FILE_STRUCTURE["sample_pool"]
+
     models = Models(model_directory)
     sample_pool = PointsDirectory(sample_pool_directory)
 

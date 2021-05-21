@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript)
+                                     SubmissionScript, TimingManager)
 
 
 def make_models(
@@ -18,6 +18,7 @@ def make_models(
     ichor_command.run_function(
         "make_models", str(directory), str(atoms), str(ntrain), str(types)
     )
-    submission_script.add_command(ichor_command)
+    with TimingManager(submission_script, message="Making Models"):
+        submission_script.add_command(ichor_command)
     submission_script.write()
     return submission_script.submit(hold=hold)

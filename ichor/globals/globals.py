@@ -325,6 +325,21 @@ class Globals:
         if self.DROP_N_COMPUTE_LOCATION:
             io.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
+        if self.FILE_STRUCTURE["training_set"].exists():
+            from ichor.files import GJF
+
+            for d in self.FILE_STRUCTURE["training_set"].iterdir():
+                for f in d.iterdir():
+                    if f.suffix == ".gjf":
+                        self.ATOMS = GJF(f).atoms
+                        break
+        else:
+            from ichor.files import Trajectory
+
+            for f in Path(os.getcwd()).iterdir():
+                if f.suffix == ".model":
+                    self.ATOMS = Trajectory(f)[0].atoms
+
     def set(self, name, value):
         name = name.upper()
         if name not in self.global_variables:

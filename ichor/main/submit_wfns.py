@@ -3,7 +3,6 @@ from typing import Optional
 
 from ichor import constants
 from ichor.batch_system import JobID
-from ichor.globals import GLOBALS
 from ichor.logging import logger
 from ichor.points import PointsDirectory
 from ichor.submission_script.aimall import AIMAllCommand
@@ -11,6 +10,8 @@ from ichor.submission_script.submision_script import SubmissionScript
 
 
 def submit_wfns(directory: Path) -> Optional[JobID]:
+    from ichor.globals import GLOBALS
+
     logger.info("Submitting wfns to AIMAll")
     points = PointsDirectory(directory)
     submission_script = SubmissionScript("AIMSub.sh")

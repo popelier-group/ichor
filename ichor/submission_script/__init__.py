@@ -1,9 +1,13 @@
+from pathlib import Path
+
 from ichor.submission_script.aimall import AIMAllCommand
+from ichor.submission_script.data_lock import DataLock
 from ichor.submission_script.ferebus import FerebusCommand
 from ichor.submission_script.gaussian import GaussianCommand
 from ichor.submission_script.ichor import ICHORCommand
 from ichor.submission_script.python import PythonCommand
 from ichor.submission_script.submision_script import SubmissionScript
+from ichor.submission_script.timing_manager import TimingManager
 
 
 def prepend_script_directory(paths):
@@ -17,17 +21,30 @@ def prepend_script_directory(paths):
     return paths
 
 
-SCRIPT_NAMES = prepend_script_directory(
+class ScriptNames(dict):
+    def __getitem__(self, item):
+        from ichor.globals import GLOBALS
+
+        script = super().__getitem__(item)
+        if isinstance(script, (str, Path)):
+            return GLOBALS.FILE_STRUCTURE["scripts"] / script
+        else:
+            return script
+
+
+SCRIPT_NAMES = ScriptNames(
     {
         "gaussian": "GAUSSIAN.sh",
         "aimall": "AIMALL.sh",
         "ferebus": "FEREBUS.sh",
-        "ichor": {
-            "gaussian": "ICHOR_GAUSSIAN.sh",
-            "aimall": "ICHOR_AIMALL.sh",
-            "ferebus": "ICHOR_FEREBUS.sh",
-            "adaptive_sampling": "ICHOR_ADAPTIVE_SAMPLING.sh",
-        },
+        "ichor": ScriptNames(
+            {
+                "gaussian": "ICHOR_GAUSSIAN.sh",
+                "aimall": "ICHOR_AIMALL.sh",
+                "ferebus": "ICHOR_FEREBUS.sh",
+                "adaptive_sampling": "ICHOR_ADAPTIVE_SAMPLING.sh",
+            }
+        ),
     }
 )
 
@@ -38,5 +55,7 @@ __all__ = [
     "FerebusCommand",
     "PythonCommand",
     "ICHORCommand",
+    "DataLock",
+    "TimingManager",
     "SCRIPT_NAMES",
 ]

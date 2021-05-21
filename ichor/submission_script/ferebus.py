@@ -5,11 +5,13 @@ from ichor.common.functools import classproperty
 from ichor.logging import logger
 from ichor.modules import FerebusModules, Modules
 from ichor.submission_script.command_line import CommandLine
+from ichor.submission_script.ichor import ICHORCommand
 
 
 class FerebusCommand(CommandLine):
-    def __init__(self, ferebus_directory: Path):
+    def __init__(self, ferebus_directory: Path, move_models: bool = True):
         self.ferebus_directory = ferebus_directory
+        self.move_models = move_models
 
     @property
     def data(self) -> List[str]:
@@ -39,4 +41,8 @@ class FerebusCommand(CommandLine):
         cmd = f"pushd {variables[0]}\n"
         cmd += f"  {self.command}\n"
         cmd += "popd\n"
+        if self.move_models:
+            move_models = ICHORCommand()
+            move_models.run_function("move_models", variables[0])
+            cmd += f"{move_models.repr()}\n"
         return cmd

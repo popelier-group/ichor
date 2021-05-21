@@ -1,22 +1,33 @@
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Union
 
 from ichor.common.functools import classproperty
+from ichor.common.str import get_digits
+from ichor.files import WFN
 from ichor.globals import Machine
 from ichor.modules import AIMAllModules, Modules
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
 class AIMAllCommand(CommandLine):
-    def __init__(self, wfn_file: Path, aimall_output: Optional[Path] = None):
-        self.wfn_file = wfn_file
+    def __init__(
+        self,
+        wfn_file: Path,
+        atoms: Optional[Union[str, List[str]]] = None,
+        aimall_output: Optional[Path] = None,
+    ):
+        self.wfn_file = WFN(wfn_file)
         self.aimall_output = aimall_output or wfn_file.with_suffix(".aim")
-        self.atoms = "all"
+        self.atoms = atoms or "all"
+        if not isinstance(self.atoms, str) and self.wfn_file.exists() and len(self.atoms) == len(
+            self.wfn_file.atoms
+        ):
+            self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
 
     @property
     def data(self) -> List[str]:
         return [
-            str(self.wfn_file.absolute()),
+            str(self.wfn_file.path.absolute()),
             str(self.aimall_output.absolute()),
         ]
 
@@ -46,15 +57,21 @@ class AIMAllCommand(CommandLine):
     def arguments(self) -> List[str]:
         from ichor.globals import GLOBALS
 
+        atoms = (
+            self.atoms
+            if isinstance(self.atoms, str)
+            else ",".join(map(str, [get_digits(a) for a in self.atoms]))
+        )
+
         return [
             "-nogui",
             "-usetwoe=0",
-            f"-atoms={self.atoms}",
+            f"-atoms={atoms}",
             f"-encomp={GLOBALS.ENCOMP}",
             f"-boaq={GLOBALS.BOAQ}",
             f"-iasmesh={GLOBALS.IASMESH}",
             f"-nproc={self.ncores}",
-            f"-naat={self.ncores if self.atoms == 'all' else 1}",
+            f"-naat={self.ncores if self.atoms == 'all' else max(len(self.atoms), self.ncores)}",
         ]
 
     @classproperty

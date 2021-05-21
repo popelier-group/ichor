@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from ichor import constants
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir, cp
+from ichor.common.io import cp, mkdir
 from ichor.common.str import get_digits
 from ichor.menu import Menu
 from ichor.points import PointsDirectory
@@ -199,18 +199,21 @@ def make_models(
     return _make_models(hold=hold)
 
 
-def move_models():
+def move_models(model_dir: Optional[Path] = None):
     from ichor.globals import GLOBALS
 
-    mkdir()
+    mkdir(GLOBALS.FILE_STRUCTURE["models"])
 
-    model_dir = [model for model in GLOBALS.FILE_STRUCTURE["models"].iterdir() if model.suffix == ".model"]
+    if model_dir is None:
+        model_dir = GLOBALS.FILE_STRUCTURE["ferebus"]
 
-    for d in GLOBALS.FILE_STRUCTURE["ferebus"].iterdir():
+    for d in model_dir.iterdir():
         if d.is_dir() and d != GLOBALS.FILE_STRUCTURE["models"]:
             for f in d.iterdir():
-                if f.suffix == ".model" and f.name not in model_dir:
+                if f.suffix == ".model":
                     cp(f, GLOBALS.FILE_STRUCTURE["models"])
+        elif d.is_file() and d.suffix == ".model":
+            cp(d, GLOBALS.FILE_STRUCTURE["models"])
 
 
 def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:

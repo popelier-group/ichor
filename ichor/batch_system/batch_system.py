@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Optional, Union
 
 from ichor.common.functools import classproperty
-from ichor.common.io import convert_to_path
 from ichor.common.os import run_cmd
 
 
@@ -41,7 +40,12 @@ class BatchSystem(ABC):
         if hold:
             cmd += [cls.hold_job(hold)]
         cmd += [job_script]
-        stdout, _ = run_cmd(cmd)
+        from ichor.globals import GLOBALS, Machine
+
+        stdout, _ = (
+            run_cmd(cmd) if GLOBALS.MACHINE is not Machine.local else "1234",
+            "",
+        )
         job_id = cls.parse_job_id(stdout)
         return JobID(job_script, job_id)
 
