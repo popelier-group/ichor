@@ -9978,13 +9978,11 @@ class Model:
     def variance(self, point):
         r = self.r(point.features[self.i])
 
-        res1 = np.matmul(r.T, np.matmul(self.invR, r))
-        res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
-        res3 = np.matmul(self.ones.T, np.matmul(self.invR, self.ones))
+        res1 = np.matmul(np.matmul(r.T, self.invR), r)
+        res2 = 1.0 - np.matmul(np.matmul(self.ones.T, self.invR), r)
+        res3 = np.matmul(np.matmul(self.ones.T, self.invR), self.ones)
 
-        return self.sigma2 * (
-            1 - res1.item() + (1 + res2.item()) ** 2 / res3.item()
-        )
+        return 1.0 - res1.item() + (res2.item()**2.0) / res3.item()
 
     def distance_to_point(self, point):
         if self.standardise:
