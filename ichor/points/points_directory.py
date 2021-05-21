@@ -1,7 +1,9 @@
 from ichor.common.functools import buildermethod
-from ichor.files import Directory, FileState
+from ichor.files import Directory
 from ichor.points.point_directory import PointDirectory
 from ichor.points.points import Points
+from ichor.common.io import mkdir
+from pathlib import Path
 
 
 class PointsDirectory(Points, Directory):
@@ -13,6 +15,11 @@ class PointsDirectory(Points, Directory):
         for f in self:
             if f.is_dir() and PointDirectory.dirpattern.match(f.name):
                 self += [PointDirectory(f)]
+            elif f.is_file() and f.suffix == ".gjf":
+                new_dir = self.path / f.stem
+                mkdir(new_dir)
+                f.replace(new_dir / f.name)
+                self += [PointDirectory(new_dir)]
         self.sort(key=lambda x: x.path.name)
 
     @buildermethod
