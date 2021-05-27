@@ -7,7 +7,7 @@ from scipy.spatial.distance import cdist
 
 from ichor.adaptive_sampling.expected_improvement import ExpectedImprovement
 from ichor.atoms import ListOfAtoms
-from ichor.models import Model, ModelResult, ModelsResult
+from ichor.models import Model, ModelsResult
 
 
 def B(model: Model) -> float:
@@ -66,7 +66,7 @@ class MEPE(ExpectedImprovement):
             cv_errors[atom] = atom_cv_errors
         return cv_errors
 
-    def alpha(self, points):
+    def alpha(self) -> float:
         from ichor.globals import GLOBALS
 
         cv_errors_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
@@ -100,7 +100,7 @@ class MEPE(ExpectedImprovement):
         features_dict = self.models.get_features_dict(points)
         cv_errors = self.cv_error(features_dict)
         variance = self.models.variance(features_dict)
-        alpha = self.alpha(points)
+        alpha = self.alpha()
         epe = alpha * cv_errors - (1.0 - alpha) * variance
 
         epe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
