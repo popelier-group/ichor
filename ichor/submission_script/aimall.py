@@ -6,6 +6,7 @@ from ichor.common.str import get_digits
 from ichor.files import WFN
 from ichor.globals import Machine
 from ichor.modules import AIMAllModules, Modules
+from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
@@ -15,14 +16,18 @@ class AIMAllCommand(CommandLine):
         wfn_file: Path,
         atoms: Optional[Union[str, List[str]]] = None,
         aimall_output: Optional[Path] = None,
+        check: bool = True,
     ):
         self.wfn_file = WFN(wfn_file)
         self.aimall_output = aimall_output or wfn_file.with_suffix(".aim")
         self.atoms = atoms or "all"
-        if not isinstance(self.atoms, str) and self.wfn_file.exists() and len(self.atoms) == len(
-            self.wfn_file.atoms
+        if (
+            not isinstance(self.atoms, str)
+            and self.wfn_file.exists()
+            and len(self.atoms) == len(self.wfn_file.atoms)
         ):
             self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
+        self.check = check
 
     @property
     def data(self) -> List[str]:
@@ -71,7 +76,7 @@ class AIMAllCommand(CommandLine):
             f"-boaq={GLOBALS.BOAQ}",
             f"-iasmesh={GLOBALS.IASMESH}",
             f"-nproc={self.ncores}",
-            f"-naat={self.ncores if self.atoms == 'all' else max(len(self.atoms), self.ncores)}",
+            f"-naat={self.ncores if self.atoms == 'all' else min(len(self.atoms), self.ncores)}",
         ]
 
     @classproperty
@@ -81,4 +86,16 @@ class AIMAllCommand(CommandLine):
         return GLOBALS.AIMALL_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:
-        return f"{self.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
+        cmd = f"{self.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
+
+        if self.check:
+            from ichor.globals import GLOBALS
+
+            cm = CheckManager(
+                check_function="check_aimall_output",
+                check_args=[variables[0]],
+                ntimes=GLOBALS.AIMALL_N_TRIES,
+            )
+            return cm.check(cmd)
+        else:
+            return cmd

@@ -4,13 +4,20 @@ from typing import List, Optional
 from ichor.common.functools import classproperty
 from ichor.globals import Machine
 from ichor.modules import GaussianModules, Modules
+from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
 class GaussianCommand(CommandLine):
-    def __init__(self, gjf_file: Path, gjf_output: Optional[Path] = None):
+    def __init__(
+        self,
+        gjf_file: Path,
+        gjf_output: Optional[Path] = None,
+        check: bool = True,
+    ):
         self.gjf_file = gjf_file
         self.gjf_output = gjf_output or gjf_file.with_suffix(".gau")
+        self.check = check
 
     @property
     def data(self) -> List[str]:
@@ -41,4 +48,16 @@ class GaussianCommand(CommandLine):
         return GLOBALS.GAUSSIAN_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:
-        return f"{self.command} {variables[0]} {variables[1]}"
+        cmd = f"{self.command} {variables[0]} {variables[1]}"
+
+        if self.check:
+            from ichor.globals import GLOBALS
+
+            cm = CheckManager(
+                check_function="check_gaussian_output",
+                check_args=[variables[0]],
+                ntimes=GLOBALS.GAUSSIAN_N_TRIES,
+            )
+            return cm.check(cmd)
+        else:
+            return cmd

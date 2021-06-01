@@ -34,8 +34,12 @@ class SubmissionScript:
 
         options = [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
-            BATCH_SYSTEM.output_directory(GLOBALS.FILE_STRUCTURE["outputs"].resolve()),
-            BATCH_SYSTEM.error_directory(GLOBALS.FILE_STRUCTURE["errors"].resolve()),
+            BATCH_SYSTEM.output_directory(
+                GLOBALS.FILE_STRUCTURE["outputs"].resolve()
+            ),
+            BATCH_SYSTEM.error_directory(
+                GLOBALS.FILE_STRUCTURE["errors"].resolve()
+            ),
         ]
 
         if self.ncores > 1:
@@ -146,7 +150,7 @@ class SubmissionScript:
             f.write("#!/bin/bash -l\n")
             for option in self.options:
                 f.write(f"#{BATCH_SYSTEM.OptionCmd} {option}\n")
-            if len(self.commands) > 1:
+            if njobs > 1:
                 f.write(
                     f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
                 )

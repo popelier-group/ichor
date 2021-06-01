@@ -8,7 +8,8 @@ from ichor.common.io import convert_to_path
 
 
 class SunGridEngine(BatchSystem):
-    def is_present(self) -> bool:
+    @staticmethod
+    def is_present() -> bool:
         return "SGE_ROOT" in os.environ.keys()
 
     @classproperty
@@ -34,11 +35,11 @@ class SunGridEngine(BatchSystem):
     @classmethod
     def change_working_directory(cls, path: Path) -> str:
         return f"-wd {path}"
-    
+
     @classmethod
     def output_directory(cls, path: Path) -> str:
         return f"-o {path}"
-    
+
     @classmethod
     def error_directory(cls, path: Path) -> str:
         return f"-e {path}"
@@ -61,6 +62,10 @@ class SunGridEngine(BatchSystem):
     @classproperty
     def TaskID(self) -> str:
         return "SGE_TASK_ID"
+
+    @classproperty
+    def TaskLast(self) -> str:
+        return "SGE_TASK_LAST"
 
     @classproperty
     def NumProcs(self) -> str:

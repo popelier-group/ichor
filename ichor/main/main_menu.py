@@ -1,3 +1,4 @@
+from ichor.main.tools_menu import tools_menu
 from ichor.menu import Menu
 
 
@@ -29,7 +30,7 @@ def main_menu() -> None:
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
 
-    with Menu("ICHOR Main Menu", space=True, back=True, exit=True) as menu:
+    with Menu("ICHOR Main Menu", space=True, back=False, exit=True) as menu:
         menu.add_option(
             "1",
             "Training Set Menu",
@@ -61,3 +62,5 @@ def main_menu() -> None:
         menu.add_option(
             "r", "Auto Run", auto_run,
         )
+        menu.add_space()
+        menu.add_option("t", "Tools Menu", tools_menu)

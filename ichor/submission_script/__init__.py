@@ -1,6 +1,8 @@
 from pathlib import Path
 
 from ichor.submission_script.aimall import AIMAllCommand
+from ichor.submission_script.check_manager import (CheckManager, default_check,
+                                                   print_completed)
 from ichor.submission_script.data_lock import DataLock
 from ichor.submission_script.ferebus import FerebusCommand
 from ichor.submission_script.gaussian import GaussianCommand
@@ -58,4 +60,7 @@ __all__ = [
     "DataLock",
     "TimingManager",
     "SCRIPT_NAMES",
+    "CheckManager",
+    "print_completed",
+    "default_check",
 ]

@@ -75,9 +75,6 @@ class GJF(Geometry, File):
     def format(self):
         from ichor.globals import GLOBALS
 
-        if not self.atoms:
-            self.read()
-
         self.method = GLOBALS.METHOD
         self.basis_set = GLOBALS.BASIS_SET
 
@@ -102,5 +99,5 @@ class GJF(Geometry, File):
             f.write(f"{self.title}\n\n")
             f.write(f"{self.charge} {self.multiplicity}\n")
             for atom in self.atoms:
-                f.write(f"{str(atom)}\n")
+                f.write(f"{atom.type} {atom.coordinates_string}\n")
             f.write(f"\n{self.wfn}")

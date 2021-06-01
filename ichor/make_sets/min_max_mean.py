@@ -1,0 +1,28 @@
+from typing import List
+
+import numpy as np
+
+from ichor.atoms import ListOfAtoms
+from ichor.make_sets.make_set_method import MakeSetMethod
+
+
+class MinMaxMean(MakeSetMethod):
+    @classmethod
+    def name(cls) -> str:
+        return "min_max_mean"
+
+    def get_points(self, points: ListOfAtoms) -> List[int]:
+        features = points["O1"].features
+        # print(features.shape)
+        if features.ndim > 2:
+            features = features[:, 0, :]
+        elif features.ndim < 2:
+            features = features[:, np.newaxis]
+
+        return (
+            list(np.argmin(features, axis=0))
+            + list(np.argmax(features, axis=0))
+            + list(
+                np.argmin(np.abs(features - np.mean(features, axis=0)), axis=0)
+            )
+        )

@@ -87,6 +87,10 @@ class Globals:
     DLPOLY_CORE_COUNT: int = 1
     CP2K_CORE_COUNT: int = 8
 
+    # N TRIES SETTINGS FOR RETRYING TO RUN PROGRAMS
+    GAUSSIAN_N_TRIES: int = 10
+    AIMALL_N_TRIES: int = 10
+
     FEREBUS_SWARM_SIZE: int = (
         50  # If negative >> Size dynamically allocated by FEREBUS
     )

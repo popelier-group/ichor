@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
-                                     TimingManager, SubmissionScript)
+                                     SubmissionScript, TimingManager)
 
 
 def auto_run_ferebus(

@@ -1,6 +1,6 @@
-import numpy as np
+import math
 
 
 def count_digits(n: int) -> int:
     """Count number of digits in n"""
-    return np.floor(np.log(n, 10) + 1)
+    return math.floor(math.log(n, 10) + 1)

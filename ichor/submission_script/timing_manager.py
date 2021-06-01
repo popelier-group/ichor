@@ -1,10 +1,15 @@
+from typing import Optional
+
 from ichor.submission_script.ichor import ICHORCommand
 from ichor.submission_script.submision_script import SubmissionScript
-from typing import Optional
 
 
 class TimingManager:
-    def __init__(self, submission_script: SubmissionScript, message: Optional[str] = None):
+    def __init__(
+        self,
+        submission_script: SubmissionScript,
+        message: Optional[str] = None,
+    ):
         self.submission_script = submission_script
         self.message = message
 
@@ -13,7 +18,9 @@ class TimingManager:
 
     @property
     def identifier(self):
-        return f"{self.submission_script.path.name}:{self.job_id}:{self.task_id}"
+        return (
+            f"{self.submission_script.path.name}:{self.job_id}:{self.task_id}"
+        )
 
     def __enter__(self):
         python_job = ICHORCommand()

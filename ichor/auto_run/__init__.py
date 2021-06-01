@@ -7,10 +7,10 @@ from ichor.auto_run.gaussian import auto_run_gaussian
 from ichor.auto_run.ichor import (adaptive_sampling, make_models, submit_gjfs,
                                   submit_wfns)
 from ichor.batch_system import JobID
-from ichor.submission_script import DataLock
-from ichor.points import PointsDirectory
 from ichor.common.types import MutableInt
-
+from ichor.points import PointsDirectory
+from ichor.submission_script import DataLock
+from ichor.globals import GLOBALS
 
 __all__ = [
     "auto_run_gaussian",
@@ -39,19 +39,13 @@ class IterUsage(Enum):
 
 
 class IterArgs:
-    from ichor.globals import GLOBALS
-
     TrainingSetLocation = GLOBALS.FILE_STRUCTURE["training_set"]
     SamplePoolLocation = GLOBALS.FILE_STRUCTURE["sample_pool"]
     FerebusDirectory = GLOBALS.FILE_STRUCTURE["ferebus"]
     ModelLocation = GLOBALS.FILE_STRUCTURE["models"]
     nPoints = MutableInt(1)  # Overwritten Based On IterState
 
-    Atoms = (
-        [atom.name for atom in GLOBALS.ATOMS]
-        if GLOBALS.OPTIMISE_ATOM == "all"
-        else [GLOBALS.OPTIMISE_ATOM]
-    )
+    Atoms = []  # Overwritten from GLOBALS.ATOMS
 
 
 class IterStep:
@@ -80,9 +74,7 @@ func_order = [
         [IterArgs.TrainingSetLocation, IterArgs.Atoms],
     ),
     IterStep(
-        auto_run_aimall,
-        IterUsage.All,
-        [IterArgs.nPoints, IterArgs.Atoms],
+        auto_run_aimall, IterUsage.All, [IterArgs.nPoints, IterArgs.Atoms],
     ),
     IterStep(
         make_models,
@@ -105,11 +97,19 @@ func_order = [
 def next_iter(
     wait_for_job: Optional[JobID], state: IterState = IterState.Standard
 ) -> Optional[JobID]:
+    # from ichor.globals import GLOBALS
+
     if state == IterState.First:
-        IterArgs.nPoints.value = len(PointsDirectory(IterArgs.TrainingSetLocation))
+        IterArgs.nPoints.value = len(
+            PointsDirectory(IterArgs.TrainingSetLocation)
+        )
     else:
-        from ichor.globals import GLOBALS
         IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
+
+    if GLOBALS.OPTIMISE_ATOM == "all":
+        IterArgs.Atoms = [atom.name for atom in GLOBALS.ATOMS]
+    else:
+        IterArgs.Atoms = [GLOBALS.OPTIMISE_ATOM]
 
     job_id = wait_for_job
     for iter_step in func_order:

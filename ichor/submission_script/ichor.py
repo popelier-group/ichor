@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.submission_script.python import PythonCommand
 from ichor.common.functools import classproperty
+from ichor.submission_script.python import PythonCommand
 
 
 class ICHORCommand(PythonCommand):

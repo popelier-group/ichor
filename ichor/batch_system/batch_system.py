@@ -1,8 +1,10 @@
+import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Union
 
 from ichor.common.functools import classproperty
+from ichor.common.io import mkdir
 from ichor.common.os import run_cmd
 
 
@@ -19,6 +21,27 @@ class JobID:
         from ichor.globals import GLOBALS
 
         self.instance = instance or str(GLOBALS.UID)
+
+    def write(self):
+        from ichor.globals import GLOBALS
+
+        mkdir(GLOBALS.FILE_STRUCTURE["jid"].parent)
+
+        job_ids = []
+        if GLOBALS.FILE_STRUCTURE["jid"].exists():
+            with open(GLOBALS.FILE_STRUCTURE["jid"], "r") as f:
+                job_ids += json.load(f)
+
+        job_ids += [
+            {
+                "script": str(self.script),
+                "id": str(self.id),
+                "instance": str(self.instance),
+            }
+        ]
+
+        with open(GLOBALS.FILE_STRUCTURE["jid"], "w") as f:
+            json.dump(job_ids, f)
 
     def __repr__(self) -> str:
         return f"JobID(Script: {self.script}, Id: {self.id}, Instance: {self.instance})"
@@ -40,12 +63,11 @@ class BatchSystem(ABC):
         if hold:
             cmd += cls.hold_job(hold)
         cmd += [job_script]
-        from ichor.globals import GLOBALS, Machine
 
         stdout, stderr = run_cmd(cmd)
-        print(stdout, stderr)
-        job_id = cls.parse_job_id(stdout)
-        return JobID(job_script, job_id)
+        job_id = JobID(job_script, cls.parse_job_id(stdout))
+        job_id.write()
+        return job_id
 
     @classmethod
     @abstractmethod
@@ -111,6 +133,11 @@ class BatchSystem(ABC):
     @classproperty
     @abstractmethod
     def TaskID(self) -> str:
+        pass
+
+    @classproperty
+    @abstractmethod
+    def TaskLast(self) -> str:
         pass
 
     @classproperty
