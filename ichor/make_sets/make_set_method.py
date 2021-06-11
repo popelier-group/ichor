@@ -10,6 +10,11 @@ class MakeSetMethod(ABC):
     def name(cls) -> str:
         pass
 
+    @classmethod
+    @abstractmethod
+    def npoints(cls, npoints: int, points: ListOfAtoms) -> int:
+        pass
+
     @abstractmethod
     def get_points(self, points: ListOfAtoms) -> List[int]:
         pass

@@ -18,6 +18,7 @@ def import_external_functions():
     from ichor.main.submit_gjfs import check_gaussian_output, submit_gjfs
     from ichor.main.submit_wfns import check_aimall_output, submit_wfns
     from ichor.submission_script import print_completed
+    from ichor.make_sets import make_sets
 
     Arguments.external_functions = locals()
 

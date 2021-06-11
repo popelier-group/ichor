@@ -11,6 +11,10 @@ class MinMaxMean(MakeSetMethod):
     def name(cls) -> str:
         return "min_max_mean"
 
+    @classmethod
+    def npoints(cls, npoints: int, points: ListOfAtoms) -> int:
+        return 3 * len(points[0].features)
+
     def get_points(self, points: ListOfAtoms) -> List[int]:
         features = points["O1"].features
         # print(features.shape)

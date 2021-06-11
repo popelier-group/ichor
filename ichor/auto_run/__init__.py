@@ -1,16 +1,19 @@
 from enum import Enum
 from typing import Any, Callable, Optional, Sequence
+from pathlib import Path
 
 from ichor.auto_run.aimall import auto_run_aimall
 from ichor.auto_run.ferebus import auto_run_ferebus
 from ichor.auto_run.gaussian import auto_run_gaussian
 from ichor.auto_run.ichor import (adaptive_sampling, make_models, submit_gjfs,
-                                  submit_wfns)
+                                  submit_wfns, make_sets)
 from ichor.batch_system import JobID
 from ichor.common.types import MutableInt
 from ichor.points import PointsDirectory
 from ichor.submission_script import DataLock
 from ichor.globals import GLOBALS
+from ichor.files import Trajectory
+from ichor.make_sets import make_sets_npoints
 
 __all__ = [
     "auto_run_gaussian",
@@ -31,6 +34,7 @@ class IterState(Enum):
 
 
 class IterUsage(Enum):
+    First = 0
     All = 1
     AllButLast = 2
 
@@ -94,15 +98,39 @@ func_order = [
 ]
 
 
+def get_points_location() -> Path:
+    for f in Path(".").iterdir():
+        if f.suffix == ".xyz":
+            return f
+    raise FileNotFoundError("No Points Location Found")
+
+
 def next_iter(
     wait_for_job: Optional[JobID], state: IterState = IterState.Standard
 ) -> Optional[JobID]:
-    # from ichor.globals import GLOBALS
+    from ichor.globals import GLOBALS
+
+    job_id = wait_for_job
 
     if state == IterState.First:
-        IterArgs.nPoints.value = len(
-            PointsDirectory(IterArgs.TrainingSetLocation)
-        )
+        if IterArgs.TrainingSetLocation.exists():
+            IterArgs.nPoints.value = len(
+                PointsDirectory(IterArgs.TrainingSetLocation)
+            )
+        else:
+            points_location = get_points_location()
+            points = None
+            if points_location.is_dir():
+                points = PointsDirectory(points_location)
+            elif points_location.suffix == ".xyz":
+                points = Trajectory(points_location)
+            else:
+                raise ValueError("Unknown Points Location")
+
+            IterArgs.nPoints.value = make_sets_npoints(points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD)
+            job_id = IterStep(make_sets, IterUsage.All, [points_location]).run(job_id, state)
+
+
     else:
         IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
 
@@ -111,7 +139,6 @@ def next_iter(
     else:
         IterArgs.Atoms = [GLOBALS.OPTIMISE_ATOM]
 
-    job_id = wait_for_job
     for iter_step in func_order:
         job_id = iter_step.run(job_id, state)
         if job_id is not None:

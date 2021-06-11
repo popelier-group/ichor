@@ -12,6 +12,10 @@ class RandomPoints(MakeSetMethod):
         self.npoints = npoints
 
     @classmethod
+    def npoints(cls, npoints: int, points: ListOfAtoms) -> int:
+        return npoints
+
+    @classmethod
     def name(cls) -> str:
         return "random"
 

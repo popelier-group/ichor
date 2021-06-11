@@ -15,7 +15,7 @@ from ichor.common.io import mkdir
 from ichor.common.int import count_digits
 from ichor.tab_completer import PathCompleter
 
-__all__ = ["make_sets", "make_sets_menu"]
+__all__ = ["make_sets", "make_sets_menu", "make_sets_npoints"]
 
 
 POINTS_LOCATION: Optional[Path] = None
@@ -29,6 +29,15 @@ def get_make_set_methods() -> List[Any]:
         )
         if issubclass(obj, MakeSetMethod)
     ]
+
+
+def make_sets_npoints(points: ListOfAtoms, set_size: int, methods: List[str]) -> int:
+    npoints = 0
+    for method in methods:
+        for MakeSet in get_make_set_methods():
+            if method == MakeSet.name():
+                npoints += MakeSet.npoints(set_size, points)
+    return npoints
 
 
 def make_sets(
@@ -196,16 +205,17 @@ def make_sets_menu_refresh(menu):
     menu.add_final_options()
 
 
-def make_sets_menu():
-    global POINTS_LOCATION
+def find_points_location() -> Optional[Path]:
     for f in Path(".").iterdir():
         if f.suffix == ".xyz":
-            POINTS_LOCATION = f
-            break
-    else:
-        for d in Path(".").iterdir():
-            if d.is_dir() and len(PointsDirectory(d)) > 1:
-                POINTS_LOCATION = d
-                break
+            return f
+    for d in Path(".").iterdir():
+        if d.is_dir() and len(PointsDirectory(d)) > 1:
+            return d
+
+
+def make_sets_menu():
+    global POINTS_LOCATION
+    POINTS_LOCATION = find_points_location()
     with Menu("Make Set Menu", refresh=make_sets_menu_refresh):
         pass
