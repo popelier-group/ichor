@@ -102,7 +102,7 @@ class GJF(Geometry, File):
 
     @property
     def header_line(self) -> str:
-        f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
+        return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     def write(self):
         self.format()

@@ -11,7 +11,7 @@ def submit_gjfs(directory):
     points = PointsDirectory(directory)
     submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])
     for point in points:
-        point.gjf.read()
+        # point.gjf.read()  # <- Shouldn't be needed
         point.gjf.write()
         submission_script.add_command(GaussianCommand(point.gjf.path))
     submission_script.write()
