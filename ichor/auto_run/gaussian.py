@@ -2,13 +2,13 @@ from pathlib import Path
 from typing import Optional, Union
 
 from ichor.batch_system import JobID
-from ichor.common.types import MutableInt
+from ichor.common.types import MutableValue
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, TimingManager)
 
 
 def auto_run_gaussian(
-    npoints: MutableInt, hold: Optional[JobID] = None
+    npoints: MutableValue, hold: Optional[JobID] = None
 ) -> Optional[JobID]:
     script_name = SCRIPT_NAMES["gaussian"]
 

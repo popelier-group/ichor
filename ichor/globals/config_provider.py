@@ -1,5 +1,6 @@
-from ..arguments import Arguments
-from ..constants import ichor_logo
+from ichor.arguments import Arguments
+from ichor.constants import ichor_logo
+from pathlib import Path
 
 
 class ConfigProvider(dict):
@@ -27,14 +28,14 @@ class ConfigProvider(dict):
        an extra condition to the if statement in loadConfig()
     """
 
-    def __init__(self, source=Arguments.config_file):
-        self.src = source
+    def __init__(self, source: Path = Arguments.config_file):
+        self.src: Path = Path(source)
         self.load_config()
 
     def load_config(self):
-        if self.src.endswith(".properties"):
+        if self.src.suffix == ".properties":
             self.load_properties_config()
-        elif self.src.endswith(".yaml"):
+        elif self.src.suffix == ".yaml":
             self.load_yaml_config()
 
     def print_key_vals(self):

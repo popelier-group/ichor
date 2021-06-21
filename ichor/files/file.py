@@ -11,14 +11,14 @@ class File(PathObject, ABC):
         super().__init__(path)
 
     @buildermethod
-    def read(self) -> None:
+    def read(self, *args, **kwargs) -> None:
         if self.state is FileState.Unread:
             self.state = FileState.Reading
-            self._read_file()
+            self._read_file(*args, **kwargs)
             self.state = FileState.Read
 
     @abstractmethod
-    def _read_file(self):
+    def _read_file(self, *args, **kwargs):
         pass
 
     def move(self, dst):

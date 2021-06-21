@@ -20,7 +20,7 @@ class Trajectory(ListOfAtoms, File):
         ListOfAtoms.__init__(self)
         File.__init__(self, path)
 
-    def _read_file(self):
+    def _read_file(self, n: int = -1):
         with open(self.path, "r") as f:
             atoms = Atoms()
             for line in f:
@@ -38,6 +38,8 @@ class Trajectory(ListOfAtoms, File):
                                 Atom(atom_type, float(x), float(y), float(z))
                             )
                     self.add(atoms)
+                    if n > 0 and len(self) >= n:
+                        break
                     atoms = Atoms()
 
     @property

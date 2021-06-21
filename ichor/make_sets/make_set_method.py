@@ -12,7 +12,7 @@ class MakeSetMethod(ABC):
 
     @classmethod
     @abstractmethod
-    def npoints(cls, npoints: int, points: ListOfAtoms) -> int:
+    def get_npoints(cls, npoints: int, points: ListOfAtoms) -> int:
         pass
 
     @abstractmethod

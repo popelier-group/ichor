@@ -166,6 +166,9 @@ class Model(File):
         ones = np.ones((self.ntrain, 1))
         variance = np.empty(len(x))
         res3 = np.matmul(np.matmul(ones.T, invR), ones)
+
+        print(r)
+        quit()
         # TODO: Remove loop
         for i, ri in enumerate(r):
             res1 = np.matmul(np.matmul(ri.T, invR), ri)

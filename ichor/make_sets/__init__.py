@@ -36,7 +36,7 @@ def make_sets_npoints(points: ListOfAtoms, set_size: int, methods: List[str]) ->
     for method in methods:
         for MakeSet in get_make_set_methods():
             if method == MakeSet.name():
-                npoints += MakeSet.npoints(set_size, points)
+                npoints += MakeSet.get_npoints(set_size, points)
     return npoints
 
 

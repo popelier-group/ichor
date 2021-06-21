@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from ichor.batch_system import BATCH_SYSTEM, JobID
 from ichor.common.functools import classproperty
@@ -124,13 +124,13 @@ class SubmissionScript:
         read_datafile_str += "do\n"
         for i in range(ndata):
             read_datafile_str += f"    {self.arr(i)}+=(${self.var(i)})\n"
-        read_datafile_str += f"done < {self.datafile_var}\n"
+        read_datafile_str += f"done < ${self.datafile_var}\n"
 
         return f"{datafile_str}\n{read_datafile_str}"
 
     def setup_datafile(
         self, datafile: Path, data: List[List[str]]
-    ) -> (List[str], str):
+    ) -> Tuple[List[str], str]:
         self.write_datafile(datafile, data)
         datafile_str = self.read_datafile_str(datafile, data)
         datafile_variables = [self.array_index(i) for i in range(len(data[0]))]

@@ -12,7 +12,7 @@ class MinMax(MakeSetMethod):
         return "min_max"
 
     @classmethod
-    def npoints(cls, npoints: int, points: ListOfAtoms) -> int:
+    def get_npoints(cls, npoints: int, points: ListOfAtoms) -> int:
         return 2*len(points[0].features)
 
     def get_points(self, points: ListOfAtoms) -> List[int]:

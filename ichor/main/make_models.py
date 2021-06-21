@@ -1,6 +1,7 @@
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional
+import numpy as np
 
 from ichor import constants
 from ichor.batch_system import JobID
@@ -65,7 +66,7 @@ def setup(directory: Path):
     model_data_location = directory
     _model_data = PointsDirectory(directory)
     n_training_points = len(_model_data)
-    atoms = [atom.atom_num for atom in _model_data[0].atoms]
+    atoms = [atom.name for atom in _model_data[0].atoms]
     atom_models = list(atoms)
 
 
@@ -166,7 +167,7 @@ def make_models_menu_refresh(menu):
         f"Model Type(s): {', '.join(map(ModelType.to_str, model_types))}"
     )
     menu.add_message(f"Number of Training Points: {n_training_points}")
-    menu.add_message(f"Atoms: {', '.join(atom_models)}")
+    menu.add_message(f"Atoms: {', '.join(map(str, atom_models))}")
     menu.add_final_options()
 
 
@@ -221,13 +222,12 @@ def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
 
     for atom in atom_models:
         training_data = []
-        for point in _model_data:
-            # TODO: Clean This Up Using New `ListOfAtoms`
-            features = point.features[point.atoms.i(atom)]
+        features = _model_data[atom].features
+        for i, point in enumerate(_model_data):
             properties = {
                 ty.value: getattr(point, ty.value)[atom] for ty in model_types
             }
-            training_data += [(features, properties)]
+            training_data += [(features[i], properties)]
 
         ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
@@ -276,14 +276,15 @@ def write_training_set(atom, training_data) -> Path:
 
 def write_ftoml(ferebus_directory, atom):
     from ichor.globals import GLOBALS
+    from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import ALFFeatureCalculator
 
     ftoml_file = ferebus_directory / "ferebus.toml"
-    alf = GLOBALS.ALF[get_digits(atom) - 1]
+    alf = list(np.array(ALFFeatureCalculator._alf[get_digits(atom) - 1]) + 1)
 
     with open(ftoml_file, "w") as ftoml:
         ftoml.write("[system]\n")
         ftoml.write(f'name = "{GLOBALS.SYSTEM_NAME}"\n')
-        ftoml.write(f"natoms = {len(GLOBALS.ALF)}\n")
+        ftoml.write(f"natoms = {len(GLOBALS.ATOMS)}\n")
         ftoml.write(f"atoms = [\n")
         ftoml.write(
             f'  {{name="{atom}", alf=[{alf[0]}, {alf[1]}, {alf[2]}]}}\n'

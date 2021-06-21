@@ -1,6 +1,7 @@
 import os
 import re
 from pathlib import Path
+from typing import List
 
 from ichor.batch_system.batch_system import BatchSystem, JobID
 from ichor.common.functools import classproperty
@@ -13,24 +14,24 @@ class SunGridEngine(BatchSystem):
         return "SGE_ROOT" in os.environ.keys()
 
     @classproperty
-    def submit_script_command(self) -> str:
-        return "qsub"
+    def submit_script_command(self) -> List[str]:
+        return ["qsub"]
 
     @classmethod
     def parse_job_id(cls, stdout) -> str:
         return re.findall(r"\d+", stdout)[0]
 
     @classmethod
-    def hold_job(cls, job_id: JobID):
+    def hold_job(cls, job_id: JobID) -> List[str]:
         return ["-hold_jid", f"{job_id.id}"]
 
     @classproperty
-    def delete_job_command(self) -> str:
-        return "qdel"
+    def delete_job_command(self) -> List[str]:
+        return ["qdel"]
 
     @staticmethod
-    def status() -> str:
-        return "qstat"
+    def status() -> List[str]:
+        return ["qstat"]
 
     @classmethod
     def change_working_directory(cls, path: Path) -> str:

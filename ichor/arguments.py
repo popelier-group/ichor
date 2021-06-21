@@ -120,8 +120,8 @@ def parse_args(func: Callable, args: List[str]) -> List[Any]:
     if not func.__annotations__:
         return args
 
-    for i, arg_type in enumerate(func.__annotations__.values()):
-        args[i] = parse_arg(args[i], arg_type)
+    for i, (arg, arg_type) in enumerate(zip(args, func.__annotations__.values())):
+        args[i] = parse_arg(arg, arg_type)
 
     return args
 
@@ -139,9 +139,7 @@ def parse_arg(arg, arg_type) -> Any:
         return check_bool(arg)
     elif hasattr(arg_type, "__args__"):
         # From typing (Optional, List)
-        if len(arg_type.__args__) == 2 and isinstance(
-            arg_type.__args__[-1], type(None)
-        ):
+        if len(arg_type.__args__) == 2 and arg_type.__args__[-1] is type(None):
             # Optional argument
             if arg == "None":
                 return None

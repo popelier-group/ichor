@@ -12,7 +12,7 @@ class RandomPoints(MakeSetMethod):
         self.npoints = npoints
 
     @classmethod
-    def npoints(cls, npoints: int, points: ListOfAtoms) -> int:
+    def get_npoints(cls, npoints: int, points: ListOfAtoms) -> int:
         return npoints
 
     @classmethod

@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
@@ -57,9 +57,7 @@ class BatchSystem(ABC):
     def submit_script(
         cls, job_script: Path, hold: Optional[JobID] = None
     ) -> JobID:
-        cmd = [
-            cls.submit_script_command,
-        ]
+        cmd = cls.submit_script_command
         if hold:
             cmd += cls.hold_job(hold)
         cmd += [job_script]
@@ -68,6 +66,11 @@ class BatchSystem(ABC):
         job_id = JobID(job_script, cls.parse_job_id(stdout))
         job_id.write()
         return job_id
+
+    @classmethod
+    def delete(cls, job: JobID):
+        cmd = cls.delete_job_command + [job.id]
+        stdout, stderr = run_cmd(cmd)
 
     @classmethod
     @abstractmethod
@@ -81,7 +84,7 @@ class BatchSystem(ABC):
 
     @classproperty
     @abstractmethod
-    def submit_script_command(self) -> str:
+    def submit_script_command(self) -> List[str]:
         pass
 
     @classmethod
@@ -92,7 +95,7 @@ class BatchSystem(ABC):
 
     @classproperty
     @abstractmethod
-    def delete_job_command(self) -> str:
+    def delete_job_command(self) -> List[str]:
         pass
 
     @staticmethod

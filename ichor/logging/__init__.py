@@ -3,10 +3,13 @@ import logging
 from ichor.logging.concurrent_log_handler import ConcurrentRotatingFileHandler
 
 
+LOG_LEVEL = logging.DEBUG
+
+
 def setup_logger(
     name,
     log_file,
-    level=logging.INFO,
+    level=LOG_LEVEL,
     formatter=logging.Formatter(
         "%(asctime)s - %(levelname)s - %(message)s", "%d-%m-%Y %H:%M:%S"
     ),

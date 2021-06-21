@@ -345,8 +345,10 @@ class Globals:
             from ichor.files import Trajectory
 
             for f in Path(os.getcwd()).iterdir():
-                if f.suffix == ".model":
-                    self.ATOMS = Trajectory(f)[0].atoms
+                if f.suffix == ".xyz":
+                    traj = Trajectory(f)
+                    traj.read(n=1)
+                    self.ATOMS = traj[0]
 
     def set(self, name, value):
         name = name.upper()

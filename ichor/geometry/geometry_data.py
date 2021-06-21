@@ -38,3 +38,6 @@ class GeometryData:
             raise AttributeError(
                 f"'{self.__class__}' object has no attribute '{item}'"
             )
+
+    def __setitem__(self, key, value):
+        self.data[key] = value      

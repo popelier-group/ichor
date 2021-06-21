@@ -8,12 +8,14 @@ from ichor.auto_run.gaussian import auto_run_gaussian
 from ichor.auto_run.ichor import (adaptive_sampling, make_models, submit_gjfs,
                                   submit_wfns, make_sets)
 from ichor.batch_system import JobID
-from ichor.common.types import MutableInt
+from ichor.common.types import MutableValue
 from ichor.points import PointsDirectory
 from ichor.submission_script import DataLock
 from ichor.globals import GLOBALS
 from ichor.files import Trajectory
 from ichor.make_sets import make_sets_npoints
+from ichor.common.points import get_points_location
+
 
 __all__ = [
     "auto_run_gaussian",
@@ -47,9 +49,9 @@ class IterArgs:
     SamplePoolLocation = GLOBALS.FILE_STRUCTURE["sample_pool"]
     FerebusDirectory = GLOBALS.FILE_STRUCTURE["ferebus"]
     ModelLocation = GLOBALS.FILE_STRUCTURE["models"]
-    nPoints = MutableInt(1)  # Overwritten Based On IterState
+    nPoints = MutableValue(1)  # Overwritten Based On IterState
 
-    Atoms = []  # Overwritten from GLOBALS.ATOMS
+    Atoms = MutableValue([])  # Overwritten from GLOBALS.ATOMS
 
 
 class IterStep:
@@ -98,13 +100,6 @@ func_order = [
 ]
 
 
-def get_points_location() -> Path:
-    for f in Path(".").iterdir():
-        if f.suffix == ".xyz":
-            return f
-    raise FileNotFoundError("No Points Location Found")
-
-
 def next_iter(
     wait_for_job: Optional[JobID], state: IterState = IterState.Standard
 ) -> Optional[JobID]:
@@ -129,15 +124,16 @@ def next_iter(
 
             IterArgs.nPoints.value = make_sets_npoints(points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD)
             job_id = IterStep(make_sets, IterUsage.All, [points_location]).run(job_id, state)
+            print(f"Submitted: {job_id}")
 
 
     else:
         IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
 
     if GLOBALS.OPTIMISE_ATOM == "all":
-        IterArgs.Atoms = [atom.name for atom in GLOBALS.ATOMS]
+        IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
     else:
-        IterArgs.Atoms = [GLOBALS.OPTIMISE_ATOM]
+        IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
     for iter_step in func_order:
         job_id = iter_step.run(job_id, state)

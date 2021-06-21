@@ -72,7 +72,7 @@ def print_completed():
     task_last = 1
     if BATCH_SYSTEM.TaskLast in os.environ.keys():
         try:
-            task_last = int(BATCH_SYSTEM.TaskLast)
+            task_last = int(os.environ[BATCH_SYSTEM.TaskLast])
         except TypeError:
             pass  # In case SGE_TASK_LAST is undefined
     if task_last < ntasks and task_id + task_last <= ntasks:
