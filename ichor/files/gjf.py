@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from ichor import patterns
 from ichor.atoms import Atom, Atoms
@@ -14,25 +14,24 @@ class GaussianJobType(Enum):
     Optimisation = "opt"
     Frequency = "freq"
 
+    @classmethod
+    def types(cls) -> List[str]:
+        return [ty.value for ty in GaussianJobType]
 
 class GJF(Geometry, File):
     def __init__(self, path):
         File.__init__(self, path)
         Geometry.__init__(self)
 
-        self.job_type: GaussianJobType = GaussianJobType.Energy
-        self.method: str = "b3lyp"
-        self.basis_set: str = "6-31+g(d,p)"
+        self.job_type: Optional[GaussianJobType] = None
+        self.method: Optional[str] = None
+        self.basis_set: Optional[str] = None
 
-        self.charge: int = 0
-        self.multiplicity: int = 1
+        self.charge: Optional[int] = None
+        self.multiplicity: Optional[int] = None
 
-        self.header_line: str = ""
-
-        # self.wfn = WFN(self.path.replace(".gjf", ".wfn"))
-
-        self.startup_options: List[str] = []
-        self.keywords: List[str] = []
+        self.startup_options: Optional[List[str]] = None
+        self.keywords: Optional[List[str]] = None
 
     @classproperty
     def filetype(cls) -> str:
@@ -44,6 +43,8 @@ class GJF(Geometry, File):
         with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("%"):
+                    if self.startup_options is None:
+                        self.startup_options = []
                     self.startup_options += [line.strip().replace("%", "")]
                 if line.startswith("#"):
                     keywords = line.split()
@@ -51,6 +52,15 @@ class GJF(Geometry, File):
                         if "/" in keyword:
                             self.method = keyword.split("/")[0].upper()
                             self.basis_set = keyword.split("/")[1].lower()
+                        elif keyword in GaussianJobType.types():
+                            for ty in GaussianJobType:
+                                if keyword == ty:
+                                    self.job_type = ty
+                                    break
+                        else:
+                            if self.keywords is None:
+                                self.keywords = []
+                            self.keywords += [keyword]
                 if re.match(r"^\s*\d+\s+\d+$", line):
                     self.charge = int(line.split()[0])
                     self.multiplicity = int(line.split()[1])
@@ -75,20 +85,24 @@ class GJF(Geometry, File):
     def format(self):
         from ichor.globals import GLOBALS
 
-        self.method = GLOBALS.METHOD
-        self.basis_set = GLOBALS.BASIS_SET
-
+        if self.keywords is None:
+            self.keywords = []
         required_keywords = ["nosymm", "output=wfn"]
         self.keywords = list(
             set(self.keywords + GLOBALS.KEYWORDS + required_keywords)
         )
+
+        self.method = GLOBALS.METHOD
+        self.basis_set = GLOBALS.BASIS_SET
 
         self.startup_options = [
             f"nproc={GLOBALS.GAUSSIAN_CORE_COUNT}",
             f"mem=1GB",  # TODO: Convert this to global variable
         ]
 
-        self.header_line = f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
+    @property
+    def header_line(self) -> str:
+        f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     def write(self):
         self.format()
