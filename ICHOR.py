@@ -10239,7 +10239,10 @@ class Models:
         data = {"npoints": UsefulTools.n_train()}
         data["cv_errors"] = [float(cv_errors[index]) for index in indices]
         data["predictions"] = [predictions[index] for index in indices]
-        with open(GLOBALS.FILE_STRUCTURE["cv_errors"], "w") as f:
+        cv_file = Path(GLOBALS.FILE_STRUCTURE["cv_errors"])
+        if cv_file.exists():
+            cv_file.unlink()
+        with open(cv_file, "w") as f:
             json.dump(data, f)
 
     def expected_improvement_epe(self, points):
@@ -10771,7 +10774,9 @@ class Set(Points):
             data["true_errors"].append(true_error)
 
         FileTools.mkdir(GLOBALS.FILE_STRUCTURE["adaptive_sampling"])
-        alpha_file = GLOBALS.FILE_STRUCTURE["alpha"]
+        alpha_file = Path(GLOBALS.FILE_STRUCTURE["alpha"])
+        if alpha_file.exists():
+            alpha_file.unlink()
         with open(alpha_file, "w") as f:
             json.dump(data, f)
 
