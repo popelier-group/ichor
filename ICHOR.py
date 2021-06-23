@@ -92,7 +92,7 @@ from enum import Enum
 import itertools as it
 from pathlib import Path
 from signal import SIGTERM
-from getpass import getpass
+from getpass import getpass, getuser
 from functools import wraps
 import multiprocessing as mp
 from functools import lru_cache
@@ -2683,6 +2683,8 @@ class Globals:
     ATOMS: Atoms = None
 
     CWD: str = os.getcwd()
+    USER: str = getuser()
+    USER_GROUPS: List[str] = [grp.getgrgid(g).gr_name for g in os.getgroups()]
 
     MAX_ITERATION: int = 1
     POINTS_PER_ITERATION: int = 1
@@ -2934,10 +2936,9 @@ class Globals:
         else:
             self.MACHINE = "local"
 
-        # Uncomment this when drop-n-compute is activated
-        # # Add to list of drop-n-compute-services as they're added
-        # if self.MACHINE in ["csf3"]:
-        #     self.DROP_N_COMPUTE = True
+        # Add to list of drop-n-compute-services as they're added
+        if self.MACHINE in ["csf3"] and "ri_dropcompute" in self.USER_GROUPS:
+            self.DROP_N_COMPUTE = True
 
         # SGE settings
         self.SGE = "SGE_ROOT" in os.environ.keys()
@@ -2957,7 +2958,7 @@ class Globals:
         if self.DROP_N_COMPUTE and not self.DROP_N_COMPUTE_LOCATION:
             if self.MACHINE == "csf3":
                 self.DROP_N_COMPUTE_LOCATION = str(
-                    Path.home() / "DROP_N_COMPUTE"
+                    Path.home() / "scratch/DropCompute"
                 )
         if self.DROP_N_COMPUTE_LOCATION:
             FileTools.mkdir(self.DROP_N_COMPUTE_LOCATION)
@@ -6017,14 +6018,16 @@ class AutoTools:
             AutoTools.submit_ichor_errors,
         ]
 
+        uid = GLOBALS.UID.int & (1<<64)-1
+
         script_names = [
-            f"PySub.{GLOBALS.UID}.sh.1",
-            f"GaussSub.{GLOBALS.UID}.sh.hold_1.2",
-            f"PySub.{GLOBALS.UID}.sh.hold_2.3",
-            f"AIMSub.{GLOBALS.UID}.sh.hold_3.4",
-            f"PySub.{GLOBALS.UID}.sh.hold_4.5",
-            f"FereSub.{GLOBALS.UID}.sh.hold_5.6",
-            f"PySub.{GLOBALS.UID}.sh.hold_6.7",
+            f"PySub.sh+{uid}",
+            f"GaussSub.sh+{uid+1}+hold_{uid}",
+            f"PySub.sh+{uid+2}+hold_{uid+1}",
+            f"AIMSub.sh+{uid+3}+hold_{uid+2}",
+            f"PySub.sh+{uid+4}+hold_{uid+3}",
+            f"FereSub.sh+{uid+5}+hold_{uid+4}",
+            f"PySub.sh+{uid+6}+hold_{uid+5}"
         ]
 
         with open(GLOBALS.FILE_STRUCTURE["counter"], "r") as f:
@@ -6054,6 +6057,10 @@ class AutoTools:
 
         for script in submitted_scripts:
             FileTools.move_file(script, GLOBALS.DROP_N_COMPUTE_LOCATION)
+
+        no_submit = Path(GLOBALS.DROP_N_COMPUTE_LOCATION) / "NOSUBMIT"
+        if no_submit.exists():
+            no_submit.unlink()
 
     @staticmethod
     def run():
