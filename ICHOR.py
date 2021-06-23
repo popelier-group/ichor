@@ -2684,7 +2684,7 @@ class Globals:
 
     CWD: str = os.getcwd()
     USER: str = getuser()
-    USER_GROUPS: List[str] = [grp.getgrgid(g).gr_name for g in os.getgroups()]
+    # USER_GROUPS: List[str] = [grp.getgrgid(g).gr_name for g in os.getgroups()]
 
     MAX_ITERATION: int = 1
     POINTS_PER_ITERATION: int = 1
@@ -2937,7 +2937,7 @@ class Globals:
             self.MACHINE = "local"
 
         # Add to list of drop-n-compute-services as they're added
-        if self.MACHINE in ["csf3"] and "ri_dropcompute" in self.USER_GROUPS:
+        if self.MACHINE in ["csf3"]:  # and "ri_dropcompute" in self.USER_GROUPS:
             self.DROP_N_COMPUTE = True
 
         # SGE settings
@@ -6018,7 +6018,7 @@ class AutoTools:
             AutoTools.submit_ichor_errors,
         ]
 
-        uid = GLOBALS.UID.int & (1<<64)-1
+        uid = uuid4().int & (1<<32)-1
 
         script_names = [
             f"PySub.sh+{uid}",
