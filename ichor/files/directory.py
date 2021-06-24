@@ -70,7 +70,7 @@ class Directory(PathObject, ABC):
 
     @classproperty
     @abstractmethod
-    def dirpattern(self) -> re.Pattern:
+    def dirpattern(self):
         pass
 
     def iterdir(self):

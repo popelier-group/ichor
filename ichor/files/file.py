@@ -12,7 +12,7 @@ class File(PathObject, ABC):
 
     @buildermethod
     def read(self, *args, **kwargs) -> None:
-        if self.state is FileState.Unread:
+        if self.path.exists() and self.state is FileState.Unread:
             self.state = FileState.Reading
             self._read_file(*args, **kwargs)
             self.state = FileState.Read

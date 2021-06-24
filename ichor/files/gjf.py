@@ -33,6 +33,8 @@ class GJF(Geometry, File):
         self.startup_options: Optional[List[str]] = None
         self.keywords: Optional[List[str]] = None
 
+        self.atoms = None
+
     @classproperty
     def filetype(cls) -> str:
         return ".gjf"
@@ -47,6 +49,7 @@ class GJF(Geometry, File):
                         self.startup_options = []
                     self.startup_options += [line.strip().replace("%", "")]
                 if line.startswith("#"):
+                    line = line.replace("#", "")
                     keywords = line.split()
                     for keyword in keywords:
                         if "/" in keyword:
@@ -84,6 +87,12 @@ class GJF(Geometry, File):
 
     def format(self):
         from ichor.globals import GLOBALS
+
+        self.read()
+
+        self.job_type = GaussianJobType.Energy
+        self.charge = 0
+        self.multiplicity = 1
 
         if self.keywords is None:
             self.keywords = []

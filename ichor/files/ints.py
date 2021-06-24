@@ -22,7 +22,7 @@ class INTs(Directory, dict):
         pass
 
     @classproperty
-    def dirpattern(self) -> re.Pattern:
+    def dirpattern(self):
         return re.compile(r".+_atomicfiles")
 
     @buildermethod

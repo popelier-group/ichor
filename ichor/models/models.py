@@ -36,7 +36,7 @@ class Models(Directory, list):
                 self.append(Model(f))
 
     @property
-    def dirpattern(self) -> re.Pattern:
+    def dirpattern(self):
         from ichor.globals import GLOBALS
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")

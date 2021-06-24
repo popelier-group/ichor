@@ -18,7 +18,7 @@ class PointDirectory(Point, Directory):
         Directory.__init__(self, path)
 
     @classproperty
-    def dirpattern(self) -> re.Pattern:
+    def dirpattern(self):
         from ichor.globals import GLOBALS
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
