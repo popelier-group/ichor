@@ -156,19 +156,17 @@ class Model(File):
 
     @check_x_2d
     def predict(self, x: np.ndarray) -> np.ndarray:
-        r = self.k.r(self.x, x)
+        r = self.k.r(self.x, x).T
         return self.mean.value(x) + np.matmul(r, self.weights)
 
     @check_x_2d
     def variance(self, x: np.ndarray) -> np.ndarray:
-        r = self.k.r(self.x, x)
+        r = self.k.r(self.x, x).T
         invR = self.invR
         ones = np.ones((self.ntrain, 1))
         variance = np.empty(len(x))
         res3 = np.matmul(np.matmul(ones.T, invR), ones)
 
-        print(r)
-        quit()
         # TODO: Remove loop
         for i, ri in enumerate(r):
             res1 = np.matmul(np.matmul(ri.T, invR), ri)

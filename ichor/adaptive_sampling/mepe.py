@@ -8,6 +8,7 @@ from scipy.spatial.distance import cdist
 from ichor.adaptive_sampling.expected_improvement import ExpectedImprovement
 from ichor.atoms import ListOfAtoms
 from ichor.models import Model, ModelsResult
+from ichor.common.io import mkdir
 
 
 def B(model: Model) -> float:
@@ -73,11 +74,14 @@ class MEPE(ExpectedImprovement):
         if not cv_errors_file.exists():
             return 0.5
 
-        with open(cv_errors_file, "r") as f:
-            obj = json.load(f)
-            npoints = obj["added_points"]
-            cv_errors = ModelsResult(obj["cv_errors"])
-            predictions = ModelsResult(obj["predictions"])
+        try:
+            with open(cv_errors_file, "r") as f:
+                obj = json.load(f)
+                npoints = obj["added_points"]
+                cv_errors = ModelsResult(obj["cv_errors"])
+                predictions = ModelsResult(obj["predictions"])
+        except json.JSONDecodeError:
+            return 0.5
 
         alpha_sum = 0.0
         nalpha = 0
@@ -106,8 +110,11 @@ class MEPE(ExpectedImprovement):
         epe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
 
         from ichor.globals import GLOBALS
-
-        with open(GLOBALS.FILE_STRUCTURE["cv_errors"], "w") as f:
+        cv_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
+        mkdir(cv_file.parent)
+        if cv_file.exists():
+            cv_file.unlink()
+        with open(cv_file, "w") as f:
             json.dump(
                 {
                     "added_points": npoints,

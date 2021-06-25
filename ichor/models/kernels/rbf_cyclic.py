@@ -72,7 +72,5 @@ class RBFCyclic(Kernel):
         diff = x1[np.newaxis,:,:] - x2[:,np.newaxis,:]
         mask = (np.array([x for x in range(len(self._lengthscale))]) + 1) % 3 == 0
         diff[:,:,mask] = (diff[:,:,mask] + np.pi) % (2 * np.pi) - np.pi
-        diff = np.power(diff / self._lengthscale, 2)
-        print(np.exp(-0.5* np.sum(diff, axis=2)))
-        quit()
+        diff = np.power(diff, 2) * self._lengthscale
         return np.exp(-0.5* np.sum(diff, axis=2))
