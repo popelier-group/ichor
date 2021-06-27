@@ -1,8 +1,5 @@
 import os
-
-from .common.functools import get_functions_to_run, run_function
-
-
+from .common.functools import run_function
 class Problem:
     def __init__(self, name="", problem="", solution=""):
         self.name = name

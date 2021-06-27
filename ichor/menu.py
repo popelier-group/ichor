@@ -1,3 +1,5 @@
+"""Main menu that pops up when you run python ICHOR.py (specifically python3 ICHOR.py)"""
+
 import os
 import sys
 from typing import Callable, List

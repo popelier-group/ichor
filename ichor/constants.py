@@ -1,3 +1,5 @@
+"""Contains all avalable settings for Gaussian, AIMALL, FEREBUS, as well as constant values that are used throughout ICHOR to make conversions, etc."""
+
 import random
 from typing import Dict, List
 

@@ -1,3 +1,5 @@
+"""Contains patterns that ICHOR looks for in output files from Gaussian/AIMALL."""
+
 import re
 
 COORDINATE_LINE = re.compile(r"\s*\w+(\s*[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}")

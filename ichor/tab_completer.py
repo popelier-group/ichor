@@ -1,3 +1,5 @@
+"""Implements Tab completion for ICHOR's menus. Tab completion is handy when providing files or browsing between ICHOR menus."""
+
 import os
 from abc import ABC, abstractmethod
 from glob import glob
