@@ -11292,12 +11292,6 @@ class DlpolyTools:
     def write_control_updated(control_file):
         with open(control_file, "w+") as f:
             f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
-            f.write(
-                "# This is a generic CONTROL file. Please adjust to your requirement.\n"
-            )
-            f.write(
-                "# Directives which are commented are some useful options.\n"
-            )
             f.write("\n")
             f.write("ensemble nvt hoover 0.04\n")
             if int(GLOBALS.DLPOLY_TEMPERATURE) == 0:
@@ -11309,38 +11303,16 @@ class DlpolyTools:
             else:
                 f.write(f"temperature {GLOBALS.DLPOLY_TEMPERATURE}\n")
                 f.write("\n")
-            f.write(
-                "# Cap forces during equilibration, in unit kT/angstrom.\n"
-            )
-            f.write("# (useful if your system is far from equilibrium)\n")
-            f.write("# cap 100.0\n")
-            f.write("\n")
-            f.write("# Bypass checking restrictions and reporting\n")
-            f.write("# no index\n")
-            f.write("# no strict\n")
-            f.write("# no topolgy\n")
-            f.write("# no vdw\n")
             f.write("\n")
             f.write(f"timestep {GLOBALS.DLPOLY_TIMESTEP}\n")
             f.write(f"steps {GLOBALS.DLPOLY_NUMBER_OF_STEPS}\n")
-            f.write(f"# equilibration {GLOBALS.DLPOLY_NUMBER_OF_STEPS}\n")
             f.write("scale 100\n")
             f.write("\n")
-            f.write("cutoff 15.0\n")
-            f.write("fflux\n")
-            f.write("spme precision 1d-6\n")
-            f.write("cutoff  0.5\n")
-            f.write("rvdw    0.5\n")
+            f.write("cutoff 8.0\n")
+            f.write("rvdw   8.0\n")
             f.write("vdw direct\n")
             f.write("vdw shift\n")
-            f.write("fflux ewald L1\n")
-            f.write("\n")
-            f.write("# Need these for bond contraints\n")
-            f.write("# mxshak 100\n")
-            f.write("# shake 1.0e-6\n")
-            f.write("\n")
-            f.write("# Continue MD simulation\n")
-            f.write("# restart\n")
+            f.write("fflux cluster L1\n")
             f.write("\n")
             f.write("dump  1000\n")
             f.write("traj 0 1 0\n")
@@ -11356,9 +11328,9 @@ class DlpolyTools:
         with open(config_file, "w+") as f:
             f.write("Frame :         1\n")
             f.write("\t0\t1\n")  # PBC Solution to temporary problem
-            f.write("25.0 0.0 0.0\n")
-            f.write("0.0 25.0 0.0\n")
-            f.write("0.0 0.0 25.0\n")
+            f.write("50.0 0.0 0.0\n")
+            f.write("0.0 50.0 0.0\n")
+            f.write("0.0 0.0 50.0\n")
             for atom in atoms:
                 f.write(
                     f"{atom.type}  {atom.num}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.num}\n"
