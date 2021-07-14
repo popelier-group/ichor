@@ -66,7 +66,7 @@ class Models(Directory, list):
     def _features_from_list_of_atoms_models(
         self, x: ListOfAtoms
     ) -> Dict[str, np.ndarray]:
-        return {atom: x[atom].features for atom in self.atoms}
+        return {atom: x[atom].features for atom in self.atoms if atom in x.atom_names}
 
     def _features_from_array(self, x: np.ndarray):
         if x.ndim == 2:

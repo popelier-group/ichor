@@ -26,7 +26,8 @@ class Atoms(list):
         self._centred = False
         self._counter = it.count(1)
         if atoms is not None:
-            self.add(atoms)
+            for atom in atoms:
+                self.add(atom)
 
     def add(self, atom: Atom):
         """

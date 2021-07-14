@@ -53,12 +53,12 @@ class Trajectory(ListOfAtoms, File):
         else:
             self.append(Atoms(atoms))
 
-    def extend(self, atoms):
-        """extend the current trajectory by another list of atoms (could be another trajectory list)"""
-        if isinstance(atoms, Atoms):
-            self.extend(atoms)
-        else:
-            self.extend(Atoms(atoms))
+    # def extend(self, atoms):
+    #     """extend the current trajectory by another list of atoms (could be another trajectory list)"""
+    #     if isinstance(atoms, Atoms):
+    #         self.extend(atoms)
+    #     else:
+    #         self.extend(Atoms(atoms))
 
     def write(self, fname=None):
         """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
