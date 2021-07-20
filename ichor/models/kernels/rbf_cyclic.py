@@ -1,4 +1,5 @@
 import numpy as np
+from functools import cached_property
 
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
@@ -47,11 +48,15 @@ class RBFCyclic(Kernel):
                 deviations for each feature, calculated from the training set points.
         """
 
-        self._lengthscale = lengthscale
+        self._lengthscale = lengthscale # np.power(1/(2.0 * lengthscale), 2)
 
     @property
     def params(self):
         return self._lengthscale
+
+    @cached_property
+    def mask(self):
+        return (np.array([x for x in range(len(self._lengthscale))]) + 1) % 3 == 0
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calcualtes cyclic RBF covariance matrix from two sets of points
@@ -69,8 +74,11 @@ class RBFCyclic(Kernel):
 
         # work with distance matrices for each dimension(feature) and check which phi matrices if corrections are needed
         # after distance matrices for each dimension are computed(and corrected where needed), divide by lengthscale and square
-        diff = x1[np.newaxis,:,:] - x2[:,np.newaxis,:]
-        mask = (np.array([x for x in range(len(self._lengthscale))]) + 1) % 3 == 0
-        diff[:,:,mask] = (diff[:,:,mask] + np.pi) % (2 * np.pi) - np.pi
-        diff = np.power(diff, 2) * self._lengthscale
-        return np.exp(-0.5* np.sum(diff, axis=2))
+        # diff = x1[np.newaxis, :, :] - x2[:, np.newaxis, :]
+        # mask = (np.array([x for x in range(len(self._lengthscale))]) + 1) % 3 == 0
+        # diff[:, :, mask] = (diff[:, :, mask] + np.pi) % (2 * np.pi) - np.pi
+        # diff = self._lengthscale * diff * diff
+        # return np.exp(-0.5 * np.sum(diff, axis=2))
+        diff = x1 - x2
+        diff[self.mask] = (diff[self.mask] + np.pi) % (2 * np.pi) - np.pi
+        return np.exp(-0.5 * np.sum(self._lengthscale * np.power(diff, 2)))

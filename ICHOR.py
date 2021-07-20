@@ -6934,7 +6934,6 @@ class INT(Point):
         self.atom = os.path.splitext(os.path.basename(self.path))[0].upper()
 
         self.parent = atom
-        printq(self.C)
 
         self.integration_results = {}
         self.multipoles = {}

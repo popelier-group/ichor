@@ -56,7 +56,7 @@ class Trajectory(ListOfAtoms, File):
     # def extend(self, atoms):
     #     """extend the current trajectory by another list of atoms (could be another trajectory list)"""
     #     if isinstance(atoms, Atoms):
-    #         self.extend(atoms)
+    #         super().extend(atoms)
     #     else:
     #         self.extend(Atoms(atoms))
 

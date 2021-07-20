@@ -31,11 +31,22 @@ class Kernel(ABC):
 
     def r(self, x_train: np.ndarray, x_test: np.ndarray) -> np.ndarray:
         """helper method to return x_test, x_train covariance matrix K(X*, X)"""
-        return self.k(x_test, x_train)
+        r = np.empty((x_test.shape[0], x_train.shape[0]))
+        for i in range(x_test.shape[0]):
+            for j in range(x_train.shape[0]):
+                r[i, j] = self.k(x_test[i], x_train[j])
+        return r
 
     def R(self, x_train: np.ndarray) -> np.ndarray:
         """helper method to return symmetric square matrix x_train, x_train covariance matrix K(X, X)"""
-        return self.k(x_train, x_train)
+        # return self.k(x_train, x_train)
+        R = np.empty((x_train.shape[0], x_train.shape[0]))
+        for i in range(x_train.shape[0]):
+            R[i, i] = 1.0
+            for j in range(i+1, x_train.shape[0]):
+                R[i, j] = self.k(x_train[i], x_train[j])
+                R[j, i] = R[i, j]
+        return R
 
     def __add__(self, other):
         return KernelSum(self, other)

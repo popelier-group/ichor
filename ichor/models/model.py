@@ -1,4 +1,4 @@
-from functools import wraps
+from functools import wraps, cached_property
 
 import numpy as np
 
@@ -64,7 +64,7 @@ class Model(File):
                     self.ntrain = int(line.split()[1])
 
                 if "[mean]" in line:
-                    line = next(f)
+                    _ = next(f)
                     line = next(f)
                     self.mean = ConstantMean(float(line.split()[1]))
 
@@ -77,14 +77,13 @@ class Model(File):
                     kernel_type = line.split()[-1].strip()
 
                     if kernel_type == "rbf":
-                        line = next(f)
-                        line = next(f)
+                        _ = next(f)
+                        _ = next(f)
                         line = next(f)
                         lengthscale = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
                         # TODO: Change theta from FEREBUS to lengthscale to match label
-                        lengthscale = np.sqrt(1 / (2.0 * lengthscale))
                         kernel_list[kernel_name] = RBF(lengthscale)
                     elif kernel_type in [
                         "rbf-cyclic",
@@ -124,6 +123,7 @@ class Model(File):
                         except:
                             break
                     self.weights = np.array(weights)
+                    self.weights = self.weights[:, np.newaxis]
 
         self.k = KernelInterpreter(kernel_composition, kernel_list).interpret()
 
@@ -132,13 +132,14 @@ class Model(File):
         return ".model"
 
     def write(self) -> None:
+        #TODO
         pass
 
-    @property
+    @cached_property
     def atom_num(self) -> int:
         return get_digits(self.atom)
 
-    @property
+    @cached_property
     def i(self) -> int:
         return self.atom_num - 1
 
@@ -146,18 +147,22 @@ class Model(File):
     def r(self, x: np.ndarray) -> np.ndarray:
         return self.k.r(self.x, x)
 
-    @property
+    @cached_property
     def R(self) -> np.ndarray:
         return self.k.R(self.x)
 
-    @property
+    @cached_property
     def invR(self) -> np.ndarray:
         return np.linalg.inv(self.R)
 
     @check_x_2d
     def predict(self, x: np.ndarray) -> np.ndarray:
-        r = self.k.r(self.x, x).T
-        return self.mean.value(x) + np.matmul(r, self.weights)
+        r = self.k.r(self.x, x)
+        # print(r)
+        # quit()
+        # self.mean.value(x) + np.matmul(r, self.weights)
+        # print(self.weights)
+        return self.mean.value(x) + np.matmul(r.T, np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)))
 
     @check_x_2d
     def variance(self, x: np.ndarray) -> np.ndarray:
