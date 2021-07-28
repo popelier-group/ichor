@@ -4,7 +4,7 @@ import numpy as np
 
 
 class ListOfAtoms(list):
-    """Used to focus only on how one atom moves in a trajectory, so the usercan do something
+    """Used to focus only on how one atom moves in a trajectory, so the user can do something
      like trajectory['C1'] where trajectory is an instance of class Trajectory. This way the
     user can also do trajectory['C1'].features, trajectory['C1'].coordinates, etc."""
 
