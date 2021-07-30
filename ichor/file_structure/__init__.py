@@ -3,7 +3,7 @@ from ichor.file_structure.tree import FileTree
 
 __all__ = ["FileStructure"]
 
-
+#TODO: Place in a file_structure.py file instead of here
 class FileStructure(FileTree):
     def __init__(self):
         super(FileStructure, self).__init__()
