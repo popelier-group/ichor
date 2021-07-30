@@ -8,6 +8,8 @@ from ichor.points.points import Points
 
 
 class PointsDirectory(Points, Directory):
+    """A directory which contains points (molecules with various geometries) which are fed to Gaussian or AIMALL to get data for GPR.
+    """
     def __init__(self, path):
         Points.__init__(self)
         Directory.__init__(self, path)

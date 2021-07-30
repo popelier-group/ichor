@@ -1,3 +1,4 @@
+# todo: remove shutil as it is not used
 import shutil
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -7,17 +8,20 @@ from ichor.common.functools import called_from_hasattr, hasattr
 
 
 class FileState(Enum):
+    """An enum that is used to make it easier to check the current file state."""
     Unread = 1
     Reading = 2
     Read = 3
 
 
 class PathObject(ABC, object):
+    """An abstract base class that is used for anything that has a path (i.e. files or directories)"""
+
     def __init__(self, path):
         self.path = Path(path)
         self.state = FileState.Unread
 
-        if self.exists():
+        if self.exists(): 
             from ichor.files.directory import Directory
 
             if (
@@ -32,13 +36,16 @@ class PathObject(ABC, object):
                 raise TypeError(f"{self.path} is not a file")
 
     def exists(self) -> bool:
+        """Determines if the path points to an existing directory or file on the storage drive."""
         return self.path.exists()
 
     @abstractmethod
     def move(self, dst) -> None:
+        """An abstract method that subclasses need to implement. This is used to move files around."""
         pass
 
     def __getattribute__(self, item):
+        # todo: not sure what this does
         if not called_from_hasattr() and (
             (
                 not hasattr(self, item)
