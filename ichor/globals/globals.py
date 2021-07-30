@@ -73,6 +73,7 @@ class Globals:
     SAMPLE_POOL_METHOD: List[str] = ["random"]
     VALIDATION_SET_METHOD: List[str] = ["random"]
 
+    # todo: thought we were using normal rbf kernel
     KERNEL: str = "rbf-cyclic"  # rbf or rbf-cyclic currently
     FEREBUS_TYPE: str = (
         "executable"  # executable (FEREBUS) or python (FEREBUS.py)
@@ -329,6 +330,7 @@ class Globals:
         if self.DROP_N_COMPUTE_LOCATION:
             io.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
+        # todo: why is the training set structure generated in Globals?
         if self.FILE_STRUCTURE["training_set"].exists():
             from ichor.files import GJF
 
@@ -409,6 +411,7 @@ class Globals:
 
     @property
     def global_variables(self):
+        # todo: remove import because it is not used
         from optparse import OptionParser
 
         try:

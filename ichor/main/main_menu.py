@@ -2,7 +2,7 @@ from ichor.main.tools_menu import tools_menu
 from ichor.main.queue import queue_menu
 from ichor.menu import Menu
 
-
+#TODO: move this to a separate file because adaptive sampling is in its own file
 def points_directory_menu(path):
     from ichor.main.make_models import make_models_menu
     from ichor.main.submit_gjfs import submit_gjfs
@@ -27,6 +27,7 @@ def points_directory_menu(path):
 
 
 def main_menu() -> None:
+    """Initialize the main menu Command Line Interface (CLI) for ICHOR."""
     from ichor.auto_run import auto_run
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
