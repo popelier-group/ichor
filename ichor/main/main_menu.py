@@ -28,6 +28,7 @@ def points_directory_menu(path):
 
 def main_menu() -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR."""
+    
     from ichor.auto_run import auto_run
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
