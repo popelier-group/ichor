@@ -8,10 +8,12 @@ from ichor.files.path_object import PathObject
 
 
 class Directory(PathObject, ABC):
+    """A class that implements helper methods for working with directories (which are stored on a hard drive).
+    :param path: The path to a directory"""
     def __init__(self, path):
-        PathObject.__init__(self, path)
-        self.parse()
-        self.parsed = True
+        PathObject.__init__(self, path) # set path for directory instance as well as FileState to Unread
+        self.parse() # parse directory to find contents
+        self.parsed = True  # todo: remove this attribute as it is not used anywhere else, the self.state is Unread from PathObject init
 
     def parse(self) -> None:
         filetypes = {}
@@ -38,8 +40,14 @@ class Directory(PathObject, ABC):
                         break
 
     def move(self, dst):
-        self.path.replace(dst)
+        """
+        Move a directory to a new location (a new path)
+        :param dst: The new path of the directory
+        """
+
+        self.path.replace(dst)  # todo: (from pathlib 3.8) This should be self.path = self.path.replace(dst) as .replace() returns a new Path instance pointing to dst 
         self.path = dst
+        # todo: doesn't replacing the path automatically move all other files?
         for f in self.path.iterdir():
             if f.is_file():
                 fdst = self.path / f"{self.path.name}{f.suffix}"
@@ -60,6 +68,7 @@ class Directory(PathObject, ABC):
 
     @buildermethod
     def read(self) -> "Directory":
+        # todo: Not sure what exactly it does
         if self.state is FileState.Unread:
             self.state = FileState.Reading
             for var in vars(self):

@@ -138,14 +138,14 @@ class Menu(object):
         wait: bool = False,
         auto_close: bool = False,
         hidden: bool = False,
-    ):
-        #TODO: do not know what the handler function is supposed to do exactly, so it is not documented
-        #TODO: do not know what the wait/wait options do exactly
-        #TODO do not know what auto_close does, does it close the menu only or the whole ICHOR?
+    ) -> None:
+        #todo: do not know what the handler function is supposed to do exactly, so it is not documented
+        #todo: do not know what the wait/wait options do exactly
+        #todo: do not know what auto_close does, does it close the menu only or the whole ICHOR?
         """
         Add menu option that the user can select
         
-        :param label: The keyboard key that needs to be pressed in order to go to the menu option
+        :param label: The letter/word that needs to be typed into the input prompt in order to go to the menu option
         :param name: The name of the option that can be selected by the user
         :param handles: A function
         :param kwargs: Key word arguments to be passed to the `handler` function

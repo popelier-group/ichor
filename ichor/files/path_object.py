@@ -21,7 +21,7 @@ class PathObject(ABC, object):
         self.path = Path(path)
         self.state = FileState.Unread
 
-        if self.exists(): 
+        if self.exists():
             from ichor.files.directory import Directory
 
             if (
