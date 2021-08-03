@@ -16,10 +16,9 @@ class Menu(object):
     :param options: A list of options to be displayed. Default is None. Options are added using `add_option` method.
     :param message: A message to be displayed at the top of the menu
     :param prompt: A set of characters that appear where user input will be taken
-    :param refresh:
     :param auto_clear: Whether to clear the screen before a menu is shown. Default True.
     :param enable_problems: Whether to display any problems that ICHOR has found with the current setup.
-    :param auto_close: 
+    :param auto_close: Whether or not to close ICHOR once a function is executed.
     :param space: Whether to add a blank line at the bottom of the menu. This is added when the Back and Exit options are present.
     :param back: Whether to add a back option in the current menu in order to go to previous menu.
     :param exit: Whether to add an exit option to exit ICHOR.
@@ -47,8 +46,6 @@ class Menu(object):
         self.is_title_enabled = title is not None
         self.message = message
         self.is_message_enabled = message is not None
-        self.refresh = None
-        self.set_refresh(refresh)
         self.prompt = prompt
         self.is_open = None
         self.auto_clear = auto_clear
@@ -100,11 +97,6 @@ class Menu(object):
     def set_prompt(self, prompt: str) -> None:
         """Set the prompt characters that are displayed where user input is typed in."""
         self.prompt = prompt
-
-    def set_refresh(self, refresh) -> None:
-        if not callable(refresh):
-            raise TypeError(refresh, "refresh is not callable")
-        self.refresh = refresh
 
     def clear_options(self) -> None:
         """Clear the current set of options that were stored (and which the user could select from), so that a new set of options can be displayed
