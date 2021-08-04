@@ -15,7 +15,7 @@ class Menu(object):
     :param options: A list of options to be displayed. Default is None. Options are usually added using `add_option` method.
     :param message: A message to be displayed at the top of the menu
     :param prompt: A set of characters that appear where user input will be taken
-    :param refresh: matt_todo not sure how this refresh works
+    :param refresh: matt_todo not sure how this refresh works, so I have not documented methods/variables which relate to it.
     :param auto_clear: Whether to clear the screen before a menu is shown. Default True.
     :param enable_problems: Whether to display any problems that ICHOR has found with the current setup.
     :param auto_close: Whether or not to close ICHOR once a function is executed.
