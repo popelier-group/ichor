@@ -8,12 +8,11 @@ from ichor.tab_completer import ListCompleter
 
 
 class Menu(object):
-    #TODO: do not understand some of the init arguments and their use cases
     """A constructor class that makes menus for menus to be displayed in the ICHOR CLU, such as
     when `python ICHOR.py (specifically python3 ICHOR.py)` is ran
     
     :param title: The title of the menu
-    :param options: A list of options to be displayed. Default is None. Options are added using `add_option` method.
+    :param options: A list of options to be displayed. Default is None. Options are usually added using `add_option` method.
     :param message: A message to be displayed at the top of the menu
     :param prompt: A set of characters that appear where user input will be taken
     :param auto_clear: Whether to clear the screen before a menu is shown. Default True.
@@ -64,6 +63,11 @@ class Menu(object):
         self.exit = exit
 
     def set_options(self, options):
+        """If a list of options to be displayed in the menu is passed when an instance of the class `Menu` is made, then this method is called.
+        Usually, this method is not used but instead the `add_option` method is used instead once an instance has already been made.
+
+        :param options: A list of tuples of options. Must have a label, name, and handler. See `add_option` method for details.
+        """
         original = self.options
         self.options = {}
         try:
@@ -139,10 +143,10 @@ class Menu(object):
         
         :param label: The letter/word that needs to be typed into the input prompt in order to go to the menu option
         :param name: The name of the option that can be selected by the user
-        :param handles: A function
+        :param handler: A function which is going to perform the operation selected by the user, eg. submit_gjfs() will submit Gaussian gjf files.
         :param kwargs: Key word arguments to be passed to the `handler` function
-        :param wait:
-        :param auto_close:
+        :param wait: Whether or not to wait for user input (press Enter) before the user can type in another input/navigate the menu.
+        :param auto_close: Whether or not to close ICHOR once a function is executed.
         :param hidden: Whether or not to display this as an option in the menu or remain hidden (but can still be accessed to by the user)
         """
         if kwargs is None:
@@ -179,7 +183,7 @@ class Menu(object):
         while self.is_open:
             self.refresh(self)
             func, wait, close = self.input()
-            if func == Menu.CLOSE:
+            if func == Menu.CLOSE: # if self.input() returns Menu.CLOSE, then set func to self.close
                 func = self.close
             print()
             func()
@@ -199,11 +203,11 @@ class Menu(object):
         print()
 
     def print_problems(self) -> None:
+        # matt_todo: remove UsefulTools from here as it is not even imported. This method does not work right now?
         """Print problems found (such as with config files, etc.) at the top of the menu."""
         problems = ProblemFinder()
         problems.find()
         if len(problems) > 0:
-            # TODO: remove UsefulTools from here as it is not even imported.
             max_len = UsefulTools.count_digits(len(problems))
             s = "s" if len(problems) > 1 else ""
             print(f"Problem{s} Found:")
@@ -261,7 +265,7 @@ class Menu(object):
                 print()
         print()
 
-    # TODO: this method is not used anywhere in ICHOR, so do not think it is needed.
+    # matt_todo: this method is not used anywhere in ICHOR, so do not think it is needed.
     def func_wrapper(self, func):
         func()
         self.close()
@@ -273,42 +277,59 @@ class Menu(object):
         """Shows the menu and waits for user input into the prompt. Once a user input is detected, it returns the
         handler function (with its respective key word arguments), as well as boolean values whether depending on
         whether or not there are wait or close options associated with the handler function.
-        
-        .. note:: A lambda function (unnamed function) which has NOT been executed is returned. This lambda function
-        contains the handler function. See the `run` method, where the lambda function is actually executed and thus the
-        inner handler function is executed then, not here.
+
+        .. note::
+            A lambda function (unnamed function) which has NOT been executed is returned by this method. This lambda function
+            contains the handler function. See the `run` method, where the lambda function is actually executed and thus the
+            inner handler function is executed then, not here.
         """
+        # if no options then close the menu
         if len(self.options) == 0:
             return Menu.CLOSE
 
+        # show the menu
         self.show()
 
-        with ListCompleter(self.get_options()):
+        # allow for user input to select options
+        with ListCompleter(self.get_options()): # get the labels to be autocompleted
             while True:
                 try:
-                    index = str(input(self.prompt + " ")).strip()
-                    option = self.options[index]
-                    handler = option[1]
+                    index = str(input(self.prompt + " ")).strip() # get the index of the option
+                    option = self.options[index] # get the values from the self.options dictionary
+                    handler = option[1] # the first value in the returned list is the function which handles the operation
                     if handler == Menu.CLOSE:
                         return Menu.CLOSE, False, False
-                    kwargs = option[2]
+                    kwargs = option[2] # the second option is any key word arguments to be passed to the handler function
                     return (
                         lambda: handler(**kwargs),
-                        index in self.wait_options,
-                        index in self.close_options,
+                        index in self.wait_options,  # returns True or False
+                        index in self.close_options,  # returns True or False
                     )
                 except (ValueError, IndexError):
-                    return self.input(), False, False
+                    # matt_todo: Here self.input() is executed, but shouldn't the return value be self.input, False, False
+                    # so then going to the .run method func is self.input which is later executed?
+                    return self.input(), False, False 
                 except KeyError:
                     print("Error: Invalid input")
 
     def CLOSE(self):
+        """Used to determine if the current menu should be closed."""
         pass
 
     def __enter__(self):
+        """
+        To be used when a Menu is constructed as a context manager. Returns the instance of a menu.
+        For example, in main_menu.py `with Menu(f"{path} Menu", space=True, back=True, exit=True) as menu:`
+        is used where `with Menu(f"{path} Menu", space=True, back=True, exit=True)` is going to make a new
+        instance of class `Menu` which is going to be stored in the variable `menu`. Then, this `menu`
+        object can be manipulated (i.e. can have options added to it) inside the `with` block.
+        """
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Once the `menu`'s `with` context manager block ends, this `__exit__ method is automatically called. It adds
+        options to navigate to other menus as well as to exit ICHOR. Finally, the menu's `run` method is called, which
+        prints out the menu to the terminal with the options that the user can select from."""
         if any([self.space, self.back, self.exit]):
             self.add_final_options(self.space, self.back, self.exit)
         self.run()
