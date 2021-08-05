@@ -3,6 +3,7 @@ This module provides an interface for invoking CMake executable.
 """
 
 from __future__ import print_function
+
 import argparse
 import distutils.sysconfig as du_sysconfig
 import glob
@@ -12,20 +13,19 @@ import os
 import os.path
 import platform
 import re
-import subprocess
 import shlex
+import subprocess
 import sys
 import sysconfig
 
-from .constants import (CMAKE_BUILD_DIR,
-                        CMAKE_DEFAULT_EXECUTABLE,
-                        CMAKE_INSTALL_DIR,
-                        SETUPTOOLS_INSTALL_DIR)
-from .platform_specifics import get_platform
+from .constants import (CMAKE_BUILD_DIR, CMAKE_DEFAULT_EXECUTABLE,
+                        CMAKE_INSTALL_DIR, SETUPTOOLS_INSTALL_DIR)
 from .exceptions import SKBuildError
+from .platform_specifics import get_platform
 
 RE_FILE_INSTALL = re.compile(
-    r"""[ \t]*file\(INSTALL DESTINATION "([^"]+)".*"([^"]+)"\).*""")
+    r"""[ \t]*file\(INSTALL DESTINATION "([^"]+)".*"([^"]+)"\).*"""
+)
 
 
 def pop_arg(arg, args, default=None):
@@ -76,15 +76,19 @@ def get_cmake_version(cmake_executable=CMAKE_DEFAULT_EXECUTABLE):
     Raises :class:`skbuild.exceptions.SKBuildError` if it failed to execute CMake.
     """
     try:
-        version_string = subprocess.check_output([cmake_executable, '--version'])
+        version_string = subprocess.check_output(
+            [cmake_executable, "--version"]
+        )
     except (OSError, subprocess.CalledProcessError):
         raise SKBuildError(
-            "Problem with the CMake installation, aborting build. CMake executable is %s" % cmake_executable)
+            "Problem with the CMake installation, aborting build. CMake executable is %s"
+            % cmake_executable
+        )
 
     if sys.version_info > (3, 0):
         version_string = version_string.decode()
 
-    return version_string.splitlines()[0].split(' ')[-1]
+    return version_string.splitlines()[0].split(" ")[-1]
 
 
 class CMaker(object):
@@ -100,11 +104,11 @@ class CMaker(object):
         Returns None if not found.
         """
         try:
-            cmake_generator = 'CMAKE_GENERATOR:INTERNAL='
-            with open(os.path.join(CMAKE_BUILD_DIR(), 'CMakeCache.txt')) as fp:
+            cmake_generator = "CMAKE_GENERATOR:INTERNAL="
+            with open(os.path.join(CMAKE_BUILD_DIR(), "CMakeCache.txt")) as fp:
                 for line in fp:
                     if line.startswith(cmake_generator):
-                        return line[len(cmake_generator):].strip()
+                        return line[len(cmake_generator) :].strip()
         except (OSError, IOError):
             pass
 
@@ -119,9 +123,16 @@ class CMaker(object):
 
         return None
 
-    def configure(self, clargs=(), generator_name=None, skip_generator_test=False,
-                  cmake_source_dir='.', cmake_install_dir='',
-                  languages=('C', 'CXX'), cleanup=True):
+    def configure(
+        self,
+        clargs=(),
+        generator_name=None,
+        skip_generator_test=False,
+        cmake_source_dir=".",
+        cmake_install_dir="",
+        languages=("C", "CXX"),
+        cleanup=True,
+    ):
         """Calls cmake to generate the Makefile/VS Solution/XCode project.
 
         clargs: tuple
@@ -164,17 +175,22 @@ class CMaker(object):
             generator_name = os.environ.get("CMAKE_GENERATOR")
 
         # if generator_name is provided on command line, use it
-        clargs, cli_generator_name = pop_arg('-G', clargs)
+        clargs, cli_generator_name = pop_arg("-G", clargs)
         if cli_generator_name is not None:
             generator_name = cli_generator_name
 
         # if arch is provided on command line, use it
-        clargs, cli_arch = pop_arg('-A', clargs)
+        clargs, cli_arch = pop_arg("-A", clargs)
 
         generator = self.platform.get_best_generator(
-            generator_name, skip_generator_test=skip_generator_test,
-            cmake_executable=self.cmake_executable, cmake_args=clargs,
-            languages=languages, cleanup=cleanup, architecture=cli_arch)
+            generator_name,
+            skip_generator_test=skip_generator_test,
+            cmake_executable=self.cmake_executable,
+            cmake_args=clargs,
+            languages=languages,
+            cleanup=cleanup,
+            architecture=cli_arch,
+        )
 
         if not os.path.exists(CMAKE_BUILD_DIR()):
             os.makedirs(CMAKE_BUILD_DIR())
@@ -191,34 +207,39 @@ class CMaker(object):
 
         cmake_source_dir = os.path.abspath(cmake_source_dir)
         cmd = [
-            self.cmake_executable, cmake_source_dir, '-G', generator.name,
-            ("-DCMAKE_INSTALL_PREFIX:PATH=" +
-                os.path.abspath(
-                    os.path.join(CMAKE_INSTALL_DIR(), cmake_install_dir))),
-            ("-DPYTHON_EXECUTABLE:FILEPATH=" +
-                sys.executable),
-            ("-DPYTHON_VERSION_STRING:STRING=" +
-                sys.version.split(' ')[0]),
-            ("-DPYTHON_INCLUDE_DIR:PATH=" +
-                python_include_dir),
-            ("-DPYTHON_LIBRARY:FILEPATH=" +
-                python_library),
-            ("-DSKBUILD:INTERNAL=" +
-                "TRUE"),
-            ("-DCMAKE_MODULE_PATH:PATH=" +
-                os.path.join(os.path.dirname(__file__), "resources", "cmake"))
+            self.cmake_executable,
+            cmake_source_dir,
+            "-G",
+            generator.name,
+            (
+                "-DCMAKE_INSTALL_PREFIX:PATH="
+                + os.path.abspath(
+                    os.path.join(CMAKE_INSTALL_DIR(), cmake_install_dir)
+                )
+            ),
+            ("-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable),
+            ("-DPYTHON_VERSION_STRING:STRING=" + sys.version.split(" ")[0]),
+            ("-DPYTHON_INCLUDE_DIR:PATH=" + python_include_dir),
+            ("-DPYTHON_LIBRARY:FILEPATH=" + python_library),
+            ("-DSKBUILD:INTERNAL=" + "TRUE"),
+            (
+                "-DCMAKE_MODULE_PATH:PATH="
+                + os.path.join(os.path.dirname(__file__), "resources", "cmake")
+            ),
         ]
 
         if generator.toolset:
-            cmd.extend(['-T', generator.toolset])
+            cmd.extend(["-T", generator.toolset])
         if generator.architecture:
-            cmd.extend(['-A', generator.architecture])
+            cmd.extend(["-A", generator.architecture])
 
         cmd.extend(clargs)
 
         cmd.extend(
-            filter(bool,
-                   shlex.split(os.environ.get("SKBUILD_CONFIGURE_OPTIONS", "")))
+            filter(
+                bool,
+                shlex.split(os.environ.get("SKBUILD_CONFIGURE_OPTIONS", "")),
+            )
         )
 
         # changes dir to cmake_build and calls cmake's configure step
@@ -230,8 +251,9 @@ class CMaker(object):
             "  Command:\n"
             "    {}\n".format(
                 os.path.abspath(CMAKE_BUILD_DIR()),
-                self._formatArgsForDisplay(cmd)
-            ))
+                self._formatArgsForDisplay(cmd),
+            )
+        )
         rtn = subprocess.call(cmd, cwd=CMAKE_BUILD_DIR(), env=generator.env)
         if rtn != 0:
             raise SKBuildError(
@@ -245,7 +267,9 @@ class CMaker(object):
                 "Please see CMake's output for more information.".format(
                     self._formatArgsForDisplay(cmd),
                     os.path.abspath(cmake_source_dir),
-                    os.path.abspath(CMAKE_BUILD_DIR())))
+                    os.path.abspath(CMAKE_BUILD_DIR()),
+                )
+            )
 
         CMaker.check_for_bad_installs()
 
@@ -254,10 +278,10 @@ class CMaker(object):
     @staticmethod
     def get_python_version():
         """Get version associated with the current python interpreter."""
-        python_version = sysconfig.get_config_var('VERSION')
+        python_version = sysconfig.get_config_var("VERSION")
 
         if not python_version:
-            python_version = sysconfig.get_config_var('py_version_short')
+            python_version = sysconfig.get_config_var("py_version_short")
 
         if not python_version:
             python_version = ".".join(map(str, sys.version_info[:2]))
@@ -271,13 +295,12 @@ class CMaker(object):
         """Get include directory associated with the current python
         interpreter."""
         # determine python include dir
-        python_include_dir = sysconfig.get_config_var('INCLUDEPY')
+        python_include_dir = sysconfig.get_config_var("INCLUDEPY")
 
         # if Python.h not found (or python_include_dir is None), try to find a
         # suitable include dir
-        found_python_h = (
-            python_include_dir is not None and
-            os.path.exists(os.path.join(python_include_dir, 'Python.h'))
+        found_python_h = python_include_dir is not None and os.path.exists(
+            os.path.join(python_include_dir, "Python.h")
         )
 
         if not found_python_h:
@@ -285,20 +308,20 @@ class CMaker(object):
             # NOTE(opadron): these possible prefixes must be guarded against
             # AttributeErrors and KeyErrors because they each can throw on
             # different platforms or even different builds on the same platform.
-            include_py = sysconfig.get_config_var('INCLUDEPY')
-            include_dir = sysconfig.get_config_var('INCLUDEDIR')
+            include_py = sysconfig.get_config_var("INCLUDEPY")
+            include_dir = sysconfig.get_config_var("INCLUDEDIR")
             include = None
             plat_include = None
             python_inc = None
             python_inc2 = None
 
             try:
-                include = sysconfig.get_path('include')
+                include = sysconfig.get_path("include")
             except (AttributeError, KeyError):
                 pass
 
             try:
-                plat_include = sysconfig.get_path('platinclude')
+                plat_include = sysconfig.get_path("platinclude")
             except (AttributeError, KeyError):
                 pass
 
@@ -315,40 +338,45 @@ class CMaker(object):
                 plat_include = os.path.dirname(plat_include)
             if python_inc is not None:
                 python_inc2 = os.path.join(
-                    python_inc, ".".join(map(str, sys.version_info[:2])))
+                    python_inc, ".".join(map(str, sys.version_info[:2]))
+                )
 
-            candidate_prefixes = list(filter(bool, (
-                include_py,
-                include_dir,
-                include,
-                plat_include,
-                python_inc,
-                python_inc2,
-            )))
+            candidate_prefixes = list(
+                filter(
+                    bool,
+                    (
+                        include_py,
+                        include_dir,
+                        include,
+                        plat_include,
+                        python_inc,
+                        python_inc2,
+                    ),
+                )
+            )
 
             candidate_versions = (python_version,)
             if python_version:
-                candidate_versions += ('',)
+                candidate_versions += ("",)
 
                 pymalloc = None
                 try:
-                    pymalloc = bool(sysconfig.get_config_var('WITH_PYMALLOC'))
+                    pymalloc = bool(sysconfig.get_config_var("WITH_PYMALLOC"))
                 except AttributeError:
                     pass
 
                 if pymalloc:
-                    candidate_versions += (python_version + 'm',)
+                    candidate_versions += (python_version + "m",)
 
             candidates = (
-                os.path.join(prefix, ''.join(('python', ver)))
+                os.path.join(prefix, "".join(("python", ver)))
                 for (prefix, ver) in itertools.product(
-                    candidate_prefixes,
-                    candidate_versions
+                    candidate_prefixes, candidate_versions
                 )
             )
 
             for candidate in candidates:
-                if os.path.exists(os.path.join(candidate, 'Python.h')):
+                if os.path.exists(os.path.join(candidate, "Python.h")):
                     # we found an include directory
                     python_include_dir = candidate
                     break
@@ -363,61 +391,64 @@ class CMaker(object):
         """Get path to the python library associated with the current python
         interpreter."""
         # determine direct path to libpython
-        python_library = sysconfig.get_config_var('LIBRARY')
+        python_library = sysconfig.get_config_var("LIBRARY")
 
         # if static (or nonexistent), try to find a suitable dynamic libpython
-        if (not python_library or
-                os.path.splitext(python_library)[1][-2:] == '.a'):
+        if (
+            not python_library
+            or os.path.splitext(python_library)[1][-2:] == ".a"
+        ):
 
-            candidate_lib_prefixes = ['', 'lib']
+            candidate_lib_prefixes = ["", "lib"]
 
-            candidate_implementations = ['python']
+            candidate_implementations = ["python"]
             if hasattr(sys, "pypy_version_info"):
-                candidate_implementations = ['pypy-c', 'pypy3-c']
+                candidate_implementations = ["pypy-c", "pypy3-c"]
 
-            candidate_extensions = ['.lib', '.so', '.a']
-            if sysconfig.get_config_var('WITH_DYLD'):
-                candidate_extensions.insert(0, '.dylib')
+            candidate_extensions = [".lib", ".so", ".a"]
+            if sysconfig.get_config_var("WITH_DYLD"):
+                candidate_extensions.insert(0, ".dylib")
 
             candidate_versions = [python_version]
             if python_version:
-                candidate_versions.append('')
+                candidate_versions.append("")
                 candidate_versions.insert(
-                    0, "".join(python_version.split(".")[:2]))
+                    0, "".join(python_version.split(".")[:2])
+                )
 
-            abiflags = getattr(sys, 'abiflags', '')
+            abiflags = getattr(sys, "abiflags", "")
             candidate_abiflags = [abiflags]
             if abiflags:
-                candidate_abiflags.append('')
+                candidate_abiflags.append("")
 
             # Ensure the value injected by virtualenv is
             # returned on windows.
             # Because calling `sysconfig.get_config_var('multiarchsubdir')`
             # returns an empty string on Linux, `du_sysconfig` is only used to
             # get the value of `LIBDIR`.
-            libdir = du_sysconfig.get_config_var('LIBDIR')
-            if sysconfig.get_config_var('MULTIARCH'):
-                masd = sysconfig.get_config_var('multiarchsubdir')
+            libdir = du_sysconfig.get_config_var("LIBDIR")
+            if sysconfig.get_config_var("MULTIARCH"):
+                masd = sysconfig.get_config_var("multiarchsubdir")
                 if masd:
                     if masd.startswith(os.sep):
-                        masd = masd[len(os.sep):]
+                        masd = masd[len(os.sep) :]
                     libdir = os.path.join(libdir, masd)
 
             if libdir is None:
-                libdir = os.path.abspath(os.path.join(
-                    sysconfig.get_config_var('LIBDEST'), "..", "libs"))
+                libdir = os.path.abspath(
+                    os.path.join(
+                        sysconfig.get_config_var("LIBDEST"), "..", "libs"
+                    )
+                )
 
             candidates = (
-                os.path.join(
-                    libdir,
-                    ''.join((pre, impl, ver, abi, ext))
-                )
+                os.path.join(libdir, "".join((pre, impl, ver, abi, ext)))
                 for (pre, impl, ext, ver, abi) in itertools.product(
                     candidate_lib_prefixes,
                     candidate_implementations,
                     candidate_extensions,
                     candidate_versions,
-                    candidate_abiflags
+                    candidate_abiflags,
                 )
             )
 
@@ -452,7 +483,9 @@ class CMaker(object):
                 if os.path.splitext(filename)[1] != ".cmake":
                     continue
 
-                with io.open(os.path.join(root, filename), encoding="utf-8") as fp:
+                with io.open(
+                    os.path.join(root, filename), encoding="utf-8"
+                ) as fp:
                     lines = fp.readlines()
 
                 for line in lines:
@@ -461,42 +494,61 @@ class CMaker(object):
                         continue
 
                     destination = os.path.normpath(
-                        match.group(1).replace("${CMAKE_INSTALL_PREFIX}",
-                                               install_dir))
+                        match.group(1).replace(
+                            "${CMAKE_INSTALL_PREFIX}", install_dir
+                        )
+                    )
 
                     if not destination.startswith(install_dir):
                         bad_installs.append(
                             os.path.join(
-                                destination,
-                                os.path.basename(match.group(2))
+                                destination, os.path.basename(match.group(2))
                             )
                         )
 
         if bad_installs:
-            raise SKBuildError("\n".join((
-                "  CMake-installed files must be within the project root.",
-                "    Project Root:",
-                "      " + install_dir,
-                "    Violating Files:",
+            raise SKBuildError(
                 "\n".join(
-                    ("      " + _install) for _install in bad_installs)
-            )))
+                    (
+                        "  CMake-installed files must be within the project root.",
+                        "    Project Root:",
+                        "      " + install_dir,
+                        "    Violating Files:",
+                        "\n".join(
+                            ("      " + _install) for _install in bad_installs
+                        ),
+                    )
+                )
+            )
 
     def make(self, clargs=(), config="Release", source_dir=".", env=None):
         """Calls the system-specific make program to compile code.
         """
-        clargs, config = pop_arg('--config', clargs, config)
+        clargs, config = pop_arg("--config", clargs, config)
         if not os.path.exists(CMAKE_BUILD_DIR()):
-            raise SKBuildError(("CMake build folder ({}) does not exist. "
-                                "Did you forget to run configure before "
-                                "make?").format(CMAKE_BUILD_DIR()))
+            raise SKBuildError(
+                (
+                    "CMake build folder ({}) does not exist. "
+                    "Did you forget to run configure before "
+                    "make?"
+                ).format(CMAKE_BUILD_DIR())
+            )
 
-        cmd = [self.cmake_executable, "--build", source_dir,
-               "--target", "install", "--config", config, "--"]
+        cmd = [
+            self.cmake_executable,
+            "--build",
+            source_dir,
+            "--target",
+            "install",
+            "--config",
+            config,
+            "--",
+        ]
         cmd.extend(clargs)
         cmd.extend(
-            filter(bool,
-                   shlex.split(os.environ.get("SKBUILD_BUILD_OPTIONS", "")))
+            filter(
+                bool, shlex.split(os.environ.get("SKBUILD_BUILD_OPTIONS", ""))
+            )
         )
 
         rtn = subprocess.call(cmd, cwd=CMAKE_BUILD_DIR(), env=env)
@@ -512,7 +564,9 @@ class CMaker(object):
                 "Please see CMake's output for more information.".format(
                     self._formatArgsForDisplay(cmd),
                     os.path.abspath(source_dir),
-                    os.path.abspath(CMAKE_BUILD_DIR())))
+                    os.path.abspath(CMAKE_BUILD_DIR()),
+                )
+            )
 
     def install(self):
         """Returns a list of file paths to install via setuptools that is
@@ -521,8 +575,9 @@ class CMaker(object):
         return self._parse_manifests()
 
     def _parse_manifests(self):
-        paths = \
-            glob.glob(os.path.join(CMAKE_BUILD_DIR(), "install_manifest*.txt"))
+        paths = glob.glob(
+            os.path.join(CMAKE_BUILD_DIR(), "install_manifest*.txt")
+        )
         try:
             return [self._parse_manifest(path) for path in paths][0]
         except IndexError:
@@ -549,4 +604,4 @@ class CMaker(object):
         except ImportError:
             from pipes import quote
 
-        return ' '.join(quote(arg) for arg in args)
+        return " ".join(quote(arg) for arg in args)

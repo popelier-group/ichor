@@ -1,21 +1,20 @@
 from enum import Enum
-from typing import Any, Callable, Optional, Sequence
 from pathlib import Path
+from typing import Any, Callable, Optional, Sequence
 
 from ichor.auto_run.aimall import auto_run_aimall
 from ichor.auto_run.ferebus import auto_run_ferebus
 from ichor.auto_run.gaussian import auto_run_gaussian
-from ichor.auto_run.ichor import (adaptive_sampling, make_models, submit_gjfs,
-                                  submit_wfns, make_sets)
+from ichor.auto_run.ichor import (adaptive_sampling, make_models, make_sets,
+                                  submit_gjfs, submit_wfns)
 from ichor.batch_system import JobID
+from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
+from ichor.files import Trajectory
+from ichor.globals import GLOBALS
+from ichor.make_sets import make_sets_npoints
 from ichor.points import PointsDirectory
 from ichor.submission_script import DataLock
-from ichor.globals import GLOBALS
-from ichor.files import Trajectory
-from ichor.make_sets import make_sets_npoints
-from ichor.common.points import get_points_location
-
 
 __all__ = [
     "auto_run_gaussian",
@@ -122,10 +121,13 @@ def next_iter(
             else:
                 raise ValueError("Unknown Points Location")
 
-            IterArgs.nPoints.value = make_sets_npoints(points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD)
-            job_id = IterStep(make_sets, IterUsage.All, [points_location]).run(job_id, state)
+            IterArgs.nPoints.value = make_sets_npoints(
+                points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
+            )
+            job_id = IterStep(make_sets, IterUsage.All, [points_location]).run(
+                job_id, state
+            )
             print(f"Submitted: {job_id}")
-
 
     else:
         IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION

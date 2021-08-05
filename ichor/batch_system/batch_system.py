@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir

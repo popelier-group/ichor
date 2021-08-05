@@ -1,6 +1,7 @@
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional
+
 import numpy as np
 
 from ichor import constants
@@ -275,8 +276,9 @@ def write_training_set(atom, training_data) -> Path:
 
 
 def write_ftoml(ferebus_directory, atom):
+    from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import \
+        ALFFeatureCalculator
     from ichor.globals import GLOBALS
-    from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import ALFFeatureCalculator
 
     ftoml_file = ferebus_directory / "ferebus.toml"
     alf = list(np.array(ALFFeatureCalculator._alf[get_digits(atom) - 1]) + 1)

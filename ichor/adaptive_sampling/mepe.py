@@ -7,8 +7,8 @@ from scipy.spatial.distance import cdist
 
 from ichor.adaptive_sampling.expected_improvement import ExpectedImprovement
 from ichor.atoms import ListOfAtoms
-from ichor.models import Model, ModelsResult
 from ichor.common.io import mkdir
+from ichor.models import Model, ModelsResult
 
 
 def B(model: Model) -> float:
@@ -110,6 +110,7 @@ class MEPE(ExpectedImprovement):
         epe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
 
         from ichor.globals import GLOBALS
+
         cv_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
         mkdir(cv_file.parent)
         if cv_file.exists():

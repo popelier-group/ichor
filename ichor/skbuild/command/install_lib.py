@@ -5,8 +5,8 @@ from distutils import log as distutils_log
 
 from setuptools.command.install_lib import install_lib as _install_lib
 
-from . import set_build_base_mixin
 from ..utils import distribution_hide_listing, new_style
+from . import set_build_base_mixin
 
 
 class install_lib(set_build_base_mixin, new_style(_install_lib)):

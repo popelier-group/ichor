@@ -8,7 +8,9 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
 
 
 def auto_run_aimall(
-    npoints: MutableValue, atoms: MutableValue = None, hold: Optional[JobID] = None,
+    npoints: MutableValue,
+    atoms: MutableValue = None,
+    hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     script_name = SCRIPT_NAMES["aimall"]
     aimall_script = SubmissionScript(script_name)

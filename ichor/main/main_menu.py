@@ -1,5 +1,5 @@
-from ichor.main.tools_menu import tools_menu
 from ichor.main.queue import queue_menu
+from ichor.main.tools_menu import tools_menu
 from ichor.menu import Menu
 
 

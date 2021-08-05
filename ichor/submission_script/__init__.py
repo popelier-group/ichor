@@ -45,7 +45,7 @@ SCRIPT_NAMES = ScriptNames(
                 "aimall": "ICHOR_AIMALL.sh",
                 "ferebus": "ICHOR_FEREBUS.sh",
                 "adaptive_sampling": "ICHOR_ADAPTIVE_SAMPLING.sh",
-                "make_sets": "ICHOR_MAKE_SETS.sh"
+                "make_sets": "ICHOR_MAKE_SETS.sh",
             }
         ),
     }

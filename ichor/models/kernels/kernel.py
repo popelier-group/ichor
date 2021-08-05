@@ -43,7 +43,7 @@ class Kernel(ABC):
         R = np.empty((x_train.shape[0], x_train.shape[0]))
         for i in range(x_train.shape[0]):
             R[i, i] = 1.0
-            for j in range(i+1, x_train.shape[0]):
+            for j in range(i + 1, x_train.shape[0]):
                 R[i, j] = self.k(x_train[i], x_train[j])
                 R[j, i] = R[i, j]
         return R

@@ -1,8 +1,7 @@
 """This module defines object specific to Unix platform."""
 
-from .abstract import CMakeGenerator
-
 from . import abstract
+from .abstract import CMakeGenerator
 
 
 # pylint:disable=abstract-method
@@ -13,5 +12,5 @@ class UnixPlatform(abstract.CMakePlatform):
         super(UnixPlatform, self).__init__()
         self.default_generators = [
             CMakeGenerator("Ninja"),
-            CMakeGenerator("Unix Makefiles")
+            CMakeGenerator("Unix Makefiles"),
         ]

@@ -1,16 +1,22 @@
-from ichor.menu import Menu
-from ichor.batch_system import JobID, BATCH_SYSTEM
 import json
+
+from ichor.batch_system import BATCH_SYSTEM, JobID
+from ichor.menu import Menu
 
 
 def delete_jobs():
     from ichor.globals import GLOBALS
+
     jid_file = GLOBALS.FILE_STRUCTURE["jid"]
     if jid_file.exists():
         with open(jid_file, "r") as f:
             jids = json.load(f)
             for jid in jids:
-                jid = JobID(script=jid["script"], id=jid["id"], instance=jid["instance"])
+                jid = JobID(
+                    script=jid["script"],
+                    id=jid["id"],
+                    instance=jid["instance"],
+                )
                 BATCH_SYSTEM.delete(jid)
                 print(f"Deleted {jid}")
 

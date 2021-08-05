@@ -1,9 +1,10 @@
 """This module defines object specific to Linux platform."""
 
-import distro
 import platform
 import sys
 import textwrap
+
+import distro
 
 from . import unix
 
@@ -27,17 +28,21 @@ class LinuxPlatform(unix.UnixPlatform):
 
         distribution_name = distro.id()
         cmd = ""
-        if distribution_name in [
-                'debian', 'Ubuntu', 'mandrake', 'mandriva']:
+        if distribution_name in ["debian", "Ubuntu", "mandrake", "mandriva"]:
             cmd = "sudo apt-get install build-essential"
 
         elif distribution_name in [
-                'centos', 'fedora', 'redhat',
-                'turbolinux', 'yellowdog', 'rocks']:
+            "centos",
+            "fedora",
+            "redhat",
+            "turbolinux",
+            "yellowdog",
+            "rocks",
+        ]:
             # http://unix.stackexchange.com/questions/16422/cant-install-build-essential-on-centos#32439
             cmd = "sudo yum groupinstall 'Development Tools'"
 
-        elif distribution_name in ['SuSE']:
+        elif distribution_name in ["SuSE"]:
             # http://serverfault.com/questions/437680/equivalent-development-build-tools-for-suse-professional-11#437681
             cmd = "zypper install -t pattern devel_C_C++"
 
@@ -61,8 +66,9 @@ class LinuxPlatform(unix.UnixPlatform):
             )
 
         arch = "x64" if platform.architecture()[0] == "64bit" else "x86"
-        return textwrap.dedent(
-            """
+        return (
+            textwrap.dedent(
+                """
             Building Linux wheels for Python %s requires a compiler (e.g gcc).
             %s
             To build compliant wheels, consider using the manylinux system described in PEP-513.
@@ -74,4 +80,6 @@ class LinuxPlatform(unix.UnixPlatform):
 
               http://scikit-build.readthedocs.io/en/latest/generators.html#linux
             """  # noqa: E501
-        ).strip() % ("%s.%s" % sys.version_info[:2], install_help, arch)
+            ).strip()
+            % ("%s.%s" % sys.version_info[:2], install_help, arch)
+        )

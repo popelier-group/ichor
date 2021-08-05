@@ -9,5 +9,5 @@ __all__ = [
     "submit_wfns",
     "make_models",
     "adaptive_sampling",
-    "make_sets"
+    "make_sets",
 ]

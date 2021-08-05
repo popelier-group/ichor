@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 from ichor import constants
 from ichor.batch_system import JobID
@@ -9,7 +9,9 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
                                      SubmissionScript, print_completed)
 
 
-def submit_wfns(directory: Path, atoms: Optional[List[str]]) -> Optional[JobID]:
+def submit_wfns(
+    directory: Path, atoms: Optional[List[str]]
+) -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
     logger.info("Submitting wfns to AIMAll")

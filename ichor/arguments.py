@@ -17,8 +17,8 @@ def import_external_functions():
     from ichor.main.make_models import make_models, move_models
     from ichor.main.submit_gjfs import check_gaussian_output, submit_gjfs
     from ichor.main.submit_wfns import check_aimall_output, submit_wfns
-    from ichor.submission_script import print_completed
     from ichor.make_sets import make_sets
+    from ichor.submission_script import print_completed
 
     Arguments.external_functions = locals()
 
@@ -120,7 +120,9 @@ def parse_args(func: Callable, args: List[str]) -> List[Any]:
     if not func.__annotations__:
         return args
 
-    for i, (arg, arg_type) in enumerate(zip(args, func.__annotations__.values())):
+    for i, (arg, arg_type) in enumerate(
+        zip(args, func.__annotations__.values())
+    ):
         args[i] = parse_arg(arg, arg_type)
 
     return args

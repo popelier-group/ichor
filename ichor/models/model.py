@@ -132,7 +132,7 @@ class Model(File):
         return ".model"
 
     def write(self) -> None:
-        #TODO
+        # TODO
         pass
 
     def atom_num(self) -> int:
@@ -158,7 +158,10 @@ class Model(File):
         # quit()
         # self.mean.value(x) + np.matmul(r, self.weights)
         # print(self.weights)
-        return self.mean.value(x) + np.matmul(r.T, np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)))
+        return self.mean.value(x) + np.matmul(
+            r.T,
+            np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)),
+        )
 
     @check_x_2d
     def variance(self, x: np.ndarray) -> np.ndarray:

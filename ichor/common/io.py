@@ -1,12 +1,13 @@
+import os
 import shutil
 import sys
-import os
 from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
 from typing import Any
 
 from ichor.typing import F
+
 
 def convert_to_path(func: F) -> F:
     @wraps(func)

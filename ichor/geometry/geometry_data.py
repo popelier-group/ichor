@@ -40,4 +40,4 @@ class GeometryData:
             )
 
     def __setitem__(self, key, value):
-        self.data[key] = value      
+        self.data[key] = value

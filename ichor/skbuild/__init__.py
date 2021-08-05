@@ -6,13 +6,14 @@ This module provides the *glue* between the setuptools Python module and CMake.
 """
 
 from ichor.skbuild._version import get_versions
-#from ichor.skbuild.setuptools_wrap import setup  # noqa: F401
 
-__author__ = 'The scikit-build team'
-__email__ = 'scikit-build@googlegroups.com'
-__version__ = '0.7.1'
-__version__ = get_versions()['version']
+# from ichor.skbuild.setuptools_wrap import setup  # noqa: F401
 
-#__all__ = ["setup"]
+__author__ = "The scikit-build team"
+__email__ = "scikit-build@googlegroups.com"
+__version__ = "0.7.1"
+__version__ = get_versions()["version"]
 
-#del get_versions
+# __all__ = ["setup"]
+
+# del get_versions

@@ -4,15 +4,15 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 from ichor.atoms import ListOfAtoms
-from ichor.files import Trajectory, GJF
+from ichor.common.int import count_digits
+from ichor.common.io import mkdir
+from ichor.files import GJF, Trajectory
 from ichor.make_sets.make_set_method import MakeSetMethod
 from ichor.make_sets.min_max import MinMax
 from ichor.make_sets.min_max_mean import MinMaxMean
 from ichor.make_sets.random import RandomPoints
 from ichor.menu import Menu
 from ichor.points import PointsDirectory
-from ichor.common.io import mkdir
-from ichor.common.int import count_digits
 from ichor.tab_completer import PathCompleter
 
 __all__ = ["make_sets", "make_sets_menu", "make_sets_npoints"]
@@ -31,7 +31,9 @@ def get_make_set_methods() -> List[Any]:
     ]
 
 
-def make_sets_npoints(points: ListOfAtoms, set_size: int, methods: List[str]) -> int:
+def make_sets_npoints(
+    points: ListOfAtoms, set_size: int, methods: List[str]
+) -> int:
     npoints = 0
     for method in methods:
         for MakeSet in get_make_set_methods():
@@ -91,7 +93,9 @@ def make_sets(
         validation_set, _ = make_set(
             points, validation_set_size, validation_set_method
         )
-        write_set_to_dir(GLOBALS.FILE_STRUCTURE["validation_set"], validation_set)
+        write_set_to_dir(
+            GLOBALS.FILE_STRUCTURE["validation_set"], validation_set
+        )
 
 
 def make_set(
@@ -116,6 +120,7 @@ def make_set(
 
 def write_set_to_dir(path: Path, points: ListOfAtoms) -> None:
     from ichor.globals import GLOBALS
+
     mkdir(path)
     for i, point in enumerate(points):
         point_name = f"{GLOBALS.SYSTEM_NAME}{str(i+1).zfill(max(4, count_digits(len(points))))}"

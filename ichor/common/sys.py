@@ -1,4 +1,4 @@
-from ichor.modules import load_module, InternetModules
+from ichor.modules import InternetModules, load_module
 
 
 def access_internet():

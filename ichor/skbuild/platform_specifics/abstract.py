@@ -21,6 +21,7 @@ class CMakePlatform(object):
 
     Derived class should at least set :attr:`default_generators`.
     """
+
     def __init__(self):
         self._default_generators = []
         self.architecture = None
@@ -70,16 +71,24 @@ class CMakePlatform(object):
     def get_generators(self, generator_name):
         """Loop over generators and return all that match the given name.
         """
-        return [default_generator
-                for default_generator in self.default_generators
-                if default_generator.name == generator_name]
+        return [
+            default_generator
+            for default_generator in self.default_generators
+            if default_generator.name == generator_name
+        ]
 
     # TODO: this method name is not great.  Does anyone have a better idea for
     # renaming it?
     def get_best_generator(
-            self, generator_name=None, skip_generator_test=False,
-            languages=("CXX", "C"), cleanup=True,
-            cmake_executable=CMAKE_DEFAULT_EXECUTABLE, cmake_args=(), architecture=None):
+        self,
+        generator_name=None,
+        skip_generator_test=False,
+        languages=("CXX", "C"),
+        cleanup=True,
+        cmake_executable=CMAKE_DEFAULT_EXECUTABLE,
+        cmake_args=(),
+        architecture=None,
+    ):
         """Loop over generators to find one that works by configuring
         and compiling a test project.
 
@@ -129,7 +138,9 @@ class CMakePlatform(object):
                 self.architecture = architecture
 
             # Support classic names for generators
-            generator_name, self.architecture = _parse_legacy_generator_name(generator_name, self.architecture)
+            generator_name, self.architecture = _parse_legacy_generator_name(
+                generator_name, self.architecture
+            )
 
             candidate_generators = []
             for default_generator in self.default_generators:
@@ -144,20 +155,26 @@ class CMakePlatform(object):
             working_generator = candidate_generators[0]
         else:
             working_generator = self.compile_test_cmakelist(
-                cmake_executable, candidate_generators, cmake_args)
+                cmake_executable, candidate_generators, cmake_args
+            )
 
         if working_generator is None:
-            raise SKBuildGeneratorNotFoundError(textwrap.dedent(
-                """
+            raise SKBuildGeneratorNotFoundError(
+                textwrap.dedent(
+                    """
                 {line}
                 scikit-build could not get a working generator for your system. Aborting build.
 
                 {installation_help}
 
                 {line}
-                """).strip().format(  # noqa: E501
-                    line="*"*80,
-                    installation_help=self.generator_installation_help)
+                """
+                )
+                .strip()
+                .format(  # noqa: E501
+                    line="*" * 80,
+                    installation_help=self.generator_installation_help,
+                )
             )
 
         if cleanup:
@@ -168,7 +185,8 @@ class CMakePlatform(object):
     @staticmethod
     @push_dir(directory=test_folder)
     def compile_test_cmakelist(
-            cmake_exe_path, candidate_generators, cmake_args=()):
+        cmake_exe_path, candidate_generators, cmake_args=()
+    ):
         """Attempt to configure the test project with
         each :class:`CMakeGenerator` from ``candidate_generators``.
 
@@ -190,7 +208,9 @@ class CMakePlatform(object):
             outer = "-" * 80
             inner = ["-" * ((idx * 5) - 3) for idx in range(1, 8)]
             print(outer if suffix == "" else "\n".join(inner))
-            print("-- Trying \"%s\" generator%s" % (_generator.description, suffix))
+            print(
+                '-- Trying "%s" generator%s' % (_generator.description, suffix)
+            )
             print(outer if suffix != "" else "\n".join(inner[::-1]))
 
         for generator in candidate_generators:
@@ -198,23 +218,24 @@ class CMakePlatform(object):
             _generator_discovery_status_msg(generator)
 
             # clear the cache for each attempted generator type
-            if os.path.isdir('build'):
-                shutil.rmtree('build')
+            if os.path.isdir("build"):
+                shutil.rmtree("build")
 
-            with push_dir('build', make_directory=True):
+            with push_dir("build", make_directory=True):
                 # call cmake to see if the compiler specified by this
                 # generator works for the specified languages
-                cmd = [cmake_exe_path, '../', '-G', generator.name]
+                cmd = [cmake_exe_path, "../", "-G", generator.name]
                 if generator.toolset:
-                    cmd.extend(['-T', generator.toolset])
+                    cmd.extend(["-T", generator.toolset])
                 if generator.architecture:
-                    cmd.extend(['-A', generator.architecture])
+                    cmd.extend(["-A", generator.architecture])
                 cmd.extend(cmake_args)
 
                 status = subprocess.call(cmd, env=generator.env)
 
             _generator_discovery_status_msg(
-                generator, " - %s" % ("success" if status == 0 else "failure"))
+                generator, " - %s" % ("success" if status == 0 else "failure")
+            )
             print("")
 
             # cmake succeeded, this generator should work
@@ -245,7 +266,8 @@ class CMakeGenerator(object):
         """
         self._generator_name = name
         self.env = dict(
-            list(os.environ.items()) + list(env.items() if env else []))
+            list(os.environ.items()) + list(env.items() if env else [])
+        )
         self._generator_toolset = toolset
         self._generator_architecture = arch
         if arch is None:

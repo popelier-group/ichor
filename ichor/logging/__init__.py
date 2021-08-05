@@ -2,7 +2,6 @@ import logging
 
 from ichor.logging.concurrent_log_handler import ConcurrentRotatingFileHandler
 
-
 LOG_LEVEL = logging.DEBUG
 
 

@@ -16,7 +16,11 @@ def make_models(
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["ferebus"])
     ichor_command = ICHORCommand()
     ichor_command.run_function(
-        "make_models", str(directory), str(atoms.value), str(ntrain), str(types)
+        "make_models",
+        str(directory),
+        str(atoms.value),
+        str(ntrain),
+        str(types),
     )
     with TimingManager(submission_script, message="Making Models"):
         submission_script.add_command(ichor_command)

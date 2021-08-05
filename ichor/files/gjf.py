@@ -18,6 +18,7 @@ class GaussianJobType(Enum):
     def types(cls) -> List[str]:
         return [ty.value for ty in GaussianJobType]
 
+
 class GJF(Geometry, File):
     def __init__(self, path):
         File.__init__(self, path)

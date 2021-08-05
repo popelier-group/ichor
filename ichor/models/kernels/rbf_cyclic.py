@@ -47,14 +47,16 @@ class RBFCyclic(Kernel):
                 deviations for each feature, calculated from the training set points.
         """
 
-        self._lengthscale = lengthscale # np.power(1/(2.0 * lengthscale), 2)
+        self._lengthscale = lengthscale  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
     def params(self):
         return self._lengthscale
 
     def mask(self):
-        return (np.array([x for x in range(len(self._lengthscale))]) + 1) % 3 == 0
+        return (
+            np.array([x for x in range(len(self._lengthscale))]) + 1
+        ) % 3 == 0
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calcualtes cyclic RBF covariance matrix from two sets of points
