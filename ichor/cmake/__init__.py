@@ -5,6 +5,7 @@ import subprocess
 import sys
 
 from ichor.cmake._version import get_versions
+from ichor.cmake.scripts import update
 
 __version__ = get_versions()['version']
 del get_versions
