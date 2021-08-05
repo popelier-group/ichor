@@ -234,10 +234,38 @@ def main():
 
 
 def update_cmake(cmake_version):
-    update_cmake_urls_script(cmake_version)
-    # update_docs(cmake_version)
-    # update_tests(cmake_version)
-    # update_raw_versions(cmake_version)
+    from pathlib import Path
+    import tarfile
+    from sys import platform
+    import shutil
+    from ichor.common.io import recursive_move, remove
+    import os
+    if platform == "linux" or platform == "linux2":
+        cmake_ext = "linux-x86_64"
+    elif platform == "darwin":
+        cmake_ext = "macos-universal"
+    elif platform == "win32":
+        cmake_ext = "windows-x86_64"
+    targz = Path(f"cmake-{cmake_version}-{cmake_ext}.tar.gz")
+    url = f"https://github.com/Kitware/CMake/releases/download/v{cmake_version}/{targz}"
+    target_path = Path.home() / Path(f".local/scratch/{targz}")
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        with open(target_path, 'wb') as f:
+            f.write(response.raw.read())
+    tar = tarfile.open(target_path, "r:gz")
+    tar.extractall(path=target_path.parent)
+    tar.close()
+    
+    for f in Path(target_path.parent / Path(targz.stem).stem).iterdir():
+        recursive_move(f, Path.home() / ".local")
+
+    # Cleanup Files
+    remove(target_path)
+    remove(Path(target_path.parent / Path(targz.stem).stem))
+    
+    os.environ["PATH"] = str(Path.home() / Path(".local") / Path("bin")) +os.pathsep + os.environ["PATH"]
 
 
 if __name__ == "__main__":

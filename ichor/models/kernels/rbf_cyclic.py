@@ -1,5 +1,4 @@
 import numpy as np
-from functools import cached_property
 
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
@@ -54,7 +53,6 @@ class RBFCyclic(Kernel):
     def params(self):
         return self._lengthscale
 
-    @cached_property
     def mask(self):
         return (np.array([x for x in range(len(self._lengthscale))]) + 1) % 3 == 0
 
