@@ -7,7 +7,6 @@ from typing import Any
 
 from ichor.typing import F
 
-
 def convert_to_path(func: F) -> F:
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
@@ -46,5 +45,30 @@ def move(src: Path, dst: Path) -> None:
     src.replace(dst)
 
 
+@convert_to_path
 def cp(src: Path, dst: Path) -> None:
     shutil.copy2(src, dst)
+
+
+@convert_to_path
+def recursive_move(src: Path, dst: Path) -> None:
+    if src.isdir():
+        for f in src.iterdir():
+            if f.isdir() and (dst / f.name).exists():
+                recursive_move(f, dst / f.name)
+            else:
+                move(f, dst)
+    else:
+        move(f, dst)
+
+
+@convert_to_path
+def remove(path: Path) -> None:
+    """ param <path> could either be relative or absolute. """
+    if path.exists():
+        if path.isfile() or path.islink():
+            path.unlink()  # remove the file
+        elif os.path.isdir(path):
+            shutil.rmtree(path)  # remove dir and all contains
+        else:
+            raise ValueError(f"file {path} is not a file or dir.")

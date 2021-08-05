@@ -36,18 +36,18 @@ except ImportError:
 from setuptools import setup as upstream_setup
 from setuptools.dist import Distribution as upstream_Distribution
 
-from . import cmaker
-from .command import (build, build_ext, build_py, clean,
+from ichor.skbuild import cmaker
+from ichor.skbuild.command import (build, build_ext, build_py, clean,
                       install, install_lib, install_scripts,
                       bdist, bdist_wheel, egg_info,
                       sdist, generate_source_manifest, test)
-from .constants import (CMAKE_DEFAULT_EXECUTABLE,
+from ichor.skbuild.constants import (CMAKE_DEFAULT_EXECUTABLE,
                         CMAKE_INSTALL_DIR,
                         CMAKE_SPEC_FILE,
                         set_skbuild_plat_name,
                         skbuild_plat_name)
-from .exceptions import SKBuildError, SKBuildGeneratorNotFoundError
-from .utils import (mkdir_p, parse_manifestin, PythonModuleFinder, to_platform_path, to_unix_path)
+from ichor.skbuild.exceptions import SKBuildError, SKBuildGeneratorNotFoundError
+from ichor.skbuild.utils import (mkdir_p, parse_manifestin, PythonModuleFinder, to_platform_path, to_unix_path)
 
 
 def create_skbuild_argparser():

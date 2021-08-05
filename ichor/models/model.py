@@ -1,4 +1,4 @@
-from functools import wraps, cached_property
+from functools import wraps
 
 import numpy as np
 
@@ -135,11 +135,9 @@ class Model(File):
         #TODO
         pass
 
-    @cached_property
     def atom_num(self) -> int:
         return get_digits(self.atom)
 
-    @cached_property
     def i(self) -> int:
         return self.atom_num - 1
 
@@ -147,23 +145,20 @@ class Model(File):
     def r(self, x: np.ndarray) -> np.ndarray:
         return self.k.r(self.x, x)
 
-    @cached_property
     def R(self) -> np.ndarray:
         return self.k.R(self.x)
 
-    @cached_property
     def invR(self) -> np.ndarray:
         return np.linalg.inv(self.R)
 
     @check_x_2d
     def predict(self, x: np.ndarray) -> np.ndarray:
         r = self.k.r(self.x, x)
-        return (self.mean.value(x) + np.dot(r, self.weights)).flatten()
         # print(r)
         # quit()
         # self.mean.value(x) + np.matmul(r, self.weights)
         # print(self.weights)
-        # return self.mean.value(x) + np.matmul(r.T, np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)))
+        return self.mean.value(x) + np.matmul(r.T, np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)))
 
     @check_x_2d
     def variance(self, x: np.ndarray) -> np.ndarray:
