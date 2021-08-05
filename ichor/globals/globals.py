@@ -15,6 +15,7 @@ from ichor.file_structure import FileStructure
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.machine import Machine
+from ichor.globals.os import OS
 from ichor.problem_finder import ProblemFinder
 
 
@@ -155,7 +156,8 @@ class Globals:
     # Activate Warnings when making models
     LOG_WARNINGS: bool = False  # Gets set in _make_models
 
-    MACHINE: Machine = ""
+    MACHINE: Machine = Machine.local
+    OS: OS = OS.Linux
     SGE: bool = False  # Don't Change
     SUBMITTED: bool = False  # Don't Change
 
@@ -188,6 +190,7 @@ class Globals:
             "UID",
             "IQA_MODELS",
             "MACHINE",
+            "OS",
             "ATOMS",
         ]
 
@@ -300,6 +303,14 @@ class Globals:
             self.MACHINE = Machine.ffluxlab
         else:
             self.MACHINE = Machine.local
+
+        # Set OS
+        if platform == "linux" or platform == "linux2":
+            self.OS = OS.Linux
+        elif platform == "darwin":
+            self.OS = OS.MacOS
+        elif platform == "win32":
+            self.OS = OS.Windows
 
         # Uncomment this when drop-n-compute is activated
         # # Add to list of drop-n-compute-services as they're added
