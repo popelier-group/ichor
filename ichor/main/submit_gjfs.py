@@ -8,12 +8,12 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
 
 def submit_gjfs(directory: Path):
     """Function that submits all .gjf files in a directory to Gaussian, which will output .wfn files.
-    
-    :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.)
+
+    :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
     """
     logger.info("Submitting gjfs to Gaussian")
-    points = PointsDirectory(directory)
-    submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])
+    points = PointsDirectory(directory)  # a directory which contains points (a bunch of molecular geometries)
+    submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])  # SCRIPT_NAMES["gaussian"] gives a path to the GAUSSIAN.sh script
     for point in points:
         # point.gjf.read()  # <- Shouldn't be needed
         point.gjf.write()

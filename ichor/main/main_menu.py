@@ -2,7 +2,7 @@ from ichor.main.tools_menu import tools_menu
 from ichor.main.queue import queue_menu
 from ichor.menu import Menu
 
-#TODO: move this to a separate file because adaptive sampling is in its own file
+
 def points_directory_menu(path):
     from ichor.main.make_models import make_models_menu
     from ichor.main.submit_gjfs import submit_gjfs
@@ -13,16 +13,16 @@ def points_directory_menu(path):
             "1",
             "Submit GJFs to Gaussian",
             submit_gjfs,
-            kwargs={"directory": path},
+            kwargs={"directory": path}, # which directory to submit gjfs from (TRAINING_SET, SAMPLE_POOL, etc.)
         )
         menu.add_option(
             "2",
             "Submit WFNs to AIMAll",
             submit_wfns,
-            kwargs={"directory": path},
+            kwargs={"directory": path}, # which directory to submit AIMALLs from (TRAINING_SET, SAMPLE_POOL, etc.)
         )
         menu.add_option(
-            "3", "Make Models", make_models_menu, kwargs={"directory": path}
+            "3", "Make Models", make_models_menu, kwargs={"directory": path} # which directory to make models from (TRAINING_SET, SAMPLE_POOL, etc.)
         )
 
 
@@ -33,24 +33,28 @@ def main_menu() -> None:
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
 
+    # initialize an instance of Menu called menu
     with Menu("ICHOR Main Menu", space=True, back=False, exit=True) as menu:
+        # add options to the instance `menu`
         menu.add_option(
             "1",
             "Training Set Menu",
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["training_set"]},
+            # give key word arguments which are passed to the handler function
+            # the handler function in this case is points_directory_menu. See the Menu class for details.
+            kwargs={"path": GLOBALS.FILE_STRUCTURE["training_set"]},  # get the Path of the training set from GLOBALS
         )
         menu.add_option(
             "2",
             "Sample Pool Menu",
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["sample_pool"]},
+            kwargs={"path": GLOBALS.FILE_STRUCTURE["sample_pool"]},  # get the Path of the sample pool from GLOBALS
         )
         menu.add_option(
             "3",
             "Validation Set Menu",
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["validation_set"]},
+            kwargs={"path": GLOBALS.FILE_STRUCTURE["validation_set"]},  # get the Path of the validation set from GLOBALS
         )
         menu.add_option(
             "4",

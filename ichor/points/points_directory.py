@@ -8,10 +8,12 @@ from ichor.points.points import Points
 
 
 class PointsDirectory(Points, Directory):
-    """A directory which contains points (molecules with various geometries) which are fed to Gaussian or AIMALL to get data for GPR.
+    """A helper class that wraps around a directory which contains points (molecules with various geometries)
+
+    :param path: Path to a directory which contains points. This path is typically the path to the training set, sample pool, etc. These paths are defined in GLOBALS.
     """
     def __init__(self, path):
-        Points.__init__(self)
+        Points.__init__(self)  # matt_todo: Points does not have __init__, so don't think this is needed
         Directory.__init__(self, path)
 
     def parse(self) -> None:

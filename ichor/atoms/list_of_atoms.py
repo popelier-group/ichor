@@ -13,10 +13,14 @@ class ListOfAtoms(list):
 
     @property
     def atom_names(self):
+        """Return the atom names from the first timestep. Assumes that all timesteps have the same
+        number of atoms/atom names."""
         return self[0].atom_names if len(self) > 0 else []
 
     @property
     def features(self):
+        # matt_todo: Not exactly sure how to document this one because it returns different things depending on size of array
+        # if 3D array (so has timesteps, atoms, and features) then transpose to get atoms, timesteps, features?
         features = np.array([i.features for i in self])
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))

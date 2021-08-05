@@ -143,6 +143,7 @@ def next_iter(
 
 
 def auto_run():
+    """Auto run Gaussian, AIMALL and make model files."""
     from ichor.globals import GLOBALS
 
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]

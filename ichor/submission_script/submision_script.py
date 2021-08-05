@@ -10,19 +10,27 @@ from ichor.submission_script.data_lock import DataLock
 
 
 class SubmissionScript:
+    """
+    A class that can be used to construct submission scripts for various programs such as Gaussian and AIMALL.
+    :param path: A path to a submission script (such as GAUSSIAN.sh and AIMALL.sh). These .sh files are submitted as jobs to CSF3/FFLUXLAB.
+    :param commands: A list of commands 
+    """
     def __init__(self, path: Path):
         self.path = Path(path)
         self.commands = []
 
     @classproperty
     def filetype(self) -> str:
+        """The extension of the submission script file. Will always be .sh (a shell script)"""
         return ".sh"
 
     def add_command(self, command):
+        """Add a command to the list of commands."""
         self.commands += [command]
 
     @property
     def ncores(self) -> int:
+        """Number of cores to be used for the job."""
         return max(command.ncores for command in self.grouped_commands)
 
     @property

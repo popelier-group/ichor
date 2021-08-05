@@ -24,12 +24,18 @@ def prepend_script_directory(paths):
 
 
 class ScriptNames(dict):
-    def __getitem__(self, item):
-        from ichor.globals import GLOBALS
+    """A helper class which retruns the full path of a particular script that is used to submit job files
+    for programs like Guassian and AIMALL. These jobs are submitted to compute nodes on CSF3/FFLUXLAB."""
 
-        script = super().__getitem__(item)
+    def __getitem__(self, item: str):
+        """
+        :param item: a key which corresponds to a particular script file. See SCRIPT_NAMES.
+        """
+        from ichor.globals import GLOBALS  # import globals as the paths to the script directory is defined there
+
+        script = super().__getitem__(item)  # call dict __getitem__ method to get the script name (the value corresponding to the given key)
         if isinstance(script, (str, Path)):
-            return GLOBALS.FILE_STRUCTURE["scripts"] / script
+            return GLOBALS.FILE_STRUCTURE["scripts"] / script  # append the script name to the path where the scripts are located
         else:
             return script
 
