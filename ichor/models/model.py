@@ -158,11 +158,12 @@ class Model(File):
     @check_x_2d
     def predict(self, x: np.ndarray) -> np.ndarray:
         r = self.k.r(self.x, x)
+        return (self.mean.value(x) + np.dot(r, self.weights)).flatten()
         # print(r)
         # quit()
         # self.mean.value(x) + np.matmul(r, self.weights)
         # print(self.weights)
-        return self.mean.value(x) + np.matmul(r.T, np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)))
+        # return self.mean.value(x) + np.matmul(r.T, np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)))
 
     @check_x_2d
     def variance(self, x: np.ndarray) -> np.ndarray:

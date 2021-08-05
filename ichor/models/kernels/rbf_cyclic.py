@@ -48,7 +48,7 @@ class RBFCyclic(Kernel):
                 deviations for each feature, calculated from the training set points.
         """
 
-        self._lengthscale = lengthscale # np.power(1/(2.0 * lengthscale), 2)
+        self._lengthscale = lengthscale  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
     def params(self):
@@ -81,4 +81,5 @@ class RBFCyclic(Kernel):
         # return np.exp(-0.5 * np.sum(diff, axis=2))
         diff = x1 - x2
         diff[self.mask] = (diff[self.mask] + np.pi) % (2 * np.pi) - np.pi
+
         return np.exp(-0.5 * np.sum(self._lengthscale * np.power(diff, 2)))
