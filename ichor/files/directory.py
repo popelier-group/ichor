@@ -17,13 +17,19 @@ class Directory(PathObject, ABC):
         self.parse()  # parse directory to find contents
         self.parsed = True  # matt_todo: remove this attribute as it is not used anywhere else, the self.state is Unread from PathObject init
 
+    # matt_todo: Possibly make this parse method an @abstractmethod
+    # Then each class that subclasses from Directory will need its own parse method
+    # This will prevent confusion with PointsDirectory calling Directory.__init__(self, path)
+    # which then calls self.parse() in its init, but actually the PointsDirectory parse() method is still used
+    # The current code that is in Directory parse() can then be moved into a parse() method in PointDirectory instead because
+    # it is only used there.
+    # Also then a self.parse() will need to be added to the __init__() methods of PointsDirectory and PointDirecory
+    # but then you can easily tell which parse() method is being called
     def parse(self) -> None:
         """ Parse a directory. """
         filetypes = {}
         dirtypes = {}
 
-        # todo: not sure what this is doing as __annotations__ are only for class variables (from what I've tested)
-        # so in this case there are not class variables so this will be empty
         for var, type_ in self.__annotations__.items():
             if hasattr(type_, "__args__"):
                 type_ = type_.__args__[0]
