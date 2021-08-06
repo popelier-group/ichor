@@ -34,11 +34,14 @@ class RBF(Kernel):
 
         # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
         # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1
-        x1 = x1 * self._lengthscale
-        x2 = x2 * self._lengthscale
+        # x1 = x1 * self._lengthscale
+        # x2 = x2 * self._lengthscale
+        #
+        # dist = Distance.squared_euclidean_distance(x1, x2)
+        # return np.exp(-0.5 * dist)
 
-        dist = Distance.squared_euclidean_distance(x1, x2)
-        return np.exp(-0.5 * dist)
+        diff = x1 - x2
+        return np.exp(-0.5 * np.sum(self._lengthscale * np.power(diff, 2)))
 
         # dist = np.empty((x1.shape[0], x2.shape[0], x1.shape[1]))
         # for i, xi in enumerate(x1):
