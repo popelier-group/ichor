@@ -2,7 +2,7 @@ from functools import wraps
 
 import numpy as np
 
-from ichor.common.functools import classproperty, cached_property
+from ichor.common.functools import cached_property, classproperty
 from ichor.common.str import get_digits
 from ichor.files import File
 from ichor.models.kernels import RBF, Kernel, RBFCyclic
@@ -36,8 +36,11 @@ class Model(File):
     y: np.ndarray
     weights: np.ndarray
 
+    nugget: float
+
     def __init__(self, path):
         File.__init__(self, path)
+        self.nugget = 1e-10
 
     def _read_file(self) -> None:
         kernel_composition = ""
@@ -56,6 +59,10 @@ class Model(File):
                     continue
                 if line.startswith("atom"):
                     self.atom = line.split()[1]
+                    continue
+
+                if "nugget" in line:
+                    self.nugget = float(line.split()[-1])
                     continue
 
                 if "number_of_features" in line:
@@ -113,17 +120,17 @@ class Model(File):
                         line = next(f)
                     self.y = np.array(y)
 
-                if "[weights]" in line:
-                    line = next(f)
-                    weights = []
-                    while line.strip() != "":
-                        weights += [float(line)]
-                        try:
-                            line = next(f)
-                        except:
-                            break
-                    self.weights = np.array(weights)
-                    self.weights = self.weights[:, np.newaxis]
+                # if "[weights]" in line:
+                #     line = next(f)
+                #     weights = []
+                #     while line.strip() != "":
+                #         weights += [float(line)]
+                #         try:
+                #             line = next(f)
+                #         except:
+                #             break
+                #     self.weights = np.array(weights)
+                #     self.weights = self.weights[:, np.newaxis]
 
         self.k = KernelInterpreter(kernel_composition, kernel_list).interpret()
 
@@ -148,8 +155,14 @@ class Model(File):
         return self.k.r(self.x, x)
 
     @cached_property
+    def weights(self):
+        return np.matmul(
+            self.invR, self.y[:, np.newaxis] - self.mean.value(self.x)
+        )
+
+    @cached_property
     def R(self) -> np.ndarray:
-        return self.k.R(self.x)
+        return self.k.R(self.x) + (self.nugget * np.eye(self.ntrain))
 
     @cached_property
     def invR(self) -> np.ndarray:
@@ -157,15 +170,9 @@ class Model(File):
 
     @check_x_2d
     def predict(self, x: np.ndarray) -> np.ndarray:
-        r = self.k.r(self.x, x)
-        # print(r)
-        # quit()
-        # self.mean.value(x) + np.matmul(r, self.weights)
-        # print(self.weights)
-        return self.mean.value(x) + np.matmul(
-            r.T,
-            np.matmul(self.invR, self.y[:, np.newaxis] - self.mean.value(x)),
-        )
+        return (
+            self.mean.value(x) + np.dot(self.k.r(self.x, x).T, self.weights)
+        ).flatten()
 
     @check_x_2d
     def variance(self, x: np.ndarray) -> np.ndarray:

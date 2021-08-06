@@ -31,10 +31,10 @@ class Kernel(ABC):
 
     def r(self, x_train: np.ndarray, x_test: np.ndarray) -> np.ndarray:
         """helper method to return x_test, x_train covariance matrix K(X*, X)"""
-        r = np.empty((x_test.shape[0], x_train.shape[0]))
+        r = np.empty((x_train.shape[0], x_test.shape[0]))
         for i in range(x_test.shape[0]):
             for j in range(x_train.shape[0]):
-                r[i, j] = self.k(x_test[i], x_train[j])
+                r[j, i] = self.k(x_test[i], x_train[j])
         return r
 
     def R(self, x_train: np.ndarray) -> np.ndarray:
@@ -47,6 +47,10 @@ class Kernel(ABC):
                 R[i, j] = self.k(x_train[i], x_train[j])
                 R[j, i] = R[i, j]
         return R
+
+    @abstractmethod
+    def __repr__(self):
+        pass
 
     def __add__(self, other):
         return KernelSum(self, other)
@@ -75,6 +79,9 @@ class KernelSum(Kernel):
     def R(self, x):
         return self.k1.R(x) + self.k2.R(x)
 
+    def __repr__(self):
+        return f"({self.k1} + {self.k2})"
+
 
 class KernelProd(Kernel):
     """Kernel multiplication implementation"""
@@ -95,3 +102,6 @@ class KernelProd(Kernel):
 
     def R(self, x):
         return self.k1.R(x) * self.k2.R(x)
+
+    def __repr__(self):
+        return f"({self.k1} * {self.k2})"

@@ -1,8 +1,8 @@
 import numpy as np
 
+from ichor.common.functools import cached_property
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
-from ichor.common.functools import cached_property
 
 
 class RBFCyclic(Kernel):
@@ -84,3 +84,6 @@ class RBFCyclic(Kernel):
         diff = x1 - x2
         diff[self.mask] = (diff[self.mask] + np.pi) % (2 * np.pi) - np.pi
         return np.exp(-0.5 * np.sum(self._lengthscale * np.power(diff, 2)))
+
+    def __repr__(self):
+        return f"RBFCyclic({self._lengthscale})"

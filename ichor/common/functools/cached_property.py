@@ -5,9 +5,9 @@ __email__ = "pydanny@gmail.com"
 __version__ = "1.5.2"
 __license__ = "BSD"
 
+import threading
 from functools import wraps
 from time import time
-import threading
 
 try:
     import asyncio
@@ -145,7 +145,9 @@ class threaded_cached_property_with_ttl(cached_property_with_ttl):
 
     def __get__(self, obj, cls):
         with self.lock:
-            return super(threaded_cached_property_with_ttl, self).__get__(obj, cls)
+            return super(threaded_cached_property_with_ttl, self).__get__(
+                obj, cls
+            )
 
 
 # Alias to make threaded_cached_property_with_ttl easier to use

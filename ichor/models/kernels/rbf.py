@@ -47,3 +47,6 @@ class RBF(Kernel):
         #         dist[i, j, :] = diff * diff
         #
         # return np.exp(-0.5 * np.sum(dist / self._lengthscale, axis=2))
+
+    def __repr__(self):
+        return f"RBF({self._lengthscale})"
