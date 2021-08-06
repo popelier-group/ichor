@@ -203,8 +203,10 @@ def make_models(
 
 def move_models(model_dir: Optional[Path] = None):
     from ichor.globals import GLOBALS
+    from ichor.models import Model
 
     mkdir(GLOBALS.FILE_STRUCTURE["models"])
+    mkdir(GLOBALS.FILE_STRUCTURE["model_log"])
 
     if model_dir is None:
         model_dir = GLOBALS.FILE_STRUCTURE["ferebus"]
@@ -214,8 +216,15 @@ def move_models(model_dir: Optional[Path] = None):
             for f in d.iterdir():
                 if f.suffix == ".model":
                     cp(f, GLOBALS.FILE_STRUCTURE["models"])
+                    model_log = GLOBALS.FILE_STRUCTURE["model_log"] / GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
+                    mkdir(model_log)
+                    cp(f, model_log)
+
         elif d.is_file() and d.suffix == ".model":
             cp(d, GLOBALS.FILE_STRUCTURE["models"])
+            model_log = GLOBALS.FILE_STRUCTURE["model_log"] / GLOBALS.SYSTEM_NAME + str(Model(d).ntrain).zfill(4)
+            mkdir(model_log)
+            cp(d, model_log)
 
 
 def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:

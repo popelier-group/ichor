@@ -14,7 +14,7 @@ class FileStructure(FileTree):
         self.add("FEREBUS", "ferebus")
         self.add("MODELS", "models", parent="ferebus")
         self.add("MODELS", "remake-models")
-        self.add("LOG", "log")
+        self.add("MODEL_LOG", "model_log")
         self.add("PROGRAMS", "programs")
         self.add("OPT", "opt")
         self.add("CP2K", "cp2k")
