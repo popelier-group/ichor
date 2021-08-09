@@ -16,11 +16,11 @@ class PointDirectory(Point, Directory):
     :param path: Path to a directory which contains ONE point.
 
     Attributes:
-        cls.gjf Optional[GJF]: 
-        cls.wfn Optional[WFN]: 
-        cls.ints Optional[INTs]: 
+        cls.gjf Optional[GJF]: Used when iterating over __annotations__
+        cls.wfn Optional[WFN]: Used when iterating over __annotations__
+        cls.ints Optional[INTs]: Used when iterating over __annotations__
     """
-    gjf: Optional[GJF] = None
+    gjf: Optional[GJF] = None 
     wfn: Optional[WFN] = None
     ints: Optional[INTs] = None
 

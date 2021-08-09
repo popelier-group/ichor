@@ -26,7 +26,10 @@ class Directory(PathObject, ABC):
     # Also then a self.parse() will need to be added to the __init__() methods of PointsDirectory and PointDirecory
     # but then you can easily tell which parse() method is being called
     def parse(self) -> None:
-        """ Parse a directory. """
+        """ matt_todo Move to PointDirectory parse and make this an abstract method.
+        Iterate over __annotations__ which is a dictionary of {"gjf": Optional[GJF], "wfn": Optional[WFN], "ints": Optional[INTs]}
+        as defined from class variables in PointsDirectory. Get the type inside the [] brackets
+         """
         filetypes = {}
         dirtypes = {}
 
