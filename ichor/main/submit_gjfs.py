@@ -14,7 +14,7 @@ def submit_gjfs(directory: Path):
     logger.info("Submitting gjfs to Gaussian")
     points = PointsDirectory(directory)  # a directory which contains points (a bunch of molecular geometries)
     submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])  # SCRIPT_NAMES["gaussian"] gives a path to the GAUSSIAN.sh script
-    for point in points:
+    for point in points: # point is an instance of PointDirectory
         # point.gjf.read()  # <- Shouldn't be needed
         point.gjf.write()
         submission_script.add_command(GaussianCommand(point.gjf.path))
