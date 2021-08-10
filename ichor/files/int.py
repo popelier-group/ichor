@@ -11,6 +11,7 @@ from ichor.geometry import GeometryData
 
 
 class INT(GeometryData, File):
+    """Wraps around .int files which are generated with AIMALL for every atom in the system."""
     def __init__(self, path, atom=None):
         File.__init__(self, path)
         GeometryData.__init__(self)
@@ -23,6 +24,7 @@ class INT(GeometryData, File):
 
     @property
     def atom(self) -> str:
+        # matt_todo: does this return the name with index C1 or just atom element C?
         return self.path.stem.upper()
 
     @classproperty
@@ -31,6 +33,9 @@ class INT(GeometryData, File):
 
     @buildermethod
     def _read_file(self, atom=None):
+        """ Read an .int file. The first time that the .int file is read successfully, a json file with the
+        important information is written in the same directory. This json file has the suffix `.int` from now on
+        and the original `.int` file is stored with suffix `.int.bak` for backup."""
         self.parent = atom
         try:
             self.read_json()
@@ -48,6 +53,8 @@ class INT(GeometryData, File):
 
     @buildermethod
     def read_int(self):
+        # matt_todo: probably better for you to add docstring and comments for what is being searched for here
+        # I'm not that familiar with the .int files.
         with open(self.path, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
@@ -101,9 +108,12 @@ class INT(GeometryData, File):
             self.rotate_multipoles()
 
     def delete(self):
+        """ Delete the .int file from disk. """
         self.path.unlink()
 
     def rotate_multipoles(self):
+        # matt_todo: What was the reason for rotating moments? What was the difference between AIMALL and FFLUX moments? cartesian vs spherical?
+        # also link to paper where these moments are rotated
         self.rotate_dipole()
         self.rotate_quadrupole()
         self.rotate_octupole()
@@ -367,6 +377,7 @@ class INT(GeometryData, File):
 
     @property
     def eiqa(self):
+        # matt_todo: I remember there were two E_IQA energies in the .int file. Maybe put what the difference is here.
         return self.iqa_data["E_IQA(A)"]
 
     @property
@@ -390,6 +401,7 @@ class INT(GeometryData, File):
 
     @property
     def dipole(self):
+        # matt_todo: Where can I find the formulas for this?
         return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
 
     def revert_backup(self):

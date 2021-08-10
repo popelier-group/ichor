@@ -8,6 +8,7 @@ from ichor.units import AtomicDistance
 
 
 class WFN(Geometry, GeometryData, File):
+    """Wraps around a .wfn file that is the output of Gaussian"""
     def __init__(self, path):
         File.__init__(self, path)
         Geometry.__init__(self)

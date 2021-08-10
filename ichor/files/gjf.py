@@ -10,6 +10,7 @@ from ichor.geometry import Geometry
 
 
 class GaussianJobType(Enum):
+    """Enum that give variable names to some of the keywords used in a Gaussian job."""
     Energy = "p"
     Optimisation = "opt"
     Frequency = "freq"
@@ -18,7 +19,9 @@ class GaussianJobType(Enum):
     def types(cls) -> List[str]:
         return [ty.value for ty in GaussianJobType]
 
+
 class GJF(Geometry, File):
+    """ Wraps around a .gjf file that is used as input to Gaussian. """
     def __init__(self, path):
         File.__init__(self, path)
         Geometry.__init__(self)
@@ -41,32 +44,41 @@ class GJF(Geometry, File):
 
     @buildermethod
     def _read_file(self):
+        """ Parse and red a .gjf file for information we need to submit a Gaussian job."""
         self.atoms = Atoms()
         with open(self.path, "r") as f:
             for line in f:
+                # These are Link 0 Commands in Gaussian, eg. %chk
                 if line.startswith("%"):
                     if self.startup_options is None:
                         self.startup_options = []
                     self.startup_options += [line.strip().replace("%", "")]
+                # This is the following line where key words for Gaussian (level of theory, etc.) are defined
                 if line.startswith("#"):
                     line = line.replace("#", "")
-                    keywords = line.split()
+                    keywords = line.split()  # split keywords by whitespace
                     for keyword in keywords:
-                        if "/" in keyword:
+                        if "/" in keyword:  # if the user has used something like B3LYP/6-31G Then split them up
                             self.method = keyword.split("/")[0].upper()
                             self.basis_set = keyword.split("/")[1].lower()
+                        # if the keyword is in the job enum GaussianJobType: p, opt, freq
                         elif keyword in GaussianJobType.types():
                             for ty in GaussianJobType:
                                 if keyword == ty:
+                                    # set self.job_type to the enum value corresponding to the keyword
                                     self.job_type = ty
                                     break
+                        # if the given Gaussian keyword is not defined in GaussianJobType or is not level of theory/basis set
+                        # then add to self.keywords which is None by Default
                         else:
                             if self.keywords is None:
                                 self.keywords = []
                             self.keywords += [keyword]
+                # find charge and multiplicity which are given on one line in Gaussian .gjf
                 if re.match(r"^\s*\d+\s+\d+$", line):
                     self.charge = int(line.split()[0])
                     self.multiplicity = int(line.split()[1])
+                # find all the types of atoms as well as their coordinates from .gjf file
                 if re.match(patterns.COORDINATE_LINE, line):
                     line_split = line.strip().split()
                     atom_type, x, y, z = (
@@ -75,17 +87,22 @@ class GJF(Geometry, File):
                         float(line_split[2]),
                         float(line_split[3]),
                     )
+                    # add the coordinate line as an Atom instance to self.atoms (which is an Atoms instance)
                     self.atoms.add(Atom(atom_type, x, y, z))
 
     @property
-    def title(self):
+    def title(self) -> str:
+        """The name of the system."""
         return self.path.stem
 
     @property
     def wfn(self):
+        """The name of the .wfn file to be returned by Gaussian."""
         return self.path.with_suffix(".wfn")
 
     def format(self):
+        """Format the .gjf file to use Gaussian keywords/variables that are defined in 
+        ICHOR GLOBALS."""
         from ichor.globals import GLOBALS
 
         self.read()
@@ -111,9 +128,11 @@ class GJF(Geometry, File):
 
     @property
     def header_line(self) -> str:
+        """Returns a string that is the line in the gjf file that contains all keywords. """
         return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
-    def write(self):
+    def write(self) -> None:
+        """Write the .gjf file to disk."""
         self.format()
         with open(self.path, "w") as f:
             for startup_option in self.startup_options:
