@@ -9,7 +9,7 @@ from ichor.adaptive_sampling.expected_improvement import ExpectedImprovement
 from ichor.atoms import ListOfAtoms
 from ichor.models import Model, ModelsResult
 
-# todo: This code needs links to papers where the formulas are found
+# matt_todo: This code needs links to papers where the formulas are found
 def B(model: Model) -> float:
     return np.matmul(
         (
