@@ -48,6 +48,7 @@ class JobID:
 
 
 class BatchSystem(ABC):
+    """ An abstract base class for batch systems which are the systems used to submit jobs to compute nodes (for example Sun Grid Engine.)"""
     @staticmethod
     @abstractmethod
     def is_present() -> bool:
@@ -57,6 +58,7 @@ class BatchSystem(ABC):
     def submit_script(
         cls, job_script: Path, hold: Optional[JobID] = None
     ) -> JobID:
+        """ Submit a job script to the batch system in order to queue/run jobs."""
         cmd = cls.submit_script_command
         if hold:
             cmd += cls.hold_job(hold)
@@ -69,6 +71,7 @@ class BatchSystem(ABC):
 
     @classmethod
     def delete(cls, job: JobID):
+        """ Delete submitted jobs on the batch system."""
         cmd = cls.delete_job_command + [job.id]
         stdout, stderr = run_cmd(cmd)
 
@@ -80,6 +83,7 @@ class BatchSystem(ABC):
     @classmethod
     @abstractmethod
     def hold_job(cls, job: JobID):
+        """Hold a job in order for it to be ran at another time/ after another job has finished running."""
         pass
 
     @classproperty

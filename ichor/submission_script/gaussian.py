@@ -9,6 +9,12 @@ from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
 class GaussianCommand(CommandLine):
+    """Class used to construct a Gaussian Job. This job is submitted using the `SubmissionScript` class.
+    
+    :param gjf_file: Path object to a gjf file
+    :param gjf_output: Optional Path to a Gaussian output file. Default is None as self.gjf_output is set to gjf_file with suffix .gau
+    :param check: 
+    """
     def __init__(
         self,
         gjf_file: Path,
@@ -21,6 +27,7 @@ class GaussianCommand(CommandLine):
 
     @property
     def data(self) -> List[str]:
+        """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau)"""
         return [str(self.gjf_file.absolute()), str(self.gjf_output.absolute())]
 
     @classproperty
@@ -29,6 +36,7 @@ class GaussianCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
+        """Returns the command used to run Gaussian on different systems."""
         from ichor.globals import GLOBALS
 
         if GLOBALS.MACHINE is Machine.csf3:
@@ -43,6 +51,7 @@ class GaussianCommand(CommandLine):
 
     @classproperty
     def ncores(self) -> int:
+        """Returns the number of cores that Gaussian should use for the job."""
         from ichor.globals import GLOBALS
 
         return GLOBALS.GAUSSIAN_CORE_COUNT

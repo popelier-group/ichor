@@ -35,11 +35,14 @@ class SubmissionScript:
 
     @property
     def default_options(self) -> List[str]:
+        """ Returns a list of default options to use in a submission script for a job."""
         from ichor.globals import GLOBALS
 
         mkdir(GLOBALS.FILE_STRUCTURE["outputs"])
         mkdir(GLOBALS.FILE_STRUCTURE["errors"])
 
+        # change current working directory to directory from which ICHOR is launched.
+        # make the paths to outputs and errors absolute
         options = [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
             BATCH_SYSTEM.output_directory(
@@ -50,6 +53,7 @@ class SubmissionScript:
             ),
         ]
 
+        # if the number of cores is more than 1, have to add additional options
         if self.ncores > 1:
             options += [BATCH_SYSTEM.parallel_environment(self.ncores)]
 
@@ -57,13 +61,16 @@ class SubmissionScript:
 
     @property
     def options(self) -> List[str]:
+        """Return the complete list of options (default options + other options for job)"""
         options = []
         for command in self.grouped_commands:
             options += command.options
+        # do not duplicate commands
         return list(set(options + self.default_options))
 
     @property
     def modules(self) -> List[str]:
+        """Returns a list of modules that need to be loaded before a job can be ran."""
         from ichor.globals import GLOBALS
 
         modules = []
@@ -86,6 +93,7 @@ class SubmissionScript:
             commands += [command_group]
         return commands
 
+    # matt_todo: why is a separate method needed? Make the top group_commands method into a property and rename it so there are not two methods
     @property
     def grouped_commands(self):
         return self.group_commands()
