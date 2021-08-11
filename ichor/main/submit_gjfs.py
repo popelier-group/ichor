@@ -17,12 +17,13 @@ def submit_gjfs(directory: Path):
     for point in points: # point is an instance of PointDirectory
         # point.gjf.read()  # <- Shouldn't be needed
         point.gjf.write()
-        submission_script.add_command(GaussianCommand(point.gjf.path))
+        submission_script.add_command(GaussianCommand(point.gjf.path)) # make a list of GaussianCommand instances.
     submission_script.write()
     submission_script.submit()
 
 
 def check_gaussian_output(gaussian_file: str):
+    # matt_todo: Check here that the .wfn file has the Normal termination line o prevent having .wfn outputs with errors
     if Path(gaussian_file).with_suffix(".wfn").exists():
         print_completed()
     else:

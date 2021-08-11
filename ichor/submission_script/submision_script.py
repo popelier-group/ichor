@@ -13,11 +13,10 @@ class SubmissionScript:
     """
     A class that can be used to construct submission scripts for various programs such as Gaussian and AIMALL.
     :param path: A path to a submission script (such as GAUSSIAN.sh and AIMALL.sh). These .sh files are submitted as jobs to CSF3/FFLUXLAB.
-    :param commands: A list of commands 
     """
     def __init__(self, path: Path):
         self.path = Path(path)
-        self.commands = []
+        self.commands = []  # a list of commands to be submitted to batch system
 
     @classproperty
     def filetype(self) -> str:
@@ -80,9 +79,12 @@ class SubmissionScript:
 
     def group_commands(self) -> List[CommandGroup]:
         commands = []
-        command_group = CommandGroup()
+        command_group = CommandGroup()  # make a new command group
         command_type = None
+        # iterate over each command instance in self.commands
+        # matt_todo: not really sure what this  is doing. Is this to make a group of Gaussian jobs for example to run in a job array?
         for command in self.commands:
+            # if the command is not equal to command_type or commands.group is set to False (group method defined in CommandLine class, default True)
             if type(command) != command_type or not command.group:
                 if command_group:
                     commands += [command_group]
