@@ -20,6 +20,8 @@ def submit_gjfs(directory):
 
 
 def check_gaussian_output(gaussian_file: str):
+    if not gaussian_file.strip():
+        print_completed()
     if Path(gaussian_file).with_suffix(".wfn").exists():
         print_completed()
     else:
