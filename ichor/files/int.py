@@ -8,6 +8,7 @@ from ichor.common.functools import buildermethod, classproperty
 from ichor.common.io import move
 from ichor.files.file import File
 from ichor.geometry import GeometryData
+from ichor.common.types import ClassDict
 
 
 class INT(GeometryData, File):
@@ -336,9 +337,9 @@ class INT(GeometryData, File):
     def read_json(self):
         with open(self.path, "r") as f:
             int_data = json.load(f)
-            self.integration_data = int_data["integration"]
-            self.multipoles_data = int_data["multipoles"]
-            self.iqa_data = int_data["iqa_data"]
+            self.integration_data.data = ClassDict(int_data["integration"])
+            self.multipoles_data.data = ClassDict(int_data["multipoles"])
+            self.iqa_data.data = ClassDict(int_data["iqa_data"])
 
     @property
     def backup_path(self):
@@ -349,9 +350,9 @@ class INT(GeometryData, File):
 
     def write_json(self):
         int_data = {
-            "integration": self.integration_data,
-            "multipoles": self.multipoles_data,
-            "iqa_data": self.iqa_data,
+            "integration": self.integration_data.data,
+            "multipoles": self.multipoles_data.data,
+            "iqa_data": self.iqa_data.data,
         }
 
         with open(self.path, "w") as f:

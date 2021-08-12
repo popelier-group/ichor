@@ -52,3 +52,15 @@ class Executable(ABC):
     @abstractmethod
     def build(self):
         pass
+
+    @abstractmethod
+    @property
+    def exepath(self):
+        # if not self.up_to_date
+        self.update()
+        self.build()
+        return
+
+    @abstractmethod
+    def build(self):
+        pass
