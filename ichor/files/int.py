@@ -39,7 +39,7 @@ class INT(GeometryData, File):
             # Backup only if read correctly
             # E_IQA_Inter(A) Last Line that needs to be parsed, if this is here then the
             # rest of the values we care about should be
-            if "E_IQA_Inter(A)" in self.iqa_data.keys():
+            if "E_IQA_Inter(A)" in self.iqa_data.data.keys():
                 self.backup_int()
                 self.write_json()
             else:
