@@ -1,5 +1,6 @@
 from ichor.main.queue import queue_menu
 from ichor.main.tools_menu import tools_menu
+from ichor.main.options_menu import options_menu
 from ichor.menu import Menu
 
 
@@ -65,4 +66,5 @@ def main_menu() -> None:
         )
         menu.add_space()
         menu.add_option("t", "Tools Menu", tools_menu)
+        menu.add_option("o", "Options Menu", options_menu)
         menu.add_option("q", "Queue Menu", queue_menu)

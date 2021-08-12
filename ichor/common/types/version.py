@@ -1,8 +1,13 @@
+import re
+
+
+# TODO: Add revision in comparisons
 class Version:
     def __init__(self, rep=None):
         self.major = 0
         self.minor = 0
         self.patch = 0
+        self.revision = ""
 
         if rep:
             if isinstance(rep, str):
@@ -17,12 +22,17 @@ class Version:
         if len(split_rep) > 1:
             self.minor = int(split_rep[1])
         if len(split_rep) > 2:
-            self.patch = int(split_rep[2])
+            if re.match(r"\d+.+", split_rep[2]):
+                self.patch = int(re.findall(r"\d+", split_rep[2])[0])
+                self.revision = split_rep[2].lstrip(str(self.patch))
+            else:
+                self.patch = int(split_rep[2])
 
     def parse_from_version(self, ver_rep):
         self.major = ver_rep.major
         self.minor = ver_rep.minor
         self.patch = ver_rep.patch
+        self.revision = ver_rep.revision
 
     def __gt__(self, other):
         if self.major > other.major:
@@ -74,7 +84,7 @@ class Version:
         )
 
     def __str__(self):
-        return f"{self.major}.{self.minor}.{self.patch}"
+        return f"{self.major}.{self.minor}.{self.patch}{self.revision}"
 
     def __repr__(self):
         return str(self)

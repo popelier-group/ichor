@@ -23,6 +23,7 @@ import time
 from unittest import SkipTest
 from urllib.parse import urlsplit, urlunsplit
 import warnings
+from typing import Tuple
 
 # from git.objects.util import Traversable
 
@@ -1114,3 +1115,9 @@ class IterableObj(Protocol):
 class NullHandler(logging.Handler):
     def emit(self, record: object) -> None:
         pass
+
+
+def get_git_credentials() -> Tuple[str, str]:
+    user = input("Git Username:")
+    password = getpass.getpass('Git Password:')
+    return user, password

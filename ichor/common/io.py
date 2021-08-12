@@ -6,6 +6,8 @@ from itertools import zip_longest
 from pathlib import Path
 from typing import Any
 
+from contextlib import contextmanager
+
 from ichor.typing import F
 
 
@@ -61,16 +63,26 @@ def recursive_move(src: Path, dst: Path) -> None:
             else:
                 move(f, dst)
     else:
-        move(f, dst)
+        move(src, dst)
 
 
 @convert_to_path
 def remove(path: Path) -> None:
     """ param <path> could either be relative or absolute. """
     if path.exists():
-        if path.isfile() or path.islink():
+        if path.is_file() or path.is_symlink():
             path.unlink()  # remove the file
         elif os.path.isdir(path):
             shutil.rmtree(path)  # remove dir and all contains
         else:
             raise ValueError(f"file {path} is not a file or dir.")
+
+
+@contextmanager
+def pushd(new_dir: Path):
+    previous_dir = os.getcwd()
+    os.chdir(new_dir)
+    try:
+        yield
+    finally:
+        os.chdir(previous_dir)

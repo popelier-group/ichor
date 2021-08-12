@@ -169,6 +169,10 @@ class Globals:
     DROP_N_COMPUTE: bool = False
     DROP_N_COMPUTE_LOCATION: Path = ""
 
+    GIT_USERNAME: str = ""
+    GIT_PASSWORD: str = ""
+    GIT_TOKEN: str = " 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"
+
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
 
