@@ -13,7 +13,7 @@ def delete_jobs():
             try:
                 jids = json.load(f)
             except json.JSONDecodeError:
-                pass
+                jids = []
             for jid in jids:
                 jid = JobID(
                     script=jid["script"],
@@ -24,7 +24,7 @@ def delete_jobs():
                 print(f"Deleted {jid}")
 
         with open(jid_file, "w") as f:
-            pass
+            f.write("[]")
 
 
 def queue_menu():
