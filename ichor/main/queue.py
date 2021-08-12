@@ -10,18 +10,19 @@ def delete_jobs():
     jid_file = GLOBALS.FILE_STRUCTURE["jid"]
     if jid_file.exists():
         with open(jid_file, "r") as f:
-            jids = json.load(f)
+            try:
+                jids = json.load(f)
+            except json.JSONDecodeError:
+                pass
             for jid in jids:
-                try:
-                    jid = JobID(
-                        script=jid["script"],
-                        id=jid["id"],
-                        instance=jid["instance"],
-                    )
-                    BATCH_SYSTEM.delete(jid)
-                    print(f"Deleted {jid}")
-                except json.JSONDecodeError:
-                    pass
+                jid = JobID(
+                    script=jid["script"],
+                    id=jid["id"],
+                    instance=jid["instance"],
+                )
+                BATCH_SYSTEM.delete(jid)
+                print(f"Deleted {jid}")
+
         with open(jid_file, "w") as f:
             pass
 
