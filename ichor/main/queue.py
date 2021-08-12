@@ -19,6 +19,8 @@ def delete_jobs():
                 )
                 BATCH_SYSTEM.delete(jid)
                 print(f"Deleted {jid}")
+        with open(jid_file, "w") as f:
+            pass
 
 
 def queue_menu():
