@@ -56,7 +56,7 @@ class AIMAllCommand(CommandLine):
 
     @classproperty
     def options(self) -> List[str]:
-        return ["-j y", "-S /bin/bash"]
+        return ["-S /bin/bash"]
 
     @property
     def arguments(self) -> List[str]:
