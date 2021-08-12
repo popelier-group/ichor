@@ -5,6 +5,9 @@ from ichor.submission_script.command_line import CommandLine
 
 
 class CommandGroup(CommandLine, list):
+    """ Wraps around multiple jobs that are supposed to be ran as a job array.
+    Since each job uses the same settings, we can just use the 0th index."""
+
     @property
     def command(self) -> str:
         return self[0].command
