@@ -31,7 +31,7 @@ def check_aimall_output(wfn_file: str):
     # AIMAll deletes this sh file when it has successfully completed
     # If this file still exists then something went wrong
     if not wfn_file:
-        logger.debug("reached here")
+        print_completed()
         sys.exit()
     logger.debug(f"Checking {wfn_file}")
     if not Path(wfn_file).with_suffix(".sh").exists():
