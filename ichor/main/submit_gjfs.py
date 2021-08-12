@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 from ichor.logging import logger
 from ichor.points import PointsDirectory
@@ -20,8 +21,9 @@ def submit_gjfs(directory):
 
 
 def check_gaussian_output(gaussian_file: str):
-    if not Path(gaussian_file) == Path(gaussian_file).parent:
+    if not gaussian_file:
         print_completed()
+        sys.exit()
     if Path(gaussian_file).with_suffix(".wfn").exists():
         print_completed()
     else:

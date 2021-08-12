@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List, Optional
+import sys
 
 from ichor import constants
 from ichor.batch_system import JobID
@@ -29,8 +30,9 @@ def submit_wfns(
 def check_aimall_output(wfn_file: str):
     # AIMAll deletes this sh file when it has successfully completed
     # If this file still exists then something went wrong
-    if not Path(wfn_file) == Path(wfn_file).parent:
-        print_completed()
+    if not wfn_file:
+        logger.debug("reached here")
+        sys.exit()
     logger.debug(f"Checking {wfn_file}")
     if not Path(wfn_file).with_suffix(".sh").exists():
         logger.debug(f"AIMAll finished")
