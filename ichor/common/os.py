@@ -1,11 +1,11 @@
 import os
 import subprocess
-from typing import Tuple
+from typing import Tuple, List
 
 from ichor.common.str import decode
 
 
-def run_cmd(cmd) -> Tuple[str, str]:
+def run_cmd(cmd: List[str]) -> Tuple[str, str]:
     print(cmd)
     p = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=os.environ

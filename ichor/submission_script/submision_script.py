@@ -69,7 +69,7 @@ class SubmissionScript:
 
     @property
     def modules(self) -> List[str]:
-        """Returns a list of modules that need to be loaded before a job can be ran."""
+        """ Returns a list of modules that need to be loaded before a job can be ran. """
         from ichor.globals import GLOBALS
 
         modules = []
@@ -86,14 +86,20 @@ class SubmissionScript:
         for command in self.commands:
             # if the command is not equal to command_type or commands.group is set to False (group method defined in CommandLine class, default True)
             if type(command) != command_type or not command.group:
-                if command_group:
+                if len(command_group) > 0:  # just for first iteration of the loop
                     commands += [command_group]
                     command_group = CommandGroup()
                 command_type = type(command)
             command_group += [command]
-        if command_group:
+        # commands = [[GaussianCommand(), GaussianCommand()]]
+        if len(command_group) > 0:
             commands += [command_group]
         return commands
+
+        # ICHOR_SUBMIT_GJF
+        # GAUSSIAN commands
+        # ICHOR_SUBMIT_WFNS
+        # AIMALL commands
 
     # matt_todo: why is a separate method needed? Make the top group_commands method into a property and rename it so there are not two methods
     @property
@@ -177,7 +183,7 @@ class SubmissionScript:
 
             if self.ncores > 1:
                 f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
-                f.write(f"export OMP_PROC_BIND=true\n")
+                f.write(f"export OMP_PROC_BIND=true\n")  # give physical cores
 
             for module in self.modules:
                 f.write(f"module load {module}\n")

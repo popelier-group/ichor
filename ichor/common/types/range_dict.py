@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Tuple
 
 
 class RangeDict(dict):
@@ -8,7 +8,7 @@ class RangeDict(dict):
                 return key
         raise KeyError(f"'{item}' not found in '{self.__class__.__name__}'")
 
-    def __setitem__(self, key: str, value: [int, int]):
+    def __setitem__(self, key: str, value: Tuple[int, int]):
         if not isinstance(key, str):
             raise TypeError(
                 f"Key for '{self.__class__.__name__}' must be of type 'str'"

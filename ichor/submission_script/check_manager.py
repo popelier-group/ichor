@@ -77,7 +77,7 @@ def print_completed():
             pass  # In case SGE_TASK_LAST is undefined
     if task_last < ntasks and task_id + task_last <= ntasks:
         logger.info(f"Running Task {task_id} as {task_id + task_last}")
-        task_id += task_last
+        task_id += task_last  # matt_todo: check if it needs to be task_last - 1 instead
         logger.info(
             f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}"
         )
