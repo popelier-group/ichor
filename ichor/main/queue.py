@@ -12,13 +12,16 @@ def delete_jobs():
         with open(jid_file, "r") as f:
             jids = json.load(f)
             for jid in jids:
-                jid = JobID(
-                    script=jid["script"],
-                    id=jid["id"],
-                    instance=jid["instance"],
-                )
-                BATCH_SYSTEM.delete(jid)
-                print(f"Deleted {jid}")
+                try:
+                    jid = JobID(
+                        script=jid["script"],
+                        id=jid["id"],
+                        instance=jid["instance"],
+                    )
+                    BATCH_SYSTEM.delete(jid)
+                    print(f"Deleted {jid}")
+                except json.JSONDecodeError:
+                    pass
         with open(jid_file, "w") as f:
             pass
 
