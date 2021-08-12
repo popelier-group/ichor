@@ -222,7 +222,7 @@ def move_models(model_dir: Optional[Path] = None):
 
         elif d.is_file() and d.suffix == ".model":
             cp(d, GLOBALS.FILE_STRUCTURE["models"])
-            model_log = GLOBALS.FILE_STRUCTURE["model_log"] / GLOBALS.SYSTEM_NAME + str(Model(d).ntrain).zfill(4)
+            model_log = GLOBALS.FILE_STRUCTURE["model_log"] / (GLOBALS.SYSTEM_NAME + str(Model(d).ntrain).zfill(4))
             mkdir(model_log)
             cp(d, model_log)
 
