@@ -33,6 +33,7 @@ class PointsDirectory(Points, Directory):
 
     def parse(self) -> None:
         """
+        Called from Directory.__init__(self, path)
         Parse a directory (such as TRAINING_SET, TEST_SET,etc.) and make PointDirectory objects of each of the subirectories.
         If however there are only .gjf files present in the directory at the moment, then make a new directory for each .gjf file
         and move the .gjf file in there. So for example, if there is a file called WATER001.gjf, this method will make a
