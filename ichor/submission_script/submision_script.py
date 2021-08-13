@@ -190,7 +190,7 @@ class SubmissionScript:
 
             for command_group in self.grouped_commands:
                 command_variables = []
-                if command_group.data:
+                if command_group.data: # Gaussian, Ferebus, AIMALL jobs
                     datafile = GLOBALS.FILE_STRUCTURE["datafiles"] / Path(
                         str(GLOBALS.UID)
                     )
