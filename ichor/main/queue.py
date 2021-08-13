@@ -10,7 +10,10 @@ def delete_jobs():
     jid_file = GLOBALS.FILE_STRUCTURE["jid"]
     if jid_file.exists():
         with open(jid_file, "r") as f:
-            jids = json.load(f)
+            try:
+                jids = json.load(f)
+            except json.JSONDecodeError:
+                jids = []
             for jid in jids:
                 jid = JobID(
                     script=jid["script"],
@@ -19,6 +22,9 @@ def delete_jobs():
                 )
                 BATCH_SYSTEM.delete(jid)
                 print(f"Deleted {jid}")
+
+        with open(jid_file, "w") as f:
+            f.write("[]")
 
 
 def queue_menu():

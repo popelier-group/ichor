@@ -14,8 +14,8 @@ class FileStructure(FileTree):
         self.add("FEREBUS", "ferebus")
         self.add("MODELS", "models", parent="ferebus")
         self.add("MODELS", "remake-models")
-        self.add("LOG", "log")
-        self.add("PROGRAMS", "programs")
+        self.add("MODEL_LOG", "model_log")
+
         self.add("OPT", "opt")
         self.add("CP2K", "cp2k")
         self.add("PROPERTIES", "properties")
@@ -25,6 +25,8 @@ class FileStructure(FileTree):
         self.add("GJF", "dlpoly_gjf", parent="dlpoly")
 
         self.add(".DATA", "data")
+
+        self.add("PROGRAMS", "programs", parent="data")
         self.add("data", "data_file", parent="data")
 
         self.add("JOBS", "jobs", parent="data")

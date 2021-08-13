@@ -30,7 +30,10 @@ class JobID:
         job_ids = []
         if GLOBALS.FILE_STRUCTURE["jid"].exists():
             with open(GLOBALS.FILE_STRUCTURE["jid"], "r") as f:
-                job_ids += json.load(f)
+                try:
+                    job_ids += json.load(f)
+                except json.JSONDecodeError:
+                    pass
 
         job_ids += [
             {
