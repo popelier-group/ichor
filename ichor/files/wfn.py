@@ -32,11 +32,12 @@ class WFN(Geometry, GeometryData, File):
             for line in f:
                 if "CHARGE" in line:
                     line_split = line.split()
+                    reline = re.findall(r"[+-]?\d+\.\d+([[Ee]?[+-]?]\d+)?", line)
                     atom_type, x, y, z = (
                         line_split[0],
-                        float(line_split[4]),
-                        float(line_split[5]),
-                        float(line_split[6]),
+                        float(next(reline).group(0)),
+                        float(next(reline).group(0)]),
+                        float(next(reline).group(0)),
                     )
                     self.atoms.add(
                         Atom(atom_type, x, y, z, units=AtomicDistance.Bohr)
