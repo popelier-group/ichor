@@ -24,9 +24,6 @@ class GeometryData:
             )
 
     def __getattr__(self, item):
-        # try:
-        #     return super().__getattribute__(item)
-        # except AttributeError:
         try:
             for var, inst in self.__dict__.items():
                 if isinstance(inst, (dict, ClassDict)) and item in inst.keys():
@@ -38,6 +35,14 @@ class GeometryData:
             raise AttributeError(
                 f"'{self.__class__}' object has no attribute '{item}'"
             )
+    
+    def __setattr__(self, name, value):
+        for var, inst in self.__dict__.items():
+            if isinstance(inst, (dict, ClassDict)) and name in inst.keys():
+                inst[name] = value
+                break
+        else:
+            super().__setattr__(name, value)
 
     def __setitem__(self, key, value):
         self.data[key] = value

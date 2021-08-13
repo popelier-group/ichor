@@ -7,14 +7,15 @@ from ichor.files.int import INT
 
 
 class INTs(Directory, dict):
-    def __init__(self, path):
+    def __init__(self, path, parent=None):
+        self.parent = parent
         dict.__init__(self)
         Directory.__init__(self, path)
 
     def parse(self) -> None:
         for f in self:
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f)
+                self[f.stem.upper()] = INT(f, self.parent)
         self.sort()
 
     def sort(self):
@@ -28,6 +29,7 @@ class INTs(Directory, dict):
     @buildermethod
     def read(self):
         for atom, int_file in self.items():
+            # int_file.parent = self.atoms
             int_file.read()
 
     def __getattr__(self, item):

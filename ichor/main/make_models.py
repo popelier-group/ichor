@@ -19,6 +19,9 @@ _model_data: Optional[PointsDirectory] = None
 n_training_points: int = 0
 atom_models: List[str] = []
 
+atoms_selected = False
+models_selected = False
+
 
 class ModelType(Enum):
     iqa = "iqa"
@@ -81,6 +84,9 @@ def toggle_model_type(ty: ModelType):
 
 def select_model_type():
     global model_types
+    global models_selected
+    if not models_selected:
+        model_types = []
     while True:
         Menu.clear_screen()
         print("Select Models To Create")
@@ -106,6 +112,7 @@ def select_model_type():
                     toggle_model_type(ModelType[ans])
             elif ans in ["c", "clear"]:
                 model_types.clear()
+    models_selected = True
 
 
 def select_number_of_training_points():
@@ -136,6 +143,9 @@ def toggle_atom_model(atom: str):
 
 def select_atoms():
     global atom_models
+    global atoms_selected
+    if not atoms_selected:
+        atom_models = []
     with ListCompleter(atoms):
         while True:
             print("Select Atoms To Create Models For")
@@ -150,6 +160,7 @@ def select_atoms():
                 toggle_atom_model(ans)
             elif ans in ["c", "clear"]:
                 atom_models.clear()
+    atoms_selected = True
 
 
 def make_models_menu_refresh(menu):

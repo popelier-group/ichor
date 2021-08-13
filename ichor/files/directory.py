@@ -1,6 +1,7 @@
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
+import inspect
 
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File, FileState
@@ -29,14 +30,19 @@ class Directory(PathObject, ABC):
             if f.is_file():
                 for var, filetype in filetypes.items():
                     if f.suffix == filetype.filetype:
-                        setattr(self, var, filetype(f))
+                        if 'parent' in inspect.signature(filetype.__init__).parameters:
+                            setattr(self, var, filetype(f, parent=self))
+                        else:
+                            setattr(self, var, filetype(f))
                         break
             elif f.is_dir():
                 for var, dirtype in dirtypes.items():
                     if dirtype.dirpattern.match(f.name):
-                        setattr(self, var, dirtype(f))
+                        if 'parent' in inspect.signature(dirtype.__init__).parameters:
+                            setattr(self, var, dirtype(f, parent=self))
+                        else:
+                            setattr(self, var, dirtype(f))
                         break
-
     def move(self, dst):
         self.path.replace(dst)
         self.path = dst

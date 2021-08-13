@@ -8,18 +8,19 @@ from ichor.common.functools import buildermethod, classproperty
 from ichor.common.io import move
 from ichor.files.file import File
 from ichor.geometry import GeometryData
+from ichor.common.functools import cached_property
 
 
 class INT(GeometryData, File):
-    def __init__(self, path, atom=None):
+    def __init__(self, path, parent=None):
         File.__init__(self, path)
         GeometryData.__init__(self)
 
-        self.parent = atom
+        self.parent = parent
 
-        self.integration_data = GeometryData()
-        self.multipoles_data = GeometryData()
-        self.iqa_data = GeometryData()
+        self.integration_data = None
+        self.multipoles_data = None
+        self.iqa_data = None
 
     @property
     def atom(self) -> str:
@@ -30,8 +31,7 @@ class INT(GeometryData, File):
         return ".int"
 
     @buildermethod
-    def _read_file(self, atom=None):
-        self.parent = atom
+    def _read_file(self):
         try:
             self.read_json()
         except json.decoder.JSONDecodeError:
@@ -48,6 +48,9 @@ class INT(GeometryData, File):
 
     @buildermethod
     def read_int(self):
+        self.integration_data = {}
+        self.multipoles_data = {}
+        self.iqa_data = {}
         with open(self.path, "r") as f:
             for line in f:
                 if "Results of the basin integration:" in line:
@@ -97,6 +100,7 @@ class INT(GeometryData, File):
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
+
         if self.parent:
             self.rotate_multipoles()
 
@@ -109,30 +113,32 @@ class INT(GeometryData, File):
         self.rotate_octupole()
         self.rotate_hexadecapole()
 
-    @property
+    # @cached_property
     def C(self):
-        try:
-            return self._C
-        except KeyError:
-            r12 = np.array(self.parent.vec_to(self.parent.x_axis))
-            r13 = np.array(self.parent.vec_to(self.parent.xy_plane))
+        from ichor.atoms.calculators.feature_calculator import ALFFeatureCalculator
 
-            mod_r12 = self.parent.dist(self.parent.x_axis)
+        atom = self.parent.atoms[self.atom]
+        x_axis = ALFFeatureCalculator.calculate_x_axis_atom(atom)
+        xy_plane = ALFFeatureCalculator.calculate_xy_plane_atom(atom)
 
-            r12 /= mod_r12
+        r12 = x_axis.coordinates - atom.coordinates
+        r13 = xy_plane.coordinates - atom.coordinates
 
-            ex = r12
-            s = sum(ex * r13)
-            ey = r13 - s * ex
+        mod_r12 = np.linalg.norm(r12)
 
-            ey /= np.sqrt(sum(ey * ey))
-            ez = np.cross(ex, ey)
-            self._C = np.array([ex, ey, ez])
-            return self._C
+        r12 /= mod_r12
+
+        ex = r12
+        s = sum(ex * r13)
+        ey = r13 - s * ex
+
+        ey /= np.sqrt(sum(ey * ey))
+        ez = np.cross(ex, ey)
+        return np.array([ex, ey, ez])
 
     def rotate_dipole(self):
         d = np.array([self.q11c, self.q11s, self.q10])
-        rotated_d = np.einsum("ia,a->i", self.C, d)
+        rotated_d = np.einsum("ia,a->i", self.C(), d)
         self.q10 = rotated_d[2]
         self.q11c = rotated_d[0]
         self.q11s = rotated_d[1]
@@ -149,7 +155,7 @@ class INT(GeometryData, File):
             [[q_xx, q_xy, q_xz], [q_xy, q_yy, q_yz], [q_xz, q_yz, q_zz]]
         )
 
-        rotated_q = np.einsum("ia,jb,ab->ij", self.C, self.C, q)
+        rotated_q = np.einsum("ia,jb,ab->ij", self.C(), self.C(), q)
 
         self.q20 = rotated_q[2, 2]
         self.q21c = constants.rt12_3 * rotated_q[0, 2]
@@ -189,7 +195,7 @@ class INT(GeometryData, File):
             ]
         )
 
-        rotated_o = np.einsum("ia,jb,kc,abc->ijk", self.C, self.C, self.C, o)
+        rotated_o = np.einsum("ia,jb,kc,abc->ijk", self.C(), self.C(), self.C(), o)
 
         self.q30 = rotated_o[2, 2, 2]
         self.q31c = constants.rt_3_3 * rotated_o[0, 2, 2]
@@ -299,7 +305,7 @@ class INT(GeometryData, File):
         )
 
         h_rotated = np.einsum(
-            "ia,jb,kc,ld,abcd->ijkl", self.C, self.C, self.C, self.C, h
+            "ia,jb,kc,ld,abcd->ijkl", self.C(), self.C(), self.C(), self.C(), h
         )
 
         self.q40 = h_rotated[2, 2, 2, 2]
