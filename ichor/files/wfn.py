@@ -36,7 +36,7 @@ class WFN(Geometry, GeometryData, File):
                     atom_type, x, y, z = (
                         line_split[0],
                         float(next(reline).group(0)),
-                        float(next(reline).group(0)]),
+                        float(next(reline).group(0)),
                         float(next(reline).group(0)),
                     )
                     self.atoms.add(
