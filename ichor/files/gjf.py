@@ -132,7 +132,8 @@ class GJF(Geometry, File):
         return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     def write(self) -> None:
-        """Write the .gjf file to disk."""
+        """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
+        should be given to Gaussian."""
         self.format()
         with open(self.path, "w") as f:
             for startup_option in self.startup_options:
