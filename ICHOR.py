@@ -11325,6 +11325,7 @@ class DlpolyTools:
 
     @staticmethod
     def write_config_updated(config_file, atoms):
+        atoms.centre()
         with open(config_file, "w+") as f:
             f.write("Frame :         1\n")
             f.write("\t0\t1\n")  # PBC Solution to temporary problem
