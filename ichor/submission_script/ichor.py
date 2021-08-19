@@ -6,8 +6,9 @@ from typing import List, Optional
 from ichor.common.functools import classproperty
 from ichor.submission_script.python import PythonCommand
 
-
+# matt_todo: I think the command/job files need some renaming because ichor.py is not a good name since that is the name of the whole program as well.
 class ICHORCommand(PythonCommand):
+    # matt_todo: Better docstrings to explain that this does formatting of things that need to be written to submission script
     """ Class used to submit ICHOR jobs to compute nodes. Jobs are submitted using the `SubmissionScript` class.
     
     :param script: Optional path of script that needs to be executed
@@ -28,7 +29,6 @@ class ICHORCommand(PythonCommand):
 
         self.args += [f"-c {Arguments.config_file}", f"-u {GLOBALS.UID}"]
 
-    # matt_todo: maybe make this into class vairable since it always returns the same thing
     @classproperty
     def group(self) -> bool:
         return False

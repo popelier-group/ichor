@@ -98,9 +98,10 @@ def print_completed():
         logger.info(
             f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}"
         )
-        # matt_todo: Where are these printed? When they are printed, how are they executed because ICHOR_TASK_COMPLETED is set to false in the scripts initially
+        # prints out to standard output, which then gets evaluated with eval
         print(f"export {BATCH_SYSTEM.TaskID}={task_id}")
     else:
+        # prints out to standard output, which then gets evaluated with eval
         print(f"export {CheckManager.TASK_COMPLETED}=true")
 
 

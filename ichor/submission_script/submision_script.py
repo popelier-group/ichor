@@ -101,7 +101,14 @@ class SubmissionScript:
                     command_group = CommandGroup()
                 command_type = type(command)
             command_group += [command]
-        # commands = [[GaussianCommand(), GaussianCommand()]]
+        # commands = [[GaussianCommand(), GaussianCommand()], [IchorCommand]]
+        # [[Gaussian], [Ichor], [Aimall]]
+
+        # In one job script file
+        # Gaussian part
+        # ichor part
+        # Aimall part
+
         if len(command_group) > 0:
             commands += [command_group]
         return commands
