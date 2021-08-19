@@ -8,6 +8,12 @@ from ichor.submission_script.python import PythonCommand
 
 
 class ICHORCommand(PythonCommand):
+    """ Class used to submit ICHOR jobs to compute nodes. Jobs are submitted using the `SubmissionScript` class.
+    
+    :param script: Optional path of script that needs to be executed
+    :param args: Optional arguments that need to be passed to ICHOR via command line (parsed with argparse)
+    """
+
     def __init__(
         self, script: Optional[Path] = None, args: Optional[List[str]] = None
     ):
@@ -22,10 +28,12 @@ class ICHORCommand(PythonCommand):
 
         self.args += [f"-c {Arguments.config_file}", f"-u {GLOBALS.UID}"]
 
+    # matt_todo: maybe make this into class vairable since it always returns the same thing
     @classproperty
     def group(self) -> bool:
         return False
 
-    def run_function(self, function_to_run, *args):
+    def run_function(self, function_to_run: str, *args):
+        """ extends self.args with the function and function arguments that need to be executed to check output"""
         arg_str = " ".join(f'"{str(arg)}"' for arg in args)
         self.args += [f"-f {function_to_run} {arg_str}"]

@@ -54,6 +54,8 @@ class AIMAllCommand(CommandLine):
             f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'"
         )
 
+    # matt_todo: maybe have these as class variables instead because they it returns the same thing every time.
+    # matt_todo: what do these options do?
     @classproperty
     def options(self) -> List[str]:
         return ["-j y", "-S /bin/bash"]

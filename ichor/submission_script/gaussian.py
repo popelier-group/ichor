@@ -7,13 +7,13 @@ from ichor.modules import GaussianModules, Modules
 from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
-
+# matt_todo: What do you think about naming these GaussianJob, AIMALLJob, etc. Why is it names command?
 class GaussianCommand(CommandLine):
-    """Class used to construct a Gaussian Job. This job is submitted using the `SubmissionScript` class.
+    """Class used to construct a Gaussian Job. Jobs are submitted using the `SubmissionScript` class.
     
     :param gjf_file: Path object to a gjf file
     :param gjf_output: Optional Path to a Gaussian output file. Default is None as self.gjf_output is set to gjf_file with suffix .gau
-    :param check: 
+    :param check: Whether or not to check that the outputs of the job are correct or the job needs to be ran again. Default True.
     """
     def __init__(
         self,
@@ -57,7 +57,13 @@ class GaussianCommand(CommandLine):
         return GLOBALS.GAUSSIAN_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:
-        cmd = f"{self.command} {variables[0]} {variables[1]}"
+        """ Returns a strings which is then written out to the final submission script file.
+        If the outputs of the job need to be checked (by default self.check is set to True, so job outputs are checked),
+        then the corres
+        """
+
+        # matt_todo: maybe check if there is the corrent number of arrays is passed here.
+        cmd = f"{self.command} {variables[0]} {variables[1]}"  # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
 
         if self.check:
             from ichor.globals import GLOBALS
