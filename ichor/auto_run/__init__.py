@@ -156,4 +156,3 @@ def auto_run():
         for i, iter_state in enumerate(iterations):
             print(f"Submitting Iter: {i+1}")
             job_id = next_iter(job_id, iter_state)
-    quit()

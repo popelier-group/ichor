@@ -332,7 +332,7 @@ class Globals:
             if key in self.global_variables:
                 self.set(key, val)
                 self._in_config += [key]
-            elif key == "MAX_ITERATION": # Deprecated variable name
+            elif key in ["MAX_ITERATION", "N_ITERATION"]:  # Deprecated variable names
                 self.set("N_ITERATIONS", val)
                 self._in_config += ["N_ITERATIONS"]
             else:
