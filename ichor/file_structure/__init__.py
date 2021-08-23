@@ -26,7 +26,7 @@ class FileStructure(FileTree):
 
         self.add(".DATA", "data")
 
-        self.add("PROGRAMS", "programs", parent="data")
+        self.add("PROGRAMS", "programs")#, parent="data")
         self.add("data", "data_file", parent="data")
 
         self.add("JOBS", "jobs", parent="data")

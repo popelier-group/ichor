@@ -404,7 +404,7 @@ class Globals:
         with open(config_file, "w") as config:
             yaml.dump(global_variables, config)
 
-    def save_to_config(self, config_file=Arguments.config_file):
+    def save_to_config(self, config_file: str = Arguments.config_file):
         global_variables = {
             global_variable: global_value
             for global_variable, global_value in self.items()

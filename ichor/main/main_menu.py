@@ -31,6 +31,7 @@ def main_menu() -> None:
     from ichor.auto_run import auto_run
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
+    from ichor.auto_run.per import auto_run_per_atom_menu
 
     with Menu("ICHOR Main Menu", space=True, back=False, exit=True) as menu:
         menu.add_option(
@@ -64,6 +65,7 @@ def main_menu() -> None:
         menu.add_option(
             "r", "Auto Run", auto_run,
         )
+        menu.add_option("p", "Per-Value Auto Run", auto_run_per_atom_menu)
         menu.add_space()
         menu.add_option("t", "Tools Menu", tools_menu)
         menu.add_option("o", "Options Menu", options_menu)

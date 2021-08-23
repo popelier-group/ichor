@@ -4,7 +4,7 @@ import sys
 from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Union
 
 from contextlib import contextmanager
 
@@ -50,8 +50,28 @@ def move(src: Path, dst: Path) -> None:
 
 
 @convert_to_path
-def cp(src: Path, dst: Path) -> None:
+def cp(src: Path, dst: Path, *args, **kwargs) -> None:
+    if src.is_file():
+        copyfile(src, dst, *args, **kwargs)
+    elif src.is_dir():
+        copytree(src, dst, *args, **kwargs)
+
+
+@convert_to_path
+def copyfile(src: Path, dst: Path) -> None:
     shutil.copy2(src, dst)
+
+
+@convert_to_path
+def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
+    for item in src.iterdir():
+        s = item
+        d = dst / item.name
+        print(s, d)
+        if s.is_dir():
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
 
 @convert_to_path
@@ -79,10 +99,29 @@ def remove(path: Path) -> None:
 
 
 @contextmanager
-def pushd(new_dir: Path):
+def pushd(new_dir: Path, update_cwd: bool = False):
     previous_dir = os.getcwd()
     os.chdir(new_dir)
+    if update_cwd:
+        from ichor.globals import GLOBALS
+        GLOBALS.CWD = new_dir
     try:
         yield
     finally:
         os.chdir(previous_dir)
+        if update_cwd:
+            from ichor.globals import GLOBALS
+            GLOBALS.CWD = previous_dir
+
+
+
+@convert_to_path
+def get_files_of_type(filetype: Union[str, List[str]], directory: Path = Path.cwd()) -> List[Path]:
+    if isinstance(filetype, str):
+        filetype = [filetype]
+    for i, ft in enumerate(filetype):
+        if not ft.startswith("."):
+            filetype[i] = "." + ft
+    return [f for f in directory.iterdir() if f.is_file() and f.suffix in filetype]
+
+
