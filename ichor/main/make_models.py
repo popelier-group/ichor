@@ -54,6 +54,13 @@ class ModelType(Enum):
     @classmethod
     def to_str(cls, ty: "ModelType"):
         return ty.value
+    
+    @classmethod
+    def from_str(cls, ty: str) -> 'ModelType':
+        for ity in cls:
+            if ity.value == ty:
+                return ity
+        raise ValueError(f"No ModelType {ty}")
 
 
 model_types: List[ModelType] = [ModelType.iqa]
@@ -206,7 +213,7 @@ def make_models(
     _model_data = PointsDirectory(directory)
 
     n_training_points = ntrain or len(_model_data)
-    model_types = types or [ModelType.iqa]
+    model_types = [ModelType.from_str(ty) for ty in types] or [ModelType.iqa]
     atom_models = atoms or [atom.atom_num for atom in _model_data[0].atoms]
 
     return _make_models(hold=hold)
