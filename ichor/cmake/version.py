@@ -1,5 +1,5 @@
+from ichor.cmake.check import cmake_present, run_cmake_version
 from ichor.common.types import Version
-from ichor.cmake.check import run_cmake_version, cmake_present
 
 
 class CMakeNotFound(Exception):
@@ -14,4 +14,3 @@ def cmake_current_version() -> Version:
         if "cmake version" in line:
             return Version(line.split()[-1])
     raise CMakeNotFound()
-

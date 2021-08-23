@@ -1,12 +1,12 @@
-from pathlib import Path
 import sys
+from pathlib import Path
+from typing import Optional
 
+from ichor.batch_system import JobID
 from ichor.logging import logger
 from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
-from ichor.batch_system import JobID
-from typing import Optional
 
 
 def submit_gjfs(directory) -> Optional[JobID]:
@@ -16,7 +16,9 @@ def submit_gjfs(directory) -> Optional[JobID]:
         if not point.gjf.path.with_suffix(".wfn").exists():
             point.gjf.write()
             submission_script.add_command(GaussianCommand(point.gjf.path))
-    logger.info(f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian")
+    logger.info(
+        f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
+    )
     submission_script.write()
     return submission_script.submit()
 

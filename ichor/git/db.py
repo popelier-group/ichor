@@ -1,19 +1,16 @@
 """Module with our own gitdb implementation - it uses the git command"""
-from ichor.git.util import bin_to_hex, hex_to_bin
-from ichor.git.ext.gitdb.base import (
-    OInfo,
-    OStream
-)
+from typing import TYPE_CHECKING
+
+from ichor.git.exc import GitCommandError
+from ichor.git.ext.gitdb.base import OInfo, OStream
 from ichor.git.ext.gitdb.db import GitDB  # @UnusedImport
 from ichor.git.ext.gitdb.db import LooseObjectDB
-
 from ichor.git.ext.gitdb.exc import BadObject
-from ichor.git.exc import GitCommandError
+from ichor.git.types import PathLike
+from ichor.git.util import bin_to_hex, hex_to_bin
 
 # typing-------------------------------------------------
 
-from typing import TYPE_CHECKING
-from ichor.git.types import PathLike
 
 if TYPE_CHECKING:
     from ichor.git.cmd import Git
@@ -21,7 +18,7 @@ if TYPE_CHECKING:
 
 # --------------------------------------------------------
 
-__all__ = ('GitCmdObjectDB', 'GitDB')
+__all__ = ("GitCmdObjectDB", "GitDB")
 
 
 class GitCmdObjectDB(LooseObjectDB):
@@ -34,18 +31,22 @@ class GitCmdObjectDB(LooseObjectDB):
         have packs and the other implementations
     """
 
-    def __init__(self, root_path: PathLike, git: 'Git') -> None:
+    def __init__(self, root_path: PathLike, git: "Git") -> None:
         """Initialize this instance with the root and a git command"""
         super(GitCmdObjectDB, self).__init__(root_path)
         self._git = git
 
     def info(self, binsha: bytes) -> OInfo:
-        hexsha, typename, size = self._git.get_object_header(bin_to_hex(binsha))
+        hexsha, typename, size = self._git.get_object_header(
+            bin_to_hex(binsha)
+        )
         return OInfo(hex_to_bin(hexsha), typename, size)
 
     def stream(self, binsha: bytes) -> OStream:
         """For now, all lookup is done by git itself"""
-        hexsha, typename, size, stream = self._git.stream_object_data(bin_to_hex(binsha))
+        hexsha, typename, size, stream = self._git.stream_object_data(
+            bin_to_hex(binsha)
+        )
         return OStream(hex_to_bin(hexsha), typename, size, stream)
 
     # { Interface
@@ -57,10 +58,12 @@ class GitCmdObjectDB(LooseObjectDB):
         :note: currently we only raise BadObject as git does not communicate
             AmbiguousObjects separately"""
         try:
-            hexsha, _typename, _size = self._git.get_object_header(partial_hexsha)
+            hexsha, _typename, _size = self._git.get_object_header(
+                partial_hexsha
+            )
             return hex_to_bin(hexsha)
         except (GitCommandError, ValueError) as e:
             raise BadObject(partial_hexsha) from e
         # END handle exceptions
 
-    #} END interface
+    # } END interface

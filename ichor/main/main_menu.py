@@ -1,6 +1,6 @@
+from ichor.main.options_menu import options_menu
 from ichor.main.queue import queue_menu
 from ichor.main.tools_menu import tools_menu
-from ichor.main.options_menu import options_menu
 from ichor.menu import Menu
 
 
@@ -29,9 +29,9 @@ def points_directory_menu(path):
 
 def main_menu() -> None:
     from ichor.auto_run import auto_run
+    from ichor.auto_run.per import auto_run_per_atom_menu
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
-    from ichor.auto_run.per import auto_run_per_atom_menu
 
     with Menu("ICHOR Main Menu", space=True, back=False, exit=True) as menu:
         menu.add_option(
@@ -63,7 +63,9 @@ def main_menu() -> None:
         )
         menu.add_space()
         menu.add_option(
-            "r", "Auto Run", auto_run,
+            "r",
+            "Auto Run",
+            auto_run,
         )
         menu.add_option("p", "Per-Value Auto Run", auto_run_per_atom_menu)
         menu.add_space()

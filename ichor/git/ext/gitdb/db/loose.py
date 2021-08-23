@@ -2,62 +2,26 @@
 #
 # This module is part of GitDB and is released under
 # the New BSD License: http://www.opensource.org/licenses/bsd-license.php
-from ichor.git.ext.gitdb.db.base import (
-    FileDBBase,
-    ObjectDBR,
-    ObjectDBW
-)
-
-
-from ichor.git.ext.gitdb.exc import (
-    BadObject,
-    AmbiguousObjectName
-)
-
-from ichor.git.ext.gitdb.stream import (
-    DecompressMemMapReader,
-    FDCompressedSha1Writer,
-    FDStream,
-    Sha1Writer
-)
-
-from ichor.git.ext.gitdb.base import (
-    OStream,
-    OInfo
-)
-
-from ichor.git.ext.gitdb.util import (
-    file_contents_ro_filepath,
-    ENOENT,
-    hex_to_bin,
-    bin_to_hex,
-    exists,
-    chmod,
-    isdir,
-    isfile,
-    remove,
-    mkdir,
-    rename,
-    dirname,
-    basename,
-    join
-)
-
-from ichor.git.ext.gitdb.fun import (
-    chunk_size,
-    loose_object_header_info,
-    write_object,
-    stream_copy
-)
-
-from ichor.git.ext.gitdb.utils.encoding import force_bytes
-
-import tempfile
 import os
 import sys
+import tempfile
 
+from ichor.git.ext.gitdb.base import OInfo, OStream
+from ichor.git.ext.gitdb.db.base import FileDBBase, ObjectDBR, ObjectDBW
+from ichor.git.ext.gitdb.exc import AmbiguousObjectName, BadObject
+from ichor.git.ext.gitdb.fun import (chunk_size, loose_object_header_info,
+                                     stream_copy, write_object)
+from ichor.git.ext.gitdb.stream import (DecompressMemMapReader,
+                                        FDCompressedSha1Writer, FDStream,
+                                        Sha1Writer)
+from ichor.git.ext.gitdb.util import (ENOENT, basename, bin_to_hex, chmod,
+                                      dirname, exists,
+                                      file_contents_ro_filepath, hex_to_bin,
+                                      isdir, isfile, join, mkdir, remove,
+                                      rename)
+from ichor.git.ext.gitdb.utils.encoding import force_bytes
 
-__all__ = ('LooseObjectDB', )
+__all__ = ("LooseObjectDB",)
 
 
 class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
@@ -71,7 +35,7 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
     # On windows we need to keep it writable, otherwise it cannot be removed
     # either
     new_objects_mode = int("444", 8)
-    if os.name == 'nt':
+    if os.name == "nt":
         new_objects_mode = int("644", 8)
 
     def __init__(self, root_path):
@@ -80,9 +44,9 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
         # Additional Flags - might be set to 0 after the first failure
         # Depending on the root, this might work for some mounts, for others not, which
         # is why it is per instance
-        self._fd_open_flags = getattr(os, 'O_NOATIME', 0)
+        self._fd_open_flags = getattr(os, "O_NOATIME", 0)
 
-    #{ Interface
+    # { Interface
     def object_path(self, hexsha):
         """
         :return: path at which the object with the given hexsha would be stored,
@@ -111,7 +75,7 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
         """:return: 20 byte binary sha1 string which matches the given name uniquely
         :param name: hexadecimal partial name (bytes or ascii string)
         :raise AmbiguousObjectName:
-        :raise BadObject: """
+        :raise BadObject:"""
         candidate = None
         for binsha in self.sha_iter():
             if bin_to_hex(binsha).startswith(force_bytes(partial_hexsha)):
@@ -124,7 +88,7 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
             raise BadObject(partial_hexsha)
         return candidate
 
-    #} END interface
+    # } END interface
 
     def _map_loose_object(self, sha):
         """
@@ -132,7 +96,9 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
         :raise BadObject: if object could not be located"""
         db_path = self.db_path(self.object_path(bin_to_hex(sha)))
         try:
-            return file_contents_ro_filepath(db_path, flags=self._fd_open_flags)
+            return file_contents_ro_filepath(
+                db_path, flags=self._fd_open_flags
+            )
         except OSError as e:
             if e.errno != ENOENT:
                 # try again without noatime
@@ -150,7 +116,10 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
     def set_ostream(self, stream):
         """:raise TypeError: if the stream does not support the Sha1Writer interface"""
         if stream is not None and not isinstance(stream, Sha1Writer):
-            raise TypeError("Output stream musst support the %s interface" % Sha1Writer.__name__)
+            raise TypeError(
+                "Output stream musst support the %s interface"
+                % Sha1Writer.__name__
+            )
         return super(LooseObjectDB, self).set_ostream(stream)
 
     def info(self, sha):
@@ -159,13 +128,15 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
             typ, size = loose_object_header_info(m)
             return OInfo(sha, typ, size)
         finally:
-            if hasattr(m, 'close'):
+            if hasattr(m, "close"):
                 m.close()
         # END assure release of system resources
 
     def stream(self, sha):
         m = self._map_loose_object(sha)
-        type, size, stream = DecompressMemMapReader.new(m, close_on_deletion=True)
+        type, size, stream = DecompressMemMapReader.new(
+            m, close_on_deletion=True
+        )
         return OStream(sha, type, size, stream)
 
     def has_object(self, sha):
@@ -182,7 +153,7 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
         writer = self.ostream()
         if writer is None:
             # open a tmp file to write the data to
-            fd, tmp_path = tempfile.mkstemp(prefix='obj', dir=self._root_path)
+            fd, tmp_path = tempfile.mkstemp(prefix="obj", dir=self._root_path)
 
             if istream.binsha is None:
                 writer = FDCompressedSha1Writer(fd)
@@ -196,11 +167,21 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
                 if istream.binsha is not None:
                     # copy as much as possible, the actual uncompressed item size might
                     # be smaller than the compressed version
-                    stream_copy(istream.read, writer.write, sys.maxsize, self.stream_chunk_size)
+                    stream_copy(
+                        istream.read,
+                        writer.write,
+                        sys.maxsize,
+                        self.stream_chunk_size,
+                    )
                 else:
                     # write object with header, we have to make a new one
-                    write_object(istream.type, istream.size, istream.read, writer.write,
-                                 chunk_size=self.stream_chunk_size)
+                    write_object(
+                        istream.type,
+                        istream.size,
+                        istream.read,
+                        writer.write,
+                        chunk_size=self.stream_chunk_size,
+                    )
                 # END handle direct stream copies
             finally:
                 if tmp_path:

@@ -1,6 +1,6 @@
+import sys
 from pathlib import Path
 from typing import List, Optional
-import sys
 
 from ichor import constants
 from ichor.batch_system import JobID
@@ -19,11 +19,16 @@ def submit_wfns(
     points = PointsDirectory(directory)
     submission_script = SubmissionScript(SCRIPT_NAMES["aimall"])
     for point in points:
-        if not point.wfn.path.with_suffix(".aim").exists() or point.wfn.path.with_suffix(".sh").exists():
+        if (
+            not point.wfn.path.with_suffix(".aim").exists()
+            or point.wfn.path.with_suffix(".sh").exists()
+        ):
             if GLOBALS.METHOD in constants.AIMALL_FUNCTIONALS:
                 point.wfn.check_header()
             submission_script.add_command(AIMAllCommand(point.wfn.path))
-    logger.info(f"Submitting {len(submission_script.commands)} WFN(s) to AIMAll")
+    logger.info(
+        f"Submitting {len(submission_script.commands)} WFN(s) to AIMAll"
+    )
     submission_script.write()
     return submission_script.submit()
 

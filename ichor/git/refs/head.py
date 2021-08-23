@@ -1,20 +1,20 @@
-from ichor.git.config import GitConfigParser, SectionConstraint
-from ichor.git.util import join_path
-from ichor.git.exc import GitCommandError
+from typing import TYPE_CHECKING, Any, Sequence, Union
 
-from ichor.git.refs.symbolic import SymbolicReference
+from ichor.git.config import GitConfigParser, SectionConstraint
+from ichor.git.exc import GitCommandError
 from ichor.git.refs.reference import Reference
+from ichor.git.refs.symbolic import SymbolicReference
+from ichor.git.types import Commit_ish, PathLike
+from ichor.git.util import join_path
 
 # typinng ---------------------------------------------------
 
-from typing import Any, Sequence, Union, TYPE_CHECKING
 
-from ichor.git.types import PathLike, Commit_ish
 
 if TYPE_CHECKING:
-    from ichor.git.repo import Repo
     from ichor.git.objects import Commit
     from ichor.git.refs import RemoteReference
+    from ichor.git.repo import Repo
 
 # -------------------------------------------------------------------
 
@@ -31,15 +31,19 @@ class HEAD(SymbolicReference):
 
     """Special case of a Symbolic Reference as it represents the repository's
     HEAD reference."""
-    _HEAD_NAME = 'HEAD'
-    _ORIG_HEAD_NAME = 'ORIG_HEAD'
+
+    _HEAD_NAME = "HEAD"
+    _ORIG_HEAD_NAME = "ORIG_HEAD"
     __slots__ = ()
 
-    def __init__(self, repo: 'Repo', path: PathLike = _HEAD_NAME):
+    def __init__(self, repo: "Repo", path: PathLike = _HEAD_NAME):
         if path != self._HEAD_NAME:
-            raise ValueError("HEAD instance must point to %r, got %r" % (self._HEAD_NAME, path))
+            raise ValueError(
+                "HEAD instance must point to %r, got %r"
+                % (self._HEAD_NAME, path)
+            )
         super(HEAD, self).__init__(repo, path)
-        self.commit: 'Commit'
+        self.commit: "Commit"
 
     def orig_head(self) -> SymbolicReference:
         """
@@ -47,9 +51,14 @@ class HEAD(SymbolicReference):
             to contain the previous value of HEAD"""
         return SymbolicReference(self.repo, self._ORIG_HEAD_NAME)
 
-    def reset(self, commit: Union[Commit_ish, SymbolicReference, str] = 'HEAD',
-              index: bool = True, working_tree: bool = False,
-              paths: Union[PathLike, Sequence[PathLike], None] = None, **kwargs: Any) -> 'HEAD':
+    def reset(
+        self,
+        commit: Union[Commit_ish, SymbolicReference, str] = "HEAD",
+        index: bool = True,
+        working_tree: bool = False,
+        paths: Union[PathLike, Sequence[PathLike], None] = None,
+        **kwargs: Any
+    ) -> "HEAD":
         """Reset our HEAD to the given commit optionally synchronizing
         the index and working tree. The reference we refer to will be set to
         commit as well.
@@ -90,12 +99,14 @@ class HEAD(SymbolicReference):
         if working_tree:
             mode = "--hard"
             if not index:
-                raise ValueError("Cannot reset the working tree if the index is not reset as well")
+                raise ValueError(
+                    "Cannot reset the working tree if the index is not reset as well"
+                )
 
         # END working tree handling
 
         try:
-            self.repo.git.reset(mode, commit, '--', paths, **kwargs)
+            self.repo.git.reset(mode, commit, "--", paths, **kwargs)
         except GitCommandError as e:
             # git nowadays may use 1 as status to indicate there are still unstaged
             # modifications after the reset
@@ -124,12 +135,15 @@ class Head(Reference):
 
         >>> head.commit.hexsha
         '1c09f116cbc2cb4100fb6935bb162daa4723f455'"""
+
     _common_path_default = "refs/heads"
     k_config_remote = "remote"
-    k_config_remote_ref = "merge"           # branch to merge from remote
+    k_config_remote_ref = "merge"  # branch to merge from remote
 
     @classmethod
-    def delete(cls, repo: 'Repo', *heads: 'Head', force: bool = False, **kwargs: Any) -> None:
+    def delete(
+        cls, repo: "Repo", *heads: "Head", force: bool = False, **kwargs: Any
+    ) -> None:
         """Delete the given heads
 
         :param force:
@@ -141,7 +155,9 @@ class Head(Reference):
             flag = "-D"
         repo.git.branch(flag, *heads)
 
-    def set_tracking_branch(self, remote_reference: Union['RemoteReference', None]) -> 'Head':
+    def set_tracking_branch(
+        self, remote_reference: Union["RemoteReference", None]
+    ) -> "Head":
         """
         Configure this branch to track the given remote reference. This will alter
             this branch's configuration accordingly.
@@ -150,7 +166,10 @@ class Head(Reference):
             any references
         :return: self"""
         from .remote import RemoteReference
-        if remote_reference is not None and not isinstance(remote_reference, RemoteReference):
+
+        if remote_reference is not None and not isinstance(
+            remote_reference, RemoteReference
+        ):
             raise ValueError("Incorrect parameter type: %r" % remote_reference)
         # END handle type
 
@@ -161,27 +180,42 @@ class Head(Reference):
                 if len(writer.options()) == 0:
                     writer.remove_section()
             else:
-                writer.set_value(self.k_config_remote, remote_reference.remote_name)
-                writer.set_value(self.k_config_remote_ref, Head.to_full_path(remote_reference.remote_head))
+                writer.set_value(
+                    self.k_config_remote, remote_reference.remote_name
+                )
+                writer.set_value(
+                    self.k_config_remote_ref,
+                    Head.to_full_path(remote_reference.remote_head),
+                )
 
         return self
 
-    def tracking_branch(self) -> Union['RemoteReference', None]:
+    def tracking_branch(self) -> Union["RemoteReference", None]:
         """
         :return: The remote_reference we are tracking, or None if we are
             not a tracking branch"""
         from .remote import RemoteReference
+
         reader = self.config_reader()
-        if reader.has_option(self.k_config_remote) and reader.has_option(self.k_config_remote_ref):
-            ref = Head(self.repo, Head.to_full_path(strip_quotes(reader.get_value(self.k_config_remote_ref))))
-            remote_refpath = RemoteReference.to_full_path(join_path(reader.get_value(self.k_config_remote), ref.name))
+        if reader.has_option(self.k_config_remote) and reader.has_option(
+            self.k_config_remote_ref
+        ):
+            ref = Head(
+                self.repo,
+                Head.to_full_path(
+                    strip_quotes(reader.get_value(self.k_config_remote_ref))
+                ),
+            )
+            remote_refpath = RemoteReference.to_full_path(
+                join_path(reader.get_value(self.k_config_remote), ref.name)
+            )
             return RemoteReference(self.repo, remote_refpath)
         # END handle have tracking branch
 
         # we are not a tracking branch
         return None
 
-    def rename(self, new_path: PathLike, force: bool = False) -> 'Head':
+    def rename(self, new_path: PathLike, force: bool = False) -> "Head":
         """Rename self to a new path
 
         :param new_path:
@@ -202,7 +236,9 @@ class Head(Reference):
         self.path = "%s/%s" % (self._common_path_default, new_path)
         return self
 
-    def checkout(self, force: bool = False, **kwargs: Any) -> Union['HEAD', 'Head']:
+    def checkout(
+        self, force: bool = False, **kwargs: Any
+    ) -> Union["HEAD", "Head"]:
         """Checkout this head by setting the HEAD to this reference, by updating the index
         to reflect the tree we point to and by updating the working tree to reflect
         the latest index.
@@ -227,9 +263,9 @@ class Head(Reference):
             By default it is only allowed to checkout heads - everything else
             will leave the HEAD detached which is allowed and possible, but remains
             a special state that some tools might not be able to handle."""
-        kwargs['f'] = force
-        if kwargs['f'] is False:
-            kwargs.pop('f')
+        kwargs["f"] = force
+        if kwargs["f"] is False:
+            kwargs.pop("f")
 
         self.repo.git.checkout(self, **kwargs)
         if self.repo.head.is_detached:
@@ -237,8 +273,10 @@ class Head(Reference):
         else:
             return self.repo.active_branch
 
-    #{ Configuration
-    def _config_parser(self, read_only: bool) -> SectionConstraint[GitConfigParser]:
+    # { Configuration
+    def _config_parser(
+        self, read_only: bool
+    ) -> SectionConstraint[GitConfigParser]:
         if read_only:
             parser = self.repo.config_reader()
         else:
@@ -259,4 +297,4 @@ class Head(Reference):
             to options of this head"""
         return self._config_parser(read_only=False)
 
-    #} END configuration
+    # } END configuration

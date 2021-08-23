@@ -18,9 +18,7 @@ def input_with_prefill(prompt: str, prefill: str = "") -> str:
         # Readline only available on Unix
         import readline
 
-        readline.set_startup_hook(
-            lambda: readline.insert_text(str(prefill))
-        )
+        readline.set_startup_hook(lambda: readline.insert_text(str(prefill)))
         return input(prompt)
     except ImportError:
         return input(prompt)

@@ -35,7 +35,7 @@ class GeometryData:
             raise AttributeError(
                 f"'{self.__class__}' object has no attribute '{item}'"
             )
-    
+
     def __setattr__(self, name, value):
         for var, inst in self.__dict__.items():
             if isinstance(inst, (dict, ClassDict)) and name in inst.keys():

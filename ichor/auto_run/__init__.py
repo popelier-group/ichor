@@ -79,7 +79,9 @@ func_order = [
         [IterArgs.TrainingSetLocation, IterArgs.Atoms],
     ),
     IterStep(
-        auto_run_aimall, IterUsage.All, [IterArgs.nPoints, IterArgs.Atoms],
+        auto_run_aimall,
+        IterUsage.All,
+        [IterArgs.nPoints, IterArgs.Atoms],
     ),
     IterStep(
         make_models,

@@ -1,21 +1,19 @@
 import os
 
-from ichor.git.util import join_path
-
 from ichor.git.refs.head import Head
-
+from ichor.git.util import join_path
 
 __all__ = ["RemoteReference"]
 
 # typing ------------------------------------------------------------------
 
-from typing import Any, Iterator, NoReturn, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Iterator, NoReturn, Union
+
 from ichor.git.types import PathLike
 
-
 if TYPE_CHECKING:
-    from ichor.git.repo import Repo
     from ichor.git import Remote
+    from ichor.git.repo import Repo
 
 # ------------------------------------------------------------------------------
 
@@ -23,12 +21,18 @@ if TYPE_CHECKING:
 class RemoteReference(Head):
 
     """Represents a reference pointing to a remote head."""
+
     _common_path_default = Head._remote_common_path_default
 
     @classmethod
-    def iter_items(cls, repo: 'Repo', common_path: Union[PathLike, None] = None,
-                   remote: Union['Remote', None] = None, *args: Any, **kwargs: Any
-                   ) -> Iterator['RemoteReference']:
+    def iter_items(
+        cls,
+        repo: "Repo",
+        common_path: Union[PathLike, None] = None,
+        remote: Union["Remote", None] = None,
+        *args: Any,
+        **kwargs: Any
+    ) -> Iterator["RemoteReference"]:
         """Iterate remote references, and if given, constrain them to the given remote"""
         common_path = common_path or cls._common_path_default
         if remote is not None:
@@ -37,8 +41,10 @@ class RemoteReference(Head):
         # super is Reference
         return super(RemoteReference, cls).iter_items(repo, common_path)
 
-    @ classmethod
-    def delete(cls, repo: 'Repo', *refs: 'RemoteReference', **kwargs: Any) -> None:
+    @classmethod
+    def delete(
+        cls, repo: "Repo", *refs: "RemoteReference", **kwargs: Any
+    ) -> None:
         """Delete the given remote references
 
         :note:
@@ -59,7 +65,7 @@ class RemoteReference(Head):
                 pass
         # END for each ref
 
-    @ classmethod
+    @classmethod
     def create(cls, *args: Any, **kwargs: Any) -> NoReturn:
         """Used to disable this method"""
         raise TypeError("Cannot explicitly create remote references")

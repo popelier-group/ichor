@@ -4,11 +4,11 @@ import re
 import numpy as np
 
 from ichor import constants, patterns
-from ichor.common.functools import buildermethod, classproperty
+from ichor.common.functools import (buildermethod, cached_property,
+                                    classproperty)
 from ichor.common.io import move
 from ichor.files.file import File
 from ichor.geometry import GeometryData
-from ichor.common.functools import cached_property
 
 
 class INT(GeometryData, File):
@@ -115,7 +115,8 @@ class INT(GeometryData, File):
 
     @cached_property
     def C(self):
-        from ichor.atoms.calculators.feature_calculator import ALFFeatureCalculator
+        from ichor.atoms.calculators.feature_calculator import \
+            ALFFeatureCalculator
 
         atom = self.parent.atoms[self.atom]
         x_axis = ALFFeatureCalculator.calculate_x_axis_atom(atom)

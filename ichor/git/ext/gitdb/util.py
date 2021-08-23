@@ -3,18 +3,15 @@
 # This module is part of GitDB and is released under
 # the New BSD License: http://www.opensource.org/licenses/bsd-license.php
 import binascii
-import os
+import errno
 import mmap
+import os
 import sys
 import time
-import errno
-
 from io import BytesIO
 
-from ichor.git.ext.gitdb.ext.smmap import (
-    SlidingWindowMapManager,
-    SlidingWindowMapBuffer
-)
+from ichor.git.ext.gitdb.ext.smmap import (SlidingWindowMapBuffer,
+                                           SlidingWindowMapManager)
 
 # initialize our global memory manager instance
 # Use it to free cached (and unused) resources.
@@ -26,7 +23,8 @@ import hashlib
 try:
     from struct import unpack_from
 except ImportError:
-    from struct import unpack, calcsize
+    from struct import calcsize, unpack
+
     __calcsize_cache = dict()
 
     def unpack_from(fmt, data, offset=0):
@@ -36,11 +34,12 @@ except ImportError:
             size = calcsize(fmt)
             __calcsize_cache[fmt] = size
         # END exception handling
-        return unpack(fmt, data[offset: offset + size])
+        return unpack(fmt, data[offset : offset + size])
+
     # END own unpack_from implementation
 
 
-#{ Aliases
+# { Aliases
 
 hex_to_bin = binascii.a2b_hex
 bin_to_hex = binascii.b2a_hex
@@ -84,18 +83,19 @@ def remove(*args, **kwargs):
 
 # Backwards compatibility imports
 
-#} END Aliases
+# } END Aliases
 
-#{ compatibility stuff ...
+# { compatibility stuff ...
 
 
 class _RandomAccessBytesIO(object):
 
     """Wrapper to provide required functionality in case memory maps cannot or may
     not be used. This is only really required in python 2.4"""
-    __slots__ = '_sio'
 
-    def __init__(self, buf=''):
+    __slots__ = "_sio"
+
+    def __init__(self, buf=""):
         self._sio = BytesIO(buf)
 
     def __getattr__(self, attr):
@@ -121,19 +121,21 @@ def byte_ord(b):
     except TypeError:
         return b
 
-#} END compatibility stuff ...
 
-#{ Routines
+# } END compatibility stuff ...
+
+# { Routines
 
 
-def make_sha(source=''.encode("ascii")):
+def make_sha(source="".encode("ascii")):
     """A python2.4 workaround for the sha/hashlib module fiasco
 
-    **Note** From the dulwich project """
+    **Note** From the dulwich project"""
     try:
         return hashlib.sha1(source)
     except NameError:
         import sha
+
         sha1 = sha.sha(source)
         return sha1
 
@@ -141,7 +143,7 @@ def make_sha(source=''.encode("ascii")):
 def allocate_memory(size):
     """:return: a file-protocol accessible memory block of the given size"""
     if size == 0:
-        return _RandomAccessBytesIO(b'')
+        return _RandomAccessBytesIO(b"")
     # END handle empty chunks gracefully
 
     try:
@@ -171,7 +173,9 @@ def file_contents_ro(fd, stream=False, allow_mmap=True):
                 return mmap.mmap(fd, 0, access=mmap.ACCESS_READ)
             except EnvironmentError:
                 # python 2.4 issue, 0 wants to be the actual size
-                return mmap.mmap(fd, os.fstat(fd).st_size, access=mmap.ACCESS_READ)
+                return mmap.mmap(
+                    fd, os.fstat(fd).st_size, access=mmap.ACCESS_READ
+                )
             # END handle python 2.4
     except OSError:
         pass
@@ -184,7 +188,9 @@ def file_contents_ro(fd, stream=False, allow_mmap=True):
     return contents
 
 
-def file_contents_ro_filepath(filepath, stream=False, allow_mmap=True, flags=0):
+def file_contents_ro_filepath(
+    filepath, stream=False, allow_mmap=True, flags=0
+):
     """Get the file contents at filepath as fast as possible
 
     :return: random access compatible memory of the given filepath
@@ -196,7 +202,7 @@ def file_contents_ro_filepath(filepath, stream=False, allow_mmap=True, flags=0):
     **Note** for now we don't try to use O_NOATIME directly as the right value needs to be
     shared per database in fact. It only makes a real difference for loose object
     databases anyway, and they use it with the help of the ``flags`` parameter"""
-    fd = os.open(filepath, os.O_RDONLY | getattr(os, 'O_BINARY', 0) | flags)
+    fd = os.open(filepath, os.O_RDONLY | getattr(os, "O_BINARY", 0) | flags)
     try:
         return file_contents_ro(fd, stream, allow_mmap)
     finally:
@@ -224,10 +230,11 @@ def to_bin_sha(sha):
     return hex_to_bin(sha)
 
 
-#} END routines
+# } END routines
 
 
-#{ Utilities
+# { Utilities
+
 
 class LazyMixin(object):
 
@@ -244,7 +251,7 @@ class LazyMixin(object):
         """
         Whenever an attribute is requested that we do not know, we allow it
         to be created and set. Next time the same attribute is reqeusted, it is simply
-        returned from our dict/slots. """
+        returned from our dict/slots."""
         self._set_cache_(attr)
         # will raise in case the cache was not created
         return object.__getattribute__(self, attr)
@@ -276,13 +283,14 @@ class LockedFD(object):
     on destruction.
 
     **note** with this setup, parallel reading is not possible"""
-    __slots__ = ("_filepath", '_fd', '_write')
+
+    __slots__ = ("_filepath", "_fd", "_write")
 
     def __init__(self, filepath):
         """Initialize an instance with the givne filepath"""
         self._filepath = filepath
         self._fd = None
-        self._write = None          # if True, we write a file
+        self._write = None  # if True, we write a file
 
     def __del__(self):
         # will do nothing if the file descriptor is already closed
@@ -312,7 +320,7 @@ class LockedFD(object):
         self._write = write
 
         # try to open the lock file
-        binary = getattr(os, 'O_BINARY', 0)
+        binary = getattr(os, "O_BINARY", 0)
         lockmode = os.O_WRONLY | os.O_CREAT | os.O_EXCL | binary
         try:
             fd = os.open(self._lockfilepath(), lockmode, int("600", 8))
@@ -322,7 +330,9 @@ class LockedFD(object):
                 self._fd = fd
             # END handle file descriptor
         except OSError as e:
-            raise IOError("Lock at %r could not be obtained" % self._lockfilepath()) from e
+            raise IOError(
+                "Lock at %r could not be obtained" % self._lockfilepath()
+            ) from e
         # END handle lock retrieval
 
         # open actual file if required
@@ -340,6 +350,7 @@ class LockedFD(object):
         if stream:
             # need delayed import
             from gitdb.stream import FDStream
+
             return FDStream(self._fd)
         else:
             return self._fd
@@ -361,9 +372,11 @@ class LockedFD(object):
         self._end_writing(successful=False)
 
     def _end_writing(self, successful=True):
-        """Handle the lock according to the write mode """
+        """Handle the lock according to the write mode"""
         if self._write is None:
-            raise AssertionError("Cannot end operation if it wasn't started yet")
+            raise AssertionError(
+                "Cannot end operation if it wasn't started yet"
+            )
 
         if self._fd is None:
             return
@@ -390,4 +403,5 @@ class LockedFD(object):
             remove(lockfile)
         # END successful handling
 
-#} END utilities
+
+# } END utilities

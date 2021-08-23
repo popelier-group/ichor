@@ -32,7 +32,9 @@ class WFN(Geometry, GeometryData, File):
             for line in f:
                 if "CHARGE" in line:
                     line_split = line.split()
-                    reline = re.finditer(r"[+-]?\d+\.\d+([[Ee]?[+-]?]\d+)?", line)
+                    reline = re.finditer(
+                        r"[+-]?\d+\.\d+([[Ee]?[+-]?]\d+)?", line
+                    )
                     atom_type, x, y, z = (
                         line_split[0],
                         float(next(reline).group(0)),

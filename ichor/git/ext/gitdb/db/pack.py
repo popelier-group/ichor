@@ -3,30 +3,19 @@
 # This module is part of GitDB and is released under
 # the New BSD License: http://www.opensource.org/licenses/bsd-license.php
 """Module containing a database to deal with packs"""
-from ichor.git.ext.gitdb.db.base import (
-    FileDBBase,
-    ObjectDBR,
-    CachingDB
-)
-
-from ichor.git.ext.gitdb.util import LazyMixin
-
-from ichor.git.ext.gitdb.exc import (
-    BadObject,
-    UnsupportedOperation,
-    AmbiguousObjectName
-)
-
-from ichor.git.ext.gitdb.pack import PackEntity
-
+import glob
+import os
 from functools import reduce
 
-import os
-import glob
+from ichor.git.ext.gitdb.db.base import CachingDB, FileDBBase, ObjectDBR
+from ichor.git.ext.gitdb.exc import (AmbiguousObjectName, BadObject,
+                                     UnsupportedOperation)
+from ichor.git.ext.gitdb.pack import PackEntity
+from ichor.git.ext.gitdb.util import LazyMixin
 
-__all__ = ('PackedDB', )
+__all__ = ("PackedDB",)
 
-#{ Utilities
+# { Utilities
 
 
 class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
@@ -45,11 +34,11 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
         # * entity - Pack entity instance
         # * sha_to_index - PackIndexFile.sha_to_index method for direct cache query
         # self._entities = list()       # lazy loaded list
-        self._hit_count = 0             # amount of hits
-        self._st_mtime = 0              # last modification data of our root path
+        self._hit_count = 0  # amount of hits
+        self._st_mtime = 0  # last modification data of our root path
 
     def _set_cache_(self, attr):
-        if attr == '_entities':
+        if attr == "_entities":
             self._entities = list()
             self.update_cache(force=True)
         # END handle entities initialization
@@ -73,8 +62,8 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
         for item in self._entities:
             index = item[2](sha)
             if index is not None:
-                item[0] += 1            # one hit for you
-                self._hit_count += 1    # general hit count
+                item[0] += 1  # one hit for you
+                self._hit_count += 1  # general hit count
                 return (item[1], index)
             # END index found in pack
         # END for each item
@@ -84,7 +73,7 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
         # and leave it to the super-caller to trigger that
         raise BadObject(sha)
 
-    #{ Object DB Read
+    # { Object DB Read
 
     def has_object(self, sha):
         try:
@@ -115,9 +104,9 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
         sizes = [item[1].index().size() for item in self._entities]
         return reduce(lambda x, y: x + y, sizes, 0)
 
-    #} END object db read
+    # } END object db read
 
-    #{ object db write
+    # { object db write
 
     def store(self, istream):
         """Storing individual objects is not feasible as a pack is designed to
@@ -125,9 +114,9 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
         inefficient"""
         raise UnsupportedOperation()
 
-    #} END object db write
+    # } END object db write
 
-    #{ Interface
+    # { Interface
 
     def update_cache(self, force=False):
         """
@@ -146,19 +135,23 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
 
         # packs are supposed to be prefixed with pack- by git-convention
         # get all pack files, figure out what changed
-        pack_files = set(glob.glob(os.path.join(self.root_path(), "pack-*.pack")))
+        pack_files = set(
+            glob.glob(os.path.join(self.root_path(), "pack-*.pack"))
+        )
         our_pack_files = {item[1].pack().path() for item in self._entities}
 
         # new packs
-        for pack_file in (pack_files - our_pack_files):
+        for pack_file in pack_files - our_pack_files:
             # init the hit-counter/priority with the size, a good measure for hit-
             # probability. Its implemented so that only 12 bytes will be read
             entity = PackEntity(pack_file)
-            self._entities.append([entity.pack().size(), entity, entity.index().sha_to_index])
+            self._entities.append(
+                [entity.pack().size(), entity, entity.index().sha_to_index]
+            )
         # END for each new packfile
 
         # removed packs
-        for pack_file in (our_pack_files - pack_files):
+        for pack_file in our_pack_files - pack_files:
             del_index = -1
             for i, item in enumerate(self._entities):
                 if item[1].pack().path() == pack_file:
@@ -167,7 +160,7 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
                 # END found index
             # END for each entity
             assert del_index != -1
-            del(self._entities[del_index])
+            del self._entities[del_index]
         # END for each removed pack
 
         # reinitialize prioritiess
@@ -185,10 +178,14 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
             It is required as binary sha's cannot display whether the original hex sha
             had an odd or even number of characters
         :raise AmbiguousObjectName:
-        :raise BadObject: """
+        :raise BadObject:"""
         candidate = None
         for item in self._entities:
-            item_index = item[1].index().partial_sha_to_index(partial_binsha, canonical_length)
+            item_index = (
+                item[1]
+                .index()
+                .partial_sha_to_index(partial_binsha, canonical_length)
+            )
             if item_index is not None:
                 sha = item[1].index().sha(item_index)
                 if candidate and candidate != sha:
@@ -203,4 +200,4 @@ class PackedDB(FileDBBase, ObjectDBR, CachingDB, LazyMixin):
         # still not found ?
         raise BadObject(partial_binsha)
 
-    #} END interface
+    # } END interface

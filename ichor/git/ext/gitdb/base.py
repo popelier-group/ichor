@@ -3,18 +3,22 @@
 # This module is part of GitDB and is released under
 # the New BSD License: http://www.opensource.org/licenses/bsd-license.php
 """Module with basic data structures - they are designed to be lightweight and fast"""
+from ichor.git.ext.gitdb.fun import type_id_to_type_map, type_to_type_id_map
 from ichor.git.ext.gitdb.util import bin_to_hex
 
-from ichor.git.ext.gitdb.fun import (
-    type_id_to_type_map,
-    type_to_type_id_map
+__all__ = (
+    "OInfo",
+    "OPackInfo",
+    "ODeltaPackInfo",
+    "OStream",
+    "OPackStream",
+    "ODeltaPackStream",
+    "IStream",
+    "InvalidOInfo",
+    "InvalidOStream",
 )
 
-__all__ = ('OInfo', 'OPackInfo', 'ODeltaPackInfo',
-           'OStream', 'OPackStream', 'ODeltaPackStream',
-           'IStream', 'InvalidOInfo', 'InvalidOStream')
-
-#{ ODB Bases
+# { ODB Bases
 
 
 class OInfo(tuple):
@@ -30,6 +34,7 @@ class OInfo(tuple):
         assert dbi[2] == dbi.size
 
     The type is designed to be as lightweight as possible."""
+
     __slots__ = tuple()
 
     def __new__(cls, sha, type, size):
@@ -38,7 +43,7 @@ class OInfo(tuple):
     def __init__(self, *args):
         tuple.__init__(self)
 
-    #{ Interface
+    # { Interface
     @property
     def binsha(self):
         """:return: our sha as binary, 20 bytes"""
@@ -60,7 +65,8 @@ class OInfo(tuple):
     @property
     def size(self):
         return self[2]
-    #} END interface
+
+    # } END interface
 
 
 class OPackInfo(tuple):
@@ -71,6 +77,7 @@ class OPackInfo(tuple):
     Additionally, the pack_offset is the absolute offset into the packfile at which
     all object information is located. The data_offset property points to the absolute
     location in the pack at which that actual data stream can be found."""
+
     __slots__ = tuple()
 
     def __new__(cls, packoffset, type, size):
@@ -79,7 +86,7 @@ class OPackInfo(tuple):
     def __init__(self, *args):
         tuple.__init__(self)
 
-    #{ Interface
+    # { Interface
 
     @property
     def pack_offset(self):
@@ -97,7 +104,7 @@ class OPackInfo(tuple):
     def size(self):
         return self[2]
 
-    #} END interface
+    # } END interface
 
 
 class ODeltaPackInfo(OPackInfo):
@@ -106,16 +113,18 @@ class ODeltaPackInfo(OPackInfo):
     Either the 20 byte sha which points to some object in the database,
     or the negative offset from the pack_offset, so that pack_offset - delta_info yields
     the pack offset of the base object"""
+
     __slots__ = tuple()
 
     def __new__(cls, packoffset, type, size, delta_info):
         return tuple.__new__(cls, (packoffset, type, size, delta_info))
 
-    #{ Interface
+    # { Interface
     @property
     def delta_info(self):
         return self[3]
-    #} END interface
+
+    # } END interface
 
 
 class OStream(OInfo):
@@ -123,6 +132,7 @@ class OStream(OInfo):
     """Base for object streams retrieved from the database, providing additional
     information about the stream.
     Generally, ODB streams are read-only as objects are immutable"""
+
     __slots__ = tuple()
 
     def __new__(cls, sha, type, size, stream, *args, **kwargs):
@@ -132,7 +142,7 @@ class OStream(OInfo):
     def __init__(self, *args, **kwargs):
         tuple.__init__(self)
 
-    #{ Stream Reader Interface
+    # { Stream Reader Interface
 
     def read(self, size=-1):
         return self[3].read(size)
@@ -141,7 +151,7 @@ class OStream(OInfo):
     def stream(self):
         return self[3]
 
-    #} END stream reader interface
+    # } END stream reader interface
 
 
 class ODeltaStream(OStream):
@@ -152,51 +162,55 @@ class ODeltaStream(OStream):
         """Helps with the initialization of subclasses"""
         return tuple.__new__(cls, (sha, type, size, stream))
 
-    #{ Stream Reader Interface
+    # { Stream Reader Interface
 
     @property
     def size(self):
         return self[3].size
 
-    #} END stream reader interface
+    # } END stream reader interface
 
 
 class OPackStream(OPackInfo):
 
     """Next to pack object information, a stream outputting an undeltified base object
     is provided"""
+
     __slots__ = tuple()
 
     def __new__(cls, packoffset, type, size, stream, *args):
         """Helps with the initialization of subclasses"""
         return tuple.__new__(cls, (packoffset, type, size, stream))
 
-    #{ Stream Reader Interface
+    # { Stream Reader Interface
     def read(self, size=-1):
         return self[3].read(size)
 
     @property
     def stream(self):
         return self[3]
-    #} END stream reader interface
+
+    # } END stream reader interface
 
 
 class ODeltaPackStream(ODeltaPackInfo):
 
     """Provides a stream outputting the uncompressed offset delta information"""
+
     __slots__ = tuple()
 
     def __new__(cls, packoffset, type, size, delta_info, stream):
         return tuple.__new__(cls, (packoffset, type, size, delta_info, stream))
 
-    #{ Stream Reader Interface
+    # { Stream Reader Interface
     def read(self, size=-1):
         return self[4].read(size)
 
     @property
     def stream(self):
         return self[4]
-    #} END stream reader interface
+
+    # } END stream reader interface
 
 
 class IStream(list):
@@ -208,6 +222,7 @@ class IStream(list):
     to blend in without prior conversion.
 
     The only method your content stream must support is 'read'"""
+
     __slots__ = tuple()
 
     def __new__(cls, type, size, stream, sha=None):
@@ -216,7 +231,7 @@ class IStream(list):
     def __init__(self, type, size, stream, sha=None):
         list.__init__(self, (sha, type, size, stream, None))
 
-    #{ Interface
+    # { Interface
     @property
     def hexsha(self):
         """:return: our sha, hex encoded, 40 bytes"""
@@ -232,18 +247,18 @@ class IStream(list):
 
     error = property(_error, _set_error)
 
-    #} END interface
+    # } END interface
 
-    #{ Stream Reader Interface
+    # { Stream Reader Interface
 
     def read(self, size=-1):
         """Implements a simple stream reader interface, passing the read call on
-            to our internal stream"""
+        to our internal stream"""
         return self[3].read(size)
 
-    #} END stream reader interface
+    # } END stream reader interface
 
-    #{  interface
+    # {  interface
 
     def _set_binsha(self, binsha):
         self[0] = binsha
@@ -277,7 +292,7 @@ class IStream(list):
 
     stream = property(_stream, _set_stream)
 
-    #} END odb info interface
+    # } END odb info interface
 
 
 class InvalidOInfo(tuple):
@@ -285,6 +300,7 @@ class InvalidOInfo(tuple):
     """Carries information about a sha identifying an object which is invalid in
     the queried database. The exception attribute provides more information about
     the cause of the issue"""
+
     __slots__ = tuple()
 
     def __new__(cls, sha, exc):
@@ -310,6 +326,8 @@ class InvalidOInfo(tuple):
 class InvalidOStream(InvalidOInfo):
 
     """Carries information about an invalid ODB stream"""
+
     __slots__ = tuple()
 
-#} END ODB Bases
+
+# } END ODB Bases

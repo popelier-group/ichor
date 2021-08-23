@@ -1,9 +1,9 @@
 import atexit
 import os
 import sys
+import time
 from abc import ABC, abstractmethod
 from signal import SIGTERM
-import time
 
 
 class Daemon(ABC):

@@ -1,20 +1,26 @@
-from ichor.git import Repo
-from ichor.git.util import get_git_credentials
-from ichor.globals import GLOBALS
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 
+from ichor.git import Repo
+from ichor.git.util import get_git_credentials
+from ichor.globals import GLOBALS
+
 
 class Executable(ABC):
-    def __init__(self, git_repository: str, branch: str = "master", path: Optional[Path] = None):
+    def __init__(
+        self,
+        git_repository: str,
+        branch: str = "master",
+        path: Optional[Path] = None,
+    ):
         self.git_repository = git_repository
         self.branch = branch
         self.path = path or GLOBALS.FILE_STRUCTURE["programs"] / self.name
 
     @property
     def name(self):
-        return self.git_repository.split('.git')[0].split('/')[-1]
+        return self.git_repository.split(".git")[0].split("/")[-1]
 
     @property
     def _sanitised_url(self) -> str:
@@ -29,11 +35,14 @@ class Executable(ABC):
     @property
     def authenticated_url(self):
         from ichor.globals import GLOBALS
+
         if GLOBALS.GIT_TOKEN:
             return self.authenticated_token_url(GLOBALS.GIT_TOKEN)
         elif not GLOBALS.GIT_USERNAME and GLOBALS.GIT_PASSWORD:
             GLOBALS.GIT_USERNAME, GLOBALS.GIT_PASSWORD = get_git_credentials()
-        return self.authenticated_user_url(GLOBALS.GIT_USERNAME, GLOBALS.GIT_PASSWORD)
+        return self.authenticated_user_url(
+            GLOBALS.GIT_USERNAME, GLOBALS.GIT_PASSWORD
+        )
 
     @property
     def repo(self) -> Repo:

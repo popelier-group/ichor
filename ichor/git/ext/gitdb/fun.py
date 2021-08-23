@@ -7,23 +7,20 @@ Keeping this code separate from the beginning makes it easier to out-source
 it into c later, if required"""
 
 import zlib
+
 from ichor.git.ext.gitdb.util import byte_ord
+
 decompressobj = zlib.decompressobj
 
 import mmap
-from itertools import islice
 from functools import reduce
-
-from ichor.git.ext.gitdb.const import NULL_BYTE, BYTE_SPACE
-from ichor.git.ext.gitdb.utils.encoding import force_text
-from ichor.git.ext.gitdb.typ import (
-    str_blob_type,
-    str_commit_type,
-    str_tree_type,
-    str_tag_type,
-)
-
 from io import StringIO
+from itertools import islice
+
+from ichor.git.ext.gitdb.const import BYTE_SPACE, NULL_BYTE
+from ichor.git.ext.gitdb.typ import (str_blob_type, str_commit_type,
+                                     str_tag_type, str_tree_type)
+from ichor.git.ext.gitdb.utils.encoding import force_text
 
 # INVARIANTS
 OFS_DELTA = 6
@@ -31,14 +28,14 @@ REF_DELTA = 7
 delta_types = (OFS_DELTA, REF_DELTA)
 
 type_id_to_type_map = {
-    0: b'',             # EXT 1
+    0: b"",  # EXT 1
     1: str_commit_type,
     2: str_tree_type,
     3: str_blob_type,
     4: str_tag_type,
-    5: b'',             # EXT 2
-    OFS_DELTA: "OFS_DELTA",    # OFFSET DELTA
-    REF_DELTA: "REF_DELTA"     # REFERENCE DELTA
+    5: b"",  # EXT 2
+    OFS_DELTA: "OFS_DELTA",  # OFFSET DELTA
+    REF_DELTA: "REF_DELTA",  # REFERENCE DELTA
 }
 
 type_to_type_id_map = {
@@ -53,12 +50,24 @@ type_to_type_id_map = {
 # used when dealing with larger streams
 chunk_size = 1000 * mmap.PAGESIZE
 
-__all__ = ('is_loose_object', 'loose_object_header_info', 'msb_size', 'pack_object_header_info',
-           'write_object', 'loose_object_header', 'stream_copy', 'apply_delta_data',
-           'is_equal_canonical_sha', 'connect_deltas', 'DeltaChunkList', 'create_pack_object_header')
+__all__ = (
+    "is_loose_object",
+    "loose_object_header_info",
+    "msb_size",
+    "pack_object_header_info",
+    "write_object",
+    "loose_object_header",
+    "stream_copy",
+    "apply_delta_data",
+    "is_equal_canonical_sha",
+    "connect_deltas",
+    "DeltaChunkList",
+    "create_pack_object_header",
+)
 
 
-#{ Structures
+# { Structures
+
 
 def _set_delta_rbound(d, size):
     """Truncate the given delta to the given size
@@ -100,13 +109,13 @@ def delta_chunk_apply(dc, bbuf, write):
     :param write: write method to call with data to write"""
     if dc.data is None:
         # COPY DATA FROM SOURCE
-        write(bbuf[dc.so:dc.so + dc.ts])
+        write(bbuf[dc.so : dc.so + dc.ts])
     else:
         # APPEND DATA
         # whats faster: if + 4 function calls or just a write with a slice ?
         # Considering data can be larger than 127 bytes now, it should be worth it
         if dc.ts < len(dc.data):
-            write(dc.data[:dc.ts])
+            write(dc.data[: dc.ts])
         else:
             write(dc.data)
         # END handle truncation
@@ -117,12 +126,13 @@ class DeltaChunk(object):
 
     """Represents a piece of a delta, it can either add new data, or copy existing
     one from a source buffer"""
+
     __slots__ = (
-        'to',       # start offset in the target buffer in bytes
-                    'ts',       # size of this chunk in the target buffer in bytes
-                    'so',       # start offset in the source buffer in bytes or None
-                    'data',     # chunk of bytes to be added to the target buffer,
-                                # DeltaChunkList to use as base, or None
+        "to",  # start offset in the target buffer in bytes
+        "ts",  # size of this chunk in the target buffer in bytes
+        "so",  # start offset in the source buffer in bytes or None
+        "data",  # chunk of bytes to be added to the target buffer,
+        # DeltaChunkList to use as base, or None
     )
 
     def __init__(self, to, ts, so, data):
@@ -132,9 +142,14 @@ class DeltaChunk(object):
         self.data = data
 
     def __repr__(self):
-        return "DeltaChunk(%i, %i, %s, %s)" % (self.to, self.ts, self.so, self.data or "")
+        return "DeltaChunk(%i, %i, %s, %s)" % (
+            self.to,
+            self.ts,
+            self.so,
+            self.data or "",
+        )
 
-    #{ Interface
+    # { Interface
 
     def rbound(self):
         return self.to + self.ts
@@ -143,7 +158,7 @@ class DeltaChunk(object):
         """:return: True if the instance has data to add to the target stream"""
         return self.data is not None
 
-    #} END interface
+    # } END interface
 
 
 def _closest_index(dcl, absofs):
@@ -183,7 +198,7 @@ def delta_list_slice(dcl, absofs, size, ndcl):
     """:return: Subsection of this  list at the given absolute  offset, with the given
         size in bytes.
     :return: None"""
-    cdi = _closest_index(dcl, absofs)   # delta start index
+    cdi = _closest_index(dcl, absofs)  # delta start index
     cd = dcl[cdi]
     slen = len(dcl)
     lappend = ndcl.append
@@ -259,18 +274,25 @@ class DeltaChunkList(list):
             dc = self[i]
             i += 1
             if dc.data is None:
-                if first_data_index is not None and i - 2 - first_data_index > 1:
+                if (
+                    first_data_index is not None
+                    and i - 2 - first_data_index > 1
+                ):
                     # if first_data_index is not None:
-                    nd = StringIO()                     # new data
-                    so = self[first_data_index].to      # start offset in target buffer
+                    nd = StringIO()  # new data
+                    so = self[
+                        first_data_index
+                    ].to  # start offset in target buffer
                     for x in range(first_data_index, i - 1):
                         xdc = self[x]
-                        nd.write(xdc.data[:xdc.ts])
+                        nd.write(xdc.data[: xdc.ts])
                     # END collect data
 
-                    del(self[first_data_index:i - 1])
+                    del self[first_data_index : i - 1]
                     buf = nd.getvalue()
-                    self.insert(first_data_index, DeltaChunk(so, len(buf), 0, buf))
+                    self.insert(
+                        first_data_index, DeltaChunk(so, len(buf), 0, buf)
+                    )
 
                     slen = len(self)
                     i = first_data_index + 1
@@ -295,7 +317,10 @@ class DeltaChunkList(list):
         :raise AssertionError: if the size doen't match"""
         if target_size > -1:
             assert self[-1].rbound() == target_size
-            assert reduce(lambda x, y: x + y, (d.ts for d in self), 0) == target_size
+            assert (
+                reduce(lambda x, y: x + y, (d.ts for d in self), 0)
+                == target_size
+            )
         # END target size verification
 
         if len(self) < 2:
@@ -323,6 +348,7 @@ class TopdownDeltaChunkList(DeltaChunkList):
 
     """Represents a list which is generated by feeding its ancestor streams one by
     one"""
+
     __slots__ = tuple()
 
     def connect_with_next_base(self, bdcl):
@@ -334,10 +360,10 @@ class TopdownDeltaChunkList(DeltaChunkList):
             consequtively and in order, towards the earliest ancestor delta
         :return: True if processing was done. Use it to abort processing of
             remaining streams if False is returned"""
-        nfc = 0                             # number of frozen chunks
-        dci = 0                             # delta chunk index
-        slen = len(self)                    # len of self
-        ccl = list()                        # temporary list
+        nfc = 0  # number of frozen chunks
+        dci = 0  # delta chunk index
+        slen = len(self)  # len of self
+        ccl = list()  # temporary list
         while dci < slen:
             dc = self[dci]
             dci += 1
@@ -354,7 +380,7 @@ class TopdownDeltaChunkList(DeltaChunkList):
             # we live with it. Internally, its all just a 32/64bit pointer, and
             # the portions of moved memory should be smallish. Maybe we just rebuild
             # ourselves in order to reduce the amount of insertions ...
-            del(ccl[:])
+            del ccl[:]
             delta_list_slice(bdcl, dc.so, dc.ts, ccl)
 
             # move the target bounds into place to match with our chunk
@@ -371,12 +397,12 @@ class TopdownDeltaChunkList(DeltaChunkList):
                 # TODO: Use a deque here, and decide by the index whether to extend
                 # or extend left !
                 post_dci = self[dci:]
-                del(self[dci - 1:])           # include deletion of dc
+                del self[dci - 1 :]  # include deletion of dc
                 self.extend(ccl)
                 self.extend(post_dci)
 
                 slen = len(self)
-                dci += len(ccl) - 1           # deleted dc, added rest
+                dci += len(ccl) - 1  # deleted dc, added rest
 
             # END handle chunk replacement
         # END for each chunk
@@ -387,9 +413,10 @@ class TopdownDeltaChunkList(DeltaChunkList):
         return True
 
 
-#} END structures
+# } END structures
 
-#{ Routines
+# { Routines
+
 
 def is_loose_object(m):
     """
@@ -405,9 +432,9 @@ def loose_object_header_info(m):
     :return: tuple(type_string, uncompressed_size_in_bytes) the type string of the
         object as well as its uncompressed size in bytes.
     :param m: memory map from which to read the compressed object data"""
-    decompress_size = 8192      # is used in cgit as well
+    decompress_size = 8192  # is used in cgit as well
     hdr = decompressobj().decompress(m, decompress_size)
-    type_name, size = hdr[:hdr.find(NULL_BYTE)].split(BYTE_SPACE)
+    type_name, size = hdr[: hdr.find(NULL_BYTE)].split(BYTE_SPACE)
 
     return type_name, int(size)
 
@@ -418,15 +445,15 @@ def pack_object_header_info(data):
         The type_id should be interpreted according to the ``type_id_to_type_map`` map
         The byte-offset specifies the start of the actual zlib compressed datastream
     :param m: random-access memory, like a string or memory map"""
-    c = byte_ord(data[0])           # first byte
-    i = 1                           # next char to read
-    type_id = (c >> 4) & 7          # numeric type
-    size = c & 15                   # starting size
-    s = 4                           # starting bit-shift size
+    c = byte_ord(data[0])  # first byte
+    i = 1  # next char to read
+    type_id = (c >> 4) & 7  # numeric type
+    size = c & 15  # starting size
+    s = 4  # starting bit-shift size
     while c & 0x80:
         c = byte_ord(data[i])
         i += 1
-        size += (c & 0x7f) << s
+        size += (c & 0x7F) << s
         s += 7
     # END character loop
     # end performance at expense of maintenance ...
@@ -440,14 +467,14 @@ def create_pack_object_header(obj_type, obj_size):
 
     :param obj_type: pack type_id of the object
     :param obj_size: uncompressed size in bytes of the following object stream"""
-    c = 0       # 1 byte
+    c = 0  # 1 byte
     hdr = bytearray()  # output string
 
-    c = (obj_type << 4) | (obj_size & 0xf)
+    c = (obj_type << 4) | (obj_size & 0xF)
     obj_size >>= 4
     while obj_size:
         hdr.append(c | 0x80)
-        c = obj_size & 0x7f
+        c = obj_size & 0x7F
         obj_size >>= 7
     # END until size is consumed
     hdr.append(c)
@@ -465,7 +492,7 @@ def msb_size(data, offset=0):
     hit_msb = False
     while i < l:
         c = data[i + offset]
-        size |= (c & 0x7f) << i * 7
+        size |= (c & 0x7F) << i * 7
         i += 1
         if not c & 0x80:
             hit_msb = True
@@ -474,7 +501,9 @@ def msb_size(data, offset=0):
     # END while in range
     # end performance ...
     if not hit_msb:
-        raise AssertionError("Could not find terminating MSB byte in data stream")
+        raise AssertionError(
+            "Could not find terminating MSB byte in data stream"
+        )
     return i + offset, size
 
 
@@ -482,7 +511,7 @@ def loose_object_header(type, size):
     """
     :return: bytes representing the loose object header, which is immediately
         followed by the content stream of size 'size'"""
-    return ('%s %i\0' % (force_text(type), size)).encode('ascii')
+    return ("%s %i\0" % (force_text(type), size)).encode("ascii")
 
 
 def write_object(type, size, read, write, chunk_size=chunk_size):
@@ -497,7 +526,7 @@ def write_object(type, size, read, write, chunk_size=chunk_size):
     :param close_target_stream: if True, the target stream will be closed when
         the routine exits, even if an error is thrown
     :return: The actual amount of bytes written to stream, which includes the header and a trailing newline"""
-    tbw = 0                                             # total num bytes written
+    tbw = 0  # total num bytes written
 
     # WRITE HEADER: type SP size NULL
     tbw += write(loose_object_header(type, size))
@@ -512,7 +541,7 @@ def stream_copy(read, write, size, chunk_size):
     in chunks of chunk_size
 
     **Note:** its much like stream_copy utility, but operates just using methods"""
-    dbw = 0                                             # num data bytes written
+    dbw = 0  # num data bytes written
 
     # WRITE ALL DATA UP TO SIZE
     while True:
@@ -541,7 +570,7 @@ def connect_deltas(dstreams):
     :param dstreams: iterable of delta stream objects, the delta to be applied last
         comes first, then all its ancestors in order
     :return: DeltaChunkList, containing all operations to apply"""
-    tdcl = None                         # topmost dcl
+    tdcl = None  # topmost dcl
 
     dcl = tdcl = TopdownDeltaChunkList()
     for dsi, ds in enumerate(dstreams):
@@ -554,40 +583,39 @@ def connect_deltas(dstreams):
         i, target_size = msb_size(db, i)
 
         # interpret opcodes
-        tbw = 0                     # amount of target bytes written
+        tbw = 0  # amount of target bytes written
         while i < delta_buf_size:
             c = ord(db[i])
             i += 1
             if c & 0x80:
                 cp_off, cp_size = 0, 0
-                if (c & 0x01):
+                if c & 0x01:
                     cp_off = ord(db[i])
                     i += 1
-                if (c & 0x02):
-                    cp_off |= (ord(db[i]) << 8)
+                if c & 0x02:
+                    cp_off |= ord(db[i]) << 8
                     i += 1
-                if (c & 0x04):
-                    cp_off |= (ord(db[i]) << 16)
+                if c & 0x04:
+                    cp_off |= ord(db[i]) << 16
                     i += 1
-                if (c & 0x08):
-                    cp_off |= (ord(db[i]) << 24)
+                if c & 0x08:
+                    cp_off |= ord(db[i]) << 24
                     i += 1
-                if (c & 0x10):
+                if c & 0x10:
                     cp_size = ord(db[i])
                     i += 1
-                if (c & 0x20):
-                    cp_size |= (ord(db[i]) << 8)
+                if c & 0x20:
+                    cp_size |= ord(db[i]) << 8
                     i += 1
-                if (c & 0x40):
-                    cp_size |= (ord(db[i]) << 16)
+                if c & 0x40:
+                    cp_size |= ord(db[i]) << 16
                     i += 1
 
                 if not cp_size:
                     cp_size = 0x10000
 
                 rbound = cp_off + cp_size
-                if (rbound < cp_size or
-                        rbound > base_size):
+                if rbound < cp_size or rbound > base_size:
                     break
 
                 dcl.append(DeltaChunk(tbw, cp_size, cp_off, None))
@@ -595,7 +623,7 @@ def connect_deltas(dstreams):
             elif c:
                 # NOTE: in C, the data chunks should probably be concatenated here.
                 # In python, we do it as a post-process
-                dcl.append(DeltaChunk(tbw, c, 0, db[i:i + c]))
+                dcl.append(DeltaChunk(tbw, c, 0, db[i : i + c]))
                 i += c
                 tbw += c
             else:
@@ -636,38 +664,37 @@ def apply_delta_data(src_buf, src_buf_size, delta_buf, delta_buf_size, write):
         i += 1
         if c & 0x80:
             cp_off, cp_size = 0, 0
-            if (c & 0x01):
+            if c & 0x01:
                 cp_off = db[i]
                 i += 1
-            if (c & 0x02):
-                cp_off |= (db[i] << 8)
+            if c & 0x02:
+                cp_off |= db[i] << 8
                 i += 1
-            if (c & 0x04):
-                cp_off |= (db[i] << 16)
+            if c & 0x04:
+                cp_off |= db[i] << 16
                 i += 1
-            if (c & 0x08):
-                cp_off |= (db[i] << 24)
+            if c & 0x08:
+                cp_off |= db[i] << 24
                 i += 1
-            if (c & 0x10):
+            if c & 0x10:
                 cp_size = db[i]
                 i += 1
-            if (c & 0x20):
-                cp_size |= (db[i] << 8)
+            if c & 0x20:
+                cp_size |= db[i] << 8
                 i += 1
-            if (c & 0x40):
-                cp_size |= (db[i] << 16)
+            if c & 0x40:
+                cp_size |= db[i] << 16
                 i += 1
 
             if not cp_size:
                 cp_size = 0x10000
 
             rbound = cp_off + cp_size
-            if (rbound < cp_size or
-                    rbound > src_buf_size):
+            if rbound < cp_size or rbound > src_buf_size:
                 break
-            write(src_buf[cp_off:cp_off + cp_size])
+            write(src_buf[cp_off : cp_off + cp_size])
         elif c:
-            write(db[i:i + c])
+            write(db[i : i + c])
             i += c
         else:
             raise ValueError("unexpected delta opcode 0")
@@ -689,13 +716,16 @@ def is_equal_canonical_sha(canonical_length, match, sha1):
     if match[:binary_length] != sha1[:binary_length]:
         return False
 
-    if canonical_length - binary_length and \
-            (byte_ord(match[-1]) ^ byte_ord(sha1[len(match) - 1])) & 0xf0:
+    if (
+        canonical_length - binary_length
+        and (byte_ord(match[-1]) ^ byte_ord(sha1[len(match) - 1])) & 0xF0
+    ):
         return False
     # END handle uneven canonnical length
     return True
 
-#} END routines
+
+# } END routines
 
 
 try:

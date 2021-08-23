@@ -1,12 +1,11 @@
 import os
 import shutil
 import sys
+from contextlib import contextmanager
 from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
 from typing import Any, List, Union
-
-from contextlib import contextmanager
 
 from ichor.typing import F
 
@@ -88,7 +87,7 @@ def recursive_move(src: Path, dst: Path) -> None:
 
 @convert_to_path
 def remove(path: Path) -> None:
-    """ param <path> could either be relative or absolute. """
+    """param <path> could either be relative or absolute."""
     if path.exists():
         if path.is_file() or path.is_symlink():
             path.unlink()  # remove the file
@@ -103,6 +102,7 @@ def pushd(new_dir: Path, update_cwd: bool = False):
     previous_dir = os.getcwd()
     if update_cwd:
         from ichor.globals import GLOBALS
+
         GLOBALS.CWD = new_dir.absolute()
     os.chdir(new_dir)
     try:
@@ -111,17 +111,19 @@ def pushd(new_dir: Path, update_cwd: bool = False):
         os.chdir(previous_dir)
         if update_cwd:
             from ichor.globals import GLOBALS
+
             GLOBALS.CWD = previous_dir
 
 
-
 @convert_to_path
-def get_files_of_type(filetype: Union[str, List[str]], directory: Path = Path.cwd()) -> List[Path]:
+def get_files_of_type(
+    filetype: Union[str, List[str]], directory: Path = Path.cwd()
+) -> List[Path]:
     if isinstance(filetype, str):
         filetype = [filetype]
     for i, ft in enumerate(filetype):
         if not ft.startswith("."):
             filetype[i] = "." + ft
-    return [f for f in directory.iterdir() if f.is_file() and f.suffix in filetype]
-
-
+    return [
+        f for f in directory.iterdir() if f.is_file() and f.suffix in filetype
+    ]

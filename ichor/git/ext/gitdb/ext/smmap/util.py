@@ -1,14 +1,18 @@
 """Module containing a memory memory manager which provides a sliding window on a number of memory mapped files"""
 import os
 import sys
+from mmap import ACCESS_READ, ALLOCATIONGRANULARITY, mmap
 
-from mmap import mmap, ACCESS_READ
-from mmap import ALLOCATIONGRANULARITY
+__all__ = [
+    "align_to_mmap",
+    "is_64_bit",
+    "MapWindow",
+    "MapRegion",
+    "MapRegionList",
+    "ALLOCATIONGRANULARITY",
+]
 
-__all__ = ["align_to_mmap", "is_64_bit",
-           "MapWindow", "MapRegion", "MapRegionList", "ALLOCATIONGRANULARITY"]
-
-#{ Utilities
+# { Utilities
 
 
 def align_to_mmap(num, round_up):
@@ -29,17 +33,20 @@ def is_64_bit():
     """:return: True if the system is 64 bit. Otherwise it can be assumed to be 32 bit"""
     return sys.maxsize > (1 << 32) - 1
 
-#}END utilities
+
+# }END utilities
 
 
-#{ Utility Classes
+# { Utility Classes
+
 
 class MapWindow(object):
 
     """Utility type which is used to snap windows towards each other, and to adjust their size"""
+
     __slots__ = (
-        'ofs',      # offset into the file in bytes
-        'size'              # size of the window in bytes
+        "ofs",  # offset into the file in bytes
+        "size",  # size of the window in bytes
     )
 
     def __init__(self, offset, size):
@@ -60,7 +67,7 @@ class MapWindow(object):
     def align(self):
         """Assures the previous window area is contained in the new one"""
         nofs = align_to_mmap(self.ofs, 0)
-        self.size += self.ofs - nofs    # keep size constant
+        self.size += self.ofs - nofs  # keep size constant
         self.ofs = nofs
         self.size = align_to_mmap(self.size, 1)
 
@@ -85,16 +92,17 @@ class MapRegion(object):
     """Defines a mapped region of memory, aligned to pagesizes
 
     **Note:** deallocates used region automatically on destruction"""
+
     __slots__ = [
-        '_b',   # beginning of mapping
-        '_mf',  # mapped memory chunk (as returned by mmap)
-        '_uc',  # total amount of usages
-        '_size',  # cached size of our memory map
-        '__weakref__'
+        "_b",  # beginning of mapping
+        "_mf",  # mapped memory chunk (as returned by mmap)
+        "_uc",  # total amount of usages
+        "_size",  # cached size of our memory map
+        "__weakref__",
     ]
 
-    #{ Configuration
-    #} END configuration
+    # { Configuration
+    # } END configuration
 
     def __init__(self, path_or_fd, ofs, size, flags=0):
         """Initialize a region, allocate the memory map
@@ -111,7 +119,9 @@ class MapRegion(object):
         if isinstance(path_or_fd, int):
             fd = path_or_fd
         else:
-            fd = os.open(path_or_fd, os.O_RDONLY | getattr(os, 'O_BINARY', 0) | flags)
+            fd = os.open(
+                path_or_fd, os.O_RDONLY | getattr(os, "O_BINARY", 0) | flags
+            )
         # END handle fd
 
         try:
@@ -138,7 +148,7 @@ class MapRegion(object):
     def __repr__(self):
         return "MapRegion<%i, %i>" % (self._b, self.size())
 
-    #{ Interface
+    # { Interface
 
     def buffer(self):
         """:return: a buffer containing the memory"""
@@ -168,12 +178,15 @@ class MapRegion(object):
         """:return: number of clients currently using this region"""
         return self._uc
 
-    def increment_client_count(self, ofs = 1):
+    def increment_client_count(self, ofs=1):
         """Adjust the usage count by the given positive or negative offset.
         If usage count equals 0, we will auto-release our resources
         :return: True if we released resources, False otherwise. In the latter case, we can still be used"""
         self._uc += ofs
-        assert self._uc > -1, "Increments must match decrements, usage counter negative: %i" % self._uc
+        assert self._uc > -1, (
+            "Increments must match decrements, usage counter negative: %i"
+            % self._uc
+        )
 
         if self.client_count() == 0:
             self.release()
@@ -186,15 +199,16 @@ class MapRegion(object):
         """Release all resources this instance might hold. Must only be called if there usage_count() is zero"""
         self._mf.close()
 
-    #} END interface
+    # } END interface
 
 
 class MapRegionList(list):
 
     """List of MapRegion instances associating a path with a list of regions."""
+
     __slots__ = (
-        '_path_or_fd',  # path or file descriptor which is mapped by all our regions
-        '_file_size'    # total size of the file we map
+        "_path_or_fd",  # path or file descriptor which is mapped by all our regions
+        "_file_size",  # total size of the file we map
     )
 
     def __new__(cls, path):
@@ -219,4 +233,5 @@ class MapRegionList(list):
         # END update file size
         return self._file_size
 
-#} END utility classes
+
+# } END utility classes

@@ -4,39 +4,50 @@
 # This module is part of GitPython and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 """ Module containing all object based types. """
-from ichor.git.objects import base
-from ichor.git.objects.util import get_object_type_by_name, parse_actor_and_date
-from ichor.git.util import hex_to_bin
+from typing import TYPE_CHECKING, List, Union
+
 from ichor.git.compat import defenc
-
-from typing import List, TYPE_CHECKING, Union
-
+from ichor.git.objects import base
+from ichor.git.objects.util import (get_object_type_by_name,
+                                    parse_actor_and_date)
 from ichor.git.types import Literal
+from ichor.git.util import hex_to_bin
 
 if TYPE_CHECKING:
+    from ichor.git.objects.blob import Blob
+    from ichor.git.objects.commit import Commit
+    from ichor.git.objects.tree import Tree
     from ichor.git.repo import Repo
     from ichor.git.util import Actor
-    from ichor.git.objects.commit import Commit
-    from ichor.git.objects.blob import Blob
-    from ichor.git.objects.tree import Tree
 
-__all__ = ("TagObject", )
+__all__ = ("TagObject",)
 
 
 class TagObject(base.Object):
 
     """Non-Lightweight tag carrying additional information about an object we are pointing to."""
-    type: Literal['tag'] = "tag"
-    __slots__ = ("object", "tag", "tagger", "tagged_date", "tagger_tz_offset", "message")
 
-    def __init__(self, repo: 'Repo', binsha: bytes,
-                 object: Union[None, base.Object] = None,
-                 tag: Union[None, str] = None,
-                 tagger: Union[None, 'Actor'] = None,
-                 tagged_date: Union[int, None] = None,
-                 tagger_tz_offset: Union[int, None] = None,
-                 message: Union[str, None] = None
-                 ) -> None:   # @ReservedAssignment
+    type: Literal["tag"] = "tag"
+    __slots__ = (
+        "object",
+        "tag",
+        "tagger",
+        "tagged_date",
+        "tagger_tz_offset",
+        "message",
+    )
+
+    def __init__(
+        self,
+        repo: "Repo",
+        binsha: bytes,
+        object: Union[None, base.Object] = None,
+        tag: Union[None, str] = None,
+        tagger: Union[None, "Actor"] = None,
+        tagged_date: Union[int, None] = None,
+        tagger_tz_offset: Union[int, None] = None,
+        message: Union[str, None] = None,
+    ) -> None:  # @ReservedAssignment
         """Initialize a tag object with additional data
 
         :param repo: repository this object is located in
@@ -51,7 +62,7 @@ class TagObject(base.Object):
             authored_date is in, in a format similar to time.altzone"""
         super(TagObject, self).__init__(repo, binsha)
         if object is not None:
-            self.object: Union['Commit', 'Blob', 'Tree', 'TagObject'] = object
+            self.object: Union["Commit", "Blob", "Tree", "TagObject"] = object
         if tag is not None:
             self.tag = tag
         if tagger is not None:
@@ -67,19 +78,24 @@ class TagObject(base.Object):
         """Cache all our attributes at once"""
         if attr in TagObject.__slots__:
             ostream = self.repo.odb.stream(self.binsha)
-            lines: List[str] = ostream.read().decode(defenc, 'replace').splitlines()
+            lines: List[str] = (
+                ostream.read().decode(defenc, "replace").splitlines()
+            )
 
             _obj, hexsha = lines[0].split(" ")
             _type_token, type_name = lines[1].split(" ")
-            object_type = get_object_type_by_name(type_name.encode('ascii'))
-            self.object = \
-                object_type(self.repo, hex_to_bin(hexsha))
+            object_type = get_object_type_by_name(type_name.encode("ascii"))
+            self.object = object_type(self.repo, hex_to_bin(hexsha))
 
             self.tag = lines[2][4:]  # tag <tag name>
 
             if len(lines) > 3:
                 tagger_info = lines[3]  # tagger <actor> <date>
-                self.tagger, self.tagged_date, self.tagger_tz_offset = parse_actor_and_date(tagger_info)
+                (
+                    self.tagger,
+                    self.tagged_date,
+                    self.tagger_tz_offset,
+                ) = parse_actor_and_date(tagger_info)
 
             # line 4 empty - it could mark the beginning of the next header
             # in case there really is no message, it would not exist. Otherwise
@@ -87,7 +103,7 @@ class TagObject(base.Object):
             if len(lines) > 5:
                 self.message = "\n".join(lines[5:])
             else:
-                self.message = ''
+                self.message = ""
         # END check our attributes
         else:
             super(TagObject, self)._set_cache_(attr)

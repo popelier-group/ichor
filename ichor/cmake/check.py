@@ -1,5 +1,6 @@
-from ichor.common.os import run_cmd
 from typing import Tuple
+
+from ichor.common.os import run_cmd
 
 
 def run_cmake_version() -> Tuple[str, str]:
@@ -8,4 +9,4 @@ def run_cmake_version() -> Tuple[str, str]:
 
 def cmake_present() -> bool:
     _, error = run_cmake_version()
-    return error == ''
+    return error == ""

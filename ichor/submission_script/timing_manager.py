@@ -26,7 +26,9 @@ class TimingManager:
         python_job = ICHORCommand()
         if self.message:
             python_job.run_function(
-                "log_time", f"START:{self.identifier}", self.message,
+                "log_time",
+                f"START:{self.identifier}",
+                self.message,
             )
         else:
             python_job.run_function("log_time", f"START:{self.identifier}")

@@ -2,21 +2,15 @@
 #
 # This module is part of GitDB and is released under
 # the New BSD License: http://www.opensource.org/licenses/bsd-license.php
-from ichor.git.ext.gitdb.db.base import (
-    CompoundDB,
-    ObjectDBW,
-    FileDBBase
-)
+import os
 
+from ichor.git.ext.gitdb.db.base import CompoundDB, FileDBBase, ObjectDBW
 from ichor.git.ext.gitdb.db.loose import LooseObjectDB
 from ichor.git.ext.gitdb.db.pack import PackedDB
 from ichor.git.ext.gitdb.db.ref import ReferenceDB
-
 from ichor.git.ext.gitdb.exc import InvalidDBRoot
 
-import os
-
-__all__ = ('GitDB', )
+__all__ = ("GitDB",)
 
 
 class GitDB(FileDBBase, ObjectDBW, CompoundDB):
@@ -27,27 +21,30 @@ class GitDB(FileDBBase, ObjectDBW, CompoundDB):
     ``IMPORTANT``: The usage of this implementation is highly discouraged as it fails to release file-handles.
     This can be a problem with long-running processes and/or big repositories.
     """
+
     # Configuration
     PackDBCls = PackedDB
     LooseDBCls = LooseObjectDB
     ReferenceDBCls = ReferenceDB
 
     # Directories
-    packs_dir = 'pack'
-    loose_dir = ''
-    alternates_dir = os.path.join('info', 'alternates')
+    packs_dir = "pack"
+    loose_dir = ""
+    alternates_dir = os.path.join("info", "alternates")
 
     def __init__(self, root_path):
         """Initialize ourselves on a git objects directory"""
         super(GitDB, self).__init__(root_path)
 
     def _set_cache_(self, attr):
-        if attr == '_dbs' or attr == '_loose_db':
+        if attr == "_dbs" or attr == "_loose_db":
             self._dbs = list()
             loose_db = None
-            for subpath, dbcls in ((self.packs_dir, self.PackDBCls),
-                                   (self.loose_dir, self.LooseDBCls),
-                                   (self.alternates_dir, self.ReferenceDBCls)):
+            for subpath, dbcls in (
+                (self.packs_dir, self.PackDBCls),
+                (self.loose_dir, self.LooseDBCls),
+                (self.alternates_dir, self.ReferenceDBCls),
+            ):
                 path = self.db_path(subpath)
                 if os.path.exists(path):
                     self._dbs.append(dbcls(path))
@@ -63,7 +60,9 @@ class GitDB(FileDBBase, ObjectDBW, CompoundDB):
             # END handle error
 
             # we the first one should have the store method
-            assert loose_db is not None and hasattr(loose_db, 'store'), "First database needs store functionality"
+            assert loose_db is not None and hasattr(
+                loose_db, "store"
+            ), "First database needs store functionality"
 
             # finally set the value
             self._loose_db = loose_db
@@ -71,7 +70,7 @@ class GitDB(FileDBBase, ObjectDBW, CompoundDB):
             super(GitDB, self)._set_cache_(attr)
         # END handle attrs
 
-    #{ ObjectDBW interface
+    # { ObjectDBW interface
 
     def store(self, istream):
         return self._loose_db.store(istream)
@@ -82,4 +81,4 @@ class GitDB(FileDBBase, ObjectDBW, CompoundDB):
     def set_ostream(self, ostream):
         return self._loose_db.set_ostream(ostream)
 
-    #} END objectdbw interface
+    # } END objectdbw interface

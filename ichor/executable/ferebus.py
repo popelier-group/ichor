@@ -1,14 +1,17 @@
-from ichor.executable.executable import Executable
-from ichor.common.io import pushd, mkdir
-from ichor.common.os import run_cmd
-from ichor.modules import load_module, FerebusModules
-from ichor.cmake import CMakeLists, update_cmake
 from pathlib import Path
+
+from ichor.cmake import CMakeLists, update_cmake
+from ichor.common.io import mkdir, pushd
+from ichor.common.os import run_cmd
+from ichor.executable.executable import Executable
+from ichor.modules import FerebusModules, load_module
 
 
 class Ferebus(Executable):
     def __init__(self):
-        Executable.__init__(self, git_repository="https://github.com/popelier-group/FEREBUS")
+        Executable.__init__(
+            self, git_repository="https://github.com/popelier-group/FEREBUS"
+        )
 
     @property
     def exepath(self) -> Path:

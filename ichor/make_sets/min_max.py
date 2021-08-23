@@ -18,7 +18,11 @@ class MinMax(MakeSetMethod):
     def get_points(self, points: ListOfAtoms) -> List[int]:
         from ichor.globals import GLOBALS
 
-        atom = GLOBALS.OPTIMISE_ATOM if GLOBALS.OPTIMISE_ATOM is not "all" else GLOBALS.ATOMS[0].name
+        atom = (
+            GLOBALS.OPTIMISE_ATOM
+            if GLOBALS.OPTIMISE_ATOM is not "all"
+            else GLOBALS.ATOMS[0].name
+        )
         features = points[atom].features
 
         if features.ndim > 2:

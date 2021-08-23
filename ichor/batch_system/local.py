@@ -1,6 +1,7 @@
+from typing import List
+
 from ichor.batch_system.sge import SunGridEngine
 from ichor.common.functools import classproperty
-from typing import List
 
 
 class LocalBatchSystem(SunGridEngine):

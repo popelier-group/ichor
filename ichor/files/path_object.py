@@ -1,8 +1,8 @@
 import shutil
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
-from contextlib import contextmanager
 
 from ichor.common.functools import called_from_hasattr, hasattr
 
@@ -35,7 +35,7 @@ class PathObject(ABC, object):
 
     def exists(self) -> bool:
         return self.path.exists()
-    
+
     @contextmanager
     def block(self):
         saved_state = self.state
@@ -53,7 +53,8 @@ class PathObject(ABC, object):
                 not hasattr(self, item)
                 or object.__getattribute__(self, item) is None
             )
-            and self.state is FileState.Unread and not self.state is FileState.Blocked
+            and self.state is FileState.Unread
+            and not self.state is FileState.Blocked
         ):
             self.read()
 

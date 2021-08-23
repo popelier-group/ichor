@@ -200,7 +200,7 @@ class Atom:
         return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
 
     def __str__(self):
-        """ Print out the atom name (containing atom type and index as used in model making), as well as
+        """Print out the atom name (containing atom type and index as used in model making), as well as
         coordinates of the atom
         """
         return f"{self.name:<3s}{self.coordinates_string}"
@@ -209,7 +209,7 @@ class Atom:
         return str(self)
 
     def __eq__(self, other: Union["Atom", int]):
-        """Check if """
+        """Check if"""
         if isinstance(other, Atom):
             return self.index == other.index
         elif isinstance(other, int):

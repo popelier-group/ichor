@@ -3,11 +3,10 @@ import re
 from typing import Optional
 
 from ichor.atoms import AtomsNotFoundError
-from ichor.common.functools import classproperty
-from ichor.files import GJF, WFN, Directory, INTs, FileState
+from ichor.common.functools import buildermethod, classproperty
+from ichor.files import GJF, WFN, Directory, FileState, INTs
 from ichor.geometry import AtomData
 from ichor.points.point import Point
-from ichor.common.functools import buildermethod
 
 
 class PointDirectory(Point, Directory):
@@ -26,12 +25,12 @@ class PointDirectory(Point, Directory):
 
     # def parse(self):
     #     super().parse()
-        # print("setting atoms")
-        # if self.ints.path.exists() and self.gjf.path.exists():
-        #     print("adding atoms to path")
-        #     with self.ints.block():
-        #         self.ints.atoms = self.gjf.atoms
-        #     print("atoms added")
+    # print("setting atoms")
+    # if self.ints.path.exists() and self.gjf.path.exists():
+    #     print("adding atoms to path")
+    #     with self.ints.block():
+    #         self.ints.atoms = self.gjf.atoms
+    #     print("atoms added")
 
     @property
     def atoms(self):

@@ -1,29 +1,34 @@
-import ichor.git
-from ichor.git.exc import InvalidGitRepositoryError
-from ichor.git.config import GitConfigParser
-from io import BytesIO
 import weakref
+from io import BytesIO
+from typing import TYPE_CHECKING, Any, Sequence, Union
 
+import ichor.git
+from ichor.git.config import GitConfigParser
+from ichor.git.exc import InvalidGitRepositoryError
+from ichor.git.types import PathLike
 
 # typing -----------------------------------------------------------------------
 
-from typing import Any, Sequence, TYPE_CHECKING, Union
 
-from ichor.git.types import PathLike
 
 if TYPE_CHECKING:
-    from ichor.git.objects.submodule.base import Submodule
     from weakref import ReferenceType
-    from ichor.git.repo import Repo
-    from ichor.git.refs import Head
+
     from ichor.git import Remote
-    from ichor.git.refs import RemoteReference
+    from ichor.git.objects.submodule.base import Submodule
+    from ichor.git.refs import Head, RemoteReference
+    from ichor.git.repo import Repo
 
 
-__all__ = ('sm_section', 'sm_name', 'mkhead', 'find_first_remote_branch',
-           'SubmoduleConfigParser')
+__all__ = (
+    "sm_section",
+    "sm_name",
+    "mkhead",
+    "find_first_remote_branch",
+    "SubmoduleConfigParser",
+)
 
-#{ Utilities
+# { Utilities
 
 
 def sm_section(name: str) -> str:
@@ -37,12 +42,14 @@ def sm_name(section: str) -> str:
     return section[11:-1]
 
 
-def mkhead(repo: 'Repo', path: PathLike) -> 'Head':
+def mkhead(repo: "Repo", path: PathLike) -> "Head":
     """:return: New branch/head instance"""
     return ichor.git.Head(repo, ichor.git.Head.to_full_path(path))
 
 
-def find_first_remote_branch(remotes: Sequence['Remote'], branch_name: str) -> 'RemoteReference':
+def find_first_remote_branch(
+    remotes: Sequence["Remote"], branch_name: str
+) -> "RemoteReference":
     """Find the remote branch matching the name of the given branch or raise InvalidGitRepositoryError"""
     for remote in remotes:
         try:
@@ -51,12 +58,17 @@ def find_first_remote_branch(remotes: Sequence['Remote'], branch_name: str) -> '
             continue
         # END exception handling
     # END for remote
-    raise InvalidGitRepositoryError("Didn't find remote branch '%r' in any of the given remotes" % branch_name)
+    raise InvalidGitRepositoryError(
+        "Didn't find remote branch '%r' in any of the given remotes"
+        % branch_name
+    )
 
-#} END utilities
+
+# } END utilities
 
 
-#{ Classes
+# { Classes
+
 
 class SubmoduleConfigParser(GitConfigParser):
 
@@ -70,13 +82,13 @@ class SubmoduleConfigParser(GitConfigParser):
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self._smref: Union['ReferenceType[Submodule]', None] = None
+        self._smref: Union["ReferenceType[Submodule]", None] = None
         self._index = None
         self._auto_write = True
         super(SubmoduleConfigParser, self).__init__(*args, **kwargs)
 
-    #{ Interface
-    def set_submodule(self, submodule: 'Submodule') -> None:
+    # { Interface
+    def set_submodule(self, submodule: "Submodule") -> None:
         """Set this instance's submodule. It must be called before
         the first write operation begins"""
         self._smref = weakref.ref(submodule)
@@ -97,14 +109,15 @@ class SubmoduleConfigParser(GitConfigParser):
             sm._clear_cache()
         # END handle weakref
 
-    #} END interface
+    # } END interface
 
-    #{ Overridden Methods
+    # { Overridden Methods
     def write(self) -> None:  # type: ignore[override]
         rval: None = super(SubmoduleConfigParser, self).write()
         self.flush_to_index()
         return rval
+
     # END overridden methods
 
 
-#} END classes
+# } END classes

@@ -85,7 +85,9 @@ def open_atomic(filename: Filename, binary: bool = True):
     path.parent.mkdir(parents=True, exist_ok=True)
 
     temp_fh = tempfile.NamedTemporaryFile(
-        mode=binary and "wb" or "w", dir=str(path.parent), delete=False,
+        mode=binary and "wb" or "w",
+        dir=str(path.parent),
+        delete=False,
     )
     yield temp_fh
     temp_fh.flush()
@@ -416,7 +418,8 @@ class BoundedSemaphore(LockBase):
 
     def get_filename(self, number) -> pathlib.Path:
         return pathlib.Path(self.directory) / self.filename_pattern.format(
-            name=self.name, number=number,
+            name=self.name,
+            number=number,
         )
 
     def acquire(

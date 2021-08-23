@@ -1,9 +1,9 @@
 from ichor.arguments import Arguments
+from ichor.common.os import input_with_prefill
 from ichor.globals.globals import Globals
 from ichor.globals.machine import Machine
 from ichor.globals.os import OS
 from ichor.menu import Menu
-from ichor.common.os import input_with_prefill
 
 __all__ = ["GLOBALS", "Machine", "OS"]
 
@@ -14,9 +14,7 @@ with Arguments():
 def edit_value(global_variable):
     print(f"Edit {global_variable}")
     while True:
-        new_value = input_with_prefill(
-            ">> ", GLOBALS.get(global_variable)
-        )
+        new_value = input_with_prefill(">> ", GLOBALS.get(global_variable))
         try:
             GLOBALS.set(global_variable, new_value)
             break
@@ -27,9 +25,15 @@ def edit_value(global_variable):
 
 
 def choose_value(global_variable):
-    with Menu(title=f"{global_variable} Allowed Values", auto_close=True, space=True, back=True, exit=True) as menu:
+    with Menu(
+        title=f"{global_variable} Allowed Values",
+        auto_close=True,
+        space=True,
+        back=True,
+        exit=True,
+    ) as menu:
         for i, allowed_value in enumerate(
-                GLOBALS._allowed_values[global_variable]
+            GLOBALS._allowed_values[global_variable]
         ):
             menu.add_option(
                 str(i + 1),
@@ -42,7 +46,7 @@ def choose_value(global_variable):
                 str(allowed_value),
                 GLOBALS.set,
                 kwargs={"name": global_variable, "value": allowed_value},
-                hidden=True
+                hidden=True,
             )
 
 
@@ -57,10 +61,22 @@ def edit_global_refresh(menu) -> None:
     menu.add_message(f"Protected: {_gv in GLOBALS._protected}")
     menu.add_message(f"Changed: {GLOBALS.get(_gv) != GLOBALS._defaults[_gv]}")
     menu.add_space()
-    menu.add_option("e", "Edit Setting", edit_value, kwargs={"global_variable": _gv})
-    menu.add_option("d", "Revert to Default", GLOBALS.set, kwargs={"name": _gv, "value": GLOBALS._defaults[_gv]})
+    menu.add_option(
+        "e", "Edit Setting", edit_value, kwargs={"global_variable": _gv}
+    )
+    menu.add_option(
+        "d",
+        "Revert to Default",
+        GLOBALS.set,
+        kwargs={"name": _gv, "value": GLOBALS._defaults[_gv]},
+    )
     if _gv in GLOBALS._allowed_values.keys():
-        menu.add_option("c", "Choose from allowed values", choose_value, kwargs={"global_variable": _gv})
+        menu.add_option(
+            "c",
+            "Choose from allowed values",
+            choose_value,
+            kwargs={"global_variable": _gv},
+        )
     menu.add_final_options()
 
 
@@ -74,8 +90,13 @@ def edit_global(global_variable) -> None:
 def settings_menu_refresh(menu):
     menu.clear_options()
     for global_variable in GLOBALS.global_variables:
-        menu.add_option(f"{global_variable}", f"{GLOBALS.get(global_variable)}", edit_global,
-                        kwargs={"global_variable": global_variable}, hidden=global_variable in GLOBALS._protected)
+        menu.add_option(
+            f"{global_variable}",
+            f"{GLOBALS.get(global_variable)}",
+            edit_global,
+            kwargs={"global_variable": global_variable},
+            hidden=global_variable in GLOBALS._protected,
+        )
     menu.add_final_options()
 
 

@@ -10,38 +10,31 @@
 import locale
 import os
 import sys
+from typing import IO, AnyStr, Optional, Tuple, Type, Union, overload
 
-from ichor.git.ext.gitdb.utils.encoding import (
-    force_bytes,  # @UnusedImport
-    force_text  # @UnusedImport
-)
+from ichor.git.ext.gitdb.utils.encoding import force_bytes  # @UnusedImport
+from ichor.git.ext.gitdb.utils.encoding import force_text  # @UnusedImport
 
 # typing --------------------------------------------------------------------
 
-from typing import (
-    AnyStr,
-    IO,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-    overload,
-)
+
 # ---------------------------------------------------------------------------
 
 
-is_win: bool = (os.name == 'nt')
-is_posix = (os.name == 'posix')
-is_darwin = (os.name == 'darwin')
+is_win: bool = os.name == "nt"
+is_posix = os.name == "posix"
+is_darwin = os.name == "darwin"
 defenc = sys.getfilesystemencoding()
 
 
 @overload
-def safe_decode(s: None) -> None: ...
+def safe_decode(s: None) -> None:
+    ...
 
 
 @overload
-def safe_decode(s: AnyStr) -> str: ...
+def safe_decode(s: AnyStr) -> str:
+    ...
 
 
 def safe_decode(s: Union[AnyStr, None]) -> Optional[str]:
@@ -49,19 +42,21 @@ def safe_decode(s: Union[AnyStr, None]) -> Optional[str]:
     if isinstance(s, str):
         return s
     elif isinstance(s, bytes):
-        return s.decode(defenc, 'surrogateescape')
+        return s.decode(defenc, "surrogateescape")
     elif s is None:
         return None
     else:
-        raise TypeError('Expected bytes or text, but got %r' % (s,))
+        raise TypeError("Expected bytes or text, but got %r" % (s,))
 
 
 @overload
-def safe_encode(s: None) -> None: ...
+def safe_encode(s: None) -> None:
+    ...
 
 
 @overload
-def safe_encode(s: AnyStr) -> bytes: ...
+def safe_encode(s: AnyStr) -> bytes:
+    ...
 
 
 def safe_encode(s: Optional[AnyStr]) -> Optional[bytes]:
@@ -73,15 +68,17 @@ def safe_encode(s: Optional[AnyStr]) -> Optional[bytes]:
     elif s is None:
         return None
     else:
-        raise TypeError('Expected bytes or text, but got %r' % (s,))
+        raise TypeError("Expected bytes or text, but got %r" % (s,))
 
 
 @overload
-def win_encode(s: None) -> None: ...
+def win_encode(s: None) -> None:
+    ...
 
 
 @overload
-def win_encode(s: AnyStr) -> bytes: ...
+def win_encode(s: AnyStr) -> bytes:
+    ...
 
 
 def win_encode(s: Optional[AnyStr]) -> Optional[bytes]:
@@ -91,5 +88,5 @@ def win_encode(s: Optional[AnyStr]) -> Optional[bytes]:
     elif isinstance(s, bytes):
         return s
     elif s is not None:
-        raise TypeError('Expected bytes or text, but got %r' % (s,))
+        raise TypeError("Expected bytes or text, but got %r" % (s,))
     return None

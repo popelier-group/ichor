@@ -15,9 +15,10 @@ class SlidingWindowMapBuffer(object):
     **Note:** Although this type effectively hides the fact that there are mapped windows
     underneath, it can unfortunately not be used in any non-pure python method which
     needs a buffer or string"""
+
     __slots__ = (
-        '_c',           # our cursor
-        '_size',        # our supposed size
+        "_c",  # our cursor
+        "_size",  # our supposed size
     )
 
     def __init__(self, cursor=None, offset=0, size=sys.maxsize, flags=0):
@@ -34,7 +35,9 @@ class SlidingWindowMapBuffer(object):
         :raise ValueError: if the buffer could not achieve a valid state"""
         self._c = cursor
         if cursor and not self.begin_access(cursor, offset, size, flags):
-            raise ValueError("Failed to allocate the buffer - probably the given offset is out of bounds")
+            raise ValueError(
+                "Failed to allocate the buffer - probably the given offset is out of bounds"
+            )
         # END handle offset
 
     def __del__(self):
@@ -74,9 +77,9 @@ class SlidingWindowMapBuffer(object):
             j = self._size + j
         if (c.ofs_begin() <= i) and (j < c.ofs_end()):
             b = c.ofs_begin()
-            return c.buffer()[i - b:j - b]
+            return c.buffer()[i - b : j - b]
         else:
-            l = j - i                 # total length
+            l = j - i  # total length
             ofs = i
             # It's fastest to keep tokens and join later, especially in py3, which was 7 times slower
             # in the previous iteration of this code
@@ -89,13 +92,14 @@ class SlidingWindowMapBuffer(object):
                 l -= len(d)
                 # Make sure we don't keep references, as c.use_region() might attempt to free resources, but
                 # can't unless we use pure bytes
-                if hasattr(d, 'tobytes'):
+                if hasattr(d, "tobytes"):
                     d = d.tobytes()
                 md.append(d)
             # END while there are bytes to read
             return bytes().join(md)
         # END fast or slow path
-    #{ Interface
+
+    # { Interface
 
     def begin_access(self, cursor=None, offset=0, size=sys.maxsize, flags=0):
         """Call this before the first use of this instance. The method was already
@@ -140,4 +144,4 @@ class SlidingWindowMapBuffer(object):
         """:return: the currently set cursor which provides access to the data"""
         return self._c
 
-    #}END interface
+    # }END interface

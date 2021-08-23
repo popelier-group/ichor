@@ -1,7 +1,14 @@
-from ichor.menu import Menu
-from ichor.auto_run.per.per_atom import auto_run_per_atom
+from ichor.auto_run.per.per_atom import PerAtomDaemon, auto_run_per_atom
+from ichor.auto_run.per.per_atom_per_property import (
+    PerAtomPerPropertyDaemon, auto_run_per_atom_per_property)
+from ichor.auto_run.per.per_property import (PerPropertyDaemon,
+                                             auto_run_per_property)
 
-
-def auto_run_per_atom_menu():
-    with Menu("Per-Atom Menu", space=True, back=True, exit=True) as menu:
-        menu.add_option("r", "Run per-atom", auto_run_per_atom)
+__all__ = [
+    "auto_run_per_atom",
+    "PerAtomDaemon",
+    "auto_run_per_property",
+    "PerPropertyDaemon",
+    "auto_run_per_atom_per_property",
+    "PerAtomPerPropertyDaemon",
+]

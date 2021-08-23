@@ -339,7 +339,16 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if stack:
             stack_str = ":\n" + "".join(traceback.format_stack())
         asctime = time.asctime()
-        print("[%s %s %s] %s%s" % (tid, pid, asctime, msg, stack_str,))
+        print(
+            "[%s %s %s] %s%s"
+            % (
+                tid,
+                pid,
+                asctime,
+                msg,
+                stack_str,
+            )
+        )
 
     def emit(self, record):
         """

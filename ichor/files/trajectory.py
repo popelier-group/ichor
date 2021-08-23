@@ -130,7 +130,7 @@ class Trajectory(ListOfAtoms, File):
 
     def __getitem__(self, item):
         # TODO: Implement isinstance(item, slice) if needed
-        """ Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
+        """Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
         remember that indeces in Python start at 0, so trajectory[2] is the 3rd timestep.
         You can use something like (np.array([traj[i].features for i in range(2)]).shape) to features of a slice of
         a trajectory as slice is not implemented in __getitem__"""
@@ -140,13 +140,13 @@ class Trajectory(ListOfAtoms, File):
         return super().__getitem__(item)
 
     def __iter__(self):
-        """ Used to iterate over timesteps (Atoms instances) in places such as for loops"""
+        """Used to iterate over timesteps (Atoms instances) in places such as for loops"""
         if self.state is not FileState.Read:
             self.read()
         return super().__iter__()
 
     def __len__(self):
-        """ Returns the number of timesteps in the Trajectory instance"""
+        """Returns the number of timesteps in the Trajectory instance"""
         if self.state is not FileState.Read:
             self.read()
         return super().__len__()
