@@ -23,6 +23,7 @@ def submit_wfns(
             if GLOBALS.METHOD in constants.AIMALL_FUNCTIONALS:
                 point.wfn.check_header()
             submission_script.add_command(AIMAllCommand(point.wfn.path))
+    logger.info(f"Submitting {len(submission_script.commands)} WFN(s) to AIMAll")
     submission_script.write()
     return submission_script.submit()
 
@@ -33,9 +34,9 @@ def check_aimall_output(wfn_file: str):
     if not wfn_file:
         print_completed()
         sys.exit()
-    logger.debug(f"Checking {wfn_file}")
+    # logger.debug(f"Checking {wfn_file}")
     if not Path(wfn_file).with_suffix(".sh").exists():
-        logger.debug(f"AIMAll finished")
+        # logger.debug(f"AIMAll finished")
         print_completed()
-    else:
-        logger.error(f"AIMAll Job {wfn_file} failed to run")
+    # else:
+    #     logger.error(f"AIMAll Job {wfn_file} failed to run")

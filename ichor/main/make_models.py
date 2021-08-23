@@ -13,6 +13,7 @@ from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter
+from ichor.logging import logger
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -216,6 +217,8 @@ def make_models(
     model_types = [ModelType.from_str(ty) for ty in types] if types is not None else [ModelType.iqa]
     atom_models = atoms or [atom.atom_num for atom in _model_data[0].atoms]
 
+    logger.info(f"Making Models for {atom_models} atoms and {model_types} types with {n_training_points} training points")
+
     return _make_models(hold=hold)
 
 
@@ -235,6 +238,7 @@ def move_models(model_dir: Optional[Path] = None):
                 if f.suffix == ".model":
                     cp(f, GLOBALS.FILE_STRUCTURE["models"])
                     model_log = GLOBALS.FILE_STRUCTURE["model_log"] / GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
+                    logger.info(f"Moving {f} to {GLOBALS.FILE_STRUCTURE['models']} and {model_log}")
                     mkdir(model_log)
                     cp(f, model_log)
 

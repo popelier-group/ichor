@@ -5,19 +5,20 @@ from ichor.logging import logger
 from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
+from ichor.batch_system import JobID
+from typing import Optional
 
 
-def submit_gjfs(directory):
-    logger.info("Submitting gjfs to Gaussian")
+def submit_gjfs(directory) -> Optional[JobID]:
     points = PointsDirectory(directory)
     submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])
     for point in points:
-        # point.gjf.read()  # <- Shouldn't be needed
         if not point.gjf.path.with_suffix(".wfn").exists():
             point.gjf.write()
             submission_script.add_command(GaussianCommand(point.gjf.path))
+    logger.info(f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian")
     submission_script.write()
-    submission_script.submit()
+    return submission_script.submit()
 
 
 def check_gaussian_output(gaussian_file: str):
