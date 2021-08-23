@@ -101,10 +101,10 @@ def remove(path: Path) -> None:
 @contextmanager
 def pushd(new_dir: Path, update_cwd: bool = False):
     previous_dir = os.getcwd()
-    os.chdir(new_dir)
     if update_cwd:
         from ichor.globals import GLOBALS
         GLOBALS.CWD = new_dir.absolute()
+    os.chdir(new_dir)
     try:
         yield
     finally:
