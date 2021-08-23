@@ -104,7 +104,7 @@ def pushd(new_dir: Path, update_cwd: bool = False):
     os.chdir(new_dir)
     if update_cwd:
         from ichor.globals import GLOBALS
-        GLOBALS.CWD = new_dir
+        GLOBALS.CWD = new_dir.absolute()
     try:
         yield
     finally:
