@@ -113,7 +113,7 @@ class INT(GeometryData, File):
         self.rotate_octupole()
         self.rotate_hexadecapole()
 
-    # @cached_property
+    @cached_property
     def C(self):
         from ichor.atoms.calculators.feature_calculator import ALFFeatureCalculator
 
@@ -138,7 +138,7 @@ class INT(GeometryData, File):
 
     def rotate_dipole(self):
         d = np.array([self.q11c, self.q11s, self.q10])
-        rotated_d = np.einsum("ia,a->i", self.C(), d)
+        rotated_d = np.einsum("ia,a->i", self.C, d)
         self.q10 = rotated_d[2]
         self.q11c = rotated_d[0]
         self.q11s = rotated_d[1]
@@ -155,7 +155,7 @@ class INT(GeometryData, File):
             [[q_xx, q_xy, q_xz], [q_xy, q_yy, q_yz], [q_xz, q_yz, q_zz]]
         )
 
-        rotated_q = np.einsum("ia,jb,ab->ij", self.C(), self.C(), q)
+        rotated_q = np.einsum("ia,jb,ab->ij", self.C, self.C, q)
 
         self.q20 = rotated_q[2, 2]
         self.q21c = constants.rt12_3 * rotated_q[0, 2]
@@ -195,7 +195,7 @@ class INT(GeometryData, File):
             ]
         )
 
-        rotated_o = np.einsum("ia,jb,kc,abc->ijk", self.C(), self.C(), self.C(), o)
+        rotated_o = np.einsum("ia,jb,kc,abc->ijk", self.C, self.C, self.C, o)
 
         self.q30 = rotated_o[2, 2, 2]
         self.q31c = constants.rt_3_3 * rotated_o[0, 2, 2]
@@ -305,7 +305,7 @@ class INT(GeometryData, File):
         )
 
         h_rotated = np.einsum(
-            "ia,jb,kc,ld,abcd->ijkl", self.C(), self.C(), self.C(), self.C(), h
+            "ia,jb,kc,ld,abcd->ijkl", self.C, self.C, self.C, self.C, h
         )
 
         self.q40 = h_rotated[2, 2, 2, 2]
