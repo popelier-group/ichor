@@ -16,8 +16,11 @@ class MinMaxMean(MakeSetMethod):
         return 3 * len(points[0].features)
 
     def get_points(self, points: ListOfAtoms) -> List[int]:
-        features = points["O1"].features
-        # print(features.shape)
+        from ichor.globals import GLOBALS
+
+        atom = GLOBALS.OPTIMISE_ATOM if GLOBALS.OPTIMISE_ATOM is not "all" else GLOBALS.ATOMS[0].name
+        features = points[atom].features
+
         if features.ndim > 2:
             features = features[:, 0, :]
         elif features.ndim < 2:
