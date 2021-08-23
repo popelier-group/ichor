@@ -58,7 +58,7 @@ class BatchSystem(ABC):
 
     @classmethod
     def submit_script(
-        cls, job_script: Path, hold: Optional[JobID] = None
+        cls, job_script: Path, hold: Optional[Union[JobID, List[JobID]]] = None
     ) -> JobID:
         cmd = cls.submit_script_command
         if hold:
@@ -82,7 +82,7 @@ class BatchSystem(ABC):
 
     @classmethod
     @abstractmethod
-    def hold_job(cls, job: JobID):
+    def hold_job(cls, job: Union[JobID, List[JobID]]):
         pass
 
     @classproperty

@@ -1,7 +1,7 @@
 import os
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from ichor.batch_system.batch_system import BatchSystem, JobID
 from ichor.common.functools import classproperty
@@ -22,8 +22,9 @@ class SunGridEngine(BatchSystem):
         return re.findall(r"\d+", stdout)[0]
 
     @classmethod
-    def hold_job(cls, job_id: JobID) -> List[str]:
-        return ["-hold_jid", f"{job_id.id}"]
+    def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
+        jid = job_id.id if isinstance(job_id, JobID) else ','.join(map(str, [j.id for j in job_id]))
+        return ["-hold_jid", f"{jid}"]
 
     @classproperty
     def delete_job_command(self) -> List[str]:

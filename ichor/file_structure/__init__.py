@@ -38,6 +38,8 @@ class FileStructure(FileTree):
         self.add("cv_errors", "cv_errors", parent="adaptive_sampling")
         self.add("counter", "counter", parent="adaptive_sampling")
 
+        self.add("child_processes", "child_processes", parent="adaptive_sampling")
+
         self.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
         self.add(
             "properties.pid", "properties_pid", parent="properties_daemon"

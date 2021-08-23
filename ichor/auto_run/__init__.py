@@ -146,7 +146,7 @@ def next_iter(
     return job_id
 
 
-def auto_run():
+def auto_run() -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]
@@ -158,3 +158,4 @@ def auto_run():
         for i, iter_state in enumerate(iterations):
             print(f"Submitting Iter: {i+1}")
             job_id = next_iter(job_id, iter_state)
+    return job_id

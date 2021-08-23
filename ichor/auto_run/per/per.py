@@ -1,8 +1,12 @@
 import os
+import json
 from pathlib import Path
 from typing import Any, Callable, List, Optional
 
+from ichor.batch_system import JobID
 from ichor.common.io import cp, get_files_of_type, mkdir, pushd
+
+from ichor.auto_run.ichor import submit_collate_log
 
 
 class TooManyXYZs(Exception):
@@ -14,13 +18,24 @@ def auto_run_per_value(
     values: List[str],
     directory: Path = Path.cwd(),
     run_func: Optional[Callable] = None,
-):
+) -> List[Optional[JobID]]:
     from ichor.arguments import Arguments
     from ichor.globals import GLOBALS
+
+    final_job_ids = []
 
     for value in values:
         path = directory / value
         mkdir(path)
+
+        mkdir(GLOBALS.FILE_STRUCTURE["child_processes"].parent)
+        child_processes = []
+        if GLOBALS.FILE_STRUCTURE["child_processes"].exists():
+            with open(GLOBALS.FILE_STRUCTURE["child_processes"], "w") as f:
+                child_processes = json.load(f)
+        child_processes.append(str(path.absolute()))
+        with open(GLOBALS.FILE_STRUCTURE["child_processes"], "w") as f:
+            json.dump(child_processes, f)
 
         if not (
             path / GLOBALS.FILE_STRUCTURE["training_set"]
@@ -80,9 +95,39 @@ def auto_run_per_value(
             if run_func is None:
                 from ichor.auto_run import auto_run
 
-                auto_run()
+                final_job = auto_run()
+                final_job_ids.append(final_job)
             else:
-                run_func()
+                final_jobs = run_func()
+                final_job_ids.extend(final_jobs)
 
         GLOBALS.set(variable, save_value)
         Arguments.config_file = save_config
+
+    final_job = submit_collate_log(GLOBALS.CWD, hold = final_job_ids)
+    final_job_ids.append(final_job)
+
+    return final_job_ids
+
+def collate_model_log(directory: Optional[Path] = None) -> None:
+    from ichor.globals import GLOBALS
+    from ichor.models import Models
+    if directory is None:
+        directory = GLOBALS.CWD
+
+    with pushd(directory, update_cwd=True):
+        if not GLOBALS.FILE_STRUCTURE["child_processes"].exists():
+            return
+
+        with open(GLOBALS.FILE_STRUCTURE["child_processes"], "r") as f:
+            child_processes = json.load(f)
+
+        parent_dir = Path(GLOBALS.CWD)
+        parent_model_dir = parent_dir / GLOBALS.FILE_STRUCTURE["model_log"]
+        mkdir(parent_model_dir)
+
+        for child_process in child_processes:
+            with pushd(child_process, update_cwd=True):
+                for model_log in GLOBALS.FILE_STRUCTURE["model_log"].iterdir():
+                    if model_log.is_dir() and Models.dirpattern.match(model_log.name):
+                        cp(model_log, parent_model_dir / model_log.name)
