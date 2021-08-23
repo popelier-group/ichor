@@ -38,7 +38,8 @@ def adaptive_sampling(
             training_set.path
             / f"{GLOBALS.SYSTEM_NAME}{str(len(training_set)+1).zfill(4)}"
         )
-        new_training_point = sample_pool[point]
+        new_training_point = PointsDirectory(sample_pool_directory)[point]
+
         logger.info(
             f"Moved point {new_training_point.path} -> {new_directory}"
         )
