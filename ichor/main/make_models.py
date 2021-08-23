@@ -213,7 +213,7 @@ def make_models(
     _model_data = PointsDirectory(directory)
 
     n_training_points = ntrain or len(_model_data)
-    model_types = [ModelType.from_str(ty) for ty in types] or [ModelType.iqa]
+    model_types = [ModelType.from_str(ty) for ty in types] if types is not None else [ModelType.iqa]
     atom_models = atoms or [atom.atom_num for atom in _model_data[0].atoms]
 
     return _make_models(hold=hold)
