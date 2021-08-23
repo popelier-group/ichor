@@ -3,7 +3,7 @@
 #
 # This module is part of GitPython and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
-from __future__ import annotations
+# from __future__ import annotations
 import logging
 import os
 import re
@@ -796,7 +796,7 @@ class Repo(object):
         # reveal_type(self.head.reference)  # => Reference
         return self.head.reference
 
-    def blame_incremental(self, rev: str | HEAD, file: str, **kwargs: Any) -> Iterator['BlameEntry']:
+    def blame_incremental(self, rev: Union[str, HEAD], file: str, **kwargs: Any) -> Iterator['BlameEntry']:
         """Iterator for blame information for the given file at the given revision.
 
         Unlike .blame(), this does not return the actual file's contents, only
@@ -873,7 +873,7 @@ class Repo(object):
                              range(orig_lineno, orig_lineno + num_lines))
 
     def blame(self, rev: Union[str, HEAD], file: str, incremental: bool = False, **kwargs: Any
-              ) -> List[List[Commit | List[str | bytes] | None]] | Iterator[BlameEntry] | None:
+              ) -> Union[List[List[Union[Commit, List[Union[str, bytes]],  None]]], Iterator[BlameEntry], None]:
         """The blame information for the given file at the given revision.
 
         :param rev: revision specifier, see git-rev-parse for viable options.
@@ -1148,7 +1148,7 @@ class Repo(object):
         return cls._clone(git, url, to_path, GitCmdObjectDB, progress, multi_options, **kwargs)
 
     def archive(self, ostream: Union[TextIO, BinaryIO], treeish: Optional[str] = None,
-                prefix: Optional[str] = None, **kwargs: Any) -> Repo:
+                prefix: Optional[str] = None, **kwargs: Any) -> 'Repo':
         """Archive the tree at the given revision.
 
         :param ostream: file compatible stream object to which the archive will be written as bytes
@@ -1195,7 +1195,7 @@ class Repo(object):
         clazz = self.__class__
         return '<%s.%s %r>' % (clazz.__module__, clazz.__name__, self.git_dir)
 
-    def currently_rebasing_on(self) -> Commit | None:
+    def currently_rebasing_on(self) -> Union[Commit, None]:
         """
         :return: The commit which is currently being replayed while rebasing.
 

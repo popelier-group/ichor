@@ -5,7 +5,7 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 from ichor.git.util import IterableList, join_path
-import ichor.git.diff as git_diff
+from  ichor.git import diff as git_diff
 from ichor.git.util import to_bin_sha
 
 from ichor.git.objects import util

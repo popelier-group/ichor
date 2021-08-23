@@ -1,5 +1,5 @@
 """Package with general repository related functions"""
-from __future__ import annotations
+# from __future__ import annotations
 import os
 import stat
 from string import digits

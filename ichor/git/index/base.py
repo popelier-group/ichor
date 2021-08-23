@@ -41,7 +41,7 @@ from ichor.git.util import (
 from ichor.git.ext.gitdb.base import IStream
 from ichor.git.ext.gitdb.db import MemoryDB
 
-import ichor.git.diff as git_diff
+from  ichor.git import diff as git_diff
 import os.path as osp
 
 from ichor.git.index.fun import (

@@ -10,7 +10,7 @@ from typing import (Callable, Dict, NoReturn, Sequence, Tuple, Union, Any, Itera
 if sys.version_info[:2] >= (3, 8):
     from typing import Final, Literal, SupportsIndex, TypedDict, Protocol, runtime_checkable  # noqa: F401
 else:
-    from typing_extensions import (Final, Literal, SupportsIndex,                           # noqa: F401
+    from ichor.typing_extensions import (Final, Literal, SupportsIndex,                           # noqa: F401
                                    TypedDict, Protocol, runtime_checkable)  # noqa: F401
 
 # if sys.version_info[:2] >= (3, 10):

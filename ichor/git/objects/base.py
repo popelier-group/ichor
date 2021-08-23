@@ -7,7 +7,7 @@
 from ichor.git.exc import WorkTreeRepositoryUnsupported
 from ichor.git.util import LazyMixin, join_path_native, stream_copy, bin_to_hex
 
-import ichor.git.ext.gitdb.typ as dbtyp
+from ichor.git.ext.gitdb import typ as dbtyp
 import os.path as osp
 
 from ichor.git.objects.util import get_object_type_by_name

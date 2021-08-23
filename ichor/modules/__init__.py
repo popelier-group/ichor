@@ -38,6 +38,9 @@ def initialise_modules():
 
 
 def module(*args):
+    from ichor.globals import GLOBALS, Machine
+    if GLOBALS.MACHINE is Machine.local:
+        return
     if type(args[0]) == type([]):
         args = args[0]
     else:
