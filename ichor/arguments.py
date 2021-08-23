@@ -19,7 +19,7 @@ def import_external_functions():
     from ichor.main.submit_wfns import check_aimall_output, submit_wfns
     from ichor.make_sets import make_sets
     from ichor.submission_script import print_completed
-    from ichor.auto_run.per import collate_model_log
+    from ichor.main.collate_log import collate_model_log
 
     Arguments.external_functions = locals()
 
