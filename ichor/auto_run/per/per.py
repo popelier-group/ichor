@@ -42,7 +42,7 @@ def auto_run_per_value(variable: str, values: List[str], directory: Path = Path.
         GLOBALS.set(variable, value)
         GLOBALS.save_to_config(config_path)
 
-        with pushd(path):
+        with pushd(path, update_cwd=True):
             run_auto_from_extern()
 
         GLOBALS.set(variable, save_value)
