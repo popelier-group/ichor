@@ -31,7 +31,7 @@ def auto_run_per_value(
         mkdir(GLOBALS.FILE_STRUCTURE["child_processes"].parent)
         child_processes = []
         if GLOBALS.FILE_STRUCTURE["child_processes"].exists():
-            with open(GLOBALS.FILE_STRUCTURE["child_processes"], "w") as f:
+            with open(GLOBALS.FILE_STRUCTURE["child_processes"], "r") as f:
                 child_processes = json.load(f)
         child_processes.append(str(path.absolute()))
         with open(GLOBALS.FILE_STRUCTURE["child_processes"], "w") as f:
