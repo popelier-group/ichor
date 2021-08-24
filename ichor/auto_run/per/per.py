@@ -104,6 +104,9 @@ def auto_run_per_value(
         GLOBALS.set(variable, save_value)
         Arguments.config_file = save_config
 
+    print(final_job_ids)
+    quit()
+
     final_job = submit_collate_log(GLOBALS.CWD, hold = final_job_ids)
     final_job_ids.append(final_job)
 

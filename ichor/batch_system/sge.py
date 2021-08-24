@@ -23,7 +23,7 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
-        jid = job_id.id if isinstance(job_id, JobID) else ','.join(map(str, [j.id for j in job_id]))
+        jid = job_id.id if isinstance(job_id, JobID) else ','.join(map(str, [j.id for j in job_id if j is not None]))
         return ["-hold_jid", f"{jid}"]
 
     @classproperty
