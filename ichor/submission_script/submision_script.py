@@ -101,7 +101,7 @@ class SubmissionScript:
                     command_group = CommandGroup()
                 command_type = type(command)
             command_group += [command]
-        # commands = [[GaussianCommand(), GaussianCommand()], [IchorCommand]]
+        # commands = [CommandGroup([GaussianCommand(), GaussianCommand()]), CommandGroup([IchorCommand])]
         # [[Gaussian], [Ichor], [Aimall]]
 
         # In one job script file
@@ -259,7 +259,7 @@ class SubmissionScript:
 
             for command_group in self.grouped_commands:
                 command_variables = []
-                if command_group.data: # Gaussian, Ferebus, AIMALL jobs need access to datafiles
+                if command_group.data:  # Gaussian, Ferebus, AIMALL jobs need access to datafiles
                     datafile = GLOBALS.FILE_STRUCTURE["datafiles"] / Path(
                         str(GLOBALS.UID)
                     )

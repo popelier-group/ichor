@@ -39,7 +39,8 @@ class PointsDirectory(Points, Directory):
         and move the .gjf file in there. So for example, if there is a file called WATER001.gjf, this method will make a
         folder called WATER001 and will move WATER001.gjf in it.
         Initially when the training set, test set, and sample pool directories are made, there are only .gjf files present in the 
-        directory. This method makes them in separate directories."""
+        directory. This method makes them in separate directories.
+        """
 
         # if current instance is empty, then iterate over the contents of the directory (see __iter__ method below)
         for f in self:
@@ -59,7 +60,13 @@ class PointsDirectory(Points, Directory):
 
     @buildermethod
     def read(self) -> "PointsDirectory":
-        """Read each o"""
+        """Read each of the PointDirectory instances inside a PointsDirectory instance and store relevant information into attributes.
+
+        .. note::
+            This method does not need to be called explicitly because if an the state of the file is `FileState.Unread` and the attribute
+            does not exist, the `__getattribute__` method defined in `class PathObject` will be called which automatically reads the file
+            if a non existing attribute is being accessed.
+        """
         for point in self:
             point.read()
 
@@ -67,7 +74,7 @@ class PointsDirectory(Points, Directory):
         """
         This method is called when iterating over an instance of `PointsDirectory`. If the current instance is empty (i.e. its length is 0),
         then iterate over the directory set as `self.path` (`self.path` attribute is inherited from PathObject and because PointsDirectory
-        subclases from Directory and the Directory `__init__` method is called, then the PointsDirectory object will
+        subclasses from Directory and the Directory `__init__` method is called, then the PointsDirectory object will
         also have this attribute). If the current instance is not empty, then iterate over the `PointDirectory` objects
         which are in `self`. Because `PointsDirectory` inherits from Points, which
         inherits from `ListofAtoms` (which subsequently inherits from `list`), then `self` can be used as a list itself.

@@ -9,6 +9,14 @@ from ichor.common.os import run_cmd
 
 
 class JobID:
+    """ Class used to keep track of jobs submitted to compute nodes.
+    
+    :param script: A path to a script file such as GAUSSIAN.sh
+    :param id: The job id given to the job when the job was submitted to a compute node.
+    :instance: the unique identified (UUID) that is used for the job's datafile (containing the names of all the files needed for the job).
+    """
+
+    # matt_todo: are these type annotations needed?
     script: str
     id: str
     instance: str
@@ -25,9 +33,10 @@ class JobID:
     def write(self):
         from ichor.globals import GLOBALS
 
-        mkdir(GLOBALS.FILE_STRUCTURE["jid"].parent)
+        mkdir(GLOBALS.FILE_STRUCTURE["jid"].parent)  # make parent directories if they don't exist
 
         job_ids = []
+        # if the jid file exists (which contains queued jobs), then read it and append to job_ids list
         if GLOBALS.FILE_STRUCTURE["jid"].exists():
             with open(GLOBALS.FILE_STRUCTURE["jid"], "r") as f:
                 job_ids += json.load(f)
@@ -40,6 +49,7 @@ class JobID:
             }
         ]
 
+        # overwrite the jobs file, writing out any new jobs that were submitted plus the old jobs that were already in the file.
         with open(GLOBALS.FILE_STRUCTURE["jid"], "w") as f:
             json.dump(job_ids, f)
 
@@ -89,10 +99,12 @@ class BatchSystem(ABC):
     @classproperty
     @abstractmethod
     def submit_script_command(self) -> List[str]:
+        """ Command to submit job to compute node, such as `qsub`."""
         pass
 
     @classmethod
     def delete_job(cls, job_id: JobID) -> None:
+        """ Delete job submitted to compute node."""
         cmd = [cls.delete_job_command, job_id]
         stdout, _ = run_cmd(cmd)
         return stdout
@@ -100,6 +112,7 @@ class BatchSystem(ABC):
     @classproperty
     @abstractmethod
     def delete_job_command(self) -> List[str]:
+        """ Command that is used to delete a job, such as `qdel`."""
         pass
 
     @staticmethod

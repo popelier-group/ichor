@@ -17,7 +17,7 @@ def submit_gjfs(directory: Path):
     # make a SubmissionScript instance which is going to house all the jobs that are going to be ran
     submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])  # SCRIPT_NAMES["gaussian"] gives a path to the GAUSSIAN.sh script
     for point in points:  # point is an instance of PointDirectory
-        # point.gjf.read()  # <- Shouldn't be needed
+        # point.gjf.read()  # <- Shouldn't be needed because __getattribute__ of PathObject makes sure files are read
         point.gjf.write()
         submission_script.add_command(GaussianCommand(point.gjf.path))  # make a list of GaussianCommand instances.
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)

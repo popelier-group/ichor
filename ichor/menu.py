@@ -8,14 +8,16 @@ from ichor.tab_completer import ListCompleter
 
 
 class Menu(object):
-    """A constructor class that makes menus for menus to be displayed in the ICHOR CLU, such as
-    when `python ICHOR.py (specifically python3 ICHOR.py)` is ran
+    """A constructor class that makes menus to be displayed in ICHOR's Command Line Interface (CLI), such as
+    when `python ichor3.py` is ran.
     
     :param title: The title of the menu
     :param options: A list of options to be displayed. Default is None. Options are usually added using `add_option` method.
     :param message: A message to be displayed at the top of the menu
     :param prompt: A set of characters that appear where user input will be taken
-    :param refresh: matt_todo not sure how this refresh works, so I have not documented methods/variables which relate to it.
+    :param refresh: A callable (function) that can be optionally passed in. This allows for a menu to be constructed in a function.
+        See `make_models_menu_refresh` for an example. Default value for this is a lambda function that returns None (does nothing).
+        See `run` method where `self.refresh` is ran, which only does something if `refresh` is passed in when a `Menu` object is made.
     :param auto_clear: Whether to clear the screen before a menu is shown. Default True.
     :param enable_problems: Whether to display any problems that ICHOR has found with the current setup.
     :param auto_close: Whether or not to close ICHOR once a function is executed.
@@ -189,6 +191,8 @@ class Menu(object):
         handler function inside to be executed with its arguments."""
         self.is_open = True
         while self.is_open:
+            # most of the time, this will call an empty lambda function that returns None, since this is the default value
+            # if another callable function is given when the menu object is being made, then use that as the refresh
             self.refresh(self)
             func, wait, close = self.input()
             if func == Menu.CLOSE: # if self.input() returns Menu.CLOSE, then set func to self.close
@@ -248,6 +252,7 @@ class Menu(object):
 
     @classmethod
     def clear_screen(cls):
+        """ Clear the currently displayed lines in the terminal"""
         os.system("cls" if os.name == "nt" else "clear")
 
     def show(self):
@@ -321,7 +326,7 @@ class Menu(object):
                     print("Error: Invalid input")
 
     def CLOSE(self):
-        """Used to determine if the current menu should be closed."""
+        """Used to determine if the current menu should be closed. See Menu.CLOSE in `run` method."""
         pass
 
     def __enter__(self):

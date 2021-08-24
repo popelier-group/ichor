@@ -1,4 +1,4 @@
-from typing import List
+ from typing import List
 
 import numpy as np
 
@@ -16,6 +16,7 @@ class MinMaxMean(MakeSetMethod):
         return 3 * len(points[0].features)
 
     def get_points(self, points: ListOfAtoms) -> List[int]:
+        # matt_todo: This is hard coded O1, so it will not work most of the time
         features = points["O1"].features
         # print(features.shape)
         if features.ndim > 2:

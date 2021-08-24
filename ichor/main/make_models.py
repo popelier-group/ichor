@@ -13,13 +13,10 @@ from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter
 
-model_data_location: Path = Path()
-_model_data: Optional[PointsDirectory] = None
-n_training_points: int = 0
-atom_models: List[str] = []
-
 
 class ModelType(Enum):
+    """ Enum used for all the different models we make: iqa and multipole moments."""
+
     iqa = "iqa"
     q00 = "q00"
     q10 = "q10"
@@ -49,8 +46,14 @@ class ModelType(Enum):
 
     @classmethod
     def to_str(cls, ty: "ModelType"):
+        """ Convert the named element to its string value. """
         return ty.value
 
+
+model_data_location: Path = Path()
+_model_data: Optional[PointsDirectory] = None
+n_training_points: int = 0
+atom_models: List[str] = []
 
 model_types: List[ModelType] = [ModelType.iqa]
 atoms: List[str] = []
@@ -173,6 +176,8 @@ def make_models_menu_refresh(menu):
 
 def make_models_menu(directory: Path):
     setup(directory)
+    # use context manager here because we need to run the __enter__ and __exit__ methods. Otherwise, the actual menu
+    # is in the make_models_menu_refresh function
     with Menu("Make Models Menu", refresh=make_models_menu_refresh) as menu:
         pass
 

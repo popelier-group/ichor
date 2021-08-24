@@ -15,6 +15,7 @@ class ParallelEnvironment(RangeDict):
 
 
 class ParallelEnvironments(dict):
+    """ A wrapper around multiple parallel environments. Essentially a dictionary whose values are `ParallelEnvironemnt` instances"""
     def __getitem__(self, item: Machine) -> ParallelEnvironment:
         if item not in self.keys():
             self[item] = ParallelEnvironment()

@@ -45,15 +45,20 @@ class PathObject(ABC, object):
         pass
 
     def __getattribute__(self, item):
-        # todo: not sure what this does
+        """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.
+        If the attribute does not exist, then read the file and update its filestate. Then try to return the value of the attribute, if
+        the attribute still does not exist after reading the file, then erturn an AttributeError.
+        
+        :param item: The attribute that needs to be accessed.
+        """
         if not called_from_hasattr() and (
             (
-                not hasattr(self, item)
-                or object.__getattribute__(self, item) is None
+                not hasattr(self, item)  # this is True if `self` does not have an attribute `item`
+                or object.__getattribute__(self, item) is None  # this is  True if __getattribute__(self, item) returns None (does not exist)
             )
-            and self.state is FileState.Unread
+            and self.state is FileState.Unread  # this is True if the file has not been read already
         ):
-            self.read()
+            self.read()  # read the file and make the filestate FileState.Read
 
         try:
             return object.__getattribute__(self, item)
@@ -63,6 +68,8 @@ class PathObject(ABC, object):
             )
 
     def __getitem__(self, item):
+        """ Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
+        read the file and try to access the item again. If the item still does not exist, then throw a KeyError."""
         try:
             return super().__getitem__(item)
         except KeyError:

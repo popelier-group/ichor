@@ -9,14 +9,14 @@ from ichor.files.path_object import FileState, PathObject
 class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
     def __init__(self, path):
-        super().__init__(path) # initialize PathObject init
+        super().__init__(path)  # initialize PathObject init
 
     @buildermethod
     def read(self, *args, **kwargs) -> None:
         """Read the contents of the file. Depending on the type of file, different parts will be read in."""
         if self.path.exists() and self.state is FileState.Unread:
             self.state = FileState.Reading
-            self._read_file(*args, **kwargs)
+            self._read_file(*args, **kwargs) # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             self.state = FileState.Read
 
     @abstractmethod

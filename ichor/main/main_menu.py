@@ -3,7 +3,12 @@ from ichor.main.queue import queue_menu
 from ichor.menu import Menu
 
 
-def points_directory_menu(path):
+def points_directory_menu(path: "Path"):
+    """ Menu that shows up when the user wants to run jobs for a particular Points directory, such as the training set directory,
+    validation set directory, or sample pool directory.
+
+    :param path: A path object to the directory for which the menu is about.
+    """
     from ichor.main.make_models import make_models_menu
     from ichor.main.submit_gjfs import submit_gjfs
     from ichor.main.submit_wfns import submit_wfns
@@ -13,27 +18,27 @@ def points_directory_menu(path):
             "1",
             "Submit GJFs to Gaussian",
             submit_gjfs,
-            kwargs={"directory": path}, # which directory to submit gjfs from (TRAINING_SET, SAMPLE_POOL, etc.)
+            kwargs={"directory": path},  # which directory to submit gjfs from (TRAINING_SET, SAMPLE_POOL, etc.)
         )
         menu.add_option(
             "2",
             "Submit WFNs to AIMAll",
             submit_wfns,
-            kwargs={"directory": path}, # which directory to submit AIMALLs from (TRAINING_SET, SAMPLE_POOL, etc.)
+            kwargs={"directory": path},
         )
         menu.add_option(
-            "3", "Make Models", make_models_menu, kwargs={"directory": path} # which directory to make models from (TRAINING_SET, SAMPLE_POOL, etc.)
+            "3", "Make Models", make_models_menu, kwargs={"directory": path}
         )
 
 
 def main_menu() -> None:
-    """Initialize the main menu Command Line Interface (CLI) for ICHOR."""
+    """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
 
     from ichor.auto_run import auto_run
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
 
-    # initialize an instance of Menu called menu
+    # initialize an instance of Menu called menu and add construct the menu in the context manager
     with Menu("ICHOR Main Menu", space=True, back=False, exit=True) as menu:
         # add options to the instance `menu`
         menu.add_option(

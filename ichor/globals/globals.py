@@ -330,7 +330,7 @@ class Globals:
         if self.DROP_N_COMPUTE_LOCATION:
             io.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
-        # todo: why is the training set structure generated in Globals?
+        # this is used to define the .ATOMS attribute from one .gjf file in the training set
         if self.FILE_STRUCTURE["training_set"].exists():
             from ichor.files import GJF
 

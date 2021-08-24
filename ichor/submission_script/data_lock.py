@@ -5,6 +5,7 @@ _locked = False
 
 
 class DataLock:
+    """ Used to lock the datafiles which are used to write out submission scripts for jobs."""
     @classproperty
     def locked(self):
         return _locked

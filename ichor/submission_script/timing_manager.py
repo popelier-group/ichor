@@ -5,6 +5,12 @@ from ichor.submission_script.submision_script import SubmissionScript
 
 
 class TimingManager:
+    """ A class that times how long jobs take. It uses the logging library, see `log_time` function.
+    
+    :param submission_script: A SubmissionScript instance (which represents a job) that is going to be timed.
+    :param message: A string to write in the logger.
+    """
+
     def __init__(
         self,
         submission_script: SubmissionScript,

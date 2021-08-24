@@ -1,3 +1,5 @@
+""" Input/output useful functions that are used in ICHOR."""
+
 import shutil
 import sys
 from functools import wraps
@@ -9,6 +11,7 @@ from ichor.typing import F
 
 
 def convert_to_path(func: F) -> F:
+    """ A decoratore which converts any function inputs which have type annotation `Path` to a `Path` object."""
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         if func.__annotations__:
@@ -31,6 +34,12 @@ def convert_to_path(func: F) -> F:
 
 @convert_to_path
 def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
+    """Makes a directory.
+    
+    :param path: Where to make the directory
+    :param empty: Whether to ignore FileExistsError exceptions. Set to False to ignore exceptions.
+    :param force: When set to True (default), do not make the directory if an OSError occurs
+    """
     if path.is_dir() and empty:
         try:
             shutil.rmtree(path)
@@ -43,8 +52,10 @@ def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
 
 @convert_to_path
 def move(src: Path, dst: Path) -> None:
+    """ Move the object from src to dst."""
     src.replace(dst)
 
 
 def cp(src: Path, dst: Path) -> None:
+    """ Copy contents and metadata (such as date created, etc.) from src to dst."""
     shutil.copy2(src, dst)
