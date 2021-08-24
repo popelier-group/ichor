@@ -199,7 +199,7 @@ class SubmissionScript:
         )
         
         # writes out the while loop needed to read in files names into their corresponding arrays
-        # -r option prevents backslashes from being treats as escape characters
+        # -r option prevents backslashes from being treated as escape characters
         read_datafile_str += (
             f"while IFS={self.separator} read -r "
             f"{' '.join(self.var(i) for i in range(ndata))}\n"
