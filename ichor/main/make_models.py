@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from ichor import constants
@@ -60,6 +60,8 @@ atoms: List[str] = []
 
 
 def setup(directory: Path):
+    # matt_todo: Is there a better way to do it without all these globals?
+
     global model_data_location
     global _model_data
     global n_training_points
@@ -69,7 +71,7 @@ def setup(directory: Path):
     model_data_location = directory
     _model_data = PointsDirectory(directory)
     n_training_points = len(_model_data)
-    atoms = [atom.name for atom in _model_data[0].atoms]
+    atoms = [atom.name for atom in _model_data[0].atoms]  # matt_todo: rename to atom_names
     atom_models = list(atoms)
 
 
@@ -82,6 +84,8 @@ def toggle_model_type(ty: ModelType):
 
 
 def select_model_type():
+    """ Select properties for which to make models - these can be any combination of multiple moments and iqa energy."""
+
     global model_types
     while True:
         Menu.clear_screen()
@@ -154,7 +158,11 @@ def select_atoms():
                 atom_models.clear()
 
 
-def make_models_menu_refresh(menu):
+def make_models_menu_refresh(menu: "Menu"):
+    """ This is a `refresh` function that takes in an instance of a menu and add options to it. See `class Menu` `refresh` attrubute.
+
+    :param menu: An instance of `class Menu` to which options are added.
+    """
     menu.clear_options()
     menu.add_option("1", "Make Models", _make_models)
     menu.add_space()
@@ -175,37 +183,17 @@ def make_models_menu_refresh(menu):
 
 
 def make_models_menu(directory: Path):
+    """ The handler function for making models from a specific directory. To make the models, both Gaussian and AIMALL have to be ran
+    for the points that are in the directory."""
     setup(directory)
-    # use context manager here because we need to run the __enter__ and __exit__ methods. Otherwise, the actual menu
-    # is in the make_models_menu_refresh function
+    # use context manager here because we need to run the __enter__ and __exit__ methods.
+    # Make an instance called `menu` and set its `self.refresh` to `make_models_menu_refresh`, which gets called in the menu's `run` method
     with Menu("Make Models Menu", refresh=make_models_menu_refresh) as menu:
         pass
 
 
-def make_models(
-    directory: Path,
-    atoms: Optional[List[str]] = None,
-    ntrain: Optional[int] = None,
-    types: Optional[List[str]] = None,
-    hold: Optional[JobID] = None,
-) -> Optional[JobID]:
-    global model_data_location
-    global _model_data
-    global n_training_points
-    global atom_models
-    global model_types
-
-    model_data_location = directory
-    _model_data = PointsDirectory(directory)
-
-    n_training_points = ntrain or len(_model_data)
-    model_types = types or [ModelType.iqa]
-    atom_models = atoms or [atom.atom_num for atom in _model_data[0].atoms]
-
-    return _make_models(hold=hold)
-
-
 def move_models(model_dir: Optional[Path] = None):
+    """ Move model files from the ferebus directory to the models directory."""
     from ichor.globals import GLOBALS
 
     mkdir(GLOBALS.FILE_STRUCTURE["models"])
@@ -222,7 +210,40 @@ def move_models(model_dir: Optional[Path] = None):
             cp(d, GLOBALS.FILE_STRUCTURE["models"])
 
 
+def make_models(
+    directory: Path,
+    atoms: Optional[List[str]] = None,
+    ntrain: Optional[int] = None,
+    types: Optional[List[str]] = None,
+    hold: Optional[JobID] = None,
+) -> Optional[JobID]:
+    """ Function that is used in auto run to make GP models with FEREBUS. The actual function that makes the needed files is called `_make_models`.
+    
+    :return: The job id of the submitted job
+    """
+
+    global model_data_location
+    global _model_data
+    global n_training_points
+    global atom_models
+    global model_types
+
+    model_data_location = directory
+    _model_data = PointsDirectory(directory)
+
+    n_training_points = ntrain or len(_model_data)
+    model_types = types or [ModelType.iqa]
+    atom_models = atoms or [atom.atom_num for atom in _model_data[0].atoms]
+
+    return _make_models(hold=hold)
+
+
 def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
+    """ Makes the training set file in a separate directory for each topological atom. Calls `make_ferebus_script` which writes out the ferebus
+    job script that needed to run on compute nodes and submits to queue.
+    
+    :return: The job id of the submitted job
+    """
     ferebus_directories = []
 
     for atom in atom_models:
@@ -243,6 +264,10 @@ def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
 def make_ferebus_scrpt(
     ferebus_directories: List[Path], hold: Optional[JobID] = None
 ) -> Optional[JobID]:
+    """ Writes our the ferebus script needed to run a ferebus job and submits to queueing system.
+    
+    :return: The job id of the submitted job
+    """
     script_name = SCRIPT_NAMES["ferebus"]
     ferebus_script = SubmissionScript(script_name)
     for ferebus_directory in ferebus_directories:
@@ -251,26 +276,37 @@ def make_ferebus_scrpt(
     return ferebus_script.submit(hold=hold)
 
 
-def write_training_set(atom, training_data) -> Path:
+def write_training_set(atom: str, training_data: List[Tuple["np.ndarray", Dict]]) -> Path:
+    """ Write training set, containing inputs (such as r, theta, phi features), and outputs (IQA and multipole moments) for one atom. 
+    Returns the directory in which the training set was written as each atom has its own directory.
+
+    :param atom: The name of the atom for which the training set is made (e.g. C1)
+    :param training_data: A list of tuples containing the training data. Each tuple contains the (input, output) pair. The inputs are stored as a numpy array,
+        while the outputs are stored as a dictionary, containing key:value paris of property_name (eg. iqa, q00) : value
+    """
     from ichor.globals import GLOBALS
 
+    # make a ferebus directory for each atom
     ferebus_directory = GLOBALS.FILE_STRUCTURE["ferebus"] / atom
     mkdir(ferebus_directory, empty=True)
 
-    ntrain = len(training_data)
+    ntrain = len(training_data)  # matt_todo: There is a global called n_training_points
 
     training_set_file = (
         ferebus_directory / f"{GLOBALS.SYSTEM_NAME}_{atom}_TRAINING_SET.csv"
     )
+    # write config for ferebus
     write_ftoml(ferebus_directory, atom)
     with open(training_set_file, "w") as ts:
         if ntrain > 0:
+            # this part is to get headers for the columns (so f1,f2,f3....,q00,q10,....)
             inputs, outputs = training_data[0]
             input_headers = [f"f{i+1}" for i in range(len(inputs))]
             output_headers = [f"{output}" for output in outputs.keys()]
             ts.write(
                 f",{','.join(input_headers)},{','.join(output_headers)}\n"
             )
+            # this part is for writing out the features and outputs for each point.
             for i, (inputs, outputs) in enumerate(training_data):
                 ts.write(
                     f"{i},{','.join(map(str, inputs))},{','.join(map(str, outputs.values()))}\n"
@@ -279,7 +315,13 @@ def write_training_set(atom, training_data) -> Path:
     return ferebus_directory
 
 
-def write_ftoml(ferebus_directory, atom):
+def write_ftoml(ferebus_directory: Path, atom: str):
+    """ Write the toml file which holds settings for FEREBUS.
+    
+    :param ferebus_directory: A Path object pointing to the directory where the FEREBUS job is going to be ran
+    :param atom: A string corresponding to the atom's name (such as C1, H3, etc.)
+    """
+
     from ichor.globals import GLOBALS
     from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import ALFFeatureCalculator
 

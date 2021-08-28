@@ -7,12 +7,13 @@ from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 from ichor.common.types import MutableValue
 
-
+# write out the ICHOR_AIMALL.sh file which runs 
 def submit_wfns(
     directory: Path,
     atoms: Optional[MutableValue],
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
+    """ Writes out the datafile need to submit the wavefunction files to AIMALL. The actual AIMALL calculations are ran in the next step."""
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["aimall"])
     ichor_command = ICHORCommand()
     ichor_command.run_function("submit_wfns", str(directory), atoms.value)

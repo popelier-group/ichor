@@ -23,6 +23,8 @@ class WFN(Geometry, GeometryData, File):
 
     @buildermethod
     def _read_file(self, only_header=False):
+        """ Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
+        FileState of the file is FileState.Unread"""
         self.atoms = Atoms()
         with open(self.path, "r") as f:
             next(f)
@@ -50,9 +52,11 @@ class WFN(Geometry, GeometryData, File):
 
     @classproperty
     def filetype(cls) -> str:
+        """ Returns the file extension of a WFN file"""
         return ".wfn"
 
     def read_header(self):
+        """ Read in the top of the wavefunction file."""
         from ichor.globals import GLOBALS
 
         data = re.findall(r"\s\d+\s", self.header)
@@ -69,9 +73,12 @@ class WFN(Geometry, GeometryData, File):
 
     @property
     def title(self):
+        """ The name of the WFN file (excluding the .wfn extension)"""
         return self.path.stem
 
     def check_header(self):
+        """ Checks if the correct Gaussian method (eg. B3LYP) is being used in the Gaussian calculations."""
+
         from ichor.globals import GLOBALS
 
         data = []

@@ -10,6 +10,7 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
 def auto_run_aimall(
     npoints: MutableValue, atoms: MutableValue = None, hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
+    """ Submit an AIMALL job which generates .int files."""
     script_name = SCRIPT_NAMES["aimall"]
     aimall_script = SubmissionScript(script_name)
     with TimingManager(aimall_script):

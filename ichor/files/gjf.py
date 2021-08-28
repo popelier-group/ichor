@@ -40,6 +40,7 @@ class GJF(Geometry, File):
 
     @classproperty
     def filetype(cls) -> str:
+        """ Returns the extension of the GJF file."""
         return ".gjf"
 
     @buildermethod
@@ -101,11 +102,10 @@ class GJF(Geometry, File):
         return self.path.with_suffix(".wfn")
 
     def format(self):
-        """Format the .gjf file to use Gaussian keywords/variables that are defined in 
-        ICHOR GLOBALS."""
+        """Format the .gjf file to use Gaussian keywords/variables that are defined in ICHOR GLOBALS."""
         from ichor.globals import GLOBALS
 
-        self.read()
+        self.read()  # see class File
 
         self.job_type = GaussianJobType.Energy
         self.charge = 0

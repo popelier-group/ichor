@@ -10,7 +10,7 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
 
 
 def submit_wfns(directory: Path, atoms: Optional[List[str]]) -> Optional[JobID]:
-    """ Submits .wfn files which will be partitioned into .int files by AIMALL."""
+    """ Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file"""
 
     from ichor.globals import GLOBALS
 

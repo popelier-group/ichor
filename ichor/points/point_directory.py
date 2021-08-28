@@ -35,7 +35,7 @@ class PointDirectory(Point, Directory):
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
 
     @property
-    def atoms(self):
+    def atoms(self) -> "Atoms": 
         if self.gjf.exists():
             return self.gjf.atoms
         elif self.wfn.exists():

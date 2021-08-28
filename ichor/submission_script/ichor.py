@@ -33,6 +33,7 @@ class ICHORCommand(PythonCommand):
     def group(self) -> bool:
         return False
 
+    # matt_todo: rename this because the function isn't actually ran here but in the job instead (something like function_in_job)
     def run_function(self, function_to_run: str, *args):
         """ extends self.args with the function and function arguments that need to be executed to check output"""
         arg_str = " ".join(f'"{str(arg)}"' for arg in args)

@@ -44,22 +44,22 @@ def main_menu() -> None:
         menu.add_option(
             "1",
             "Training Set Menu",
+            # the handler function in this case is points_directory_menu. This function gets called when the user selects option 1 in the menu.
             points_directory_menu,
             # give key word arguments which are passed to the handler function
-            # the handler function in this case is points_directory_menu. See the Menu class for details.
             kwargs={"path": GLOBALS.FILE_STRUCTURE["training_set"]},  # get the Path of the training set from GLOBALS
         )
         menu.add_option(
             "2",
             "Sample Pool Menu",
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["sample_pool"]},  # get the Path of the sample pool from GLOBALS
+            kwargs={"path": GLOBALS.FILE_STRUCTURE["sample_pool"]},
         )
         menu.add_option(
             "3",
             "Validation Set Menu",
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["validation_set"]},  # get the Path of the validation set from GLOBALS
+            kwargs={"path": GLOBALS.FILE_STRUCTURE["validation_set"]},
         )
         menu.add_option(
             "4",
@@ -70,7 +70,7 @@ def main_menu() -> None:
                 "sample_pool_directory": GLOBALS.FILE_STRUCTURE["sample_pool"],
             },
         )
-        menu.add_space()
+        menu.add_space()  # add a blank line
         menu.add_option(
             "r", "Auto Run", auto_run,
         )

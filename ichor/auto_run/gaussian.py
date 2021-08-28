@@ -10,6 +10,8 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
 def auto_run_gaussian(
     npoints: MutableValue, hold: Optional[JobID] = None
 ) -> Optional[JobID]:
+    """ Writes out the Gaussian script that is needed to run all the individual Gaussian jobs that were written in the datafile in the previous
+    job. This function submits the Gaussian script to compute nodes and returns the job ID that is assigned by the workload manager."""
     script_name = SCRIPT_NAMES["gaussian"]
 
     gauss_script = SubmissionScript(script_name)

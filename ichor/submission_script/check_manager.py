@@ -80,8 +80,8 @@ def print_completed():
             with open(datafile, "r") as f:
                 for _ in f:
                     ntasks += 1
+        # If the datafile hasn't been created then there is no tasks to complete
         except FileNotFoundError:
-            # If the datafile hasn't been created then there is no tasks to complete
             pass
     task_id = 1
     if BATCH_SYSTEM.TaskID in os.environ.keys():

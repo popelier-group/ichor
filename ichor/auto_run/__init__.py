@@ -30,12 +30,14 @@ __all__ = [
 
 
 class IterState(Enum):
+    """ The iteration which the adaptive sampling is on. The first step is making the sets (running Makeset)."""
     First = 1
     Standard = 2
     Last = 3
 
 
 class IterUsage(Enum):
+    """ Tells the IterStep wheter or not it can be run given an IterState"""
     First = 0
     All = 1
     AllButLast = 2
@@ -95,7 +97,7 @@ func_order = [
     ),
     IterStep(
         adaptive_sampling,
-        IterUsage.AllButLast,
+        IterUsage.AllButLast,  # don't want to add point in the last iteration
         [IterArgs.ModelLocation, IterArgs.SamplePoolLocation],
     ),
 ]

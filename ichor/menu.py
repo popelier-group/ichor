@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Callable, List, Tuple
+from typing import Callable, Dict, List, Tuple
 from uuid import uuid4
 
 from ichor.problem_finder import ProblemFinder
@@ -15,24 +15,24 @@ class Menu(object):
     :param options: A list of options to be displayed. Default is None. Options are usually added using `add_option` method.
     :param message: A message to be displayed at the top of the menu
     :param prompt: A set of characters that appear where user input will be taken
-    :param refresh: A callable (function) that can be optionally passed in. This allows for a menu to be constructed in a function.
+    :param refresh: A callable (function) that can be optionally passed in. This allows for a menu to be constructed in a function which can then be passed into here.
         See `make_models_menu_refresh` for an example. Default value for this is a lambda function that returns None (does nothing).
-        See `run` method where `self.refresh` is ran, which only does something if `refresh` is passed in when a `Menu` object is made.
+        See `run` method below, where `self.refresh` is ran, which only does something if `refresh` is passed in when a `Menu` object is made.
     :param auto_clear: Whether to clear the screen before a menu is shown. Default True.
     :param enable_problems: Whether to display any problems that ICHOR has found with the current setup.
     :param auto_close: Whether or not to close ICHOR once a function is executed.
     :param space: Whether to add a blank line at the bottom of the menu. This is added when the Back and Exit options are present.
     :param back: Whether to add a back option in the current menu in order to go to previous menu.
-    :param exit: Whether to add an exit option to exit ICHOR.
+    :param exit: Whether to add an exit option to exit ICHOR and return to the command line.
     """
 
     def __init__(
         self,
         title: str = None,
-        options: List = None,
+        options: List[Tuple[str, str, Callable, Dict]] = None,
         message: str = None,
         prompt: str = ">>",
-        refresh: Callable = lambda *args: None,
+        refresh: Callable = lambda *args: None,  # note that the default for the refresh is
         auto_clear: bool = True,
         enable_problems: bool = False,
         auto_close: bool = False,
@@ -48,7 +48,7 @@ class Menu(object):
         self.is_title_enabled = title is not None
         self.message = message
         self.is_message_enabled = message is not None
-        self.refresh = None
+        self.refresh = None  # matt_todo: this line is not needed as you are setting the value of self.refresh to an empty lambda function anyway
         self.set_refresh(refresh)
         self.prompt = prompt
         self.is_open = None
@@ -69,14 +69,14 @@ class Menu(object):
 
     def set_options(self, options):
         """If a list of options to be displayed in the menu is passed when an instance of the class `Menu` is made, then this method is called.
-        Usually, this method is not used but instead the `add_option` method is used instead once an instance has already been made.
+        Usually, this method is not used. The `add_option` method is used instead once an instance has already been made.
 
         :param options: A list of tuples of options. Must have a label, name, and handler. See `add_option` method for details.
         """
-        original = self.options
+        original = self.options  # this is None by default
         self.options = {}
         try:
-            for option in options:
+            for option in options:  # this is the list of options that can be passed in
                 if not isinstance(option, tuple):
                     raise TypeError(option, "option is not a tuple")
                 if len(option) < 2:
@@ -145,11 +145,8 @@ class Menu(object):
         auto_close: bool = False,
         hidden: bool = False,
     ) -> None:
-        #todo: do not know what the handler function is supposed to do exactly, so it is not documented
-        #todo: do not know what the wait/wait options do exactly
-        #todo: do not know what auto_close does, does it close the menu only or the whole ICHOR?
         """
-        Add menu option that the user can select
+        Add menu option that the user can select. A menu options needs to have at least a label, name, and handler function.
         
         :param label: The letter/word that needs to be typed into the input prompt in order to go to the menu option
         :param name: The name of the option that can be selected by the user
@@ -163,7 +160,7 @@ class Menu(object):
             kwargs = {}
         if not callable(handler):
             raise TypeError(handler, "handler is not callable")
-        self.options[label] = (name, handler, kwargs) # add the option to the list of options
+        self.options[label] = (name, handler, kwargs)  # add the option to the list of options
         if wait:
             self.wait_options.append(label)
         if auto_close:
@@ -195,7 +192,7 @@ class Menu(object):
             # if another callable function is given when the menu object is being made, then use that as the refresh
             self.refresh(self)
             func, wait, close = self.input()
-            if func == Menu.CLOSE: # if self.input() returns Menu.CLOSE, then set func to self.close
+            if func == Menu.CLOSE:  # if self.input() returns Menu.CLOSE, then set func to self.close
                 func = self.close
             print()
             func()
@@ -332,10 +329,11 @@ class Menu(object):
     def __enter__(self):
         """
         To be used when a Menu is constructed as a context manager. Returns the instance of a menu.
-        For example, in main_menu.py `with Menu(f"{path} Menu", space=True, back=True, exit=True) as menu:`
+        For example, in main_menu.py; `with Menu(f"{path} Menu", space=True, back=True, exit=True) as menu:`
         is used where `with Menu(f"{path} Menu", space=True, back=True, exit=True)` is going to make a new
         instance of class `Menu` which is going to be stored in the variable `menu`. Then, this `menu`
-        object can be manipulated (i.e. can have options added to it) inside the `with` block.
+        object can be manipulated (i.e. can have options added to it) inside the `with` block. Using a context
+        manager for the menu saves some lines of code when constructing new menus.
         """
         return self
 

@@ -6,11 +6,12 @@ from ichor.logging import logger
 from ichor.models import Models
 from ichor.points import PointsDirectory
 
-
+# matt_todo: Maybe rename this function and file
 def adaptive_sampling(
     model_directory: Optional[Path] = None,
     sample_pool_directory: Optional[Path] = None,
 ):
+    """ Add a new training point to the training set based on the most recent model that was made."""
     from ichor.globals import GLOBALS
 
     if model_directory is None:

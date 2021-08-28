@@ -9,6 +9,7 @@ class DlpolyHistory(Trajectory):
 
     # overload the Trajectory _read_file method because the formatting of the history file is different
     def _read_file(self):
+        """ Read in a file with DLPOLY HISTORY format and store the timesteps (each timestep has a different geometry)."""
         with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("timestep"):
