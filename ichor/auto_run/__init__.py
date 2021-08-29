@@ -159,7 +159,8 @@ def auto_run():
     # Make a list of types of iterations. Only first and last iterations are different.
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]
     iterations[0] = IterState.First
-    iterations += [IterState.Last]
+    iterations += [IterState.Last]  # matt_todo: Does anything different happen with IterState.Last? In the last step, no adaptive sampling is performed
+    # matt_todo: but that is done using IterUsage.AllButLast instead of IterState.Last
 
     job_id = None
     with DataLock():

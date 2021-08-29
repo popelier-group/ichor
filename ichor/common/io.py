@@ -11,7 +11,7 @@ from ichor.typing import F
 
 
 def convert_to_path(func: F) -> F:
-    """ A decoratore which converts any function inputs which have type annotation `Path` to a `Path` object."""
+    """ A decorator which converts any function inputs which have type annotation `Path` to a `Path` object."""
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         if func.__annotations__:

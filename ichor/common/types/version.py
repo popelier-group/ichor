@@ -1,4 +1,7 @@
+# matt_todo: I think this file should be moved somewhere else because it does not really have to do with helpful types/classes used in ICHOR
 class Version:
+    """ Version system for ICHOR. Useful when comparing two different ICHOR versions."""
+
     def __init__(self, rep=None):
         self.major = 0
         self.minor = 0

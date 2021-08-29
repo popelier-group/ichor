@@ -4,6 +4,7 @@ import json
 
 
 def delete_jobs():
+    """ Delete all jobs that were queued up to run. This function reads the GLOBALS.FILE_STRUCTURE["jid"] file, which contains the names of all submitted jobs."""
     from ichor.globals import GLOBALS
     jid_file = GLOBALS.FILE_STRUCTURE["jid"]
     if jid_file.exists():
@@ -16,5 +17,6 @@ def delete_jobs():
 
 
 def queue_menu():
-    with Menu("Queue Meu", space=True, back=True, exit=True) as menu:
+    """ Handler function which opens up a menu containing options relating to jobs."""
+    with Menu("Queue Menu", space=True, back=True, exit=True) as menu:
         menu.add_option("del", "Delete currently running jobs", delete_jobs)

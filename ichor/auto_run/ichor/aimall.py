@@ -7,7 +7,7 @@ from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 from ichor.common.types import MutableValue
 
-# write out the ICHOR_AIMALL.sh file which runs 
+# matt_todo: Rename this file/function
 def submit_wfns(
     directory: Path,
     atoms: Optional[MutableValue],

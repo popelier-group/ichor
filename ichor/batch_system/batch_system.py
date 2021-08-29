@@ -74,8 +74,8 @@ class BatchSystem(ABC):
             cmd += cls.hold_job(hold)
         cmd += [job_script]
 
-        stdout, stderr = run_cmd(cmd)
-        job_id = JobID(job_script, cls.parse_job_id(stdout))
+        stdout, stderr = run_cmd(cmd)  # this is the part which actually submits the job to  the queuing system
+        job_id = JobID(job_script, cls.parse_job_id(stdout)) # stdout is parsed because this is where the job id is printed once a job is submitted
         job_id.write()
         return job_id
 
@@ -118,21 +118,25 @@ class BatchSystem(ABC):
     @staticmethod
     @abstractmethod
     def status() -> str:
+        """ Returns the status of running jobs."""
         pass
 
     @classmethod
     @abstractmethod
     def change_working_directory(cls, path: Path) -> str:
+        """" Changes the working directory"""
         pass
 
     @classmethod
     @abstractmethod
     def output_directory(cls, path: Path) -> str:
+        """ Changes the output directory where (these are .o files)"""
         pass
 
     @classmethod
     @abstractmethod
     def error_directory(cls, path: Path) -> str:
+        """ Changes the error directory where (these are .e files)"""
         pass
 
     @classmethod

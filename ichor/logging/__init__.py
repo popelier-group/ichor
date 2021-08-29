@@ -1,3 +1,6 @@
+""" Implements logging functionalities for ICHOR to time how long jobs took, as well as to log important information a user should know (e.g. integration errors
+for points)."""
+
 import logging
 
 from ichor.logging.concurrent_log_handler import ConcurrentRotatingFileHandler

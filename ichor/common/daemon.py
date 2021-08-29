@@ -1,3 +1,5 @@
+""" Used to run ICHOR as a deamon, where it is detached from terminal."""
+
 import atexit
 import os
 import sys

@@ -157,7 +157,7 @@ def select_atoms():
             elif ans in ["c", "clear"]:
                 atom_models.clear()
 
-
+# matt_todo: why is a refresh method needed here but nowhere else?
 def make_models_menu_refresh(menu: "Menu"):
     """ This is a `refresh` function that takes in an instance of a menu and add options to it. See `class Menu` `refresh` attrubute.
 

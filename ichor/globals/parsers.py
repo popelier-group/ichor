@@ -25,6 +25,7 @@ def parser(func: F) -> F:
 
 @parser
 def split_keywords(keywords: Union[str, List[str]]):
+    """ Split up a configuration setting's value into separate keywords"""
     if isinstance(keywords, str):
         keywords = keywords.replace("[", "")
         keywords = keywords.replace("]", "")
@@ -34,6 +35,7 @@ def split_keywords(keywords: Union[str, List[str]]):
 
 @parser
 def read_alf(alf: Union[str, List[List[int]]]):
+    """ Read in ALF from config file as a string and then convert to Python list of lists because this is the typing given in Globals.__annotations__ for the ALF class variable"""
     if isinstance(alf, str):
         alf = ast.literal_eval(alf)
     if isinstance(alf, list):
@@ -43,6 +45,7 @@ def read_alf(alf: Union[str, List[List[int]]]):
 
 @parser
 def read_version(ver: str) -> Version:
+    """ Read in ICHOR version"""
     return Version(ver)
 
 

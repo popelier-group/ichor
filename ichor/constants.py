@@ -7,6 +7,7 @@ import numpy as np
 
 from ichor.common.types import Version
 
+# matt_todo: I think sticking to only 1 logo will be better for consistency. Someone might want to parse the file for some reason.
 ichor_logo_1 = (
     "#############################################################################################################\n"
     "#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#\n"

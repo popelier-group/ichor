@@ -27,11 +27,12 @@ class ListOfAtoms(list):
         return features
 
     def iteratoms(self):
+        """ Returns a generator of the atoms."""
         for atom in self.atom_names:
             yield self[atom]
 
     def __getitem__(self, item: Union[int, str]):
-        """Used when indexing a trajectory by an integer or string"""
+        """Used when indexing a Trajectory instance by an integer or string"""
         if isinstance(item, (int, np.int64)):
             return super().__getitem__(item)
         elif isinstance(item, str):
@@ -60,6 +61,7 @@ class ListOfAtoms(list):
             if hasattr(self, "_is_atom_view"):
                 return self
             return AtomView(self, item)
+            
         elif isinstance(item, slice):
 
             class AtomSlice(self.__class__):

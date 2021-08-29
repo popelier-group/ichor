@@ -20,6 +20,7 @@ class INTs(Directory, dict):
         self.sort()  # matt_todo: This is not implemented.
 
     def sort(self):
+        # matt_todo: This is where natural sort is used, but is not implemented yet.
         # TODO: natural sort keys
         pass
 

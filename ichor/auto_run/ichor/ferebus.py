@@ -5,7 +5,7 @@ from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-
+# matt_todo: Rename this file/function
 def make_models(
     directory: Path,
     atoms: Optional[List[str]] = None,

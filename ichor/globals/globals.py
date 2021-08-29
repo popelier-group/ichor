@@ -18,6 +18,10 @@ from ichor.globals.machine import Machine
 from ichor.problem_finder import ProblemFinder
 
 
+# matt_todo: These will all need to be documented in detail, either in a big docstring or comments to the side to say what they do (I prefer a big docstring.)
+# matt_todo: This  is important as people might not know what settings are available or what the settings are used for, so need to make it clear.
+# matt_todo: I will do that later, once v3 is up and running with all the changes
+
 class Globals:
     _types = []
 
@@ -220,7 +224,7 @@ class Globals:
         # - Training/Sample/Validation Set methods
         # - Make sure List[int] is parsed correctly
 
-        # Setup Formatters
+        # Setup Formatters. Formatters read in a setting from a config file and do clean up (e.g. remove white space, confert to upper/lowe)
         for global_variable in self.global_variables:
             global_type = self.__annotations__[global_variable]
             if global_type is str:
