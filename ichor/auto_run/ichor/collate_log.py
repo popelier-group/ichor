@@ -5,7 +5,7 @@ from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-
+# matt_todo: better naming for file and function, new file so I have not documented yet
 def submit_collate_log(
     directory: Path,
     hold: Optional[Union[JobID, List[JobID]]] = None,
