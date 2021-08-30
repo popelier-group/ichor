@@ -10,19 +10,32 @@ from ichor.points.point import Point
 
 
 class PointDirectory(Point, Directory):
+    """
+    A helper class that wraps around ONE directory which contains ONE point (one molecular geometry).
+
+    :param path: Path to a directory which contains ONE point.
+
+    Attributes:
+        cls.gjf Optional[GJF]: Used when iterating over __annotations__
+        cls.wfn Optional[WFN]: Used when iterating over __annotations__
+        cls.ints Optional[INTs]: Used when iterating over __annotations__
+    """
+
     gjf: Optional[GJF] = None
     wfn: Optional[WFN] = None
     ints: Optional[INTs] = None
 
     def __init__(self, path):
-        Directory.__init__(self, path)
+        Directory.__init__(self, path)  # this will execute the self.parse() that is implemented in Directory because self.parse is not implemented for PointDirectory
 
     @classproperty
     def dirpattern(self):
+        """A regex pattern corresponding to the name of the system name (stored in GLOBALS.SYSTEM_NAME)."""
         from ichor.globals import GLOBALS
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
 
+    # matt_todo: Is this needed?
     # def parse(self):
     #     super().parse()
     # print("setting atoms")
@@ -34,6 +47,7 @@ class PointDirectory(Point, Directory):
 
     @property
     def atoms(self):
+        """ Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
         if self.gjf.exists():
             return self.gjf.atoms
         elif self.wfn.exists():

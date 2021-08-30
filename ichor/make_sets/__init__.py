@@ -22,6 +22,8 @@ POINTS_LOCATION: Optional[Path] = None
 
 
 def get_make_set_methods() -> List[Any]:
+    """ Returns a list of classes which are used to initialize a training set. These are classes such as MinMaxMean, RandomPoints, etc."""
+
     return [
         obj
         for _, obj in inspect.getmembers(
@@ -34,8 +36,11 @@ def get_make_set_methods() -> List[Any]:
 def make_sets_npoints(
     points: ListOfAtoms, set_size: int, methods: List[str]
 ) -> int:
+    """ Return the total number of points that are going to be used to initialize the training set. Multiple initialization methods
+    can be combined to give the total number of initial training points."""
+
     npoints = 0
-    for method in methods:
+    for method in methods:  # see GLOBALS.TRAINING_SET_METHOD for example
         for MakeSet in get_make_set_methods():
             if method == MakeSet.name():
                 npoints += MakeSet.get_npoints(set_size, points)

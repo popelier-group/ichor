@@ -6,12 +6,18 @@ from ichor.globals import GLOBALS
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-
+# matt_todo: better naming for file and function
 def adaptive_sampling(
     model_directory: Path = GLOBALS.FILE_STRUCTURE["models"],
     sample_pool_directory: Path = GLOBALS.FILE_STRUCTURE["sample_pool"],
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
+    """ Submits the adaptive sampling job that ICHOR performs. After FEREBUS job (previous job in the auto run sequence) is done, ICHOR performs
+    the adaptive sampling step, which adds additional traning set points. Variance or prediction error are calculated for each point. The worst
+    predicted point is added to the training set. After this step, the next iteration of auto run can begin.
+    
+    :return JobID: The job ID number assigned to this job after it was submitted to the workload manager (SLURM, SGE, etc.)
+    """
     submission_script = SubmissionScript(
         SCRIPT_NAMES["ichor"]["adaptive_sampling"]
     )

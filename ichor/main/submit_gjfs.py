@@ -10,20 +10,31 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
 
 
 def submit_gjfs(directory) -> Optional[JobID]:
-    points = PointsDirectory(directory)
+    """Function that submits all .gjf files in a directory to Gaussian, which will output .wfn files.
+
+    :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
+    """
+    points = PointsDirectory(directory) # a directory which contains points (a bunch of molecular geometries)
+    # make a SubmissionScript instance which is going to house all the jobs that are going to be ran
     submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])
-    for point in points:
+    for point in points:  # point is an instance of PointDirectory
         if not point.gjf.path.with_suffix(".wfn").exists():
-            point.gjf.write()
-            submission_script.add_command(GaussianCommand(point.gjf.path))
+            point.gjf.write()  # write out the .gjf files which are input to Gaussian
+            submission_script.add_command(GaussianCommand(point.gjf.path))  # make a list of GaussianCommand instances.
+    # matt_todo: Maybe add the Path from which gjfs are being submitted in the logger
     logger.info(
         f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
     )
+    # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
     submission_script.write()
+    # submit the final submission script to the queuing system, so that job is ran on compute nodes.
     return submission_script.submit()
 
 
 def check_gaussian_output(gaussian_file: str):
+    """ Checks if Gaussian jobs ran correctly and a full .wfn file is returned. If there is no .wfn file or it does not
+    have the correct contents, then rerun Gaussian."""
+     # matt_todo: Check here that the .wfn file has the Normal termination line to prevent having .wfn outputs with errors
     if not gaussian_file:
         print_completed()
         sys.exit()

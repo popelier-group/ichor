@@ -19,6 +19,11 @@ from ichor.globals.os import OS
 from ichor.problem_finder import ProblemFinder
 
 
+# matt_todo: These will all need to be documented in detail, either in a big docstring or comments to the side to say what they do (I prefer a big docstring.)
+# matt_todo: This  is important as people might not know what settings are available or what the settings are used for, so need to make it clear.
+# matt_todo: I will do that later, once v3 is up and running with all the changes
+
+
 class Globals:
     _types = []
 

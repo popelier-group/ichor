@@ -1,7 +1,6 @@
-from pathlib import Path
-
 from ichor.arguments import Arguments
 from ichor.constants import ichor_logo
+from pathlib import Path
 
 
 class ConfigProvider(dict):
@@ -34,16 +33,19 @@ class ConfigProvider(dict):
         self.load_config()
 
     def load_config(self):
+        """ Load config depending if the config file ends with `.properties` or `.yaml` file extension (usually a `config.properties` file is used)."""
         if self.src.suffix == ".properties":
             self.load_properties_config()
         elif self.src.suffix == ".yaml":
             self.load_yaml_config()
 
     def print_key_vals(self):
+        """ Print configuration settings."""
         for key in self:
             print("%s:\t%s" % (key, self[key]))
 
     def load_file_data(self):
+        """ Read in the config file lines"""
         global _config_read_error
         try:
             with open(self.src, "r") as finput:
@@ -53,12 +55,14 @@ class ConfigProvider(dict):
         return ""
 
     def load_properties_config(self):
+        """ Load key value pairs in self (since it subclasses from dict)"""
         for line in self.load_file_data():
             if not line.strip().startswith("#") and "=" in line:
                 key, val = line.split("=", 1)
                 self[self.cleanup_key(key)] = val.strip()
 
     def load_yaml_config(self):
+        """ Read in `.yaml` file"""
         import yaml
 
         entries = yaml.load(self.load_file_data())
@@ -66,12 +70,15 @@ class ConfigProvider(dict):
             self.update(entries)
 
     def cleanup_key(self, key):
+        """ Remove whitespace and add underscores from the key"""
         return key.strip().replace(" ", "_").upper()
 
     def add_key_val(self, key, val):
+        """ Helper method which adds a key:value pair. Not really used as can use self[key] = val directly instead."""
         self[key] = val
 
     def write_key_vals(self):
+        """ Write the configuration file or make config file with default settings if it is not present."""
         with open(self.src, "w+") as f:
             f.write(ichor_logo)
             f.write("\n")

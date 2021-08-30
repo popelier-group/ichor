@@ -10,6 +10,7 @@ from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
+# matt_todo: I think aimall.py is a bit ambiguous name. Make into something like aimall_submission_script.py to be more precise.
 class AIMAllCommand(CommandLine):
     def __init__(
         self,
@@ -54,6 +55,8 @@ class AIMAllCommand(CommandLine):
             f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'"
         )
 
+    # matt_todo: maybe have these as class variables instead because they it returns the same thing every time?
+    # matt_todo: what do these options do? This was ["-j y", "-S /bin/bash"] in the Ichor version I documented.
     @classproperty
     def options(self) -> List[str]:
         return ["-S /bin/bash"]

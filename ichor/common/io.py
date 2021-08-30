@@ -11,6 +11,7 @@ from ichor.typing import F
 
 
 def convert_to_path(func: F) -> F:
+    """ Used as a decorator which converts any function inputs which have type annotation `Path` to a `Path` object."""
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         if func.__annotations__:
@@ -33,6 +34,12 @@ def convert_to_path(func: F) -> F:
 
 @convert_to_path
 def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
+    """Makes a directory.
+    
+    :param path: Where to make the directory
+    :param empty: Whether to ignore FileExistsError exceptions. Set to False to ignore exceptions.
+    :param force: When set to True (default), do not make the directory if an OSError occurs
+    """
     if path.is_dir() and empty:
         try:
             shutil.rmtree(path)
@@ -45,11 +52,13 @@ def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
 
 @convert_to_path
 def move(src: Path, dst: Path) -> None:
+    """ Move the object from src to dst."""
     src.replace(dst)
 
 
 @convert_to_path
 def cp(src: Path, dst: Path, *args, **kwargs) -> None:
+    """ See copyfile function below"""
     if src.is_file():
         copyfile(src, dst, *args, **kwargs)
     elif src.is_dir():
@@ -58,11 +67,23 @@ def cp(src: Path, dst: Path, *args, **kwargs) -> None:
 
 @convert_to_path
 def copyfile(src: Path, dst: Path) -> None:
+    """ Copy contents and metadata (such as date created, etc.) from src to dst.
+    
+    :param src: The source directory where the file/directory are currently
+    :param dst: The destination directory where the file/directory are to be copied to
+    """
     shutil.copy2(src, dst)
 
 
 @convert_to_path
 def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
+    """ Copy a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.)
+
+    :param src: The source directory where the tree is currently
+    :param dst: The destination directory where the tree is to be copied to
+    :param symlinks: Whether or not to keep symlinks or copy the files corresponding to the symlinks (default is False, so copies the files directly)
+    :param ignore: A callable which indicates which files should not be copied over.
+    """
     for item in src.iterdir():
         s = item
         d = dst / item.name
@@ -75,6 +96,11 @@ def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
 
 @convert_to_path
 def recursive_move(src: Path, dst: Path) -> None:
+    """ Move a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.) or a file to a new location.
+
+    :param src: The current location of directory of file
+    :param dst: The location where the directory or file should be moved to
+    """
     if src.isdir():
         for f in src.iterdir():
             if f.isdir() and (dst / f.name).exists():
@@ -87,7 +113,10 @@ def recursive_move(src: Path, dst: Path) -> None:
 
 @convert_to_path
 def remove(path: Path) -> None:
-    """param <path> could either be relative or absolute."""
+    """
+    Remove a file or directory and all of its contents.
+
+    :param path: Relative or absolute path to the file/directory to be removed."""
     if path.exists():
         if path.is_file() or path.is_symlink():
             path.unlink()  # remove the file
@@ -99,6 +128,7 @@ def remove(path: Path) -> None:
 
 @contextmanager
 def pushd(new_dir: Path, update_cwd: bool = False):
+    # matt_todo: I think it would be good to you to say where this will be needed and give some examples.
     previous_dir = os.getcwd()
     if update_cwd:
         from ichor.globals import GLOBALS
@@ -119,6 +149,11 @@ def pushd(new_dir: Path, update_cwd: bool = False):
 def get_files_of_type(
     filetype: Union[str, List[str]], directory: Path = Path.cwd()
 ) -> List[Path]:
+    """ Returns a list of all files that end in a certain file extension/suffix (such as .txt).
+    
+    :param filetype: A string or list of strings corresponding to the suffixes that files should have
+    :param directory: The directory where to do the searching for particular files.
+    """
     if isinstance(filetype, str):
         filetype = [filetype]
     for i, ft in enumerate(filetype):

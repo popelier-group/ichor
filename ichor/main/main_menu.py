@@ -5,6 +5,11 @@ from ichor.menu import Menu
 
 
 def points_directory_menu(path):
+    """ Menu that shows up when the user wants to run jobs for a particular Points directory, such as the training set directory,
+    validation set directory, or sample pool directory.
+
+    :param path: A Path object to the directory for which the menu is about.
+    """
     from ichor.main.make_models import make_models_menu
     from ichor.main.submit_gjfs import submit_gjfs
     from ichor.main.submit_wfns import submit_wfns
@@ -14,7 +19,7 @@ def points_directory_menu(path):
             "1",
             "Submit GJFs to Gaussian",
             submit_gjfs,
-            kwargs={"directory": path},
+            kwargs={"directory": path},  # which directory to submit gjfs from (TRAINING_SET, SAMPLE_POOL, etc.). Set by GLOBALS.FILE_STRUCTURE
         )
         menu.add_option(
             "2",
@@ -28,17 +33,22 @@ def points_directory_menu(path):
 
 
 def main_menu() -> None:
+    """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
     from ichor.auto_run import auto_run
     from ichor.main.per_menu import auto_run_per_menu
     from ichor.globals import GLOBALS
     from ichor.main.adaptive_sampling import adaptive_sampling
 
+    # initialize an instance of Menu called menu and add construct the menu in the context manager
     with Menu("ICHOR Main Menu", space=True, back=False, exit=True) as menu:
+        # add options to the instance `menu`
         menu.add_option(
             "1",
             "Training Set Menu",
+            # the handler function in this case is points_directory_menu. This function gets called when the user selects option 1 in the menu.
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["training_set"]},
+            # give key word arguments which are passed to the handler function
+            kwargs={"path": GLOBALS.FILE_STRUCTURE["training_set"]},  # get the Path of the training set from GLOBALS.FILE_STRUCTURE
         )
         menu.add_option(
             "2",
@@ -61,7 +71,7 @@ def main_menu() -> None:
                 "sample_pool_directory": GLOBALS.FILE_STRUCTURE["sample_pool"],
             },
         )
-        menu.add_space()
+        menu.add_space()  # add a blank line
         menu.add_option(
             "r",
             "Auto Run",

@@ -1,3 +1,6 @@
+""" Vendored from https://pypi.org/project/concurrent-log-handler/ to be able to run ICHOR without actually installing the concurrent log handler package
+separately. This is needed as multiple ICHOR instances could write to the same file at the same time."""
+
 #!/usr/bin/env python
 # -*- coding: utf-8; mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vim: fileencoding=utf-8 tabstop=4 expandtab shiftwidth=4

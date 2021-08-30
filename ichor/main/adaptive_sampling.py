@@ -6,11 +6,13 @@ from ichor.logging import logger
 from ichor.models import Models
 from ichor.points import PointsDirectory
 
-
+# matt_todo: Maybe rename this function and file because it performs a bit more that just adaptive sampling.
 def adaptive_sampling(
     model_directory: Optional[Path] = None,
     sample_pool_directory: Optional[Path] = None,
 ):
+    """ Add a new training point to the training set based on the most recent FERBUS model that was made. Adaptive sampling is
+    used to add the worst performing point from the sample pool to the training set."""
     from ichor.globals import GLOBALS
 
     if model_directory is None:

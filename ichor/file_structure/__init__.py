@@ -3,8 +3,20 @@ from ichor.file_structure.tree import FileTree
 
 __all__ = ["FileStructure"]
 
-
+# matt_todo: place this in a file_structure.py file instead of __init__.py for clarity
 class FileStructure(FileTree):
+    """A class which manages all the files/directories that ICHOR needs in order to function. It makes it easier to find
+    the full paths of files and directories (which could be subdirectories). ICHOR GLOBALS uses this class to make a tree
+    of all the directories/files. Then the full path of a directory can be obtained by doing:
+
+    `self.FILE_STRUCTURE["training_set"]` to get the TRAINING_SET directory path.
+    
+    Because a `Path` object is returned by the above code (see the `FileNode` class), it makes it possible to write code like
+
+    `if self.FILE_STRUCTURE["training_set"].exists():`
+
+    where the `exists()` method can be called because `self.FILE_STRUCTURE["training_set"]` is a `Path` object (see pathlib library).
+    """
     def __init__(self):
         super(FileStructure, self).__init__()
 
@@ -80,5 +92,6 @@ class FileStructure(FileTree):
         self.add("OUTPUTS", "outputs", parent="scripts")
         self.add("ERRORS", "errors", parent="scripts")
 
+    # todo: if this method is not used, better to delete it to prevent accidental changes in strucutre
     def modify(self, node_name, node_value):
         self[node_name] = FileNode(node_value, self[node_name].parent)

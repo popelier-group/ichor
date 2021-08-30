@@ -6,10 +6,12 @@ from ichor.common.types import MutableValue
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript, TimingManager)
 
-
+# matt_todo: better naming for file and function
 def auto_run_ferebus(
     ferebus_directory: Path, atoms: MutableValue, hold: Optional[JobID] = None
 ) -> Optional[JobID]:
+    """ Submits a job to compute nodes that runs FEREBUS. FEREBUS can be ran on each atom separately (since each atom has its own model and its own
+    adaptive sampling)."""
     script_name = SCRIPT_NAMES["ferebus"]
     ferebus_script = SubmissionScript(script_name)
     ferebus_directories = [ferebus_directory / atom for atom in atoms.value]

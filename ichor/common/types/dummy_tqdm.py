@@ -9,7 +9,7 @@ class dummy_tqdm:
     Used to replace tqdm when not writing to std.out, prevents ugly
     output files, should function identically while doing nothing
 
-    Can be used as a substitution to make tqdm not a required dependency
+    Can be used as a substitution to make tqdm not a required dependency.
     """
 
     def __new__(cls, *args, **kwargs):

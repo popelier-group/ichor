@@ -1,3 +1,5 @@
+"""Contains all avalable settings for Gaussian, AIMALL, FEREBUS, as well as constant values that are used throughout ICHOR to make conversions, etc."""
+
 import random
 from typing import Dict, List
 
@@ -5,6 +7,7 @@ import numpy as np
 
 from ichor.common.types import Version
 
+# matt_todo: I think sticking to only 1 logo will be better for consistency. Someone might want to parse the file for some reason.
 ichor_logo_1 = (
     "#############################################################################################################\n"
     "#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#\n"

@@ -10,7 +10,7 @@ from ichor.atoms import ListOfAtoms
 from ichor.common.io import mkdir
 from ichor.models import Model, ModelsResult
 
-
+# matt_todo: This code needs links to papers where the formulas are found
 def B(model: Model) -> float:
     return np.matmul(
         (
@@ -48,7 +48,7 @@ def cross_validation(model: Model) -> np.ndarray:
         ).item() ** 2
     return cross_validation_error
 
-
+# matt_todo: this is not defined
 # def closest_point(point, model) -> int:
 
 

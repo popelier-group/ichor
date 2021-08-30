@@ -22,6 +22,13 @@ def check_x_2d(func: F) -> F:
 
 
 class Model(File):
+    """ A model file that is returned back from our machine learning program FEREBUS.
+    
+    .. note::
+        Another program can be used for the machine learning as long as it outputs files of the same format as the FEREBUS outputs.
+    """
+
+    # these can be accessed with __annotations__, so leave them
     system: str
     atom: str
     type: str
@@ -43,21 +50,23 @@ class Model(File):
         self.nugget = 1e-10
 
     def _read_file(self) -> None:
+        """ Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
         kernel_composition = ""
         kernel_list = {}
 
+        # matt_todo: These can probably be if elif statements instead of all if
         with open(self.path) as f:
             for line in f:
                 if line.startswith("#"):
                     continue
 
-                if "name" in line:
+                if "name" in line:  # system name e.g. WATER
                     self.system = line.split()[1]
                     continue
-                if "property" in line:
+                if "property" in line:  # property (such as IQA or particular multipole moment) for which a GP model was made
                     self.type = line.split()[1]
                     continue
-                if line.startswith("atom"):
+                if line.startswith("atom"):  # atom for which a GP model was made
                     self.atom = line.split()[1]
                     continue
 
@@ -67,7 +76,7 @@ class Model(File):
 
                 if "number_of_features" in line:
                     self.nfeats = int(line.split()[1])
-                if "number_of_training_points" in line:
+                if "number_of_training_points" in line:  # number of training points to make the GP model
                     self.ntrain = int(line.split()[1])
 
                 if "[mean]" in line:
@@ -75,7 +84,7 @@ class Model(File):
                     line = next(f)
                     self.mean = ConstantMean(float(line.split()[1]))
 
-                if "composition" in line:
+                if "composition" in line:  # which kernels were used to make the GP model. Different kernels can be specified for different input dimensions
                     kernel_composition = line.split()[-1]
 
                 if "[kernel." in line:
@@ -90,6 +99,7 @@ class Model(File):
                         lengthscale = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
+                        # matt_todo: Rename theta to lengthscale in ferebus because it is more widely used / easier to think about
                         # TODO: Change theta from FEREBUS to lengthscale to match label
                         kernel_list[kernel_name] = RBF(lengthscale)
                     elif kernel_type in [

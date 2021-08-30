@@ -1,0 +1,551 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ichor.common.sorting.natsort package &#8212; ichor 3 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ichor.common.sorting.natsort.compat package" href="ichor.common.sorting.natsort.compat.html" />
+    <link rel="prev" title="ichor.common.sorting package" href="ichor.common.sorting.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="ichor-common-sorting-natsort-package">
+<h1>ichor.common.sorting.natsort package<a class="headerlink" href="#ichor-common-sorting-natsort-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ichor.common.sorting.natsort.compat.html">ichor.common.sorting.natsort.compat package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ichor.common.sorting.natsort.compat.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.common.sorting.natsort.compat.html#module-ichor.common.sorting.natsort.compat.fake_fastnumbers">ichor.common.sorting.natsort.compat.fake_fastnumbers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.common.sorting.natsort.compat.html#module-ichor.common.sorting.natsort.compat.fastnumbers">ichor.common.sorting.natsort.compat.fastnumbers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.common.sorting.natsort.compat.html#module-ichor.common.sorting.natsort.compat.locale">ichor.common.sorting.natsort.compat.locale module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="ichor-common-sorting-natsort-natsort-module">
+<h2>ichor.common.sorting.natsort.natsort module<a class="headerlink" href="#ichor-common-sorting-natsort-natsort-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ichor.common.sorting.natsort.ns_enum">
+<span id="ichor-common-sorting-natsort-ns-enum-module"></span><h2>ichor.common.sorting.natsort.ns_enum module<a class="headerlink" href="#module-ichor.common.sorting.natsort.ns_enum" title="Permalink to this headline">¶</a></h2>
+<p>This module defines the “ns” enum for natsort is used to determine
+what algorithm natsort uses.</p>
+</div>
+<div class="section" id="module-ichor.common.sorting.natsort.unicode_numbers">
+<span id="ichor-common-sorting-natsort-unicode-numbers-module"></span><h2>ichor.common.sorting.natsort.unicode_numbers module<a class="headerlink" href="#module-ichor.common.sorting.natsort.unicode_numbers" title="Permalink to this headline">¶</a></h2>
+<p>Pre-determine the collection of unicode decimals, digits, and numerals.</p>
+</div>
+<div class="section" id="module-ichor.common.sorting.natsort.unicode_numeric_hex">
+<span id="ichor-common-sorting-natsort-unicode-numeric-hex-module"></span><h2>ichor.common.sorting.natsort.unicode_numeric_hex module<a class="headerlink" href="#module-ichor.common.sorting.natsort.unicode_numeric_hex" title="Permalink to this headline">¶</a></h2>
+<p>Contains all possible non-ASCII unicode numbers.</p>
+</div>
+<div class="section" id="module-ichor.common.sorting.natsort.utils">
+<span id="ichor-common-sorting-natsort-utils-module"></span><h2>ichor.common.sorting.natsort.utils module<a class="headerlink" href="#module-ichor.common.sorting.natsort.utils" title="Permalink to this headline">¶</a></h2>
+<p>Utilities and definitions for natsort, mostly all used to define
+the natsort_key function.</p>
+<p>SOME CONVENTIONS USED IN THIS FILE.</p>
+<p>1 - Factory Functions</p>
+<p>Most of the logic of natsort revolves around factory functions
+that create branchless transformation functions. For example, rather
+than making a string transformation function that has an if
+statement to determine whether or not to perform .lowercase() at
+runtime for each element to transform, there is a string transformation
+factory function that will return a function that either calls
+.lowercase() or does nothing. In this way, all the branches and
+decisions are taken care of once, up front. In addition to a slight
+speed improvement, this provides a more extensible infrastructure.</p>
+<p>Each of these factory functions will end with the suffix “_factory”
+to indicate that they themselves return a function.</p>
+<p>2 - Keyword Parameters For Local Scope</p>
+<p>Many of the closures that are created by the factory functions
+have signatures similar to the following</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">factory</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39;yes&#39;</span> <span class="k">if</span> <span class="n">parameter</span> <span class="k">else</span> <span class="s1">&#39;no&#39;</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">closure</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_val</span><span class="o">=</span><span class="n">val</span><span class="p">):</span>
+<span class="gp">... </span>         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_val</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">closure</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>The variable value is passed as the default to a keyword argument.
+This is a micro-optimization
+that ensures “val” is a local variable instead of global variable
+and thus has a slightly improved performance at runtime.</p>
+<dl class="py class">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions">
+<em class="property">class </em><code class="sig-name descname">NumericalRegularExpressions</code><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container of regular expressions that match numbers.</p>
+<p>The numbers also account for unicode non-decimal characters.</p>
+<p>Not intended to be made an instance - use class methods only.</p>
+<dl class="py attribute">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.digits">
+<code class="sig-name descname">digits</code><em class="property"> = '²³¹፩፪፫፬፭፮፯፰፱᧚⁰⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉①②③④⑤⑥⑦⑧⑨⑴⑵⑶⑷⑸⑹⑺⑻⑼⒈⒉⒊⒋⒌⒍⒎⒏⒐⓪⓵⓶⓷⓸⓹⓺⓻⓼⓽⓿❶❷❸❹❺❻❼❽❾➀➁➂➃➄➅➆➇➈➊➋➌➍➎➏➐➑➒𐩀𐩁𐩂𐩃𐹠𐹡𐹢𐹣𐹤𐹥𐹦𐹧𐹨𑁒𑁓𑁔𑁕𑁖𑁗𑁘𑁙𑁚🄀🄁🄂🄃🄄🄅🄆🄇🄈🄉🄊'</em><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.digits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.exp">
+<code class="sig-name descname">exp</code><em class="property"> = '(?:[eE][-+]?\\d+)?'</em><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.exp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_exp">
+<em class="property">classmethod </em><code class="sig-name descname">float_nosign_exp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regular expression to match an unsigned float with exponent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_noexp">
+<em class="property">classmethod </em><code class="sig-name descname">float_nosign_noexp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_noexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regular expression to match an unsigned float without exponent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_num">
+<code class="sig-name descname">float_num</code><em class="property"> = '(?:\\d+\\.?\\d*|\\.\\d+)'</em><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_num" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_exp">
+<em class="property">classmethod </em><code class="sig-name descname">float_sign_exp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regular expression to match a signed float with exponent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_noexp">
+<em class="property">classmethod </em><code class="sig-name descname">float_sign_noexp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_noexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regular expression to match a signed float without exponent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.int_nosign">
+<em class="property">classmethod </em><code class="sig-name descname">int_nosign</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.int_nosign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regular expression to match an unsigned int.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.int_sign">
+<em class="property">classmethod </em><code class="sig-name descname">int_sign</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.int_sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regular expression to match a signed int.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="ichor.common.sorting.natsort.utils.NumericalRegularExpressions.numeric">
+<code class="sig-name descname">numeric</code><em class="property"> = '²³¹¼½¾৴৵৶৷৸৹୲୳୴୵୶୷௰௱௲౸౹౺౻౼౽౾൘൙൚൛൜൝൞൰൱൲൳൴൵൶൷൸༪༫༬༭༮༯༰༱༲༳፩፪፫፬፭፮፯፰፱፲፳፴፵፶፷፸፹፺፻፼ᛮᛯᛰ៰៱៲៳៴៵៶៷៸៹᧚⁰⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞⅟ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫⅬⅭⅮⅯⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻⅼⅽⅾⅿↀↁↂↅↆↇↈ↉①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛⓪⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴⓵⓶⓷⓸⓹⓺⓻⓼⓽⓾⓿❶❷❸❹❺❻❼❽❾❿➀➁➂➃➄➅➆➇➈➉➊➋➌➍➎➏➐➑➒➓⳽〇〡〢〣〤〥〦〧〨〩〸〹〺㆒㆓㆔㆕㈠㈡㈢㈣㈤㈥㈦㈧㈨㈩㉈㉉㉊㉋㉌㉍㉎㉏㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟㊀㊁㊂㊃㊄㊅㊆㊇㊈㊉㊱㊲㊳㊴㊵㊶㊷㊸㊹㊺㊻㊼㊽㊾㊿㐅㒃㠪㭍一七万三九二五亖亿什仟仨伍佰億兆兩八六十千卄卅卌叁参參叄四壱壹幺廾廿弌弍弎弐拾捌柒漆玖百肆萬貮貳贰阡陆陌陸零ꛦꛧꛨꛩꛪꛫꛬꛭꛮꛯ꠰꠱꠲꠳꠴꠵參拾兩零六陸什𐄇𐄈𐄉𐄊𐄋𐄌𐄍𐄎𐄏𐄐𐄑𐄒𐄓𐄔𐄕𐄖𐄗𐄘𐄙𐄚𐄛𐄜𐄝𐄞𐄟𐄠𐄡𐄢𐄣𐄤𐄥𐄦𐄧𐄨𐄩𐄪𐄫𐄬𐄭𐄮𐄯𐄰𐄱𐄲𐄳𐅀𐅁𐅂𐅃𐅄𐅅𐅆𐅇𐅈𐅉𐅊𐅋𐅌𐅍𐅎𐅏𐅐𐅑𐅒𐅓𐅔𐅕𐅖𐅗𐅘𐅙𐅚𐅛𐅜𐅝𐅞𐅟𐅠𐅡𐅢𐅣𐅤𐅥𐅦𐅧𐅨𐅩𐅪𐅫𐅬𐅭𐅮𐅯𐅰𐅱𐅲𐅳𐅴𐅵𐅶𐅷𐅸𐆊𐆋𐋡𐋢𐋣𐋤𐋥𐋦𐋧𐋨𐋩𐋪𐋫𐋬𐋭𐋮𐋯𐋰𐋱𐋲𐋳𐋴𐋵𐋶𐋷𐋸𐋹𐋺𐋻𐌠𐌡𐌢𐌣𐍁𐍊𐏑𐏒𐏓𐏔𐏕𐡘𐡙𐡚𐡛𐡜𐡝𐡞𐡟𐡹𐡺𐡻𐡼𐡽𐡾𐡿𐢧𐢨𐢩𐢪𐢫𐢬𐢭𐢮𐢯𐣻𐣼𐣽𐣾𐣿𐤖𐤗𐤘𐤙𐤚𐤛𐦼𐦽𐧀𐧁𐧂𐧃𐧄𐧅𐧆𐧇𐧈𐧉𐧊𐧋𐧌𐧍𐧎𐧏𐧒𐧓𐧔𐧕𐧖𐧗𐧘𐧙𐧚𐧛𐧜𐧝𐧞𐧟𐧠𐧡𐧢𐧣𐧤𐧥𐧦𐧧𐧨𐧩𐧪𐧫𐧬𐧭𐧮𐧯𐧰𐧱𐧲𐧳𐧴𐧵𐧶𐧷𐧸𐧹𐧺𐧻𐧼𐧽𐧾𐧿𐩀𐩁𐩂𐩃𐩄𐩅𐩆𐩇𐩈𐩽𐩾𐪝𐪞𐪟𐫫𐫬𐫭𐫮𐫯𐭘𐭙𐭚𐭛𐭜𐭝𐭞𐭟𐭸𐭹𐭺𐭻𐭼𐭽𐭾𐭿𐮩𐮪𐮫𐮬𐮭𐮮𐮯𐳺𐳻𐳼𐳽𐳾𐳿𐹠𐹡𐹢𐹣𐹤𐹥𐹦𐹧𐹨𐹩𐹪𐹫𐹬𐹭𐹮𐹯𐹰𐹱𐹲𐹳𐹴𐹵𐹶𐹷𐹸𐹹𐹺𐹻𐹼𐹽𐹾𐼝𐼞𐼟𐼠𐼡𐼢𐼣𐼤𐼥𐼦𐽑𐽒𐽓𐽔𑁒𑁓𑁔𑁕𑁖𑁗𑁘𑁙𑁚𑁛𑁜𑁝𑁞𑁟𑁠𑁡𑁢𑁣𑁤𑁥𑇡𑇢𑇣𑇤𑇥𑇦𑇧𑇨𑇩𑇪𑇫𑇬𑇭𑇮𑇯𑇰𑇱𑇲𑇳𑇴𑜺𑜻𑣪𑣫𑣬𑣭𑣮𑣯𑣰𑣱𑣲𑱚𑱛𑱜𑱝𑱞𑱟𑱠𑱡𑱢𑱣𑱤𑱥𑱦𑱧𑱨𑱩𑱪𑱫𑱬𒐀𒐁𒐂𒐃𒐄𒐅𒐆𒐇𒐈𒐉𒐊𒐋𒐌𒐍𒐎𒐏𒐐𒐑𒐒𒐓𒐔𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝𒐞𒐟𒐠𒐡𒐢𒐣𒐤𒐥𒐦𒐧𒐨𒐩𒐪𒐫𒐬𒐭𒐮𒐯𒐰𒐱𒐲𒐳𒐴𒐵𒐶𒐷𒐸𒐹𒐺𒐻𒐼𒐽𒐾𒐿𒑀𒑁𒑂𒑃𒑄𒑅𒑆𒑇𒑈𒑉𒑊𒑋𒑌𒑍𒑎𒑏𒑐𒑑𒑒𒑓𒑔𒑕𒑖𒑗𒑘𒑙𒑚𒑛𒑜𒑝𒑞𒑟𒑠𒑡𒑢𒑣𒑤𒑥𒑦𒑧𒑨𒑩𒑪𒑫𒑬𒑭𒑮𖭛𖭜𖭝𖭞𖭟𖭠𖭡𖺀𖺁𖺂𖺃𖺄𖺅𖺆𖺇𖺈𖺉𖺊𖺋𖺌𖺍𖺎𖺏𖺐𖺑𖺒𖺓𖺔𖺕𖺖𝋠𝋡𝋢𝋣𝋤𝋥𝋦𝋧𝋨𝋩𝋪𝋫𝋬𝋭𝋮𝋯𝋰𝋱𝋲𝋳𝍠𝍡𝍢𝍣𝍤𝍥𝍦𝍧𝍨𝍩𝍪𝍫𝍬𝍭𝍮𝍯𝍰𝍱𝍲𝍳𝍴𝍵𝍶𝍷𝍸𞣇𞣈𞣉𞣊𞣋𞣌𞣍𞣎𞣏𞱱𞱲𞱳𞱴𞱵𞱶𞱷𞱸𞱹𞱺𞱻𞱼𞱽𞱾𞱿𞲀𞲁𞲂𞲃𞲄𞲅𞲆𞲇𞲈𞲉𞲊𞲋𞲌𞲍𞲎𞲏𞲐𞲑𞲒𞲓𞲔𞲕𞲖𞲗𞲘𞲙𞲚𞲛𞲜𞲝𞲞𞲟𞲠𞲡𞲢𞲣𞲤𞲥𞲦𞲧𞲨𞲩𞲪𞲫𞲭𞲮𞲯𞲱𞲲𞲳𞲴🄀🄁🄂🄃🄄🄅🄆🄇🄈🄉🄊🄋🄌𠀁𠁤𠃢𠄡𠤪𠦃𠦌𠦜𠫪𠫽𠬙𢎐𢦘𣬛𦉭廾'</em><a class="headerlink" href="#ichor.common.sorting.natsort.utils.NumericalRegularExpressions.numeric" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.chain_functions">
+<code class="sig-name descname">chain_functions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">functions</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.chain_functions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chain a list of single-argument functions together and return.</p>
+<p>The functions are applied in list order, and the output of the
+previous functions is passed to the next function.</p>
+<dl class="simple">
+<dt>functions<span class="classifier">list</span></dt><dd><p>A list of single-argument functions to chain together.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A single argument function.</p>
+</dd>
+</dl>
+<p>Chain several functions together!</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">funcs</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func</span> <span class="o">=</span> <span class="n">chain_functions</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func</span><span class="p">(</span><span class="s1">&#39;hey&#39;</span><span class="p">)</span>
+<span class="go">17</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.do_decoding">
+<code class="sig-name descname">do_decoding</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em>, <em class="sig-param"><span class="n">encoding</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.do_decoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to decode a <em>bytes</em> object, or return the object as-is.</p>
+<p>s : bytes | object
+encoding : str</p>
+<blockquote>
+<div><p>The encoding to use to decode <em>s</em>.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>decoded</dt><dd><p><em>str</em> if <em>s</em> was <em>bytes</em> and the decoding was successful.
+<em>s</em> if <em>s</em> was not <em>bytes</em>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.final_data_transform_factory">
+<code class="sig-name descname">final_data_transform_factory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alg</span></em>, <em class="sig-param"><span class="n">sep</span></em>, <em class="sig-param"><span class="n">pre_sep</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.final_data_transform_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a function to transform a tuple.</p>
+<dl class="simple">
+<dt>alg<span class="classifier">ns enum</span></dt><dd><p>Indicate how to format the <em>str</em>.</p>
+</dd>
+<dt>sep<span class="classifier">str</span></dt><dd><p>Separator that was passed to <em>parse_string_factory</em>.</p>
+</dd>
+<dt>pre_sep<span class="classifier">str</span></dt><dd><p>String separator to insert at the at the front
+of the return tuple in the case that the first element
+is <em>sep</em>.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A function to be used as the <em>final_transform</em> argument to
+<em>parse_string_factory</em>.</p>
+</dd>
+</dl>
+<p>parse_string_factory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.groupletters">
+<code class="sig-name descname">groupletters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">_low</span><span class="o">=</span><span class="default_value">operator.methodcaller('casefold')</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.groupletters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Double all characters, making doubled letters lowercase.</p>
+<p>x : str</p>
+<p>str</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">groupletters</span><span class="p">(</span><span class="s2">&quot;Apple&quot;</span><span class="p">)</span>
+<span class="go">&#39;aAppppllee&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.input_string_transform_factory">
+<code class="sig-name descname">input_string_transform_factory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alg</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.input_string_transform_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a function to transform a string.</p>
+<dl class="simple">
+<dt>alg<span class="classifier">ns enum</span></dt><dd><p>Indicate how to format the <em>str</em>.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A function to be used as the <em>input_transform</em> argument to
+<em>parse_string_factory</em>.</p>
+</dd>
+</dl>
+<p>parse_string_factory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.natsort_key">
+<code class="sig-name descname">natsort_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">string_func</span></em>, <em class="sig-param"><span class="n">bytes_func</span></em>, <em class="sig-param"><span class="n">num_func</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.natsort_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key to sort strings and numbers naturally.</p>
+<p>It works by splitting the string into components of strings and numbers,
+and then converting the numbers into actual ints or floats.</p>
+<p>val : str | unicode | bytes | int | float | iterable
+key : callable | None</p>
+<blockquote>
+<div><p>A key to apply to the <em>val</em> before any other operations are performed.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>string_func<span class="classifier">callable</span></dt><dd><p>If <em>val</em> (or the output of <em>key</em> if given) is of type <em>str</em>, this
+function will be applied to it. The function must return
+a tuple.</p>
+</dd>
+<dt>bytes_func<span class="classifier">callable</span></dt><dd><p>If <em>val</em> (or the output of <em>key</em> if given) is of type <em>bytes</em>, this
+function will be applied to it. The function must return
+a tuple.</p>
+</dd>
+<dt>num_func<span class="classifier">callable</span></dt><dd><p>If <em>val</em> (or the output of <em>key</em> if given) is not of type <em>bytes</em>,
+<em>str</em>, nor is iterable, this function will be applied to it.
+The function must return a tuple.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>out<span class="classifier">tuple</span></dt><dd><p>The string split into its string and numeric components.
+It <em>always</em> starts with a string, and then alternates
+between numbers and strings (unless it was applied
+recursively, in which case it will return tuples of tuples,
+but the lowest-level tuples will then <em>always</em> start with
+a string etc.).</p>
+</dd>
+</dl>
+<p>parse_string_factory
+parse_bytes_factory
+parse_number_factory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.parse_bytes_factory">
+<code class="sig-name descname">parse_bytes_factory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alg</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.parse_bytes_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a function that will format a <em>bytes</em> object into a tuple.</p>
+<dl class="simple">
+<dt>alg<span class="classifier">ns enum</span></dt><dd><p>Indicate how to format the <em>bytes</em>.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A function that accepts <em>bytes</em> input and returns a tuple
+with the formatted <em>bytes</em>. Intended to be used as the
+<em>bytes_func</em> argument to <em>natsort_key</em>.</p>
+</dd>
+</dl>
+<p>natsort_key</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.parse_number_or_none_factory">
+<code class="sig-name descname">parse_number_or_none_factory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alg</span></em>, <em class="sig-param"><span class="n">sep</span></em>, <em class="sig-param"><span class="n">pre_sep</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.parse_number_or_none_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a function that will format a number (or None) into a tuple.</p>
+<dl class="simple">
+<dt>alg<span class="classifier">ns enum</span></dt><dd><p>Indicate how to format the <em>bytes</em>.</p>
+</dd>
+<dt>sep<span class="classifier">str</span></dt><dd><p>The string character to be inserted before the number
+in the returned tuple.</p>
+</dd>
+<dt>pre_sep<span class="classifier">str</span></dt><dd><p>In the event that <em>alg</em> contains <code class="docutils literal notranslate"><span class="pre">UNGROUPLETTERS</span></code>, this
+string will be placed in a single-element tuple at the front
+of the returned nested tuple.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A function that accepts numeric input (e.g. <em>int</em> or <em>float</em>)
+and returns a tuple containing the number with the leading string
+<em>sep</em>. Intended to be used as the <em>num_func</em> argument to
+<em>natsort_key</em>.</p>
+</dd>
+</dl>
+<p>natsort_key</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.parse_path_factory">
+<code class="sig-name descname">parse_path_factory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">str_split</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.parse_path_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a function that will properly split and format a path.</p>
+<dl class="simple">
+<dt>str_split<span class="classifier">callable</span></dt><dd><p>The output of the <em>parse_string_factory</em> function.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A function that accepts a string or path-like object
+and splits it into its path components, then passes
+each component to <em>str_split</em> and returns the result
+as a nested tuple. Can be used as the <em>string_func</em>
+argument to <em>natsort_key</em>.</p>
+</dd>
+</dl>
+<p>natsort_key
+parse_string_factory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.parse_string_factory">
+<code class="sig-name descname">parse_string_factory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alg</span></em>, <em class="sig-param"><span class="n">sep</span></em>, <em class="sig-param"><span class="n">splitter</span></em>, <em class="sig-param"><span class="n">input_transform</span></em>, <em class="sig-param"><span class="n">component_transform</span></em>, <em class="sig-param"><span class="n">final_transform</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.parse_string_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a function that will split and format a <em>str</em> into a tuple.</p>
+<dl class="simple">
+<dt>alg<span class="classifier">ns enum</span></dt><dd><p>Indicate how to format and split the <em>str</em>.</p>
+</dd>
+<dt>sep<span class="classifier">str</span></dt><dd><p>The string character to be inserted between adjacent numeric
+objects in the returned tuple.</p>
+</dd>
+<dt>splitter<span class="classifier">callable</span></dt><dd><p>A function the will accept a string and returns an iterable
+of strings where the numbers are separated from the non-numbers.</p>
+</dd>
+<dt>input_transform<span class="classifier">callable</span></dt><dd><p>A function to apply to the string input <em>before</em> applying
+the <em>splitter</em> function. Must return a string.</p>
+</dd>
+<dt>component_transform<span class="classifier">callable</span></dt><dd><p>A function that is operated elementwise on the output of
+<em>splitter</em>. It must accept a single string and return either
+a string or a number.</p>
+</dd>
+<dt>final_transform<span class="classifier">callable</span></dt><dd><p>A function to operate on the return value as a whole. It
+must accept a tuple and a string argument - the tuple
+should be the result of applying the above functions, and the
+string is the original input value. It must return a tuple.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A function that accepts string input and returns a tuple
+containing the string split into numeric and non-numeric
+components, where the numeric components are converted into
+numeric objects. The first element is <em>always</em> a string,
+and then alternates number then string. Intended to be
+used as the <em>string_func</em> argument to <em>natsort_key</em>.</p>
+</dd>
+</dl>
+<p>natsort_key
+input_string_transform_factory
+string_component_transform_factory
+final_data_transform_factory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.path_splitter">
+<code class="sig-name descname">path_splitter</code><span class="sig-paren">(</span><em class="sig-param">s</em>, <em class="sig-param">_d_match=&lt;built-in method match of re.Pattern object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.path_splitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a string into its path components.</p>
+<p>Assumes a string is a path or is path-like.</p>
+<p>s : str | pathlib.Path</p>
+<dl class="simple">
+<dt>split<span class="classifier">tuple</span></dt><dd><p>The path split by directory components and extensions.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">path_splitter</span><span class="p">(</span><span class="s2">&quot;this/thing.ext&quot;</span><span class="p">))</span>
+<span class="go">(&#39;this&#39;, &#39;thing&#39;, &#39;.ext&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.regex_chooser">
+<code class="sig-name descname">regex_chooser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alg</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.regex_chooser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select an appropriate regex for the type of number of interest.</p>
+<dl class="simple">
+<dt>alg<span class="classifier">ns enum</span></dt><dd><p>Used to indicate the regular expression to select.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>regex<span class="classifier">compiled regex object</span></dt><dd><p>Regular expression object that matches the desired number type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.sep_inserter">
+<code class="sig-name descname">sep_inserter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iterable</span></em>, <em class="sig-param"><span class="n">sep</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.sep_inserter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert ‘’ between numbers in an iterable.</p>
+<p>iterable
+sep : str</p>
+<blockquote>
+<div><p>The string character to be inserted between adjacent numeric objects.</p>
+</div></blockquote>
+<p>The values of <em>iterable</em> in order, with <em>sep</em> inserted where adjacent
+elements are numeric. If the first element in the input is numeric
+then <em>sep</em> will be the first value yielded.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ichor.common.sorting.natsort.utils.string_component_transform_factory">
+<code class="sig-name descname">string_component_transform_factory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alg</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.common.sorting.natsort.utils.string_component_transform_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a function to either transform a string or convert to a number.</p>
+<dl class="simple">
+<dt>alg<span class="classifier">ns enum</span></dt><dd><p>Indicate how to format the <em>str</em>.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>func<span class="classifier">callable</span></dt><dd><p>A function to be used as the <em>component_transform</em> argument to
+<em>parse_string_factory</em>.</p>
+</dd>
+</dl>
+<p>parse_string_factory</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ichor</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.html">ichor package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#module-ichor.arguments">ichor.arguments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-constants-module">ichor.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-debugging-module">ichor.debugging module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-menu-module">ichor.menu module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-patterns-module">ichor.patterns module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-problem-finder-module">ichor.problem_finder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-tab-completer-module">ichor.tab_completer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-tqdm-module">ichor.tqdm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#module-ichor.typing">ichor.typing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.html#ichor-units-module">ichor.units module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="ichor.html">ichor package</a><ul>
+  <li><a href="ichor.common.html">ichor.common package</a><ul>
+  <li><a href="ichor.common.sorting.html">ichor.common.sorting package</a><ul>
+      <li>Previous: <a href="ichor.common.sorting.html" title="previous chapter">ichor.common.sorting package</a></li>
+      <li>Next: <a href="ichor.common.sorting.natsort.compat.html" title="next chapter">ichor.common.sorting.natsort.compat package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Matt Burn.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/ichor.common.sorting.natsort.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

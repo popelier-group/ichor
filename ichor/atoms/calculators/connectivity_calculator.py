@@ -36,7 +36,7 @@ class ConnectivityCalculator:
                             np.linalg.norm(
                                 iatom.coordinates - jatom.coordinates
                             )
-                            < max_dist
+                            < max_dist  # if distance is less than the max_dist, the atoms are bonded, otherwise there are not
                         ):
                             connectivity[i, j] = 1
 

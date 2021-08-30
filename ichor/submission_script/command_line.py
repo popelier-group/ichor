@@ -10,6 +10,8 @@ class SubmissionError(Exception):
 
 
 class CommandLine(ABC):
+    """Abstract Base Class for job types (such as Gaussian, AIMALL, and FEREBUS jobs.)"""
+
     @classproperty
     @abstractmethod
     def command(self) -> str:

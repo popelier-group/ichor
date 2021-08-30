@@ -8,6 +8,8 @@ from ichor.common.functools import called_from_hasattr, hasattr
 
 
 class FileState(Enum):
+    # matt_todo: Not sure what Blocked is used for as it is a new addition. Does it mean you can't read the file and where would that be useful?
+    """An enum that is used to make it easier to check the current file state."""
     Unread = 1
     Reading = 2
     Read = 3
@@ -15,6 +17,7 @@ class FileState(Enum):
 
 
 class PathObject(ABC, object):
+    """An abstract base class that is used for anything that has a path (i.e. files or directories)"""
     def __init__(self, path):
         self.path = Path(path)
         self.state = FileState.Unread
@@ -34,10 +37,12 @@ class PathObject(ABC, object):
                 raise TypeError(f"{self.path} is not a file")
 
     def exists(self) -> bool:
+        """Determines if the path points to an existing directory or file on the storage drive."""
         return self.path.exists()
 
     @contextmanager
     def block(self):
+        # matt_todo: What new has been added that needs to have blocked files? Don't know when blocking files is needed
         saved_state = self.state
         self.state = FileState.Blocked
         yield
@@ -45,9 +50,19 @@ class PathObject(ABC, object):
 
     @abstractmethod
     def move(self, dst) -> None:
+        """An abstract method that subclasses need to implement. This is used to move files around."""
         pass
 
     def __getattribute__(self, item):
+        # matt_todo: can't __getattr_ be used here because it gets called after __getattribute__ fails to return the attribute?
+        """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.
+        If the attribute does not exist, then read the file and update its filestate. Then try to return the value of the attribute, if
+        the attribute still does not exist after reading the file, then return an AttributeError.
+        
+        :param item: The attribute that needs to be accessed.
+        """
+
+        # matt_todo: can you put an example in the docstring for when this would occur.
         if not called_from_hasattr() and (
             (
                 not hasattr(self, item)
@@ -66,6 +81,8 @@ class PathObject(ABC, object):
             )
 
     def __getitem__(self, item):
+        """ Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
+        read the file and try to access the item again. If the item still does not exist, then throw a KeyError."""
         try:
             return super().__getitem__(item)
         except KeyError:
