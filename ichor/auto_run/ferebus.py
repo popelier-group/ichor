@@ -6,7 +6,7 @@ from ichor.common.types import MutableValue
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript, TimingManager)
 
-# matt_todo: better naming for file and function
+# todo: better naming for file and function
 def auto_run_ferebus(
     ferebus_directory: Path, atoms: MutableValue, hold: Optional[JobID] = None
 ) -> Optional[JobID]:

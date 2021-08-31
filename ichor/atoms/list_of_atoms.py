@@ -19,8 +19,10 @@ class ListOfAtoms(list):
 
     @property
     def features(self):
-        # matt_todo: Not exactly sure how to document this one because it returns different things depending on size of array
-        # if 3D array (so has timesteps, atoms, and features) then transpose to get atoms, timesteps, features?
+        """Return the ndarray of features. This is assumed to be either a 1D, 2D or 3D array.
+        If the dimensionality of the feature array is 3, the array is transposed to transform a
+        (natom, ntimestep, nfeature) array into a (ntimestep, natom, nfeature) array so that
+        all features for a single timestep are easier to group."""
         features = np.array([i.features for i in self])
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))

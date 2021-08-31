@@ -10,8 +10,19 @@ from ichor.atoms import ListOfAtoms
 from ichor.common.io import mkdir
 from ichor.models import Model, ModelsResult
 
-# matt_todo: This code needs links to papers where the formulas are found
+"""
+    Implementation of the Maximum Expected Prediction Error (MEPE) method
+    
+    Liu, H., Cai, J., Ong, Y.-S., 2017.
+    An adaptive sampling approach for Kriging metamodeling by maximizing expected prediction error.
+    Computers & Chemical Engineering 106, 171–182..
+    doi:10.1016/j.compchemeng.2017.05.025
+    
+    Equation numbers provided above relevant code
+"""
+
 def B(model: Model) -> float:
+    """Eq. 6"""
     return np.matmul(
         (
             la.inv(
@@ -26,6 +37,7 @@ def B(model: Model) -> float:
 
 
 def H(ntrain: int) -> np.ndarray:
+    """Eq. 19"""
     return np.matmul(
         np.ones((ntrain, 1)),
         la.inv(np.matmul(np.ones((1, ntrain)), np.ones((ntrain, 1)))).item()
@@ -34,9 +46,11 @@ def H(ntrain: int) -> np.ndarray:
 
 
 def cross_validation(model: Model) -> np.ndarray:
+    """Eq. 18"""
     d = (model.y - B(model)).reshape((-1, 1))
     h = H(model.ntrain)
 
+    """Eq. 17"""
     cross_validation_error = np.empty(model.ntrain)
     for i in range(model.ntrain):
         cross_validation_error[i] = (
@@ -48,15 +62,13 @@ def cross_validation(model: Model) -> np.ndarray:
         ).item() ** 2
     return cross_validation_error
 
-# matt_todo: this is not defined
-# def closest_point(point, model) -> int:
-
 
 class MEPE(ExpectedImprovement):
     def __init__(self, models):
         ExpectedImprovement.__init__(self, models)
 
     def cv_error(self, x: Dict[str, np.ndarray]) -> ModelsResult:
+        """Eq. 20"""
         cv_errors = ModelsResult()
         for atom in self.models.atoms:
             atom_cv_errors = ModelsResult()
@@ -93,6 +105,7 @@ class MEPE(ExpectedImprovement):
             for property, predicted_values in data.items():
                 true_values = self.models[atom][property].y[-npoints:]
                 true_error = (true_values - predicted_values) ** 2
+                """Eq. 24"""
                 alpha_sum += np.sum(
                     0.99
                     * np.clip(
@@ -109,8 +122,10 @@ class MEPE(ExpectedImprovement):
         cv_errors = self.cv_error(features_dict)
         variance = self.models.variance(features_dict)
         alpha = self.alpha()
+        """Eq. 23"""
         epe = alpha * cv_errors - (1.0 - alpha) * variance
 
+        """Eq. 25"""
         epe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
 
         from ichor.globals import GLOBALS

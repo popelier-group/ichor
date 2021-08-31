@@ -14,7 +14,8 @@ def set_uid(uid=None):
     """ Set the GLOBALS Unique ID to one given by get_uid()"""
     from ichor.globals import GLOBALS
 
-    # matt_todo: GLOBALS.SUBMITTED is set to False (and says to not change), so not sure what this is doing
+    """ if GLOBALS.SUBMITTED is true then we are running on the compute node, when running on a compute node, it is important
+    not to change the UID if it has already been set as this is what is used to write and read to datafiles"""
     if GLOBALS.SUBMITTED and GLOBALS.UID:
         return
     GLOBALS.UID = uid or get_uid()

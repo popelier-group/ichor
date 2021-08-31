@@ -6,7 +6,7 @@ from ichor.common.types import MutableValue
 from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
                                      SubmissionScript, TimingManager)
 
-# matt_todo: better naming for file and function
+# todo: better naming for file and function
 def auto_run_aimall(
     npoints: MutableValue,
     atoms: MutableValue = None,

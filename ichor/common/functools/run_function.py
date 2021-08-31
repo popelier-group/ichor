@@ -3,8 +3,10 @@ from typing import Any, Sequence
 
 from ichor.typing import F
 
-# matt_todo: ProblemFinder and this need to be reimplemented.
+
 def run_function(order: int) -> F:
+    """ Used to decorate a method so that `get_functions_to_run` can find and return the methods in
+    the order specified by the order parameter """
     def decorator(func: F) -> F:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -17,6 +19,8 @@ def run_function(order: int) -> F:
 
 
 def get_functions_to_run(obj: Any) -> Sequence[F]:
+    """ Finds all methods of `obj` with the `order` attribute then returns the sequence of methods
+    in the order defined """
     return sorted(
         [
             getattr(obj, field)

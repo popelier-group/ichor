@@ -5,7 +5,7 @@ from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-# matt_todo: better naming for file and function
+# todo: better naming for file and function
 def make_sets(
     points_input: Path, hold: Optional[JobID] = None
 ) -> Optional[JobID]:

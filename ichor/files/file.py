@@ -23,15 +23,6 @@ class File(PathObject, ABC):
     def _read_file(self, *args, **kwargs):
         pass
 
-    def move(self, dst) -> None:
-        # matt_todo: There are two move methods defined here. (see the other one at the bottom.)
-        """Move the file to a new destination.
-
-        :param dst: The new path to the file.
-        """
-        self.path.replace(dst)
-        self.path = dst
-
     def move_formatted(self, dst):
         pass
 
@@ -45,7 +36,11 @@ class File(PathObject, ABC):
             f"'write' method not implemented for {self.__class__.__name__}"
         )
 
-    def move(self, dst):
+    def move(self, dst) -> None:
+        """Move the file to a new destination.
+
+        :param dst: The new path to the file.
+        """
         if dst.is_dir():
             dst /= self.path.name
         move(self.path, dst)

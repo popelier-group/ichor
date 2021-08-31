@@ -23,7 +23,13 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def parse_job_id(cls, stdout) -> str:
-        # matt_todo: does this give you the job id back?
+        """
+        Example script submission using SGE:
+            $ qsub test.sh
+            > Your job 518753 ("test.sh") has been submitted
+
+        Our job id is given by the number, this is parsed by finding the number in the return string
+        """
         return re.findall(r"\d+", stdout)[0]
 
     @classmethod
@@ -54,9 +60,9 @@ class SunGridEngine(BatchSystem):
         return f"-o {path}"
 
     @classmethod
-        """ Return the line in the job script defining the error directory where any errors from the job should be written to.
-        These files end in `.e{job_id}`. """
     def error_directory(cls, path: Path) -> str:
+        """ Return the line in the job script defining the error directory where any errors from the job should be written to.
+            These files end in `.e{job_id}`. """
         return f"-e {path}"
 
     @classmethod
@@ -76,22 +82,22 @@ class SunGridEngine(BatchSystem):
 
     @classproperty
     def JobID(self) -> str:
-        # matt_todo: When is this used?
+        """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
         return "JOB_ID"
 
     @classproperty
     def TaskID(self) -> str:
-        # matt_todo: When is this used?
+        """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
         return "SGE_TASK_ID"
 
     @classproperty
     def TaskLast(self) -> str:
-        # matt_todo: When is this used?
+        """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
         return "SGE_TASK_LAST"
 
     @classproperty
     def NumProcs(self) -> str:
-        # matt_todo: When is this used?
+        """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
         return "NSLOTS"
 
     @classproperty

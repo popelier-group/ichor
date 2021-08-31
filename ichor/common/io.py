@@ -128,7 +128,24 @@ def remove(path: Path) -> None:
 
 @contextmanager
 def pushd(new_dir: Path, update_cwd: bool = False):
-    # matt_todo: I think it would be good to you to say where this will be needed and give some examples.
+    """
+    Works like the UNIX `pushd` commmand whereby it changes the current directory and stores the previous directory on the stack
+    By exiting the context manager, the equivalent of `popd` is called and the location is reverted to the previous e.g.
+
+    ```python
+    # currently in /home
+    with pushd('usr/bin'):
+        # now in /home/usr/bin
+        ...
+        with pushd('/foo/bar'):
+            # now in /foo/bar
+            ...
+        # now in /home/usr/bin
+    # now back in /home
+    ```
+
+    Is good to use to temporarily change the current working directory as it is easy to return to the original location
+    """
     previous_dir = os.getcwd()
     if update_cwd:
         from ichor.globals import GLOBALS

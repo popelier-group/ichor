@@ -6,7 +6,7 @@ from ichor.globals import GLOBALS
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-# matt_todo: better naming for file and function
+# todo: better naming for file and function
 def adaptive_sampling(
     model_directory: Path = GLOBALS.FILE_STRUCTURE["models"],
     sample_pool_directory: Path = GLOBALS.FILE_STRUCTURE["sample_pool"],

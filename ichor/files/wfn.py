@@ -59,8 +59,8 @@ class WFN(Geometry, GeometryData, File):
         return ".wfn"
 
     def read_header(self):
-        # matt_todo: Why is the method read in from the .wfn file when it is set in the .gjf file before the job is ran?
-        """ Read in the top of the wavefunction file."""
+        """ Read in the top of the wavefunction file, currently the data is not used but could be useful
+        Following the 'just in case' mentality"""
         from ichor.globals import GLOBALS
 
         data = re.findall(r"\s\d+\s", self.header)

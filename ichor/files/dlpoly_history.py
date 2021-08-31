@@ -29,9 +29,8 @@ class DlpolyHistory(Trajectory):
 
     def write(self, fname=None):
         """ Writes a trajectory .xyz file from the DL POLY History file."""
-        # matt_todo: Path() is not needed here
         if fname is None:
-            fname = self.path.parent / Path("TRAJECTORY.xyz")
+            fname = self.path.parent / "TRAJECTORY.xyz"
         super().write(fname=fname)
 
     def write_to_trajectory(self) -> None:

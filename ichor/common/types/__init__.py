@@ -4,6 +4,7 @@ from ichor.common.types.dummy_tqdm import dummy_tqdm
 from ichor.common.types.mutable_value import MutableValue
 from ichor.common.types.range_dict import RangeDict
 from ichor.common.types.version import Version
+from ichor.common.types.tree import FileTree, FileNode
 
 __all__ = [
     "Version",
@@ -12,4 +13,6 @@ __all__ = [
     "RangeDict",
     "dummy_tqdm",
     "MutableValue",
+    "FileNode",
+    "FileTree",
 ]

@@ -18,7 +18,20 @@ def run_cmd(cmd) -> Tuple[str, str]:
 
 
 def input_with_prefill(prompt: str, prefill: str = "") -> str:
-    # matt_todo: Where is this function needed? Better to give examples here. Also good to explain the name because I can't tell what the function is going to do from it.
+    """
+    Use over the builtin `input` function when wanting to prefill the input with text e.g.
+
+    ```python
+    >>> input_with_prefill("ENTER YOUR ANSWER: ", "example answer here")
+    ENTER YOUR ANSWER: example answer here
+    ```
+
+    The user can then choose to replace the prefill text or use what is already there
+
+    This is currently used in the settings menu in ichor when editing variables so that the
+    current value is already prefilled and the user can just edit it but is general purpose code
+    so can be used anywhere (unless you're on windows as readline isn't available... just defaults to normal input)
+    """
     try:
         # Readline only available on Unix
         import readline

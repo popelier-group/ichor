@@ -7,7 +7,7 @@ from ichor.common.types.mutable_value import MutableValue
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-# matt_todo: better naming for file and function
+# todo: better naming for file and function
 def submit_wfns(
     directory: Path,
     atoms: Optional[MutableValue],

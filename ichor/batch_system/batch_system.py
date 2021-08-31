@@ -144,34 +144,41 @@ class BatchSystem(ABC):
     @classmethod
     @abstractmethod
     def parallel_environment(cls, ncores: int) -> str:
+        """ Returns the flag to set the parallel environment for the job """
         pass
 
     @classmethod
     @abstractmethod
     def array_job(cls, njobs: int) -> str:
+        """ Returns the flag to set the number of tasks for a job """
         pass
 
     @classproperty
     @abstractmethod
     def JobID(self) -> str:
+        """ Returns environment variable name to get the current job id, not currently used """
         pass
 
     @classproperty
     @abstractmethod
     def TaskID(self) -> str:
+        """ Returns environment variable name for the current task id, used to index datafile arrays and by CheckManager """
         pass
 
     @classproperty
     @abstractmethod
     def TaskLast(self) -> str:
+        """ Returns environment variable name for the last task in a task array, used by CheckManager """
         pass
 
     @classproperty
     @abstractmethod
     def NumProcs(self) -> str:
+        """ Returns environment variable name for the number of processors assigned to a job, used to set OpenMP etc."""
         pass
 
     @classproperty
     @abstractmethod
     def OptionCmd(self) -> str:
+        """ Returns the character used to define a batch system option statement in a submission script """
         pass

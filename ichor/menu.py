@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from ichor.problem_finder import ProblemFinder
 from ichor.tab_completer import ListCompleter
+from ichor.common.int import count_digits
 
 
 class Menu(object):
@@ -212,12 +213,11 @@ class Menu(object):
         print()
 
     def print_problems(self) -> None:
-        # matt_todo: remove UsefulTools from here as it is not even imported. This method does not work right now?
         """Print problems found (such as with config files, etc.) at the top of the menu."""
         problems = ProblemFinder()
         problems.find()
         if len(problems) > 0:
-            max_len = UsefulTools.count_digits(len(problems))
+            max_len = count_digits(len(problems))
             s = "s" if len(problems) > 1 else ""
             print(f"Problem{s} Found:")
             print()
@@ -239,7 +239,6 @@ class Menu(object):
         if exit:
             self.add_option("0", "Exit", sys.exit)
 
-    #TODO: rename method to better describe what it does
     def longest_label(self) -> int:
         """Returns the length of the longest option. This is used to print out the options nicely."""
         lengths = [

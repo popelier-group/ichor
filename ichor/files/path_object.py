@@ -8,7 +8,6 @@ from ichor.common.functools import called_from_hasattr, hasattr
 
 
 class FileState(Enum):
-    # matt_todo: Not sure what Blocked is used for as it is a new addition. Does it mean you can't read the file and where would that be useful?
     """An enum that is used to make it easier to check the current file state."""
     Unread = 1
     Reading = 2
@@ -42,7 +41,11 @@ class PathObject(ABC, object):
 
     @contextmanager
     def block(self):
-        # matt_todo: What new has been added that needs to have blocked files? Don't know when blocking files is needed
+        """Calling `block` converts the current state to FileState.Blocked, this means that the file
+        cannot be read, once called again or the context manager is exited, the state is reverted to
+        state previous to calling `block`. This may be useful in case one wants to avoid possible
+        recursive loops from the __getattr__ in PathObject or to optimise attribute accessing if the
+        attribute does not need to be read from a file."""
         saved_state = self.state
         self.state = FileState.Blocked
         yield
@@ -54,21 +57,28 @@ class PathObject(ABC, object):
         pass
 
     def __getattribute__(self, item):
-        # matt_todo: can't __getattr_ be used here because it gets called after __getattribute__ fails to return the attribute?
         """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.
         If the attribute does not exist, then read the file and update its filestate. Then try to return the value of the attribute, if
         the attribute still does not exist after reading the file, then return an AttributeError.
+
+        One must be careful to make sure all attributes that want to be accessed lazily must be an attribute of the class and
+        not to override __getattribute__ in subclasses of PathObject.
         
         :param item: The attribute that needs to be accessed.
         """
 
-        # matt_todo: can you put an example in the docstring for when this would occur.
+        # As hasattr calls __getattribute__, one must check whether __getattribute__ is being
+        # called from hasattr to avoid an infinite recurssive loop
         if not called_from_hasattr() and (
             (
+                # reading the file may set attributes which aren't currently defined
                 not hasattr(self, item)
+                # subclasses attributes that want to be read lazily should be initialised to None
                 or object.__getattribute__(self, item) is None
             )
+            # only read if unread otherwise we have already tried looking for the attribute and need to throw an error
             and self.state is FileState.Unread
+            # new addition to allow blocking of file reading
             and not self.state is FileState.Blocked
         ):
             self.read()

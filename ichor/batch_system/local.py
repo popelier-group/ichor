@@ -2,8 +2,9 @@ from typing import List
 from ichor.batch_system.sge import SunGridEngine
 from ichor.common.functools import classproperty
 
-# matt_todo: These methods will probably need to get implemented or are they needed to run launch ICHOR locally?
 class LocalBatchSystem(SunGridEngine):
+    """LocalBatchSystem is to only be used for debugging purposes
+    (Unless one wants to implement a batch system to run on a local machine... would be a nice addition)"""
     @staticmethod
     def is_present() -> bool:
         from ichor.globals import GLOBALS, Machine

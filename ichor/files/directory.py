@@ -16,65 +16,23 @@ class Directory(PathObject, ABC):
     def __init__(self, path):
         PathObject.__init__(self, path)  # set path for directory instance as well as FileState to Unread
         self.parse()  # parse directory to find contents
-        self.parsed = True  # matt_todo: remove this attribute as it is not used anywhere else, the self.state is Unread from PathObject init
 
-    # matt_todo: Possibly make this parse method an @abstractmethod with just pass inside
-    # Then each class that subclasses from Directory will need its own parse method
-    # This will prevent confusion with PointsDirectory calling Directory.__init__(self, path)
-    # which then calls self.parse() in its init, but actually the PointsDirectory parse() method is still used
-    # The current code that is in Directory parse() can then be moved into a parse() method in PointDirectory instead because
-    # it is only used there.
-    # Also then a self.parse() will need to be added to the __init__() methods of PointsDirectory and PointDirecory
-    # but then you can easily tell which parse() method is being called
+    @abstractmethod
     def parse(self) -> None:
-        """ matt_todo Move to PointDirectory parse and make this an abstract method.
-        Iterate over __annotations__ which is a dictionary of {"gjf": Optional[GJF], "wfn": Optional[WFN], "ints": Optional[INTs]}
-        as defined from class variables in PointsDirectory. Get the type inside the [] brackets
-         """
-        filetypes = {}
-        dirtypes = {}
-        for var, type_ in self.__annotations__.items():
-            if hasattr(type_, "__args__"):
-                type_ = type_.__args__[0]
-
-            if issubclass(type_, File):
-                filetypes[var] = type_
-            elif issubclass(type_, Directory):
-                dirtypes[var] = type_
-
-        for f in self:  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
-            if f.is_file():
-                for var, filetype in filetypes.items():
-                    if f.suffix == filetype.filetype:
-                        if (
-                            "parent"
-                            in inspect.signature(filetype.__init__).parameters
-                        ):
-                            setattr(self, var, filetype(f, parent=self))
-                        else:
-                            setattr(self, var, filetype(f))
-                        break
-            elif f.is_dir():
-                for var, dirtype in dirtypes.items():
-                    if dirtype.dirpattern.match(f.name):
-                        if (
-                            "parent"
-                            in inspect.signature(dirtype.__init__).parameters
-                        ):
-                            setattr(self, var, dirtype(f, parent=self))
-                        else:
-                            setattr(self, var, dirtype(f))
-                        break
+        """
+        Abstract method to find all relevant files within the directory,
+        note this is not reading the files just finding the paths to the files
+        """
+        pass
 
     def move(self, dst):
-        # matt_todo: Does this actually move the files to the new location or just the Path object changes? What happens when you replace a path?
         """
-        Move a directory object to a new location (a new path)
+        Move a directory object to a new location (a new path), modifies the `path` attribute and moves contents on disk
         :param dst: The new path of the directory
         """
         self.path.replace(dst)
         self.path = dst
-        for f in self.path.iterdir():  # matt_todo: can just be for f in self because of how __iter__ is implemented.
+        for f in self.path.iterdir():  # need to use iterdir in case object overrides __iter__
             if f.is_file():
                 fdst = self.path / f"{self.path.name}{f.suffix}"
                 f.replace(fdst)
@@ -112,10 +70,10 @@ class Directory(PathObject, ABC):
         pass
 
     def iterdir(self):
-        # matt_todo: This is same as __iter__ method, so not sure if it is needed.
+        """ alias to __iter__ in case child object overrides __iter__ """
         return self.path.iterdir()
 
     def __iter__(self):
         """ When code iterates over an instance of a directory, it calls the pathlib iterdir() method which yields
         path objects to all directory contents."""
-        return self.path.iterdir()
+        return self.iterdir()

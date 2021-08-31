@@ -1,12 +1,12 @@
-import os
 import re
 from typing import Optional
 
 from ichor.atoms import AtomsNotFoundError
-from ichor.common.functools import buildermethod, classproperty
-from ichor.files import GJF, WFN, Directory, FileState, INTs
+from ichor.common.functools import classproperty
+from ichor.files import GJF, WFN, Directory, INTs, File
 from ichor.geometry import AtomData
 from ichor.points.point import Point
+import inspect
 
 
 class PointDirectory(Point, Directory):
@@ -26,7 +26,7 @@ class PointDirectory(Point, Directory):
     ints: Optional[INTs] = None
 
     def __init__(self, path):
-        Directory.__init__(self, path)  # this will execute the self.parse() that is implemented in Directory because self.parse is not implemented for PointDirectory
+        Directory.__init__(self, path)
 
     @classproperty
     def dirpattern(self):
@@ -35,15 +35,45 @@ class PointDirectory(Point, Directory):
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
 
-    # matt_todo: Is this needed?
-    # def parse(self):
-    #     super().parse()
-    # print("setting atoms")
-    # if self.ints.path.exists() and self.gjf.path.exists():
-    #     print("adding atoms to path")
-    #     with self.ints.block():
-    #         self.ints.atoms = self.gjf.atoms
-    #     print("atoms added")
+    def parse(self):
+        """
+        Iterate over __annotations__ which is a dictionary of {"gjf": Optional[GJF], "wfn": Optional[WFN], "ints": Optional[INTs]}
+        as defined from class variables in PointsDirectory. Get the type inside the [] brackets
+         """
+        filetypes = {}
+        dirtypes = {}
+        for var, type_ in self.__annotations__.items():
+            if hasattr(type_, "__args__"):
+                type_ = type_.__args__[0]
+
+            if issubclass(type_, File):
+                filetypes[var] = type_
+            elif issubclass(type_, Directory):
+                dirtypes[var] = type_
+
+        for f in self:  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
+            if f.is_file():
+                for var, filetype in filetypes.items():
+                    if f.suffix == filetype.filetype:
+                        if (
+                                "parent"
+                                in inspect.signature(filetype.__init__).parameters
+                        ):
+                            setattr(self, var, filetype(f, parent=self))
+                        else:
+                            setattr(self, var, filetype(f))
+                        break
+            elif f.is_dir():
+                for var, dirtype in dirtypes.items():
+                    if dirtype.dirpattern.match(f.name):
+                        if (
+                                "parent"
+                                in inspect.signature(dirtype.__init__).parameters
+                        ):
+                            setattr(self, var, dirtype(f, parent=self))
+                        else:
+                            setattr(self, var, dirtype(f))
+                        break
 
     @property
     def atoms(self):

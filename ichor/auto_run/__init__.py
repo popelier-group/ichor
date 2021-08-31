@@ -121,14 +121,14 @@ def next_iter(
                 PointsDirectory(IterArgs.TrainingSetLocation)
             )
         else:
-            points_location = get_points_location()
+            points_location = get_points_location() # get points location on disk to transform into ListOfAtoms
             points = None
-            # matt_todo: This means that the directory ends in .xyz? What does it contain then?
+            # points_location could be a directory of points to use, if so initialise a PointsDirectory
             if points_location.is_dir(): 
                 points = PointsDirectory(points_location)
-            # this is what gets executed as we always have a .xyz file which is our trajectory file containing a lot of geometries.
+            # points_location could be a .xyz file, if so initialise a Trajectory
             elif points_location.suffix == ".xyz":
-                points = Trajectory(points_location)  # compose a trajectory which is a list of timesteps in the trajectory file
+                points = Trajectory(points_location)
             else:
                 raise ValueError("Unknown Points Location")
 
@@ -136,7 +136,7 @@ def next_iter(
             IterArgs.nPoints.value = make_sets_npoints(
                 points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
             )
-            # run the make_sets function on a compute node, which makes the training and sample pool sets from a .xyz file
+            # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
             job_id = IterStep(make_sets, IterUsage.All, [points_location]).run(
                 job_id, state
             )
@@ -165,8 +165,7 @@ def auto_run() -> Optional[JobID]:
     # Make a list of types of iterations. Only first and last iterations are different.
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]
     iterations[0] = IterState.First
-    iterations += [IterState.Last] # matt_todo: Does anything different happen with IterState.Last? In the last step, no adaptive sampling is performed
-    # matt_todo: but that is done using IterUsage.AllButLast instead of IterState.Last
+    iterations += [IterState.Last] # The IterState.Last informs the active learning IterStep to not run on the final iteration as it has IterUsage.AllButLast
 
     job_id = None
     with DataLock():
