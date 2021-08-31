@@ -4,17 +4,22 @@
 def add_integers(a: int, b: int) -> int:
     """ Add two integers together 
     
-    :param a: The first integer to sum
+    :param a: The first integer to sum. If the explanation is longer
+        that one line, then following lines of the explanation need to be
+        indented so they are displayed correctly in the html docs.
     :param b: The second integer to sum
     :raises TypeError: If `a` or `b` are not integers, `TypeError` is raised.
     :return: The sum of the two integers `a` and `b`
+
+    .. note::
+        This is a note that will be outlined when making html documentation with sphinx
     """
 
     if not isinstance(a, int):
         raise TypeError(f"a is of type '{type(a)}' but should be type int")
 
     if not isinstance(b, int):
-        raise TypeError(f"b is of type "{type(a)}" but should be type int")
+        raise TypeError(f"b is of type "{type(b)}" but should be type int")
 
     return a + b
 ```
@@ -40,7 +45,7 @@ def add_integers(a: int, b: int) -> int:
         raise TypeError(f"a is of type '{type(a)}' but should be type int")
 
     if not isinstance(b, int):
-        raise TypeError(f"b is of type "{type(a)}" but should be type int")
+        raise TypeError(f"b is of type "{type(b)}" but should be type int")
 
     return a + b
 ```
