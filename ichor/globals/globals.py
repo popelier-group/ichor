@@ -39,7 +39,7 @@ N_ITERATIONS                    | int             | 1                 | Number o
 POINTS_PER_ITERATION            | int             | 1                 | Number of points to add to training set per iteration                                      |
 OPTIMISE_PROPERTY               | str             | iqa               | Atomic property to optimise in adaptive sampling                                           |
 OPTIMISE_ATOM                   | str             | all               | Atom to optimise in adaptive sampling                                                      | Can be all or a specific atom
-ADAPTIVE_SAMPLING_METHOD        | str             | epe               | Adaptive sampling method to use                                                            | Currently only epe is implemented
+ACTIVE_LEARNING_METHOD          | str             | epe               | Active learning method to use                                                              | Currently only epe is implemented
 NORMALISE                       | bool            | False             | Whether to normalise data before running through ferebus                                   | No longer implemented
 STANDARDISE                     | bool            | False             | Whether to standardise data before running through ferebus                                 | No longer implemented
 METHOD                          | str             | B3LYP             | Quantum mechanics method to use in Gaussian calculation                                    |
@@ -59,6 +59,7 @@ KERNEL                          | str             | rbf-cyclic        | Kernel t
 FEREBUS_TYPE                    | str             | executable        | Tells ichor to run FEREBUS or FEREBUS.py                                                   | Currently executable implemented only                                                           # todo: implement python variant and convert to enum
 FEREBUS_VERSION                 | Version         | 7.0               | Current ferebus version                                                                    | Older versions use different training set and config files                                      # todo: reimplement older style for v3
 FEREBUS_LOCATION                | Path            | PROGRAMS/FEREBUS  | Path to ferebus executable                                                                 |
+GAUSSIAN_MEMORY_LIMIT           | str             | 1GB               | Memory limit for runnning Gaussian
 GAUSSIAN_CORE_COUNT             | int             | 2                 | Number of cores to run Gaussian                                                            |
 AIMALL_CORE_COUNT               | int             | 2                 | Number of cores to run AIMAll                                                              |
 FEREBUS_CORE_COUNT              | int             | 4                 | Number of cores to run FEREBUS                                                             |
@@ -153,7 +154,7 @@ class Globals:
     OPTIMISE_PROPERTY: str = "iqa"
     OPTIMISE_ATOM: str = "all"
 
-    ADAPTIVE_SAMPLING_METHOD: str = "epe"
+    ACTIVE_LEARNING_METHOD: str = "epe"
 
     NORMALISE: bool = False
     STANDARDISE: bool = False
@@ -182,6 +183,8 @@ class Globals:
     )
     FEREBUS_VERSION: Version = Version("7.0")
     FEREBUS_LOCATION: Path = Path("PROGRAMS/FEREBUS")
+
+    GAUSSIAN_MEMORY_LIMIT: str = "1GB"
 
     # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
     GAUSSIAN_CORE_COUNT: int = 2

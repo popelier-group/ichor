@@ -10,7 +10,6 @@ from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
-# matt_todo: I think aimall.py is a bit ambiguous name. Make into something like aimall_submission_script.py to be more precise.
 class AIMAllCommand(CommandLine):
     def __init__(
         self,
@@ -55,10 +54,14 @@ class AIMAllCommand(CommandLine):
             f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'"
         )
 
-    # matt_todo: maybe have these as class variables instead because they it returns the same thing every time?
-    # matt_todo: what do these options do? This was ["-j y", "-S /bin/bash"] in the Ichor version I documented.
     @classproperty
     def options(self) -> List[str]:
+        """ Options taken from GAIA to run AIMAll likely not necessary as we specifiy /bin/bash at the top of the
+        submission script
+
+        Note: '-j y' removed from these options from the GAIA version as this outputted both stdout and stderr to
+              stdout whereas we want them to be put in the files we specify with the -o and -e flags separately
+        """
         return ["-S /bin/bash"]
 
     @property
@@ -89,14 +92,14 @@ class AIMAllCommand(CommandLine):
         return GLOBALS.AIMALL_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:
-        cmd = f"{self.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
+        cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
         if self.check:
             from ichor.globals import GLOBALS
 
             cm = CheckManager(
                 check_function="check_aimall_output",
-                check_args=[variables[0]],
+                args_for_check_function=[variables[0]],
                 ntimes=GLOBALS.AIMALL_N_TRIES,
             )
             return cm.check(cmd)

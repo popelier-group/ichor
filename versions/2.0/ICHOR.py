@@ -654,9 +654,9 @@ class FileTools:
         tree.create_node("DATA", "data", parent="file_locs")
         tree.create_node("data", "data_file", parent="data", is_file=True)
         tree.create_node("JOBS", "jobs", parent="data")
-        tree.create_node("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
-        tree.create_node("alpha", "alpha", parent="adaptive_sampling", is_file=True)
-        tree.create_node("cv_errors", "cv_errors", parent="adaptive_sampling", is_file=True)
+        tree.create_node("ADAPTIVE_SAMPLING", "active_learning", parent="data")
+        tree.create_node("alpha", "alpha", parent="active_learning", is_file=True)
+        tree.create_node("cv_errors", "cv_errors", parent="active_learning", is_file=True)
 
         return tree
 
@@ -3218,7 +3218,7 @@ class Models:
         predictions = self.predict(points, atoms=True)
 
         n_points = FileTools.count_points_in(FILE_STRUCTURE.get_file_path("training_set"))
-        FileTools.mkdir(FILE_STRUCTURE.get_file_path("adaptive_sampling"))
+        FileTools.mkdir(FILE_STRUCTURE.get_file_path("active_learning"))
         with open(FILE_STRUCTURE.get_file_path("cv_errors"), "w") as f:
             f.write(f"{n_points}\n")
             for index in indices:
@@ -3393,7 +3393,7 @@ class Points:
             true_values += [point.get_true_value("iqa", atoms=True)]
 
         n_points = FileTools.count_points_in(FILE_STRUCTURE.get_file_path("training_set"))
-        FileTools.mkdir(FILE_STRUCTURE.get_file_path("adaptive_sampling"))
+        FileTools.mkdir(FILE_STRUCTURE.get_file_path("active_learning"))
         alpha_file = FILE_STRUCTURE.get_file_path("alpha")
         with open(alpha_file, "w") as f:
             f.write(f"{n_points}\n")

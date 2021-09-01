@@ -54,7 +54,7 @@ class Model(File):
         kernel_composition = ""
         kernel_list = {}
 
-        # matt_todo: These can probably be if elif statements instead of all if
+        # implemented as a series of if statements to reduced number of iterations needed to read the file
         with open(self.path) as f:
             for line in f:
                 if line.startswith("#"):
@@ -62,30 +62,37 @@ class Model(File):
 
                 if "name" in line:  # system name e.g. WATER
                     self.system = line.split()[1]
-                    continue
+                    line = next(f)
+
                 if "property" in line:  # property (such as IQA or particular multipole moment) for which a GP model was made
                     self.type = line.split()[1]
-                    continue
+                    line = next(f)
+
                 if line.startswith("atom"):  # atom for which a GP model was made
                     self.atom = line.split()[1]
-                    continue
+                    line = next(f)
 
                 if "nugget" in line:
                     self.nugget = float(line.split()[-1])
-                    continue
+                    line = next(f)
 
                 if "number_of_features" in line:
                     self.nfeats = int(line.split()[1])
+                    line = next(f)
+
                 if "number_of_training_points" in line:  # number of training points to make the GP model
                     self.ntrain = int(line.split()[1])
+                    line = next(f)
 
                 if "[mean]" in line:
                     _ = next(f)
                     line = next(f)
                     self.mean = ConstantMean(float(line.split()[1]))
+                    line = next(f)
 
                 if "composition" in line:  # which kernels were used to make the GP model. Different kernels can be specified for different input dimensions
                     kernel_composition = line.split()[-1]
+                    line = next(f)
 
                 if "[kernel." in line:
                     kernel_name = line.split(".")[-1].rstrip().rstrip("]")
@@ -99,7 +106,7 @@ class Model(File):
                         lengthscale = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
-                        # matt_todo: Rename theta to lengthscale in ferebus because it is more widely used / easier to think about
+                        # todo: Rename theta to lengthscale in ferebus because it is more widely used / easier to think about
                         # TODO: Change theta from FEREBUS to lengthscale to match label
                         kernel_list[kernel_name] = RBF(lengthscale)
                     elif kernel_type in [

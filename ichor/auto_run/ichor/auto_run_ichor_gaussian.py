@@ -4,8 +4,8 @@ from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-# todo: better naming for file and function
-def submit_gjfs(directory, hold: Optional[JobID] = None) -> Optional[JobID]:
+
+def submit_ichor_gaussian_command_to_auto_run(directory, hold: Optional[JobID] = None) -> Optional[JobID]:
     """ Writes out datafile that is needed for the Gaussian jobs. The actual Gaussian calculations run with the next job in the auto run sequence,
     but they need access to the datafile. This is why the datafile needs to be written prior to actually running the Gaussian job.
     
@@ -17,7 +17,7 @@ def submit_gjfs(directory, hold: Optional[JobID] = None) -> Optional[JobID]:
     """
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["gaussian"])
     ichor_command = ICHORCommand()
-    ichor_command.run_function("submit_gjfs", str(directory))
+    ichor_command.add_function_to_job("submit_gjfs", str(directory))
     with TimingManager(submission_script, message="Sumitting GJFs"):
         submission_script.add_command(ichor_command)
     submission_script.write()

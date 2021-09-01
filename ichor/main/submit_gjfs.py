@@ -7,6 +7,7 @@ from ichor.logging import logger
 from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
+from ichor.common.io import last_line
 
 
 def submit_gjfs(directory) -> Optional[JobID]:
@@ -19,9 +20,9 @@ def submit_gjfs(directory) -> Optional[JobID]:
     submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])
     for point in points:  # point is an instance of PointDirectory
         if not point.gjf.path.with_suffix(".wfn").exists():
-            point.gjf.write()  # write out the .gjf files which are input to Gaussian
+            point.gjf.write()  # write out the .gjf files which are input to Gaussian to ensure correct formatting
             submission_script.add_command(GaussianCommand(point.gjf.path))  # make a list of GaussianCommand instances.
-    # matt_todo: Maybe add the Path from which gjfs are being submitted in the logger
+            logger.debug(f"Adding {point.gjf.path} to {SCRIPT_NAMES['gaussian']}")
     logger.info(
         f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
     )
@@ -34,11 +35,10 @@ def submit_gjfs(directory) -> Optional[JobID]:
 def check_gaussian_output(gaussian_file: str):
     """ Checks if Gaussian jobs ran correctly and a full .wfn file is returned. If there is no .wfn file or it does not
     have the correct contents, then rerun Gaussian."""
-     # matt_todo: Check here that the .wfn file has the Normal termination line to prevent having .wfn outputs with errors
     if not gaussian_file:
         print_completed()
         sys.exit()
-    if Path(gaussian_file).with_suffix(".wfn").exists():
+    if Path(gaussian_file).with_suffix(".wfn").exists() and "TOTAL ENERGY" in last_line(Path(gaussian_file).with_suffix(".wfn")):
         print_completed()
     else:
         logger.error(f"Gaussian Job {gaussian_file} failed to run")

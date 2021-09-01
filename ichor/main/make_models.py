@@ -18,7 +18,7 @@ from ichor.tab_completer import ListCompleter
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
 n_training_points: int = 0
-atom_models: List[str] = []
+atom_models_to_make: List[str] = []
 
 atoms_selected = False
 models_selected = False
@@ -68,23 +68,27 @@ class ModelType(Enum):
 
 
 model_types: List[ModelType] = [ModelType.iqa]
-atoms: List[str] = []
+atom_names: List[str] = []
 
 
 def setup(directory: Path):
-    # matt_todo: Is there a better way to do it without all these globals?
+    """
+    Setup the global variables defining what GPR models to make
+    Implemented with global variables to allow for calling from the menu and from the command line
+    during auto run, having one setup function for both allows for less code duplication
+    """
 
     global model_data_location
     global _model_data
     global n_training_points
-    global atoms
-    global atom_models
+    global atom_names
+    global atom_models_to_make
 
     model_data_location = directory
     _model_data = PointsDirectory(directory)
     n_training_points = len(_model_data)
-    atoms = [atom.name for atom in _model_data[0].atoms]  # matt_todo: rename to atom_names as this is not instance of Atoms and kind of confusing
-    atom_models = list(atoms)
+    atom_names = [atom.name for atom in _model_data[0].atoms]
+    atom_models_to_make = list(atom_names)
 
 
 def toggle_model_type(ty: ModelType):
@@ -148,37 +152,40 @@ def select_number_of_training_points():
 
 
 def toggle_atom_model(atom: str):
-    global atom_models
-    if atom in atom_models:
-        del atom_models[atom_models.index(atom)]
+    global atom_models_to_make
+    if atom in atom_models_to_make:
+        del atom_models_to_make[atom_models_to_make.index(atom)]
     else:
-        atom_models += [atom]
+        atom_models_to_make += [atom]
 
 
 def select_atoms():
-    global atom_models
+    global atom_models_to_make
     global atoms_selected
     if not atoms_selected:
-        atom_models = []
-    with ListCompleter(atoms):
+        atom_models_to_make = []
+    with ListCompleter(atom_names):
         while True:
             print("Select Atoms To Create Models For")
-            for atom in atoms:
-                print(f"[{'x'if atom in atom_models else ' '}] {atom}")
+            for atom in atom_names:
+                print(f"[{'x'if atom in atom_models_to_make else ' '}] {atom}")
             print()
             ans = input(">> ")
             ans = ans.strip()
             if ans == "":
-                return
-            elif ans in atoms:
+                break
+            elif ans in atom_names:
                 toggle_atom_model(ans)
             elif ans in ["c", "clear"]:
-                atom_models.clear()
+                atom_models_to_make.clear()
     atoms_selected = True
 
-# matt_todo: why is a refresh method needed here but nowhere else? Is this just another way of making a menu by using a function?
+
 def make_models_menu_refresh(menu):
-    """ This is a `refresh` function that takes in an instance of a menu and add options to it. See `class Menu` `refresh` attrubute.
+    """
+    This is a `refresh` function that takes in an instance of a menu and add options to it. See `class Menu` `refresh` attrubute.
+    By defining a custom refresh function, when the menu refreshes we can clear the menu options to refresh the messages so they
+    update when changed by the user
 
     :param menu: An instance of `class Menu` to which options are added.
     """
@@ -197,7 +204,7 @@ def make_models_menu_refresh(menu):
         f"Model Type(s): {', '.join(map(ModelType.to_str, model_types))}"
     )
     menu.add_message(f"Number of Training Points: {n_training_points}")
-    menu.add_message(f"Atoms: {', '.join(map(str, atom_models))}")
+    menu.add_message(f"Atoms: {', '.join(map(str, atom_models_to_make))}")
     menu.add_final_options()
 
 
@@ -211,7 +218,7 @@ def make_models_menu(directory: Path):
         pass
 
 
-# matt_todo:  I think that the functions could be named better because there is make_models and _make_models. Also the file could be 
+# todo: I think that the functions could be named better because there is make_models and _make_models. Also the file could be
 # arranged better because make_models is followed by move_models instead of _make_models. It is hard to understand what is going on due to the use of globals and a lot of functiosn in functions
 def make_models(
     directory: Path,
@@ -227,7 +234,7 @@ def make_models(
     global model_data_location
     global _model_data
     global n_training_points
-    global atom_models
+    global atom_models_to_make
     global model_types
 
     model_data_location = directory
@@ -239,10 +246,10 @@ def make_models(
         if types is not None
         else [ModelType.iqa]
     )
-    atom_models = atoms or [atom.atom_num for atom in _model_data[0].atoms]
+    atom_models_to_make = atoms or [atom.atom_num for atom in _model_data[0].atoms]
 
     logger.info(
-        f"Making Models for {atom_models} atoms and {model_types} types with {n_training_points} training points"
+        f"Making Models for {atom_models_to_make} atoms and {model_types} types with {n_training_points} training points"
     )
 
     return _make_models(hold=hold)
@@ -290,7 +297,7 @@ def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
     """
     ferebus_directories = []
 
-    for atom in atom_models:
+    for atom in atom_models_to_make:
         training_data = []
         features = _model_data[atom].features
         for i, point in enumerate(_model_data):
@@ -334,15 +341,13 @@ def write_training_set(atom, training_data) -> Path:
     ferebus_directory = GLOBALS.FILE_STRUCTURE["ferebus"] / atom
     mkdir(ferebus_directory, empty=True)
 
-    ntrain = len(training_data)  # matt_todo: There is a global called n_training_points, can't it be used here?
-
     training_set_file = (
         ferebus_directory / f"{GLOBALS.SYSTEM_NAME}_{atom}_TRAINING_SET.csv"
     )
     # write config for ferebus
     write_ftoml(ferebus_directory, atom)
     with open(training_set_file, "w") as ts:
-        if ntrain > 0:
+        if n_training_points > 0:
             # this part is to get headers for the columns (so f1,f2,f3....,q00,q10,....)
             inputs, outputs = training_data[0]
             input_headers = [f"f{i+1}" for i in range(len(inputs))]

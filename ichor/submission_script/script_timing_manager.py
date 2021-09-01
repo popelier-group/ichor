@@ -1,10 +1,9 @@
 from typing import Optional
 
-from ichor.submission_script.ichor import ICHORCommand
+from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.submission_script.submision_script import SubmissionScript
 
-# matt_todo: I think timing_manager.py is a bit ambiguous name. Make into something like timing_manager_submission_script.py to be more precise.
-# because all it does it adds extra lines to the submission script files, it doesn't run any timings itself
+
 class TimingManager:
     """ A class that times how long jobs take. It uses the logging library, see `log_time` function.
     
@@ -31,16 +30,16 @@ class TimingManager:
     def __enter__(self):
         python_job = ICHORCommand()
         if self.message:
-            python_job.run_function(
+            python_job.add_function_to_job(
                 "log_time",
                 f"START:{self.identifier}",
                 self.message,
             )
         else:
-            python_job.run_function("log_time", f"START:{self.identifier}")
+            python_job.add_function_to_job("log_time", f"START:{self.identifier}")
         self.submission_script.add_command(python_job)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         python_job = ICHORCommand()
-        python_job.run_function("log_time", f"FINISH:{self.identifier}")
+        python_job.add_function_to_job("log_time", f"FINISH:{self.identifier}")
         self.submission_script.add_command(python_job)

@@ -5,9 +5,9 @@ from ichor.common.functools import classproperty
 from ichor.logging import logger
 from ichor.modules import FerebusModules, Modules
 from ichor.submission_script.command_line import CommandLine
-from ichor.submission_script.ichor import ICHORCommand
+from ichor.submission_script.ichor_command import ICHORCommand
 
-# matt_todo: I think ferebus.py is a bit ambiguous name. Make into something like aimall_submission_script.py to be more precise.
+
 class FerebusCommand(CommandLine):
     """Class used to construct a FEREBUS job. Jobs are submitted using the `SubmissionScript` class.
     
@@ -50,10 +50,10 @@ class FerebusCommand(CommandLine):
     def repr(self, variables: List[str]) -> str:
         """ Return a string that is used to construct ferebus job files."""
         cmd = f"pushd {variables[0]}\n"
-        cmd += f"  {self.command}\n"
+        cmd += f"  {FerebusCommand.command}\n"
         cmd += "popd\n"
         if self.move_models:
             move_models = ICHORCommand()
-            move_models.run_function("move_models", variables[0])
+            move_models.add_function_to_job("move_models", variables[0])
             cmd += f"{move_models.repr()}\n"
         return cmd

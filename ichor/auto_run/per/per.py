@@ -4,13 +4,10 @@ from pathlib import Path
 from typing import Any, Callable, List, Optional
 
 from ichor.batch_system import JobID
-from ichor.common.io import cp, get_files_of_type, mkdir, pushd
+from ichor.common.io import cp, mkdir, pushd
 
-from ichor.auto_run.ichor import submit_collate_log
-
-
-class TooManyXYZs(Exception):
-    pass
+from ichor.auto_run.ichor import submit_ichor_collate_log_job_to_auto_run
+from ichor.common.points import get_points_location
 
 
 def auto_run_per_value(
@@ -61,18 +58,13 @@ def auto_run_per_value(
                         target_is_directory=True,
                     )  # can be symlinked as all should be identical
             else:
-                # todo: come up with better solution to find initial training set location
-                xyzs = get_files_of_type(".xyz")
-                if len(xyzs) == 0:
-                    raise FileNotFoundError(
-                        "Cannot find training set initialisation location, add xyz to directory"
-                    )
-                elif len(xyzs) > 1:
-                    raise TooManyXYZs(
-                        "Too many xyz files found, remove those that aren't required"
-                    )
-                (path / xyzs[0].name).symlink_to(
-                    xyzs[0]
+                points_location = get_points_location()
+
+                if points_location.suffix != ".xyz":
+                    raise TypeError("Cannot find xyz for make sets")
+
+                (path / points_location.name).symlink_to(
+                    points_location
                 )  # can symlink as xyz won't be modified
 
         if not (path / GLOBALS.FILE_STRUCTURE["programs"]).exists():
@@ -104,10 +96,7 @@ def auto_run_per_value(
         GLOBALS.set(variable, save_value)
         Arguments.config_file = save_config
 
-    print(final_job_ids)
-    quit()
-
-    final_job = submit_collate_log(GLOBALS.CWD, hold = final_job_ids)
+    final_job = submit_ichor_collate_log_job_to_auto_run(GLOBALS.CWD, hold = final_job_ids)
     final_job_ids.append(final_job)
 
     return final_job_ids

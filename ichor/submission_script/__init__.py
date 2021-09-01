@@ -1,15 +1,15 @@
 from pathlib import Path
 
-from ichor.submission_script.aimall import AIMAllCommand
+from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.check_manager import (CheckManager, default_check,
                                                    print_completed)
 from ichor.submission_script.data_lock import DataLock
-from ichor.submission_script.ferebus import FerebusCommand
-from ichor.submission_script.gaussian import GaussianCommand
-from ichor.submission_script.ichor import ICHORCommand
-from ichor.submission_script.python import PythonCommand
+from ichor.submission_script.ferebus_command import FerebusCommand
+from ichor.submission_script.gaussian_command import GaussianCommand
+from ichor.submission_script.ichor_command import ICHORCommand
+from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.submision_script import SubmissionScript
-from ichor.submission_script.timing_manager import TimingManager
+from ichor.submission_script.script_timing_manager import TimingManager
 
 
 def prepend_script_directory(paths):
@@ -52,7 +52,7 @@ SCRIPT_NAMES = ScriptNames(
                 "gaussian": "ICHOR_GAUSSIAN.sh",
                 "aimall": "ICHOR_AIMALL.sh",
                 "ferebus": "ICHOR_FEREBUS.sh",
-                "adaptive_sampling": "ICHOR_ADAPTIVE_SAMPLING.sh",
+                "active_learning": "ICHOR_ADAPTIVE_SAMPLING.sh",
                 "make_sets": "ICHOR_MAKE_SETS.sh",
             }
         ),

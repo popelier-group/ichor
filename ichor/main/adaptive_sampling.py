@@ -1,12 +1,12 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.adaptive_sampling import AdaptiveSamplingMethod
+from ichor.active_learning import ActiveLearningMethod
 from ichor.logging import logger
 from ichor.models import Models
 from ichor.points import PointsDirectory
 
-# matt_todo: Maybe rename this function and file because it performs a bit more that just adaptive sampling.
+# todo: Maybe rename this function and file because it performs a bit more that just adaptive sampling.
 def adaptive_sampling(
     model_directory: Optional[Path] = None,
     sample_pool_directory: Optional[Path] = None,
@@ -31,7 +31,7 @@ def adaptive_sampling(
     if GLOBALS.OPTIMISE_PROPERTY != "all":
         models = models[GLOBALS.OPTIMISE_PROPERTY]
 
-    asm = AdaptiveSamplingMethod(models)
+    asm = ActiveLearningMethod(models)
     points_to_add = asm(sample_pool, GLOBALS.POINTS_PER_ITERATION)
 
     for point in points_to_add:

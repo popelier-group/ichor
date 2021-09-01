@@ -1,5 +1,5 @@
 """Implements an Enum for atomic distances to decrease the chance of spelling mistakes / typos."""
-# matt_todo: potentially move to constants as this will not change. Ones less file to worry about.
+# todo: implement conversions between units
 from enum import Enum
 
 

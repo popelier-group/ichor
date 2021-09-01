@@ -43,14 +43,14 @@ class FileStructure(FileTree):
         self.add("jid", "jid", parent="jobs")
         self.add("DATAFILES", "datafiles", parent="jobs")
 
-        self.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
-        self.add("alpha", "alpha", parent="adaptive_sampling")
-        self.add("cv_errors", "cv_errors", parent="adaptive_sampling")
-        self.add("counter", "counter", parent="adaptive_sampling")
+        self.add("ADAPTIVE_SAMPLING", "active_learning", parent="data")
+        self.add("alpha", "alpha", parent="active_learning")
+        self.add("cv_errors", "cv_errors", parent="active_learning")
+        self.add("counter", "counter", parent="active_learning")
 
-        self.add("child_processes", "child_processes", parent="adaptive_sampling")
+        self.add("child_processes", "child_processes", parent="active_learning")
 
-        self.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
+        self.add("PROPERTIES", "properties_daemon", parent="active_learning")
         self.add(
             "properties.pid", "properties_pid", parent="properties_daemon"
         )
@@ -61,12 +61,12 @@ class FileStructure(FileTree):
             "properties.err", "properties_stderr", parent="properties_daemon"
         )
 
-        self.add("ATOMS", "atoms_daemon", parent="adaptive_sampling")
+        self.add("ATOMS", "atoms_daemon", parent="active_learning")
         self.add("atoms.pid", "atoms_pid", parent="atoms_daemon")
         self.add("atoms.out", "atoms_stdout", parent="atoms_daemon")
         self.add("atoms.err", "atoms_stderr", parent="atoms_daemon")
 
-        self.add("counter", "counter", parent="adaptive_sampling")
+        self.add("counter", "counter", parent="active_learning")
 
         self.add("FILES_REMOVED", "file_remover_daemon", parent="data")
         self.add(
@@ -89,7 +89,3 @@ class FileStructure(FileTree):
         self.add("TEMP", "tmp_scripts", parent="scripts")
         self.add("OUTPUTS", "outputs", parent="scripts")
         self.add("ERRORS", "errors", parent="scripts")
-
-    # todo: if this method is not used, better to delete it to prevent accidental changes in strucutre
-    def modify(self, node_name, node_value):
-        self[node_name] = FileNode(node_value, self[node_name].parent)

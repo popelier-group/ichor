@@ -123,7 +123,7 @@ class GJF(Geometry, File):
 
         self.startup_options = [
             f"nproc={GLOBALS.GAUSSIAN_CORE_COUNT}",
-            f"mem=1GB",  # TODO: Convert this to global variable
+            f"mem={GLOBALS.GAUSSIAN_MEMORY_LIMIT}",
         ]
 
     @property

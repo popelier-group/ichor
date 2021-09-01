@@ -747,9 +747,9 @@ class FileTools:
         tree.create_node("JOBS", "jobs", parent="data")
         tree.create_node("jid", "jid", parent="jobs", is_file=True)
 
-        tree.create_node("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
-        tree.create_node("alpha", "alpha", parent="adaptive_sampling", is_file=True)
-        tree.create_node("cv_errors", "cv_errors", parent="adaptive_sampling", is_file=True)
+        tree.create_node("ADAPTIVE_SAMPLING", "active_learning", parent="data")
+        tree.create_node("alpha", "alpha", parent="active_learning", is_file=True)
+        tree.create_node("cv_errors", "cv_errors", parent="active_learning", is_file=True)
 
         tree.create_node("SCRIPTS", "scripts", parent="data")
         tree.create_node("OUTPUTS", "outputs", parent="scripts")
@@ -3612,7 +3612,7 @@ class Models:
     def write_data(self, indices, points):
         global FILE_STRUCTURE
         
-        adaptive_sampling = FILE_STRUCTURE.get_file_path("adaptive_sampling")
+        adaptive_sampling = FILE_STRUCTURE.get_file_path("active_learning")
         FileTools.mkdir(adaptive_sampling)
 
         cv_errors = self.cross_validation(points)
@@ -3796,7 +3796,7 @@ class Points:
                 true_error += (true_value[int(predicted_atom)-1] - predicted_value)**2
             data["true_errors"].append(true_error)
 
-        FileTools.mkdir(FILE_STRUCTURE.get_file_path("adaptive_sampling"))
+        FileTools.mkdir(FILE_STRUCTURE.get_file_path("active_learning"))
         alpha_file = FILE_STRUCTURE.get_file_path("alpha")
         with open(alpha_file, "w") as f:
             json.dump(data, f)

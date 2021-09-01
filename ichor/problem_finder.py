@@ -1,6 +1,5 @@
 import os
 
-# matt_todo: get_functions_to_run is not accessed
 from .common.functools import get_functions_to_run, run_function
 
 
@@ -123,7 +122,7 @@ class ProblemFinder:
         from .globals import GLOBALS
 
         if not GLOBALS.DISABLE_PROBLEMS:
-            problems_to_find = UsefulTools.get_functions_to_run(self)
+            problems_to_find = get_functions_to_run(self)
             for find_problem in problems_to_find:
                 find_problem()
 

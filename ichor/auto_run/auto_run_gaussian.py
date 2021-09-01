@@ -6,8 +6,8 @@ from ichor.common.types import MutableValue
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, TimingManager)
 
-# todo: better naming for file and function
-def auto_run_gaussian(
+
+def submit_gaussian_job_to_auto_run(
     npoints: MutableValue, hold: Optional[JobID] = None
 ) -> Optional[JobID]:
     """ Writes out the Gaussian script that is needed to run all the individual Gaussian jobs that were written in the datafile in the previous

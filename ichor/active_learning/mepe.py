@@ -5,7 +5,7 @@ import numpy as np
 import numpy.linalg as la
 from scipy.spatial.distance import cdist
 
-from ichor.adaptive_sampling.expected_improvement import ExpectedImprovement
+from ichor.active_learning.expected_improvement import ExpectedImprovement
 from ichor.atoms import ListOfAtoms
 from ichor.common.io import mkdir
 from ichor.models import Model, ModelsResult
@@ -20,6 +20,7 @@ from ichor.models import Model, ModelsResult
     
     Equation numbers provided above relevant code
 """
+
 
 def B(model: Model) -> float:
     """Eq. 6"""
@@ -84,14 +85,20 @@ class MEPE(ExpectedImprovement):
         return cv_errors
 
     def alpha(self) -> float:
+        """ alpha value is a balance factor which varies based on how well the cv error
+        approximated the prediction error of the points added in the previous iteration.
+
+        For the first iteration there are no previously added points therefore alpha defaults
+        to 0.5, for each subsequent iteration, equation 24 of the above cited paper is used.
+        """
         from ichor.globals import GLOBALS
 
         cv_errors_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
         if not cv_errors_file.exists():
-            return 0.5
+            return 0.5  # if the cv_errors_file doesn't exist, there was no previous iteration and we can default to 0.5
 
         try:
-            with open(cv_errors_file, "r") as f:
+            with open(cv_errors_file, "r") as f:  # the previous iterations data is stored as json in cv_errors_file
                 obj = json.load(f)
                 npoints = obj["added_points"]
                 cv_errors = ModelsResult(obj["cv_errors"])
@@ -133,8 +140,8 @@ class MEPE(ExpectedImprovement):
         cv_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
         mkdir(cv_file.parent)
         if cv_file.exists():
-            cv_file.unlink()
-        with open(cv_file, "w") as f:
+            cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
+        with open(cv_file, "w") as f:  # store data as json for next iterations alpha calculation
             json.dump(
                 {
                     "added_points": npoints,

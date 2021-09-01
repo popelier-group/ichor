@@ -6,8 +6,7 @@ from ichor.globals import GLOBALS
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-# todo: better naming for file and function
-def adaptive_sampling(
+def submit_ichor_active_learning_job_to_auto_run(
     model_directory: Path = GLOBALS.FILE_STRUCTURE["models"],
     sample_pool_directory: Path = GLOBALS.FILE_STRUCTURE["sample_pool"],
     hold: Optional[JobID] = None,
@@ -19,11 +18,11 @@ def adaptive_sampling(
     :return JobID: The job ID number assigned to this job after it was submitted to the workload manager (SLURM, SGE, etc.)
     """
     submission_script = SubmissionScript(
-        SCRIPT_NAMES["ichor"]["adaptive_sampling"]
+        SCRIPT_NAMES["ichor"]["active_learning"]
     )
     ichor_command = ICHORCommand()
-    ichor_command.run_function(
-        "adaptive_sampling", str(model_directory), str(sample_pool_directory)
+    ichor_command.add_function_to_job(
+        "active_learning", str(model_directory), str(sample_pool_directory)
     )
     with TimingManager(submission_script, message="Adaptive Sampling"):
         submission_script.add_command(ichor_command)

@@ -5,7 +5,7 @@ from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
-# todo: better naming for file and function
+
 def make_models(
     directory: Path,
     atoms: Optional[List[str]] = None,
@@ -17,7 +17,7 @@ def make_models(
     which is assigned by the workload manager (SGE,SLURM, etc.)."""
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["ferebus"])
     ichor_command = ICHORCommand()
-    ichor_command.run_function(
+    ichor_command.add_function_to_job(
         "make_models",
         str(directory),
         str(atoms.value),

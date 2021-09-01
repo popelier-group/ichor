@@ -49,7 +49,7 @@ class Menu(object):
         self.is_title_enabled = title is not None
         self.message = message
         self.is_message_enabled = message is not None
-        self.refresh = None  # matt_todo: this line is not needed as you are setting the value of self.refresh to an empty lambda function anyway
+        self.refresh = None  # Note it is good practice to define all instance attributes in the __init__ function
         self.set_refresh(refresh)
         self.prompt = prompt
         self.is_open = None
@@ -274,11 +274,6 @@ class Menu(object):
                 print()
         print()
 
-    # matt_todo: this method is not used anywhere in ICHOR, so do not think it is needed.
-    def func_wrapper(self, func):
-        func()
-        self.close()
-
     # show the menu
     # get the option index from the input
     # return the corresponding option handler
@@ -315,9 +310,7 @@ class Menu(object):
                         index in self.close_options,  # returns True or False
                     )
                 except (ValueError, IndexError):
-                    # matt_todo: Here self.input() is executed, but shouldn't the return value be self.input, False, False
-                    # so then going to the .run method func is self.input which is later executed?
-                    return self.input(), False, False 
+                    return self.input, False, False
                 except KeyError:
                     print("Error: Invalid input")
 

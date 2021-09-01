@@ -1,7 +1,7 @@
 import re
 
-# todo: I think this file should be moved somewhere else because it does not really have to do with helpful types/classes used in ICHOR
-# TODO: Add revision in comparisons
+
+# todo: Add revision in comparisons
 class Version:
     """ Version system for ICHOR. Useful when comparing two different ICHOR versions."""
 

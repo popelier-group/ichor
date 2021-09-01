@@ -60,10 +60,9 @@ class Models(Directory, list):
             return x
         raise TypeError(f"Cannot predict values from type '{type(x)}'")
 
-    # matt_todo: better naming of variables, do not call it x as it is too arbitrary
-    def _features_from_atoms(self, x: Atoms) -> Dict[str, np.ndarray]:
+    def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
         """ Returns a dictionary containing atom name as key and atom features for values."""
-        return {atom.name: atom.features for atom in x}
+        return {atom.name: atom.features for atom in atoms}
 
     def _features_from_list_of_atoms(
         self, x: ListOfAtoms

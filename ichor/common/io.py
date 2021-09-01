@@ -179,3 +179,45 @@ def get_files_of_type(
     return [
         f for f in directory.iterdir() if f.is_file() and f.suffix in filetype
     ]
+
+
+@convert_to_path
+def tail(path: Path, lines: int = 20) -> str:
+    """ Works in the same way as the unix `tail` command giving the last n lines of a file
+
+    :param path: the path of the file to read last m lines of
+    :param lines: specifies how many lines from the bottom of the file to return
+    :returns last n lines of file as string
+    """
+    with open(path, 'rb') as f:
+        total_lines_wanted = lines
+
+        BLOCK_SIZE = 1024
+        f.seek(0, 2)
+        block_end_byte = f.tell()
+        lines_to_go = total_lines_wanted
+        block_number = -1
+        blocks = []
+        while lines_to_go > 0 and block_end_byte > 0:
+            if (block_end_byte - BLOCK_SIZE > 0):
+                f.seek(block_number*BLOCK_SIZE, 2)
+                blocks.append(f.read(BLOCK_SIZE))
+            else:
+                f.seek(0,0)
+                blocks.append(f.read(block_end_byte))
+            lines_found = blocks[-1].count(b'\n')
+            lines_to_go -= lines_found
+            block_end_byte -= BLOCK_SIZE
+            block_number -= 1
+        all_read_text = b''.join(reversed(blocks))
+        return b'\n'.join(all_read_text.splitlines()[-total_lines_wanted:]).decode('utf-8')
+
+
+@convert_to_path
+def last_line(path: Path) -> str:
+    """ Alias for `tail` for getting the last line of a file
+
+    :param path: the path of the file to read last line of
+    :returns last line of file as string
+    """
+    return tail(path, lines=1)

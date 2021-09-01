@@ -29,15 +29,14 @@ class CommandGroup(CommandLine, list):
         """ Retruns a string containing any modules that need to be loaded in order for a program to run"""
         return self[0].modules
 
-    # matt_todo: import Union type and make it Union[List[str], []]
     @property
     def arguments(self) -> List[str]:
         """ Returns the arguments (if any) that need to be passed to the program that the job is going to execute."""
         return self[0].arguments
 
-    # matt_todo: Not sure how the options are different than the arguments. Only saw options in class AIMALLCommand
     @property
     def options(self) -> List[str]:
+        """ Returns the options to write at the top of the submission script """
         return self[0].options
 
     def repr(self, variables: Optional[List[str]] = None) -> str:

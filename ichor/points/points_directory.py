@@ -25,7 +25,7 @@ class PointsDirectory(Points, Directory):
         These paths are defined in GLOBALS.
     """
     def __init__(self, path):
-        # matt_todo: Points does not have __init__, so don't think this is needed
+        # Initialise `list` parent class of `Points`
         Points.__init__(self)
         # this will call Directory __init__ method (which then calls self.parse)
         # since PointsDirectory also implements a `parse` method, it will be called instead of the Directory parse method

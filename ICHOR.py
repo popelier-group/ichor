@@ -1757,12 +1757,12 @@ class FileStructure(Tree):
         self.add("jid", "jid", parent="jobs")
         self.add("DATAFILES", "datafiles", parent="jobs")
 
-        self.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
-        self.add("alpha", "alpha", parent="adaptive_sampling")
-        self.add("cv_errors", "cv_errors", parent="adaptive_sampling")
-        self.add("counter", "counter", parent="adaptive_sampling")
+        self.add("ADAPTIVE_SAMPLING", "active_learning", parent="data")
+        self.add("alpha", "alpha", parent="active_learning")
+        self.add("cv_errors", "cv_errors", parent="active_learning")
+        self.add("counter", "counter", parent="active_learning")
 
-        self.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
+        self.add("PROPERTIES", "properties_daemon", parent="active_learning")
         self.add(
             "properties.pid", "properties_pid", parent="properties_daemon"
         )
@@ -1773,12 +1773,12 @@ class FileStructure(Tree):
             "properties.err", "properties_stderr", parent="properties_daemon"
         )
 
-        self.add("ATOMS", "atoms_daemon", parent="adaptive_sampling")
+        self.add("ATOMS", "atoms_daemon", parent="active_learning")
         self.add("atoms.pid", "atoms_pid", parent="atoms_daemon")
         self.add("atoms.out", "atoms_stdout", parent="atoms_daemon")
         self.add("atoms.err", "atoms_stderr", parent="atoms_daemon")
 
-        self.add("counter", "counter", parent="adaptive_sampling")
+        self.add("counter", "counter", parent="active_learning")
 
         self.add("FILES_REMOVED", "file_remover_daemon", parent="data")
         self.add(
@@ -3780,11 +3780,11 @@ class FileTools:
         tree.add("jid", "jid", parent="jobs")
         tree.add("DATAFILES", "datafiles", parent="jobs")
 
-        tree.add("ADAPTIVE_SAMPLING", "adaptive_sampling", parent="data")
-        tree.add("alpha", "alpha", parent="adaptive_sampling")
-        tree.add("cv_errors", "cv_errors", parent="adaptive_sampling")
+        tree.add("ADAPTIVE_SAMPLING", "active_learning", parent="data")
+        tree.add("alpha", "alpha", parent="active_learning")
+        tree.add("cv_errors", "cv_errors", parent="active_learning")
 
-        tree.add("PROPERTIES", "properties_daemon", parent="adaptive_sampling")
+        tree.add("PROPERTIES", "properties_daemon", parent="active_learning")
         tree.add(
             "properties.pid", "properties_pid", parent="properties_daemon"
         )
@@ -3795,7 +3795,7 @@ class FileTools:
             "properties.err", "properties_stderr", parent="properties_daemon"
         )
 
-        tree.add("ATOMS", "atoms_daemon", parent="adaptive_sampling")
+        tree.add("ATOMS", "atoms_daemon", parent="active_learning")
         tree.add("atoms.pid", "atoms_pid", parent="atoms_daemon")
         tree.add("atoms.out", "atoms_stdout", parent="atoms_daemon")
         tree.add("atoms.err", "atoms_stderr", parent="atoms_daemon")
@@ -6092,7 +6092,7 @@ class AutoTools:
 
         jid = None
 
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["adaptive_sampling"])
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["active_learning"])
         counter_loc = GLOBALS.FILE_STRUCTURE["counter"]
         if os.path.exists(counter_loc):
             with open(counter_loc, "r") as f:
@@ -10258,7 +10258,7 @@ class Models:
         return sig * np.sqrt(np.abs(mu))
 
     def write_data(self, indices, points):
-        adaptive_sampling = GLOBALS.FILE_STRUCTURE["adaptive_sampling"]
+        adaptive_sampling = GLOBALS.FILE_STRUCTURE["active_learning"]
         FileTools.mkdir(adaptive_sampling)
 
         cv_errors = self.cross_validation(points)
@@ -10800,7 +10800,7 @@ class Set(Points):
 
             data["true_errors"].append(true_error)
 
-        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["adaptive_sampling"])
+        FileTools.mkdir(GLOBALS.FILE_STRUCTURE["active_learning"])
         alpha_file = GLOBALS.FILE_STRUCTURE["alpha"]
         with open(alpha_file, "w") as f:
             json.dump(data, f)
@@ -14061,14 +14061,14 @@ def submit_gjfs(directory):
     logger.info("Submitting gjfs to Gaussian")
     gjfs = Set(directory).read_gjfs()
     gjfs.format_gjfs()
-    return gjfs.submit_gjfs()
+    return gjfs.submit_ichor_gaussian_command_to_auto_run()
 
 
 @UsefulTools.external_function()
 def submit_wfns(directory, atoms="all"):
     logger.info("Submitting wfns to AIMAll")
     wfns = Set(directory).read_gjfs().read_wfns()
-    wfns.submit_wfns(atoms=atoms)
+    wfns.submit_ichor_aimall_command_to_auto_run(atoms=atoms)
 
 
 @UsefulTools.external_function()

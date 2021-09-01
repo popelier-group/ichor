@@ -16,6 +16,10 @@ class SubmissionScript:
     These job scripts will have different contents depending on the number of cores selected, the number of tasks to do (if running an array job), etc.,
     so they need to be written out dynamically depending on what is going to be ran.
     """
+
+    SEPARATOR = ","  # separator which is used to separate names of files in the datafiles (files with random UID names) which are written by ICHOR.
+    DATAFILE = "ICHOR_DATFILE"  # name of the bash variable which is used to store the location of the datafile for the given job.
+
     def __init__(self, path: Path):
         self.path = Path(path)
         self.commands = []  # a list of commands to be submitted to batch system
@@ -80,60 +84,40 @@ class SubmissionScript:
 
         modules = []
         for command in self.grouped_commands:
-            modules += command.modules[GLOBALS.MACHINE] # modules depend on which machine (CSF/FFLUXLAB) we are currently on
+            modules += command.modules[GLOBALS.MACHINE]  # modules depend on which machine (CSF/FFLUXLAB) we are currently on
         return list(set(modules))
 
-    def group_commands(self) -> List[CommandGroup]:
-        """ Group commands if they need to be submitted into an array job. These commands will all be the same type, i.e. they
+    @property
+    def grouped_commands(self) -> List[CommandGroup]:
+        """
+        Group commands if they need to be submitted into an array job. These commands will all be the same type, i.e. they
         will all be Gaussian jobs, or AIMALL jobs. Sometimes ICHOR needs to be ran after the job is complete (for example ICHOR needs
-        to be ran after a FEREBUS job in order to do adaptive sampling). """
+        to be ran after a FEREBUS job in order to do adaptive sampling).
+
+        e.g. if we had a list of commands like the following:
+        [Gaussian, Gaussian, Ichor, AIMAll, AIMAll]
+        The commands will be grouped by type:
+        [[Gaussian, Gaussian], [Ichor], [AIMAll, AIMAll]]
+
+        The groupings are then used to allocate a task array to the batch system
+        """
         commands = []
         command_group = CommandGroup()  # make a new command group
         command_type = None
-        # matt_todo: not really sure what this  is doing. Is this to make a group of Gaussian jobs for example to run in a job array?
-        # matt_todo: also command.group is only defined for ICHORCommand jobs. Maybe then modify the for loop to be more explicit.
+
         # iterate over each command instance that has been added to self.commands
         for command in self.commands:
             # if the command is not equal to command_type or commands.group is set to False (group method defined in CommandLine class, default True)
-            if type(command) != command_type or not command.group:
+            if type(command) != command_type or not command.group:  # .group flag used by command if it doesn't want to be grouped
                 if len(command_group) > 0:  # just for first iteration of the loop
                     commands += [command_group]
                     command_group = CommandGroup()
                 command_type = type(command)
             command_group += [command]
-        # commands = [CommandGroup([GaussianCommand(), GaussianCommand()]), CommandGroup([IchorCommand])]
-        # [[Gaussian], [Ichor], [Aimall]]
-
-        # In one job script file
-        # Gaussian part
-        # ichor part
-        # Aimall part
 
         if len(command_group) > 0:
             commands += [command_group]
         return commands
-
-        # ICHOR_SUBMIT_GJF
-        # GAUSSIAN commands
-        # ICHOR_SUBMIT_WFNS
-        # AIMALL commands
-
-    # matt_todo: why is a separate method needed? Make the top group_commands method into a property and rename it so there are not two methods
-    @property
-    def grouped_commands(self):
-        return self.group_commands()
-
-    # matt_todo: These just return constant things, so there is no need for classproperty here I think. Can make into class variables
-    @classproperty
-    def separator(self):
-        """ Returns the separator which is used to separate names of files in the datafiles (files with random UID names)
-        which are written by ICHOR."""
-        return ","
-
-    @classproperty
-    def datafile_var(self) -> str:
-        """ Returns the name of the variable which is used to store the location of the datafile for the given job."""
-        return "ICHOR_DATFILE"
 
     @classmethod
     def arr(cls, n):
@@ -150,7 +134,7 @@ class SubmissionScript:
             g09 ${arr1[$SGE_TASK_ID-1]} ${arr2[$SGE_TASK_ID-1]}
             The g09 is the program (however this depend on which system you are on). The rest is what is returned by this method.
         """
-        # matt_todo: pretty sure you do not need two of the {{ }} on each side
+        # Note: double {{ }} is python notation for writing a curly brace in an f-string
         return f"${{{cls.arr(n)}[${BATCH_SYSTEM.TaskID}-1]}}"
 
     @classmethod
@@ -171,29 +155,22 @@ class SubmissionScript:
             mkdir(datafile.parent)
             with open(datafile, "w") as f:
                 for cmd_data in data:
-                    # matt_todo: self.separator should be SubmissionScript.separator because separator is a class property
-                    # matt_todo: not sure if the map is needed as you have made them strings in GaussianCommand.data anyway, so they
-                    # should already be strings
-                    f.write(f"{self.separator.join(map(str, cmd_data))}\n")
+                    # Note: cmd_data should already be strings but we will perform a map just to be safe
+                    f.write(f"{SubmissionScript.SEPARATOR.join(map(str, cmd_data))}\n")
 
-    # matt_todo: I this this method could be renamed and some of the variables as well, because it doesn't really read a datafile string,
-    # matt_todo: it just construct the strings needed to make the arrays for the datafiles
-    # matt_todo: maybe call it setup_script_arrays or something like that
-    def read_datafile_str(self, datafile: Path, data: List[List[str]]) -> str:
+    def setup_script_arrays(self, datafile: Path, data: List[List[str]]) -> str:
         """ Forms the strings for array jobs which are then written to the submission script to specify the number of 
         tasks in the array job and things like that. Easiest to see if you have GAUSSIAN.sh or another submission script opened.
         """
-        # matt_todo: make used of classproperty so SubmissionScript.datafile_var instead of self.datafile_var. I think that will make it easier to read
-        # matt_todo: really I think some of these can be made into class variables since they are constant, no need of classproperty here
 
         # number of files needeed for one of the tasks in the array job
         ndata = len(data[0])
 
         # absolute location of datafile on disk
-        datafile_str = f"{self.datafile_var}={datafile.absolute()}"
+        datafile_str = f"{SubmissionScript.DATAFILE}={datafile.absolute()}"
 
         # writes out the number of arrays needed for the job
-        # matt_todo: since using a for loop below, maybe use a for loop here as well to make it more readable
+        # Note: implemented as generator so that a list generation and comprehension is not required
         read_datafile_str = "".join(
             f"{self.arr(i)}=()\n" for i in range(ndata)
         )
@@ -201,13 +178,13 @@ class SubmissionScript:
         # writes out the while loop needed to read in files names into their corresponding arrays
         # -r option prevents backslashes from being treated as escape characters
         read_datafile_str += (
-            f"while IFS={self.separator} read -r "
+            f"while IFS={SubmissionScript.SEPARATOR} read -r "
             f"{' '.join(self.var(i) for i in range(ndata))}\n"
         )
         read_datafile_str += "do\n"
         for i in range(ndata):
             read_datafile_str += f"    {self.arr(i)}+=(${self.var(i)})\n"
-        read_datafile_str += f"done < ${self.datafile_var}\n"
+        read_datafile_str += f"done < ${SubmissionScript.DATAFILE}\n"
 
         return f"{datafile_str}\n{read_datafile_str}"
 
@@ -220,7 +197,7 @@ class SubmissionScript:
         :param data: A list of lists. Each inner list contains strings which are the names of the inputs and output files.
         """
         self.write_datafile(datafile, data)
-        datafile_str = self.read_datafile_str(datafile, data)
+        datafile_str = self.setup_script_arrays(datafile, data)
         datafile_variables = [self.array_index(i) for i in range(len(data[0]))]
         set_uid()
         return datafile_variables, datafile_str
@@ -284,10 +261,17 @@ class SubmissionScript:
         if not GLOBALS.SUBMITTED:
             return BATCH_SYSTEM.submit_script(self.path, hold)
 
-    # matt_todo: Is the SubmissionScript class used as a context manager somewhere?
-    def __enter__(self):
+    def __enter__(self) -> 'SubmissionScript':
+        """
+        Allows for syntax such as
+        ```python
+        with SubmissionScript(...) as submission_script:
+            ...
+        ```
+        :return: self: self instance for used during context
+        """
         return self
 
-    # matt_todo: some of the arguments are not used inside the __exit__ method
+    # Note: arguments of __exit__ statement are required
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.write()

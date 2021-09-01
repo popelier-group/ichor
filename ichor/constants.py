@@ -7,8 +7,8 @@ import numpy as np
 
 from ichor.common.types import Version
 
-# matt_todo: I think sticking to only 1 logo will be better for consistency. Someone might want to parse the file for some reason.
-ichor_logo_1 = (
+# old logo memorialised here for old times sake, it was a bit too big imho
+old_ichor_logo = (
     "#############################################################################################################\n"
     "#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#\n"
     "#::#######################################################################################################::#\n"
@@ -34,7 +34,7 @@ ichor_logo_1 = (
     "#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#\n"
 )
 
-ichor_logo_2 = (
+new_ichor_logo = (
     "###############################################\n"
     "#.####..######..##.....##..#######..########..#\n"
     "#..##..##....##.##.....##.##.....##.##.....##.#\n"
@@ -46,12 +46,7 @@ ichor_logo_2 = (
     "###############################################\n"
 )
 
-_ichor_logos = [
-    ichor_logo_1,
-    ichor_logo_2,
-]
-
-ichor_logo = random.choice(_ichor_logos)
+ichor_logo = new_ichor_logo
 
 BOAQ_VALUES: List[str] = [
     "auto",

@@ -2,11 +2,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Optional, Sequence
 
-from ichor.auto_run.aimall import auto_run_aimall
-from ichor.auto_run.ferebus import auto_run_ferebus
-from ichor.auto_run.gaussian import auto_run_gaussian
-from ichor.auto_run.ichor import (adaptive_sampling, make_models, make_sets,
-                                  submit_gjfs, submit_wfns)
+from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
+from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
+from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
+from ichor.auto_run.ichor import (submit_ichor_active_learning_job_to_auto_run, make_models, submit_make_sets_job_to_auto_run,
+                                  submit_ichor_gaussian_command_to_auto_run, submit_ichor_aimall_command_to_auto_run)
 from ichor.batch_system import JobID
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
@@ -18,13 +18,13 @@ from ichor.submission_script import DataLock
 
 
 __all__ = [
-    "auto_run_gaussian",
-    "auto_run_aimall",
-    "auto_run_ferebus",
-    "submit_gjfs",
-    "submit_wfns",
+    "submit_gaussian_job_to_auto_run",
+    "submit_aimall_job_to_auto_run",
+    "submit_ferebus_job_to_auto_run",
+    "submit_ichor_gaussian_command_to_auto_run",
+    "submit_ichor_aimall_command_to_auto_run",
     "make_models",
-    "adaptive_sampling",
+    "submit_ichor_active_learning_job_to_auto_run",
     "auto_run",
 ]
 
@@ -76,15 +76,15 @@ class IterStep:
 
 # order in which to submit jobs for each of the adaptive sampling iterations.
 func_order = [
-    IterStep(submit_gjfs, IterUsage.All, [IterArgs.TrainingSetLocation]),
-    IterStep(auto_run_gaussian, IterUsage.All, [IterArgs.nPoints]),
+    IterStep(submit_ichor_gaussian_command_to_auto_run, IterUsage.All, [IterArgs.TrainingSetLocation]),
+    IterStep(submit_gaussian_job_to_auto_run, IterUsage.All, [IterArgs.nPoints]),
     IterStep(
-        submit_wfns,
+        submit_ichor_aimall_command_to_auto_run,
         IterUsage.All,
         [IterArgs.TrainingSetLocation, IterArgs.Atoms],
     ),
     IterStep(
-        auto_run_aimall,
+        submit_aimall_job_to_auto_run,
         IterUsage.All,
         [IterArgs.nPoints, IterArgs.Atoms],
     ),
@@ -94,12 +94,12 @@ func_order = [
         [IterArgs.TrainingSetLocation, IterArgs.Atoms],
     ),
     IterStep(
-        auto_run_ferebus,
+        submit_ferebus_job_to_auto_run,
         IterUsage.All,
         [IterArgs.FerebusDirectory, IterArgs.Atoms],
     ),
     IterStep(
-        adaptive_sampling,
+        submit_ichor_active_learning_job_to_auto_run,
         IterUsage.AllButLast,
         [IterArgs.ModelLocation, IterArgs.SamplePoolLocation],
     ),
@@ -137,7 +137,7 @@ def next_iter(
                 points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
             )
             # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
-            job_id = IterStep(make_sets, IterUsage.All, [points_location]).run(
+            job_id = IterStep(submit_make_sets_job_to_auto_run, IterUsage.All, [points_location]).run(
                 job_id, state
             )
             print(f"Submitted: {job_id}")

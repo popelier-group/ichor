@@ -177,7 +177,6 @@ if HAVE_PROTOCOLS:
     __all__.extend(["Protocol", "runtime", "runtime_checkable"])
 
 
-# TODO
 if hasattr(typing, "NoReturn"):
     NoReturn = typing.NoReturn
 elif hasattr(typing, "_FinalTypingBase"):

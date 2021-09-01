@@ -22,13 +22,11 @@ class PythonCommand(CommandLine):
         """ Returns a `Modules` instance which contains modules that need to be loaded on the machine for Python to function."""
         return PythonModules
 
-    # matt_todo: Maybe make these into class variables instead of classproperty because they are static
     @classproperty
     def command(self) -> str:
         """ Returns the command(program) which is ran in the job."""
         return "python"
 
-    # matt_todo: variables argument not used in the function, also make self.command into PythonCommand.command instead
     def repr(self, variables=None) -> str:
         """ Returns a string which is then written into the submission script in order to run a python job."""
-        return f"{self.command} {self.script} {' '.join(self.args)}"
+        return f"{PythonCommand.command} {self.script} {' '.join(self.args)}"

@@ -4,19 +4,35 @@ from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import natsorted, ignore_alpha
 from ichor.files.directory import Directory
 from ichor.files.int import INT
+from ichor.atoms import Atoms
+
+from typing import Optional
 
 
 class INTs(Directory, dict):
-    # todo: check if parent parameter is correctly described
     """Wraps around a directory which contains all .int files for the system.
     
     :param path: The Path corresponding to a directory holding .int files
     :param parent: An `Atoms` instance that holds coordinate information for all the atoms in the system
     """
-    def __init__(self, path, parent=None):
-        self.parent = parent
+    def __init__(self, path, parent: Optional[Atoms] = None):
+        self._parent = None
+        if parent is not None:
+            self.parent = parent
         dict.__init__(self)
         Directory.__init__(self, path)
+
+    @property
+    def parent(self) -> Atoms:
+        if self._parent is None:
+            raise ValueError(f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined")
+        return self._parent
+
+    @parent.setter
+    def parent(self, value: Atoms):
+        if not isinstance(value, Atoms):
+            raise TypeError(f"'parent' must be of type 'Atoms' not of type {type(value)}")
+        self._parent = value
 
     def parse(self) -> None:
         for f in self:
