@@ -7,10 +7,11 @@ from ichor.common import Daemon
 class PerPropertyDaemon(Daemon):
     def __init__(self):
         from ichor.globals import GLOBALS
+        from ichor.file_structure import FILE_STRUCTURE
 
-        pidfile = GLOBALS.CWD / GLOBALS.FILE_STRUCTURE["properties_pid"]
-        stdout = GLOBALS.CWD / GLOBALS.FILE_STRUCTURE["properties_stdout"]
-        stderr = GLOBALS.CWD / GLOBALS.FILE_STRUCTURE["properties_stderr"]
+        pidfile = GLOBALS.CWD / FILE_STRUCTURE["properties_pid"]
+        stdout = GLOBALS.CWD / FILE_STRUCTURE["properties_stdout"]
+        stderr = GLOBALS.CWD / FILE_STRUCTURE["properties_stderr"]
         super().__init__(pidfile, stdout=stdout, stderr=stderr)
 
     def run(self):
@@ -19,13 +20,13 @@ class PerPropertyDaemon(Daemon):
 
 
 def auto_run_per_property(run_func: Optional[Callable] = None) -> None:
-    from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
     from ichor.main.make_models import ModelType
 
     properties = [ty.value for ty in ModelType]
     auto_run_per_value(
         "OPTIMISE_PROPERTY",
         properties,
-        directory=GLOBALS.FILE_STRUCTURE["properties"],
+        directory=FILE_STRUCTURE["properties"],
         run_func=run_func,
     )

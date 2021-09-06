@@ -261,31 +261,32 @@ def make_models(
 def move_models(model_dir: Optional[Path] = None):
     """Move model files from the ferebus directory to the models directory."""
     from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
     from ichor.models import Model
 
-    mkdir(GLOBALS.FILE_STRUCTURE["models"])
-    mkdir(GLOBALS.FILE_STRUCTURE["model_log"])
+    mkdir(FILE_STRUCTURE["models"])
+    mkdir(FILE_STRUCTURE["model_log"])
 
     if model_dir is None:
-        model_dir = GLOBALS.FILE_STRUCTURE["ferebus"]
+        model_dir = FILE_STRUCTURE["ferebus"]
 
     for d in model_dir.iterdir():
-        if d.is_dir() and d != GLOBALS.FILE_STRUCTURE["models"]:
+        if d.is_dir() and d != FILE_STRUCTURE["models"]:
             for f in d.iterdir():
                 if f.suffix == ".model":
-                    cp(f, GLOBALS.FILE_STRUCTURE["models"])
-                    model_log = GLOBALS.FILE_STRUCTURE[
+                    cp(f, FILE_STRUCTURE["models"])
+                    model_log = FILE_STRUCTURE[
                         "model_log"
                     ] / GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
                     logger.info(
-                        f"Moving {f} to {GLOBALS.FILE_STRUCTURE['models']} and {model_log}"
+                        f"Moving {f} to {FILE_STRUCTURE['models']} and {model_log}"
                     )
                     mkdir(model_log)
                     cp(f, model_log)
 
         elif d.is_file() and d.suffix == ".model":
-            cp(d, GLOBALS.FILE_STRUCTURE["models"])
-            model_log = GLOBALS.FILE_STRUCTURE["model_log"] / (
+            cp(d, FILE_STRUCTURE["models"])
+            model_log = FILE_STRUCTURE["model_log"] / (
                 GLOBALS.SYSTEM_NAME + str(Model(d).ntrain).zfill(4)
             )
             mkdir(model_log)
@@ -339,9 +340,10 @@ def write_training_set(atom, training_data) -> Path:
         while the outputs are stored as a dictionary, containing key:value paris of property_name (eg. iqa, q00) : value
     """
     from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
 
     # make a ferebus directory for each atom
-    ferebus_directory = GLOBALS.FILE_STRUCTURE["ferebus"] / atom
+    ferebus_directory = FILE_STRUCTURE["ferebus"] / atom
     mkdir(ferebus_directory, empty=True)
 
     training_set_file = (

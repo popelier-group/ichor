@@ -48,19 +48,20 @@ class SubmissionScript:
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
         the system on which the job is ran, as well as on the number of cores that the job needs."""
         from ichor.globals import GLOBALS
+        from ichor.file_structure import FILE_STRUCTURE
 
-        mkdir(GLOBALS.FILE_STRUCTURE["outputs"])
-        mkdir(GLOBALS.FILE_STRUCTURE["errors"])
+        mkdir(FILE_STRUCTURE["outputs"])
+        mkdir(FILE_STRUCTURE["errors"])
 
         # change current working directory to directory from which ICHOR is launched.
         # make the paths to outputs and errors absolute
         options = [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
             BATCH_SYSTEM.output_directory(
-                GLOBALS.FILE_STRUCTURE["outputs"].resolve()
+                FILE_STRUCTURE["outputs"].resolve()
             ),
             BATCH_SYSTEM.error_directory(
-                GLOBALS.FILE_STRUCTURE["errors"].resolve()
+                FILE_STRUCTURE["errors"].resolve()
             ),
         ]
 
@@ -216,6 +217,7 @@ class SubmissionScript:
 
     def write(self):
         from ichor.globals import GLOBALS
+        from ichor.file_structure import FILE_STRUCTURE
 
         mkdir(self.path.parent)
 
@@ -251,7 +253,7 @@ class SubmissionScript:
                 if (
                     command_group.data
                 ):  # Gaussian, Ferebus, AIMALL jobs need access to datafiles
-                    datafile = GLOBALS.FILE_STRUCTURE["datafiles"] / Path(
+                    datafile = FILE_STRUCTURE["datafiles"] / Path(
                         str(GLOBALS.UID)
                     )
                     # get the data that is needed for each command in a command group

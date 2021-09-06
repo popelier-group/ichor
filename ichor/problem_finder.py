@@ -58,12 +58,12 @@ class ProblemFinder:
 
     # @run_function(2)
     def check_directories(self):
-        from .globals import GLOBALS
+        from ichor.file_structure import FILE_STRUCTURE
 
         dirs_to_check = ["training_set", "sample_pool"]
 
         for dir_name in dirs_to_check:
-            dir_path = GLOBALS.FILE_STRUCTURE[dir_name]
+            dir_path = FILE_STRUCTURE[dir_name]
             if not os.path.isdir(dir_path):
                 self.add(
                     Problem(

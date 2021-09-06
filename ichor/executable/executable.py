@@ -4,7 +4,7 @@ from typing import Optional
 
 from ichor.git import Repo
 from ichor.git.util import get_git_credentials
-from ichor.globals import GLOBALS
+from ichor.file_structure import FILE_STRUCTURE
 
 
 class Executable(ABC):
@@ -16,7 +16,7 @@ class Executable(ABC):
     ):
         self.git_repository = git_repository
         self.branch = branch
-        self.path = path or GLOBALS.FILE_STRUCTURE["programs"] / self.name
+        self.path = path or FILE_STRUCTURE["programs"] / self.name
 
     @property
     def name(self):

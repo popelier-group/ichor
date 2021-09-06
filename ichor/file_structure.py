@@ -39,11 +39,13 @@ class FileStructure(FileTree):
         self.add("PROGRAMS", "programs")  # , parent="data")
         self.add("data", "data_file", parent="data")
 
+        self.add("machine", "machine", parent="data")
+
         self.add("JOBS", "jobs", parent="data")
         self.add("jid", "jid", parent="jobs")
         self.add("DATAFILES", "datafiles", parent="jobs")
 
-        self.add("ADAPTIVE_SAMPLING", "active_learning", parent="data")
+        self.add("ACTIVE_LEARNING", "active_learning", parent="data")
         self.add("alpha", "alpha", parent="active_learning")
         self.add("cv_errors", "cv_errors", parent="active_learning")
         self.add("counter", "counter", parent="active_learning")
@@ -91,3 +93,6 @@ class FileStructure(FileTree):
         self.add("TEMP", "tmp_scripts", parent="scripts")
         self.add("OUTPUTS", "outputs", parent="scripts")
         self.add("ERRORS", "errors", parent="scripts")
+
+
+FILE_STRUCTURE = FileStructure()

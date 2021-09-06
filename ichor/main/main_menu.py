@@ -37,7 +37,7 @@ def points_directory_menu(path):
 def main_menu() -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
     from ichor.auto_run import auto_run
-    from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
     from ichor.main.adaptive_sampling import adaptive_sampling
     from ichor.main.per_menu import auto_run_per_menu
 
@@ -51,28 +51,28 @@ def main_menu() -> None:
             points_directory_menu,
             # give key word arguments which are passed to the handler function
             kwargs={
-                "path": GLOBALS.FILE_STRUCTURE["training_set"]
+                "path": FILE_STRUCTURE["training_set"]
             },  # get the Path of the training set from GLOBALS.FILE_STRUCTURE
         )
         menu.add_option(
             "2",
             "Sample Pool Menu",
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["sample_pool"]},
+            kwargs={"path": FILE_STRUCTURE["sample_pool"]},
         )
         menu.add_option(
             "3",
             "Validation Set Menu",
             points_directory_menu,
-            kwargs={"path": GLOBALS.FILE_STRUCTURE["validation_set"]},
+            kwargs={"path": FILE_STRUCTURE["validation_set"]},
         )
         menu.add_option(
             "4",
             "Adaptive Sampling",
             adaptive_sampling,
             kwargs={
-                "model_directory": GLOBALS.FILE_STRUCTURE["models"],
-                "sample_pool_directory": GLOBALS.FILE_STRUCTURE["sample_pool"],
+                "model_directory": FILE_STRUCTURE["models"],
+                "sample_pool_directory": FILE_STRUCTURE["sample_pool"],
             },
         )
         menu.add_space()  # add a blank line

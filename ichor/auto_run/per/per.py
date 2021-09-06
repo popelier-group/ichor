@@ -17,6 +17,7 @@ def auto_run_per_value(
 ) -> List[Optional[JobID]]:
     from ichor.arguments import Arguments
     from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
 
     final_job_ids = []
 
@@ -24,34 +25,34 @@ def auto_run_per_value(
         path = directory / value
         mkdir(path)
 
-        mkdir(GLOBALS.FILE_STRUCTURE["child_processes"].parent)
+        mkdir(FILE_STRUCTURE["child_processes"].parent)
         child_processes = []
-        if GLOBALS.FILE_STRUCTURE["child_processes"].exists():
-            with open(GLOBALS.FILE_STRUCTURE["child_processes"], "r") as f:
+        if FILE_STRUCTURE["child_processes"].exists():
+            with open(FILE_STRUCTURE["child_processes"], "r") as f:
                 child_processes = json.load(f)
         child_processes.append(str(path.absolute()))
-        with open(GLOBALS.FILE_STRUCTURE["child_processes"], "w") as f:
+        with open(FILE_STRUCTURE["child_processes"], "w") as f:
             json.dump(child_processes, f)
 
         if not (
-            path / GLOBALS.FILE_STRUCTURE["training_set"]
+            path / FILE_STRUCTURE["training_set"]
         ).exists():  # No need to make training set if already exists
-            if GLOBALS.FILE_STRUCTURE["training_set"].exists():
+            if FILE_STRUCTURE["training_set"].exists():
                 cp(
-                    GLOBALS.FILE_STRUCTURE["training_set"],
-                    path / GLOBALS.FILE_STRUCTURE["training_set"],
+                    FILE_STRUCTURE["training_set"],
+                    path / FILE_STRUCTURE["training_set"],
                 )  # need to copy as will be modified
-                if GLOBALS.FILE_STRUCTURE["sample_pool"].exists():
+                if FILE_STRUCTURE["sample_pool"].exists():
                     cp(
-                        GLOBALS.FILE_STRUCTURE["sample_pool"],
-                        path / GLOBALS.FILE_STRUCTURE["sample_pool"],
+                        FILE_STRUCTURE["sample_pool"],
+                        path / FILE_STRUCTURE["sample_pool"],
                     )  # need to copy as will be modified
-                if GLOBALS.FILE_STRUCTURE["validation_set"].exists():
+                if FILE_STRUCTURE["validation_set"].exists():
                     (
-                        path / GLOBALS.FILE_STRUCTURE["validation_set"]
+                        path / FILE_STRUCTURE["validation_set"]
                     ).symlink_to(
                         os.path.relpath(
-                            GLOBALS.FILE_STRUCTURE["validation_set"],
+                            FILE_STRUCTURE["validation_set"],
                             start=path,
                         ),
                         target_is_directory=True,
@@ -66,10 +67,10 @@ def auto_run_per_value(
                     points_location
                 )  # can symlink as xyz won't be modified
 
-        if not (path / GLOBALS.FILE_STRUCTURE["programs"]).exists():
-            (path / GLOBALS.FILE_STRUCTURE["programs"]).symlink_to(
+        if not (path / FILE_STRUCTURE["programs"]).exists():
+            (path / FILE_STRUCTURE["programs"]).symlink_to(
                 os.path.relpath(
-                    GLOBALS.FILE_STRUCTURE["programs"], start=path
+                    FILE_STRUCTURE["programs"], start=path
                 ),
                 target_is_directory=True,
             )

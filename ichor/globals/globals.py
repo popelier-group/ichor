@@ -46,7 +46,6 @@ KEYWORDS                        | List[str]       | []                | Keywords
 ENCOMP                          | int             | 3                 | Encomp setting to use for AIMAll                                                           | Can be 3 or 4
 BOAQ                            | str             | gs20              | Boaq setting used for AIMAll                                                               |
 IASMESH                         | str             | fine              | Iasmesh setting used for AIMAll                                                            |
-FILE_STRUCTURE                  | FileStructure   | FileStructure     | Object containing all file paths for ichor                                                 | Protected
 TRAINING_POINTS                 | int             | 500               | Number of training points to initialise training set with                                  | Not used by min_max or min_max_mean
 SAMPLE_POINTS                   | int             | 9000              | Number of sample points to initialise sample pool with                                     |
 VALIDATION_POINTS               | int             | 500               | Number of validation points to initialise validation set with                              |
@@ -162,8 +161,6 @@ class Globals:
     ENCOMP: int = 3
     BOAQ: str = "gs20"
     IASMESH: str = "fine"
-
-    FILE_STRUCTURE: FileStructure = FileStructure()  # Don't change
 
     TRAINING_POINTS: int = 500
     SAMPLE_POINTS: int = 9000
@@ -434,10 +431,12 @@ class Globals:
         # if self.DROP_N_COMPUTE_LOCATION:
         #     io.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
-        if self.FILE_STRUCTURE["training_set"].exists():
+        from ichor.file_structure import FILE_STRUCTURE
+
+        if FILE_STRUCTURE["training_set"].exists():
             from ichor.files import GJF
 
-            for d in self.FILE_STRUCTURE["training_set"].iterdir():
+            for d in FILE_STRUCTURE["training_set"].iterdir():
                 if d.is_dir():
                     for f in d.iterdir():
                         if f.suffix == ".gjf":

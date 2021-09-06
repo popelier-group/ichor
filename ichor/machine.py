@@ -39,3 +39,6 @@ if "csf3." in machine_name:
     MACHINE = Machine.csf3
 elif "ffluxlab" in machine_name:
     MACHINE = Machine.ffluxlab
+
+if MACHINE is Machine.local:
+

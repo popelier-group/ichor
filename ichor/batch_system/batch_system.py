@@ -31,16 +31,16 @@ class JobID:
         self.instance = instance or str(GLOBALS.UID)
 
     def write(self):
-        from ichor.globals import GLOBALS
+        from ichor.file_structure import FILE_STRUCTURE
 
         mkdir(
-            GLOBALS.FILE_STRUCTURE["jid"].parent
+            FILE_STRUCTURE["jid"].parent
         )  # make parent directories if they don't exist
 
         job_ids = []
         # if the jid file exists (which contains queued jobs), then read it and append to job_ids list
-        if GLOBALS.FILE_STRUCTURE["jid"].exists():
-            with open(GLOBALS.FILE_STRUCTURE["jid"], "r") as f:
+        if FILE_STRUCTURE["jid"].exists():
+            with open(FILE_STRUCTURE["jid"], "r") as f:
                 try:
                     job_ids += json.load(f)
                 except json.JSONDecodeError:
@@ -55,7 +55,7 @@ class JobID:
         ]
 
         # overwrite the jobs file, writing out any new jobs that were submitted plus the old jobs that were already in the file.
-        with open(GLOBALS.FILE_STRUCTURE["jid"], "w") as f:
+        with open(FILE_STRUCTURE["jid"], "w") as f:
             json.dump(job_ids, f)
 
     def __repr__(self) -> str:

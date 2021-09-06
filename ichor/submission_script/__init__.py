@@ -13,13 +13,13 @@ from ichor.submission_script.submision_script import SubmissionScript
 
 
 def prepend_script_directory(paths):
-    from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
 
     for key, val in paths.items():
         if isinstance(val, dict):
             paths[key] = prepend_script_directory(paths)
         else:
-            paths[key] = GLOBALS.FILE_STRUCTURE["scripts"] / val
+            paths[key] = FILE_STRUCTURE["scripts"] / val
     return paths
 
 
@@ -32,8 +32,7 @@ class ScriptNames(dict):
         """
         :param item: a key which corresponds to a particular script file value. See SCRIPT_NAMES.
         """
-        from ichor.globals import \
-            GLOBALS  # import globals as the paths to the script directory is defined there
+        from ichor.file_structure import FILE_STRUCTURE
 
         script = super().__getitem__(
             item
@@ -42,7 +41,7 @@ class ScriptNames(dict):
         # then the second time this object is indexed with ["gaussian"], it will be an instance of "str", so this if statement will be executed
         if isinstance(script, (str, Path)):
             return (
-                GLOBALS.FILE_STRUCTURE["scripts"] / script
+                FILE_STRUCTURE["scripts"] / script
             )  # append the script name to the path where the scripts are located
         else:
             return script

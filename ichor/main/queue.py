@@ -6,9 +6,9 @@ from ichor.menu import Menu
 
 def delete_jobs():
     """Delete all jobs that were queued up to run. This function reads the GLOBALS.FILE_STRUCTURE["jid"] file, which contains the names of all submitted jobs."""
-    from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
 
-    jid_file = GLOBALS.FILE_STRUCTURE["jid"]
+    jid_file = FILE_STRUCTURE["jid"]
     if jid_file.exists():
         with open(jid_file, "r") as f:
             try:

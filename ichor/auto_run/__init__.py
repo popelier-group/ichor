@@ -14,7 +14,7 @@ from ichor.batch_system import JobID
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
 from ichor.files import Trajectory
-from ichor.globals import GLOBALS
+from ichor.file_structure import FILE_STRUCTURE
 from ichor.make_sets import make_sets_npoints
 from ichor.points import PointsDirectory
 from ichor.submission_script import DataLock
@@ -53,10 +53,10 @@ class IterUsage(Enum):
 class IterArgs:
     """Various arguments which need to be defined for a job to run successfully."""
 
-    TrainingSetLocation = GLOBALS.FILE_STRUCTURE["training_set"]
-    SamplePoolLocation = GLOBALS.FILE_STRUCTURE["sample_pool"]
-    FerebusDirectory = GLOBALS.FILE_STRUCTURE["ferebus"]
-    ModelLocation = GLOBALS.FILE_STRUCTURE["models"]
+    TrainingSetLocation = FILE_STRUCTURE["training_set"]
+    SamplePoolLocation = FILE_STRUCTURE["sample_pool"]
+    FerebusDirectory = FILE_STRUCTURE["ferebus"]
+    ModelLocation = FILE_STRUCTURE["models"]
     nPoints = MutableValue(1)  # Overwritten Based On IterState
     Atoms = MutableValue([])  # Overwritten from GLOBALS.ATOMS
 

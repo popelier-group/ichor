@@ -60,6 +60,7 @@ def make_sets(
     validation_set_method: Optional[List[str]] = None,
 ) -> None:
     from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
 
     if points_input.suffix == ".xyz":
         points = Trajectory(points_input)
@@ -78,7 +79,7 @@ def make_sets(
         training_set, points = make_set(
             points, training_set_size, training_set_method
         )
-        write_set_to_dir(GLOBALS.FILE_STRUCTURE["training_set"], training_set)
+        write_set_to_dir(FILE_STRUCTURE["training_set"], training_set)
 
     if make_sample_pool:
         if sample_pool_size is None:
@@ -88,7 +89,7 @@ def make_sets(
         sample_pool, points = make_set(
             points, sample_pool_size, sample_pool_method
         )
-        write_set_to_dir(GLOBALS.FILE_STRUCTURE["sample_pool"], sample_pool)
+        write_set_to_dir(FILE_STRUCTURE["sample_pool"], sample_pool)
 
     if make_validation_set:
         if validation_set_size is None:
@@ -99,7 +100,7 @@ def make_sets(
             points, validation_set_size, validation_set_method
         )
         write_set_to_dir(
-            GLOBALS.FILE_STRUCTURE["validation_set"], validation_set
+            FILE_STRUCTURE["validation_set"], validation_set
         )
 
 

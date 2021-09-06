@@ -91,9 +91,9 @@ class MEPE(ExpectedImprovement):
         For the first iteration there are no previously added points therefore alpha defaults
         to 0.5, for each subsequent iteration, equation 24 of the above cited paper is used.
         """
-        from ichor.globals import GLOBALS
+        from ichor.file_structure import FILE_STRUCTURE
 
-        cv_errors_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
+        cv_errors_file = FILE_STRUCTURE["cv_errors"]
         if not cv_errors_file.exists():
             return 0.5  # if the cv_errors_file doesn't exist, there was no previous iteration and we can default to 0.5
 
@@ -137,9 +137,9 @@ class MEPE(ExpectedImprovement):
         """Eq. 25"""
         epe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
 
-        from ichor.globals import GLOBALS
+        from ichor.file_structure import FILE_STRUCTURE
 
-        cv_file = GLOBALS.FILE_STRUCTURE["cv_errors"]
+        cv_file = FILE_STRUCTURE["cv_errors"]
         mkdir(cv_file.parent)
         if cv_file.exists():
             cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
