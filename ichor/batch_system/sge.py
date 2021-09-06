@@ -5,7 +5,7 @@ from typing import List, Union
 
 from ichor.batch_system.batch_system import BatchSystem, JobID
 from ichor.common.functools import classproperty
-from ichor.common.io import convert_to_path
+from ichor.batch_system.node import NodeType
 
 
 class SunGridEngine(BatchSystem):
@@ -13,8 +13,15 @@ class SunGridEngine(BatchSystem):
     are used to construct job scripts for any program we want to run on SGE. """
     @staticmethod
     def is_present() -> bool:
-        """ Check if SGE is present on the current machine ICHOR is running on."""
+        """ Check if SGE is present on the current machine ICHOR is running on. """
         return "SGE_ROOT" in os.environ.keys()
+
+    @staticmethod
+    def current_node() -> NodeType:
+        """ Return the current type of node ichor is running on
+        SGE defines the SGE_O_HOST when running on a compute node
+        """
+        return NodeType.ComputeNode if "SGE_O_HOST" in os.environ.keys() else NodeType.LoginNode
 
     @classproperty
     def submit_script_command(self) -> List[str]:

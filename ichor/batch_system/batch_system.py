@@ -6,6 +6,7 @@ from typing import List, Optional, Union
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
 from ichor.common.os import run_cmd
+from ichor.batch_system.node import NodeType
 
 
 class JobID:
@@ -64,6 +65,12 @@ class BatchSystem(ABC):
     @staticmethod
     @abstractmethod
     def is_present() -> bool:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def current_node() -> NodeType:
+        """ Return the type of the node ichor is currently running on e.g. NodeType.ComputeNode """
         pass
 
     @classmethod

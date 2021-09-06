@@ -1,6 +1,8 @@
 from typing import List
 from ichor.batch_system.sge import SunGridEngine
 from ichor.common.functools import classproperty
+from ichor.batch_system.node import NodeType
+
 
 class LocalBatchSystem(SunGridEngine):
     """LocalBatchSystem is to only be used for debugging purposes
@@ -10,6 +12,10 @@ class LocalBatchSystem(SunGridEngine):
         from ichor.globals import GLOBALS, Machine
 
         return GLOBALS.MACHINE is Machine.Local
+
+    @staticmethod
+    def current_node() -> NodeType:
+        return NodeType.LoginNode
 
     @classproperty
     def delete_job_command(self) -> List[str]:

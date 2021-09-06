@@ -108,8 +108,6 @@ INTEGRATION_ERROR_THRESHOLD     | float           | 0.001             | Threshol
 LOG_WARNINGS                    | bool            | False             | Switch to write warnings to log file                                                       | Warnings not currently implemented in v3                                                       # todo: implement warnings for v3
 MACHINE                         | Machine         | Machine.local     | Current machine                                                                            | Should automatically detect between local, ffluxlab and csf3
 OS                              | OS              | OS.Linux          | Current operating system                                                                   | Should automatically detect between linux, macos and windows
-SGE                             | bool            | False             | Boolean for whether sun grid engine is present                                             | Will be replaced by BATCH_SYSTEM                                                               # todo: deprecate SGE
-SUBMITTED                       | bool            | False             | Boolean for whether running on compute node                                                | Could do with a better name # todo: rename `SUBMITTED` to `ON_COMPUTE` or `RUNNING_ON_COMPUTE`
 DISABLE_PROBLEMS                | bool            | False             | Disables showing problems at the top of the main menu                                      | Problems currently not implemented for v3                                                      # todo: implement problems for v3
 UID                             | UUID            | Arguments.uid     | Unique ID for ichor instance                                                               | Very important variable for making sure ichor reads and writes data to the correct location
 IQA_MODELS                      | bool            | False             | Deprecated variable for older ferebus version to toggle whether ichor is making iqa models | No longer required # todo: delete `IQA_MODELS`
@@ -263,8 +261,6 @@ class Globals:
 
     MACHINE: Machine = Machine.local
     OS: OS = OS.Linux
-    SGE: bool = False  # Don't Change
-    SUBMITTED: bool = False  # Don't Change
 
     DISABLE_PROBLEMS: bool = False
     UID: UUID = Arguments.uid
@@ -425,11 +421,6 @@ class Globals:
         # # Add to list of drop-n-compute-services as they're added
         # if self.MACHINE in ["csf3"]:
         #     self.DROP_N_COMPUTE = True
-
-        # TODO: Remove need for SGE, abstract over batch systems
-        # SGE settings
-        self.SGE = "SGE_ROOT" in os.environ.keys()
-        self.SUBMITTED = "SGE_O_HOST" in os.environ.keys()
 
         config = ConfigProvider(source=Arguments.config_file)
 

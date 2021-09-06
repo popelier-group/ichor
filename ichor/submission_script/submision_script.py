@@ -256,9 +256,9 @@ class SubmissionScript:
                 f.write(f"{command_group.repr(command_variables)}\n")  # see class GaussianCommand for example
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
-        from ichor.globals import GLOBALS
+        from ichor.batch_system import BATCH_SYSTEM, NodeType
 
-        if not GLOBALS.SUBMITTED:
+        if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode:
             return BATCH_SYSTEM.submit_script(self.path, hold)
 
     def __enter__(self) -> 'SubmissionScript':
