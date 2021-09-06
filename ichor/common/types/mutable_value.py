@@ -30,5 +30,6 @@ class MutableValue:
     There may be a better way to implement this with descriptors but this works for now and is used
     by auto_run for modifying function arguments while iterating
     """
+
     def __init__(self, value: Any):
         self.value = value

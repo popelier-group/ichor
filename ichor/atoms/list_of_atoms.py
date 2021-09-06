@@ -29,7 +29,7 @@ class ListOfAtoms(list):
         return features
 
     def iteratoms(self):
-        """ Returns a generator of the atoms."""
+        """Returns a generator of the atoms."""
         for atom in self.atom_names:
             yield self[atom]
 
@@ -63,7 +63,7 @@ class ListOfAtoms(list):
             if hasattr(self, "_is_atom_view"):
                 return self
             return AtomView(self, item)
-            
+
         elif isinstance(item, slice):
 
             class AtomSlice(self.__class__):

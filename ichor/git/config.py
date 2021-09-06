@@ -28,7 +28,6 @@ from ichor.git.util import LockFile
 # typing-------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from io import BytesIO
 

@@ -3,15 +3,15 @@ import sys
 from typing import Callable, Dict, List, Tuple
 from uuid import uuid4
 
+from ichor.common.int import count_digits
 from ichor.problem_finder import ProblemFinder
 from ichor.tab_completer import ListCompleter
-from ichor.common.int import count_digits
 
 
 class Menu(object):
     """A constructor class that makes menus to be displayed in ICHOR's Command Line Interface (CLI), such as
     when `python ichor3.py` is ran.
-    
+
     :param title: The title of the menu
     :param options: A list of options to be displayed. Default is None. Options are usually added using `add_option` method.
     :param message: A message to be displayed at the top of the menu
@@ -77,7 +77,9 @@ class Menu(object):
         original = self.options  # this is None by default
         self.options = {}
         try:
-            for option in options:  # this is the list of options that can be passed in
+            for (
+                option
+            ) in options:  # this is the list of options that can be passed in
                 if not isinstance(option, tuple):
                     raise TypeError(option, "option is not a tuple")
                 if len(option) < 2:
@@ -148,7 +150,7 @@ class Menu(object):
     ) -> None:
         """
         Add menu option that the user can select. A menu options needs to have at least a label, name, and handler function.
-        
+
         :param label: The letter/word that needs to be typed into the input prompt in order to go to the menu option
         :param name: The name of the option that can be selected by the user
         :param handler: A function which is going to perform the operation selected by the user, eg. submit_gjfs() will submit Gaussian gjf files.
@@ -161,7 +163,11 @@ class Menu(object):
             kwargs = {}
         if not callable(handler):
             raise TypeError(handler, "handler is not callable")
-        self.options[label] = (name, handler, kwargs)  # add the option to the list of options
+        self.options[label] = (
+            name,
+            handler,
+            kwargs,
+        )  # add the option to the list of options
         if wait:
             self.wait_options.append(label)
         if auto_close:
@@ -193,7 +199,9 @@ class Menu(object):
             # if another callable function is given when the menu object is being made, then use that as the refresh
             self.refresh(self)
             func, wait, close = self.input()
-            if func == Menu.CLOSE:  # if self.input() returns Menu.CLOSE, then set func to self.close
+            if (
+                func == Menu.CLOSE
+            ):  # if self.input() returns Menu.CLOSE, then set func to self.close
                 func = self.close
             print()
             func()
@@ -248,7 +256,7 @@ class Menu(object):
 
     @classmethod
     def clear_screen(cls):
-        """ Clear the currently displayed lines in the terminal"""
+        """Clear the currently displayed lines in the terminal"""
         os.system("cls" if os.name == "nt" else "clear")
 
     def show(self):
@@ -295,15 +303,25 @@ class Menu(object):
         self.show()
 
         # allow for user input to select options
-        with ListCompleter(self.get_options()): # get the labels to be autocompleted
+        with ListCompleter(
+            self.get_options()
+        ):  # get the labels to be autocompleted
             while True:
                 try:
-                    index = str(input(self.prompt + " ")).strip() # get the index of the option
-                    option = self.options[index] # get the values from the self.options dictionary
-                    handler = option[1] # the first value in the returned list is the function which handles the operation
+                    index = str(
+                        input(self.prompt + " ")
+                    ).strip()  # get the index of the option
+                    option = self.options[
+                        index
+                    ]  # get the values from the self.options dictionary
+                    handler = option[
+                        1
+                    ]  # the first value in the returned list is the function which handles the operation
                     if handler == Menu.CLOSE:
                         return Menu.CLOSE, False, False
-                    kwargs = option[2] # the second option is any key word arguments to be passed to the handler function
+                    kwargs = option[
+                        2
+                    ]  # the second option is any key word arguments to be passed to the handler function
                     return (
                         lambda: handler(**kwargs),
                         index in self.wait_options,  # returns True or False

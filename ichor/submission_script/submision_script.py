@@ -22,7 +22,9 @@ class SubmissionScript:
 
     def __init__(self, path: Path):
         self.path = Path(path)
-        self.commands = []  # a list of commands to be submitted to batch system
+        self.commands = (
+            []
+        )  # a list of commands to be submitted to batch system
 
     @classproperty
     def filetype(self) -> str:
@@ -40,7 +42,7 @@ class SubmissionScript:
 
     @property
     def default_options(self) -> List[str]:
-        """ Returns a list of default options to use in a submission script for a job.
+        """Returns a list of default options to use in a submission script for a job.
         This list contaning the current working directory, the output directory (where .o files are written),
         the errors directory (where .e files are witten). If the number of cores is more than 1, the keyword
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
@@ -70,7 +72,7 @@ class SubmissionScript:
 
     @property
     def options(self) -> List[str]:
-        """ Return the complete list of options (default options + other options that are specific to the job). """
+        """Return the complete list of options (default options + other options that are specific to the job)."""
         options = []
         for command in self.grouped_commands:
             options += command.options
@@ -79,12 +81,14 @@ class SubmissionScript:
 
     @property
     def modules(self) -> List[str]:
-        """ Returns a list of modules that need to be loaded before a job can be ran. """
-        from ichor.globals import GLOBALS
+        """Returns a list of modules that need to be loaded before a job can be ran."""
+        from ichor.machine import MACHINE
 
         modules = []
         for command in self.grouped_commands:
-            modules += command.modules[GLOBALS.MACHINE]  # modules depend on which machine (CSF/FFLUXLAB) we are currently on
+            modules += command.modules[
+                MACHINE
+            ]  # modules depend on which machine (CSF/FFLUXLAB) we are currently on
         return list(set(modules))
 
     @property
@@ -108,8 +112,12 @@ class SubmissionScript:
         # iterate over each command instance that has been added to self.commands
         for command in self.commands:
             # if the command is not equal to command_type or commands.group is set to False (group method defined in CommandLine class, default True)
-            if type(command) != command_type or not command.group:  # .group flag used by command if it doesn't want to be grouped
-                if len(command_group) > 0:  # just for first iteration of the loop
+            if (
+                type(command) != command_type or not command.group
+            ):  # .group flag used by command if it doesn't want to be grouped
+                if (
+                    len(command_group) > 0
+                ):  # just for first iteration of the loop
                     commands += [command_group]
                     command_group = CommandGroup()
                 command_type = type(command)
@@ -121,13 +129,13 @@ class SubmissionScript:
 
     @classmethod
     def arr(cls, n):
-        """ Returns the keyword which is used to select array jobs. Since array jobs start at 1 instead of 0, 1 needs to be added
-        to the array size. """
+        """Returns the keyword which is used to select array jobs. Since array jobs start at 1 instead of 0, 1 needs to be added
+        to the array size."""
         return f"arr{n + 1}"
 
     @classmethod
     def array_index(cls, n):
-        """ Returns the keywords used to run an array job through a program such as Gaussian.
+        """Returns the keywords used to run an array job through a program such as Gaussian.
 
         .. note::
             For example, this line in GAUSSIAN.sh (the submission script for Gaussian) is
@@ -142,7 +150,7 @@ class SubmissionScript:
         return f"var{n + 1}"
 
     def write_datafile(self, datafile: Path, data: List[List[str]]) -> None:
-        """ Write the datafile to disk. All datafiles are stored in GLOBALS.FILE_STRUCTURE["datafiles"]. Each line of the
+        """Write the datafile to disk. All datafiles are stored in GLOBALS.FILE_STRUCTURE["datafiles"]. Each line of the
         datafile contains text that corresponds to the inputs and output file names. These are separated by self.separator, which is a comma.
 
         .. note::
@@ -156,10 +164,14 @@ class SubmissionScript:
             with open(datafile, "w") as f:
                 for cmd_data in data:
                     # Note: cmd_data should already be strings but we will perform a map just to be safe
-                    f.write(f"{SubmissionScript.SEPARATOR.join(map(str, cmd_data))}\n")
+                    f.write(
+                        f"{SubmissionScript.SEPARATOR.join(map(str, cmd_data))}\n"
+                    )
 
-    def setup_script_arrays(self, datafile: Path, data: List[List[str]]) -> str:
-        """ Forms the strings for array jobs which are then written to the submission script to specify the number of 
+    def setup_script_arrays(
+        self, datafile: Path, data: List[List[str]]
+    ) -> str:
+        """Forms the strings for array jobs which are then written to the submission script to specify the number of
         tasks in the array job and things like that. Easiest to see if you have GAUSSIAN.sh or another submission script opened.
         """
 
@@ -174,7 +186,7 @@ class SubmissionScript:
         read_datafile_str = "".join(
             f"{self.arr(i)}=()\n" for i in range(ndata)
         )
-        
+
         # writes out the while loop needed to read in files names into their corresponding arrays
         # -r option prevents backslashes from being treated as escape characters
         read_datafile_str += (
@@ -191,8 +203,8 @@ class SubmissionScript:
     def setup_datafile(
         self, datafile: Path, data: List[List[str]]
     ) -> Tuple[List[str], str]:
-        """ Calls write_datafile which writes the datafile to disk (if it is not locked). Then it reads 
-   
+        """Calls write_datafile which writes the datafile to disk (if it is not locked). Then it reads
+
         :param datafile: Path object that points to a datafile location (which is going to be written now by write_datafile)
         :param data: A list of lists. Each inner list contains strings which are the names of the inputs and output files.
         """
@@ -236,7 +248,9 @@ class SubmissionScript:
 
             for command_group in self.grouped_commands:
                 command_variables = []
-                if command_group.data:  # Gaussian, Ferebus, AIMALL jobs need access to datafiles
+                if (
+                    command_group.data
+                ):  # Gaussian, Ferebus, AIMALL jobs need access to datafiles
                     datafile = GLOBALS.FILE_STRUCTURE["datafiles"] / Path(
                         str(GLOBALS.UID)
                     )
@@ -252,8 +266,12 @@ class SubmissionScript:
                         datafile, command_group_data
                     )
                     command_variables += datafile_vars
-                    f.write(f"{datafile_str}\n")  # write the array job parts to the submission script
-                f.write(f"{command_group.repr(command_variables)}\n")  # see class GaussianCommand for example
+                    f.write(
+                        f"{datafile_str}\n"
+                    )  # write the array job parts to the submission script
+                f.write(
+                    f"{command_group.repr(command_variables)}\n"
+                )  # see class GaussianCommand for example
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
         from ichor.batch_system import BATCH_SYSTEM, NodeType
@@ -261,7 +279,7 @@ class SubmissionScript:
         if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode:
             return BATCH_SYSTEM.submit_script(self.path, hold)
 
-    def __enter__(self) -> 'SubmissionScript':
+    def __enter__(self) -> "SubmissionScript":
         """
         Allows for syntax such as
         ```python

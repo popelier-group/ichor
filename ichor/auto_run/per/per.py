@@ -1,12 +1,11 @@
-import os
 import json
+import os
 from pathlib import Path
 from typing import Any, Callable, List, Optional
 
+from ichor.auto_run.ichor import submit_ichor_collate_log_job_to_auto_run
 from ichor.batch_system import JobID
 from ichor.common.io import cp, mkdir, pushd
-
-from ichor.auto_run.ichor import submit_ichor_collate_log_job_to_auto_run
 from ichor.common.points import get_points_location
 
 
@@ -96,7 +95,9 @@ def auto_run_per_value(
         GLOBALS.set(variable, save_value)
         Arguments.config_file = save_config
 
-    final_job = submit_ichor_collate_log_job_to_auto_run(GLOBALS.CWD, hold = final_job_ids)
+    final_job = submit_ichor_collate_log_job_to_auto_run(
+        GLOBALS.CWD, hold=final_job_ids
+    )
     final_job_ids.append(final_job)
 
     return final_job_ids

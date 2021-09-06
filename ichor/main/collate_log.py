@@ -1,11 +1,14 @@
-from typing import Optional
-from pathlib import Path
 import json
-from ichor.common.io import pushd, mkdir
+from pathlib import Path
+from typing import Optional
+
+from ichor.common.io import mkdir, pushd
+
 
 def collate_model_log(directory: Optional[Path] = None) -> None:
     from ichor.globals import GLOBALS
     from ichor.models import Models
+
     if directory is None:
         directory = GLOBALS.CWD
 
@@ -23,5 +26,7 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
         for child_process in child_processes:
             with pushd(child_process, update_cwd=True):
                 for model_log in GLOBALS.FILE_STRUCTURE["model_log"].iterdir():
-                    if model_log.is_dir() and Models.dirpattern.match(model_log.name):
+                    if model_log.is_dir() and Models.dirpattern.match(
+                        model_log.name
+                    ):
                         cp(model_log, parent_model_dir / model_log.name)

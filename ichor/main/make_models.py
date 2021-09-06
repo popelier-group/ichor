@@ -25,7 +25,8 @@ models_selected = False
 
 
 class ModelType(Enum):
-    """ Enum used for all the different models we make: iqa and multipole moments."""
+    """Enum used for all the different models we make: iqa and multipole moments."""
+
     iqa = "iqa"
     q00 = "q00"
     q10 = "q10"
@@ -55,12 +56,12 @@ class ModelType(Enum):
 
     @classmethod
     def to_str(cls, ty: "ModelType"):
-        """ Convert the named element to its string value. """
+        """Convert the named element to its string value."""
         return ty.value
 
     @classmethod
     def from_str(cls, ty: str) -> "ModelType":
-        """ Convert the string value to its corresponding named element if one exists. """
+        """Convert the string value to its corresponding named element if one exists."""
         for ity in cls:
             if ity.value == ty:
                 return ity
@@ -100,7 +101,7 @@ def toggle_model_type(ty: ModelType):
 
 
 def select_model_type():
-    """ Select properties for which to make models - these can be any combination of multiple moments and iqa energy."""
+    """Select properties for which to make models - these can be any combination of multiple moments and iqa energy."""
     global model_types
     global models_selected
     if not models_selected:
@@ -209,7 +210,7 @@ def make_models_menu_refresh(menu):
 
 
 def make_models_menu(directory: Path):
-    """ The handler function for making models from a specific directory. To make the models, both Gaussian and AIMALL have to be ran
+    """The handler function for making models from a specific directory. To make the models, both Gaussian and AIMALL have to be ran
     for the points that are in the directory."""
     setup(directory)
     # use context manager here because we need to run the __enter__ and __exit__ methods.
@@ -227,8 +228,8 @@ def make_models(
     types: Optional[List[str]] = None,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
-    """ Function that is used in auto run to make GP models with FEREBUS. The actual function that makes the needed files is called `_make_models`.
-    
+    """Function that is used in auto run to make GP models with FEREBUS. The actual function that makes the needed files is called `_make_models`.
+
     :return: The job id of the submitted job
     """
     global model_data_location
@@ -246,7 +247,9 @@ def make_models(
         if types is not None
         else [ModelType.iqa]
     )
-    atom_models_to_make = atoms or [atom.atom_num for atom in _model_data[0].atoms]
+    atom_models_to_make = atoms or [
+        atom.atom_num for atom in _model_data[0].atoms
+    ]
 
     logger.info(
         f"Making Models for {atom_models_to_make} atoms and {model_types} types with {n_training_points} training points"
@@ -256,7 +259,7 @@ def make_models(
 
 
 def move_models(model_dir: Optional[Path] = None):
-    """ Move model files from the ferebus directory to the models directory."""
+    """Move model files from the ferebus directory to the models directory."""
     from ichor.globals import GLOBALS
     from ichor.models import Model
 
@@ -290,9 +293,9 @@ def move_models(model_dir: Optional[Path] = None):
 
 
 def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
-    """ Makes the training set file in a separate directory for each topological atom. Calls `make_ferebus_script` which writes out the ferebus
+    """Makes the training set file in a separate directory for each topological atom. Calls `make_ferebus_script` which writes out the ferebus
     job script that needed to run on compute nodes and submits to queue.
-    
+
     :return: The job id of the submitted job
     """
     ferebus_directories = []
@@ -315,8 +318,8 @@ def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
 def make_ferebus_scrpt(
     ferebus_directories: List[Path], hold: Optional[JobID] = None
 ) -> Optional[JobID]:
-    """ Writes our the ferebus script needed to run a ferebus job and submits to queueing system.
-    
+    """Writes our the ferebus script needed to run a ferebus job and submits to queueing system.
+
     :return: The job id of the submitted job
     """
     script_name = SCRIPT_NAMES["ferebus"]
@@ -328,7 +331,7 @@ def make_ferebus_scrpt(
 
 
 def write_training_set(atom, training_data) -> Path:
-    """ Write training set, containing inputs (such as r, theta, phi features), and outputs (IQA and multipole moments) for one atom. 
+    """Write training set, containing inputs (such as r, theta, phi features), and outputs (IQA and multipole moments) for one atom.
     Returns the directory in which the training set was written as each atom has its own directory.
 
     :param atom: The name of the atom for which the training set is made (e.g. C1)
@@ -365,8 +368,8 @@ def write_training_set(atom, training_data) -> Path:
 
 
 def write_ftoml(ferebus_directory, atom):
-    """ Write the toml file which holds settings for FEREBUS.
-    
+    """Write the toml file which holds settings for FEREBUS.
+
     :param ferebus_directory: A Path object pointing to the directory where the FEREBUS job is going to be ran
     :param atom: A string corresponding to the atom's name (such as C1, H3, etc.)
     """

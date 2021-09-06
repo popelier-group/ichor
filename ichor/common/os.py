@@ -6,9 +6,9 @@ from ichor.common.str import decode
 
 
 def run_cmd(cmd) -> Tuple[str, str]:
-    """ Run a command in the terminal. This is used to submit jobs through ICHOR  (e.g. via qsub on CSF3).
-    
-    :param cmd: command to run in terminal. 
+    """Run a command in the terminal. This is used to submit jobs through ICHOR  (e.g. via qsub on CSF3).
+
+    :param cmd: command to run in terminal.
     """
     p = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=os.environ

@@ -3,7 +3,7 @@ import re
 
 # todo: Add revision in comparisons
 class Version:
-    """ Version system for ICHOR. Useful when comparing two different ICHOR versions."""
+    """Version system for ICHOR. Useful when comparing two different ICHOR versions."""
 
     def __init__(self, rep=None):
         self.major = 0

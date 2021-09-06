@@ -16,7 +16,6 @@ from ichor.git.util import LazyMixin, bin_to_hex, join_path_native, stream_copy
 # typing ------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.ext.gitdb.base import OStream
     from ichor.git.objects.blob import Blob

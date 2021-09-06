@@ -34,7 +34,6 @@ from ichor.git.exc import InvalidGitRepositoryError
 # typing ---------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.remote import Remote
     from ichor.git.repo.base import Repo
@@ -44,10 +43,9 @@ if TYPE_CHECKING:
     # from git.objects.base import IndexObject
 
 from ichor.git.types import Files_TD  # aliases
-from ichor.git.types import \
-    runtime_checkable  # because behind py version guards
-from ichor.git.types import (HSH_TD, Has_id_attribute, Literal, PathLike,
-                             Protocol, SupportsIndex, Total_TD)
+from ichor.git.types import (HSH_TD,  # because behind py version guards
+                             Has_id_attribute, Literal, PathLike, Protocol,
+                             SupportsIndex, Total_TD, runtime_checkable)
 
 T_IterableObj = TypeVar(
     "T_IterableObj",
@@ -65,9 +63,9 @@ from ichor.git.ext.gitdb.util import bin_to_hex  # @UnusedImport
 from ichor.git.ext.gitdb.util import file_contents_ro  # @UnusedImport
 from ichor.git.ext.gitdb.util import file_contents_ro_filepath  # @UnusedImport
 from ichor.git.ext.gitdb.util import hex_to_bin  # @UnusedImport
+from ichor.git.ext.gitdb.util import make_sha  # NOQA @IgnorePep8
 from ichor.git.ext.gitdb.util import to_bin_sha  # @UnusedImport
 from ichor.git.ext.gitdb.util import to_hex_sha  # @UnusedImport
-from ichor.git.ext.gitdb.util import make_sha  # NOQA @IgnorePep8
 
 # NOTE:  Some of the unused imports might be used/imported by others.
 # Handle once test-cases are back up and running.

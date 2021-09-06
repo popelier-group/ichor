@@ -19,7 +19,6 @@ from ichor.git.util import IterableList, join_path, to_bin_sha
 # typing -------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from io import BytesIO
 

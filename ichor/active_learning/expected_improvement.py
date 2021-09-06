@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from ichor.atoms import ListOfAtoms
-from ichor.models import Models
 from ichor.common.functools import classproperty
+from ichor.models import Models
 
 
 class ExpectedImprovement(ABC):
@@ -13,7 +13,7 @@ class ExpectedImprovement(ABC):
     @abstractmethod
     @classproperty
     def name(self) -> str:
-        """ Name of the expected improvement function to be selected from GLOBALS. """
+        """Name of the expected improvement function to be selected from GLOBALS."""
         pass
 
     @abstractmethod

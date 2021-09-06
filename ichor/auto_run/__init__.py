@@ -5,8 +5,11 @@ from typing import Any, Callable, Optional, Sequence
 from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
 from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
-from ichor.auto_run.ichor import (submit_ichor_active_learning_job_to_auto_run, make_models, submit_make_sets_job_to_auto_run,
-                                  submit_ichor_gaussian_command_to_auto_run, submit_ichor_aimall_command_to_auto_run)
+from ichor.auto_run.ichor import (make_models,
+                                  submit_ichor_active_learning_job_to_auto_run,
+                                  submit_ichor_aimall_command_to_auto_run,
+                                  submit_ichor_gaussian_command_to_auto_run,
+                                  submit_make_sets_job_to_auto_run)
 from ichor.batch_system import JobID
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
@@ -15,7 +18,6 @@ from ichor.globals import GLOBALS
 from ichor.make_sets import make_sets_npoints
 from ichor.points import PointsDirectory
 from ichor.submission_script import DataLock
-
 
 __all__ = [
     "submit_gaussian_job_to_auto_run",
@@ -30,14 +32,16 @@ __all__ = [
 
 
 class IterState(Enum):
-    """ The iteration which the adaptive sampling is on. The first step is making the sets (running Makeset)."""
+    """The iteration which the adaptive sampling is on. The first step is making the sets (running Makeset)."""
+
     First = 1
     Standard = 2
     Last = 3
 
 
 class IterUsage(Enum):
-    """ Tells the IterStep wheter or not it can be run given an IterState"""
+    """Tells the IterStep wheter or not it can be run given an IterState"""
+
     First = 0
     All = 1
     AllButLast = 2
@@ -47,7 +51,8 @@ class IterUsage(Enum):
 
 
 class IterArgs:
-    """ Various arguments which need to be defined for a job to run successfully."""
+    """Various arguments which need to be defined for a job to run successfully."""
+
     TrainingSetLocation = GLOBALS.FILE_STRUCTURE["training_set"]
     SamplePoolLocation = GLOBALS.FILE_STRUCTURE["sample_pool"]
     FerebusDirectory = GLOBALS.FILE_STRUCTURE["ferebus"]
@@ -57,7 +62,8 @@ class IterArgs:
 
 
 class IterStep:
-    """ A class which wraps around each step of one iteration (each iteration has Guassian, AIMALL, FEREBUS, and ICHOR steps)."""
+    """A class which wraps around each step of one iteration (each iteration has Guassian, AIMALL, FEREBUS, and ICHOR steps)."""
+
     func: Callable
     usage: IterUsage
     args: Sequence[Any]
@@ -76,8 +82,14 @@ class IterStep:
 
 # order in which to submit jobs for each of the adaptive sampling iterations.
 func_order = [
-    IterStep(submit_ichor_gaussian_command_to_auto_run, IterUsage.All, [IterArgs.TrainingSetLocation]),
-    IterStep(submit_gaussian_job_to_auto_run, IterUsage.All, [IterArgs.nPoints]),
+    IterStep(
+        submit_ichor_gaussian_command_to_auto_run,
+        IterUsage.All,
+        [IterArgs.TrainingSetLocation],
+    ),
+    IterStep(
+        submit_gaussian_job_to_auto_run, IterUsage.All, [IterArgs.nPoints]
+    ),
     IterStep(
         submit_ichor_aimall_command_to_auto_run,
         IterUsage.All,
@@ -121,10 +133,12 @@ def next_iter(
                 PointsDirectory(IterArgs.TrainingSetLocation)
             )
         else:
-            points_location = get_points_location() # get points location on disk to transform into ListOfAtoms
+            points_location = (
+                get_points_location()
+            )  # get points location on disk to transform into ListOfAtoms
             points = None
             # points_location could be a directory of points to use, if so initialise a PointsDirectory
-            if points_location.is_dir(): 
+            if points_location.is_dir():
                 points = PointsDirectory(points_location)
             # points_location could be a .xyz file, if so initialise a Trajectory
             elif points_location.suffix == ".xyz":
@@ -137,9 +151,11 @@ def next_iter(
                 points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
             )
             # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
-            job_id = IterStep(submit_make_sets_job_to_auto_run, IterUsage.All, [points_location]).run(
-                job_id, state
-            )
+            job_id = IterStep(
+                submit_make_sets_job_to_auto_run,
+                IterUsage.All,
+                [points_location],
+            ).run(job_id, state)
             print(f"Submitted: {job_id}")
 
     # for every other job, i.e. IterState.Standard, IterState.Last
@@ -165,7 +181,9 @@ def auto_run() -> Optional[JobID]:
     # Make a list of types of iterations. Only first and last iterations are different.
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]
     iterations[0] = IterState.First
-    iterations += [IterState.Last] # The IterState.Last informs the active learning IterStep to not run on the final iteration as it has IterUsage.AllButLast
+    iterations += [
+        IterState.Last
+    ]  # The IterState.Last informs the active learning IterStep to not run on the final iteration as it has IterUsage.AllButLast
 
     job_id = None
     with DataLock():

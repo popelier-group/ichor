@@ -19,17 +19,17 @@ def formatter(func: F) -> F:
 
 @formatter
 def cleanup_str(str_in: str) -> str:
-    """ Clean up a string that is read in from the config file."""
+    """Clean up a string that is read in from the config file."""
     return str_in.replace('"', "").replace("'", "").strip()
 
 
 @formatter
 def to_upper(s: str) -> str:
-    """ Convert the read in string from the config file to upper."""
+    """Convert the read in string from the config file to upper."""
     return s.upper()
 
 
 @formatter
 def to_lower(s: str) -> str:
-    """ Convert the read in string from the config file to lower."""
+    """Convert the read in string from the config file to lower."""
     return s.lower()

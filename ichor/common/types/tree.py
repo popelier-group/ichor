@@ -10,7 +10,7 @@ class FileNode:
     :param parent: A directory which contains the directory/file whose path is stored in `self.name`
     """
 
-    def __init__(self, name: str, parent: Optional['FileNode']):
+    def __init__(self, name: str, parent: Optional["FileNode"]):
         self.name = Path(name)
         self.parent = parent
 
@@ -45,7 +45,7 @@ class FileTree(dict):
         self[_id] = FileNode(name, parent)
 
     def __getitem__(self, _id) -> Path:
-        """ Get the Path corresponding to the given _id
+        """Get the Path corresponding to the given _id
 
         :param _id: A string used as a key, whose cossesponding value is a Path object. Example: `training_set` key returns the `TRAINING_SET` directory path
         """

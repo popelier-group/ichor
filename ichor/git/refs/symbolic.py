@@ -1,6 +1,7 @@
 import os
-from typing import (TYPE_CHECKING, Any, Iterator, List, Tuple, Type,  # NOQA
-                    TypeVar, Union, cast)
+from typing import Type  # NOQA
+from typing import (TYPE_CHECKING, Any, Iterator, List, Tuple, TypeVar, Union,
+                    cast)
 
 from ichor.git.compat import defenc
 from ichor.git.ext.gitdb.exc import BadName, BadObject

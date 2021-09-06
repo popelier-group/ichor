@@ -22,7 +22,7 @@ POINTS_LOCATION: Optional[Path] = None
 
 
 def get_make_set_methods() -> List[Any]:
-    """ Returns a list of classes which are used to initialize a training set. These are classes such as MinMaxMean, RandomPoints, etc."""
+    """Returns a list of classes which are used to initialize a training set. These are classes such as MinMaxMean, RandomPoints, etc."""
 
     return [
         obj
@@ -36,7 +36,7 @@ def get_make_set_methods() -> List[Any]:
 def make_sets_npoints(
     points: ListOfAtoms, set_size: int, methods: List[str]
 ) -> int:
-    """ Return the total number of points that are going to be used to initialize the training set. Multiple initialization methods
+    """Return the total number of points that are going to be used to initialize the training set. Multiple initialization methods
     can be combined to give the total number of initial training points."""
 
     npoints = 0

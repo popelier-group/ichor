@@ -25,7 +25,7 @@ class ClassPropertyDescriptor:
 
 
 def classproperty(func: F) -> ClassPropertyDescriptor:
-    """ A decorator which makes it possible to make class properties, where the class can call a class method without the parenthesis at the end.
+    """A decorator which makes it possible to make class properties, where the class can call a class method without the parenthesis at the end.
     This is useful to have as class variables are static and cannot be changed. Class properties allow us to change these values on the fly
     (for example some classes rely on ICHOR's GLOBALS which could change at any time, so class variables cannot be used)."""
     if not isinstance(func, (classmethod, staticmethod)):

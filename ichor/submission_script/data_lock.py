@@ -38,6 +38,7 @@ class DataLock:
       |                           |                            | Job2 runs on compute
 
     """
+
     @classproperty
     def locked(self):
         return _locked

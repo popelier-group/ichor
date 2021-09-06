@@ -19,9 +19,9 @@ MODULES_HOME = Path("/usr/share/Modules")
 def initialise_modules():
     global MODULES_HOME
 
-    from ichor.globals import GLOBALS, Machine
+    from ichor.machine import MACHINE, Machine
 
-    if GLOBALS.MACHINE is Machine.csf3:
+    if MACHINE is Machine.csf3:
         MODULES_HOME = Path("/opt/clusterware/opt/modules")
 
     if "MODULEPATH" not in os.environ:
@@ -38,9 +38,9 @@ def initialise_modules():
 
 
 def module(*args):
-    from ichor.globals import GLOBALS, Machine
+    from ichor.machine import MACHINE, Machine
 
-    if GLOBALS.MACHINE is Machine.local:
+    if MACHINE is Machine.local:
         return
     if type(args[0]) == type([]):
         args = args[0]
@@ -59,9 +59,9 @@ def load_module(module_to_load: Union[str, List[str], Modules]):
     elif isinstance(module_to_load, list):
         module("load", *module_to_load)
     elif isinstance(module_to_load, Modules):
-        from ichor.globals import GLOBALS
+        from ichor.machine import MACHINE
 
-        load_module(module_to_load[GLOBALS.MACHINE])
+        load_module(module_to_load[MACHINE])
     else:
         raise TypeError(f"Unknown module type: {type(module_to_load)}")
 

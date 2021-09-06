@@ -51,4 +51,6 @@ builtins.hasattr = hasattr
 def called_from_hasattr():
     # Caller's caller's frame.
     frame = inspect.currentframe().f_back.f_back
-    return frame.f_code is hasattr.__code__  # returns True if the frame's code is the same as the code in the hasattr function above
+    return (
+        frame.f_code is hasattr.__code__
+    )  # returns True if the frame's code is the same as the code in the hasattr function above

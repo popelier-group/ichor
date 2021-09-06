@@ -9,6 +9,7 @@ from ichor.common.functools import called_from_hasattr, hasattr
 
 class FileState(Enum):
     """An enum that is used to make it easier to check the current file state."""
+
     Unread = 1
     Reading = 2
     Read = 3
@@ -17,6 +18,7 @@ class FileState(Enum):
 
 class PathObject(ABC, object):
     """An abstract base class that is used for anything that has a path (i.e. files or directories)"""
+
     def __init__(self, path):
         self.path = Path(path)
         self.state = FileState.Unread
@@ -63,7 +65,7 @@ class PathObject(ABC, object):
 
         One must be careful to make sure all attributes that want to be accessed lazily must be an attribute of the class and
         not to override __getattribute__ in subclasses of PathObject.
-        
+
         :param item: The attribute that needs to be accessed.
         """
 
@@ -91,7 +93,7 @@ class PathObject(ABC, object):
             )
 
     def __getitem__(self, item):
-        """ Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
+        """Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
         read the file and try to access the item again. If the item still does not exist, then throw a KeyError."""
         try:
             return super().__getitem__(item)

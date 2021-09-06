@@ -6,7 +6,8 @@ from ichor.make_sets.make_set_method import MakeSetMethod
 
 
 class RandomPoints(MakeSetMethod):
-    """ Chooses random points from the sample pool which are added to the training set"""
+    """Chooses random points from the sample pool which are added to the training set"""
+
     npoints: int = 1
 
     def __init__(self, npoints: int):

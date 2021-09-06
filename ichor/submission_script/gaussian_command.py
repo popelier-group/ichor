@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.common.functools import classproperty
-from ichor.globals import Machine
 from ichor.modules import GaussianModules, Modules
 from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
@@ -16,32 +15,34 @@ class GaussianCommand(CommandLine):
         check: bool = True,
     ):
         self.gjf_file = gjf_file
-        self.gjf_output = gjf_output or gjf_file.with_suffix(".gau")  # .gau file used to store the output from Gaussian
+        self.gjf_output = gjf_output or gjf_file.with_suffix(
+            ".gau"
+        )  # .gau file used to store the output from Gaussian
         self.check = check
 
     @property
     def data(self) -> List[str]:
-        """ Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau) """
+        """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau)"""
         return [str(self.gjf_file.absolute()), str(self.gjf_output.absolute())]
 
     @classproperty
     def modules(self) -> Modules:
-        """ Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
+        """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
         return GaussianModules
 
     @classproperty
     def command(self) -> str:
         """Returns the command used to run Gaussian on different machines."""
-        from ichor.globals import GLOBALS
+        from ichor.machine import MACHINE, Machine
 
-        if GLOBALS.MACHINE is Machine.csf3:
+        if MACHINE is Machine.csf3:
             return "$g09root/g09/g09"
-        elif GLOBALS.MACHINE is Machine.ffluxlab:
+        elif MACHINE is Machine.ffluxlab:
             return "g09"
-        elif GLOBALS.MACHINE is Machine.local:
+        elif MACHINE is Machine.local:
             return "g09_test"
         raise SubmissionError(
-            f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'"
+            f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
         )
 
     @classproperty

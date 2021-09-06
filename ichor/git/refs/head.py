@@ -10,7 +10,6 @@ from ichor.git.util import join_path
 # typinng ---------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.objects import Commit
     from ichor.git.refs import RemoteReference

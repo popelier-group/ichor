@@ -4,7 +4,6 @@ from typing import List, Optional, Union
 from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
 from ichor.files import WFN
-from ichor.globals import Machine
 from ichor.modules import AIMAllModules, Modules
 from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
@@ -42,21 +41,21 @@ class AIMAllCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
-        from ichor.globals import GLOBALS
+        from ichor.machine import MACHINE, Machine
 
-        if GLOBALS.MACHINE is Machine.csf3:
+        if MACHINE is Machine.csf3:
             return "~/AIMAll/aimqb.ish"
-        elif GLOBALS.MACHINE is Machine.ffluxlab:
+        elif MACHINE is Machine.ffluxlab:
             return "aimall"
-        elif GLOBALS.MACHINE is Machine.local:
+        elif MACHINE is Machine.local:
             return "aimall_test"
         raise SubmissionError(
-            f"Command not defined for '{self.__name__}' on '{GLOBALS.MACHINE.name}'"
+            f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
         )
 
     @classproperty
     def options(self) -> List[str]:
-        """ Options taken from GAIA to run AIMAll likely not necessary as we specifiy /bin/bash at the top of the
+        """Options taken from GAIA to run AIMAll likely not necessary as we specifiy /bin/bash at the top of the
         submission script
 
         Note: '-j y' removed from these options from the GAIA version as this outputted both stdout and stderr to

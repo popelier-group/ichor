@@ -10,7 +10,7 @@ from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
 def submit_ferebus_job_to_auto_run(
     ferebus_directory: Path, atoms: MutableValue, hold: Optional[JobID] = None
 ) -> Optional[JobID]:
-    """ Submits a job to compute nodes that runs FEREBUS. FEREBUS can be ran on each atom separately (since each atom has its own model and its own
+    """Submits a job to compute nodes that runs FEREBUS. FEREBUS can be ran on each atom separately (since each atom has its own model and its own
     adaptive sampling)."""
     script_name = SCRIPT_NAMES["ferebus"]
     ferebus_script = SubmissionScript(script_name)

@@ -13,12 +13,14 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
 def submit_wfns(
     directory: Path, atoms: Optional[List[str]]
 ) -> Optional[JobID]:
-    """ Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file"""
+    """Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file"""
     from ichor.globals import GLOBALS
 
     logger.info("Submitting wfns to AIMAll")
     points = PointsDirectory(directory)
-    submission_script = SubmissionScript(SCRIPT_NAMES["aimall"])  # SCRIPT_NAMES["aimall"] gives a path to the AIMALL.sh script
+    submission_script = SubmissionScript(
+        SCRIPT_NAMES["aimall"]
+    )  # SCRIPT_NAMES["aimall"] gives a path to the AIMALL.sh script
     for point in points:
         if (
             not point.wfn.path.with_suffix(".aim").exists()

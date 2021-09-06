@@ -7,6 +7,7 @@ from ichor.logging import logger
 from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.submission_script.submision_script import SubmissionScript
 
+
 class CheckManager:
     """
     Class used to check if the jobs submitted to the compute nodes via the sumbission system have ran correctly/have the correct outputs.
@@ -27,11 +28,15 @@ class CheckManager:
         ntimes: Optional[int] = None,
     ):
         self.check_function = check_function
-        self.check_args = args_for_check_function if args_for_check_function is not None else []
+        self.check_args = (
+            args_for_check_function
+            if args_for_check_function is not None
+            else []
+        )
         self.ntimes = ntimes
 
     def check(self, runcmd: str) -> str:
-        """ Append extra lines to the submission script file, which are used to rerun the job if it fails and check the outputs of the job
+        """Append extra lines to the submission script file, which are used to rerun the job if it fails and check the outputs of the job
         for errors."""
 
         new_runcmd = ""
@@ -53,7 +58,9 @@ class CheckManager:
             new_runcmd += "fi\n"
         python_job = ICHORCommand()
         if self.check_args:
-            python_job.add_function_to_job(self.check_function, *self.check_args)
+            python_job.add_function_to_job(
+                self.check_function, *self.check_args
+            )
         else:
             python_job.add_function_to_job(self.check_function)
         new_runcmd += f"eval $({python_job.repr()})\n"
@@ -62,7 +69,7 @@ class CheckManager:
 
 
 def print_completed():
-    """ Logs information about completed jobs/tasks into ICHOR log file."""
+    """Logs information about completed jobs/tasks into ICHOR log file."""
     ntasks = 0
     if SubmissionScript.DATAFILE in os.environ.keys():
         datafile = os.environ[SubmissionScript.DATAFILE]
@@ -96,12 +103,15 @@ def print_completed():
 
 
 def default_check(*args, **kwargs):
-    """ Default check function which always prints completed, takes in arbitrary args and kwargs to prevent
+    """Default check function which always prints completed, takes in arbitrary args and kwargs to prevent
     errors when being called with arguments and keyword arguments
 
     Note: Although implemented, should never be used as one should implement a function that actually checks
           whether a task has completed successfully
     """
     from ichor.logging import logger
-    logger.warn("Default check function being used, implement a custom function to check task has completed successfully")
+
+    logger.warn(
+        "Default check function being used, implement a custom function to check task has completed successfully"
+    )
     print_completed()

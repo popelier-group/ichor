@@ -11,7 +11,8 @@ from ichor.typing import F
 
 
 def convert_to_path(func: F) -> F:
-    """ Used as a decorator which converts any function inputs which have type annotation `Path` to a `Path` object."""
+    """Used as a decorator which converts any function inputs which have type annotation `Path` to a `Path` object."""
+
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         if func.__annotations__:
@@ -35,7 +36,7 @@ def convert_to_path(func: F) -> F:
 @convert_to_path
 def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
     """Makes a directory.
-    
+
     :param path: Where to make the directory
     :param empty: Whether to ignore FileExistsError exceptions. Set to False to ignore exceptions.
     :param force: When set to True (default), do not make the directory if an OSError occurs
@@ -52,13 +53,13 @@ def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
 
 @convert_to_path
 def move(src: Path, dst: Path) -> None:
-    """ Move the object from src to dst."""
+    """Move the object from src to dst."""
     src.replace(dst)
 
 
 @convert_to_path
 def cp(src: Path, dst: Path, *args, **kwargs) -> None:
-    """ See copyfile function below"""
+    """See copyfile function below"""
     if src.is_file():
         copyfile(src, dst, *args, **kwargs)
     elif src.is_dir():
@@ -67,8 +68,8 @@ def cp(src: Path, dst: Path, *args, **kwargs) -> None:
 
 @convert_to_path
 def copyfile(src: Path, dst: Path) -> None:
-    """ Copy contents and metadata (such as date created, etc.) from src to dst.
-    
+    """Copy contents and metadata (such as date created, etc.) from src to dst.
+
     :param src: The source directory where the file/directory are currently
     :param dst: The destination directory where the file/directory are to be copied to
     """
@@ -77,7 +78,7 @@ def copyfile(src: Path, dst: Path) -> None:
 
 @convert_to_path
 def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
-    """ Copy a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.)
+    """Copy a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.)
 
     :param src: The source directory where the tree is currently
     :param dst: The destination directory where the tree is to be copied to
@@ -96,7 +97,7 @@ def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
 
 @convert_to_path
 def recursive_move(src: Path, dst: Path) -> None:
-    """ Move a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.) or a file to a new location.
+    """Move a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.) or a file to a new location.
 
     :param src: The current location of directory of file
     :param dst: The location where the directory or file should be moved to
@@ -166,8 +167,8 @@ def pushd(new_dir: Path, update_cwd: bool = False):
 def get_files_of_type(
     filetype: Union[str, List[str]], directory: Path = Path.cwd()
 ) -> List[Path]:
-    """ Returns a list of all files that end in a certain file extension/suffix (such as .txt).
-    
+    """Returns a list of all files that end in a certain file extension/suffix (such as .txt).
+
     :param filetype: A string or list of strings corresponding to the suffixes that files should have
     :param directory: The directory where to do the searching for particular files.
     """
@@ -183,13 +184,13 @@ def get_files_of_type(
 
 @convert_to_path
 def tail(path: Path, lines: int = 20) -> str:
-    """ Works in the same way as the unix `tail` command giving the last n lines of a file
+    """Works in the same way as the unix `tail` command giving the last n lines of a file
 
     :param path: the path of the file to read last m lines of
     :param lines: specifies how many lines from the bottom of the file to return
     :returns last n lines of file as string
     """
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         total_lines_wanted = lines
 
         BLOCK_SIZE = 1024
@@ -199,23 +200,25 @@ def tail(path: Path, lines: int = 20) -> str:
         block_number = -1
         blocks = []
         while lines_to_go > 0 and block_end_byte > 0:
-            if (block_end_byte - BLOCK_SIZE > 0):
-                f.seek(block_number*BLOCK_SIZE, 2)
+            if block_end_byte - BLOCK_SIZE > 0:
+                f.seek(block_number * BLOCK_SIZE, 2)
                 blocks.append(f.read(BLOCK_SIZE))
             else:
-                f.seek(0,0)
+                f.seek(0, 0)
                 blocks.append(f.read(block_end_byte))
-            lines_found = blocks[-1].count(b'\n')
+            lines_found = blocks[-1].count(b"\n")
             lines_to_go -= lines_found
             block_end_byte -= BLOCK_SIZE
             block_number -= 1
-        all_read_text = b''.join(reversed(blocks))
-        return b'\n'.join(all_read_text.splitlines()[-total_lines_wanted:]).decode('utf-8')
+        all_read_text = b"".join(reversed(blocks))
+        return b"\n".join(
+            all_read_text.splitlines()[-total_lines_wanted:]
+        ).decode("utf-8")
 
 
 @convert_to_path
 def last_line(path: Path) -> str:
-    """ Alias for `tail` for getting the last line of a file
+    """Alias for `tail` for getting the last line of a file
 
     :param path: the path of the file to read last line of
     :returns last line of file as string

@@ -26,14 +26,14 @@ def x_to_features(func: F) -> F:
 
 
 class Models(Directory, list):
-    """ A class which wraps around a directory containing models made by FEREBUS or any other program used to make GP models."""
+    """A class which wraps around a directory containing models made by FEREBUS or any other program used to make GP models."""
 
     def __init__(self, path):
         list.__init__(self)
         Directory.__init__(self, path)
 
     def parse(self) -> None:
-        """ Parse a directory and add any `.model` files to the `Models` instance """
+        """Parse a directory and add any `.model` files to the `Models` instance"""
 
         for f in self:
             if f.suffix == Model.filetype:
@@ -41,7 +41,7 @@ class Models(Directory, list):
 
     @property
     def dirpattern(self):
-        """ A regex pattern used to find directories containing models."""
+        """A regex pattern used to find directories containing models."""
         from ichor.globals import GLOBALS
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")
@@ -61,7 +61,7 @@ class Models(Directory, list):
         raise TypeError(f"Cannot predict values from type '{type(x)}'")
 
     def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
-        """ Returns a dictionary containing atom name as key and atom features for values."""
+        """Returns a dictionary containing atom name as key and atom features for values."""
         return {atom.name: atom.features for atom in atoms}
 
     def _features_from_list_of_atoms(

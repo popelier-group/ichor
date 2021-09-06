@@ -11,7 +11,7 @@ from ichor.common.uid import get_uid
 
 
 def import_external_functions():
-    """ Import functions which ICHOR will need to execute in a job script. For example, ICHOR will need to make the training sets on a compute node,so
+    """Import functions which ICHOR will need to execute in a job script. For example, ICHOR will need to make the training sets on a compute node,so
     the following command will need to be ran in the job script
     python /home/mfbx4mb9/src/ICHOR-v3/ichor3.py -c config.properties -u 427d42b6-1b68-4647-9784-0e56f3e858fe -f make_sets "WATER-3000.xyz"
     where the `make_sets` part corresponds to the `make_sets` function that is imported here.
@@ -19,18 +19,19 @@ def import_external_functions():
     # Place functions to run externally in here
     from ichor.logging import log_time
     from ichor.main.adaptive_sampling import adaptive_sampling
+    from ichor.main.collate_log import collate_model_log
     from ichor.main.make_models import make_models, move_models
     from ichor.main.submit_gjfs import check_gaussian_output, submit_gjfs
     from ichor.main.submit_wfns import check_aimall_output, submit_wfns
     from ichor.make_sets import make_sets
     from ichor.submission_script import print_completed
-    from ichor.main.collate_log import collate_model_log
 
     Arguments.external_functions = locals()
 
 
 class Arguments:
-    """ Used to parse command line arguments that are given to ICHOR. These arguments are given using `-` or `--` and read with argparse."""
+    """Used to parse command line arguments that are given to ICHOR. These arguments are given using `-` or `--` and read with argparse."""
+
     config_file: str = "config.properties"
     uid: UUID = get_uid()
 

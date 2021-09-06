@@ -4,6 +4,7 @@ from enum import Enum
 
 
 class AtomicDistance(Enum):
-    """ Enum that encapsulates units that are used in ICHOR."""
+    """Enum that encapsulates units that are used in ICHOR."""
+
     Bohr = "bohr"
     Angstroms = "angstroms"

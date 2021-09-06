@@ -4,28 +4,33 @@ from pathlib import Path
 from typing import List, Union
 
 from ichor.batch_system.batch_system import BatchSystem, JobID
-from ichor.common.functools import classproperty
 from ichor.batch_system.node import NodeType
+from ichor.common.functools import classproperty
 
 
 class SunGridEngine(BatchSystem):
-    """ A class that implements methods ICHOR uses to submit jobs to the Sun Grid Engine (SGE) batch system. These methods/properties
-    are used to construct job scripts for any program we want to run on SGE. """
+    """A class that implements methods ICHOR uses to submit jobs to the Sun Grid Engine (SGE) batch system. These methods/properties
+    are used to construct job scripts for any program we want to run on SGE."""
+
     @staticmethod
     def is_present() -> bool:
-        """ Check if SGE is present on the current machine ICHOR is running on. """
+        """Check if SGE is present on the current machine ICHOR is running on."""
         return "SGE_ROOT" in os.environ.keys()
 
     @staticmethod
     def current_node() -> NodeType:
-        """ Return the current type of node ichor is running on
+        """Return the current type of node ichor is running on
         SGE defines the SGE_O_HOST when running on a compute node
         """
-        return NodeType.ComputeNode if "SGE_O_HOST" in os.environ.keys() else NodeType.LoginNode
+        return (
+            NodeType.ComputeNode
+            if "SGE_O_HOST" in os.environ.keys()
+            else NodeType.LoginNode
+        )
 
     @classproperty
     def submit_script_command(self) -> List[str]:
-        """ Return a list containing command used to submit jobs to SGE batch system."""
+        """Return a list containing command used to submit jobs to SGE batch system."""
         return ["qsub"]
 
     @classmethod
@@ -41,50 +46,54 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
-        """ Return a list containing `hold_jid` keyword and job id which is used to hold a particular job id for it to be ran at a later time. """
-        jid = job_id.id if isinstance(job_id, JobID) else ','.join(map(str, [j.id for j in job_id if j is not None]))
+        """Return a list containing `hold_jid` keyword and job id which is used to hold a particular job id for it to be ran at a later time."""
+        jid = (
+            job_id.id
+            if isinstance(job_id, JobID)
+            else ",".join(map(str, [j.id for j in job_id if j is not None]))
+        )
         return ["-hold_jid", f"{jid}"]
 
     @classproperty
     def delete_job_command(self) -> List[str]:
-        """ Return a list containing command used to delete jobs on SGE batch system. """
+        """Return a list containing command used to delete jobs on SGE batch system."""
         return ["qdel"]
 
     @staticmethod
     def status() -> List[str]:
-        """ Return a list containing command used to check status of jobs on SGE batch system. """
+        """Return a list containing command used to check status of jobs on SGE batch system."""
         return ["qstat"]
 
     @classmethod
     def change_working_directory(cls, path: Path) -> str:
-        """ Return the line in the job script definning the working directory from where the job is going to run. """
+        """Return the line in the job script definning the working directory from where the job is going to run."""
         return f"-wd {path}"
 
     @classmethod
     def output_directory(cls, path: Path) -> str:
-        """ Return the line in the job script defining the output directory where the output of the job should be written to.
-        These files end in `.o{job_id}`. """
+        """Return the line in the job script defining the output directory where the output of the job should be written to.
+        These files end in `.o{job_id}`."""
         return f"-o {path}"
 
     @classmethod
     def error_directory(cls, path: Path) -> str:
-        """ Return the line in the job script defining the error directory where any errors from the job should be written to.
-            These files end in `.e{job_id}`. """
+        """Return the line in the job script defining the error directory where any errors from the job should be written to.
+        These files end in `.e{job_id}`."""
         return f"-e {path}"
 
     @classmethod
     def parallel_environment(cls, ncores: int) -> str:
-        """ Returns the line in the job script defining the number of corest to be used for the job. """
+        """Returns the line in the job script defining the number of corest to be used for the job."""
         from ichor.batch_system import PARALLEL_ENVIRONMENT
-        from ichor.globals import GLOBALS
+        from ichor.machine import MACHINE
 
-        return f"-pe {PARALLEL_ENVIRONMENT[GLOBALS.MACHINE][ncores]} {ncores}"
+        return f"-pe {PARALLEL_ENVIRONMENT[MACHINE][ncores]} {ncores}"
 
     @classmethod
     def array_job(cls, njobs: int) -> str:
-        """ Returns the line in the job script that specifies this job is an array job. These jobs are run at the same time in parallel
+        """Returns the line in the job script that specifies this job is an array job. These jobs are run at the same time in parallel
         as they do not depend on one another. An example will be running 50 Gaussian or AIMALL jobs at the same time without having to submit
-        50 separate jobs. Instead 1 array job can be submitted. """
+        50 separate jobs. Instead 1 array job can be submitted."""
         return f"-t 1-{njobs}"
 
     @classproperty
@@ -109,5 +118,5 @@ class SunGridEngine(BatchSystem):
 
     @classproperty
     def OptionCmd(self) -> str:
-        """ Returns the character used to define SGE options (defined at the top of the file)."""
+        """Returns the character used to define SGE options (defined at the top of the file)."""
         return "$"

@@ -5,11 +5,12 @@ from ichor.submission_script.submision_script import SubmissionScript
 
 
 class TimingManager:
-    """ A class that times how long jobs take. It uses the logging library, see `log_time` function.
-    
+    """A class that times how long jobs take. It uses the logging library, see `log_time` function.
+
     :param submission_script: A SubmissionScript instance (which represents a job) that is going to be timed.
     :param message: A string to write in the logger.
     """
+
     def __init__(
         self,
         submission_script: SubmissionScript,
@@ -36,7 +37,9 @@ class TimingManager:
                 self.message,
             )
         else:
-            python_job.add_function_to_job("log_time", f"START:{self.identifier}")
+            python_job.add_function_to_job(
+                "log_time", f"START:{self.identifier}"
+            )
         self.submission_script.add_command(python_job)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):

@@ -3,13 +3,13 @@ from ichor.files.trajectory import Trajectory
 
 
 class DlpolyHistory(Trajectory):
-    """ Wraps around a DL POLY History file, which just contains timesteps 
+    """Wraps around a DL POLY History file, which just contains timesteps
     with different molecular configurations. Essentially the same contents as a
     .xyz trajectory file, but in a different format."""
 
     # overload the Trajectory _read_file method because the formatting of the history file is different
     def _read_file(self):
-        """ Read in a file with DLPOLY HISTORY format and store the timesteps (each timestep has a different geometry)."""
+        """Read in a file with DLPOLY HISTORY format and store the timesteps (each timestep has a different geometry)."""
         with open(self.path, "r") as f:
             for line in f:
                 if line.startswith("timestep"):
@@ -28,12 +28,12 @@ class DlpolyHistory(Trajectory):
                     self.add(atoms)
 
     def write(self, fname=None):
-        """ Writes a trajectory .xyz file from the DL POLY History file."""
+        """Writes a trajectory .xyz file from the DL POLY History file."""
         if fname is None:
             fname = self.path.parent / "TRAJECTORY.xyz"
         super().write(fname=fname)
 
     def write_to_trajectory(self) -> None:
-        """ See the `DlpolyHistory` `write` method which writes a .xyz trajectory
+        """See the `DlpolyHistory` `write` method which writes a .xyz trajectory
         from a DL POLY History File."""
         self.write()

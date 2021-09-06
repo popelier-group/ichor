@@ -1,12 +1,12 @@
+import inspect
 import re
 from typing import Optional
 
 from ichor.atoms import AtomsNotFoundError
 from ichor.common.functools import classproperty
-from ichor.files import GJF, WFN, Directory, INTs, File
+from ichor.files import GJF, WFN, Directory, File, INTs
 from ichor.geometry import AtomData
 from ichor.points.point import Point
-import inspect
 
 
 class PointDirectory(Point, Directory):
@@ -39,7 +39,7 @@ class PointDirectory(Point, Directory):
         """
         Iterate over __annotations__ which is a dictionary of {"gjf": Optional[GJF], "wfn": Optional[WFN], "ints": Optional[INTs]}
         as defined from class variables in PointsDirectory. Get the type inside the [] brackets
-         """
+        """
         filetypes = {}
         dirtypes = {}
         for var, type_ in self.__annotations__.items():
@@ -51,13 +51,17 @@ class PointDirectory(Point, Directory):
             elif issubclass(type_, Directory):
                 dirtypes[var] = type_
 
-        for f in self:  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
+        for (
+            f
+        ) in (
+            self
+        ):  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
             if f.is_file():
                 for var, filetype in filetypes.items():
                     if f.suffix == filetype.filetype:
                         if (
-                                "parent"
-                                in inspect.signature(filetype.__init__).parameters
+                            "parent"
+                            in inspect.signature(filetype.__init__).parameters
                         ):
                             setattr(self, var, filetype(f, parent=self))
                         else:
@@ -67,8 +71,8 @@ class PointDirectory(Point, Directory):
                 for var, dirtype in dirtypes.items():
                     if dirtype.dirpattern.match(f.name):
                         if (
-                                "parent"
-                                in inspect.signature(dirtype.__init__).parameters
+                            "parent"
+                            in inspect.signature(dirtype.__init__).parameters
                         ):
                             setattr(self, var, dirtype(f, parent=self))
                         else:
@@ -77,7 +81,7 @@ class PointDirectory(Point, Directory):
 
     @property
     def atoms(self):
-        """ Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
+        """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
         if self.gjf.exists():
             return self.gjf.atoms
         elif self.wfn.exists():

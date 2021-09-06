@@ -48,7 +48,9 @@ class FileStructure(FileTree):
         self.add("cv_errors", "cv_errors", parent="active_learning")
         self.add("counter", "counter", parent="active_learning")
 
-        self.add("child_processes", "child_processes", parent="active_learning")
+        self.add(
+            "child_processes", "child_processes", parent="active_learning"
+        )
 
         self.add("PROPERTIES", "properties_daemon", parent="active_learning")
         self.add(

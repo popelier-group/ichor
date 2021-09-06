@@ -5,7 +5,7 @@ that ICHOR is being ran on."""
 from ichor.arguments import Arguments
 from ichor.common.os import input_with_prefill
 from ichor.globals.globals import Globals
-from ichor.globals.machine import Machine
+from ichor.machine import Machine
 from ichor.globals.os import OS
 from ichor.menu import Menu
 

@@ -22,8 +22,8 @@ def check_x_2d(func: F) -> F:
 
 
 class Model(File):
-    """ A model file that is returned back from our machine learning program FEREBUS.
-    
+    """A model file that is returned back from our machine learning program FEREBUS.
+
     .. note::
         Another program can be used for the machine learning as long as it outputs files of the same format as the FEREBUS outputs.
     """
@@ -50,7 +50,7 @@ class Model(File):
         self.nugget = 1e-10
 
     def _read_file(self) -> None:
-        """ Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
+        """Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
         kernel_composition = ""
         kernel_list = {}
 
@@ -64,11 +64,15 @@ class Model(File):
                     self.system = line.split()[1]
                     line = next(f)
 
-                if "property" in line:  # property (such as IQA or particular multipole moment) for which a GP model was made
+                if (
+                    "property" in line
+                ):  # property (such as IQA or particular multipole moment) for which a GP model was made
                     self.type = line.split()[1]
                     line = next(f)
 
-                if line.startswith("atom"):  # atom for which a GP model was made
+                if line.startswith(
+                    "atom"
+                ):  # atom for which a GP model was made
                     self.atom = line.split()[1]
                     line = next(f)
 
@@ -80,7 +84,9 @@ class Model(File):
                     self.nfeats = int(line.split()[1])
                     line = next(f)
 
-                if "number_of_training_points" in line:  # number of training points to make the GP model
+                if (
+                    "number_of_training_points" in line
+                ):  # number of training points to make the GP model
                     self.ntrain = int(line.split()[1])
                     line = next(f)
 
@@ -90,7 +96,9 @@ class Model(File):
                     self.mean = ConstantMean(float(line.split()[1]))
                     line = next(f)
 
-                if "composition" in line:  # which kernels were used to make the GP model. Different kernels can be specified for different input dimensions
+                if (
+                    "composition" in line
+                ):  # which kernels were used to make the GP model. Different kernels can be specified for different input dimensions
                     kernel_composition = line.split()[-1]
                     line = next(f)
 

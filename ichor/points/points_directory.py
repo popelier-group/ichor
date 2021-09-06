@@ -8,7 +8,7 @@ from ichor.points.points import Points
 
 
 class PointsDirectory(Points, Directory):
-    """A helper class that wraps around a directory which contains points (molecules with various geometries). 
+    """A helper class that wraps around a directory which contains points (molecules with various geometries).
     Calling Directory.__init__(self, path) will call the `parse` method of PointsDirectory instead of Directory
     (because Python looks for the method in this class first before looking at parent class methods.) A typical ICHOR
     directory that contains points will points will have a structure like this:
@@ -24,6 +24,7 @@ class PointsDirectory(Points, Directory):
     :param path: Path to a directory which contains points. This path is typically the path to the training set, sample pool, etc.
         These paths are defined in GLOBALS.
     """
+
     def __init__(self, path):
         # Initialise `list` parent class of `Points`
         Points.__init__(self)
@@ -38,7 +39,7 @@ class PointsDirectory(Points, Directory):
         If however there are only .gjf files present in the directory at the moment, then make a new directory for each .gjf file
         and move the .gjf file in there. So for example, if there is a file called WATER001.gjf, this method will make a
         folder called WATER001 and will move WATER001.gjf in it.
-        Initially when the training set, test set, and sample pool directories are made, there are only .gjf files present in the 
+        Initially when the training set, test set, and sample pool directories are made, there are only .gjf files present in the
         directory. This method makes them in separate directories.
         """
 
@@ -54,7 +55,9 @@ class PointsDirectory(Points, Directory):
                 new_dir = self.path / f.stem
                 mkdir(new_dir)
                 f.replace(new_dir / f.name)
-                self += [PointDirectory(new_dir)]  # wrap the new directory as a PointDirectory instance and add to self
+                self += [
+                    PointDirectory(new_dir)
+                ]  # wrap the new directory as a PointDirectory instance and add to self
         # sort by the names of the directories (by the numbers in their name) since the system name is always the same
         self.sort(key=lambda x: x.path.name)
 

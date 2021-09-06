@@ -11,6 +11,7 @@ from ichor.geometry import Geometry
 
 class GaussianJobType(Enum):
     """Enum that give variable names to some of the keywords used in a Gaussian job."""
+
     Energy = "p"
     Optimisation = "opt"
     Frequency = "freq"
@@ -21,7 +22,8 @@ class GaussianJobType(Enum):
 
 
 class GJF(Geometry, File):
-    """ Wraps around a .gjf file that is used as input to Gaussian. """
+    """Wraps around a .gjf file that is used as input to Gaussian."""
+
     def __init__(self, path):
         File.__init__(self, path)
         Geometry.__init__(self)
@@ -40,12 +42,12 @@ class GJF(Geometry, File):
 
     @classproperty
     def filetype(cls) -> str:
-        """ Returns the extension of the GJF file."""
+        """Returns the extension of the GJF file."""
         return ".gjf"
 
     @buildermethod
     def _read_file(self):
-        """ Parse and red a .gjf file for information we need to submit a Gaussian job."""
+        """Parse and red a .gjf file for information we need to submit a Gaussian job."""
         self.atoms = Atoms()
         with open(self.path, "r") as f:
             for line in f:
@@ -59,7 +61,9 @@ class GJF(Geometry, File):
                     line = line.replace("#", "")
                     keywords = line.split()  # split keywords by whitespace
                     for keyword in keywords:
-                        if "/" in keyword:  # if the user has used something like B3LYP/6-31G Then split them up
+                        if (
+                            "/" in keyword
+                        ):  # if the user has used something like B3LYP/6-31G Then split them up
                             self.method = keyword.split("/")[0].upper()
                             self.basis_set = keyword.split("/")[1].lower()
                         # if the keyword is in the job enum GaussianJobType: p, opt, freq
@@ -128,7 +132,7 @@ class GJF(Geometry, File):
 
     @property
     def header_line(self) -> str:
-        """Returns a string that is the line in the gjf file that contains all keywords. """
+        """Returns a string that is the line in the gjf file that contains all keywords."""
         return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     def write(self) -> None:

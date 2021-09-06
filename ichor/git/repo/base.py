@@ -39,7 +39,6 @@ from ichor.git.util import (Actor, decygpath, expand_path, finalize_process,
 # typing ------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.objects import Tree
     from ichor.git.objects.submodule.base import UpdateProgress

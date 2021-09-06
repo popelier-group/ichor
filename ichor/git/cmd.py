@@ -26,7 +26,6 @@ from ichor.git.util import (LazyMixin, cygpath, expand_path, is_cygwin_git,
 # typing ---------------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.diff import DiffIndex
     from ichor.git.repo.base import Repo

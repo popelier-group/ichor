@@ -23,7 +23,6 @@ from ichor.git.util import (CallableRemoteProgress, IterableList, IterableObj,
 # typing-------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.objects.submodule.base import UpdateProgress
     from ichor.git.repo.base import Repo

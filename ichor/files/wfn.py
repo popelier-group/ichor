@@ -9,6 +9,7 @@ from ichor.units import AtomicDistance
 
 class WFN(Geometry, GeometryData, File):
     """Wraps around a .wfn file that is the output of Gaussian"""
+
     def __init__(self, path):
         File.__init__(self, path)
         Geometry.__init__(self)
@@ -23,7 +24,7 @@ class WFN(Geometry, GeometryData, File):
 
     @buildermethod
     def _read_file(self, only_header=False):
-        """ Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
+        """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
         FileState of the file is FileState.Unread"""
         self.atoms = Atoms()
         with open(self.path, "r") as f:
@@ -55,11 +56,11 @@ class WFN(Geometry, GeometryData, File):
 
     @classproperty
     def filetype(cls) -> str:
-        """ Returns the file extension of a WFN file"""
+        """Returns the file extension of a WFN file"""
         return ".wfn"
 
     def read_header(self):
-        """ Read in the top of the wavefunction file, currently the data is not used but could be useful
+        """Read in the top of the wavefunction file, currently the data is not used but could be useful
         Following the 'just in case' mentality"""
         from ichor.globals import GLOBALS
 
@@ -77,11 +78,11 @@ class WFN(Geometry, GeometryData, File):
 
     @property
     def title(self):
-        """ Returns the name of the WFN file (excluding the .wfn extension)"""
+        """Returns the name of the WFN file (excluding the .wfn extension)"""
         return self.path.stem
 
     def check_header(self):
-        """ Checks if the correct Gaussian method (eg. B3LYP) is being used in the Gaussian calculations."""
+        """Checks if the correct Gaussian method (eg. B3LYP) is being used in the Gaussian calculations."""
         from ichor.globals import GLOBALS
 
         data = []

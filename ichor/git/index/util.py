@@ -12,7 +12,6 @@ from ichor.git.types import _T, PathLike
 # typing ----------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.index import IndexFile
 

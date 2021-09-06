@@ -13,8 +13,11 @@ class Directory(PathObject, ABC):
     A class that implements helper methods for working with directories (which are stored on a hard drive).
     :param path: The path to a directory
     """
+
     def __init__(self, path):
-        PathObject.__init__(self, path)  # set path for directory instance as well as FileState to Unread
+        PathObject.__init__(
+            self, path
+        )  # set path for directory instance as well as FileState to Unread
         self.parse()  # parse directory to find contents
 
     @abstractmethod
@@ -32,7 +35,11 @@ class Directory(PathObject, ABC):
         """
         self.path.replace(dst)
         self.path = dst
-        for f in self.path.iterdir():  # need to use iterdir in case object overrides __iter__
+        for (
+            f
+        ) in (
+            self.path.iterdir()
+        ):  # need to use iterdir in case object overrides __iter__
             if f.is_file():
                 fdst = self.path / f"{self.path.name}{f.suffix}"
                 f.replace(fdst)
@@ -52,7 +59,7 @@ class Directory(PathObject, ABC):
 
     @buildermethod
     def read(self) -> "Directory":
-        """ Read a directory and all of its contents and store information that ICHOR needs to function (such as .wfn or .int information that is needed.)
+        """Read a directory and all of its contents and store information that ICHOR needs to function (such as .wfn or .int information that is needed.)
         If an attribute such as a gjf's energy is being accessed, but the file has not been read yet, the file will be read in first and then the attribute
         can be returned if it has been successfully read. This method heavily ties in with accessing attributes of `File` objects, since these `File` objects
         are all encapsulated by a `Directory` object."""
@@ -70,10 +77,10 @@ class Directory(PathObject, ABC):
         pass
 
     def iterdir(self):
-        """ alias to __iter__ in case child object overrides __iter__ """
+        """alias to __iter__ in case child object overrides __iter__"""
         return self.path.iterdir()
 
     def __iter__(self):
-        """ When code iterates over an instance of a directory, it calls the pathlib iterdir() method which yields
+        """When code iterates over an instance of a directory, it calls the pathlib iterdir() method which yields
         path objects to all directory contents."""
         return self.iterdir()

@@ -21,7 +21,10 @@ def buildermethod(func: F) -> F:
         t = Test()
         t.add()
     """
-    @wraps(func)  # makes sure that func.__name__ returns the name of the function instead of wrapper if the decorator has been applied to func
+
+    @wraps(
+        func
+    )  # makes sure that func.__name__ returns the name of the function instead of wrapper if the decorator has been applied to func
     def wrapper(self: T, *args, **kwargs) -> T:
         func(self, *args, **kwargs)
         return self

@@ -16,6 +16,7 @@ except ImportError:
 
 class TabCompleter(ABC):
     """Abstract method for any kind of auto completion in the user input prompt when pressing Tab."""
+
     @abstractmethod
     def completer(self, text, state):
         """
@@ -34,8 +35,12 @@ class TabCompleter(ABC):
         """
         if readline:
             readline.set_completer_delims(pattern)  # set a tab as delimiter
-            readline.parse_and_bind("tab: complete")  # set tab to trigger readline
-            readline.set_completer(self.completer)  # depending on menu, a different functionality is needed for readline
+            readline.parse_and_bind(
+                "tab: complete"
+            )  # set tab to trigger readline
+            readline.set_completer(
+                self.completer
+            )  # depending on menu, a different functionality is needed for readline
 
     @staticmethod
     def remove_completer() -> None:
@@ -65,12 +70,15 @@ class ListCompleter(TabCompleter):
     :param list_completions: A list of strings which are the options to be auto completed when the user types
     in the prompt and presses Tab.
     """
+
     def __init__(self, list_completions: List[str]):
         self.list_completions = list_completions
 
     def completer(self, text, state):
         if readline:
-            line = readline.get_line_buffer() # get what is currently typed in the prompt
+            line = (
+                readline.get_line_buffer()
+            )  # get what is currently typed in the prompt
             if not line:
                 return [c + " " for c in self.list_completions][state]
             else:
@@ -85,17 +93,22 @@ class PathCompleter(TabCompleter):
     """
     Used to show the paths to files when the user pressed Tab.
     """
+
     def completer(self, text, state):
         if not readline:
             return
         p = Path(text)
-        if "~" in text: # if home directory is shown as ~/ show the full path from /home/ instead
+        if (
+            "~" in text
+        ):  # if home directory is shown as ~/ show the full path from /home/ instead
             p = p.expanduser()
         p = f"{p}{os.sep if p.is_dir() else ''}"  # Add trailing slash if p is a directory
         if p == f".{os.sep}":
             p = ""  # No point in showing ./
 
-        files = [x for x in glob(p + "*")]  # find all files which match what is typed into the prompt
+        files = [
+            x for x in glob(p + "*")
+        ]  # find all files which match what is typed into the prompt
         for i, f in enumerate(files):
             if Path(f).is_dir():
                 files[i] += os.sep

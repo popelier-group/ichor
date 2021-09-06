@@ -37,7 +37,6 @@ from ichor.git.util import (LazyMixin, LockedFD, file_contents_ro,
 # typing -----------------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from subprocess import Popen
 

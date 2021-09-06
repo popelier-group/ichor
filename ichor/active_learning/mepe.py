@@ -85,7 +85,7 @@ class MEPE(ExpectedImprovement):
         return cv_errors
 
     def alpha(self) -> float:
-        """ alpha value is a balance factor which varies based on how well the cv error
+        """alpha value is a balance factor which varies based on how well the cv error
         approximated the prediction error of the points added in the previous iteration.
 
         For the first iteration there are no previously added points therefore alpha defaults
@@ -98,7 +98,9 @@ class MEPE(ExpectedImprovement):
             return 0.5  # if the cv_errors_file doesn't exist, there was no previous iteration and we can default to 0.5
 
         try:
-            with open(cv_errors_file, "r") as f:  # the previous iterations data is stored as json in cv_errors_file
+            with open(
+                cv_errors_file, "r"
+            ) as f:  # the previous iterations data is stored as json in cv_errors_file
                 obj = json.load(f)
                 npoints = obj["added_points"]
                 cv_errors = ModelsResult(obj["cv_errors"])
@@ -141,7 +143,9 @@ class MEPE(ExpectedImprovement):
         mkdir(cv_file.parent)
         if cv_file.exists():
             cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
-        with open(cv_file, "w") as f:  # store data as json for next iterations alpha calculation
+        with open(
+            cv_file, "w"
+        ) as f:  # store data as json for next iterations alpha calculation
             json.dump(
                 {
                     "added_points": npoints,

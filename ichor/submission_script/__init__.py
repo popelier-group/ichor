@@ -8,8 +8,8 @@ from ichor.submission_script.ferebus_command import FerebusCommand
 from ichor.submission_script.gaussian_command import GaussianCommand
 from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.submission_script.python_command import PythonCommand
-from ichor.submission_script.submision_script import SubmissionScript
 from ichor.submission_script.script_timing_manager import TimingManager
+from ichor.submission_script.submision_script import SubmissionScript
 
 
 def prepend_script_directory(paths):
@@ -27,17 +27,23 @@ class ScriptNames(dict):
     """A helper class which retruns the full path of a particular script that is used to submit job files
     for programs like Guassian and AIMALL. All the script files are stored into a directory GLOBALS.FILE_STRUCTURE["scripts"].
     These scripts are submitted to compute nodes on CSF3/FFLUXLAB which initiates a job."""
+
     def __getitem__(self, item):
         """
         :param item: a key which corresponds to a particular script file value. See SCRIPT_NAMES.
         """
-        from ichor.globals import GLOBALS  # import globals as the paths to the script directory is defined there
+        from ichor.globals import \
+            GLOBALS  # import globals as the paths to the script directory is defined there
 
-        script = super().__getitem__(item)  # call dict __getitem__ method to get the script name (the value corresponding to the given key)
+        script = super().__getitem__(
+            item
+        )  # call dict __getitem__ method to get the script name (the value corresponding to the given key)
         # if an ichor script, you have to do SCRIPT_NAMES["ichor"]["gaussian"] as SCRIPT_NAMES["ichor"] retruns a ScriptNames type object
         # then the second time this object is indexed with ["gaussian"], it will be an instance of "str", so this if statement will be executed
         if isinstance(script, (str, Path)):
-            return GLOBALS.FILE_STRUCTURE["scripts"] / script  # append the script name to the path where the scripts are located
+            return (
+                GLOBALS.FILE_STRUCTURE["scripts"] / script
+            )  # append the script name to the path where the scripts are located
         else:
             return script
 

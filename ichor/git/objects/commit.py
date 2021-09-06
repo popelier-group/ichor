@@ -25,7 +25,6 @@ from ichor.git.util import Actor, Stats, finalize_process, hex_to_bin
 # typing ------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.refs import SymbolicReference
     from ichor.git.repo import Repo

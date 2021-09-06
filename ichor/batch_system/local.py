@@ -1,17 +1,18 @@
 from typing import List
+
+from ichor.batch_system.node import NodeType
 from ichor.batch_system.sge import SunGridEngine
 from ichor.common.functools import classproperty
-from ichor.batch_system.node import NodeType
+from ichor.machine import MACHINE, Machine
 
 
 class LocalBatchSystem(SunGridEngine):
     """LocalBatchSystem is to only be used for debugging purposes
     (Unless one wants to implement a batch system to run on a local machine... would be a nice addition)"""
+
     @staticmethod
     def is_present() -> bool:
-        from ichor.globals import GLOBALS, Machine
-
-        return GLOBALS.MACHINE is Machine.Local
+        return MACHINE is Machine.Local
 
     @staticmethod
     def current_node() -> NodeType:

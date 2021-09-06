@@ -14,10 +14,8 @@ from ichor.common.types import DictList, Version
 from ichor.file_structure import FileStructure
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
-from ichor.globals.machine import Machine
 from ichor.globals.os import OS
 from ichor.problem_finder import ProblemFinder
-
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -106,7 +104,6 @@ RECOVERY_ERROR_THRESHOLD        | float           | 0.00038           | Threshol
 WARN_INTEGRATION_ERROR          | bool            | True              | Switch on warnings for large integration errors                                            | Warnings not currently implemented in v3                                                       # todo: implement integration error warning for v3
 INTEGRATION_ERROR_THRESHOLD     | float           | 0.001             | Threshold to warn user about large integration erorrs                                      | Warnings not currently implemented in v3                                                       # todo: implement integrations error warning for v3
 LOG_WARNINGS                    | bool            | False             | Switch to write warnings to log file                                                       | Warnings not currently implemented in v3                                                       # todo: implement warnings for v3
-MACHINE                         | Machine         | Machine.local     | Current machine                                                                            | Should automatically detect between local, ffluxlab and csf3
 OS                              | OS              | OS.Linux          | Current operating system                                                                   | Should automatically detect between linux, macos and windows
 DISABLE_PROBLEMS                | bool            | False             | Disables showing problems at the top of the main menu                                      | Problems currently not implemented for v3                                                      # todo: implement problems for v3
 UID                             | UUID            | Arguments.uid     | Unique ID for ichor instance                                                               | Very important variable for making sure ichor reads and writes data to the correct location
@@ -119,6 +116,7 @@ GIT_TOKEN                       | str             | ghp_...           | Git toke
 INCLUDE_NODES                   | List[str]       | []                | Node whitelist for ichor to run jobs on                                                    |
 EXCLUDE_NODES                   | List[str]       | []                | Node blacklist for ichor not to run jobs on                                                |
 """
+
 
 class Globals:
     _types = []
@@ -259,7 +257,6 @@ class Globals:
     # Activate Warnings when making models
     LOG_WARNINGS: bool = False  # Gets set in _make_models
 
-    MACHINE: Machine = Machine.local
     OS: OS = OS.Linux
 
     DISABLE_PROBLEMS: bool = False
@@ -400,15 +397,6 @@ class Globals:
         return globals_instance
 
     def init(self):
-        # Set Machine Name
-        machine_name = platform.node()
-        if "csf3." in machine_name:
-            self.MACHINE = Machine.csf3
-        elif "ffluxlab" in machine_name:
-            self.MACHINE = Machine.ffluxlab
-        else:
-            self.MACHINE = Machine.local
-
         # Set OS
         if platform == "linux" or platform == "linux2":
             self.OS = OS.Linux
@@ -437,14 +425,14 @@ class Globals:
             else:
                 ProblemFinder.unknown_settings += [key]
 
-        if (
-            self.DROP_N_COMPUTE
-            and not self.DROP_N_COMPUTE_LOCATION
-            and self.MACHINE == "csf3"
-        ):
-            self.DROP_N_COMPUTE_LOCATION = Path.home() / "DropCompute"
-        if self.DROP_N_COMPUTE_LOCATION:
-            io.mkdir(self.DROP_N_COMPUTE_LOCATION)
+        # if (
+        #     self.DROP_N_COMPUTE
+        #     and not self.DROP_N_COMPUTE_LOCATION
+        #     and self.MACHINE == "csf3"
+        # ):
+        #     self.DROP_N_COMPUTE_LOCATION = Path.home() / "DropCompute"
+        # if self.DROP_N_COMPUTE_LOCATION:
+        #     io.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
         if self.FILE_STRUCTURE["training_set"].exists():
             from ichor.files import GJF
@@ -526,7 +514,6 @@ class Globals:
 
     @property
     def global_variables(self):
-        from optparse import OptionParser
 
         try:
             return self._global_variables

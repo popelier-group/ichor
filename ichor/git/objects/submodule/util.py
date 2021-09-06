@@ -10,7 +10,6 @@ from ichor.git.types import PathLike
 # typing -----------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from weakref import ReferenceType
 

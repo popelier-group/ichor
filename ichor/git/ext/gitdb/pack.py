@@ -28,8 +28,8 @@ import tempfile
 from binascii import crc32
 from struct import pack
 
-from ichor.git.ext.gitdb.base import (ODeltaPackInfo,  # Amazing !
-                                      ODeltaPackStream, ODeltaStream, OInfo,
+from ichor.git.ext.gitdb.base import ODeltaPackInfo  # Amazing !
+from ichor.git.ext.gitdb.base import (ODeltaPackStream, ODeltaStream, OInfo,
                                       OPackInfo, OPackStream, OStream)
 from ichor.git.ext.gitdb.const import NULL_BYTE
 from ichor.git.ext.gitdb.stream import (DecompressMemMapReader,

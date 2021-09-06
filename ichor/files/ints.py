@@ -1,20 +1,20 @@
 import re
+from typing import Optional
 
+from ichor.atoms import Atoms
 from ichor.common.functools import buildermethod, classproperty
-from ichor.common.sorting.natsort import natsorted, ignore_alpha
+from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files.directory import Directory
 from ichor.files.int import INT
-from ichor.atoms import Atoms
-
-from typing import Optional
 
 
 class INTs(Directory, dict):
     """Wraps around a directory which contains all .int files for the system.
-    
+
     :param path: The Path corresponding to a directory holding .int files
     :param parent: An `Atoms` instance that holds coordinate information for all the atoms in the system
     """
+
     def __init__(self, path, parent: Optional[Atoms] = None):
         self._parent = None
         if parent is not None:
@@ -25,13 +25,17 @@ class INTs(Directory, dict):
     @property
     def parent(self) -> Atoms:
         if self._parent is None:
-            raise ValueError(f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined")
+            raise ValueError(
+                f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined"
+            )
         return self._parent
 
     @parent.setter
     def parent(self, value: Atoms):
         if not isinstance(value, Atoms):
-            raise TypeError(f"'parent' must be of type 'Atoms' not of type {type(value)}")
+            raise TypeError(
+                f"'parent' must be of type 'Atoms' not of type {type(value)}"
+            )
         self._parent = value
 
     def parse(self) -> None:
@@ -41,7 +45,7 @@ class INTs(Directory, dict):
         self.sort()
 
     def sort(self):
-        """ Sorts keys of self by atom index e.g.
+        """Sorts keys of self by atom index e.g.
         {'H2': , 'H3': , 'O1': } -> {'O1': , 'H2': , 'H3': }"""
         copy = self.copy()
         self.clear()
@@ -50,7 +54,7 @@ class INTs(Directory, dict):
 
     @classproperty
     def dirpattern(self):
-        """ Returns the regex pattern that needs to be in the directory name containing all .int files"""
+        """Returns the regex pattern that needs to be in the directory name containing all .int files"""
         return re.compile(r".+_atomicfiles")
 
     @buildermethod

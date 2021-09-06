@@ -51,8 +51,8 @@ try:
     from ichor.git.refs import *  # @NoMove @IgnorePep8
     from ichor.git.remote import *  # @NoMove @IgnorePep8
     from ichor.git.repo import Repo  # @NoMove @IgnorePep8
-    from ichor.git.util import (Actor, BlockingLockFile,  # @NoMove @IgnorePep8
-                                LockFile, Stats, rmtree)
+    from ichor.git.util import BlockingLockFile  # @NoMove @IgnorePep8
+    from ichor.git.util import Actor, LockFile, Stats, rmtree
 except GitError as exc:
     raise ImportError("%s: %s" % (exc.__class__.__name__, exc)) from exc
 

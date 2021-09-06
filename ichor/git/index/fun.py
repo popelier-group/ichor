@@ -27,7 +27,6 @@ from ichor.git.util import IndexFileSHA1Writer, finalize_process
 # typing -----------------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.db import GitCmdObjectDB
     from ichor.git.index.base import IndexFile

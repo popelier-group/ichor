@@ -10,7 +10,6 @@ from ichor.git.types import Commit_ish
 # typing -------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from ichor.git.repo import Repo
     from ichor.git.util import IterableList

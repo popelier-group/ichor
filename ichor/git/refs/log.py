@@ -14,7 +14,6 @@ from ichor.git.util import (Actor, LockedFD, LockFile, assure_directory_exists,
 # typing ------------------------------------------------------------------
 
 
-
 if TYPE_CHECKING:
     from io import BytesIO
 

@@ -12,7 +12,7 @@ def submit_aimall_job_to_auto_run(
     atoms: MutableValue = None,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
-    """ Submit an AIMALL job to the workload manager. This job generates .int files."""
+    """Submit an AIMALL job to the workload manager. This job generates .int files."""
     script_name = SCRIPT_NAMES["aimall"]
     aimall_script = SubmissionScript(script_name)
     with TimingManager(aimall_script):
