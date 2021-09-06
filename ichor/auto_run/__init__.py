@@ -13,8 +13,8 @@ from ichor.auto_run.ichor import (make_models,
 from ichor.batch_system import JobID
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
-from ichor.files import Trajectory
 from ichor.file_structure import FILE_STRUCTURE
+from ichor.files import Trajectory
 from ichor.make_sets import make_sets_npoints
 from ichor.points import PointsDirectory
 from ichor.submission_script import DataLock

@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 
+from ichor.file_structure import FILE_STRUCTURE
 from ichor.git import Repo
 from ichor.git.util import get_git_credentials
-from ichor.file_structure import FILE_STRUCTURE
 
 
 class Executable(ABC):

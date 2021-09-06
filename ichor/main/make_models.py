@@ -260,8 +260,8 @@ def make_models(
 
 def move_models(model_dir: Optional[Path] = None):
     """Move model files from the ferebus directory to the models directory."""
-    from ichor.globals import GLOBALS
     from ichor.file_structure import FILE_STRUCTURE
+    from ichor.globals import GLOBALS
     from ichor.models import Model
 
     mkdir(FILE_STRUCTURE["models"])
@@ -339,8 +339,8 @@ def write_training_set(atom, training_data) -> Path:
     :param training_data: A list of tuples containing the training data. Each tuple contains the (input, output) pair. The inputs are stored as a numpy array,
         while the outputs are stored as a dictionary, containing key:value paris of property_name (eg. iqa, q00) : value
     """
-    from ichor.globals import GLOBALS
     from ichor.file_structure import FILE_STRUCTURE
+    from ichor.globals import GLOBALS
 
     # make a ferebus directory for each atom
     ferebus_directory = FILE_STRUCTURE["ferebus"] / atom

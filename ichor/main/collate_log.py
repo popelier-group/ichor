@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from ichor.common.io import mkdir, pushd, cp
+from ichor.common.io import cp, mkdir, pushd
 
 
 def collate_model_log(directory: Optional[Path] = None) -> None:
-    from ichor.globals import GLOBALS
     from ichor.file_structure import FILE_STRUCTURE
+    from ichor.globals import GLOBALS
     from ichor.models import Models
 
     if directory is None:

@@ -59,8 +59,8 @@ def make_sets(
     validation_set_size: Optional[int] = None,
     validation_set_method: Optional[List[str]] = None,
 ) -> None:
-    from ichor.globals import GLOBALS
     from ichor.file_structure import FILE_STRUCTURE
+    from ichor.globals import GLOBALS
 
     if points_input.suffix == ".xyz":
         points = Trajectory(points_input)
@@ -99,9 +99,7 @@ def make_sets(
         validation_set, _ = make_set(
             points, validation_set_size, validation_set_method
         )
-        write_set_to_dir(
-            FILE_STRUCTURE["validation_set"], validation_set
-        )
+        write_set_to_dir(FILE_STRUCTURE["validation_set"], validation_set)
 
 
 def make_set(

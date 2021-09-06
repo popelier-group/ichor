@@ -42,9 +42,9 @@ if TYPE_CHECKING:
 
     # from git.objects.base import IndexObject
 
+from ichor.git.types import HSH_TD  # because behind py version guards
 from ichor.git.types import Files_TD  # aliases
-from ichor.git.types import (HSH_TD,  # because behind py version guards
-                             Has_id_attribute, Literal, PathLike, Protocol,
+from ichor.git.types import (Has_id_attribute, Literal, PathLike, Protocol,
                              SupportsIndex, Total_TD, runtime_checkable)
 
 T_IterableObj = TypeVar(

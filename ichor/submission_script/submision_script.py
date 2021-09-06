@@ -47,8 +47,8 @@ class SubmissionScript:
         the errors directory (where .e files are witten). If the number of cores is more than 1, the keyword
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
         the system on which the job is ran, as well as on the number of cores that the job needs."""
-        from ichor.globals import GLOBALS
         from ichor.file_structure import FILE_STRUCTURE
+        from ichor.globals import GLOBALS
 
         mkdir(FILE_STRUCTURE["outputs"])
         mkdir(FILE_STRUCTURE["errors"])
@@ -57,12 +57,8 @@ class SubmissionScript:
         # make the paths to outputs and errors absolute
         options = [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
-            BATCH_SYSTEM.output_directory(
-                FILE_STRUCTURE["outputs"].resolve()
-            ),
-            BATCH_SYSTEM.error_directory(
-                FILE_STRUCTURE["errors"].resolve()
-            ),
+            BATCH_SYSTEM.output_directory(FILE_STRUCTURE["outputs"].resolve()),
+            BATCH_SYSTEM.error_directory(FILE_STRUCTURE["errors"].resolve()),
         ]
 
         # if the number of cores is more than 1, have to add additional options
@@ -216,8 +212,8 @@ class SubmissionScript:
         return datafile_variables, datafile_str
 
     def write(self):
-        from ichor.globals import GLOBALS
         from ichor.file_structure import FILE_STRUCTURE
+        from ichor.globals import GLOBALS
 
         mkdir(self.path.parent)
 

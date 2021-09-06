@@ -6,8 +6,8 @@ from ichor.common import Daemon
 
 class PerPropertyDaemon(Daemon):
     def __init__(self):
-        from ichor.globals import GLOBALS
         from ichor.file_structure import FILE_STRUCTURE
+        from ichor.globals import GLOBALS
 
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["properties_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["properties_stdout"]
