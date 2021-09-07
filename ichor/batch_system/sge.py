@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import List, Union
 
-from ichor.batch_system.batch_system import BatchSystem, JobID
+from ichor.batch_system.batch_system import BatchSystem, JobID, CannotParseJobID
 from ichor.batch_system.node import NodeType
 from ichor.common.functools import classproperty
 
@@ -42,7 +42,10 @@ class SunGridEngine(BatchSystem):
 
         Our job id is given by the number, this is parsed by finding the number in the return string
         """
-        return re.findall(r"\d+", stdout)[0]
+        try:
+            return re.findall(r"\d+", stdout)[0]
+        except IndexError:
+            raise CannotParseJobID(f"Cannot parse job id from output: '{stdout}'")
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:

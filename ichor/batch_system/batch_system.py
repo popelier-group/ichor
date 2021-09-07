@@ -9,6 +9,10 @@ from ichor.common.io import mkdir
 from ichor.common.os import run_cmd
 
 
+class CannotParseJobID(Exception):
+    pass
+
+
 class JobID:
     """Class used to keep track of jobs submitted to compute nodes.
 
