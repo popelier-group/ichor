@@ -32,8 +32,9 @@ def import_external_functions():
 class Arguments:
     """Used to parse command line arguments that are given to ICHOR. These arguments are given using `-` or `--` and read with argparse."""
 
-    config_file: str = "config.properties"
+    config_file: str = "config.properties"  # todo: convert to Path
     uid: UUID = get_uid()
+    auto_run: bool = False
 
     external_functions = {}
     call_external_function = None
@@ -63,14 +64,23 @@ class Arguments:
             type=str,
             metavar=("func", "arg"),
             nargs="+",
-            help=f"Call ICHOR function with args, allowed functions: [{allowed_functions}]",
+            help=f"Call ichor function with args, allowed functions: [{allowed_functions}]",
         )
         parser.add_argument(
             "-u",
             "--uid",
             dest="uid",
             type=str,
-            help="Unique Identifier For ICHOR Jobs To Write To",
+            help="Unique Identifier For ichor Jobs To Write To",
+        )
+
+        parser.add_argument(
+            "-ar",
+            "--autorun",
+            dest='autorun',
+            default=False,
+            action='store_true',
+            help='Flag used to specify ichor is running in auto-run mode'
         )
 
         args = parser.parse_args()
@@ -98,6 +108,8 @@ class Arguments:
 
         if args.uid:
             Arguments.uid = args.uid
+
+        Arguments.auto_run = args.autorun
 
     def __enter__(self):
         Arguments.read()
