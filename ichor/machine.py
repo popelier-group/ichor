@@ -3,6 +3,7 @@ from enum import auto
 
 from ichor.common.types import Enum
 from ichor.file_structure import FILE_STRUCTURE
+from ichor.common.functools import cached_property
 
 
 class MachineNotFound(Exception):
@@ -31,15 +32,21 @@ class Machine(Enum):
         drop_n_compute_available: bool,
     ):
         self.address = address
+        self.submit_on_compute = submit_on_compute
+        self.drop_n_compute_available = drop_n_compute_available
 
-        self.submit_type = SubmitType.HoldQueueWait
-        if submit_on_compute:
-            self.submit_type = SubmitType.SubmitOnCompute
-        elif drop_n_compute_available:
+    @cached_property
+    def submit_type(self) -> SubmitType:
+        submit_type = SubmitType.HoldQueueWait
+        if self.submit_on_compute:
+            submit_type = SubmitType.SubmitOnCompute
+        elif self.drop_n_compute_available:
             from ichor.drop_compute import drop_compute_available_for_user
 
             if drop_compute_available_for_user():
-                self.submit_type = SubmitType.DropCompute
+                submit_type = SubmitType.DropCompute
+
+        return submit_type
 
 
 machine_name = platform.node()
