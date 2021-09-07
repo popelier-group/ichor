@@ -224,3 +224,8 @@ def last_line(path: Path) -> str:
     :returns last line of file as string
     """
     return tail(path, lines=1)
+
+
+@convert_to_path
+def relpath(path: Path, start: Path) -> Path:
+    return Path(os.path.relpath(path, start))
