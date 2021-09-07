@@ -3,6 +3,7 @@ from typing import List
 
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
+from ichor.file_structure import FILE_STRUCTURE
 from ichor.models import Models
 
 
@@ -17,5 +18,8 @@ class ExpectedImprovement(ABC):
         pass
 
     @abstractmethod
-    def __call__(self, points: ListOfAtoms, npoints: int) -> List[int]:
+    def get_points(self, points: ListOfAtoms, npoints: int) -> List[int]:
         pass
+
+    def __call__(self, points: ListOfAtoms, npoints: int) -> List[int]:
+        return self.get_points()

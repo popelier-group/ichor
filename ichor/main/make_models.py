@@ -24,6 +24,7 @@ atoms_selected = False
 models_selected = False
 
 
+# todo: refactor to use ichor.common.types.enum.Enum
 class ModelType(Enum):
     """Enum used for all the different models we make: iqa and multipole moments."""
 

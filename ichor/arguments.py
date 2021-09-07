@@ -18,7 +18,7 @@ def import_external_functions():
     """
     # Place functions to run externally in here
     from ichor.logging import log_time
-    from ichor.main.adaptive_sampling import adaptive_sampling
+    from ichor.main.active_learning import adaptive_sampling
     from ichor.main.collate_log import collate_model_log
     from ichor.main.make_models import make_models, move_models
     from ichor.main.submit_gjfs import check_gaussian_output, submit_gjfs

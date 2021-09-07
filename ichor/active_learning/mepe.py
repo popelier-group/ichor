@@ -126,7 +126,7 @@ class MEPE(ExpectedImprovement):
                 nalpha += len(true_values)
         return alpha_sum / nalpha
 
-    def __call__(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
+    def get_points(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
         features_dict = self.models.get_features_dict(points)
         cv_errors = self.cv_error(features_dict)
         variance = self.models.variance(features_dict)

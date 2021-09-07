@@ -38,7 +38,7 @@ def main_menu() -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
     from ichor.auto_run import auto_run
     from ichor.file_structure import FILE_STRUCTURE
-    from ichor.main.adaptive_sampling import adaptive_sampling
+    from ichor.main.active_learning import adaptive_sampling
     from ichor.main.per_menu import auto_run_per_menu
 
     # initialize an instance of Menu called menu and add construct the menu in the context manager

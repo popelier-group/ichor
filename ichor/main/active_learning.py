@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.active_learning import ActiveLearningMethod
+from ichor.common.io import mkdir
 from ichor.logging import logger
 from ichor.models import Models
 from ichor.points import PointsDirectory
@@ -23,6 +24,11 @@ def adaptive_sampling(
     if sample_pool_directory is None:
         sample_pool_directory = FILE_STRUCTURE["sample_pool"]
 
+    current_iteration = 0
+    if FILE_STRUCTURE["counter"].exists():
+        with open(FILE_STRUCTURE["counter"], "r") as f:
+            current_iteration = int(f.read())
+
     models = Models(model_directory)
     sample_pool = PointsDirectory(sample_pool_directory)
 
@@ -33,8 +39,8 @@ def adaptive_sampling(
     if GLOBALS.OPTIMISE_PROPERTY != "all":
         models = models[GLOBALS.OPTIMISE_PROPERTY]
 
-    asm = ActiveLearningMethod(models)
-    points_to_add = asm(sample_pool, GLOBALS.POINTS_PER_ITERATION)
+    alm = ActiveLearningMethod(models)
+    points_to_add = alm(sample_pool, GLOBALS.POINTS_PER_ITERATION)
 
     for point in points_to_add:
         training_set = PointsDirectory(FILE_STRUCTURE["training_set"])
@@ -48,3 +54,9 @@ def adaptive_sampling(
             f"Moved point {new_training_point.path} -> {new_directory}"
         )
         new_training_point.move(new_directory)
+
+        current_iteration += 1
+        if not FILE_STRUCTURE["counter"].parent.exists():
+            mkdir(FILE_STRUCTURE["counter"].parent)
+        with open(FILE_STRUCTURE["counter"], "w") as f:
+            f.write(f"{current_iteration}")

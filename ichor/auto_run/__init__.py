@@ -1,5 +1,4 @@
 from enum import Enum
-from pathlib import Path
 from typing import Any, Callable, Optional, Sequence
 
 from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
@@ -29,6 +28,10 @@ __all__ = [
     "submit_ichor_active_learning_job_to_auto_run",
     "auto_run",
 ]
+
+
+class AutoRunAlreadyRunning(Exception):
+    pass
 
 
 class IterState(Enum):
@@ -177,6 +180,15 @@ def next_iter(
 def auto_run() -> Optional[JobID]:
     """Auto run Gaussian, AIMALL, FEREBUS, and ICHOR jobs needed to make GP models."""
     from ichor.globals import GLOBALS
+
+    if FILE_STRUCTURE["counter"].exists():
+        raise AutoRunAlreadyRunning(
+            f"Auto Run may already be running, as {FILE_STRUCTURE['counter']} exists\nIf this is a mistake, remove {FILE_STRUCTURE['counter']} and retry"
+        )
+
+    mkdir(FILE_STRUCTURE["counter"].parent)
+    with open(FILE_STRUCTURE["counter"], "w") as f:
+        f.write("0")
 
     # Make a list of types of iterations. Only first and last iterations are different.
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]
