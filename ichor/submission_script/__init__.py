@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from ichor.file_structure import FILE_STRUCTURE
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.check_manager import (CheckManager, default_check,
                                                    print_completed)
@@ -10,7 +11,6 @@ from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.script_timing_manager import TimingManager
 from ichor.submission_script.submision_script import SubmissionScript
-from ichor.file_structure import FILE_STRUCTURE
 
 
 def prepend_script_directory(paths):

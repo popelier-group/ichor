@@ -1,12 +1,12 @@
-from ichor.machine import MACHINE, Machine
 from pathlib import Path
-import os
-import grp
-from ichor.file_structure import FILE_STRUCTURE
+
 from ichor.common.os import current_user_groups
+from ichor.file_structure import FILE_STRUCTURE
+from ichor.machine import MACHINE, Machine
 
-
-DROP_COMPUTE_LOCATION: Path = FILE_STRUCTURE["scripts"]  # should be overwritten
+DROP_COMPUTE_LOCATION: Path = FILE_STRUCTURE[
+    "scripts"
+]  # should be overwritten
 DROP_COMPUTE_GROUP: str = "dropcompute"
 
 if MACHINE is Machine.csf3:

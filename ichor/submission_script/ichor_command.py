@@ -15,7 +15,10 @@ class ICHORCommand(PythonCommand):
     """
 
     def __init__(
-        self, script: Optional[Path] = None, args: Optional[List[str]] = None, auto_run: bool = False
+        self,
+        script: Optional[Path] = None,
+        args: Optional[List[str]] = None,
+        auto_run: bool = False,
     ):
         PythonCommand.__init__(
             self,

@@ -3,7 +3,6 @@ from enum import auto
 
 from ichor.common.types import Enum
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.drop_compute import drop_compute_available_for_user
 
 
 class MachineNotFound(Exception):
@@ -37,6 +36,8 @@ class Machine(Enum):
         if submit_on_compute:
             self.submit_type = SubmitType.SubmitOnCompute
         elif drop_n_compute_available:
+            from ichor.drop_compute import drop_compute_available_for_user
+
             if drop_compute_available_for_user():
                 self.submit_type = SubmitType.DropCompute
 

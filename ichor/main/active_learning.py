@@ -15,10 +15,10 @@ def adaptive_sampling(
 ):
     """Add a new training point to the training set based on the most recent FERBUS model that was made. Adaptive sampling is
     used to add the worst performing point from the sample pool to the training set."""
+    from ichor.auto_run import AutoRunOnly, submit_next_iter
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.machine import MACHINE, SubmitType
-    from ichor.auto_run import AutoRunOnly, submit_next_iter
 
     if model_directory is None:
         model_directory = FILE_STRUCTURE["models"]

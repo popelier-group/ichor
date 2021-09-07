@@ -77,10 +77,10 @@ class Arguments:
         parser.add_argument(
             "-ar",
             "--autorun",
-            dest='autorun',
+            dest="autorun",
             default=False,
-            action='store_true',
-            help='Flag used to specify ichor is running in auto-run mode'
+            action="store_true",
+            help="Flag used to specify ichor is running in auto-run mode",
         )
 
         args = parser.parse_args()

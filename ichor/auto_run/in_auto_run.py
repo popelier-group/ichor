@@ -1,6 +1,5 @@
 import sys
 
-
 """
 IMPORTANT
 
@@ -23,6 +22,7 @@ class NotInAutoRun(Exception):
 class AutoRunOnly:
     def __init__(self):
         from ichor.arguments import Arguments
+
         self.auto_run = Arguments.auto_run
 
     def __enter__(self):

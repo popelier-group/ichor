@@ -11,17 +11,17 @@ from ichor.auto_run.ichor import (make_models,
                                   submit_make_sets_job_to_auto_run)
 from ichor.auto_run.in_auto_run import AutoRunOnly
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir
 from ichor.common.int import truncate
+from ichor.common.io import mkdir
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
+from ichor.drop_compute import DROP_COMPUTE_LOCATION
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import Trajectory
 from ichor.machine import MACHINE, SubmitType
 from ichor.make_sets import make_sets_npoints
 from ichor.points import PointsDirectory
-from ichor.submission_script import DataLock, SCRIPT_NAMES
-from ichor.drop_compute import DROP_COMPUTE_LOCATION
+from ichor.submission_script import SCRIPT_NAMES, DataLock
 
 __all__ = [
     "submit_gaussian_job_to_auto_run",
@@ -176,7 +176,9 @@ def next_iter(
     else:
         IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
-    modify_id = truncate(GLOBALS.UID.int, nbits=32)  # only used for drop-n-compute
+    modify_id = truncate(
+        GLOBALS.UID.int, nbits=32
+    )  # only used for drop-n-compute
 
     for iter_step in func_order:
         if MACHINE.submit_type is SubmitType.DropCompute:
@@ -229,5 +231,9 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
     if MACHINE.submit_type is SubmitType.DropCompute:
         SCRIPT_NAMES.parent = DROP_COMPUTE_LOCATION
 
-    iter_state = IterState.Last if current_iteration == GLOBALS.N_ITERATIONS else IterState.Standard
+    iter_state = (
+        IterState.Last
+        if current_iteration == GLOBALS.N_ITERATIONS
+        else IterState.Standard
+    )
     return next_iter(None, iter_state)
