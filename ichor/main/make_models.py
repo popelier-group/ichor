@@ -122,7 +122,7 @@ def select_model_type():
             ans = input(">> ")
             ans = ans.strip().lower()
             if ans == "":
-                return
+                break
             elif ans in model_type_list:
                 if ans == "multipoles":
                     for multipole in constants.multipole_names:

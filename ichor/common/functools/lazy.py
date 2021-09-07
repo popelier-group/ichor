@@ -32,13 +32,13 @@ class _LazyWrapper:
             self._override = False
 
     def __getattr__(self, name):
-        if self.__dict__['_override']:
+        if self.__dict__["_override"]:
             return self.__dict__[name]
         self._checkset()
         return self._value.__getattribute__(name)
 
     def __setattr__(self, name, val):
-        if name == '_override' or self._override:
+        if name == "_override" or self._override:
             self.__dict__[name] = val
             return
         self._checkset()

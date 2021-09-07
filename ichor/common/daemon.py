@@ -5,8 +5,9 @@ import os
 import sys
 import time
 from abc import ABC, abstractmethod
-from signal import SIGTERM
 from pathlib import Path
+from signal import SIGTERM
+
 from ichor.common.io import mkdir
 
 

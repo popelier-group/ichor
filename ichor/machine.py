@@ -1,10 +1,10 @@
 import platform
 from enum import auto
 
-from ichor.common.types import Enum
-from ichor.file_structure import FILE_STRUCTURE
 from ichor.common.functools import cached_property
 from ichor.common.io import mkdir
+from ichor.common.types import Enum
+from ichor.file_structure import FILE_STRUCTURE
 
 
 class MachineNotFound(Exception):

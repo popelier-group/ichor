@@ -13,6 +13,7 @@ active_learning_methods = {
 @lazy
 def _get_active_learning_method() -> ExpectedImprovement:
     from ichor.globals import GLOBALS
+
     return active_learning_methods[GLOBALS.ACTIVE_LEARNING_METHOD]
 
 

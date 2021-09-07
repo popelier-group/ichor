@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, List, Optional
+from typing import Callable, List, Optional
 
 from ichor.auto_run.ichor import submit_ichor_collate_log_job_to_auto_run
 from ichor.batch_system import JobID

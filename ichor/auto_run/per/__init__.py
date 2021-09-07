@@ -1,3 +1,5 @@
+from ichor.auto_run.per.child_processes import (
+    delete_child_process_jobs, find_child_processes_recursively)
 from ichor.auto_run.per.per_atom import PerAtomDaemon, auto_run_per_atom
 from ichor.auto_run.per.per_atom_per_property import (
     PerAtomPerPropertyDaemon, auto_run_per_atom_per_property)
@@ -11,4 +13,6 @@ __all__ = [
     "PerPropertyDaemon",
     "auto_run_per_atom_per_property",
     "PerAtomPerPropertyDaemon",
+    "find_child_processes_recursively",
+    "delete_child_process_jobs",
 ]
