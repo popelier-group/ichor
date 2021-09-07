@@ -1,5 +1,5 @@
 from ichor.common.types import RangeDict
-from ichor.globals import Machine
+from ichor.machine import Machine
 
 
 class ParallelEnvironment(RangeDict):
