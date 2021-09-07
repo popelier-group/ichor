@@ -16,7 +16,7 @@ def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
     for child_process in child_processes:
         child_processes += find_child_processes_recursively(child_process)
 
-    child_processes = list(map(Path, child_processes))
+    child_processes = list(set(map(Path, child_processes)))
     return child_processes
 
 
