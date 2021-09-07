@@ -9,14 +9,19 @@ from ichor.auto_run.ichor import (make_models,
                                   submit_ichor_aimall_command_to_auto_run,
                                   submit_ichor_gaussian_command_to_auto_run,
                                   submit_make_sets_job_to_auto_run)
+from ichor.auto_run.in_auto_run import AutoRunOnly
 from ichor.batch_system import JobID
+from ichor.common.io import mkdir
+from ichor.common.int import truncate
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import Trajectory
+from ichor.machine import MACHINE, SubmitType
 from ichor.make_sets import make_sets_npoints
 from ichor.points import PointsDirectory
-from ichor.submission_script import DataLock
+from ichor.submission_script import DataLock, SCRIPT_NAMES
+from ichor.drop_compute import DROP_COMPUTE_LOCATION
 
 __all__ = [
     "submit_gaussian_job_to_auto_run",
@@ -27,6 +32,7 @@ __all__ = [
     "make_models",
     "submit_ichor_active_learning_job_to_auto_run",
     "auto_run",
+    "AutoRunOnly",
 ]
 
 
@@ -170,7 +176,15 @@ def next_iter(
     else:
         IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
+    modify_id = truncate(GLOBALS.UID.int, nbits=32)  # only used for drop-n-compute
+
     for iter_step in func_order:
+        if MACHINE.submit_type is SubmitType.DropCompute:
+            modify = f"+{modify_id}"
+            if job_id is not None:
+                modify += f"+hold_{modify_id - 1}"
+            SCRIPT_NAMES.modify = modify
+            modify_id += 1
         job_id = iter_step.run(job_id, state)
         if job_id is not None:
             print(f"Submitted: {job_id}")
@@ -203,4 +217,17 @@ def auto_run() -> Optional[JobID]:
             print(f"Submitting Iter: {i+1}")
             # initially job_id is none, then next_iter returns the job id of the submitted job. The next job has to wait for the previous job that was submitted.
             job_id = next_iter(job_id, iter_state)
+
+            if MACHINE.submit_type is SubmitType.DropCompute:
+                break  # Only submit the first iteration for drop-n-compute
     return job_id
+
+
+def submit_next_iter(current_iteration) -> Optional[JobID]:
+    from ichor.globals import GLOBALS
+
+    if MACHINE.submit_type is SubmitType.DropCompute:
+        SCRIPT_NAMES.parent = DROP_COMPUTE_LOCATION
+
+    iter_state = IterState.Last if current_iteration == GLOBALS.N_ITERATIONS else IterState.Standard
+    return next_iter(None, iter_state)

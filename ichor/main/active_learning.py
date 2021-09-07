@@ -17,6 +17,8 @@ def adaptive_sampling(
     used to add the worst performing point from the sample pool to the training set."""
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
+    from ichor.machine import MACHINE, SubmitType
+    from ichor.auto_run import AutoRunOnly, submit_next_iter
 
     if model_directory is None:
         model_directory = FILE_STRUCTURE["models"]
@@ -25,9 +27,10 @@ def adaptive_sampling(
         sample_pool_directory = FILE_STRUCTURE["sample_pool"]
 
     current_iteration = 0
-    if FILE_STRUCTURE["counter"].exists():
-        with open(FILE_STRUCTURE["counter"], "r") as f:
-            current_iteration = int(f.read())
+    with AutoRunOnly():
+        if FILE_STRUCTURE["counter"].exists():
+            with open(FILE_STRUCTURE["counter"], "r") as f:
+                current_iteration = int(f.read())
 
     models = Models(model_directory)
     sample_pool = PointsDirectory(sample_pool_directory)
@@ -55,8 +58,13 @@ def adaptive_sampling(
         )
         new_training_point.move(new_directory)
 
-        current_iteration += 1
-        if not FILE_STRUCTURE["counter"].parent.exists():
-            mkdir(FILE_STRUCTURE["counter"].parent)
-        with open(FILE_STRUCTURE["counter"], "w") as f:
-            f.write(f"{current_iteration}")
+        with AutoRunOnly():
+            current_iteration += 1
+            if not FILE_STRUCTURE["counter"].parent.exists():
+                mkdir(FILE_STRUCTURE["counter"].parent)
+            with open(FILE_STRUCTURE["counter"], "w") as f:
+                f.write(f"{current_iteration}")
+
+            if current_iteration <= GLOBALS.N_ITERATIONS:
+                if MACHINE.submit_type is SubmitType.DropCompute:
+                    submit_next_iter(current_iteration)

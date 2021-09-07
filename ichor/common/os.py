@@ -1,6 +1,7 @@
 import os
+import grp
 import subprocess
-from typing import Tuple
+from typing import Tuple, List
 
 from ichor.common.str import decode
 
@@ -47,3 +48,8 @@ def input_with_prefill(prompt: str, prefill: str = "") -> str:
             readline.set_startup_hook()
         except ImportError:
             pass
+
+
+def current_user_groups() -> List[str]:
+    """ Returns the list of user groups the current user is in """
+    return [grp.getgrgid(g).gr_name for g in os.getgroups()]
