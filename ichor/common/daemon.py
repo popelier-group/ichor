@@ -6,6 +6,8 @@ import sys
 import time
 from abc import ABC, abstractmethod
 from signal import SIGTERM
+from pathlib import Path
+from ichor.common.io import mkdir
 
 
 class Daemon(ABC):
@@ -19,15 +21,20 @@ class Daemon(ABC):
 
     def __init__(
         self,
-        pidfile: str,
-        stdin: str = "/dev/null",
-        stdout: str = "/dev/null",
-        stderr: str = "/dev/null",
+        pidfile: Path,
+        stdin: Path = Path("/dev/null"),
+        stdout: Path = Path("/dev/null"),
+        stderr: Path = Path("/dev/null"),
     ):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
+
+        mkdir(pidfile.parent)
+        mkdir(stdin.parent)
+        mkdir(stdout.parent)
+        mkdir(stderr.parent)
 
     def daemonize(self):
         """

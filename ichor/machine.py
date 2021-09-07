@@ -4,6 +4,7 @@ from enum import auto
 from ichor.common.types import Enum
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.common.functools import cached_property
+from ichor.common.io import mkdir
 
 
 class MachineNotFound(Exception):
@@ -70,5 +71,6 @@ if MACHINE is Machine.local:
 
 # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
 if MACHINE is not Machine.local:
+    mkdir(FILE_STRUCTURE["machine"].parent)
     with open(FILE_STRUCTURE["machine"], "w") as f:
         f.write(f"{MACHINE.name}")
