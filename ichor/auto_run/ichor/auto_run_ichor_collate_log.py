@@ -11,7 +11,7 @@ def submit_ichor_collate_log_job_to_auto_run(
     hold: Optional[Union[JobID, List[JobID]]] = None,
 ) -> Optional[JobID]:
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["aimall"])
-    ichor_command = ICHORCommand()
+    ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job("collate_model_log", str(directory))
     with TimingManager(
         submission_script,

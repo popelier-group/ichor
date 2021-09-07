@@ -14,7 +14,7 @@ def submit_make_sets_job_to_auto_run(
     :returns: Returns the job ID which was assigned by the workload manager
     """
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["make_sets"])
-    ichor_command = ICHORCommand()
+    ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job("make_sets", str(points_input))
     with TimingManager(submission_script, message="Make Sets"):
         submission_script.add_command(ichor_command)

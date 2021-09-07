@@ -16,7 +16,7 @@ def make_models(
     """Write out datafiles and settings needed by FEREBUS. The actual FEREBUS calculations are done in the next job. Returns the job ID of this job,
     which is assigned by the workload manager (SGE,SLURM, etc.)."""
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["ferebus"])
-    ichor_command = ICHORCommand()
+    ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
         "make_models",
         str(directory),

@@ -21,7 +21,7 @@ def submit_ichor_active_learning_job_to_auto_run(
     submission_script = SubmissionScript(
         SCRIPT_NAMES["ichor"]["active_learning"]
     )
-    ichor_command = ICHORCommand()
+    ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
         "active_learning", str(model_directory), str(sample_pool_directory)
     )

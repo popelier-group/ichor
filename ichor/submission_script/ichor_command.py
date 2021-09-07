@@ -15,7 +15,7 @@ class ICHORCommand(PythonCommand):
     """
 
     def __init__(
-        self, script: Optional[Path] = None, args: Optional[List[str]] = None
+        self, script: Optional[Path] = None, args: Optional[List[str]] = None, auto_run: bool = False
     ):
         PythonCommand.__init__(
             self,
@@ -27,6 +27,9 @@ class ICHORCommand(PythonCommand):
         from ichor.globals import GLOBALS
 
         self.args += [f"-c {Arguments.config_file}", f"-u {GLOBALS.UID}"]
+
+        if auto_run:
+            self.args += ["-ar"]
 
     @classproperty
     def group(self) -> bool:
