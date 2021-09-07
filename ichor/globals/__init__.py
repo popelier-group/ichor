@@ -6,10 +6,9 @@ from ichor.arguments import Arguments
 from ichor.common.os import input_with_prefill
 from ichor.globals.globals import Globals
 from ichor.globals.os import OS
-from ichor.machine import Machine
 from ichor.menu import Menu
 
-__all__ = ["GLOBALS", "Machine", "OS"]
+__all__ = ["GLOBALS", "OS"]
 
 with Arguments():
     GLOBALS = Globals.define()
