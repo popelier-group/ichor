@@ -1,4 +1,4 @@
-from ichor.globals import Machine
+from ichor.machine import Machine
 from ichor.modules.modules import Modules
 
 GaussianModules = Modules()
