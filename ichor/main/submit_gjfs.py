@@ -10,7 +10,7 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
 
 
-def submit_gjfs(directory) -> Optional[JobID]:
+def submit_gjfs(directory: Path) -> Optional[JobID]:
     """Function that submits all .gjf files in a directory to Gaussian, which will output .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
