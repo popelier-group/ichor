@@ -87,6 +87,8 @@ class IterStep:
     ) -> Optional[JobID]:
         if state in self.usage:
             return self.func(*self.args, hold=wait_for_job)
+        else:
+            return wait_for_job
 
 
 # order in which to submit jobs for each of the adaptive sampling iterations.
@@ -181,19 +183,21 @@ def next_iter(
     )  # only used for drop-n-compute
 
     for iter_step in func_order:
+        # Drop-n-compute
         if MACHINE.submit_type is SubmitType.DropCompute:
             modify = f"+{modify_id}"
             if job_id is not None:
                 modify += f"+hold_{modify_id - 1}"
             SCRIPT_NAMES.modify = modify
             modify_id += 1
+        # All runs
         job_id = iter_step.run(job_id, state)
         if job_id is not None:
             print(f"Submitted: {job_id}")
     return job_id
 
 
-def auto_run() -> Optional[JobID]:
+def auto_run() -> JobID:
     """Auto run Gaussian, AIMALL, FEREBUS, and ICHOR jobs needed to make GP models."""
     from ichor.globals import GLOBALS
 
