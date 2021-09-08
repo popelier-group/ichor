@@ -128,6 +128,7 @@ def remove(path: Path) -> None:
 
 
 @contextmanager
+@convert_to_path
 def pushd(new_dir: Path, update_cwd: bool = False):
     """
     Works like the UNIX `pushd` commmand whereby it changes the current directory and stores the previous directory on the stack
