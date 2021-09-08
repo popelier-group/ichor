@@ -38,7 +38,7 @@ def main_menu() -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
     from ichor.auto_run import auto_run
     from ichor.file_structure import FILE_STRUCTURE
-    from ichor.main.active_learning import adaptive_sampling
+    from ichor.main.active_learning import active_learning
     from ichor.main.per_menu import auto_run_per_menu
 
     # initialize an instance of Menu called menu and add construct the menu in the context manager
@@ -69,7 +69,7 @@ def main_menu() -> None:
         menu.add_option(
             "4",
             "Adaptive Sampling",
-            adaptive_sampling,
+            active_learning,
             kwargs={
                 "model_directory": FILE_STRUCTURE["models"],
                 "sample_pool_directory": FILE_STRUCTURE["sample_pool"],

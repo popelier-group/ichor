@@ -2,14 +2,14 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.active_learning import ActiveLearningMethod
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, remove
 from ichor.logging import logger
 from ichor.models import Models
 from ichor.points import PointsDirectory
 
 
 # todo: Maybe rename this function and file because it performs a bit more that just adaptive sampling.
-def adaptive_sampling(
+def active_learning(
     model_directory: Optional[Path] = None,
     sample_pool_directory: Optional[Path] = None,
 ):
@@ -62,8 +62,12 @@ def adaptive_sampling(
             current_iteration += 1
             if not FILE_STRUCTURE["counter"].parent.exists():
                 mkdir(FILE_STRUCTURE["counter"].parent)
+
             with open(FILE_STRUCTURE["counter"], "w") as f:
                 f.write(f"{current_iteration}")
+
+            if current_iteration == GLOBALS.N_ITERATIONS:
+                remove(FILE_STRUCTURE["counter"])  # delete counter at the end of the auto run
 
             if current_iteration <= GLOBALS.N_ITERATIONS:
                 if MACHINE.submit_type is SubmitType.DropCompute:

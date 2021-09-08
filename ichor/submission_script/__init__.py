@@ -63,7 +63,7 @@ SCRIPT_NAMES = ScriptNames(
                 "gaussian": "ICHOR_GAUSSIAN.sh",
                 "aimall": "ICHOR_AIMALL.sh",
                 "ferebus": "ICHOR_FEREBUS.sh",
-                "active_learning": "ICHOR_ADAPTIVE_SAMPLING.sh",
+                "active_learning": "ICHOR_ACTIVE_LEARNING.sh",
                 "make_sets": "ICHOR_MAKE_SETS.sh",
             }
         ),

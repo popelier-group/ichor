@@ -25,7 +25,7 @@ def submit_ichor_active_learning_job_to_auto_run(
     ichor_command.add_function_to_job(
         "active_learning", str(model_directory), str(sample_pool_directory)
     )
-    with TimingManager(submission_script, message="Adaptive Sampling"):
+    with TimingManager(submission_script, message="Active Learning"):
         submission_script.add_command(ichor_command)
     submission_script.write()
     return submission_script.submit(hold=hold)
