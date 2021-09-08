@@ -9,6 +9,7 @@ from ichor.active_learning.expected_improvement import ExpectedImprovement
 from ichor.atoms import ListOfAtoms
 from ichor.common.io import mkdir
 from ichor.models import Model, ModelsResult
+from ichor.common.functools import classproperty
 
 """
     Implementation of the Maximum Expected Prediction Error (MEPE) method
@@ -67,6 +68,10 @@ def cross_validation(model: Model) -> np.ndarray:
 class MEPE(ExpectedImprovement):
     def __init__(self, models):
         ExpectedImprovement.__init__(self, models)
+
+    @classproperty
+    def name(self) -> str:
+        return "epe"
 
     def cv_error(self, x: Dict[str, np.ndarray]) -> ModelsResult:
         """Eq. 20"""
