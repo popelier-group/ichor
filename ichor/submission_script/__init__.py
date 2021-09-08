@@ -65,6 +65,7 @@ SCRIPT_NAMES = ScriptNames(
                 "ferebus": "ICHOR_FEREBUS.sh",
                 "active_learning": "ICHOR_ACTIVE_LEARNING.sh",
                 "make_sets": "ICHOR_MAKE_SETS.sh",
+                "collate_log": "ICHOR_COLLATE_LOG.sh"
             }
         ),
     }
