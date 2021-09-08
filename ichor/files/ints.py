@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from ichor.atoms import Atoms
+from ichor.geometry import Geometry
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files.directory import Directory
@@ -15,7 +15,7 @@ class INTs(Directory, dict):
     :param parent: An `Atoms` instance that holds coordinate information for all the atoms in the system
     """
 
-    def __init__(self, path, parent: Optional[Atoms] = None):
+    def __init__(self, path, parent: Optional[Geometry] = None):
         self._parent = None
         if parent is not None:
             self.parent = parent
@@ -23,7 +23,7 @@ class INTs(Directory, dict):
         Directory.__init__(self, path)
 
     @property
-    def parent(self) -> Atoms:
+    def parent(self) -> Geometry:
         if self._parent is None:
             raise ValueError(
                 f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined"
@@ -31,8 +31,8 @@ class INTs(Directory, dict):
         return self._parent
 
     @parent.setter
-    def parent(self, value: Atoms):
-        if not isinstance(value, Atoms):
+    def parent(self, value: Geometry):
+        if not isinstance(value, Geometry):
             raise TypeError(
                 f"'parent' must be of type 'Atoms' not of type {type(value)}"
             )
