@@ -12,6 +12,11 @@ from ichor.models.mean import ConstantMean, Mean, ZeroMean
 from ichor.typing import F
 
 
+class ModelParameterMissing(Exception):
+    def __init__(self, instance: 'Model', missing_parameter_name: str):
+        self.message = f"'{missing_parameter_name}' is not defined for '{instance.path}' instance of '{instance.__class__.__name__}' check model file"
+
+
 def check_x_2d(func: F) -> F:
     @wraps(func)
     def wrapper(self, x, *args, **kwargs):
@@ -30,19 +35,19 @@ class Model(File):
     """
 
     # these can be accessed with __annotations__, so leave them
-    system: Optional[str] = None
-    atom: Optional[str] = None
-    type: Optional[str] = None
+    _system: Optional[str] = None
+    _atom: Optional[str] = None
+    _type: Optional[str] = None
 
-    nfeats: Optional[int] = None
-    ntrain: Optional[int] = None
+    _nfeats: Optional[int] = None
+    _ntrain: Optional[int] = None
 
-    mean: Optional[Mean] = None
-    k: Optional[Kernel] = None
+    _mean: Optional[Mean] = None
+    _k: Optional[Kernel] = None
 
-    x: Optional[np.ndarray] = None
-    y: Optional[np.ndarray] = None
-    weights: Optional[np.ndarray] = None
+    _x: Optional[np.ndarray] = None
+    _y: Optional[np.ndarray] = None
+    # _weights: Optional[np.ndarray] = None
 
     nugget: Optional[float] = None
 
@@ -62,46 +67,46 @@ class Model(File):
                     continue
 
                 if "name" in line:  # system name e.g. WATER
-                    self.system = line.split()[1]
-                    line = next(f)
-
-                if (
-                    "property" in line
-                ):  # property (such as IQA or particular multipole moment) for which a GP model was made
-                    self.type = line.split()[1]
-                    line = next(f)
+                    self._system = line.split()[1]
+                    continue
 
                 if line.startswith(
                     "atom"
                 ):  # atom for which a GP model was made
-                    self.atom = line.split()[1]
-                    line = next(f)
+                    self._atom = line.split()[1]
+                    continue
+
+                if (
+                    "property" in line
+                ):  # property (such as IQA or particular multipole moment) for which a GP model was made
+                    self._type = line.split()[1]
+                    continue
 
                 if "nugget" in line:
                     self.nugget = float(line.split()[-1])
-                    line = next(f)
+                    continue
 
                 if "number_of_features" in line:
-                    self.nfeats = int(line.split()[1])
-                    line = next(f)
+                    self._nfeats = int(line.split()[1])
+                    continue
 
                 if (
                     "number_of_training_points" in line
                 ):  # number of training points to make the GP model
-                    self.ntrain = int(line.split()[1])
-                    line = next(f)
+                    self._ntrain = int(line.split()[1])
+                    continue
 
                 if "[mean]" in line:
                     _ = next(f)
                     line = next(f)
-                    self.mean = ConstantMean(float(line.split()[1]))
-                    line = next(f)
+                    self._mean = ConstantMean(float(line.split()[1]))
+                    continue
 
                 if (
                     "composition" in line
                 ):  # which kernels were used to make the GP model. Different kernels can be specified for different input dimensions
                     kernel_composition = line.split()[-1]
-                    line = next(f)
+                    continue
 
                 if "[kernel." in line:
                     kernel_name = line.split(".")[-1].rstrip().rstrip("]")
@@ -129,6 +134,7 @@ class Model(File):
                             [float(hp) for hp in line.split()[1:]]
                         )
                         kernel_list[kernel_name] = RBFCyclic(lengthscale)
+                    continue
 
                 if "[training_data.x]" in line:
                     line = next(f)
@@ -136,7 +142,8 @@ class Model(File):
                     while line.strip() != "":
                         x += [[float(num) for num in line.split()]]
                         line = next(f)
-                    self.x = np.array(x)
+                    self._x = np.array(x)
+                    continue
 
                 if "[training_data.y]" in line:
                     line = next(f)
@@ -144,7 +151,8 @@ class Model(File):
                     while line.strip() != "":
                         y += [float(line)]
                         line = next(f)
-                    self.y = np.array(y)
+                    self._y = np.array(y)
+                    continue
 
                 # if "[weights]" in line:
                 #     line = next(f)
@@ -159,6 +167,60 @@ class Model(File):
                 #     self.weights = self.weights[:, np.newaxis]
 
         self.k = KernelInterpreter(kernel_composition, kernel_list).interpret()
+
+    @cached_property
+    def system(self):
+        if self._system is None:
+            raise ModelParameterMissing(self, "system")
+        return self._system
+
+    @cached_property
+    def atom(self):
+        if self._atom is None:
+            raise ModelParameterMissing(self, "atom")
+        return self._atom
+
+    @cached_property
+    def type(self):
+        if self._type is None:
+            raise ModelParameterMissing(self, "property")
+        return self._type
+
+    @cached_property
+    def nfeats(self):
+        if self._nfeats is None:
+            raise ModelParameterMissing(self, "nfeats")
+        return self._nfeats
+
+    @cached_property
+    def ntrain(self):
+        if self._ntrain is None:
+            raise ModelParameterMissing(self, "ntrain")
+        return self._ntrain
+
+    @cached_property
+    def mean(self):
+        if self._mean is None:
+            raise ModelParameterMissing(self, "mean")
+        return self._mean
+
+    @cached_property
+    def k(self):
+        if self._k is None:
+            raise ModelParameterMissing(self, "kernel")
+        return self._k
+
+    @cached_property
+    def x(self):
+        if self._x is None:
+            raise ModelParameterMissing(self, "x")
+        return self._x
+
+    @cached_property
+    def y(self):
+        if self._y is None:
+            raise ModelParameterMissing(self, "y")
+        return self._y
 
     @classproperty
     def filetype(self) -> str:

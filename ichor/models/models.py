@@ -34,7 +34,6 @@ class Models(Directory, list):
 
     def parse(self) -> None:
         """Parse a directory and add any `.model` files to the `Models` instance"""
-
         for f in self:
             if f.suffix == Model.filetype:
                 self.append(Model(f))
@@ -126,12 +125,12 @@ class Models(Directory, list):
     @property
     def atoms(self):
         return natsorted(
-            list({model.atom for model in self}), key=ignore_alpha
+            [model.atom for model in self], key=ignore_alpha
         )
 
     @property
     def types(self):
-        return list({model.type for model in self})
+        return [model.type for model in self]
 
 
 class ModelsView(Models):
@@ -140,7 +139,7 @@ class ModelsView(Models):
         list.__init__(self)
         for arg in args:
             for model in models:
-                if arg in [model.atom, model.type]:
+                if arg in (model.atom, model.type):
                     self.append(model)
 
     def __getattr__(self, item):
