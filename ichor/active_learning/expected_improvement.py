@@ -22,4 +22,4 @@ class ExpectedImprovement(ABC):
         pass
 
     def __call__(self, points: ListOfAtoms, npoints: int) -> List[int]:
-        return self.get_points()
+        return self.get_points(points, npoints)
