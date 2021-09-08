@@ -1,6 +1,6 @@
 from ichor.active_learning.expected_improvement import ExpectedImprovement
 from ichor.active_learning.mepe import MEPE
-from ichor.common.functools import lazy
+from ichor.globals import GLOBALS
 
 active_learning_methods = {
     active_learning_method.name: active_learning_method
@@ -8,15 +8,6 @@ active_learning_methods = {
     if isinstance(active_learning_method, ExpectedImprovement)
 }
 
-
-# implemented as a lazy function to prevent circular dependency
-@lazy
-def _get_active_learning_method() -> ExpectedImprovement:
-    from ichor.globals import GLOBALS
-
-    return active_learning_methods[GLOBALS.ACTIVE_LEARNING_METHOD]
-
-
-ActiveLearningMethod = _get_active_learning_method()
+ActiveLearningMethod = active_learning_methods[GLOBALS.ACTIVE_LEARNING_METHOD]
 
 __all__ = ["ActiveLearningMethod"]

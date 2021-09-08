@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.active_learning import ActiveLearningMethod
 from ichor.common.io import mkdir, remove
 from ichor.logging import logger
 from ichor.models import Models
@@ -15,6 +14,7 @@ def active_learning(
 ):
     """Add a new training point to the training set based on the most recent FERBUS model that was made. Adaptive sampling is
     used to add the worst performing point from the sample pool to the training set."""
+    from ichor.active_learning import ActiveLearningMethod
     from ichor.auto_run import AutoRunOnly, submit_next_iter
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
@@ -67,7 +67,9 @@ def active_learning(
                 f.write(f"{current_iteration}")
 
             if current_iteration == GLOBALS.N_ITERATIONS:
-                remove(FILE_STRUCTURE["counter"])  # delete counter at the end of the auto run
+                remove(
+                    FILE_STRUCTURE["counter"]
+                )  # delete counter at the end of the auto run
 
             if current_iteration <= GLOBALS.N_ITERATIONS:
                 if MACHINE.submit_type is SubmitType.DropCompute:

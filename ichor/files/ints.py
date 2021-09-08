@@ -1,11 +1,11 @@
 import re
 from typing import Optional
 
-from ichor.geometry import Geometry
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files.directory import Directory
 from ichor.files.int import INT
+from ichor.geometry import Geometry
 
 
 class INTs(Directory, dict):

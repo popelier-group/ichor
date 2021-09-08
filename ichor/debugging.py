@@ -1,4 +1,8 @@
 import sys
+import time
+from functools import wraps
+
+from ichor.typing import F, T
 
 
 def printq(*args) -> None:
@@ -13,3 +17,22 @@ def printq(*args) -> None:
     """
     print(*args)
     sys.exit()
+
+
+def timer(f: F) -> F:
+    """
+    Times execution time of function f and prints to stdout
+
+    :param f: Function to time
+    :return: Return value of function f
+    """
+
+    @wraps(f)
+    def wrap(*args, **kwargs) -> T:
+        time1 = time.time()
+        ret = f(*args, **kwargs)
+        time2 = time.time()
+        print(f"{f.__name__} function took {time2 - time1:.3f} s")
+        return ret
+
+    return wrap
