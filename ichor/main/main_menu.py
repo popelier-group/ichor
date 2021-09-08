@@ -68,7 +68,7 @@ def main_menu() -> None:
         )
         menu.add_option(
             "4",
-            "Adaptive Sampling",
+            "Active Learning",
             active_learning,
             kwargs={
                 "model_directory": FILE_STRUCTURE["models"],

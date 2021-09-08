@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Optional
 
 import numpy as np
 
@@ -29,21 +30,21 @@ class Model(File):
     """
 
     # these can be accessed with __annotations__, so leave them
-    system: str
-    atom: str
-    type: str
+    system: Optional[str] = None
+    atom: Optional[str] = None
+    type: Optional[str] = None
 
-    nfeats: int
-    ntrain: int
+    nfeats: Optional[int] = None
+    ntrain: Optional[int] = None
 
-    mean: Mean
-    k: Kernel
+    mean: Optional[Mean] = None
+    k: Optional[Kernel] = None
 
-    x: np.ndarray
-    y: np.ndarray
-    weights: np.ndarray
+    x: Optional[np.ndarray] = None
+    y: Optional[np.ndarray] = None
+    weights: Optional[np.ndarray] = None
 
-    nugget: float
+    nugget: Optional[float] = None
 
     def __init__(self, path):
         File.__init__(self, path)
