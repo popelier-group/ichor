@@ -91,20 +91,21 @@ class Trajectory(ListOfAtoms, File):
                 str(GLOBALS.SYSTEM_NAME) + str(n + 1).zfill(4) + ".gjf"
             )
             gjf = GJF(root / path)
-            gjf._atoms = self[i]
+            gjf.atoms = self[i]
             gjf.write()
             del self[i]
 
     def to_dir(self, root: Path, every: int = 1):
         from ichor.globals import GLOBALS
 
+        mkdir(root, empty=True)
         for i, geometry in enumerate(self):
             if i % every == 0:
                 path = Path(
                     str(GLOBALS.SYSTEM_NAME) + str(i + 1).zfill(4) + ".gjf"
                 )
                 gjf = GJF(root / path)
-                gjf._atoms = geometry
+                gjf.atoms = geometry  # matt_todo: GJFs write out a gjf file even if there are no atoms present. This should not be possible
                 gjf.write()
 
     @property
