@@ -14,7 +14,12 @@ class Trajectory(ListOfAtoms, File):
     # TODO: get something like trajectory["C1"][2] working, currently it is not
     # TODO: I think Trajectory should return another Trajectory instance when indexed or sliced.
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
-    atoms."""
+    atoms. A user can also initialize an empty trajectory and append `Atoms` instances to it without reading in a .xyz file. This allows
+    the user to build custom trajectories containing any sort of geometries.
+
+    :param path: The path to a .xyz file that contains timesteps. Set to None by default as the user can initialize an empty trajectory and built it up
+        themselves
+    """
 
     def __init__(self, path: Path = None):
         # if we are making a trajectory from a coordinate file (such as .xyz or dlpoly history) directly
