@@ -16,9 +16,15 @@ class Trajectory(ListOfAtoms, File):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
     atoms."""
 
-    def __init__(self, path: Path):
-        ListOfAtoms.__init__(self)
-        File.__init__(self, path)
+    def __init__(self, path: Path = None):
+        # if we are making a trajectory from a coordinate file (such as .xyz or dlpoly history) directly
+        if path is not None:
+            ListOfAtoms.__init__(self)
+            File.__init__(self, path)
+        # if we are building a trajectory another way without reading a file containing xyz coordinates
+        else:
+            self.state = FileState.Read  # set the state to read as we don't need to read any file
+            ListOfAtoms.__init__(self)
 
     def _read_file(self, n: int = -1):
         with open(self.path, "r") as f:
@@ -68,7 +74,7 @@ class Trajectory(ListOfAtoms, File):
         with open(fname, "w") as f:
             for i, atoms in enumerate(self):
                 f.write(f"    {len(atoms)}\ni = {i}\n")
-                f.write(f"{atoms}\n")
+                f.write(f"{atoms.xyz_string}\n")
 
     def rmsd(self, ref=None):
         if ref is None:
@@ -107,6 +113,18 @@ class Trajectory(ListOfAtoms, File):
                 gjf = GJF(root / path)
                 gjf.atoms = geometry  # matt_todo: GJFs write out a gjf file even if there are no atoms present. This should not be possible
                 gjf.write()
+
+    @property
+    def types(self) -> List[str]:
+        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
+        Removes duplicates."""
+        return self[0].types
+
+    @property
+    def types_extended(self) -> List[str]:
+        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
+        Does not remove duplicates"""
+        return self[0].types_extended
 
     @property
     def features(self) -> np.ndarray:

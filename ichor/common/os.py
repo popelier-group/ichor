@@ -1,4 +1,8 @@
-import grp
+# matt_todo: This is a temporary fix to allow a user to run ICHOR (or use as a library) on Windows. Maybe use GLOBALS.os to check if it needs to be imported.
+try:
+    import grp
+except:
+    pass
 import os
 import subprocess
 from typing import List, Tuple
