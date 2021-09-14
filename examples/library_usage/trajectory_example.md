@@ -229,7 +229,7 @@ Features can be sliced in exactly the same ways as coordinates.
 
 ```python
 print("C1 features for first two timesteps")
-print(traj["C1"].features)
+print(traj["C1"][:2].features)
 ```
 ```
 Output:
@@ -242,7 +242,7 @@ C1 features for first two timesteps
 
 ```python
 print("C1 features for first two timesteps")
-print(traj["C1"][:2].features[:2])
+print(traj["C1"].features[:2])
 ```
 ```
 Output:
