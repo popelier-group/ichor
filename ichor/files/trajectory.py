@@ -107,20 +107,6 @@ class Trajectory(ListOfAtoms, File):
         else:
             self.append(Atoms(atoms))
 
-    def to_xyz(self, fname=None):
-        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
-        for that timestep.
-        
-        :param fname: The file name to which to write the timesteps/coordinates
-        """
-        if fname is None:
-            fname = self.path
-        with open(fname, "w") as f:
-            for i, atoms in enumerate(self):
-                f.write(f"    {len(atoms)}\ni = {i}\n")
-                for atom in atoms:
-                    f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
-
     def rmsd(self, ref=None):
         if ref is None:
             ref = self[0]
