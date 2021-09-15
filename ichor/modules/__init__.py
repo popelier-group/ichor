@@ -29,7 +29,7 @@ def initialise_modules():
         path = []
         for line in f.readlines():
             line = re.sub("#.*$", "", line)
-            if line is not "":
+            if line is not "":  # matt_todo: This should be !=
                 path.append(line)
         os.environ["MODULEPATH"] = os.pathsep.join(path)
 
