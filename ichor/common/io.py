@@ -127,6 +127,22 @@ def remove(path: Path) -> None:
             raise ValueError(f"file {path} is not a file or dir.")
 
 
+@convert_to_path
+def remove_with_suffix(suffix: str, path_to_search: Path = Path().cwd(), recursive: bool = False) -> None:
+    """
+    Remove all files with given suffix 'suffix'
+
+    :param suffix: suffix to search and remove
+    :param path_to_search: path to search for files with suffix, defaults to cwd
+    :param recursive: boolean to search recursively in subdirectories for files with suffix
+    """
+    for f in path_to_search.iterdir():
+        if f.suffix == suffix:
+            remove(f)
+        if f.is_dir() and recursive:
+            remove_with_suffix(f, path=f, recursive=recursive)
+
+
 @contextmanager
 @convert_to_path
 def pushd(new_dir: Path, update_cwd: bool = False):
@@ -229,4 +245,25 @@ def last_line(path: Path) -> str:
 
 @convert_to_path
 def relpath(path: Path, start: Path) -> Path:
+    """
+    Returns relative path of 'path' from 'start'
+
+    :param path: Path to return relative path of
+    :param start: Path to return relative path from
+    :return: relative path of 'path; from 'start'
+    """
     return Path(os.path.relpath(path, start))
+
+
+@convert_to_path
+def cat(outfile: Path, infiles: List[Path]) -> None:
+    """
+    Mimics unix cat command by concatenating all infiles to outfile
+    :param outfile: path to concatenate infiles to
+    :param infiles: list of one or more paths to concatenatr to outfile
+    :return: none
+    """
+    with open(outfile, 'ab') as outf:
+        for infile in infiles:
+            with open(infile, 'rb') as inf:
+                shutil.copyfileobj(inf, outf)
