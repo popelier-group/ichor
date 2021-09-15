@@ -12,7 +12,7 @@ from pathlib import Path
 from ichor import in_main
 
 filetrace = [i.filename for i in inspect.stack(0)]
-in_main.IN_MAIN = os.path.relpath(filetrace[-1], Path(__file__).parent) == '../ichor3.py'
+in_main._IN_MAIN = os.path.relpath(filetrace[-1], Path(__file__).parent) == (Path('..') / 'ichor3.py')
 
 from ichor.globals import GLOBALS
 
