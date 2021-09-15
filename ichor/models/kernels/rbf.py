@@ -5,7 +5,7 @@ from ichor.models.kernels.kernel import Kernel
 
 
 class RBF(Kernel):
-    """Implemtation of Radial Basis Function (RBF) kernel
+    """Implementation of Radial Basis Function (RBF) kernel
     When each dimension has a separate lengthscale, this is also called the RBF-ARD kernel
     """
 
@@ -19,13 +19,13 @@ class RBF(Kernel):
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """
-        Calcualtes RBF covariance matrix from two sets of points
+        Calculates RBF covariance matrix from two sets of points
 
         Args:
             :param: `x1` np.ndarray of shape n x ndimensions:
                 First matrix of n points
             :param: `x2` np.ndarray of shape m x ndimensions:
-                Second marix of m points, can be identical to the first matrix `x1`
+                Second matrix of m points, can be identical to the first matrix `x1`
 
         Returns:
             :type: `np.ndarray`

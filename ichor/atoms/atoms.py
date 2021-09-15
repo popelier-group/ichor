@@ -215,6 +215,11 @@ class Atoms(list):
         else:
             del self[i]
 
+    @property
+    def xyz_string(self):
+        """ Returns a string contaning all atoms and their coordinates stored in the Atoms instance"""
+        return "\n".join(atom.xyz_string for atom in self)
+
     def __str__(self):
         return "\n".join(str(atom) for atom in self)
 
