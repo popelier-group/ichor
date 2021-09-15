@@ -2,31 +2,58 @@ import sys
 from argparse import ArgumentParser
 from ast import literal_eval
 from pathlib import Path
-from typing import Any, Callable, List, Sequence, Tuple
+from typing import Any, Callable, List, Sequence, Tuple, Optional
 from uuid import UUID
+import importlib
 
 from ichor.common.bool import check_bool
 from ichor.common.functools import run_once
 from ichor.common.uid import get_uid
 
 
-def import_external_functions():
-    """Import functions which ICHOR will need to execute in a job script. For example, ICHOR will need to make the training sets on a compute node,so
-    the following command will need to be ran in the job script
-    python /home/mfbx4mb9/src/ICHOR-v3/ichor3.py -c config.properties -u 427d42b6-1b68-4647-9784-0e56f3e858fe -f make_sets "WATER-3000.xyz"
-    where the `make_sets` part corresponds to the `make_sets` function that is imported here.
+class ExternalFunction:
     """
-    # Place functions to run externally in here
-    from ichor.logging import log_time
-    from ichor.main.active_learning import active_learning
-    from ichor.main.collate_log import collate_model_log
-    from ichor.main.make_models import make_models, move_models
-    from ichor.main.submit_gjfs import check_gaussian_output, submit_gjfs
-    from ichor.main.submit_wfns import check_aimall_output, submit_wfns
-    from ichor.make_sets import make_sets
-    from ichor.submission_script import print_completed
+    Class to contain information for adding an ichor function to be able to be ran externally
+    e.g.
+    python ichor3.py -f submit_gjfs TRAINING_SET
+    """
+    def __init__(self, module: str, function: str, name: Optional[str] = None):
+        """
+        Constructor for ExternalFunction, think of arguments in terms of the import statement
 
-    Arguments.external_functions = locals()
+        ```python
+        from {module} import {function} as {name}
+        ```
+
+        :param module: module to import from
+        :param function: function to import from module
+        :param name: the name which the function will be called externally, defaults to the name of the function
+        """
+        self.module = module
+        self.function = function
+        self.name = name or self.function
+
+    def import_function(self):
+        m = importlib.import_module(self.module)
+        return getattr(m, self.function)
+
+
+# List of all ichor external functions, add functions to the list. Note: a checker for these has not been implemented
+external_functions = [
+    ExternalFunction('ichor.logging', 'log_time'),
+    ExternalFunction('ichor.main.active_learning', 'active_learning'),
+    ExternalFunction('ichor.main.collate_log', 'collate_model_log'),
+    ExternalFunction('ichor.main.make_models', 'make_models, move_models'),
+    ExternalFunction('ichor.main.submit_gjfs', 'submit_gjfs'),
+    ExternalFunction('ichor.main.submit_gjfs', 'check_gaussian_output'),
+    ExternalFunction('ichor.main.submit_wfns', 'submit_wfns'),
+    ExternalFunction('ichor.main.submit_wfns', 'check_aimall_output'),
+    ExternalFunction('ichor.make_sets', 'make_sets'),
+    ExternalFunction('ichor.submission_script', 'print_completed'),
+]
+
+# Convert list of external functions to a dictionary of external functions with the name of each function as the key
+external_functions = {ef.name: ef for ef in external_functions}
 
 
 class Arguments:
@@ -36,15 +63,12 @@ class Arguments:
     uid: UUID = get_uid()
     auto_run: bool = False
 
-    external_functions = {}
     call_external_function = None
     call_external_function_args = []
 
     @staticmethod
     @run_once
     def read():
-        import_external_functions()
-
         parser = ArgumentParser(description="ICHOR: A kriging training suite")
 
         parser.add_argument(
@@ -55,7 +79,7 @@ class Arguments:
             help="Name of Config File for ICHOR",
         )
         allowed_functions = ", ".join(
-            map(str, Arguments.external_functions.keys())
+            map(str, external_functions.keys())
         )
         parser.add_argument(
             "-f",
@@ -90,10 +114,8 @@ class Arguments:
         if args.func:
             func = args.func[0]
             func_args = args.func[1:] if len(args.func) > 1 else []
-            if func in Arguments.external_functions.keys():
-                Arguments.call_external_function = (
-                    Arguments.external_functions[func]
-                )
+            if func in external_functions.keys():
+                Arguments.call_external_function = external_functions[func].import_function()
                 Arguments.call_external_function_args = parse_args(
                     func=Arguments.call_external_function, args=func_args
                 )
