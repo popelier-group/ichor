@@ -5,10 +5,14 @@ into topological atoms. The topological atoms have unique energies/multipole mom
 learning. ICHOR can automatically run Gaussian-AIMALL-FEREBUS jobs on CSF3 (see auto-run), but it can also be used more generally of CSF3 for submitting 
 Gaussian/AIMALL jobs. """
 
+import inspect
+import os
+from pathlib import Path
+
 from ichor import in_main
-in_main.IN_MAIN = __name__ == "__main__"
-print(in_main.IN_MAIN)
-quit()
+
+filetrace = [i.filename for i in inspect.stack(0)]
+in_main.IN_MAIN = os.path.relpath(filetrace[-1], Path(__file__).parent) == '../ichor3.py'
 
 from ichor.globals import GLOBALS
 
