@@ -9,7 +9,6 @@ from ichor.auto_run.ichor import (make_models,
                                   submit_ichor_aimall_command_to_auto_run,
                                   submit_ichor_gaussian_command_to_auto_run,
                                   submit_make_sets_job_to_auto_run)
-from ichor.auto_run.in_auto_run import AutoRunOnly
 from ichor.batch_system import JobID
 from ichor.common.int import truncate
 from ichor.common.io import mkdir
@@ -32,7 +31,6 @@ __all__ = [
     "make_models",
     "submit_ichor_active_learning_job_to_auto_run",
     "auto_run",
-    "AutoRunOnly",
 ]
 
 

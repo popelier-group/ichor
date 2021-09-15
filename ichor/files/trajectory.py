@@ -79,7 +79,8 @@ class Trajectory(ListOfAtoms, File):
         with open(fname, "w") as f:
             for i, atoms in enumerate(self):
                 f.write(f"    {len(atoms)}\ni = {i}\n")
-                f.write(f"{atoms.xyz_string}\n")
+                for atom in atoms:
+                    f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}")
 
     def rmsd(self, ref=None):
         if ref is None:

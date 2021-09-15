@@ -19,6 +19,7 @@ def active_learning(
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.machine import MACHINE, SubmitType
+    from ichor.arguments import Arguments
 
     if model_directory is None:
         model_directory = FILE_STRUCTURE["models"]
@@ -27,7 +28,7 @@ def active_learning(
         sample_pool_directory = FILE_STRUCTURE["sample_pool"]
 
     current_iteration = 0
-    with AutoRunOnly():
+    if Arguments.auto_run:
         if FILE_STRUCTURE["counter"].exists():
             with open(FILE_STRUCTURE["counter"], "r") as f:
                 current_iteration = int(f.read())
@@ -58,7 +59,7 @@ def active_learning(
         )
         new_training_point.move(new_directory)
 
-        with AutoRunOnly():
+        if Arguments.auto_run:
             current_iteration += 1
             if not FILE_STRUCTURE["counter"].parent.exists():
                 mkdir(FILE_STRUCTURE["counter"].parent)
