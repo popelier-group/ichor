@@ -51,11 +51,7 @@ class PointDirectory(Point, Directory):
             elif issubclass(type_, Directory):
                 dirtypes[var] = type_
 
-        for (
-            f
-        ) in (
-            self
-        ):  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
+        for f in self:  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
             if f.is_file():
                 for var, filetype in filetypes.items():
                     if f.suffix == filetype.filetype:

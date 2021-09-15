@@ -29,7 +29,7 @@ class PointsDirectory(Points, Directory):
         # Initialise `list` parent class of `Points`
         Points.__init__(self)
         # this will call Directory __init__ method (which then calls self.parse)
-        # since PointsDirectory also implements a `parse` method, it will be called instead of the Directory parse method
+        # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
         Directory.__init__(self, path)
 
     def parse(self) -> None:
