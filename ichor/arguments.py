@@ -6,6 +6,7 @@ from typing import Any, Callable, List, Sequence, Tuple, Optional
 from uuid import UUID
 import importlib
 
+from ichor.in_main import main_only
 from ichor.common.bool import check_bool
 from ichor.common.functools import run_once
 from ichor.common.uid import get_uid
@@ -67,6 +68,7 @@ class Arguments:
     call_external_function_args = []
 
     @staticmethod
+    @main_only
     @run_once
     def read():
         parser = ArgumentParser(description="ICHOR: A kriging training suite")
