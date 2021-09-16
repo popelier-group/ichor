@@ -242,9 +242,9 @@ class ALFFeatureCalculator(FeatureCalculator):
             i_feat = 3
             for jatom in atom._parent:
                 if (
-                    (jatom is x_axis_atom)
-                    or (jatom is xy_plane_atom)
-                    or (jatom is atom)
+                    (jatom.name == x_axis_atom.name)
+                    or (jatom.name == xy_plane_atom.name)
+                    or (jatom.name == atom.name)
                 ):
                     continue
 

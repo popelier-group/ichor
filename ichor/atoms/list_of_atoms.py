@@ -1,5 +1,6 @@
 from typing import Union, List, Optional
 import numpy as np
+from pathlib import Path
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -54,7 +55,7 @@ class ListOfAtoms(list):
             features = np.transpose(features, (1, 0, 2))
         return features
 
-    def coordinates_to_xyz(self, fname: Optional[str]=None, step: Optional[int]=1):
+    def coordinates_to_xyz(self, fname: Optional[Union[str,Path]]=None, step: Optional[int]=1):
         """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
         for that timestep.
         
@@ -62,16 +63,29 @@ class ListOfAtoms(list):
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
         if fname is None:
-            fname = "system_to_xyz.xyz"
-        with open(fname, "w") as f:
-            for i, atoms in enumerate(self[::step]):
-                f.write(f"    {len(atoms)}\ni = {i}\n")
-                for atom in atoms:
-                    f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
+            fname = Path("system_to_xyz.xyz")
+        elif isinstance(fname, str):
+            fname = Path(fname)
 
-    def features_to_csv(self, atom_names: Optional[List[str]]=None):
+        fname = fname.with_suffix(".xyz")
+
+        with open(fname, "w") as f:
+            for i, point in enumerate(self[::step]):
+                f.write(f"    {len(point)}\ni = {i}\n")
+                # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
+                if hasattr(point, "atoms"):
+                    for atom in point.atoms:
+                        f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
+                # this is used when self is a Trajectory and you are iterating over Atoms instances
+                else:
+                    for atom in point:
+                        f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
+
+    def features_to_csv(self, fname: Optional[Union[str,Path]]=None, atom_names: Optional[List[str]]=None):
         """ Writes csv files containing features for every atom in the system. Optionally a list can be passed in to get csv files for only a subset of atoms
         
+        :param fname: A string to be appended to the default csv file names. A .csv file is written out for every atom with default name `atom_name`_features.csv
+            If an fname is given, the name becomes `fname`_`atom_name`_features.csv
         :param atom_names: A list of atom names for which to write csv files
         """
         import pandas as pd
@@ -86,7 +100,10 @@ class ListOfAtoms(list):
         for atom_name in atom_names:
                 atom_features = self[atom_name].features
                 df = pd.DataFrame(atom_features, columns=self.get_headings())
-                df.to_csv(f"{atom_name}_features.csv")
+                if fname is None:
+                    df.to_csv(f"{atom_name}_features.csv")
+                else:
+                    df.to_csv(f"{fname}_{atom_name}_features.csv")
 
     def get_headings(self):
         headings = [
@@ -105,7 +122,7 @@ class ListOfAtoms(list):
 
         return headings
 
-    def features_to_excel(self, fname=None, atom_names: List[str]=None):
+    def features_to_excel(self, fname: Optional[Union[str, Path]]=None, atom_names: List[str]=None):
         """ Writes out one excel file which contains a sheet with features for every atom in the system. Optionally a list of atom names can be
         passed in to only make sheets for certain atoms
         
@@ -114,7 +131,12 @@ class ListOfAtoms(list):
         import pandas as pd
 
         if fname is None:
-            fname = "features_to_excel.xlsx"
+            fname = Path("features_to_excel.xlsx")
+        elif isinstance(fname, str):
+            fname = Path(fname)
+
+        fname = fname.with_suffix(".xlsx")
+
         if isinstance (atom_names, str):
             atom_names = [atom_names]
         # whether to write excel sheets for all atoms or subset
