@@ -1,4 +1,4 @@
-# Submitting .gjf files using ICHOR
+# Submitting .gjf files to Gaussian or .wfn files to AIMALL using ICHOR
 
 Since ICHOR can be used as a library, we can write a separate python script that uses ICHOR's modules to do tasks like submitting a lot of gjf files at once.
 
@@ -63,3 +63,15 @@ water_testing_globals/SYSTEM0001.wfn
 ```
 
 See `ichor/globals/globals.py` file which contains a table with all the different settings that can be changed from by GLOBALS.
+
+# Submitting AIMALL jobs
+
+Now that we have ran Gaussian, we should have `.wfn` files which can be passed into AIMALL. After the Gaussian jobs are finished we can do
+
+```python
+from ichor.main.submit_wfns import submit_wfns
+
+submit_wfns("./water_no_angle_change", atoms=None)
+```
+
+This will queue up AIMALL jobs for all the .wfn files that were found in the given directory.
