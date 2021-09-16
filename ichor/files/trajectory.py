@@ -1,3 +1,4 @@
+from ichor.typing import F
 import re
 from pathlib import Path
 from typing import List
@@ -146,32 +147,45 @@ class Trajectory(ListOfAtoms, File):
                 gjf.write()
 
     @classmethod
-    def features_csv_to_trajectory(
-    csv_file: "Path",
-    n_features: int,
+    def features_file_to_trajectory(
+    cls,
+    f: "Path",
     atom_types: List[str],
-    header=None,
-    index_col=None,
+    header=0,
+    index_col=0,
+    sheet_name=0,
     ) -> "Trajectory":
 
-        """ Takes in a csv file containing features and convert it to a `Trajectory` object.
-        It assumes that the features start from the first column (column after the index column, if one exists). Feature csv files that 
+        """ Takes in a csv or excel file containing features and convert it to a `Trajectory` object.
+        It assumes that the features start from the first column (column after the index column, if one exists). Feature files that 
         are written out by ichor are in Bohr instead of Angstroms for now. After converting to cartesian coordinates, we have to convert
         Bohr to Angstroms because .xyz files are written out in Angstroms (and programs like Avogadro, VMD, etc. expect distances in angstroms).
         Failing to do that will result in xyz files that are in Bohr, so if features are calculated from them again, the features will be wrong.
 
-        :param csv_file: Path to the csv file
-        :param n_features: Integer corresponding to the number of features (3N-6)
+        :param f: Path to the file (either .csv or .xlsx) containing the features. We only need the features for one atom to reconstruct the geometries,
+            thus we only need 1 csv file or 1 sheet of an excel file. By default, the 0th sheet of the excel file is read in.
         :param atom_types: A list of strings corresponding to the atom elements (C, O, H, etc.). This has to be ordered the same way
             as atoms corresponding to the features.
-        :param header: Whether the first line of the csv file contains the names of the columns. Default is None. Set to 0 to use the 0th row.
-        :param index_col: Whether a column should be used as the index column. Default is None, so no column used. Set to 0 to use 0th column.
+        :param header: Whether the first line of the csv file contains the names of the columns. Default is set to 0 to use the 0th row.
+        :param index_col: Whether a column should be used as the index column. Default is set to 0 to use 0th column.
+        :param sheet_name: The excel sheet to be used to convert to xyz. Default is 0. This is only needed for excel files, not csv files.
         """
 
+        from pathlib import Path
         import pandas as pd
         from ichor.constants import bohr2ang
 
-        features_array = pd.read_csv(csv_file, header=header, index_col=index_col).values
+        if isinstance(f, str):
+            f = Path(f)
+        if f.suffix == ".xlsx":
+            features_array = pd.read_excel(f, sheet_name=sheet_name, header=header, index_col=index_col).values
+        elif f.suffix == ".csv":
+            features_array = pd.read_csv(f, header=header, index_col=index_col).values
+        else:
+            raise NotImplementedError("File needs to have .xlsx or .csv extension")
+
+        n_features = 3 * len(atom_types) - 6
+
         features_array = features_array[:, :n_features]
 
         # xyz coordinates are currently in bohr, so convert them to angstroms
@@ -181,13 +195,12 @@ class Trajectory(ListOfAtoms, File):
         trajectory = Trajectory()
 
         for geometry in xyz_array:
-
+            # initialize empty Atoms instance
             atoms = Atoms()
-
             for ty, atom_coord in zip(atom_types, geometry):
-
+                # add Atom instances for every atom in the geometry to the Atoms instance
                 atoms.add(Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2]))
-
+            # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
             trajectory.add(atoms)
 
         return trajectory
