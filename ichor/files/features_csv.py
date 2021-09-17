@@ -1,17 +1,19 @@
+from typing import List
+
 import numpy as np
 import pandas as pd
-from typing import List
-from ichor.files import Trajectory
-from ichor.atoms.atoms import Atoms
+
 from ichor.atoms.atom import Atom
+from ichor.atoms.atoms import Atoms
+from ichor.files import Trajectory
 
 
 def read_features_csv(
     csv_file: "Path", n_features: int, header=None, index_col=None
 ):
-    """ Read in a csv file and give back an array corresponding to features. It assumes that the
+    """Read in a csv file and give back an array corresponding to features. It assumes that the
     features start from the first column (column after the index column).
-    
+
     :param csv_file: Path to the csv file
     :param n_features: Integer corresponding to the number of features (3N-6)
     :param header: Whether the first line of the csv file contains the names of the columns. Default is None. Set to 0 to use the 0th row.
@@ -36,7 +38,7 @@ def spherical_to_cartesian(r, theta, phi):
 
 
 def features_to_coordinates(features: np.ndarray) -> np.ndarray:
-    """ Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
+    """Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
     n_points x n_atoms x 3
 
     :param features: a numpy array of shape n_points x n_features
@@ -75,9 +77,9 @@ def features_csv_to_trajectory(
     index_col=None,
 ) -> Trajectory:
 
-    """ Takes in a csv file containing features and convert it to a `Trajectory` object.
+    """Takes in a csv file containing features and convert it to a `Trajectory` object.
     It assumes that the features start from the first column (column after the index column, if one exists).
-    
+
     :param csv_file: Path to the csv file
     :param n_features: Integer corresponding to the number of features (3N-6)
     :param atom_types: A list of strings corresponding to the atom elements (C, O, H, etc.). This has to be ordered the same way

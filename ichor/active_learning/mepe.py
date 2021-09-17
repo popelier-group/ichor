@@ -7,9 +7,9 @@ from scipy.spatial.distance import cdist
 
 from ichor.active_learning.expected_improvement import ExpectedImprovement
 from ichor.atoms import ListOfAtoms
+from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
 from ichor.models import Model, ModelsResult
-from ichor.common.functools import classproperty
 
 """
     Implementation of the Maximum Expected Prediction Error (MEPE) method

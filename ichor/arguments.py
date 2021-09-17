@@ -1,15 +1,15 @@
+import importlib
 import sys
 from argparse import ArgumentParser
 from ast import literal_eval
 from pathlib import Path
-from typing import Any, Callable, List, Sequence, Tuple, Optional
+from typing import Any, Callable, List, Optional, Sequence, Tuple
 from uuid import UUID
-import importlib
 
-from ichor.in_main import main_only
 from ichor.common.bool import check_bool
 from ichor.common.functools import run_once
 from ichor.common.uid import get_uid
+from ichor.in_main import main_only
 
 
 class ExternalFunction:
@@ -18,6 +18,7 @@ class ExternalFunction:
     e.g.
     python ichor3.py -f submit_gjfs TRAINING_SET
     """
+
     def __init__(self, module: str, function: str, name: Optional[str] = None):
         """
         Constructor for ExternalFunction, think of arguments in terms of the import statement
@@ -41,16 +42,16 @@ class ExternalFunction:
 
 # List of all ichor external functions, add functions to the list. Note: a checker for these has not been implemented
 external_functions = [
-    ExternalFunction('ichor.logging', 'log_time'),
-    ExternalFunction('ichor.main.active_learning', 'active_learning'),
-    ExternalFunction('ichor.main.collate_log', 'collate_model_log'),
-    ExternalFunction('ichor.main.make_models', 'make_models, move_models'),
-    ExternalFunction('ichor.main.submit_gjfs', 'submit_gjfs'),
-    ExternalFunction('ichor.main.submit_gjfs', 'check_gaussian_output'),
-    ExternalFunction('ichor.main.submit_wfns', 'submit_wfns'),
-    ExternalFunction('ichor.main.submit_wfns', 'check_aimall_output'),
-    ExternalFunction('ichor.make_sets', 'make_sets'),
-    ExternalFunction('ichor.submission_script', 'print_completed'),
+    ExternalFunction("ichor.logging", "log_time"),
+    ExternalFunction("ichor.main.active_learning", "active_learning"),
+    ExternalFunction("ichor.main.collate_log", "collate_model_log"),
+    ExternalFunction("ichor.main.make_models", "make_models, move_models"),
+    ExternalFunction("ichor.main.submit_gjfs", "submit_gjfs"),
+    ExternalFunction("ichor.main.submit_gjfs", "check_gaussian_output"),
+    ExternalFunction("ichor.main.submit_wfns", "submit_wfns"),
+    ExternalFunction("ichor.main.submit_wfns", "check_aimall_output"),
+    ExternalFunction("ichor.make_sets", "make_sets"),
+    ExternalFunction("ichor.submission_script", "print_completed"),
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key
@@ -80,9 +81,7 @@ class Arguments:
             type=str,
             help="Name of Config File for ICHOR",
         )
-        allowed_functions = ", ".join(
-            map(str, external_functions.keys())
-        )
+        allowed_functions = ", ".join(map(str, external_functions.keys()))
         parser.add_argument(
             "-f",
             "--func",
@@ -117,7 +116,9 @@ class Arguments:
             func = args.func[0]
             func_args = args.func[1:] if len(args.func) > 1 else []
             if func in external_functions.keys():
-                Arguments.call_external_function = external_functions[func].import_function()
+                Arguments.call_external_function = external_functions[
+                    func
+                ].import_function()
                 Arguments.call_external_function_args = parse_args(
                     func=Arguments.call_external_function, args=func_args
                 )

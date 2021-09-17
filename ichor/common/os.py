@@ -53,8 +53,10 @@ def current_user_groups() -> List[str]:
     """Returns the list of user groups the current user is in"""
     try:
         import grp
+
         return [grp.getgrgid(g).gr_name for g in os.getgroups()]
     except ImportError:
         import warnings
+
         warnings.warn("Warning: Cannot import 'grp' on current machine")
         return []

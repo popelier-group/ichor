@@ -109,6 +109,13 @@ class ArithMixin(ABC):
         else:
             return self._rdiv_value(other)
 
+    @abstractmethod
+    def _abs_result(self):
+        pass
+
+    def abs(self):
+        return self._abs_result()
+
 
 class ModelResult(dict, ArithMixin):
     def _add_value(self, other):
@@ -189,6 +196,24 @@ class ModelResult(dict, ArithMixin):
                 result[key] = other[key] / val
         return result
 
+    def _abs_result(self):
+        result = ModelResult()
+        for key, val in self.items():
+            if isinstance(val, ArithMixin):
+                result[key] = val.abs()
+            else:
+                result[key] = np.abs(val)
+        return result
+
+    def len(self) -> int:
+        lengths = []
+        for key, val in self.items():
+            if isinstance(val, ModelResult):
+                lengths += [val.len()]
+            else:
+                lengths += [len(val)]
+        return max(lengths)
+
     def __eq__(self, other):
         a = []
         if not isinstance(other, dict):
@@ -256,6 +281,18 @@ class ModelResult(dict, ArithMixin):
             value = np.array(value)
         super().__setitem__(key, value)
 
+    def array(self) -> np.ndarray:
+        if len(self) == 1:
+            values = next(iter(self.values()))
+            if isinstance(values, np.ndarray):
+                return values
+            else:
+                return values.array()
+        else:
+            raise ValueError(
+                f"Can only return 'array' of '{self.__class__.__name__}' of length 1"
+            )
+
 
 class ModelsResult(ModelResult):
     def __init__(
@@ -265,6 +302,15 @@ class ModelsResult(ModelResult):
         if result is not None:
             for key, val in result.items():
                 self[key] = ModelResult(val)
+
+    def append(self, other):
+        if isinstance(other, ModelsResult):
+            for key, val in other.items():
+                self[key] = val
+        else:
+            raise TypeError(
+                f"Cannot append value of type '{type(other)}' to type '{self.__class__.__name__}"
+            )
 
     @property
     def T(self):

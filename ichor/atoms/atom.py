@@ -201,9 +201,9 @@ class Atom:
 
     @property
     def xyz_string(self):
-        """ Returns the atom type and coordinates for one Atom instance. This is used to write out an xyz file, which expects
+        """Returns the atom type and coordinates for one Atom instance. This is used to write out an xyz file, which expects
         entries in the form of atom_type x_coordinate, y_coordinate, z_coordinate"""
-        return f"{self.atom_type:<3s}{self.coordinates_string}" 
+        return f"{self.atom_type:<3s}{self.coordinates_string}"
 
     def __str__(self):
         """Print out the atom name (containing atom type and index as used in model making), as well as

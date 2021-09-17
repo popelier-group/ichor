@@ -124,13 +124,15 @@ class Models(Directory, list):
 
     @property
     def atoms(self):
-        return natsorted(
-            [model.atom for model in self], key=ignore_alpha
-        )
+        return natsorted([model.atom for model in self], key=ignore_alpha)
 
     @property
     def types(self):
         return [model.type for model in self]
+
+    @property
+    def ntrain(self) -> int:
+        return max(model.ntrain for model in self)
 
 
 class ModelsView(Models):

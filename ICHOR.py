@@ -3211,7 +3211,7 @@ class TabCompleter:
             pass
 
 
-# Moved to ichor/menu.py
+# Moved to ichor/analysis_menu.py
 class Menu(object):
     def __init__(
         self,

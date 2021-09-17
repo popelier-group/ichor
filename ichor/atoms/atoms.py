@@ -217,7 +217,7 @@ class Atoms(list):
 
     @property
     def xyz_string(self):
-        """ Returns a string contaning all atoms and their coordinates stored in the Atoms instance"""
+        """Returns a string contaning all atoms and their coordinates stored in the Atoms instance"""
         return "\n".join(atom.xyz_string for atom in self)
 
     def __str__(self):

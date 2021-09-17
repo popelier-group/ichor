@@ -13,7 +13,7 @@ from ichor.typing import F
 
 
 class ModelParameterMissing(Exception):
-    def __init__(self, instance: 'Model', missing_parameter_name: str):
+    def __init__(self, instance: "Model", missing_parameter_name: str):
         self.message = f"'{missing_parameter_name}' is not defined for '{instance.path}' instance of '{instance.__class__.__name__}' check model file"
 
 

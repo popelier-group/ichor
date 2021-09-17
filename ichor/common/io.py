@@ -128,7 +128,9 @@ def remove(path: Path) -> None:
 
 
 @convert_to_path
-def remove_with_suffix(suffix: str, path_to_search: Path = Path().cwd(), recursive: bool = False) -> None:
+def remove_with_suffix(
+    suffix: str, path_to_search: Path = Path().cwd(), recursive: bool = False
+) -> None:
     """
     Remove all files with given suffix 'suffix'
 
@@ -263,7 +265,7 @@ def cat(outfile: Path, infiles: List[Path]) -> None:
     :param infiles: list of one or more paths to concatenatr to outfile
     :return: none
     """
-    with open(outfile, 'ab') as outf:
+    with open(outfile, "ab") as outf:
         for infile in infiles:
-            with open(infile, 'rb') as inf:
+            with open(infile, "rb") as inf:
                 shutil.copyfileobj(inf, outf)

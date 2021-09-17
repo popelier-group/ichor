@@ -28,7 +28,9 @@ class Trajectory(ListOfAtoms, File):
             File.__init__(self, path)
         # if we are building a trajectory another way without reading a file containing xyz coordinates
         else:
-            self.state = FileState.Read  # set the state to read as we don't need to read any file
+            self.state = (
+                FileState.Read
+            )  # set the state to read as we don't need to read any file
             ListOfAtoms.__init__(self)
 
     def _read_file(self, n: int = -1):
@@ -80,7 +82,9 @@ class Trajectory(ListOfAtoms, File):
             for i, atoms in enumerate(self):
                 f.write(f"    {len(atoms)}\ni = {i}\n")
                 for atom in atoms:
-                    f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}")
+                    f.write(
+                        f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}"
+                    )
 
     def rmsd(self, ref=None):
         if ref is None:

@@ -9,6 +9,7 @@ from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
                                      SubmissionScript, print_completed)
 
+
 # matt_todo: atoms is an optional argument but does not have a default value, so it causes problems.
 def submit_wfns(
     directory: Path, atoms: Optional[List[str]]
