@@ -58,6 +58,7 @@ class Atom:
             raise TypeError(f"'parent' is not defined for '{self.name}'")
         return self._parent
 
+    # todo: have a think about how indexing is going to work best. Either index by 0 and add 1 when using the atom indeces which are in their name or index starting at 1 and subtract when working in python lists
     @property
     def index(self) -> int:
         if self._index is None:
