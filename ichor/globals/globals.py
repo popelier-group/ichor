@@ -154,8 +154,7 @@ class Globals:
     NORMALISE: bool = False
     STANDARDISE: bool = False
 
-
-    new_globals = Globals(METHOD="aug-cc-pVTZ")
+    # todo: implement something like this, so there could be multiple globals instances: new_globals = Globals(METHOD="aug-cc-pVTZ")
     METHOD: str = "B3LYP"
     BASIS_SET: str = "6-31+g(d,p)"
     KEYWORDS: List[str] = []
