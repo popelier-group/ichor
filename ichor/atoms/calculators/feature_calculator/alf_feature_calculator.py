@@ -14,7 +14,7 @@ class ALFFeatureCalculator(FeatureCalculator):
     _alf = {}
 
     @classmethod
-    def calculate_alf(cls, atom) -> list:
+    def calculate_alf(cls, atom: "Atom") -> list:
         """Returns the Atomic Local Frame (ALF) of the specified atom. The ALF consists of 3 Atom instances,
         the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
         matrix and features.
@@ -30,7 +30,7 @@ class ALFFeatureCalculator(FeatureCalculator):
                 the 1st element is the x-axis Atom instance, and the 2nd element is the xy-plane Atom instance.
         """
 
-        def _priority_by_mass(atoms) -> float:
+        def _priority_by_mass(atoms: List["Atom"]) -> float:
             """Returns the sum of masses of a list of Atom instances
 
             Args:
@@ -42,7 +42,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             """
             return sum([a.mass for a in atoms])
 
-        def _get_priority(atom, level):
+        def _get_priority(atom: "Atom", level: int):
             """Returns the priority of atoms on a given level."""
             atoms = [atom]
             for _ in range(level):
@@ -56,7 +56,7 @@ class ALFFeatureCalculator(FeatureCalculator):
 
             return _priority_by_mass(atoms)
 
-        def _max_priority(atoms: list):
+        def _max_priority(atoms: List["Atom"]):
             """Returns the Atom instance that has the highest priority in the given list.
 
              Args:
