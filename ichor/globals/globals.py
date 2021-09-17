@@ -2,16 +2,12 @@ import inspect
 import os
 import platform
 from pathlib import Path
-from typing import List
-from uuid import UUID
+from typing import List, Optional
+from uuid import UUID, uuid4
 
 from ichor import constants
-from ichor.arguments import Arguments
 from ichor.atoms.atoms import Atoms
-from ichor.common import io
-from ichor.common.functools import run_once
 from ichor.common.types import DictList, Version
-from ichor.file_structure import FileStructure
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
@@ -117,6 +113,10 @@ EXCLUDE_NODES                   | List[str]       | []                | Node bla
 """
 
 
+class GlobalVariableError(Exception):
+    pass
+
+
 class Globals:
     _types = []
 
@@ -136,6 +136,9 @@ class Globals:
     # For checking global variables after formatting
     _checkers = DictList()
 
+    # for saving the location the global variables were loaded from
+    _config_file: Optional[Path] = None
+
     SYSTEM_NAME: str = "SYSTEM"
     ALF_REFERENCE_FILE: str = ""  # set automatically if not defined
     ALF: List[List[int]] = []
@@ -154,7 +157,6 @@ class Globals:
     NORMALISE: bool = False
     STANDARDISE: bool = False
 
-    # todo: implement something like this, so there could be multiple globals instances: new_globals = Globals(METHOD="aug-cc-pVTZ")
     METHOD: str = "B3LYP"
     BASIS_SET: str = "6-31+g(d,p)"
     KEYWORDS: List[str] = []
@@ -258,7 +260,7 @@ class Globals:
     OS: OS = OS.Linux
 
     DISABLE_PROBLEMS: bool = False
-    UID: UUID = Arguments.uid
+    UID: UUID = uuid4()
 
     IQA_MODELS: bool = False
 
@@ -272,15 +274,13 @@ class Globals:
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
 
-    def __init__(self, **kwargs):
+    def __init__(self, config_file: Optional[Path] = None, globals_instance: Optional['Globals'] = None, **kwargs):
         # check types
         for global_variable in self.global_variables:
             if global_variable not in self.__annotations__.keys():
                 self.__annotations__[global_variable] = type(
                     self.get(global_variable)
                 )
-
-        self.UID = Arguments.uid
 
         # Set Protected Variables
         self._protected = [
@@ -387,14 +387,6 @@ class Globals:
         for global_variable in self.global_variables:
             self._defaults[global_variable] = self.get(global_variable)
 
-    @staticmethod
-    @run_once
-    def define():
-        globals_instance = Globals()
-        globals_instance.init()
-        return globals_instance
-
-    def init(self):
         # Set OS
         if platform == "linux" or platform == "linux2":
             self.OS = OS.Linux
@@ -402,35 +394,6 @@ class Globals:
             self.OS = OS.MacOS
         elif platform == "win32":
             self.OS = OS.Windows
-
-        # Uncomment this when drop-n-compute is activated
-        # # Add to list of drop-n-compute-services as they're added
-        # if self.MACHINE in ["csf3"]:
-        #     self.DROP_N_COMPUTE = True
-
-        config = ConfigProvider(source=Arguments.config_file)
-
-        for key, val in config.items():
-            if key in self.global_variables:
-                self.set(key, val)
-                self._in_config += [key]
-            elif key in [
-                "MAX_ITERATION",
-                "N_ITERATION",
-            ]:  # Deprecated variable names
-                self.set("N_ITERATIONS", val)
-                self._in_config += ["N_ITERATIONS"]
-            else:
-                ProblemFinder.unknown_settings += [key]
-
-        # if (
-        #     self.DROP_N_COMPUTE
-        #     and not self.DROP_N_COMPUTE_LOCATION
-        #     and self.MACHINE == "csf3"
-        # ):
-        #     self.DROP_N_COMPUTE_LOCATION = Path.home() / "DropCompute"
-        # if self.DROP_N_COMPUTE_LOCATION:
-        #     io.mkdir(self.DROP_N_COMPUTE_LOCATION)
 
         from ichor.file_structure import FILE_STRUCTURE
 
@@ -456,6 +419,38 @@ class Globals:
                     traj = Trajectory(f)
                     traj.read(n=1)
                     self.ATOMS = traj[0]
+
+        if config_file:
+            self.init_from_config(config_file)
+
+        if globals_instance is not None:
+            self.init_from_globals(globals_instance)
+
+        for key, value in kwargs.items():
+            if key not in self.global_variables:
+                raise GlobalVariableError(f"Global Variable: {key} does not exist.")
+            self.set(key, value)
+
+    def init_from_config(self, config_file: Path):
+        self._config_file = config_file
+        config = ConfigProvider(source=config_file)
+
+        for key, val in config.items():
+            if key in self.global_variables:
+                self.set(key, val)
+                self._in_config += [key]
+            elif key in [
+                "MAX_ITERATION",
+                "N_ITERATION",
+            ]:  # Deprecated variable names
+                self.set("N_ITERATIONS", val)
+                self._in_config += ["N_ITERATIONS"]
+            else:
+                ProblemFinder.unknown_settings += [key]  # todo: implement ProblemFinder
+
+    def init_from_globals(self, globals_instance: 'Globals'):
+        for key, value in globals_instance.items(show_protected=True):
+            self.set(key, value)
 
     def set(self, name, value):
         name = name.upper()
@@ -493,7 +488,15 @@ class Globals:
         with open(config_file, "w") as config:
             yaml.dump(global_variables, config)
 
-    def save_to_config(self, config_file: str = Arguments.config_file):
+    def save_to_config(self, config_file: Optional[Path] = None):
+        if config_file is None:
+            if self._config_file is None:
+                # if no config file is provided and the instance of globals wasn't defined from a config, default to
+                # `Arguments.config_file`
+                from ichor.arguments import Arguments
+                config_file = Arguments.config_file
+            else:
+                config_file = self._config_file
         global_variables = {
             global_variable: global_value
             for global_variable, global_value in self.items()
@@ -560,9 +563,11 @@ class Globals:
 
         super(Globals, self).__setattr__(name, value)
 
-    def __enter__(self):
-        self._save_globals = GLOBALS
-        GLOBALS = self
+    def __enter__(self, *args, **kwargs):
+        from ichor import globals
+        self._save_globals = Globals(globals_instance=globals.GLOBALS)
+        globals.GLOBALS.init_from_globals(self)
 
-    def __exit__(self):
-        GLOBALS = self._save_globals
+    def __exit__(self, type, value, traceback):
+        from ichor import globals
+        globals.GLOBALS.init_from_globals(self._save_globals)

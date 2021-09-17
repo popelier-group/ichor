@@ -2,16 +2,17 @@
 defined in globals.py, but these can be overwritten using an ICHOR config file. GLOBALS also determine imporatnt values/keywords depending on the machine (CSF3/FFLUXLAB)
 that ICHOR is being ran on."""
 
-from ichor.arguments import Arguments
 from ichor.common.os import input_with_prefill
 from ichor.globals.globals import Globals
 from ichor.globals.os import OS
 from ichor.menu import Menu
 
-__all__ = ["GLOBALS", "OS"]
+__all__ = ["GLOBALS", "Globals", "OS"]
 
-with Arguments():
-    GLOBALS = Globals.define()
+GLOBALS = Globals()
+
+# with Arguments():
+#     GLOBALS = Globals.define()
 
 
 def edit_value(global_variable):

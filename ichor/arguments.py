@@ -61,7 +61,7 @@ external_functions = {ef.name: ef for ef in external_functions}
 class Arguments:
     """Used to parse command line arguments that are given to ICHOR. These arguments are given using `-` or `--` and read with argparse."""
 
-    config_file: str = "config.properties"  # todo: convert to Path
+    config_file: Path = Path("config.properties")
     uid: UUID = get_uid()
     auto_run: bool = False
 
@@ -110,7 +110,7 @@ class Arguments:
 
         args = parser.parse_args()
         if args.config_file:
-            Arguments.config_file = args.config_file
+            Arguments.config_file = Path(args.config_file)
 
         if args.func:
             func = args.func[0]
@@ -135,16 +135,6 @@ class Arguments:
             Arguments.uid = args.uid
 
         Arguments.auto_run = args.autorun
-
-    def __enter__(self):
-        Arguments.read()
-
-    def __exit__(self, type, value, traceback):
-        if Arguments.call_external_function:
-            Arguments.call_external_function(
-                *Arguments.call_external_function_args
-            )
-            sys.exit(0)
 
 
 def parse_args(func: Callable, args: List[str]) -> List[Any]:
