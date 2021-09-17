@@ -38,7 +38,8 @@ class PointDirectory(Point, Directory):
     def parse(self):
         """
         Iterate over __annotations__ which is a dictionary of {"gjf": Optional[GJF], "wfn": Optional[WFN], "ints": Optional[INTs]}
-        as defined from class variables in PointsDirectory. Get the type inside the [] brackets
+        as defined from class variables in PointsDirectory. Get the type inside the [] brackets. After that it constructs a filetypes
+        dictionary containing {"gjf": GJF, "wfn": WFN} and dirtypes dictionary containing {"ints": INTs}
         """
         filetypes = {}
         dirtypes = {}
@@ -46,18 +47,19 @@ class PointDirectory(Point, Directory):
             if hasattr(type_, "__args__"):
                 type_ = type_.__args__[0]
 
+            # GJF and WFN are subclasses of File
             if issubclass(type_, File):
                 filetypes[var] = type_
+            # only INTs is a subclass of Directory for now
             elif issubclass(type_, Directory):
                 dirtypes[var] = type_
 
-        for (
-            f
-        ) in (
-            self
-        ):  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
+        for f in self:  # calls the __iter__() method which yields pathlib Path objects for all files/folders inside a directory.
+
+            # if the content is a file. This is true for .gjf/.wfn files
             if f.is_file():
                 for var, filetype in filetypes.items():
+                    # if the suffix is either gjf or wfn, since there could be other files in the directory (such as .gau which we don't use)
                     if f.suffix == filetype.filetype:
                         if (
                             "parent"
@@ -67,6 +69,7 @@ class PointDirectory(Point, Directory):
                         else:
                             setattr(self, var, filetype(f))
                         break
+            # if the content is a directory. This is currently only for `*_atomicfiles` directories containing .int files
             elif f.is_dir():
                 for var, dirtype in dirtypes.items():
                     if dirtype.dirpattern.match(f.name):
@@ -74,6 +77,7 @@ class PointDirectory(Point, Directory):
                             "parent"
                             in inspect.signature(dirtype.__init__).parameters
                         ):
+                            # sets the .ints attribute to INTs(path_to_directory, parent=PointDirecotry_instance)
                             setattr(self, var, dirtype(f, parent=self))
                         else:
                             setattr(self, var, dirtype(f))

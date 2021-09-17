@@ -448,6 +448,8 @@ class Globals:
         else:
             from ichor.files import Trajectory
 
+            # todo: There could be multiple .xyz files (with different systems) in a directory, so GLOBALS.ATOMS could be wrong
+            # todo: If one .xyz file is not written out correctly (does not have any written out atoms for example), a StopIteration can occur
             for f in Path(os.getcwd()).iterdir():
                 if f.suffix == ".xyz":
                     traj = Trajectory(f)

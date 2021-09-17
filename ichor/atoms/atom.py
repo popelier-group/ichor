@@ -1,5 +1,5 @@
 import itertools as it
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 import numpy as np
 
@@ -169,7 +169,7 @@ class Atom:
         ]
 
     @property
-    def alf(self) -> np.ndarray:
+    def alf(self) -> List["Atom"]:
         """Returns a numpy array of the Atomic Local Frame (ALF). This ALF is ONLY for this Atom.
 
         e.g. If we have an Atoms instance for the water monomer, the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
