@@ -31,9 +31,7 @@ class PointDirectory(Point, Directory):
     @classproperty
     def dirpattern(self):
         """A regex pattern corresponding to the name of the system name (stored in GLOBALS.SYSTEM_NAME)."""
-        from ichor.globals import GLOBALS
-
-        return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+")
+        return re.compile(rf".+")
 
     def parse(self):
         """

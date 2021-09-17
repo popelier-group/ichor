@@ -154,6 +154,8 @@ class Globals:
     NORMALISE: bool = False
     STANDARDISE: bool = False
 
+
+    new_globals = Globals(METHOD="aug-cc-pVTZ")
     METHOD: str = "B3LYP"
     BASIS_SET: str = "6-31+g(d,p)"
     KEYWORDS: List[str] = []
@@ -271,7 +273,7 @@ class Globals:
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         # check types
         for global_variable in self.global_variables:
             if global_variable not in self.__annotations__.keys():
@@ -558,3 +560,10 @@ class Globals:
                 )
 
         super(Globals, self).__setattr__(name, value)
+
+    def __enter__(self):
+        self._save_globals = GLOBALS
+        GLOBALS = self
+
+    def __exit__(self):
+        GLOBALS = self._save_globals
