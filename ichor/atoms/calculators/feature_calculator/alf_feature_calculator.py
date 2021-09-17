@@ -130,9 +130,6 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `Atom` instance
                 The Atom instance which corresponds to the x-axis atom
         """
-        # print(cls.calculate_alf(atom))
-        # print(cls._alf)
-        # quit()
         return atom.parent[cls.calculate_alf(atom)[1]]
 
     @classmethod
