@@ -1,5 +1,5 @@
 import itertools as it
-
+from typing import List
 import numpy as np
 
 from ichor.atoms.calculators.feature_calculator.feature_calculator import \
@@ -11,7 +11,7 @@ feature_unit = AtomicDistance.Bohr
 
 
 class ALFFeatureCalculator(FeatureCalculator):
-    _alf = None
+    _alf = {}
 
     @classmethod
     def calculate_alf(cls, atom) -> list:
@@ -80,7 +80,7 @@ class ALFFeatureCalculator(FeatureCalculator):
                     prev_priorities = priorities
             return atoms[priorities.index(max(priorities))]
 
-        def _calculate_alf(atom) -> list:
+        def _calculate_alf(atom) -> List["Atom"]:
             """Returns a list consisting of the x-axis and xy-plane Atom instances, which
             correspond to the atoms of first and second highest priorty as determined by the
             Cahn-Ingold-Prelog rules."""
@@ -102,14 +102,20 @@ class ALFFeatureCalculator(FeatureCalculator):
                 alf.append(max_priority_atom)
             return alf
 
-        # add the atom of interest to the x_axis and xy_plane atoms, thus this returns a list of 3 Atom instances.
-        if cls._alf is None:
-            cls._alf = [None for _ in range(len(atom.parent))]
-        if cls._alf[atom.index - 1] is None:
-            cls._alf[atom.index - 1] = [
-                a.index - 1 for a in _calculate_alf(atom)
-            ]
-        return cls._alf[atom.index - 1]
+        # since the systems we are working on are not isomers we assume that the connectivity of the atoms remains the same
+        # if connectivity changes but the atoms remain the same (i.e. it is a different configuration), then this code might not work
+        # we use a dictionary where we store a key = hash (a string with all the atom names) and value = a list of alfs for the whole system
+        system_hash = ",".join([atom_name for atom_name in atom.parent.names])
+        if system_hash not in cls._alf.keys():
+            # make an empty list to fill with the alfs for the system
+            cls._alf[system_hash] = []
+            # calculate the alf for every atom in the system and add to the list above
+            for a in atom.parent:
+                alf = _calculate_alf(a)
+                cls._alf[system_hash].append([a.i for a in alf])
+
+        # return a list of the index (starts at 0 because we use this alf to index lists) of central atom, the x_axis and xy_plane atoms
+        return cls._alf[system_hash][atom.i]
 
     @classmethod
     def calculate_x_axis_atom(cls, atom):

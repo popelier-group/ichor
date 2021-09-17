@@ -72,6 +72,23 @@ class Atom:
         self._index = index
 
     @property
+    def atom_number(self) -> int:
+        """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
+        This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
+        return self.index
+
+    @property
+    def num(self):
+        """See `atom_number` method."""
+        return self.atom_number
+
+    @property
+    def i(self) -> int:
+        """Returns the index of the atom, if used in any arrays/list in Python."""
+        return self.index - 1
+
+
+    @property
     def name(self) -> str:
         """Returns the name of the Atom instance, which is later used to distinguish atoms when making GPR models.
         The number in the name starts at 1 (inclusive).
@@ -94,22 +111,6 @@ class Atom:
     def atom_type(self) -> str:
         """Returns the type (i.e. element) of the Atom instance."""
         return self.type
-
-    @property
-    def atom_number(self) -> int:
-        """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
-        This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
-        return self.index
-
-    @property
-    def num(self):
-        """See `atom_number` method."""
-        return self.atom_number
-
-    @property
-    def i(self) -> int:
-        """Returns the index of the atom, if used in any arrays/list in Python."""
-        return self.index - 1
 
     @property
     def mass(self) -> float:
@@ -170,8 +171,8 @@ class Atom:
         ]
 
     @property
-    def alf(self) -> List["Atom"]:
-        """Returns a numpy array of the Atomic Local Frame (ALF). This ALF is ONLY for this Atom.
+    def alf(self) -> List[int]:
+        """Returns a list of the Atomic Local Frame (ALF). This ALF is ONLY for this Atom.
 
         e.g. If we have an Atoms instance for the water monomer, the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
         while the ALF for the first atom only is [0,1,2]
@@ -189,9 +190,6 @@ class Atom:
     @property
     def features(self) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
-        # print("here")
-        # print(ALFFeatureCalculator.calculate_features(self))
-        # quit()
         return ALFFeatureCalculator.calculate_features(self)
 
     @property

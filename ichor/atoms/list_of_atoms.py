@@ -38,6 +38,14 @@ class ListOfAtoms(list):
         return np.array([timestep.coordinates for timestep in self])
 
     @property
+    def alf(self) -> List:
+
+        if hasattr(self, "atoms"):
+            return self.atoms.alf
+        else:
+            return self[0].alf
+
+    @property
     def features(self):
         """Return the ndarray of features. This is assumed to be either a 1D, 2D or 3D array.
         If the dimensionality of the feature array is 3, the array is transposed to transform a
