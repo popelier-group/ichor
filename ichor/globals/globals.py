@@ -11,7 +11,7 @@ from ichor.common.types import DictList, Version
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
-from ichor.problem_finder import ProblemFinder
+from ichor.problem_finder import PROBLEM_FINDER
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -446,7 +446,7 @@ class Globals:
                 self.set("N_ITERATIONS", val)
                 self._in_config += ["N_ITERATIONS"]
             else:
-                ProblemFinder.unknown_settings += [key]  # todo: implement ProblemFinder
+                PROBLEM_FINDER.unknown_settings += [key]  # todo: implement ProblemFinder
 
     def init_from_globals(self, globals_instance: 'Globals'):
         for key, value in globals_instance.items(show_protected=True):
@@ -455,14 +455,14 @@ class Globals:
     def set(self, name, value):
         name = name.upper()
         if name not in self.global_variables:
-            ProblemFinder.unknown_settings.append(name)
+            PROBLEM_FINDER.unknown_settings.append(name)
         elif name in self._protected:
-            ProblemFinder.protected_settings.append(name)
+            PROBLEM_FINDER.protected_settings.append(name)
         else:
             try:
                 setattr(self, name, value)
             except ValueError as e:
-                ProblemFinder.incorrect_settings[name] = e
+                PROBLEM_FINDER.incorrect_settings[name] = e
 
     def get(self, name):
         return getattr(self, name, None)

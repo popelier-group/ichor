@@ -234,4 +234,4 @@ class Atoms(list):
         return self
 
     def __bool__(self):
-        return bool(self)
+        return bool(len(self))

@@ -1,6 +1,6 @@
 import os
 
-from .common.functools import get_functions_to_run, run_function
+from ichor.common.functools import get_functions_to_run, run_function
 
 
 class Problem:
@@ -20,22 +20,21 @@ class Problem:
         return str(self)
 
 
-class ProblemFinder:
-    unknown_settings = []
-    protected_settings = []
-    incorrect_settings = {}
+class ProblemFinder(list):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unknown_settings = []
+        self.protected_settings = []
+        self.incorrect_settings = {}
 
-    _no_reference_file = False
-
-    def __init__(self):
-        self.problems = []
+        self._no_reference_file = False
 
     @run_function(1)
     def check_alf(self):
-        from .globals import GLOBALS
+        from ichor.globals import GLOBALS
 
         if len(GLOBALS.ALF) < 1:
-            self.add(
+            self.append(
                 Problem(
                     name="ALF",
                     problem="ALF not set due to error in calculation",
@@ -45,10 +44,10 @@ class ProblemFinder:
 
     @run_function(1.1)
     def check_atoms(self):
-        from .globals import GLOBALS
+        from ichor.globals import GLOBALS
 
         if not GLOBALS.ATOMS:
-            self.add(
+            self.append(
                 Problem(
                     name="ATOMS",
                     problem="ATOMS not set due to missing reference file",
@@ -65,7 +64,7 @@ class ProblemFinder:
         for dir_name in dirs_to_check:
             dir_path = FILE_STRUCTURE[dir_name]
             if not os.path.isdir(dir_path):
-                self.add(
+                self.append(
                     Problem(
                         name="Directory Not Found",
                         problem=f"Could not find: {dir_path}",
@@ -75,10 +74,10 @@ class ProblemFinder:
 
     @run_function(3)
     def check_system(self):
-        from .globals import GLOBALS
+        from ichor.globals import GLOBALS
 
         if GLOBALS.SYSTEM_NAME == "SYSTEM":
-            self.add(
+            self.append(
                 Problem(
                     name="SYSTEM_NAME",
                     problem="SYSTEM_NAME not been set, defaulted to SYSTEM",
@@ -88,8 +87,8 @@ class ProblemFinder:
 
     @run_function(4)
     def check_settings(self):
-        for setting in ProblemFinder.unknown_settings:
-            self.add(
+        for setting in self.unknown_settings:
+            self.append(
                 Problem(
                     name=f"Unknown setting found in config",
                     problem=f"Unknown setting: {setting}",
@@ -97,8 +96,8 @@ class ProblemFinder:
                 )
             )
 
-        for setting in ProblemFinder.protected_settings:
-            self.add(
+        for setting in self.protected_settings:
+            self.append(
                 Problem(
                     name=f"Tried to modify protected setting in config",
                     problem=f"Protected setting: {setting}",
@@ -106,8 +105,8 @@ class ProblemFinder:
                 )
             )
 
-        for setting, error in ProblemFinder.incorrect_settings.items():
-            self.add(
+        for setting, error in self.incorrect_settings.items():
+            self.append(
                 Problem(
                     name=f"Setting variable ({setting}) to incorrect value",
                     problem=f"{error}",
@@ -115,25 +114,19 @@ class ProblemFinder:
                 )
             )
 
-    def add(self, problem):
-        self.problems.append(problem)
-
     def find(self):
-        from .globals import GLOBALS
+        from ichor.globals import GLOBALS
 
         if not GLOBALS.DISABLE_PROBLEMS:
             problems_to_find = get_functions_to_run(self)
             for find_problem in problems_to_find:
                 find_problem()
 
-    def __getitem__(self, i):
-        return self.problems[i]
-
-    def __len__(self):
-        return len(self.problems)
-
     def __str__(self):
-        return "\n\n".join(str(problem) for problem in self.problems)
+        return "\n\n".join(str(problem) for problem in self)
 
     def __repr__(self):
         return str(self)
+
+
+PROBLEM_FINDER = ProblemFinder()

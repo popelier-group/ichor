@@ -4,7 +4,7 @@ from typing import Callable, Dict, List, Tuple
 from uuid import uuid4
 
 from ichor.common.int import count_digits
-from ichor.problem_finder import ProblemFinder
+from ichor.problem_finder import PROBLEM_FINDER
 from ichor.tab_completer import ListCompleter
 
 
@@ -67,6 +67,7 @@ class Menu(object):
         self.space = space
         self.back = back
         self.exit = exit
+
 
     def set_options(self, options):
         """If a list of options to be displayed in the menu is passed when an instance of the class `Menu` is made, then this method is called.
@@ -222,14 +223,13 @@ class Menu(object):
 
     def print_problems(self) -> None:
         """Print problems found (such as with config files, etc.) at the top of the menu."""
-        problems = ProblemFinder()
-        problems.find()
-        if len(problems) > 0:
-            max_len = count_digits(len(problems))
-            s = "s" if len(problems) > 1 else ""
+        PROBLEM_FINDER.find()
+        if len(PROBLEM_FINDER) > 0:
+            max_len = count_digits(len(PROBLEM_FINDER))
+            s = "s" if len(PROBLEM_FINDER) > 1 else ""
             print(f"Problem{s} Found:")
             print()
-            for i, problem in enumerate(problems):
+            for i, problem in enumerate(PROBLEM_FINDER):
                 print(
                     f"{i + 1:{str(max_len)}d}) "
                     + str(problem).replace(  # index problem  # print problem
