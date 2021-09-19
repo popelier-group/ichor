@@ -12,6 +12,7 @@ from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
 from ichor.problem_finder import PROBLEM_FINDER
+from ichor.common.functools import ntimes_cached_property
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -397,28 +398,28 @@ class Globals:
 
         from ichor.file_structure import FILE_STRUCTURE
 
-        if FILE_STRUCTURE["training_set"].exists():
-            from ichor.files import GJF
-
-            for d in FILE_STRUCTURE["training_set"].iterdir():
-                if d.is_dir():
-                    for f in d.iterdir():
-                        if f.suffix == ".gjf":
-                            self.ATOMS = GJF(f).atoms
-                            break
-                elif d.is_file() and d.suffix == ".gjf":
-                    self.ATOMS = GJF(d).atoms
-                    break
-        else:
-            from ichor.files import Trajectory
-
-            # todo: There could be multiple .xyz files (with different systems) in a directory, so GLOBALS.ATOMS could be wrong
-            # todo: If one .xyz file is not written out correctly (does not have any written out atoms for example), a StopIteration can occur
-            for f in Path(os.getcwd()).iterdir():
-                if f.suffix == ".xyz":
-                    traj = Trajectory(f)
-                    traj.read(n=1)
-                    self.ATOMS = traj[0]
+        # if FILE_STRUCTURE["training_set"].exists():
+        #     from ichor.files import GJF
+        #
+        #     for d in FILE_STRUCTURE["training_set"].iterdir():
+        #         if d.is_dir():
+        #             for f in d.iterdir():
+        #                 if f.suffix == ".gjf":
+        #                     self.ATOMS = GJF(f).atoms
+        #                     break
+        #         elif d.is_file() and d.suffix == ".gjf":
+        #             self.ATOMS = GJF(d).atoms
+        #             break
+        # else:
+        #     from ichor.files import Trajectory
+        #
+        #     # todo: There could be multiple .xyz files (with different systems) in a directory, so GLOBALS.ATOMS could be wrong
+        #     # todo: If one .xyz file is not written out correctly (does not have any written out atoms for example), a StopIteration can occur
+        #     for f in Path(os.getcwd()).iterdir():
+        #         if f.suffix == ".xyz":
+        #             traj = Trajectory(f)
+        #             traj.read(n=1)
+        #             self.ATOMS = traj[0]
 
         if config_file:
             self.init_from_config(config_file)
@@ -463,6 +464,48 @@ class Globals:
                 setattr(self, name, value)
             except ValueError as e:
                 PROBLEM_FINDER.incorrect_settings[name] = e
+
+    @ntimes_cached_property(2)  # todo: is this wise?
+    def ATOMS(self) -> Atoms:
+        if self.ALF_REFERENCE_FILE:
+            alf_reference_file = Path(self.ALF_REFERENCE_FILE)
+            if not alf_reference_file.exists():
+                raise ValueError(f"ALF reference file: {alf_reference_file} does not exit")
+            elif alf_reference_file.is_dir():
+                raise ValueError(f"ALF reference file: {alf_reference_file} is a directory.")
+            if alf_reference_file.suffix == ".gjf":
+                from ichor.files import GJF
+                return GJF(alf_reference_file).atoms
+            elif alf_reference_file.suffix == ".xyz":
+                from ichor.files import Trajectory
+                return Trajectory(alf_reference_file)[0]
+            else:
+                raise ValueError(f"Unknown filetype ({alf_reference_file}")
+        else:
+            def scan_dir(d) -> Optional[Atoms]:
+                # todo: could be slow, maybe best to search key locations first
+                dirs_to_scan = []
+                print("scanning", d)
+                for f in d.iterdir():
+                    if f.is_file():
+                        if f.suffix == ".gjf":
+                            from ichor.files import GJF
+                            return GJF(f).atoms
+                        elif f.suffix == ".xyz":
+                            from ichor.files import Trajectory
+                            return Trajectory(f)[0]
+                    elif f.is_dir():
+                        dirs_to_scan += [f]
+                for dir_to_scan in dirs_to_scan:
+                    scan_dir(dir_to_scan)
+            atoms = scan_dir(Path.cwd())
+            if atoms is not None:
+                return atoms
+        raise NoAtomsFound("No instance of Atoms could be found")
+
+    @property
+    def ALF(self):
+        return self.ATOMS.alf
 
     def get(self, name):
         return getattr(self, name, None)
@@ -571,3 +614,7 @@ class Globals:
     def __exit__(self, type, value, traceback):
         from ichor import globals
         globals.GLOBALS.init_from_globals(self._save_globals)
+
+
+class NoAtomsFound(Exception):
+    pass

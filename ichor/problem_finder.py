@@ -29,7 +29,7 @@ class ProblemFinder(list):
 
         self._no_reference_file = False
 
-    @run_function(1)
+    # @run_function(1)
     def check_alf(self):
         from ichor.globals import GLOBALS
 
@@ -42,7 +42,7 @@ class ProblemFinder(list):
                 )
             )
 
-    @run_function(1.1)
+    # @run_function(1.1)
     def check_atoms(self):
         from ichor.globals import GLOBALS
 

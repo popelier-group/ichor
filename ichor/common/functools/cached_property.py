@@ -128,6 +128,59 @@ class cached_property_with_ttl(object):
             self.__module__ = func.__module__
 
 
+class cached_property_with_ntimes(object):
+    """
+    A property that is only computed once per instance and then replaces itself
+    with an ordinary attribute. Setting the ntimes to a number expresses how many
+    times the property can be called before being recalculated
+    """
+
+    def __init__(self, ntimes=None):
+        if callable(ntimes):
+            func = ntimes
+            ntimes = None
+        else:
+            func = None
+        self.ntimes = ntimes
+        self._prepare_func(func)
+
+    def __call__(self, func):
+        self._prepare_func(func)
+        return self
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+
+        obj_dict = obj.__dict__
+        name = self.__name__
+        try:
+            value, ntimes_called = obj_dict[name]
+        except KeyError:
+            pass
+        else:
+            ntimes_expired = self.ntimes and self.ntimes <= ntimes_called
+            if not ntimes_expired:
+                obj_dict[name] = (value, ntimes_called + 1)
+                return value
+
+        value = self.func(obj)
+        obj_dict[name] = (value, 1)
+        return value
+
+    def __delete__(self, obj):
+        obj.__dict__.pop(self.__name__, None)
+
+    def __set__(self, obj, value):
+        obj.__dict__[self.__name__] = (value, 1)
+
+    def _prepare_func(self, func):
+        self.func = func
+        if func:
+            self.__doc__ = func.__doc__
+            self.__name__ = func.__name__
+            self.__module__ = func.__module__
+
 # Aliases to make cached_property_with_ttl easier to use
 cached_property_ttl = cached_property_with_ttl
 timed_cached_property = cached_property_with_ttl
@@ -153,3 +206,4 @@ class threaded_cached_property_with_ttl(cached_property_with_ttl):
 # Alias to make threaded_cached_property_with_ttl easier to use
 threaded_cached_property_ttl = threaded_cached_property_with_ttl
 timed_threaded_cached_property = threaded_cached_property_with_ttl
+ntimes_cached_property = cached_property_with_ntimes
