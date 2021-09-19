@@ -7,7 +7,6 @@ from ichor.models import Models
 from ichor.points import PointsDirectory
 
 
-# todo: Maybe rename this function and file because it performs a bit more that just adaptive sampling.
 def active_learning(
     model_directory: Optional[Path] = None,
     sample_pool_directory: Optional[Path] = None,

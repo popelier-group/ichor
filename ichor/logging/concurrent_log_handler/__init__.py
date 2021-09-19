@@ -112,16 +112,6 @@ if sys.version_info[0] == 2:
     PY2 = True
 
 
-# Workaround for handleError() in Python 2.7+ where record is written to stderr
-# TODO: unused - probably can delete now.
-class NullLogRecord(LogRecord):
-    def __init__(self, *args, **kw):
-        super(NullLogRecord, self).__init__(*args, **kw)
-
-    def __getattr__(self, attr):
-        return None
-
-
 class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     """
     Handler for logging to a set of files, which switches from one file to the

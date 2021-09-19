@@ -15,5 +15,4 @@ if MACHINE is Machine.csf3:
 
 
 def drop_compute_available_for_user() -> bool:
-    # todo: implement check for if drop-n-compute is available to the current user
     return DROP_COMPUTE_GROUP in current_user_groups()

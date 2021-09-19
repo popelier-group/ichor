@@ -1,11 +1,16 @@
 import re
+from typing import Union, Optional
 
 
-# todo: Add revision in comparisons
 class Version:
-    """Version system for ICHOR. Useful when comparing two different ICHOR versions."""
+    """Version system for ICHOR. Useful when comparing two different program versions."""
 
-    def __init__(self, rep=None):
+    major: int
+    minor: int
+    patch: int
+    revision: str
+
+    def __init__(self, rep: Optional[Union[str, 'Version']] = None):
         self.major = 0
         self.minor = 0
         self.patch = 0
@@ -52,6 +57,11 @@ class Version:
         elif self.patch < other.patch:
             return False
 
+        if self.revision.casefold() > other.revision.casefold():
+            return True
+        elif self.revision.casefold() < other.revision.casefold():
+            return False
+
         return False
 
     def __ge__(self, other):
@@ -73,6 +83,11 @@ class Version:
         elif self.patch > other.patch:
             return False
 
+        if self.revision.casefold() < other.revision.casefold():
+            return True
+        elif self.revision.casefold() > other.revision.casefold():
+            return False
+
         return False
 
     def __le__(self, other):
@@ -83,6 +98,7 @@ class Version:
             self.major == other.major
             and self.minor == other.minor
             and self.patch == other.patch
+            and self.revision == other.revision
         )
 
     def __str__(self):

@@ -10,9 +10,8 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
                                      SubmissionScript, print_completed)
 
 
-# matt_todo: atoms is an optional argument but does not have a default value, so it causes problems.
 def submit_wfns(
-    directory: Path, atoms: Optional[List[str]]
+    directory: Path, atoms: Optional[List[str]] = None
 ) -> Optional[JobID]:
     """Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file"""
     from ichor.globals import GLOBALS
@@ -29,7 +28,7 @@ def submit_wfns(
         ):
             if GLOBALS.METHOD in constants.AIMALL_FUNCTIONALS:
                 point.wfn.check_header()
-            submission_script.add_command(AIMAllCommand(point.wfn.path))
+            submission_script.add_command(AIMAllCommand(point.wfn.path, atoms=atoms))
     logger.info(
         f"Submitting {len(submission_script.commands)} WFN(s) to AIMAll"
     )

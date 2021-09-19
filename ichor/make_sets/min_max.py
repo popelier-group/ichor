@@ -20,8 +20,7 @@ class MinMax(MakeSetMethod):
 
         atom = (
             GLOBALS.OPTIMISE_ATOM
-            if GLOBALS.OPTIMISE_ATOM
-            is not "all"  # matt_todo: this should be !=
+            if GLOBALS.OPTIMISE_ATOM != "all"
             else GLOBALS.ATOMS[0].name
         )
         features = points[atom].features
