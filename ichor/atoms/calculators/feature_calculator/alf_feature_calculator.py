@@ -105,7 +105,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         # since the systems we are working on are not isomers we assume that the connectivity of the atoms remains the same
         # if connectivity changes but the atoms remain the same (i.e. it is a different configuration), then this code might not work
         # we use a dictionary where we store a key = hash (a string with all the atom names) and value = a list of alfs for the whole system
-        system_hash = ",".join([atom_name for atom_name in atom.parent.names])
+        system_hash = atom.parent.hash
         if system_hash not in cls._alf.keys():
             # make an empty list to fill with the alfs for the system
             cls._alf[system_hash] = []

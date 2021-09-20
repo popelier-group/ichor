@@ -410,6 +410,8 @@ class Globals:
                 raise GlobalVariableError(f"Global Variable: {key} does not exist.")
             self.set(key, value)
 
+        self.initialising = False
+
     def init_from_config(self, config_file: Path):
         self._config_file = config_file
         config = ConfigProvider(source=config_file)
@@ -426,8 +428,6 @@ class Globals:
                 self._in_config += ["N_ITERATIONS"]
             else:
                 PROBLEM_FINDER.unknown_settings += [key]  # todo: implement ProblemFinder
-
-        self.initialising = False
 
     def init_from_globals(self, globals_instance: 'Globals'):
         for key, value in globals_instance.items(show_protected=True):
@@ -449,8 +449,7 @@ class Globals:
     def ATOMS(self) -> Atoms:
         if self.initialising:
             return None
-        if self._ATOMS is None:
-            get_atoms(self.ALF_REFERENCE_FILE)
+        self._ATOMS = get_atoms(self.ALF_REFERENCE_FILE)
         return self._ATOMS
 
     @ATOMS.setter
@@ -462,8 +461,7 @@ class Globals:
     def ALF(self):
         if self.initialising:
             return None
-        if self._ALF is None:
-            self._ALF = self.ATOMS.alf
+        self._ALF = self.ATOMS.alf
         return self._ALF
 
     @ALF.setter

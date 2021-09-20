@@ -3,7 +3,7 @@ import numpy as np
 
 class ConnectivityCalculator:
 
-    connectivity = None
+    connectivity = {}
 
     @classmethod
     def calculate_connectivity(cls, atoms):
@@ -24,7 +24,8 @@ class ConnectivityCalculator:
             timesteps in a trajectory.
         """
 
-        if cls.connectivity is None:
+        system_hash = atoms.hash
+        if system_hash not in cls.connectivity.keys():
 
             connectivity = np.zeros((len(atoms), len(atoms)))
 
@@ -40,6 +41,6 @@ class ConnectivityCalculator:
                         ):
                             connectivity[i, j] = 1
 
-            cls.connectivity = connectivity
+            cls.connectivity[system_hash] = connectivity
 
-        return cls.connectivity
+        return cls.connectivity[system_hash]

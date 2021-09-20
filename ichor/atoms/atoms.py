@@ -220,6 +220,10 @@ class Atoms(list):
         """Returns a string contaning all atoms and their coordinates stored in the Atoms instance"""
         return "\n".join(atom.xyz_string for atom in self)
 
+    @property
+    def hash(self):
+        return ",".join([atom_name for atom_name in self.names])
+
     def __str__(self):
         return "\n".join(str(atom) for atom in self)
 
