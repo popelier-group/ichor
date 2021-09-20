@@ -69,8 +69,6 @@ class Arguments:
     call_external_function_args = []
 
     @staticmethod
-    @main_only
-    @run_once
     def read():
         parser = ArgumentParser(description="ICHOR: A kriging training suite")
 

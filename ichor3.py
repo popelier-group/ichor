@@ -8,6 +8,10 @@ import sys
 warnings.filterwarnings("ignore", category=FutureWarning)   # regex string in WFN.read() issues warning of recurssive group, will likely change WFN parsing in future and remove this
 
 if __name__ == '__main__':
+    from ichor import in_main
+
+    in_main.IN_MAIN = True
+
     Arguments.read()
     GLOBALS.init_from_config(Arguments.config_file)
     GLOBALS.UID = Arguments.uid

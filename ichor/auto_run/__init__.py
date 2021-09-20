@@ -179,6 +179,7 @@ def next_iter(
     modify_id = truncate(
         GLOBALS.UID.int, nbits=32
     )  # only used for drop-n-compute
+    # todo: think about overflow
 
     for iter_step in func_order:
         # Drop-n-compute

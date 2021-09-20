@@ -60,7 +60,7 @@ def write_to_excel(
                 s_curve.add_series(
                     {
                         "categories": [sheet_name, 1, 3, len(df["Error"]), 3],
-                        "values": [sheet_name, 1, 4, len(df["Error"]), 4],
+                        "values": [sheet_name, 1, 4, len(df["%"]), 4],
                         "line": {"width": 1.5},
                     }
                 )
