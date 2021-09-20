@@ -473,12 +473,18 @@ class INT(GeometryData, File):
         return self.eiqa
 
     @property
+    def e_intra(self):
+        return self.iqa_data["E_IQA_Intra(A)"]
+
+    @property
     def multipoles(self):
         """Returns a dictionary of the multipole moments that were calculated for this particular topological atom (since 1 .int file is written for each topological atom)."""
-        return {
+        multipoles = {
             multipole: self.multipoles_data[multipole]
             for multipole in constants.multipole_names
         }
+        multipoles["q00"] = self.q
+        return multipoles
 
     @property
     def q(self):

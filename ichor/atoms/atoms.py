@@ -97,8 +97,8 @@ class Atoms(list):
         elif centre_atom is None:
             centre_atom = self.centroid
 
-        for i, atom in enumerate(self):
-            atom -= centre_atom
+        for atom in self:
+            atom.coordinates -= centre_atom
 
         self._centred = True
 
@@ -106,8 +106,15 @@ class Atoms(list):
         """Perform a rotation in 3D space with a matrix R. This rotates all atoms in the system the same amount.
         This method also changes the coordinates of the Atom instances held in the Atoms instance."""
 
+        centroid = self.centroid
+        self.centre()
         for atom in self:
-            atom._coordinates = R.dot(atom._coordinates.T).T
+            atom.coordinates = R.dot(atom.coordinates.T).T
+        self.translate(centroid)
+    
+    def translate(self, v):
+        for atom in self:
+            atom.coordinates += v
 
     def _rmsd(self, other):
         dist = sum(iatom.sq_dist(jatom) for iatom, jatom in zip(self, other))
@@ -141,7 +148,7 @@ class Atoms(list):
         y = np.mean(coordinates[1])
         z = np.mean(coordinates[2])
 
-        return Atom([x, y, z])
+        return np.array([x, y, z])
 
     @property
     def masses(self) -> list:
