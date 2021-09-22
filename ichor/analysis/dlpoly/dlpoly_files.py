@@ -350,8 +350,8 @@ def get_dlpoly_directories(models: List[Models]) -> List[Path]:
 
 
 @convert_to_path
-def setup_dlpoly_directories(atoms: Atoms, models: List[Models]) -> List[Path]:
+def setup_dlpoly_directories(atoms: Atoms, models: List[Models], temperature: float = 0.0) -> List[Path]:
     dlpoly_directories = get_dlpoly_directories(models)
     for dlpoly_dir, model in zip(dlpoly_directories, models):
-        setup_dlpoly_directory(dlpoly_dir, atoms, model)
+        setup_dlpoly_directory(dlpoly_dir, atoms, model, temperature=temperature)
     return dlpoly_directories
