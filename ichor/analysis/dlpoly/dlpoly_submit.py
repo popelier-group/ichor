@@ -12,7 +12,6 @@ from ichor.submission_script.common import submit_gjf_files
 def submit_setup_dlpoly_directories(
     dlpoly_input: Path,
     model_location: Path,
-    dlpoly_directories: List[Path],
     hold: Optional[JobID] = None,
 ) -> JobID:
     with SubmissionScript(
@@ -20,7 +19,7 @@ def submit_setup_dlpoly_directories(
     ) as submission_script:
         submission_script.add_command(
             ICHORCommand(
-                func="run_dlpoly",
+                func="run_dlpoly_geometry_optimisations",
                 func_args=[str(dlpoly_input), str(model_location)],
             )
         )
@@ -72,7 +71,7 @@ def submit_dlpoly_energies(
     return submission_script.submit(hold=hold)
 
 
-def submit_dlpoly_auto_run(
+def submit_dlpoly_optimisation_analysis_auto_run(
     dlpoly_input: Path,
     model_location: Path,
     dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
@@ -89,3 +88,4 @@ def submit_dlpoly_auto_run(
             dlpoly_directory, dummy_paths, hold=hold
         )
         job_id = submit_dlpoly_gjfs(dummy_paths, hold=hold)
+    return job_id

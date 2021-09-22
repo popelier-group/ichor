@@ -219,7 +219,7 @@ class DlpolyHistory(Trajectory):
                     self.add(timestep)
 
 
-def write_control(path: Path):
+def write_control(path: Path, temperature: float = 0.0):
     with open(path / "CONTROL", "w+") as f:
         f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
         f.write(
@@ -228,14 +228,14 @@ def write_control(path: Path):
         f.write("# Directives which are commented are some useful options.\n")
         f.write("\n")
         f.write("ensemble nvt hoover 0.04\n")
-        if int(GLOBALS.DLPOLY_TEMPERATURE) == 0:
+        if int(temperature) == 0:
             f.write("temperature 0\n")
             f.write("\n")
             f.write("#perform zero temperature run (really set to 10K)\n")
             f.write("zero\n")
             f.write("\n")
         else:
-            f.write(f"temperature {GLOBALS.DLPOLY_TEMPERATURE}\n")
+            f.write(f"temperature {temperature}\n")
             f.write("\n")
         f.write("# Cap forces during equilibration, in unit kT/angstrom.\n")
         f.write("# (useful if your system is far from equilibrium)\n")

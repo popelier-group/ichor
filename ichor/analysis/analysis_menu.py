@@ -1,5 +1,5 @@
-from ichor.analysis.s_curves import s_curve_menu
 from ichor.analysis.rmse import rmse_menu
+from ichor.analysis.s_curves import s_curve_menu
 from ichor.menu import Menu
 
 
