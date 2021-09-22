@@ -331,9 +331,9 @@ def link_models(path: Path, models: Models):
         model.link(model_dir)
 
 
-def setup_dlpoly_directory(path: Path, atoms: Atoms, models: Models):
+def setup_dlpoly_directory(path: Path, atoms: Atoms, models: Models, temperature: float = 0.0):
     mkdir(path)
-    write_control(path)
+    write_control(path, temperature=temperature)
     write_config(path, atoms)
     write_field(path, atoms)
     link_models(path, models)
