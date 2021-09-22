@@ -7,7 +7,7 @@ import numpy as np
 from ichor.analysis.geometry.geometry_calculator import \
     get_internal_feature_indices
 from ichor.atoms import Atom, Atoms
-from ichor.common.io import convert_to_path, mkdir, ln
+from ichor.common.io import convert_to_path, mkdir, ln, relpath
 from ichor.common.str import split_by
 from ichor.constants import dlpoly_weights
 from ichor.file_structure import FILE_STRUCTURE
@@ -328,7 +328,7 @@ def link_models(path: Path, models: Models):
     model_dir = path / "model_krig"
     mkdir(model_dir)
     for model in models:
-        ln(model.path, model_dir)
+        ln(relpath(model.path, model_dir), model_dir)
 
 
 def setup_dlpoly_directory(path: Path, atoms: Atoms, models: Models, temperature: float = 0.0):
