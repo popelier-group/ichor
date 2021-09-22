@@ -279,7 +279,7 @@ def cat(outfile: Path, infiles: List[Path]) -> None:
                 shutil.copyfileobj(inf, outf)
 
 
-def ln(f: Path, link: Path, force: bool = True) -> None:
+def ln(f: Path, link: Path, force: bool = True):
     """
     Creates symlink between f and link
     :param f: file to link to

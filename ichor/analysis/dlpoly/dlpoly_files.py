@@ -328,7 +328,7 @@ def link_models(path: Path, models: Models):
     model_dir = path / "model_krig"
     mkdir(model_dir)
     for model in models:
-        ln(relpath(model.path, model_dir), model_dir)
+        ln(model.path.absolute(), model_dir)
 
 
 def setup_dlpoly_directory(path: Path, atoms: Atoms, models: Models, temperature: float = 0.0):
