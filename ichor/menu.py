@@ -68,7 +68,6 @@ class Menu(object):
         self.back = back
         self.exit = exit
 
-
     def set_options(self, options):
         """If a list of options to be displayed in the menu is passed when an instance of the class `Menu` is made, then this method is called.
         Usually, this method is not used. The `add_option` method is used instead once an instance has already been made.

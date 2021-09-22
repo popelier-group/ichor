@@ -181,6 +181,7 @@ class cached_property_with_ntimes(object):
             self.__name__ = func.__name__
             self.__module__ = func.__module__
 
+
 # Aliases to make cached_property_with_ttl easier to use
 cached_property_ttl = cached_property_with_ttl
 timed_cached_property = cached_property_with_ttl

@@ -1,19 +1,19 @@
 import inspect
 import os
 import platform
+from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 from uuid import UUID, uuid4
-from functools import lru_cache
 
 from ichor import constants
 from ichor.atoms.atoms import Atoms
+from ichor.common.functools import ntimes_cached_property
 from ichor.common.types import DictList, Version
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
 from ichor.problem_finder import PROBLEM_FINDER
-from ichor.common.functools import ntimes_cached_property
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -247,6 +247,10 @@ class Globals:
     CP2K_BASIS_SET: str = "6-31G*"
     CP2K_DATA_DIR: str = ""
 
+    # OPTIMUM ENERGY
+    OPTIMUM_ENERGY: float = None
+    OPTIMUM_ENERGY_FILE: Path = None
+
     # Recovery and Integration Errors
     WARN_RECOVERY_ERROR: bool = True
     RECOVERY_ERROR_THRESHOLD: float = (
@@ -276,7 +280,12 @@ class Globals:
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
 
-    def __init__(self, config_file: Optional[Path] = None, globals_instance: Optional['Globals'] = None, **kwargs):
+    def __init__(
+        self,
+        config_file: Optional[Path] = None,
+        globals_instance: Optional["Globals"] = None,
+        **kwargs,
+    ):
         self.initialising = True
 
         # check types
@@ -407,7 +416,9 @@ class Globals:
 
         for key, value in kwargs.items():
             if key not in self.global_variables:
-                raise GlobalVariableError(f"Global Variable: {key} does not exist.")
+                raise GlobalVariableError(
+                    f"Global Variable: {key} does not exist."
+                )
             self.set(key, value)
 
         self.initialising = False
@@ -427,9 +438,11 @@ class Globals:
                 self.set("N_ITERATIONS", val)
                 self._in_config += ["N_ITERATIONS"]
             else:
-                PROBLEM_FINDER.unknown_settings += [key]  # todo: implement ProblemFinder
+                PROBLEM_FINDER.unknown_settings += [
+                    key
+                ]  # todo: implement ProblemFinder
 
-    def init_from_globals(self, globals_instance: 'Globals'):
+    def init_from_globals(self, globals_instance: "Globals"):
         for key, value in globals_instance.items(show_protected=True):
             self.set(key, value)
 
@@ -498,6 +511,7 @@ class Globals:
                 # if no config file is provided and the instance of globals wasn't defined from a config, default to
                 # `Arguments.config_file`
                 from ichor.arguments import Arguments
+
                 config_file = Arguments.config_file
             else:
                 config_file = self._config_file
@@ -571,14 +585,15 @@ class Globals:
     #     self.__init__(*args, **kwargs)
     #     return self.__enter__()
 
-
     def __enter__(self, *args, **kwargs):
         from ichor import globals
+
         self._save_globals = Globals(globals_instance=globals.GLOBALS)
         globals.GLOBALS.init_from_globals(self)
 
     def __exit__(self, type, value, traceback):
         from ichor import globals
+
         globals.GLOBALS.init_from_globals(self._save_globals)
 
 
@@ -591,18 +606,25 @@ def get_atoms(path: Optional[Path] = None) -> Atoms:
     if path is not None:
         alf_reference_file = Path(path)
         if not alf_reference_file.exists():
-            raise ValueError(f"ALF reference file: {alf_reference_file} does not exit")
+            raise ValueError(
+                f"ALF reference file: {alf_reference_file} does not exit"
+            )
         elif alf_reference_file.is_dir():
-            raise ValueError(f"ALF reference file: {alf_reference_file} is a directory.")
+            raise ValueError(
+                f"ALF reference file: {alf_reference_file} is a directory."
+            )
         if alf_reference_file.suffix == ".gjf":
             from ichor.files import GJF
+
             return GJF(alf_reference_file).atoms
         elif alf_reference_file.suffix == ".xyz":
             from ichor.files import Trajectory
+
             return Trajectory(alf_reference_file)[0]
         else:
             raise ValueError(f"Unknown filetype ({alf_reference_file}")
     else:
+
         def scan_dir(d) -> Optional[Atoms]:
             # todo: could be slow, maybe best to search key locations first
             dirs_to_scan = []
@@ -611,9 +633,11 @@ def get_atoms(path: Optional[Path] = None) -> Atoms:
                 if f.is_file():
                     if f.suffix == ".gjf":
                         from ichor.files import GJF
+
                         return GJF(f).atoms
                     elif f.suffix == ".xyz":
                         from ichor.files import Trajectory
+
                         return Trajectory(f)[0]
                 elif f.is_dir():
                     dirs_to_scan += [f]

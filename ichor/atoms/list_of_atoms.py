@@ -1,6 +1,8 @@
-from typing import Union, List, Optional
-import numpy as np
 from pathlib import Path
+from typing import List, Optional, Union
+
+import numpy as np
+
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -63,10 +65,12 @@ class ListOfAtoms(list):
             features = np.transpose(features, (1, 0, 2))
         return features
 
-    def coordinates_to_xyz(self, fname: Optional[Union[str,Path]]=None, step: Optional[int]=1):
+    def coordinates_to_xyz(
+        self, fname: Optional[Union[str, Path]] = None, step: Optional[int] = 1
+    ):
         """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
         for that timestep.
-        
+
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
@@ -83,22 +87,30 @@ class ListOfAtoms(list):
                 # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
                 if hasattr(point, "atoms"):
                     for atom in point.atoms:
-                        f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
+                        f.write(
+                            f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+                        )
                 # this is used when self is a Trajectory and you are iterating over Atoms instances
                 else:
                     for atom in point:
-                        f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
+                        f.write(
+                            f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+                        )
 
-    def features_to_csv(self, fname: Optional[Union[str,Path]]=None, atom_names: Optional[List[str]]=None):
-        """ Writes csv files containing features for every atom in the system. Optionally a list can be passed in to get csv files for only a subset of atoms
-        
+    def features_to_csv(
+        self,
+        fname: Optional[Union[str, Path]] = None,
+        atom_names: Optional[List[str]] = None,
+    ):
+        """Writes csv files containing features for every atom in the system. Optionally a list can be passed in to get csv files for only a subset of atoms
+
         :param fname: A string to be appended to the default csv file names. A .csv file is written out for every atom with default name `atom_name`_features.csv
             If an fname is given, the name becomes `fname`_`atom_name`_features.csv
         :param atom_names: A list of atom names for which to write csv files
         """
         import pandas as pd
 
-        if isinstance (atom_names, str):
+        if isinstance(atom_names, str):
             atom_names = [atom_names]
 
         # whether to write csvs for all atoms or subset
@@ -106,34 +118,38 @@ class ListOfAtoms(list):
             atom_names = self.atom_names
 
         for atom_name in atom_names:
-                atom_features = self[atom_name].features
-                df = pd.DataFrame(atom_features, columns=self.get_headings())
-                if fname is None:
-                    df.to_csv(f"{atom_name}_features.csv")
-                else:
-                    df.to_csv(f"{fname}_{atom_name}_features.csv")
+            atom_features = self[atom_name].features
+            df = pd.DataFrame(atom_features, columns=self.get_headings())
+            if fname is None:
+                df.to_csv(f"{atom_name}_features.csv")
+            else:
+                df.to_csv(f"{fname}_{atom_name}_features.csv")
 
     def get_headings(self):
-        headings = [
-            "bond1", 
-            "bond2", 
-            "angle"
-            ]
+        headings = ["bond1", "bond2", "angle"]
 
-        remaining_features = len(self[0].features[-1]) - 3 # Removes bond1, bond 2, angle
-        remaining_features = int(remaining_features / 3) # each feature has r, theta, phi component
+        remaining_features = (
+            len(self[0].features[-1]) - 3
+        )  # Removes bond1, bond 2, angle
+        remaining_features = int(
+            remaining_features / 3
+        )  # each feature has r, theta, phi component
 
         for feat in range(remaining_features):
             headings.append(f"r{feat+3}")  # starts at r3
-            headings.append(f"theta{feat+3}")  #starts at theta3
-            headings.append(f"phi{feat+3}")  #starts at phi3
+            headings.append(f"theta{feat+3}")  # starts at theta3
+            headings.append(f"phi{feat+3}")  # starts at phi3
 
         return headings
 
-    def features_to_excel(self, fname: Optional[Union[str, Path]]=None, atom_names: List[str]=None):
-        """ Writes out one excel file which contains a sheet with features for every atom in the system. Optionally a list of atom names can be
+    def features_to_excel(
+        self,
+        fname: Optional[Union[str, Path]] = None,
+        atom_names: List[str] = None,
+    ):
+        """Writes out one excel file which contains a sheet with features for every atom in the system. Optionally a list of atom names can be
         passed in to only make sheets for certain atoms
-        
+
         :param atom_names: A list of atom names for which to calculate features and write in excel spreadsheet
         """
         import pandas as pd
@@ -145,7 +161,7 @@ class ListOfAtoms(list):
 
         fname = fname.with_suffix(".xlsx")
 
-        if isinstance (atom_names, str):
+        if isinstance(atom_names, str):
             atom_names = [atom_names]
         # whether to write excel sheets for all atoms or subset
         if atom_names is None:
@@ -177,10 +193,11 @@ class ListOfAtoms(list):
 
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
+
             class AtomView(self.__class__):
-                """ Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
+                """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
                 a user to get information (such as coordinates or features) for one atom.
-                
+
                 :param parent: An instance of a class that subclasses from ListOfAtoms
                 :param atom: A string reperesenting the name of an atom, e.g. 'C1', 'H2', etc.
                 """
@@ -200,17 +217,17 @@ class ListOfAtoms(list):
 
                 @property
                 def name(self):
-                    """ Returuns the name of the atom, e.g. 'C1', 'H2', etc."""
+                    """Returuns the name of the atom, e.g. 'C1', 'H2', etc."""
                     return self._atom
 
                 @property
                 def atom_names(self):
-                    """ Returns a list of atom names, since the AtomView only stores information for one atom, this list has one element."""
+                    """Returns a list of atom names, since the AtomView only stores information for one atom, this list has one element."""
                     return [self._atom]
 
                 @property
                 def types(self):
-                    """ Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
+                    """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
                     return [self[0].type]
 
             if hasattr(self, "_is_atom_view"):
@@ -236,7 +253,7 @@ class ListOfAtoms(list):
             if hasattr(self, "get_slice"):
                 return super().__getitem__(item)
             return AtomSlice(self, item)
-        
+
         # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
         raise TypeError(
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"

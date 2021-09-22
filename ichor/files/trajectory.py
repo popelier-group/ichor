@@ -1,4 +1,3 @@
-from ichor.typing import F
 import re
 from pathlib import Path
 from typing import List
@@ -9,6 +8,8 @@ from ichor.atoms import Atom, Atoms, ListOfAtoms
 from ichor.common.io import mkdir
 from ichor.files.file import File, FileState
 from ichor.files.gjf import GJF
+from ichor.typing import F
+
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
     """
@@ -22,8 +23,9 @@ def spherical_to_cartesian(r, theta, phi) -> List[float]:
     z = r * np.cos(theta)
     return [x, y, z]
 
+
 def features_to_coordinates(features: np.ndarray) -> np.ndarray:
-    """ Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
+    """Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
     n_points x n_atoms x 3
 
     :param features: a numpy array of shape n_points x n_features
@@ -55,6 +57,7 @@ def features_to_coordinates(features: np.ndarray) -> np.ndarray:
         one_point = []
 
     return np.array(all_points)
+
 
 class Trajectory(ListOfAtoms, File):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
@@ -150,16 +153,16 @@ class Trajectory(ListOfAtoms, File):
 
     @classmethod
     def features_file_to_trajectory(
-    cls,
-    f: "Path",
-    atom_types: List[str],
-    header=0,
-    index_col=0,
-    sheet_name=0,
+        cls,
+        f: "Path",
+        atom_types: List[str],
+        header=0,
+        index_col=0,
+        sheet_name=0,
     ) -> "Trajectory":
 
-        """ Takes in a csv or excel file containing features and convert it to a `Trajectory` object.
-        It assumes that the features start from the first column (column after the index column, if one exists). Feature files that 
+        """Takes in a csv or excel file containing features and convert it to a `Trajectory` object.
+        It assumes that the features start from the first column (column after the index column, if one exists). Feature files that
         are written out by ichor are in Bohr instead of Angstroms for now. After converting to cartesian coordinates, we have to convert
         Bohr to Angstroms because .xyz files are written out in Angstroms (and programs like Avogadro, VMD, etc. expect distances in angstroms).
         Failing to do that will result in xyz files that are in Bohr, so if features are calculated from them again, the features will be wrong.
@@ -174,17 +177,25 @@ class Trajectory(ListOfAtoms, File):
         """
 
         from pathlib import Path
+
         import pandas as pd
+
         from ichor.constants import bohr2ang
 
         if isinstance(f, str):
             f = Path(f)
         if f.suffix == ".xlsx":
-            features_array = pd.read_excel(f, sheet_name=sheet_name, header=header, index_col=index_col).values
+            features_array = pd.read_excel(
+                f, sheet_name=sheet_name, header=header, index_col=index_col
+            ).values
         elif f.suffix == ".csv":
-            features_array = pd.read_csv(f, header=header, index_col=index_col).values
+            features_array = pd.read_csv(
+                f, header=header, index_col=index_col
+            ).values
         else:
-            raise NotImplementedError("File needs to have .xlsx or .csv extension")
+            raise NotImplementedError(
+                "File needs to have .xlsx or .csv extension"
+            )
 
         n_features = 3 * len(atom_types) - 6
 
@@ -201,7 +212,9 @@ class Trajectory(ListOfAtoms, File):
             atoms = Atoms()
             for ty, atom_coord in zip(atom_types, geometry):
                 # add Atom instances for every atom in the geometry to the Atoms instance
-                atoms.add(Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2]))
+                atoms.add(
+                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
+                )
             # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
             trajectory.add(atoms)
 

@@ -28,7 +28,9 @@ def submit_wfns(
         ):
             if GLOBALS.METHOD in constants.AIMALL_FUNCTIONALS:
                 point.wfn.check_header()
-            submission_script.add_command(AIMAllCommand(point.wfn.path, atoms=atoms))
+            submission_script.add_command(
+                AIMAllCommand(point.wfn.path, atoms=atoms)
+            )
     logger.info(
         f"Submitting {len(submission_script.commands)} WFN(s) to AIMAll"
     )

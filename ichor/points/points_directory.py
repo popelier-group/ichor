@@ -47,7 +47,9 @@ class PointsDirectory(Points, Directory):
         for f in self:
             # if the current PathObject is a directory that matches the given regex pattern, then wrap the directory in
             # a PointDirectory instance and add to self
-            if f.is_dir():  # todo: add method to determine if f is a PointDirectory
+            if (
+                f.is_dir()
+            ):  # todo: add method to determine if f is a PointDirectory
                 self += [PointDirectory(f)]
             # otherwise if the PathObject is a file that ends in .gjf, make a new directory with its path set to self.path/f.stem
             # for example if the given path is ./TRAINING_SET/ and there is WATER001.gjf, it will make ./TRANING_SET/WATER001/

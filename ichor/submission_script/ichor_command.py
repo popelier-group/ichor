@@ -19,6 +19,8 @@ class ICHORCommand(PythonCommand):
         script: Optional[Path] = None,
         args: Optional[List[str]] = None,
         auto_run: bool = False,
+        func: Optional[str] = None,
+        func_args: Optional[List[str]] = None,
     ):
         PythonCommand.__init__(
             self,
@@ -33,6 +35,10 @@ class ICHORCommand(PythonCommand):
 
         if auto_run:
             self.args += ["-ar"]
+
+        if func is not None:
+            func_args = func_args if func_args is not None else []
+            self.add_function_to_job(func, *func_args)
 
     @classproperty
     def group(self) -> bool:

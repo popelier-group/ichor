@@ -6,6 +6,7 @@ from typing import List, Union
 
 from ichor.common.functools import run_once
 from ichor.modules.aimall import AIMAllModules
+from ichor.modules.dlpoly import DlpolyModules
 from ichor.modules.ferebus import FerebusModules
 from ichor.modules.gaussian import GaussianModules
 from ichor.modules.internet import InternetModules
@@ -73,5 +74,6 @@ __all__ = [
     "AIMAllModules",
     "PythonModules",
     "InternetModules",
+    "DlpolyModules",
     "load_module",
 ]

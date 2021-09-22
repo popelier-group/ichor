@@ -43,7 +43,13 @@ def main_menu() -> None:
     from ichor.main.per_menu import auto_run_per_menu
 
     # initialize an instance of Menu called menu and add construct the menu in the context manager
-    with Menu("ICHOR Main Menu", enable_problems=True, space=True, back=False, exit=True) as menu:
+    with Menu(
+        "ICHOR Main Menu",
+        enable_problems=True,
+        space=True,
+        back=False,
+        exit=True,
+    ) as menu:
         # add options to the instance `menu`
         menu.add_option(
             "1",

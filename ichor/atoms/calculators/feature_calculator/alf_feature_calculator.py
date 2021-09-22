@@ -1,5 +1,6 @@
 import itertools as it
 from typing import List
+
 import numpy as np
 
 from ichor.atoms.calculators.feature_calculator.feature_calculator import \

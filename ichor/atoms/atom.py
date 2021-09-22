@@ -1,5 +1,5 @@
 import itertools as it
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -39,6 +39,18 @@ class Atom:
         self.units = units
 
         self._properties = None
+
+    @classmethod
+    def from_atom(cls, atom: "Atom") -> "Atom":
+        return Atom(
+            atom.type,
+            atom.x,
+            atom.y,
+            atom.z,
+            atom.index,
+            atom.parent,
+            atom.units,
+        )
 
     def to_angstroms(self):
         """Convert the coordiantes to Angstroms"""
@@ -86,7 +98,6 @@ class Atom:
     def i(self) -> int:
         """Returns the index of the atom, if used in any arrays/list in Python."""
         return self.index - 1
-
 
     @property
     def name(self) -> str:
@@ -156,6 +167,36 @@ class Atom:
             self.parent[connected_atom].name
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
+
+    def vec_to(self, other: "Atom") -> np.ndarray:
+        """
+        Calculates the vector from self to other
+        :param other: atom to calculate the vector to
+        :return: the vector from self to other as numpy array
+        """
+        return other.coordinates - self.coordinates
+
+    def dist(self, other: "Atom") -> float:
+        """
+        Calculated the distance between self and other
+        :param other: atom to calculate the distance to
+        :return: the distance between self and other as a float
+        """
+        d = self.coordinates - other.coordinates
+        return np.sqrt(d.dot(d))
+
+    def angle(self, atom1: "Atom", atom2: "Atom") -> float:
+        """
+        Angle subtending atom1-self-atom2
+        :param atom1: atom bonded to self
+        :param atom2: other atom bonded to self
+        :return: angle subtending atom1-self-atom2 as float
+        """
+        d1 = self.coordinates - atom1.coordinates
+        d2 = self.coordinates - atom2.coordinates
+        return np.arccos(
+            d1.dot(d2) / (np.sqrt(d1.dot(d1)) * np.sqrt(d2.dot(d2)))
+        )
 
     @property
     def bonded_atoms_i(self) -> list:

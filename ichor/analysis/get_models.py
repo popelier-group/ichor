@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 from ichor.analysis.get_path import get_dir
 from ichor.common.io import get_files_of_type
@@ -96,3 +97,27 @@ def choose_model_menu(current_model: Path) -> Path:
     ):
         pass
     return _current_model
+
+
+def get_models_from_path(path: Path) -> List[Models]:
+    """
+    Get list of 'Models' instances from 'path'
+    :param path: the path to search for instances of 'Models'
+    :return: list of 'Models' from path
+    :raises: ModelsNotFound if no models are found
+    """
+    if path.is_dir():
+        if len(get_files_of_type(Model.filetype, path)) > 0:
+            return [Models(path)]
+        else:
+            models = []
+            for d in path.iterdir():
+                if (
+                    d.is_dir()
+                    and len(get_files_of_type(Model.filetype, path)) > 0
+                ):
+                    models += [Models(d)]
+            if len(models) > 0:
+                return models
+
+    raise ModelsNotFound(f"No models found from '{path}")

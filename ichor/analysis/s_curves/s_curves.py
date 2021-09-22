@@ -4,11 +4,10 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 
-from ichor.analysis.predictions import get_true_predicted
-from ichor.models import ModelsResult, Models
-from ichor.points import PointsDirectory
-
 from ichor.analysis.excel import num2col
+from ichor.analysis.predictions import get_true_predicted
+from ichor.models import Models, ModelsResult
+from ichor.points import PointsDirectory
 
 
 def percentile(n: int) -> np.ndarray:
@@ -23,9 +22,7 @@ def calculate_s_curves(
 ):
     model = Models(model_location)
     validation_set = PointsDirectory(validation_set_location)
-    true, predicted = get_true_predicted(
-        model, validation_set, atoms, types
-    )
+    true, predicted = get_true_predicted(model, validation_set, atoms, types)
     write_to_excel(true, predicted)
 
 
@@ -70,11 +67,11 @@ def write_to_excel(
                         "log_base": 10,
                         "major_gridlines": {
                             "visible": True,
-                            "line": {"width": 0.75, 'color': '#BFBFBF'},
+                            "line": {"width": 0.75, "color": "#BFBFBF"},
                         },
                         "minor_gridlines": {
                             "visible": True,
-                            "line": {"width": 0.75, 'color': '#F2F2F2'},
+                            "line": {"width": 0.75, "color": "#F2F2F2"},
                         },
                     }
                 )
@@ -85,7 +82,7 @@ def write_to_excel(
                         "max": 100,
                         "major_gridlines": {
                             "visible": True,
-                            "line": {"width": 0.75, 'color': '#BFBFBF'},
+                            "line": {"width": 0.75, "color": "#BFBFBF"},
                         },
                     }
                 )
@@ -109,8 +106,20 @@ def write_to_excel(
             )
             total_s_curve.add_series(
                 {
-                    "categories": [sheet_name, 1, len(atom_names)+1, ndata, len(atom_names)+1],
-                    "values": [sheet_name, 1, len(atom_names)+2, ndata, len(atom_names)+2],
+                    "categories": [
+                        sheet_name,
+                        1,
+                        len(atom_names) + 1,
+                        ndata,
+                        len(atom_names) + 1,
+                    ],
+                    "values": [
+                        sheet_name,
+                        1,
+                        len(atom_names) + 2,
+                        ndata,
+                        len(atom_names) + 2,
+                    ],
                     "line": {"width": 1.5},
                 }
             )
@@ -120,11 +129,11 @@ def write_to_excel(
                     "log_base": 10,
                     "major_gridlines": {
                         "visible": True,
-                        "line": {"width": 0.75, 'color': '#BFBFBF'},
+                        "line": {"width": 0.75, "color": "#BFBFBF"},
                     },
                     "minor_gridlines": {
                         "visible": True,
-                        "line": {"width": 0.75, 'color': '#F2F2F2'},
+                        "line": {"width": 0.75, "color": "#F2F2F2"},
                     },
                 }
             )
@@ -135,7 +144,7 @@ def write_to_excel(
                     "max": 100,
                     "major_gridlines": {
                         "visible": True,
-                        "line": {"width": 0.75, 'color': '#BFBFBF'},
+                        "line": {"width": 0.75, "color": "#BFBFBF"},
                     },
                 }
             )
@@ -162,11 +171,11 @@ def write_to_excel(
                     "log_base": 10,
                     "major_gridlines": {
                         "visible": True,
-                        "line": {"width": 0.75, 'color': '#BFBFBF'},
+                        "line": {"width": 0.75, "color": "#BFBFBF"},
                     },
                     "minor_gridlines": {
                         "visible": True,
-                        "line": {"width": 0.75, 'color': '#F2F2F2'},
+                        "line": {"width": 0.75, "color": "#F2F2F2"},
                     },
                 }
             )
@@ -177,7 +186,7 @@ def write_to_excel(
                     "max": 100,
                     "major_gridlines": {
                         "visible": True,
-                        "line": {"width": 0.75, 'color': '#BFBFBF'},
+                        "line": {"width": 0.75, "color": "#BFBFBF"},
                     },
                 }
             )
@@ -185,5 +194,9 @@ def write_to_excel(
             atomic_s_curve.set_legend({"position": "right"})
             total_s_curve.set_style(10)
 
-            writer.sheets[sheet_name].insert_chart(f"{num2col(len(atom_names)+5)}2", total_s_curve)
-            writer.sheets[sheet_name].insert_chart(f"{num2col(len(atom_names)+5)}18", atomic_s_curve)
+            writer.sheets[sheet_name].insert_chart(
+                f"{num2col(len(atom_names)+5)}2", total_s_curve
+            )
+            writer.sheets[sheet_name].insert_chart(
+                f"{num2col(len(atom_names)+5)}18", atomic_s_curve
+            )

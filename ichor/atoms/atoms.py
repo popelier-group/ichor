@@ -111,7 +111,7 @@ class Atoms(list):
         for atom in self:
             atom.coordinates = R.dot(atom.coordinates.T).T
         self.translate(centroid)
-    
+
     def translate(self, v):
         for atom in self:
             atom.coordinates += v

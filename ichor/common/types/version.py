@@ -1,5 +1,5 @@
 import re
-from typing import Union, Optional
+from typing import Optional, Union
 
 
 class Version:
@@ -10,7 +10,7 @@ class Version:
     patch: int
     revision: str
 
-    def __init__(self, rep: Optional[Union[str, 'Version']] = None):
+    def __init__(self, rep: Optional[Union[str, "Version"]] = None):
         self.major = 0
         self.minor = 0
         self.patch = 0

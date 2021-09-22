@@ -5,6 +5,7 @@ from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.check_manager import (CheckManager, default_check,
                                                    print_completed)
 from ichor.submission_script.data_lock import DataLock
+from ichor.submission_script.dlpoly_command import DlpolyCommand
 from ichor.submission_script.ferebus_command import FerebusCommand
 from ichor.submission_script.gaussian_command import GaussianCommand
 from ichor.submission_script.ichor_command import ICHORCommand
@@ -66,8 +67,17 @@ SCRIPT_NAMES = ScriptNames(
                 "active_learning": "ICHOR_ACTIVE_LEARNING.sh",
                 "make_sets": "ICHOR_MAKE_SETS.sh",
                 "collate_log": "ICHOR_COLLATE_LOG.sh",
+                "dlpoly": ScriptNames(
+                    {
+                        "setup": "ICHOR_DLPOLY_SETUP.sh",
+                        "gaussian": "ICHOR_DLPOLY_GAUSSIAN.sh",
+                        "energies": "ICHOR_DLPOLY_ENERGIES.sh",
+                    }
+                ),
             }
         ),
+        "dlpoly": "DLPOLY.sh",
+        "dlpoly_gaussian": "ICHOR_DLPOLY_GAUSSIAN.sh",
     }
 )
 
@@ -76,6 +86,7 @@ __all__ = [
     "GaussianCommand",
     "AIMAllCommand",
     "FerebusCommand",
+    "DlpolyCommand",
     "PythonCommand",
     "ICHORCommand",
     "DataLock",

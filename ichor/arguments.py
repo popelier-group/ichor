@@ -52,6 +52,11 @@ external_functions = [
     ExternalFunction("ichor.main.submit_wfns", "check_aimall_output"),
     ExternalFunction("ichor.make_sets", "make_sets"),
     ExternalFunction("ichor.submission_script", "print_completed"),
+    ExternalFunction("ichor.analysis.dlpoly", "run_dlpoly"),
+    ExternalFunction("ichor.analysis.dlpoly", "get_dlpoly_energies"),
+    ExternalFunction(
+        "ichor.analysis.dlpoly", "submit_final_geometry_to_gaussian"
+    ),
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key

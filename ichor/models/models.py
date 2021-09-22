@@ -134,6 +134,10 @@ class Models(Directory, list):
     def ntrain(self) -> int:
         return max(model.ntrain for model in self)
 
+    @property
+    def system(self) -> str:
+        return self[0].system
+
 
 class ModelsView(Models):
     def __init__(self, models, *args):

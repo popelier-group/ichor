@@ -7,13 +7,16 @@ from ichor.typing import F, Scalar
 def run_function(order: Scalar) -> F:
     """Used to decorate a method so that `get_functions_to_run` can find and return the methods in
     the order specified by the order parameter"""
+
     def decorator(func: F) -> F:
         func._order = order
 
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
