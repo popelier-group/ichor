@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union, List
 
 from ichor.common.io import pushd
 from ichor.tab_completer import PathCompleter
@@ -26,16 +26,19 @@ def get_dir(startdir: Path = Path.cwd()) -> Path:
 
 
 def get_file(
-    startdir: Path = Path.cwd(), filetype: Optional[str] = None
+    startdir: Path = Path.cwd(), filetype: Optional[Union[str, List[str]]] = None
 ) -> Path:
+    if filetype is not None:
+        if isinstance(filetype, str):
+            filetype = [filetype]
     while True:
         ft = " " if filetype is None else f" {filetype} "
         p = get_path(startdir=startdir, prompt=f"Enter{ft}File: ")
         if not p.is_file():
             print(f"Error: {p} is not a file")
-        elif filetype and p.suffix != filetype:
+        elif filetype is not None and p.suffix not in filetype:
             print(
-                f"Error: Filetype of {p} ({p.suffix}) is not of type {filetype}"
+                f"Error: Filetype of {p} ({p.suffix}) is not of type {' | '.join(filetype)}"
             )
         else:
             return p
