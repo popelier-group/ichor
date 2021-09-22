@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any, List, Union, Optional
 
 from ichor.typing import F
 
@@ -184,21 +184,29 @@ def pushd(new_dir: Path, update_cwd: bool = False):
 
 @convert_to_path
 def get_files_of_type(
-    filetype: Union[str, List[str]], directory: Path = Path.cwd()
+    filetype: Union[str, List[str]], directory: Path = Path.cwd(), recursive: bool = False, sort: Optional[F] = None
 ) -> List[Path]:
     """Returns a list of all files that end in a certain file extension/suffix (such as .txt).
 
     :param filetype: A string or list of strings corresponding to the suffixes that files should have
     :param directory: The directory where to do the searching for particular files.
+    :param recursive: Boolean flag to recursively search subdirectories for files
+    :param sort: Optional function to sort files
     """
     if isinstance(filetype, str):
         filetype = [filetype]
     for i, ft in enumerate(filetype):
         if not ft.startswith("."):
             filetype[i] = "." + ft
-    return [
-        f for f in directory.iterdir() if f.is_file() and f.suffix in filetype
-    ]
+    files = []
+    for f in directory.iterdir():
+        if f.is_file() and f.suffix in filetype:
+            files.append(f)
+        elif f.is_dir() and recursive:
+            files.extend(get_files_of_type(filetype, f, recursive=recursive))
+    if sort is not None:
+        files = sort(files)
+    return files
 
 
 @convert_to_path

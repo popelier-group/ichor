@@ -4,6 +4,7 @@ from typing import Optional, List
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.common.io import get_files_of_type
 from ichor.analysis.get_path import get_file
+from ichor.common.sorting.natsort import natsorted
 
 
 _input_file: Optional[Path] = None
@@ -13,7 +14,7 @@ _input_filetypes: Optional[List[str]] = None
 def get_first_file(directory: Path, filetypes: List[str], recursive: bool = False) -> Optional[Path]:
     if directory.exists():
         for ft in filetypes:
-            files = get_files_of_type(ft, directory, recursive=recursive)
+            files = get_files_of_type(ft, directory, recursive=recursive, sort=natsorted)
             if len(files) > 0:
                 return files[0]
 
