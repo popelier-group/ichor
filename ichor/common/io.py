@@ -290,4 +290,4 @@ def ln(f: Path, link: Path, force: bool = True) -> None:
         link = link / f.name
     if link.exists() and force:
         link.unlink()
-    link.link_to(f)
+    link.symlink_to(f)
