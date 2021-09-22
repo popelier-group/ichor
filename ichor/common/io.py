@@ -277,3 +277,15 @@ def cat(outfile: Path, infiles: List[Path]) -> None:
         for infile in infiles:
             with open(infile, "rb") as inf:
                 shutil.copyfileobj(inf, outf)
+
+
+def ln(f: Path, link: Path, force: bool = True) -> None:
+    """
+    Creates symlink between f and link
+    :param f: file to link to
+    :param link: link to create
+    :param force: if the path exists then unlink first
+    """
+    if link.exists() and force:
+        link.unlink()
+    link.link_to(f)
