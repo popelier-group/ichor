@@ -8,6 +8,7 @@ from ichor.analysis.excel import num2col
 from ichor.analysis.predictions import get_true_predicted
 from ichor.models import Models, ModelsResult
 from ichor.points import PointsDirectory
+from ichor.constants import ha_to_kj_mol
 
 
 def percentile(n: int) -> np.ndarray:
@@ -43,7 +44,7 @@ def write_to_excel(
                 data = {
                     "True": true[type_][atom],
                     "Predicted": predicted[type_][atom],
-                    "Error": error[type_][atom],
+                    "Error": error[type_][atom] * ha_to_kj_mol,
                 }
                 df = pd.DataFrame(data)
                 df.sort_values("Error", inplace=True)

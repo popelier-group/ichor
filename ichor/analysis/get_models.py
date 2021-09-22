@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from ichor.analysis.get_path import get_dir
 from ichor.common.io import get_files_of_type
@@ -13,7 +13,7 @@ class ModelsNotFound(Exception):
 
 
 def number_of_models_in_dir(path: Path) -> int:
-    return len(get_files_of_type(Model.filetype, path))
+    return len(get_files_of_type(Model.filetype, path)) if path.exists() else 0
 
 
 def get_latest_models_from_log() -> Path:
@@ -121,3 +121,24 @@ def get_models_from_path(path: Path) -> List[Models]:
                 return models
 
     raise ModelsNotFound(f"No models found from '{path}")
+
+
+def try_get_latest_models() -> Optional[Path]:
+    try:
+        return get_latest_models()
+    except ModelsNotFound:
+        return None
+
+
+def try_get_models_from_path(path: Path) -> Optional[List[Models]]:
+    try:
+        return get_models_from_path(path)
+    except ModelsNotFound:
+        return None
+
+
+def try_get_latest_models_from_log() -> Optional[Path]:
+    try:
+        return get_latest_models_from_log()
+    except ModelsNotFound:
+        return None

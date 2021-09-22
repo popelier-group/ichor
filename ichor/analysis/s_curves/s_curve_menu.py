@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ichor.analysis.get_models import choose_model_menu, get_latest_models
+from ichor.analysis.get_models import choose_model_menu, try_get_latest_models
 from ichor.analysis.get_validation_set import choose_validation_set_menu
 from ichor.analysis.s_curves.s_curves import calculate_s_curves
 from ichor.file_structure import FILE_STRUCTURE
@@ -47,7 +47,7 @@ def s_curve_menu():
     global _model_location
 
     _validation_set_location = FILE_STRUCTURE["validation_set"]
-    _model_location = get_latest_models()
+    _model_location = try_get_latest_models()
 
     with Menu("S-Curve Analysis Menu", refresh=s_curve_menu_refresh):
         pass
