@@ -39,12 +39,14 @@ def write_to_excel(
     with pd.ExcelWriter(output) as writer:
         workbook = writer.book
         for type_ in true.keys():
+            if "type_" == "iqa":
+                error[type_] *= ha_to_kj_mol
             atom_sheets = {}
             for atom in true[type_].keys():
                 data = {
                     "True": true[type_][atom],
                     "Predicted": predicted[type_][atom],
-                    "Error": error[type_][atom] * ha_to_kj_mol,
+                    "Error": error[type_][atom],
                 }
                 df = pd.DataFrame(data)
                 df.sort_values("Error", inplace=True)

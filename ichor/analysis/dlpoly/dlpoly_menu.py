@@ -6,11 +6,10 @@ from ichor.analysis.dlpoly.dlpoly_submit import submit_dlpoly_optimisation_analy
 from ichor.globals import GLOBALS
 
 from ichor.analysis.get_models import choose_model_menu
-from ichor.analysis.get_input import get_input_menu, get_first_file
+from ichor.analysis.get_input import get_input_menu, try_get_first_file
 
 from ichor.files import GJF
 from ichor.file_structure import FILE_STRUCTURE
-
 
 
 _dlpoly_input_file = Path(".")
