@@ -10,5 +10,5 @@ DlpolyModules[Machine.csf3] = [
 
 
 DlpolyModules[Machine.ffluxlab] = [
-    "compilers/intel/20.0.1",
+    "mpi/intel/18.0.3",
 ]
