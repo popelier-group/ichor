@@ -229,7 +229,7 @@ class Atoms(list):
 
     @property
     def hash(self):
-        return ",".join(self.names)
+        return ",".join(self.atom_names)
 
     def __str__(self):
         return "\n".join(str(atom) for atom in self)
