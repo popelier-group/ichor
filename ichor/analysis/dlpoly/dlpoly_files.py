@@ -45,10 +45,10 @@ class DlpolyPeriodicBoundary(Enum):
 class DlpolyTimestepAtom(Atom):
     def __init__(
         self,
-        ty: str,
-        x: float,
-        y: float,
-        z: float,
+        ty: str = "H",
+        x: float = 0.0,
+        y: float = 0.0,
+        z: float = 0.0,
         index: Optional[int] = None,
         parent: Optional["Atoms"] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
