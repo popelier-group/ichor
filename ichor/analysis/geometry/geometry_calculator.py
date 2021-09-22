@@ -66,7 +66,7 @@ class ConnectedAtoms(Atoms):
             for k in list(set(self[i].bond_list) & set(self[j].bond_list)):
                 self[i].set_angle(self[j])
                 self[j].set_angle(self[i])
-                self._angles.append((i, k, j))
+                self._angles.append((i, k.i, j))
 
         for i, j in dihedral_list:
             iatoms = list(set(self[i].bond_list) & set(self[j].angle_list))
@@ -76,7 +76,7 @@ class ConnectedAtoms(Atoms):
                     if k in self[l].bond_list:
                         self[i].set_dihedral(self[j])
                         self[j].set_dihedral(self[i])
-                        self._dihedrals.append((i, k, l, j))
+                        self._dihedrals.append((i, k.i, l.i, j))
                         break
 
     @property
