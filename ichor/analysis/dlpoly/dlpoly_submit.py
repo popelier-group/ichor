@@ -81,11 +81,11 @@ def submit_dlpoly_optimisation_analysis_auto_run(
     dummy_paths = [Path("tmp.file") for _ in range(ninputs)]
     with DataLock():
         job_id = submit_setup_dlpoly_directories(
-            dlpoly_input, model_location, dummy_paths, hold=hold
+            dlpoly_input, model_location, hold=hold
         )
         job_id = submit_dlpoly_jobs(dummy_paths, hold=hold)
         job_id = submit_write_dlpoly_gjfs(
-            dlpoly_directory, dummy_paths, hold=hold
+            dlpoly_directory, hold=hold
         )
         job_id = submit_dlpoly_gjfs(dummy_paths, hold=hold)
     return job_id
