@@ -83,9 +83,9 @@ def submit_dlpoly_optimisation_analysis_auto_run(
         job_id = submit_setup_dlpoly_directories(
             dlpoly_input, model_location, hold=hold
         )
-        job_id = submit_dlpoly_jobs(dummy_paths, hold=hold)
+        job_id = submit_dlpoly_jobs(dummy_paths, hold=job_id)
         job_id = submit_write_dlpoly_gjfs(
-            dlpoly_directory, hold=hold
+            dlpoly_directory, hold=job_id
         )
-        job_id = submit_dlpoly_gjfs(dummy_paths, hold=hold)
+        job_id = submit_dlpoly_gjfs(dummy_paths, hold=job_id)
     return job_id
