@@ -11,10 +11,11 @@ _input_filetypes: Optional[List[str]] = None
 
 
 def get_first_file(directory: Path, filetypes: List[str]) -> Optional[Path]:
-    for ft in filetypes:
-        files = get_files_of_type(ft, directory)
-        if len(files) > 0:
-            return files[0]
+    if not directory.exists():
+        for ft in filetypes:
+            files = get_files_of_type(ft, directory)
+            if len(files) > 0:
+                return files[0]
     return None
 
 
