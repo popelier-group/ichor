@@ -114,7 +114,7 @@ def get_models_from_path(path: Path) -> List[Models]:
             for d in path.iterdir():
                 if (
                     d.is_dir()
-                    and len(get_files_of_type(Model.filetype, path)) > 0
+                    and number_of_models_in_dir(d) > 0
                 ):
                     models += [Models(d)]
             if len(models) > 0:
