@@ -286,6 +286,8 @@ def ln(f: Path, link: Path, force: bool = True) -> None:
     :param link: link to create
     :param force: if the path exists then unlink first
     """
+    if link.exists() and link.is_dir() and f.is_file():
+        link = link / f.name
     if link.exists() and force:
         link.unlink()
     link.link_to(f)
