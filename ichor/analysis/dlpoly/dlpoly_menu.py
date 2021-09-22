@@ -59,7 +59,7 @@ def dlpoly_menu():
     global _dlpoly_input_file
     global _model_location
 
-    _dlpoly_input_file = get_first_file(FILE_STRUCTURE["validation_set"], [GJF.filetype])
+    _dlpoly_input_file = get_first_file(FILE_STRUCTURE["validation_set"], [GJF.filetype], recursive=True)
     _model_location = FILE_STRUCTURE["model_log"]
 
     with Menu("DLPOLY Analysis Menu", refresh=dlpoly_menu_refresh):
