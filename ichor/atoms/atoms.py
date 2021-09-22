@@ -1,5 +1,5 @@
 import itertools as it
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, List
 
 import numpy as np
 
@@ -47,13 +47,13 @@ class Atoms(list):
         return len(self)
 
     @property
-    def names(self) -> list:
+    def names(self) -> List[str]:
         """Return a list of atom names that are held in the instance of Atoms."""
 
         return [atom.name for atom in self]
 
     @property
-    def types(self) -> list:
+    def types(self) -> List[str]:
         """Returns the atom elements for atoms, removes duplicates"""
         return list({atom.type for atom in self})
 
@@ -229,7 +229,7 @@ class Atoms(list):
 
     @property
     def hash(self):
-        return ",".join([atom_name for atom_name in self.names])
+        return ",".join(self.names)
 
     def __str__(self):
         return "\n".join(str(atom) for atom in self)
