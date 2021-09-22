@@ -41,7 +41,7 @@ def _set_input(input_file: Path):
 
 def _get_input_menu_refresh(menu):
     files = get_default_files(_input_filetypes)
-    files += get_files_in_cwd()
+    files += get_files_in_cwd(_input_filetypes)
     menu.clear_options()
     for i, f in enumerate(files):
         menu.add_option(f"{i+1}", f"{f}", _set_input, kwargs={"input_file": f})
