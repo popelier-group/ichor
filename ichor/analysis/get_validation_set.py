@@ -38,9 +38,9 @@ def choose_validation_set_menu_refresh(menu: Menu):
     menu.add_final_options()
 
 
-def choose_validation_set_menu(current_validation_set: Path) -> Path:
+def choose_validation_set_menu(current_validation_set_directory: Path) -> Path:
     global _current_validation_set
-    _current_validation_set = current_validation_set
+    _current_validation_set = current_validation_set_directory
     with Menu(
         "Choose Validation Set Menu",
         refresh=choose_validation_set_menu_refresh,
