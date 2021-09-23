@@ -64,7 +64,7 @@ def submit_dlpoly_energies(
     ) as submission_script:
         submission_script.add_command(
             ICHORCommand(
-                func="submit_final_geometry_to_gaussian",
+                func="get_dlpoly_energies",
                 func_args=[str(dlpoly_directory)],
             )
         )
@@ -88,4 +88,5 @@ def submit_dlpoly_optimisation_analysis_auto_run(
             dlpoly_directory, hold=job_id
         )
         job_id = submit_dlpoly_gjfs(dummy_paths, hold=job_id)
+        job_id = submit_dlpoly_energies(dlpoly_directory, hold=job_id)
     return job_id

@@ -93,11 +93,11 @@ def get_dlpoly_energies(
         "fflux": [],
         "gaussian": [],
     }
-    for d in dlpoly_directory:
-        if (d / "FFLUX").exists():
+    for d in dlpoly_directory.iterdir():
+        if d.is_dir() and (d / "FFLUX").exists():
             data["ntrain"] += [Models(d / "model_krig").ntrain]
             data["fflux"] += [read_fflux(d / "FFLUX")["e_iqa"][-1]]
-            wfn_files = get_files_of_type(d, WFN.filetype)
+            wfn_files = get_files_of_type(WFN.filetype, d)
             if len(wfn_files) > 0:
                 data["gaussian"] += [read_wfn_energy(wfn_files[0])]
             else:
@@ -109,6 +109,7 @@ def get_dlpoly_energies(
         del data["gaussian"]
 
     df = pd.DataFrame(data)
+    df.sort_values("ntrain", inplace=True)
 
     optimum_energy = find_opt()
     if optimum_energy is not None:
@@ -120,4 +121,4 @@ def get_dlpoly_energies(
                 df["gaussian_diff / Ha"] * ha_to_kj_mol
             )
 
-    df.to_excel(output)
+    df.to_excel(output, index=False)
