@@ -15,6 +15,7 @@ from ichor.files import Trajectory
 from ichor.globals import GLOBALS
 from ichor.models import Models
 from ichor.units import AtomicDistance
+from ichor.common.conversion import try_float
 
 
 class DlpolyTrajectoryKey(Enum):
@@ -193,9 +194,9 @@ class DlpolyHistory(Trajectory):
                         ta.type = str(record[0])
                         ta.index = int(record[1])
                         ta.atomic_mass = float(record[2])
-                        ta.atomic_charge = float(record[3])
+                        ta.atomic_charge = try_float(record[3], default=0.0)  # can fail if no q00 file is provided
 
-                        ta.coordinates = np.ndarray(
+                        ta.coordinates = np.array(
                             [float(ci) for ci in next(f).split()]
                         )
 
@@ -203,7 +204,7 @@ class DlpolyHistory(Trajectory):
                             DlpolyTrajectoryKey.CoordinateVelocity,
                             DlpolyTrajectoryKey.CoordinateVelocityForce,
                         ]:
-                            ta.velocity = np.ndarray(
+                            ta.velocity = np.array(
                                 [float(vi) for vi in next(f).split()]
                             )
 
@@ -211,7 +212,7 @@ class DlpolyHistory(Trajectory):
                             timestep.trajectory_key
                             is DlpolyTrajectoryKey.CoordinateVelocityForce
                         ):
-                            ta.force = np.ndarray(
+                            ta.force = np.array(
                                 [float(fi) for fi in next(f).split()]
                             )
 
