@@ -30,6 +30,10 @@ def calculate_s_curves(
     :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves. S-curves are made for all properties in the model files.
     :param **kwargs: Any key word arguments that can be passed into the write_to_excel function to change how the S-curves excel file looks. See write_to_excel() method
     """
+
+    if model_location is None or validation_set_location is None:
+        raise ValueError("Enter valid locations for models and validation sets.")
+
     model = Models(model_location)
     validation_set = PointsDirectory(validation_set_location)
     true, predicted = get_true_predicted(model, validation_set, atoms, types)
