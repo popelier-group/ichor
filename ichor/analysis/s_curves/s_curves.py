@@ -25,9 +25,9 @@ def make_chart_settings(local_kwargs):
     x_axis_settings["name"] = local_kwargs["x_axis_name"]
     x_axis_settings["major_gridlines"]["visible"] = local_kwargs["x_major_gridlines_visible"]
     x_axis_settings["minor_gridlines"]["visible"] = local_kwargs["x_minor_gridlines_visible"]
+    x_axis_settings["major_gridlines"]["line"] = {"width": local_kwargs["x_axis_major_gridline_width"], "color": local_kwargs["x_axis_major_gridline_color"]}
     if local_kwargs["x_log_scale"]:
         x_axis_settings["log_base"] = 10
-    x_axis_settings["major_gridlines"]["line"] = {"width": 0.75, "color": "#F2F2F2"}
 
     # y_axis_settings
     y_axis_settings["y_axis_name"] = local_kwargs["y_axis_name"]
@@ -35,7 +35,7 @@ def make_chart_settings(local_kwargs):
     y_axis_settings["max"] = local_kwargs["y_max"]
     y_axis_settings["major_gridlines"]["visible"] = local_kwargs["y_major_gridlines_visible"]
     y_axis_settings["minor_gridlines"]["visible"] = local_kwargs["y_minor_gridlines_visible"]
-    y_axis_settings["major_gridlines"]["line"] = {"width": 0.75, "color": "#BFBFBF"}
+    x_axis_settings["major_gridlines"]["line"] = {"width": local_kwargs["y_axis_major_gridline_width"], "color": local_kwargs["y_axis_major_gridline_color"]}
 
     return x_axis_settings, y_axis_settings
 
@@ -73,11 +73,15 @@ def write_to_excel(
     x_log_scale:bool = True,
     x_major_gridlines_visible:bool = True,
     x_minor_gridlines_visible:bool = True,
+    x_axis_major_gridline_width = 0.75,
+    x_axis_major_gridline_color = "#F2F2F2",
     y_axis_name:str = "%",
     y_min:int = 0,
     y_max:int = 100,
     y_major_gridlines_visible:bool = True,
     y_minor_gridlines_visible:bool = False,
+    y_axis_major_gridline_width = 0.75,
+    y_axis_major_gridline_color = "#BFBFBF",
     show_legend:bool = False,
     excel_style:int = 10
 ):
