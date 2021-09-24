@@ -14,10 +14,16 @@ def percentile(n: int) -> np.ndarray:
     return np.linspace(100 / n, 100, n)
 
 
-def make_chart_settings(local_kwargs):
+def make_chart_settings(local_kwargs: dict):
+    """ Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
+    constructs dictionaries with parameter values to be passed to xlsx writer to configure graph settings.
+    
+    :param local_kwargs: A dictionary containing key word arguments that are parsed to construct the xlsx-writer graph settings
+    """
 
     from collections import defaultdict
 
+    # make a dictionary with default values of dictionaries
     x_axis_settings = defaultdict(dict)
     y_axis_settings = defaultdict(dict)
 
@@ -96,11 +102,15 @@ def write_to_excel(
     :param x_log_scale: Whether to make x dimension log scaled. Default True.
     :param x_major_gridlines_visible: Whether to show major gridlines along x. Default True.
     :param x_minor_gridlines_visible: Whether to show minor gridlines along x. Default True.
+    :param x_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
+    :param x_axis_major_gridline_color: Color to use for gridlines. Default is "#F2F2F2".
     :param y_axis_name: The title to be used for the y-axis in the S-curves plot.
     :param y_min: The minimum percentage value to show.
     :param y_max: The maximum percentage value to show.
     :param y_major_gridlines_visible: Whether to show major gridlines along y. Default True.
     :param y_minor_gridlines_visible: Whether to show minor gridlines along y. Default False.
+    :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
+    :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
     :param show_legend: Whether to show legend on the plot. Default False.
     :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
     """
