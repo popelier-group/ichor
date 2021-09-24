@@ -9,8 +9,6 @@ from ichor.analysis.predictions import get_true_predicted
 from ichor.models import Models, ModelsResult
 from ichor.points import PointsDirectory
 from ichor.constants import ha_to_kj_mol
-from ichor.common.types import DictList
-
 
 def percentile(n: int) -> np.ndarray:
     return np.linspace(100 / n, 100, n)
@@ -18,8 +16,10 @@ def percentile(n: int) -> np.ndarray:
 
 def make_chart_settings(local_kwargs):
 
-    x_axis_settings = DictList(dict)
-    y_axis_settings = DictList(dict)
+    from collections import defaultdict
+
+    x_axis_settings = defaultdict(dict)
+    y_axis_settings = defaultdict(dict)
 
     # x-axis settings
     x_axis_settings["name"] = local_kwargs["x_axis_name"]
