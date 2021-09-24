@@ -9,11 +9,35 @@ from ichor.analysis.predictions import get_true_predicted
 from ichor.models import Models, ModelsResult
 from ichor.points import PointsDirectory
 from ichor.constants import ha_to_kj_mol
+from ichor.common.types import DictList
 
 
 def percentile(n: int) -> np.ndarray:
     return np.linspace(100 / n, 100, n)
 
+
+def make_chart_settings(local_kwargs):
+
+    x_axis_settings = DictList(dict)
+    y_axis_settings = DictList(dict)
+
+    # x-axis settings
+    x_axis_settings["name"] = local_kwargs["x_axis_name"]
+    x_axis_settings["major_gridlines"]["visible"] = local_kwargs["x_major_gridlines_visible"]
+    x_axis_settings["minor_gridlines"]["visible"] = local_kwargs["x_minor_gridlines_visible"]
+    if local_kwargs["x_log_scale"]:
+        x_axis_settings["log_base"] = 10
+    x_axis_settings["major_gridlines"]["line"] = {"width": 0.75, "color": "#F2F2F2"}
+
+    # y_axis_settings
+    y_axis_settings["y_axis_name"] = local_kwargs["y_axis_name"]
+    y_axis_settings["min"] = local_kwargs["y_min"]
+    y_axis_settings["max"] = local_kwargs["y_max"]
+    y_axis_settings["major_gridlines"]["visible"] = local_kwargs["y_major_gridlines_visible"]
+    y_axis_settings["minor_gridlines"]["visible"] = local_kwargs["y_minor_gridlines_visible"]
+    y_axis_settings["major_gridlines"]["line"] = {"width": 0.75, "color": "#BFBFBF"}
+
+    return x_axis_settings, y_axis_settings
 
 def calculate_s_curves(
     model_location: Path,
@@ -37,6 +61,7 @@ def calculate_s_curves(
     model = Models(model_location)
     validation_set = PointsDirectory(validation_set_location)
     true, predicted = get_true_predicted(model, validation_set, atoms, types)
+
     write_to_excel(true, predicted, **kwargs)
 
 
@@ -75,6 +100,10 @@ def write_to_excel(
     :param show_legend: Whether to show legend on the plot. Default False.
     :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
     """
+
+    # use the key word arguments to construct the settings used for x and y axes
+    x_axis_settings, y_axis_settings = make_chart_settings(locals())
+
     true = true.T
     predicted = predicted.T
     # error is still a ModelResult
@@ -91,8 +120,10 @@ def write_to_excel(
                 error[type_] *= ha_to_kj_mol
             atom_sheets = {}
 
+            # our true values dictionary only contains info about atoms that we care about (see get_true_predicted function above)
+            atom_names = true[type_].keys()
             # iterate over all atoms that have this property calculated
-            for atom in true[type_].keys():
+            for atom in atom_names:
 
                 sheet_name = f"{atom}_{type_}"
                 atom_sheets[atom] = sheet_name
@@ -124,36 +155,9 @@ def write_to_excel(
                     }
                 )
 
-                # make the chart nicer looking
-                s_curve.set_x_axis(
-                    {
-                        "name": x_axis_name,
-                        "major_gridlines": {
-                            "visible": True,
-                            "line": {"width": 0.75, "color": "#BFBFBF"},
-                        },
-                        "minor_gridlines": {
-                            "visible": True,
-                            "line": {"width": 0.75, "color": "#F2F2F2"},
-                        },
-                    }
-                )
-                if x_log_scale:
-                    s_curve.set_x_axis({"log_base": 10})
-
-                s_curve.set_y_axis(
-                    {
-                        "name": y_axis_name,
-                        "min": 0,
-                        "max": 100,
-                        "major_gridlines": {
-                            "visible": True,
-                            "line": {"width": 0.75, "color": "#BFBFBF"},
-                        },
-                    }
-                )
-
-                # add the s-curve to the sheet
+                # Configure S-curves for individual atoms
+                s_curve.set_x_axis(x_axis_settings)
+                s_curve.set_y_axis(y_axis_settings)
                 s_curve.set_legend({"position": "none"})
                 s_curve.set_style(excel_style) # default style of excel plots
                 writer.sheets[sheet_name].insert_chart("G2", s_curve)
@@ -167,8 +171,6 @@ def write_to_excel(
             sheet_name = f"Total_{type_}"
             # write df to excel file
             df.to_excel(writer, sheet_name=sheet_name)
-
-            atom_names = list(map(str, true[type_].keys()))
 
             total_s_curve = workbook.add_chart(
                 {"type": "scatter", "subtype": "straight"}
@@ -192,42 +194,15 @@ def write_to_excel(
                     "line": {"width": 1.5},
                 }
             )
-            total_s_curve.set_x_axis(
-                {
-                    "name": x_axis_name,
-                    "major_gridlines": {
-                        "visible": x_major_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#BFBFBF"},
-                    },
-                    "minor_gridlines": {
-                        "visible": x_minor_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#F2F2F2"},
-                    },
-                }
-            )
-            if x_log_scale:
-                s_curve.set_x_axis({"log_base": 10})
 
-            total_s_curve.set_y_axis(
-                {
-                    "name": y_axis_name,
-                    "min": y_min,
-                    "max": y_max,
-                    "major_gridlines": {
-                        "visible": y_major_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#BFBFBF"},
-                    },
-                    "minor_gridlines": {
-                        "visible": y_minor_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#F2F2F2"},
-                    },
-                }
-            )
-
-            if show_legend:
-                total_s_curve.set_legend({"position": "none"})
+            # Configure total prediction error S-curve
+            total_s_curve.set_x_axis(x_axis_settings)
+            total_s_curve.set_y_axis(y_axis_settings)
+            total_s_curve.set_legend({"position": "none"})
             total_s_curve.set_style(excel_style)
 
+
+            # below the total s_curve, make an S-curve which overlaps all the individual atom S-curves
             atomic_s_curve = workbook.add_chart(
                 {"type": "scatter", "subtype": "straight"}
             )
@@ -241,42 +216,13 @@ def write_to_excel(
                         "line": {"width": 1.5},
                     }
                 )
-            atomic_s_curve.set_x_axis(
-                {
-                    "name": "Prediction Error",
-                    "major_gridlines": {
-                        "visible": x_major_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#BFBFBF"},
-                    },
-                    "minor_gridlines": {
-                        "visible": x_minor_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#F2F2F2"},
-                    },
-                }
-            )
-            if x_log_scale:
-                s_curve.set_x_axis({"log_base": 10})
 
-            atomic_s_curve.set_y_axis(
-                {
-                    "name": y_axis_name,
-                    "min": y_min,
-                    "max": y_max,
-                    "major_gridlines": {
-                        "visible": y_major_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#BFBFBF"},
-                    },
-                    "minor_gridlines": {
-                        "visible": y_minor_gridlines_visible,
-                        "line": {"width": 0.75, "color": "#F2F2F2"},
-                    },
-                }
-            )
-
+            # Configure graph with overlapping S-curves for all atoms
+            atomic_s_curve.set_x_axis(x_axis_settings)
+            atomic_s_curve.set_y_axis(y_axis_settings)
             if show_legend:
                 atomic_s_curve.set_legend({"position": "right"})
-
-            total_s_curve.set_style(excel_style)
+            atomic_s_curve.set_style(excel_style)
 
             writer.sheets[sheet_name].insert_chart(
                 f"{num2col(len(atom_names)+5)}2", total_s_curve
