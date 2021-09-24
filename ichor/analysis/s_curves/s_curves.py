@@ -36,7 +36,7 @@ def make_chart_settings(local_kwargs: dict):
         x_axis_settings["log_base"] = 10
 
     # y_axis_settings
-    y_axis_settings["y_axis_name"] = local_kwargs["y_axis_name"]
+    y_axis_settings["name"] = local_kwargs["y_axis_name"]
     y_axis_settings["min"] = local_kwargs["y_min"]
     y_axis_settings["max"] = local_kwargs["y_max"]
     y_axis_settings["major_gridlines"]["visible"] = local_kwargs["y_major_gridlines_visible"]
