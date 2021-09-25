@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from ichor.analysis.get_models import choose_model_menu
-from ichor.analysis.get_validation_set import choose_validation_set_menu
+from ichor.analysis.get_models import choose_model_menu, try_get_latest_models
+from ichor.analysis.get_validation_set import choose_validation_set_menu, get_validation_set_from_current_dir
 from ichor.analysis.rmse.rmse import calculate_rmse
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.menu import Menu
@@ -46,7 +46,7 @@ def rmse_menu():
     global _validation_set_location
     global _model_location
 
-    _validation_set_location = FILE_STRUCTURE["validation_set"]
+    _validation_set_location = get_validation_set_from_current_dir()
     _model_location = FILE_STRUCTURE["model_log"]
 
     with Menu("RMSE Analysis Menu", refresh=rmse_menu_refresh):
