@@ -9,12 +9,10 @@ from ichor.analysis.predictions import get_true_predicted
 from ichor.models import Models, ModelsResult
 from ichor.points import PointsDirectory
 
-# todo: add plots
-
-
-def calculate_rmse(models_location: Path, validation_set_location: Path):
+def calculate_rmse(models_location: Path, validation_set_location: Path, **kwargs):
     """
-    Calculates rmse errors for a given directory containing model files and a given validation set directory.
+    Calculates rmse errors for a given directory containing model files and a given validation set directory. Also, writes the data to
+    an excel file.
 
     :param models_location: The directory where models are located.
     :type models_location: Path
@@ -32,12 +30,6 @@ def calculate_rmse(models_location: Path, validation_set_location: Path):
 
     validation_set = PointsDirectory(validation_set_location)
 
-    _calculate_rmse(models, validation_set)
-
-
-def _calculate_rmse(
-    models: Union[Models, List[Models]], validation_set: PointsDirectory
-):
     true_values = {}
     predicted_values = {}
     if isinstance(models, Models):
@@ -52,22 +44,119 @@ def _calculate_rmse(
 
     write_to_excel(true_values, predicted_values)
 
+def make_rmse_chart_settings(local_kwargs: dict):
+    """ Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
+    constructs dictionaries with parameter values to be passed to xlsx writer to configure graph settings.
+    
+    :param local_kwargs: A dictionary containing key word arguments that are parsed to construct the xlsx-writer graph settings
+    """
+
+    from collections import defaultdict
+
+    # make a dictionary with default values of dictionaries
+    x_axis_settings = defaultdict(dict)
+    y_axis_settings = defaultdict(dict)
+
+    # x-axis settings
+    x_axis_settings["name"] = local_kwargs["x_axis_name"]
+    x_axis_settings["major_gridlines"]["visible"] = local_kwargs["x_major_gridlines_visible"]
+    x_axis_settings["minor_gridlines"]["visible"] = local_kwargs["x_minor_gridlines_visible"]
+    x_axis_settings["major_gridlines"]["line"] = {"width": local_kwargs["x_axis_major_gridline_width"], "color": local_kwargs["x_axis_major_gridline_color"]}
+    if local_kwargs["x_log_scale"]:
+        x_axis_settings["log_base"] = 10
+
+    # y_axis_settings
+    y_axis_settings["name"] = local_kwargs["y_axis_name"]
+    y_axis_settings["major_gridlines"]["visible"] = local_kwargs["y_major_gridlines_visible"]
+    y_axis_settings["minor_gridlines"]["visible"] = local_kwargs["y_minor_gridlines_visible"]
+    x_axis_settings["major_gridlines"]["line"] = {"width": local_kwargs["y_axis_major_gridline_width"], "color": local_kwargs["y_axis_major_gridline_color"]}
+
+    return x_axis_settings, y_axis_settings
+
+def calculate_error(data: np.array, error_type: str):
+
+    error_type = error_type.lower()
+
+    if error_type == "mae":
+        return np.mean(data).item()
+    elif error_type == "rmse":
+        return np.sqrt(np.mean(data**2)).item()
+    else:
+        raise ValueError("error_type value can either be 'rmse' or 'mae'")
 
 def write_to_excel(
     true_values: Dict[int, ModelsResult],
     predicted_values: Dict[int, ModelsResult],
-    output: Path = "rmse_new_implementation.xlsx",
+    output_name: Path = "rmse_new_implementation.xlsx",
+    error_type: Union["mae", "rmse"] = "rmse",
+    only_every_nth_model: Union[int, None] = None,
+    x_axis_name:str = "Number of Training Points",
+    x_log_scale:bool = False,
+    x_major_gridlines_visible:bool = True,
+    x_minor_gridlines_visible:bool = False,
+    x_axis_major_gridline_width:int = 0.75,
+    x_axis_major_gridline_color:str = "#F2F2F2",
+    y_axis_name:str = "Error",
+    y_major_gridlines_visible:bool = True,
+    y_minor_gridlines_visible:bool = False,
+    y_axis_major_gridline_width:int = 0.75,
+    y_axis_major_gridline_color:str = "#BFBFBF",
+    show_legend:bool = True,
+    excel_style:int = 10
 ):
+    """
+    Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
+    also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
+
+    :param true: a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set
+    :param predicted: a ModelsResult containing predicted values, given the validation/test set features
+    :param output_name: The name of the excel file to be written out.
+    :param x_axis_name: The title to be used for x-axis in the S-curves plot.
+    :param x_log_scale: Whether to make x dimension log scaled. Default True.
+    :param x_major_gridlines_visible: Whether to show major gridlines along x. Default True.
+    :param x_minor_gridlines_visible: Whether to show minor gridlines along x. Default True.
+    :param x_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
+    :param x_axis_major_gridline_color: Color to use for gridlines. Default is "#F2F2F2".
+    :param y_axis_name: The title to be used for the y-axis in the S-curves plot.
+    :param y_min: The minimum percentage value to show.
+    :param y_max: The maximum percentage value to show.
+    :param y_major_gridlines_visible: Whether to show major gridlines along y. Default True.
+    :param y_minor_gridlines_visible: Whether to show minor gridlines along y. Default False.
+    :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
+    :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
+    :param show_legend: Whether to show legend on the plot. Default False.
+    :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
+    """
+
     from collections import defaultdict
     # not sure if OrderedDict needed for python 3.6, but use it for now
     from collections import OrderedDict
-    # sort the models by the training points
+    from ichor.constants import ha_to_kj_mol
+    from ichor.analysis.excel import num2col
+
+    # use the key word arguments to construct the settings used for x and y axes
+    y_axis_name = error_type.upper() + " Error"
+    x_axis_settings, y_axis_settings = make_rmse_chart_settings(locals())
+
+    # sort the models by the number of training points
     true_values = OrderedDict(sorted(true_values.items()))
     predicted_values = OrderedDict(sorted(predicted_values.items()))
+    dictionary_keys = list(true_values.keys())
 
-    with pd.ExcelWriter(output) as writer:
+    # todo: move this is the calculate_rmse function where you can do this before making predictions, right now it makes the predictions and then deletes.
+    # leave every nth model, delete the other ones. This can come in useful if you have a lot of models and do not want to go though each one 
+    if only_every_nth_model:
+        for idx in range(len(dictionary_keys)):
+            if not (idx % only_every_nth_model == 0):
+                key_to_del = dictionary_keys[idx]
+                del true_values[key_to_del]
+                del predicted_values[key_to_del]
 
-        all_rmse_errors = defaultdict(lambda: defaultdict(float))
+    with pd.ExcelWriter(output_name) as writer:
+        workbook = writer.book
+
+        # make a dictionary of dictionaries which is used to write out the final sheet containing MAE errors for each n training point model
+        all_errors_dict = defaultdict(lambda: defaultdict(float))
 
         # loop over all models which have different numbers of training points
         for ntrain, true, predicted in zip(
@@ -77,46 +166,52 @@ def write_to_excel(
             sheet_name = f"{ntrain} points"
             true = true.T
             predicted = predicted.T
-            rmse_data = {}
 
+            # a dict that is made into a pandas df and written to one sheet
+            rmse_data = {}
+            # contains the MAE errors to be written at the bottom of the each
             errors_to_write = []
+
             # loop over all types (eg. iqa, q00, etc.)
             for type_ in true.keys():
 
+                # a list containing all the MAE errors to be written on the last line of the sheet
                 type_errors = []
 
                 # loop over all atoms (eg. C1, H2, O3, etc.)
                 for atom in true[type_].keys():
 
                     # make true and predicted columns
-                    rmse_data[f"{atom}_{type_} True"] = true[type_][atom]
-                    rmse_data[f"{atom}_{type_} Predicted"] = predicted[type_][atom]
+                    rmse_data[f"{atom}_{type_} True (Ha)"] = true[type_][atom]
+                    rmse_data[f"{atom}_{type_} Predicted (Ha)"] = predicted[type_][atom]
 
-                    # calculate mean absolute error (MAE)
-                    abs_error = np.abs(true[type_][atom] - predicted[type_][atom])
+                    # calculate absolute error column, make into kJ mol-1 if working with iqa energies
+                    if type_ == "iqa":
+                        abs_error = ha_to_kj_mol * np.abs(true[type_][atom] - predicted[type_][atom])
+                    else:
+                        abs_error = np.abs(true[type_][atom] - predicted[type_][atom])
 
                     # calculate MAE and append to errors row to be written below the last row of the df
-                    mean_absolute_error = np.mean(abs_error).item()
+                    mean_absolute_error = calculate_error(abs_error, error_type)
                     errors_to_write.append(mean_absolute_error)
                     # also write this error to dictionary which will be used to make an MAE sheet
-                    all_rmse_errors[f"{atom}_{type_}"][ntrain] = mean_absolute_error
+                    all_errors_dict[f"{atom}_{type_} (kJ mol-1)"][ntrain] = mean_absolute_error
 
                     # add Absolute Error Column
-                    rmse_data[f"{atom}_{type_} absError"] = abs_error
-
+                    rmse_data[f"{atom}_{type_} absError (kJ mol-1)"] = abs_error
 
                     type_errors += [abs_error]
 
                 # after looping thorugh all atoms, we can sum up all the errors to make a total error column for every property
                 # make the list into a 2D numpy array and sum over the rows, which are the errors for each atom
-                total_error = np.sum(np.array(type_errors), axis=0)
-                rmse_data[f"{type_} Total absError"] = total_error
+                total_abs_error = np.sum(np.array(type_errors), axis=0)
+                rmse_data[f"{type_} Total absError (kJ mol-1)"] = total_abs_error
 
-                # calculate total MAE and append to errors row to be written below the last row of the df
-                total_mean_absolute_error = np.mean(total_error).item()
+                # calculate total MAE/rmse and append to errors row to be written below the last row of the df
+                total_mean_absolute_error = calculate_error(total_abs_error, error_type)
                 errors_to_write.append(total_mean_absolute_error)
-                # also write this error to dictionary which will be used to make an RMSE sheet
-                all_rmse_errors[f"total_{type_}"][ntrain] = total_mean_absolute_error
+                # also write this error to dictionary which will be used to make the final sheet containing mae/rmse
+                all_errors_dict[f"total_{type_}"][ntrain] = total_mean_absolute_error
 
             df = pd.DataFrame(rmse_data)
             df.to_excel(writer, sheet_name=sheet_name)
@@ -126,7 +221,7 @@ def write_to_excel(
 
             # write out the MAE row for every third column.
             col_idx = 0
-            writer.sheets[sheet_name].write(n_rows+1, col_idx, "MAE")
+            writer.sheets[sheet_name].write(n_rows+1, col_idx, error_type)
             col_idx += 3
             for error in errors_to_write[:-1]:
                 writer.sheets[sheet_name].write(n_rows+1, col_idx, error)
@@ -135,7 +230,31 @@ def write_to_excel(
             col_idx -= 2
             writer.sheets[sheet_name].write(n_rows+1, col_idx, errors_to_write[-1])
 
-        # make the sheet that only contains MAE information
-        df = pd.DataFrame(all_rmse_errors)
-        df.to_excel(writer, sheet_name="MAE")
-        writer.sheets["MAE"].write(0, 0, "n_train")
+        # make the sheet that only contains MAE information, pandas df can accept a dictionary of dictionaries
+        df = pd.DataFrame(all_errors_dict)
+        df.to_excel(writer, sheet_name=error_type)
+        writer.sheets[error_type].write(0, 0, "n_train")
+
+        # add the s-curve to the error_type sheet
+        s_curve = workbook.add_chart(
+            {"type": "scatter", "subtype": "straight"}
+        )
+
+        for idx, col in enumerate(df.columns, start=1):
+            s_curve.add_series(
+                {
+                    "name": col,
+                    "categories": [error_type, 1, 0, df.shape[0], 0],
+                    "values": [error_type, 1, idx, df.shape[0], idx],
+                    "line": {"width": 1.5},
+                }
+            )
+
+        # Configure S-curves for individual atoms
+        s_curve.set_x_axis(x_axis_settings)
+        s_curve.set_y_axis(y_axis_settings)
+        if not show_legend:
+            s_curve.set_legend({"position": "none"})
+        s_curve.set_style(excel_style) # default style of excel plots
+
+        writer.sheets[error_type].insert_chart(f"{num2col(df.shape[1]+3)}2", s_curve)
