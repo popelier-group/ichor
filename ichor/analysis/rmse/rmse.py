@@ -108,8 +108,11 @@ def write_to_excel(
     Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
     also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
 
-    :param true: a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set
-    :param predicted: a ModelsResult containing predicted values, given the validation/test set features
+    :param true_values: a dictionary of key: number of training points, value: a ModelsResult instance
+    :param predicted_values: a dictionary of key: number of training points, value: a ModelsResult instance
+    :param error_type: The type of error to calculate. Either Mean Absolute Error (MAE) or Root Mean Squared Error (RMSE). Default is RMSE ("rmse").
+    :param only_every_nth_model: Only write out every nth model to the excel file. This is useful if you have a very large number of models and only
+        want to write out a subset of them.
     :param output_name: The name of the excel file to be written out.
     :param x_axis_name: The title to be used for x-axis in the S-curves plot.
     :param x_log_scale: Whether to make x dimension log scaled. Default True.
@@ -118,8 +121,6 @@ def write_to_excel(
     :param x_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
     :param x_axis_major_gridline_color: Color to use for gridlines. Default is "#F2F2F2".
     :param y_axis_name: The title to be used for the y-axis in the S-curves plot.
-    :param y_min: The minimum percentage value to show.
-    :param y_max: The maximum percentage value to show.
     :param y_major_gridlines_visible: Whether to show major gridlines along y. Default True.
     :param y_minor_gridlines_visible: Whether to show minor gridlines along y. Default False.
     :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
