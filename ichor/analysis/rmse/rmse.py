@@ -111,8 +111,8 @@ def write_to_excel(
     :param true_values: a dictionary of key: number of training points, value: a ModelsResult instance
     :param predicted_values: a dictionary of key: number of training points, value: a ModelsResult instance
     :param error_type: The type of error to calculate. Either Mean Absolute Error (MAE) or Root Mean Squared Error (RMSE). Default is RMSE ("rmse").
-    :param only_every_nth_model: Only write out every nth model to the excel file. This is useful if you have a very large number of models and only
-        want to write out a subset of them.
+    :param only_every_nth_model: Only write out every `nth` model to the excel file, where `n` is an integer. This is useful if you have a very large number of models and only
+        want to write out a subset of them. Defaults to None which means every model is written out.
     :param output_name: The name of the excel file to be written out.
     :param x_axis_name: The title to be used for x-axis in the S-curves plot.
     :param x_log_scale: Whether to make x dimension log scaled. Default True.
