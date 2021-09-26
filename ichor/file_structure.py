@@ -18,6 +18,13 @@ class FileStructure(FileTree):
     def __init__(self):
         super(FileStructure, self).__init__()
 
+        # todo: possibly add a type (either file or directory), so it is easier to distingush between directories/files here
+        # e.g. self.add("counter", "counter", parent="active_learning") is a file but self.add("MODELS", "models", parent="ferebus") is a dir
+        # todo: make a make method, that way we can do something like FILE_STRUCTURE["counter"].make() which will create an empty file at that location
+        # and make all upper directories if they do not exist already.
+
+        # name of the directory, how the directory can be internally referenced to by FILE_STRUCTURE["internal_reference"]
+        # if parent is set, then make it a subdirectory of parent directory
         self.add("TRAINING_SET", "training_set")
         self.add("SAMPLE_POOL", "sample_pool")
         self.add("VALIDATION_SET", "validation_set")
@@ -70,6 +77,7 @@ class FileStructure(FileTree):
         self.add("atoms.out", "atoms_stdout", parent="atoms_daemon")
         self.add("atoms.err", "atoms_stderr", parent="atoms_daemon")
 
+        # todo: this has already been added above
         self.add("counter", "counter", parent="active_learning")
 
         self.add("FILES_REMOVED", "file_remover_daemon", parent="data")
@@ -94,5 +102,5 @@ class FileStructure(FileTree):
         self.add("OUTPUTS", "outputs", parent="scripts")
         self.add("ERRORS", "errors", parent="scripts")
 
-
+# this type of stuff is making sphinx execute code
 FILE_STRUCTURE = FileStructure()
