@@ -74,6 +74,11 @@ def make_rmse_chart_settings(local_kwargs: dict):
     return x_axis_settings, y_axis_settings
 
 def calculate_error(data: np.array, error_type: str):
+    """ Calculates error for the data, given the error_type.
+    
+    :param data: A one dimensional numpy array which contains the (absolute) difference between true and predicted values for a property.
+    :param error_type: The error type to calculate, either `mae` or `rmse`.
+    """
 
     error_type = error_type.lower()
 
