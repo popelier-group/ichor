@@ -66,7 +66,7 @@ def make_rmse_chart_settings(local_kwargs: dict):
         x_axis_settings["log_base"] = 10
 
     # y_axis_settings
-    y_axis_settings["name"] = local_kwargs["y_axis_name"]
+    y_axis_settings["name"] = local_kwargs["error_type"].upper()
     y_axis_settings["major_gridlines"]["visible"] = local_kwargs["y_major_gridlines_visible"]
     y_axis_settings["minor_gridlines"]["visible"] = local_kwargs["y_minor_gridlines_visible"]
     x_axis_settings["major_gridlines"]["line"] = {"width": local_kwargs["y_axis_major_gridline_width"], "color": local_kwargs["y_axis_major_gridline_color"]}
@@ -96,7 +96,6 @@ def write_to_excel(
     x_minor_gridlines_visible:bool = False,
     x_axis_major_gridline_width:int = 0.75,
     x_axis_major_gridline_color:str = "#F2F2F2",
-    y_axis_name:str = "Error",
     y_major_gridlines_visible:bool = True,
     y_minor_gridlines_visible:bool = False,
     y_axis_major_gridline_width:int = 0.75,
@@ -105,8 +104,8 @@ def write_to_excel(
     excel_style:int = 10
 ):
     """
-    Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
-    also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
+    Writes out relevant information which is used to write rmse to an excel file. It will make a separate sheet for training set and a final
+    sheet containing MAE/RMSE errors.
 
     :param true_values: a dictionary of key: number of training points, value: a ModelsResult instance
     :param predicted_values: a dictionary of key: number of training points, value: a ModelsResult instance
@@ -114,13 +113,12 @@ def write_to_excel(
     :param only_every_nth_model: Only write out every `nth` model to the excel file, where `n` is an integer. This is useful if you have a very large number of models and only
         want to write out a subset of them. Defaults to None which means every model is written out.
     :param output_name: The name of the excel file to be written out.
-    :param x_axis_name: The title to be used for x-axis in the S-curves plot.
+    :param x_axis_name: The title to be used for x-axis in the MAE/RMSE plot.
     :param x_log_scale: Whether to make x dimension log scaled. Default True.
     :param x_major_gridlines_visible: Whether to show major gridlines along x. Default True.
     :param x_minor_gridlines_visible: Whether to show minor gridlines along x. Default True.
     :param x_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
     :param x_axis_major_gridline_color: Color to use for gridlines. Default is "#F2F2F2".
-    :param y_axis_name: The title to be used for the y-axis in the S-curves plot.
     :param y_major_gridlines_visible: Whether to show major gridlines along y. Default True.
     :param y_minor_gridlines_visible: Whether to show minor gridlines along y. Default False.
     :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
@@ -136,7 +134,6 @@ def write_to_excel(
     from ichor.analysis.excel import num2col
 
     # use the key word arguments to construct the settings used for x and y axes
-    y_axis_name = error_type.upper() + " Error"
     x_axis_settings, y_axis_settings = make_rmse_chart_settings(locals())
 
     # sort the models by the number of training points
@@ -236,11 +233,8 @@ def write_to_excel(
         df.to_excel(writer, sheet_name=error_type)
         writer.sheets[error_type].write(0, 0, "n_train")
 
-        # add the s-curve to the error_type sheet
-        s_curve = workbook.add_chart(
-            {"type": "scatter", "subtype": "straight"}
-        )
-
+        s_curve = workbook.add_chart({"type": "scatter", "subtype": "straight"})
+        # add data to plot
         for idx, col in enumerate(df.columns, start=1):
             s_curve.add_series(
                 {
@@ -250,8 +244,7 @@ def write_to_excel(
                     "line": {"width": 1.5},
                 }
             )
-
-        # Configure S-curves for individual atoms
+        # add the plot to the error_type sheet
         s_curve.set_x_axis(x_axis_settings)
         s_curve.set_y_axis(y_axis_settings)
         if not show_legend:
