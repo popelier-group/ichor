@@ -81,7 +81,7 @@ def auto_run_per_value(
 
         with pushd(path, update_cwd=True):
             if run_func is None:
-                from ichor.auto_run import auto_run
+                from ichor.auto_run.standard_auto_run import auto_run
 
                 final_job = auto_run()
                 final_job_ids.append(final_job)
