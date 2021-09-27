@@ -19,7 +19,7 @@ def get_predicted(
     :param models: the models to use for predicting the values of points
     :param points: a ListOfAtoms containing geometries to predict
     :param atoms: optional list of atoms to predict the values of points for, defaults to all atoms in models
-    :param types: optional list of types to predict the values of points for, defaults to all types in models
+    :param types: optional list of property types, such as iqa, q00, etc. to predict the values of points for, defaults to all types in models
     :return: predictions of points given models as a ModelsResult
     """
     if atoms is None:
@@ -45,7 +45,7 @@ def get_true(
     Returns the true values for a given PointsDirectory as a ModelsResult
     :param validation_set: the PointsDirectory containing the true values
     :param atoms: List of atoms to get the true values for
-    :param types: List of types to get the true values for
+    :param types: List of property types, such as iqa, q00, etc. to get the true values for
     :return: ModelsResult containing the true values requested from the validation set
     """
     true = {}
@@ -68,7 +68,7 @@ def get_true_predicted(
     :param models: models to use for the predictions
     :param validation_set: validation set containing geometry data and true values
     :param atoms: optional list of atoms to predict, defaults to all atoms found in model_location
-    :param types: optional list of types to predict, defaults to all types found in model_location
+    :param types: optional list of types to predict, such as iqa, q00, etc. Defaults to all types found in model_location
     :return: ModelsResult for true and predicted values from the models and validation set provided
     """
     if atoms is None:

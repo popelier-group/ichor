@@ -15,7 +15,7 @@ def active_learning(
     used to add the worst performing point from the sample pool to the training set."""
     from ichor.active_learning import ActiveLearningMethod
     from ichor.arguments import Arguments
-    from ichor.auto_run import AutoRunOnly, submit_next_iter
+    from ichor.auto_run.standard_auto_run import AutoRunOnly, submit_next_iter
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.machine import MACHINE, SubmitType

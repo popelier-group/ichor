@@ -7,6 +7,12 @@ from ichor.menu import Menu
 _current_validation_set = None
 
 
+def get_validation_set_from_current_dir():
+
+    if FILE_STRUCTURE["validation_set"].exists():
+            return FILE_STRUCTURE["validation_set"]
+    return None
+
 def set_validation_set(vs: Path) -> None:
     global _current_validation_set
     _current_validation_set = vs
@@ -38,9 +44,9 @@ def choose_validation_set_menu_refresh(menu: Menu):
     menu.add_final_options()
 
 
-def choose_validation_set_menu(current_validation_set: Path) -> Path:
+def choose_validation_set_menu(current_validation_set_directory: Path) -> Path:
     global _current_validation_set
-    _current_validation_set = current_validation_set
+    _current_validation_set = current_validation_set_directory
     with Menu(
         "Choose Validation Set Menu",
         refresh=choose_validation_set_menu_refresh,

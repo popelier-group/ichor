@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Callable, List, Optional
 
-from ichor.auto_run.ichor import submit_ichor_collate_log_job_to_auto_run
+from ichor.auto_run.ichor_jobs import submit_ichor_collate_log_job_to_auto_run
 from ichor.batch_system import JobID
 from ichor.common.io import cp, mkdir, pushd, relpath
 from ichor.common.points import get_points_location
@@ -81,7 +81,7 @@ def auto_run_per_value(
 
         with pushd(path, update_cwd=True):
             if run_func is None:
-                from ichor.auto_run import auto_run
+                from ichor.auto_run.standard_auto_run import auto_run
 
                 final_job = auto_run()
                 final_job_ids.append(final_job)

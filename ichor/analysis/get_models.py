@@ -68,7 +68,7 @@ def enter_custom_directory():
 
 
 def choose_model_menu_refresh(menu: Menu):
-    latest_model_from_log = get_latest_models_from_log()
+    latest_model_from_log = try_get_latest_models_from_log()
     menu.clear_options()
     menu.add_option(
         "1",
