@@ -112,6 +112,12 @@ class AnnotatedDirectory(Directory, ABC):
                     dirtypes[var] = type_
         return dirtypes
 
+    def files(self):
+        return [getattr(self, var) for var in vars(self) if isinstance(getattr(self, var), File)]
+
+    def directories(self):
+        return [getattr(self, var) for var in vars(self) if isinstance(getattr(self, var), Directory)]
+
     def parse(self):
         """todo: fix this docstring
         Iterate over __annotations__ which is a dictionary of {"gjf": Optional[GJF], "wfn": Optional[WFN], "ints": Optional[INTs]}

@@ -12,7 +12,7 @@ class MorfiWFN(WFN):
         return path.name == "morfi.wfn"
 
 
-class PySCFOutput(AnnotatedDirectory):
+class PySCFDirectory(AnnotatedDirectory):
     morfi_wfn: MorfiWFN
     wfn: WFN
 

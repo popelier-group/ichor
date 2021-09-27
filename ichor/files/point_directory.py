@@ -10,6 +10,8 @@ from ichor.files.geometry import AtomData, GeometryData, GeometryFile
 from ichor.files.gjf import GJF
 from ichor.files.ints import INTs
 from ichor.files.wfn import WFN
+from ichor.files.xyz import XYZ
+from ichor.files.pandora import PandoraDirectory
 
 
 class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
@@ -24,23 +26,30 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
         cls.ints Optional[INTs]: Used when iterating over __annotations__
     """
 
+    xyz: Optional[XYZ] = None
     gjf: Optional[GJF] = None
     wfn: Optional[WFN] = None
     ints: Optional[INTs] = None
+    pandora: Optional[PandoraDirectory] = None
 
     def __init__(self, path):
         GeometryFile.__init__(self)
         GeometryData.__init__(self)
         AnnotatedDirectory.__init__(self, path)
 
-    @classproperty
-    def dirpattern(self):
-        """A regex pattern corresponding to the name of the system name (stored in GLOBALS.SYSTEM_NAME)."""
-        return re.compile(rf".+")
+    def parse(self):
+        super().parse()
+        if self.xyz is None:
+            for f in self.files():
+                if isinstance(f, GeometryFile):
+                    self.xyz = XYZ(Path(self.path) / (self.path.name + XYZ.filetype), atoms=f.atoms)
+                    self.xyz.write()
 
     @property
     def atoms(self):
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
+        if self.xyz.exists():
+            return self.xyz
         if self.gjf.exists():
             return self.gjf.atoms
         elif self.wfn.exists():

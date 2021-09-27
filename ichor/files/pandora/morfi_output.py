@@ -7,7 +7,7 @@ from ichor.files.directory import AnnotatedDirectory
 from ichor.files.pandora.mout import MOUT
 
 
-class MorfiOutput(AnnotatedDirectory):
+class MorfiDirectory(AnnotatedDirectory):
     mout: Optional[MOUT] = None
 
     def __init__(self, path: Path):

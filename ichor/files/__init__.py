@@ -10,6 +10,7 @@ from ichor.files.points_directory import PointsDirectory
 from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.files.trajectory import Trajectory
 from ichor.files.wfn import WFN
+from ichor.files.xyz import XYZ
 
 __all__ = [
     "File",
@@ -25,4 +26,5 @@ __all__ = [
     "QuantumChemistryProgramInput",
     "PointDirectory",
     "PointsDirectory",
+    "XYZ"
 ]
