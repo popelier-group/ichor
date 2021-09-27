@@ -11,6 +11,7 @@ from ichor.modules.ferebus import FerebusModules
 from ichor.modules.gaussian import GaussianModules
 from ichor.modules.internet import InternetModules
 from ichor.modules.modules import Modules
+from ichor.modules.pandora import PandoraModules
 from ichor.modules.python import PythonModules
 
 MODULES_HOME = Path("/usr/share/Modules")
@@ -75,5 +76,6 @@ __all__ = [
     "PythonModules",
     "InternetModules",
     "DlpolyModules",
+    "PandoraModules",
     "load_module",
 ]

@@ -4,8 +4,8 @@ from typing import List, Optional, Tuple
 import numpy as np
 
 from ichor.atoms import ListOfAtoms
+from ichor.files import PointsDirectory
 from ichor.models import Models, ModelsResult
-from ichor.points import PointsDirectory
 
 
 def get_predicted(

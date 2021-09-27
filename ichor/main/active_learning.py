@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.common.io import mkdir, remove
+from ichor.files import PointsDirectory
 from ichor.logging import logger
 from ichor.models import Models
-from ichor.points import PointsDirectory
 
 
 def active_learning(

@@ -5,10 +5,11 @@ import numpy as np
 
 from ichor import constants
 from ichor.atoms.calculators import ALFFeatureCalculator
+from ichor.common.types import VarReprMixin
 from ichor.units import AtomicDistance
 
 
-class Atom:
+class Atom(VarReprMixin):
     """
     The Atom class is used for ONE atom in ONE timestep.
 
@@ -245,14 +246,14 @@ class Atom:
         entries in the form of atom_type x_coordinate, y_coordinate, z_coordinate"""
         return f"{self.atom_type:<3s}{self.coordinates_string}"
 
-    def __str__(self):
-        """Print out the atom name (containing atom type and index as used in model making), as well as
-        coordinates of the atom
-        """
-        return f"{self.name:<3s}{self.coordinates_string}"
+    # def __str__(self):
+    #     """Print out the atom name (containing atom type and index as used in model making), as well as
+    #     coordinates of the atom
+    #     """
+    #     return f"{self.name:<3s}{self.coordinates_string}"
 
     def __repr__(self):
-        return str(self)
+        return f"{self.__class__.__name__}(f'{self.name:<3s}{self.coordinates_string}')"
 
     def __eq__(self, other: Union["Atom", int]):
         """Check if"""

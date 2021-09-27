@@ -3,16 +3,16 @@ import re
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
-from ichor.geometry import Geometry, GeometryData
+from ichor.files.geometry import GeometryData, GeometryFile
 from ichor.units import AtomicDistance
 
 
-class WFN(Geometry, GeometryData, File):
+class WFN(GeometryFile, GeometryData, File):
     """Wraps around a .wfn file that is the output of Gaussian"""
 
     def __init__(self, path):
         File.__init__(self, path)
-        Geometry.__init__(self)
+        GeometryFile.__init__(self)
         GeometryData.__init__(self)
 
         self.header: str = ""

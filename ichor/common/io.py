@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
-from typing import Any, List, Union, Optional
+from typing import Any, List, Optional, Union
 
 from ichor.typing import F
 
@@ -184,7 +184,10 @@ def pushd(new_dir: Path, update_cwd: bool = False):
 
 @convert_to_path
 def get_files_of_type(
-    filetype: Union[str, List[str]], directory: Path = Path.cwd(), recursive: bool = False, sort: Optional[F] = None
+    filetype: Union[str, List[str]],
+    directory: Path = Path.cwd(),
+    recursive: bool = False,
+    sort: Optional[F] = None,
 ) -> List[Path]:
     """Returns a list of all files that end in a certain file extension/suffix (such as .txt).
 

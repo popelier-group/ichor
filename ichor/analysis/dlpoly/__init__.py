@@ -1,6 +1,7 @@
-from ichor.analysis.dlpoly.dlpoly_menu import dlpoly_menu
 from ichor.analysis.dlpoly.dlpoly_analysis import (
-    get_dlpoly_energies, run_dlpoly_geometry_optimisations, submit_final_geometry_to_gaussian)
+    get_dlpoly_energies, run_dlpoly_geometry_optimisations,
+    submit_final_geometry_to_gaussian)
+from ichor.analysis.dlpoly.dlpoly_menu import dlpoly_menu
 
 __all__ = [
     "dlpoly_menu",

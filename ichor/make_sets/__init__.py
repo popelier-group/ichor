@@ -6,13 +6,12 @@ from typing import Any, List, Optional, Tuple
 from ichor.atoms import ListOfAtoms
 from ichor.common.int import count_digits
 from ichor.common.io import mkdir
-from ichor.files import GJF, Trajectory
+from ichor.files import GJF, PointsDirectory, Trajectory
 from ichor.make_sets.make_set_method import MakeSetMethod
 from ichor.make_sets.min_max import MinMax
 from ichor.make_sets.min_max_mean import MinMaxMean
 from ichor.make_sets.random import RandomPoints
 from ichor.menu import Menu
-from ichor.points import PointsDirectory
 from ichor.tab_completer import PathCompleter
 
 __all__ = ["make_sets", "make_sets_menu", "make_sets_npoints"]

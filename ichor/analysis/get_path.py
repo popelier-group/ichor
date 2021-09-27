@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 from ichor.common.io import pushd
 from ichor.tab_completer import PathCompleter
@@ -26,7 +26,8 @@ def get_dir(startdir: Path = Path.cwd()) -> Path:
 
 
 def get_file(
-    startdir: Path = Path.cwd(), filetype: Optional[Union[str, List[str]]] = None
+    startdir: Path = Path.cwd(),
+    filetype: Optional[Union[str, List[str]]] = None,
 ) -> Path:
     if filetype is not None:
         if isinstance(filetype, str):

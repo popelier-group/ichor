@@ -4,8 +4,8 @@ from typing import List, Optional
 
 from ichor import constants
 from ichor.batch_system import JobID
+from ichor.files import PointsDirectory
 from ichor.logging import logger
-from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
                                      SubmissionScript, print_completed)
 

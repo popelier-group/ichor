@@ -3,8 +3,15 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
+from typing import Optional
 
 from ichor.common.functools import called_from_hasattr, hasattr
+from ichor.common.obj import (object_getattribute, object_getdict,
+                              object_hasattr, object_setattr)
+
+
+class FileReadError(Exception):
+    pass
 
 
 class FileState(Enum):
@@ -16,8 +23,15 @@ class FileState(Enum):
     Blocked = -1
 
 
+class AttrNotFound:
+    pass
+
+
 class PathObject(ABC, object):
     """An abstract base class that is used for anything that has a path (i.e. files or directories)"""
+
+    path: Path
+    state: FileState = FileState.Unread
 
     def __init__(self, path):
         self.path = Path(path)
@@ -40,6 +54,10 @@ class PathObject(ABC, object):
     def exists(self) -> bool:
         """Determines if the path points to an existing directory or file on the storage drive."""
         return self.path.exists()
+
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return True
 
     @contextmanager
     def block(self):
@@ -69,27 +87,18 @@ class PathObject(ABC, object):
         :param item: The attribute that needs to be accessed.
         """
 
-        # As hasattr calls __getattribute__, one must check whether __getattribute__ is being
-        # called from hasattr to avoid an infinite recurssive loop
-        if not called_from_hasattr() and (
-            (
-                # reading the file may set attributes which aren't currently defined
-                not hasattr(self, item)
-                # subclasses attributes that want to be read lazily should be initialised to None
-                or object.__getattribute__(self, item) is None
-            )
-            # only read if unread otherwise we have already tried looking for the attribute and need to throw an error
-            and self.state is FileState.Unread
-            # new addition to allow blocking of file reading
-            and not self.state is FileState.Blocked
-        ):
-            self.read()
+        objhasattr = object_hasattr(self, item)
+        if (
+            (objhasattr and object_getattribute(self, item) is None)
+            or not objhasattr
+        ) and object_getattribute(self, "state") is FileState.Unread:
+            object_getattribute(self, "read")()
 
         try:
-            return object.__getattribute__(self, item)
+            return object_getattribute(self, item)
         except AttributeError:
             raise AttributeError(
-                f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}'"
+                f"'{object_getattribute(self, 'path')}' instance of '{object_getattribute(self, '__class__').__name__}' has no attribute '{item}'"
             )
 
     def __getitem__(self, item):

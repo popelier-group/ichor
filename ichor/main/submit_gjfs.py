@@ -4,8 +4,8 @@ from typing import Optional
 
 from ichor.batch_system import JobID
 from ichor.common.io import last_line
+from ichor.files import PointsDirectory
 from ichor.logging import logger
-from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
 

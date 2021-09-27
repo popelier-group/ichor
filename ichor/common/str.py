@@ -63,3 +63,13 @@ def split_by(
         if m < len(s):
             new_s += [s[m:]]
     return new_s
+
+
+def in_sensitive(value: str, lst: List[str]) -> bool:
+    """
+    Case insensitive 'in'
+    :param value: value to search list for
+    :param lst: list of strings to search value in
+    :return: boolean based on whether value is in lst ignoring case
+    """
+    return value.lower() in [i.lower() for i in lst]

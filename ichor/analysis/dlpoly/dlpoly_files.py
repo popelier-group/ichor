@@ -7,7 +7,8 @@ import numpy as np
 from ichor.analysis.geometry.geometry_calculator import \
     get_internal_feature_indices
 from ichor.atoms import Atom, Atoms
-from ichor.common.io import convert_to_path, mkdir, ln, relpath
+from ichor.common.conversion import try_float
+from ichor.common.io import convert_to_path, ln, mkdir, relpath
 from ichor.common.str import split_by
 from ichor.constants import dlpoly_weights
 from ichor.file_structure import FILE_STRUCTURE
@@ -15,7 +16,6 @@ from ichor.files import Trajectory
 from ichor.globals import GLOBALS
 from ichor.models import Models
 from ichor.units import AtomicDistance
-from ichor.common.conversion import try_float
 
 
 class DlpolyTrajectoryKey(Enum):
@@ -194,7 +194,9 @@ class DlpolyHistory(Trajectory):
                         ta.type = str(record[0])
                         ta.index = int(record[1])
                         ta.atomic_mass = float(record[2])
-                        ta.atomic_charge = try_float(record[3], default=0.0)  # can fail if no q00 file is provided
+                        ta.atomic_charge = try_float(
+                            record[3], default=0.0
+                        )  # can fail if no q00 file is provided
 
                         ta.coordinates = np.array(
                             [float(ci) for ci in next(f).split()]
@@ -309,7 +311,9 @@ def link_models(path: Path, models: Models):
         ln(model.path.absolute(), model_dir)
 
 
-def setup_dlpoly_directory(path: Path, atoms: Atoms, models: Models, temperature: float = 0.0):
+def setup_dlpoly_directory(
+    path: Path, atoms: Atoms, models: Models, temperature: float = 0.0
+):
     mkdir(path)
     write_control(path, temperature=temperature)
     write_config(path, atoms)
@@ -328,8 +332,12 @@ def get_dlpoly_directories(models: List[Models]) -> List[Path]:
 
 
 @convert_to_path
-def setup_dlpoly_directories(atoms: Atoms, models: List[Models], temperature: float = 0.0) -> List[Path]:
+def setup_dlpoly_directories(
+    atoms: Atoms, models: List[Models], temperature: float = 0.0
+) -> List[Path]:
     dlpoly_directories = get_dlpoly_directories(models)
     for dlpoly_dir, model in zip(dlpoly_directories, models):
-        setup_dlpoly_directory(dlpoly_dir, atoms, model, temperature=temperature)
+        setup_dlpoly_directory(
+            dlpoly_dir, atoms, model, temperature=temperature
+        )
     return dlpoly_directories

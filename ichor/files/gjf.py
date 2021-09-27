@@ -1,12 +1,12 @@
 import re
 from enum import Enum
+from pathlib import Path
 from typing import List, Optional
 
 from ichor import patterns
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
-from ichor.files.file import File
-from ichor.geometry import Geometry
+from ichor.files.qcp import QuantumChemistryProgramInput
 
 
 class GaussianJobType(Enum):
@@ -21,24 +21,19 @@ class GaussianJobType(Enum):
         return [ty.value for ty in GaussianJobType]
 
 
-class GJF(Geometry, File):
+class GJF(QuantumChemistryProgramInput):
     """Wraps around a .gjf file that is used as input to Gaussian."""
 
-    def __init__(self, path):
-        File.__init__(self, path)
-        Geometry.__init__(self)
+    def __init__(self, path: Path):
+        QuantumChemistryProgramInput.__init__(self, path)
 
         self.job_type: Optional[GaussianJobType] = None
-        self.method: Optional[str] = None
-        self.basis_set: Optional[str] = None
 
         self.charge: Optional[int] = None
         self.multiplicity: Optional[int] = None
 
         self.startup_options: Optional[List[str]] = None
         self.keywords: Optional[List[str]] = None
-
-        self.atoms = None
 
     @classproperty
     def filetype(cls) -> str:

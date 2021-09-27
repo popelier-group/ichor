@@ -1,20 +1,24 @@
-from ichor.menu import Menu
 from pathlib import Path
-from typing import Optional, List
-from ichor.file_structure import FILE_STRUCTURE
-from ichor.common.io import get_files_of_type
-from ichor.analysis.get_path import get_file
-from ichor.common.sorting.natsort import natsorted
+from typing import List, Optional
 
+from ichor.analysis.get_path import get_file
+from ichor.common.io import get_files_of_type
+from ichor.common.sorting.natsort import natsorted
+from ichor.file_structure import FILE_STRUCTURE
+from ichor.menu import Menu
 
 _input_file: Optional[Path] = None
 _input_filetypes: Optional[List[str]] = None
 
 
-def get_first_file(directory: Path, filetypes: List[str], recursive: bool = False) -> Optional[Path]:
+def get_first_file(
+    directory: Path, filetypes: List[str], recursive: bool = False
+) -> Optional[Path]:
     if directory.exists():
         for ft in filetypes:
-            files = get_files_of_type(ft, directory, recursive=recursive, sort=natsorted)
+            files = get_files_of_type(
+                ft, directory, recursive=recursive, sort=natsorted
+            )
             if len(files) > 0:
                 return files[0]
 
@@ -48,13 +52,17 @@ def _get_input_menu_refresh(menu):
     for i, f in enumerate(files):
         menu.add_option(f"{i+1}", f"{f}", _set_input, kwargs={"input_file": f})
     menu.add_space()
-    menu.add_option(f"c", f"Custom Input", get_file, kwargs={"filetype": _input_filetypes})
+    menu.add_option(
+        f"c", f"Custom Input", get_file, kwargs={"filetype": _input_filetypes}
+    )
     menu.add_space()
     menu.add_message(f"Current Input File {_input_file}")
     menu.add_final_options()
 
 
-def get_input_menu(current_input: Path, filetypes: Optional[List[str]] = None) -> Path:
+def get_input_menu(
+    current_input: Path, filetypes: Optional[List[str]] = None
+) -> Path:
     global _input_file
     global _input_filetypes
     _input_file = current_input

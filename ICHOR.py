@@ -1729,7 +1729,7 @@ class Tree:
         return str(self._dict[id])
 
 
-# Moved to ichor/file_strcture/__init__.py
+# Moved to ichor/file_strcture/qcp.py
 class FileStructure(Tree):
     def __init__(self):
         super().__init__()

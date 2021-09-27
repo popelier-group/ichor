@@ -16,10 +16,9 @@ from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
 from ichor.drop_compute import DROP_COMPUTE_LOCATION
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.files import Trajectory
+from ichor.files import PointsDirectory, Trajectory
 from ichor.machine import MACHINE, SubmitType
 from ichor.make_sets import make_sets_npoints
-from ichor.points import PointsDirectory
 from ichor.submission_script import SCRIPT_NAMES, DataLock
 
 __all__ = [

@@ -8,7 +8,7 @@ from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
 from ichor.common.io import move
 from ichor.files.file import File
-from ichor.geometry import GeometryData
+from ichor.files.geometry import GeometryData
 
 
 class INT(GeometryData, File):
@@ -483,7 +483,7 @@ class INT(GeometryData, File):
             multipole: self.multipoles_data[multipole]
             for multipole in constants.multipole_names
         }
-        multipoles["q00"] = self.q
+        multipoles["q00"] = self.q  # replace charge with net charge
         return multipoles
 
     @property
@@ -505,5 +505,6 @@ class INT(GeometryData, File):
         """Move the original .int file (which is now stored as *.int.bak) to its original path *.int"""
         move(self.backup_path, self.path)
 
+    # not sure what this is for
     def getattr_as_dict(self, attr):
         pass

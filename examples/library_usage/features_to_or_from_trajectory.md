@@ -92,7 +92,7 @@ We can do
 
 ```python
 
-from ichor.points.points_directory import PointsDirectory
+from ichor.files import PointsDirectory
 
 points = PointsDirectory("WD_phi_change_only")
 ```

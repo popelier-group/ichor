@@ -41,7 +41,7 @@ Each `SYSTEM*` directory is one molecular geometry for which `.wfn` and `.int` f
 To get the energy of all `.wfn files`, we can do
 
 ```python
-from ichor.points.points_directory import PointsDirectory
+from ichor.files import PointsDirectory
 
 # PointsDirectory("path_to_directory_with_wfn_and_int_files")
 points_dir = PointsDirectory("water_small_dataset")
