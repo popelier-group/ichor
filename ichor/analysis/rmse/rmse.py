@@ -194,19 +194,18 @@ def write_to_excel(
                     else:
                         abs_error = np.abs(true[type_][atom] - predicted[type_][atom])
 
-                    # calculate MAE and append to errors row to be written below the last row of the df
-                    mean_absolute_error = calculate_error(abs_error, error_type)
-                    errors_to_write.append(mean_absolute_error)
-                    # also write this error to dictionary which will be used to make an MAE sheet
-                    all_errors_dict[f"{atom}_{type_} (kJ mol-1)"][ntrain] = mean_absolute_error
-
-                    # add Absolute Error Column
+                    # add Absolute Error Column to df
                     rmse_data[f"{atom}_{type_} absError (kJ mol-1)"] = abs_error
-
                     type_errors += [abs_error]
 
-                # after looping thorugh all atoms, we can sum up all the errors to make a total error column for every property
-                # make the list into a 2D numpy array and sum over the rows, which are the errors for each atom (for every property)
+                    # calculate MAE/RMSE and append to errors row to be written below the last row of the df
+                    error_estimator = calculate_error(abs_error, error_type)
+                    errors_to_write.append(error_estimator)
+                    # also write this error to dictionary which will be used to make the final sheet containing mae/rmse
+                    all_errors_dict[f"{atom}_{type_} (kJ mol-1)"][ntrain] = error_estimator
+
+                # after looping thorugh all atoms, we can sum up all the errors to make a total error column for one property
+                # make the list into a 2D numpy array and sum over the rows, which are the errors for each atom (for one property)
                 total_abs_error = np.sum(np.array(type_errors), axis=0)
                 rmse_data[f"{type_} Total absError (kJ mol-1)"] = total_abs_error
 
