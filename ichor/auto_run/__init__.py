@@ -18,5 +18,4 @@ __all__ = [
     "submit_ichor_aimall_command_to_auto_run",
     "make_models",
     "submit_ichor_active_learning_job_to_auto_run",
-    "auto_run",
 ]
