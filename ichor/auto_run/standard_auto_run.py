@@ -22,11 +22,13 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import Trajectory
 from ichor.machine import MACHINE, SubmitType
 from ichor.make_sets import make_sets_npoints
-from ichor.points import PointsDirectory
+from ichor.files import PointsDirectory
 from ichor.submission_script import SCRIPT_NAMES, DataLock
+
 
 class AutoRunAlreadyRunning(Exception):
     pass
+
 
 class IterState(Enum):
     """The iteration which the adaptive sampling is on. The first step is making the sets (running Makeset)."""
