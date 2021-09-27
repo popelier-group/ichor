@@ -170,9 +170,9 @@ def write_to_excel(
             true = true.T
             predicted = predicted.T
 
-            # a dict that is made into a pandas df and written to one sheet
+            # a dict that is made into a pandas df and written to a separate excel sheet for every model
             rmse_data = {}
-            # contains the MAE errors to be written at the bottom of the each
+            # contains the MAE errors to be written at the bottom of the each sheet
             errors_to_write = []
 
             # loop over all types (eg. iqa, q00, etc.)
@@ -206,34 +206,33 @@ def write_to_excel(
                     type_errors += [abs_error]
 
                 # after looping thorugh all atoms, we can sum up all the errors to make a total error column for every property
-                # make the list into a 2D numpy array and sum over the rows, which are the errors for each atom
+                # make the list into a 2D numpy array and sum over the rows, which are the errors for each atom (for every property)
                 total_abs_error = np.sum(np.array(type_errors), axis=0)
                 rmse_data[f"{type_} Total absError (kJ mol-1)"] = total_abs_error
 
-                # calculate total MAE/rmse and append to errors row to be written below the last row of the df
+                # calculate total MAE/RMSE and append to errors list that is written on the row below the written dataframe
                 total_mean_absolute_error = calculate_error(total_abs_error, error_type)
                 errors_to_write.append(total_mean_absolute_error)
-                # also write this error to dictionary which will be used to make the final sheet containing mae/rmse
+                # also write this error to the dictionary which is used to make the final sheet containing mae/rmse
                 all_errors_dict[f"total_{type_} (kJ mol-1)"][ntrain] = total_mean_absolute_error
 
             df = pd.DataFrame(rmse_data)
             df.to_excel(writer, sheet_name=sheet_name)
 
-            # get the number of rows. Since excel starts counting from 1, this number will be the next empty row where we can write MAE
+            # get the number of rows. Since excel starts counting from 1, this number will be the next empty row where we can write RMSE
             n_rows = df.shape[0]
-
-            # write out the MAE row for every third column.
+            # write out the RMSE row for every third column.
             col_idx = 0
             writer.sheets[sheet_name].write(n_rows+1, col_idx, error_type)
             col_idx += 3
             for error in errors_to_write[:-1]:
                 writer.sheets[sheet_name].write(n_rows+1, col_idx, error)
                 col_idx += 3
-            # subtract two columns as we need to write out the Total absError MAE, but that should be written right next to the previous MAE
+            # subtract two columns as we need to write out the Total absError MAE, but that should be written right next to the previous RMSE
             col_idx -= 2
             writer.sheets[sheet_name].write(n_rows+1, col_idx, errors_to_write[-1])
 
-        # make the sheet that only contains MAE information, pandas df can accept a dictionary of dictionaries
+        # make the sheet that only contains RMSE information, pandas df can accept a dictionary of dictionaries
         df = pd.DataFrame(all_errors_dict)
         df.to_excel(writer, sheet_name=error_type)
         writer.sheets[error_type].write(0, 0, "n_train")
