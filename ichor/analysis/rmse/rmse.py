@@ -92,7 +92,7 @@ def calculate_error(data: np.array, error_type: str):
 def write_to_excel(
     true_values: Dict[int, ModelsResult],
     predicted_values: Dict[int, ModelsResult],
-    output_name: Path = "rmse_new_implementation.xlsx",
+    output_name: Path = "rmse.xlsx",
     error_type: Union["mae", "rmse"] = "rmse",
     only_every_nth_model: Union[int, None] = None,
     x_axis_name:str = "Number of Training Points",
@@ -214,7 +214,7 @@ def write_to_excel(
                 total_mean_absolute_error = calculate_error(total_abs_error, error_type)
                 errors_to_write.append(total_mean_absolute_error)
                 # also write this error to dictionary which will be used to make the final sheet containing mae/rmse
-                all_errors_dict[f"total_{type_}"][ntrain] = total_mean_absolute_error
+                all_errors_dict[f"total_{type_} (kJ mol-1)"][ntrain] = total_mean_absolute_error
 
             df = pd.DataFrame(rmse_data)
             df.to_excel(writer, sheet_name=sheet_name)
@@ -238,22 +238,46 @@ def write_to_excel(
         df.to_excel(writer, sheet_name=error_type)
         writer.sheets[error_type].write(0, 0, "n_train")
 
-        s_curve = workbook.add_chart({"type": "scatter", "subtype": "straight"})
+        # RMSE plot for IQA energies
+        rmse_plot1 = workbook.add_chart({"type": "scatter", "subtype": "straight"})
         # add data to plot
-        for idx, col in enumerate(df.columns, start=1):
-            s_curve.add_series(
-                {
-                    "name": col,
-                    "categories": [error_type, 1, 0, df.shape[0], 0],
-                    "values": [error_type, 1, idx, df.shape[0], idx],
-                    "line": {"width": 1.5},
-                }
-            )
+        for col in df.columns:
+            if ("iqa" in col.lower()):
+                rmse_plot1.add_series(
+                    {
+                        "name": col,
+                        "categories": [error_type, 1, 0, df.shape[0], 0],
+                        "values": [error_type, 1, df.columns.get_loc(col)+1, df.shape[0], df.columns.get_loc(col)+1],
+                        "line": {"width": 1.5},
+                    }
+                )
         # add the plot to the error_type sheet
-        s_curve.set_x_axis(x_axis_settings)
-        s_curve.set_y_axis(y_axis_settings)
+        rmse_plot1.set_x_axis(x_axis_settings)
+        rmse_plot1.set_y_axis(y_axis_settings)
         if not show_legend:
-            s_curve.set_legend({"position": "none"})
-        s_curve.set_style(excel_style) # default style of excel plots
+            rmse_plot1.set_legend({"position": "none"})
+        rmse_plot1.set_style(excel_style) # default style of excel plots
 
-        writer.sheets[error_type].insert_chart(f"{num2col(df.shape[1]+3)}2", s_curve)
+        writer.sheets[error_type].insert_chart(f"{num2col(df.shape[1]+3)}2", rmse_plot1)
+
+        # RMSE plot for multipoles
+        rmse_plot2 = workbook.add_chart({"type": "scatter", "subtype": "straight"})
+        # add data to plot
+        for col in df.columns:
+            if not ("iqa" in col.lower()):
+                rmse_plot2.add_series(
+                    {
+                        "name": col,
+                        "categories": [error_type, 1, 0, df.shape[0], 0],
+                        "values": [error_type, 1, df.columns.get_loc(col)+1, df.shape[0], df.columns.get_loc(col)+1],
+                        "line": {"width": 1.5},
+                    }
+                )
+        # add the plot to the error_type sheet
+        rmse_plot2.set_x_axis(x_axis_settings)
+        rmse_plot2.set_y_axis(y_axis_settings)
+        if not show_legend:
+            rmse_plot2.set_legend({"position": "none"})
+        rmse_plot2.set_style(excel_style) # default style of excel plots
+
+        writer.sheets[error_type].insert_chart(f"{num2col(df.shape[1]+3)}19", rmse_plot2)
