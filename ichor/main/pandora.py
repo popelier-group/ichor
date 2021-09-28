@@ -50,7 +50,7 @@ def write_pandora_input(points: PointsDirectory) -> List[Path]:
             point.pandora.mkdir()
         if not point.pandora.input.exists():
             point.pandora.input = PandoraInput(point.pandora.path / f"{point.path.name}{PandoraInput.filetype}")
-            point.pandora.input.atoms = point.xyz
+            point.pandora.input.atoms = point.xyz.atoms
         point.pandora.input.write()
         pandora_inputs.append(point.pandora.input.path)
     return pandora_inputs

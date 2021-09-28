@@ -22,6 +22,7 @@ class XYZ(GeometryFile, File):
         with open(self.path, 'r') as f:
             natoms = int(next(f))
             _ = next(f)  # blank line
+            self.atoms = Atoms()
             for _ in range(natoms):
                 record = next(f).split()
                 self.atoms.add(Atom(record[0], float(record[1]), float(record[2]), float(record[3])))
