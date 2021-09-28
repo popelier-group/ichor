@@ -9,14 +9,14 @@ from ichor.submission_script.ichor_command import ICHORCommand
 
 
 class PandoraCommand(PythonCommand):
-    def __int__(
+    def __init__(
         self, config_file: Path, pyscf: bool = True, morfi: bool = True
     ):
         self.config_file = config_file
         self.run_pyscf = pyscf
         self.run_morfi = morfi
 
-        super().__init__(Path(GLOBALS.PANDORA_LOCATION).absolute())
+        PythonCommand.__init__(self, Path(GLOBALS.PANDORA_LOCATION).absolute())
 
     @classproperty
     def modules(self) -> Modules:
@@ -44,7 +44,7 @@ class PandoraCommand(PythonCommand):
 
 class PandoraPySCFCommand(PandoraCommand):
     def __init__(self, config_file: Path, point_directory: Optional[Path] = None):
-        super().__init__(config_file, pyscf=True, morfi=False)
+        PandoraCommand.__init__(self, config_file, pyscf=True, morfi=False)
         self.point_directory = point_directory
 
     def data(self) -> List[str]:
