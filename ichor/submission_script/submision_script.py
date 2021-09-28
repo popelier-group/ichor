@@ -290,4 +290,5 @@ class SubmissionScript:
 
     # Note: arguments of __exit__ statement are required
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.write()
+        if exc_type is None:
+            self.write()
