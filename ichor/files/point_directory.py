@@ -44,13 +44,12 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
             for f in self.files():
                 if isinstance(f, GeometryFile):
                     self.xyz = XYZ(Path(self.path) / (self.path.name + XYZ.filetype), atoms=f.atoms)
-                    self.xyz.write()
 
     @property
     def atoms(self):
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
         if self.xyz.exists():
-            return self.xyz
+            return self.xyz.atoms
         if self.gjf.exists():
             return self.gjf.atoms
         elif self.wfn.exists():
