@@ -24,6 +24,7 @@ def make_models(
         str(ntrain),
         str(types),
     )
+    # todo: This function submits jobs which write out datafile, it does not make models.
     with TimingManager(submission_script, message="Making Models"):
         submission_script.add_command(ichor_command)
     submission_script.write()

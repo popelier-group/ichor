@@ -148,14 +148,14 @@ def next_iter(
             # return the total number of points which are going to be in the initial training set
             IterArgs.nPoints.value = make_sets_npoints(
                 points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
-            )
+            ) # GLOBALS.TRAINING_POINTS contains the number of initial training points
             # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
             job_id = IterStep(
                 submit_make_sets_job_to_auto_run,
                 IterUsage.All,
                 [points_location],
             ).run(job_id, state)
-            print(f"Submitted: {job_id}")
+            print(f"Submitted: {job_id}")  # GLOBALS.TRAINING_POINTS is used in make_sets to make training sets with initial number of points
 
     # for every other job, i.e. IterState.Standard, IterState.Last
     else:
@@ -166,23 +166,27 @@ def next_iter(
     else:
         IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
+    # modify the uid for dropincompute as SGE is 32-bit
     modify_id = truncate(
         GLOBALS.UID.int, nbits=32
     )  # only used for drop-n-compute
     # todo: think about overflow
 
+    # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
     for iter_step in func_order:
-        # Drop-n-compute
+
+        # append the modified id to the submission script name as this is how drop-in-compute holds jobs
         if MACHINE.submit_type is SubmitType.DropCompute:
             modify = f"+{modify_id}"
             if job_id is not None:
-                modify += f"+hold_{modify_id - 1}"
+                modify += f"+hold_{modify_id - 1}" # hold for the previous job (whose job id is one less than this job)
             SCRIPT_NAMES.modify = modify
             modify_id += 1
-        # All runs
         job_id = iter_step.run(job_id, state)
         if job_id is not None:
             print(f"Submitted: {job_id}")
+
+    # always return the job_id at the end because we need to hold next jobs
     return job_id
 
 
@@ -217,7 +221,7 @@ def auto_run() -> JobID:
                 break  # Only submit the first iteration for drop-n-compute
     return job_id
 
-
+# used for Drop-In compute
 def submit_next_iter(current_iteration) -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
