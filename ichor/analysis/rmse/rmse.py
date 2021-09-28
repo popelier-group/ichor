@@ -189,10 +189,9 @@ def write_to_excel(
                     rmse_data[f"{atom}_{type_} Predicted (Ha)"] = predicted[type_][atom]
 
                     # calculate absolute error column, make into kJ mol-1 if working with iqa energies
+                    abs_error = np.abs(true[type_][atom] - predicted[type_][atom])
                     if type_ == "iqa":
                         abs_error = ha_to_kj_mol * np.abs(true[type_][atom] - predicted[type_][atom])
-                    else:
-                        abs_error = np.abs(true[type_][atom] - predicted[type_][atom])
 
                     # add Absolute Error Column to df
                     rmse_data[f"{atom}_{type_} absError (kJ mol-1)"] = abs_error

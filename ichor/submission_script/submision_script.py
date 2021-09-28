@@ -22,9 +22,7 @@ class SubmissionScript:
 
     def __init__(self, path: Path):
         self.path = Path(path)
-        self.commands = (
-            []
-        )  # a list of commands to be submitted to batch system
+        self.commands = []  # a list of commands to be submitted to batch system
 
     @classproperty
     def filetype(self) -> str:
@@ -212,12 +210,15 @@ class SubmissionScript:
         return datafile_variables, datafile_str
 
     def write(self):
+        """ Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
+        are written at the top of the file. The commands to run (such as Gaussian, AIMALL, etc.) are written below the options. """
         from ichor.file_structure import FILE_STRUCTURE
         from ichor.globals import GLOBALS
 
         mkdir(self.path.parent)
 
         with open(self.path, "w") as f:
+
             njobs = max(
                 len(command_group) for command_group in self.grouped_commands
             )
@@ -248,7 +249,7 @@ class SubmissionScript:
                 command_variables = []
                 if (
                     command_group.data
-                ):  # Gaussian, Ferebus, AIMALL jobs need access to datafiles
+                ):  # Gaussian, Ferebus, AIMALL jobs need access to datafiles, the datfile's name is the unique id that was assigned to GLOBALS
                     datafile = FILE_STRUCTURE["datafiles"] / Path(
                         str(GLOBALS.UID)
                     )
@@ -288,7 +289,14 @@ class SubmissionScript:
         """
         return self
 
+    # todo: Add exc_type, exc_val, etc. to docstring as it is not clear what they are used for. Examples will also help
     # Note: arguments of __exit__ statement are required
     def __exit__(self, exc_type, exc_val, exc_tb):
+            """ Writes out the submission script once the `with` context manager is done.
+
+        .. note::
+            This does not submit the submission script, it only writes it to disk.
+        """
+
         if exc_type is None:
             self.write()

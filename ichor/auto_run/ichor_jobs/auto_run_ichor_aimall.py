@@ -12,7 +12,7 @@ def submit_ichor_aimall_command_to_auto_run(
     atoms: Optional[MutableValue],
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
-    """Writes out the datafile need to submit the wavefunction files to AIMALL. The actual AIMALL calculations are ran in the next step."""
+    """Writes out the datafile needed to submit the wavefunction files to AIMALL. The actual AIMALL calculations are ran in the next step."""
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["aimall"])
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
