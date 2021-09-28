@@ -129,6 +129,9 @@ class AnnotatedDirectory(Directory, ABC):
         as defined from class variables in PointsDirectory. Get the type inside the [] brackets. After that it constructs a filetypes
         dictionary containing {"gjf": GJF, "wfn": WFN} and dirtypes dictionary containing {"ints": INTs}
         """
+        if not self.exists():
+            return
+
         filetypes = self.filetypes
         dirtypes = self.dirtypes
 

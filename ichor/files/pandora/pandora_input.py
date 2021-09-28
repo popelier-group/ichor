@@ -44,7 +44,7 @@ class PandoraInput(QuantumChemistryProgramInput):
         self.basis_set = GLOBALS.BASIS_SET.lower()
         if not self.basis_set.startswith("unc-"):
             self.basis_set = "unc-" + self.basis_set
-        self.ccsdmod = GLOBALS.PANDORA_CCSDMOD
+        self.ccsdmod = PandoraCCSDmod(GLOBALS.PANDORA_CCSDMOD)
         self.morfi_grid_angular = GLOBALS.MORFI_ANGULAR
         self.morfi_grid_radial = GLOBALS.MORFI_RADIAL
 
