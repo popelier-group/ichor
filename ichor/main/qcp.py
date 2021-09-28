@@ -14,9 +14,10 @@ class CannotSubmitPointsDirectoryToQuantumChemistryProgram(Exception):  # lol th
 
 
 def submit_qcp(directory: Path) -> Optional[JobID]:
-    if QUANTUM_CHEMISTRY_PROGRAM is QuantumChemistryProgram.Gaussian:
+    qcp = QUANTUM_CHEMISTRY_PROGRAM()
+    if qcp is QuantumChemistryProgram.Gaussian:
         return submit_points_directory_to_gaussian(directory)
-    elif QUANTUM_CHEMISTRY_PROGRAM is QuantumChemistryProgram.PySCF:
+    elif qcp is QuantumChemistryProgram.PySCF:
         return submit_points_directory_to_pyscf(directory)
     else:
-        raise CannotSubmitPointsDirectoryToQuantumChemistryProgram(directory, QUANTUM_CHEMISTRY_PROGRAM)
+        raise CannotSubmitPointsDirectoryToQuantumChemistryProgram(directory, qcp)

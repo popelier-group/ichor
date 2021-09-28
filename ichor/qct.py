@@ -7,4 +7,5 @@ class QuantumChemicalTopologyProgram(Enum):
     Morfi = QuantumChemistryProgram.PySCF
 
 
-QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM = QuantumChemicalTopologyProgram(QUANTUM_CHEMISTRY_PROGRAM)
+def QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM():
+    return QuantumChemicalTopologyProgram(QUANTUM_CHEMISTRY_PROGRAM)

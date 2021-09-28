@@ -40,4 +40,5 @@ class QuantumChemistryProgram(Enum):
         return super()._missing_(value)
 
 
-QUANTUM_CHEMISTRY_PROGRAM = QuantumChemistryProgram(GLOBALS.METHOD)
+def QUANTUM_CHEMISTRY_PROGRAM():
+    return QuantumChemistryProgram(GLOBALS.METHOD)

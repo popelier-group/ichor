@@ -21,7 +21,7 @@ def _points_directory_menu_refresh(menu):
     menu.clear_options()
     menu.add_option(
         "1",
-        f"Submit Points to {QUANTUM_CHEMISTRY_PROGRAM.name}",
+        f"Submit Points to {QUANTUM_CHEMISTRY_PROGRAM().name}",
         submit_qcp,
         kwargs={
             "directory": _points_directory_path
@@ -29,7 +29,7 @@ def _points_directory_menu_refresh(menu):
     )
     menu.add_option(
         "2",
-        f"Submit Points to {QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM.name}",
+        f"Submit Points to {QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM().name}",
         submit_qct,
         kwargs={"directory": _points_directory_path},
     )
