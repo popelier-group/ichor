@@ -6,6 +6,7 @@ from ichor.globals import GLOBALS
 from ichor.modules import Modules, PandoraModules
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.ichor_command import ICHORCommand
+from ichor.pandora import PANDORA_LOCATION
 
 
 class PandoraCommand(PythonCommand):
@@ -16,7 +17,7 @@ class PandoraCommand(PythonCommand):
         self.run_pyscf = pyscf
         self.run_morfi = morfi
 
-        PythonCommand.__init__(self, Path(GLOBALS.PANDORA_LOCATION).absolute())
+        PythonCommand.__init__(self, Path(PANDORA_LOCATION()).absolute())
 
     @classproperty
     def modules(self) -> Modules:
