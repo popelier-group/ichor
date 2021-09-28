@@ -56,6 +56,13 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
             return self.wfn.atoms
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
+    @atoms.setter
+    def atoms(self, value):
+        if value is not None:
+            if not self.xyz.exists():
+                self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
+            self.xyz = XYZ(self.xyz.path, value)
+
     def get_atom_data(self, atom) -> AtomData:
         if self.ints:
             return AtomData(self.atoms[atom], self.ints[atom])
