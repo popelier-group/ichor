@@ -35,7 +35,7 @@ class PandoraInput(QuantumChemistryProgramInput):
             self.atoms.add(Atom(atom[0], atom[1], atom[2], atom[3]))
         self.ccsdmod = PandoraCCSDmod(data["pandora"]["ccsdmod"])
         self.basis_set = data["pyscf"]["method"]
-        self.basis_set = data["pyscf"]["basis_set"]
+        self.basis_set = data["pyscf"]["basis"]
         self.morfi_grid_angular = data["morfi"]["grid"]["angular"]
         self.morfi_grid_radial = data["morfi"]["grid"]["radial"]
 
@@ -62,7 +62,7 @@ class PandoraInput(QuantumChemistryProgramInput):
             },
             "pyscf": {
                 "method": self.method,
-                "basis_set": self.basis_set,
+                "basis": self.basis_set,
             },
             "morfi": {
                 "grid": {
