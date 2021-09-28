@@ -9,6 +9,8 @@ from ichor.common.functools import (buildermethod, cached_property,
 from ichor.files.file import File, FileState
 from ichor.files.path_object import PathObject
 
+from ichor.common.io import mkdir
+
 
 class Directory(PathObject, ABC):
     """
@@ -29,6 +31,9 @@ class Directory(PathObject, ABC):
         note this is not reading the files just finding the paths to the files
         """
         pass
+
+    def mkdir(self):
+        mkdir(self.path)
 
     def move(self, dst):
         """

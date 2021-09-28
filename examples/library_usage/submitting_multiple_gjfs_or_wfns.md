@@ -6,12 +6,12 @@ The `Trajectory` class can be used to convert a trajectory file (such as a `.xyz
 
 ```python
 
-from ichor.main.submit_gjfs import submit_gjfs
+from ichor.main.gaussian import submit_points_directory_to_gaussian
 from ichor.files.trajectory import Trajectory
 
 traj = Trajectory("WATER.xyz")
 traj.to_dir("./water_no_angle_change")
-submit_gjfs("./water_no_angle_change")
+submit_points_directory_to_gaussian("./water_no_angle_change")
 ```
 
 The `to_dir` method accepts a directory where all the `.gjf` are going to be written to. From that we can use the `submit_gjfs` function which accepts a path to a directory containing `.gjf` files.
@@ -35,7 +35,7 @@ ICHOR's Globals handle all the settings that various programs use. Gaussian has 
 For example, if we want to change the Gaussian core count that is used for the job, we can do:
 
 ```python
-from ichor.main.submit_gjfs import submit_gjfs
+from ichor.main.gaussian import submit_points_directory_to_gaussian
 from ichor.globals import GLOBALS
 from ichor.files.trajectory import Trajectory
 
@@ -69,9 +69,9 @@ See `ichor/globals/globals.py` file which contains a table with all the differen
 Now that we have ran Gaussian, we should have `.wfn` files which can be passed into AIMALL. After the Gaussian jobs are finished we can do
 
 ```python
-from ichor.main.submit_wfns import submit_wfns
+from ichor.main.aimall import submit_points_directory_to_aimall
 
-submit_wfns("./water_no_angle_change", atoms=None)
+submit_points_directory_to_aimall("./water_no_angle_change", atoms=None)
 ```
 
 This will queue up AIMALL jobs for all the .wfn files that were found in the given directory.

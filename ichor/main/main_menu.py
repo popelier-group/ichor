@@ -3,36 +3,54 @@ from ichor.main.options_menu import options_menu
 from ichor.main.queue import queue_menu
 from ichor.main.tools_menu import tools_menu
 from ichor.menu import Menu
+from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM
+from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM
+from pathlib import Path
+from ichor.main.make_models import make_models_menu
+from ichor.main.gaussian import submit_points_directory_to_gaussian
+from ichor.main.aimall import submit_points_directory_to_aimall
+from ichor.main.qcp import submit_qcp
+from ichor.main.qct import submit_qct
 
 
-def points_directory_menu(path):
+_points_directory_path = None
+
+
+def _points_directory_menu_refresh(menu):
+    global _points_directory_path
+    menu.clear_options()
+    menu.add_option(
+        "1",
+        f"Submit Points to {QUANTUM_CHEMISTRY_PROGRAM.name}",
+        submit_qcp,
+        kwargs={
+            "directory": _points_directory_path
+        },  # which directory to submit gjfs from (TRAINING_SET, SAMPLE_POOL, etc.). Set by GLOBALS.FILE_STRUCTURE
+    )
+    menu.add_option(
+        "2",
+        f"Submit Points to {QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM.name}",
+        submit_qct,
+        kwargs={"directory": _points_directory_path},
+    )
+    menu.add_option(
+        "3", "Make Models", make_models_menu, kwargs={"directory": _points_directory_path}
+    )
+    menu.add_final_options()
+
+
+
+def points_directory_menu(path: Path):
     """Menu that shows up when the user wants to run jobs for a particular Points directory, such as the training set directory,
     validation set directory, or sample pool directory.
 
     :param path: A Path object to the directory for which the menu is about.
     """
-    from ichor.main.make_models import make_models_menu
-    from ichor.main.submit_gjfs import submit_gjfs
-    from ichor.main.submit_wfns import submit_wfns
+    global _points_directory_path
+    _points_directory_path = path
 
-    with Menu(f"{path} Menu", space=True, back=True, exit=True) as menu:
-        menu.add_option(
-            "1",
-            "Submit GJFs to Gaussian",
-            submit_gjfs,
-            kwargs={
-                "directory": path
-            },  # which directory to submit gjfs from (TRAINING_SET, SAMPLE_POOL, etc.). Set by GLOBALS.FILE_STRUCTURE
-        )
-        menu.add_option(
-            "2",
-            "Submit WFNs to AIMAll",
-            submit_wfns,
-            kwargs={"directory": path},
-        )
-        menu.add_option(
-            "3", "Make Models", make_models_menu, kwargs={"directory": path}
-        )
+    with Menu(f"{path} Menu", refresh=_points_directory_menu_refresh):
+        pass
 
 
 def main_menu() -> None:

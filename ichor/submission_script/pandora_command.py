@@ -1,10 +1,11 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from ichor.common.functools import classproperty
 from ichor.globals import GLOBALS
 from ichor.modules import Modules, PandoraModules
 from ichor.submission_script.python_command import PythonCommand
+from ichor.submission_script.ichor_command import ICHORCommand
 
 
 class PandoraCommand(PythonCommand):
@@ -39,3 +40,27 @@ class PandoraCommand(PythonCommand):
         repr += f"{PythonCommand.command} {self.script} {variables[0]} {' '.join(self.args)}\n"
         repr += "popd"
         return repr
+
+
+class PandoraPySCFCommand(PandoraCommand):
+    def __init__(self, config_file: Path, point_directory: Optional[Path] = None):
+        super().__init__(config_file, pyscf=True, morfi=False)
+        self.point_directory = point_directory
+
+    def data(self) -> List[str]:
+        data = super().data
+        if self.point_directory is not None:
+            data.append(self.point_directory)
+        return data
+
+    def repr(self, variables: List[str]) -> str:
+        repr = super().repr(variables)
+        if self.point_directory is not None:
+            ichor_command = ICHORCommand(func='copy_aimall_wfn_to_point_directory', func_args=[variables[1]])
+            repr += f'\n{ichor_command.repr(variables)}'
+        return repr
+
+
+class PandoraMorfiCommand(PandoraCommand):
+    def __init__(self, config_file: Path):
+        super().__init__(config_file, pyscf=False, morfi=True)

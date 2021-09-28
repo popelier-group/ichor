@@ -74,12 +74,13 @@ Now we have a custom trajectory and we can run it through gaussian and Aimall li
 
 ```python
 
-from ichor.main.submit_gjfs import submit_gjfs
+from ichor.main.gaussian import submit_points_directory_to_gaussian
 from ichor.files.trajectory import Trajectory
 
-traj = Trajectory.features_file_to_trajector("water_dimer_phi_change_only.csv", atom_types=["O", "H", "H", "O", "H", "H"])
+traj = Trajectory.features_file_to_trajector("water_dimer_phi_change_only.csv",
+                                             atom_types=["O", "H", "H", "O", "H", "H"])
 traj.to_dir("./water_no_angle_change")
-submit_gjfs("./water_no_angle_change")
+submit_points_directory_to_gaussian("./water_no_angle_change")
 ```
 
 See the other example file for submitting multiple gjf or aimall files for details on batch Gaussian/Aimall submission with ichor.

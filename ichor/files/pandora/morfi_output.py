@@ -10,9 +10,10 @@ from ichor.files.pandora.mout import MOUT
 class MorfiDirectory(AnnotatedDirectory):
     mout: Optional[MOUT] = None
 
-    def __init__(self, path: Path):
-        AnnotatedDirectory.__init__(self, path)
+    @classproperty
+    def dirname(self) -> str:
+        return 'morfi-2pdm'
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
-        return path.name == "morfi-2pdm"
+        return path.name == MorfiDirectory.dirname

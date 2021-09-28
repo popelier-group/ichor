@@ -5,6 +5,8 @@ from ichor.common.functools import buildermethod, classproperty
 from ichor.files.file import File
 from ichor.files.geometry import GeometryData, GeometryFile
 from ichor.units import AtomicDistance
+from ichor.globals import GLOBALS
+from ichor.constants import AIMALL_FUNCTIONALS
 
 
 class WFN(GeometryFile, GeometryData, File):
@@ -83,18 +85,18 @@ class WFN(GeometryFile, GeometryData, File):
 
     def check_header(self):
         """Checks if the correct Gaussian method (eg. B3LYP) is being used in the Gaussian calculations."""
-        from ichor.globals import GLOBALS
 
-        data = []
-        with open(self.path, "r") as f:
-            for i, line in enumerate(f):
-                if i == 1:
-                    if GLOBALS.METHOD.upper() not in line.upper():
-                        f.seek(0)
-                        data = f.readlines()
-                    break
+        if GLOBALS.METHOD in AIMALL_FUNCTIONALS:
+            data = []
+            with open(self.path, "r") as f:
+                for i, line in enumerate(f):
+                    if i == 1:
+                        if GLOBALS.METHOD.upper() not in line.upper():
+                            f.seek(0)
+                            data = f.readlines()
+                        break
 
-        if data:
-            data[1] = data[1].strip() + "   " + str(GLOBALS.METHOD) + "\n"
-            with open(self.path, "w") as f:
-                f.writelines(data)
+            if data:
+                data[1] = data[1].strip() + "   " + str(GLOBALS.METHOD) + "\n"
+                with open(self.path, "w") as f:
+                    f.writelines(data)
