@@ -29,4 +29,4 @@ class XYZ(Atoms, File):
             f.write(f'{len(self)}\n')
             f.write('\n')
             for atom in self:
-                f.write(f'{atom.type} {atom.x} {atom.y} {atom.z}')
+                f.write(f'{atom.type} {atom.x} {atom.y} {atom.z}\n')
