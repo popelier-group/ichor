@@ -4,6 +4,7 @@ from pathlib import Path
 from ichor.common.functools import classproperty
 from ichor.files.directory import AnnotatedDirectory
 from ichor.files.wfn import WFN
+from ichor.files.optional_file import OptionalFile, OptionalPath
 
 
 class MorfiWFN(WFN):
@@ -13,8 +14,8 @@ class MorfiWFN(WFN):
 
 
 class PySCFDirectory(AnnotatedDirectory):
-    morfi_wfn: MorfiWFN
-    aimall_wfn: WFN
+    morfi_wfn: OptionalPath[MorfiWFN] = OptionalFile
+    aimall_wfn: OptionalPath[WFN] = OptionalFile
 
     @classproperty
     def dirname(self) -> str:

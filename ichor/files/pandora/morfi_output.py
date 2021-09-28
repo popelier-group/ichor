@@ -1,14 +1,14 @@
 import re
 from pathlib import Path
-from typing import Optional
 
 from ichor.common.functools import classproperty
 from ichor.files.directory import AnnotatedDirectory
 from ichor.files.pandora.mout import MOUT
+from ichor.files.optional_file import OptionalPath, OptionalFile
 
 
 class MorfiDirectory(AnnotatedDirectory):
-    mout: Optional[MOUT] = None
+    mout: OptionalPath[MOUT] = OptionalFile
 
     @classproperty
     def dirname(self) -> str:

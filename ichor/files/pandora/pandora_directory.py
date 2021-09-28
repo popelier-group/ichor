@@ -6,13 +6,15 @@ from ichor.files.pandora.pyscf_output import PySCFDirectory
 from ichor.common.functools import classproperty
 from ichor.files.geometry import GeometryFile, GeometryData
 
+from ichor.files.optional_file import OptionalFile, OptionalPath
+
 from pathlib import Path
 
 
 class PandoraDirectory(AnnotatedDirectory, GeometryFile, GeometryData):
-    input: Optional[PandoraInput] = None
-    pyscf: Optional[PySCFDirectory] = None
-    morfi: Optional[MorfiDirectory] = None
+    input: OptionalPath[PandoraInput] = OptionalFile
+    pyscf: OptionalPath[PySCFDirectory] = OptionalFile
+    morfi: OptionalPath[MorfiDirectory] = OptionalFile
 
     def write(self):
         if not self.exists():

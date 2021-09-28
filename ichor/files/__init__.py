@@ -11,6 +11,7 @@ from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.files.trajectory import Trajectory
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
+from ichor.files.optional_file import OptionalFile, OptionalPath
 
 __all__ = [
     "File",
@@ -29,5 +30,7 @@ __all__ = [
     "XYZ",
     "PySCFDirectory",
     "MorfiDirectory",
-    "PandoraDirectory"
+    "PandoraDirectory",
+    "OptionalFile",
+    "OptionalPath",
 ]

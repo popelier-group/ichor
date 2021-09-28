@@ -12,6 +12,7 @@ from ichor.files.ints import INTs
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
 from ichor.files.pandora import PandoraDirectory
+from ichor.files.optional_file import OptionalPath, OptionalFile
 
 
 class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
@@ -26,11 +27,11 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
         cls.ints Optional[INTs]: Used when iterating over __annotations__
     """
 
-    xyz: Optional[XYZ] = None
-    gjf: Optional[GJF] = None
-    wfn: Optional[WFN] = None
-    ints: Optional[INTs] = None
-    pandora: Optional[PandoraDirectory] = None
+    xyz: OptionalPath[XYZ] = OptionalFile
+    gjf: OptionalPath[GJF] = OptionalFile
+    wfn: OptionalPath[WFN] = OptionalFile
+    ints: OptionalPath[INTs] = OptionalFile
+    pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path):
         GeometryFile.__init__(self)
