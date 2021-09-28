@@ -26,6 +26,10 @@ class CommandLine(ABC):
         return 1
 
     @classproperty
+    def ndata(self) -> int:
+        return len(self.data)
+
+    @classproperty
     def data(self) -> List[str]:
         return []
 

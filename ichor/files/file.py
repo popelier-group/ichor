@@ -1,9 +1,15 @@
 import shutil
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Optional
 
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.io import move
 from ichor.files.path_object import FileState, PathObject
+
+
+class FileReadError(Exception):
+    pass
 
 
 class File(PathObject, ABC):
@@ -34,10 +40,9 @@ class File(PathObject, ABC):
     def filetype(self) -> str:
         pass
 
-    def write(self):
-        raise NotImplementedError(
-            f"'write' method not implemented for {self.__class__.__name__}"
-        )
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return path.suffix == cls.filetype
 
     def move(self, dst) -> None:
         """Move the file to a new destination.
@@ -47,3 +52,8 @@ class File(PathObject, ABC):
         if dst.is_dir():
             dst /= self.path.name
         move(self.path, dst)
+
+    def write(self, path: Optional[Path] = None):
+        raise NotImplementedError(
+            f"'write' method not implemented for {self.__class__.__name__}"
+        )

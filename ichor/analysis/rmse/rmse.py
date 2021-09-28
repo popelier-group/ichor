@@ -6,8 +6,8 @@ import pandas as pd
 
 from ichor.analysis.get_models import number_of_models_in_dir
 from ichor.analysis.predictions import get_true_predicted
+from ichor.files import PointsDirectory
 from ichor.models import Models, ModelsResult
-from ichor.points import PointsDirectory
 
 def calculate_rmse(models_location: Path, validation_set_location: Path, **kwargs):
     """

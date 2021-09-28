@@ -1,5 +1,5 @@
 import itertools as it
-from typing import Optional, Sequence, Union, List
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 
@@ -235,7 +235,7 @@ class Atoms(list):
         return "\n".join(str(atom) for atom in self)
 
     def __repr__(self):
-        return str(self)
+        return f"{self.__class__.__name__}({', '.join(repr(atom) for atom in self)})"
 
     def __sub__(self, other):
         for i, atom in enumerate(self):

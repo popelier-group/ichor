@@ -1,11 +1,12 @@
 import re
+from pathlib import Path
 from typing import Optional
 
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files.directory import Directory
+from ichor.files.geometry import GeometryFile
 from ichor.files.int import INT
-from ichor.geometry import Geometry
 
 
 class INTs(Directory, dict):
@@ -15,7 +16,7 @@ class INTs(Directory, dict):
     :param parent: An `Atoms` instance that holds coordinate information for all the atoms in the system
     """
 
-    def __init__(self, path, parent: Optional[Geometry] = None):
+    def __init__(self, path, parent: Optional[GeometryFile] = None):
         self._parent = None
         if parent is not None:
             self.parent = parent
@@ -23,7 +24,7 @@ class INTs(Directory, dict):
         Directory.__init__(self, path)
 
     @property
-    def parent(self) -> Geometry:
+    def parent(self) -> GeometryFile:
         if self._parent is None:
             raise ValueError(
                 f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined"
@@ -31,10 +32,10 @@ class INTs(Directory, dict):
         return self._parent
 
     @parent.setter
-    def parent(self, value: Geometry):
-        if not isinstance(value, Geometry):
+    def parent(self, value: GeometryFile):
+        if not isinstance(value, GeometryFile):
             raise TypeError(
-                f"'parent' must be of type 'Atoms' not of type {type(value)}"
+                f"'parent' must be of type 'GeometryFile' not of type {type(value)}"
             )
         self._parent = value
 
@@ -52,17 +53,16 @@ class INTs(Directory, dict):
         for k in natsorted(list(copy.keys()), key=ignore_alpha):
             self[k] = copy[k]
 
-    @classproperty
-    def dirpattern(self):
-        """Returns the regex pattern that needs to be in the directory name containing all .int files"""
-        return re.compile(r".+_atomicfiles")
-
     @buildermethod
     def read(self):
         """Read all the individual .int files. See the `INT` class for how one .int file is read."""
         for atom, int_file in self.items():
             # int_file.parent = self.atoms
             int_file.read()
+
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return path.name.endswith("_atomicfiles")
 
     def __getattr__(self, item):
         """

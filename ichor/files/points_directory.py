@@ -1,13 +1,14 @@
+import re
 from pathlib import Path
 
+from ichor.atoms import ListOfAtoms
 from ichor.common.functools import buildermethod
 from ichor.common.io import mkdir
 from ichor.files import Directory
-from ichor.points.point_directory import PointDirectory
-from ichor.points.points import Points
+from ichor.files.point_directory import PointDirectory
 
 
-class PointsDirectory(Points, Directory):
+class PointsDirectory(ListOfAtoms, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).
     Calling Directory.__init__(self, path) will call the `parse` method of PointsDirectory instead of Directory
     (because Python looks for the method in this class first before looking at parent class methods.) A typical ICHOR
@@ -26,8 +27,8 @@ class PointsDirectory(Points, Directory):
     """
 
     def __init__(self, path):
-        # Initialise `list` parent class of `Points`
-        Points.__init__(self)
+        # Initialise `list` parent class of `ListOfAtoms`
+        ListOfAtoms.__init__(self)
         # this will call Directory __init__ method (which then calls self.parse)
         # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
         Directory.__init__(self, path)
@@ -50,21 +51,24 @@ class PointsDirectory(Points, Directory):
             if (
                 f.is_dir()
             ):  # todo: add method to determine if f is a PointDirectory
-                self += [PointDirectory(f)]
+                self.append(PointDirectory(f))
             # otherwise if the PathObject is a file that ends in .gjf, make a new directory with its path set to self.path/f.stem
             # for example if the given path is ./TRAINING_SET/ and there is WATER001.gjf, it will make ./TRANING_SET/WATER001/
             elif f.is_file() and f.suffix == ".gjf":
                 new_dir = self.path / f.stem
                 mkdir(new_dir)
                 f.replace(new_dir / f.name)
-                self += [
+                self.append(
                     PointDirectory(new_dir)
-                ]  # wrap the new directory as a PointDirectory instance and add to self
+                )  # wrap the new directory as a PointDirectory instance and add to self
         # sort by the names of the directories (by the numbers in their name) since the system name is always the same
         self.sort(key=lambda x: x.path.name)
 
+    def dirpattern(self):
+        return re.compile(r".+")
+
     @buildermethod
-    def read(self) -> "PointsDirectory":
+    def read(self):
         """Read each of the PointDirectory instances inside a PointsDirectory instance and store relevant information into attributes.
 
         .. note::
@@ -87,4 +91,12 @@ class PointsDirectory(Points, Directory):
         if len(self) == 0:
             return Directory.__iter__(self)
         else:
-            return Points.__iter__(self)
+            return ListOfAtoms.__iter__(self)
+
+    def __getattr__(self, item):
+        try:
+            return [getattr(point, item) for point in self]
+        except AttributeError:
+            raise AttributeError(
+                f"'{self.__class__.__name__}' has no attribute '{item}'"
+            )

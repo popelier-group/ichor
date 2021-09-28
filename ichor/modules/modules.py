@@ -9,3 +9,8 @@ class Modules(dict):
             self[key] += value
         else:
             super().__setitem__(key, value)
+
+    def __add__(self, other: "Modules"):
+        result = self.copy()
+        result.update(other)
+        return result

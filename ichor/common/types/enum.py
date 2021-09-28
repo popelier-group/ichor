@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Any
 
 from ichor.common.functools import classproperty
+from ichor.common.str import in_sensitive
 
 
 class Enum(Enum):
@@ -26,3 +27,15 @@ class Enum(Enum):
     @classmethod
     def from_value(cls, value: Any):
         return cls(value)
+
+
+class EnumStrList(Enum):
+    """Extension of Enum where each enumeration is a list of strings to be searched through when initialising an enumeration"""
+
+    @classmethod
+    def _missing_(cls, value):
+        if isinstance(value, str):
+            for item in cls:
+                if in_sensitive(value, item.value):
+                    return item
+        return super()._missing_(value)

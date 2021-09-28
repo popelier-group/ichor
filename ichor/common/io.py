@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
-from typing import Any, List, Union, Optional
+from typing import Any, List, Optional, Union
 
 from ichor.typing import F
 
@@ -34,20 +34,19 @@ def convert_to_path(func: F) -> F:
 
 
 @convert_to_path
-def mkdir(path: Path, empty: bool = False, force: bool = True) -> None:
+def mkdir(path: Path, empty: bool = False, fail_ok: bool = False) -> None:
     """Makes a directory.
 
     :param path: Where to make the directory
     :param empty: Whether to ignore FileExistsError exceptions. Set to False to ignore exceptions.
-    :param force: When set to True (default), do not make the directory if an OSError occurs
+    :param fail_ok: When set to False (default), raise OSError if cannot make directory
     """
     if path.is_dir() and empty:
         try:
             shutil.rmtree(path)
         except OSError as err:
-            if force:
-                print(str(err))
-                sys.exit(1)
+            if not fail_ok:
+                raise err
     path.mkdir(parents=True, exist_ok=not empty)
 
 
@@ -184,7 +183,10 @@ def pushd(new_dir: Path, update_cwd: bool = False):
 
 @convert_to_path
 def get_files_of_type(
-    filetype: Union[str, List[str]], directory: Path = Path.cwd(), recursive: bool = False, sort: Optional[F] = None
+    filetype: Union[str, List[str]],
+    directory: Path = Path.cwd(),
+    recursive: bool = False,
+    sort: Optional[F] = None,
 ) -> List[Path]:
     """Returns a list of all files that end in a certain file extension/suffix (such as .txt).
 

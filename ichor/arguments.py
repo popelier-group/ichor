@@ -7,9 +7,7 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple
 from uuid import UUID
 
 from ichor.common.bool import check_bool
-from ichor.common.functools import run_once
 from ichor.common.uid import get_uid
-from ichor.in_main import main_only
 
 
 class ExternalFunction:
@@ -46,13 +44,15 @@ external_functions = [
     ExternalFunction("ichor.main.active_learning", "active_learning"),
     ExternalFunction("ichor.main.collate_log", "collate_model_log"),
     ExternalFunction("ichor.main.make_models", "make_models, move_models"),
-    ExternalFunction("ichor.main.submit_gjfs", "submit_gjfs"),
-    ExternalFunction("ichor.main.submit_gjfs", "check_gaussian_output"),
+    ExternalFunction("ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"),
+    ExternalFunction("ichor.main.gaussian", "check_gaussian_output"),
     ExternalFunction("ichor.main.submit_wfns", "submit_wfns"),
     ExternalFunction("ichor.main.submit_wfns", "check_aimall_output"),
     ExternalFunction("ichor.make_sets", "make_sets"),
     ExternalFunction("ichor.submission_script", "print_completed"),
-    ExternalFunction("ichor.analysis.dlpoly", "run_dlpoly_geometry_optimisations"),
+    ExternalFunction(
+        "ichor.analysis.dlpoly", "run_dlpoly_geometry_optimisations"
+    ),
     ExternalFunction("ichor.analysis.dlpoly", "get_dlpoly_energies"),
     ExternalFunction(
         "ichor.analysis.dlpoly", "submit_final_geometry_to_gaussian"

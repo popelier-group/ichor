@@ -1,16 +1,16 @@
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from ichor.batch_system import JobID
 from ichor.common.io import last_line
+from ichor.files import PointsDirectory, GJF
 from ichor.logging import logger
-from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
 
 
-def submit_gjfs(directory: Path) -> Optional[JobID]:
+def submit_points_directory_to_gaussian(directory: Path) -> Optional[JobID]:
     """Function that submits all .gjf files in a directory to Gaussian, which will output .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
@@ -18,24 +18,37 @@ def submit_gjfs(directory: Path) -> Optional[JobID]:
     points = PointsDirectory(
         directory
     )  # a directory which contains points (a bunch of molecular geometries)
+    gjf_files = write_gjfs(points)
+    return submit_gjfs(gjf_files)
+
+
+def submit_gjfs(gjfs: List[Path], force: bool = False, hold: Optional[JobID] = None) -> Optional[JobID]:
     # make a SubmissionScript instance which is going to house all the jobs that are going to be ran
-    submission_script = SubmissionScript(SCRIPT_NAMES["gaussian"])
-    for point in points:  # point is an instance of PointDirectory
-        if not point.gjf.path.with_suffix(".wfn").exists():
-            point.gjf.write()  # write out the .gjf files which are input to Gaussian to ensure correct formatting
-            submission_script.add_command(
-                GaussianCommand(point.gjf.path)
-            )  # make a list of GaussianCommand instances.
-            logger.debug(
-                f"Adding {point.gjf.path} to {SCRIPT_NAMES['gaussian']}"
-            )
-    logger.info(
-        f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
-    )
+    with SubmissionScript(SCRIPT_NAMES["gaussian"]) as submission_script:
+        for gjf in gjfs:
+            if force or not gjf.with_suffix('.wfn').exists():
+                submission_script.add_command(GaussianCommand(gjf))
+                logger.debug(
+                    f"Adding {gjf} to {submission_script.path}"
+                )  # make a list of GaussianCommand instances.
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
-    submission_script.write()
-    # submit the final submission script to the queuing system, so that job is ran on compute nodes.
-    return submission_script.submit()
+    if len(submission_script.commands) > 0:
+        logger.info(
+            f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
+        )
+        # submit the final submission script to the queuing system, so that job is ran on compute nodes.
+        return submission_script.submit(hold=hold)
+
+
+def write_gjfs(points: PointsDirectory) -> List[Path]:
+    gjfs = []
+    for point in points:
+        if not point.gjf.exists():
+            point.gjf = GJF(Path(point.path / (point.path.name + GJF.filetype)))
+            point.gjf.atoms = point.xyz
+        point.gjf.write()
+        gjfs.append(point.gjf.path)
+    return gjfs
 
 
 def check_gaussian_output(gaussian_file: str):

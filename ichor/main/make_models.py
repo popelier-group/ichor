@@ -8,9 +8,9 @@ from ichor import constants
 from ichor.batch_system import JobID
 from ichor.common.io import cp, mkdir
 from ichor.common.str import get_digits
+from ichor.files import PointsDirectory
 from ichor.logging import logger
 from ichor.menu import Menu
-from ichor.points import PointsDirectory
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter

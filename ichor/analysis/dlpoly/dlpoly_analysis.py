@@ -21,7 +21,12 @@ from ichor.files import GJF, WFN
 from ichor.models import Models
 
 
-def run_dlpoly(dlpoly_input: Path, model_location: Path, temperature: float = 0.0, hold=Optional[JobID]) -> JobID:
+def run_dlpoly(
+    dlpoly_input: Path,
+    model_location: Path,
+    temperature: float = 0.0,
+    hold=Optional[JobID],
+) -> JobID:
     dlpoly_input_atoms = get_atoms_from_path(dlpoly_input)
     dlpoly_input_models = get_models_from_path(model_location)
     dlpoly_directories = setup_dlpoly_directories(
@@ -34,7 +39,6 @@ def run_dlpoly_geometry_optimisations(
     dlpoly_input: Path, model_location: Path, hold=Optional[JobID]
 ) -> JobID:
     return run_dlpoly(dlpoly_input, model_location, temperature=0.0)
-
 
 
 def write_final_geometry_to_gjf(
