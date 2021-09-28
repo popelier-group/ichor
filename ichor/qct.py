@@ -8,4 +8,4 @@ class QuantumChemicalTopologyProgram(Enum):
 
 
 def QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM():
-    return QuantumChemicalTopologyProgram(QUANTUM_CHEMISTRY_PROGRAM)
+    return QuantumChemicalTopologyProgram(QUANTUM_CHEMISTRY_PROGRAM())
