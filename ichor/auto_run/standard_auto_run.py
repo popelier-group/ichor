@@ -39,7 +39,7 @@ class IterState(Enum):
 
 
 class IterUsage(Enum):
-    """Tells the IterStep wheter or not it can be run given an IterState"""
+    """Tells the IterStep whether or not it can be run given an IterState"""
 
     First = 0
     All = 1

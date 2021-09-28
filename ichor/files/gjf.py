@@ -35,11 +35,6 @@ class GJF(QuantumChemistryProgramInput):
         self.startup_options: Optional[List[str]] = None
         self.keywords: Optional[List[str]] = None
 
-    @classproperty
-    def filetype(cls) -> str:
-        """Returns the extension of the GJF file."""
-        return ".gjf"
-
     @buildermethod
     def _read_file(self):
         """Parse and red a .gjf file for information we need to submit a Gaussian job."""
@@ -90,6 +85,11 @@ class GJF(QuantumChemistryProgramInput):
                     # add the coordinate line as an Atom instance to self.atoms (which is an Atoms instance)
                     self.atoms.add(Atom(atom_type, x, y, z))
 
+    @classproperty
+    def filetype(cls) -> str:
+        """Returns the extension of the GJF file."""
+        return ".gjf"
+
     @property
     def title(self) -> str:
         """The name of the system."""
@@ -99,6 +99,11 @@ class GJF(QuantumChemistryProgramInput):
     def wfn(self):
         """The name of the .wfn file to be returned by Gaussian."""
         return self.path.with_suffix(".wfn")
+
+    @property
+    def header_line(self) -> str:
+        """Returns a string that is the line in the gjf file that contains all keywords."""
+        return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     def format(self):
         """Format the .gjf file to use Gaussian keywords/variables that are defined in ICHOR GLOBALS."""
@@ -124,11 +129,6 @@ class GJF(QuantumChemistryProgramInput):
             f"nproc={GLOBALS.GAUSSIAN_CORE_COUNT}",
             f"mem={GLOBALS.GAUSSIAN_MEMORY_LIMIT}",
         ]
-
-    @property
-    def header_line(self) -> str:
-        """Returns a string that is the line in the gjf file that contains all keywords."""
-        return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     def write(self) -> None:
         """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
