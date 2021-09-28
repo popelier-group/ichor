@@ -19,7 +19,7 @@ def PANDORA_LOCATION() -> Path:
             else:
                 pandora_location = GLOBALS.PANDORA_LOCATION
     elif MACHINE is Machine.ffluxlab:
-        pandora_location = Path('/shared/pandora/pandora.py')
+        pandora_location = Path('/home/modules/apps/pandora/0.1.0/pandora.py')
     elif MACHINE is Machine.csf3:
         pandora_location = Path('/mnt/pp01-home01/shared/pandora/pandora.py')
     else:
