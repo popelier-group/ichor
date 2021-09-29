@@ -14,6 +14,7 @@ class MorfiCommand(CommandLine):
         self.pandora_command = PandoraMorfiCommand(morfi_input)
         self.aimall_command = AIMAllCommand(aimall_wfn, atoms=atoms) if aimall_wfn is not None else None
 
+    @property
     def data(self) -> List[str]:
         data = self.pandora_command.data
         if self.aimall_command is not None:
