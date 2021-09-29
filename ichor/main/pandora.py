@@ -81,7 +81,7 @@ def submit_morfi(morfi_inputs: List[Path], aimall_wfns: Optional[List[Path]] = N
         aimall_wfns = [None for _ in range(len(morfi_inputs))]
     with SubmissionScript(SCRIPT_NAMES["pandora"]["morfi"]) as submission_script:
         for morfi_input, aimall_wfn in zip(morfi_inputs, aimall_wfns):
-            if force or not (morfi_input.parent / MorfiDirectory).exists():
+            if force or not (morfi_input.parent / PandoraDirectory.dirname / MorfiDirectory.dirname).exists():
                 submission_script.add_command(MorfiCommand(morfi_input, aimall_wfn, atoms=atoms))
 
     if len(submission_script.commands) > 0:
