@@ -31,7 +31,7 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
     gjf: OptionalPath[GJF] = OptionalFile
     wfn: OptionalPath[WFN] = OptionalFile
     ints: OptionalPath[INTs] = OptionalFile
-    input: OptionalPath[PandoraInput] = OptionalFile
+    pandora_input: OptionalPath[PandoraInput] = OptionalFile
     pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path):
