@@ -53,6 +53,7 @@ class PandoraPySCFCommand(PandoraCommand):
         PandoraCommand.__init__(self, config_file, pyscf=True, morfi=False)
         self.point_directory = point_directory
 
+    @property
     def data(self) -> List[str]:
         data = super().data
         if self.point_directory is not None:
