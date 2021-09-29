@@ -285,14 +285,17 @@ class SubmissionScript:
         with SubmissionScript(...) as submission_script:
             ...
         ```
-        :return: self: self instance for used during context
+        :return self: SubmissionScript instance used during context
         """
         return self
 
-    # todo: Add exc_type, exc_val, etc. to docstring as it is not clear what they are used for. Examples will also help
     # Note: arguments of __exit__ statement are required
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        """ Writes out the submission script once the `with` context manager is done.
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """ Writes out the submission script once the `with` context manager is done. The exc_type, exc_val, exc_tb are needed for every __exit__ method.
+
+        :param exc_type: If an exception has ocurred during the context, the write method will not be executed
+        :param exc_val: Not used
+        :param exc_tb: Not used
 
         .. note::
             This does not submit the submission script, it only writes it to disk.

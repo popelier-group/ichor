@@ -32,6 +32,9 @@ class FileStructure(FileTree):
         self.add("MODELS", "models", parent="ferebus")
         self.add("MODELS", "remake-models")
         self.add("MODEL_LOG", "model_log")
+        self.add("SCRUBBED_POINTS", "scrubbed_points")
+        self.add("GAUSSIAN_SCRUBBED_POINTS", "gaussian_scrubbed_points", parent="scrubbed_points")
+        self.add("AIMALL_SCRUBBED_POINTS", "aimall_scrubbed_points", parent="scrubbed_points")
 
         self.add("OPT", "opt")
         self.add("CP2K", "cp2k")

@@ -37,7 +37,7 @@ class ExternalFunction:
         m = importlib.import_module(self.module)
         return getattr(m, self.function)
 
-
+# todo: these will need updating because the paths/names are updated
 # List of all ichor external functions, add functions to the list. Note: a checker for these has not been implemented
 external_functions = [
     ExternalFunction("ichor.logging", "log_time"),

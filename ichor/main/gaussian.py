@@ -11,7 +11,8 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
 
 
 def submit_points_directory_to_gaussian(directory: Path) -> Optional[JobID]:
-    """Function that submits all .gjf files in a directory to Gaussian, which will output .wfn files.
+    """Function that writes out .gjf files from .xyz files that are in each directory and 
+    calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
     """
@@ -21,9 +22,38 @@ def submit_points_directory_to_gaussian(directory: Path) -> Optional[JobID]:
     gjf_files = write_gjfs(points)
     return submit_gjfs(gjf_files)
 
+def write_gjfs(points: PointsDirectory) -> List[Path]:
+    """Writes out .gjf files in every PointDirectory which is contained in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
+    which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf` file in the PointDirectory (if it does not exist already).
+
+    :param points: A PointsDirectory instance which wraps around a whole directory containing points (such as TRAINING_SET).
+    :return: A list of Path objects which point to `.gjf` files in each PointDirectory that is contained in the PointsDirectory.
+    """
+    gjfs = []
+    for point in points:
+        if not point.gjf.exists():
+            point.gjf = GJF(Path(point.path / (point.path.name + GJF.filetype)))
+            point.gjf.atoms = point.xyz
+        point.gjf.write()
+        gjfs.append(point.gjf.path)
+    return gjfs
+
 
 def submit_gjfs(gjfs: List[Path], force: bool = False, hold: Optional[JobID] = None) -> Optional[JobID]:
+    """Function that writes out a submission script which contains an array of Gaussian jobs to be ran on compute nodes. If calling this function from
+    a log-in node, it will write out the submission script, a datafile (file which contains the names of all the .gjf file that need to be ran through Gaussian),
+    and it will submit the submission script to compute nodes as well to run Gaussian on compute nodes. However, if using this function from a compute node,
+    (which will happen when ichor is ran in auto-run mode), this function will only be used to write out the datafile and will not submit any new jobs
+    from the compute node (as you cannot submit jobs from compute nodes on CSF3.)
+
+    :param gjfs: A list of Path objects pointing to .gjf files
+    :param force: todo: Not sure when this is used[description], defaults to False
+    :param hold: An optional JobID for which this job to hold. This is used in auto-run to hold this job for the previous job to finish, defaults to None
+    :return: The JobID of this job given by the submission system.
+    """
+
     # make a SubmissionScript instance which is going to house all the jobs that are going to be ran
+    # the submission_script object can be accessed even after the context manager
     with SubmissionScript(SCRIPT_NAMES["gaussian"]) as submission_script:
         for gjf in gjfs:
             if force or not gjf.with_suffix('.wfn').exists():
@@ -38,17 +68,6 @@ def submit_gjfs(gjfs: List[Path], force: bool = False, hold: Optional[JobID] = N
         )
         # submit the final submission script to the queuing system, so that job is ran on compute nodes.
         return submission_script.submit(hold=hold)
-
-
-def write_gjfs(points: PointsDirectory) -> List[Path]:
-    gjfs = []
-    for point in points:
-        if not point.gjf.exists():
-            point.gjf = GJF(Path(point.path / (point.path.name + GJF.filetype)))
-            point.gjf.atoms = point.xyz
-        point.gjf.write()
-        gjfs.append(point.gjf.path)
-    return gjfs
 
 
 def check_gaussian_output(gaussian_file: str):
