@@ -61,7 +61,7 @@ def copy_aimall_wfn_to_point_directory(pandora_directory: Path, point_directory:
         if pandora_directory.pyscf.aimall_wfn.exists():
             if not point_directory.exists():
                 point_directory.mkdir()
-            aimall_wfn = point_directory.path / (point_directory.path.name / WFN.filetype)
+            aimall_wfn = point_directory.path / f"{point_directory.path.name}{WFN.filetype}"
             cp(pandora_directory.pyscf.aimall_wfn.path, aimall_wfn)
             return aimall_wfn
         else:
