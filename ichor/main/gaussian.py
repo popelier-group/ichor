@@ -72,7 +72,10 @@ def submit_gjfs(gjfs: List[Path], force: bool = False, hold: Optional[JobID] = N
 
 def rerun_gaussian(gaussian_file: str):
     """Used by `CheckManager`. Checks if Gaussian jobs ran correctly and a full .wfn file is returned. If there is no .wfn file or it does not
-    have the correct contents, then rerun Gaussian."""
+    have the correct contents, then rerun Gaussian.
+    
+    :param gaussian_file: A string that is a Path to a .gjf file
+    """
     if not gaussian_file:
         print_completed()
         sys.exit()
@@ -90,7 +93,7 @@ def scrub_gaussian_point(gaussian_file: str):
     and record that it has moved the point in the log file. If a .wfn file exists and it contains the correct information in its last line, then
     this checking function will not do anything.
     
-    :param gaussian_file: 
+    :param gaussian_file: A string that is a Path to a .gjf file
     """
 
     from ichor.common.io import mkdir, move
