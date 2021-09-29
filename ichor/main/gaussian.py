@@ -112,6 +112,12 @@ def scrub_gaussian_point(gaussian_file: str):
             point_dir_path = wfn_file_name.parent
             new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
 
+            # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
+            # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
+            if new_path.exists():
+                point_dir_name = point_dir_name + "1"
+                new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
+
             # move to new path and record in logger
             move(point_dir_path, new_path)
             logger.error(f"Moved point directory {point_dir_path} to {new_path} because it failed to run.")
