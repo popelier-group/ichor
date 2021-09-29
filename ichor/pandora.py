@@ -11,7 +11,7 @@ class CannotFindPandora(Exception):
 def PANDORA_LOCATION() -> Path:
     pandora_location = OptionalFile
 
-    if GLOBALS.PANDORA_LOCATION.exists():
+    if GLOBALS.PANDORA_LOCATION != "" and GLOBALS.PANDORA_LOCATION.exists():
         if GLOBALS.PANDORA_LOCATION.exists():
             if GLOBALS.PANDORA_LOCATION.is_dir():
                 if (GLOBALS.PANDORA_LOCATION / 'pandora.py').exists():
@@ -25,6 +25,9 @@ def PANDORA_LOCATION() -> Path:
     else:
         pass
         # implement download for pandora
+
+    if pandora_location is OptionalFile:
+        raise CannotFindPandora(f"Pandora could not be found, please set PANDORA_LOCATION in the config")
 
     if not pandora_location.exists():
         raise CannotFindPandora(f"Cannot find pandora location from: {pandora_location}")

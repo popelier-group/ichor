@@ -12,5 +12,9 @@ class Modules(dict):
 
     def __add__(self, other: "Modules"):
         result = self.copy()
-        result.update(other)
-        return result
+        for key, value in other.items():
+            if key in result.keys():
+                result[key].extend(value)
+            else:
+                result[key] = value
+        return Modules(result)

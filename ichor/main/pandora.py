@@ -45,14 +45,11 @@ def submit_pandora_input_to_pyscf(pandora_inputs: List[Path], point_directories:
 def write_pandora_input(points: PointsDirectory) -> List[Path]:
     pandora_inputs = []
     for point in points:
-        if not point.pandora.exists():
-            point.pandora = PandoraDirectory(Path(point.path / PandoraDirectory.dirname))
-            point.pandora.mkdir()
-        if not point.pandora.input.exists():
-            point.pandora.input = PandoraInput(point.pandora.path / f"{point.path.name}{PandoraInput.filetype}")
-            point.pandora.input.atoms = point.xyz.atoms
-        point.pandora.input.write()
-        pandora_inputs.append(point.pandora.input.path)
+        if not point.pandora_input.exists():
+            point.pandora_input = PandoraInput(point.path / f"{point.path.name}{PandoraInput.filetype}")
+            point.pandora_input.atoms = point.xyz.atoms
+        point.pandora_input.write()
+        pandora_inputs.append(point.pandora_input.path)
     return pandora_inputs
 
 
@@ -64,7 +61,7 @@ def copy_aimall_wfn_to_point_directory(pandora_directory: Path, point_directory:
         if pandora_directory.pyscf.aimall_wfn.exists():
             if not point_directory.exists():
                 point_directory.mkdir()
-            aimall_wfn = point_directory.path / (point_directory.path.name / WFN.filetype)
+            aimall_wfn = point_directory.path / f"{point_directory.path.name}{WFN.filetype}"
             cp(pandora_directory.pyscf.aimall_wfn.path, aimall_wfn)
             return aimall_wfn
         else:
@@ -84,7 +81,7 @@ def submit_morfi(morfi_inputs: List[Path], aimall_wfns: Optional[List[Path]] = N
         aimall_wfns = [None for _ in range(len(morfi_inputs))]
     with SubmissionScript(SCRIPT_NAMES["pandora"]["morfi"]) as submission_script:
         for morfi_input, aimall_wfn in zip(morfi_inputs, aimall_wfns):
-            if force or not (morfi_input.parent / MorfiDirectory).exists():
+            if force or not (morfi_input.parent / PandoraDirectory.dirname / MorfiDirectory.dirname).exists():
                 submission_script.add_command(MorfiCommand(morfi_input, aimall_wfn, atoms=atoms))
 
     if len(submission_script.commands) > 0:
@@ -96,8 +93,8 @@ def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path]]:
     aimall_wfns = []
     for point in points:
         if point.pandora.exists():
-            if point.pandora.input.exists():
-                morfi_inputs.append(point.pandora.input.path)
+            if point.pandora_input.exists():
+                morfi_inputs.append(point.pandora_input.path)
                 if not point.wfn.exists():
                     if point.pandora.pyscf.exists():
                         if point.pandora.pyscf.aimall_wfn.exists():

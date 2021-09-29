@@ -58,6 +58,7 @@ external_functions = [
     ExternalFunction(
         "ichor.analysis.dlpoly", "submit_final_geometry_to_gaussian"
     ),
+    ExternalFunction("ichor.main.pandora", "copy_aimall_wfn_to_point_directory"),
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key

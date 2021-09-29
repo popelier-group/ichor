@@ -273,7 +273,7 @@ class Globals:
     DROP_N_COMPUTE: bool = False
     DROP_N_COMPUTE_LOCATION: Path = ""
 
-    PANDORA_LOCATION: Path = Path()
+    PANDORA_LOCATION: Path = ""
     PANDORA_CCSDMOD: str = "ccsdHF"
     MORFI_ANGULAR: int = 20
     MORFI_RADIAL: float = 15.0

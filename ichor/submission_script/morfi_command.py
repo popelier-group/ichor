@@ -3,6 +3,8 @@ from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.command_line import CommandLine
 from pathlib import Path
 from typing import Optional, List
+from ichor.modules import Modules
+from ichor.common.functools import classproperty
 
 
 class NoInputs(Exception):
@@ -14,6 +16,11 @@ class MorfiCommand(CommandLine):
         self.pandora_command = PandoraMorfiCommand(morfi_input)
         self.aimall_command = AIMAllCommand(aimall_wfn, atoms=atoms) if aimall_wfn is not None else None
 
+    @classproperty
+    def modules(self) -> Modules:
+        return PandoraMorfiCommand.modules + AIMAllCommand.modules
+
+    @property
     def data(self) -> List[str]:
         data = self.pandora_command.data
         if self.aimall_command is not None:

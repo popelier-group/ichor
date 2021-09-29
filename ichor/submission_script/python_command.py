@@ -27,6 +27,6 @@ class PythonCommand(CommandLine):
         """Returns the command(program) which is ran in the job."""
         return "python"
 
-    def repr(self, variables: List[str]) -> str:
+    def repr(self, variables: Optional[List[str]] = None) -> str:
         """Returns a string which is then written into the submission script in order to run a python job."""
         return f"{PythonCommand.command} {self.script} {' '.join(self.args)}"
