@@ -7,6 +7,7 @@ from ichor.modules import Modules, PandoraModules
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.pandora import PANDORA_LOCATION
+from ichor.files import PandoraDirectory
 
 
 class PandoraCommand(PythonCommand):
@@ -57,13 +58,14 @@ class PandoraPySCFCommand(PandoraCommand):
     def data(self) -> List[str]:
         data = super().data
         if self.point_directory is not None:
+            data.append(self.config_file.parent / PandoraDirectory.dirname)
             data.append(self.point_directory)
         return data
 
     def repr(self, variables: List[str]) -> str:
         repr = super().repr(variables)
         if self.point_directory is not None:
-            ichor_command = ICHORCommand(func='copy_aimall_wfn_to_point_directory', func_args=[variables[1]])
+            ichor_command = ICHORCommand(func='copy_aimall_wfn_to_point_directory', func_args=[variables[1], variables[2]])
             repr += f'\n{ichor_command.repr(variables)}'
         return repr
 
