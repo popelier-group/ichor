@@ -24,7 +24,7 @@ class PandoraCommand(PythonCommand):
 
     @classproperty
     def modules(self) -> Modules:
-        return super().modules + PandoraModules
+        return PythonCommand.modules + PandoraModules
 
     @property
     def data(self) -> List[str]:

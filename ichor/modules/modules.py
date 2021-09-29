@@ -17,4 +17,4 @@ class Modules(dict):
                 result[key].extend(value)
             else:
                 result[key] = value
-        return result
+        return Modules(result)
