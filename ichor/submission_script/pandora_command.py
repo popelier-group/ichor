@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from ichor.common.functools import classproperty
 from ichor.globals import GLOBALS
-from ichor.modules import Modules, PandoraModules
+from ichor.modules import Modules, PandoraModules, MorfiModules
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.pandora import PANDORA_LOCATION
@@ -73,3 +73,7 @@ class PandoraPySCFCommand(PandoraCommand):
 class PandoraMorfiCommand(PandoraCommand):
     def __init__(self, config_file: Path):
         super().__init__(config_file, pyscf=False, morfi=True)
+
+    @classproperty
+    def modules(self) -> Modules:
+        return PandoraCommand.modules + MorfiModules
