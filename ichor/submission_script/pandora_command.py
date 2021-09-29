@@ -17,6 +17,8 @@ class PandoraCommand(PythonCommand):
         self.run_pyscf = pyscf
         self.run_morfi = morfi
 
+        self._args = []
+
         PythonCommand.__init__(self, Path(PANDORA_LOCATION()).absolute())
 
     @classproperty
@@ -29,12 +31,15 @@ class PandoraCommand(PythonCommand):
 
     @property
     def args(self) -> List[str]:
-        args = []
-        if self.run_pyscf:
-            args.append("--pyscf")
-        if self.run_morfi:
-            args.append("--morfi")
-        return args
+        if self.run_pyscf and '--pyscf' not in self._args:
+            self._args.append("--pyscf")
+        if self.run_morfi and '--morfi' not in self._args:
+            self._args.append("--morfi")
+        return self._args
+
+    @args.setter
+    def args(self, value):
+        self._args = value
 
     def repr(self, variables: List[str]) -> str:
         repr = f"pushd $(dirname {variables[0]})\n"
