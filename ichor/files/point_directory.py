@@ -11,7 +11,7 @@ from ichor.files.gjf import GJF
 from ichor.files.ints import INTs
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
-from ichor.files.pandora import PandoraDirectory
+from ichor.files.pandora import PandoraDirectory, PandoraInput
 from ichor.files.optional_file import OptionalPath, OptionalFile
 
 
@@ -31,6 +31,7 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
     gjf: OptionalPath[GJF] = OptionalFile
     wfn: OptionalPath[WFN] = OptionalFile
     ints: OptionalPath[INTs] = OptionalFile
+    input: OptionalPath[PandoraInput] = OptionalFile
     pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path):

@@ -45,14 +45,11 @@ def submit_pandora_input_to_pyscf(pandora_inputs: List[Path], point_directories:
 def write_pandora_input(points: PointsDirectory) -> List[Path]:
     pandora_inputs = []
     for point in points:
-        if not point.pandora.exists():
-            point.pandora = PandoraDirectory(Path(point.path / PandoraDirectory.dirname))
-            point.pandora.mkdir()
-        if not point.pandora.input.exists():
-            point.pandora.input = PandoraInput(point.pandora.path / f"{point.path.name}{PandoraInput.filetype}")
-            point.pandora.input.atoms = point.xyz.atoms
-        point.pandora.input.write()
-        pandora_inputs.append(point.pandora.input.path)
+        if not point.pandora_input.exists():
+            point.pandora_input = PandoraInput(point.path / f"{point.path.name}{PandoraInput.filetype}")
+            point.pandora_input.atoms = point.xyz.atoms
+        point.pandora_input.write()
+        pandora_inputs.append(point.pandora_input.path)
     return pandora_inputs
 
 

@@ -12,7 +12,6 @@ from pathlib import Path
 
 
 class PandoraDirectory(AnnotatedDirectory, GeometryFile, GeometryData):
-    input: OptionalPath[PandoraInput] = OptionalFile
     pyscf: OptionalPath[PySCFDirectory] = OptionalFile
     morfi: OptionalPath[MorfiDirectory] = OptionalFile
 
