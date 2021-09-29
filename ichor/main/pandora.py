@@ -93,8 +93,8 @@ def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path]]:
     aimall_wfns = []
     for point in points:
         if point.pandora.exists():
-            if point.pandora.input.exists():
-                morfi_inputs.append(point.pandora.input.path)
+            if point.pandora_input.exists():
+                morfi_inputs.append(point.pandora_input.path)
                 if not point.wfn.exists():
                     if point.pandora.pyscf.exists():
                         if point.pandora.pyscf.aimall_wfn.exists():
