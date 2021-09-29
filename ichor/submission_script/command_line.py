@@ -25,11 +25,11 @@ class CommandLine(ABC):
     def ncores(self) -> int:
         return 1
 
-    @classproperty
+    @property
     def ndata(self) -> int:
         return len(self.data)
 
-    @classproperty
+    @property
     def data(self) -> List[str]:
         return []
 
