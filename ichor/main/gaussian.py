@@ -70,8 +70,8 @@ def submit_gjfs(gjfs: List[Path], force: bool = False, hold: Optional[JobID] = N
         return submission_script.submit(hold=hold)
 
 
-def check_gaussian_output(gaussian_file: str):
-    """Checks if Gaussian jobs ran correctly and a full .wfn file is returned. If there is no .wfn file or it does not
+def rerun_gaussian(gaussian_file: str):
+    """Used by `CheckManager`. Checks if Gaussian jobs ran correctly and a full .wfn file is returned. If there is no .wfn file or it does not
     have the correct contents, then rerun Gaussian."""
     if not gaussian_file:
         print_completed()
@@ -84,3 +84,31 @@ def check_gaussian_output(gaussian_file: str):
         print_completed()
     else:
         logger.error(f"Gaussian Job {gaussian_file} failed to run")
+
+def scrub_gaussian_point(gaussian_file: str):
+    """ Used by `CheckManager`. Checks if Gaussian job ran correctly. If it did not, it will move the Point to the `FILE_STRUCTURE["gaussian_scrubbed_points"]` directory
+    and record that it has moved the point in the log file. If a .wfn file exists and it contains the correct information in its last line, then
+    this checking function will not do anything.
+    
+    :param gaussian_file: 
+    """
+
+    from ichor.common.io import mkdir, move
+    from ichor.logging import logger
+    from ichor.file_structure import FILE_STRUCTURE
+
+    if gaussian_file:
+
+        wfn_file_name = Path(gaussian_file).with_suffix(".wfn")
+
+        if (not wfn_file_name.exists()) or (not "TOTAL ENERGY" in last_line(wfn_file_name)):
+            mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
+            # get the name of the directory only containing the .gjf file
+            point_dir_name = wfn_file_name.parent.name
+            # get the Path to the Parent directory
+            point_dir_path = wfn_file_name.parent
+            new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
+
+            # move to new path and record in logger
+            move(point_dir_path, new_path)
+            logger.error(f"Moved point directory {point_dir_path} to {new_path} because it failed to run.")
