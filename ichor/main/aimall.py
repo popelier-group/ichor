@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from ichor import constants
 from ichor.batch_system import JobID
 from ichor.files import PointsDirectory
 from ichor.logging import logger
