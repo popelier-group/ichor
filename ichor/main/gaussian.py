@@ -10,7 +10,7 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
 
 
-def submit_points_directory_to_gaussian(directory: Path) -> Optional[JobID]:
+def submit_points_directory_to_gaussian(directory: Path, overwrite_existing: bool = True) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and 
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
@@ -19,10 +19,10 @@ def submit_points_directory_to_gaussian(directory: Path) -> Optional[JobID]:
     points = PointsDirectory(
         directory
     )  # a directory which contains points (a bunch of molecular geometries)
-    gjf_files = write_gjfs(points)
+    gjf_files = write_gjfs(points, overwrite_existing)
     return submit_gjfs(gjf_files)
 
-def write_gjfs(points: PointsDirectory) -> List[Path]:
+def write_gjfs(points: PointsDirectory, overwrite_existing: bool) -> List[Path]:
     """Writes out .gjf files in every PointDirectory which is contained in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
     which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf` file in the PointDirectory (if it does not exist already).
 
@@ -31,12 +31,16 @@ def write_gjfs(points: PointsDirectory) -> List[Path]:
     """
     gjfs = []
     for point in points:
+
         if not point.gjf.exists():
             point.gjf = GJF(Path(point.path / (point.path.name + GJF.filetype)))
             point.gjf.atoms = point.xyz
-        # todo: Do we always want to overwite existing gjfs
-        point.gjf.write()
+
+        if overwrite_existing:
+            point.gjf.write()
+
         gjfs.append(point.gjf.path)
+
     return gjfs
 
 
