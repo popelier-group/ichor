@@ -10,12 +10,26 @@ from ichor.submission_script.command_line import CommandLine, SubmissionError
 
 
 class AIMAllCommand(CommandLine):
+
+    """
+    A class which is used to add AIMALL-related commands to a submission script. It is used to write the submission script line where
+    AIMALL modules are loaded. It is also used to write out the submission script line where AIMALL is ran on a specified array of files (usually
+    AIMALL is ran as an array job because we want to run hundreds of AIMALL tasks in parallel). Finally, depending on the `check` and `scrub` arguments,
+    additional lines are written to the submission script file which rerun failed tasks as well as remove any points that did not terminate normally (even
+    after being reran).
+
+    :param wfn_file: Path to a .wfn file. This is not needed when running auto-run for a whole directory.
+    :param aimall_output: Optional path to the AIMALL job output. Default is None as it is set to the `gjf_file_name`.aim if not specified.
+    :param check: Whether to rerun 
+    """
+
     def __init__(
         self,
         wfn_file: Path,
         atoms: Optional[Union[str, List[str]]] = None,
         aimall_output: Optional[Path] = None,
-        check: bool = True,
+        rerun: bool = True,
+        scrub: bool = True,
     ):
         self.wfn_file = WFN(wfn_file)
         self.aimall_output = aimall_output or wfn_file.with_suffix(".aim")
@@ -26,7 +40,8 @@ class AIMAllCommand(CommandLine):
             and len(self.atoms) == len(self.wfn_file.atoms)
         ):
             self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
-        self.check = check
+        self.rerun = rerun
+        self.scrub = scrub
 
     @property
     def data(self) -> List[str]:
@@ -93,14 +108,21 @@ class AIMAllCommand(CommandLine):
     def repr(self, variables: List[str]) -> str:
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
-        if self.check:
+        if self.rerun:
             from ichor.globals import GLOBALS
 
             cm = CheckManager(
-                check_function="check_aimall_output",
+                check_function="rerun_aimall",
                 args_for_check_function=[variables[0]],
-                ntimes=GLOBALS.AIMALL_N_TRIES,
+                ntimes=GLOBALS.GAUSSIAN_N_TRIES,
             )
-            return cm.check(cmd)
-        else:
-            return cmd
+            cmd = cm.rerun_if_job_failed(cmd)
+
+        if self.scrub:
+            cm = CheckManager(
+                check_function="scrub_aimall",
+                args_for_check_function=[variables[0]],
+            )
+            cmd = cm.scrub_point_directory(cmd)
+
+        return cmd

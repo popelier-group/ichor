@@ -90,7 +90,7 @@ class GaussianCommand(CommandLine):
 
         if self.scrub:
             cm = CheckManager(
-                check_function="scrub_gaussian_point",
+                check_function="scrub_gaussian",
                 args_for_check_function=[variables[0]],
             )
             cmd = cm.scrub_point_directory(cmd)

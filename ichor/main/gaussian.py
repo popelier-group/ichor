@@ -88,7 +88,7 @@ def rerun_gaussian(gaussian_file: str):
     else:
         logger.error(f"Gaussian Job {gaussian_file} failed to run")
 
-def scrub_gaussian_point(gaussian_file: str):
+def scrub_gaussian(gaussian_file: str):
     """ Used by `CheckManager`. Checks if Gaussian job ran correctly. If it did not, it will move the Point to the `FILE_STRUCTURE["gaussian_scrubbed_points"]` directory
     and record that it has moved the point in the log file. If a .wfn file exists and it contains the correct information in its last line, then
     this checking function will not do anything.
@@ -102,14 +102,14 @@ def scrub_gaussian_point(gaussian_file: str):
 
     if gaussian_file:
 
-        wfn_file_name = Path(gaussian_file).with_suffix(".wfn")
+        wfn_file_path = Path(gaussian_file).with_suffix(".wfn")
 
-        if (not wfn_file_name.exists()) or (not "TOTAL ENERGY" in last_line(wfn_file_name)):
+        if (not wfn_file_path.exists()) or (not "TOTAL ENERGY" in last_line(wfn_file_path)):
             mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
             # get the name of the directory only containing the .gjf file
-            point_dir_name = wfn_file_name.parent.name
+            point_dir_name = wfn_file_path.parent.name
             # get the Path to the Parent directory
-            point_dir_path = wfn_file_name.parent
+            point_dir_path = wfn_file_path.parent
             new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
 
             # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end

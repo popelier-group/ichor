@@ -195,6 +195,9 @@ class Globals:
     GAUSSIAN_N_TRIES: int = 10
     AIMALL_N_TRIES: int = 10
 
+    # WHETHER OR NOT TO MOVE POINTS FOR WHICH AIMALL OR GAUSSIAN HAVE FAILED OR CONTAIN BAD DATA. DEFAULT False
+    SCRUB_POINTS: bool = False
+
     FEREBUS_SWARM_SIZE: int = (
         50  # If negative >> Size dynamically allocated by FEREBUS
     )
