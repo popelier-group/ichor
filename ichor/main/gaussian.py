@@ -47,7 +47,7 @@ def submit_gjfs(gjfs: List[Path], force: bool = False, hold: Optional[JobID] = N
     from the compute node (as you cannot submit jobs from compute nodes on CSF3.)
 
     :param gjfs: A list of Path objects pointing to .gjf files
-    :param force: todo: Not sure when this is used[description], defaults to False
+    :param force: Run Gaussian calculations on given .gjf files, even if .wfn files already exist. Defaults to False.
     :param hold: An optional JobID for which this job to hold. This is used in auto-run to hold this job for the previous job to finish, defaults to None
     :return: The JobID of this job given by the submission system.
     """
