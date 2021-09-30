@@ -104,6 +104,7 @@ def scrub_gaussian(gaussian_file: str):
 
         wfn_file_path = Path(gaussian_file).with_suffix(".wfn")
 
+        # if the wfn file path does not exist or the "TOTAL ENERGY" is not in the last line of the .wfn file
         if (not wfn_file_path.exists()) or (not "TOTAL ENERGY" in last_line(wfn_file_path)):
             mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
             # get the name of the directory only containing the .gjf file
@@ -114,8 +115,8 @@ def scrub_gaussian(gaussian_file: str):
 
             # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
             # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
-            if new_path.exists():
-                point_dir_name = point_dir_name + "1"
+            while new_path.exists():
+                point_dir_name = point_dir_name + "~"
                 new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
 
             # move to new path and record in logger

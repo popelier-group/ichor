@@ -106,6 +106,7 @@ class AIMAllCommand(CommandLine):
         return GLOBALS.AIMALL_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:
+        
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
         if self.rerun:

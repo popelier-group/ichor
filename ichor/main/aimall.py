@@ -45,7 +45,7 @@ def submit_wfns(wfns: List[Path], atoms: Optional[List[str]] = None, force: bool
         return submission_script.submit(hold=hold)
 
 
-def check_aimall_output(wfn_file: str):
+def rerun_aimall(wfn_file: str):
     # AIMAll deletes this sh file when it has successfully completed
     # If this file still exists then something went wrong
     if not wfn_file:
@@ -106,7 +106,7 @@ def scrub_aimall(wfn_file: str):
 
                     # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
                     # this can happen for example if aimall fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
-                    if new_path.exists():
+                    while new_path.exists():
                         point_dir_name = point_dir_name + "~"
                         new_path = FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
 

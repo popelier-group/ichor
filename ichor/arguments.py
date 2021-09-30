@@ -47,6 +47,8 @@ external_functions = [
     ExternalFunction("ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"),
     ExternalFunction("ichor.main.gaussian", "rerun_gaussian"),
     ExternalFunction("ichor.main.gaussian", "scrub_gaussian"),
+    ExternalFunction("ichor.main.aimall", "rerun_aimall"),
+    ExternalFunction("ichor.main.gaussian", "scrub_aimall"),
     ExternalFunction("ichor.main.submit_wfns", "submit_wfns"),
     ExternalFunction("ichor.main.submit_wfns", "check_aimall_output"),
     ExternalFunction("ichor.make_sets", "make_sets"),
