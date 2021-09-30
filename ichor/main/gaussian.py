@@ -121,4 +121,8 @@ def scrub_gaussian(gaussian_file: str):
 
             # move to new path and record in logger
             move(point_dir_path, new_path)
-            logger.error(f"Moved point directory {point_dir_path} to {new_path} because it failed to run.")
+
+            if not wfn_file_path.exists():
+                logger.error(f"Moved point directory {point_dir_path} to {new_path} because .wfn file was not produced.")
+            elif not "TOTAL ENERGY" in last_line(wfn_file_path):
+                logger.error(f"Moved point directory {point_dir_path} to {new_path} because .wfn file did not have 'TOTAL_ENERGY' in last line.")

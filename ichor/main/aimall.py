@@ -114,11 +114,11 @@ def scrub_aimall(wfn_file: str):
                     move(point_dir_path, new_path)
 
                     if sh_file_path.exists():
-                        logger.error(f"Moved point directory {point_dir_path} to {new_path} because it failed to run.")
+                        logger.error(f"Moved point directory {point_dir_path} to {new_path} because AIMALL failed to run.")
                     elif n_integration_error > 0:
-                        logger.error(f"Moved point directory {point_dir_path} to {new_path} because integration error for atom was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}.")
+                        logger.error(f"Moved point directory {point_dir_path} to {new_path} because AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}.")
 
             else:
                 logger.warning(
-                    f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points or increasing precision"
+                    f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points by setting GLOBALS.SCRUB_POINTS to True or increasing precision."
                 )
