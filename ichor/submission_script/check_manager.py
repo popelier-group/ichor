@@ -98,6 +98,7 @@ class CheckManager:
             )
         else:
             python_job.add_function_to_job(self.check_function)
+        new_runcmd += python_job.repr()
         new_runcmd += "\n"
         return new_runcmd
 

@@ -18,22 +18,21 @@ class GaussianCommand(CommandLine):
 
     :param gjf_file: Path to a gjf file. This is not needed when running auto-run for a whole directory.
     :param gjf_output: Optional path to the Gaussian job output for the gjf_file. Default is None as it is set to the `gjf_file_name`.gau if not specified.
-    :param check:
     """
 
     def __init__(
         self,
         gjf_file: Path,
-        gjf_output: Optional[Path] = None,
-        rerun: bool = True,
-        scrub: bool = True,
-    ):
+        gjf_output: Optional[Path] = None,):
         self.gjf_file = gjf_file
         self.gjf_output = gjf_output or gjf_file.with_suffix(
             ".gau"
         )  # .gau file used to store the output from Gaussian
-        self.rerun = rerun
-        self.scrub = scrub
+
+        # overwrite based on GLOBALS
+        from ichor.globals import GLOBALS
+        self.rerun = GLOBALS.RERUN_POINTS
+        self.scrub = GLOBALS.SCRUB_POINTS
 
     @property
     def data(self) -> List[str]:

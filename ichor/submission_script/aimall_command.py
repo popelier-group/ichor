@@ -20,7 +20,6 @@ class AIMAllCommand(CommandLine):
 
     :param wfn_file: Path to a .wfn file. This is not needed when running auto-run for a whole directory.
     :param aimall_output: Optional path to the AIMALL job output. Default is None as it is set to the `gjf_file_name`.aim if not specified.
-    :param check: Whether to rerun 
     """
 
     def __init__(
@@ -28,8 +27,6 @@ class AIMAllCommand(CommandLine):
         wfn_file: Path,
         atoms: Optional[Union[str, List[str]]] = None,
         aimall_output: Optional[Path] = None,
-        rerun: bool = True,
-        scrub: bool = True,
     ):
         self.wfn_file = WFN(wfn_file)
         self.aimall_output = aimall_output or wfn_file.with_suffix(".aim")
@@ -40,8 +37,10 @@ class AIMAllCommand(CommandLine):
             and len(self.atoms) == len(self.wfn_file.atoms)
         ):
             self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
-        self.rerun = rerun
-        self.scrub = scrub
+
+        from ichor.globals import GLOBALS
+        self.rerun = GLOBALS.RERUN_POINTS
+        self.scrub = GLOBALS.SCRUB_POINTS
 
     @property
     def data(self) -> List[str]:
@@ -106,7 +105,7 @@ class AIMAllCommand(CommandLine):
         return GLOBALS.AIMALL_CORE_COUNT
 
     def repr(self, variables: List[str]) -> str:
-        
+
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
         if self.rerun:
