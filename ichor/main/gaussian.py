@@ -99,6 +99,7 @@ def scrub_gaussian(gaussian_file: str):
     from ichor.common.io import mkdir, move
     from ichor.logging import logger
     from ichor.file_structure import FILE_STRUCTURE
+    from ichor.globals import GLOBALS
 
     if gaussian_file:
 
@@ -106,23 +107,32 @@ def scrub_gaussian(gaussian_file: str):
 
         # if the wfn file path does not exist or the "TOTAL ENERGY" is not in the last line of the .wfn file
         if (not wfn_file_path.exists()) or (not "TOTAL ENERGY" in last_line(wfn_file_path)):
-            mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
-            # get the name of the directory only containing the .gjf file
-            point_dir_name = wfn_file_path.parent.name
-            # get the Path to the Parent directory
-            point_dir_path = wfn_file_path.parent
-            new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
 
-            # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
-            # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
-            while new_path.exists():
-                point_dir_name = point_dir_name + "~"
+            point_dir_path = wfn_file_path.parent
+
+            if GLOBALS.SCRUB_POINTS:
+
+                mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
+                # get the name of the directory only containing the .gjf file
+                point_dir_name = wfn_file_path.parent.name
+                # get the Path to the Parent directory
                 new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
 
-            # move to new path and record in logger
-            move(point_dir_path, new_path)
+                # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
+                # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
+                while new_path.exists():
+                    point_dir_name = point_dir_name + "~"
+                    new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
 
-            if not wfn_file_path.exists():
-                logger.error(f"Moved point directory {point_dir_path} to {new_path} because .wfn file was not produced.")
-            elif not "TOTAL ENERGY" in last_line(wfn_file_path):
-                logger.error(f"Moved point directory {point_dir_path} to {new_path} because .wfn file did not have 'TOTAL_ENERGY' in last line.")
+                # move to new path and record in logger
+                move(point_dir_path, new_path)
+
+                if not wfn_file_path.exists():
+                    logger.error(f"Moved point directory {point_dir_path} to {new_path} because .wfn file was not produced.")
+                elif not "TOTAL ENERGY" in last_line(wfn_file_path):
+                    logger.error(f"Moved point directory {point_dir_path} to {new_path} because .wfn file did not have 'TOTAL_ENERGY' in last line.")
+
+            else:
+
+                logger.error(f" Gaussian for {point_dir_path} did not run correctly.")
+
