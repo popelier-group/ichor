@@ -17,7 +17,7 @@ def submit_points_directory_to_gaussian(directory: Path, overwrite_existing: boo
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
     :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True.
         If this is False, then any existing `.gjf` files in the directory will not be overwritten
-        (thus they would not be using the GLOBLALS Gaussian settings.)
+        (thus they would not be using the Gaussian settings from GLOBALS.)
     """
     points = PointsDirectory(
         directory
@@ -31,7 +31,7 @@ def write_gjfs(points: PointsDirectory, overwrite_existing: bool) -> List[Path]:
 
     :param points: A PointsDirectory instance which wraps around a whole directory containing points (such as TRAINING_SET).
     :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True (see `submit_points_directory_to_gaussian`)
-        If this is False, then any existing `.gjf` files in the directory will not be overwritten (thus they would not be using the GLOBLALS Gaussian settings.)
+        If this is False, then any existing `.gjf` files in the directory will not be overwritten (thus they would not be using the GLOBALS Gaussian settings.)
     :return: A list of Path objects which point to `.gjf` files in each PointDirectory that is contained in the PointsDirectory.
     """
     gjfs = []
