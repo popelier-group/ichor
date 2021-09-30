@@ -39,7 +39,7 @@ def write_gjfs(points: PointsDirectory, overwrite_existing: bool) -> List[Path]:
 
         if not point.gjf.exists():
             point.gjf = GJF(Path(point.path / (point.path.name + GJF.filetype)))
-            point.gjf.atoms = point.xyz
+            point.gjf.atoms = point.xyz.atoms
 
         if overwrite_existing:
             point.gjf.write()
