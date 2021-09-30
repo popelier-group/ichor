@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+import ichor
 from ichor.common.functools import classproperty
 from ichor.submission_script.python_command import PythonCommand
 
@@ -24,7 +25,7 @@ class ICHORCommand(PythonCommand):
     ):
         PythonCommand.__init__(
             self,
-            script or Path(sys.argv[0]).resolve(),
+            script or (Path(ichor.__file__).parent.parent / 'ichor3.py').resolve(),
             args if args is not None else [],
         )
 
