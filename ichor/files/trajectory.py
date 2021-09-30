@@ -121,35 +121,25 @@ class Trajectory(ListOfAtoms, File):
 
         return [ref.rmsd(point) for point in self]
 
-    def to_set(self, root: Path, indices: List[int]):
-        """Converts the geometries in the timesteps to gjf files which then can be passed into Gaussian
-        to calculate .wfn files."""
-        from ichor.globals import GLOBALS
-
-        mkdir(root, empty=True)
-        root = Path(root)
-        indices.sort(reverse=True)
-        for n, i in enumerate(indices):
-            path = Path(
-                str(GLOBALS.SYSTEM_NAME) + str(n + 1).zfill(4) + ".gjf"
-            )
-            gjf = GJF(root / path)
-            gjf.atoms = self[i]
-            gjf.write()
-            del self[i]
-
     def to_dir(self, root: Path, every: int = 1):
+        """ Writes out every nth timestep to a separate .xyz file to a given directory
+        
+        :param root: A Path to a directory where to write the .xyz files. An empty directory is made for the given Path and
+            overwrites an existing directory for the given Path.
+        :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
+            a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
+        """
         from ichor.globals import GLOBALS
+        from ichor.files import XYZ
 
         mkdir(root, empty=True)
         for i, geometry in enumerate(self):
-            if i % every == 0:
-                path = Path(
-                    str(GLOBALS.SYSTEM_NAME) + str(i + 1).zfill(4) + ".gjf"
-                )
-                gjf = GJF(root / path)
-                gjf.atoms = geometry  # matt_todo: GJFs write out a gjf file even if there are no atoms present. This should not be possible
-                gjf.write()
+
+            if (i % every) == 0:
+
+                path = Path(str(GLOBALS.SYSTEM_NAME) + str(i + 1).zfill(4) + ".xyz")
+                path = root / path
+                XYZ(path, geometry)
 
     @classmethod
     def features_file_to_trajectory(
