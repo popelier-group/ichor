@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from ichor import constants
 from ichor.batch_system import JobID
 from ichor.files import PointsDirectory
 from ichor.logging import logger
@@ -38,8 +37,14 @@ def submit_wfns(
 ) -> Optional[JobID]:
     with SubmissionScript(SCRIPT_NAMES["aimall"]) as submission_script:
         for wfn in wfns:
-            if force or not wfn.with_suffix(".aim").exists():
-                submission_script.add_command(AIMAllCommand(wfn, atoms=atoms))
+            if force or not wfn.with_suffix('.aim').exists():
+                submission_script.add_command(
+                    AIMAllCommand(wfn, atoms=atoms)
+                )
+                logger.debug(
+                    f"Adding {wfn} to {submission_script.path}"
+                ) 
+
     if len(submission_script.commands) > 0:
         # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
         logger.info(

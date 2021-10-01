@@ -10,35 +10,42 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
 
 
-def submit_points_directory_to_gaussian(directory: Path) -> Optional[JobID]:
-    """Function that writes out .gjf files from .xyz files that are in each directory and
+def submit_points_directory_to_gaussian(directory: Path, overwrite_existing: bool = True) -> Optional[JobID]:
+    """Function that writes out .gjf files from .xyz files that are in each directory and 
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
+    :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True.
+        If this is False, then any existing `.gjf` files in the directory will not be overwritten
+        (thus they would not be using the Gaussian settings from GLOBALS.)
     """
     points = PointsDirectory(
         directory
     )  # a directory which contains points (a bunch of molecular geometries)
-    gjf_files = write_gjfs(points)
+    gjf_files = write_gjfs(points, overwrite_existing)
     return submit_gjfs(gjf_files)
 
-
-def write_gjfs(points: PointsDirectory) -> List[Path]:
+def write_gjfs(points: PointsDirectory, overwrite_existing: bool) -> List[Path]:
     """Writes out .gjf files in every PointDirectory which is contained in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
     which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf` file in the PointDirectory (if it does not exist already).
 
     :param points: A PointsDirectory instance which wraps around a whole directory containing points (such as TRAINING_SET).
+    :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True (see `submit_points_directory_to_gaussian`)
+        If this is False, then any existing `.gjf` files in the directory will not be overwritten (thus they would not be using the GLOBALS Gaussian settings.)
     :return: A list of Path objects which point to `.gjf` files in each PointDirectory that is contained in the PointsDirectory.
     """
     gjfs = []
     for point in points:
+
         if not point.gjf.exists():
-            point.gjf = GJF(
-                Path(point.path / (point.path.name + GJF.filetype))
-            )
-            point.gjf.atoms = point.xyz
-        point.gjf.write()
+            point.gjf = GJF(Path(point.path / (point.path.name + GJF.filetype)))
+            point.gjf.atoms = point.xyz.atoms
+
+        if overwrite_existing:
+            point.gjf.write()
+
         gjfs.append(point.gjf.path)
+
     return gjfs
 
 
@@ -61,11 +68,11 @@ def submit_gjfs(
     # the submission_script object can be accessed even after the context manager
     with SubmissionScript(SCRIPT_NAMES["gaussian"]) as submission_script:
         for gjf in gjfs:
-            if force or not gjf.with_suffix(".wfn").exists():
-                submission_script.add_command(GaussianCommand(gjf))
+            if force or not gjf.with_suffix('.wfn').exists():
+                submission_script.add_command(GaussianCommand(gjf))  # make a list of GaussianCommand instances.
                 logger.debug(
                     f"Adding {gjf} to {submission_script.path}"
-                )  # make a list of GaussianCommand instances.
+                ) 
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
     if len(submission_script.commands) > 0:
         logger.info(
