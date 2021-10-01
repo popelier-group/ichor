@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional, List
 from ichor.modules import Modules
 from ichor.common.functools import classproperty
+from ichor.globals import GLOBALS
 
 
 class NoInputs(Exception):
@@ -19,6 +20,10 @@ class MorfiCommand(CommandLine):
     @classproperty
     def modules(self) -> Modules:
         return PandoraMorfiCommand.modules + AIMAllCommand.modules
+
+    @property
+    def ncores(self):
+        return GLOBALS.MORFI_NCORES
 
     @property
     def data(self) -> List[str]:

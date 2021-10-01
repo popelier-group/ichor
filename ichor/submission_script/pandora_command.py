@@ -55,6 +55,10 @@ class PandoraPySCFCommand(PandoraCommand):
         self.point_directory = point_directory
 
     @property
+    def ncores(self):
+        return GLOBALS.PYSCF_NCORES
+
+    @property
     def data(self) -> List[str]:
         data = super().data
         if self.point_directory is not None:
