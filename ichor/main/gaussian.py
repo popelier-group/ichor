@@ -67,10 +67,10 @@ def submit_gjfs(gjfs: List[Path], force: bool = False, hold: Optional[JobID] = N
     with SubmissionScript(SCRIPT_NAMES["gaussian"]) as submission_script:
         for gjf in gjfs:
             if force or not gjf.with_suffix('.wfn').exists():
-                submission_script.add_command(GaussianCommand(gjf))
+                submission_script.add_command(GaussianCommand(gjf))  # make a list of GaussianCommand instances.
                 logger.debug(
                     f"Adding {gjf} to {submission_script.path}"
-                )  # make a list of GaussianCommand instances.
+                ) 
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
     if len(submission_script.commands) > 0:
         logger.info(

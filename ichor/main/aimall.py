@@ -36,6 +36,10 @@ def submit_wfns(wfns: List[Path], atoms: Optional[List[str]] = None, force: bool
                 submission_script.add_command(
                     AIMAllCommand(wfn, atoms=atoms)
                 )
+                logger.debug(
+                    f"Adding {wfn} to {submission_script.path}"
+                ) 
+
     if len(submission_script.commands) > 0:
         # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
         logger.info(
