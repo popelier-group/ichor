@@ -9,11 +9,13 @@ from ichor.submission_script.dlpoly_command import DlpolyCommand
 from ichor.submission_script.ferebus_command import FerebusCommand
 from ichor.submission_script.gaussian_command import GaussianCommand
 from ichor.submission_script.ichor_command import ICHORCommand
+from ichor.submission_script.morfi_command import MorfiCommand
+from ichor.submission_script.pandora_command import (PandoraCommand,
+                                                     PandoraMorfiCommand,
+                                                     PandoraPySCFCommand)
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.script_timing_manager import TimingManager
 from ichor.submission_script.submision_script import SubmissionScript
-from ichor.submission_script.pandora_command import PandoraCommand, PandoraPySCFCommand, PandoraMorfiCommand
-from ichor.submission_script.morfi_command import MorfiCommand
 
 
 def prepend_script_directory(paths):
@@ -79,10 +81,7 @@ SCRIPT_NAMES = ScriptNames(
             }
         ),
         "pandora": ScriptNames(
-            {
-                "pyscf": "PANDORA_PYSCF.sh",
-                "morfi": "PANDORA_MORFI.sh"
-            }
+            {"pyscf": "PANDORA_PYSCF.sh", "morfi": "PANDORA_MORFI.sh"}
         ),
         "dlpoly": "DLPOLY.sh",
         "dlpoly_gaussian": "ICHOR_DLPOLY_GAUSSIAN.sh",

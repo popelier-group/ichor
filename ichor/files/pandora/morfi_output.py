@@ -3,8 +3,8 @@ from pathlib import Path
 
 from ichor.common.functools import classproperty
 from ichor.files.directory import AnnotatedDirectory
+from ichor.files.optional_file import OptionalFile, OptionalPath
 from ichor.files.pandora.mout import MOUT
-from ichor.files.optional_file import OptionalPath, OptionalFile
 
 
 class MorfiDirectory(AnnotatedDirectory):
@@ -12,7 +12,7 @@ class MorfiDirectory(AnnotatedDirectory):
 
     @classproperty
     def dirname(self) -> str:
-        return 'morfi-2pdm'
+        return "morfi-2pdm"
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

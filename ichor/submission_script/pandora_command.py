@@ -2,12 +2,12 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.common.functools import classproperty
-from ichor.globals import GLOBALS
-from ichor.modules import Modules, PandoraModules, MorfiModules
-from ichor.submission_script.python_command import PythonCommand
-from ichor.submission_script.ichor_command import ICHORCommand
-from ichor.pandora import PANDORA_LOCATION
 from ichor.files import PandoraDirectory
+from ichor.globals import GLOBALS
+from ichor.modules import Modules, MorfiModules, PandoraModules
+from ichor.pandora import PANDORA_LOCATION
+from ichor.submission_script.ichor_command import ICHORCommand
+from ichor.submission_script.python_command import PythonCommand
 
 
 class PandoraCommand(PythonCommand):
@@ -32,9 +32,9 @@ class PandoraCommand(PythonCommand):
 
     @property
     def args(self) -> List[str]:
-        if self.run_pyscf and '--pyscf' not in self._args:
+        if self.run_pyscf and "--pyscf" not in self._args:
             self._args.append("--pyscf")
-        if self.run_morfi and '--morfi' not in self._args:
+        if self.run_morfi and "--morfi" not in self._args:
             self._args.append("--morfi")
         return self._args
 
@@ -50,7 +50,9 @@ class PandoraCommand(PythonCommand):
 
 
 class PandoraPySCFCommand(PandoraCommand):
-    def __init__(self, config_file: Path, point_directory: Optional[Path] = None):
+    def __init__(
+        self, config_file: Path, point_directory: Optional[Path] = None
+    ):
         PandoraCommand.__init__(self, config_file, pyscf=True, morfi=False)
         self.point_directory = point_directory
 
@@ -69,8 +71,11 @@ class PandoraPySCFCommand(PandoraCommand):
     def repr(self, variables: List[str]) -> str:
         repr = super().repr(variables)
         if self.point_directory is not None:
-            ichor_command = ICHORCommand(func='copy_aimall_wfn_to_point_directory', func_args=[variables[1], variables[2]])
-            repr += f'\n{ichor_command.repr(variables)}'
+            ichor_command = ICHORCommand(
+                func="copy_aimall_wfn_to_point_directory",
+                func_args=[variables[1], variables[2]],
+            )
+            repr += f"\n{ichor_command.repr(variables)}"
         return repr
 
 

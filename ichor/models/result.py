@@ -312,7 +312,7 @@ class ModelsResult(ModelResult):
                 f"Cannot append value of type '{type(other)}' to type '{self.__class__.__name__}"
             )
 
-    # todo: this file needs some docstrings because it is hard to tell what is going on and 
+    # todo: this file needs some docstrings because it is hard to tell what is going on and
     @property
     def T(self):
         result = ModelsResult()

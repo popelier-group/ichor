@@ -1,17 +1,17 @@
+from pathlib import Path
+
 from ichor.analysis import analysis_menu
+from ichor.main.aimall import submit_points_directory_to_aimall
+from ichor.main.gaussian import submit_points_directory_to_gaussian
+from ichor.main.make_models import make_models_menu
 from ichor.main.options_menu import options_menu
+from ichor.main.qcp import submit_qcp
+from ichor.main.qct import submit_qct
 from ichor.main.queue import queue_menu
 from ichor.main.tools_menu import tools_menu
 from ichor.menu import Menu
 from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM
 from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM
-from pathlib import Path
-from ichor.main.make_models import make_models_menu
-from ichor.main.gaussian import submit_points_directory_to_gaussian
-from ichor.main.aimall import submit_points_directory_to_aimall
-from ichor.main.qcp import submit_qcp
-from ichor.main.qct import submit_qct
-
 
 _points_directory_path = None
 
@@ -34,10 +34,12 @@ def _points_directory_menu_refresh(menu):
         kwargs={"directory": _points_directory_path},
     )
     menu.add_option(
-        "3", "Make Models", make_models_menu, kwargs={"directory": _points_directory_path}
+        "3",
+        "Make Models",
+        make_models_menu,
+        kwargs={"directory": _points_directory_path},
     )
     menu.add_final_options()
-
 
 
 def points_directory_menu(path: Path):

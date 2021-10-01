@@ -1,10 +1,12 @@
 import os
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
+import ichor
 from ichor.common.functools import classproperty
 from ichor.submission_script.python_command import PythonCommand
+from ichor.typing import F
 
 
 class ICHORCommand(PythonCommand):
@@ -19,12 +21,13 @@ class ICHORCommand(PythonCommand):
         script: Optional[Path] = None,
         args: Optional[List[str]] = None,
         auto_run: bool = False,
-        func: Optional[str] = None,
+        func: Optional[: Union[str, F]] = None,
         func_args: Optional[List[str]] = None,
     ):
         PythonCommand.__init__(
             self,
-            script or Path(sys.argv[0]).resolve(),
+            script
+            or (Path(ichor.__file__).parent.parent / "ichor3.py").resolve(),
             args if args is not None else [],
         )
 
@@ -44,7 +47,9 @@ class ICHORCommand(PythonCommand):
     def group(self) -> bool:
         return False
 
-    def add_function_to_job(self, function_to_run: str, *args):
+    def add_function_to_job(self, function_to_run: Union[str, F], *args):
         """extends self.args with the function and function arguments that need to be executed to check output"""
+        if not isinstance(function_to_run, str):
+            function_to_run = function_to_run.__name__
         arg_str = " ".join(f'"{str(arg)}"' for arg in args)
         self.args += [f"-f {function_to_run} {arg_str}"]

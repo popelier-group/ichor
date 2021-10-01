@@ -62,6 +62,7 @@ DLPOLY_CORE_COUNT               | int             | 1                 | Number o
 CP2K_CORE_COUNT                 | int             | 8                 | Number of cores to run CP2K                                                                |
 GAUSSIAN_N_TRIES                | int             | 10                | Number of tries to run Gaussian job before giving up                                       | If negative will run infinitely
 AIMALL_N_TRIES                  | int             | 10                | Number of tries to run AIMAll job before giving up                                         | If negative will run infinitely
+SCRUB_POINTS                    | bool            | False             | Whether or not to remove any bad/failed points after Gaussian or AIMALL are ran            | Only implemented for Gaussian and Aimall currently. Default is false.
 FEREBUS_SWARM_SIZE              | int             | 50                | Swarm size for FEREBUS PSO                                                                 |
 FEREBUS_NUGGET                  | float           | 1.0e-10           | Nugget parameter for FEREBUS                                                               |
 FEREBUS_THETA_MIN               | float           | 0.0               | Min theta value for PSO initialisation in FEREBUS                                          |
@@ -196,6 +197,11 @@ class Globals:
     # N TRIES SETTINGS FOR RETRYING TO RUN PROGRAMS
     GAUSSIAN_N_TRIES: int = 10
     AIMALL_N_TRIES: int = 10
+
+    # WHETHER OR NOT TO RERUN POINTS THAT HAVE FAILED (UP TO GAUSSIAN_N_TRIES, AIMALL_N_TRIES)
+    RERUN_POINTS = True
+    # WHETHER OR NOT TO MOVE POINTS FOR WHICH AIMALL OR GAUSSIAN HAVE FAILED OR CONTAIN BAD DATA. DEFAULT False
+    SCRUB_POINTS: bool = False
 
     FEREBUS_SWARM_SIZE: int = (
         50  # If negative >> Size dynamically allocated by FEREBUS

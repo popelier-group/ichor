@@ -52,9 +52,9 @@ class PointsDirectory(ListOfAtoms, Directory):
                 f.is_dir()
             ):  # todo: add method to determine if f is a PointDirectory
                 self.append(PointDirectory(f))
-            # otherwise if the PathObject is a file that ends in .gjf, make a new directory with its path set to self.path/f.stem
-            # for example if the given path is ./TRAINING_SET/ and there is WATER001.gjf, it will make ./TRANING_SET/WATER001/
-            elif f.is_file() and f.suffix == ".gjf":
+            # otherwise if the PathObject is a file that ends in .xyz, make a new directory with its path set to self.path/f.stem
+            # for example if the given path is ./TRAINING_SET/ and there is WATER001.xyz, it will make ./TRANING_SET/WATER001/
+            elif f.is_file() and f.suffix == ".xyz":
                 new_dir = self.path / f.stem
                 mkdir(new_dir)
                 f.replace(new_dir / f.name)
