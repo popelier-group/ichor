@@ -10,8 +10,9 @@ _current_validation_set = None
 def get_validation_set_from_current_dir():
 
     if FILE_STRUCTURE["validation_set"].exists():
-            return FILE_STRUCTURE["validation_set"]
+        return FILE_STRUCTURE["validation_set"]
     return None
+
 
 def set_validation_set(vs: Path) -> None:
     global _current_validation_set

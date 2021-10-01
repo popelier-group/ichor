@@ -13,7 +13,7 @@ class CheckManager:
     Class used to check if the jobs submitted to the compute nodes via the sumbission system have ran correctly/have the correct outputs.
     Since each type of job has different outputs, each type of job has its own `check_function` which looks at the output of the job to check if
     the job has ran successfully. This class is also used to append extra lines to a submission script, which have to do with rerunning failed jobs
-    as well as removing points which did not run successfully. 
+    as well as removing points which did not run successfully.
 
     :param check_function: A string corresponding to the name of the function to be used to check outputs of the job
     :param args_for_check_function: Arguments that need to be passed to the function that will do the checking.
@@ -42,13 +42,13 @@ class CheckManager:
         for errors. By default, this is appended right after the line which tries to run Gaussian/AIMALL on a task array. Essentially, this is a
         while loop which tries running Gaussian or AIMALL again n times (where n is specified by `CheckManager.NTRIES`) on any tasks that have failed.
         After each run, the output of Gaussian or AIMALL is checked via ICHOR. If the job finished successfully, then the while loop is broken. If the job
-        was reran n times and still fails, then the while loop is also broken and the next parts of the submission script can be executed (right now that 
+        was reran n times and still fails, then the while loop is also broken and the next parts of the submission script can be executed (right now that
         is the scrubbing up bad points part).
-        
+
         :param runcmd: The string which will be written out to the submission script. This string contains Gaussian or AIMALL-related commands/options
             for the job (such as Gaussian/AIMALL location, loading modules, running Gaussian/AIMALL commands, etc.)
         :return: Appends extra lines to the string, which will try to run the Gaussian or AIMALL job if it has failed the first time. The output
-            of the job is checked on each iteration using ICHOR (by adding an ICHOR command) 
+            of the job is checked on each iteration using ICHOR (by adding an ICHOR command)
             The modified string is returned as the new set of commands to be written to in the submission script file.
 
         .. note::
@@ -63,7 +63,7 @@ class CheckManager:
         new_runcmd += "do\n"
         new_runcmd += "\n"
 
-        new_runcmd += runcmd # add the initial command to be ran
+        new_runcmd += runcmd  # add the initial command to be ran
 
         new_runcmd += "\n"
         python_job = ICHORCommand()
@@ -80,7 +80,7 @@ class CheckManager:
 
     def scrub_point_directory(self, runcmd: str) -> str:
         """Append extra lines to the submission script file, which are used to remove any points which have failed either Gaussian or AIMALL.
-        By default, this is appended after the `rerun_if_job_failed` lines, so it runs after the jobs have been reran several times. 
+        By default, this is appended after the `rerun_if_job_failed` lines, so it runs after the jobs have been reran several times.
 
         :param runcmd: The string which will be written out to the submission script. This string contains Gaussian or AIMALL-related commands/options
             for the job (such as Gaussian/AIMALL location, loading modules, running Gaussian/AIMALL commands, etc.)
@@ -89,7 +89,7 @@ class CheckManager:
         """
 
         new_runcmd = ""
-        new_runcmd += runcmd # add the initial command to be ran
+        new_runcmd += runcmd  # add the initial command to be ran
         new_runcmd += "\n"
         python_job = ICHORCommand()
         if self.check_args:

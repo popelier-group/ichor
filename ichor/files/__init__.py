@@ -4,14 +4,15 @@ from ichor.files.file import File, FileState
 from ichor.files.gjf import GJF
 from ichor.files.int import INT
 from ichor.files.ints import INTs
-from ichor.files.pandora import PandoraInput, PySCFDirectory, MorfiDirectory, PandoraDirectory
+from ichor.files.optional_file import OptionalFile, OptionalPath
+from ichor.files.pandora import (MorfiDirectory, PandoraDirectory,
+                                 PandoraInput, PySCFDirectory)
 from ichor.files.point_directory import PointDirectory
 from ichor.files.points_directory import PointsDirectory
 from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.files.trajectory import Trajectory
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
-from ichor.files.optional_file import OptionalFile, OptionalPath
 
 __all__ = [
     "File",

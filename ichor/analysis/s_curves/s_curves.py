@@ -10,14 +10,15 @@ from ichor.constants import ha_to_kj_mol
 from ichor.files import PointsDirectory
 from ichor.models import Models, ModelsResult
 
+
 def percentile(n: int) -> np.ndarray:
     return np.linspace(100 / n, 100, n)
 
 
 def make_chart_settings(local_kwargs: dict):
-    """ Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
+    """Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
     constructs dictionaries with parameter values to be passed to xlsx writer to configure graph settings.
-    
+
     :param local_kwargs: A dictionary containing key word arguments that are parsed to construct the xlsx-writer graph settings
     """
 
@@ -29,9 +30,16 @@ def make_chart_settings(local_kwargs: dict):
 
     # x-axis settings
     x_axis_settings["name"] = local_kwargs["x_axis_name"]
-    x_axis_settings["major_gridlines"]["visible"] = local_kwargs["x_major_gridlines_visible"]
-    x_axis_settings["minor_gridlines"]["visible"] = local_kwargs["x_minor_gridlines_visible"]
-    x_axis_settings["major_gridlines"]["line"] = {"width": local_kwargs["x_axis_major_gridline_width"], "color": local_kwargs["x_axis_major_gridline_color"]}
+    x_axis_settings["major_gridlines"]["visible"] = local_kwargs[
+        "x_major_gridlines_visible"
+    ]
+    x_axis_settings["minor_gridlines"]["visible"] = local_kwargs[
+        "x_minor_gridlines_visible"
+    ]
+    x_axis_settings["major_gridlines"]["line"] = {
+        "width": local_kwargs["x_axis_major_gridline_width"],
+        "color": local_kwargs["x_axis_major_gridline_color"],
+    }
     if local_kwargs["x_log_scale"]:
         x_axis_settings["log_base"] = 10
 
@@ -39,11 +47,19 @@ def make_chart_settings(local_kwargs: dict):
     y_axis_settings["name"] = local_kwargs["y_axis_name"]
     y_axis_settings["min"] = local_kwargs["y_min"]
     y_axis_settings["max"] = local_kwargs["y_max"]
-    y_axis_settings["major_gridlines"]["visible"] = local_kwargs["y_major_gridlines_visible"]
-    y_axis_settings["minor_gridlines"]["visible"] = local_kwargs["y_minor_gridlines_visible"]
-    x_axis_settings["major_gridlines"]["line"] = {"width": local_kwargs["y_axis_major_gridline_width"], "color": local_kwargs["y_axis_major_gridline_color"]}
+    y_axis_settings["major_gridlines"]["visible"] = local_kwargs[
+        "y_major_gridlines_visible"
+    ]
+    y_axis_settings["minor_gridlines"]["visible"] = local_kwargs[
+        "y_minor_gridlines_visible"
+    ]
+    x_axis_settings["major_gridlines"]["line"] = {
+        "width": local_kwargs["y_axis_major_gridline_width"],
+        "color": local_kwargs["y_axis_major_gridline_color"],
+    }
 
     return x_axis_settings, y_axis_settings
+
 
 def calculate_s_curves(
     model_location: Path,
@@ -52,8 +68,8 @@ def calculate_s_curves(
     types: Optional[List[str]] = None,
     **kwargs,
 ):
-    """ Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
-    
+    """Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
+
     :param model_location: A directory containing model files `.model`
     :param validation_set_location: A directory containing validation or test set points. These points should NOT be in the training set.
     :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves. S-curves are made for all atoms in the system by default.
@@ -62,7 +78,9 @@ def calculate_s_curves(
     """
 
     if model_location is None or validation_set_location is None:
-        raise ValueError("Enter valid locations for models and validation sets.")
+        raise ValueError(
+            "Enter valid locations for models and validation sets."
+        )
 
     model = Models(model_location)
     validation_set = PointsDirectory(validation_set_location)
@@ -75,21 +93,21 @@ def write_to_excel(
     true: ModelsResult,
     predicted: ModelsResult,
     output_name: Path = "s-curves.xlsx",
-    x_axis_name:str = "Absolute Prediction Error",
-    x_log_scale:bool = True,
-    x_major_gridlines_visible:bool = True,
-    x_minor_gridlines_visible:bool = True,
-    x_axis_major_gridline_width:int = 0.75,
-    x_axis_major_gridline_color:str = "#F2F2F2",
-    y_axis_name:str = "%",
-    y_min:int = 0,
-    y_max:int = 100,
-    y_major_gridlines_visible:bool = True,
-    y_minor_gridlines_visible:bool = False,
-    y_axis_major_gridline_width:int = 0.75,
-    y_axis_major_gridline_color:str = "#BFBFBF",
-    show_legend:bool = False,
-    excel_style:int = 10
+    x_axis_name: str = "Absolute Prediction Error",
+    x_log_scale: bool = True,
+    x_major_gridlines_visible: bool = True,
+    x_minor_gridlines_visible: bool = True,
+    x_axis_major_gridline_width: int = 0.75,
+    x_axis_major_gridline_color: str = "#F2F2F2",
+    y_axis_name: str = "%",
+    y_min: int = 0,
+    y_max: int = 100,
+    y_major_gridlines_visible: bool = True,
+    y_minor_gridlines_visible: bool = False,
+    y_axis_major_gridline_width: int = 0.75,
+    y_axis_major_gridline_color: str = "#BFBFBF",
+    show_legend: bool = False,
+    excel_style: int = 10,
 ):
     """
     Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
@@ -173,7 +191,7 @@ def write_to_excel(
                 s_curve.set_x_axis(x_axis_settings)
                 s_curve.set_y_axis(y_axis_settings)
                 s_curve.set_legend({"position": "none"})
-                s_curve.set_style(excel_style) # default style of excel plots
+                s_curve.set_style(excel_style)  # default style of excel plots
                 writer.sheets[sheet_name].insert_chart("G2", s_curve)
 
             # also make a sheet with total errors for the whole system (for every property)
@@ -214,7 +232,6 @@ def write_to_excel(
             total_s_curve.set_y_axis(y_axis_settings)
             total_s_curve.set_legend({"position": "none"})
             total_s_curve.set_style(excel_style)
-
 
             # below the total s_curve, make an S-curve which overlaps all the individual atom S-curves
             atomic_s_curve = workbook.add_chart(

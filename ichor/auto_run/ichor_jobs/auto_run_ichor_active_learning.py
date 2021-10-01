@@ -3,6 +3,7 @@ from typing import Optional
 
 from ichor.batch_system import JobID
 from ichor.file_structure import FILE_STRUCTURE
+from ichor.main.active_learning import active_learning
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
@@ -23,7 +24,7 @@ def submit_ichor_active_learning_job_to_auto_run(
     )
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
-        "active_learning", str(model_directory), str(sample_pool_directory)
+        active_learning, str(model_directory), str(sample_pool_directory)
     )
     with TimingManager(submission_script, message="Active Learning"):
         submission_script.add_command(ichor_command)

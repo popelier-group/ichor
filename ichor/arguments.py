@@ -37,6 +37,7 @@ class ExternalFunction:
         m = importlib.import_module(self.module)
         return getattr(m, self.function)
 
+
 # todo: these will need updating because the paths/names are updated
 # List of all ichor external functions, add functions to the list. Note: a checker for these has not been implemented
 external_functions = [
@@ -44,7 +45,9 @@ external_functions = [
     ExternalFunction("ichor.main.active_learning", "active_learning"),
     ExternalFunction("ichor.main.collate_log", "collate_model_log"),
     ExternalFunction("ichor.main.make_models", "make_models, move_models"),
-    ExternalFunction("ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"),
+    ExternalFunction(
+        "ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"
+    ),
     ExternalFunction("ichor.main.gaussian", "rerun_gaussian"),
     ExternalFunction("ichor.main.gaussian", "scrub_gaussian"),
     ExternalFunction("ichor.main.aimall", "rerun_aimall"),
@@ -60,7 +63,9 @@ external_functions = [
     ExternalFunction(
         "ichor.analysis.dlpoly", "submit_final_geometry_to_gaussian"
     ),
-    ExternalFunction("ichor.main.pandora", "copy_aimall_wfn_to_point_directory"),
+    ExternalFunction(
+        "ichor.main.pandora", "copy_aimall_wfn_to_point_directory"
+    ),
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key

@@ -9,10 +9,10 @@ from ichor.files.directory import AnnotatedDirectory
 from ichor.files.geometry import AtomData, GeometryData, GeometryFile
 from ichor.files.gjf import GJF
 from ichor.files.ints import INTs
+from ichor.files.optional_file import OptionalFile, OptionalPath
+from ichor.files.pandora import PandoraDirectory, PandoraInput
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
-from ichor.files.pandora import PandoraDirectory, PandoraInput
-from ichor.files.optional_file import OptionalPath, OptionalFile
 
 
 class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
@@ -44,7 +44,10 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
         if self.xyz is None:
             for f in self.files():
                 if isinstance(f, GeometryFile):
-                    self.xyz = XYZ(Path(self.path) / (self.path.name + XYZ.filetype), atoms=f.atoms)
+                    self.xyz = XYZ(
+                        Path(self.path) / (self.path.name + XYZ.filetype),
+                        atoms=f.atoms,
+                    )
 
     @property
     def atoms(self):

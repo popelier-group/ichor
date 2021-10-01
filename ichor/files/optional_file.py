@@ -1,10 +1,11 @@
 from typing import TypeVar, Union
+
 from ichor.files.path_object import PathObject
 
-PathType = TypeVar('PathType', bound=PathObject)
+PathType = TypeVar("PathType", bound=PathObject)
 
 
-class OptionalFileType():
+class OptionalFileType:
     def exists(self):
         return False
 

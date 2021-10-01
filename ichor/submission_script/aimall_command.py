@@ -39,6 +39,7 @@ class AIMAllCommand(CommandLine):
             self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
 
         from ichor.globals import GLOBALS
+
         self.rerun = GLOBALS.RERUN_POINTS
         self.scrub = GLOBALS.SCRUB_POINTS
 

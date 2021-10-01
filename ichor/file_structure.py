@@ -33,8 +33,16 @@ class FileStructure(FileTree):
         self.add("MODELS", "remake-models")
         self.add("MODEL_LOG", "model_log")
         self.add("SCRUBBED_POINTS", "scrubbed_points")
-        self.add("GAUSSIAN_SCRUBBED_POINTS", "gaussian_scrubbed_points", parent="scrubbed_points")
-        self.add("AIMALL_SCRUBBED_POINTS", "aimall_scrubbed_points", parent="scrubbed_points")
+        self.add(
+            "GAUSSIAN_SCRUBBED_POINTS",
+            "gaussian_scrubbed_points",
+            parent="scrubbed_points",
+        )
+        self.add(
+            "AIMALL_SCRUBBED_POINTS",
+            "aimall_scrubbed_points",
+            parent="scrubbed_points",
+        )
 
         self.add("OPT", "opt")
         self.add("CP2K", "cp2k")
@@ -104,6 +112,7 @@ class FileStructure(FileTree):
         self.add("TEMP", "tmp_scripts", parent="scripts")
         self.add("OUTPUTS", "outputs", parent="scripts")
         self.add("ERRORS", "errors", parent="scripts")
+
 
 # this type of stuff is making sphinx execute code
 FILE_STRUCTURE = FileStructure()

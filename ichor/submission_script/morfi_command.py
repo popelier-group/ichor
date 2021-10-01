@@ -1,10 +1,11 @@
-from ichor.submission_script.pandora_command import PandoraMorfiCommand
+from pathlib import Path
+from typing import List, Optional
+
+from ichor.common.functools import classproperty
+from ichor.modules import Modules
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.command_line import CommandLine
-from pathlib import Path
-from typing import Optional, List
-from ichor.modules import Modules
-from ichor.common.functools import classproperty
+from ichor.submission_script.pandora_command import PandoraMorfiCommand
 
 
 class NoInputs(Exception):
@@ -12,9 +13,18 @@ class NoInputs(Exception):
 
 
 class MorfiCommand(CommandLine):
-    def __init__(self, morfi_input: Path, aimall_wfn: Optional[Path] = None, atoms: Optional[List[str]] = None):
+    def __init__(
+        self,
+        morfi_input: Path,
+        aimall_wfn: Optional[Path] = None,
+        atoms: Optional[List[str]] = None,
+    ):
         self.pandora_command = PandoraMorfiCommand(morfi_input)
-        self.aimall_command = AIMAllCommand(aimall_wfn, atoms=atoms) if aimall_wfn is not None else None
+        self.aimall_command = (
+            AIMAllCommand(aimall_wfn, atoms=atoms)
+            if aimall_wfn is not None
+            else None
+        )
 
     @classproperty
     def modules(self) -> Modules:
@@ -28,11 +38,15 @@ class MorfiCommand(CommandLine):
         return data
 
     def command(self) -> str:
-        return ''
+        return ""
 
     def repr(self, variables: List[str]) -> str:
-        repr = self.pandora_command.repr(variables[:self.pandora_command.ndata])
+        repr = self.pandora_command.repr(
+            variables[: self.pandora_command.ndata]
+        )
         if self.aimall_command is not None:
             repr += "\n"
-            repr += self.aimall_command.repr(variables[self.pandora_command.ndata:])
+            repr += self.aimall_command.repr(
+                variables[self.pandora_command.ndata :]
+            )
         return repr

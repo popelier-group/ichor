@@ -7,11 +7,14 @@ from typing import Any, Callable, Optional, Sequence
 from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
 from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
-from ichor.auto_run.ichor_jobs import (make_models,
-                                  submit_ichor_active_learning_job_to_auto_run,
-                                  submit_ichor_aimall_command_to_auto_run,
-                                  submit_ichor_gaussian_command_to_auto_run,
-                                  submit_make_sets_job_to_auto_run)
+from ichor.auto_run.auto_run_morfi import submit_morfi_job_to_auto_run
+from ichor.auto_run.auto_run_pyscf import submit_pyscf_job_to_auto_run
+from ichor.auto_run.ichor_jobs import (
+    make_models, submit_ichor_active_learning_job_to_auto_run,
+    submit_ichor_aimall_command_to_auto_run,
+    submit_ichor_gaussian_command_to_auto_run,
+    submit_ichor_morfi_command_to_auto_run,
+    submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
 from ichor.batch_system import JobID
 from ichor.common.int import truncate
 from ichor.common.io import mkdir
@@ -19,10 +22,12 @@ from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
 from ichor.drop_compute import DROP_COMPUTE_LOCATION
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.files import Trajectory
+from ichor.files import PointsDirectory, Trajectory
 from ichor.machine import MACHINE, SubmitType
 from ichor.make_sets import make_sets_npoints
-from ichor.files import PointsDirectory
+from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
+from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                       QuantumChemicalTopologyProgram)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
 
 
@@ -81,26 +86,55 @@ class IterStep:
             return wait_for_job
 
 
+QCP = QUANTUM_CHEMISTRY_PROGRAM()
+if QCP is QuantumChemistryProgram.Gaussian:
+    ichor_qcp_function = submit_ichor_gaussian_command_to_auto_run
+    qcp_function = submit_gaussian_job_to_auto_run
+elif QCP is QuantumChemistryProgram.PySCF:
+    ichor_qcp_function = submit_ichor_pyscf_command_to_auto_run
+    qcp_function = submit_pyscf_job_to_auto_run
+else:
+    raise ValueError(
+        f"Cannot run Quantum Chemistry Program '{QCP.name}' in auto-run"
+    )
+
+ichor_qcp_step = IterStep(
+    ichor_qcp_function,
+    IterUsage.All,
+    [IterArgs.TrainingSetLocation],
+)
+qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints])
+
+QCTP = QUANTUM_CHEMISTRY_PROGRAM()
+if QCTP is QuantumChemicalTopologyProgram.AIMAll:
+    ichor_qct_function = submit_ichor_aimall_command_to_auto_run
+    qct_function = submit_aimall_job_to_auto_run
+elif QCTP is QuantumChemicalTopologyProgram.Morfi:
+    ichor_qct_function = submit_ichor_morfi_command_to_auto_run
+    qct_function = submit_morfi_job_to_auto_run
+else:
+    raise ValueError(
+        f"Cannot run Quantum Chemical Topology Program '{QCTP.name}' in auto-run"
+    )
+
+ichor_qct_step = IterStep(
+    ichor_qct_function,
+    IterUsage.All,
+    [IterArgs.TrainingSetLocation, IterArgs.Atoms],
+)
+
+qct_step = IterStep(
+    qct_function,
+    IterUsage.All,
+    [IterArgs.nPoints, IterArgs.Atoms],
+)
+
 # order in which to submit jobs for each of the adaptive sampling iterations.
 func_order = [
-    IterStep(
-        submit_ichor_gaussian_command_to_auto_run,
-        IterUsage.All,
-        [IterArgs.TrainingSetLocation],
-    ),
-    IterStep(
-        submit_gaussian_job_to_auto_run, IterUsage.All, [IterArgs.nPoints]
-    ),
-    IterStep(
-        submit_ichor_aimall_command_to_auto_run,
-        IterUsage.All,
-        [IterArgs.TrainingSetLocation, IterArgs.Atoms],
-    ),
-    IterStep(
-        submit_aimall_job_to_auto_run,
-        IterUsage.All,
-        [IterArgs.nPoints, IterArgs.Atoms],
-    ),
+    ichor_qcp_step,
+    qcp_step,
+    ichor_qct_step,
+    qct_step,
     IterStep(
         make_models,
         IterUsage.All,
@@ -137,7 +171,6 @@ def next_iter(
             points_location = (
                 get_points_location()
             )  # get points location on disk to transform into ListOfAtoms
-            points = None
             # points_location could be a directory of points to use, if so initialise a PointsDirectory
             if points_location.is_dir():
                 points = PointsDirectory(points_location)
@@ -150,14 +183,16 @@ def next_iter(
             # return the total number of points which are going to be in the initial training set
             IterArgs.nPoints.value = make_sets_npoints(
                 points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
-            ) # GLOBALS.TRAINING_POINTS contains the number of initial training points
+            )  # GLOBALS.TRAINING_POINTS contains the number of initial training points
             # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
             job_id = IterStep(
                 submit_make_sets_job_to_auto_run,
                 IterUsage.All,
                 [points_location],
             ).run(job_id, state)
-            print(f"Submitted: {job_id}")  # GLOBALS.TRAINING_POINTS is used in make_sets to make training sets with initial number of points
+            print(
+                f"Submitted: {job_id}"
+            )  # GLOBALS.TRAINING_POINTS is used in make_sets to make training sets with initial number of points
 
     # for every other job, i.e. IterState.Standard, IterState.Last
     else:
@@ -181,7 +216,7 @@ def next_iter(
         if MACHINE.submit_type is SubmitType.DropCompute:
             modify = f"+{modify_id}"
             if job_id is not None:
-                modify += f"+hold_{modify_id - 1}" # hold for the previous job (whose job id is one less than this job)
+                modify += f"+hold_{modify_id - 1}"  # hold for the previous job (whose job id is one less than this job)
             SCRIPT_NAMES.modify = modify
             modify_id += 1
         job_id = iter_step.run(job_id, state)
@@ -222,6 +257,7 @@ def auto_run() -> JobID:
             if MACHINE.submit_type is SubmitType.DropCompute:
                 break  # Only submit the first iteration for drop-n-compute
     return job_id
+
 
 # used for Drop-In compute
 def submit_next_iter(current_iteration) -> Optional[JobID]:

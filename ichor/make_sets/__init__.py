@@ -128,7 +128,9 @@ def write_set_to_dir(path: Path, points: ListOfAtoms) -> None:
     for i, point in enumerate(points):
         point_name = f"{GLOBALS.SYSTEM_NAME}{str(i+1).zfill(max(4, count_digits(len(points))))}"
         mkdir(path / point_name)
-        xyz = XYZ(path / point_name / f"{point_name}{XYZ.filetype}", atoms=point)
+        xyz = XYZ(
+            path / point_name / f"{point_name}{XYZ.filetype}", atoms=point
+        )
         xyz.write()
 
 

@@ -18,7 +18,9 @@ def submit_gaussian_job_to_auto_run(
     with TimingManager(gauss_script):
         for point in range(npoints.value):
             # todo: Why is this f"Point{point+1}" needed, it doesn't point to any real file, it is just to make the same number of GaussianCommands as number of points
-            gauss_script.add_command(GaussianCommand(Path(f"Point{point+1}"))) # don't actually need the names of  the files here, we just need
+            gauss_script.add_command(
+                GaussianCommand(Path(f"Point{point+1}"))
+            )  # don't actually need the names of  the files here, we just need
             # to make the submission script contain the same number of GaussianCommands as the number of points
     gauss_script.write()
     return gauss_script.submit(hold=hold)

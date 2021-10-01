@@ -3,8 +3,8 @@ from pathlib import Path
 
 from ichor.common.functools import classproperty
 from ichor.files.directory import AnnotatedDirectory
-from ichor.files.wfn import WFN
 from ichor.files.optional_file import OptionalFile, OptionalPath
+from ichor.files.wfn import WFN
 
 
 class MorfiWFN(WFN):
@@ -19,7 +19,7 @@ class PySCFDirectory(AnnotatedDirectory):
 
     @classproperty
     def dirname(self) -> str:
-        return 'pyscf'
+        return "pyscf"
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

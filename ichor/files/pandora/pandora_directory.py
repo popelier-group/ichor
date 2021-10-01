@@ -1,14 +1,13 @@
-from ichor.files.directory import AnnotatedDirectory
-from ichor.files.pandora.pandora_input import PandoraInput
-from typing import Optional
-from ichor.files.pandora.morfi_output import MorfiDirectory
-from ichor.files.pandora.pyscf_output import PySCFDirectory
-from ichor.common.functools import classproperty
-from ichor.files.geometry import GeometryFile, GeometryData
-
-from ichor.files.optional_file import OptionalFile, OptionalPath
-
 from pathlib import Path
+from typing import Optional
+
+from ichor.common.functools import classproperty
+from ichor.files.directory import AnnotatedDirectory
+from ichor.files.geometry import GeometryData, GeometryFile
+from ichor.files.optional_file import OptionalFile, OptionalPath
+from ichor.files.pandora.morfi_output import MorfiDirectory
+from ichor.files.pandora.pandora_input import PandoraInput
+from ichor.files.pandora.pyscf_output import PySCFDirectory
 
 
 class PandoraDirectory(AnnotatedDirectory, GeometryFile, GeometryData):
@@ -19,13 +18,15 @@ class PandoraDirectory(AnnotatedDirectory, GeometryFile, GeometryData):
         if not self.exists():
             self.mkdir()
         if self.input is None:
-            self.input = PandoraInput(self.path / (self.path.name + PandoraInput.filetype))
+            self.input = PandoraInput(
+                self.path / (self.path.name + PandoraInput.filetype)
+            )
         self.input.atoms = self.atoms
         self.input.write()
 
     @classproperty
     def dirname(self) -> str:
-        return 'pandora'
+        return "pandora"
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

@@ -22,7 +22,9 @@ class SubmissionScript:
 
     def __init__(self, path: Path):
         self.path = Path(path)
-        self.commands = []  # a list of commands to be submitted to batch system
+        self.commands = (
+            []
+        )  # a list of commands to be submitted to batch system
 
     @classproperty
     def filetype(self) -> str:
@@ -210,8 +212,8 @@ class SubmissionScript:
         return datafile_variables, datafile_str
 
     def write(self):
-        """ Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
-        are written at the top of the file. The commands to run (such as Gaussian, AIMALL, etc.) are written below the options. """
+        """Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
+        are written at the top of the file. The commands to run (such as Gaussian, AIMALL, etc.) are written below the options."""
         from ichor.file_structure import FILE_STRUCTURE
         from ichor.globals import GLOBALS
 
@@ -291,7 +293,7 @@ class SubmissionScript:
 
     # Note: arguments of __exit__ statement are required
     def __exit__(self, exception_type, exception_value, exception_traceback):
-        """ Writes out the submission script once the `with` context manager is done. The exc_type, exc_val, exc_tb are needed for every __exit__ method.
+        """Writes out the submission script once the `with` context manager is done. The exc_type, exc_val, exc_tb are needed for every __exit__ method.
 
         :param exception_type: If an exception has ocurred during the context, the write method will not be executed
         :param exception_value: Not used
