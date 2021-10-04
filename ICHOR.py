@@ -2839,6 +2839,8 @@ class Globals:
         self._parsers["INCLUDE_NODES"] += [GlobalTools.split_keywords]
         self._parsers["EXCLUDE_NODES"] += [GlobalTools.split_keywords]
 
+        self._parsers["TRAINING_SET_METHOD"] += [GlobalTools.split_keywords]
+
         # TODO: Parsers to add
         # - Training/Sample/Validation Set methods
         # - Make sure List[int] is parsed correctly
