@@ -13429,6 +13429,7 @@ class SetupTools:
                 input(f"Would you like to make set: Training Set [Y/N]")
             )
         if make_training_set:
+            n_training_points = n_training_points if n_training_points > 0 else GLOBALS.TRAINING_POINTS
             SetupTools.make_set(
                 "training_set", points, training_set_method, n_training_points
             )
@@ -13439,6 +13440,7 @@ class SetupTools:
                 input(f"Would you like to make set: Sample Pool [Y/N]")
             )
         if make_sample_pool:
+            n_sample_points = n_sample_points if n_sample_points > 0 else GLOBALS.SAMPLE_POINTS
             SetupTools.make_set(
                 "sample_pool", points, sample_pool_method, n_sample_points
             )
@@ -13449,6 +13451,7 @@ class SetupTools:
                 input(f"Would you like to make set: Validation Set [Y/N]")
             )
         if make_validation_set:
+            n_validation_points = n_validation_points if n_validation_points > 0 else GLOBALS.VALIDATION_POINTS
             SetupTools.make_set(
                 "validation_set",
                 points,
