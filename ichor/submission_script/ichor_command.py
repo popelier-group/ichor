@@ -23,6 +23,7 @@ class ICHORCommand(PythonCommand):
         auto_run: bool = False,
         func: Optional[Union[str, F]] = None,
         func_args: Optional[List[str]] = None,
+        needs_uid: Optional[bool] = True
     ):
         PythonCommand.__init__(
             self,
@@ -34,7 +35,12 @@ class ICHORCommand(PythonCommand):
         from ichor.arguments import Arguments
         from ichor.globals import GLOBALS
 
-        self.args += [f"-c {Arguments.config_file}", f"-u {GLOBALS.UID}"]
+        self.needs_uid = needs_uid
+
+        self.args += [f"-c {Arguments.config_file}"]
+
+        if self.needs_uid:
+            self.args += [f"-u {GLOBALS.UID}"]
 
         if auto_run:
             self.args += ["-ar"]

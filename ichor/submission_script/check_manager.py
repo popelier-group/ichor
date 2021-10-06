@@ -78,7 +78,7 @@ class CheckManager:
             new_runcmd += "break\n"
             new_runcmd += "fi\n"
 
-            python_job = ICHORCommand()
+            python_job = ICHORCommand(needs_uid=False)
             if self.check_args:
                 python_job.add_function_to_job(
                     self.check_function, *self.check_args
@@ -104,7 +104,7 @@ class CheckManager:
         new_runcmd = ""
         new_runcmd += runcmd  # add the initial command to be ran
         new_runcmd += "\n"
-        python_job = ICHORCommand()
+        python_job = ICHORCommand(needs_uid=False)
         if self.check_args:
             python_job.add_function_to_job(
                 self.check_function, *self.check_args
