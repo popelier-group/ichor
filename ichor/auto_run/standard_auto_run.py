@@ -105,7 +105,7 @@ ichor_qcp_step = IterStep(
 )
 qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints])
 
-QCTP = QUANTUM_CHEMISTRY_PROGRAM()
+QCTP = QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
 if QCTP is QuantumChemicalTopologyProgram.AIMAll:
     ichor_qct_function = submit_ichor_aimall_command_to_auto_run
     qct_function = submit_aimall_job_to_auto_run
