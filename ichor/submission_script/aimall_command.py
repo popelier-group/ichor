@@ -38,11 +38,6 @@ class AIMAllCommand(CommandLine):
         ):
             self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
 
-        from ichor.globals import GLOBALS
-
-        self.rerun = GLOBALS.RERUN_POINTS
-        self.scrub = GLOBALS.SCRUB_POINTS
-
     @property
     def data(self) -> List[str]:
         return [
@@ -109,8 +104,9 @@ class AIMAllCommand(CommandLine):
 
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
-        if self.rerun:
-            from ichor.globals import GLOBALS
+        from ichor.globals import GLOBALS
+        
+        if GLOBALS.RERUN_POINTS:
 
             cm = CheckManager(
                 check_function="rerun_aimall",
@@ -119,7 +115,7 @@ class AIMAllCommand(CommandLine):
             )
             cmd = cm.rerun_if_job_failed(cmd)
 
-        if self.scrub:
+        if GLOBALS.SCRUB_POINTS:
             cm = CheckManager(
                 check_function="scrub_aimall",
                 args_for_check_function=[variables[0]],
