@@ -108,38 +108,37 @@ def scrub_aimall(wfn_file: str):
                     )
                     n_integration_error += 1
 
+        else:
+            logger.error(f".int files for the current point {point_dir_path} do not exist.")
+
         # if the .sh file exists or there is an atom with large integration error
         if sh_file_path.exists() or n_integration_error > 0:
 
-            if GLOBALS.SCRUB_POINTS:
+            mkdir(FILE_STRUCTURE["aimall_scrubbed_points"])
+            new_path = (
+                FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
+            )
 
-                mkdir(FILE_STRUCTURE["aimall_scrubbed_points"])
+            # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
+            # this can happen for example if aimall fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
+            while new_path.exists():
+                point_dir_name = point_dir_name + "~"
                 new_path = (
-                    FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
+                    FILE_STRUCTURE["aimall_scrubbed_points"]
+                    / point_dir_name
                 )
 
-                # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
-                # this can happen for example if aimall fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
-                while new_path.exists():
-                    point_dir_name = point_dir_name + "~"
-                    new_path = (
-                        FILE_STRUCTURE["aimall_scrubbed_points"]
-                        / point_dir_name
-                    )
+            # move to new path and record in logger
+            move(point_dir_path, new_path)
 
-                # move to new path and record in logger
-                move(point_dir_path, new_path)
-
-                if sh_file_path.exists():
-                    logger.error(
-                        f"Moved point directory {point_dir_path} to {new_path} because AIMALL failed to run."
-                    )
-                elif n_integration_error > 0:
-                    logger.error(
-                        f"Moved point directory {point_dir_path} to {new_path} because AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
-                    )
-
-            else:
-                logger.warning(
-                    f"{n_integration_error} atoms are above the integration error threshold ({GLOBALS.INTEGRATION_ERROR_THRESHOLD}), consider removing these points by setting GLOBALS.SCRUB_POINTS to True or increasing precision."
+            if sh_file_path.exists():
+                logger.error(
+                    f"Moved point directory {point_dir_path} to {new_path} because AIMALL failed to run."
                 )
+            elif n_integration_error > 0:
+                logger.error(
+                    f"Moved point directory {point_dir_path} to {new_path} because AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
+                )
+
+    else:
+        logger.error(".wfn files does not exist.")

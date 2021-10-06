@@ -30,12 +30,6 @@ class GaussianCommand(CommandLine):
             ".gau"
         )  # .gau file used to store the output from Gaussian
 
-        # overwrite based on GLOBALS
-        from ichor.globals import GLOBALS
-
-        self.rerun = GLOBALS.RERUN_POINTS
-        self.scrub = GLOBALS.SCRUB_POINTS
-
     @property
     def data(self) -> List[str]:
         """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau)"""
@@ -79,8 +73,9 @@ class GaussianCommand(CommandLine):
 
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"  # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
 
-        if self.rerun:
-            from ichor.globals import GLOBALS
+        from ichor.globals import GLOBALS
+
+        if GLOBALS.RERUN_POINTS:
 
             cm = CheckManager(
                 check_function="rerun_gaussian",
@@ -89,7 +84,7 @@ class GaussianCommand(CommandLine):
             )
             cmd = cm.rerun_if_job_failed(cmd)
 
-        if self.scrub:
+        if GLOBALS.SCRUB_POINTS:
             cm = CheckManager(
                 check_function="scrub_gaussian",
                 args_for_check_function=[variables[0]],

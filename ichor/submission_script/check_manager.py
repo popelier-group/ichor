@@ -55,27 +55,40 @@ class CheckManager:
             This does not make new jobs where it reruns the failed job. It tries to rerun the same commands `n` times in the same job.
         """
 
+        from ichor.globals import GLOBALS
+
         new_runcmd = ""
+
         if self.ntimes is not None:
+
             new_runcmd += f"{CheckManager.NTRIES}=0\n"
-        new_runcmd += f"export {CheckManager.TASK_COMPLETED}=false\n"
-        new_runcmd += f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
-        new_runcmd += "do\n"
-        new_runcmd += "\n"
+            new_runcmd += f"export {CheckManager.TASK_COMPLETED}=false\n"
+            new_runcmd += f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
+            new_runcmd += "do\n"
+            new_runcmd += "\n"
 
         new_runcmd += runcmd  # add the initial command to be ran
 
-        new_runcmd += "\n"
-        python_job = ICHORCommand()
-        if self.check_args:
-            python_job.add_function_to_job(
-                self.check_function, *self.check_args
-            )
-        else:
-            python_job.add_function_to_job(self.check_function)
+        if self.ntimes is not None:
 
-        new_runcmd += f"eval $({python_job.repr()})\n"
-        new_runcmd += "done\n"
+            new_runcmd += "\n"
+            new_runcmd += f"let {CheckManager.NTRIES}++\n"
+            new_runcmd += f'if [ "${CheckManager.NTRIES}" == {self.ntimes} ]\n'
+            new_runcmd += "then\n"
+            new_runcmd += "break\n"
+            new_runcmd += "fi\n"
+
+            python_job = ICHORCommand()
+            if self.check_args:
+                python_job.add_function_to_job(
+                    self.check_function, *self.check_args
+                )
+            else:
+                python_job.add_function_to_job(self.check_function)
+
+            new_runcmd += f"eval $({python_job.repr()})\n"
+            new_runcmd += "done\n"
+
         return new_runcmd
 
     def scrub_point_directory(self, runcmd: str) -> str:
@@ -104,7 +117,8 @@ class CheckManager:
 
 
 def print_completed():
-    """Logs information about completed jobs/tasks into ICHOR log file."""
+    """Logs information about completed jobs/tasks into ICHOR log file. It also exports some environment variables which are used
+    to rerun tasks from a job if they failed the first time."""
     ntasks = 0
     if SubmissionScript.DATAFILE in os.environ.keys():
         datafile = os.environ[SubmissionScript.DATAFILE]
