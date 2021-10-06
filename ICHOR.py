@@ -2704,6 +2704,7 @@ class Globals:
     ENCOMP: int = 3
     BOAQ: str = "gs20"
     IASMESH: str = "fine"
+    FEYNMAN: bool = False
 
     FILE_STRUCTURE: FileStructure = FileStructure()  # Don't change
 
@@ -4846,6 +4847,7 @@ class AIMAllCommand(CommandLine):
             f"-encomp={GLOBALS.ENCOMP}",
             f"-boaq={GLOBALS.BOAQ}",
             f"-iasmesh={GLOBALS.IASMESH}",
+            f"-feynman={str(GLOBALS.FEYNMAN).lower()}"
             f"-nproc={self.ncores}",
             f"-naat={self.ncores if self.atoms == 'all' else 1}",
         ]
