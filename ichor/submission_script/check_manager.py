@@ -58,32 +58,37 @@ class CheckManager:
         from ichor.globals import GLOBALS
 
         new_runcmd = ""
+
         if self.ntimes is not None:
+
             new_runcmd += f"{CheckManager.NTRIES}=0\n"
-        new_runcmd += f"export {CheckManager.TASK_COMPLETED}=false\n"
-        new_runcmd += f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
-        new_runcmd += "do\n"
-        new_runcmd += "\n"
+            new_runcmd += f"export {CheckManager.TASK_COMPLETED}=false\n"
+            new_runcmd += f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
+            new_runcmd += "do\n"
+            new_runcmd += "\n"
 
         new_runcmd += runcmd  # add the initial command to be ran
 
-        new_runcmd += "\n"
-        new_runcmd += f"let {CheckManager.NTRIES}++\n"
-        new_runcmd += f'if [ "${CheckManager.NTRIES}" == {GLOBALS.GAUSSIAN_N_TRIES} ]\n'
-        new_runcmd += "then\n"
-        new_runcmd += "break\n"
-        new_runcmd += "fi\n"
+        if self.ntimes is not None:
 
-        python_job = ICHORCommand()
-        if self.check_args:
-            python_job.add_function_to_job(
-                self.check_function, *self.check_args
-            )
-        else:
-            python_job.add_function_to_job(self.check_function)
+            new_runcmd += "\n"
+            new_runcmd += f"let {CheckManager.NTRIES}++\n"
+            new_runcmd += f'if [ "${CheckManager.NTRIES}" == {self.ntimes} ]\n'
+            new_runcmd += "then\n"
+            new_runcmd += "break\n"
+            new_runcmd += "fi\n"
 
-        new_runcmd += f"eval $({python_job.repr()})\n"
-        new_runcmd += "done\n"
+            python_job = ICHORCommand()
+            if self.check_args:
+                python_job.add_function_to_job(
+                    self.check_function, *self.check_args
+                )
+            else:
+                python_job.add_function_to_job(self.check_function)
+
+            new_runcmd += f"eval $({python_job.repr()})\n"
+            new_runcmd += "done\n"
+
         return new_runcmd
 
     def scrub_point_directory(self, runcmd: str) -> str:
