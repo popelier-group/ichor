@@ -72,7 +72,7 @@ def submit_gjfs(
                 submission_script.add_command(GaussianCommand(gjf))  # make a list of GaussianCommand instances.
                 logger.debug(
                     f"Adding {gjf} to {submission_script.path}"
-                ) 
+                )
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
     if len(submission_script.commands) > 0:
         logger.info(
