@@ -55,6 +55,8 @@ class CheckManager:
             This does not make new jobs where it reruns the failed job. It tries to rerun the same commands `n` times in the same job.
         """
 
+        from ichor.globals import GLOBALS
+
         new_runcmd = ""
         if self.ntimes is not None:
             new_runcmd += f"{CheckManager.NTRIES}=0\n"
@@ -66,6 +68,12 @@ class CheckManager:
         new_runcmd += runcmd  # add the initial command to be ran
 
         new_runcmd += "\n"
+        new_runcmd += f"let {CheckManager.NTRIES}++\n"
+        new_runcmd += f'if [ "${CheckManager.NTRIES}" == {GLOBALS.GAUSSIAN_N_TRIES} ]\n'
+        new_runcmd += "then\n"
+        new_runcmd += "break\n"
+        new_runcmd += "fi\n"
+
         python_job = ICHORCommand()
         if self.check_args:
             python_job.add_function_to_job(
