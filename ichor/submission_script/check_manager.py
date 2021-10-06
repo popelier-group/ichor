@@ -104,7 +104,8 @@ class CheckManager:
 
 
 def print_completed():
-    """Logs information about completed jobs/tasks into ICHOR log file."""
+    """Logs information about completed jobs/tasks into ICHOR log file. It also exports some environment variables which are used
+    to rerun tasks from a job if they failed the first time."""
     ntasks = 0
     if SubmissionScript.DATAFILE in os.environ.keys():
         datafile = os.environ[SubmissionScript.DATAFILE]

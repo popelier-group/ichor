@@ -111,7 +111,6 @@ def scrub_gaussian(gaussian_file: str):
 
     from ichor.common.io import mkdir, move
     from ichor.file_structure import FILE_STRUCTURE
-    from ichor.globals import GLOBALS
     from ichor.logging import logger
 
     if gaussian_file:

@@ -21,7 +21,7 @@ class ICHORCommand(PythonCommand):
         script: Optional[Path] = None,
         args: Optional[List[str]] = None,
         auto_run: bool = False,
-        func: Optional[: Union[str, F]] = None,
+        func: Optional[Union[str, F]] = None,
         func_args: Optional[List[str]] = None,
     ):
         PythonCommand.__init__(
