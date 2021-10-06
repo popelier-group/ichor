@@ -283,8 +283,8 @@ class Globals:
 
     PANDORA_LOCATION: Path = ""
     PANDORA_CCSDMOD: str = "ccsdHF"
-    MORFI_ANGULAR: int = 20
-    MORFI_RADIAL: float = 15.0
+    MORFI_ANGULAR: int = 15
+    MORFI_RADIAL: float = 20.0
 
     GIT_USERNAME: str = ""
     GIT_PASSWORD: str = ""
