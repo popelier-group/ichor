@@ -1,6 +1,7 @@
 import os
 import subprocess
 from typing import List, Tuple
+import getpass
 
 from ichor.common.str import decode
 
@@ -47,6 +48,10 @@ def input_with_prefill(prompt: str, prefill: str = "") -> str:
             readline.set_startup_hook()
         except ImportError:
             pass
+
+
+def current_user() -> str:
+    return getpass.getuser()
 
 
 def current_user_groups() -> List[str]:

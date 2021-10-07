@@ -73,7 +73,7 @@ class ConnectedAtoms(Atoms):
             jatoms = list(set(self[j].bond_list) & set(self[i].angle_list))
             for k in iatoms:
                 for l in jatoms:
-                    if k in self[l].bond_list:
+                    if k in self[l.i].bond_list:
                         self[i].set_dihedral(self[j])
                         self[j].set_dihedral(self[i])
                         self._dihedrals.append((i, k.i, l.i, j))
