@@ -119,10 +119,10 @@ class Atom(VarReprMixin):
     def z(self) -> np.float64:
         return self.coordinates[2]
 
-    @property
-    def atom_type(self) -> str:
-        """Returns the type (i.e. element) of the Atom instance."""
-        return self.type
+    # @property
+    # def atom_type(self) -> str:
+    #     """Returns the type (i.e. element) of the Atom instance."""
+    #     return self.type
 
     @property
     def mass(self) -> float:
