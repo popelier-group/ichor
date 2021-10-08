@@ -141,4 +141,4 @@ def scrub_aimall(wfn_file: str):
                 )
 
     else:
-        logger.error(".wfn files does not exist.")
+        logger.error(".wfn file does not exist.")
