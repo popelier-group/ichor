@@ -113,9 +113,10 @@ def scrub_gaussian(gaussian_file: str):
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.logging import logger
 
-    if gaussian_file:
+    gaussian_file = Path(gaussian_file)
+    wfn_file_path = Path(gaussian_file).with_suffix(".wfn")
 
-        wfn_file_path = Path(gaussian_file).with_suffix(".wfn")
+    if gaussian_file.exists():
 
         # if the wfn file path does not exist or the "TOTAL ENERGY" is not in the last line of the .wfn file
         if (not wfn_file_path.exists()) or (
@@ -153,5 +154,28 @@ def scrub_gaussian(gaussian_file: str):
                     f"Moved point directory {point_dir_path} to {new_path} because .wfn file did not have 'TOTAL_ENERGY' in last line."
                 )
     
+    # if a .gjf file does not exist, we also move the point. A .gjf file should exist because this function is called when Gaussian is being ran.
     else:
-        logger.error("Gaussian .gjf file for which output needs to be checked does not exist.")
+        logger.error(f"Gaussian .gjf file {gaussian_file} for which output needs to be checked does not exist.")
+
+        point_dir_path = wfn_file_path.parent
+
+        mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
+        # get the name of the directory only containing the .gjf file
+        point_dir_name = wfn_file_path.parent.name
+        # get the Path to the Parent directory
+        new_path = (
+            FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
+        )
+
+        # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
+        # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
+        while new_path.exists():
+            point_dir_name = point_dir_name + "~"
+            new_path = (
+                FILE_STRUCTURE["gaussian_scrubbed_points"]
+                / point_dir_name
+            )
+
+        # move to new path and record in logger
+        move(point_dir_path, new_path)
