@@ -60,6 +60,7 @@ class AmberCommand(CommandLine):
 
         mol2_file = self.mol2_file.absolute()
         cmd = ""
+        cmd += f"pushd {mol2_file.parent}\n"
         # run antechanmber to modify mol2 file for use in amber
         cmd += f"antechamber -i {mol2_file} -o {mol2_file} -fi mol2 -fo mol2 -c bcc -pf yes -nc -2 -at gaff2 -j 5 -rn {GLOBALS.SYSTEM_NAME.lower()}\n"
         # run parmchk to generate frcmod file
@@ -78,6 +79,8 @@ class AmberCommand(CommandLine):
         cmd += f"tleap -f {tleap_script}\n"
         # run amber
         cmd += f"{AmberCommand.command} -O -i {self.mdin_file.absolute()} -o md.out -p {prmtop_file} -c {inpcrd_file} -inf md.info\n"
+
+        cmd += "popd\n"
 
         mdcrd = (self.mol2_file.parent / "mdcrd").absolute()
         ichor_command = ICHORCommand(
