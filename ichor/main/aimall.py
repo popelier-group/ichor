@@ -76,17 +76,16 @@ def scrub_aimall(wfn_file: str):
     from ichor.files.point_directory import PointDirectory
     from ichor.globals import GLOBALS
     from ichor.logging import logger
+    from pathlib import Path
 
-    if wfn_file:
+    wfn_file = Path(wfn_file)
+    point_dir_path = wfn_file.parent
+    point_dir_name = point_dir_path.name  # returns the name of the directory, eg. WATER0001, WATER0002, etc.
+
+    if wfn_file.exists():
 
         # AIMAll deletes this sh file when it has successfully completed
-        sh_file_path = Path(wfn_file).with_suffix(".sh")
-
-        # get the name of the directory only containing the .wfn file
-        point_dir_path = sh_file_path.parent
-        point_dir_name = (
-            point_dir_path.name
-        )  # returns the name of the directory, eg. WATER0001, WATER0002, etc.
+        sh_file_path = wfn_file.with_suffix(".sh")
 
         n_integration_error = 0
         point = PointDirectory(point_dir_path)
@@ -137,5 +136,22 @@ def scrub_aimall(wfn_file: str):
                     f"Moved point directory {point_dir_path} to {new_path} because AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
                 )
 
+    # if a wfn file does not exist for some reason, we do not want this point as well. This shouldn't really be needed as points without wfn
+    # files should be cleaned up after running Gaussian. But use this as a check.
     else:
-        logger.error(".wfn files does not exist.")
+        mkdir(FILE_STRUCTURE["aimall_scrubbed_points"])
+        new_path = (
+            FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
+        )
+
+        while new_path.exists():
+            point_dir_name = point_dir_name + "~"
+            new_path = (
+                FILE_STRUCTURE["aimall_scrubbed_points"]
+                / point_dir_name
+            )
+
+        # move to new path and record in logger
+        move(point_dir_path, new_path)
+
+        logger.error(f".wfn file does not exist. Moving point {point_dir_path} to {new_path}.")
