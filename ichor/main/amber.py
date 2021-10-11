@@ -111,7 +111,7 @@ def submit_amber(input_file: Path) -> JobID:
     write_mdin(mdin)
 
     with SubmissionScript(SCRIPT_NAMES["amber"]) as submission_script:
-        submission_script.add_command(AmberCommand(mol2, mdin))
+        submission_script.add_command(AmberCommand(mol2.path, mdin))
     return submission_script.submit()
 
 
