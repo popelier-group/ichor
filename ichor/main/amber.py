@@ -183,7 +183,7 @@ def set_input():
 
 def amber_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option("1", "Run Amber", submit_amber)
+    menu.add_option("1", "Run Amber", submit_amber, kwargs={'input_file': _input_file})
     menu.add_space()
     menu.add_option("i", "Set input file", set_input)
     menu.add_option("t", "Set Temperature", set_temperature)
