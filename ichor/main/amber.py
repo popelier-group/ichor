@@ -63,32 +63,32 @@ def write_mdin(mdin_file: Path):
     with open(mdin_file, "w") as f:
         f.write("Production\n")
         f.write(" &cntrl\n")
-        f.write("  imin=0\n")  # not running minimisation
-        f.write("  ntx=1\n")  # read input coordinates only
-        f.write("  irest=0\n")  # not restarting simulation
-        f.write(f"  ntslim={GLOBALS.AMBER_STEPS}\n")  # number of time steps
-        f.write(f"  dt={GLOBALS.AMBER_TIMESTEP}\n")  # time step in picoseconds
-        f.write(f"  ntf={FORCE_EVALUATION.value}\n")  # force constraint
-        f.write(f"  ntc={BOND_CONSTRAINT.value}\n")  # bond contraint
-        f.write(f"  temp0={GLOBALS.AMBER_TEMPERATURE}\n")  # temperature
-        f.write("  ntpr=1\n")  # energy info printed to mdout every ntpr steps
+        f.write("  imin=0,\n")  # not running minimisation
+        f.write("  ntx=1,\n")  # read input coordinates only
+        f.write("  irest=0,\n")  # not restarting simulation
+        f.write(f"  ntslim={GLOBALS.AMBER_STEPS},\n")  # number of time steps
+        f.write(f"  dt={GLOBALS.AMBER_TIMESTEP},\n")  # time step in picoseconds
+        f.write(f"  ntf={FORCE_EVALUATION.value},\n")  # force constraint
+        f.write(f"  ntc={BOND_CONSTRAINT.value},\n")  # bond contraint
+        f.write(f"  temp0={GLOBALS.AMBER_TEMPERATURE},\n")  # temperature
+        f.write("  ntpr=1,\n")  # energy info printed to mdout every ntpr steps
         f.write(
-            "  ntwx=1\n"
+            "  ntwx=1,\n"
         )  # coordinate info printed to mdout every ntwx steps
         f.write(
-            "  ntwv=0\n"
+            "  ntwv=0,\n"
         )  # velocity info printed to mdout every ntwv steps
-        f.write("  ntwf=0\n")  # force info printed to mdout every ntwf steps
-        f.write("  ioutfm=0\n")  # output formatting
-        f.write("  cut=999.0\n")  # nonbonded cutoff
-        f.write(f"  ntb={PBC.value}\n")  # periodic boundary conditions
-        f.write("  ntp=0\n")  # pressure control
-        f.write(f"  ntt={THERMOSTAT.value}\n")  # thermostat
+        f.write("  ntwf=0,\n")  # force info printed to mdout every ntwf steps
+        f.write("  ioutfm=0,\n")  # output formatting
+        f.write("  cut=999.0,\n")  # nonbonded cutoff
+        f.write(f"  ntb={PBC.value},\n")  # periodic boundary conditions
+        f.write("  ntp=0,\n")  # pressure control
+        f.write(f"  ntt={THERMOSTAT.value},\n")  # thermostat
         f.write(
-            f"  gamma_ln={GLOBALS.AMBER_LN_GAMMA}\n"
+            f"  gamma_ln={GLOBALS.AMBER_LN_GAMMA},\n"
         )  # ln(gamma) for the langevin thermostat
-        f.write("  tempi=0.0\n")  # temperature to initialise velocities
-        f.write("  ig=-1\n")  # random seed (-1 randomises seed)
+        f.write("  tempi=0.0,\n")  # temperature to initialise velocities
+        f.write("  ig=-1,\n")  # random seed (-1 randomises seed)
         f.write(" /\n")
 
 
