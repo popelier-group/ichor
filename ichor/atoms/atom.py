@@ -143,6 +143,10 @@ class Atom(VarReprMixin):
         return constants.type2valence[self.type]
 
     @property
+    def unpaired_electrons(self):
+        return constants.type2orbital[self.type].value - self.valence
+
+    @property
     def connectivity(self) -> np.ndarray:
         """
         Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
