@@ -102,7 +102,7 @@ def scrub_aimall(wfn_file: str):
                     abs(integration_error)
                     > GLOBALS.INTEGRATION_ERROR_THRESHOLD
                 ):
-                    logger.warning(
+                    logger.error(
                         f"{point_dir_path} | {atom} | Integration Error: {integration_error}"
                     )
                     n_integration_error += 1
