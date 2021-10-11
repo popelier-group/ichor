@@ -68,8 +68,8 @@ def write_mdin(mdin_file: Path):
         f.write("  irest=0\n")  # not restarting simulation
         f.write(f"  ntslim={GLOBALS.AMBER_STEPS}\n")  # number of time steps
         f.write(f"  dt={GLOBALS.AMBER_TIMESTEP}\n")  # time step in picoseconds
-        f.write(f"  ntf={FORCE_EVALUATION}\n")  # force constraint
-        f.write(f"  ntc={BOND_CONSTRAINT}\n")  # bond contraint
+        f.write(f"  ntf={FORCE_EVALUATION.value}\n")  # force constraint
+        f.write(f"  ntc={BOND_CONSTRAINT.value}\n")  # bond contraint
         f.write(f"  temp0={GLOBALS.AMBER_TEMPERATURE}\n")  # temperature
         f.write("  ntpr=1\n")  # energy info printed to mdout every ntpr steps
         f.write(
@@ -81,9 +81,9 @@ def write_mdin(mdin_file: Path):
         f.write("  ntwf=0\n")  # force info printed to mdout every ntwf steps
         f.write("  ioutfm=0\n")  # output formatting
         f.write("  cut=999.0\n")  # nonbonded cutoff
-        f.write(f"  ntb={PBC}\n")  # periodic boundary conditions
+        f.write(f"  ntb={PBC.value}\n")  # periodic boundary conditions
         f.write("  ntp=0\n")  # pressure control
-        f.write(f"  ntt={THERMOSTAT}\n")  # thermostat
+        f.write(f"  ntt={THERMOSTAT.value}\n")  # thermostat
         f.write(
             f"  gamma_ln={GLOBALS.AMBER_LN_GAMMA}\n"
         )  # ln(gamma) for the langevin thermostat
@@ -191,7 +191,7 @@ def amber_menu_refresh(menu):
     menu.add_space()
     menu.add_message(f"Input File: {_input_file}")
     menu.add_message(f"Temperature: {GLOBALS.AMBER_TEMPERATURE} K")
-    menu.add_message(f"Number of Timesteps: {GLOBALS.AMBER_STEPS}")
+    menu.add_message(f"Number of Timesteps: {GLOBALS.AMBER_STEPS:,}")
     menu.add_final_options()
 
 
