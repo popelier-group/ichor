@@ -88,7 +88,7 @@ def write_mdin(mdin_file: Path):
             f"  gamma_ln={GLOBALS.AMBER_LN_GAMMA},\n"
         )  # ln(gamma) for the langevin thermostat
         f.write("  tempi=0.0,\n")  # temperature to initialise velocities
-        f.write("  ig=-1,\n")  # random seed (-1 randomises seed)
+        f.write("  ig=-1\n")  # random seed (-1 randomises seed)
         f.write(" /\n")
 
 
