@@ -63,7 +63,9 @@ class CheckManager:
 
             new_runcmd += f"{CheckManager.NTRIES}=0\n"
             new_runcmd += f"export {CheckManager.TASK_COMPLETED}=false\n"
-            new_runcmd += f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
+            new_runcmd += (
+                f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
+            )
             new_runcmd += "do\n"
             new_runcmd += "\n"
 

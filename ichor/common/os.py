@@ -1,7 +1,7 @@
+import getpass
 import os
 import subprocess
 from typing import List, Tuple
-import getpass
 
 from ichor.common.str import decode
 

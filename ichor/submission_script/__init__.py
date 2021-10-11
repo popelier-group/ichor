@@ -2,6 +2,7 @@ from pathlib import Path
 
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.submission_script.aimall_command import AIMAllCommand
+from ichor.submission_script.amber_command import AmberCommand
 from ichor.submission_script.check_manager import (CheckManager, default_check,
                                                    print_completed)
 from ichor.submission_script.data_lock import DataLock
@@ -85,6 +86,7 @@ SCRIPT_NAMES = ScriptNames(
         ),
         "dlpoly": "DLPOLY.sh",
         "dlpoly_gaussian": "ICHOR_DLPOLY_GAUSSIAN.sh",
+        "amber": "AMBER.sh",
     }
 )
 
@@ -106,4 +108,5 @@ __all__ = [
     "PandoraPySCFCommand",
     "PandoraMorfiCommand",
     "MorfiCommand",
+    "AmberCommand",
 ]

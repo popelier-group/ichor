@@ -193,6 +193,7 @@ class Globals:
     CP2K_CORE_COUNT: int = 8
     PYSCF_NCORES: int = 2
     MORFI_NCORES: int = 4
+    AMBER_NCORES: int = 8
 
     # N TRIES SETTINGS FOR RETRYING TO RUN PROGRAMS
     GAUSSIAN_N_TRIES: int = 10
@@ -254,6 +255,12 @@ class Globals:
     CP2K_METHOD: str = "BLYP"
     CP2K_BASIS_SET: str = "6-31G*"
     CP2K_DATA_DIR: str = ""
+
+    # AMBER SETTINGS
+    AMBER_TEMPERATURE: float = 300  # K
+    AMBER_TIMESTEP: float = 0.001  # ps
+    AMBER_STEPS: int = 100000
+    AMBER_LN_GAMMA: float = 0.7
 
     # OPTIMUM ENERGY
     OPTIMUM_ENERGY: float = None

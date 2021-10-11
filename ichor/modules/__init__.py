@@ -78,5 +78,6 @@ __all__ = [
     "DlpolyModules",
     "PandoraModules",
     "MorfiModules",
+    "AmberModules",
     "load_module",
 ]

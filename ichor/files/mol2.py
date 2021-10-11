@@ -1,16 +1,17 @@
+import datetime
+from enum import Enum
+from pathlib import Path
+from typing import List, Optional, Tuple
+
+from ichor.analysis.geometry import bonds, calculate_bond
+from ichor.atoms import Atom, Atoms
+from ichor.common.functools import classproperty
+from ichor.common.os import current_user
+from ichor.constants import type2rad, type2valence
 from ichor.files.file import File
 from ichor.files.geometry import GeometryFile
-from pathlib import Path
-from enum import Enum
-from ichor.atoms import Atom, Atoms
-from ichor.units import AtomicDistance
-from typing import Optional, List, Tuple
-from ichor.common.functools import classproperty
 from ichor.globals import GLOBALS
-from ichor.common.os import current_user
-import datetime
-from ichor.analysis.geometry import bonds, calculate_bond
-from ichor.constants import type2rad, type2valence
+from ichor.units import AtomicDistance
 
 
 class MoleculeType(Enum):
@@ -47,45 +48,45 @@ class SybylStatus(Enum):
 
 
 class AtomType(Enum):
-    Al = "Al"        # (aluminum)
-    Br = "Br"        # (bromine)
-    C1 = "C.1"       # (sp carbon)
-    C2 = "C.2"       # (sp2 carbon)
-    C3 = "C.3"       # (sp3 carbon)
-    CAr = "C.ar"     # (aromatic carbon)
-    CCat = "C.cat"   # (carbon)
-    Ca = "Ca"        # (calcium)
-    Cl = "Cl"        # (aromatic carbon)
-    Dummy = "Du"     # (dummy atom-used as a placeholder)
-    F = "F"          # (fluorine)
-    H = "H"          # (hydrogen)
-    HSPC = "H.spc"   # (hydrogen-water spc model)
-    HT3P = "H.t3p"   # (hydrogen-water tip3p model)
-    I = "I"          # (iodine)
-    K = "K"          # (potassium)
-    Li = "Li"        # (lithium)
+    Al = "Al"  # (aluminum)
+    Br = "Br"  # (bromine)
+    C1 = "C.1"  # (sp carbon)
+    C2 = "C.2"  # (sp2 carbon)
+    C3 = "C.3"  # (sp3 carbon)
+    CAr = "C.ar"  # (aromatic carbon)
+    CCat = "C.cat"  # (carbon)
+    Ca = "Ca"  # (calcium)
+    Cl = "Cl"  # (aromatic carbon)
+    Dummy = "Du"  # (dummy atom-used as a placeholder)
+    F = "F"  # (fluorine)
+    H = "H"  # (hydrogen)
+    HSPC = "H.spc"  # (hydrogen-water spc model)
+    HT3P = "H.t3p"  # (hydrogen-water tip3p model)
+    I = "I"  # (iodine)
+    K = "K"  # (potassium)
+    Li = "Li"  # (lithium)
     LonePair = "LP"  # (lone pair electrons)
-    N1 = "N.1"       # (sp nitrogen)
-    N2 = "N.2"       # (sp2 nitrogen)
-    N3 = "N.3"       # (sp3 nitrogen)
-    N4 = "N.4"       # (quaternary nitrogen)
-    NAm = "N.am"     # (amide nitrogen)
-    NAr = "N.ar"     # (aromatic nitrogen)
-    NP13 = "N.p13"   # (trigonal nitrogen)
-    Na = "Na"        # (sodium)
-    O2 = "O.2"       # (sp2 oxygen)
-    O3 = "O.3"       # (sp3 oxygen)
-    OCO2 = "O.co2"   # (carboxy oxygen)
-    OSPC = "O.spc"   # (oxygen-water spc model)
-    OT3P = "O.t3p"   # (oxygen-water tip3p model)
-    P3 = "P.3"       # (sp3 phosphorous)
-    S2 = "S.2"       # (sp2 sulfur)
-    S3 = "S.3"       # (sp3 sulfur)
-    SO = "S.o"       # (sulfoxide sulfur)
-    SO2 = "S.o2"     # (sulfone sulfur)
-    Si = "Si"        # (silicon)
-    CoOH = "Co.oh"   # (cobalt)
-    RuOH = "Ru.oh"   # (Ruthenium)
+    N1 = "N.1"  # (sp nitrogen)
+    N2 = "N.2"  # (sp2 nitrogen)
+    N3 = "N.3"  # (sp3 nitrogen)
+    N4 = "N.4"  # (quaternary nitrogen)
+    NAm = "N.am"  # (amide nitrogen)
+    NAr = "N.ar"  # (aromatic nitrogen)
+    NP13 = "N.p13"  # (trigonal nitrogen)
+    Na = "Na"  # (sodium)
+    O2 = "O.2"  # (sp2 oxygen)
+    O3 = "O.3"  # (sp3 oxygen)
+    OCO2 = "O.co2"  # (carboxy oxygen)
+    OSPC = "O.spc"  # (oxygen-water spc model)
+    OT3P = "O.t3p"  # (oxygen-water tip3p model)
+    P3 = "P.3"  # (sp3 phosphorous)
+    S2 = "S.2"  # (sp2 sulfur)
+    S3 = "S.3"  # (sp3 sulfur)
+    SO = "S.o"  # (sulfoxide sulfur)
+    SO2 = "S.o2"  # (sulfone sulfur)
+    Si = "Si"  # (silicon)
+    CoOH = "Co.oh"  # (cobalt)
+    RuOH = "Ru.oh"  # (Ruthenium)
 
 
 class BondType(Enum):
@@ -138,7 +139,7 @@ def get_valence(atom):
 
 
 def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
-    if {atom1.type, atom2.type} ==  {"C", "N"}:
+    if {atom1.type, atom2.type} == {"C", "N"}:
         # check for amide bond
         catom = atom1 if atom1.type == "C" else atom2
         natom = atom1 if atom1.type == "N" else atom2
@@ -147,12 +148,14 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
             if "O" in [atom.type for atom in get_bonded_atoms(catom)]:
                 return BondType.Amide
 
-
     atom1_valence = get_valence(atom1)
     atom2_valence = get_valence(atom2)
     if atom1.valence == atom1_valence or atom2_valence == atom2.valence:
         return BondType.Single
-    if atom1.valence - 1 == atom1_valence or atom2_valence - 1 == atom2.valence:
+    if (
+        atom1.valence - 1 == atom1_valence
+        or atom2_valence - 1 == atom2.valence
+    ):
         aromatic_types = ["C", "N"]
         if atom1.type in aromatic_types and atom2.type in aromatic_types:
             # check aromatic
@@ -164,26 +167,42 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
             single_bond_distance = atom1.radius + atom2.radius
             bond_distance = calculate_bond(atom1.parent, atom1.i, atom2.i)
             bond_percentage = bond_distance / single_bond_distance
-            if abs(bond_percentage - portion_of_single_bond[BondType.Aromatic]) <= abs(bond_percentage - portion_of_single_bond[BondType.Double]):
+            if abs(
+                bond_percentage - portion_of_single_bond[BondType.Aromatic]
+            ) <= abs(
+                bond_percentage - portion_of_single_bond[BondType.Double]
+            ):
                 return BondType.Aromatic
 
         return BondType.Double
-    if atom1.valence - 1 == atom1_valence or atom2_valence - 1 == atom2.valence:
+    if (
+        atom1.valence - 1 == atom1_valence
+        or atom2_valence - 1 == atom2.valence
+    ):
         return BondType.Triple
 
 
 visited = []
 
 
-def _get_ring(atom: Atom, current_ring: List[Atom], called_from: Atom,) -> List[Atom]:
+def _get_ring(
+    atom: Atom,
+    current_ring: List[Atom],
+    called_from: Atom,
+) -> List[Atom]:
     bonded_atoms = get_bonded_atoms(atom)
     if len(bonded_atoms) > 1:
         for bonded_atom in bonded_atoms:
             if bonded_atom not in current_ring:
-                ring, found =  _get_ring(bonded_atom, current_ring + [bonded_atom], atom)
+                ring, found = _get_ring(
+                    bonded_atom, current_ring + [bonded_atom], atom
+                )
                 if found:
                     return ring, found
-            if bonded_atom == current_ring[0] and not bonded_atom == called_from:
+            if (
+                bonded_atom == current_ring[0]
+                and not bonded_atom == called_from
+            ):
                 return current_ring, True
     return [current_ring[0]], False
 
@@ -201,7 +220,11 @@ def acyclic_bond(atom1: Atom, atom2: Atom) -> bool:
 
 
 def bonds_of_type(atom, parent, bond_type):
-    return [b for b in get_atom_bonds(atom) if get_bond_type(parent[b[0]-1], parent[b[1]-1]) is bond_type]
+    return [
+        b
+        for b in get_atom_bonds(atom)
+        if get_bond_type(parent[b[0] - 1], parent[b[1] - 1]) is bond_type
+    ]
 
 
 def n_bonds_of_type(atom, parent, bond_type):
@@ -209,7 +232,10 @@ def n_bonds_of_type(atom, parent, bond_type):
 
 
 def get_bond_types(atom, parent) -> List[BondType]:
-    return [get_bond_type(parent[i-1], parent[j-1]) for i, j in get_atom_bonds(atom, parent)]
+    return [
+        get_bond_type(parent[i - 1], parent[j - 1])
+        for i, j in get_atom_bonds(atom, parent)
+    ]
 
 
 def other_atom(atom: Atom, atom1: Atom, atom2: Atom) -> Atom:
@@ -222,8 +248,10 @@ def other_atom(atom: Atom, atom1: Atom, atom2: Atom) -> Atom:
         raise ValueError(f"{atom} not in bond Bond({atom1}, {atom2})")
 
 
-def bond_index_to_atom(bond: Tuple[int, int], parent: List[Atom]) -> Tuple[Atom, Atom]:
-    return parent[bond[0]-1], parent[bond[1]-1]
+def bond_index_to_atom(
+    bond: Tuple[int, int], parent: List[Atom]
+) -> Tuple[Atom, Atom]:
+    return parent[bond[0] - 1], parent[bond[1] - 1]
 
 
 def get_atom_bonds(atom: Atom) -> List[Tuple[int, int]]:
@@ -233,7 +261,10 @@ def get_atom_bonds(atom: Atom) -> List[Tuple[int, int]]:
 
 def get_bonded_atoms(atom: Atom) -> List[Atom]:
     """Return the atoms bonded to 'atom' from 'parent'"""
-    return [other_atom(atom, *bond_index_to_atom(bond, atom.parent)) for bond in get_atom_bonds(atom)]
+    return [
+        other_atom(atom, *bond_index_to_atom(bond, atom.parent))
+        for bond in get_atom_bonds(atom)
+    ]
 
 
 def other_atom_bonds(atom, atom1, atom2) -> List[Tuple[int, int]]:
@@ -254,44 +285,110 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
 
     atom_bonds = get_atom_bonds(atom)
     if atom.type == "C":
-        if 4 <= len(atom_bonds) == n_bonds_of_type(atom, parent, BondType.Single):
+        if (
+            4
+            <= len(atom_bonds)
+            == n_bonds_of_type(atom, parent, BondType.Single)
+        ):
             return AtomType.C3
         elif (
-                len(atom_bonds) == 3 and
-                all(acyclic_bond(parent[i-1], parent[j-1]) for i, j in atom_bonds) and
-                all([atom.type == "N" for atom in get_bonded_atoms(atom)]) and
-                all([len(other_atom_bonds(atom, parent[i-1], parent[j-1])) == 2 for i, j in atom_bonds]) and
-                sum(other_atom(parent[k-1], parent[k-1], parent[l-1]).type == "O" for k, l in [other_atom_bonds(atom, parent[i-1], parent[j-1]) for i, j in atom_bonds]) == 0
+            len(atom_bonds) == 3
+            and all(
+                acyclic_bond(parent[i - 1], parent[j - 1])
+                for i, j in atom_bonds
+            )
+            and all([atom.type == "N" for atom in get_bonded_atoms(atom)])
+            and all(
+                [
+                    len(other_atom_bonds(atom, parent[i - 1], parent[j - 1]))
+                    == 2
+                    for i, j in atom_bonds
+                ]
+            )
+            and sum(
+                other_atom(parent[k - 1], parent[k - 1], parent[l - 1]).type
+                == "O"
+                for k, l in [
+                    other_atom_bonds(atom, parent[i - 1], parent[j - 1])
+                    for i, j in atom_bonds
+                ]
+            )
+            == 0
         ):
             return AtomType.CCat
-        elif len(atom_bonds) >= 2 and sum(get_bond_type(parent[i-1], parent[j-1]) == BondType.Aromatic for i, j in atom_bonds) >= 2:
+        elif (
+            len(atom_bonds) >= 2
+            and sum(
+                get_bond_type(parent[i - 1], parent[j - 1])
+                == BondType.Aromatic
+                for i, j in atom_bonds
+            )
+            >= 2
+        ):
             return AtomType.CAr
-        elif (len(atom_bonds) == 1 or len(atom_bonds) == 2) and sum(get_bond_type(parent[i-1], parent[j-1]) == BondType.Triple for i, j in atom_bonds) >= 1:
+        elif (len(atom_bonds) == 1 or len(atom_bonds) == 2) and sum(
+            get_bond_type(parent[i - 1], parent[j - 1]) == BondType.Triple
+            for i, j in atom_bonds
+        ) >= 1:
             return AtomType.C1
         return AtomType.C2
     elif atom.type == "O":
         if len(nonmet(atom)) == 1:
-            bonded_atom = other_atom(atom, parent[atom_bonds[0][0]-1], parent[atom_bonds[0][1]-1])
+            bonded_atom = other_atom(
+                atom,
+                parent[atom_bonds[0][0] - 1],
+                parent[atom_bonds[0][1] - 1],
+            )
             bonded_atom_bonds = get_atom_bonds(bonded_atom)
-            if bonded_atom.type in ["C", "P"] and len(bonded_atom_bonds) == 3 and sum(other_atom(bonded_atom, parent[i-1], parent[j-1]).type == "O" for i, j in bonded_atom_bonds) >= 2:
+            if (
+                bonded_atom.type in ["C", "P"]
+                and len(bonded_atom_bonds) == 3
+                and sum(
+                    other_atom(bonded_atom, parent[i - 1], parent[j - 1]).type
+                    == "O"
+                    for i, j in bonded_atom_bonds
+                )
+                >= 2
+            ):
                 return AtomType.OCO2
-        elif len(atom_bonds) >= 2 and all(get_bond_type(parent[i-1], parent[j-1]) == BondType.Single for i, j in atom_bonds):
+        elif len(atom_bonds) >= 2 and all(
+            get_bond_type(parent[i - 1], parent[j - 1]) == BondType.Single
+            for i, j in atom_bonds
+        ):
             return AtomType.O3
         return AtomType.O2
     elif atom.type == "N":
-        if len(nonmet(atom)) == 4 and n_bonds_of_type(atom, parent, BondType.Single) == len(atom_bonds):
+        if len(nonmet(atom)) == 4 and n_bonds_of_type(
+            atom, parent, BondType.Single
+        ) == len(atom_bonds):
             return AtomType.N4
-        elif len(atom_bonds) >=2 and len(bonds_of_type(atom, parent, BondType.Aromatic)) >=2:
+        elif (
+            len(atom_bonds) >= 2
+            and len(bonds_of_type(atom, parent, BondType.Aromatic)) >= 2
+        ):
             return AtomType.NAr
-        elif len(nonmet(atom)) == 1 and get_bond_type(atom, nonmet(atom)[0]) is BondType.Triple:
+        elif (
+            len(nonmet(atom)) == 1
+            and get_bond_type(atom, nonmet(atom)[0]) is BondType.Triple
+        ):
             return AtomType.N1
-        elif len(nonmet(atom)) == 2 and [get_bond_types(atom, nonmetatom) for nonmetatom in nonmet(atom)] in [[BondType.Double, BondType.Double], [BondType.Single, BondType.Triple], [BondType.Triple, BondType.Single]]:
+        elif len(nonmet(atom)) == 2 and [
+            get_bond_types(atom, nonmetatom) for nonmetatom in nonmet(atom)
+        ] in [
+            [BondType.Double, BondType.Double],
+            [BondType.Single, BondType.Triple],
+            [BondType.Triple, BondType.Single],
+        ]:
             return AtomType.N1
         elif len(nonmet(atom)) == 3:
             for nonmetatom in nonmet(atom):
                 if nonmetatom.type == "C":
                     for batom in get_bonded_atoms(nonmetatom):
-                        if batom.type in ["O", "S"] and get_bond_type(nonmetatom, batom) is BondType.Double:
+                        if (
+                            batom.type in ["O", "S"]
+                            and get_bond_type(nonmetatom, batom)
+                            is BondType.Double
+                        ):
                             return AtomType.NAm
             for a in nonmet(atom):
                 if get_bond_type(atom, a) is not BondType.Single:
@@ -305,7 +402,17 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
 
 
 class Mol2Atom(Atom):
-    def __init__(self, ty: str, x: float, y: float, z: float, index: Optional[int] = None, parent: Optional[Atoms] = None, units: AtomicDistance = AtomicDistance.Angstroms, atom_type: Optional[AtomType] = None):
+    def __init__(
+        self,
+        ty: str,
+        x: float,
+        y: float,
+        z: float,
+        index: Optional[int] = None,
+        parent: Optional[Atoms] = None,
+        units: AtomicDistance = AtomicDistance.Angstroms,
+        atom_type: Optional[AtomType] = None,
+    ):
         super().__init__(ty, x, y, z, index, parent, units)
         self._atom_type = atom_type
 
@@ -314,7 +421,6 @@ class Mol2Atom(Atom):
         if self._atom_type is None:
             self._atom_type = get_atom_type(self, self.parent)
         return self._atom_type
-
 
 
 non_metal_atoms = [
@@ -361,14 +467,14 @@ class Mol2(File, GeometryFile):
 
     @classproperty
     def filetype(self) -> str:
-        return '.mol2'
+        return ".mol2"
 
     def _read_file(self):
-        with open(self.path, 'r') as f:
+        with open(self.path, "r") as f:
             for line in f:
-                if line.startswith('#'):
+                if line.startswith("#"):
                     continue
-                if '@<TRIPOS>MOLECULE' in line:
+                if "@<TRIPOS>MOLECULE" in line:
                     system_name = next(f).strip()
 
     def format(self):
@@ -378,17 +484,22 @@ class Mol2(File, GeometryFile):
 
         for i, atom in enumerate(self.atoms):
             if not isinstance(atom, Mol2Atom):
-                self.atoms[i] = Mol2Atom(atom.type, atom.x, atom.y, atom.z, index=atom.index, parent=self.atoms, units=atom.units)
+                self.atoms[i] = Mol2Atom(
+                    atom.type,
+                    atom.x,
+                    atom.y,
+                    atom.z,
+                    index=atom.index,
+                    parent=self.atoms,
+                    units=atom.units,
+                )
 
     def write(self, path: Optional[Path] = None):
         self.format()
         b = bonds(self.atoms)
-        for atom in self.atoms:
-            print(atom.name, get_ring(atom))
-            # quit()
 
         path = path or self.path
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(f"# Name: {GLOBALS.SYSTEM_NAME}\n")
             f.write(f"# Created by: {current_user()}\n")
             f.write(f"# Created on: {datetime.datetime.now()}\n")
@@ -402,7 +513,11 @@ class Mol2(File, GeometryFile):
             f.write("\n")
             f.write("@<TRIPOS>ATOM\n")
             for atom in self.atoms:
-                f.write(f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {GLOBALS.SYSTEM_NAME}\n")
+                f.write(
+                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {GLOBALS.SYSTEM_NAME} {gasteigger_charge(atom):6.4f}\n"
+                )
             f.write("@<TRIPOS>BOND\n")
             for i, (bi, bj) in enumerate(b):
-                f.write(f"{i+1:7d} {bi:4d} {bj:4d} {get_bond_type(self.atoms[bi-1], self.atoms[bj-1]).value:>4}\n")
+                f.write(
+                    f"{i+1:7d} {bi:4d} {bj:4d} {get_bond_type(self.atoms[bi-1], self.atoms[bj-1]).value:>4}\n"
+                )

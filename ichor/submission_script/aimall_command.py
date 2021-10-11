@@ -105,7 +105,7 @@ class AIMAllCommand(CommandLine):
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
         from ichor.globals import GLOBALS
-        
+
         if GLOBALS.RERUN_POINTS:
 
             cm = CheckManager(

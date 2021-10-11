@@ -37,13 +37,9 @@ def submit_wfns(
 ) -> Optional[JobID]:
     with SubmissionScript(SCRIPT_NAMES["aimall"]) as submission_script:
         for wfn in wfns:
-            if force or not wfn.with_suffix('.aim').exists():
-                submission_script.add_command(
-                    AIMAllCommand(wfn, atoms=atoms)
-                )
-                logger.debug(
-                    f"Adding {wfn} to {submission_script.path}"
-                ) 
+            if force or not wfn.with_suffix(".aim").exists():
+                submission_script.add_command(AIMAllCommand(wfn, atoms=atoms))
+                logger.debug(f"Adding {wfn} to {submission_script.path}")
 
     if len(submission_script.commands) > 0:
         # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
@@ -109,7 +105,9 @@ def scrub_aimall(wfn_file: str):
                     n_integration_error += 1
 
         else:
-            logger.error(f".int files for the current point {point_dir_path} do not exist.")
+            logger.error(
+                f".int files for the current point {point_dir_path} do not exist."
+            )
 
         # if the .sh file exists or there is an atom with large integration error
         if sh_file_path.exists() or n_integration_error > 0:
@@ -124,8 +122,7 @@ def scrub_aimall(wfn_file: str):
             while new_path.exists():
                 point_dir_name = point_dir_name + "~"
                 new_path = (
-                    FILE_STRUCTURE["aimall_scrubbed_points"]
-                    / point_dir_name
+                    FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
                 )
 
             # move to new path and record in logger
