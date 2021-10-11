@@ -62,7 +62,7 @@ _input_filetypes = [XYZ.filetype, GJF.filetype]
 def write_mdin(mdin_file: Path):
     with open(mdin_file, "w") as f:
         f.write("Production\n")
-        f.write(" &ctrl\n")
+        f.write(" &cntrl\n")
         f.write("  imin=0\n")  # not running minimisation
         f.write("  ntx=1\n")  # read input coordinates only
         f.write("  irest=0\n")  # not restarting simulation
