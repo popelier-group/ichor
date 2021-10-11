@@ -10,8 +10,10 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
 
 
-def submit_points_directory_to_gaussian(directory: Path, overwrite_existing: bool = True) -> Optional[JobID]:
-    """Function that writes out .gjf files from .xyz files that are in each directory and 
+def submit_points_directory_to_gaussian(
+    directory: Path, overwrite_existing: bool = True
+) -> Optional[JobID]:
+    """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
@@ -25,7 +27,10 @@ def submit_points_directory_to_gaussian(directory: Path, overwrite_existing: boo
     gjf_files = write_gjfs(points, overwrite_existing)
     return submit_gjfs(gjf_files)
 
-def write_gjfs(points: PointsDirectory, overwrite_existing: bool) -> List[Path]:
+
+def write_gjfs(
+    points: PointsDirectory, overwrite_existing: bool
+) -> List[Path]:
     """Writes out .gjf files in every PointDirectory which is contained in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
     which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf` file in the PointDirectory (if it does not exist already).
 
@@ -38,7 +43,9 @@ def write_gjfs(points: PointsDirectory, overwrite_existing: bool) -> List[Path]:
     for point in points:
 
         if not point.gjf.exists():
-            point.gjf = GJF(Path(point.path / (point.path.name + GJF.filetype)))
+            point.gjf = GJF(
+                Path(point.path / (point.path.name + GJF.filetype))
+            )
             point.gjf.atoms = point.xyz.atoms
 
         if overwrite_existing:
@@ -68,11 +75,11 @@ def submit_gjfs(
     # the submission_script object can be accessed even after the context manager
     with SubmissionScript(SCRIPT_NAMES["gaussian"]) as submission_script:
         for gjf in gjfs:
-            if force or not gjf.with_suffix('.wfn').exists():
-                submission_script.add_command(GaussianCommand(gjf))  # make a list of GaussianCommand instances.
-                logger.debug(
-                    f"Adding {gjf} to {submission_script.path}"
-                )
+            if force or not gjf.with_suffix(".wfn").exists():
+                submission_script.add_command(
+                    GaussianCommand(gjf)
+                )  # make a list of GaussianCommand instances.
+                logger.debug(f"Adding {gjf} to {submission_script.path}")
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
     if len(submission_script.commands) > 0:
         logger.info(
@@ -138,8 +145,7 @@ def scrub_gaussian(gaussian_file: str):
             while new_path.exists():
                 point_dir_name = point_dir_name + "~"
                 new_path = (
-                    FILE_STRUCTURE["gaussian_scrubbed_points"]
-                    / point_dir_name
+                    FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
                 )
 
             # move to new path and record in logger

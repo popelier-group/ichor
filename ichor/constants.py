@@ -1,6 +1,7 @@
 """Contains all avalable settings for Gaussian, AIMALL, FEREBUS, as well as constant values that are used throughout ICHOR to make conversions, etc."""
 
 from typing import Dict, List
+from enum import Enum
 
 import numpy as np
 
@@ -350,6 +351,143 @@ type2valence: Dict[str, int] = {
     "W": 14,
     "Au": 11,
     "Bi": 5,
+}
+
+type2electronegativity: Dict[str, float] = {
+    "H": 2.20,
+    "He": 0.0,
+    "Li": 0.98,
+    "Be": 1.57,
+    "B": 2.04,
+    "C": 2.55,
+    "N": 3.04,
+    "O": 3.44,
+    "F": 3.98,
+    "Ne": 0.0,
+    "Na": 0.93,
+    "Mg": 1.31,
+    "Al": 1.61,
+    "Si": 1.90,
+    "P": 2.19,
+    "S": 2.58,
+    "Cl": 3.16,
+    "Ar": 0.0,
+    "K": 0.82,
+    "Ca": 1.00,
+    "Sc": 1.36,
+    "Ti": 1.54,
+    "V": 1.63,
+    "Cr": 1.66,
+    "Mn": 1.55,
+    "Fe": 1.83,
+    "Co": 1.88,
+    "Ni": 1.91,
+    "Cu": 1.90,
+    "Zn": 1.65,
+    "Ga": 1.81,
+    "Ge": 2.01,
+    "As": 2.18,
+    "Se": 2.55,
+    "Br": 2.96,
+    "Kr": 3.00,
+    "Sr": 10.95,
+    "Y": 1.22,
+    "Zr": 1.33,
+    "Mo": 2.16,
+    "Ru": 2.20,
+    "Rh": 2.28,
+    "Pd": 2.20,
+    "Ag": 1.93,
+    "In": 1.78,
+    "Sb": 2.05,
+    "Te": 2.1,
+    "I": 2.66,
+    "Ba": 0.89,
+    "Ce": 1.12,
+    "Gd": 1.2,
+    "W": 12.36,
+    "Au": 2.54,
+    "Bi": 2.02,
+}
+
+
+class Orbital:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def __add__(self, other):
+        return Orbital(f"{self.name}{other.name}", self.value + other.value)
+
+    def __repr__(self):
+        return f"{self.name}({self.value})"
+
+
+class Orbitals(Orbital, Enum):
+    S = 2
+    P = 6
+    D = 10
+    F = 14
+
+    def __init__(self, value):
+        pass
+
+
+type2orbital = {
+    "H": Orbitals.S,
+    "He": Orbitals.S,
+    "Li": Orbitals.S,
+    "Be": Orbitals.S,
+    "B": Orbitals.S+Orbitals.P,
+    "C": Orbitals.S+Orbitals.P,
+    "N": Orbitals.S+Orbitals.P,
+    "O": Orbitals.S+Orbitals.P,
+    "F": Orbitals.S+Orbitals.P,
+    "Ne": Orbitals.S+Orbitals.P,
+    "Na": Orbitals.S,
+    "Mg": Orbitals.S,
+    "Al": Orbitals.S+Orbitals.P,
+    "Si": Orbitals.S+Orbitals.P,
+    "P": Orbitals.S+Orbitals.P,
+    "S": Orbitals.S+Orbitals.P,
+    "Cl": Orbitals.S+Orbitals.P,
+    "Ar": Orbitals.S+Orbitals.P,
+    "K": Orbitals.S,
+    "Ca": Orbitals.S,
+    "Sc": Orbitals.S+Orbitals.D,
+    "Ti": Orbitals.S+Orbitals.D,
+    "V": Orbitals.S+Orbitals.D,
+    "Cr": Orbitals.S+Orbitals.D,
+    "Mn": Orbitals.S+Orbitals.D,
+    "Fe": Orbitals.S+Orbitals.D,
+    "Co": Orbitals.S+Orbitals.D,
+    "Ni": Orbitals.S+Orbitals.D,
+    "Cu": Orbitals.S+Orbitals.D,
+    "Zn": Orbitals.S+Orbitals.D,
+    "Ga": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Ge": Orbitals.S+Orbitals.D+Orbitals.P,
+    "As": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Se": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Br": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Kr": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Sr": Orbitals.S,
+    "Y": Orbitals.S+Orbitals.D,
+    "Zr": Orbitals.S+Orbitals.D,
+    "Mo": Orbitals.S+Orbitals.D,
+    "Ru": Orbitals.S+Orbitals.D,
+    "Rh": Orbitals.S+Orbitals.D,
+    "Pd": Orbitals.S+Orbitals.D,
+    "Ag": Orbitals.S+Orbitals.D,
+    "In": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Sb": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Te": Orbitals.S+Orbitals.D+Orbitals.P,
+    "I": Orbitals.S+Orbitals.D+Orbitals.P,
+    "Ba": Orbitals.S,
+    "Ce": Orbitals.S+Orbitals.F,
+    "Gd": Orbitals.S+Orbitals.F,
+    "W": Orbitals.S+Orbitals.F+Orbitals.D,
+    "Au": Orbitals.S+Orbitals.F+Orbitals.D,
+    "Bi": Orbitals.S+Orbitals.F+Orbitals.D+Orbitals.P,
 }
 
 dlpoly_weights: Dict[str, float] = {

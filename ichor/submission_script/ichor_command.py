@@ -23,7 +23,7 @@ class ICHORCommand(PythonCommand):
         auto_run: bool = False,
         func: Optional[Union[str, F]] = None,
         func_args: Optional[List[str]] = None,
-        needs_uid: Optional[bool] = True
+        needs_uid: Optional[bool] = True,
     ):
         PythonCommand.__init__(
             self,

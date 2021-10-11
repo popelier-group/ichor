@@ -127,12 +127,24 @@ class Atom(VarReprMixin):
     @property
     def mass(self) -> float:
         """Returns the mass of the atom"""
-        return round(constants.type2mass[self.atom_type], 6)
+        return round(constants.type2mass[self.type], 6)
 
     @property
     def radius(self):
         """Returns the Van der Waals radius of the given Atom instance."""
         return round(constants.type2rad[self.type], 2)
+
+    @property
+    def electronegativity(self):
+        return constants.type2electronegativity[self.type]
+
+    @property
+    def valence(self):
+        return constants.type2valence[self.type]
+
+    @property
+    def unpaired_electrons(self):
+        return constants.type2orbital[self.type].value - self.valence
 
     @property
     def connectivity(self) -> np.ndarray:

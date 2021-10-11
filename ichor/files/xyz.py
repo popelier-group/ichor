@@ -8,9 +8,9 @@ from ichor.files.geometry import GeometryFile
 
 
 class XYZ(GeometryFile, File):
-    """ A class which wraps around a .xyz file that is contained in each PointDirectory. This .xyz file should always be there and it is
-    used to write out .gjf files. Each instance is 
-    
+    """A class which wraps around a .xyz file that is contained in each PointDirectory. This .xyz file should always be there and it is
+    used to write out .gjf files. Each instance is
+
     :param path: The path to an .xyz file
     :param atoms: Optional list of Atoms which can be used to construct a .xyz file. If a list of atoms is passed, then a new xyz file
         with the given Atoms will be written to the given Path.
@@ -28,8 +28,8 @@ class XYZ(GeometryFile, File):
         return ".xyz"
 
     def _read_file(self):
-        """ Read a .xyz file and constructs the `self.atoms` attribute which is an instance of `Atoms`"""
-        with open(self.path, 'r') as f:
+        """Read a .xyz file and constructs the `self.atoms` attribute which is an instance of `Atoms`"""
+        with open(self.path, "r") as f:
             natoms = int(next(f))
             _ = next(f)  # blank line
             self.atoms = Atoms()
@@ -45,8 +45,8 @@ class XYZ(GeometryFile, File):
                 )
 
     def write(self, path: Optional[Path] = None):
-        """ Write a .xyz to a given path. If no path is given, it will write it to the path given when the XYZ instance was constructed.
-        
+        """Write a .xyz to a given path. If no path is given, it will write it to the path given when the XYZ instance was constructed.
+
         :param path: An optional path to which to write the .xyz file
         """
         if path is None:

@@ -66,6 +66,7 @@ external_functions = [
     ExternalFunction(
         "ichor.main.pandora", "copy_aimall_wfn_to_point_directory"
     ),
+    ExternalFunction("ichor.main.amber", "mdcrd_to_xyz"),
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key

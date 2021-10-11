@@ -13,6 +13,7 @@ from ichor.modules.internet import InternetModules
 from ichor.modules.modules import Modules
 from ichor.modules.pandora import MorfiModules, PandoraModules
 from ichor.modules.python import PythonModules
+from ichor.modules.amber import AmberModules
 
 MODULES_HOME = Path("/usr/share/Modules")
 
@@ -78,5 +79,6 @@ __all__ = [
     "DlpolyModules",
     "PandoraModules",
     "MorfiModules",
+    "AmberModules",
     "load_module",
 ]

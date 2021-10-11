@@ -52,6 +52,8 @@ class FileStructure(FileTree):
         self.add("DLPOLY", "dlpoly")
         self.add("GJF", "dlpoly_gjf", parent="dlpoly")
 
+        self.add("AMBER", "amber")
+
         self.add(".DATA", "data")
 
         self.add("PROGRAMS", "programs")  # , parent="data")

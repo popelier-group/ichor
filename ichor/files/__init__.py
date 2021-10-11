@@ -4,6 +4,7 @@ from ichor.files.file import File, FileState
 from ichor.files.gjf import GJF
 from ichor.files.int import INT
 from ichor.files.ints import INTs
+from ichor.files.mol2 import Mol2
 from ichor.files.optional_file import OptionalFile, OptionalPath
 from ichor.files.pandora import (MorfiDirectory, PandoraDirectory,
                                  PandoraInput, PySCFDirectory)
@@ -29,6 +30,7 @@ __all__ = [
     "PointDirectory",
     "PointsDirectory",
     "XYZ",
+    "Mol2",
     "PySCFDirectory",
     "MorfiDirectory",
     "PandoraDirectory",

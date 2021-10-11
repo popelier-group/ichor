@@ -27,14 +27,14 @@ class CommandLine(ABC):
 
     @classproperty
     def rerun(self) -> bool:
-        """ Whether to rerun points if they fail, up to GLOBALS.GAUSSIAN_N_TRIES"""
+        """Whether to rerun points if they fail, up to GLOBALS.GAUSSIAN_N_TRIES"""
         from ichor.globals import GLOBALS
 
         return GLOBALS.RERUN_POINTS
 
     @classproperty
     def scrub(self) -> bool:
-        """ Whether to remove failed points from a PointsDirectory and move them to a separate location, so they are not
+        """Whether to remove failed points from a PointsDirectory and move them to a separate location, so they are not
         used in training/validating."""
         from ichor.globals import GLOBALS
 

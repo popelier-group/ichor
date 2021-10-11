@@ -122,22 +122,24 @@ class Trajectory(ListOfAtoms, File):
         return [ref.rmsd(point) for point in self]
 
     def to_dir(self, root: Path, every: int = 1):
-        """ Writes out every nth timestep to a separate .xyz file to a given directory
-        
+        """Writes out every nth timestep to a separate .xyz file to a given directory
+
         :param root: A Path to a directory where to write the .xyz files. An empty directory is made for the given Path and
             overwrites an existing directory for the given Path.
         :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
             a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
         """
-        from ichor.globals import GLOBALS
         from ichor.files import XYZ
+        from ichor.globals import GLOBALS
 
         mkdir(root, empty=True)
         for i, geometry in enumerate(self):
 
             if (i % every) == 0:
 
-                path = Path(str(GLOBALS.SYSTEM_NAME) + str(i + 1).zfill(4) + ".xyz")
+                path = Path(
+                    str(GLOBALS.SYSTEM_NAME) + str(i + 1).zfill(4) + ".xyz"
+                )
                 path = root / path
                 XYZ(path, geometry)
 
