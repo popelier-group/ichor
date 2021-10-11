@@ -74,6 +74,8 @@ class ListOfAtoms(list):
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
+        from ichor.files.point_directory import PointDirectory
+
         if fname is None:
             fname = Path("system_to_xyz.xyz")
         elif isinstance(fname, str):
@@ -85,7 +87,7 @@ class ListOfAtoms(list):
             for i, point in enumerate(self[::step]):
                 f.write(f"    {len(point)}\ni = {i}\n")
                 # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
-                if hasattr(point, "atoms"):
+                if isinstance(point, PointDirectory):
                     for atom in point.atoms:
                         f.write(
                             f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
