@@ -190,7 +190,7 @@ class Globals:
     AIMALL_CORE_COUNT: int = 2
     FEREBUS_CORE_COUNT: int = 4
     DLPOLY_CORE_COUNT: int = 1
-    CP2K_CORE_COUNT: int = 8
+    CP2K_NCORES: int = 8
     PYSCF_NCORES: int = 2
     MORFI_NCORES: int = 4
     AMBER_NCORES: int = 8

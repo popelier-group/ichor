@@ -14,6 +14,7 @@ from ichor.modules.modules import Modules
 from ichor.modules.pandora import MorfiModules, PandoraModules
 from ichor.modules.python import PythonModules
 from ichor.modules.amber import AmberModules
+from ichor.modules.cp2k import CP2KModules
 
 MODULES_HOME = Path("/usr/share/Modules")
 
@@ -80,5 +81,6 @@ __all__ = [
     "PandoraModules",
     "MorfiModules",
     "AmberModules",
+    "CP2KModules",
     "load_module",
 ]

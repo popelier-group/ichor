@@ -1,13 +1,6 @@
-from ichor.main.amber import amber_menu
+from main.md.amber import amber_menu
 from ichor.make_sets import make_sets_menu
 from ichor.menu import Menu
-
-
-def md_menu() -> None:
-    with Menu(
-        "Molecular Dynamics Menu", space=True, back=True, exit=True
-    ) as menu:
-        menu.add_option("amber", "Amber Menu", amber_menu)
 
 
 def tools_menu() -> None:
