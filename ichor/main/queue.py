@@ -1,6 +1,6 @@
 import json
 
-from ichor.batch_system import BATCH_SYSTEM, JobID
+from ichor.batch_system import BATCH_SYSTEM, JobID, Job
 from ichor.menu import Menu
 from ichor.file_structure import FILE_STRUCTURE
 from typing import List
@@ -31,12 +31,16 @@ def delete_jobs():
         f.write("[]")
 
 
-def get_status_of_running_jobs():
+def get_current_jobs() -> List[Job]:
     all_jobs = BATCH_SYSTEM.get_queued_jobs()
     ichor_jobs = read_jid(FILE_STRUCTURE['jid'])
     ichor_job_ids = [job.id for job in ichor_jobs]
 
-    ichor_queued_jobs = [job for job in all_jobs if job.id in ichor_job_ids]
+    return [job for job in all_jobs if job.id in ichor_job_ids]
+
+
+def get_status_of_running_jobs():
+    ichor_queued_jobs = get_current_jobs()
 
     for job in ichor_queued_jobs:
         print(job)

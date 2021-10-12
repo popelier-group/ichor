@@ -49,6 +49,9 @@ class FileStructure(FileTree):
         self.add("PROPERTIES", "properties")
         self.add("ATOMS", "atoms")
 
+        self.add("TYCHE", "tyche")
+        self.add("GAUSSIAN", "tyche_g09", parent="tyche")
+
         self.add("DLPOLY", "dlpoly")
         self.add("GJF", "dlpoly_gjf", parent="dlpoly")
 
@@ -89,6 +92,11 @@ class FileStructure(FileTree):
         self.add("atoms.pid", "atoms_pid", parent="atoms_daemon")
         self.add("atoms.out", "atoms_stdout", parent="atoms_daemon")
         self.add("atoms.err", "atoms_stderr", parent="atoms_daemon")
+
+        self.add("RERUN", "rerun_daemon", parent="active_learning")
+        self.add("rerun.pid", "rerun_pid", parent="rerun_daemon")
+        self.add("rerun.out", "rerun_stdout", parent="rerun_daemon")
+        self.add("rerun.err", "rerun_stderr", parent="rerun_daemon")
 
         # todo: this has already been added above
         self.add("counter", "counter", parent="active_learning")

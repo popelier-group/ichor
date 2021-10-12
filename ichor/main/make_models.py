@@ -14,6 +14,7 @@ from ichor.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter
+from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM, QuantumChemicalTopologyProgram
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -54,6 +55,8 @@ class ModelType(Enum):
     q43s = "q43s"
     q44c = "q44c"
     q44s = "q44s"
+    iqa_dispersion = "iqa_dispersion"
+    dispersion = "dispersion"
 
     @classmethod
     def to_str(cls, ty: "ModelType"):
@@ -69,7 +72,12 @@ class ModelType(Enum):
         raise ValueError(f"No ModelType {ty}")
 
 
-model_types: List[ModelType] = [ModelType.iqa]
+default_model_type = {
+    QuantumChemicalTopologyProgram.AIMAll: [ModelType.iqa],
+    QuantumChemicalTopologyProgram.Morfi: [ModelType.iqa_dispersion]
+}
+
+model_types: List[ModelType] = default_model_type[QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()]
 atom_names: List[str] = []
 
 
@@ -192,7 +200,7 @@ def make_models_menu_refresh(menu):
     :param menu: An instance of `class Menu` to which options are added.
     """
     menu.clear_options()
-    menu.add_option("1", "Make Models", _make_models)
+    menu.add_option("1", "Make Models", create_ferebus_directories_and_submit)
     menu.add_space()
     menu.add_option("t", "Select Model Type", select_model_type)
     menu.add_option(
@@ -220,8 +228,8 @@ def make_models_menu(directory: Path):
         pass
 
 
-# todo: I think that the functions could be named better because there is make_models and _make_models. Also the file could be
-# arranged better because make_models is followed by move_models instead of _make_models. It is hard to understand what is going on due to the use of globals and a lot of functiosn in functions
+# todo: I think that the functions could be named better because there is make_models and create_ferebus_directories_and_submit. Also the file could be
+# arranged better because make_models is followed by move_models instead of create_ferebus_directories_and_submit. It is hard to understand what is going on due to the use of globals and a lot of functiosn in functions
 def make_models(
     directory: Path,
     atoms: Optional[List[str]] = None,
@@ -229,7 +237,7 @@ def make_models(
     types: Optional[List[str]] = None,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
-    """Function that is used in auto run to make GP models with FEREBUS. The actual function that makes the needed files is called `_make_models`.
+    """Function that is used in auto run to make GP models with FEREBUS. The actual function that makes the needed files is called `create_ferebus_directories_and_submit`.
 
     :return: The job id of the submitted job
     """
@@ -256,7 +264,7 @@ def make_models(
         f"Making Models for {atom_models_to_make} atoms and {model_types} types with {n_training_points} training points"
     )
 
-    return _make_models(hold=hold)
+    return create_ferebus_directories_and_submit(hold=hold)
 
 
 def move_models(model_dir: Optional[Path] = None):
@@ -294,7 +302,7 @@ def move_models(model_dir: Optional[Path] = None):
             cp(d, model_log)
 
 
-def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
+def create_ferebus_directories_and_submit(hold: Optional[JobID] = None) -> Optional[JobID]:
     """Makes the training set file in a separate directory for each topological atom. Calls `make_ferebus_script` which writes out the ferebus
     job script that needed to run on compute nodes and submits to queue.
 
@@ -314,10 +322,10 @@ def _make_models(hold: Optional[JobID] = None) -> Optional[JobID]:
         ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
 
-    return make_ferebus_scrpt(ferebus_directories, hold=hold)
+    return make_ferebus_script(ferebus_directories, hold=hold)
 
 
-def make_ferebus_scrpt(
+def make_ferebus_script(
     ferebus_directories: List[Path], hold: Optional[JobID] = None
 ) -> Optional[JobID]:
     """Writes our the ferebus script needed to run a ferebus job and submits to queueing system.

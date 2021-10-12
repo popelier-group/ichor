@@ -17,7 +17,7 @@ from ichor.auto_run.ichor_jobs import (
     submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
 from ichor.batch_system import JobID
 from ichor.common.int import truncate
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, remove
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
 from ichor.drop_compute import DROP_COMPUTE_LOCATION
@@ -29,6 +29,7 @@ from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
+from ichor.main.queue import get_current_jobs
 
 
 class AutoRunAlreadyRunning(Exception):
@@ -272,3 +273,18 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
         else IterState.Standard
     )
     return next_iter(None, iter_state)
+
+
+def rerun_from_failed() -> Optional[JobID]:
+    from ichor.globals import GLOBALS
+
+    current_iteration = 0
+    if FILE_STRUCTURE["counter"].exists():
+        with open(FILE_STRUCTURE["counter"], 'r') as f:
+            current_iteration = int(next(f))
+
+    if current_iteration < GLOBALS.N_ITERATIONS and len(get_current_jobs()) == 0:
+        GLOBALS.N_ITERATIONS = GLOBALS.N_ITERATIONS - current_iteration
+        GLOBALS.save_to_config()
+        remove(FILE_STRUCTURE["counter"])
+        return auto_run()

@@ -5,6 +5,9 @@ from typing import List, Optional
 from ichor.common.io import pushd
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.queue import delete_jobs
+from ichor.auto_run import rerun_from_failed
+from ichor.common.daemon import Daemon
+from ichor.common.io import mkdir
 
 
 def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
@@ -28,3 +31,27 @@ def delete_child_process_jobs(
     for child_process in child_processes:
         with pushd(child_process, update_cwd=True):
             delete_jobs()
+
+
+class ReRunDaemon(Daemon):
+    def __init__(self):
+        from ichor.file_structure import FILE_STRUCTURE
+        from ichor.globals import GLOBALS
+
+        mkdir(FILE_STRUCTURE["rerun_daemon"])
+        pidfile = GLOBALS.CWD / FILE_STRUCTURE["rerun_pid"]
+        stdout = GLOBALS.CWD / FILE_STRUCTURE["rerun_stdout"]
+        stderr = GLOBALS.CWD / FILE_STRUCTURE["rerun_stderr"]
+        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+
+    def run(self):
+        rerun_from_failed()
+        self.stop()
+
+
+def rerun_failed_child_process(child_processes: Optional[List[Path]] = None,) -> None:
+    if child_processes is None:
+        child_processes = find_child_processes_recursively()
+    for child_process in child_processes:
+        with pushd(child_process, update_cwd=True):
+            ReRunDaemon().start()

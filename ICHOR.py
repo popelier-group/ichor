@@ -2800,7 +2800,7 @@ class Globals:
     INTEGRATION_ERROR_THRESHOLD: float = 0.001
 
     # Activate Warnings when making models
-    LOG_WARNINGS: bool = False  # Gets set in _make_models
+    LOG_WARNINGS: bool = False  # Gets set in create_ferebus_directories_and_submit
 
     MACHINE: str = ""
     SGE: bool = False  # Don't Change
