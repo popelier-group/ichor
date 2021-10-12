@@ -69,7 +69,7 @@ class AmberCommand(CommandLine):
         # run tleap to generate prmtop and inpcrd
         tleap_script = mol2_file.with_suffix(".tleap")
         prmtop_file = mol2_file.with_suffix(".prmtop")
-        inpcrd_file = mol2_file.with_suffix("")
+        inpcrd_file = mol2_file.with_suffix(".inpcrd")
         with open(tleap_script, "w") as f:
             f.write("source leaprc.protein.ff14SB\n")
             f.write("source leaprc.gaff2\n")
