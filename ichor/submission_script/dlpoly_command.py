@@ -43,7 +43,7 @@ class DlpolyCommand(CommandLine):
 
         from ichor.globals import GLOBALS
 
-        return GLOBALS.DLPOLY_CORE_COUNT
+        return GLOBALS.DLPOLY_NCORES
 
     def repr(self, variables: List[str]) -> str:
         """Return a string that is used to construct ferebus job files."""

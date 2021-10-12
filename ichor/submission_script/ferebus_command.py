@@ -46,7 +46,7 @@ class FerebusCommand(CommandLine):
 
         from ichor.globals import GLOBALS
 
-        return GLOBALS.FEREBUS_CORE_COUNT
+        return GLOBALS.FEREBUS_NCORES
 
     def repr(self, variables: List[str]) -> str:
         """Return a string that is used to construct ferebus job files."""

@@ -1,21 +1,16 @@
-from enum import Enum
 from pathlib import Path
-from typing import Optional
-
-import numpy as np
 
 from ichor.analysis.get_input import get_first_file, get_input_menu
-from ichor.atoms import Atom, Atoms
+from ichor.atoms import Atoms
 from ichor.batch_system import JobID
 from ichor.common.io import mkdir
 from ichor.common.os import input_with_prefill
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.files import GJF, XYZ, Mol2, Trajectory
+from ichor.files import GJF, XYZ
 from ichor.globals import GLOBALS
-from ichor.menu import Menu
-from ichor.submission_script import (SCRIPT_NAMES, AmberCommand,
-                                     SubmissionScript)
 from ichor.machine import MACHINE, Machine
+from ichor.menu import Menu
+from ichor.submission_script import SCRIPT_NAMES, CP2KCommand, SubmissionScript
 
 _input_file = None
 _input_filetypes = [XYZ.filetype, GJF.filetype]
@@ -24,28 +19,25 @@ _n_molecules = 1
 
 _solver = "periodic"
 
-_method = "BLYP"
-
 _box_size = 25.0
 
 
 datafile_location = {
     Machine.ffluxlab: Path("/home/modules/apps/cp2k/6.1.0/data"),
     Machine.csf3: Path("/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"),
-    Machine.local: Path("$CP2K_HOME/data")
+    Machine.local: Path("$CP2K_HOME/data"),
 }
 
 
-def write_cp2k_input(cp2k_input_file: Path):
+def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
+    atoms.centre()
     with open(cp2k_input_file, "w") as f:
         f.write("&GLOBAL\n")
         f.write(
             "  ! the project name is made part of most output files... useful to keep order\n"
         )
         f.write(f"  PROJECT {GLOBALS.SYSTEM_NAME}\n")
-        f.write(
-            "  ! various runtypes (energy, geo_opt, etc.) available.\n"
-        )
+        f.write("  ! various runtypes (energy, geo_opt, etc.) available.\n")
         f.write("  RUN_TYPE MD\n")
         f.write("\n")
         f.write("  IOLEVEL LOW\n")
@@ -68,9 +60,7 @@ def write_cp2k_input(cp2k_input_file: Path):
         )
         f.write("\n")
         f.write("    ! Charge and multiplicity\n")
-        f.write(
-            "    CHARGE 0\n"
-        )  # TODO: Handle Charged Molecules
+        f.write("    CHARGE 0\n")  # TODO: Handle Charged Molecules
         f.write("    MULTIPLICITY 1\n")
         f.write("\n")
         f.write("    &MGRID\n")
@@ -80,12 +70,8 @@ def write_cp2k_input(cp2k_input_file: Path):
         f.write(
             "      ! certain calculations (e.g. geometry optimization, vibrational frequencies,\n"
         )
-        f.write(
-            "      ! NPT and cell optimizations, need higher cutoffs)\n"
-        )
-        f.write(
-            "      CUTOFF [Ry] 400\n"
-        )  # TODO: Turn this into variable
+        f.write("      ! NPT and cell optimizations, need higher cutoffs)\n")
+        f.write("      CUTOFF [Ry] 400\n")  # TODO: Turn this into variable
         f.write("    &END MGRID\n")
         f.write("\n")
         f.write("    &QS\n")
@@ -96,9 +82,7 @@ def write_cp2k_input(cp2k_input_file: Path):
         f.write(
             "      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n"
         )
-        f.write(
-            "      ! sets reasonable values for all other thresholds.\n"
-        )
+        f.write("      ! sets reasonable values for all other thresholds.\n")
         f.write("      EPS_DEFAULT 1.0E-10\n")
         f.write(
             "      ! used for MD, the method used to generate the initial guess.\n"
@@ -114,9 +98,7 @@ def write_cp2k_input(cp2k_input_file: Path):
             f.write("      PERIODIC XYZ\n")
         else:
             f.write("      PERIODIC NONE\n")
-        f.write(
-            f"      POISSON_SOLVER {_solver.upper()}\n"
-        )
+        f.write(f"      POISSON_SOLVER {_solver.upper()}\n")
         f.write("    &END POISSON\n")
         f.write("\n")
         f.write(
@@ -140,9 +122,7 @@ def write_cp2k_input(cp2k_input_file: Path):
         )
         f.write("        MINIMIZER DIIS\n")
         f.write("      &END OT\n")
-        f.write(
-            "      &OUTER_SCF ! repeat the inner SCF cycle 10 times\n"
-        )
+        f.write("      &OUTER_SCF ! repeat the inner SCF cycle 10 times\n")
         f.write("        MAX_SCF 10\n")
         f.write("        EPS_SCF 1.0E-6 ! must match the above\n")
         f.write("      &END\n")
@@ -155,27 +135,21 @@ def write_cp2k_input(cp2k_input_file: Path):
         f.write("      &END PRINT\n")
         f.write("    &END SCF\n")
         f.write("\n")
-        f.write(
-            "    ! specify the exchange and correlation treatment\n"
-        )
+        f.write("    ! specify the exchange and correlation treatment\n")
         f.write("    &XC\n")
-        f.write(f"      &XC_FUNCTIONAL {_method}\n")
+        f.write(f"      &XC_FUNCTIONAL {GLOBALS.CP2K_METHOD}\n")
         f.write("      &END XC_FUNCTIONAL\n")
         f.write(
             "      ! adding Grimme's D3 correction (by default without C9 terms)\n"
         )
-        f.write(
-            f"      &VDW_POTENTIAL {'OFF' if _n_molecules == 1 else ''}\n"
-        )
+        f.write(f"      &VDW_POTENTIAL {'OFF' if _n_molecules == 1 else ''}\n")
         f.write("        POTENTIAL_TYPE PAIR_POTENTIAL\n")
         f.write("        &PAIR_POTENTIAL\n")
         f.write(
             f"          PARAMETER_FILE_NAME {datafile_location[MACHINE]}/dftd3.dat\n"
         )
         f.write("          TYPE DFTD3\n")
-        f.write(
-            f"          REFERENCE_FUNCTIONAL {_method}\n"
-        )
+        f.write(f"          REFERENCE_FUNCTIONAL {GLOBALS.CP2K_METHOD}\n")
         f.write("          R_CUTOFF [angstrom] 16\n")
         f.write("        &END PAIR_POTENTIAL\n")
         f.write("      &END VDW_POTENTIAL\n")
@@ -188,36 +162,30 @@ def write_cp2k_input(cp2k_input_file: Path):
         f.write(
             "      ! unit cells that are orthorhombic are more efficient with CP2K\n"
         )
-        f.write(
-            f"      ABC [angstrom] {_box_size} {_box_size} {_box_size}\n"
-        )
+        f.write(f"      ABC [angstrom] {_box_size} {_box_size} {_box_size}\n")
         if _solver == "wavelet":
             f.write("      PERIODIC NONE\n")
         f.write("    &END CELL\n")
         f.write("\n")
-        f.write(
-            "    ! atom coordinates can be in the &COORD section,\n"
-        )
+        f.write("    ! atom coordinates can be in the &COORD section,\n")
         f.write("    ! or provided as an external file.\n")
         f.write("    &COORD\n")
-        for atom in CP2KTools.input_geometry:
+        for atom in atoms:
             f.write(f"      {atom}\n")
         f.write("    &END COORD\n")
         f.write("\n")
         f.write("    ! keep atoms away from box borders,\n")
-        f.write(
-            "    ! a requirement for the wavelet Poisson solver\n"
-        )
+        f.write("    ! a requirement for the wavelet Poisson solver\n")
         f.write("    &TOPOLOGY\n")
         f.write("      &CENTER_COORDINATES\n")
         f.write("      &END\n")
         f.write("    &END TOPOLOGY\n")
         f.write("\n")
-        for atom_type in CP2KTools.input_geometry.types:
-            f.write(f"    &KIND {atom_type.upper()}\n")
-            f.write(f"      BASIS_SET {CP2KTools.basis_set}\n")
+        for atom in atoms:
+            f.write(f"    &KIND {atom.type.upper()}\n")
+            f.write(f"      BASIS_SET {GLOBALS.CP2K_BASIS_SET}\n")
             f.write(
-                f"      POTENTIAL GTH-{CP2KTools.method}-q{Constants.type2valence[atom_type.upper()]}\n"
+                f"      POTENTIAL GTH-{GLOBALS.CP2K_METHOD}-q{atom.valence}\n"
             )
             f.write("    &END KIND\n")
         f.write("  &END SUBSYS\n")
@@ -232,9 +200,7 @@ def write_cp2k_input(cp2k_input_file: Path):
             "    OPTIMIZER LBFGS ! Good choice for 'small' systems (use LBFGS for large systems)\n"
         )
         f.write("    MAX_ITER  100\n")
-        f.write(
-            "    MAX_DR    [bohr] 0.003 ! adjust target as needed\n"
-        )
+        f.write("    MAX_DR    [bohr] 0.003 ! adjust target as needed\n")
         f.write("    &BFGS\n")
         f.write("    &END BFGS\n")
         f.write("  &END GEO_OPT\n")
@@ -242,11 +208,11 @@ def write_cp2k_input(cp2k_input_file: Path):
         f.write(
             "    ENSEMBLE NVT  ! sampling the canonical ensemble, accurate properties might need NVE\n"
         )
-        f.write(f"    TEMPERATURE [K] {CP2KTools.temperature}\n")
+        f.write(f"    TEMPERATURE [K] {GLOBALS.CP2K_TEMPERATURE}\n")
         f.write(
             "    TIMESTEP [fs] 1.0\n"
         )  # TODO: Turn this into user defined variable
-        f.write(f"    STEPS {CP2KTools.n_iterations}\n")
+        f.write(f"    STEPS {GLOBALS.CP2K_STEPS}\n")
         f.write("    &THERMOSTAT\n")
         f.write("      TYPE NOSE\n")
         f.write("      REGION GLOBAL\n")
@@ -283,17 +249,11 @@ def submit_cp2k(input_file: Path) -> JobID:
         raise ValueError(f"Unknown filetype: {input_file}")
 
     mkdir(FILE_STRUCTURE["cp2k"])
-    xyz = XYZ(
-        FILE_STRUCTURE["cp2k"] / (GLOBALS.SYSTEM_NAME + XYZ.filetype)
-    )
-    xyz.atoms = atoms
-    xyz.write()
+    cp2k_input = FILE_STRUCTURE["cp2k"] / f"{GLOBALS.SYSTEM_NAME}.inp"
+    write_cp2k_input(cp2k_input, atoms)
 
-    mdin = FILE_STRUCTURE["cp2k"] / "md.in"
-    write_mdin(mdin)
-
-    with SubmissionScript(SCRIPT_NAMES["amber"]) as submission_script:
-        submission_script.add_command(AmberCommand(mol2.path, mdin))
+    with SubmissionScript(SCRIPT_NAMES["cp2k"]) as submission_script:
+        submission_script.add_command(CP2KCommand(cp2k_input))
     return submission_script.submit()
 
 
@@ -331,7 +291,9 @@ def set_input():
 
 def cp2k_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option("1", "Run CP2K", submit_cp2k, kwargs={'input_file': _input_file})
+    menu.add_option(
+        "1", "Run CP2K", submit_cp2k, kwargs={"input_file": _input_file}
+    )
     menu.add_space()
     menu.add_option("i", "Set input file", set_input)
     menu.add_option("t", "Set Temperature", set_temperature)

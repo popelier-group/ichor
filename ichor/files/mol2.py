@@ -150,7 +150,10 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
 
     atom1_valence = get_valence(atom1)
     atom2_valence = get_valence(atom2)
-    if atom1.unpaired_electrons == atom1_valence or atom2_valence == atom2.unpaired_electrons:
+    if (
+        atom1.unpaired_electrons == atom1_valence
+        or atom2_valence == atom2.unpaired_electrons
+    ):
         return BondType.Single
     if (
         atom1.valence - 1 == atom1_valence
@@ -166,6 +169,7 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
 
             single_bond_distance = atom1.radius + atom2.radius
             from ichor.analysis.geometry import calculate_bond
+
             bond_distance = calculate_bond(atom1.parent, atom1.i, atom2.i)
             bond_percentage = bond_distance / single_bond_distance
             if abs(
@@ -257,6 +261,7 @@ def bond_index_to_atom(
 
 def get_atom_bonds(atom: Atom) -> List[Tuple[int, int]]:
     from ichor.analysis.geometry import bonds
+
     """Return list of bond indices (1-index)"""
     return [bond for bond in bonds(atom.parent) if atom.index in bond]
 
@@ -498,6 +503,7 @@ class Mol2(File, GeometryFile):
 
     def write(self, path: Optional[Path] = None):
         from ichor.analysis.geometry import bonds
+
         self.format()
         b = bonds(self.atoms)
 

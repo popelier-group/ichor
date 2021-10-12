@@ -71,16 +71,19 @@ def scrub_aimall(wfn_file: str):
     :param wfn_file: A string that is a Path to a .gjf file
     """
 
+    from pathlib import Path
+
     from ichor.common.io import mkdir, move
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.files.point_directory import PointDirectory
     from ichor.globals import GLOBALS
     from ichor.logging import logger
-    from pathlib import Path
 
     wfn_file = Path(wfn_file)
     point_dir_path = wfn_file.parent
-    point_dir_name = point_dir_path.name  # returns the name of the directory, eg. WATER0001, WATER0002, etc.
+    point_dir_name = (
+        point_dir_path.name
+    )  # returns the name of the directory, eg. WATER0001, WATER0002, etc.
 
     if wfn_file.exists():
 
@@ -140,18 +143,17 @@ def scrub_aimall(wfn_file: str):
     # files should be cleaned up after running Gaussian. But use this as a check.
     else:
         mkdir(FILE_STRUCTURE["aimall_scrubbed_points"])
-        new_path = (
-            FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
-        )
+        new_path = FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
 
         while new_path.exists():
             point_dir_name = point_dir_name + "~"
             new_path = (
-                FILE_STRUCTURE["aimall_scrubbed_points"]
-                / point_dir_name
+                FILE_STRUCTURE["aimall_scrubbed_points"] / point_dir_name
             )
 
         # move to new path and record in logger
         move(point_dir_path, new_path)
 
-        logger.error(f".wfn file does not exist. Moving point {point_dir_path} to {new_path}.")
+        logger.error(
+            f".wfn file does not exist. Moving point {point_dir_path} to {new_path}."
+        )

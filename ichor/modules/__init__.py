@@ -6,6 +6,8 @@ from typing import List, Union
 
 from ichor.common.functools import run_once
 from ichor.modules.aimall import AIMAllModules
+from ichor.modules.amber import AmberModules
+from ichor.modules.cp2k import CP2KModules
 from ichor.modules.dlpoly import DlpolyModules
 from ichor.modules.ferebus import FerebusModules
 from ichor.modules.gaussian import GaussianModules
@@ -13,8 +15,7 @@ from ichor.modules.internet import InternetModules
 from ichor.modules.modules import Modules
 from ichor.modules.pandora import MorfiModules, PandoraModules
 from ichor.modules.python import PythonModules
-from ichor.modules.amber import AmberModules
-from ichor.modules.cp2k import CP2KModules
+from ichor.modules.tyche import TycheModules
 
 MODULES_HOME = Path("/usr/share/Modules")
 
@@ -82,5 +83,6 @@ __all__ = [
     "MorfiModules",
     "AmberModules",
     "CP2KModules",
+    "TycheModules",
     "load_module",
 ]

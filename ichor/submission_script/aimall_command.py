@@ -98,10 +98,10 @@ class AIMAllCommand(CommandLine):
     def ncores(self) -> int:
         from ichor.globals import GLOBALS
 
-        return GLOBALS.AIMALL_CORE_COUNT
+        return GLOBALS.AIMALL_NCORES
 
     def repr(self, variables: List[str]) -> str:
-        """ Returns a string which is written out to the submission script file in order to run AIMALL correctly (with the appropriate settings)."""
+        """Returns a string which is written out to the submission script file in order to run AIMALL correctly (with the appropriate settings)."""
 
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 

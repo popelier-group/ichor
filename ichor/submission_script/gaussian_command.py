@@ -60,7 +60,7 @@ class GaussianCommand(CommandLine):
         """Returns the number of cores that Gaussian should use for the job."""
         from ichor.globals import GLOBALS
 
-        return GLOBALS.GAUSSIAN_CORE_COUNT
+        return GLOBALS.GAUSSIAN_NCORES
 
     def repr(self, variables: List[str]) -> str:
         """

@@ -67,7 +67,9 @@ def write_mdin(mdin_file: Path):
         f.write("  ntx=1,\n")  # read input coordinates only
         f.write("  irest=0,\n")  # not restarting simulation
         f.write(f"  nstlim={GLOBALS.AMBER_STEPS},\n")  # number of time steps
-        f.write(f"  dt={GLOBALS.AMBER_TIMESTEP},\n")  # time step in picoseconds
+        f.write(
+            f"  dt={GLOBALS.AMBER_TIMESTEP},\n"
+        )  # time step in picoseconds
         f.write(f"  ntf={FORCE_EVALUATION.value},\n")  # force constraint
         f.write(f"  ntc={BOND_CONSTRAINT.value},\n")  # bond contraint
         f.write(f"  temp0={GLOBALS.AMBER_TEMPERATURE},\n")  # temperature
@@ -183,7 +185,9 @@ def set_input():
 
 def amber_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option("1", "Run Amber", submit_amber, kwargs={'input_file': _input_file})
+    menu.add_option(
+        "1", "Run Amber", submit_amber, kwargs={"input_file": _input_file}
+    )
     menu.add_space()
     menu.add_option("i", "Set input file", set_input)
     menu.add_option("t", "Set Temperature", set_temperature)

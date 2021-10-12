@@ -3,9 +3,9 @@ from pathlib import Path
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.amber_command import AmberCommand
-from ichor.submission_script.cp2k_command import CP2KCommand
 from ichor.submission_script.check_manager import (CheckManager, default_check,
                                                    print_completed)
+from ichor.submission_script.cp2k_command import CP2KCommand
 from ichor.submission_script.data_lock import DataLock
 from ichor.submission_script.dlpoly_command import DlpolyCommand
 from ichor.submission_script.ferebus_command import FerebusCommand
@@ -18,6 +18,7 @@ from ichor.submission_script.pandora_command import (PandoraCommand,
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.script_timing_manager import TimingManager
 from ichor.submission_script.submision_script import SubmissionScript
+from ichor.submission_script.tyche_command import TycheCommand
 
 
 def prepend_script_directory(paths):
@@ -88,6 +89,7 @@ SCRIPT_NAMES = ScriptNames(
         "dlpoly": "DLPOLY.sh",
         "dlpoly_gaussian": "ICHOR_DLPOLY_GAUSSIAN.sh",
         "amber": "AMBER.sh",
+        "cp2k": "CP2K.sh",
     }
 )
 
@@ -111,4 +113,5 @@ __all__ = [
     "MorfiCommand",
     "AmberCommand",
     "CP2KCommand",
+    "TycheCommand",
 ]

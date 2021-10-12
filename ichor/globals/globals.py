@@ -10,6 +10,7 @@ from ichor import constants
 from ichor.atoms.atoms import Atoms
 from ichor.common.functools import ntimes_cached_property
 from ichor.common.types import DictList, Version
+from ichor.file_structure import FILE_STRUCTURE
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
@@ -55,10 +56,10 @@ FEREBUS_TYPE                    | str             | executable        | Tells ic
 FEREBUS_VERSION                 | Version         | 7.0               | Current ferebus version                                                                    | Older versions use different training set and config files                                      # todo: reimplement older style for v3
 FEREBUS_LOCATION                | Path            | PROGRAMS/FEREBUS  | Path to ferebus executable                                                                 |
 GAUSSIAN_MEMORY_LIMIT           | str             | 1GB               | Memory limit for runnning Gaussian
-GAUSSIAN_CORE_COUNT             | int             | 2                 | Number of cores to run Gaussian                                                            |
-AIMALL_CORE_COUNT               | int             | 2                 | Number of cores to run AIMAll                                                              |
-FEREBUS_CORE_COUNT              | int             | 4                 | Number of cores to run FEREBUS                                                             |
-DLPOLY_CORE_COUNT               | int             | 1                 | Number of cores to run DLPOLY                                                              |
+GAUSSIAN_NCORES             | int             | 2                 | Number of cores to run Gaussian                                                            |
+AIMALL_NCORES               | int             | 2                 | Number of cores to run AIMAll                                                              |
+FEREBUS_NCORES              | int             | 4                 | Number of cores to run FEREBUS                                                             |
+DLPOLY_NCORES               | int             | 1                 | Number of cores to run DLPOLY                                                              |
 CP2K_CORE_COUNT                 | int             | 8                 | Number of cores to run CP2K                                                                |
 GAUSSIAN_N_TRIES                | int             | 10                | Number of tries to run Gaussian job before giving up                                       | If negative will run infinitely
 AIMALL_N_TRIES                  | int             | 10                | Number of tries to run AIMAll job before giving up                                         | If negative will run infinitely
@@ -186,14 +187,15 @@ class Globals:
     GAUSSIAN_MEMORY_LIMIT: str = "1GB"
 
     # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
-    GAUSSIAN_CORE_COUNT: int = 2
-    AIMALL_CORE_COUNT: int = 2
-    FEREBUS_CORE_COUNT: int = 4
-    DLPOLY_CORE_COUNT: int = 1
+    GAUSSIAN_NCORES: int = 2
+    AIMALL_NCORES: int = 2
+    FEREBUS_NCORES: int = 4
+    DLPOLY_NCORES: int = 1
     CP2K_NCORES: int = 8
     PYSCF_NCORES: int = 2
     MORFI_NCORES: int = 4
     AMBER_NCORES: int = 8
+    TYCHE_NCORES: int = 1
 
     # N TRIES SETTINGS FOR RETRYING TO RUN PROGRAMS
     GAUSSIAN_N_TRIES: int = 10
@@ -261,6 +263,11 @@ class Globals:
     AMBER_TIMESTEP: float = 0.001  # ps
     AMBER_STEPS: int = 100000
     AMBER_LN_GAMMA: float = 0.7
+
+    # TYCHE SETTINGS
+    TYCHE_TEMPERATURE: float = 300  # K
+    TYCHE_STEPS: int = 10000
+    TYCHE_LOCATION: Path = FILE_STRUCTURE / "tyche"
 
     # OPTIMUM ENERGY
     OPTIMUM_ENERGY: float = None

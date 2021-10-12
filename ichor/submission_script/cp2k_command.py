@@ -36,7 +36,7 @@ class CP2KCommand(CommandLine):
         if self.ncores == 1:
             return "cp2k.sopt"
         else:
-            return f"cp2k.popt"
+            return f"cp2k.ssmp"
 
     @classproperty
     def ncores(self) -> int:
