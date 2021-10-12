@@ -1,5 +1,6 @@
 import json
 from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -7,6 +8,7 @@ from ichor.batch_system.node import NodeType
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
 from ichor.common.os import run_cmd
+from ichor.common.types import VarReprMixin
 
 
 class CannotParseJobID(Exception):
@@ -66,6 +68,30 @@ class JobID:
         return f"JobID(Script: {self.script}, Id: {self.id}, Instance: {self.instance})"
 
 
+class Job(VarReprMixin):
+    def __init__(
+        self,
+        id: str,
+        priority: float,
+        name: str,
+        user: str,
+        state: str,
+        start: datetime,
+        queue: str,
+        slots: int,
+        task_id: Optional[str] = None,
+    ):
+        self.id = id
+        self.priority = priority
+        self.name = name
+        self.user = user
+        self.state = state
+        self.start = start
+        self.queue = queue
+        self.slots = slots
+        self.task_id = task_id
+
+
 class BatchSystem(ABC):
     """An abstract base class for batch systems which are the systems used to submit jobs to compute nodes (for example Sun Grid Engine.)"""
 
@@ -100,6 +126,11 @@ class BatchSystem(ABC):
         return job_id
 
     @classmethod
+    @abstractmethod
+    def get_queued_jobs(cls) -> List[Job]:
+        pass
+
+    @classmethod
     def delete(cls, job: JobID):
         """Delete submitted jobs on the batch system."""
         cmd = cls.delete_job_command + [job.id]
@@ -123,7 +154,7 @@ class BatchSystem(ABC):
         pass
 
     @classmethod
-    def delete_job(cls, job_id: JobID) -> None:
+    def delete_job(cls, job_id: JobID) -> str:
         """Delete job submitted to compute node."""
         cmd = [cls.delete_job_command, job_id]
         stdout, _ = run_cmd(cmd)
