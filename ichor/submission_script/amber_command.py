@@ -75,7 +75,8 @@ class AmberCommand(CommandLine):
             f.write("source leaprc.gaff2\n")
             f.write(f"mol = loadmol2 {mol2_file}\n")
             f.write(f"loadamberparams {frcmod_file}\n")
-            f.write(f"saveamberparm mol {prmtop_file} {inpcrd_file}")
+            f.write(f"saveamberparm mol {prmtop_file} {inpcrd_file}\n")
+            f.write(f"quit")
         cmd += f"tleap -f {tleap_script}\n"
         # run amber
         cmd += f"{AmberCommand.command} -O -i {self.mdin_file.absolute()} -o md.out -p {prmtop_file} -c {inpcrd_file} -inf md.info\n"
