@@ -1,4 +1,3 @@
-from main.md.amber import amber_menu
 from ichor.make_sets import make_sets_menu
 from ichor.menu import Menu
 
