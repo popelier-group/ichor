@@ -43,6 +43,8 @@ class MorfiCommand(CommandLine):
         data = self.pandora_command.data
         if self.aimall_command is not None:
             data += self.aimall_command.data
+        if self.point_directory is not None:
+            data += [self.point_directory]
         return data
 
     def command(self) -> str:
@@ -55,9 +57,9 @@ class MorfiCommand(CommandLine):
         if self.aimall_command is not None:
             repr += "\n"
             repr += self.aimall_command.repr(
-                variables[self.pandora_command.ndata :]
+                variables[self.pandora_command.ndata:self.pandora_command.ndata+self.aimall_command.ndata]
             )
             if self.point_directory is not None:
-                ichor_command = ICHORCommand(func="add_dispersion_to_aimall", func_args=[str(self.point_directory)])
+                ichor_command = ICHORCommand(func="add_dispersion_to_aimall", func_args=[str(variables[self.pandora_command.ndata:self.pandora_command.ndata+self.aimall_command.ndata])])
                 repr += f"{ichor_command.repr()}\n"
         return repr
