@@ -27,6 +27,7 @@ class INT(GeometryData, File):
         self.integration_data = None
         self.multipoles_data = None
         self.iqa_data = None
+        self.dispersion_data = None
 
     @property
     def atom(self) -> str:
@@ -63,6 +64,7 @@ class INT(GeometryData, File):
         self.integration_data = {}
         self.multipoles_data = {}
         self.iqa_data = {}
+        self.dispersion_data = {}
         with open(self.path, "r") as f:
             for line in f:
                 """
@@ -475,6 +477,18 @@ class INT(GeometryData, File):
     @property
     def e_intra(self):
         return self.iqa_data["E_IQA_Intra(A)"]
+
+    @property
+    def dispersion(self):
+        if self.dispersion_data is not None and "dispersion" in self.dispersion_data.keys():
+            return self.dispersion_data["dispersion"]
+        raise AttributeError(f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'dispersion")
+
+    @property
+    def iqa_dispersion(self):
+        if self.dispersion_data is not None and "iqa_dispersion" in self.dispersion_data.keys():
+            return self.dispersion_data["iqa_dispersion"]
+        raise AttributeError(f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'iqa_dispersion")
 
     @property
     def multipoles(self):

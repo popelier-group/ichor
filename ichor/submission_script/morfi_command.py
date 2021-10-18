@@ -7,6 +7,7 @@ from ichor.modules import Modules
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.command_line import CommandLine
 from ichor.submission_script.pandora_command import PandoraMorfiCommand
+from ichor.submission_script.ichor_command import ICHORCommand
 
 
 class NoInputs(Exception):
@@ -18,6 +19,7 @@ class MorfiCommand(CommandLine):
         self,
         morfi_input: Path,
         aimall_wfn: Optional[Path] = None,
+        point_directory: Optional[Path] = None,
         atoms: Optional[List[str]] = None,
     ):
         self.pandora_command = PandoraMorfiCommand(morfi_input)
@@ -26,6 +28,7 @@ class MorfiCommand(CommandLine):
             if aimall_wfn is not None
             else None
         )
+        self.point_directory = point_directory
 
     @classproperty
     def modules(self) -> Modules:
@@ -54,4 +57,7 @@ class MorfiCommand(CommandLine):
             repr += self.aimall_command.repr(
                 variables[self.pandora_command.ndata :]
             )
+            if self.point_directory is not None:
+                ichor_command = ICHORCommand(func="add_dispersion_to_aimall", func_args=[str(self.point_directory)])
+                repr += f"{ichor_command.repr()}\n"
         return repr

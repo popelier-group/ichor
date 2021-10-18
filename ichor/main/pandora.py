@@ -109,16 +109,19 @@ def submit_points_directory_to_morfi(
 def submit_morfi(
     morfi_inputs: List[Path],
     aimall_wfns: Optional[List[Path]] = None,
+    point_directories: Optional[List[Path]] = None,
     atoms: Optional[List[str]] = None,
     force: bool = False,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     if aimall_wfns is None:
         aimall_wfns = [None for _ in range(len(morfi_inputs))]
+    if point_directories is None:
+        point_directories = [None for _ in range(len(morfi_inputs))]
     with SubmissionScript(
         SCRIPT_NAMES["pandora"]["morfi"]
     ) as submission_script:
-        for morfi_input, aimall_wfn in zip(morfi_inputs, aimall_wfns):
+        for morfi_input, aimall_wfn, point_directory in zip(morfi_inputs, aimall_wfns, point_directories):
             if (
                 force
                 or not (
@@ -128,7 +131,7 @@ def submit_morfi(
                 ).exists()
             ):
                 submission_script.add_command(
-                    MorfiCommand(morfi_input, aimall_wfn, atoms=atoms)
+                    MorfiCommand(morfi_input, aimall_wfn, point_directory, atoms=atoms)
                 )
 
     if len(submission_script.commands) > 0:
@@ -153,3 +156,13 @@ def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path]]:
                 aimall_wfns.append(point.wfn.path)
 
     return morfi_inputs, aimall_wfns
+
+
+def add_dispersion_to_aimall(point_directory: Path):
+    point = PointDirectory(point_directory)
+    point.read()
+    integration_data = point.pandora.morfi.mout.integration_data
+    for atom, int_ in point.ints.items():
+        dispersion = integration_data[atom]
+        int_.dispersion_data = {'dispersion': dispersion, 'iqa_dispersion': int_.iqa + dispersion}
+        int_.write_json()
