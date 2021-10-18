@@ -102,8 +102,8 @@ def submit_points_directory_to_morfi(
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     points = PointsDirectory(directory)
-    morfi_inputs, aimall_wfns = check_pyscf_wfns(points)
-    return submit_morfi(morfi_inputs, aimall_wfns, atoms=atoms, hold=hold)
+    morfi_inputs, aimall_wfns, point_directories = check_pyscf_wfns(points)
+    return submit_morfi(morfi_inputs, aimall_wfns, point_directories, atoms=atoms, hold=hold)
 
 
 def submit_morfi(
@@ -141,6 +141,7 @@ def submit_morfi(
 def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path]]:
     morfi_inputs = []
     aimall_wfns = []
+    point_directories = []
     for point in points:
         if point.pandora.exists():
             if point.pandora_input.exists():
@@ -154,8 +155,9 @@ def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path]]:
                                 )
                             )
                 aimall_wfns.append(point.wfn.path)
+                point_directories.append(point.path)
 
-    return morfi_inputs, aimall_wfns
+    return morfi_inputs, aimall_wfns, point_directories
 
 
 def add_dispersion_to_aimall(point_directory: Path):

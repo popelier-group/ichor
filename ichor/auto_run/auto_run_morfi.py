@@ -21,6 +21,7 @@ def submit_morfi_job_to_auto_run(
                 MorfiCommand(
                     Path(f"Point{point+1}"),
                     Path(f"Point{point+1}"),
+                    Path(f"Point{point+1}"),
                     atoms.value,
                 )
             )
