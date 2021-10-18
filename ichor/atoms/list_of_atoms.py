@@ -85,15 +85,16 @@ class ListOfAtoms(list):
 
         with open(fname, "w") as f:
             for i, point in enumerate(self[::step]):
-                f.write(f"    {len(point)}\ni = {i}\n")
                 # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
                 if isinstance(point, PointDirectory):
+                    f.write(f"    {len(point.atoms)}\ni = {i}\n")
                     for atom in point.atoms:
                         f.write(
                             f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
                         )
                 # this is used when self is a Trajectory and you are iterating over Atoms instances
                 else:
+                    f.write(f"    {len(point)}\ni = {i}\n")
                     for atom in point:
                         f.write(
                             f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
