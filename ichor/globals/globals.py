@@ -267,7 +267,7 @@ class Globals:
     # TYCHE SETTINGS
     TYCHE_TEMPERATURE: float = 300  # K
     TYCHE_STEPS: int = 10000
-    TYCHE_LOCATION: Path = FILE_STRUCTURE / "tyche"
+    TYCHE_LOCATION: Path = FILE_STRUCTURE["programs"] / "tyche"
 
     # OPTIMUM ENERGY
     OPTIMUM_ENERGY: float = None
