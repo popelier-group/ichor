@@ -44,7 +44,7 @@ class MorfiCommand(CommandLine):
         if self.aimall_command is not None:
             data += self.aimall_command.data
         if self.point_directory is not None:
-            data += [self.point_directory]
+            data += [self.point_directory.absolute()]
         return data
 
     def command(self) -> str:
