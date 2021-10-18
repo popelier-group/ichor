@@ -60,6 +60,6 @@ class MorfiCommand(CommandLine):
                 variables[self.pandora_command.ndata:self.pandora_command.ndata+self.aimall_command.ndata]
             )
             if self.point_directory is not None:
-                ichor_command = ICHORCommand(func="add_dispersion_to_aimall", func_args=[str(variables[self.pandora_command.ndata:self.pandora_command.ndata+self.aimall_command.ndata])])
+                ichor_command = ICHORCommand(func="add_dispersion_to_aimall", func_args=[str(variables[self.pandora_command.ndata+self.aimall_command.ndata])])
                 repr += f"{ichor_command.repr()}\n"
         return repr

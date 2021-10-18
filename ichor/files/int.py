@@ -431,6 +431,8 @@ class INT(GeometryData, File):
             self.integration_data = int_data["integration"]
             self.multipoles_data = int_data["multipoles"]
             self.iqa_data = int_data["iqa_data"]
+            if "dispersion_data" in int_data.keys():
+                self.dispersion_data = int_data["dispersion_data"]
 
     @property
     def backup_path(self):
@@ -449,6 +451,8 @@ class INT(GeometryData, File):
             "multipoles": self.multipoles_data,
             "iqa_data": self.iqa_data,
         }
+        if self.dispersion_data is not None:
+            int_data["dispersion_data"] = self.dispersion_data
 
         with open(self.path, "w") as f:
             json.dump(int_data, f)
