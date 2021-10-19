@@ -24,6 +24,9 @@ class WFN(GeometryFile, GeometryData, File):
         self.nuclei: int = 0
         self.method: str = "HF"
 
+        self.energy: float = 0.0
+        self.virial: float = 0.0
+
     @buildermethod
     def _read_file(self, only_header=False):
         """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
@@ -53,8 +56,8 @@ class WFN(GeometryFile, GeometryData, File):
                 if "CENTRE ASSIGNMENTS" in line:
                     self.atoms.to_angstroms()
                 if "TOTAL ENERGY" in line:
-                    self.data.energy = float(line.split()[3])
-                    self.data.virial = float(line.split()[-1])
+                    self.energy = float(line.split()[3])
+                    self.virial = float(line.split()[-1])
 
     @classproperty
     def filetype(cls) -> str:
