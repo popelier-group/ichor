@@ -1,8 +1,6 @@
 from pathlib import Path
 
 from ichor.analysis import analysis_menu
-from ichor.main.aimall import submit_points_directory_to_aimall
-from ichor.main.gaussian import submit_points_directory_to_gaussian
 from ichor.main.make_models import make_models_menu
 from ichor.main.options_menu import options_menu
 from ichor.main.qcp import submit_qcp
@@ -17,6 +15,7 @@ _points_directory_path = None
 
 
 def _points_directory_menu_refresh(menu):
+    from ichor.auto_run.standard_auto_run import auto_run_qct
     global _points_directory_path
     menu.clear_options()
     menu.add_option(
@@ -37,6 +36,13 @@ def _points_directory_menu_refresh(menu):
         "3",
         "Make Models",
         make_models_menu,
+        kwargs={"directory": _points_directory_path},
+    )
+    menu.add_space()
+    menu.add_option(
+        "a",
+        f"Auto-Run {QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM().name}",
+        auto_run_qct,
         kwargs={"directory": _points_directory_path},
     )
     menu.add_final_options()

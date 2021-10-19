@@ -2,7 +2,8 @@
 
 
 from enum import Enum
-from typing import Any, Callable, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence, List
+from pathlib import Path
 
 from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
@@ -87,75 +88,8 @@ class IterStep:
             return wait_for_job
 
 
-QCP = QUANTUM_CHEMISTRY_PROGRAM()
-if QCP is QuantumChemistryProgram.Gaussian:
-    ichor_qcp_function = submit_ichor_gaussian_command_to_auto_run
-    qcp_function = submit_gaussian_job_to_auto_run
-elif QCP is QuantumChemistryProgram.PySCF:
-    ichor_qcp_function = submit_ichor_pyscf_command_to_auto_run
-    qcp_function = submit_pyscf_job_to_auto_run
-else:
-    raise ValueError(
-        f"Cannot run Quantum Chemistry Program '{QCP.name}' in auto-run"
-    )
-
-ichor_qcp_step = IterStep(
-    ichor_qcp_function,
-    IterUsage.All,
-    [IterArgs.TrainingSetLocation],
-)
-qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints])
-
-QCTP = QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
-if QCTP is QuantumChemicalTopologyProgram.AIMAll:
-    ichor_qct_function = submit_ichor_aimall_command_to_auto_run
-    qct_function = submit_aimall_job_to_auto_run
-elif QCTP is QuantumChemicalTopologyProgram.Morfi:
-    ichor_qct_function = submit_ichor_morfi_command_to_auto_run
-    qct_function = submit_morfi_job_to_auto_run
-else:
-    raise ValueError(
-        f"Cannot run Quantum Chemical Topology Program '{QCTP.name}' in auto-run"
-    )
-
-ichor_qct_step = IterStep(
-    ichor_qct_function,
-    IterUsage.All,
-    [IterArgs.TrainingSetLocation, IterArgs.Atoms],
-)
-
-qct_step = IterStep(
-    qct_function,
-    IterUsage.All,
-    [IterArgs.nPoints, IterArgs.Atoms],
-)
-
-# order in which to submit jobs for each of the adaptive sampling iterations.
-func_order = [
-    ichor_qcp_step,
-    qcp_step,
-    ichor_qct_step,
-    qct_step,
-    IterStep(
-        make_models,
-        IterUsage.All,
-        [IterArgs.TrainingSetLocation, IterArgs.Atoms],
-    ),
-    IterStep(
-        submit_ferebus_job_to_auto_run,
-        IterUsage.All,
-        [IterArgs.FerebusDirectory, IterArgs.Atoms],
-    ),
-    IterStep(
-        submit_ichor_active_learning_job_to_auto_run,
-        IterUsage.AllButLast,
-        [IterArgs.ModelLocation, IterArgs.SamplePoolLocation],
-    ),
-]
-
-
-def next_iter(
-    wait_for_job: Optional[JobID], state: IterState = IterState.Standard
+def submit_auto_run_iter(
+    func_order: List[IterStep], wait_for_job: Optional[JobID] = None, state: IterState = IterState.Standard
 ) -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
@@ -204,28 +138,103 @@ def next_iter(
     else:
         IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
-    # modify the uid for dropincompute as SGE is 32-bit
+    # modify the uid for drop-n-compute as SGE is 32-bit
     modify_id = truncate(
         GLOBALS.UID.int, nbits=32
     )  # only used for drop-n-compute
-    # todo: think about overflow
+    if MACHINE.submit_type is SubmitType.DropCompute and modify_id >= 2**32 - len(func_order): # overflow protection
+        modify_id -= len(func_order)
 
-    # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
-    for iter_step in func_order:
-
-        # append the modified id to the submission script name as this is how drop-in-compute holds jobs
-        if MACHINE.submit_type is SubmitType.DropCompute:
-            modify = f"+{modify_id}"
+    with DataLock():
+        # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
+        for iter_step in func_order:
+            # append the modified id to the submission script name as this is how drop-in-compute holds jobs
+            if MACHINE.submit_type is SubmitType.DropCompute:
+                modify = f"+{modify_id}"
+                if job_id is not None:
+                    modify += f"+hold_{modify_id - 1}"  # hold for the previous job (whose job id is one less than this job)
+                SCRIPT_NAMES.modify = modify
+                modify_id += 1
+            job_id = iter_step.run(job_id, state)
             if job_id is not None:
-                modify += f"+hold_{modify_id - 1}"  # hold for the previous job (whose job id is one less than this job)
-            SCRIPT_NAMES.modify = modify
-            modify_id += 1
-        job_id = iter_step.run(job_id, state)
-        if job_id is not None:
-            print(f"Submitted: {job_id}")
+                print(f"Submitted: {job_id}")
 
     # always return the job_id at the end because we need to hold next jobs
     return job_id
+
+
+def get_qcp_steps():
+    QCP = QUANTUM_CHEMISTRY_PROGRAM()
+    if QCP is QuantumChemistryProgram.Gaussian:
+        ichor_qcp_function = submit_ichor_gaussian_command_to_auto_run
+        qcp_function = submit_gaussian_job_to_auto_run
+    elif QCP is QuantumChemistryProgram.PySCF:
+        ichor_qcp_function = submit_ichor_pyscf_command_to_auto_run
+        qcp_function = submit_pyscf_job_to_auto_run
+    else:
+        raise ValueError(
+            f"Cannot run Quantum Chemistry Program '{QCP.name}' in auto-run"
+        )
+
+    ichor_qcp_step = IterStep(
+        ichor_qcp_function,
+        IterUsage.All,
+        [IterArgs.TrainingSetLocation],
+    )
+    qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints])
+
+    return ichor_qcp_step, qcp_step
+
+
+def get_qct_steps():
+    QCTP = QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+    if QCTP is QuantumChemicalTopologyProgram.AIMAll:
+        ichor_qct_function = submit_ichor_aimall_command_to_auto_run
+        qct_function = submit_aimall_job_to_auto_run
+    elif QCTP is QuantumChemicalTopologyProgram.Morfi:
+        ichor_qct_function = submit_ichor_morfi_command_to_auto_run
+        qct_function = submit_morfi_job_to_auto_run
+    else:
+        raise ValueError(
+            f"Cannot run Quantum Chemical Topology Program '{QCTP.name}' in auto-run"
+        )
+
+    ichor_qct_step = IterStep(
+        ichor_qct_function,
+        IterUsage.All,
+        [IterArgs.TrainingSetLocation, IterArgs.Atoms],
+    )
+
+    qct_step = IterStep(
+        qct_function,
+        IterUsage.All,
+        [IterArgs.nPoints, IterArgs.Atoms],
+    )
+
+    return ichor_qct_step, qct_step
+
+
+def get_func_order():
+    # order in which to submit jobs for each of the adaptive sampling iterations.
+    return [
+        *get_qcp_steps(),
+        *get_qct_steps(),
+        IterStep(
+            make_models,
+            IterUsage.All,
+            [IterArgs.TrainingSetLocation, IterArgs.Atoms],
+        ),
+        IterStep(
+            submit_ferebus_job_to_auto_run,
+            IterUsage.All,
+            [IterArgs.FerebusDirectory, IterArgs.Atoms],
+        ),
+        IterStep(
+            submit_ichor_active_learning_job_to_auto_run,
+            IterUsage.AllButLast,
+            [IterArgs.ModelLocation, IterArgs.SamplePoolLocation],
+        ),
+    ]
 
 
 def auto_run() -> JobID:
@@ -248,12 +257,14 @@ def auto_run() -> JobID:
         IterState.Last
     ]  # The IterState.Last informs the active learning IterStep to not run on the final iteration as it has IterUsage.AllButLast
 
+    func_order = get_func_order()
+
     job_id = None
     with DataLock():
         for i, iter_state in enumerate(iterations):
             print(f"Submitting Iter: {i+1}")
             # initially job_id is none, then next_iter returns the job id of the submitted job. The next job has to wait for the previous job that was submitted.
-            job_id = next_iter(job_id, iter_state)
+            job_id = submit_auto_run_iter(func_order, job_id, iter_state)
 
             if MACHINE.submit_type is SubmitType.DropCompute:
                 break  # Only submit the first iteration for drop-n-compute
@@ -272,7 +283,7 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
         if current_iteration == GLOBALS.N_ITERATIONS
         else IterState.Standard
     )
-    return next_iter(None, iter_state)
+    return submit_auto_run_iter(get_func_order(), None, iter_state)
 
 
 def rerun_from_failed() -> Optional[JobID]:
@@ -288,3 +299,17 @@ def rerun_from_failed() -> Optional[JobID]:
         GLOBALS.save_to_config()
         remove(FILE_STRUCTURE["counter"])
         return auto_run()
+
+
+def auto_run_qct(directory: Path):
+    qct_func_order = [
+        *get_qcp_steps(),
+        *get_qct_steps(),
+    ]
+    points = PointsDirectory(directory)
+    IterArgs.nPoints = len(points)
+    IterArgs.TrainingSetLocation = directory
+    IterArgs.Atoms = points[0].atoms.names
+
+    submit_auto_run_iter(qct_func_order)
+
