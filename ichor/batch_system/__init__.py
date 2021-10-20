@@ -1,6 +1,6 @@
 import multiprocessing as mp
 
-from ichor.batch_system.batch_system import JobID, Job
+from ichor.batch_system.batch_system import Job, JobID
 from ichor.batch_system.local import LocalBatchSystem
 from ichor.batch_system.node import NodeType
 from ichor.batch_system.parallel_environment import ParallelEnvironments

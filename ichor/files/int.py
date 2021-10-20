@@ -484,15 +484,25 @@ class INT(GeometryData, File):
 
     @property
     def dispersion(self):
-        if self.dispersion_data is not None and "dispersion" in self.dispersion_data.keys():
+        if (
+            self.dispersion_data is not None
+            and "dispersion" in self.dispersion_data.keys()
+        ):
             return self.dispersion_data["dispersion"]
-        raise AttributeError(f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'dispersion")
+        raise AttributeError(
+            f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'dispersion"
+        )
 
     @property
     def iqa_dispersion(self):
-        if self.dispersion_data is not None and "iqa_dispersion" in self.dispersion_data.keys():
+        if (
+            self.dispersion_data is not None
+            and "iqa_dispersion" in self.dispersion_data.keys()
+        ):
             return self.dispersion_data["iqa_dispersion"]
-        raise AttributeError(f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'iqa_dispersion")
+        raise AttributeError(
+            f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'iqa_dispersion"
+        )
 
     @property
     def multipoles(self):

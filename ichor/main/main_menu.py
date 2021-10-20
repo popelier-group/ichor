@@ -16,6 +16,7 @@ _points_directory_path = None
 
 def _points_directory_menu_refresh(menu):
     from ichor.auto_run.standard_auto_run import auto_run_qct
+
     global _points_directory_path
     menu.clear_options()
     menu.add_option(

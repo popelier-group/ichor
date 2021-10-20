@@ -6,8 +6,8 @@ from ichor.globals import GLOBALS
 from ichor.modules import Modules
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.command_line import CommandLine
-from ichor.submission_script.pandora_command import PandoraMorfiCommand
 from ichor.submission_script.ichor_command import ICHORCommand
+from ichor.submission_script.pandora_command import PandoraMorfiCommand
 
 
 class NoInputs(Exception):
@@ -57,9 +57,22 @@ class MorfiCommand(CommandLine):
         if self.aimall_command is not None:
             repr += "\n"
             repr += self.aimall_command.repr(
-                variables[self.pandora_command.ndata:self.pandora_command.ndata+self.aimall_command.ndata]
+                variables[
+                    self.pandora_command.ndata : self.pandora_command.ndata
+                    + self.aimall_command.ndata
+                ]
             )
             if self.point_directory is not None:
-                ichor_command = ICHORCommand(func="add_dispersion_to_aimall", func_args=[str(variables[self.pandora_command.ndata+self.aimall_command.ndata])])
+                ichor_command = ICHORCommand(
+                    func="add_dispersion_to_aimall",
+                    func_args=[
+                        str(
+                            variables[
+                                self.pandora_command.ndata
+                                + self.aimall_command.ndata
+                            ]
+                        )
+                    ],
+                )
                 repr += f"{ichor_command.repr()}\n"
         return repr
