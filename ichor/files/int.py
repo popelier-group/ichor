@@ -25,10 +25,10 @@ class INT(GeometryData, File):
 
         self.parent = parent
 
-        self.integration_data = {}
-        self.iqa_data = {}
-        self.dispersion_data = {}
-        self.raw_multipoles_data = {}
+        self.integration_data = None
+        self.iqa_data = None
+        self.dispersion_data = None
+        self.raw_multipoles_data = None
 
     @property
     def atom(self) -> str:
@@ -62,6 +62,11 @@ class INT(GeometryData, File):
     @buildermethod
     def read_int(self):
         """Method used to parse the AIMAll '.int' file"""
+
+        self.integration_data = {}
+        self.iqa_data = {}
+        self.dispersion_data = {}
+        self.raw_multipoles_data = {}
 
         with open(self.path, "r") as f:
             for line in f:
@@ -148,12 +153,6 @@ class INT(GeometryData, File):
             data[multipole_name] = getattr(self, multipole_name)
 
         return data
-
-    @multipoles_data.setter
-    def multipoles_data(self, data: dict):
-
-        for multipole_name in data.keys():
-            setattr(self, multipole_name, data[multipole_name])
 
     def rotate_multipoles(self):
         """
