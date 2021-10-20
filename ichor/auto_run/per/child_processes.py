@@ -2,12 +2,11 @@ import json
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.common.io import pushd
-from ichor.file_structure import FILE_STRUCTURE
-from ichor.main.queue import delete_jobs
 from ichor.auto_run import rerun_from_failed
 from ichor.common.daemon import Daemon
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, pushd
+from ichor.file_structure import FILE_STRUCTURE
+from ichor.main.queue import delete_jobs
 
 
 def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
@@ -49,7 +48,9 @@ class ReRunDaemon(Daemon):
         self.stop()
 
 
-def rerun_failed_child_process(child_processes: Optional[List[Path]] = None,) -> None:
+def rerun_failed_child_process(
+    child_processes: Optional[List[Path]] = None,
+) -> None:
     if child_processes is None:
         child_processes = find_child_processes_recursively()
     for child_process in child_processes:

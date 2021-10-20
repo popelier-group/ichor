@@ -73,6 +73,9 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
         else:
             return AtomData(self.atoms[atom])
 
+    def get_property(self, item: str):
+        return getattr(self.ints, item)
+
     def __getattr__(self, item):
         try:
             return getattr(self.ints, item)

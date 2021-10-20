@@ -11,10 +11,11 @@ from ichor.common.str import get_digits
 from ichor.files import PointsDirectory
 from ichor.logging import logger
 from ichor.menu import Menu
+from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                       QuantumChemicalTopologyProgram)
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter
-from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM, QuantumChemicalTopologyProgram
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -74,10 +75,12 @@ class ModelType(Enum):
 
 default_model_type = {
     QuantumChemicalTopologyProgram.AIMAll: [ModelType.iqa],
-    QuantumChemicalTopologyProgram.Morfi: [ModelType.iqa_dispersion]
+    QuantumChemicalTopologyProgram.Morfi: [ModelType.iqa_dispersion],
 }
 
-model_types: List[ModelType] = default_model_type[QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()]
+model_types: List[ModelType] = default_model_type[
+    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+]
 atom_names: List[str] = []
 
 
@@ -302,7 +305,9 @@ def move_models(model_dir: Optional[Path] = None):
             cp(d, model_log)
 
 
-def create_ferebus_directories_and_submit(hold: Optional[JobID] = None) -> Optional[JobID]:
+def create_ferebus_directories_and_submit(
+    hold: Optional[JobID] = None,
+) -> Optional[JobID]:
     """Makes the training set file in a separate directory for each topological atom. Calls `make_ferebus_script` which writes out the ferebus
     job script that needed to run on compute nodes and submits to queue.
 

@@ -1,19 +1,16 @@
 import os
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import List, Union
 
 from ichor.batch_system.batch_system import (BatchSystem, CannotParseJobID,
-                                             JobID, Job)
+                                             Job, JobID)
 from ichor.batch_system.node import NodeType
 from ichor.common.functools import classproperty
-
-from ichor.common.types import EnumStrList
-
 from ichor.common.os import run_cmd
 from ichor.common.str import split_by
-
-from datetime import datetime
+from ichor.common.types import EnumStrList
 
 
 class JobStatus(EnumStrList):
@@ -23,7 +20,18 @@ class JobStatus(EnumStrList):
     Transferring = ["t"]
     Resubmit = ["Rr", "Rt"]
     Suspended = ["s"]
-    Deleting = ["dr", "dt", "dRr", "dRt", "ds", "dS", "dT", "dRs", "dRS", "dRT"]
+    Deleting = [
+        "dr",
+        "dt",
+        "dRr",
+        "dRt",
+        "ds",
+        "dS",
+        "dT",
+        "dRs",
+        "dRS",
+        "dRT",
+    ]
     Error = ["Eqw", "Ehqw", "EhRqw"]
 
 
@@ -75,24 +83,74 @@ class SunGridEngine(BatchSystem):
         jobs = []
         # job-ID  prior   name       user         state submit/start at     queue                          slots ja-task-ID
         # -----------------------------------------------------------------------------------------------------------------
-        for line in stdout.split('\n')[2:]:
-            job_id, priority, name, user, state, start, queue, slots, tasks = split_by(line, [8, 8, 11, 13, 6, 20, 31, 6], strip=True, return_remainder=True)
+        for line in stdout.split("\n")[2:]:
+            (
+                job_id,
+                priority,
+                name,
+                user,
+                state,
+                start,
+                queue,
+                slots,
+                tasks,
+            ) = split_by(
+                line,
+                [8, 8, 11, 13, 6, 20, 31, 6],
+                strip=True,
+                return_remainder=True,
+            )
             priority = float(priority)
             state = JobStatus(state).name
             start = datetime.strptime(start, "%d/%m/%Y %H:%M:%S")
             slots = int(slots)
             if tasks:
                 if "-" in tasks:
-                    s, f = tasks.split(':')[0].split('-')
+                    s, f = tasks.split(":")[0].split("-")
                     s, f = int(s), int(f)
-                    jobs += [Job(job_id, priority, name, user, state, start, queue, slots, task_id=str(i)) for i in range(s, f)]
+                    jobs += [
+                        Job(
+                            job_id,
+                            priority,
+                            name,
+                            user,
+                            state,
+                            start,
+                            queue,
+                            slots,
+                            task_id=str(i),
+                        )
+                        for i in range(s, f)
+                    ]
                 else:
-                    jobs += [Job(job_id, priority, name, user, state, start, queue, slots, task_id=tasks)]
+                    jobs += [
+                        Job(
+                            job_id,
+                            priority,
+                            name,
+                            user,
+                            state,
+                            start,
+                            queue,
+                            slots,
+                            task_id=tasks,
+                        )
+                    ]
             else:
-                jobs += [Job(job_id, priority, name, user, state, start, queue, slots, task_id="1")]
+                jobs += [
+                    Job(
+                        job_id,
+                        priority,
+                        name,
+                        user,
+                        state,
+                        start,
+                        queue,
+                        slots,
+                        task_id="1",
+                    )
+                ]
         return jobs
-
-
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:

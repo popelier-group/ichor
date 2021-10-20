@@ -139,7 +139,9 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
         "e", "Edit Child Process List", edit_list_of_child_processes
     )
     menu.add_space()
-    menu.add_option("rerun", "Rerun failed auto-runs", rerun_failed_child_process)
+    menu.add_option(
+        "rerun", "Rerun failed auto-runs", rerun_failed_child_process
+    )
     menu.add_option(
         "q", "Queue Options For Child Processes", child_process_queue_menu
     )

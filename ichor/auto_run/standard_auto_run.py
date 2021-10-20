@@ -2,8 +2,8 @@
 
 
 from enum import Enum
-from typing import Any, Callable, Optional, Sequence, List
 from pathlib import Path
+from typing import Any, Callable, List, Optional, Sequence
 
 from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
@@ -25,12 +25,12 @@ from ichor.drop_compute import DROP_COMPUTE_LOCATION
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import PointsDirectory, Trajectory
 from ichor.machine import MACHINE, SubmitType
+from ichor.main.queue import get_current_jobs
 from ichor.make_sets import make_sets_npoints
 from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
-from ichor.main.queue import get_current_jobs
 
 
 class AutoRunAlreadyRunning(Exception):
@@ -89,7 +89,9 @@ class IterStep:
 
 
 def submit_auto_run_iter(
-    func_order: List[IterStep], wait_for_job: Optional[JobID] = None, state: IterState = IterState.Standard
+    func_order: List[IterStep],
+    wait_for_job: Optional[JobID] = None,
+    state: IterState = IterState.Standard,
 ) -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
@@ -142,7 +144,10 @@ def submit_auto_run_iter(
     modify_id = truncate(
         GLOBALS.UID.int, nbits=32
     )  # only used for drop-n-compute
-    if MACHINE.submit_type is SubmitType.DropCompute and modify_id >= 2**32 - len(func_order): # overflow protection
+    if (
+        MACHINE.submit_type is SubmitType.DropCompute
+        and modify_id >= 2 ** 32 - len(func_order)
+    ):  # overflow protection
         modify_id -= len(func_order)
 
     with DataLock():
@@ -291,10 +296,13 @@ def rerun_from_failed() -> Optional[JobID]:
 
     current_iteration = 0
     if FILE_STRUCTURE["counter"].exists():
-        with open(FILE_STRUCTURE["counter"], 'r') as f:
+        with open(FILE_STRUCTURE["counter"], "r") as f:
             current_iteration = int(next(f))
 
-    if current_iteration < GLOBALS.N_ITERATIONS and len(get_current_jobs()) == 0:
+    if (
+        current_iteration < GLOBALS.N_ITERATIONS
+        and len(get_current_jobs()) == 0
+    ):
         GLOBALS.N_ITERATIONS = GLOBALS.N_ITERATIONS - current_iteration
         GLOBALS.save_to_config()
         remove(FILE_STRUCTURE["counter"])
@@ -312,4 +320,3 @@ def auto_run_qct(directory: Path):
     IterArgs.Atoms = points[0].atoms.names
 
     submit_auto_run_iter(qct_func_order)
-

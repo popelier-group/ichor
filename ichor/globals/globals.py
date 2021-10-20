@@ -283,7 +283,9 @@ class Globals:
     INTEGRATION_ERROR_THRESHOLD: float = 0.001
 
     # Activate Warnings when making models
-    LOG_WARNINGS: bool = False  # Gets set in create_ferebus_directories_and_submit
+    LOG_WARNINGS: bool = (
+        False  # Gets set in create_ferebus_directories_and_submit
+    )
 
     OS: OS = OS.Linux
 
