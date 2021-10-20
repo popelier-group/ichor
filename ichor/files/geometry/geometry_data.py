@@ -24,6 +24,7 @@ class GeometryData(ABC):
             raise PropertyNotFound(f"Property {item} not found")
 
     def __getattr__(self, item: str) -> Any:
+        item = item.replace('+', '_').replace('-', '_')  # attributes cannot have '+' or '-' so must be replaced with underscore
         if item in dir(self):
             return super().__getattribute__(item)
         for var, inst in self.__dict__.items():

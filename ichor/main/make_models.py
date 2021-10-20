@@ -56,7 +56,7 @@ class ModelType(Enum):
     q43s = "q43s"
     q44c = "q44c"
     q44s = "q44s"
-    iqa_dispersion = "iqa_dispersion"
+    iqa_dispersion = "iqa+dispersion"
     dispersion = "dispersion"
 
     @classmethod
