@@ -214,6 +214,7 @@ class ListOfAtoms(list):
 
                     # this usually iterates over Atoms instances that are stored in a ListofAtoms instance and only adds the information for the
                     # specified atom. Thus AtomView is essentially a list of Atom instances for only one atom
+                    # also iterates over PointDirectory instances because PointsDirectory subclasses from ListofAtoms
                     for element in parent:
                         a = element[atom]
                         self.append(a)
