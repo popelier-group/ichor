@@ -67,7 +67,7 @@ class INTs(Directory, dict):
         """Moves original AIMALL files (which when parsed were converted to .int.bak) to .int files, deleting the json files which
         were written out as .int"""
         for atom, int_file in self.items():
-            int_file.revert_from_backup()
+            int_file.revert_backup()
 
     def __getattr__(self, item):
         """
