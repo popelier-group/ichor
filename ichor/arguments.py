@@ -75,6 +75,10 @@ external_functions = [
 external_functions = {ef.name: ef for ef in external_functions}
 
 
+class UnknownExternalFunction(Exception):
+    pass
+
+
 class Arguments:
     """Used to parse command line arguments that are given to ICHOR. These arguments are given using `-` or `--` and read with argparse."""
 
@@ -138,13 +142,10 @@ class Arguments:
                     func=Arguments.call_external_function, args=func_args
                 )
             else:
-                print(f"{func} not in allowed functions:")
-                formatted_functions = [
-                    str(f) for f in allowed_functions.split(",")
-                ]
-                formatted_functions = ", ".join(formatted_functions)
-                print(f"{formatted_functions}")
-                sys.exit(0)
+                known_function_names = [f' - {function_name}' for function_name in external_functions.keys()]
+                known_functions = '\n'.join(known_function_names)
+                message = f"Unknown external function: {func}\nKnown external functions:\n{known_functions}"
+                raise UnknownExternalFunction(message)
 
         if args.uid:
             Arguments.uid = args.uid
