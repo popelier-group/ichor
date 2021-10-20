@@ -49,12 +49,18 @@ external_functions = [
     ExternalFunction(
         "ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"
     ),
+    ExternalFunction(
+        "ichor.main.pandora", "submit_points_directory_to_pyscf"
+    ),
+    ExternalFunction(
+        "ichor.main.pandora", "submit_points_directory_to_morfi"
+    ),
     ExternalFunction("ichor.main.gaussian", "rerun_gaussian"),
     ExternalFunction("ichor.main.gaussian", "scrub_gaussian"),
     ExternalFunction("ichor.main.aimall", "rerun_aimall"),
     ExternalFunction("ichor.main.aimall", "scrub_aimall"),
-    ExternalFunction("ichor.main.submit_wfns", "submit_wfns"),
-    ExternalFunction("ichor.main.submit_wfns", "check_aimall_output"),
+    ExternalFunction("ichor.main.aimall", "submit_points_directory_to_aimall"),
+    ExternalFunction("ichor.main.aimall", "check_aimall_output"),
     ExternalFunction("ichor.make_sets", "make_sets"),
     ExternalFunction("ichor.submission_script", "print_completed"),
     ExternalFunction(
