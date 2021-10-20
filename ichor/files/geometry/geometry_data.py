@@ -24,6 +24,8 @@ class GeometryData(ABC):
             raise PropertyNotFound(f"Property {item} not found")
 
     def __getattr__(self, item: str) -> Any:
+        if item in dir(self):
+            return super().__getattribute__(item)
         for var, inst in self.__dict__.items():
             if isinstance(inst, dict) and item in inst.keys():
                 return inst[item]

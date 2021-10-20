@@ -447,8 +447,9 @@ class INT(GeometryData, File):
         self.move(self.backup_path)
 
     def revert_backup(self):
-        """move the backup path to the int file"""
-        move(self.backup_path, self.path)
+        """Move the original .int file (which is now stored as *.int.bak) to its original path *.int"""
+        if self.backup_path.exists():
+            move(self.backup_path, self.path)
 
     def write_json(self):
         """Write the .int file in json format that only contains the important information that ICHOR needs for later steps. This speeds up reading times
@@ -482,6 +483,7 @@ class INT(GeometryData, File):
     @property
     def iqa(self):
         """Returns the IQA energy of the topological atom that was calculated for this topological atom (since 1 .int file is written for each topological atom)."""
+        # print('here')
         return self.eiqa
 
     @property
@@ -491,7 +493,7 @@ class INT(GeometryData, File):
     def get_dispersion(self) -> Optional[float]:
         from ichor.files.pandora import PandoraDirectory
 
-        pandora_path = self.path.parent / PandoraDirectory.dirname
+        pandora_path = self.path.parent.parent / PandoraDirectory.dirname
         if pandora_path.exists():
             pandora_dir = PandoraDirectory(pandora_path)
             if pandora_dir.morfi.mout.exists():
@@ -550,7 +552,3 @@ class INT(GeometryData, File):
     def dipole(self):
         """Returns the magnitude of the dipole moment of the topological atom."""
         return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
-
-    def revert_backup(self):
-        """Move the original .int file (which is now stored as *.int.bak) to its original path *.int"""
-        move(self.backup_path, self.path)
