@@ -25,10 +25,10 @@ class INT(GeometryData, File):
 
         self.parent = parent
 
-        self.integration_data = None
-        self.multipoles_data = None
-        self.iqa_data = None
-        self.dispersion_data = None
+        self.integration_data = {}
+        self.iqa_data = {}
+        self.dispersion_data = {}
+        self.raw_multipoles_data = {}
 
     @property
     def atom(self) -> str:
@@ -62,10 +62,7 @@ class INT(GeometryData, File):
     @buildermethod
     def read_int(self):
         """Method used to parse the AIMAll '.int' file"""
-        self.integration_data = {}
-        self.multipoles_data = {}
-        self.iqa_data = {}
-        self.dispersion_data = {}
+
         with open(self.path, "r") as f:
             for line in f:
                 """
@@ -115,7 +112,7 @@ class INT(GeometryData, File):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                self.multipoles_data[
+                                self.raw_multipoles_data[
                                     multipole.lower()
                                 ] = float(tokens[-1])
                             except ValueError:
@@ -141,12 +138,22 @@ class INT(GeometryData, File):
                         line = next(f)
 
         if self.parent:
-
             self.rotate_multipoles()
 
-    def delete(self):
-        """Delete the .int file from disk."""
-        self.path.unlink()
+    @property
+    def multipoles_data(self) -> dict:
+
+        data = {}
+        for multipole_name in constants.multipole_names:
+            data[multipole_name] = getattr(self, multipole_name)
+
+        return data
+
+    @multipoles_data.setter
+    def multipoles_data(self, data: dict):
+
+        for multipole_name in data.keys():
+            setattr(self, multipole_name, data[multipole_name])
 
     def rotate_multipoles(self):
         """
@@ -200,9 +207,11 @@ class INT(GeometryData, File):
     # monopole moments (point charges) do not need to be rotated because they are symmetric
 
     def rotate_dipole(self):
-        """Rotates dipole moment from global cartesian to local cartesian"""
+        """Rotates dipole moment from global cartesian to local cartesian. Attributes like self.q11c, self.q11s, etc. are not
+        explicitly defined here, but they can be accessed because of the GeometryData __getattr__ implementation, which allows
+        accessing dictionary keys as if they were attributes."""
         # Global cartesian dipole moment d is a simple rearrangement of the spherical form
-        d = np.array([self.q11c, self.q11s, self.q10])
+        d = np.array([self.q11c, self.q11s, self.q10])  # these can be accessed like this because of GeometryData __getattr__ method
 
         # Rotation of 1D cartesian tensor from global to local frame
         rotated_d = np.einsum("ia,a->i", self.C, d)
@@ -552,3 +561,7 @@ class INT(GeometryData, File):
     def dipole(self):
         """Returns the magnitude of the dipole moment of the topological atom."""
         return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
+
+    def delete(self):
+        """Delete the .int file from disk."""
+        self.path.unlink()
