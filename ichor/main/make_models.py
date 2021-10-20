@@ -73,9 +73,9 @@ class ModelType(Enum):
         raise ValueError(f"No ModelType {ty}")
 
     @classmethod
-    def __getitem__(cls, item):
+    def get(cls, item):
         item = item.replace('+', '_').replace('-', '_')
-        return super().__getitem__(item)
+        return cls[item]
 
 
 default_model_type = {
@@ -143,9 +143,9 @@ def select_model_type():
                 if ans == "multipoles":
                     for multipole in constants.multipole_names:
                         if multipole in model_type_list:
-                            toggle_model_type(ModelType[multipole])
+                            toggle_model_type(ModelType.get(multipole))
                 else:
-                    toggle_model_type(ModelType[ans])
+                    toggle_model_type(ModelType.get(ans))
             elif ans in ["c", "clear"]:
                 model_types.clear()
     models_selected = True
