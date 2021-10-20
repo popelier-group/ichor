@@ -72,6 +72,10 @@ class ModelType(Enum):
                 return ity
         raise ValueError(f"No ModelType {ty}")
 
+    def __getitem__(self, item):
+        item = item.replace('+', '_').replace('-', '_')
+        return super().__getitem__(item)
+
 
 default_model_type = {
     QuantumChemicalTopologyProgram.AIMAll: [ModelType.iqa],
