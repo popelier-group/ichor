@@ -52,11 +52,9 @@ def revert_int_bak_menu():
             revert_point_directories,
             {
                 "paths": [
-                    FILE_STRUCTURE[
-                        "training_set",
-                        FILE_STRUCTURE["sample_pool"],
-                        FILE_STRUCTURE["validation_set"],
-                    ]
+                    FILE_STRUCTURE["training_set"],
+                    FILE_STRUCTURE["sample_pool"],
+                    FILE_STRUCTURE["validation_set"],
                 ]
             },
         )
