@@ -44,7 +44,8 @@ external_functions = [
     ExternalFunction("ichor.logging", "log_time"),
     ExternalFunction("ichor.main.active_learning", "active_learning"),
     ExternalFunction("ichor.main.collate_log", "collate_model_log"),
-    ExternalFunction("ichor.main.make_models", "make_models, move_models"),
+    ExternalFunction("ichor.main.make_models", "make_models"),
+    ExternalFunction("ichor.main.make_models", "move_models"),
     ExternalFunction(
         "ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"
     ),
