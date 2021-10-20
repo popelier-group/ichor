@@ -3,7 +3,8 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 auto_run_per_atom_per_property,
                                 auto_run_per_property,
                                 delete_child_process_jobs,
-                                find_child_processes_recursively)
+                                find_child_processes_recursively,
+                                rerun_failed_child_process)
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
 
