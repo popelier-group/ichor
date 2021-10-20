@@ -72,7 +72,8 @@ class ModelType(Enum):
                 return ity
         raise ValueError(f"No ModelType {ty}")
 
-    def __getitem__(self, item):
+    @classmethod
+    def __getitem__(cls, item):
         item = item.replace('+', '_').replace('-', '_')
         return super().__getitem__(item)
 
