@@ -383,7 +383,7 @@ def write_training_set(atom, training_data) -> Path:
     return ferebus_directory
 
 
-def write_ftoml(ferebus_directory, atom):
+def write_ftoml(ferebus_directory: Path, atom: str):
     """Write the toml file which holds settings for FEREBUS.
 
     :param ferebus_directory: A Path object pointing to the directory where the FEREBUS job is going to be ran
@@ -394,7 +394,7 @@ def write_ftoml(ferebus_directory, atom):
     from ichor.globals import GLOBALS
 
     ftoml_file = ferebus_directory / "ferebus.toml"
-    alf = list(np.array(ALFFeatureCalculator._alf[get_digits(atom) - 1]) + 1)
+    alf = list(np.array(GLOBALS.ALF[get_digits(atom) - 1]) + 1)
 
     with open(ftoml_file, "w") as ftoml:
         ftoml.write("[system]\n")
