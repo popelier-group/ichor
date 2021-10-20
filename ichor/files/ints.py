@@ -19,7 +19,7 @@ class INTs(Directory, dict):
     def __init__(self, path, parent: Optional[GeometryFile] = None):
         self._parent = None
         if parent is not None:
-            self.parent = parent
+            self._parent = parent
         dict.__init__(self)
         Directory.__init__(self, path)
 
@@ -42,7 +42,7 @@ class INTs(Directory, dict):
     def parse(self) -> None:
         for f in self:
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f, self.parent)
+                self[f.stem.upper()] = INT(f, self._parent)
         self.sort()
 
     def sort(self):
@@ -57,7 +57,6 @@ class INTs(Directory, dict):
     def read(self):
         """Read all the individual .int files. See the `INT` class for how one .int file is read."""
         for atom, int_file in self.items():
-            # int_file.parent = self.atoms
             int_file.read()
 
     @classmethod
