@@ -39,6 +39,12 @@ class INTs(Directory, dict):
             )
         self._parent = value
 
+    @buildermethod
+    def read(self):
+        """Read all the individual .int files. See the `INT` class for how one .int file is read."""
+        for atom, int_file in self.items():
+            int_file.read()
+
     def parse(self) -> None:
         for f in self:
             if f.suffix == INT.filetype:
@@ -53,15 +59,15 @@ class INTs(Directory, dict):
         for k in natsorted(list(copy.keys()), key=ignore_alpha):
             self[k] = copy[k]
 
-    @buildermethod
-    def read(self):
-        """Read all the individual .int files. See the `INT` class for how one .int file is read."""
-        for atom, int_file in self.items():
-            int_file.read()
-
     @classmethod
     def check_path(cls, path: Path) -> bool:
         return path.name.endswith("_atomicfiles")
+
+    def revert_backup(self):
+        """ Moves original AIMALL files (which when parsed were converted to .int.bak) to .int files, deleting the json files which
+        were written out as .int"""
+        for atom, int_file in self.items():
+            int_file.revert_from_backup()
 
     def __getattr__(self, item):
         """
