@@ -135,6 +135,11 @@ class Atom(VarReprMixin):
         return round(constants.type2rad[self.type], 2)
 
     @property
+    def vdwr(self):
+        """Returns the Van der Waals radius of the given Atom instance."""
+        return round(constants.type2vdwr[self.type], 2)
+
+    @property
     def electronegativity(self):
         return constants.type2electronegativity[self.type]
 
