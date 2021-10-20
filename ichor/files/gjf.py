@@ -126,7 +126,7 @@ class GJF(QuantumChemistryProgramInput):
         self.basis_set = GLOBALS.BASIS_SET
 
         self.startup_options = [
-            f"nproc={GLOBALS.GAUSSIAN_CORE_COUNT}",
+            f"nproc={GLOBALS.GAUSSIAN_NCORES}",
             f"mem={GLOBALS.GAUSSIAN_MEMORY_LIMIT}",
         ]
 
