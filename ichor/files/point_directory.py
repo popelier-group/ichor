@@ -40,7 +40,7 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
         AnnotatedDirectory.__init__(self, path)
 
     def parse(self):
-        super().parse() # call AnnotatedDirectory.parse method
+        super().parse()  # call AnnotatedDirectory.parse method
         if self.xyz is None:
             for f in self.files():
                 if isinstance(f, GeometryFile):

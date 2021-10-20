@@ -81,6 +81,12 @@ SCRIPT_NAMES = ScriptNames(
                         "energies": "ICHOR_DLPOLY_ENERGIES.sh",
                     }
                 ),
+                "pandora": ScriptNames(
+                    {
+                        "pyscf": "ICHOR_PANDORA_PYSCF.sh",
+                        "morfi": "ICHOR_PANDORA_MORFI.sh",
+                    }
+                ),
             }
         ),
         "pandora": ScriptNames(

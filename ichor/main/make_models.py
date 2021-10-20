@@ -74,7 +74,7 @@ class ModelType(Enum):
 
     @classmethod
     def get(cls, item):
-        item = item.replace('+', '_').replace('-', '_')
+        item = item.replace("+", "_").replace("-", "_")
         return cls[item]
 
 
