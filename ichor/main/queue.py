@@ -7,7 +7,7 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.menu import Menu
 
 
-def read_jid(jid_file: Path) -> List[JobID]:
+def read_jid(jid_file: Path = FILE_STRUCTURE["jid"]) -> List[JobID]:
     if jid_file.exists():
         with open(jid_file, "r") as f:
             try:
