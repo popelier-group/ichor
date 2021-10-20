@@ -1,6 +1,7 @@
 from ichor.main.md import md_menu
 from ichor.make_sets import make_sets_menu
 from ichor.menu import Menu
+from ichor.main.tools import revert_int_bak_menu
 
 
 def tools_menu() -> None:
@@ -8,3 +9,4 @@ def tools_menu() -> None:
     with Menu("Tools Menu", space=True, back=True, exit=True) as menu:
         menu.add_option("m", "Make Sets Menu", make_sets_menu)
         menu.add_option("md", "Molecular Dynamics Tools", md_menu)
+        menu.add_option("bak", "Revert INT Backups", revert_int_bak_menu)

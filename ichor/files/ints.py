@@ -64,7 +64,7 @@ class INTs(Directory, dict):
         return path.name.endswith("_atomicfiles")
 
     def revert_backup(self):
-        """ Moves original AIMALL files (which when parsed were converted to .int.bak) to .int files, deleting the json files which
+        """Moves original AIMALL files (which when parsed were converted to .int.bak) to .int files, deleting the json files which
         were written out as .int"""
         for atom, int_file in self.items():
             int_file.revert_from_backup()

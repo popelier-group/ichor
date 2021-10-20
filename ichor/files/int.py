@@ -453,7 +453,7 @@ class INT(GeometryData, File):
             "integration": self.integration_data,
             "multipoles": self.multipoles_data,
             "iqa_data": self.iqa_data,
-            "dispersion_data": self.dispersion_data or {}
+            "dispersion_data": self.dispersion_data or {},
         }
 
         with open(self.path, "w") as f:
@@ -486,16 +486,23 @@ class INT(GeometryData, File):
 
     def get_dispersion(self) -> Optional[float]:
         from ichor.files.pandora import PandoraDirectory
+
         pandora_path = self.path.parent / PandoraDirectory.dirname
         if pandora_path.exists():
             pandora_dir = PandoraDirectory(pandora_path)
             if pandora_dir.morfi.mout.exists():
-                interaction_energy = pandora_dir.morfi.mout[self.atom].interaction_energy
+                interaction_energy = pandora_dir.morfi.mout[
+                    self.atom
+                ].interaction_energy
                 self.dispersion_data["dispersion"] = interaction_energy
                 self.write_json()
                 return interaction_energy
-            raise FileNotFoundError(f"Cannot find 'MorfiOutput' in {pandora_dir}")
-        raise FileNotFoundError(f"Cannot find 'PandoraDirectory' in {self.path.parent}")
+            raise FileNotFoundError(
+                f"Cannot find 'MorfiOutput' in {pandora_dir}"
+            )
+        raise FileNotFoundError(
+            f"Cannot find 'PandoraDirectory' in {self.path.parent}"
+        )
 
     @property
     def dispersion(self):
