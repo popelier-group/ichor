@@ -19,7 +19,7 @@ class INTs(Directory, dict):
     def __init__(self, path, parent: Optional[GeometryFile] = None):
         self._parent = None
         if parent is not None:
-            self._parent = parent
+            self.parent = parent
         dict.__init__(self)
         Directory.__init__(self, path)
 
@@ -48,7 +48,7 @@ class INTs(Directory, dict):
     def parse(self) -> None:
         for f in self:
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f, self._parent)
+                self[f.stem.upper()] = INT(f, self.parent)
         self.sort()
 
     def sort(self):
