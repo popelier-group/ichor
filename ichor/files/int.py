@@ -522,7 +522,3 @@ class INT(GeometryData, File):
     def revert_backup(self):
         """Move the original .int file (which is now stored as *.int.bak) to its original path *.int"""
         move(self.backup_path, self.path)
-
-    # not sure what this is for
-    def getattr_as_dict(self, attr):
-        pass
