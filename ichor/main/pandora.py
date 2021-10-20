@@ -174,6 +174,6 @@ def add_dispersion_to_aimall(point_directory: Path):
         dispersion = dispersion_data[atom]
         int_.dispersion_data = {
             "dispersion": dispersion,
-            "iqa_dispersion": int_.iqa + dispersion,
+            # "iqa_dispersion": int_.iqa + dispersion,  # no longer needed
         }
         int_.write_json()

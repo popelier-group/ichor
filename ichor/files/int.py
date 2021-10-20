@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Optional
 
 import numpy as np
 
@@ -433,6 +434,8 @@ class INT(GeometryData, File):
             self.iqa_data = int_data["iqa_data"]
             if "dispersion_data" in int_data.keys():
                 self.dispersion_data = int_data["dispersion_data"]
+            else:
+                self.dispersion_data = {}
 
     @property
     def backup_path(self):
@@ -450,9 +453,8 @@ class INT(GeometryData, File):
             "integration": self.integration_data,
             "multipoles": self.multipoles_data,
             "iqa_data": self.iqa_data,
+            "dispersion_data": self.dispersion_data or {}
         }
-        if self.dispersion_data is not None:
-            int_data["dispersion_data"] = self.dispersion_data
 
         with open(self.path, "w") as f:
             json.dump(int_data, f)
@@ -482,6 +484,19 @@ class INT(GeometryData, File):
     def e_intra(self):
         return self.iqa_data["E_IQA_Intra(A)"]
 
+    def get_dispersion(self) -> Optional[float]:
+        from ichor.files.pandora import PandoraDirectory
+        pandora_path = self.path.parent / PandoraDirectory.dirname
+        if pandora_path.exists():
+            pandora_dir = PandoraDirectory(pandora_path)
+            if pandora_dir.morfi.mout.exists():
+                interaction_energy = pandora_dir.morfi.mout[self.atom].interaction_energy
+                self.dispersion_data["dispersion"] = interaction_energy
+                self.write_json()
+                return interaction_energy
+            raise FileNotFoundError(f"Cannot find 'MorfiOutput' in {pandora_dir}")
+        raise FileNotFoundError(f"Cannot find 'PandoraDirectory' in {self.path.parent}")
+
     @property
     def dispersion(self):
         if (
@@ -489,20 +504,16 @@ class INT(GeometryData, File):
             and "dispersion" in self.dispersion_data.keys()
         ):
             return self.dispersion_data["dispersion"]
-        raise AttributeError(
-            f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'dispersion"
-        )
+        try:
+            return self.get_dispersion()
+        except FileNotFoundError:
+            raise AttributeError(
+                f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'dispersion'"
+            )
 
     @property
     def iqa_dispersion(self):
-        if (
-            self.dispersion_data is not None
-            and "iqa_dispersion" in self.dispersion_data.keys()
-        ):
-            return self.dispersion_data["iqa_dispersion"]
-        raise AttributeError(
-            f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'iqa_dispersion"
-        )
+        return self.iqa + self.dispersion
 
     @property
     def multipoles(self):
