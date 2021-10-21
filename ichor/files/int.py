@@ -28,7 +28,6 @@ class INT(GeometryData, File):
         self.integration_data = None
         self.iqa_data = None
         self.dispersion_data = None
-        self.raw_multipoles_data = None
 
     @property
     def atom(self) -> str:
@@ -39,6 +38,12 @@ class INT(GeometryData, File):
     def filetype(cls) -> str:
         """Returns the file extension of AIMALL files which are used"""
         return ".int"
+
+    @classproperty
+    def backup_filetype(cls) -> str:
+        """Returns the file extension of AIMALL files which are stored as backup files. These backup files are the original AIMALL files,
+        which are renamed so that a json file can be written out as .int instead."""
+        return ".bak"
 
     @buildermethod
     def _read_file(self):
@@ -66,7 +71,7 @@ class INT(GeometryData, File):
         self.integration_data = {}
         self.iqa_data = {}
         self.dispersion_data = {}
-        self.raw_multipoles_data = {}
+        raw_multipoles_data = {}
 
         with open(self.path, "r") as f:
             for line in f:
@@ -117,7 +122,7 @@ class INT(GeometryData, File):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                self.raw_multipoles_data[
+                                raw_multipoles_data[
                                     multipole.lower()
                                 ] = float(tokens[-1])
                             except ValueError:
@@ -142,17 +147,31 @@ class INT(GeometryData, File):
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
 
+        # this should call the multipoles_data.setter, which should make all the q00,q10, etc. attributes
+        # thus, the GeometryData getattr method will not look into __dict__, but __getattribute__ will be used directly
+        self.multipoles_data = raw_multipoles_data
+        # after setting all the attributes, we rotate them and modify them as needed.
         if self.parent:
             self.rotate_multipoles()
 
     @property
     def multipoles_data(self) -> dict:
+        """ Returns a dictionary with key:value pairs corresponding to the atom names: mutlipole data (another dictionary containing key:value
+        pairs of multipole name and value of rotated multipole)"""
 
         data = {}
         for multipole_name in constants.multipole_names:
             data[multipole_name] = getattr(self, multipole_name)
 
         return data
+
+    @multipoles_data.setter
+    def multipoles_data(self, data):
+        """ Setter method for multipole names. This is used to set attributes such as q00, q10, etc. when reading in from a json file as
+        well as to make the q00, q10, etc. attributes right before the multipoles are rotated."""
+
+        for multipole_name, multipole_value in data.items():
+            setattr(self, multipole_name, multipole_value)
 
     def rotate_multipoles(self):
         """

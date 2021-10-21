@@ -35,7 +35,7 @@ class GeometryData(ABC):
             if isinstance(inst, dict) and item in inst.keys():
                 return inst[item]
         raise AttributeError(
-            f"'{self.__class__}' object has no attribute '{item}'"
+            f"{self.__class__} object has no attribute {item}"
         )
 
     def __getitem__(self, item):
