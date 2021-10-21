@@ -33,7 +33,3 @@ class LocalBatchSystem(SunGridEngine):
     @classmethod
     def parse_job_id(cls, stdout) -> List[str]:
         return ["test1234"]
-
-    @classproperty
-    def Host(self):
-        return "host"
