@@ -88,6 +88,8 @@ class FileStructure(FileTree):
             "properties.err", "properties_stderr", parent="properties_daemon"
         )
 
+        self.add("pid", "pids", parent="data")
+
         self.add("ATOMS", "atoms_daemon", parent="active_learning")
         self.add("atoms.pid", "atoms_pid", parent="atoms_daemon")
         self.add("atoms.out", "atoms_stdout", parent="atoms_daemon")

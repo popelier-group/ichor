@@ -1,7 +1,7 @@
 from typing import Callable, Optional
 
 from ichor.auto_run.per.per import auto_run_per_value
-from ichor.common import Daemon
+from ichor.daemon import Daemon
 
 
 class PerAtomDaemon(Daemon):

@@ -4,7 +4,8 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 auto_run_per_property,
                                 delete_child_process_jobs,
                                 find_child_processes_recursively,
-                                rerun_failed_child_process)
+                                rerun_failed_child_process,
+                                stop_all_child_processes)
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
 
@@ -142,6 +143,9 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
     menu.add_space()
     menu.add_option(
         "rerun", "Rerun failed auto-runs", rerun_failed_child_process
+    )
+    menu.add_option(
+        "stop", "Stop all child processes", stop_all_child_processes
     )
     menu.add_option(
         "q", "Queue Options For Child Processes", child_process_queue_menu

@@ -3,12 +3,16 @@
 import atexit
 import os
 import sys
-import time
 from abc import ABC, abstractmethod
 from pathlib import Path
-from signal import SIGTERM
 
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, remove
+from ichor.common.os import pid_exists, kill_pid
+from ichor.file_structure import FILE_STRUCTURE
+
+
+class DaemonRunning(Exception):
+    pass
 
 
 class Daemon(ABC):
@@ -88,25 +92,22 @@ class Daemon(ABC):
         pid = str(os.getpid())
         with open(self.pidfile, "w+") as pf:
             pf.write(f"{pid}\n")
+        with open(FILE_STRUCTURE["pids"], 'a') as f:
+            f.write(f"{pid}\n")
 
     def delpid(self):
-        os.remove(self.pidfile)
+        if os.path.exists(self.pidfile):
+            remove(self.pidfile)
 
     def start(self):
         """
         Start the daemon
         """
         # Check for a pidfile to see if the daemon already runs
-        try:
-            with open(self.pidfile, "r") as pf:
-                pid = int(pf.read().strip())
-        except IOError:
-            pid = None
-
-        if pid:
-            message = "pidfile %s already exist. Daemon already running?\n"
-            sys.stderr.write(message % self.pidfile)
-            sys.exit(1)
+        if self.pidfile.exists():
+            with open(self.pidfile, 'r') as f:
+                if pid_exists(int(f.read().strip())):
+                    raise DaemonRunning(f"Error: Daemon Running (pid file: {self.pidfile})")
 
         # Start the daemon
         self.daemonize()
@@ -117,38 +118,25 @@ class Daemon(ABC):
         Stop the daemon
         """
         # Get the pid from the pidfile
-        try:
-            with open(self.pidfile, "r") as pf:
-                pid = int(pf.read().strip())
-        except IOError:
-            pid = None
+        if not self.pidfile.exists():
+            return
 
-        if not pid:
-            message = "pidfile %s does not exist. Daemon not running?\n"
-            sys.stderr.write(message % self.pidfile)
-            return  # not an error in a restart
+        with open(self.pidfile, 'r') as f:
+            pid = int(f.read().strip())
+
+        if not pid_exists(pid):
+            return
 
         # Try killing the daemon process
-        try:
-            while 1:
-                os.kill(pid, SIGTERM)
-                time.sleep(0.1)
-        except OSError as err:
-            err = str(err)
-            if err.find("No such process") > 0:
-                if os.path.exists(self.pidfile):
-                    os.remove(self.pidfile)
-            else:
-                print(str(err))
-                sys.exit(1)
+        kill_pid(pid)
+        self.delpid()
 
-    def check(self):
-        try:
-            with open(self.pidfile, "r") as pf:
-                pid = int(pf.read().strip())
-        except IOError:
-            pid = None
-        return pid is not None
+    def check(self) -> bool:
+        if not self.pidfile.exists():
+            return False
+        with open(self.pidfile, "r") as f:
+            pid = int(f.read().strip())
+        return pid_exists(pid)
 
     def restart(self):
         """
