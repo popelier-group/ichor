@@ -315,7 +315,7 @@ class Globals:
         globals_instance: Optional["Globals"] = None,
         **kwargs,
     ):
-        self.initialising = True
+        self._initialising = True
 
         # check types
         for global_variable in self.global_variables:
@@ -450,7 +450,7 @@ class Globals:
                 )
             self.set(key, value)
 
-        self.initialising = False
+        self._initialising = False
 
     def init_from_config(self, config_file: Path):
         self._config_file = config_file
@@ -489,7 +489,7 @@ class Globals:
 
     @property
     def ATOMS(self) -> Atoms:
-        if self.initialising:
+        if self._initialising:
             return None
         self._ATOMS = get_atoms(self.ALF_REFERENCE_FILE)
         return self._ATOMS
@@ -501,7 +501,7 @@ class Globals:
 
     @property
     def ALF(self):
-        if self.initialising:
+        if self._initialising:
             return None
         self._ALF = self.ATOMS.alf
         return self._ALF
