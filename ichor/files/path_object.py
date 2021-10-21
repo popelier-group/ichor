@@ -98,7 +98,7 @@ class PathObject(ABC, object):
             return object_getattribute(self, item)
         except AttributeError:
             raise AttributeError(
-                f"'{object_getattribute(self, 'path')}' instance of '{object_getattribute(self, '__class__').__name__}' has no attribute '{item}'"
+                f"{object_getattribute(self, 'path')} instance of {object_getattribute(self, '__class__').__name__} has no attribute {item}"
             )
 
     def __getitem__(self, item):

@@ -89,3 +89,17 @@ class INTs(Directory, dict):
                     f"'{self.__class__}' object has no attribute '{item}'"
                 )
         return self.__dict__[item]
+
+    def __iter__(self):
+        """ Iterate over all .int files which are found in an INTs directory."""
+
+        for f in Directory.__iter__(self):
+            if f.suffix == INT.filetype:
+                yield f
+
+    def iter_backup(self):
+        """ Iterate over all .bak files which are found in an INTs directory"""
+
+        for f in Directory.__iter__(self):
+            if f.suffix == INT.backup_filetype:
+                yield f
