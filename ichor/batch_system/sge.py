@@ -192,7 +192,7 @@ class SunGridEngine(BatchSystem):
     @classmethod
     def parallel_environment(cls, ncores: int) -> str:
         """Returns the line in the job script defining the number of corest to be used for the job."""
-        from ichor.batch_system import PARALLEL_ENVIRONMENT
+        from ichor.parallel_environment import PARALLEL_ENVIRONMENT
         from ichor.machine import MACHINE
 
         return f"-pe {PARALLEL_ENVIRONMENT[MACHINE][ncores]} {ncores}"
@@ -213,7 +213,7 @@ class SunGridEngine(BatchSystem):
     def TaskID(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
         return "SGE_TASK_ID"
-    
+
     @classproperty
     def Host(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
