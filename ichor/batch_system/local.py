@@ -3,7 +3,6 @@ from typing import List
 from ichor.batch_system.node import NodeType
 from ichor.batch_system.sge import SunGridEngine
 from ichor.common.functools import classproperty
-from ichor.machine import MACHINE, Machine
 
 
 class LocalBatchSystem(SunGridEngine):
@@ -12,6 +11,7 @@ class LocalBatchSystem(SunGridEngine):
 
     @staticmethod
     def is_present() -> bool:
+        from ichor.machine import MACHINE, Machine
         return MACHINE is Machine.Local
 
     @staticmethod
