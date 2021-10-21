@@ -7,7 +7,7 @@ from uuid import UUID
 from ichor.common.bool import check_bool
 from ichor.common.types import Version
 from ichor.globals.formatters import cleanup_str
-from ichor.typing import F
+from ichor.itypes import F
 
 
 def parser(func: F) -> F:

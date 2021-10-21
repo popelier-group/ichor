@@ -1,6 +1,6 @@
 from functools import wraps
 
-from ichor.typing import F, T
+from ichor.itypes import F, T
 
 
 def buildermethod(func: F) -> F:

@@ -8,7 +8,7 @@ from ichor.atoms import Atom, Atoms, ListOfAtoms
 from ichor.common.io import mkdir
 from ichor.files.file import File, FileState
 from ichor.files.gjf import GJF
-from ichor.typing import F
+from ichor.itypes import F
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:

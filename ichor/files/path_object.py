@@ -86,6 +86,7 @@ class PathObject(ABC, object):
 
         :param item: The attribute that needs to be accessed.
         """
+        # print(f"getting {item}")
 
         objhasattr = object_hasattr(self, item)
         if (
@@ -100,6 +101,7 @@ class PathObject(ABC, object):
             raise AttributeError(
                 f"{object_getattribute(self, 'path')} instance of {object_getattribute(self, '__class__').__name__} has no attribute {item}"
             )
+
 
     def __getitem__(self, item):
         """Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then

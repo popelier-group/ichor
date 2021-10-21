@@ -1,4 +1,4 @@
-from ichor.typing import F
+from ichor.itypes import F
 
 
 class ClassPropertyDescriptor:

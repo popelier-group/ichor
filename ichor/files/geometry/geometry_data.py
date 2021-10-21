@@ -23,23 +23,27 @@ class GeometryData(ABC):
         except AttributeError:
             raise PropertyNotFound(f"Property {item} not found")
 
-    def __getattr__(self, item: str) -> Any:
-        item = item.replace("+", "_").replace(
-            "-", "_"
-        )  # attributes cannot have '+' or '-' so must be replaced with underscore
-        if item in dir(self):
-            return super().__getattribute__(item)
-        # loop over __dict__ and find any attributes which are dictionaries.
-        # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
-        for var, inst in self.__dict__.items():
-            if isinstance(inst, dict) and item in inst.keys():
-                return inst[item]
-        raise AttributeError(
-            f"{self.__class__} object has no attribute {item}"
-        )
+    # def __getattr__(self, item: str) -> Any:
+    #     item = item.replace("+", "_").replace(
+    #         "-", "_"
+    #     )  # attributes cannot have '+' or '-' so must be replaced with underscore
+    #     if item in dir(self):
+    #         return super().__getattribute__(item)
+    #     # loop over __dict__ and find any attributes which are dictionaries.
+    #     # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
+    #     for var, inst in self.__dict__.items():
+    #         if isinstance(inst, GeometryData) and item in inst.keys():
+    #             return inst[item]
+    #     raise AttributeError(
+    #         f"{self.__class__} object has no attribute {item}"
+    #     )
 
     def __getitem__(self, item):
         if isinstance(item, str):
-            if isinstance(self, GeometryFile):
+            if isinstance(self, GeometryFile) and item in self.atoms.names:
                 return AtomData(self.atoms[item], properties=self)
         return super().__getitem__(item)
+
+
+# class GeometryData(dict):
+#     pass

@@ -26,6 +26,7 @@ class INT(GeometryData, File):
         self.parent = parent
 
         self.integration_data = None
+        self._multipoles_data = None
         self.iqa_data = None
         self.dispersion_data = None
 
@@ -71,7 +72,7 @@ class INT(GeometryData, File):
         self.integration_data = {}
         self.iqa_data = {}
         self.dispersion_data = {}
-        raw_multipoles_data = {}
+        self._multipoles_data = {}
 
         with open(self.path, "r") as f:
             for line in f:
@@ -122,7 +123,7 @@ class INT(GeometryData, File):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                raw_multipoles_data[
+                                self._multipoles_data[
                                     multipole.lower()
                                 ] = float(tokens[-1])
                             except ValueError:
@@ -149,7 +150,7 @@ class INT(GeometryData, File):
 
         # this should call the multipoles_data.setter, which should make all the q00,q10, etc. attributes
         # thus, the GeometryData getattr method will not look into __dict__, but __getattribute__ will be used directly
-        self.multipoles_data = raw_multipoles_data
+        # self.multipoles_data = raw_multipoles_data
         # after setting all the attributes, we rotate them and modify them as needed.
         if self.parent:
             self.rotate_multipoles()
@@ -159,19 +160,20 @@ class INT(GeometryData, File):
         """ Returns a dictionary with key:value pairs corresponding to the atom names: mutlipole data (another dictionary containing key:value
         pairs of multipole name and value of rotated multipole)"""
 
-        data = {}
-        for multipole_name in constants.multipole_names:
-            data[multipole_name] = getattr(self, multipole_name)
+        return self._multipoles_data
+        # data = {}
+        # for multipole_name in constants.multipole_names:
+        #     data[multipole_name] = getattr(self, multipole_name)
+        #
+        # return data
 
-        return data
-
-    @multipoles_data.setter
-    def multipoles_data(self, data):
-        """ Setter method for multipole names. This is used to set attributes such as q00, q10, etc. when reading in from a json file as
-        well as to make the q00, q10, etc. attributes right before the multipoles are rotated."""
-
-        for multipole_name, multipole_value in data.items():
-            setattr(self, multipole_name, multipole_value)
+    # @multipoles_data.setter
+    # def multipoles_data(self, data):
+    #     """ Setter method for multipole names. This is used to set attributes such as q00, q10, etc. when reading in from a json file as
+    #     well as to make the q00, q10, etc. attributes right before the multipoles are rotated."""
+    #
+    #     for multipole_name, multipole_value in data.items():
+    #         setattr(self, multipole_name, multipole_value)
 
     def rotate_multipoles(self):
         """
@@ -457,7 +459,7 @@ class INT(GeometryData, File):
         with open(self.path, "r") as f:
             int_data = json.load(f)
             self.integration_data = int_data["integration"]
-            self.multipoles_data = int_data["multipoles"]
+            self._multipoles_data = int_data["multipoles"]
             self.iqa_data = int_data["iqa_data"]
             if "dispersion_data" in int_data.keys():
                 self.dispersion_data = int_data["dispersion_data"]
