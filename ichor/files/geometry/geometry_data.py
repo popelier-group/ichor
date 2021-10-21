@@ -29,6 +29,8 @@ class GeometryData(ABC):
         )  # attributes cannot have '+' or '-' so must be replaced with underscore
         if item in dir(self):
             return super().__getattribute__(item)
+        # loop over __dict__ and find any attributes which are dictionaries.
+        # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
         for var, inst in self.__dict__.items():
             if isinstance(inst, dict) and item in inst.keys():
                 return inst[item]

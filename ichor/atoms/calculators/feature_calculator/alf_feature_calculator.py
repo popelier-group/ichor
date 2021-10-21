@@ -111,8 +111,8 @@ class ALFFeatureCalculator(FeatureCalculator):
             # make an empty list to fill with the alfs for the system
             cls._alf[system_hash] = []
             # calculate the alf for every atom in the system and add to the list above
-            for a in atom.parent:
-                alf = _calculate_alf(a)
+            for atm in atom.parent:
+                alf = _calculate_alf(atm)
                 cls._alf[system_hash].append([a.i for a in alf])
 
         # return a list of the index (starts at 0 because we use this alf to index lists) of central atom, the x_axis and xy_plane atoms
