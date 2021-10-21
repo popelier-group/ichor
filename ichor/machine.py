@@ -1,5 +1,6 @@
 import platform
 from enum import auto
+import os
 
 from ichor.common.functools import cached_property
 from ichor.common.io import mkdir
@@ -68,6 +69,13 @@ if MACHINE is Machine.local:
                     f"Unknown machine ({_machine}) in {FILE_STRUCTURE['machine']}"
                 )
             MACHINE = Machine.from_name(_machine)
+    else:
+        from ichor.batch_system import BATCH_SYSTEM
+
+        if BATCH_SYSTEM.Host in os.environ.keys():
+            host = os.environ[BATCH_SYSTEM.Host]
+            if host == "ffluxlab":
+                MACHINE = Machine.ffluxlab
 
 # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
 if MACHINE is not Machine.local:
