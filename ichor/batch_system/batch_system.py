@@ -222,6 +222,12 @@ class BatchSystem(ABC):
 
     @classproperty
     @abstractmethod
+    def Host(self) -> str:
+        """Returns environment variable name for the batch system host"""
+        pass
+
+    @classproperty
+    @abstractmethod
     def NumProcs(self) -> str:
         """Returns environment variable name for the number of processors assigned to a job, used to set OpenMP etc."""
         pass
