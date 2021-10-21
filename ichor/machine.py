@@ -6,7 +6,6 @@ from ichor.common.functools import cached_property
 from ichor.common.io import mkdir
 from ichor.common.types import Enum
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.batch_system import BATCH_SYSTEM
 
 
 class MachineNotFound(Exception):
@@ -71,6 +70,8 @@ if MACHINE is Machine.local:
                 )
             MACHINE = Machine.from_name(_machine)
     else:
+        from ichor.batch_system import BATCH_SYSTEM
+
         if BATCH_SYSTEM.Host in os.environ.keys():
             host = os.environ[BATCH_SYSTEM.Host]
             if host == "ffluxlab":
