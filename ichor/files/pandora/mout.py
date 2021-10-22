@@ -10,8 +10,9 @@ from ichor.atoms import Atom, Atoms
 from ichor.common.functools import classproperty
 from ichor.common.types import VarReprMixin
 from ichor.files.file import File
-from ichor.files.geometry import AtomData, GeometryData, GeometryFile
+from ichor.files.geometry import GeometryFile, GeometryDataFile, AtomicDict
 from ichor.units import AtomicDistance
+from ichor.files.file import FileContents
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])
 
@@ -337,7 +338,7 @@ def read_ccp(
     )
 
 
-class MOUT(File, GeometryFile):
+class MOUT(File, GeometryFile, GeometryDataFile, AtomicDict):
     nnuc: Optional[int]
     nbcp: Optional[int]
     nrcp: Optional[int]
@@ -349,17 +350,17 @@ class MOUT(File, GeometryFile):
 
     def __init__(self, path: Path):
         GeometryFile.__init__(self)
-        GeometryData.__init__(self)
+        GeometryDataFile.__init__(self)
         File.__init__(self, path)
 
-        self.nnuc = None
-        self.nbcp = None
-        self.nrcp = None
-        self.nccp = None
+        self.nnuc = FileContents
+        self.nbcp = FileContents
+        self.nrcp = FileContents
+        self.nccp = FileContents
 
-        self.bond_critical_points = None
-        self.ring_critical_points = None
-        self.cage_critical_points = None
+        self.bond_critical_points = FileContents
+        self.ring_critical_points = FileContents
+        self.cage_critical_points = FileContents
 
     def _read_file(self):
         with open(self.path, "r") as f:
@@ -715,25 +716,12 @@ class MOUT(File, GeometryFile):
                         self[atom.name].cage_critical_points = []
                     self[atom.name].cage_critical_points.append(ccp)
 
-        # todo: implement rcps and ccps
-
     @classproperty
     def filetype(self) -> str:
         return ".mout"
 
-    def __getattr__(self, item):
-        """
-        If an attribute is requested that is not in MOUT but is an attribute of AtomicMorfiOutput, a dictionary
-        of the attributes are returned. e.g.
-        """
-        if item in self.__dict__.keys():
-            return self.__dict__[item]
-        try:
-            return {atom.name: getattr(atom, item) for atom in self.atoms}
-        except AttributeError:
-            raise AttributeError(
-                f"'{self.__class__}' object has no attribute '{item}'"
-            )
+    def items(self):
+        return [(atom.name, atom) for atom in self.atoms]
 
     def __getitem__(self, item) -> "AtomicMorfiOutput":
         return self.atoms[item]
