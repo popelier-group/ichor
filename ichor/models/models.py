@@ -9,7 +9,7 @@ from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files import Directory
 from ichor.models.model import Model
 from ichor.models.result import ModelsResult
-from ichor.typing import F
+from ichor.itypes import F
 
 
 class DimensionError(ValueError):

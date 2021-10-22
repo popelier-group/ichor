@@ -9,8 +9,8 @@ from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
 def make_models(
     directory: Path,
     atoms: Optional[List[str]] = None,
-    ntrain: Optional[int] = None,
     types: Optional[List[str]] = None,
+    ntrain: Optional[int] = None,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     """Write out datafiles and settings needed by FEREBUS. The actual FEREBUS calculations are done in the next job. Returns the job ID of this job,
@@ -22,7 +22,7 @@ def make_models(
         str(directory),
         str(atoms.value),
         str(ntrain),
-        str(types),
+        str(types.value),
     )
     # todo: This function submits jobs which write out datafile, it does not make models.
     with TimingManager(submission_script, message="Making Models"):

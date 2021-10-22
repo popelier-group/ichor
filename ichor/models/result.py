@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union
 
 import numpy as np
 
-from ichor.typing import Scalar
+from ichor.itypes import Scalar
 
 convert_to_numpy = True
 

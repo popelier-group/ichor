@@ -9,7 +9,7 @@ from ichor.files import File
 from ichor.models.kernels import RBF, Kernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
-from ichor.typing import F
+from ichor.itypes import F
 
 
 class ModelParameterMissing(Exception):

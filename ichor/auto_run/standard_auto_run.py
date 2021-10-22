@@ -65,6 +65,7 @@ class IterArgs:
     ModelLocation = FILE_STRUCTURE["models"]
     nPoints = MutableValue(1)  # Overwritten Based On IterState
     Atoms = MutableValue([])  # Overwritten from GLOBALS.ATOMS
+    ModelTypes = MutableValue([])
 
 
 class IterStep:
@@ -98,57 +99,14 @@ def submit_auto_run_iter(
     # the first submitted job does not wait for previous jobs (because there are none), so job_id is None
     job_id = wait_for_job
 
-    # the first job will execute this since the first iteration is IterState.First
-    if state == IterState.First:
-        if IterArgs.TrainingSetLocation.exists():
-            IterArgs.nPoints.value = len(
-                PointsDirectory(IterArgs.TrainingSetLocation)
-            )
-        else:
-            points_location = (
-                get_points_location()
-            )  # get points location on disk to transform into ListOfAtoms
-            # points_location could be a directory of points to use, if so initialise a PointsDirectory
-            if points_location.is_dir():
-                points = PointsDirectory(points_location)
-            # points_location could be a .xyz file, if so initialise a Trajectory
-            elif points_location.suffix == ".xyz":
-                points = Trajectory(points_location)
-            else:
-                raise ValueError("Unknown Points Location")
-
-            # return the total number of points which are going to be in the initial training set
-            IterArgs.nPoints.value = make_sets_npoints(
-                points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
-            )  # GLOBALS.TRAINING_POINTS contains the number of initial training points
-            # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
-            job_id = IterStep(
-                submit_make_sets_job_to_auto_run,
-                IterUsage.All,
-                [points_location],
-            ).run(job_id, state)
-            print(
-                f"Submitted: {job_id}"
-            )  # GLOBALS.TRAINING_POINTS is used in make_sets to make training sets with initial number of points
-
-    # for every other job, i.e. IterState.Standard, IterState.Last
-    else:
-        IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
-
-    if GLOBALS.OPTIMISE_ATOM == "all":
-        IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
-    else:
-        IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
-
-    # modify the uid for drop-n-compute as SGE is 32-bit
-    modify_id = truncate(
-        GLOBALS.UID.int, nbits=32
-    )  # only used for drop-n-compute
-    if (
-        MACHINE.submit_type is SubmitType.DropCompute
-        and modify_id >= 2 ** 32 - len(func_order)
-    ):  # overflow protection
-        modify_id -= len(func_order)
+    modify_id = ""
+    if MACHINE.submit_type is SubmitType.DropCompute:
+        # modify the uid for drop-n-compute as SGE is 32-bit
+        modify_id = truncate(
+            GLOBALS.UID.int, nbits=32
+        )  # only used for drop-n-compute
+        if modify_id >= 2 ** 32 - len(func_order):  # overflow protection
+            modify_id -= len(func_order)
 
     with DataLock():
         # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
@@ -219,21 +177,27 @@ def get_qct_steps():
     return ichor_qct_step, qct_step
 
 
+def get_model_steps():
+    make_models_step = IterStep(
+        make_models,
+        IterUsage.All,
+        [IterArgs.TrainingSetLocation, IterArgs.Atoms, IterArgs.ModelTypes],
+    )
+    ferebus_step = IterStep(
+        submit_ferebus_job_to_auto_run,
+        IterUsage.All,
+        [IterArgs.FerebusDirectory, IterArgs.Atoms],
+    )
+
+    return make_models_step, ferebus_step
+
+
 def get_func_order():
     # order in which to submit jobs for each of the adaptive sampling iterations.
     return [
         *get_qcp_steps(),
         *get_qct_steps(),
-        IterStep(
-            make_models,
-            IterUsage.All,
-            [IterArgs.TrainingSetLocation, IterArgs.Atoms],
-        ),
-        IterStep(
-            submit_ferebus_job_to_auto_run,
-            IterUsage.All,
-            [IterArgs.FerebusDirectory, IterArgs.Atoms],
-        ),
+        *get_model_steps(),
         IterStep(
             submit_ichor_active_learning_job_to_auto_run,
             IterUsage.AllButLast,
@@ -264,9 +228,59 @@ def auto_run() -> JobID:
 
     func_order = get_func_order()
 
+    if GLOBALS.OPTIMISE_ATOM == "all":
+        IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
+    else:
+        IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
+
+    if GLOBALS.OPTIMISE_PROPERTY == "all":
+        from ichor.main.make_models import MODEL_TYPES
+        IterArgs.ModelTypes.value = MODEL_TYPES
+    else:
+        types = GLOBALS.OPTIMISE_PROPERTY
+        if isinstance(types, str):
+            types = [types]
+        IterArgs.ModelTypes.value = types
+
     job_id = None
     with DataLock():
         for i, iter_state in enumerate(iterations):
+            # the first job will execute this since the first iteration is IterState.First
+            if iter_state is IterState.First:
+                if IterArgs.TrainingSetLocation.exists():
+                    IterArgs.nPoints.value = len(
+                        PointsDirectory(IterArgs.TrainingSetLocation)
+                    )
+                else:
+                    points_location = (
+                        get_points_location()
+                    )  # get points location on disk to transform into ListOfAtoms
+                    # points_location could be a directory of points to use, if so initialise a PointsDirectory
+                    if points_location.is_dir():
+                        points = PointsDirectory(points_location)
+                    # points_location could be a .xyz file, if so initialise a Trajectory
+                    elif points_location.suffix == ".xyz":
+                        points = Trajectory(points_location)
+                    else:
+                        raise ValueError("Unknown Points Location")
+
+                    print(f"Submitting Make Sets using {points_location}")
+                    # return the total number of points which are going to be in the initial training set
+                    IterArgs.nPoints.value = make_sets_npoints(
+                        points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
+                    )  # GLOBALS.TRAINING_POINTS contains the number of initial training points
+                    # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
+                    job_id = IterStep(
+                        submit_make_sets_job_to_auto_run,
+                        IterUsage.All,
+                        [points_location],
+                    ).run(job_id, iter_state)
+                    print(
+                        f"Submitted: {job_id}"
+                    )  # GLOBALS.TRAINING_POINTS is used in make_sets to make training sets with initial number of points
+            else:
+                IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
+
             print(f"Submitting Iter: {i+1}")
             # initially job_id is none, then next_iter returns the job id of the submitted job. The next job has to wait for the previous job that was submitted.
             job_id = submit_auto_run_iter(func_order, job_id, iter_state)
@@ -276,7 +290,7 @@ def auto_run() -> JobID:
     return job_id
 
 
-# used for Drop-In compute
+# used for Drop-n-compute
 def submit_next_iter(current_iteration) -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
@@ -317,6 +331,28 @@ def auto_run_qct(directory: Path):
     points = PointsDirectory(directory)
     IterArgs.nPoints = len(points)
     IterArgs.TrainingSetLocation = directory
-    IterArgs.Atoms = points[0].atoms.names
+    IterArgs.Atoms.value = points[0].atoms.names
 
     submit_auto_run_iter(qct_func_order)
+
+
+def auto_make_models(
+        directory: Path,
+        atoms: Optional[List[str]] = None,
+        types: Optional[List[str]] = None,
+        hold: Optional[JobID] = None,
+) -> JobID:
+    func_order = [
+        *get_model_steps(),
+    ]
+
+    IterArgs.TrainingSetLocation = directory
+    if atoms is None:
+        atoms = PointsDirectory(directory)[0].atoms.names
+    IterArgs.Atoms.value = atoms
+    if types is None:
+        from ichor.main.make_models import default_model_type
+        types = [default_model_type]
+    IterArgs.ModelTypes.value = types
+    return submit_auto_run_iter(func_order, wait_for_job=hold)
+

@@ -96,10 +96,10 @@ ichor.tqdm module
    :undoc-members:
    :show-inheritance:
 
-ichor.typing module
+ichor.itypes module
 -------------------
 
-.. automodule:: ichor.typing
+.. automodule:: ichor.itypes
    :members:
    :undoc-members:
    :show-inheritance:

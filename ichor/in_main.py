@@ -5,7 +5,7 @@ as a library, then the Arguments class is not used. This is needed to prevent cy
 from functools import wraps
 from typing import Any
 
-from ichor.typing import F
+from ichor.itypes import F
 
 _IN_MAIN = False
 

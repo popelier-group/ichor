@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.auto_run import rerun_from_failed
-from daemon import Daemon
+from ichor.daemon import Daemon
 from ichor.common.io import mkdir, pushd
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.queue import delete_jobs

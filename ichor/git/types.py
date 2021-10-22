@@ -13,9 +13,9 @@ if sys.version_info[:2] >= (3, 8):
     from typing import SupportsIndex  # noqa: F401
     from typing import Final, Literal, Protocol, TypedDict, runtime_checkable
 else:
-    from ichor.typing_extensions import Literal  # noqa: F401
-    from ichor.typing_extensions import SupportsIndex  # noqa: F401
-    from ichor.typing_extensions import (Final, Protocol, TypedDict,
+    from ichor.itypes_extensions import Literal  # noqa: F401
+    from ichor.itypes_extensions import SupportsIndex  # noqa: F401
+    from ichor.itypes_extensions import (Final, Protocol, TypedDict,
                                          runtime_checkable)
 
 # if sys.version_info[:2] >= (3, 10):
