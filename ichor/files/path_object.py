@@ -53,4 +53,35 @@ class PathObject(ABC, object):
     @abstractmethod
     def move(self, dst) -> None:
         """An abstract method that subclasses need to implement. This is used to move files around."""
+# <<<<<<< HEAD
+# =======
+#         pass
+#
+#     def __getattribute__(self, item):
+#         """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.
+#         If the attribute does not exist, then read the file and update its filestate. Then try to return the value of the attribute, if
+#         the attribute still does not exist after reading the file, then return an AttributeError.
+#
+#         One must be careful to make sure all attributes that want to be accessed lazily must be an attribute of the class and
+#         not to override __getattribute__ in subclasses of PathObject.
+#
+#         :param item: The attribute that needs to be accessed.
+#         """
+#         # print(f"getting {item}")
+#
+#         objhasattr = object_hasattr(self, item)
+#         objattr_value = object_getattribute(self, item)
+#         objattr_isnone = objattr_value is None
+#         obj_state = object_getattribute(self, "state")
+#         if ((objhasattr and objattr_isnone) or not objhasattr) and obj_state is FileState.Unread:
+#             object_getattribute(self, "read")()
+#
+#         try:
+#             return object_getattribute(self, item)
+#         except AttributeError:
+#             raise AttributeError(
+#                 f"{object_getattribute(self, 'path')} instance of {object_getattribute(self, '__class__').__name__} has no attribute {item}"
+#             )
+#
+# >>>>>>> a4dddc1b12bf905d2bc16516616608256762a3d1
 
