@@ -394,8 +394,6 @@ def write_ftoml(ferebus_directory: Path, atom: str):
     :param ferebus_directory: A Path object pointing to the directory where the FEREBUS job is going to be ran
     :param atom: A string corresponding to the atom's name (such as C1, H3, etc.)
     """
-    from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import \
-        ALFFeatureCalculator
     from ichor.globals import GLOBALS
 
     ftoml_file = ferebus_directory / "ferebus.toml"
@@ -440,3 +438,9 @@ def write_ftoml(ferebus_directory: Path, atom: str):
         ftoml.write("\n")
         ftoml.write("[kernels.k1]\n")
         ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
+        ftoml.write("\n")
+        ftoml.write("[notes]\n")
+        ftoml.write(f'method = "{GLOBALS.METHOD}"\n')
+        ftoml.write(f'basis-set = "{GLOBALS.BASIS_SET}"\n')
+        if ModelType.iqa in model_types and QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
+            ftoml.write(f'iqa+dispersion = "{GLOBALS.ADD_DISPERSION_TO_IQA}"\n')

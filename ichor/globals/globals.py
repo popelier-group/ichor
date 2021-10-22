@@ -302,6 +302,8 @@ class Globals:
     MORFI_ANGULAR: int = 15
     MORFI_RADIAL: float = 20.0
 
+    ADD_DISPERSION_TO_IQA: bool = True
+
     GIT_USERNAME: str = ""
     GIT_PASSWORD: str = ""
     GIT_TOKEN: str = " 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"
