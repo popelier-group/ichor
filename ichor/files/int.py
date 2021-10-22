@@ -156,6 +156,11 @@ class INT(GeometryDataFile, File):
         if self.parent:
             self.rotate_multipoles()
 
+        # overwrite the initial self.multipoles_data dict because it contains the raw data
+        # if not overwritten, the original data from the .int files is 
+        for multipole_name in constants.multipole_names:
+            self.multipoles_data[multipole_name] = getattr(self, multipole_name)
+
     def rotate_multipoles(self):
         """
         Multipoles from AIMAll are calculated in the global spherical frame whereas DL_FFLUX requires
@@ -215,10 +220,6 @@ class INT(GeometryDataFile, File):
         d = np.array(
             [self.q11c, self.q11s, self.q10]
         )  # these can be accessed like this because of GeometryData __getattr__ method
-
-        print("in rotating dipole")
-        print(d)
-        print(self.C)
 
         # Rotation of 1D cartesian tensor from global to local frame
         rotated_d = np.einsum("ia,a->i", self.C, d)
@@ -457,6 +458,7 @@ class INT(GeometryDataFile, File):
 
     @property
     def file_contents(self):
+        """A list of strings that this class should have accessible as attributes"""
         return ["iqa", *constants.multipole_names]
 
     @property
