@@ -79,15 +79,11 @@ class INTs(Directory, dict):
         {'O1': 76.51, 'H2': 0.52, 'H3': 0.53}
         ```
         """
-        # todo: this should be a dictionary comprehension but leave like that for now for testing/debugging
         if item not in self.__dict__.keys():
             try:
-                to_return = {}
-                int_files_dict = self.items()
-                for atom_name, int_file in int_files_dict:
-                    int_file_attribute = getattr(int_file, item)
-                    to_return[atom_name] = int_file_attribute
-                return to_return
+                return {
+                    atom: getattr(int_, item) for atom, int_ in self.items()
+                }
             except AttributeError:
                 raise AttributeError(
                     f"'{self.__class__}' object has no attribute '{item}'"

@@ -89,10 +89,10 @@ class PathObject(ABC, object):
         # print(f"getting {item}")
 
         objhasattr = object_hasattr(self, item)
-        objattr_value = object_getattribute(self, item)
-        objattr_isnone = objattr_value is None
-        obj_state = object_getattribute(self, "state")
-        if ((objhasattr and objattr_isnone) or not objhasattr) and obj_state is FileState.Unread:
+        if (
+            (objhasattr and object_getattribute(self, item) is None)
+            or not objhasattr
+        ) and object_getattribute(self, "state") is FileState.Unread:
             object_getattribute(self, "read")()
 
         try:

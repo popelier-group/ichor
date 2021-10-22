@@ -1,7 +1,6 @@
 import json
 import re
 from typing import Optional
-from ichor.files import FileState
 
 import numpy as np
 
@@ -233,10 +232,6 @@ class INT(GeometryData, File):
         accessing dictionary keys as if they were attributes."""
         # Global cartesian dipole moment d is a simple rearrangement of the spherical form
         d = np.array([self.q11c, self.q11s, self.q10])  # these can be accessed like this because of GeometryData __getattr__ method
-
-        print("in rotating dipole")
-        print(d)
-        print(self.C)
 
         # Rotation of 1D cartesian tensor from global to local frame
         rotated_d = np.einsum("ia,a->i", self.C, d)
@@ -590,9 +585,3 @@ class INT(GeometryData, File):
     def delete(self):
         """Delete the .int file from disk."""
         self.path.unlink()
-
-    # # todo: This should not be needed because the file should already be read
-    # def __getattr__(self, item):
-    #
-    #     self._read_file()
-    #     return getattr(self, item)
