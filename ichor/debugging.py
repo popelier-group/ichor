@@ -2,7 +2,7 @@ import sys
 import time
 from functools import wraps
 
-from ichor.typing import F, T
+from ichor.itypes import F, T
 
 
 def printq(*args) -> None:

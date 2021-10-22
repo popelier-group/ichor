@@ -5,7 +5,7 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 delete_child_process_jobs,
                                 find_child_processes_recursively,
                                 rerun_failed_child_process,
-                                stop_all_child_processes)
+                                stop_all_child_processes, make_missing_atom_models)
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
 
@@ -37,6 +37,8 @@ def auto_run_per_atom_menu():
         menu.add_space()
         menu.add_option("d", "Run per-atom daemon", PerAtomDaemon().start)
         menu.add_option("s", "Stop per-atom daemon", PerAtomDaemon().stop)
+        menu.add_space()
+        menu.add_option("m", "Make model for all properties", make_missing_atom_models)
 
 
 def auto_run_per_property_menu():

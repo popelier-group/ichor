@@ -16,6 +16,7 @@ from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter
+from ichor.globals import GLOBALS
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -26,68 +27,16 @@ atoms_selected = False
 models_selected = False
 
 
-# todo: refactor to use ichor.common.types.enum.Enum
-class ModelType(Enum):
-    """Enum used for all the different models we make: iqa and multipole moments."""
-
-    iqa = "iqa"
-    q00 = "q00"
-    q10 = "q10"
-    q11c = "q11c"
-    q11s = "q11s"
-    q20 = "q20"
-    q21c = "q21c"
-    q21s = "q21s"
-    q22c = "q22c"
-    q22s = "q22s"
-    q30 = "q30"
-    q31c = "q31c"
-    q31s = "q31s"
-    q32c = "q32c"
-    q32s = "q32s"
-    q33c = "q33c"
-    q33s = "q33s"
-    q40 = "q40"
-    q41c = "q41c"
-    q41s = "q41s"
-    q42c = "q42c"
-    q42s = "q42s"
-    q43c = "q43c"
-    q43s = "q43s"
-    q44c = "q44c"
-    q44s = "q44s"
-    iqa_dispersion = "iqa+dispersion"
-    dispersion = "dispersion"
-
-    @classmethod
-    def to_str(cls, ty: "ModelType"):
-        """Convert the named element to its string value."""
-        return ty.value
-
-    @classmethod
-    def from_str(cls, ty: str) -> "ModelType":
-        """Convert the string value to its corresponding named element if one exists."""
-        for ity in cls:
-            if ity.value == ty:
-                return ity
-        raise ValueError(f"No ModelType {ty}")
-
-    @classmethod
-    def get(cls, item):
-        item = item.replace("+", "_").replace("-", "_")
-        return cls[item]
-
-
-default_model_type = {
-    QuantumChemicalTopologyProgram.AIMAll: [ModelType.iqa],
-    QuantumChemicalTopologyProgram.Morfi: [ModelType.iqa_dispersion],
-}
-
-model_types: List[ModelType] = default_model_type[
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+MODEL_TYPES = [
+    "iqa",
+    *constants.multipole_names,
 ]
-atom_names: List[str] = []
 
+if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi and not GLOBALS.ADD_DISPERSION_TO_IQA:
+    MODEL_TYPES += ["dispersion"]  # dispersion only available when qctp is morfi
+
+default_model_type = "iqa"
+atom_names: List[str] = []
 
 def setup(directory: Path):
     """
@@ -109,7 +58,7 @@ def setup(directory: Path):
     atom_models_to_make = list(atom_names)
 
 
-def toggle_model_type(ty: ModelType):
+def toggle_model_type(ty: str):
     global model_types
     if ty in model_types:
         del model_types[model_types.index(ty)]
@@ -126,13 +75,13 @@ def select_model_type():
     while True:
         Menu.clear_screen()
         print("Select Models To Create")
-        model_type_list = list(map(ModelType.to_str, ModelType)) + [
+        model_type_list = MODEL_TYPES + [
             "multipoles"
         ]
         with ListCompleter(model_type_list):
-            for ty in ModelType:
+            for ty in MODEL_TYPES:
                 print(
-                    f"[{'x' if ty in model_types else ' '}] {ModelType.to_str(ty)}"
+                    f"[{'x' if ty in model_types else ' '}] {ty}"
                 )
             print()
             ans = input(">> ")
@@ -143,9 +92,9 @@ def select_model_type():
                 if ans == "multipoles":
                     for multipole in constants.multipole_names:
                         if multipole in model_type_list:
-                            toggle_model_type(ModelType.get(multipole))
+                            toggle_model_type(multipole)
                 else:
-                    toggle_model_type(ModelType.get(ans))
+                    toggle_model_type(ans)
             elif ans in ["c", "clear"]:
                 model_types.clear()
     models_selected = True
@@ -219,7 +168,7 @@ def make_models_menu_refresh(menu):
     menu.add_option("a", "Select Atoms", select_atoms)
     menu.add_space()
     menu.add_message(
-        f"Model Type(s): {', '.join(map(ModelType.to_str, model_types))}"
+        f"Model Type(s): {', '.join(model_types)}"
     )
     menu.add_message(f"Number of Training Points: {n_training_points}")
     menu.add_message(f"Atoms: {', '.join(map(str, atom_models_to_make))}")
@@ -260,9 +209,9 @@ def make_models(
 
     n_training_points = ntrain or len(_model_data)
     model_types = (
-        [ModelType.from_str(ty) for ty in types]
+        [ty for ty in types]
         if types is not None
-        else [ModelType.iqa]
+        else [default_model_type]
     )
     atom_models_to_make = atoms or [
         atom.atom_num for atom in _model_data[0].atoms
@@ -325,7 +274,7 @@ def create_ferebus_directories_and_submit(
         features = _model_data[atom].features
         for i, point in enumerate(_model_data):
             properties = {
-                ty.value: getattr(point, ty.value)[atom] for ty in model_types
+                ty: point[atom].get_property(ty) for ty in model_types
             }
             training_data += [(features[i], properties)]
 
@@ -442,5 +391,5 @@ def write_ftoml(ferebus_directory: Path, atom: str):
         ftoml.write("[notes]\n")
         ftoml.write(f'method = "{GLOBALS.METHOD}"\n')
         ftoml.write(f'basis-set = "{GLOBALS.BASIS_SET}"\n')
-        if ModelType.iqa in model_types and QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
+        if "iqa" in model_types and QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
             ftoml.write(f'iqa+dispersion = "{GLOBALS.ADD_DISPERSION_TO_IQA}"\n')
