@@ -3,11 +3,11 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.auto_run import rerun_from_failed
-from ichor.daemon import Daemon
 from ichor.common.io import mkdir, pushd
+from ichor.common.os import kill_pid, pid_exists
+from ichor.daemon import Daemon
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.queue import delete_jobs
-from ichor.common.os import pid_exists, kill_pid
 
 
 def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
@@ -60,11 +60,13 @@ def rerun_failed_child_process(
             ReRunDaemon().start()
 
 
-def stop_all_child_processes(child_processes: Optional[List[Path]] = None) -> None:
+def stop_all_child_processes(
+    child_processes: Optional[List[Path]] = None,
+) -> None:
     if child_processes is None:
         child_processes = find_child_processes_recursively()
 
-    with open(FILE_STRUCTURE["pids"], 'r') as f:
+    with open(FILE_STRUCTURE["pids"], "r") as f:
         for line in f:
             pid = int(line)
             if pid_exists(pid):

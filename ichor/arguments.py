@@ -50,12 +50,8 @@ external_functions = [
     ExternalFunction(
         "ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"
     ),
-    ExternalFunction(
-        "ichor.main.pandora", "submit_points_directory_to_pyscf"
-    ),
-    ExternalFunction(
-        "ichor.main.pandora", "submit_points_directory_to_morfi"
-    ),
+    ExternalFunction("ichor.main.pandora", "submit_points_directory_to_pyscf"),
+    ExternalFunction("ichor.main.pandora", "submit_points_directory_to_morfi"),
     ExternalFunction("ichor.main.gaussian", "rerun_gaussian"),
     ExternalFunction("ichor.main.gaussian", "scrub_gaussian"),
     ExternalFunction("ichor.main.aimall", "rerun_aimall"),
@@ -149,8 +145,11 @@ class Arguments:
                     func=Arguments.call_external_function, args=func_args
                 )
             else:
-                known_function_names = [f' - {function_name}' for function_name in external_functions.keys()]
-                known_functions = '\n'.join(known_function_names)
+                known_function_names = [
+                    f" - {function_name}"
+                    for function_name in external_functions.keys()
+                ]
+                known_functions = "\n".join(known_function_names)
                 message = f"Unknown external function: {func}\nKnown external functions:\n{known_functions}"
                 raise UnknownExternalFunction(message)
 

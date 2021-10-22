@@ -235,6 +235,7 @@ def auto_run() -> JobID:
 
     if GLOBALS.OPTIMISE_PROPERTY == "all":
         from ichor.main.make_models import MODEL_TYPES
+
         IterArgs.ModelTypes.value = MODEL_TYPES
     else:
         types = GLOBALS.OPTIMISE_PROPERTY
@@ -267,7 +268,9 @@ def auto_run() -> JobID:
                     print(f"Submitting Make Sets using {points_location}")
                     # return the total number of points which are going to be in the initial training set
                     IterArgs.nPoints.value = make_sets_npoints(
-                        points, GLOBALS.TRAINING_POINTS, GLOBALS.TRAINING_SET_METHOD
+                        points,
+                        GLOBALS.TRAINING_POINTS,
+                        GLOBALS.TRAINING_SET_METHOD,
                     )  # GLOBALS.TRAINING_POINTS contains the number of initial training points
                     # run the make_sets function on a compute node, which makes the training and sample pool sets from the points_location
                     job_id = IterStep(
@@ -337,10 +340,10 @@ def auto_run_qct(directory: Path):
 
 
 def auto_make_models(
-        directory: Path,
-        atoms: Optional[List[str]] = None,
-        types: Optional[List[str]] = None,
-        hold: Optional[JobID] = None,
+    directory: Path,
+    atoms: Optional[List[str]] = None,
+    types: Optional[List[str]] = None,
+    hold: Optional[JobID] = None,
 ) -> JobID:
     func_order = [
         *get_model_steps(),
@@ -352,7 +355,7 @@ def auto_make_models(
     IterArgs.Atoms.value = atoms
     if types is None:
         from ichor.main.make_models import default_model_type
+
         types = [default_model_type]
     IterArgs.ModelTypes.value = types
     return submit_auto_run_iter(func_order, wait_for_job=hold)
-

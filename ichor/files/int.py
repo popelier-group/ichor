@@ -1,7 +1,6 @@
 import json
 import re
 from typing import Optional
-from ichor.files import FileState
 
 import numpy as np
 
@@ -9,8 +8,9 @@ from ichor import constants, patterns
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
 from ichor.common.io import move
+from ichor.files import FileState
 from ichor.files.file import File, FileContents
-from ichor.files.geometry import GeometryDataFile, GeometryData
+from ichor.files.geometry import GeometryData, GeometryDataFile
 
 
 class INT(GeometryDataFile, File):
@@ -212,7 +212,9 @@ class INT(GeometryDataFile, File):
         explicitly defined here, but they can be accessed because of the GeometryData __getattr__ implementation, which allows
         accessing dictionary keys as if they were attributes."""
         # Global cartesian dipole moment d is a simple rearrangement of the spherical form
-        d = np.array([self.q11c, self.q11s, self.q10])  # these can be accessed like this because of GeometryData __getattr__ method
+        d = np.array(
+            [self.q11c, self.q11s, self.q10]
+        )  # these can be accessed like this because of GeometryData __getattr__ method
 
         print("in rotating dipole")
         print(d)
@@ -447,7 +449,9 @@ class INT(GeometryDataFile, File):
             self.multipoles_data = GeometryData(int_data["multipoles"])
             self.iqa_data = GeometryData(int_data["iqa_data"])
             if "dispersion_data" in int_data.keys():
-                self.dispersion_data = GeometryData(int_data["dispersion_data"])
+                self.dispersion_data = GeometryData(
+                    int_data["dispersion_data"]
+                )
             else:
                 self.dispersion_data = GeometryData()
 
@@ -497,6 +501,7 @@ class INT(GeometryDataFile, File):
     def iqa(self):
         """Returns the IQA energy of the topological atom that was calculated for this topological atom (since 1 .int file is written for each topological atom)."""
         from ichor.qct import ADD_DISPERSION
+
         iqa = self.iqa_data["E_IQA(A)"]
         if ADD_DISPERSION():
             iqa += self.dispersion

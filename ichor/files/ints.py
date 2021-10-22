@@ -4,7 +4,7 @@ from typing import Optional
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files.directory import Directory
-from ichor.files.geometry import GeometryFile, AtomicDict
+from ichor.files.geometry import AtomicDict, GeometryFile
 from ichor.files.int import INT
 
 
@@ -69,13 +69,13 @@ class INTs(Directory, AtomicDict):
             int_file.revert_backup()
 
     def __iter__(self):
-        """ Iterate over all .int files which are found in an INTs directory."""
+        """Iterate over all .int files which are found in an INTs directory."""
         for f in Directory.__iter__(self):
             if INT.check_path(f):
                 yield f
 
     def iter_backup(self):
-        """ Iterate over all .bak files which are found in an INTs directory"""
+        """Iterate over all .bak files which are found in an INTs directory"""
 
         for f in Directory.__iter__(self):
             if f.suffix == INT.backup_filetype:

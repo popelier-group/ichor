@@ -5,8 +5,8 @@ from typing import List, Optional, Union
 
 import ichor
 from ichor.common.functools import classproperty
-from ichor.submission_script.python_command import PythonCommand
 from ichor.itypes import F
+from ichor.submission_script.python_command import PythonCommand
 
 
 class ICHORCommand(PythonCommand):

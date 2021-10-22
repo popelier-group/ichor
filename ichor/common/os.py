@@ -2,8 +2,8 @@ import errno
 import getpass
 import os
 import subprocess
-from signal import SIGTERM
 import time
+from signal import SIGTERM
 from typing import List, Tuple
 
 from ichor.common.str import decode

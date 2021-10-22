@@ -57,9 +57,7 @@ class AtomicDict(dict):
         ```
         """
         try:
-            return {
-                atom: getattr(int_, item) for atom, int_ in self.items()
-            }
+            return {atom: getattr(int_, item) for atom, int_ in self.items()}
         except AttributeError:
             raise AttributeError(
                 f"'{self.__class__.__name__}' object has no attribute '{item}'"

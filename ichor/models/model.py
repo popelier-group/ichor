@@ -6,10 +6,10 @@ import numpy as np
 from ichor.common.functools import cached_property, classproperty
 from ichor.common.str import get_digits
 from ichor.files import File
+from ichor.itypes import F
 from ichor.models.kernels import RBF, Kernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
-from ichor.itypes import F
 
 
 class ModelParameterMissing(Exception):

@@ -1,16 +1,17 @@
-from typing import Callable, Optional, List
+from pathlib import Path
+from typing import Callable, List, Optional
 
+from ichor.auto_run.ichor_jobs.auto_run_ichor_collate_log import \
+    submit_ichor_collate_models_to_auto_run
 from ichor.auto_run.per.per import auto_run_per_value
+from ichor.auto_run.standard_auto_run import auto_make_models
+from ichor.batch_system import JobID
+from ichor.common.io import pushd
 from ichor.daemon import Daemon
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.globals import GLOBALS
-from ichor.batch_system import JobID
-from ichor.common.io import pushd
-from ichor.models import Models
 from ichor.main.make_models import MODEL_TYPES, make_models
-from pathlib import Path
-from ichor.auto_run.standard_auto_run import auto_make_models
-from ichor.auto_run.ichor_jobs.auto_run_ichor_collate_log import submit_ichor_collate_models_to_auto_run
+from ichor.models import Models
 
 
 class PerAtomDaemon(Daemon):
@@ -48,7 +49,7 @@ def run_missing_models(atom_dir: Path, make_on_compute: bool = False) -> JobID:
         return make_models_func(
             FILE_STRUCTURE["training_set"],
             atoms=[atom_dir.name],
-            types=models_to_make
+            types=models_to_make,
         )
 
 
@@ -56,6 +57,10 @@ def make_missing_atom_models(make_on_compute: bool = True) -> JobID:
     job_ids = []
     for d in FILE_STRUCTURE["atoms"].iterdir():
         if d.is_dir() and d.name in GLOBALS.ATOMS.names:
-            job_id = run_missing_models(atom_dir=d, make_on_compute=make_on_compute)
+            job_id = run_missing_models(
+                atom_dir=d, make_on_compute=make_on_compute
+            )
             job_ids.append(job_id)
-    return submit_ichor_collate_models_to_auto_run(FILE_STRUCTURE["atoms"], job_ids)
+    return submit_ichor_collate_models_to_auto_run(
+        FILE_STRUCTURE["atoms"], job_ids
+    )

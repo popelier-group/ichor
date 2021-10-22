@@ -26,7 +26,9 @@ def submit_ichor_collate_models_to_auto_run(
     directory: Path,
     hold: Optional[Union[JobID, List[JobID]]] = None,
 ) -> JobID:
-    submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["collate_models"])
+    submission_script = SubmissionScript(
+        SCRIPT_NAMES["ichor"]["collate_models"]
+    )
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job("collate_models", str(directory))
     with TimingManager(

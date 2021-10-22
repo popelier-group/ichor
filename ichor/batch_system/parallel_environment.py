@@ -1,5 +1,4 @@
 from ichor.common.types import RangeDict
-from ichor.machine import Machine
 
 
 class ParallelEnvironment(RangeDict):
@@ -19,7 +18,7 @@ class ParallelEnvironments(dict):
     """A wrapper around multiple parallel environments. Essentially a dictionary whose values are `ParallelEnvironemnt` instances. This is used to
     get the specific keyword different machines (CSF3/FFLUXLAB,etc.) use for jobs running on multiple cores."""
 
-    def __getitem__(self, item: Machine) -> ParallelEnvironment:
+    def __getitem__(self, item) -> ParallelEnvironment:
         if item not in self.keys():
             self[item] = ParallelEnvironment()
         return super().__getitem__(item)

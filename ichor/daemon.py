@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from ichor.common.io import mkdir, remove
-from ichor.common.os import pid_exists, kill_pid
+from ichor.common.os import kill_pid, pid_exists
 from ichor.file_structure import FILE_STRUCTURE
 
 
@@ -92,7 +92,7 @@ class Daemon(ABC):
         pid = str(os.getpid())
         with open(self.pidfile, "w+") as pf:
             pf.write(f"{pid}\n")
-        with open(FILE_STRUCTURE["pids"], 'a') as f:
+        with open(FILE_STRUCTURE["pids"], "a") as f:
             f.write(f"{pid}\n")
 
     def delpid(self):
@@ -105,9 +105,11 @@ class Daemon(ABC):
         """
         # Check for a pidfile to see if the daemon already runs
         if self.pidfile.exists():
-            with open(self.pidfile, 'r') as f:
+            with open(self.pidfile, "r") as f:
                 if pid_exists(int(f.read().strip())):
-                    raise DaemonRunning(f"Error: Daemon Running (pid file: {self.pidfile})")
+                    raise DaemonRunning(
+                        f"Error: Daemon Running (pid file: {self.pidfile})"
+                    )
 
         # Start the daemon
         self.daemonize()
@@ -121,7 +123,7 @@ class Daemon(ABC):
         if not self.pidfile.exists():
             return
 
-        with open(self.pidfile, 'r') as f:
+        with open(self.pidfile, "r") as f:
             pid = int(f.read().strip())
 
         if not pid_exists(pid):

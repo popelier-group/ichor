@@ -2,12 +2,12 @@ import re
 
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
+from ichor.common.str import split_by
 from ichor.constants import AIMALL_FUNCTIONALS
 from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryDataFile, GeometryFile
 from ichor.globals import GLOBALS
 from ichor.units import AtomicDistance
-from ichor.common.str import split_by
 
 
 class WFN(GeometryFile, GeometryDataFile, File):

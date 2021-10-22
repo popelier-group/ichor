@@ -33,8 +33,8 @@
 """
 
 
+from ichor.batch_system import BATCH_SYSTEM
 from ichor.globals import GLOBALS
 from ichor.machine import MACHINE
-from ichor.batch_system import BATCH_SYSTEM
 
 __all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM"]

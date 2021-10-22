@@ -1,6 +1,6 @@
+import os
 import platform
 from enum import auto
-import os
 
 from ichor.common.functools import cached_property
 from ichor.common.io import mkdir

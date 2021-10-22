@@ -2,6 +2,7 @@ from pathlib import Path
 
 from ichor.atoms import AtomsNotFoundError
 from ichor.files.directory import AnnotatedDirectory
+from ichor.files.file import FileContents
 from ichor.files.geometry import AtomData, GeometryDataFile, GeometryFile
 from ichor.files.gjf import GJF
 from ichor.files.ints import INTs
@@ -9,7 +10,6 @@ from ichor.files.optional_file import OptionalFile, OptionalPath
 from ichor.files.pandora import PandoraDirectory, PandoraInput
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
-from ichor.files.file import FileContents
 
 
 class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
@@ -86,7 +86,9 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
             except AttributeError:
                 tried.append(f.path)
 
-        raise AttributeError(f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'")
+        raise AttributeError(
+            f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'"
+        )
 
     def __repr__(self):
         return str(self.path)

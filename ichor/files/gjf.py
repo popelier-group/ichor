@@ -6,8 +6,8 @@ from typing import List, Optional
 from ichor import patterns
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
-from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.files.file import FileContents
+from ichor.files.qcp import QuantumChemistryProgramInput
 
 
 class GaussianJobType(Enum):

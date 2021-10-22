@@ -1,15 +1,15 @@
 import shutil
-from enum import Enum
 from abc import ABC, abstractmethod
+from enum import Enum
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
-from ichor.common.functools import buildermethod, classproperty
+from ichor.common.functools import (buildermethod, called_from_hasattr,
+                                    classproperty, hasattr)
 from ichor.common.io import move
-from ichor.files.path_object import PathObject
-from ichor.common.functools import called_from_hasattr, hasattr
 from ichor.common.obj import (object_getattribute, object_getdict,
                               object_hasattr, object_setattr)
+from ichor.files.path_object import PathObject
 
 
 class FileReadError(Exception):
@@ -40,12 +40,10 @@ class File(PathObject, ABC):
         super().__init__(path)  # initialize PathObject init
         self.state = FileState.Unread
 
-
     @buildermethod
     def read(self, *args, **kwargs) -> None:
         """Read the contents of the file. Depending on the type of file, different parts will be read in."""
         if self.path.exists() and self.state is FileState.Unread:
-            # print(f"Reading {self.path}")
             self.state = FileState.Reading
             self._read_file(
                 *args, **kwargs
@@ -66,7 +64,7 @@ class File(PathObject, ABC):
 
     @property
     def _file_contents(self):
-        return list(vars(self).keys()) + self.file_contents
+        return list(self.__dir__()) + self.file_contents
 
     @property
     def file_contents(self) -> List[str]:
@@ -100,12 +98,10 @@ class File(PathObject, ABC):
 
         :param item: The attribute that needs to be accessed.
         """
-        # print(f"getting {item}")
-
         try:
             if super().__getattribute__(item) is FileContents:
                 self.read()
-        except AttributeError:
+        except AttributeError:  # todo: see if we can get rid of the need for this as can cause issues if there is truly an AttributeError in self.read()
             if item in self._file_contents:
                 self.read()
 
@@ -115,7 +111,6 @@ class File(PathObject, ABC):
             raise AttributeError(
                 f"{object_getattribute(self, 'path')} instance of {object_getattribute(self, '__class__').__name__} has no attribute {item}"
             )
-
 
     def __getitem__(self, item):
         """Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
