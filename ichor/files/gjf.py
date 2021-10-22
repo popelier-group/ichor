@@ -7,6 +7,7 @@ from ichor import patterns
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
 from ichor.files.qcp import QuantumChemistryProgramInput
+from ichor.files.file import FileContents
 
 
 class GaussianJobType(Enum):
@@ -27,13 +28,13 @@ class GJF(QuantumChemistryProgramInput):
     def __init__(self, path: Path):
         QuantumChemistryProgramInput.__init__(self, path)
 
-        self.job_type: Optional[GaussianJobType] = None
+        self.job_type: Optional[GaussianJobType] = FileContents
 
-        self.charge: Optional[int] = None
-        self.multiplicity: Optional[int] = None
+        self.charge: Optional[int] = FileContents
+        self.multiplicity: Optional[int] = FileContents
 
-        self.startup_options: Optional[List[str]] = None
-        self.keywords: Optional[List[str]] = None
+        self.startup_options: Optional[List[str]] = FileContents
+        self.keywords: Optional[List[str]] = FileContents
 
     @buildermethod
     def _read_file(self):
@@ -43,7 +44,7 @@ class GJF(QuantumChemistryProgramInput):
             for line in f:
                 # These are Link 0 Commands in Gaussian, eg. %chk
                 if line.startswith("%"):
-                    if self.startup_options is None:
+                    if self.startup_options is FileContents:
                         self.startup_options = []
                     self.startup_options += [line.strip().replace("%", "")]
                 # This is the following line where key words for Gaussian (level of theory, etc.) are defined
@@ -66,7 +67,7 @@ class GJF(QuantumChemistryProgramInput):
                         # if the given Gaussian keyword is not defined in GaussianJobType or is not level of theory/basis set
                         # then add to self.keywords which is None by Default
                         else:
-                            if self.keywords is None:
+                            if self.keywords is FileContents:
                                 self.keywords = []
                             self.keywords += [keyword]
                 # find charge and multiplicity which are given on one line in Gaussian .gjf

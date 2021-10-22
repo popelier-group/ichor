@@ -1,15 +1,14 @@
-import re
 from pathlib import Path
 from typing import Optional
 
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files.directory import Directory
-from ichor.files.geometry import GeometryFile
+from ichor.files.geometry import GeometryFile, AtomicDict
 from ichor.files.int import INT
 
 
-class INTs(Directory, dict):
+class INTs(Directory, AtomicDict):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
@@ -39,11 +38,11 @@ class INTs(Directory, dict):
             )
         self._parent = value
 
-    @buildermethod
-    def read(self):
-        """Read all the individual .int files. See the `INT` class for how one .int file is read."""
-        for atom, int_file in self.items():
-            int_file.read()
+    # @buildermethod
+    # def read(self):
+    #     """Read all the individual .int files. See the `INT` class for how one .int file is read."""
+    #     for atom, int_file in self.items():
+    #         int_file.read()
 
     def parse(self) -> None:
         for f in self:
@@ -69,32 +68,10 @@ class INTs(Directory, dict):
         for atom, int_file in self.items():
             int_file.revert_backup()
 
-    def __getattr__(self, item):
-        """
-        If an attribute is requested that is not in INTs but is an attribute of INT, a dictionary
-        of the attributes are returned. e.g.
-
-        ```python
-        >>> ints.iqa
-        {'O1': 76.51, 'H2': 0.52, 'H3': 0.53}
-        ```
-        """
-        if item not in self.__dict__.keys():
-            try:
-                return {
-                    atom: getattr(int_, item) for atom, int_ in self.items()
-                }
-            except AttributeError:
-                raise AttributeError(
-                    f"'{self.__class__}' object has no attribute '{item}'"
-                )
-        return self.__dict__[item]
-
     def __iter__(self):
         """ Iterate over all .int files which are found in an INTs directory."""
-
         for f in Directory.__iter__(self):
-            if f.suffix == INT.filetype:
+            if INT.check_path(f):
                 yield f
 
     def iter_backup(self):

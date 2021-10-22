@@ -2,7 +2,7 @@ from abc import ABC
 from pathlib import Path
 from typing import Optional
 
-from ichor.files.file import File
+from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryFile
 
 
@@ -13,5 +13,5 @@ class QuantumChemistryProgramInput(GeometryFile, File, ABC):
         File.__init__(self, path)
         GeometryFile.__init__(self)
 
-        self.method: Optional[str] = None
-        self.basis_set: Optional[str] = None
+        self.method: Optional[str] = FileContents
+        self.basis_set: Optional[str] = FileContents

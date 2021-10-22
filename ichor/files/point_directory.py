@@ -1,21 +1,18 @@
-import inspect
-import re
 from pathlib import Path
-from typing import Optional
 
 from ichor.atoms import AtomsNotFoundError
-from ichor.common.functools import classproperty
 from ichor.files.directory import AnnotatedDirectory
-from ichor.files.geometry import AtomData, GeometryData, GeometryFile
+from ichor.files.geometry import AtomData, GeometryDataFile, GeometryFile
 from ichor.files.gjf import GJF
 from ichor.files.ints import INTs
 from ichor.files.optional_file import OptionalFile, OptionalPath
 from ichor.files.pandora import PandoraDirectory, PandoraInput
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
+from ichor.files.file import FileContents
 
 
-class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
+class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
     """
     A helper class that wraps around ONE directory which contains ONE point (one molecular geometry).
 
@@ -36,7 +33,7 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
 
     def __init__(self, path):
         GeometryFile.__init__(self)
-        GeometryData.__init__(self)
+        GeometryDataFile.__init__(self)
         AnnotatedDirectory.__init__(self, path)
 
     def parse(self):
@@ -62,7 +59,7 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
 
     @atoms.setter
     def atoms(self, value):
-        if value is not None:
+        if value is not FileContents:
             if not self.xyz.exists():
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
             self.xyz = XYZ(self.xyz.path, value)
@@ -77,18 +74,19 @@ class PointDirectory(GeometryFile, GeometryData, AnnotatedDirectory):
         return getattr(self.ints, item)
 
     def __getattr__(self, item):
-        try:
-            return getattr(self.ints, item)
-        except AttributeError:
+        tried = []
+        for d in self.directories():
             try:
-                return getattr(self.gjf, item)
+                return getattr(d, item)
             except AttributeError:
-                try:
-                    return getattr(self.wfn, item)
-                except AttributeError:
-                    raise AttributeError(
-                        f"'{self.path}' instance of '{self.__class__.__name__}' object has no attribute '{item}'"
-                    )
+                tried.append(d.path)
+        for f in self.files():
+            try:
+                return getattr(f, item)
+            except AttributeError:
+                tried.append(f.path)
+
+        raise AttributeError(f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'")
 
     def __repr__(self):
         return str(self.path)

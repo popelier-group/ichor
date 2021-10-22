@@ -3,34 +3,36 @@ import re
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
 from ichor.constants import AIMALL_FUNCTIONALS
-from ichor.files.file import File
-from ichor.files.geometry import GeometryData, GeometryFile
+from ichor.files.file import File, FileContents
+from ichor.files.geometry import GeometryDataFile, GeometryFile
 from ichor.globals import GLOBALS
 from ichor.units import AtomicDistance
+from ichor.common.str import split_by
 
 
-class WFN(GeometryFile, GeometryData, File):
+class WFN(GeometryFile, GeometryDataFile, File):
     """Wraps around a .wfn file that is the output of Gaussian"""
 
     def __init__(self, path):
         File.__init__(self, path)
         GeometryFile.__init__(self)
-        GeometryData.__init__(self)
+        GeometryDataFile.__init__(self)
 
         self.header: str = ""
 
-        self.mol_orbitals: int = 0
-        self.primitives: int = 0
-        self.nuclei: int = 0
-        self.method: str = "HF"
+        self.mol_orbitals: int = FileContents
+        self.primitives: int = FileContents
+        self.nuclei: int = FileContents
+        self.method: str = FileContents
 
-        self.energy: float = 0.0
-        self.virial: float = 0.0
+        self.energy: float = FileContents
+        self.virial: float = FileContents
 
     @buildermethod
     def _read_file(self, only_header=False):
         """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
         FileState of the file is FileState.Unread"""
+        self.method = GLOBALS.METHOD
         self.atoms = Atoms()
         with open(self.path, "r") as f:
             next(f)
@@ -40,16 +42,11 @@ class WFN(GeometryFile, GeometryData, File):
                 return
             for line in f:
                 if "CHARGE" in line:
-                    line_split = line.split()
-                    reline = re.finditer(
-                        r"[+-]?\d+\.\d+([[Ee]?[+-]?]\d+)?", line
-                    )
-                    atom_type, x, y, z = (
-                        line_split[0],
-                        float(next(reline).group(0)),
-                        float(next(reline).group(0)),
-                        float(next(reline).group(0)),
-                    )
+                    record = split_by(line, [4, 4, 16, 12, 12, 12])
+                    atom_type = record[0]
+                    x = float(record[3])
+                    y = float(record[4])
+                    z = float(record[5])
                     self.atoms.add(
                         Atom(atom_type, x, y, z, units=AtomicDistance.Bohr)
                     )

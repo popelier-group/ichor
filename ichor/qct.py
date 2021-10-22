@@ -9,3 +9,8 @@ class QuantumChemicalTopologyProgram(Enum):
 
 def QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM():
     return QuantumChemicalTopologyProgram(QUANTUM_CHEMISTRY_PROGRAM())
+
+
+def ADD_DISPERSION():
+    from ichor.globals import GLOBALS
+    return QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi and GLOBALS.ADD_DISPERSION_TO_IQA

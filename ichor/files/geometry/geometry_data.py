@@ -9,7 +9,7 @@ class PropertyNotFound(Exception):
     pass
 
 
-class GeometryData(ABC):
+class GeometryDataFile(ABC):
     """
     Class used to describe a file containing properties of a geometry
 
@@ -23,20 +23,16 @@ class GeometryData(ABC):
         except AttributeError:
             raise PropertyNotFound(f"Property {item} not found")
 
-    # def __getattr__(self, item: str) -> Any:
-    #     item = item.replace("+", "_").replace(
-    #         "-", "_"
-    #     )  # attributes cannot have '+' or '-' so must be replaced with underscore
-    #     if item in dir(self):
-    #         return super().__getattribute__(item)
-    #     # loop over __dict__ and find any attributes which are dictionaries.
-    #     # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
-    #     for var, inst in self.__dict__.items():
-    #         if isinstance(inst, GeometryData) and item in inst.keys():
-    #             return inst[item]
-    #     raise AttributeError(
-    #         f"{self.__class__} object has no attribute {item}"
-    #     )
+    def __getattr__(self, item: str) -> Any:
+        # loop over __dict__ and find any attributes which are dictionaries.
+        # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
+        # todo: implement method for combining multiple dictionaries with identical keys
+        for var, inst in vars(self).items():
+            if isinstance(inst, GeometryData) and item in inst.keys():
+                return inst[item]
+        raise AttributeError(
+            f"{self.__class__} object has no attribute {item}"
+        )
 
     def __getitem__(self, item):
         if isinstance(item, str):
@@ -45,5 +41,26 @@ class GeometryData(ABC):
         return super().__getitem__(item)
 
 
-# class GeometryData(dict):
-#     pass
+class GeometryData(dict):
+    pass
+
+
+class AtomicDict(dict):
+    def __getattr__(self, item):
+        """
+        If an attribute is requested that is not in INTs but is an attribute of INT, a dictionary
+        of the attributes are returned. e.g.
+
+        ```python
+        >>> ints.iqa
+        {'O1': 76.51, 'H2': 0.52, 'H3': 0.53}
+        ```
+        """
+        try:
+            return {
+                atom: getattr(int_, item) for atom, int_ in self.items()
+            }
+        except AttributeError:
+            raise AttributeError(
+                f"'{self.__class__.__name__}' object has no attribute '{item}'"
+            )

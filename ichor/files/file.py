@@ -1,27 +1,51 @@
 import shutil
+from enum import Enum
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.io import move
-from ichor.files.path_object import FileState, PathObject
+from ichor.files.path_object import PathObject
+from ichor.common.functools import called_from_hasattr, hasattr
+from ichor.common.obj import (object_getattribute, object_getdict,
+                              object_hasattr, object_setattr)
 
 
 class FileReadError(Exception):
     pass
 
 
+class FileState(Enum):
+    """An enum that is used to make it easier to check the current file state."""
+
+    Unread = 1
+    Reading = 2
+    Read = 3
+
+
+class FileContentsType:
+    pass
+
+
+FileContents = FileContentsType()
+
+
 class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
 
+    state: FileState = FileState.Unread
+
     def __init__(self, path):
         super().__init__(path)  # initialize PathObject init
+        self.state = FileState.Unread
+
 
     @buildermethod
     def read(self, *args, **kwargs) -> None:
         """Read the contents of the file. Depending on the type of file, different parts will be read in."""
         if self.path.exists() and self.state is FileState.Unread:
+            # print(f"Reading {self.path}")
             self.state = FileState.Reading
             self._read_file(
                 *args, **kwargs
@@ -40,6 +64,14 @@ class File(PathObject, ABC):
     def filetype(self) -> str:
         pass
 
+    @property
+    def _file_contents(self):
+        return list(vars(self).keys()) + self.file_contents
+
+    @property
+    def file_contents(self) -> List[str]:
+        return []
+
     @classmethod
     def check_path(cls, path: Path) -> bool:
         return path.suffix == cls.filetype
@@ -57,3 +89,41 @@ class File(PathObject, ABC):
         raise NotImplementedError(
             f"'write' method not implemented for {self.__class__.__name__}"
         )
+
+    def __getattribute__(self, item):
+        """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.
+        If the attribute does not exist, then read the file and update its filestate. Then try to return the value of the attribute, if
+        the attribute still does not exist after reading the file, then return an AttributeError.
+
+        One must be careful to make sure all attributes that want to be accessed lazily must be an attribute of the class and
+        not to override __getattribute__ in subclasses of PathObject.
+
+        :param item: The attribute that needs to be accessed.
+        """
+        # print(f"getting {item}")
+
+        try:
+            if super().__getattribute__(item) is FileContents:
+                self.read()
+        except AttributeError:
+            if item in self._file_contents:
+                self.read()
+
+        try:
+            return super().__getattribute__(item)
+        except AttributeError:
+            raise AttributeError(
+                f"{object_getattribute(self, 'path')} instance of {object_getattribute(self, '__class__').__name__} has no attribute {item}"
+            )
+
+
+    def __getitem__(self, item):
+        """Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
+        read the file and try to access the item again. If the item still does not exist, then throw a KeyError."""
+        try:
+            return super().__getitem__(item)
+        except KeyError:
+            if self.state is FileState.Unread:
+                self.read()
+                return self.__getitem__(item)
+        raise KeyError(f"No '{item}' item found for '{self.path}'")

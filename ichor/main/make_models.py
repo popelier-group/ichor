@@ -1,4 +1,3 @@
-from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
@@ -37,6 +36,9 @@ if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi a
 
 default_model_type = "iqa"
 atom_names: List[str] = []
+
+model_types = [default_model_type]
+
 
 def setup(directory: Path):
     """
@@ -185,8 +187,6 @@ def make_models_menu(directory: Path):
         pass
 
 
-# todo: I think that the functions could be named better because there is make_models and create_ferebus_directories_and_submit. Also the file could be
-# arranged better because make_models is followed by move_models instead of create_ferebus_directories_and_submit. It is hard to understand what is going on due to the use of globals and a lot of functiosn in functions
 def make_models(
     directory: Path,
     atoms: Optional[List[str]] = None,
