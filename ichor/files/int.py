@@ -216,10 +216,6 @@ class INT(GeometryDataFile, File):
             [self.q11c, self.q11s, self.q10]
         )  # these can be accessed like this because of GeometryData __getattr__ method
 
-        print("in rotating dipole")
-        print(d)
-        print(self.C)
-
         # Rotation of 1D cartesian tensor from global to local frame
         rotated_d = np.einsum("ia,a->i", self.C, d)
 
