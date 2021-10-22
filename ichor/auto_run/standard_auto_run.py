@@ -211,13 +211,19 @@ def auto_run() -> JobID:
     from ichor.globals import GLOBALS
 
     if FILE_STRUCTURE["counter"].exists():
-        raise AutoRunAlreadyRunning(
-            f"Auto Run may already be running, as {FILE_STRUCTURE['counter']} exists\nIf this is a mistake, remove {FILE_STRUCTURE['counter']} and retry"
-        )
+        with open(FILE_STRUCTURE["counter"], 'r') as f:
+            current_iter = int(next(f))
+            max_iter = int(next(f))
+
+        if current_iter < max_iter:
+            raise AutoRunAlreadyRunning(
+                f"Auto Run may already be running, as {FILE_STRUCTURE['counter']} exists and {current_iter} < {max_iter}\nIf this is a mistake, remove {FILE_STRUCTURE['counter']} and retry"
+            )
 
     mkdir(FILE_STRUCTURE["counter"].parent)
     with open(FILE_STRUCTURE["counter"], "w") as f:
-        f.write("0")
+        f.write("0\n")
+        f.write(f"{GLOBALS.N_ITERATIONS}\n")
 
     # Make a list of types of iterations. Only first and last iterations are different.
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]
@@ -315,12 +321,13 @@ def rerun_from_failed() -> Optional[JobID]:
     if FILE_STRUCTURE["counter"].exists():
         with open(FILE_STRUCTURE["counter"], "r") as f:
             current_iteration = int(next(f))
+            max_iteration = int(next(f))
 
     if (
-        current_iteration < GLOBALS.N_ITERATIONS
+        current_iteration < max_iteration
         and len(get_current_jobs()) == 0
     ):
-        GLOBALS.N_ITERATIONS = GLOBALS.N_ITERATIONS - current_iteration
+        GLOBALS.N_ITERATIONS = max_iteration - current_iteration
         GLOBALS.save_to_config()
         remove(FILE_STRUCTURE["counter"])
         return auto_run()
