@@ -98,6 +98,8 @@ class File(PathObject, ABC):
 
         :param item: The attribute that needs to be accessed.
         """
+
+        # check if the attribute has value FileContents, if not read file
         try:
             if super().__getattribute__(item) is FileContents:
                 self.read()
@@ -105,6 +107,7 @@ class File(PathObject, ABC):
             if item in self._file_contents:
                 self.read()
 
+        # now that the file is read, return the attribute that should exist now
         try:
             return super().__getattribute__(item)
         except AttributeError:
