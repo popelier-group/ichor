@@ -5,16 +5,11 @@ import numpy as np
 
 from ichor.common.functools import cached_property, classproperty
 from ichor.common.str import get_digits
-from ichor.files import File
+from ichor.files.file import File, FileContents
 from ichor.itypes import F
 from ichor.models.kernels import RBF, Kernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
-
-
-class ModelParameterMissing(Exception):
-    def __init__(self, instance: "Model", missing_parameter_name: str):
-        self.message = f"'{missing_parameter_name}' is not defined for '{instance.path}' instance of '{instance.__class__.__name__}' check model file"
 
 
 def check_x_2d(func: F) -> F:
@@ -35,18 +30,18 @@ class Model(File):
     """
 
     # these can be accessed with __annotations__, so leave them
-    _system: Optional[str] = None
-    _atom: Optional[str] = None
-    _type: Optional[str] = None
+    _system: Optional[str] = FileContents
+    _atom: Optional[str] = FileContents
+    _type: Optional[str] = FileContents
 
-    _nfeats: Optional[int] = None
-    _ntrain: Optional[int] = None
+    _nfeats: Optional[int] = FileContents
+    _ntrain: Optional[int] = FileContents
 
-    _mean: Optional[Mean] = None
-    _k: Optional[Kernel] = None
+    _mean: Optional[Mean] = FileContents
+    _k: Optional[Kernel] = FileContents
 
-    _x: Optional[np.ndarray] = None
-    _y: Optional[np.ndarray] = None
+    _x: Optional[np.ndarray] = FileContents
+    _y: Optional[np.ndarray] = FileContents
     # _weights: Optional[np.ndarray] = None
 
     nugget: Optional[float] = None
@@ -170,56 +165,38 @@ class Model(File):
 
     @cached_property
     def system(self):
-        if self._system is None:
-            raise ModelParameterMissing(self, "system")
         return self._system
 
     @cached_property
     def atom(self):
-        if self._atom is None:
-            raise ModelParameterMissing(self, "atom")
         return self._atom
 
     @cached_property
     def type(self):
-        if self._type is None:
-            raise ModelParameterMissing(self, "property")
         return self._type
 
     @cached_property
     def nfeats(self):
-        if self._nfeats is None:
-            raise ModelParameterMissing(self, "nfeats")
         return self._nfeats
 
     @cached_property
     def ntrain(self):
-        if self._ntrain is None:
-            raise ModelParameterMissing(self, "ntrain")
         return self._ntrain
 
     @cached_property
     def mean(self):
-        if self._mean is None:
-            raise ModelParameterMissing(self, "mean")
         return self._mean
 
     @cached_property
     def k(self):
-        if self._k is None:
-            raise ModelParameterMissing(self, "kernel")
         return self._k
 
     @cached_property
     def x(self):
-        if self._x is None:
-            raise ModelParameterMissing(self, "x")
         return self._x
 
     @cached_property
     def y(self):
-        if self._y is None:
-            raise ModelParameterMissing(self, "y")
         return self._y
 
     @classproperty
