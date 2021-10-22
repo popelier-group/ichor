@@ -18,6 +18,7 @@ class XYZ(GeometryFile, File):
 
     def __init__(self, path: Path, atoms: Optional[Atoms] = None):
         File.__init__(self, path)
+        GeometryFile.__init__(self)
 
         if atoms is not None:
             self.atoms = atoms

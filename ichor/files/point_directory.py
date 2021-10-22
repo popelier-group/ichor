@@ -49,12 +49,9 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
     @property
     def atoms(self):
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
-        if self.xyz.exists():
-            return self.xyz.atoms
-        if self.gjf.exists():
-            return self.gjf.atoms
-        elif self.wfn.exists():
-            return self.wfn.atoms
+        for f in self.files():
+            if isinstance(f, GeometryFile):
+                return f.atoms
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
     @atoms.setter
