@@ -31,18 +31,15 @@ class Model(File):
     """
 
     # these can be accessed with __annotations__, so leave them
-    _system: Optional[str] = FileContents
-    _atom: Optional[str] = FileContents
-    _type: Optional[str] = FileContents
-
-    _nfeats: Optional[int] = FileContents
-    _ntrain: Optional[int] = FileContents
-
-    _mean: Optional[Mean] = FileContents
-    _k: Optional[Kernel] = FileContents
-
-    _x: Optional[np.ndarray] = FileContents
-    _y: Optional[np.ndarray] = FileContents
+    _system: Optional[str]
+    _atom: Optional[str]
+    _type: Optional[str]
+    _nfeats: Optional[int]
+    _ntrain: Optional[int]
+    _mean: Optional[Mean]
+    _k: Optional[Kernel]
+    _x: Optional[np.ndarray]
+    _y: Optional[np.ndarray]
     # _weights: Optional[np.ndarray] = None
 
     nugget: Optional[float] = None
@@ -50,6 +47,16 @@ class Model(File):
     def __init__(self, path):
         File.__init__(self, path)
         self.nugget = 1e-10
+
+        self._system: Optional[str] = FileContents
+        self._atom: Optional[str] = FileContents
+        self._type: Optional[str] = FileContents
+        self._nfeats: Optional[int] = FileContents
+        self._ntrain: Optional[int] = FileContents
+        self._mean: Optional[Mean] = FileContents
+        self._k: Optional[Kernel] = FileContents
+        self._x: Optional[np.ndarray] = FileContents
+        self._y: Optional[np.ndarray] = FileContents
 
     @buildermethod
     def _read_file(self) -> None:
