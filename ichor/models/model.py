@@ -4,6 +4,7 @@ from typing import Optional
 import numpy as np
 
 from ichor.common.functools import cached_property, classproperty
+from ichor.common.functools.buildermethod import buildermethod
 from ichor.common.str import get_digits
 from ichor.files.file import File, FileContents
 from ichor.itypes import F
@@ -50,6 +51,7 @@ class Model(File):
         File.__init__(self, path)
         self.nugget = 1e-10
 
+    @buildermethod
     def _read_file(self) -> None:
         """Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
         kernel_composition = ""
