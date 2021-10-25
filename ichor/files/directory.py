@@ -2,7 +2,7 @@ import inspect
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Type
+from typing import Dict, List, Type
 
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
@@ -20,18 +20,21 @@ class Directory(PathObject, ABC):
     def __init__(self, path):
         PathObject.__init__(
             self, path
-        )  # set path for directory instance as well as FileState to Unread
-        self.parse()  # parse directory to find contents
+        )  # set path attribute for Directory instance
+        self.parse()  # parse directory to find contents and setup the directory structure. THIS DOES NOT READ IN DIRECTORY CONTENTS
 
     @abstractmethod
     def parse(self) -> None:
         """
-        Abstract method to find all relevant files within the directory,
-        note this is not reading the files just finding the paths to the files
+        Abstract method to find all relevant files within the directory.
+
+        .. note::
+            This is not reading the files just finding the paths to the files and setup the directory structure
         """
         pass
 
     def mkdir(self):
+        """ Make an empty directory at the location of the `path` attribute."""
         mkdir(self.path)
 
     def move(self, dst):
@@ -63,20 +66,6 @@ class Directory(PathObject, ABC):
                     ddst = self.path / ddst.name
                     f.replace(ddst)
 
-    @buildermethod
-    def read(self) -> "Directory":
-        """Read a directory and all of its contents and store information that ICHOR needs to function (such as .wfn or .int information that is needed.)
-        If an attribute such as a gjf's energy is being accessed, but the file has not been read yet, the file will be read in first and then the attribute
-        can be returned if it has been successfully read. This method heavily ties in with accessing attributes of `File` objects, since these `File` objects
-        are all encapsulated by a `Directory` object."""
-        if self.state is FileState.Unread:
-            self.state = FileState.Reading
-            for var in vars(self):
-                inst = getattr(self, var)
-                if issubclass(inst.__class__, PathObject):
-                    inst.read()
-            self.state = FileState.Read
-
     def iterdir(self):
         """alias to __iter__ in case child object overrides __iter__"""
         return self.path.iterdir()
@@ -88,10 +77,12 @@ class Directory(PathObject, ABC):
 
 
 class AnnotatedDirectory(Directory, ABC):
-    """Abstract method for adding a parser for a Directory that has annotated files"""
+    """Abstract method for adding a parser for a Directory that has annotated files (such as GJF, INT, WFN). For example, look at the `PointDirectory` class."""
 
     @cached_property
     def filetypes(self) -> Dict[str, Type[File]]:
+        """ Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
+        be set to. These classes are all subclassing from the `File` class. For example {'gjf': GJF,  'wfn': WFN}."""
         filetypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
@@ -105,6 +96,8 @@ class AnnotatedDirectory(Directory, ABC):
 
     @cached_property
     def dirtypes(self) -> Dict[str, Type[Directory]]:
+        """ Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
+        be set to. These classes are all subclassing from the `Directory` class. For example {'ints': INTs}."""
         dirtypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
@@ -116,14 +109,16 @@ class AnnotatedDirectory(Directory, ABC):
                     dirtypes[var] = type_
         return dirtypes
 
-    def files(self):
+    def files(self) -> list:
+        """ Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `File` class."""
         return [
             getattr(self, var)
             for var in vars(self)
             if isinstance(getattr(self, var), File)
         ]
 
-    def directories(self):
+    def directories(self) -> list:
+        """ Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `Directory` class."""
         return [
             getattr(self, var)
             for var in vars(self)
@@ -131,10 +126,8 @@ class AnnotatedDirectory(Directory, ABC):
         ]
 
     def parse(self):
-        """todo: fix this docstring
-        Iterate over __annotations__ which is a dictionary of {"gjf": Optional[GJF], "wfn": Optional[WFN], "ints": Optional[INTs]}
-        as defined from class variables in PointsDirectory. Get the type inside the [] brackets. After that it constructs a filetypes
-        dictionary containing {"gjf": GJF, "wfn": WFN} and dirtypes dictionary containing {"ints": INTs}
+        """ 
+        Iterates over an `AnnotatedDirectory`'s contents (which could be files or other directories). If the content is a file, 
         """
         if not self.exists():
             return
@@ -143,11 +136,16 @@ class AnnotatedDirectory(Directory, ABC):
         dirtypes = self.dirtypes
 
         for f in self.path.iterdir():
-            # if the content is a file. This is true for .gjf/.wfn files todo: fix this
+
+            # if the content is a file. This is true for any files (everything other than directories)
             if f.is_file():
+                # iterate over the filetypes dictionary {"gjf": GJF, "wfn": WFN,......}
                 for var, filetype in filetypes.items():
-                    # if the suffix is either gjf or wfn, since there could be other files in the directory (such as .gau which we don't use) todo: fix this
+                    # if the suffix of the file matches the suffix of the class
                     if filetype.check_path(f):
+
+                        # set attributes for the object which wrap around a file (such as .gjf, .wfn, etc.) 
+                        # if this type of file needs access to the parent (the `AnnotatedDirectory`'s path)
                         if (
                             "parent"
                             in inspect.signature(filetype.__init__).parameters
@@ -156,15 +154,19 @@ class AnnotatedDirectory(Directory, ABC):
                         else:
                             setattr(self, var, filetype(f))
                         break
-            # if the content is a directory. This is currently only for `*_atomicfiles` directories containing .int files todo: fix this
+
+            # if the content is a directory. This is true for any directories (everything other than files)
             elif f.is_dir():
+
+                # iterate over the dirtypes dictionary {"ints": INTs, ....}
                 for var, dirtype in dirtypes.items():
+                    # checks to see if the name of the directory matches a pattern
                     if dirtype.check_path(f):
                         if (
                             "parent"
                             in inspect.signature(dirtype.__init__).parameters
                         ):
-                            # sets the .ints attribute to INTs(path_to_directory, parent=PointDirecotry_instance) todo: fix this
+                            # sets the .ints attribute to INTs(path_to_directory, parent=PointDirecotry_instance)
                             setattr(self, var, dirtype(f, parent=self))
                         else:
                             setattr(self, var, dirtype(f))
