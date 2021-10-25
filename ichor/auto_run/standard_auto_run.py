@@ -339,7 +339,7 @@ def auto_run_qct(directory: Path):
         *get_qct_steps(),
     ]
     points = PointsDirectory(directory)
-    IterArgs.nPoints = len(points)
+    IterArgs.nPoints.value = len(points)
     IterArgs.TrainingSetLocation = directory
     IterArgs.Atoms.value = points[0].atoms.names
 
