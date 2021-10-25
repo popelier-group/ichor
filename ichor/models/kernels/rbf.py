@@ -9,13 +9,13 @@ class RBF(Kernel):
     When each dimension has a separate lengthscale, this is also called the RBF-ARD kernel
     """
 
-    def __init__(self, lengthscale: np.ndarray):
+    def __init__(self, thetas: np.ndarray):
 
-        self._lengthscale = np.sqrt(1 / (2.0 * lengthscale))
+        self._thetas = thetas
 
     @property
     def params(self):
-        return self._lengthscale
+        return self._thetas
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """
@@ -32,24 +32,11 @@ class RBF(Kernel):
                 The RBF covariance matrix of shape (n, m)
         """
 
-        # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
-        # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1
-        # x1 = x1 * self._lengthscale
-        # x2 = x2 * self._lengthscale
-        #
-        # dist = Distance.squared_euclidean_distance(x1, x2)
-        # return np.exp(-0.5 * dist)
-
-        diff = x1 - x2
-        return np.exp(-0.5 * np.sum(self._lengthscale * np.power(diff, 2)))
-
-        # dist = np.empty((x1.shape[0], x2.shape[0], x1.shape[1]))
-        # for i, xi in enumerate(x1):
-        #     for j, xj in enumerate(x2):
-        #         diff = xi - xj
-        #         dist[i, j, :] = diff * diff
-        #
-        # return np.exp(-0.5 * np.sum(dist / self._lengthscale, axis=2))
+        true_lengthscales = np.sqrt(1.0/self._thetas)
+        tmp_x1 = x1 / true_lengthscales
+        tmp_x2 = x2 / true_lengthscales
+        dist = Distance.squared_euclidean_distance(tmp_x1, tmp_x2)
+        return np.exp(-0.5 * dist)
 
     def __repr__(self):
-        return f"RBF({self._lengthscale})"
+        return f"RBF({self._thetas})"

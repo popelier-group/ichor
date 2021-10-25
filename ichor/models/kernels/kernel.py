@@ -8,11 +8,9 @@ class Kernel(ABC):
 
     # TODO: figure out a good way to say if training data is standardized, normalized, etc. because kernels can be affected (for example cyclic RBF is affected)
 
-    @property
+    @abstractmethod
     def params(self):
-        # TODO: Convert this to error
-        print("Error: Params not defined for specified kernel")
-        quit()
+        pass
 
     @abstractmethod
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
@@ -26,27 +24,16 @@ class Kernel(ABC):
 
         Returns:
             :type: `np.ndarray`
-                The RBF covariance matrix matrix of shape (n, m)
+                A covariance matrix of shape (n, m)
         """
 
     def r(self, x_train: np.ndarray, x_test: np.ndarray) -> np.ndarray:
         """helper method to return x_test, x_train covariance matrix K(X*, X)"""
-        r = np.empty((x_train.shape[0], x_test.shape[0]))
-        for i in range(x_test.shape[0]):
-            for j in range(x_train.shape[0]):
-                r[j, i] = self.k(x_test[i], x_train[j])
-        return r
+        return self.k(x_train, x_test)
 
     def R(self, x_train: np.ndarray) -> np.ndarray:
         """helper method to return symmetric square matrix x_train, x_train covariance matrix K(X, X)"""
-        # return self.k(x_train, x_train)
-        R = np.empty((x_train.shape[0], x_train.shape[0]))
-        for i in range(x_train.shape[0]):
-            R[i, i] = 1.0
-            for j in range(i + 1, x_train.shape[0]):
-                R[i, j] = self.k(x_train[i], x_train[j])
-                R[j, i] = R[i, j]
-        return R
+        return self.k(x_train, x_train)
 
     @abstractmethod
     def __repr__(self):
