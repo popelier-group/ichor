@@ -49,6 +49,8 @@ class File(PathObject, ABC):
                 *args, **kwargs
             )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             self.state = FileState.Read
+        elif not self.path.exists():
+            raise FileNotFoundError(f"File with path '{self.path}' is not found on disk.")
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
