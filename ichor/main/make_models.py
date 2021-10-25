@@ -393,6 +393,5 @@ def write_ftoml(ferebus_directory: Path, atom: str):
             and QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
             is QuantumChemicalTopologyProgram.Morfi
         ):
-            ftoml.write(
-                f'iqa+dispersion = "{GLOBALS.ADD_DISPERSION_TO_IQA}"\n'
-            )
+            iqa = "iqa+dispersion" if GLOBALS.ADD_DISPERSION_TO_IQA else "iqa"
+            ftoml.write(f'iqa = "{iqa}"\n')
