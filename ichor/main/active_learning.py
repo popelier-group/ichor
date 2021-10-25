@@ -15,7 +15,7 @@ def active_learning(
     used to add the worst performing point from the sample pool to the training set."""
     from ichor.active_learning import ActiveLearningMethod
     from ichor.arguments import Arguments
-    from ichor.auto_run.standard_auto_run import AutoRunOnly, submit_next_iter
+    from ichor.auto_run.standard_auto_run import submit_next_iter
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.machine import MACHINE, SubmitType
@@ -30,7 +30,8 @@ def active_learning(
     if Arguments.auto_run:
         if FILE_STRUCTURE["counter"].exists():
             with open(FILE_STRUCTURE["counter"], "r") as f:
-                current_iteration = int(f.read())
+                current_iteration = int(next(f))
+                max_iteration = int(next(f))
 
     models = Models(model_directory)
     sample_pool = PointsDirectory(sample_pool_directory)
@@ -64,13 +65,14 @@ def active_learning(
                 mkdir(FILE_STRUCTURE["counter"].parent)
 
             with open(FILE_STRUCTURE["counter"], "w") as f:
-                f.write(f"{current_iteration}")
+                f.write(f"{current_iteration}\n")
+                f.write(f"{max_iteration}\n")
 
-            if current_iteration == GLOBALS.N_ITERATIONS:
+            if current_iteration == max_iteration:
                 remove(
                     FILE_STRUCTURE["counter"]
                 )  # delete counter at the end of the auto run
 
-            if current_iteration <= GLOBALS.N_ITERATIONS:
+            if current_iteration <= max_iteration:
                 if MACHINE.submit_type is SubmitType.DropCompute:
                     submit_next_iter(current_iteration)

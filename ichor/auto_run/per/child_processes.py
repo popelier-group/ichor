@@ -45,7 +45,7 @@ class ReRunDaemon(Daemon):
         super().__init__(pidfile, stdout=stdout, stderr=stderr)
 
     def run(self):
-        rerun_from_failed()
+        rerun_failed_child_process()
         self.stop()
 
 
@@ -57,8 +57,7 @@ def rerun_failed_child_process(
     for child_process in child_processes:
         # todo: ensure finished
         with pushd(child_process, update_cwd=True):
-            ReRunDaemon().start()
-
+            rerun_from_failed()
 
 def stop_all_child_processes(
     child_processes: Optional[List[Path]] = None,
