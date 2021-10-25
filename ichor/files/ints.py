@@ -38,12 +38,6 @@ class INTs(Directory, AtomicDict):
             )
         self._parent = value
 
-    # @buildermethod
-    # def read(self):
-    #     """Read all the individual .int files. See the `INT` class for how one .int file is read."""
-    #     for atom, int_file in self.items():
-    #         int_file.read()
-
     def parse(self) -> None:
         for f in self:
             if f.suffix == INT.filetype:
