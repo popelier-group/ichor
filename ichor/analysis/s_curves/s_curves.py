@@ -140,6 +140,7 @@ def write_to_excel(
     predicted = predicted.T
     # error is still a ModelResult
     error = (true - predicted).abs()
+    true = {k: v for k, v in sorted(true.items())}
 
     with pd.ExcelWriter(output_name) as writer:
         workbook = writer.book
