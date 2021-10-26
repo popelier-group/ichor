@@ -7,7 +7,7 @@ from ichor.models.kernels.kernel import Kernel
 class PeriodicKernel(Kernel):
     """Implemtation of the Periodic Kernel."""
 
-    def __init__(self, lengthscale: np.ndarray, period: np.ndarray):
+    def __init__(self, thetas: np.ndarray, period_length: np.ndarray):
         """
 
         Args:
@@ -25,12 +25,12 @@ class PeriodicKernel(Kernel):
             still passed in as an array that is n_features long.
         """
 
-        self._lengthscale = lengthscale
-        self._period = period
+        self._thetas = thetas
+        self._period_length = period_length
 
     @property
     def params(self):
-        return self._lengthscale, self._period
+        return self._thetas, self._period_length
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """
@@ -47,23 +47,24 @@ class PeriodicKernel(Kernel):
                 The periodic covariance matrix of shape (n, m)
         """
 
-        # TODO: lengthscales vs thetas. Using lengthscales simplifies the code here because you can divide inputs prior to computing distance matrix
-        # TODO: using thetas which are 0.5*l^-2 then means you cannot just multiply by -theta here because they already include l^-2 instead of l^-1
+        # implementation from gpytorch https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
+        true_lengthscales = np.sqrt(1/self._thetas)
 
-        dist = Distance.euclidean_distance(x1, x2)
-        dist *= np.pi
-        dist /= self._period
-        dist = 2 * np.power(np.sin(dist), 2)
-        dist /= np.power(self._lengthscale, 2)
-
-        return np.exp(dist)
+        x1_ = np.pi * (x1 / self._period_length)
+        x2_ = np.pi * (x2 / self._period_length)
+        x1_ = np.expand_dims(x1_, -2)
+        x2_ = np.expand_dims(x2_, -3)
+        diff = x1_ - x2_
+        res = np.exp(np.multiply(np.divide(np.sum(np.power(np.sin(diff), 2), axis=-1), true_lengthscales), -2.0))
+        return res
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
         """helper method to return x_test, x_train Periodic covariance matrix K(X*, X)"""
-
         return self.k(x_test, x_train)
 
     def R(self, x_train: np.ndarray) -> np.ndarray:
         """helper method to return symmetric square matrix x_train, x_train Periodic covariance matrix K(X, X)"""
-
         return self.k(x_train, x_train)
+
+    def __repr__(self):
+        return f"'{self.__class__.__name__}', thetas: {self._thetas}, period_length: {self._period_length}"

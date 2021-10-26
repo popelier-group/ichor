@@ -26,7 +26,10 @@ def x_to_features(func: F) -> F:
 
 
 class Models(Directory, list):
-    """A class which wraps around a directory containing models made by FEREBUS or any other program used to make GP models."""
+    """A class which wraps around a directory containing models made by FEREBUS or any other program used to make GP models. There are different
+    models for iqa energy and each individual multipole moment. Aditionally, every atom in the system has its own set of models for iqa and 
+    multipole moments. These models can have different training input/output data if the models have been made with per-atom.
+    """
 
     def __init__(self, path):
         list.__init__(self)
@@ -44,6 +47,26 @@ class Models(Directory, list):
         from ichor.globals import GLOBALS
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")
+
+    @property
+    def atoms(self) -> list:
+        """ Returns a list of atom names for which models were made"""
+        return natsorted([model.atom for model in self], key=ignore_alpha)
+
+    @property
+    def types(self) -> list:
+        """ Returns a list of types for which models were made"""
+        return [model.type for model in self]
+
+    @property
+    def ntrain(self) -> int:
+        """ Returns the maximum number of training points that were used for a model in this `Models` instance."""
+        return max(model.ntrain for model in self)
+
+    @property
+    def system(self) -> str:
+        """ Returns the name of the system for which models were made."""
+        return self[0].system
 
     def get_features_dict(self, x) -> Dict[str, np.ndarray]:
         if isinstance(x, Atoms):
@@ -121,23 +144,6 @@ class Models(Directory, list):
             return Directory.__iter__(self)
         else:
             return list.__iter__(self)
-
-    @property
-    def atoms(self):
-        return natsorted([model.atom for model in self], key=ignore_alpha)
-
-    @property
-    def types(self):
-        return [model.type for model in self]
-
-    @property
-    def ntrain(self) -> int:
-        return max(model.ntrain for model in self)
-
-    @property
-    def system(self) -> str:
-        return self[0].system
-
 
 class ModelsView(Models):
     def __init__(self, models, *args):
