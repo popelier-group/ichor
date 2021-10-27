@@ -68,12 +68,21 @@ class Models(Directory, list):
         """ Returns the name of the system for which models were made."""
         return self[0].system
 
-    def get_features_dict(self, x) -> Dict[str, np.ndarray]:
+    def get_features_dict(self, x: Union[Atoms, ListOfAtoms, np.ndarray, dict]) -> Dict[str, np.ndarray]:
+        """ Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
+        
+        :param x: An object that contains features, such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
+        :returns: A dictionary containing the atom names as keys and an np.ndarray of features as values
+        """
+
         if isinstance(x, Atoms):
             return self._features_from_atoms(x)
+
         elif isinstance(x, ListOfAtoms):
+            # if there are less models than there are timesteps in x
             if len(self) < len(x):
                 return self._features_from_list_of_atoms_models(x)
+            # if there are more models than there are timesteps in x
             else:
                 return self._features_from_list_of_atoms(x)
         elif isinstance(x, np.ndarray):
@@ -95,6 +104,7 @@ class Models(Directory, list):
     def _features_from_list_of_atoms_models(
         self, x: ListOfAtoms
     ) -> Dict[str, np.ndarray]:
+
         return {
             atom: x[atom].features
             for atom in self.atoms
