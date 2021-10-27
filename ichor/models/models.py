@@ -51,12 +51,12 @@ class Models(Directory, list):
     @property
     def atoms(self) -> list:
         """ Returns a list of atom names for which models were made"""
-        return natsorted([model.atom for model in self], key=ignore_alpha)
+        return list(set(natsorted([model.atom for model in self], key=ignore_alpha)))
 
     @property
     def types(self) -> list:
         """ Returns a list of types for which models were made"""
-        return [model.type for model in self]
+        return list(set([model.type for model in self]))
 
     @property
     def ntrain(self) -> int:
@@ -89,6 +89,7 @@ class Models(Directory, list):
     def _features_from_list_of_atoms(
         self, x: ListOfAtoms
     ) -> Dict[str, np.ndarray]:
+        """Return a dictionary containing atom name as key and atom features as values."""
         return {atom.name: atom.features for atom in x.iteratoms()}
 
     def _features_from_list_of_atoms_models(

@@ -128,23 +128,6 @@ class ListOfAtoms(list):
             else:
                 df.to_csv(f"{fname}_{atom_name}_features.csv")
 
-    def get_headings(self):
-        headings = ["bond1", "bond2", "angle"]
-
-        remaining_features = (
-            len(self[0].features[-1]) - 3
-        )  # Removes bond1, bond 2, angle
-        remaining_features = int(
-            remaining_features / 3
-        )  # each feature has r, theta, phi component
-
-        for feat in range(remaining_features):
-            headings.append(f"r{feat+3}")  # starts at r3
-            headings.append(f"theta{feat+3}")  # starts at theta3
-            headings.append(f"phi{feat+3}")  # starts at phi3
-
-        return headings
-
     def features_to_excel(
         self,
         fname: Optional[Union[str, Path]] = None,
@@ -181,6 +164,23 @@ class ListOfAtoms(list):
             for atom_name, df in dataframes.items():
                 df.columns = self.get_headings()
                 df.to_excel(workbook, sheet_name=atom_name)
+
+    def get_headings(self):
+        headings = ["bond1", "bond2", "angle"]
+
+        remaining_features = (
+            len(self[0].features[-1]) - 3
+        )  # Removes bond1, bond 2, angle
+        remaining_features = int(
+            remaining_features / 3
+        )  # each feature has r, theta, phi component
+
+        for feat in range(remaining_features):
+            headings.append(f"r{feat+3}")  # starts at r3
+            headings.append(f"theta{feat+3}")  # starts at theta3
+            headings.append(f"phi{feat+3}")  # starts at phi3
+
+        return headings
 
     def iteratoms(self):
         """Returns a generator of AtomView instances for each atom stored in ListOfAtoms."""
