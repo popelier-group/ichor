@@ -173,51 +173,63 @@ class Model(File):
         """ Returns the suffix associated with GP model files"""
         return ".model"
 
+    @property
     def system(self) -> str:
         """ Returns the system name"""
         return self._system
 
+    @property
     def atom_name(self) -> str:
         """ Returns the atom name for which a GP model was made"""
         return self._atom
 
+    @property
     def type(self) -> str:
         """ Returns the property (iqa, q00, etc) for which a GP model was made"""
         return self._type
 
+    @property
     def nugget(self) -> float:
         """ Returns the nugget/jitter that is added to the diagonal of the train-train covariance matrix to ensure numerical stability
         of the cholesky decomposition. This is a small number on the order of 1e-6 to 1e-10."""
         return self._nugget
 
+    @property
     def nfeats(self) -> int:
         """ Returns the number of features"""
         return self._nfeats
 
+    @property
     def ntrain(self) -> int:
         """ Returns the number of training points"""
         return self._ntrain
 
+    @property
     def mean(self) -> int:
         """ Returns the GP mean value (mu)"""
         return self._mean
 
+    @property
     def k(self) -> str:
         """ Returns the name of the covariance function used to calculate the covariance matrix"""
         return self._k
 
+    @property
     def x(self) -> np.ndarray:
         """ Returns the. training inputs numpy array Shape `n_points x n_features`"""
         return self._x
 
+    @property
     def y(self) -> np.ndarray:
         """ Returns the training outputs numpy array. Shape `n_points`"""
         return self._y
 
+    @property
     def atom_num(self) -> int:
         """ Returns the integer that is in the atom name"""
         return get_digits(self.atom)
 
+    @property
     def i(self) -> int:
         """ Returns the integer that is one less than the one in the atom name.
         This is the index of the atom in Python objects such as lists (as indeces start at 0)."""
