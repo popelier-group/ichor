@@ -107,8 +107,8 @@ OS                              | OS              | OS.Linux          | Current 
 DISABLE_PROBLEMS                | bool            | False             | Disables showing problems at the top of the main menu                                      | Problems currently not implemented for v3                                                      # todo: implement problems for v3
 UID                             | UUID            | Arguments.uid     | Unique ID for ichor instance                                                               | Very important variable for making sure ichor reads and writes data to the correct location
 IQA_MODELS                      | bool            | False             | Deprecated variable for older ferebus version to toggle whether ichor is making iqa models | No longer required # todo: delete `IQA_MODELS`
-DROP_N_COMPUTE                  | bool            | False             | Toggle whether to use drop-n-compute                                                       | Drop-n-compute not currently implemented for v3                                                # todo: implement drop-n-compute interface for v3
-DROP_N_COMPUTE_LOCATION         | Path            |                   | Location of drop-n-compute directory                                                       | Drop-n-compute not currently implemented for v3                                                # todo: implement drop-n-compute interface for v3
+DROP_COMPUTE                  | bool            | False             | Toggle whether to use drop-n-compute                                                       | Drop-n-compute not currently implemented for v3                                                # todo: implement drop-n-compute interface for v3
+DROP_COMPUTE_LOCATION         | Path            |                   | Location of drop-n-compute directory                                                       | Drop-n-compute not currently implemented for v3                                                # todo: implement drop-n-compute interface for v3
 GIT_USERNAME                    | str             |                   | Git username for cloning popelier-group repositories                                       | Shouldn't be needed if GIT_TOKEN is defined
 GIT_PASSWORD                    | str             |                   | Git password for cloning popelier-group repositories                                       | Git has deprecated use of passwords on remote machines                                         # todo: delete `GIT_PASSWORD`
 GIT_TOKEN                       | str             | ghp_...           | Git token for cloning popelier-group repositories                                          |
@@ -294,8 +294,8 @@ class Globals:
 
     IQA_MODELS: bool = False
 
-    DROP_N_COMPUTE: bool = False
-    DROP_N_COMPUTE_LOCATION: Path = ""
+    DROP_COMPUTE: bool = False
+    DROP_COMPUTE_LOCATION: Path = ""
 
     PANDORA_LOCATION: Path = ""
     PANDORA_CCSDMOD: str = "ccsdHF"

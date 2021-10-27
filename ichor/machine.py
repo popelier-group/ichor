@@ -31,18 +31,18 @@ class Machine(Enum):
         self,
         address: str,
         submit_on_compute: bool,
-        drop_n_compute_available: bool,
+        drop_compute_available: bool,
     ):
         self.address = address
         self.submit_on_compute = submit_on_compute
-        self.drop_n_compute_available = drop_n_compute_available
+        self.drop_compute_available = drop_compute_available
 
     @cached_property
     def submit_type(self) -> SubmitType:
         submit_type = SubmitType.HoldQueueWait
         if self.submit_on_compute:
             submit_type = SubmitType.SubmitOnCompute
-        elif self.drop_n_compute_available:
+        elif self.drop_compute_available:
             from ichor.drop_compute import drop_compute_available_for_user
 
             if drop_compute_available_for_user():
