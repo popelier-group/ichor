@@ -118,6 +118,10 @@ class ArithMixin(ABC):
 
 
 class ModelResult(dict, ArithMixin):
+
+    def __init__(self):
+        dict.__init__(self)
+
     def _add_value(self, other):
         result = ModelResult()
         for key, val in self.items():
@@ -207,7 +211,7 @@ class ModelResult(dict, ArithMixin):
 
     def len(self) -> int:
         lengths = []
-        for key, val in self.items():
+        for val in self.values():
             if isinstance(val, ModelResult):
                 lengths += [val.len()]
             else:
@@ -295,6 +299,12 @@ class ModelResult(dict, ArithMixin):
 
 
 class ModelsResult(ModelResult):
+    """ A dictionary of dictionaries which has some extra methods defines which allows us to modify dictionary values easily.
+    Typically the structure of this dictionary of dictionaries is: `{atom_name0: {property0: np.ndarray, property1: np.ndarray,...}, 
+    atom_name1: {property0: np.ndarray, property1: np.ndarray,...}, ...}`. So for example it might look somethin like 
+    `{"O1": {"q00": np.ndarray, "q10": np.ndarray,...}, "H2": {"q00": np.ndarray, "q10": np.ndarray,...}}`
+    """
+
     def __init__(
         self, result: Optional[Dict[str, Dict[str, np.ndarray]]] = None
     ):
@@ -312,9 +322,13 @@ class ModelsResult(ModelResult):
                 f"Cannot append value of type '{type(other)}' to type '{self.__class__.__name__}"
             )
 
-    # todo: this file needs some docstrings because it is hard to tell what is going on and
     @property
     def T(self):
+        """ Transposes the dictionary, making the inner dictionary's keys the outer dictionary's keys and vice versa.
+        
+        For example, `{"O1": {"q00": np.ndarray, "q10": np.ndarray,...}, "H2": {"q00": np.ndarray, "q10": np.ndarray,...}}`
+        will become `{"q00": {"O1": np.ndarray, "H2": np.ndarray,...}, "q10": {"O1": np.ndarray, "H2": np.ndarray,...}}`
+        """
         result = ModelsResult()
         for key, val in self.items():
             for mkey, mval in val.items():
@@ -323,13 +337,15 @@ class ModelsResult(ModelResult):
                 result[mkey][key] = mval
         return result
 
+    # todo: if not used better to delete it
     def split(self):
         return SplitResult(self)
 
+    # todo: if not used better to delete it
     def group(self):
         return self.T.split()
 
-
+# todo: if this is not used better to delete it
 class ListResult(list, ArithMixin):
     def __getitem__(self, item: int):
         if item >= len(self):
@@ -406,6 +422,7 @@ class ListResult(list, ArithMixin):
         return self._rdiv_value(other)
 
 
+# todo: if this is not used better to delete it
 class SplitResult(ModelResult):
     def __init__(self, result: Optional[ModelsResult] = None):
         ModelResult.__init__(self)
