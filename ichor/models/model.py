@@ -173,70 +173,59 @@ class Model(File):
         """ Returns the suffix associated with GP model files"""
         return ".model"
 
-    @cached_property
     def system(self) -> str:
         """ Returns the system name"""
         return self._system
 
-    @cached_property
     def atom(self) -> str:
         """ Returns the atom name for which a GP model was made"""
         return self._atom
 
-    @cached_property
     def type(self) -> str:
         """ Returns the property (iqa, q00, etc) for which a GP model was made"""
         return self._type
 
-    @cached_property
     def nugget(self) -> float:
         """ Returns the nugget/jitter that is added to the diagonal of the train-train covariance matrix to ensure numerical stability
         of the cholesky decomposition. This is a small number on the order of 1e-6 to 1e-10."""
         return self._nugget
 
-    @cached_property
     def nfeats(self) -> int:
         """ Returns the number of features"""
         return self._nfeats
 
-    @cached_property
     def ntrain(self) -> int:
         """ Returns the number of training points"""
         return self._ntrain
 
-    @cached_property
     def mean(self) -> int:
         """ Returns the GP mean value (mu)"""
         return self._mean
 
-    @cached_property
     def k(self) -> str:
         """ Returns the name of the covariance function used to calculate the covariance matrix"""
         return self._k
 
-    @cached_property
     def x(self) -> np.ndarray:
         """ Returns the. training inputs numpy array Shape `n_points x n_features`"""
         return self._x
 
-    @cached_property
     def y(self) -> np.ndarray:
         """ Returns the training outputs numpy array. Shape `n_points`"""
         return self._y
 
-    @cached_property
     def atom_num(self) -> int:
         """ Returns the integer that is in the atom name"""
         return get_digits(self.atom)
 
-    @cached_property
     def i(self) -> int:
         """ Returns the integer that is one less than the one in the atom name.
         This is the index of the atom in Python objects such as lists (as indeces start at 0)."""
         return self.atom_num - 1
 
-    def r(self, x: np.ndarray) -> np.ndarray:
-        return self.k.r(self.x, x)
+    @cached_property
+    def r(self, x_test: np.ndarray) -> np.ndarray:
+        return self.k.r(self.x, x_test)
 
     @cached_property
     def weights(self) -> np.ndarray:
@@ -256,11 +245,11 @@ class Model(File):
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """ Returns an array containing the test point predictions."""
-        return (self.mean.value(self.x) + np.dot(self.k.r(self.x, x_test).T, self.weights)).flatten()
+        return (self.mean.value(self.x) + np.dot(self.r(self.x, x_test).T, self.weights)).flatten()
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
         """ Return the variance for the test data points."""
-        train_test_covar = self.k.r(self.x, x_test)
+        train_test_covar = self.r(self.x, x_test)
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
         v = np.linalg.solve(self.lower_cholesky, train_test_covar)
 
