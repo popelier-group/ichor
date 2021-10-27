@@ -5,6 +5,7 @@ import numpy as np
 
 from ichor.itypes import Scalar
 
+# TODO: we should aways use numpy, python lists are way slower and we only need to store numerical data anyway. No need in having lists as well
 convert_to_numpy = True
 
 
@@ -255,6 +256,7 @@ class ModelResult(dict, ArithMixin):
         return result
 
     def to_list(self):
+        # TODO: we should aways use numpy, python lists are way slower and we only need to store numerical data anyway. No need in having lists as well
         global convert_to_numpy
         convert_to_numpy = False
         result = ModelResult()
