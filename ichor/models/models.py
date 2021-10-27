@@ -50,12 +50,12 @@ class Models(Directory, list):
 
     @property
     def atoms(self) -> list:
-        """ Returns a list of atom names for which models were made"""
+        """ Returns a list of atom names (such as O1, H2, H3, etc.) for which models were made"""
         return list(set(natsorted([model.atom for model in self], key=ignore_alpha)))
 
     @property
     def types(self) -> list:
-        """ Returns a list of types for which models were made"""
+        """ Returns a list of types (such as q00, q10, iqa, etc.) for which models were made"""
         return list(set([model.type for model in self]))
 
     @property
