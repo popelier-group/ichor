@@ -7,7 +7,7 @@ def try_convert(inp: Any, ty: Type, default: Optional[Type]) -> Type:
     the default value is returned otherwise the original ValueError is raised
     :param inp: input to convert to ty
     :param default: optional ty to return in case inp fails
-    :returns: converted ty
+    :return: converted ty
     :raises: ValueError if ty conversion fails and no default is specified
     """
     try:
@@ -24,7 +24,7 @@ def try_int(inp: Any, default: Optional[int] = None) -> int:
     the default value is returned otherwise the original ValueError is raised
     :param inp: input to convert to integer
     :param default: optional integer to return in case inp fails
-    :returns: converted integer
+    :return: converted integer
     :raises: ValueError if int conversion fails and no default is specified
     """
     return try_convert(inp, int, default=default)
@@ -36,7 +36,7 @@ def try_float(inp: Any, default: Optional[float] = None) -> float:
     the default value is returned otherwise the original ValueError is raised
     :param inp: input to convert to float
     :param default: optional float to return in case inp fails
-    :returns: converted float
+    :return: converted float
     :raises: ValueError if float conversion fails and no default is specified
     """
     return try_convert(inp, float, default=default)

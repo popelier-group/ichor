@@ -72,7 +72,7 @@ class Models(Directory, list):
         """ Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
         
         :param x: An object that contains features, such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
-        :returns: A dictionary containing the atom names as keys and an np.ndarray of features as values
+        :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
         """
 
         if isinstance(x, Atoms):
