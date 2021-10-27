@@ -497,7 +497,7 @@ class Diff(object):
     @property
     def renamed(self) -> bool:
         """:return: True if the blob of our diff has been renamed
-        ..note::
+        .. note::
             This property is deprecated, please use ``renamed_file`` instead.
         """
         return self.renamed_file

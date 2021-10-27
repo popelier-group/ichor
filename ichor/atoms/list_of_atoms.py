@@ -54,7 +54,7 @@ class ListOfAtoms(list):
         (natom, ntimestep, nfeature) array into a (ntimestep, natom, nfeature) array so that
         all features for a single timestep are easier to group.
         :rtype: `np.ndarray`
-        :returns:
+        :return:
             A 3D array of features for every atom in every timestep. Shape `n_timesteps` x `n_atoms` x `n_features`)
             If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
             If the trajectory instance is indexed by str, the array has shape `n_atoms` x `n_features`.

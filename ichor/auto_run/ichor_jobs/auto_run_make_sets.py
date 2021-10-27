@@ -11,7 +11,7 @@ def submit_make_sets_job_to_auto_run(
 ) -> Optional[JobID]:
     """Submits a job to the workload manager which creates the initial traning/sample pool/validation set directories.
 
-    :returns: Returns the job ID which was assigned by the workload manager
+    :return: Returns the job ID which was assigned by the workload manager
     """
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["make_sets"])
     ichor_command = ICHORCommand(auto_run=True)
