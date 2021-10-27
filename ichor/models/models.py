@@ -17,6 +17,8 @@ class DimensionError(ValueError):
 
 
 def x_to_features(func: F) -> F:
+    """ Used as a decorator to convert an incoming set of test points `x` to features because we need to know the test point features in
+    order to make predictions."""
     @wraps(func)
     def wrapper(self, x, *args, **kwargs):
         features = self.get_features_dict(x)
@@ -68,79 +70,79 @@ class Models(Directory, list):
         """ Returns the name of the system for which models were made."""
         return self[0].system
 
-    def get_features_dict(self, x: Union[Atoms, ListOfAtoms, np.ndarray, dict]) -> Dict[str, np.ndarray]:
+    def get_features_dict(self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, dict]) -> Dict[str, np.ndarray]:
         """ Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
         
         :param x: An object that contains features, such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
         :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
         """
 
-        if isinstance(x, Atoms):
-            return self._features_from_atoms(x)
+        if isinstance(test_x, Atoms):
+            return self._features_from_atoms(test_x)
 
-        elif isinstance(x, ListOfAtoms):
+        elif isinstance(test_x, ListOfAtoms):
             # if there are less models than there are timesteps in x
-            if len(self) < len(x):
-                return self._features_from_list_of_atoms_models(x)
+            if len(self) < len(test_x):
+                return self._features_from_list_of_atoms_models(test_x)
             # if there are more models than there are timesteps in x
             else:
-                return self._features_from_list_of_atoms(x)
-        elif isinstance(x, np.ndarray):
-            return self._features_from_array(x)
-        elif isinstance(x, dict):
-            return x
-        raise TypeError(f"Cannot predict values from type '{type(x)}'")
+                return self._features_from_list_of_atoms(test_x)
+        elif isinstance(test_x, np.ndarray):
+            return self._features_from_array(test_x)
+        elif isinstance(test_x, dict):
+            return test_x
+        raise TypeError(f"Cannot predict values from type '{type(test_x)}'")
 
     def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
         """Returns a dictionary containing atom name as key and atom features for values."""
         return {atom.name: atom.features for atom in atoms}
 
     def _features_from_list_of_atoms(
-        self, x: ListOfAtoms
+        self, x_test: ListOfAtoms
     ) -> Dict[str, np.ndarray]:
         """Return a dictionary containing atom name as key and atom features as values."""
-        return {atom.name: atom.features for atom in x.iteratoms()}
+        return {atom.name: atom.features for atom in x_test.iteratoms()}
 
     def _features_from_list_of_atoms_models(
-        self, x: ListOfAtoms
+        self, x_test: ListOfAtoms
     ) -> Dict[str, np.ndarray]:
 
         return {
-            atom: x[atom].features
+            atom: x_test[atom].features
             for atom in self.atoms
-            if atom in x.atom_names
+            if atom in x_test.atom_names
         }
 
-    def _features_from_array(self, x: np.ndarray):
-        if x.ndim == 2:
-            return {atom: x for atom in self.atoms}
-        elif x.ndim == 3:
-            return {atom: x[i] for i, atom in enumerate(self.atoms)}
+    def _features_from_array(self, x_test: np.ndarray):
+        if x_test.ndim == 2:
+            return {atom: x_test for atom in self.atoms}
+        elif x_test.ndim == 3:
+            return {atom: x_test[i] for i, atom in enumerate(self.atoms)}
         else:
             raise DimensionError(
-                f"'x' is of incorrect dimensions ({x.ndim}) 'x' must be either 2D or 3D"
+                f"'x_test' is of incorrect dimensions ({x_test.ndim}) 'x_test' must be either 2D or 3D"
             )
 
     @x_to_features
-    def predict(self, x) -> Dict[str, Dict[str, np.ndarray]]:
+    def predict(self, x_test) -> Dict[str, Dict[str, np.ndarray]]:
         return ModelsResult(
             {
                 atom: {
                     model.type: model.predict(features) for model in self[atom]
                 }
-                for atom, features in x.items()
+                for atom, features in x_test.items()
             }
         )
 
     @x_to_features
-    def variance(self, x) -> Dict[str, Dict[str, np.ndarray]]:
+    def variance(self, x_test) -> Dict[str, Dict[str, np.ndarray]]:
         return ModelsResult(
             {
                 atom: {
                     model.type: model.variance(features)
                     for model in self[atom]
                 }
-                for atom, features in x.items()
+                for atom, features in x_test.items()
             }
         )
 
