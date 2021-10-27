@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List
-
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
-from ichor.file_structure import FILE_STRUCTURE
 from ichor.models import Models
 
 
-class ExpectedImprovement(ABC):
+class ActiveLearningMethod(ABC):
     def __init__(self, models: Models):
         self.models = models
 

@@ -5,11 +5,11 @@ import numpy as np
 import numpy.linalg as la
 from scipy.spatial.distance import cdist
 
-from ichor.active_learning.expected_improvement import ExpectedImprovement
+from ichor.active_learning.expected_improvement import ActiveLearningMethod
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
-from ichor.models import Model, ModelsResult
+from ichor.models import Model, ModelsResult, Models
 
 """
     Implementation of the Maximum Expected Prediction Error (MEPE) method
@@ -65,16 +65,19 @@ def cross_validation(model: Model) -> np.ndarray:
     return cross_validation_error
 
 
-class MEPE(ExpectedImprovement):
-    def __init__(self, models):
-        ExpectedImprovement.__init__(self, models)
+class MEPE(ActiveLearningMethod):
+
+    """ Maximum Expected Prediction Errorr implementation for selecting new training data out of sample pool."""
+
+    def __init__(self, models: Models):
+        ActiveLearningMethod.__init__(self, models)
 
     @classproperty
     def name(self) -> str:
         return "epe"
 
     def cv_error(self, x: Dict[str, np.ndarray]) -> ModelsResult:
-        """Eq. 20"""
+        """Eq. 20. Calculate cross validation error."""
         cv_errors = ModelsResult()
         for atom in self.models.atoms:
             atom_cv_errors = ModelsResult()
