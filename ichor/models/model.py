@@ -177,7 +177,7 @@ class Model(File):
         """ Returns the system name"""
         return self._system
 
-    def atom(self) -> str:
+    def atom_name(self) -> str:
         """ Returns the atom name for which a GP model was made"""
         return self._atom
 

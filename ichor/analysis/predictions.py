@@ -23,7 +23,7 @@ def get_predicted(
     :return: predictions of points given models as a ModelsResult
     """
     if atoms is None:
-        atoms = models.atoms
+        atoms = models.atom_names
     if types is None:
         types = models.types
 
@@ -72,7 +72,7 @@ def get_true_predicted(
     :return: ModelsResult for true and predicted values from the models and validation set provided
     """
     if atoms is None:
-        atoms = models.atoms
+        atoms = models.atom_names
     if types is None:
         types = models.types
 

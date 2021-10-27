@@ -51,9 +51,9 @@ class Models(Directory, list):
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")
 
     @property
-    def atoms(self) -> list:
+    def atom_names(self) -> list:
         """ Returns a list of atom names (such as O1, H2, H3, etc.) for which models were made"""
-        return list(set(natsorted([model.atom for model in self], key=ignore_alpha)))
+        return list(set(natsorted([model.atom_name for model in self], key=ignore_alpha)))
 
     @property
     def types(self) -> list:
@@ -69,59 +69,6 @@ class Models(Directory, list):
     def system(self) -> str:
         """ Returns the name of the system for which models were made."""
         return self[0].system
-
-    def get_features_dict(self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, dict]) -> Dict[str, np.ndarray]:
-        """ Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
-        
-        :param x: An object that contains features, such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
-        :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
-        """
-
-        if isinstance(test_x, Atoms):
-            return self._features_from_atoms(test_x)
-
-        elif isinstance(test_x, ListOfAtoms):
-            # if there are less models than there are timesteps in x
-            if len(self) < len(test_x):
-                return self._features_from_list_of_atoms_models(test_x)
-            # if there are more models than there are timesteps in x
-            else:
-                return self._features_from_list_of_atoms(test_x)
-        elif isinstance(test_x, np.ndarray):
-            return self._features_from_array(test_x)
-        elif isinstance(test_x, dict):
-            return test_x
-        raise TypeError(f"Cannot predict values from type '{type(test_x)}'")
-
-    def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
-        """Returns a dictionary containing atom name as key and atom features for values."""
-        return {atom.name: atom.features for atom in atoms}
-
-    def _features_from_list_of_atoms(
-        self, x_test: ListOfAtoms
-    ) -> Dict[str, np.ndarray]:
-        """Return a dictionary containing atom name as key and atom features as values."""
-        return {atom.name: atom.features for atom in x_test.iteratoms()}
-
-    def _features_from_list_of_atoms_models(
-        self, x_test: ListOfAtoms
-    ) -> Dict[str, np.ndarray]:
-
-        return {
-            atom: x_test[atom].features
-            for atom in self.atoms
-            if atom in x_test.atom_names
-        }
-
-    def _features_from_array(self, x_test: np.ndarray):
-        if x_test.ndim == 2:
-            return {atom: x_test for atom in self.atoms}
-        elif x_test.ndim == 3:
-            return {atom: x_test[i] for i, atom in enumerate(self.atoms)}
-        else:
-            raise DimensionError(
-                f"'x_test' is of incorrect dimensions ({x_test.ndim}) 'x_test' must be either 2D or 3D"
-            )
 
     @x_to_features
     def predict(self, x_test) -> Dict[str, Dict[str, np.ndarray]]:
@@ -146,6 +93,46 @@ class Models(Directory, list):
             }
         )
 
+    def get_features_dict(self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, dict]) -> Dict[str, np.ndarray]:
+        """ Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
+        
+        :param x: An object that contains features (or coordinates that can be converted into features), such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
+        :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
+        """
+
+        if isinstance(test_x, Atoms):
+            return self._features_from_atoms(test_x)
+        elif isinstance(test_x, ListOfAtoms):
+                return self._features_from_list_of_atoms(test_x)
+        elif isinstance(test_x, np.ndarray):
+            return self._features_from_array(test_x)
+        elif isinstance(test_x, dict):
+            return test_x
+        raise TypeError(f"Cannot predict values from type '{type(test_x)}'")
+
+    def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
+        """Returns a dictionary containing atom name as key and atom features for values."""
+        return {atom.name: atom.features for atom in atoms}
+
+    def _features_from_list_of_atoms(
+        self, x_test: ListOfAtoms
+    ) -> Dict[str, np.ndarray]:
+        return {
+            atom: x_test[atom].features
+            for atom in self.atom_names
+            if atom in x_test.atom_names
+        }
+
+    def _features_from_array(self, x_test: np.ndarray):
+        if x_test.ndim == 2:
+            return {atom: x_test for atom in self.atom_names}
+        elif x_test.ndim == 3:
+            return {atom: x_test[i] for i, atom in enumerate(self.atom_names)}
+        else:
+            raise DimensionError(
+                f"'x_test' is of incorrect dimensions ({x_test.ndim}) 'x_test' must be either 2D or 3D"
+            )
+
     def __getitem__(self, args):
         if isinstance(args, (str, tuple)):
             return ModelsView(self, args)
@@ -164,7 +151,7 @@ class ModelsView(Models):
         list.__init__(self)
         for arg in args:
             for model in models:
-                if arg in (model.atom, model.type):
+                if arg in (model.atom_name, model.type):
                     self.append(model)
 
     def __getattr__(self, item):

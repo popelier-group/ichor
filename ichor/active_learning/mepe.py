@@ -79,11 +79,11 @@ class MEPE(ActiveLearningMethod):
     def cv_error(self, x: Dict[str, np.ndarray]) -> ModelsResult:
         """Eq. 20. Calculate cross validation error."""
         cv_errors = ModelsResult()
-        for atom in self.models.atoms:
+        for atom in self.models.atom_names:
             atom_cv_errors = ModelsResult()
             for model in self.models[atom]:
                 cv = cross_validation(model)
-                distances = cdist(x[model.atom], model.x)
+                distances = cdist(x[model.atom_name], model.x)
                 atom_cv_errors[model.type] = cv[
                     distances.argmin(
                         axis=-1,
