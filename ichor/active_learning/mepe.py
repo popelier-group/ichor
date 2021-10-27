@@ -5,7 +5,7 @@ import numpy as np
 import numpy.linalg as la
 from scipy.spatial.distance import cdist
 
-from ichor.active_learning.expected_improvement import ActiveLearningMethod
+from ichor.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir

@@ -13,7 +13,7 @@ def active_learning(
 ):
     """Add a new training point to the training set based on the most recent FERBUS model that was made. Adaptive sampling is
     used to add the worst performing point from the sample pool to the training set."""
-    from ichor.active_learning import ActiveLearningMethod
+    from ichor.active_learning import learning_method_cls
     from ichor.arguments import Arguments
     from ichor.auto_run.standard_auto_run import submit_next_iter
     from ichor.file_structure import FILE_STRUCTURE
@@ -42,9 +42,11 @@ def active_learning(
 
     if GLOBALS.OPTIMISE_PROPERTY != "all":
         models = models[GLOBALS.OPTIMISE_PROPERTY]
-
-    alm = ActiveLearningMethod(models)
-    points_to_add = alm(sample_pool, GLOBALS.POINTS_PER_ITERATION)
+ 
+    # make the learning method instance given a set of models
+    learning_method_inst = learning_method_cls(models)
+    # use the __call__ method to calculate which points to add from the sample pool to the training set based on the given models
+    points_to_add = learning_method_inst(sample_pool, GLOBALS.POINTS_PER_ITERATION)
 
     for point in points_to_add:
         training_set = PointsDirectory(FILE_STRUCTURE["training_set"])
