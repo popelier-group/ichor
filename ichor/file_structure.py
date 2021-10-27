@@ -25,58 +25,54 @@ class FileStructure(FileTree):
 
         # name of the directory, how the directory can be internally referenced to by FILE_STRUCTURE["internal_reference"]
         # if parent is set, then make it a subdirectory of parent directory
-        self.add("TRAINING_SET", "training_set")
-        self.add("SAMPLE_POOL", "sample_pool")
-        self.add("VALIDATION_SET", "validation_set")
-        self.add("FEREBUS", "ferebus")
-        self.add("MODELS", "models", parent="ferebus")
-        self.add("MODELS", "remake-models")
-        self.add("MODEL_LOG", "model_log")
-        self.add("SCRUBBED_POINTS", "scrubbed_points")
+        self.add("TRAINING_SET", "training_set", type_="dir")
+        self.add("SAMPLE_POOL", "sample_pool", type_="dir")
+        self.add("VALIDATION_SET", "validation_set", type_="dir")
+        self.add("FEREBUS", "ferebus", type_="dir")
+        self.add("MODELS", "models", parent="ferebus", type_="dir")
+        self.add("MODELS", "remake-models", type_="dir")
+        self.add("MODEL_LOG", "model_log", type_="dir")
+        self.add("SCRUBBED_POINTS", "scrubbed_points", type_="dir")
         self.add(
             "GAUSSIAN_SCRUBBED_POINTS",
             "gaussian_scrubbed_points",
             parent="scrubbed_points",
+            type_="dir"
         )
         self.add(
             "AIMALL_SCRUBBED_POINTS",
             "aimall_scrubbed_points",
             parent="scrubbed_points",
+            type_="dir"
         )
+
+        self.add(".DATA", "data")
+        self.add("SCRIPTS", "scripts", parent="data", type_="dir")
+        self.add("TEMP", "tmp_scripts", parent="scripts", type_="dir")
+        self.add("OUTPUTS", "outputs", parent="scripts", type_="dir")
+        self.add("ERRORS", "errors", parent="scripts", type_="dir")
 
         self.add("OPT", "opt")
         self.add("CP2K", "cp2k")
         self.add("PROPERTIES", "properties")
         self.add("ATOMS", "atoms")
-
         self.add("TYCHE", "tyche")
         self.add("GAUSSIAN", "tyche_g09", parent="tyche")
-
         self.add("DLPOLY", "dlpoly")
         self.add("GJF", "dlpoly_gjf", parent="dlpoly")
-
         self.add("AMBER", "amber")
 
-        self.add(".DATA", "data")
+        self.add("PROGRAMS", "programs", type_="dir")
+        self.add("machine", "machine", parent="data", type_="f")
+        self.add("jid", "jid", parent="jobs", type_="f")
+        self.add("DATAFILES", "datafiles", parent="jobs", type_="dir")
 
-        self.add("PROGRAMS", "programs")  # , parent="data")
-        self.add("data", "data_file", parent="data")
 
-        self.add("machine", "machine", parent="data")
-
-        self.add("JOBS", "jobs", parent="data")
-        self.add("jid", "jid", parent="jobs")
-        self.add("DATAFILES", "datafiles", parent="jobs")
-
-        self.add("ACTIVE_LEARNING", "active_learning", parent="data")
-        self.add("alpha", "alpha", parent="active_learning")
-        self.add("cv_errors", "cv_errors", parent="active_learning")
-        self.add("counter", "counter", parent="active_learning")
-
+        self.add("ACTIVE_LEARNING", "active_learning", parent="data", type_="dir")
+        self.add("counter", "counter", parent="active_learning", type_="f")
         self.add(
             "child_processes", "child_processes", parent="active_learning"
         )
-
         self.add("PROPERTIES", "properties_daemon", parent="active_learning")
         self.add(
             "properties.pid", "properties_pid", parent="properties_daemon"
@@ -87,7 +83,6 @@ class FileStructure(FileTree):
         self.add(
             "properties.err", "properties_stderr", parent="properties_daemon"
         )
-
         self.add("pid", "pids", parent="data")
 
         self.add("ATOMS", "atoms_daemon", parent="active_learning")
@@ -99,9 +94,6 @@ class FileStructure(FileTree):
         self.add("rerun.pid", "rerun_pid", parent="rerun_daemon")
         self.add("rerun.out", "rerun_stdout", parent="rerun_daemon")
         self.add("rerun.err", "rerun_stderr", parent="rerun_daemon")
-
-        # todo: this has already been added above
-        self.add("counter", "counter", parent="active_learning")
 
         self.add("FILES_REMOVED", "file_remover_daemon", parent="data")
         self.add(
@@ -119,12 +111,6 @@ class FileStructure(FileTree):
             "file_remover_stderr",
             parent="file_remover_daemon",
         )
-
-        self.add("SCRIPTS", "scripts", parent="data")
-        self.add("TEMP", "tmp_scripts", parent="scripts")
-        self.add("OUTPUTS", "outputs", parent="scripts")
-        self.add("ERRORS", "errors", parent="scripts")
-
 
 # this type of stuff is making sphinx execute code
 FILE_STRUCTURE = FileStructure()

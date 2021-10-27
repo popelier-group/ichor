@@ -32,7 +32,8 @@ class FileTree(dict):
     See `FileStructure` for more details.
     """
 
-    def add(self, name: str, _id: str, parent: str = None) -> None:
+    # type_ is an optional string that can be typed in to indicate a file or directory.
+    def add(self, name: str, _id: str, parent: str = None, type_: Optional[str] = None):
         """
         Adds a new key:value pair of _id:FileNode(name) to the file structure of ICHOR.
 
