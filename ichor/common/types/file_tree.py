@@ -1,5 +1,23 @@
 from pathlib import Path
 from typing import Optional
+from enum import Enum, auto
+
+
+class WrongFileType(ValueError):
+    pass
+
+
+class FileType(Enum):
+    File = auto()
+    Directory = auto()
+
+    @classmethod
+    def check(cls, path: Path):
+        if cls is FileType.File and not path.is_file():
+            raise WrongFileType(f"Expected type {FileType.File.name}, Path {path} is type {FileType.Directory.name}")
+        if cls is FileType.Directory and not path.is_dir():
+            raise WrongFileType(f"Expected type {FileType.Directory.name}, Path {path} is type {FileType.File.name}")
+
 
 
 class FileNode:
@@ -10,15 +28,19 @@ class FileNode:
     :param parent: A directory which contains the directory/file whose path is stored in `self.name`
     """
 
-    def __init__(self, name: str, parent: Optional["FileNode"]):
+    def __init__(self, name: str, parent: Optional["FileNode"], type_: Optional[FileType] = None):
         self.name = Path(name)
         self.parent = parent
+        self.type_ = type_ if type_ is not None else FileType.Directory
 
     @property
     def path(self) -> Path:
         if self.parent is None:
             return self.name
-        return self.parent.path / self.name
+        path = self.parent.path / self.name
+        if path.exists():
+            self.type_.check(path)
+        return path
 
     def __str__(self) -> str:
         return str(self.path)
@@ -33,7 +55,7 @@ class FileTree(dict):
     """
 
     # type_ is an optional string that can be typed in to indicate a file or directory.
-    def add(self, name: str, _id: str, parent: str = None, type_: Optional[str] = None):
+    def add(self, name: str, _id: str, parent: str = None, type_: Optional[FileType] = None):
         """
         Adds a new key:value pair of _id:FileNode(name) to the file structure of ICHOR.
 
@@ -43,7 +65,7 @@ class FileTree(dict):
         """
         if parent is not None:
             parent = super().__getitem__(parent)
-        self[_id] = FileNode(name, parent)
+        self[_id] = FileNode(name, parent, type_)
 
     def __getitem__(self, _id) -> Path:
         """Get the Path corresponding to the given _id

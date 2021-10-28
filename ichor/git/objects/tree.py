@@ -1,4 +1,4 @@
-# tree.py
+# file_tree.py
 # Copyright (C) 2008, 2009 Michael Trier (mtrier@gmail.com) and contributors
 #
 # This module is part of GitPython and is released under

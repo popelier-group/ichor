@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     from ichor.git import GitCmdObjectDB
 
-EntryTup = Tuple[bytes, int, str]  # same as TreeCacheTup in tree.py
+EntryTup = Tuple[bytes, int, str]  # same as TreeCacheTup in file_tree.py
 EntryTupOrNone = Union[EntryTup, None]
 
 # ---------------------------------------------------

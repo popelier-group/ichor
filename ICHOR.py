@@ -1715,7 +1715,7 @@ class Node:
         return str(self)
 
 
-# Moved to ichor/file_strcture/tree.py
+# Moved to ichor/file_strcture/file_tree.py
 class Tree:
     def __init__(self):
         self._dict = {}
