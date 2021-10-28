@@ -20,7 +20,7 @@ class HighestVariance(ActiveLearningMethod):
     """
 
     def __init__(self, models: Models):
-        ActiveLearningMethod.__init__(self, models)
+        super().__init__(self, models)
 
     @classproperty
     def name(self) -> str:
