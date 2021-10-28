@@ -25,5 +25,4 @@ class ActiveLearningMethod(ABC):
     def __call__(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
         """Once an instance of an `ActiveLearningMethod` has been created, the instance can be called as a function (which will then
         go into this __call__ method and execute self.get_points() which is defined in each subclass of `ActiveLearningMethod`"""
-        np.random.seed() # call to set a random seed, see https://stackoverflow.com/a/21494630/11699003
         return self.get_points(points, npoints)
