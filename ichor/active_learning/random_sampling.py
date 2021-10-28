@@ -25,7 +25,6 @@ class RandomSampling(ActiveLearningMethod):
 
     def get_points(self, points: ListOfAtoms, npoints) -> np.ndarray:
 
-        np.random.seed() # call to set a random seed, see https://stackoverflow.com/a/21494630/11699003
         random_sampling_indices = np.random.shuffle(np.arange(len(points)))[:npoints]
 
         return random_sampling_indices
