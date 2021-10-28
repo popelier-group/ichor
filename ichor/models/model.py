@@ -166,7 +166,7 @@ class Model(File):
                     self._weights = np.array(weights)
                     self._weights = self._weights.reshape(-1, 1)
 
-        self.k = KernelInterpreter(kernel_composition, kernel_list).interpret()
+        self._k = KernelInterpreter(kernel_composition, kernel_list).interpret()
 
     @classproperty
     def filetype(self) -> str:
@@ -235,7 +235,6 @@ class Model(File):
         This is the index of the atom in Python objects such as lists (as indeces start at 0)."""
         return self.atom_num - 1
 
-    @cached_property
     def r(self, x_test: np.ndarray) -> np.ndarray:
         return self.k.r(self.x, x_test)
 
@@ -257,11 +256,11 @@ class Model(File):
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """ Returns an array containing the test point predictions."""
-        return (self.mean.value(self.x) + np.dot(self.r(self.x, x_test).T, self.weights)).flatten()
+        return (self.mean.value(self.x) + np.dot(self.r(x_test).T, self.weights)).flatten()
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
         """ Return the variance for the test data points."""
-        train_test_covar = self.r(self.x, x_test)
+        train_test_covar = self.r(x_test)
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
         v = np.linalg.solve(self.lower_cholesky, train_test_covar)
 

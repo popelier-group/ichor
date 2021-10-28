@@ -37,7 +37,7 @@ class RBFCyclic(Kernel):
             \end{aligned} \right.    
     """
 
-    def __init__(self, lengthscale: np.ndarray):
+    def __init__(self, thetas: np.ndarray):
 
         """
         Args:
@@ -48,16 +48,16 @@ class RBFCyclic(Kernel):
                 deviations for each feature, calculated from the training set points.
         """
 
-        self._lengthscale = lengthscale  # np.power(1/(2.0 * lengthscale), 2)
+        self._thetas = thetas  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
     def params(self):
-        return self._lengthscale
+        return self._thetas
 
     @cached_property
     def mask(self):
         return (
-            np.array([x for x in range(len(self._lengthscale))]) + 1
+            np.array([x for x in range(len(self._thetas))]) + 1
         ) % 3 == 0
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
@@ -74,16 +74,13 @@ class RBFCyclic(Kernel):
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
 
-        # work with distance matrices for each dimension(feature) and check which phi matrices if corrections are needed
-        # after distance matrices for each dimension are computed(and corrected where needed), divide by lengthscale and square
-        # diff = x1[np.newaxis, :, :] - x2[:, np.newaxis, :]
-        # mask = (np.array([x for x in range(len(self._lengthscale))]) + 1) % 3 == 0
-        # diff[:, :, mask] = (diff[:, :, mask] + np.pi) % (2 * np.pi) - np.pi
-        # diff = self._lengthscale * diff * diff
-        # return np.exp(-0.5 * np.sum(diff, axis=2))
-        diff = x1 - x2
-        diff[self.mask] = (diff[self.mask] + np.pi) % (2 * np.pi) - np.pi
-        return np.exp(-0.5 * np.sum(self._lengthscale * np.power(diff, 2)))
+        cov_matrix = np.empty((x1.shape[0], x2.shape[0]))
+        for i in range(x1.shape[0]):
+            for j in range(x2.shape[0]):
+                diff = x1[i] - x2[j]
+                diff[self.mask] = (diff[self.mask] + np.pi) % (2 * np.pi) - np.pi
+                cov_matrix[i, j] = np.exp(-0.5 * np.sum(self._thetas * np.power(diff, 2)))
+        return cov_matrix
 
     def __repr__(self):
-        return f"RBFCyclic({self._lengthscale})"
+        return f"RBFCyclic({self._thetas})"

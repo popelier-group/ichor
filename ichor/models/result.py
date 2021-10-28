@@ -120,9 +120,6 @@ class ArithMixin(ABC):
 
 class ModelResult(dict, ArithMixin):
 
-    def __init__(self):
-        dict.__init__(self)
-
     def _add_value(self, other):
         result = ModelResult()
         for key, val in self.items():
