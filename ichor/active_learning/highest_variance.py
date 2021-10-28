@@ -26,29 +26,13 @@ class HighestVariance(ActiveLearningMethod):
     def name(self) -> str:
         return "highest_variance"
 
-    def get_points(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
+    def get_points(self, points: ListOfAtoms, npoints) -> np.ndarray:
 
         features_dict = self.models.get_features_dict(points)
         variance = self.models.variance(features_dict)
 
-        from ichor.file_structure import FILE_STRUCTURE
+        # sort the array from smallest to largest, but give only the indeces back. Then flip the indeces, so that
+        # the point index with the largest variance is first. Finally, get the desired number of points
+        indices_with_highest_variance = np.flip(np.argsort(variance))[:npoints]
 
-        cv_file = FILE_STRUCTURE["highest_variance"]
-        mkdir(cv_file.parent)
-        if cv_file.exists():
-            cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
-        with open(
-            cv_file, "w"
-        ) as f:  # store data as json for next iterations alpha calculation
-            json.dump(
-                {
-                    "added_points": npoints,
-                    "cv_errors": cv_errors[epe].to_list(),
-                    "predictions": self.models.predict(features_dict)[
-                        epe
-                    ].to_list(),
-                },
-                f,
-            )
-
-        return epe
+        return indices_with_highest_variance

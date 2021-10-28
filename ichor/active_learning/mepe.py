@@ -70,7 +70,7 @@ class MEPE(ActiveLearningMethod):
     """ Maximum Expected Prediction Errorr implementation for selecting new training data out of sample pool."""
 
     def __init__(self, models: Models):
-        ActiveLearningMethod.__init__(self, models)
+        super().__init__(self, models)
 
     @classproperty
     def name(self) -> str:
@@ -92,6 +92,7 @@ class MEPE(ActiveLearningMethod):
             cv_errors[atom] = atom_cv_errors
         return cv_errors
 
+    @property
     def alpha(self) -> float:
         """alpha value is a balance factor which varies based on how well the cv error
         approximated the prediction error of the points added in the previous iteration.
@@ -135,34 +136,41 @@ class MEPE(ActiveLearningMethod):
         return alpha_sum / nalpha
 
     def get_points(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
+        """ Gets the indeces of the points to add from the sample pool to the training set based on the maximum prediction
+        error criteria
+        
+        :param points: An instance of ListOfAtoms (note than PointsDirectory inherits from ListOfAtoms)
+        :param npoints: The number of points to add to the training set from the sample pool based on the EPE criteria.
+        """
+
         features_dict = self.models.get_features_dict(points)
         cv_errors = self.cv_error(features_dict)
         variance = self.models.variance(features_dict)
-        alpha = self.alpha()
+        alpha = self.alpha
         """Eq. 23"""
         epe = alpha * cv_errors - (1.0 - alpha) * variance
 
         """Eq. 25"""
-        epe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
+        indices_mepe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
 
-        from ichor.file_structure import FILE_STRUCTURE
+        # from ichor.file_structure import FILE_STRUCTURE
 
-        cv_file = FILE_STRUCTURE["cv_errors"]
-        mkdir(cv_file.parent)
-        if cv_file.exists():
-            cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
-        with open(
-            cv_file, "w"
-        ) as f:  # store data as json for next iterations alpha calculation
-            json.dump(
-                {
-                    "added_points": npoints,
-                    "cv_errors": cv_errors[epe].to_list(),
-                    "predictions": self.models.predict(features_dict)[
-                        epe
-                    ].to_list(),
-                },
-                f,
-            )
+        # cv_file = FILE_STRUCTURE["cv_errors"]
+        # mkdir(cv_file.parent)
+        # if cv_file.exists():
+        #     cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
+        # with open(
+        #     cv_file, "w"
+        # ) as f:  # store data as json for next iterations alpha calculation
+        #     json.dump(
+        #         {
+        #             "added_points": npoints,
+        #             "cv_errors": cv_errors[epe].to_list(),
+        #             "predictions": self.models.predict(features_dict)[
+        #                 epe
+        #             ].to_list(),
+        #         },
+        #         f,
+        #     )
 
-        return epe
+        return indices_mepe
