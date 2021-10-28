@@ -106,7 +106,6 @@ def write_to_excel(
     y_minor_gridlines_visible: bool = False,
     y_axis_major_gridline_width: int = 0.75,
     y_axis_major_gridline_color: str = "#BFBFBF",
-    write_individual_atom_sheets = False,
     show_legend: bool = False,
     excel_style: int = 10,
 ):
@@ -152,8 +151,8 @@ def write_to_excel(
             # iqa predictions are in Hartrees, convert to kJ mol-1
             if type_ == "iqa":
                 error[type_] *= ha_to_kj_mol
-
             atom_sheets = {}
+
             # our true values dictionary only contains info about atoms that we care about (see get_true_predicted function above)
             atom_names = true[type_].keys()
             # iterate over all atoms that have this property calculated
@@ -172,29 +171,29 @@ def write_to_excel(
                 df.sort_values("Error", inplace=True)
                 # add percentage column after sorting by error
                 df["%"] = percentile(len(df["Error"]))
+                df.to_excel(writer, sheet_name=sheet_name)
 
-                # usually only write Total sheet as the number of sheets grows really fast and hard to analyze separate atom sheets
-                if write_individual_atom_sheets:
-                    df.to_excel(writer, sheet_name=sheet_name)
-                    # add the s-curve to the written sheet
-                    s_curve = workbook.add_chart(
-                        {"type": "scatter", "subtype": "straight"}
-                    )
-                    # we always have the error in the 3rd column. The rows start at 1 and end in len(df)
-                    s_curve.add_series(
-                        {
-                            # starting row idx, starting col idx, ending row idx, ending col idx
-                            "categories": [sheet_name, 1, 3, len(df["Error"]), 3],
-                            "values": [sheet_name, 1, 4, len(df["%"]), 4],
-                            "line": {"width": 1.5},
-                        }
-                    )
-                    # Configure S-curves for individual atoms
-                    s_curve.set_x_axis(x_axis_settings)
-                    s_curve.set_y_axis(y_axis_settings)
-                    s_curve.set_legend({"position": "none"})
-                    s_curve.set_style(excel_style)  # default style of excel plots
-                    writer.sheets[sheet_name].insert_chart("G2", s_curve)
+                # add the s-curve to the written sheet
+                s_curve = workbook.add_chart(
+                    {"type": "scatter", "subtype": "straight"}
+                )
+
+                # we always have the error in the 3rd column. The rows start at 1 and end in len(df)
+                s_curve.add_series(
+                    {
+                        # starting row idx, starting col idx, ending row idx, ending col idx
+                        "categories": [sheet_name, 1, 3, len(df["Error"]), 3],
+                        "values": [sheet_name, 1, 4, len(df["%"]), 4],
+                        "line": {"width": 1.5},
+                    }
+                )
+
+                # Configure S-curves for individual atoms
+                s_curve.set_x_axis(x_axis_settings)
+                s_curve.set_y_axis(y_axis_settings)
+                s_curve.set_legend({"position": "none"})
+                s_curve.set_style(excel_style)  # default style of excel plots
+                writer.sheets[sheet_name].insert_chart("G2", s_curve)
 
             # also make a sheet with total errors for the whole system (for every property)
             df = pd.DataFrame(error[type_])
