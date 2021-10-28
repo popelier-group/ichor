@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import numpy as np
 
@@ -68,7 +68,7 @@ class Trajectory(ListOfAtoms, File):
         themselves
     """
 
-    def __init__(self, path: Path = None):
+    def __init__(self, path: Union[Path, str] = None):
         # if we are making a trajectory from a coordinate file (such as .xyz or dlpoly history) directly
         if path is not None:
             ListOfAtoms.__init__(self)

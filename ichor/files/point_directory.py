@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 from ichor.atoms import AtomsNotFoundError
 from ichor.files.directory import AnnotatedDirectory
@@ -31,7 +32,7 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
     pandora_input: OptionalPath[PandoraInput] = OptionalFile
     pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
-    def __init__(self, path):
+    def __init__(self, path: Union[Path, str]):
         GeometryFile.__init__(self)
         GeometryDataFile.__init__(self)
         AnnotatedDirectory.__init__(self, path)

@@ -1,7 +1,7 @@
 import datetime
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 # from ichor.analysis.geometry.geometry_calculator import bonds, calculate_bond
 from ichor.atoms import Atom, Atoms
@@ -458,7 +458,7 @@ non_metal_atoms = [
 
 
 class Mol2(File, GeometryFile):
-    def __init__(self, path: Path):
+    def __init__(self, path: Union[Path, str]):
         File.__init__(self, path)
         GeometryFile.__init__(self)
 

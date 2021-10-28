@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ichor import patterns
 from ichor.atoms import Atom, Atoms
@@ -25,7 +25,7 @@ class GaussianJobType(Enum):
 class GJF(QuantumChemistryProgramInput):
     """Wraps around a .gjf file that is used as input to Gaussian."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Union[Path, str]):
         QuantumChemistryProgramInput.__init__(self, path)
 
         self.job_type: Optional[GaussianJobType] = FileContents

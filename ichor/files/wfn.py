@@ -8,12 +8,13 @@ from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryDataFile, GeometryFile
 from ichor.globals import GLOBALS
 from ichor.units import AtomicDistance
-
+from pathlib import Path
+from typing import Union
 
 class WFN(GeometryFile, GeometryDataFile, File):
     """Wraps around a .wfn file that is the output of Gaussian"""
 
-    def __init__(self, path):
+    def __init__(self, path: Union[Path, str]):
         File.__init__(self, path)
         GeometryFile.__init__(self)
         GeometryDataFile.__init__(self)

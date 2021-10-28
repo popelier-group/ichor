@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from typing import Union
 
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import buildermethod
@@ -26,7 +27,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         These paths are defined in GLOBALS.
     """
 
-    def __init__(self, path):
+    def __init__(self, path: Union[Path, str]):
         # Initialise `list` parent class of `ListOfAtoms`
         ListOfAtoms.__init__(self)
         # this will call Directory __init__ method (which then calls self.parse)

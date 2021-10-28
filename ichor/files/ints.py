@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
@@ -15,7 +15,7 @@ class INTs(Directory, AtomicDict):
     :param parent: An `Atoms` instance that holds coordinate information for all the atoms in the system
     """
 
-    def __init__(self, path, parent: Optional[GeometryFile] = None):
+    def __init__(self, path: Union[Path, str], parent: Optional[GeometryFile] = None):
         self._parent = None
         if parent is not None:
             self.parent = parent

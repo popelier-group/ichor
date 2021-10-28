@@ -1,6 +1,7 @@
 from ichor.atoms import Atom, Atoms
 from ichor.files.trajectory import Trajectory
-
+from typing import Union
+from pathlib import Path
 
 class DlpolyHistory(Trajectory):
     """Wraps around a DL POLY History file, which just contains timesteps

@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Union
 
 
 class PathObject(ABC, object):
     """An abstract base class that is used for anything that has a path (i.e. files or directories)"""
 
-    path: Path
+    path: Union[Path, str]
 
-    def __init__(self, path):
+    def __init__(self, path: Union[Path, str]):
         self.path = Path(path)
 
     def exists(self) -> bool:

@@ -1,6 +1,7 @@
 import json
 import re
-from typing import Optional
+from typing import Optional, Union
+from pathlib import Path
 
 import numpy as np
 
@@ -21,7 +22,7 @@ class INT(GeometryDataFile, File):
         This information is needed to form the C matrix when rotating multipoles from the global to the local frame.
     """
 
-    def __init__(self, path, parent=None):
+    def __init__(self, path: Union[Path, str], parent=None):
         File.__init__(self, path)
         GeometryDataFile.__init__(self)
 

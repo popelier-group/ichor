@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import classproperty
@@ -16,7 +16,7 @@ class XYZ(GeometryFile, File):
         with the given Atoms will be written to the given Path.
     """
 
-    def __init__(self, path: Path, atoms: Optional[Atoms] = None):
+    def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
         File.__init__(self, path)
         GeometryFile.__init__(self)
 

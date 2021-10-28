@@ -2,7 +2,7 @@ import shutil
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ichor.common.functools import (buildermethod, called_from_hasattr,
                                     classproperty, hasattr)
@@ -36,7 +36,7 @@ class File(PathObject, ABC):
 
     state: FileState = FileState.Unread
 
-    def __init__(self, path):
+    def __init__(self, path: Union[Path, str]):
         super().__init__(path)  # initialize PathObject init
         self.state = FileState.Unread
 

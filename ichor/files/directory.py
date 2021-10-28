@@ -2,7 +2,7 @@ import inspect
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Type
+from typing import Dict, List, Type, Union
 
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
@@ -17,7 +17,7 @@ class Directory(PathObject, ABC):
     :param path: The path to a directory
     """
 
-    def __init__(self, path):
+    def __init__(self, path: Union[Path, str]):
         PathObject.__init__(
             self, path
         )  # set path attribute for Directory instance
