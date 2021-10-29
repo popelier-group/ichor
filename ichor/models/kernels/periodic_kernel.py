@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Optional
 
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
@@ -7,7 +8,7 @@ from ichor.models.kernels.kernel import Kernel
 class PeriodicKernel(Kernel):
     """Implemtation of the Periodic Kernel."""
 
-    def __init__(self, thetas: np.ndarray, period_length: np.ndarray):
+    def __init__(self, thetas: np.ndarray, period_length: np.ndarray, active_dims: Optional[np.ndarray] = None):
         """
 
         Args:
@@ -24,7 +25,7 @@ class PeriodicKernel(Kernel):
             land after the features are scaled. Because the period can vary for individual phi angles for standardization, it is
             still passed in as an array that is n_features long.
         """
-
+        super().__init__(active_dims)
         self._thetas = thetas
         self._period_length = period_length
 
@@ -50,12 +51,12 @@ class PeriodicKernel(Kernel):
         # implementation from gpytorch https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
         true_lengthscales = np.sqrt(1/self._thetas)
 
-        x1_ = np.pi * (x1 / self._period_length)
-        x2_ = np.pi * (x2 / self._period_length)
+        x1_ = np.pi * (x1[:,self.active_dims] / self._period_length)
+        x2_ = np.pi * (x2[:,self.active_dims] / self._period_length)
         x1_ = np.expand_dims(x1_, -2)
         x2_ = np.expand_dims(x2_, -3)
         diff = x1_ - x2_
-        res = np.exp(np.multiply(np.divide(np.sum(np.power(np.sin(diff), 2), axis=-1), true_lengthscales), -2.0))
+        res = np.exp(np.multiply(-2.0, np.sum(np.power(np.sin(diff), 2)/true_lengthscales, axis=-1)))
         return res
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:

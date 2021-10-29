@@ -8,8 +8,9 @@ from ichor.common.functools.buildermethod import buildermethod
 from ichor.common.str import get_digits
 from ichor.files.file import File, FileContents
 from ichor.itypes import F
-from ichor.models.kernels import RBF, Kernel, RBFCyclic
+from ichor.models.kernels import RBF, Kernel, RBFCyclic, PeriodicKernel
 from ichor.models.kernels.interpreter import KernelInterpreter
+from ichor.models.kernels.periodic_kernel import PeriodicKernel
 from ichor.models.mean import ConstantMean, Mean, ZeroMean
 
 
@@ -109,26 +110,34 @@ class Model(File):
                     kernel_name = line.split(".")[-1].rstrip().rstrip("]")
                     line = next(f)
                     kernel_type = line.split()[-1].strip()
+                    ndims = int(next(f).split()[-1]) # number of dimensions
+                    line = next(f)
+                    if "TODO" not in line:
+                        active_dims = np.array([int(ad)-1 for ad in line.split()[1:]])
+                    else:
+                        active_dims = np.arange(ndims)
 
-                    if kernel_type == "rbf":
-                        _ = next(f)
-                        _ = next(f)
+                    if kernel_type == "rbf":                       
                         line = next(f)
                         thetas = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         ).reshape(1,-1)
-                        kernel_list[kernel_name] = RBF(thetas)
+                        kernel_list[kernel_name] = RBF(thetas, active_dims=active_dims)
                     elif kernel_type in [
                         "rbf-cyclic",
                         "rbf-cylic",
                     ]:  # Due to typo in FEREBUS 7.0
                         line = next(f)
-                        line = next(f)
+                        thetas = np.array(
+                            [float(hp) for hp in line.split()[1:]]
+                        )
+                        kernel_list[kernel_name] = RBFCyclic(thetas, active_dims=active_dims)
+                    elif kernel_type == "periodic":
                         line = next(f)
                         thetas = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
-                        kernel_list[kernel_name] = RBFCyclic(thetas)
+                        kernel_list[kernel_name] = PeriodicKernel(thetas, np.full(thetas.shape, 2*np.pi), active_dims=active_dims)
                     continue
 
                 # training inputs data
@@ -241,6 +250,7 @@ class Model(File):
     @cached_property
     def weights(self) -> np.ndarray:
         """ Returns an array containing the weights which can be stored prior to making predictions."""
+        return self._weights
         return np.linalg.solve(self.lower_cholesky.T, np.linalg.solve(self.lower_cholesky, self.y-self.mean.value(self.x)))
 
     @cached_property

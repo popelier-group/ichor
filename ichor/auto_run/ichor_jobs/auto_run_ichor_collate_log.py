@@ -27,10 +27,10 @@ def submit_ichor_collate_models_to_auto_run(
     hold: Optional[Union[JobID, List[JobID]]] = None,
 ) -> JobID:
     submission_script = SubmissionScript(
-        SCRIPT_NAMES["ichor"]["collate_models"]
+        SCRIPT_NAMES["ichor"]["collate_log"]
     )
     ichor_command = ICHORCommand(auto_run=True)
-    ichor_command.add_function_to_job("collate_models", str(directory))
+    ichor_command.add_function_to_job("collate_model_log", str(directory))
     with TimingManager(
         submission_script,
         message=f"Collating Models for {directory} child processes",

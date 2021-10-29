@@ -2,11 +2,22 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
+from typing import Optional
+
 
 class Kernel(ABC):
     """Base class for all kernels that implements dunder methods for addition or multiplication of separate kernels"""
 
     # TODO: figure out a good way to say if training data is standardized, normalized, etc. because kernels can be affected (for example cyclic RBF is affected)
+
+    def __init__(self, active_dims: Optional[np.ndarray] = None):
+        self._active_dims = active_dims
+
+    @property
+    def active_dims(self):
+        if self._active_dims is not None:
+            return self._active_dims
+        return np.arange(len(self.params))
 
     @abstractmethod
     def params(self):

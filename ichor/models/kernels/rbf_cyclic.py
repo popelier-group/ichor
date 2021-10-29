@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Optional
 
 from ichor.common.functools import cached_property
 from ichor.models.kernels.distance import Distance
@@ -37,7 +38,7 @@ class RBFCyclic(Kernel):
             \end{aligned} \right.    
     """
 
-    def __init__(self, thetas: np.ndarray):
+    def __init__(self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None):
 
         """
         Args:
@@ -47,7 +48,7 @@ class RBFCyclic(Kernel):
                 if training/test data is standardized, then `train_x_std` has to be provided. This array contains the standard
                 deviations for each feature, calculated from the training set points.
         """
-
+        super().__init__(active_dims)
         self._thetas = thetas  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
@@ -74,13 +75,10 @@ class RBFCyclic(Kernel):
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
 
-        cov_matrix = np.empty((x1.shape[0], x2.shape[0]))
-        for i in range(x1.shape[0]):
-            for j in range(x2.shape[0]):
-                diff = x1[i] - x2[j]
-                diff[self.mask] = (diff[self.mask] + np.pi) % (2 * np.pi) - np.pi
-                cov_matrix[i, j] = np.exp(-0.5 * np.sum(self._thetas * np.power(diff, 2)))
-        return cov_matrix
+        diff = x1[np.newaxis,:,self.active_dims] - x2[:,np.newaxis,self.active_dims]
+        diff = (diff + np.pi) % (2*np.pi) - np.pi
+        diff = diff*diff
+        return np.exp(-0.5 * np.sum(self._thetas*diff, axis=2)).T
 
     def __repr__(self):
         return f"RBFCyclic({self._thetas})"

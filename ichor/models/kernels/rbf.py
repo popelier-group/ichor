@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Optional
 
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
@@ -9,8 +10,8 @@ class RBF(Kernel):
     When each dimension has a separate lengthscale, this is also called the RBF-ARD kernel
     """
 
-    def __init__(self, thetas: np.ndarray):
-
+    def __init__(self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None):
+        super().__init__(active_dims)
         self._thetas = thetas
 
     @property
@@ -33,8 +34,8 @@ class RBF(Kernel):
         """
 
         true_lengthscales = np.sqrt(1.0/self._thetas)
-        tmp_x1 = x1 / true_lengthscales
-        tmp_x2 = x2 / true_lengthscales
+        tmp_x1 = x1[:,self.active_dims] / true_lengthscales
+        tmp_x2 = x2[:,self.active_dims] / true_lengthscales
         dist = Distance.squared_euclidean_distance(tmp_x1, tmp_x2)
         return np.exp(-0.5 * dist)
 
