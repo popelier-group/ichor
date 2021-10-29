@@ -47,7 +47,7 @@ class Model(File):
         self._x: Optional[np.ndarray] = FileContents
         self._y: Optional[np.ndarray] = FileContents
         self._nugget = 1e-10  # todo: read this from ferebus file as well
-        self._weights = None  # todo: read this from ferebus file as well
+        self._weights = FileContents  # todo: read this from ferebus file as well
 
     @buildermethod
     def _read_file(self) -> None:
@@ -250,7 +250,6 @@ class Model(File):
     @cached_property
     def weights(self) -> np.ndarray:
         """ Returns an array containing the weights which can be stored prior to making predictions."""
-        return self._weights
         return np.linalg.solve(self.lower_cholesky.T, np.linalg.solve(self.lower_cholesky, self.y-self.mean.value(self.x)))
 
     @cached_property
