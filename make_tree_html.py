@@ -1,3 +1,5 @@
+""" SCRIPT THAT MAKES AN EXAMPLE ICHOR STRUCTURE DIRECTORY AND MAKE A .HTML FILE USING LINUX'S `TREE` COMMAND."""
+
 from pathlib import Path
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.common.types import FileType
@@ -51,6 +53,7 @@ for tag in all_a_tags:
     
     for ref_name, node in FILE_STRUCTURE.items():
         
+        # if the text in the tag is the same as the name of the node (.name gives the name after the last /)
         if tag.string == node.path.name:
             
             # remove excess whitespace and add to title
