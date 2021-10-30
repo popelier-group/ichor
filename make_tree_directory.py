@@ -58,3 +58,5 @@ for tag in all_a_tags:
 
 with open(OUTPUT_FILE_NAME, "w+") as file:
     file.write(str(soup))
+
+os.system(f'rm -r ./ICHOR_FILE_STRUCTURE/')
