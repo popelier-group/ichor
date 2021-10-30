@@ -1,10 +1,8 @@
 .idea/
 .vscode/
 .DS_Store
-Test/
 *.sh
 *.csv
-*test*
 *.xyz
 wily*
 rmsd*
@@ -17,3 +15,4 @@ makeSets.py
 FEREBUS/
 __pycache__/
 docs/_*
+docs*
