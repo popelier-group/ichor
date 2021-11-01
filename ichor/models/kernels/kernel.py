@@ -17,7 +17,7 @@ class Kernel(ABC):
     def active_dims(self):
         if self._active_dims is not None:
             return self._active_dims
-        return np.arange(len(self.params))
+        return np.arange(len(self._thetas))
 
     @abstractmethod
     def params(self):

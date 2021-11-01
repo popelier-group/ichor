@@ -18,62 +18,100 @@ class FileStructure(FileTree):
     def __init__(self):
         super(FileStructure, self).__init__()
 
-        # todo: possibly add a type (either file or directory), so it is easier to distingush between directories/files here
-        # e.g. self.add("counter", "counter", parent="active_learning") is a file but self.add("MODELS", "models", parent="ferebus") is a dir
-        # todo: make a make method, that way we can do something like FILE_STRUCTURE["counter"].make() which will create an empty file at that location
-        # and make all upper directories if they do not exist already.
-
         # name of the directory, how the directory can be internally referenced to by FILE_STRUCTURE["internal_reference"]
         # if parent is set, then make it a subdirectory of parent directory
-        self.add("TRAINING_SET", "training_set", type_=FileType.Directory)
-        self.add("SAMPLE_POOL", "sample_pool", type_=FileType.Directory)
-        self.add("VALIDATION_SET", "validation_set", type_=FileType.Directory)
-        self.add("FEREBUS", "ferebus", type_=FileType.Directory)
-        self.add("MODELS", "models", parent="ferebus", type_=FileType.Directory)
+        self.add("TRAINING_SET", "training_set", type_=FileType.Directory, description="""Directory for points used in GP training. The number of 
+            points in this directory grows as more points are being added from the sample pool to here (with  adaptive/random sampling).""")
+        self.add("SAMPLE_POOL", "sample_pool", type_=FileType.Directory, description="""Stores all other points not used for training or validation currently.
+            This is the directory from which points are selected via adaptive sampling.""")
+        self.add("VALIDATION_SET", "validation_set", type_=FileType.Directory, description="""Stores all points used for model validation. These points
+            should NOT be present in the sample pool or training set.""")
+        self.add("FEREBUS", "ferebus", type_=FileType.Directory, description="""Directory used to store ferebus-related information""")
+        self.add("MODELS", "models", parent="ferebus", type_=FileType.Directory, description="""Directory used to store the newest models made by
+            FEREBUS. These models are then moved over to MODEL_LOG directory.""")
+
+        # TODO: have not seen this MODELS directory? When are models remade?
         self.add("MODELS", "remake-models", type_=FileType.Directory)
-        self.add("MODEL_LOG", "model_log", type_=FileType.Directory)
-        self.add("SCRUBBED_POINTS", "scrubbed_points", type_=FileType.Directory)
+
+        self.add("MODEL_LOG", "model_log", type_=FileType.Directory, description="""Directory that holds all models that are made in an
+            adaptive sampling run. As the number of training points grows, newer models are made with the updated training data and new
+                model files are written out to this directory.""")
+        self.add("SCRUBBED_POINTS", "scrubbed_points", type_=FileType.Directory, description="""Directory for points which have errorred out for
+            some reason during the Gaussian or AIMALL calculations. If no .wfn file is produced, AIMALL fails to run, or the integration error of AIMALL is high\
+                then we do not want to use the point in training, so it is moved to this directory.""")
         self.add(
             "GAUSSIAN_SCRUBBED_POINTS",
             "gaussian_scrubbed_points",
             parent="scrubbed_points",
-            type_=FileType.Directory
+            type_=FileType.Directory,
+            description="""Contains all Gaussian scrubbed points."""
         )
         self.add(
             "AIMALL_SCRUBBED_POINTS",
             "aimall_scrubbed_points",
             parent="scrubbed_points",
-            type_=FileType.Directory
+            type_=FileType.Directory,
+            description="""Contains all AIMALL scrubbed points."""
         )
 
-        self.add(".DATA", "data", type_=FileType.Directory)
-        self.add("SCRIPTS", "scripts", parent="data", type_=FileType.Directory)
-        self.add("TEMP", "tmp_scripts", parent="scripts", type_=FileType.Directory)
-        self.add("OUTPUTS", "outputs", parent="scripts", type_=FileType.Directory)
-        self.add("ERRORS", "errors", parent="scripts", type_=FileType.Directory)
+        self.add(".DATA", "data", type_=FileType.Directory, description="""Directory that contains important information for jobs submitted to
+            compute nodes. Submission scripts as well as job outputs among other things are stored here.""")
+        self.add("SCRIPTS", "scripts", parent="data", type_=FileType.Directory, description="""Stores submission scripts which are used to submit
+            jobs to compute nodes. Submission scripts are shell (.sh) files such as GAUSSIAN.sh and AIMALL.sh.""")
 
-        self.add("OPT", "opt", type_=FileType.Directory)
-        self.add("CP2K", "cp2k", type_=FileType.Directory)
+        # TODO: not sure when temp is used
+        self.add("TEMP", "tmp_scripts", parent="scripts", type_=FileType.Directory)
+
+        self.add("OUTPUTS", "outputs", parent="scripts", type_=FileType.Directory, description="""This directory contains the standard output (stdout) that the job
+            produces. Things like print statements which are written to standard output are going to be written here (if ran from a compute node).
+                These files have the '.o' extension.""")
+        self.add("ERRORS", "errors", parent="scripts", type_=FileType.Directory, description="""Contains standard error (stderr) which a job script/program has
+            produced. These files have the '.e' extension""")
+
+        # TODO: This is for a geometry optimization correct? But is the optimization ran in this directory?
+        self.add("OPT", "opt", type_=FileType.Directory, description="""Contains a gaussian""")
+
+        self.add("CP2K", "cp2k", type_=FileType.Directory, description="""Contains files relating to the molecular dynamics package CP2K.""")
+
+        # TODO: Is this when each model is created per-property instead of per-atom?. What 
         self.add("PROPERTIES", "properties", type_=FileType.Directory)
+
         self.add("ATOMS", "atoms", type_=FileType.Directory)
-        self.add("TYCHE", "tyche", type_=FileType.Directory)
-        self.add("GAUSSIAN", "tyche_g09", parent="tyche", type_=FileType.Directory)
-        self.add("DLPOLY", "dlpoly", type_=FileType.Directory)
+        self.add("TYCHE", "tyche", type_=FileType.Directory, description="""Contains files relating to TYCHE, which is a program that
+            distorts a molecule by its normal modes to produce a sample pool. Currently CP2K is used to produce sample pool becaues it 
+                is a full MD simulation package, so a much wider varierty of geometries are generated using it.""")
+        self.add("GAUSSIAN", "tyche_g09", parent="tyche", type_=FileType.Directory, description="""Directory containing files from Gaussian, which
+            TYCHE needs to have in order to distort a molecule by normal modes.""")
+
+        # todo: a better description for these two is needed
+        self.add("DLPOLY", "dlpoly", type_=FileType.Directory, description="""Directory with files relating to DLPOLY simulations.""")
         self.add("GJF", "dlpoly_gjf", parent="dlpoly", type_=FileType.Directory)
         self.add("AMBER", "amber", type_=FileType.Directory)
 
-        self.add("PROGRAMS", "programs", type_=FileType.Directory)
-        self.add("machine", "machine", parent="data", type_=FileType.Directory)
+        self.add("PROGRAMS", "programs", type_=FileType.Directory, description="""Directory containing compiled program executables such as FEREBUS.""")
 
-        self.add("JOBS", "jobs", parent="data", type_=FileType.Directory)
-        self.add("jid", "jid", parent="jobs", type_=FileType.File)
-        self.add("DATAFILES", "datafiles", parent="jobs", type_=FileType.Directory)
+        # todo: pretty sure the machine is a file instead of directory, so corrected this.
+        self.add("machine", "machine", parent="data", type_=FileType.File, description="""A file containg the name of the comuter cluster
+            we are working on (csf3, ffluxlab, etc.)""")
 
+        self.add("JOBS", "jobs", parent="data", type_=FileType.Directory, description="""Directory containing information about jobs submitted to the
+            queueing system.""")
+        self.add("jid", "jid", parent="jobs", type_=FileType.File, description="""A file containing job IDs of jobs submitted to the queueing system.""")
+        self.add("DATAFILES", "datafiles", parent="jobs", type_=FileType.Directory, description="""A directory containing datafiles, which
+            have information for paths to inputs and outputs of a calculation submitted to the computer cluster. These datafiles are used to give
+                the paths to input/output files to jobs without hard-coding the inputs/outputs in the job script itself.""")
+
+        # todo: not sure what this is for
         self.add("ACTIVE_LEARNING", "active_learning", parent="data", type_=FileType.Directory)
-        self.add("counter", "counter", parent="active_learning", type_=FileType.File)
+        self.add("counter", "counter", parent="active_learning", type_=FileType.File, description="""File that keeps track of the iteration of the
+            active learning.""")
+
+        # todo: not sure what exactly gets written out to this directory
         self.add(
             "child_processes", "child_processes", parent="active_learning", type_=FileType.Directory
         )
+
+        # todo: not sure what goes into these per-property folders exactly
         self.add("PROPERTIES", "properties_daemon", parent="active_learning", type_=FileType.Directory)
         self.add(
             "properties.pid", "properties_pid", parent="properties_daemon", type_=FileType.File
@@ -113,7 +151,7 @@ class FileStructure(FileTree):
             "file_remover.err",
             "file_remover_stderr",
             parent="file_remover_daemon",
-            type_ = FileType.Directory,
+            type_ = FileType.File,
         )
 
 
