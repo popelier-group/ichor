@@ -46,7 +46,7 @@ class Model(File):
         self._k: Optional[Kernel] = FileContents
         self._x: Optional[np.ndarray] = FileContents
         self._y: Optional[np.ndarray] = FileContents
-        self._nugget = 1e-10  # todo: read this from ferebus file as well
+        self._nugget = FileContents  # todo: read this from ferebus file as well
         self._weights = FileContents  # todo: read this from ferebus file as well
 
     @buildermethod
@@ -55,8 +55,14 @@ class Model(File):
         kernel_composition = ""
         kernel_list = {}
 
+        self._nugget = 1e-10
+
         with open(self.path) as f:
             for line in f:
+                if "nugget" in line:  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
+                    self._nugget = float(line.split()[-1])
+                    continue
+
                 if line.startswith("#"):
                     continue
 
@@ -74,10 +80,6 @@ class Model(File):
                     "property" in line
                 ):  # property (such as iqa or particular multipole moment) for which a GP model was made
                     self._type = line.split()[1]
-                    continue
-
-                if "nugget" in line:  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
-                    self._nugget = float(line.split()[-1])
                     continue
 
                 if "number_of_features" in line:  # number of inputs to the GP
@@ -159,8 +161,7 @@ class Model(File):
                     while line.strip() != "":
                         y += [float(line)]
                         line = next(f)
-                    self._y = np.array(y)
-                    self._y = self._y.reshape(-1,1)
+                    self._y = np.array(y)[:,np.newaxis]
                     continue
 
                 if "[weights]" in line:
@@ -250,7 +251,7 @@ class Model(File):
     @cached_property
     def weights(self) -> np.ndarray:
         """ Returns an array containing the weights which can be stored prior to making predictions."""
-        return np.linalg.solve(self.lower_cholesky.T, np.linalg.solve(self.lower_cholesky, self.y-self.mean.value(self.x)))
+        return self._weights
 
     @cached_property
     def R(self) -> np.ndarray:

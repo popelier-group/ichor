@@ -49,7 +49,7 @@ class RBFCyclic(Kernel):
                 deviations for each feature, calculated from the training set points.
         """
         super().__init__(active_dims)
-        self._thetas = thetas  # np.power(1/(2.0 * lengthscale), 2)
+        self._thetas = 2*thetas  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
     def params(self):
@@ -76,8 +76,10 @@ class RBFCyclic(Kernel):
         """
 
         diff = x1[np.newaxis,:,self.active_dims] - x2[:,np.newaxis,self.active_dims]
-        diff = (diff + np.pi) % (2*np.pi) - np.pi
+        diff[:,:,self.mask] = (diff[:,:,self.mask] + np.pi) % (2*np.pi) - np.pi
         diff = diff*diff
+        for i in range(diff.shape[2]):
+            np.savetxt(f"diff{i}.txt", diff[:,:,i])
         return np.exp(-0.5 * np.sum(self._thetas*diff, axis=2)).T
 
     def __repr__(self):

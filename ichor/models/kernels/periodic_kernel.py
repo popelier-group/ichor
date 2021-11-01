@@ -26,7 +26,7 @@ class PeriodicKernel(Kernel):
             still passed in as an array that is n_features long.
         """
         super().__init__(active_dims)
-        self._thetas = thetas
+        self._thetas = 2*thetas
         self._period_length = period_length
 
     @property
