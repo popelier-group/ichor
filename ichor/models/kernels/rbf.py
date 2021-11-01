@@ -18,6 +18,7 @@ class RBF(Kernel):
 
     def __init__(self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None):
         super().__init__(active_dims)
+
         self._thetas = thetas
 
     @property
@@ -40,8 +41,8 @@ class RBF(Kernel):
         """
 
         true_lengthscales = np.sqrt(1.0/(2 * self._thetas))
-        tmp_x1 = x1[:,self.active_dims] / true_lengthscales
-        tmp_x2 = x2[:,self.active_dims] / true_lengthscales
+        tmp_x1 = x1[:,self.active_dims] / true_lengthscales[self.active_dims]
+        tmp_x2 = x2[:,self.active_dims] / true_lengthscales[self.active_dims]
         dist = Distance.squared_euclidean_distance(tmp_x1, tmp_x2)
         return np.exp(-0.5 * dist)
 
