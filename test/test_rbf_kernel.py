@@ -27,7 +27,7 @@ class TestRBF(unittest.TestCase):
         kernel = RBF(thetas=thetas)
         cov_matrix = kernel.k(x1, x2)
 
-        # sklearn 0.24.2 rbf covariance matrix with one lengthscale (set to 2.0)
+        # sklearn 0.24.2
         sklearn_rbf_cov_matrix_one_lengthscale = np.array([[0.89335164, 0.76737859, 0.52052102],
                                                             [0.71847455, 0.62597177, 0.31284419],
                                                             [0.98824464, 0.96331482, 0.65986171]])
@@ -44,7 +44,7 @@ class TestRBF(unittest.TestCase):
         kernel = RBF(thetas=thetas)
         cov_matrix = kernel.k(x1, x2)
 
-        # sklearn 0.24.2 rbf covariance matrix with one lengthscale
+        # sklearn 0.24.2
         sklearn_rbf_cov_matrix_multiple_lengthscales = np.array([[0.86456942, 0.73356806, 0.52370482],
                                                             [0.66041384, 0.53581677, 0.30408973],
                                                             [0.98895348, 0.98672651, 0.78060504]])
@@ -62,7 +62,7 @@ class TestRBF(unittest.TestCase):
         kernel = RBF(thetas=thetas, active_dims=active_dims)
         cov_matrix = kernel.k(x1, x2)
 
-        # sklearn 0.24.2 rbf covariance matrix with one lengthscale
+        # sklearn 0.24.2
         sklearn_rbf_cov_matrix_with_active_dims = np.array([[0.99284612, 0.96452413, 0.89983304],
                                                             [0.99170815, 0.99832779, 0.82891097],
                                                             [0.99698238, 0.99044249, 0.84139688]])
