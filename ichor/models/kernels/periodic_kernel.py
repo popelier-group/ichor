@@ -74,24 +74,6 @@ class PeriodicKernel(Kernel):
         res = np.exp(res)
         return res
 
-        # x1_ = np.pi * (x1[:,self.active_dims] / self._period_length)
-        # print(x1_.shape)
-        # x2_ = np.pi * (x2[:,self.active_dims] / self._period_length)
-        # x1_ = np.expand_dims(x1_, -2)
-        # x2_ = np.expand_dims(x2_, -3)
-        # diff = x1_ - x2_
-
-        # print(x1_.shape)
-        # print(x2_.shape)
-
-        # res = np.sin(diff)
-        # res = np.power(res, 2)
-        # res = np.sum(res, axis=-1)
-        # res = res / true_lengthscales[self.active_dims]
-        # res = -2.0 * res
-        # res = np.exp(res)
-        # return res
-
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
         """helper method to return x_test, x_train Periodic covariance matrix K(X*, X)"""
         return self.k(x_test, x_train)
