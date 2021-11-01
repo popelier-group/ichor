@@ -49,15 +49,48 @@ class PeriodicKernel(Kernel):
         """
 
         # implementation from gpytorch https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
-        true_lengthscales = np.sqrt(1/self._thetas)
+        true_lengthscales = np.sqrt(1.0/(2 * self._thetas))
+        true_lengthscales = true_lengthscales.reshape(-1,1,1)
 
-        x1_ = np.pi * (x1[:,self.active_dims] / self._period_length)
-        x2_ = np.pi * (x2[:,self.active_dims] / self._period_length)
-        x1_ = np.expand_dims(x1_, -2)
-        x2_ = np.expand_dims(x2_, -3)
+        # get only dimensions which need periodic kernel
+        x1_ = x1[:,self.active_dims]
+        x2_ = x2[:,self.active_dims]
+
+        # divide by period length and multiply by pi beforehand
+        x1_ = np.pi * (x1_ / self._period_length)
+        x2_ = np.pi * (x2_ / self._period_length)
+
+        # expand dimensions to get a difference that is a 3d array.
+        # The shape is n_dims x n_points_x1, n_points_x2
+        x1_ = np.expand_dims(x1_.T, -1)
+        x2_ = np.expand_dims(x2_.T, -2)
         diff = x1_ - x2_
-        res = np.exp(np.multiply(-2.0, np.sum(np.power(np.sin(diff), 2)/true_lengthscales[self.active_dims], axis=-1)))
+
+        res = np.sin(diff)
+        res = res / true_lengthscales
+        res = res**2
+        res = np.sum(res, axis=-3)
+        res = -2.0 * res
+        res = np.exp(res)
         return res
+
+        # x1_ = np.pi * (x1[:,self.active_dims] / self._period_length)
+        # print(x1_.shape)
+        # x2_ = np.pi * (x2[:,self.active_dims] / self._period_length)
+        # x1_ = np.expand_dims(x1_, -2)
+        # x2_ = np.expand_dims(x2_, -3)
+        # diff = x1_ - x2_
+
+        # print(x1_.shape)
+        # print(x2_.shape)
+
+        # res = np.sin(diff)
+        # res = np.power(res, 2)
+        # res = np.sum(res, axis=-1)
+        # res = res / true_lengthscales[self.active_dims]
+        # res = -2.0 * res
+        # res = np.exp(res)
+        # return res
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
         """helper method to return x_test, x_train Periodic covariance matrix K(X*, X)"""
