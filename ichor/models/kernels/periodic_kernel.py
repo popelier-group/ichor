@@ -56,7 +56,7 @@ class PeriodicKernel(Kernel):
         x1_ = np.expand_dims(x1_, -2)
         x2_ = np.expand_dims(x2_, -3)
         diff = x1_ - x2_
-        res = np.exp(np.multiply(-2.0, np.sum(np.power(np.sin(diff), 2)/true_lengthscales, axis=-1)))
+        res = np.exp(np.multiply(-2.0, np.sum(np.power(np.sin(diff), 2)/true_lengthscales[self.active_dims], axis=-1)))
         return res
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
