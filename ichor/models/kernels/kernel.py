@@ -19,6 +19,12 @@ class Kernel(ABC):
             return self._active_dims
         return np.arange(len(self._thetas))
 
+    @property
+    def true_lengthscales(self):
+        """ These are the true lengthscale values. Typically the kernel equations are written with these values (l) instead of theta (see the
+        kernel cookbook or Rasmussen and Williams for examples."""
+        return np.sqrt(1.0/(2 * self._thetas))
+
     @abstractmethod
     def params(self):
         pass
