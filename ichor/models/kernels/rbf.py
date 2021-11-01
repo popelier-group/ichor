@@ -18,7 +18,7 @@ class RBF(Kernel):
 
     def __init__(self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None):
         super().__init__(active_dims)
-        self._thetas = 2*thetas
+        self._thetas = thetas
 
     @property
     def params(self):

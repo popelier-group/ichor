@@ -49,7 +49,7 @@ class RBFCyclic(Kernel):
                 deviations for each feature, calculated from the training set points.
         """
         super().__init__(active_dims)
-        self._thetas = 2*thetas  # np.power(1/(2.0 * lengthscale), 2)
+        self._thetas = thetas  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
     def params(self):
