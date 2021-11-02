@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from ichor import patterns
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
-from ichor.files.file import FileContents
+from ichor.files.file import File, FileContents
 from ichor.files.qcp import QuantumChemistryProgramInput
 
 
@@ -116,7 +116,7 @@ class GJF(QuantumChemistryProgramInput):
         self.charge = 0
         self.multiplicity = 1
 
-        if self.keywords is None:
+        if self.keywords is FileContents:
             self.keywords = []
         required_keywords = ["nosymm", "output=wfn"]
         self.keywords = list(
@@ -134,8 +134,8 @@ class GJF(QuantumChemistryProgramInput):
     def write(self) -> None:
         """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
         should be given to Gaussian."""
-        self.format()
         with open(self.path, "w") as f:
+            self.format()
             for startup_option in self.startup_options:
                 f.write(f"%" + startup_option + "\n")
             f.write(f"{self.header_line}\n")
