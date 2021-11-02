@@ -72,7 +72,7 @@ class PeriodicKernel(Kernel):
         res = self._thetas * (res*res) #/ true_lengthscales        
         res = np.sum(res, axis=2)
         res = np.exp(-2.0 * res)
-        return res
+        return res.T
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:
         """helper method to return x_test, x_train Periodic covariance matrix K(X*, X)"""
