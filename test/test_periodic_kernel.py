@@ -55,7 +55,7 @@ class TestPeriodicKernel(unittest.TestCase):
         kernel = PeriodicKernel(thetas=thetas, period_length=period_length)
         cov_matrix = kernel.k(x1, x2)
 
-        # custom implementation using sklearn periodic kernel, where each input-dimension covariance is calcualted and multiplied
+        # custom implementation using sklearn periodic kernel, where each input-dimension covariance is calculated and multiplied
         # by other dimension covariance matrices
 
         # import numpy as np

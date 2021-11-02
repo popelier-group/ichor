@@ -19,19 +19,25 @@ class Kernel(ABC):
             return self._active_dims
         return np.arange(len(self._thetas))
 
+    @property
+    def true_lengthscales(self):
+        """ These are the true lengthscale values. Typically the kernel equations are written with these values (l) instead of theta (see the
+        kernel cookbook or Rasmussen and Williams for examples."""
+        return np.sqrt(1.0/(2 * self._thetas))
+
     @abstractmethod
     def params(self):
         pass
 
     @abstractmethod
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
-        """Calcualtes covariance matrix from two sets of points
+        """Calculates covariance matrix from two sets of points
 
         Args:
             :param: `x1` np.ndarray of shape n x ndimensions:
                 First matrix of n points
             :param: `x2` np.ndarray of shape m x ndimensions:
-                Second marix of m points, can be identical to the first matrix `x1`
+                Second matrix of m points, can be identical to the first matrix `x1`
 
         Returns:
             :type: `np.ndarray`
