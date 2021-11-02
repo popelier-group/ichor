@@ -26,7 +26,7 @@ class PeriodicKernel(Kernel):
             still passed in as an array that is n_features long.
         """
         super().__init__(active_dims)
-        self._thetas = 2*thetas
+        self._thetas = thetas
         self._period_length = period_length
 
     @property
@@ -49,29 +49,29 @@ class PeriodicKernel(Kernel):
         """
 
         # implementation from gpytorch https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
-        true_lengthscales = np.sqrt(1.0/(2 * self._thetas))
-        true_lengthscales = true_lengthscales.reshape(-1,1,1)
+        # true_lengthscales = np.sqrt(1.0/np.log( self._thetas))
+        # true_lengthscales = true_lengthscales.reshape(-1,1,1)
 
         # get only dimensions which need periodic kernel
-        x1_ = x1[:,self.active_dims]
-        x2_ = x2[:,self.active_dims]
+        # x1_ = x1[:,self.active_dims]
+        # x2_ = x2[:,self.active_dims]
 
         # divide by period length and multiply by pi beforehand
-        x1_ = np.pi * (x1_ / self._period_length)
-        x2_ = np.pi * (x2_ / self._period_length)
+        # x1_ = np.pi * (x1_ / self._period_length)
+        # x2_ = np.pi * (x2_ / self._period_length)
 
         # expand dimensions to get a difference that is a 3d array.
         # The shape is n_dims x n_points_x1, n_points_x2
-        x1_ = np.expand_dims(x1_.T, -1)
-        x2_ = np.expand_dims(x2_.T, -2)
-        diff = x1_ - x2_
+        # x1_ = np.expand_dims(x1_.T, -1)
+        # x2_ = np.expand_dims(x2_.T, -2)
+        # diff = x1_ - x2_
+
+        diff = (x1[np.newaxis,:,self.active_dims] - x2[:,np.newaxis,self.active_dims]) / 2.0
 
         res = np.sin(diff)
-        res = res / true_lengthscales
-        res = res**2
-        res = np.sum(res, axis=-3)
-        res = -2.0 * res
-        res = np.exp(res)
+        res = self._thetas * (res*res) #/ true_lengthscales        
+        res = np.sum(res, axis=2)
+        res = np.exp(-2.0 * res)
         return res
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:

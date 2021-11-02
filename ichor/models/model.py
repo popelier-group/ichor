@@ -123,7 +123,7 @@ class Model(File):
                         line = next(f)
                         thetas = np.array(
                             [float(hp) for hp in line.split()[1:]]
-                        ).reshape(1,-1)
+                        )
                         kernel_list[kernel_name] = RBF(thetas, active_dims=active_dims)
                     elif kernel_type in [
                         "rbf-cyclic",
