@@ -77,7 +77,7 @@ class TestRBF(unittest.TestCase):
 
         x1 = np.array([[1.2, 1.6, 2.24, 4.21], [0.9, 1.2, 2.03, 3.56], [1.31, 1.25, 2.01, 5.34]])
         x2 = np.array([[1.3, 1.35, 2.20, 5.12], [0.81, 1.09, 1.98, 5.49], [1.61, 1.87, 3.56, 6.01]])
-        lengthscale = np.array([4.3, 2.14, 3.06, 1.73])
+        lengthscale = np.array([4.3, 2.14, 3.06])
         thetas = 1 / (2 * lengthscale**2)
         active_dims = [0,1,2]
         kernel = RBF(thetas=thetas, active_dims=active_dims)

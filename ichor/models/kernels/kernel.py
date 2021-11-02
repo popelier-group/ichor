@@ -105,6 +105,17 @@ class KernelProd(Kernel):
         return self.k1.r(xi, x) * self.k2.r(xi, x)
 
     def R(self, x):
+        r1 = self.k1.R(x)
+        r2 = self.k2.R(x)
+        r = r1*r2
+        print("==================")
+        print(r1[:3,:3])
+        print("------------------")
+        print(r2[:3,:3])
+        print("==================")
+        print(r[:3,:3])
+        print("==================")
+        return r
         return self.k1.R(x) * self.k2.R(x)
 
     def __repr__(self):
