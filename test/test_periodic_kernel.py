@@ -85,6 +85,35 @@ class TestPeriodicKernel(unittest.TestCase):
         np.testing.assert_allclose(cov_matrix, sklearn_periodic_cov_matrix_multi_dim)
 
 
+    def test_k_periodic_train_train_covariance(self):
+
+        x1 = np.array([[1.54, -3.14, 0.98], [1.5, 3.14, 0.69], [1.343, 3.05, 0.59], [1.25, 0.98, 2.96]])
+        lengthscale = np.array([1.2, 5.39, 1.73])
+        thetas = 1 / ( 2 * lengthscale**2)
+        period_length = 2 * np.pi
+        kernel = PeriodicKernel(thetas=thetas, period_length=period_length)
+        own_implementation_cov_matrix = kernel.k(x1, x1)
+
+        # from sklearn.gaussian_process.kernels import ExpSineSquared
+        # lengthscale = np.array([1.2, 5.39, 1.73])
+        # period_length = 2 * np.pi
+        # x1 = np.array([[1.54, -3.14, 0.98], [1.5, 3.14, 0.69], [1.343, 3.05, 0.59], [1.25, 0.98, 2.96]])
+        # x1 = x1.T
+
+        # final_sklearn_cov_matrix = np.ones((4,4))
+        # for idx, (one_dim_x1, one_dim_x2) in enumerate(zip(x1, x1)):
+
+        #     kernel = ExpSineSquared(length_scale=lengthscale[idx], periodicity=period_length)
+        #     temp_cov_matrix = kernel(one_dim_x1.reshape(-1,1), one_dim_x2.reshape(-1,1))
+        #     final_sklearn_cov_matrix *= temp_cov_matrix
+
+        final_sklearn_cov_matrix = np.array([[1.0, 0.98559734, 0.96206732, 0.57712178],
+                                    [0.98559734, 1.0, 0.98970372, 0.53563283],
+                                    [0.96206732, 0.98970372, 1.0, 0.53391177],
+                                    [0.57712178, 0.53563283, 0.53391177, 1.0]])
+
+        np.testing.assert_allclose(own_implementation_cov_matrix, final_sklearn_cov_matrix)
+
 if __name__ == "__main__":
 
     unittest.main()
