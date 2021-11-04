@@ -105,10 +105,11 @@ class FileStructure(FileTree):
         self.add("ACTIVE_LEARNING", "active_learning", parent="data", type_=FileType.Directory)
         self.add("counter", "counter", parent="active_learning", type_=FileType.File, description="""File that keeps track of the iteration of the
             active learning.""")
+        self.add("alpha", "alpha", parent="active_learning", type_=FileType.File)
+        self.add("cv_errors", "cv_errors", parent="active_learning", type_=FileType.File)
 
-        # todo: not sure what exactly gets written out to this directory
         self.add(
-            "child_processes", "child_processes", parent="active_learning", type_=FileType.Directory
+            "child_processes", "child_processes", parent="active_learning", type_=FileType.File
         )
 
         # todo: not sure what goes into these per-property folders exactly
