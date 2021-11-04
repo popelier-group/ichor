@@ -49,7 +49,7 @@ class RBFCyclic(Kernel):
                 deviations for each feature, calculated from the training set points.
         """
         super().__init__(active_dims)
-        self._thetas = 2.0*thetas  # np.power(1/(2.0 * lengthscale), 2)
+        self._thetas = thetas  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
     def params(self):
@@ -57,9 +57,7 @@ class RBFCyclic(Kernel):
 
     @cached_property
     def mask(self):
-        return (
-            np.array([x for x in range(len(self._thetas))]) + 1
-        ) % 3 == 0
+        return np.arange(2, len(self._thetas), 3)
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calcualtes cyclic RBF covariance matrix from two sets of points
@@ -75,10 +73,23 @@ class RBFCyclic(Kernel):
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
 
-        diff = x1[np.newaxis,:,self.active_dims] - x2[:,np.newaxis,self.active_dims]
+        # ntrain x ntest x nfeats
+        diff = x2[np.newaxis,:,self.active_dims] - x1[:,np.newaxis,self.active_dims]
         diff[:,:,self.mask] = (diff[:,:,self.mask] + np.pi) % (2*np.pi) - np.pi
+        # print('==========')
+        # print('test', x2[0,:])
+        # print('train', x1[0,:])
+        # print(diff[0,0,:])
+        # print(diff.shape)
+        # print('==========')
         diff = diff*diff
-        return np.exp(-0.5 * np.sum(self._thetas*diff, axis=2)).T
+        # a = self._thetas*diff
+        # print('==========')
+        # print(a[0,0,:])
+        # print(a.shape)
+        # print(self.mask)
+        # print('==========')
+        return np.exp(-np.sum(self._thetas*diff, axis=2))
 
     def __repr__(self):
         return f"RBFCyclic({self._thetas})"

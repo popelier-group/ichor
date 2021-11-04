@@ -1,5 +1,7 @@
 import unittest
 import sys
+
+from numpy.lib.function_base import cov
 sys.path.append("../ichor/")
 from ichor.models.kernels.periodic_kernel import PeriodicKernel
 import numpy as np
@@ -81,6 +83,31 @@ class TestPeriodicKernel(unittest.TestCase):
                                                         [0.91716864, 0.92175724],
                                                         [0.92588932, 0.92174029],
                                                         [0.49659173, 0.63445399]])
+
+        np.testing.assert_allclose(cov_matrix, sklearn_periodic_cov_matrix_multi_dim)
+
+    def test_k_periodic_multiple_dimensions_covariance_matrix(self):
+
+        x1 = np.array([[1.54, -3.14, 0.98], [1.5, 3.14, 0.69], [1.343, 3.05, 0.59], [1.25, 0.98, 2.96]])
+        lengthscale = np.array([1.2, 5.39, 1.73])
+        thetas = 1 / (2 * lengthscale**2)
+        period_length = 2 * np.pi
+        kernel = PeriodicKernel(thetas=thetas, period_length=period_length)
+        cov_matrix = kernel.k(x1, x1)
+
+        # custom implementation using sklearn periodic kernel, where each input-dimension covariance is calculated and multiplied
+        # by other dimension covariance matrices
+
+        from sklearn.gaussian_process.kernels import ExpSineSquared
+
+        x1 = x1.T
+
+        final_cov_matrix = np.ones((4,4))
+        for idx, (one_dim_x1, one_dim_x2) in enumerate(zip(x1, x1)):
+            kernel = ExpSineSquared(length_scale=lengthscale[idx], periodicity=period_length)
+            final_cov_matrix *= kernel(one_dim_x1.reshape(-1,1), one_dim_x2.reshape(-1,1))
+        
+        sklearn_periodic_cov_matrix_multi_dim = final_cov_matrix
 
         np.testing.assert_allclose(cov_matrix, sklearn_periodic_cov_matrix_multi_dim)
 

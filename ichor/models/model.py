@@ -246,6 +246,12 @@ class Model(File):
         return self.atom_num - 1
 
     def r(self, x_test: np.ndarray) -> np.ndarray:
+        r = self.k.r(self.x, x_test)
+        # print('>>')
+        # print(r)
+        # print(r.shape)
+        # print('<<')
+        return r
         return self.k.r(self.x, x_test)
 
     @cached_property
