@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from ichor import patterns
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
-from ichor.files.file import FileContents
+from ichor.files.file import File, FileContents
 from ichor.files.qcp import QuantumChemistryProgramInput
 
 
@@ -110,14 +110,17 @@ class GJF(QuantumChemistryProgramInput):
         """Format the .gjf file to use Gaussian keywords/variables that are defined in ICHOR GLOBALS."""
         from ichor.globals import GLOBALS
 
+        # TODO: Why is the read method needed here?
         self.read()  # see class File
 
         self.job_type = GaussianJobType.Energy
         self.charge = 0
         self.multiplicity = 1
 
-        if self.keywords is None:
-            self.keywords = []
+        # if self.keywords is FileContents:
+        #     self.keywords = []
+        # if you check that self.keywords is FileContents, it will call the _read_file method and then Atoms will be empty because the file was just created
+        self.keywords = []
         required_keywords = ["nosymm", "output=wfn"]
         self.keywords = list(
             set(self.keywords + GLOBALS.KEYWORDS + required_keywords)
@@ -134,8 +137,9 @@ class GJF(QuantumChemistryProgramInput):
     def write(self) -> None:
         """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
         should be given to Gaussian."""
-        self.format()
         with open(self.path, "w") as f:
+            # TODO: the self.format() results in NoFileFound because of the `class File` implementation. So it has to be inside here.
+            self.format()
             for startup_option in self.startup_options:
                 f.write(f"%" + startup_option + "\n")
             f.write(f"{self.header_line}\n")
