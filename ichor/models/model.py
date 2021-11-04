@@ -11,7 +11,7 @@ from ichor.itypes import F
 from ichor.models.kernels import RBF, Kernel, RBFCyclic, PeriodicKernel
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.kernels.periodic_kernel import PeriodicKernel
-from ichor.models.mean import ConstantMean, Mean, ZeroMean
+from ichor.models.mean import ConstantMean, Mean, ZeroMean, LinearMean, QuadraticMean
 
 
 class Model(File):
@@ -95,9 +95,19 @@ class Model(File):
 
                 # GP mean (mu) section
                 if "[mean]" in line:
-                    _ = next(f)
-                    line = next(f)
-                    self._mean = ConstantMean(float(line.split()[1]))
+                    mean_type = next(f).split()[-1]  # type
+                    if mean_type == "constant":
+                        self._mean = ConstantMean(float(next(f).split()[1]))
+                    elif mean_type == "zero":
+                        self._mean = ZeroMean()
+                    elif mean_type in ["linear", "quadratic"]:
+                        beta = np.array([float(b) for b in next(f).split()[1:]])
+                        xmin = np.array([float(x) for x in next(f).split()[1:]])
+                        ymin = float(next(f).split[-1])
+                        if mean_type == "linear":
+                            self._mean = LinearMean(beta, xmin, ymin)
+                        elif mean_type == "quadratic":
+                            self._mean = QuadraticMean(beta, xmin, ymin)
                     continue
 
                 if (
@@ -215,7 +225,7 @@ class Model(File):
         return self._ntrain
 
     @property
-    def mean(self) -> int:
+    def mean(self) -> Mean:
         """ Returns the GP mean value (mu)"""
         return self._mean
 

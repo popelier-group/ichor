@@ -13,13 +13,6 @@ class ConstantMean(Mean):
     def __init__(self, value: float):
         self._value = value
 
-    def value(self, x: np.ndarray) -> float:
+    def value(self, x: np.ndarray) -> np.ndarray:
         """Returns the constant mean value."""
-        return self._value
-
-    def values(self, x: np.ndarray) -> np.ndarray:
-        """Fill an array with the constant mean value, that is of the same shape as x.shape[0] (this is the number of samples usually)
-
-        :param x: A numpy array
-        """
         return np.full((x.shape[0]), self._value)
