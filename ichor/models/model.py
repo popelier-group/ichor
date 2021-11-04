@@ -103,7 +103,7 @@ class Model(File):
                     elif mean_type in ["linear", "quadratic"]:
                         beta = np.array([float(b) for b in next(f).split()[1:]])
                         xmin = np.array([float(x) for x in next(f).split()[1:]])
-                        ymin = float(next(f).split[-1])
+                        ymin = float(next(f).split()[-1])
                         if mean_type == "linear":
                             self._mean = LinearMean(beta, xmin, ymin)
                         elif mean_type == "quadratic":
@@ -282,7 +282,7 @@ class Model(File):
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """ Returns an array containing the test point predictions."""
-        return (self.mean.value(self.x) + np.dot(self.r(x_test).T, self.weights)).flatten()
+        return self.mean.value(x_test) + np.dot(self.r(x_test).T, self.weights)[:,-1]
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
         """ Return the variance for the test data points."""
