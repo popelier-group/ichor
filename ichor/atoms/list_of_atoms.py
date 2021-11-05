@@ -65,6 +65,23 @@ class ListOfAtoms(list):
             features = np.transpose(features, (1, 0, 2))
         return features
 
+    def alf_features(self, alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
+        """Return the ndarray of features. This is assumed to be either a 1D, 2D or 3D array.
+        If the dimensionality of the feature array is 3, the array is transposed to transform a
+        (natom, ntimestep, nfeature) array into a (ntimestep, natom, nfeature) array so that
+        all features for a single timestep are easier to group.
+        :rtype: `np.ndarray`
+        :return:
+            A 3D array of features for every atom in every timestep. Shape `n_timesteps` x `n_atoms` x `n_features`)
+            If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
+            If the trajectory instance is indexed by str, the array has shape `n_atoms` x `n_features`.
+            If the trajectory instance is indexed by slice, the array has shape `slice`, `n_atoms` x `n_features`.
+        """
+        features = np.array([i.alf_features(alf) for i in self])
+        if features.ndim == 3:
+            features = np.transpose(features, (1, 0, 2))
+        return features
+
     def coordinates_to_xyz(
         self, fname: Optional[Union[str, Path]] = None, step: Optional[int] = 1
     ):

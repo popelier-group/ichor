@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 
@@ -40,6 +40,7 @@ class Model(File):
         self._system: Optional[str] = FileContents
         self._atom: Optional[str] = FileContents
         self._type: Optional[str] = FileContents
+        self._alf: Optional[List[int]] = FileContents
         self._nfeats: Optional[int] = FileContents
         self._ntrain: Optional[int] = FileContents
         self._mean: Optional[Mean] = FileContents
@@ -82,6 +83,10 @@ class Model(File):
                     self._type = line.split()[1]
                     continue
 
+                if "ALF" in line:
+                    self._alf = [int(a) for a in line.split()[1:]]
+                    continue
+
                 if "number_of_features" in line:  # number of inputs to the GP
                     self._nfeats = int(line.split()[1])
                     continue
@@ -91,7 +96,6 @@ class Model(File):
                 ):  # number of training points to make the GP model
                     self._ntrain = int(line.split()[1])
                     continue
-
 
                 # GP mean (mu) section
                 if "[mean]" in line:
@@ -207,6 +211,14 @@ class Model(File):
     def type(self) -> str:
         """ Returns the property (iqa, q00, etc) for which a GP model was made"""
         return self._type
+
+    @property
+    def alf(self) -> List[int]:
+        return self._alf
+
+    @property
+    def ialf(self) -> np.ndarray:
+        return np.array(self.alf) - 1
 
     @property
     def nugget(self) -> float:

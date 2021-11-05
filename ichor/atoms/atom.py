@@ -241,15 +241,19 @@ class Atom(VarReprMixin):
         return ALFFeatureCalculator.calculate_alf(self)
 
     @property
-    def alf_i(self):
+    def ialf(self) -> np.ndarray:
         """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
-        THere indeces are what are used in python lists (as they start at 0)."""
-        return [atom.i for atom in self.alf]
+        THere indices are what are used in python lists (as they start at 0)."""
+        return np.array([atom.i for atom in self.alf])
 
     @property
     def features(self) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
         return ALFFeatureCalculator.calculate_features(self)
+
+    def alf_features(self, alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
+        """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance using the given alf"""
+        return ALFFeatureCalculator.calculate_features(self, alf)
 
     @property
     def coordinates_string(self):
@@ -268,6 +272,8 @@ class Atom(VarReprMixin):
     #     coordinates of the atom
     #     """
     #     return f"{self.name:<3s}{self.coordinates_string}"
+
+
 
     def __repr__(self):
         return f"{self.__class__.__name__}(f'{self.name:<3s}{self.coordinates_string}')"

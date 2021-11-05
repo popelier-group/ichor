@@ -1,6 +1,6 @@
 import re
 from functools import wraps
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 import numpy as np
 
@@ -51,14 +51,29 @@ class Models(Directory, list):
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")
 
     @property
-    def atom_names(self) -> list:
+    def atom_names(self) -> List[str]:
         """ Returns a list of atom names (such as O1, H2, H3, etc.) for which models were made"""
         return list(set(natsorted([model.atom_name for model in self], key=ignore_alpha)))
 
     @property
-    def types(self) -> list:
+    def types(self) -> List[str]:
         """ Returns a list of types (such as q00, q10, iqa, etc.) for which models were made"""
         return list(set([model.type for model in self]))
+
+    @property
+    def alf(self) -> List[List[int]]:
+        """Returns the alf taken straight from each model file e.g. [[1, 2, 3], [2, 1, 3], [3, 1, 2]]"""
+        return sorted([model.alf for model in self])
+
+    @property
+    def ialf(self) -> np.ndarray:
+        """Returns the zero index alf from each model file as a numpy array e.g. [[0, 1, 2], [1, 0, 2], [2, 0, 1]]"""
+        return np.array(sorted([model.ialf for model in self], key=lambda x: x[0]))
+
+    @property
+    def ialf_dict(self) -> Dict[str, np.ndarray]:
+        """Returns the zero index alf from each model file as a dictionary e.g. {'O1': [0, 1, 2], 'H2': [1, 0, 2], 'H3': [2, 0, 1]}"""
+        return {model.atom_name: model.ialf for model in self}
 
     @property
     def ntrain(self) -> int:
@@ -103,7 +118,7 @@ class Models(Directory, list):
         if isinstance(test_x, Atoms):
             return self._features_from_atoms(test_x)
         elif isinstance(test_x, ListOfAtoms):
-                return self._features_from_list_of_atoms(test_x)
+            return self._features_from_list_of_atoms(test_x)
         elif isinstance(test_x, np.ndarray):
             return self._features_from_array(test_x)
         elif isinstance(test_x, dict):
@@ -112,13 +127,13 @@ class Models(Directory, list):
 
     def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
         """Returns a dictionary containing atom name as key and atom features for values."""
-        return {atom.name: atom.features for atom in atoms}
+        return {atom.name: atom.alf_features(alf=self.ialf_dict[atom]) for atom in atoms}
 
     def _features_from_list_of_atoms(
         self, x_test: ListOfAtoms
     ) -> Dict[str, np.ndarray]:
         return {
-            atom: x_test[atom].features
+            atom: x_test[atom].alf_features(alf=self.ialf_dict[atom])
             for atom in self.atom_names
             if atom in x_test.atom_names
         }

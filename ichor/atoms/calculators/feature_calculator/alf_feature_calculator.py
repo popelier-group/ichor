@@ -1,5 +1,5 @@
 import itertools as it
-from typing import List
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -119,7 +119,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         return cls._alf[system_hash][atom.i]
 
     @classmethod
-    def calculate_x_axis_atom(cls, atom):
+    def calculate_x_axis_atom(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
         """Returns the Atom instance that is used as the x-axis of the ALF
 
         Args:
@@ -131,10 +131,19 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `Atom` instance
                 The Atom instance which corresponds to the x-axis atom
         """
-        return atom.parent[cls.calculate_alf(atom)[1]]
+        if alf is None:
+            return atom.parent[cls.calculate_alf(atom)[1]]
+        elif isinstance(alf, list):
+            from ichor.atoms.atom import Atom
+            if isinstance(alf[1], int):
+                return atom.parent[alf[1] - 1]
+            elif isinstance(alf[1], Atom):
+                return atom.parent[alf[1].i]
+        elif isinstance(alf, np.ndarray):
+            return atom.parent[alf[1]]
 
     @classmethod
-    def calculate_xy_plane_atom(cls, atom):
+    def calculate_xy_plane_atom(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
         """Returns the Atom instance that is used as the x-axis of the ALF
 
         Args:
@@ -146,10 +155,19 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `Atom` instance
                 The Atom instance which corresponds to the xy-plane atom
         """
-        return atom.parent[cls.calculate_alf(atom)[2]]
+        if alf is None:
+            return atom.parent[cls.calculate_alf(atom)[2]]
+        elif isinstance(alf, list):
+            from ichor.atoms.atom import Atom
+            if isinstance(alf[2], int):
+                return atom.parent[alf[2] - 1]
+            elif isinstance(alf[2], Atom):
+                return atom.parent[alf[2].i]
+        elif isinstance(alf, np.ndarray):
+            return atom.parent[alf[2]]
 
     @classmethod
-    def calculate_c_matrix(cls, atom) -> np.ndarray:
+    def calculate_c_matrix(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None) -> np.ndarray:
         """Retruns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
         See https://pubs.acs.org/doi/pdf/10.1021/ct500565g , Section 3.3 for the derivations. This matrix has 3 unit
         vectors.
@@ -165,8 +183,8 @@ class ALFFeatureCalculator(FeatureCalculator):
         """
         c_matrix = np.empty((3, 3))
 
-        x_axis_atom = cls.calculate_x_axis_atom(atom)
-        xy_plane_atom = cls.calculate_xy_plane_atom(atom)
+        x_axis_atom = cls.calculate_x_axis_atom(atom, alf)
+        xy_plane_atom = cls.calculate_xy_plane_atom(atom, alf)
 
         # first row
         row1 = (x_axis_atom.coordinates - atom.coordinates) / np.linalg.norm(
@@ -195,7 +213,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         return c_matrix
 
     @classmethod
-    def calculate_features(cls, atom):
+    def calculate_features(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
         """Calculates the features for the given central atom.
 
         Args:
@@ -216,8 +234,8 @@ class ALFFeatureCalculator(FeatureCalculator):
             1.0 if feature_unit is AtomicDistance.Angstroms else ang2bohr
         )
 
-        x_axis_atom = cls.calculate_x_axis_atom(atom)
-        xy_plane_atom = cls.calculate_xy_plane_atom(atom)
+        x_axis_atom = cls.calculate_x_axis_atom(atom, alf)
+        xy_plane_atom = cls.calculate_xy_plane_atom(atom, alf)
 
         x_axis_vect = unit_conversion * (
             x_axis_atom.coordinates - atom.coordinates

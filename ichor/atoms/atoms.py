@@ -184,6 +184,19 @@ class Atoms(list):
 
         return np.array([atom.features for atom in self])
 
+    def alf_features(self, alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None) -> np.ndarray:
+        """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
+        Features are calculated in the Atom class and concatenated to a 2d array here.
+
+        The array shape is n_atoms x n_features (3*n_atoms - 6)
+
+        Returns:
+            :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
+                Return the feature matrix of this Atoms instance
+        """
+
+        return np.array([atom.alf_features(alf) for atom in self])
+
     @property
     def features_dict(self) -> dict:
         """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
