@@ -102,6 +102,10 @@ def submit_amber(input_file: Path) -> JobID:
     else:
         raise ValueError(f"Unknown filetype: {input_file}")
 
+    nres = 1  # number of residues is fixed at 1 as we aren't hydrating
+    GLOBALS.AMBER_NCORES = min(GLOBALS.AMBER_NCORES, nres)  # ncores must be less than or equal to the number of residues
+
+
     mkdir(FILE_STRUCTURE["amber"])
     mol2 = Mol2(
         FILE_STRUCTURE["amber"] / (GLOBALS.SYSTEM_NAME + Mol2.filetype)
