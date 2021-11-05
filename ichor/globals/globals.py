@@ -194,7 +194,7 @@ class Globals:
     CP2K_NCORES: int = 8
     PYSCF_NCORES: int = 2
     MORFI_NCORES: int = 4
-    AMBER_NCORES: int = 8
+    AMBER_NCORES: int = 1
     TYCHE_NCORES: int = 1
 
     # N TRIES SETTINGS FOR RETRYING TO RUN PROGRAMS
