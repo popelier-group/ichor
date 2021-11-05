@@ -28,17 +28,13 @@ class ConnectivityCalculator:
         if system_hash not in cls.connectivity.keys():
             connectivity = np.zeros((len(atoms), len(atoms)))
 
-            adjus = 0.52917706  # taken from molden6.9/src/getpoi.f:874
             for i, iatom in enumerate(atoms):
                 for j, jatom in enumerate(atoms):
                     if iatom != jatom:
-                        max_dist = (iatom.vdwr + jatom.vdwr) / adjus
-                        max_dist_sq = max_dist * max_dist
-                        if (
-                            iatom.dist(jatom) ** 2 < max_dist_sq
-                        ):  # if distance is less than the max_dist, the atoms are bonded, otherwise there are not
-                            connectivity[i, j] = 1
+                        max_dist = 1.2 * (iatom.radius + jatom.radius)
 
+                        if iatom.dist(jatom) < max_dist:
+                            connectivity[i,j] = 1
             cls.connectivity[system_hash] = connectivity
 
         return cls.connectivity[system_hash]
