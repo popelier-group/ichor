@@ -579,6 +579,8 @@ class Globals:
                 config_file = Arguments.config_file
             else:
                 config_file = self._config_file
+        config_file = Path(config_file)
+
         global_variables = {
             global_variable: global_value
             for global_variable, global_value in self.items()
