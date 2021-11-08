@@ -1,12 +1,13 @@
 from pathlib import Path
+from typing import Optional
 
 from ichor.analysis.get_input import get_first_file, get_input_menu
 from ichor.atoms import Atoms
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, get_files_of_type
 from ichor.common.os import input_with_prefill
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.files import GJF, XYZ
+from ichor.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.machine import MACHINE, Machine
 from ichor.menu import Menu
@@ -255,6 +256,17 @@ def submit_cp2k(input_file: Path) -> JobID:
     with SubmissionScript(SCRIPT_NAMES["cp2k"]) as submission_script:
         submission_script.add_command(CP2KCommand(cp2k_input))
     return submission_script.submit()
+
+
+def cp2k_to_xyz(cp2k_input: Path, xyz: Optional[Path] = None) -> Path:
+    xyzs = get_files_of_type(Trajectory.filetype, cp2k_input.parent)
+    if len(xyzs) == 0:
+        raise FileNotFoundError(f"No trajectory files found in {cp2k_input.parent}")
+    traj = Trajectory(xyzs[0])
+    if xyz is None:
+        xyz = Path(f"{GLOBALS.SYSTEM_NAME}-cp2k-{GLOBALS.CP2K_TEMPERATURE}{Trajectory.filetype}")
+    traj.write(xyz)
+    return xyz
 
 
 def set_temperature():

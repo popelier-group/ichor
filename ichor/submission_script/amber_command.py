@@ -84,9 +84,13 @@ class AmberCommand(CommandLine):
         cmd += "popd\n"
 
         mdcrd = (self.mol2_file.parent / "mdcrd").absolute()
+        xyz = f"{GLOBALS.SYSTEM_NAME}-amber-{int(GLOBALS.AMBER_TEMPERATURE)}.xyz"
         ichor_command = ICHORCommand(
-            func="mdcrd_to_xyz", func_args=[mdcrd, prmtop_file]
+            func="mdcrd_to_xyz", func_args=[mdcrd, prmtop_file, xyz]
         )
         cmd += f"{ichor_command.repr(variables)}\n"
-
+        ichor_command = ICHORCommand(
+            func="set_points_location", func_args=[xyz]
+        )
+        cmd += f"{ichor_command.repr(variables)}\n"
         return cmd

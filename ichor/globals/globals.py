@@ -148,6 +148,8 @@ class Globals:
     _ALF: List[List[int]] = []
     _ATOMS: Atoms = None
 
+    POINTS_LOCATION: Path = None
+
     CWD: Path = Path(os.getcwd())
 
     N_ITERATIONS: int = 1

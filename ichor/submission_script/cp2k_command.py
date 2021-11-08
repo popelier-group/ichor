@@ -5,6 +5,9 @@ from ichor.common.functools import classproperty
 from ichor.modules import CP2KModules, Modules
 from ichor.submission_script.command_line import CommandLine
 
+from ichor.globals import GLOBALS
+from ichor.submission_script.ichor_command import ICHORCommand
+
 
 class CP2KCommand(CommandLine):
     """
@@ -59,5 +62,15 @@ class CP2KCommand(CommandLine):
         cmd += f"pushd $cp2kdir\n"
         cmd += f"{CP2KCommand.command} -i {input} -o {input.with_suffix('.out')}\n"
         cmd += "popd\n"
+
+        xyz = f"{GLOBALS.SYSTEM_NAME}-amber-{int(GLOBALS.AMBER_TEMPERATURE)}.xyz"
+        ichor_command = ICHORCommand(
+            func="cp2k_to_xyz", func_args=[input, xyz]
+        )
+        cmd += f"{ichor_command.repr(variables)}\n"
+        ichor_command = ICHORCommand(
+            func="set_points_location", func_args=[xyz]
+        )
+        cmd += f"{ichor_command.repr(variables)}\n"
 
         return cmd

@@ -219,7 +219,7 @@ class Trajectory(ListOfAtoms, File):
                 f.write(f"{len(frame)}\n")
                 f.write(f"i = {i}\n")
                 for atom in frame:
-                    f.write(f"{atom.type} {atom.x} {atom.y} {atom.z}\n")
+                    f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
 
     def __getitem__(self, item):
         """Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
