@@ -524,7 +524,7 @@ class Globals:
             if global_variable not in self._protected or show_protected
         ]
 
-    def save_to_properties_config(self, config_file, global_variables):
+    def save_to_properties_config(self, config_file: Path, global_variables):
         with open(config_file, "w") as config:
             config.write(f"{constants.ichor_logo}\n\n")
             for key, val in global_variables.items():
@@ -532,7 +532,7 @@ class Globals:
                     continue
                 config.write(f"{key}={val}\n")
 
-    def save_to_yaml_config(self, config_file, global_variables):
+    def save_to_yaml_config(self, config_file: Path, global_variables):
         import yaml
 
         with open(config_file, "w") as config:
@@ -557,9 +557,9 @@ class Globals:
             )
         }
 
-        if config_file.endswith(".properties"):
+        if config_file.suffix == ".properties":
             self.save_to_properties_config(config_file, global_variables)
-        elif config_file.endswith(".yaml"):
+        elif config_file.suffix == ".yaml":
             self.save_to_yaml_config(config_file, global_variables)
 
     @property
