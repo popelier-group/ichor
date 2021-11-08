@@ -362,6 +362,10 @@ class Globals:
         self._parsers["INCLUDE_NODES"] += [parsers.split_keywords]
         self._parsers["EXCLUDE_NODES"] += [parsers.split_keywords]
 
+        self._parsers["TRAINING_SET_METHOD"] += [parsers.split_keywords]
+        self._parsers["SAMPLE_POOL_METHOD"] += [parsers.split_keywords]
+        self._parsers["VALIDATION_SET_METHOD"] += [parsers.split_keywords]
+
         self._parsers["UID"] += [parsers.read_uid]
 
         # TODO: Parsers to add
