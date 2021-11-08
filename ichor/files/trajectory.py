@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Optional
 
 import numpy as np
 
@@ -211,6 +211,15 @@ class Trajectory(ListOfAtoms, File):
             trajectory.add(atoms)
 
         return trajectory
+
+    def write(self, path: Optional[Path] = None):
+        _path = path or self.path
+        with open(_path, 'w') as f:
+            for i, frame in enumerate(self):
+                f.write(f"{len(frame)}\n")
+                f.write(f"i = {i}\n")
+                for atom in frame:
+                    f.write(f"{atom.type} {atom.x} {atom.y} {atom.z}\n")
 
     def __getitem__(self, item):
         """Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
