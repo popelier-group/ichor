@@ -144,7 +144,7 @@ class Globals:
     _config_file: Optional[Path] = None
 
     SYSTEM_NAME: str = "SYSTEM"
-    ALF_REFERENCE_FILE: str = ""  # set automatically if not defined
+    _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined
     _ALF: List[List[int]] = []
     _ATOMS: Atoms = None
 
@@ -509,6 +509,37 @@ class Globals:
             return None
         self._ALF = self.ATOMS.alf
         return self._ALF
+
+    @property
+    def ALF_REFERENCE_FILE(self):
+        if self._ALF_REFERENCE_FILE is None or self._ALF_REFERENCE_FILE == Path():
+            # search for ALF REFERENCE FILE
+            if self.POINTS_LOCATION is not None:
+                self._ALF_REFERENCE_FILE = self.POINTS_LOCATION
+            else:
+                from ichor.files import GJF, XYZ
+                for f in Path().iterdir():
+                    if f.is_file() and f.suffix in [GJF.filetype, XYZ.filetype]:
+                        self._ALF_REFERENCE_FILE = f
+                        break
+                else:
+                    from ichor.files import PointsDirectory
+                    for d in Path().iterdir():
+                        if d.is_dir():
+                            points = PointsDirectory(d)
+                            if len(points) > 0:
+                                self._ALF_REFERENCE_FILE = points[0].xyz.path
+                                break
+        if self._ALF_REFERENCE_FILE.exists() and self._ALF_REFERENCE_FILE.is_dir():
+            from ichor.files import PointsDirectory
+            points = PointsDirectory(d)
+            if len(points) > 0:
+                self._ALF_REFERENCE_FILE = points[0].xyz.path
+        return self._ALF_REFERENCE_FILE
+
+    @ALF_REFERENCE_FILE.setter
+    def ALF_REFERENCE_FILE(self, value: Path):
+        self._ALF_REFERENCE_FILE = value
 
     @ALF.setter
     def ALF(self, value: List[List[int]]):
