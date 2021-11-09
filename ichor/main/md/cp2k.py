@@ -172,7 +172,7 @@ def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
         f.write("    ! or provided as an external file.\n")
         f.write("    &COORD\n")
         for atom in atoms:
-            f.write(f"      {atom}\n")
+            f.write(f"      {atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
         f.write("    &END COORD\n")
         f.write("\n")
         f.write("    ! keep atoms away from box borders,\n")
