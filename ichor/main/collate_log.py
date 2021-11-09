@@ -18,7 +18,7 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
             return
 
         with open(FILE_STRUCTURE["child_processes"], "r") as f:
-            child_processes = json.load(f)
+            child_processes = list(set(json.load(f)))
 
         parent_dir = Path(GLOBALS.CWD)
         parent_model_dir = parent_dir / FILE_STRUCTURE["model_log"]

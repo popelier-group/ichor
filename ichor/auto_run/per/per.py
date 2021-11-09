@@ -31,6 +31,7 @@ def auto_run_per_value(
             with open(FILE_STRUCTURE["child_processes"], "r") as f:
                 child_processes = json.load(f)
         child_processes.append(str(path.absolute()))
+        child_processes = list(set(child_processes))
         with open(FILE_STRUCTURE["child_processes"], "w") as f:
             json.dump(child_processes, f)
 

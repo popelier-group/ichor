@@ -87,7 +87,6 @@ def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
     for item in src.iterdir():
         s = item
         d = dst / item.name
-        print(s, d)
         if s.is_dir():
             shutil.copytree(s, d, symlinks, ignore)
         else:
