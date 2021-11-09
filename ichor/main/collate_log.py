@@ -28,7 +28,9 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
             with pushd(child_process, update_cwd=True):
                 for model_log in FILE_STRUCTURE["model_log"].iterdir():
                     if model_log.is_dir() and Models.check_path(model_log):
-                        cp(model_log, parent_model_dir / model_log.name)
+                        new_model_loc = parent_model_dir / model_log.name
+                        mkdir(new_model_loc)
+                        cp(model_log, new_model_loc)
 
 
 def collate_models(directory: Optional[Path] = None) -> None:
