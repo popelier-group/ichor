@@ -48,7 +48,7 @@ external_functions = [
     ExternalFunction("ichor.main.make_models", "make_models"),
     ExternalFunction("ichor.main.make_models", "move_models"),
     ExternalFunction(
-        "ichor.main.submit_gjfs", "submit_points_directory_to_gaussian"
+        "ichor.main.gaussian", "submit_points_directory_to_gaussian"
     ),
     ExternalFunction("ichor.main.pandora", "submit_points_directory_to_pyscf"),
     ExternalFunction("ichor.main.pandora", "submit_points_directory_to_morfi"),
