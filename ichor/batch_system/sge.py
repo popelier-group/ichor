@@ -204,6 +204,10 @@ class SunGridEngine(BatchSystem):
         50 separate jobs. Instead 1 array job can be submitted."""
         return f"-t 1-{njobs}"
 
+    @classmethod
+    def max_running_tasks(cls, max_running_tasks: int) -> str:
+        return f"-tc {max_running_tasks}"
+
     @classproperty
     def JobID(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""

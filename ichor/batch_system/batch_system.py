@@ -202,6 +202,12 @@ class BatchSystem(ABC):
         """Returns the flag to set the number of tasks for a job"""
         pass
 
+    @classmethod
+    @abstractmethod
+    def max_running_tasks(cls, max_running_tasks: int) -> str:
+        """Returns the flag to se the maximum number of running tasks for a job"""
+        pass
+
     @classproperty
     @abstractmethod
     def JobID(self) -> str:
