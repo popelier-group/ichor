@@ -4,17 +4,20 @@ from ichor.common.functools import get_functions_to_run, run_function, run_once
 
 
 class Problem:
-    def __init__(self, name="", problem="", solution=""):
+    def __init__(self, name="", problem="", solution="", messages=None):
         self.name = name
         self.problem = problem
         self.solution = solution
+        self.messages = messages or []
 
     def __str__(self):
-        return (
-            f"Problem:     {self.name}\n"
-            f"Description: {self.problem}\n"
-            f"Solution:    {self.solution}"
-        )
+        msg = ""
+        msg += f"Problem:     {self.name}\n"
+        msg += f"Description: {self.problem}\n"
+        msg += f"Solution:    {self.solution}"
+        for message in self.messages:
+            msg += f"\n             {message}"
+        return msg
 
     def __repr__(self):
         return str(self)
@@ -87,12 +90,19 @@ class ProblemFinder(list):
 
     @run_function(4)
     def check_settings(self):
+        from ichor.globals import GLOBALS
+        import difflib
         for setting in self.unknown_settings:
+            close_matches = difflib.get_close_matches(setting, GLOBALS.global_variables, cutoff=0.5)
+            messages = []
+            if len(close_matches) > 0:
+                messages += [f"Possible Matches: {close_matches}"]
             self.append(
                 Problem(
                     name=f"Unknown setting found in config",
                     problem=f"Unknown setting: {setting}",
-                    solution="See documentation or check [o]ptions [settings] for full list of settings",
+                    solution=f"See documentation or check [o]ptions [settings] for full list of settings",
+                    messages=messages
                 )
             )
 
