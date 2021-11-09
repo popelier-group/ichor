@@ -10,6 +10,7 @@ from ichor.common.io import move
 from ichor.common.obj import (object_getattribute, object_getdict,
                               object_hasattr, object_setattr)
 from ichor.files.path_object import PathObject
+from contextlib import contextmanager
 
 
 class FileReadError(Exception):
@@ -22,6 +23,7 @@ class FileState(Enum):
     Unread = 1
     Reading = 2
     Read = 3
+    Blocked = -1
 
 
 class FileContentsType:
@@ -49,7 +51,7 @@ class File(PathObject, ABC):
                 *args, **kwargs
             )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             self.state = FileState.Read
-        elif not self.path.exists():
+        elif not self.path.exists() and self.state is not Blocked:
             raise FileNotFoundError(f"File with path '{self.path}' is not found on disk.")
 
     @abstractmethod
@@ -89,6 +91,21 @@ class File(PathObject, ABC):
         raise NotImplementedError(
             f"'write' method not implemented for {self.__class__.__name__}"
         )
+
+    @contextmanager
+    def block(self):
+        self._save_state = self.state
+        try:
+            self.state = FileState.Blocked
+            yield
+        finally:
+            self.unblock()
+    
+
+    def unblock(self):
+        if self.state is FileState.Blocked:
+            self.state = self._save_state
+
 
     def __getattribute__(self, item):
         """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.

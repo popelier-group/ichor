@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import classproperty
-from ichor.files.file import File
+from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryFile
 
 
@@ -20,9 +20,10 @@ class XYZ(GeometryFile, File):
         File.__init__(self, path)
         GeometryFile.__init__(self)
 
+        self.atoms = FileContents
         if atoms is not None:
             self.atoms = atoms
-            self.write()
+            self.write()            
 
     @classproperty
     def filetype(self) -> str:

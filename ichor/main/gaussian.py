@@ -41,12 +41,11 @@ def write_gjfs(
     """
     gjfs = []
     for point in points:
-
         if not point.gjf.exists():
             point.gjf = GJF(
                 Path(point.path / (point.path.name + GJF.filetype))
             )
-            point.gjf.atoms = point.xyz.atoms
+        point.gjf.atoms = point.xyz.atoms
 
         if overwrite_existing:
             point.gjf.write()
