@@ -167,9 +167,34 @@ class Globals:
     BASIS_SET: str = "6-31+g(d,p)"
     KEYWORDS: List[str] = []
 
-    ENCOMP: int = 3
-    BOAQ: str = "gs20"
-    IASMESH: str = "fine"
+    AIMALL_ENCOMP: int = 3
+    AIMALL_BOAQ: str = "gs20"
+    AIMALL_IASMESH: str = "fine"
+    AIMALL_BIM: str = "auto"
+    AIMALL_CAPTURE: str = "auto"
+    AIMALL_EHREN: int = 0
+    AIMALL_FEYNMAN: bool = False
+    AIMALL_IASPROPS: bool = True
+    AIMALL_MAGPROPS: str = "none"
+    AIMALL_SOURCE: bool = False
+    AIMALL_IASWRITE: bool = False
+    AIMALL_ATIDSPROPS: str = "0.001"
+    AIMALL_WARN: bool = True
+    AIMALL_SCP: str = "some"
+    AIMALL_DELMOG: bool = True
+    AIMALL_SKIPINT: bool = False
+    AIMALL_F2W: str = "wfx"
+    AIMALL_F2WONLY: bool = False
+    AIMALL_MIR: float = -1.0
+    AIMALL_CPCONN: str = "moderate"
+    AIMALL_INTVEEAA: str = "new"
+    AIMALL_ATLAPRHOCPS: bool = False
+    AIMALL_WSP: bool = True
+    AIMALL_SHM: int = 5
+    AIMALL_MAXMEM: int = 2400
+    AIMALL_VERIFYW: str = "yes"
+    AIMALL_SAW: bool = False
+    AIMALL_AUTONNACPS: bool = True
 
     TRAINING_POINTS: int = 500
     SAMPLE_POINTS: int = 9000
@@ -384,8 +409,8 @@ class Globals:
         # Setup Checkers
         self._allowed_values = {
             "METHOD": constants.GAUSSIAN_METHODS,
-            "BOAQ": constants.BOAQ_VALUES,
-            "IASMESH": constants.IASMESH_VALUES,
+            "AIMALL_BOAQ": constants.BOAQ_VALUES,
+            "AIMALL_IASMESH": constants.IASMESH_VALUES,
             "FEREBUS_TYPE": constants.FEREBUS_TYPES,
             "OPTIMISE_PROPERTY": ["iqa"] + constants.multipole_names,
             "KERNEL": constants.KERNELS,

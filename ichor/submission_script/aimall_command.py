@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List, Optional, Union
+from enum import Enum
 
 from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
@@ -7,6 +8,131 @@ from ichor.files import WFN
 from ichor.modules import AIMAllModules, Modules
 from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError
+
+
+class BasinIntegrationMethod(Enum):
+    Auto = "auto"
+    ProAIM = "proaim"
+    ProMega = "promega"
+    ProMega1 = "promega1"
+    ProMega5 = "promega5"
+
+
+class IASMesh(Enum):
+    Sparse = "fine"
+    Medium = "medium"
+    Fine = "fine"
+    VeryFine = "veryfine"
+    SuperFine = "superfine"
+
+
+class Capture(Enum):
+    Auto = "auto"
+    Basic = "basic"
+    Extended = "extended"
+
+
+class Boaq(Enum):
+    Auto = "auto"
+    AutoGS2 = "auto_gs2"
+    AutoGS4 = "auto_gs4"
+    GS1 = "gs1"
+    GS2 = "gs2"
+    GS3 = "gs3"
+    GS4 = "gs4"
+    GS5 = "gs5"
+    GS6 = "gs6"
+    GS7 = "gs7"
+    GS8 = "gs8"
+    GS9 = "gs9"
+    GS10 = "gs10"
+    GS15 = "gs15"
+    GS20 = "gs20"
+    GS25 = "gs25"
+    GS30 = "gs30"
+    GS35 = "gs35"
+    GS40 = "gs40"
+    GS45 = "gs45"
+    GS50 = "gs50"
+    GS55 = "gs55"
+    GS60 = "gs60"
+    Leb23 = "leb23"
+    Leb25 = "leb25"
+    Leb27 = "leb27"
+    Leb29 = "leb29"
+    Leb31 = "leb31"
+    Leb32 = "leb32"
+
+
+class Ehren(Enum):
+    No = 0
+    StressDivergence = 1
+    OneElectronGradient = 2
+
+
+class MagProps(Enum):
+    NONE = "none"
+    IGAIM = "gaim"
+    CSGTB = "csgtb"
+    GIAO = "giao"
+
+
+class ATIDSProps(Enum):
+    No = "no"
+    Some = "0.001"
+    All = "all"
+
+
+class Encomp(Enum):
+    Zero = 0
+    One = 1
+    Two = 2
+    Three = 3
+    Four = 4
+
+
+class SCP(Enum):
+    No = "false"
+    Some = "some"
+    Yes = "true"
+
+
+class F2W(Enum):
+    WFX = "wfx"
+    WFN = "wfn"
+
+
+class MIR(Enum):
+    Auto = "auto"
+    Custom = "custom"
+
+
+class CPConn(Enum):
+    Moderate = "moderate"
+    Complex = "complex"
+    Simple = "simple"
+    Basic = "basic"
+
+
+class IntVeeAA(Enum):
+    Old = "old"
+    New = "new"
+
+
+class SHMMax(Enum):
+    NONE = -1
+    Charge = 0
+    Dipole = 1
+    Quadrupole = 2
+    Octupole = 3
+    Hexadecapole = 4
+    All = 5
+
+
+class VerifyW(Enum):
+    No = "no"
+    Yes = "yes"
+    Only = "only"
 
 
 class AIMAllCommand(CommandLine):
@@ -80,18 +206,43 @@ class AIMAllCommand(CommandLine):
         atoms = (
             self.atoms
             if isinstance(self.atoms, str)
-            else ",".join(map(str, [get_digits(a) for a in self.atoms]))
+            else "all_" + ",".join(map(str, [get_digits(a) for a in self.atoms]))
         )
 
         return [
             "-nogui",
             "-usetwoe=0",
             f"-atoms={atoms}",
-            f"-encomp={GLOBALS.ENCOMP}",
-            f"-boaq={GLOBALS.BOAQ}",
-            f"-iasmesh={GLOBALS.IASMESH}",
+            f"-encomp={Encomp(GLOBALS.AIMALL_ENCOMP).value}",
+            f"-boaq={Boaq(GLOBALS.AIMALL_BOAQ).value}",
+            f"-iasmesh={IASMesh(GLOBALS.AIMALL_IASMESH).value}",
             f"-nproc={self.ncores}",
             f"-naat={self.ncores if self.atoms == 'all' else min(len(self.atoms), self.ncores)}",
+            f"-bim={BasinIntegrationMethod(GLOBALS.AIMALL_BIM).value}",
+            f"-capture={Capture(GLOBALS.AIMALL_CAPTURE).value}",
+            f"-ehren={Ehren(GLOBALS.AIMALL_EHREN).value}",
+            f"-feynman={str(GLOBALS.AIMALL_FEYNMAN).lower()}",
+            f"-iasprops={str(GLOBALS.AIMALL_IASPROPS).lower()}",
+            f"-magprops={MagProps(GLOBALS.AIMALL_MAGPROPS).value}",
+            f"-source={str(GLOBALS.AIMALL_SOURCE).lower()}",
+            f"-iaswrite={str(GLOBALS.AIMALL_IASWRITE).lower()}",
+            f"-atidsprops={ATIDSProps(GLOBALS.AIMALL_ATIDSPROPS).value}",
+            f"-warn={str(GLOBALS.AIMALL_WARN).lower()}",
+            f"-scp={SCP(GLOBALS.AIMALL_SCP.lower()).value}",
+            f"-delmog={str(GLOBALS.AIMALL_DELMOG).lower()}",
+            f"-skipint={str(GLOBALS.AIMALL_SKIPINT).lower()}",
+            f"-f2w={F2W(GLOBALS.AIMALL_F2W).value}",
+            f"-f2wonly={str(GLOBALS.AIMALL_F2WONLY).lower()}",
+            f"-mir={MIR.Auto.value if GLOBALS.AIMALL_MIR < 0 else GLOBALS.AIMALL_MIR}",
+            f"-cpconn={CPConn(GLOBALS.AIMALL_CPCONN).value}",
+            f"-intveeaa={IntVeeAA(GLOBALS.AIMALL_INTVEEAA).value}",
+            f"-atlaprhocps={str(GLOBALS.AIMALL_ATLAPRHOCPS).lower()}",
+            f"-wsp={str(GLOBALS.AIMALL_WSP).lower()}",
+            f"-shm_lmax={SHMMax(GLOBALS.AIMALL_SHM).value}",
+            f"-maxmem={GLOBALS.AIMALL_MAXMEM}",
+            f"-verifyw={VerifyW(GLOBALS.AIMALL_VERIFYW).value}",
+            f"-saw={str(GLOBALS.AIMALL_SAW).lower()}",
+            f"-autonnacps={str(GLOBALS.AIMALL_AUTONNACPS).lower()}",
         ]
 
     @classproperty
