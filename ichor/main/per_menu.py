@@ -139,7 +139,7 @@ def child_process_queue_menu() -> None:
 def control_child_processes_menu_refresh(menu: Menu) -> None:
     global child_processes
     menu.clear_options()
-
+    
     menu = add_child_processes_to_menu(menu)
     menu.add_space()
     menu.add_option(
@@ -147,7 +147,7 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
     )
     menu.add_space()
     menu.add_option(
-        "rerun", "Rerun failed auto-runs", ReRunDaemon().start()
+        "rerun", "Rerun failed auto-runs", ReRunDaemon().start
     )
     menu.add_option(
         "stop", "Stop all child processes", stop_all_child_processes
