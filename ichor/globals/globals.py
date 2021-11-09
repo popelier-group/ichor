@@ -684,13 +684,12 @@ def get_atoms(path: Optional[Path] = None) -> Atoms:
 
             return GJF(alf_reference_file).atoms
         elif alf_reference_file.suffix == ".xyz":
-            from ichor.files import Trajectory
+            from ichor.files import XYZ
 
-            return Trajectory(alf_reference_file)[0]
+            return XYZ(alf_reference_file).atoms
         else:
             raise ValueError(f"Unknown filetype ({alf_reference_file}")
     else:
-
         def scan_dir(d) -> Optional[Atoms]:
             # todo: could be slow, maybe best to search key locations first
             dirs_to_scan = []
@@ -702,9 +701,9 @@ def get_atoms(path: Optional[Path] = None) -> Atoms:
 
                         return GJF(f).atoms
                     elif f.suffix == ".xyz":
-                        from ichor.files import Trajectory
+                        from ichor.files import XYZ
 
-                        return Trajectory(f)[0]
+                        return XYZ(f).atoms
                 elif f.is_dir():
                     dirs_to_scan += [f]
             for dir_to_scan in dirs_to_scan:
