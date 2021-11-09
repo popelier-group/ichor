@@ -8,7 +8,8 @@ from ichor.globals import GLOBALS
 active_learning_methods = {
     active_learning_method.name: active_learning_method
     for active_learning_method in locals().values()
-    if issubclass(active_learning_method, ActiveLearningMethod)
+    if isinstance(active_learning_method, type)
+    and issubclass(active_learning_method, ActiveLearningMethod)
     and active_learning_method is not ActiveLearningMethod
 }
 
