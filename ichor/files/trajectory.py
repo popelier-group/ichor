@@ -7,8 +7,7 @@ import numpy as np
 from ichor.atoms import Atom, Atoms, ListOfAtoms
 from ichor.common.io import mkdir
 from ichor.files.file import File, FileState
-from ichor.files.gjf import GJF
-from ichor.itypes import F
+from ichor.common.functools import classproperty
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
@@ -102,7 +101,7 @@ class Trajectory(ListOfAtoms, File):
                         break
                     atoms = Atoms()
 
-    @property
+    @classproperty
     def filetype(self) -> str:
         return ".xyz"
 
