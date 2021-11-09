@@ -70,7 +70,7 @@ class MEPE(ActiveLearningMethod):
     """ Maximum Expected Prediction Errorr implementation for selecting new training data out of sample pool."""
 
     def __init__(self, models: Models):
-        super().__init__(self, models)
+        super().__init__(models)
 
     @classproperty
     def name(self) -> str:

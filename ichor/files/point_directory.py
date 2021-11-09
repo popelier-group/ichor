@@ -63,7 +63,7 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
             self.xyz = XYZ(self.xyz.path, value)
 
     def get_atom_data(self, atom) -> AtomData:
-        if self.ints:
+        if self.ints.exists():
             return AtomData(self.atoms[atom], self.ints[atom])
         else:
             return AtomData(self.atoms[atom])

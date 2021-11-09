@@ -268,12 +268,6 @@ class Model(File):
         return self.atom_num - 1
 
     def r(self, x_test: np.ndarray) -> np.ndarray:
-        r = self.k.r(self.x, x_test)
-        # print('>>')
-        # print(r)
-        # print(r.shape)
-        # print('<<')
-        return r
         return self.k.r(self.x, x_test)
 
     @cached_property
@@ -286,6 +280,11 @@ class Model(File):
         """ Returns the covariance matrix and adds a jitter to the diagonal for numerical stability. This jitter is a very 
             small number on the order of 1e-6 to 1e-10."""
         return self.k.R(self.x) + (self.nugget * np.eye(self.ntrain))
+    
+    @cached_property
+    def invR(self) -> np.ndarray:
+        """Returns the inverse of the covariance matrix R"""
+        return np.linalg.inv(self.R)
 
     @cached_property
     def lower_cholesky(self) -> np.ndarray:
@@ -300,9 +299,9 @@ class Model(File):
         """ Return the variance for the test data points."""
         train_test_covar = self.r(x_test)
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
-        v = np.linalg.solve(self.lower_cholesky, train_test_covar)
+        v = np.linalg.solve(self.lower_cholesky, train_test_covar).T
 
-        return np.diag(self.R - np.matmul(v, v.T)).flatten()
+        return np.diag(self.k.R(x_test) - np.matmul(v, v.T)).flatten()
 
     # TODO. model write method not implemented
     def write(self) -> None:
