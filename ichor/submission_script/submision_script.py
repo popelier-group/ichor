@@ -10,7 +10,7 @@ from ichor.submission_script.data_lock import DataLock
 from ichor.common.types import BoolToggle
 
 
-SUBMIT_ON_COMPUTE = BoolToggle()
+SUBMIT_ON_COMPUTE = BoolToggle(False)
 
 
 class SubmissionScript:
