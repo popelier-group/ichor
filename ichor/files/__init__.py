@@ -1,3 +1,4 @@
+from ichor.files.aim import AIM
 from ichor.files.directory import Directory
 from ichor.files.dlpoly_history import DlpolyHistory
 from ichor.files.file import File, FileState
@@ -14,7 +15,6 @@ from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.files.trajectory import Trajectory
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
-from ichor.files.aim import AIM
 
 __all__ = [
     "File",
