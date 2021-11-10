@@ -1,6 +1,6 @@
 class BoolToggle:
     def __init__(self):
-        _bool = False
+        self._bool = False
 
     def __bool__(self):
         return self._bool

@@ -20,6 +20,7 @@ def active_learning(
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.machine import MACHINE
+    from ichor.submission_script import SUBMIT_ON_COMPUTE
 
     if model_directory is None:
         model_directory = FILE_STRUCTURE["models"]
