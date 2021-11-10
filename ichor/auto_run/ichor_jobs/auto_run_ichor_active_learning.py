@@ -3,7 +3,6 @@ from typing import Optional
 
 from ichor.batch_system import JobID
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.main.active_learning import active_learning
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
 
@@ -19,6 +18,8 @@ def submit_ichor_active_learning_job_to_auto_run(
 
     :return JobID: The job ID number assigned to this job after it was submitted to the workload manager (SLURM, SGE, etc.)
     """
+    from ichor.main.active_learning import active_learning
+    
     submission_script = SubmissionScript(
         SCRIPT_NAMES["ichor"]["active_learning"]
     )
