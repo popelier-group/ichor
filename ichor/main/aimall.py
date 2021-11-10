@@ -50,17 +50,17 @@ def submit_wfns(
 
 
 def rerun_aimall(wfn_file: str):
-    # AIMAll deletes this sh file when it has successfully completed
-    # If this file still exists then something went wrong
     if not wfn_file:
         print_completed()
         sys.exit()
-    # logger.debug(f"Checking {wfn_file}")
-    if not Path(wfn_file).with_suffix(".sh").exists():
-        # logger.debug(f"AIMAll finished")
-        print_completed()
-    # else:
-    #     logger.error(f"AIMAll Job {wfn_file} failed to run")
+    # AIMAll deletes this sh file when it has successfully completed
+    # If this file still exists then something went wrong
+    wfn_file = Path(wfn_file)
+    if not wfn_file.with_suffix(".sh").exists():
+        aim_file =  wfn_file.with_suffix(".aim")
+        if aim_file.exists():
+
+            print_completed()
 
 
 def scrub_aimall(wfn_file: str):

@@ -1,6 +1,7 @@
 import re
 from functools import wraps
 from typing import Dict, Union, List
+from pathlib import Path
 
 import numpy as np
 
@@ -49,6 +50,14 @@ class Models(Directory, list):
         from ichor.globals import GLOBALS
 
         return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")
+
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        if path.exists() and path.is_dir():
+            for f in path.iterdir():
+                if f.suffix == Model.filetype:
+                    return True
+        return False
 
     @property
     def atom_names(self) -> List[str]:

@@ -9,6 +9,8 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 stop_all_child_processes)
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
+from ichor.main.collate_log import collate_model_log
+
 
 child_processes = []
 all_child_processes = []
@@ -146,6 +148,9 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
         "e", "Edit Child Process List", edit_list_of_child_processes
     )
     menu.add_space()
+    menu.add_option(
+        "log", "Collate Model Logs from chile processes", collate_model_log
+    )
     menu.add_option(
         "rerun", "Rerun failed auto-runs", ReRunDaemon().start
     )

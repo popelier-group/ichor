@@ -160,6 +160,8 @@ class Globals:
 
     ACTIVE_LEARNING_METHOD: str = "epe"
 
+    MAX_RUNNING_TASKS: int = -1  # set to <= 0 for unlimited tasks
+
     NORMALISE: bool = False
     STANDARDISE: bool = False
 
@@ -482,6 +484,13 @@ class Globals:
                     f"Global Variable: {key} does not exist."
                 )
             self.set(key, value)
+
+        if "MAX_RUNNING_TASKS" not in self._in_config:
+            from ichor.machine import MACHINE, Machine
+            if MACHINE is Machine.ffluxlab:
+                self.MAX_RUNNING_TASKS = 25  # <- might be a bit conservative, increase in future?
+            elif MACHINE is Machine.csf3:
+                self.MAX_RUNNING_TASKS = -1
 
         self._initialising = False
 
