@@ -3,7 +3,6 @@ import sys
 sys.path.append("../ichor/")
 from ichor.files import Trajectory
 from pathlib import Path
-import os
 import numpy as np
 
 class TestALFCalculations(unittest.TestCase):
@@ -16,6 +15,18 @@ class TestALFCalculations(unittest.TestCase):
         The numbers in the alf calculation can change because the atom's indices are determined by their ordering in the xyz file. Thus, a different ordering
         of the atoms in the xyz can result in the same structure, but the calculated alf will be different.
     """
+    
+    def test_hcl_alf(self):
+        """ Test if the alf is calculated for 2d molecules as well. There are 3N-5 features here (so only 1 feature, the distance)."""
+    
+        hcl_geometry_location = Path("test/test_geometries/test_hcl_geometry.xyz")
+        traj = Trajectory(hcl_geometry_location)
+        alf = traj.alf
+        
+        correct_alf = np.array([[0, 1], [1, 0]])
+        np.testing.assert_array_equal(alf.shape, correct_alf.shape)
+        np.testing.assert_equal(alf, correct_alf)
+    
     
     def test_water_monomer_alf(self):
         

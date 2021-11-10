@@ -86,8 +86,9 @@ class ALFFeatureCalculator(FeatureCalculator):
             correspond to the atoms of first and second highest priorty as determined by the
             Cahn-Ingold-Prelog rules."""
             alf = [atom]
-            # we need to get 2 atoms - one for x-axis and one for xy-plane
-            for _ in range(2):
+            # we need to get 2 atoms - one for x-axis and one for xy-plane. If the molecule is 2d (like HCl), then we only need 1 atom.
+            n_atoms_in_alf = 2 if len(atom.parent) > 2 else 1
+            for _ in range(n_atoms_in_alf):
                 # make a list of atoms to which the central atom is bonded to that are not in alf
                 queue = [a for a in atom.bonded_atoms if a not in alf]
                 # if queue is empty, then we add the bonded atoms of the atoms that the atom of interest is connected to
