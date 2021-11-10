@@ -9,6 +9,20 @@ from ichor.submission_script.command_group import CommandGroup
 from ichor.submission_script.data_lock import DataLock
 
 
+class _SubmitAnyway:
+    _submit_anyway = False
+
+    def __bool__(self):
+        return self._submit_anyway
+
+    def __enter__(self):
+        self._submit_anyway = True
+
+    def __exit__(self, a, b, c):
+        self._submit_anyway = False
+
+SubmitAnyway = _SubmitAnyway()
+
 class SubmissionScript:
     """
     A class that can be used to construct submission scripts for various programs such as Gaussian and AIMALL.
@@ -284,7 +298,7 @@ class SubmissionScript:
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
         from ichor.batch_system import BATCH_SYSTEM, NodeType
 
-        if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode:
+        if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode or SubmitAnyway:
             return BATCH_SYSTEM.submit_script(self.path, hold)
 
     def __enter__(self) -> "SubmissionScript":

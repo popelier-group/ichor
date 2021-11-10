@@ -19,7 +19,7 @@ def submit_ichor_active_learning_job_to_auto_run(
     :return JobID: The job ID number assigned to this job after it was submitted to the workload manager (SLURM, SGE, etc.)
     """
     from ichor.main.active_learning import active_learning
-    
+
     submission_script = SubmissionScript(
         SCRIPT_NAMES["ichor"]["active_learning"]
     )

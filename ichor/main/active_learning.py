@@ -20,6 +20,7 @@ def active_learning(
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.machine import MACHINE, SubmitType
+    from ichor.submission_script import SubmitAnyway
 
     if model_directory is None:
         model_directory = FILE_STRUCTURE["models"]
@@ -77,4 +78,5 @@ def active_learning(
                 and MACHINE.submit_type.submit_after_final_step
             ):
                 logger.info(f"Submitting iteration {current_iteration}")
-                submit_next_iter(current_iteration)
+                with SubmitAnyway:
+                    submit_next_iter(current_iteration)
