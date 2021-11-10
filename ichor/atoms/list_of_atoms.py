@@ -56,16 +56,16 @@ class ListOfAtoms(list):
 
     @property
     def features(self):
-        """Return the ndarray of features. This is assumed to be either a 1D, 2D or 3D array.
+        """Return the ndarray of features. This is assumed to be either 2D or 3D array.
         If the dimensionality of the feature array is 3, the array is transposed to transform a
-        (natom, ntimestep, nfeature) array into a (ntimestep, natom, nfeature) array so that
-        all features for a single timestep are easier to group.
+        (ntimestep, natom, nfeature) array into a (natom, ntimestep, nfeature) array so that
+        all features for a single atom are easier to group.
         :rtype: `np.ndarray`
         :return:
-            A 3D array of features for every atom in every timestep. Shape `n_timesteps` x `n_atoms` x `n_features`)
+            If the features for the whole trajectory are returned, the array has shape `n_atoms` x `n_timesteps` x `n_features`
             If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
-            If the trajectory instance is indexed by str, the array has shape `n_atoms` x `n_features`.
-            If the trajectory instance is indexed by slice, the array has shape `slice`, `n_atoms` x `n_features`.
+            If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
+            If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
         """
         features = np.array([i.features for i in self])
         if features.ndim == 3:
