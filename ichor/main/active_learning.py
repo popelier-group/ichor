@@ -27,11 +27,10 @@ def active_learning(
         sample_pool_directory = FILE_STRUCTURE["sample_pool"]
 
     current_iteration = 0
-    if Arguments.auto_run:
-        if FILE_STRUCTURE["counter"].exists():
-            with open(FILE_STRUCTURE["counter"], "r") as f:
-                current_iteration = int(next(f))
-                max_iteration = int(next(f))
+    if Arguments.auto_run and FILE_STRUCTURE["counter"].exists():
+        with open(FILE_STRUCTURE["counter"], "r") as f:
+            current_iteration = int(next(f))
+            max_iteration = int(next(f))
 
     models = Models(model_directory)
     sample_pool = PointsDirectory(sample_pool_directory)
@@ -77,6 +76,8 @@ def active_learning(
                     FILE_STRUCTURE["counter"]
                 )  # delete counter at the end of the auto run
 
-            if current_iteration <= max_iteration:
-                if MACHINE.submit_type is SubmitType.DropCompute:
-                    submit_next_iter(current_iteration)
+            if (
+                current_iteration <= max_iteration
+                and MACHINE.submit_type.submit_each_iter
+            ):
+                submit_next_iter(current_iteration)
