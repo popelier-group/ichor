@@ -31,6 +31,7 @@ from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
+from ichor.auto_run.counter import read_counter, write_counter
 
 
 class AutoRunAlreadyRunning(Exception):
@@ -211,19 +212,14 @@ def auto_run() -> JobID:
     from ichor.globals import GLOBALS
 
     if FILE_STRUCTURE["counter"].exists():
-        with open(FILE_STRUCTURE["counter"], "r") as f:
-            current_iter = int(next(f))
-            max_iter = int(next(f))
+        current_iter, max_iter = read_counter()
 
         if current_iter < max_iter:
             raise AutoRunAlreadyRunning(
                 f"Auto Run may already be running, as {FILE_STRUCTURE['counter']} exists and {current_iter} < {max_iter}\nIf this is a mistake, remove {FILE_STRUCTURE['counter']} and retry"
             )
 
-    mkdir(FILE_STRUCTURE["counter"].parent)
-    with open(FILE_STRUCTURE["counter"], "w") as f:
-        f.write("0\n")
-        f.write(f"{GLOBALS.N_ITERATIONS}\n")
+    write_counter(0, GLOBALS.N_ITERATIONS)
 
     # Make a list of types of iterations. Only first and last iterations are different.
     iterations = [IterState.Standard for _ in range(GLOBALS.N_ITERATIONS)]
@@ -317,11 +313,7 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
 def rerun_from_failed() -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
-    current_iteration = 0
-    if FILE_STRUCTURE["counter"].exists():
-        with open(FILE_STRUCTURE["counter"], "r") as f:
-            current_iteration = int(next(f))
-            max_iteration = int(next(f))
+    current_iteration, max_iteration = read_counter(must_exist=False)
 
     if current_iteration < max_iteration and len(get_current_jobs()) == 0:
         GLOBALS.N_ITERATIONS = max_iteration - current_iteration

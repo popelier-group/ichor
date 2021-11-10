@@ -5,6 +5,7 @@ from ichor.common.io import mkdir, remove
 from ichor.files import PointsDirectory
 from ichor.logging import logger
 from ichor.models import Models
+from ichor.auto_run import read_counter, write_counter
 
 
 def active_learning(
@@ -27,10 +28,9 @@ def active_learning(
         sample_pool_directory = FILE_STRUCTURE["sample_pool"]
 
     current_iteration = 0
+    max_iteration = GLOBALS.N_ITERATIONS
     if Arguments.auto_run and FILE_STRUCTURE["counter"].exists():
-        with open(FILE_STRUCTURE["counter"], "r") as f:
-            current_iteration = int(next(f))
-            max_iteration = int(next(f))
+        current_iteration, max_iteration = read_counter()
 
     models = Models(model_directory)
     sample_pool = PointsDirectory(sample_pool_directory)
@@ -64,13 +64,7 @@ def active_learning(
 
         if Arguments.auto_run:
             current_iteration += 1
-            if not FILE_STRUCTURE["counter"].parent.exists():
-                mkdir(FILE_STRUCTURE["counter"].parent)
-
-            with open(FILE_STRUCTURE["counter"], "w") as f:
-                f.write(f"{current_iteration}\n")
-                f.write(f"{max_iteration}\n")
-
+            write_counter(current_iteration, max_iteration)
             if current_iteration == max_iteration:
                 remove(
                     FILE_STRUCTURE["counter"]

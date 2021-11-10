@@ -7,6 +7,7 @@ from ichor.auto_run.ichor_jobs import (
     submit_ichor_gaussian_command_to_auto_run,
     submit_make_sets_job_to_auto_run)
 from ichor.auto_run.standard_auto_run import rerun_from_failed
+from ichor.auto_run.counter import read_counter, write_counter
 
 __all__ = [
     "submit_gaussian_job_to_auto_run",
@@ -17,4 +18,6 @@ __all__ = [
     "make_models",
     "submit_ichor_active_learning_job_to_auto_run",
     "rerun_from_failed",
+    "read_counter",
+    "write_counter",
 ]
