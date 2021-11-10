@@ -1,7 +1,6 @@
 from typing import Tuple, Optional
 from ichor.file_structure import FILE_STRUCTURE
 from pathlib import Path
-from ichor.globals import GLOBALS
 from ichor.common.io import mkdir
 
 
@@ -19,6 +18,7 @@ def _get_counter_location(counter_location: Optional[Path] = None) -> Path:
 
 def read_counter(counter_location: Optional[Path] = None, must_exist: bool = True) -> Tuple[int, int]:
     """Reads the counter file, returns current iteration and max iteration"""
+    from ichor.globals import GLOBALS
 
     counter_location = _get_counter_location(counter_location)
     if not counter_location.exists() and must_exist:
@@ -38,6 +38,8 @@ def read_counter(counter_location: Optional[Path] = None, must_exist: bool = Tru
 
 
 def write_counter(current_iteration: Optional[int] = None, max_iteration: Optional[int] = None, counter_location: Optional[Path] = None) -> None:
+    from ichor.globals import GLOBALS
+
     current_iteration = current_iteration or 0
     max_iteration = max_iteration or GLOBALS.N_ITERATIONS
     counter_location = _get_counter_location(counter_location)
