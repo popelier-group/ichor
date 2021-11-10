@@ -18,7 +18,7 @@ class TestGPRPredictions(unittest.TestCase):
     
     def test_water_monomer_predictions(self):
         
-        data_path = Path("test/test_gpr_models/water_monomer/test_set/O1_dataset.csv")
+        data_path = Path("test/test_gpr_models/water_monomer/test_set/O1_dataset.txt")
         
         dataset = pd.read_csv(data_path, index_col=None, header=0).values
         test_x = dataset[:, :3]  # get the features of the dataset
@@ -37,7 +37,7 @@ class TestGPRPredictions(unittest.TestCase):
     
     def test_water_monomer_variance(self):
         
-        data_path = Path("test/test_gpr_models/water_monomer/test_set/O1_dataset.csv")
+        data_path = Path("test/test_gpr_models/water_monomer/test_set/O1_dataset.txt")
         
         dataset = pd.read_csv(data_path, index_col=None, header=0).values
         test_x = dataset[:, :3]  # get the features of the dataset
