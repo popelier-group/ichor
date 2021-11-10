@@ -34,7 +34,7 @@ class Directory(PathObject, ABC):
         pass
 
     def mkdir(self):
-        """ Make an empty directory at the location of the `path` attribute."""
+        """Make an empty directory at the location of the `path` attribute."""
         mkdir(self.path)
 
     def move(self, dst):
@@ -81,7 +81,7 @@ class AnnotatedDirectory(Directory, ABC):
 
     @cached_property
     def filetypes(self) -> Dict[str, Type[File]]:
-        """ Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
+        """Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
         be set to. These classes are all subclassing from the `File` class. For example {'gjf': GJF,  'wfn': WFN}."""
         filetypes = {}
         if hasattr(self, "__annotations__"):
@@ -96,7 +96,7 @@ class AnnotatedDirectory(Directory, ABC):
 
     @cached_property
     def dirtypes(self) -> Dict[str, Type[Directory]]:
-        """ Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
+        """Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
         be set to. These classes are all subclassing from the `Directory` class. For example {'ints': INTs}."""
         dirtypes = {}
         if hasattr(self, "__annotations__"):
@@ -110,7 +110,7 @@ class AnnotatedDirectory(Directory, ABC):
         return dirtypes
 
     def files(self) -> list:
-        """ Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `File` class."""
+        """Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `File` class."""
         return [
             getattr(self, var)
             for var in vars(self)
@@ -118,7 +118,7 @@ class AnnotatedDirectory(Directory, ABC):
         ]
 
     def directories(self) -> list:
-        """ Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `Directory` class."""
+        """Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `Directory` class."""
         return [
             getattr(self, var)
             for var in vars(self)
@@ -126,8 +126,8 @@ class AnnotatedDirectory(Directory, ABC):
         ]
 
     def parse(self):
-        """ 
-        Iterates over an `AnnotatedDirectory`'s contents (which could be files or other directories). If the content is a file, 
+        """
+        Iterates over an `AnnotatedDirectory`'s contents (which could be files or other directories). If the content is a file,
         """
         if not self.exists():
             return
@@ -144,7 +144,7 @@ class AnnotatedDirectory(Directory, ABC):
                     # if the suffix of the file matches the suffix of the class
                     if filetype.check_path(f):
 
-                        # set attributes for the object which wrap around a file (such as .gjf, .wfn, etc.) 
+                        # set attributes for the object which wrap around a file (such as .gjf, .wfn, etc.)
                         # if this type of file needs access to the parent (the `AnnotatedDirectory`'s path)
                         if (
                             "parent"

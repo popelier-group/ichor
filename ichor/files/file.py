@@ -1,5 +1,6 @@
 import shutil
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
@@ -10,7 +11,6 @@ from ichor.common.io import move
 from ichor.common.obj import (object_getattribute, object_getdict,
                               object_hasattr, object_setattr)
 from ichor.files.path_object import PathObject
-from contextlib import contextmanager
 
 
 class FileReadError(Exception):
@@ -52,7 +52,9 @@ class File(PathObject, ABC):
             )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             self.state = FileState.Read
         elif not self.path.exists() and self.state is not Blocked:
-            raise FileNotFoundError(f"File with path '{self.path}' is not found on disk.")
+            raise FileNotFoundError(
+                f"File with path '{self.path}' is not found on disk."
+            )
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
@@ -100,12 +102,10 @@ class File(PathObject, ABC):
             yield
         finally:
             self.unblock()
-    
 
     def unblock(self):
         if self.state is FileState.Blocked:
             self.state = self._save_state
-
 
     def __getattribute__(self, item):
         """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.

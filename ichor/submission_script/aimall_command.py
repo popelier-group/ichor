@@ -1,6 +1,6 @@
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
-from enum import Enum
 
 from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
@@ -206,7 +206,8 @@ class AIMAllCommand(CommandLine):
         atoms = (
             self.atoms
             if isinstance(self.atoms, str)
-            else "all_" + ",".join(map(str, [get_digits(a) for a in self.atoms]))
+            else "all_"
+            + ",".join(map(str, [get_digits(a) for a in self.atoms]))
         )
 
         return [

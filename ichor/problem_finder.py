@@ -90,10 +90,14 @@ class ProblemFinder(list):
 
     @run_function(4)
     def check_settings(self):
-        from ichor.globals import GLOBALS
         import difflib
+
+        from ichor.globals import GLOBALS
+
         for setting in self.unknown_settings:
-            close_matches = difflib.get_close_matches(setting, GLOBALS.global_variables, cutoff=0.5)
+            close_matches = difflib.get_close_matches(
+                setting, GLOBALS.global_variables, cutoff=0.5
+            )
             messages = []
             if len(close_matches) > 0:
                 messages += [f"Possible Matches: {close_matches}"]
@@ -102,7 +106,7 @@ class ProblemFinder(list):
                     name=f"Unknown setting found in config",
                     problem=f"Unknown setting: {setting}",
                     solution=f"See documentation or check [o]ptions [settings] for full list of settings",
-                    messages=messages
+                    messages=messages,
                 )
             )
 

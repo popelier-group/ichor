@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Optional, List
+from typing import List, Optional
 
 import numpy as np
 
@@ -8,10 +8,11 @@ from ichor.common.functools.buildermethod import buildermethod
 from ichor.common.str import get_digits
 from ichor.files.file import File, FileContents
 from ichor.itypes import F
-from ichor.models.kernels import RBF, Kernel, RBFCyclic, PeriodicKernel
+from ichor.models.kernels import RBF, Kernel, PeriodicKernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.kernels.periodic_kernel import PeriodicKernel
-from ichor.models.mean import ConstantMean, Mean, ZeroMean, LinearMean, QuadraticMean
+from ichor.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
+                               ZeroMean)
 
 
 class Model(File):
@@ -47,8 +48,12 @@ class Model(File):
         self._k: Optional[Kernel] = FileContents
         self._x: Optional[np.ndarray] = FileContents
         self._y: Optional[np.ndarray] = FileContents
-        self._nugget = FileContents  # todo: read this from ferebus file as well
-        self._weights = FileContents  # todo: read this from ferebus file as well
+        self._nugget = (
+            FileContents  # todo: read this from ferebus file as well
+        )
+        self._weights = (
+            FileContents  # todo: read this from ferebus file as well
+        )
 
     @buildermethod
     def _read_file(self) -> None:
@@ -60,7 +65,9 @@ class Model(File):
 
         with open(self.path) as f:
             for line in f:
-                if "nugget" in line:  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
+                if (
+                    "nugget" in line
+                ):  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
                     self._nugget = float(line.split()[-1])
                     continue
 
@@ -105,8 +112,12 @@ class Model(File):
                     elif mean_type == "zero":
                         self._mean = ZeroMean()
                     elif mean_type in ["linear", "quadratic"]:
-                        beta = np.array([float(b) for b in next(f).split()[1:]])
-                        xmin = np.array([float(x) for x in next(f).split()[1:]])
+                        beta = np.array(
+                            [float(b) for b in next(f).split()[1:]]
+                        )
+                        xmin = np.array(
+                            [float(x) for x in next(f).split()[1:]]
+                        )
                         ymin = float(next(f).split()[-1])
                         if mean_type == "linear":
                             self._mean = LinearMean(beta, xmin, ymin)
@@ -120,25 +131,28 @@ class Model(File):
                     kernel_composition = line.split()[-1]
                     continue
 
-
                 # GP kernel section
                 if "[kernel." in line:
                     kernel_name = line.split(".")[-1].rstrip().rstrip("]")
                     line = next(f)
                     kernel_type = line.split()[-1].strip()
-                    ndims = int(next(f).split()[-1]) # number of dimensions
+                    ndims = int(next(f).split()[-1])  # number of dimensions
                     line = next(f)
                     if "TODO" not in line:
-                        active_dims = np.array([int(ad)-1 for ad in line.split()[1:]])
+                        active_dims = np.array(
+                            [int(ad) - 1 for ad in line.split()[1:]]
+                        )
                     else:
                         active_dims = np.arange(ndims)
 
-                    if kernel_type == "rbf":                       
+                    if kernel_type == "rbf":
                         line = next(f)
                         thetas = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
-                        kernel_list[kernel_name] = RBF(thetas, active_dims=active_dims)
+                        kernel_list[kernel_name] = RBF(
+                            thetas, active_dims=active_dims
+                        )
                     elif kernel_type in [
                         "rbf-cyclic",
                         "rbf-cylic",
@@ -147,13 +161,19 @@ class Model(File):
                         thetas = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
-                        kernel_list[kernel_name] = RBFCyclic(thetas, active_dims=active_dims)
+                        kernel_list[kernel_name] = RBFCyclic(
+                            thetas, active_dims=active_dims
+                        )
                     elif kernel_type == "periodic":
                         line = next(f)
                         thetas = np.array(
                             [float(hp) for hp in line.split()[1:]]
                         )
-                        kernel_list[kernel_name] = PeriodicKernel(thetas, np.full(thetas.shape, 2*np.pi), active_dims=active_dims)
+                        kernel_list[kernel_name] = PeriodicKernel(
+                            thetas,
+                            np.full(thetas.shape, 2 * np.pi),
+                            active_dims=active_dims,
+                        )
                     continue
 
                 # training inputs data
@@ -165,7 +185,7 @@ class Model(File):
                         line = next(f)
                     self._x = np.array(x)
                     if self._x.ndim == 1:
-                        self._x = self._x.reshape(-1,1)
+                        self._x = self._x.reshape(-1, 1)
                     continue
 
                 # training labels data
@@ -175,7 +195,7 @@ class Model(File):
                     while line.strip() != "":
                         y += [float(line)]
                         line = next(f)
-                    self._y = np.array(y)[:,np.newaxis]
+                    self._y = np.array(y)[:, np.newaxis]
                     continue
 
                 if "[weights]" in line:
@@ -190,26 +210,28 @@ class Model(File):
                     self._weights = np.array(weights)
                     self._weights = self._weights.reshape(-1, 1)
 
-        self._k = KernelInterpreter(kernel_composition, kernel_list).interpret()
+        self._k = KernelInterpreter(
+            kernel_composition, kernel_list
+        ).interpret()
 
     @classproperty
     def filetype(self) -> str:
-        """ Returns the suffix associated with GP model files"""
+        """Returns the suffix associated with GP model files"""
         return ".model"
 
     @property
     def system(self) -> str:
-        """ Returns the system name"""
+        """Returns the system name"""
         return self._system
 
     @property
     def atom_name(self) -> str:
-        """ Returns the atom name for which a GP model was made"""
+        """Returns the atom name for which a GP model was made"""
         return self._atom
 
     @property
     def type(self) -> str:
-        """ Returns the property (iqa, q00, etc) for which a GP model was made"""
+        """Returns the property (iqa, q00, etc) for which a GP model was made"""
         return self._type
 
     @property
@@ -222,48 +244,48 @@ class Model(File):
 
     @property
     def nugget(self) -> float:
-        """ Returns the nugget/jitter that is added to the diagonal of the train-train covariance matrix to ensure numerical stability
+        """Returns the nugget/jitter that is added to the diagonal of the train-train covariance matrix to ensure numerical stability
         of the cholesky decomposition. This is a small number on the order of 1e-6 to 1e-10."""
         return self._nugget
 
     @property
     def nfeats(self) -> int:
-        """ Returns the number of features"""
+        """Returns the number of features"""
         return self._nfeats
 
     @property
     def ntrain(self) -> int:
-        """ Returns the number of training points"""
+        """Returns the number of training points"""
         return self._ntrain
 
     @property
     def mean(self) -> Mean:
-        """ Returns the GP mean value (mu)"""
+        """Returns the GP mean value (mu)"""
         return self._mean
 
     @property
     def k(self) -> str:
-        """ Returns the name of the covariance function used to calculate the covariance matrix"""
+        """Returns the name of the covariance function used to calculate the covariance matrix"""
         return self._k
 
     @property
     def x(self) -> np.ndarray:
-        """ Returns the. training inputs numpy array Shape `n_points x n_features`"""
+        """Returns the. training inputs numpy array Shape `n_points x n_features`"""
         return self._x
 
     @property
     def y(self) -> np.ndarray:
-        """ Returns the training outputs numpy array. Shape `n_points`"""
+        """Returns the training outputs numpy array. Shape `n_points`"""
         return self._y
 
     @property
     def atom_num(self) -> int:
-        """ Returns the integer that is in the atom name"""
+        """Returns the integer that is in the atom name"""
         return get_digits(self.atom)
 
     @property
     def i(self) -> int:
-        """ Returns the integer that is one less than the one in the atom name.
+        """Returns the integer that is one less than the one in the atom name.
         This is the index of the atom in Python objects such as lists (as indeces start at 0)."""
         return self.atom_num - 1
 
@@ -272,15 +294,15 @@ class Model(File):
 
     @cached_property
     def weights(self) -> np.ndarray:
-        """ Returns an array containing the weights which can be stored prior to making predictions."""
+        """Returns an array containing the weights which can be stored prior to making predictions."""
         return self._weights
 
     @cached_property
     def R(self) -> np.ndarray:
-        """ Returns the covariance matrix and adds a jitter to the diagonal for numerical stability. This jitter is a very 
-            small number on the order of 1e-6 to 1e-10."""
+        """Returns the covariance matrix and adds a jitter to the diagonal for numerical stability. This jitter is a very
+        small number on the order of 1e-6 to 1e-10."""
         return self.k.R(self.x) + (self.nugget * np.eye(self.ntrain))
-    
+
     @cached_property
     def invR(self) -> np.ndarray:
         """Returns the inverse of the covariance matrix R"""
@@ -288,15 +310,18 @@ class Model(File):
 
     @cached_property
     def lower_cholesky(self) -> np.ndarray:
-        """ Decomposes the covariance matrix into L and L^T. Returns the lower triangular matrix L."""
+        """Decomposes the covariance matrix into L and L^T. Returns the lower triangular matrix L."""
         return np.linalg.cholesky(self.R)
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
-        """ Returns an array containing the test point predictions."""
-        return self.mean.value(x_test) + np.dot(self.r(x_test).T, self.weights)[:,-1]
+        """Returns an array containing the test point predictions."""
+        return (
+            self.mean.value(x_test)
+            + np.dot(self.r(x_test).T, self.weights)[:, -1]
+        )
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
-        """ Return the variance for the test data points."""
+        """Return the variance for the test data points."""
         train_test_covar = self.r(x_test)
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
         v = np.linalg.solve(self.lower_cholesky, train_test_covar).T
@@ -308,6 +333,4 @@ class Model(File):
         pass
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}(system={self.system}, atom={self.atom}, type={self.type})"
-        )
+        return f"{self.__class__.__name__}(system={self.system}, atom={self.atom}, type={self.type})"

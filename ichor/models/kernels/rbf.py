@@ -1,5 +1,6 @@
-import numpy as np
 from typing import Optional
+
+import numpy as np
 
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
@@ -16,7 +17,9 @@ class RBF(Kernel):
     where `l` is the lengthscale value.
     """
 
-    def __init__(self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None):
+    def __init__(
+        self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
+    ):
         super().__init__(active_dims)
         self._thetas = thetas
 
@@ -39,9 +42,9 @@ class RBF(Kernel):
                 The RBF covariance matrix of shape (n, m)
         """
 
-        true_lengthscales = np.sqrt(1.0/(2 * self._thetas))
-        tmp_x1 = x1[:,self.active_dims] / true_lengthscales
-        tmp_x2 = x2[:,self.active_dims] / true_lengthscales
+        true_lengthscales = np.sqrt(1.0 / (2 * self._thetas))
+        tmp_x1 = x1[:, self.active_dims] / true_lengthscales
+        tmp_x2 = x2[:, self.active_dims] / true_lengthscales
         dist = Distance.squared_euclidean_distance(tmp_x1, tmp_x2)
         return np.exp(-0.5 * dist)
 

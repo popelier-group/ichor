@@ -4,7 +4,7 @@ from typing import Optional
 from ichor.analysis.get_input import get_first_file, get_input_menu
 from ichor.atoms import Atoms
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir, get_files_of_type
+from ichor.common.io import get_files_of_type, mkdir
 from ichor.common.os import input_with_prefill
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ, Trajectory
@@ -172,7 +172,9 @@ def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
         f.write("    ! or provided as an external file.\n")
         f.write("    &COORD\n")
         for atom in atoms:
-            f.write(f"      {atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
+            f.write(
+                f"      {atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+            )
         f.write("    &END COORD\n")
         f.write("\n")
         f.write("    ! keep atoms away from box borders,\n")
@@ -261,10 +263,14 @@ def submit_cp2k(input_file: Path) -> JobID:
 def cp2k_to_xyz(cp2k_input: Path, xyz: Optional[Path] = None) -> Path:
     xyzs = get_files_of_type(Trajectory.filetype, cp2k_input.parent)
     if len(xyzs) == 0:
-        raise FileNotFoundError(f"No trajectory files found in {cp2k_input.parent}")
+        raise FileNotFoundError(
+            f"No trajectory files found in {cp2k_input.parent}"
+        )
     traj = Trajectory(xyzs[0])
     if xyz is None:
-        xyz = Path(f"{GLOBALS.SYSTEM_NAME}-cp2k-{GLOBALS.CP2K_TEMPERATURE}{Trajectory.filetype}")
+        xyz = Path(
+            f"{GLOBALS.SYSTEM_NAME}-cp2k-{GLOBALS.CP2K_TEMPERATURE}{Trajectory.filetype}"
+        )
     traj.write(xyz)
     return xyz
 

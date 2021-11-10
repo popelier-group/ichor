@@ -1,5 +1,6 @@
-import numpy as np
 from typing import Optional
+
+import numpy as np
 
 from ichor.common.functools import cached_property
 from ichor.models.kernels.distance import Distance
@@ -38,7 +39,9 @@ class RBFCyclic(Kernel):
             \end{aligned} \right.    
     """
 
-    def __init__(self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None):
+    def __init__(
+        self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
+    ):
 
         """
         Args:
@@ -74,22 +77,27 @@ class RBFCyclic(Kernel):
         """
 
         # ntrain x ntest x nfeats
-        diff = x2[np.newaxis,:,self.active_dims] - x1[:,np.newaxis,self.active_dims]
-        diff[:,:,self.mask] = (diff[:,:,self.mask] + np.pi) % (2*np.pi) - np.pi
+        diff = (
+            x2[np.newaxis, :, self.active_dims]
+            - x1[:, np.newaxis, self.active_dims]
+        )
+        diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (
+            2 * np.pi
+        ) - np.pi
         # print('==========')
         # print('test', x2[0,:])
         # print('train', x1[0,:])
         # print(diff[0,0,:])
         # print(diff.shape)
         # print('==========')
-        diff = diff*diff
+        diff = diff * diff
         # a = self._thetas*diff
         # print('==========')
         # print(a[0,0,:])
         # print(a.shape)
         # print(self.mask)
         # print('==========')
-        return np.exp(-np.sum(self._thetas*diff, axis=2))
+        return np.exp(-np.sum(self._thetas * diff, axis=2))
 
     def __repr__(self):
         return f"RBFCyclic({self._thetas})"

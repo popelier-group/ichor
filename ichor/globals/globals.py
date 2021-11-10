@@ -487,8 +487,11 @@ class Globals:
 
         if "MAX_RUNNING_TASKS" not in self._in_config:
             from ichor.machine import MACHINE, Machine
+
             if MACHINE is Machine.ffluxlab:
-                self.MAX_RUNNING_TASKS = 25  # <- might be a bit conservative, increase in future?
+                self.MAX_RUNNING_TASKS = (
+                    25  # <- might be a bit conservative, increase in future?
+                )
             elif MACHINE is Machine.csf3:
                 self.MAX_RUNNING_TASKS = -1
 
@@ -550,26 +553,38 @@ class Globals:
 
     @property
     def ALF_REFERENCE_FILE(self):
-        if self._ALF_REFERENCE_FILE is None or self._ALF_REFERENCE_FILE == Path():
+        if (
+            self._ALF_REFERENCE_FILE is None
+            or self._ALF_REFERENCE_FILE == Path()
+        ):
             # search for ALF REFERENCE FILE
             if self.POINTS_LOCATION is not None:
                 self._ALF_REFERENCE_FILE = self.POINTS_LOCATION
             else:
                 from ichor.files import GJF, XYZ
+
                 for f in Path().iterdir():
-                    if f.is_file() and f.suffix in [GJF.filetype, XYZ.filetype]:
+                    if f.is_file() and f.suffix in [
+                        GJF.filetype,
+                        XYZ.filetype,
+                    ]:
                         self._ALF_REFERENCE_FILE = f
                         break
                 else:
                     from ichor.files import PointsDirectory
+
                     for d in Path().iterdir():
                         if d.is_dir():
                             points = PointsDirectory(d)
                             if len(points) > 0:
                                 self._ALF_REFERENCE_FILE = points[0].xyz.path
                                 break
-        if self._ALF_REFERENCE_FILE.exists() and self._ALF_REFERENCE_FILE.is_dir():
+        if (
+            self._ALF_REFERENCE_FILE.exists()
+            and self._ALF_REFERENCE_FILE.is_dir()
+        ):
             from ichor.files import PointsDirectory
+
             points = PointsDirectory(d)
             if len(points) > 0:
                 self._ALF_REFERENCE_FILE = points[0].xyz.path
@@ -728,6 +743,7 @@ def get_atoms(path: Optional[Path] = None) -> Atoms:
         else:
             raise ValueError(f"Unknown filetype ({alf_reference_file}")
     else:
+
         def scan_dir(d) -> Optional[Atoms]:
             # todo: could be slow, maybe best to search key locations first
             dirs_to_scan = []

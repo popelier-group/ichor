@@ -211,7 +211,7 @@ def auto_run() -> JobID:
     from ichor.globals import GLOBALS
 
     if FILE_STRUCTURE["counter"].exists():
-        with open(FILE_STRUCTURE["counter"], 'r') as f:
+        with open(FILE_STRUCTURE["counter"], "r") as f:
             current_iter = int(next(f))
             max_iter = int(next(f))
 
@@ -323,10 +323,7 @@ def rerun_from_failed() -> Optional[JobID]:
             current_iteration = int(next(f))
             max_iteration = int(next(f))
 
-    if (
-        current_iteration < max_iteration
-        and len(get_current_jobs()) == 0
-    ):
+    if current_iteration < max_iteration and len(get_current_jobs()) == 0:
         GLOBALS.N_ITERATIONS = max_iteration - current_iteration
         GLOBALS.save_to_config()
         remove(FILE_STRUCTURE["counter"])

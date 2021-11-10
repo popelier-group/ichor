@@ -114,7 +114,9 @@ def settings_menu_refresh(menu):
         )
     menu.add_space()
     menu.add_option("e", "Edit config file location", edit_config_location)
-    menu.add_option("s", "Save settings to config file", GLOBALS.save_to_config)
+    menu.add_option(
+        "s", "Save settings to config file", GLOBALS.save_to_config
+    )
     menu.add_space()
     menu.add_message(f"Config Location: {GLOBALS._config_file}")
     menu.add_final_options()

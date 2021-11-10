@@ -9,12 +9,13 @@ from ichor.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
-from ichor.models import ModelsResult, Models
+from ichor.models import Models, ModelsResult
+
 
 class HighestVariance(ActiveLearningMethod):
-    """ Active learning method which calculates the variance of the sample pool points (given the models) and adds
+    """Active learning method which calculates the variance of the sample pool points (given the models) and adds
     points with the highest variance to the training set.
-    
+
     .. note::
         Only one point, the one with the highest variance in the sample pool, is added by default.
     """

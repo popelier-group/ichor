@@ -1,13 +1,13 @@
 import re
 from pathlib import Path
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 
 from ichor.atoms import Atom, Atoms, ListOfAtoms
+from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
 from ichor.files.file import File, FileState
-from ichor.common.functools import classproperty
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
@@ -213,12 +213,14 @@ class Trajectory(ListOfAtoms, File):
 
     def write(self, path: Optional[Path] = None):
         _path = path or self.path
-        with open(_path, 'w') as f:
+        with open(_path, "w") as f:
             for i, frame in enumerate(self):
                 f.write(f"{len(frame)}\n")
                 f.write(f"i = {i}\n")
                 for atom in frame:
-                    f.write(f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n")
+                    f.write(
+                        f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+                    )
 
     def __getitem__(self, item):
         """Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),

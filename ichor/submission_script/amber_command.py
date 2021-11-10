@@ -84,7 +84,9 @@ class AmberCommand(CommandLine):
         cmd += "popd\n"
 
         mdcrd = (self.mol2_file.parent / "mdcrd").absolute()
-        xyz = f"{GLOBALS.SYSTEM_NAME}-amber-{int(GLOBALS.AMBER_TEMPERATURE)}.xyz"
+        xyz = (
+            f"{GLOBALS.SYSTEM_NAME}-amber-{int(GLOBALS.AMBER_TEMPERATURE)}.xyz"
+        )
         ichor_command = ICHORCommand(
             func="mdcrd_to_xyz", func_args=[mdcrd, prmtop_file, xyz]
         )

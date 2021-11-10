@@ -61,6 +61,4 @@ def make_missing_atom_models(make_on_compute: bool = True) -> JobID:
                 atom_dir=d, make_on_compute=make_on_compute
             )
             job_ids.append(job_id)
-    return submit_ichor_collate_models_to_auto_run(
-        Path.cwd(), job_ids
-    )
+    return submit_ichor_collate_models_to_auto_run(Path.cwd(), job_ids)

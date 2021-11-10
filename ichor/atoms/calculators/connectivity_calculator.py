@@ -34,7 +34,7 @@ class ConnectivityCalculator:
                         max_dist = 1.2 * (iatom.radius + jatom.radius)
 
                         if iatom.dist(jatom) < max_dist:
-                            connectivity[i,j] = 1
+                            connectivity[i, j] = 1
             cls.connectivity[system_hash] = connectivity
 
         return cls.connectivity[system_hash]

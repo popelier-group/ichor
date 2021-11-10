@@ -119,7 +119,11 @@ class ALFFeatureCalculator(FeatureCalculator):
         return cls._alf[system_hash][atom.i]
 
     @classmethod
-    def calculate_x_axis_atom(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
+    def calculate_x_axis_atom(
+        cls,
+        atom: "Atom",
+        alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None,
+    ):
         """Returns the Atom instance that is used as the x-axis of the ALF
 
         Args:
@@ -135,6 +139,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             return atom.parent[cls.calculate_alf(atom)[1]]
         elif isinstance(alf, list):
             from ichor.atoms.atom import Atom
+
             if isinstance(alf[1], int):
                 return atom.parent[alf[1] - 1]
             elif isinstance(alf[1], Atom):
@@ -143,7 +148,11 @@ class ALFFeatureCalculator(FeatureCalculator):
             return atom.parent[alf[1]]
 
     @classmethod
-    def calculate_xy_plane_atom(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
+    def calculate_xy_plane_atom(
+        cls,
+        atom: "Atom",
+        alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None,
+    ):
         """Returns the Atom instance that is used as the x-axis of the ALF
 
         Args:
@@ -159,6 +168,7 @@ class ALFFeatureCalculator(FeatureCalculator):
             return atom.parent[cls.calculate_alf(atom)[2]]
         elif isinstance(alf, list):
             from ichor.atoms.atom import Atom
+
             if isinstance(alf[2], int):
                 return atom.parent[alf[2] - 1]
             elif isinstance(alf[2], Atom):
@@ -167,7 +177,11 @@ class ALFFeatureCalculator(FeatureCalculator):
             return atom.parent[alf[2]]
 
     @classmethod
-    def calculate_c_matrix(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None) -> np.ndarray:
+    def calculate_c_matrix(
+        cls,
+        atom: "Atom",
+        alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None,
+    ) -> np.ndarray:
         """Retruns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
         See https://pubs.acs.org/doi/pdf/10.1021/ct500565g , Section 3.3 for the derivations. This matrix has 3 unit
         vectors.
@@ -213,7 +227,11 @@ class ALFFeatureCalculator(FeatureCalculator):
         return c_matrix
 
     @classmethod
-    def calculate_features(cls, atom: 'Atom', alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
+    def calculate_features(
+        cls,
+        atom: "Atom",
+        alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None,
+    ):
         """Calculates the features for the given central atom.
 
         Args:

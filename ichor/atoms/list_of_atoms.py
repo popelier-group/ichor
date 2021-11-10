@@ -65,7 +65,9 @@ class ListOfAtoms(list):
             features = np.transpose(features, (1, 0, 2))
         return features
 
-    def alf_features(self, alf: Optional[Union[List[int], List['Atom'], np.ndarray]] = None):
+    def alf_features(
+        self, alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None
+    ):
         """Return the ndarray of features. This is assumed to be either a 1D, 2D or 3D array.
         If the dimensionality of the feature array is 3, the array is transposed to transform a
         (natom, ntimestep, nfeature) array into a (ntimestep, natom, nfeature) array so that

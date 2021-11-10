@@ -1,16 +1,15 @@
 from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
-                                PerPropertyDaemon, auto_run_per_atom,
+                                PerPropertyDaemon, ReRunDaemon,
+                                auto_run_per_atom,
                                 auto_run_per_atom_per_property,
                                 auto_run_per_property,
                                 delete_child_process_jobs,
                                 find_child_processes_recursively,
                                 make_missing_atom_models,
-                                ReRunDaemon,
                                 stop_all_child_processes)
+from ichor.main.collate_log import collate_model_log
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
-from ichor.main.collate_log import collate_model_log
-
 
 child_processes = []
 all_child_processes = []
@@ -141,7 +140,7 @@ def child_process_queue_menu() -> None:
 def control_child_processes_menu_refresh(menu: Menu) -> None:
     global child_processes
     menu.clear_options()
-    
+
     menu = add_child_processes_to_menu(menu)
     menu.add_space()
     menu.add_option(
@@ -151,9 +150,7 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
     menu.add_option(
         "log", "Collate Model Logs from chile processes", collate_model_log
     )
-    menu.add_option(
-        "rerun", "Rerun failed auto-runs", ReRunDaemon().start
-    )
+    menu.add_option("rerun", "Rerun failed auto-runs", ReRunDaemon().start)
     menu.add_option(
         "stop", "Stop all child processes", stop_all_child_processes
     )

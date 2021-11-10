@@ -11,11 +11,11 @@ class QuadraticMean(Mean):
     """
 
     def __init__(self, beta: np.ndarray, xmin: np.ndarray, ymin: float):
-        self._beta = beta[:,np.newaxis]
+        self._beta = beta[:, np.newaxis]
         self._xmin = xmin
         self._ymin = ymin
 
     def value(self, x: np.ndarray) -> np.ndarray:
         """Returns the constant mean value."""
         a = x - self._xmin
-        return (np.matmul(a*a, self._beta) + self._ymin).flatten()
+        return (np.matmul(a * a, self._beta) + self._ymin).flatten()

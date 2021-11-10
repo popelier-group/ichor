@@ -119,7 +119,6 @@ class ArithMixin(ABC):
 
 
 class ModelResult(dict, ArithMixin):
-
     def _add_value(self, other):
         result = ModelResult()
         for key, val in self.items():
@@ -298,9 +297,9 @@ class ModelResult(dict, ArithMixin):
 
 
 class ModelsResult(ModelResult):
-    """ A dictionary of dictionaries which has some extra methods defines which allows us to modify dictionary values easily.
-    Typically the structure of this dictionary of dictionaries is: `{atom_name0: {property0: np.ndarray, property1: np.ndarray,...}, 
-    atom_name1: {property0: np.ndarray, property1: np.ndarray,...}, ...}`. So for example it might look somethin like 
+    """A dictionary of dictionaries which has some extra methods defines which allows us to modify dictionary values easily.
+    Typically the structure of this dictionary of dictionaries is: `{atom_name0: {property0: np.ndarray, property1: np.ndarray,...},
+    atom_name1: {property0: np.ndarray, property1: np.ndarray,...}, ...}`. So for example it might look somethin like
     `{"O1": {"q00": np.ndarray, "q10": np.ndarray,...}, "H2": {"q00": np.ndarray, "q10": np.ndarray,...}}`
     """
 
@@ -323,8 +322,8 @@ class ModelsResult(ModelResult):
 
     @property
     def T(self):
-        """ Transposes the dictionary, making the inner dictionary's keys the outer dictionary's keys and vice versa.
-        
+        """Transposes the dictionary, making the inner dictionary's keys the outer dictionary's keys and vice versa.
+
         For example, `{"O1": {"q00": np.ndarray, "q10": np.ndarray,...}, "H2": {"q00": np.ndarray, "q10": np.ndarray,...}}`
         will become `{"q00": {"O1": np.ndarray, "H2": np.ndarray,...}, "q10": {"O1": np.ndarray, "H2": np.ndarray,...}}`
         """
@@ -343,6 +342,7 @@ class ModelsResult(ModelResult):
     # todo: if not used better to delete it
     def group(self):
         return self.T.split()
+
 
 # todo: if this is not used better to delete it
 class ListResult(list, ArithMixin):

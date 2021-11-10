@@ -9,10 +9,9 @@ import numpy as np
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import classproperty
 from ichor.common.types import VarReprMixin
-from ichor.files.file import File
-from ichor.files.geometry import GeometryFile, GeometryDataFile, AtomicDict
+from ichor.files.file import File, FileContents
+from ichor.files.geometry import AtomicDict, GeometryDataFile, GeometryFile
 from ichor.units import AtomicDistance
-from ichor.files.file import FileContents
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])
 

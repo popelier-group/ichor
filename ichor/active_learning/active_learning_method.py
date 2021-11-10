@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List
+
+import numpy as np
+
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
 from ichor.models import Models
-import numpy as np
+
 
 class ActiveLearningMethod(ABC):
     def __init__(self, models: Models):

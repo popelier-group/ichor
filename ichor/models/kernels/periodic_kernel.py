@@ -1,5 +1,6 @@
-import numpy as np
 from typing import Optional
+
+import numpy as np
 
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
@@ -8,7 +9,12 @@ from ichor.models.kernels.kernel import Kernel
 class PeriodicKernel(Kernel):
     """Implemtation of the Periodic Kernel."""
 
-    def __init__(self, thetas: np.ndarray, period_length: np.ndarray, active_dims: Optional[np.ndarray] = None):
+    def __init__(
+        self,
+        thetas: np.ndarray,
+        period_length: np.ndarray,
+        active_dims: Optional[np.ndarray] = None,
+    ):
         """
 
         Args:
@@ -49,12 +55,12 @@ class PeriodicKernel(Kernel):
         """
 
         # implementation from gpytorch https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
-        true_lengthscales = np.sqrt(1.0/(2*self._thetas))
-        true_lengthscales = true_lengthscales.reshape(-1,1,1)
+        true_lengthscales = np.sqrt(1.0 / (2 * self._thetas))
+        true_lengthscales = true_lengthscales.reshape(-1, 1, 1)
 
         # get only dimensions which need periodic kernel
-        x1_ = x1[:,self.active_dims]
-        x2_ = x2[:,self.active_dims]
+        x1_ = x1[:, self.active_dims]
+        x2_ = x2[:, self.active_dims]
 
         # divide by period length and multiply by pi beforehand
         x1_ = np.pi * (x1_ / self._period_length)
@@ -68,7 +74,7 @@ class PeriodicKernel(Kernel):
 
         res = np.sin(diff)
         res = res / true_lengthscales
-        res = res**2
+        res = res ** 2
         res = np.sum(res, axis=-3)  # ntrain, ntrain
         res = -2.0 * res
         res = np.exp(res)

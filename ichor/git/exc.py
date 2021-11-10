@@ -9,8 +9,7 @@ from typing import TYPE_CHECKING, List, Sequence, Tuple, Union
 
 from ichor.git.compat import safe_decode
 from ichor.git.ext.gitdb.exc import *  # NOQA @UnusedWildImport skipcq: PYL-W0401, PYL-W0614
-from ichor.git.ext.gitdb.exc import \
-    BadName  # NOQA @UnusedWildImport skipcq: PYL-W0401, PYL-W0614
+from ichor.git.ext.gitdb.exc import BadName
 from ichor.git.types import PathLike
 
 # typing ----------------------------------------------------

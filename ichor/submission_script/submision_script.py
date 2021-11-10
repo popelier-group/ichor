@@ -235,8 +235,13 @@ class SubmissionScript:
                 f.write(
                     f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
                 )
-                if njobs > GLOBALS.MAX_RUNNING_TASKS and GLOBALS.MAX_RUNNING_TASKS > 0:
-                    f.write(f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}")
+                if (
+                    njobs > GLOBALS.MAX_RUNNING_TASKS
+                    and GLOBALS.MAX_RUNNING_TASKS > 0
+                ):
+                    f.write(
+                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}"
+                    )
             else:
                 f.write(f"{BATCH_SYSTEM.TaskID}=1\n")
 

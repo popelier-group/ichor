@@ -1,7 +1,7 @@
 import json
 import re
-from typing import Optional, Union
 from pathlib import Path
+from typing import Optional, Union
 
 import numpy as np
 
@@ -159,9 +159,11 @@ class INT(GeometryDataFile, File):
             self.rotate_multipoles()
 
         # overwrite the initial self.multipoles_data dict because it contains the raw data
-        # if not overwritten, the original data from the .int files is 
+        # if not overwritten, the original data from the .int files is
         for multipole_name in constants.multipole_names:
-            self.multipoles_data[multipole_name] = getattr(self, multipole_name)
+            self.multipoles_data[multipole_name] = getattr(
+                self, multipole_name
+            )
 
     def rotate_multipoles(self):
         """

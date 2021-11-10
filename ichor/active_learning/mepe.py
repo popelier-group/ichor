@@ -9,7 +9,7 @@ from ichor.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
-from ichor.models import Model, ModelsResult, Models
+from ichor.models import Model, Models, ModelsResult
 
 """
     Implementation of the Maximum Expected Prediction Error (MEPE) method
@@ -67,7 +67,7 @@ def cross_validation(model: Model) -> np.ndarray:
 
 class MEPE(ActiveLearningMethod):
 
-    """ Maximum Expected Prediction Errorr implementation for selecting new training data out of sample pool."""
+    """Maximum Expected Prediction Errorr implementation for selecting new training data out of sample pool."""
 
     def __init__(self, models: Models):
         super().__init__(models)
@@ -136,9 +136,9 @@ class MEPE(ActiveLearningMethod):
         return alpha_sum / nalpha
 
     def get_points(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
-        """ Gets the indeces of the points to add from the sample pool to the training set based on the maximum prediction
+        """Gets the indeces of the points to add from the sample pool to the training set based on the maximum prediction
         error criteria
-        
+
         :param points: An instance of ListOfAtoms (note than PointsDirectory inherits from ListOfAtoms)
         :param npoints: The number of points to add to the training set from the sample pool based on the EPE criteria.
         """

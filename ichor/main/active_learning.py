@@ -42,11 +42,13 @@ def active_learning(
 
     if GLOBALS.OPTIMISE_PROPERTY != "all":
         models = models[GLOBALS.OPTIMISE_PROPERTY]
- 
+
     # make the learning method instance given a set of models
     learning_method_inst = learning_method_cls(models)
     # use the __call__ method to calculate which points to add from the sample pool to the training set based on the given models
-    points_to_add = learning_method_inst(sample_pool, GLOBALS.POINTS_PER_ITERATION)
+    points_to_add = learning_method_inst(
+        sample_pool, GLOBALS.POINTS_PER_ITERATION
+    )
 
     for point in points_to_add:
         training_set = PointsDirectory(FILE_STRUCTURE["training_set"])

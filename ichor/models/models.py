@@ -1,7 +1,7 @@
 import re
 from functools import wraps
-from typing import Dict, Union, List
 from pathlib import Path
+from typing import Dict, List, Union
 
 import numpy as np
 
@@ -18,8 +18,9 @@ class DimensionError(ValueError):
 
 
 def x_to_features(func: F) -> F:
-    """ Used as a decorator to convert an incoming set of test points `x` to features because we need to know the test point features in
+    """Used as a decorator to convert an incoming set of test points `x` to features because we need to know the test point features in
     order to make predictions."""
+
     @wraps(func)
     def wrapper(self, x, *args, **kwargs):
         features = self.get_features_dict(x)
@@ -30,7 +31,7 @@ def x_to_features(func: F) -> F:
 
 class Models(Directory, list):
     """A class which wraps around a directory containing models made by FEREBUS or any other program used to make GP models. There are different
-    models for iqa energy and each individual multipole moment. Aditionally, every atom in the system has its own set of models for iqa and 
+    models for iqa energy and each individual multipole moment. Aditionally, every atom in the system has its own set of models for iqa and
     multipole moments. These models can have different training input/output data if the models have been made with per-atom.
     """
 
@@ -61,12 +62,18 @@ class Models(Directory, list):
 
     @property
     def atom_names(self) -> List[str]:
-        """ Returns a list of atom names (such as O1, H2, H3, etc.) for which models were made"""
-        return list(set(natsorted([model.atom_name for model in self], key=ignore_alpha)))
+        """Returns a list of atom names (such as O1, H2, H3, etc.) for which models were made"""
+        return list(
+            set(
+                natsorted(
+                    [model.atom_name for model in self], key=ignore_alpha
+                )
+            )
+        )
 
     @property
     def types(self) -> List[str]:
-        """ Returns a list of types (such as q00, q10, iqa, etc.) for which models were made"""
+        """Returns a list of types (such as q00, q10, iqa, etc.) for which models were made"""
         return list(set([model.type for model in self]))
 
     @property
@@ -77,7 +84,9 @@ class Models(Directory, list):
     @property
     def ialf(self) -> np.ndarray:
         """Returns the zero index alf from each model file as a numpy array e.g. [[0, 1, 2], [1, 0, 2], [2, 0, 1]]"""
-        return np.array(sorted([model.ialf for model in self], key=lambda x: x[0]))
+        return np.array(
+            sorted([model.ialf for model in self], key=lambda x: x[0])
+        )
 
     @property
     def ialf_dict(self) -> Dict[str, np.ndarray]:
@@ -86,12 +95,12 @@ class Models(Directory, list):
 
     @property
     def ntrain(self) -> int:
-        """ Returns the maximum number of training points that were used for a model in this `Models` instance."""
+        """Returns the maximum number of training points that were used for a model in this `Models` instance."""
         return max(model.ntrain for model in self)
 
     @property
     def system(self) -> str:
-        """ Returns the name of the system for which models were made."""
+        """Returns the name of the system for which models were made."""
         return self[0].system
 
     @x_to_features
@@ -117,9 +126,11 @@ class Models(Directory, list):
             }
         )
 
-    def get_features_dict(self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, dict]) -> Dict[str, np.ndarray]:
-        """ Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
-        
+    def get_features_dict(
+        self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, dict]
+    ) -> Dict[str, np.ndarray]:
+        """Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
+
         :param x: An object that contains features (or coordinates that can be converted into features), such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
         :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
         """
@@ -136,7 +147,10 @@ class Models(Directory, list):
 
     def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
         """Returns a dictionary containing atom name as key and atom features for values."""
-        return {atom.name: atom.alf_features(alf=self.ialf_dict[atom]) for atom in atoms}
+        return {
+            atom.name: atom.alf_features(alf=self.ialf_dict[atom])
+            for atom in atoms
+        }
 
     def _features_from_list_of_atoms(
         self, x_test: ListOfAtoms
@@ -168,6 +182,7 @@ class Models(Directory, list):
             return Directory.__iter__(self)
         else:
             return list.__iter__(self)
+
 
 class ModelsView(Models):
     def __init__(self, models, *args):

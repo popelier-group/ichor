@@ -23,7 +23,7 @@ class XYZ(GeometryFile, File):
         self.atoms = FileContents
         if atoms is not None:
             self.atoms = atoms
-            self.write()            
+            self.write()
 
     @classproperty
     def filetype(self) -> str:
