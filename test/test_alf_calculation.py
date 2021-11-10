@@ -8,7 +8,9 @@ import numpy as np
 
 class TestALFCalculations(unittest.TestCase):
     
-    """ These are tests to check if the ALF calculation matches the alf calculation done by hand (as determined by Cahn–Ingold–Prelog priority rules).
+    """ These are tests to check if the ALF calculation matches the alf calculation done by hand (as determined by Cahn–Ingold–Prelog priority rules). The
+    ALF that is calculated here is zero indexed because this allows us to correctly index the atoms in Python. Otherwise, the actual atom names start at index 1,
+    so C1, C2, H3, etc.
     
     .. note::
         The numbers in the alf calculation can change because the atom's indices are determined by their ordering in the xyz file. Thus, a different ordering
