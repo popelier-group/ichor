@@ -17,7 +17,7 @@ from ichor.submission_script.pandora_command import (PandoraCommand,
                                                      PandoraPySCFCommand)
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.script_timing_manager import TimingManager
-from ichor.submission_script.submision_script import SubmissionScript, SubmitAnyway
+from ichor.submission_script.submision_script import SubmissionScript, SUBMIT_ON_COMPUTE
 from ichor.submission_script.tyche_command import TycheCommand
 
 
@@ -120,5 +120,5 @@ __all__ = [
     "AmberCommand",
     "CP2KCommand",
     "TycheCommand",
-    "SubmitAnyway",
+    "SUBMIT_ON_COMPUTE",
 ]
