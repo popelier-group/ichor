@@ -2,8 +2,9 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+from ichor.common.io import remove
 from ichor.batch_system import JobID
-from ichor.files import PointsDirectory
+from ichor.files import PointsDirectory, AIM, INT
 from ichor.logging import logger
 from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
                                      SubmissionScript, print_completed)
@@ -56,11 +57,32 @@ def rerun_aimall(wfn_file: str):
     # AIMAll deletes this sh file when it has successfully completed
     # If this file still exists then something went wrong
     wfn_file = Path(wfn_file)
-    if not wfn_file.with_suffix(".sh").exists():
-        aim_file =  wfn_file.with_suffix(".aim")
-        if aim_file.exists():
+    aim_failed = False
+    aim_file = wfn_file.with_suffix(".aim")
+    int_files = []
+    if aim_file.exists():
+        aim = AIM(aim_file)
+        for atom, aimdata in aim.items():
+            if not aimdata.outfile.exists():
+                logger.error(f"AIMAll for {wfn_file} failed to run for atom '{atom}'")
+                aim_failed = True
+            else:
+                int_file = INT(aimdata.outfile)
+                try:
+                    int_file.integration_error
+                    int_file.q44s
+                    int_file.iqa
+                except AttributeError:
+                    logger.error(f"AIMAll for '{wfn_file}' failed to run producing invalid int file '{int_file.path}'")
+                    aim_failed = True
 
-            print_completed()
+    if aim_failed:
+        atomicfiles = wfn_file.with_suffix("_atomicfiles")
+        if atomicfiles.exists():
+            remove(atomicfiles)
+            logger.error(f"AIMAll for '{wfn_file}' failed, removing atomicfiles directory '{atomicfiles}'")
+    else:
+        print_completed()
 
 
 def scrub_aimall(wfn_file: str):
