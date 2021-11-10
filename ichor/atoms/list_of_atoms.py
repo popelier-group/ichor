@@ -40,7 +40,14 @@ class ListOfAtoms(list):
         return np.array([timestep.coordinates for timestep in self])
 
     @property
-    def alf(self) -> List:
+    def connectivity(self) -> np.ndarray:
+        if hasattr(self, "atoms"):
+            return self.atoms.connectivity
+        else:
+            return self[0].connectivity
+
+    @property
+    def alf(self) -> np.ndarray:
 
         if hasattr(self, "atoms"):
             return self.atoms.alf
