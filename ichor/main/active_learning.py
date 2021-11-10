@@ -63,6 +63,8 @@ def active_learning(
         new_training_point.move(new_directory)
 
         if Arguments.auto_run:
+            logger.info(f"Completed iteration {current_iteration} of {max_iteration}")
+
             current_iteration += 1
             write_counter(current_iteration, max_iteration)
             if current_iteration == max_iteration:
@@ -74,4 +76,5 @@ def active_learning(
                 current_iteration <= max_iteration
                 and MACHINE.submit_type.submit_after_final_step
             ):
+                logger.info(f"Submitting iteration {current_iteration}")
                 submit_next_iter(current_iteration)
