@@ -15,9 +15,12 @@ class MachineNotFound(Exception):
 class SubmitType(Enum):
     """Enum holding information on various submission systems ichor implements"""
 
-    HoldQueueWait = auto()
-    SubmitOnCompute = auto()
-    DropCompute = auto()
+    HoldQueueWait = False
+    SubmitOnCompute = True
+    DropCompute = True
+    
+    def __init__(self, submit_each_iter: bool):
+        submit_each_iter = submit_each_iter
 
 
 class Machine(Enum):
