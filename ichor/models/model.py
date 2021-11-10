@@ -289,13 +289,14 @@ class Model(File):
         This is the index of the atom in Python objects such as lists (as indeces start at 0)."""
         return self.atom_num - 1
 
-    def r(self, x_test: np.ndarray) -> np.ndarray:
-        return self.k.r(self.x, x_test)
-
     @cached_property
     def weights(self) -> np.ndarray:
         """Returns an array containing the weights which can be stored prior to making predictions."""
         return self._weights
+
+    def r(self, x_test: np.ndarray) -> np.ndarray:
+        """ Returns the n_train by n_test covariance matrix"""
+        return self.k.r(self.x, x_test)
 
     @cached_property
     def R(self) -> np.ndarray:
@@ -318,15 +319,15 @@ class Model(File):
         return (
             self.mean.value(x_test)
             + np.dot(self.r(x_test).T, self.weights)[:, -1]
-        )
+        ).flatten()
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
         """Return the variance for the test data points."""
         train_test_covar = self.r(x_test)
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
-        v = np.linalg.solve(self.lower_cholesky, train_test_covar).T
+        v = np.linalg.solve(self.lower_cholesky, train_test_covar)
 
-        return np.diag(self.k.R(x_test) - np.matmul(v, v.T)).flatten()
+        return np.diag(self.k.R(x_test) - np.matmul(v.T, v)).flatten()
 
     # TODO. model write method not implemented
     def write(self) -> None:
