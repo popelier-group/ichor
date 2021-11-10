@@ -294,7 +294,7 @@ def auto_run() -> JobID:
             # initially job_id is none, then next_iter returns the job id of the submitted job. The next job has to wait for the previous job that was submitted.
             job_id = submit_auto_run_iter(func_order, job_id, iter_state)
 
-            if MACHINE.submit_type.submit_each_iter:
+            if MACHINE.submit_type.submit_after_final_step:
                 break  # Only submit the first iteration for drop-n-compute and submit on compute
     return job_id
 

@@ -19,8 +19,8 @@ class SubmitType(Enum):
     SubmitOnCompute = True
     DropCompute = True
     
-    def __init__(self, submit_each_iter: bool):
-        submit_each_iter = submit_each_iter
+    def __init__(self, submit_after_final_step: bool):
+        self.submit_after_final_step = submit_after_final_step
 
 
 class Machine(Enum):
