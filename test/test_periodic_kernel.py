@@ -1,7 +1,6 @@
 import unittest
 import sys
 
-from numpy.lib.function_base import cov
 sys.path.append("../ichor/")
 from ichor.models.kernels.periodic_kernel import PeriodicKernel
 import numpy as np
