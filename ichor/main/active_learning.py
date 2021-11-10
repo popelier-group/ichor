@@ -78,5 +78,5 @@ def active_learning(
                 and MACHINE.submit_type.submit_after_final_step
             ):
                 logger.info(f"Submitting iteration {current_iteration}")
-                with SubmitAnyway:
+                with SUBMIT_ON_COMPUTE:
                     submit_next_iter(current_iteration)

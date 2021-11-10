@@ -7,21 +7,11 @@ from ichor.common.io import mkdir
 from ichor.common.uid import set_uid
 from ichor.submission_script.command_group import CommandGroup
 from ichor.submission_script.data_lock import DataLock
+from ichor.common.types import BoolToggle
 
 
-class _SubmitAnyway:
-    _submit_anyway = False
+SUBMIT_ON_COMPUTE = BoolToggle()
 
-    def __bool__(self):
-        return self._submit_anyway
-
-    def __enter__(self):
-        self._submit_anyway = True
-
-    def __exit__(self, a, b, c):
-        self._submit_anyway = False
-
-SubmitAnyway = _SubmitAnyway()
 
 class SubmissionScript:
     """
@@ -298,7 +288,7 @@ class SubmissionScript:
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
         from ichor.batch_system import BATCH_SYSTEM, NodeType
 
-        if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode or SubmitAnyway:
+        if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode or SUBMIT_ON_COMPUTE:
             return BATCH_SYSTEM.submit_script(self.path, hold)
 
     def __enter__(self) -> "SubmissionScript":
