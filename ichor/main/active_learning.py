@@ -78,6 +78,6 @@ def active_learning(
 
             if (
                 current_iteration <= max_iteration
-                and MACHINE.submit_type.submit_each_iter
+                and MACHINE.submit_type.submit_after_final_step
             ):
                 submit_next_iter(current_iteration)
