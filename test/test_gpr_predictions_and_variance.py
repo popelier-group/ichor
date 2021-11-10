@@ -32,7 +32,7 @@ class TestGPRPredictions(unittest.TestCase):
         predictions = model.predict(test_x)
         np.testing.assert_equal(predictions.shape, (500,))  # we have 500 test points in the test dataset
     
-        previous_predictions = np.loadtxt(Path("test/test_gpr_models/water_monomer/previous_gpr_predictions/WATER_iqa_O1_predictions.csv"))
+        previous_predictions = np.loadtxt(Path("test/test_gpr_models/water_monomer/previous_gpr_predictions/WATER_iqa_O1_predictions.txt"))
         np.testing.assert_allclose(predictions, previous_predictions)
     
     def test_water_monomer_variance(self):
@@ -51,7 +51,7 @@ class TestGPRPredictions(unittest.TestCase):
         test_set_variance = model.variance(test_x)
         np.testing.assert_equal(test_set_variance.shape, (500,))
         
-        previous_variance = np.loadtxt(Path("test/test_gpr_models/water_monomer/previous_gpr_predictions/WATER_iqa_O1_variance.csv"))
+        previous_variance = np.loadtxt(Path("test/test_gpr_models/water_monomer/previous_gpr_predictions/WATER_iqa_O1_variance.txt"))
         np.testing.assert_allclose(test_set_variance, previous_variance)
         
 if __name__ == "__main__":
