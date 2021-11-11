@@ -32,6 +32,7 @@ from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
 from ichor.auto_run.counter import read_counter, write_counter
+from ichor.batch_system import BATCH_SYSTEM, NodeType
 
 
 class AutoRunAlreadyRunning(Exception):
@@ -113,11 +114,11 @@ def submit_auto_run_iter(
         # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
         for iter_step in func_order:
             # append the modified id to the submission script name as this is how drop-in-compute holds jobs
-            if MACHINE.submit_type is SubmitType.DropCompute:
+            if MACHINE.submit_type is SubmitType.DropCompute and BATCH_SYSTEM.current_node() is NodeType.ComputeNode:
                 modify = f"+{modify_id}"
                 if job_id is not None:
                     modify += f"+hold_{modify_id - 1}"  # hold for the previous job (whose job id is one less than this job)
-                SCRIPT_NAMES.modify = modify
+                SCRIPT_NAMES.modify.value = modify
                 modify_id += 1
             job_id = iter_step.run(job_id, state)
             if job_id is not None:
@@ -300,7 +301,7 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
     if MACHINE.submit_type is SubmitType.DropCompute:
-        SCRIPT_NAMES.parent = DROP_COMPUTE_LOCATION
+        SCRIPT_NAMES.parent.value = DROP_COMPUTE_LOCATION
 
     iter_state = (
         IterState.Last
