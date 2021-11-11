@@ -120,7 +120,7 @@ class ListOfAtoms(list):
         if isinstance(self, Trajectory):
             features = np.array([timestep.alf_features(alf) for timestep in self])
         elif isinstance(self, PointsDirectory):
-            features = np.array([point.atoms.alf_features(alf) for point in self])
+            features = np.array([point.alf_features(alf) for point in self])
             
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))

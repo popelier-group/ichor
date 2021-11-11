@@ -151,26 +151,4 @@ class MEPE(ActiveLearningMethod):
         epe = alpha * cv_errors - (1.0 - alpha) * variance
 
         """Eq. 25"""
-        indices_mepe = np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]
-
-        # from ichor.file_structure import FILE_STRUCTURE
-
-        # cv_file = FILE_STRUCTURE["cv_errors"]
-        # mkdir(cv_file.parent)
-        # if cv_file.exists():
-        #     cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
-        # with open(
-        #     cv_file, "w"
-        # ) as f:  # store data as json for next iterations alpha calculation
-        #     json.dump(
-        #         {
-        #             "added_points": npoints,
-        #             "cv_errors": cv_errors[epe].to_list(),
-        #             "predictions": self.models.predict(features_dict)[
-        #                 epe
-        #             ].to_list(),
-        #         },
-        #         f,
-        #     )
-
-        return indices_mepe
+        return np.flip(np.argsort(epe.reduce(-1)), axis=-1)[:npoints]

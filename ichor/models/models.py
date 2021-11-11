@@ -74,7 +74,7 @@ class Models(Directory, list):
     @property
     def types(self) -> List[str]:
         """Returns a list of types (such as q00, q10, iqa, etc.) for which models were made"""
-        return list(set([model.type for model in self]))
+        return list({model.type for model in self})
 
     @property
     def alf(self) -> List[List[int]]:
@@ -131,7 +131,7 @@ class Models(Directory, list):
     ) -> Dict[str, np.ndarray]:
         """Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
 
-        :param x: An object that contains features (or coordinates that can be converted into features), such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
+        :param test_x: An object that contains features (or coordinates that can be converted into features), such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
         :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
         """
 
