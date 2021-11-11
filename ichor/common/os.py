@@ -62,7 +62,13 @@ def current_user_groups() -> List[str]:
     try:
         import grp
 
-        return [grp.getgrgid(g).gr_name for g in os.getgroups()]
+        groups = []
+        for g in os.getgroups():
+            try:
+                groups.append(grp.getgrgid(g).gr_name)
+            except KeyError:
+                pass
+        return groups
     except ImportError:
         import warnings
 

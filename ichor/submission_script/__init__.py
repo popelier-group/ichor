@@ -19,6 +19,7 @@ from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.script_timing_manager import TimingManager
 from ichor.submission_script.submision_script import SubmissionScript, SUBMIT_ON_COMPUTE
 from ichor.submission_script.tyche_command import TycheCommand
+from ichor.common.types import MutableValue
 
 
 def prepend_script_directory(paths):
@@ -37,13 +38,11 @@ class ScriptNames(dict):
     for programs like Guassian and AIMALL. All the script files are stored into a directory GLOBALS.FILE_STRUCTURE["scripts"].
     These scripts are submitted to compute nodes on CSF3/FFLUXLAB which initiates a job."""
 
-    parent: Path
-    modify = ""
+    parent: Path = MutableValue(FILE_STRUCTURE["scripts"])
+    modify: str = MutableValue("")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.parent = FILE_STRUCTURE["scripts"]
-        self.modify = ""
 
     def __getitem__(self, item):
         """
@@ -56,7 +55,7 @@ class ScriptNames(dict):
         # then the second time this object is indexed with ["gaussian"], it will be an instance of "str", so this if statement will be executed
         if isinstance(script, (str, Path)):
             # append the script name to the path where the scripts are located and modify script name with self.modify
-            return self.parent / (script + self.modify)
+            return self.parent.value / (script + self.modify.value)
         else:
             return script
 
