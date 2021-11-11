@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
+from numpy.lib.arraysetops import isin
 
 
 class ListOfAtoms(list):
@@ -16,19 +17,37 @@ class ListOfAtoms(list):
     def types(self) -> List[str]:
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
-        return self[0].types
+        
+        from ichor.files import PointsDirectory, Trajectory
+        
+        if isinstance(self, PointsDirectory):
+            return self[0].atoms.types
+        elif isinstance(self, Trajectory):
+            return self[0].types
 
     @property
     def types_extended(self) -> List[str]:
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Does not remove duplicates"""
-        return self[0].types_extended
+        
+        from ichor.files import PointsDirectory, Trajectory
+        
+        if isinstance(self, PointsDirectory):
+            return self[0].atoms.types_extended
+        elif isinstance(self, Trajectory):
+            return self[0].types
 
     @property
     def atom_names(self):
         """Return the atom names from the first timestep. Assumes that all timesteps have the same
         number of atoms/atom names."""
-        return self[0].atom_names
+        
+        from ichor.files import PointsDirectory, Trajectory
+        
+        if isinstance(self, PointsDirectory):
+            return self[0].atoms.atom_names
+        elif isinstance(self, Trajectory):
+            return self[0].atom_names
 
     @property
     def coordinates(self) -> np.ndarray:
@@ -37,21 +56,31 @@ class ListOfAtoms(list):
             :type: `np.ndarray`
             the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
         """
-        return np.array([timestep.coordinates for timestep in self])
+        from ichor.files import PointsDirectory, Trajectory
+        
+        if isinstance(self, PointsDirectory):
+            return np.array([timestep.atoms.coordinates for timestep in self])
+        elif isinstance(self, Trajectory):
+            return np.array([timestep.coordinates for timestep in self])
 
     @property
     def connectivity(self) -> np.ndarray:
-        if hasattr(self, "atoms"):
-            return self.atoms.connectivity
-        else:
+        
+        from ichor.files import PointsDirectory, Trajectory
+        
+        if isinstance(self, PointsDirectory):
+            return self[0].atoms.connectivity
+        elif isinstance(self, Trajectory):
             return self[0].connectivity
 
     @property
     def alf(self) -> np.ndarray:
 
-        if hasattr(self, "atoms"):
-            return self.atoms.alf
-        else:
+        from ichor.files import PointsDirectory, Trajectory
+        
+        if isinstance(self, PointsDirectory):
+            return self[0].atoms.alf
+        elif isinstance(self, Trajectory):
             return self[0].alf
 
     @property
@@ -86,7 +115,13 @@ class ListOfAtoms(list):
             If the trajectory instance is indexed by str, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `slice`, `n_atoms` x `n_features`.
         """
-        features = np.array([i.alf_features(alf) for i in self])
+        
+        from ichor.files import PointsDirectory, Trajectory
+        if isinstance(self, Trajectory):
+            features = np.array([timestep.alf_features(alf) for timestep in self])
+        elif isinstance(self, PointsDirectory):
+            features = np.array([point.atoms.alf_features(alf) for point in self])
+            
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))
         return features
