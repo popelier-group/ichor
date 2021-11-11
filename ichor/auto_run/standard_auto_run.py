@@ -308,7 +308,9 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
         if current_iteration == GLOBALS.N_ITERATIONS
         else IterState.Standard
     )
-    return submit_auto_run_iter(get_func_order(), None, iter_state)
+
+    with DataLock():
+        return submit_auto_run_iter(get_func_order(), None, iter_state)
 
 
 def rerun_from_failed() -> Optional[JobID]:
