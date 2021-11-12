@@ -252,7 +252,8 @@ class ALFFeatureCalculator(FeatureCalculator):
         else:
             raise ValueError("atom.parent needs to have more than 1 atom in order to calculate features.")
 
-        # Feature calculation assumes units are in angstroms
+        # Convert to angstroms to make sure units are in angstroms
+        # For not features are calculated in bohr, so the unit_conversion is ang2bohr
         atom.to_angstroms()
         atom.parent.to_angstroms()
         unit_conversion = (
@@ -290,7 +291,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         c_matrix = cls.calculate_c_matrix(atom)
 
         # the rest of the atoms are described as 3 features each: distance(r), polar angle(theta), and azimuthal angle(phi) - physics convention
-        # theta is between 0 and pi (not cyclic), phi is between 0 and 2pi (cyclic)
+        # theta is between 0 and pi (not cyclic), phi is between -pi and pi (cyclic)
 
         if len(atom._parent) > 3:
             i_feat = 3
