@@ -4,6 +4,8 @@ from typing import List, Optional, Union
 import numpy as np
 from numpy.lib.arraysetops import isin
 
+from ICHOR import Trajectory
+
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -102,23 +104,29 @@ class ListOfAtoms(list):
         return features
 
     def alf_features(
-        self, alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None
+        self, alf: Optional[Union[List[List[int]], np.ndarray]] = None
     ):
-        """Return the ndarray of features. This is assumed to be either a 2D or 3D array.
-        If the dimensionality of the feature array is 3, the array is transposed to transform a
-        (natom, ntimestep, nfeature) array into a (ntimestep, natom, nfeature) array so that
-        all features for a single timestep are easier to group.
+        """Return the ndarray of features. This is assumed to be either a 3D array.
+        The given alf is the alf for the full system, not just one individual atom.
+
+        :param alf: A list of ALFs for each individual atom in the system
         :rtype: `np.ndarray`
         :return:
             A 3D array of features for every atom in every timestep. Shape `n_atoms` x `n_timesteps` x `n_features`)
-            If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
-            If the trajectory instance is indexed by str, the array has shape `n_atoms` x `n_features`.
+            If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x `slice` x `n_features`.
         """
 
-        features = np.array([point.alf_features(alf) for point in self])
+        from ichor.files import PointsDirectory, trajectory
+        
+        if isinstance(self, Trajectory):
+            features = np.array([timestep.alf_features(alf) for timestep in self])
+        elif isinstance(self, PointsDirectory):
+            features = np.array([point.atoms.alf_features(alf) for point in self])
+        
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))
+
         return features
 
     def coordinates_to_xyz(
@@ -289,6 +297,20 @@ class ListOfAtoms(list):
                 def types(self):
                     """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
                     return [self[0].type]
+
+                def alf_features(
+                    self, alf: Optional[Union[List[int], np.ndarray]] = None
+                ):
+                    """Return the ndarray of features for only one atom, given an alf for that atom.
+                    This is assumed to a 2D array of features for only one atom.
+                    
+                    :param alf: A list of integers or a numpy array corresponding to the alf of one atom - The atom which the atom view is for.
+                    :rtype: `np.ndarray`
+                    :return: Тhe array has shape `n_timesteps` x `n_features`.
+                    """
+
+                    features = np.array([atom.alf_features(alf) for atom in self])
+                    return features
 
             if hasattr(self, "_is_atom_view"):
                 return self
