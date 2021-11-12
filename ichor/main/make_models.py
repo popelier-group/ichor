@@ -211,7 +211,7 @@ def make_models(
         [ty for ty in types] if types is not None else [default_model_type]
     )
     atom_models_to_make = atoms or [
-        atom.atom_num for atom in _model_data[0].atoms
+        atom.name for atom in _model_data[0].atoms
     ]
 
     logger.info(

@@ -6,6 +6,7 @@ from ichor.files import PointsDirectory
 from ichor.logging import logger
 from ichor.models import Models
 from ichor.auto_run.counter import read_counter, write_counter
+from ichor.auto_run.stop import stop, stopped
 
 
 def active_learning(
@@ -31,6 +32,8 @@ def active_learning(
     current_iteration = 0
     max_iteration = GLOBALS.N_ITERATIONS
     if Arguments.auto_run and FILE_STRUCTURE["counter"].exists():
+        if stopped():
+            return  # don't add extra point if auto run has stopped
         current_iteration, max_iteration = read_counter()
 
     models = Models(model_directory)

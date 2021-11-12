@@ -33,6 +33,7 @@ from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
 from ichor.submission_script import SCRIPT_NAMES, DataLock
 from ichor.auto_run.counter import read_counter, write_counter
 from ichor.batch_system import BATCH_SYSTEM, NodeType
+from ichor.auto_run.stop import start
 
 
 class AutoRunAlreadyRunning(Exception):
@@ -112,11 +113,11 @@ def submit_auto_run_iter(
 
     with DataLock():
         # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
-        for iter_step in func_order:
+        for i, iter_step in enumerate(func_order):
             # append the modified id to the submission script name as this is how drop-in-compute holds jobs
             if MACHINE.submit_type is SubmitType.DropCompute and BATCH_SYSTEM.current_node() is NodeType.ComputeNode:
                 modify = f"+{modify_id}"
-                if job_id is not None:
+                if i > 0:
                     modify += f"+hold_{modify_id - 1}"  # hold for the previous job (whose job id is one less than this job)
                 SCRIPT_NAMES.modify.value = modify
                 modify_id += 1
@@ -208,6 +209,25 @@ def get_func_order():
     ]
 
 
+def setup_iter_args():
+    from ichor.globals import GLOBALS
+
+    if GLOBALS.OPTIMISE_ATOM == "all":
+        IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
+    else:
+        IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
+
+    if GLOBALS.OPTIMISE_PROPERTY == "all":
+        from ichor.main.make_models import MODEL_TYPES
+
+        IterArgs.ModelTypes.value = MODEL_TYPES
+    else:
+        types = GLOBALS.OPTIMISE_PROPERTY
+        if isinstance(types, str):
+            types = [types]
+        IterArgs.ModelTypes.value = types
+
+
 def auto_run() -> JobID:
     """Auto run Gaussian, AIMALL, FEREBUS, and ICHOR jobs needed to make GP models."""
     from ichor.globals import GLOBALS
@@ -231,23 +251,11 @@ def auto_run() -> JobID:
 
     func_order = get_func_order()
 
-    if GLOBALS.OPTIMISE_ATOM == "all":
-        IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
-    else:
-        IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
-
-    if GLOBALS.OPTIMISE_PROPERTY == "all":
-        from ichor.main.make_models import MODEL_TYPES
-
-        IterArgs.ModelTypes.value = MODEL_TYPES
-    else:
-        types = GLOBALS.OPTIMISE_PROPERTY
-        if isinstance(types, str):
-            types = [types]
-        IterArgs.ModelTypes.value = types
+    setup_iter_args()
 
     job_id = None
     with DataLock():
+        start()
         for i, iter_state in enumerate(iterations):
             # the first job will execute this since the first iteration is IterState.First
             if iter_state is IterState.First:
@@ -302,6 +310,8 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
 
     if MACHINE.submit_type is SubmitType.DropCompute:
         SCRIPT_NAMES.parent.value = DROP_COMPUTE_LOCATION
+
+    setup_iter_args()
 
     iter_state = (
         IterState.Last

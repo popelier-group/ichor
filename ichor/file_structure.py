@@ -235,6 +235,14 @@ class FileStructure(FileTree):
             active learning.""",
         )
         self.add(
+            "stop",
+            "stop",
+            parent="active_learning",
+            type_=FileType.File,
+            description="""File that indicates whether the active learning should stop iterating.""",
+        )
+
+        self.add(
             "alpha", "alpha", parent="active_learning", type_=FileType.File
         )
         self.add(
