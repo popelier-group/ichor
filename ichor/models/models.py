@@ -83,7 +83,12 @@ class Models(Directory, list):
 
     @property
     def ialf(self) -> np.ndarray:
-        """Returns the zero index alf from each model file as a numpy array e.g. [[0, 1, 2], [1, 0, 2], [2, 0, 1]]"""
+        """Returns the zero index alf from each model file as a numpy array e.g. [[0, 1, 2], [1, 0, 2], [2, 0, 1]]
+        
+        .. note::
+            Sorting by the first integer in elements of the list will give a list like this [[0,...], [1,....], [2,....]]
+            before that the list could look like [[2,...], [0,....], [1,....]] which would mess up the alf for atoms
+        """
         return np.array(
             sorted([model.ialf for model in self], key=lambda x: x[0])
         )
