@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="Made by 'tree'" name="Author"/>
+<meta content="$Version: $ tree v1.8.0 (c) 1996 - 2018 by Steve Baker, Thomas Moore, Francesc Rocher, Florian Sesser, Kyosuke Tokoro $" name="GENERATOR"/>
+<title>ICHOR FILE STRUCTURE</title>
+<style type="text/css">
+  <!-- 
+  BODY { font-family : ariel, monospace, sans-serif; }
+  P { font-weight: normal; font-family : ariel, monospace, sans-serif; color: black; background-color: transparent;}
+  B { font-weight: normal; color: black; background-color: transparent;}
+  A:visited { font-weight : normal; text-decoration : none; background-color : transparent; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  A:link    { font-weight : normal; text-decoration : none; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  A:hover   { color : #000000; font-weight : normal; text-decoration : underline; background-color : yellow; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  A:active  { color : #000000; font-weight: normal; background-color : transparent; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  .VERSION { font-size: small; font-family : arial, sans-serif; }
+  .NORM  { color: black;  background-color: transparent;}
+  .FIFO  { color: purple; background-color: transparent;}
+  .CHAR  { color: yellow; background-color: transparent;}
+  .DIR   { color: blue;   background-color: transparent;}
+  .BLOCK { color: yellow; background-color: transparent;}
+  .LINK  { color: aqua;   background-color: transparent;}
+  .SOCK  { color: fuchsia;background-color: transparent;}
+  .EXEC  { color: green;  background-color: transparent;}
+  -->
+ .tooltip .tooltiptext {top: -5px; left: 105%;}</style>
+<style type="text/css"></style></head>
+<body>
+<h1>ICHOR FILE STRUCTURE</h1><p>
+<a class="NORM">./</a><br/>
+	├── <a class="DIR" style="color:blue;" title="">AMBER</a><br/>
+	├── <a class="DIR" style="color:blue;" title="">ATOMS</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Contains files relating to the molecular dynamics package CP2K.">CP2K</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Directory that contains important information for jobs submitted to compute nodes. Submission scripts as well as job outputs among other things are stored here.">.DATA</a><br/>
+	│   ├── <a class="DIR" style="color:blue;" title="">ACTIVE_LEARNING</a><br/>
+	│   │   ├── <a class="DIR" style="color:blue;" title="">ATOMS</a><br/>
+	│   │   │   ├── <a class="NORM" title="">atoms.err</a><br/>
+	│   │   │   ├── <a class="NORM" title="">atoms.out</a><br/>
+	│   │   │   └── <a class="NORM" title="">atoms.pid</a><br/>
+	│   │   ├── <a class="DIR" style="color:blue;" title="">child_processes</a><br/>
+	│   │   ├── <a class="NORM" title="File that keeps track of the iteration of the active learning.">counter</a><br/>
+	│   │   ├── <a class="DIR" style="color:blue;" title="">PROPERTIES</a><br/>
+	│   │   │   ├── <a class="NORM" title="">properties.err</a><br/>
+	│   │   │   ├── <a class="NORM" title="">properties.out</a><br/>
+	│   │   │   └── <a class="NORM" title="">properties.pid</a><br/>
+	│   │   └── <a class="DIR" style="color:blue;" title="">RERUN</a><br/>
+	│   │       ├── <a class="NORM" title="">rerun.err</a><br/>
+	│   │       ├── <a class="NORM" title="">rerun.out</a><br/>
+	│   │       └── <a class="NORM" title="">rerun.pid</a><br/>
+	│   ├── <a class="DIR" style="color:blue;" title="">FILES_REMOVED</a><br/>
+	│   │   ├── <a class="DIR" style="color:blue;" title="">file_remover.err</a><br/>
+	│   │   ├── <a class="NORM" title="">file_remover.out</a><br/>
+	│   │   └── <a class="NORM" title="">file_remover.pid</a><br/>
+	│   ├── <a class="DIR" style="color:blue;" title="Directory containing information about jobs submitted to the queueing system.">JOBS</a><br/>
+	│   │   ├── <a class="DIR" style="color:blue;" title="A directory containing datafiles, which have information for paths to inputs and outputs of a calculation submitted to the computer cluster. These datafiles are used to give the paths to input/output files to jobs without hard-coding the inputs/outputs in the job script itself.">DATAFILES</a><br/>
+	│   │   └── <a class="NORM" title="A file containing job IDs of jobs submitted to the queueing system.">jid</a><br/>
+	│   ├── <a class="NORM" title="A file containg the name of the comuter cluster we are working on (csf3, ffluxlab, etc.)">machine</a><br/>
+	│   ├── <a class="NORM" title="">pid</a><br/>
+	│   └── <a class="DIR" style="color:blue;" title="Stores submission scripts which are used to submit jobs to compute nodes. Submission scripts are shell (.sh) files such as GAUSSIAN.sh and AIMALL.sh.">SCRIPTS</a><br/>
+	│       ├── <a class="DIR" style="color:blue;" title="Contains standard error (stderr) which a job script/program has produced. These files have the '.e' extension">ERRORS</a><br/>
+	│       ├── <a class="DIR" style="color:blue;" title="This directory contains the standard output (stdout) that the job produces. Things like print statements which are written to standard output are going to be written here (if ran from a compute node). These files have the '.o' extension.">OUTPUTS</a><br/>
+	│       └── <a class="DIR" style="color:blue;" title="">TEMP</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Directory with files relating to DLPOLY simulations.">DLPOLY</a><br/>
+	│   └── <a class="DIR" style="color:blue;" title="">GJF</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Directory used to store ferebus-related information">FEREBUS</a><br/>
+	│   └── <a class="DIR" style="color:blue;" title="">MODELS</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Directory that holds all models that are made in an adaptive sampling run. As the number of training points grows, newer models are made with the updated training data and new model files are written out to this directory.">MODEL_LOG</a><br/>
+	├── <a class="DIR" style="color:blue;" title="">MODELS</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Contains a gaussian">OPT</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Directory containing compiled program executables such as FEREBUS.">PROGRAMS</a><br/>
+	├── <a class="DIR" style="color:blue;" title="">PROPERTIES</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Stores all other points not used for training or validation currently. This is the directory from which points are selected via adaptive sampling.">SAMPLE_POOL</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Directory for points which have errorred out for some reason during the Gaussian or AIMALL calculations. If no .wfn file is produced, AIMALL fails to run, or the integration error of AIMALL is high then we do not want to use the point in training, so it is moved to this directory.">SCRUBBED_POINTS</a><br/>
+	│   ├── <a class="DIR" style="color:blue;" title="Contains all AIMALL scrubbed points.">AIMALL_SCRUBBED_POINTS</a><br/>
+	│   └── <a class="DIR" style="color:blue;" title="Contains all Gaussian scrubbed points.">GAUSSIAN_SCRUBBED_POINTS</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Directory for points used in GP training. The number of points in this directory grows as more points are being added from the sample pool to here (with adaptive/random sampling).">TRAINING_SET</a><br/>
+	├── <a class="DIR" style="color:blue;" title="Contains files relating to TYCHE, which is a program that distorts a molecule by its normal modes to produce a sample pool. Currently CP2K is used to produce sample pool becaues it is a full MD simulation package, so a much wider varierty of geometries are generated using it.">TYCHE</a><br/>
+	│   └── <a class="DIR" style="color:blue;" title="Directory containing files from Gaussian, which TYCHE needs to have in order to distort a molecule by normal modes.">GAUSSIAN</a><br/>
+	└── <a class="DIR" style="color:blue;" title="Stores all points used for model validation. These points should NOT be present in the sample pool or training set.">VALIDATION_SET</a><br/>
+<br/><br/>
+</p>
+<p>
+
+34 directories, 15 files
+	<br/><br/>
+</p>
+<hr/>
+
+</body>
+</html>

@@ -8,7 +8,7 @@ from ichor.common.io import mkdir
 import bs4 as bs
 import os
 
-OUTPUT_FILE_NAME = "test_struct.html"
+OUTPUT_FILE_NAME = "ichor_file_structure.html"
 
 # make an example directory containing ichor's file structure
 for ref_name, node in FILE_STRUCTURE.items():
