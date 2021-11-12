@@ -8,6 +8,7 @@ from ichor.auto_run.ichor_jobs import (
     submit_make_sets_job_to_auto_run)
 from ichor.auto_run.standard_auto_run import rerun_from_failed
 from ichor.auto_run.counter import read_counter, write_counter
+from ichor.auto_run.stop import start, stop, stopped
 
 __all__ = [
     "submit_gaussian_job_to_auto_run",
@@ -20,4 +21,7 @@ __all__ = [
     "rerun_from_failed",
     "read_counter",
     "write_counter",
+    "start",
+    "stop",
+    "stopped"
 ]

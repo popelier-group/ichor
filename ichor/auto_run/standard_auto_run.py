@@ -33,6 +33,7 @@ from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
 from ichor.submission_script import SCRIPT_NAMES, DataLock
 from ichor.auto_run.counter import read_counter, write_counter
 from ichor.batch_system import BATCH_SYSTEM, NodeType
+from ichor.auto_run.stop import start
 
 
 class AutoRunAlreadyRunning(Exception):
@@ -254,6 +255,7 @@ def auto_run() -> JobID:
 
     job_id = None
     with DataLock():
+        start()
         for i, iter_state in enumerate(iterations):
             # the first job will execute this since the first iteration is IterState.First
             if iter_state is IterState.First:

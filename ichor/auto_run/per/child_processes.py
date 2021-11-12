@@ -8,6 +8,7 @@ from ichor.common.os import kill_pid, pid_exists
 from ichor.daemon import Daemon
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.queue import delete_jobs
+from ichor.auto_run.stop import stop
 
 
 def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
@@ -31,6 +32,7 @@ def delete_child_process_jobs(
     for child_process in child_processes:
         with pushd(child_process, update_cwd=True):
             delete_jobs()
+            stop()
 
 
 class ReRunDaemon(Daemon):
