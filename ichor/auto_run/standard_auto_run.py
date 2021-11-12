@@ -111,6 +111,7 @@ def submit_auto_run_iter(
             modify_id -= len(func_order)
 
     with DataLock():
+        job_id = None
         # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
         for iter_step in func_order:
             # append the modified id to the submission script name as this is how drop-in-compute holds jobs
