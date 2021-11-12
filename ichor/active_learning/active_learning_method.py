@@ -21,7 +21,7 @@ class ActiveLearningMethod(ABC):
     @abstractmethod
     def get_points(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
         """
-        Method which gets the indeces of the points to be added from the sample pool to the training set based on active learning criteria.
+        Method which gets the indices of the points to be added from the sample pool to the training set based on active learning criteria.
         """
         pass
 
