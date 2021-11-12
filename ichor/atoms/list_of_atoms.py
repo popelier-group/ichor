@@ -277,7 +277,7 @@ class ListOfAtoms(list):
 
                 @property
                 def name(self):
-                    """Returuns the name of the atom, e.g. 'C1', 'H2', etc."""
+                    """Returns the name of the atom, e.g. 'C1', 'H2', etc."""
                     return self._atom
 
                 @property
