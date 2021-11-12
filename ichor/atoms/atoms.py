@@ -185,7 +185,7 @@ class Atoms(list):
         return np.array([atom.features for atom in self])
 
     def alf_features(
-        self, alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None
+        self, alf: Optional[Union[List[List[int]], np.ndarray]] = None
     ) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
