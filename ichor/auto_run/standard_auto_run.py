@@ -208,6 +208,25 @@ def get_func_order():
     ]
 
 
+def setup_iter_args():
+    from ichor.globals import GLOBALS
+
+    if GLOBALS.OPTIMISE_ATOM == "all":
+        IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
+    else:
+        IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
+
+    if GLOBALS.OPTIMISE_PROPERTY == "all":
+        from ichor.main.make_models import MODEL_TYPES
+
+        IterArgs.ModelTypes.value = MODEL_TYPES
+    else:
+        types = GLOBALS.OPTIMISE_PROPERTY
+        if isinstance(types, str):
+            types = [types]
+        IterArgs.ModelTypes.value = types
+
+
 def auto_run() -> JobID:
     """Auto run Gaussian, AIMALL, FEREBUS, and ICHOR jobs needed to make GP models."""
     from ichor.globals import GLOBALS
@@ -231,20 +250,7 @@ def auto_run() -> JobID:
 
     func_order = get_func_order()
 
-    if GLOBALS.OPTIMISE_ATOM == "all":
-        IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
-    else:
-        IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
-
-    if GLOBALS.OPTIMISE_PROPERTY == "all":
-        from ichor.main.make_models import MODEL_TYPES
-
-        IterArgs.ModelTypes.value = MODEL_TYPES
-    else:
-        types = GLOBALS.OPTIMISE_PROPERTY
-        if isinstance(types, str):
-            types = [types]
-        IterArgs.ModelTypes.value = types
+    setup_iter_args()
 
     job_id = None
     with DataLock():
@@ -302,6 +308,8 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
 
     if MACHINE.submit_type is SubmitType.DropCompute:
         SCRIPT_NAMES.parent.value = DROP_COMPUTE_LOCATION
+
+    setup_iter_args()
 
     iter_state = (
         IterState.Last
