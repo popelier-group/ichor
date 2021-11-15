@@ -207,7 +207,7 @@ def write_to_excel(
             total_s_curve.set_legend({"position": "none"})
             total_s_curve.set_style(excel_style)
             total_s_curve.set_title({"name":"Total S-Curve"})
-            total_s_curve.set_size({'width': 650, 'height': 540})
+            total_s_curve.set_size({'width': 650, 'height': 520})
 
             writer.sheets[sheet_name].insert_chart(
                 "A1", total_s_curve
@@ -264,10 +264,8 @@ def write_to_excel(
                 atomic_s_curve.set_legend({"position": "right"})
             atomic_s_curve.set_style(excel_style)
             atomic_s_curve.set_title({"name":"Individual Atom S-Curve"})
-            atomic_s_curve.set_size({'width': 650, 'height': 540})
+            atomic_s_curve.set_size({'width': 650, 'height': 520})
 
             writer.sheets[sheet_name].insert_chart(
-                "A30", atomic_s_curve
+                "A28", atomic_s_curve
             )
-            
-    exit()
