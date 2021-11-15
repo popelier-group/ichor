@@ -177,6 +177,7 @@ def write_to_excel(
             df.sort_values("Total", inplace=True)
             ndata = len(df["Total"])
             df["%"] = percentile(ndata)
+            # the end row is one more because the df starts one row down
             end_row = ndata + 1
             df.to_excel(writer, sheet_name=sheet_name, startrow=1, startcol=start_col)
             writer.sheets[sheet_name].write(0, start_col, "Total")
@@ -215,8 +216,6 @@ def write_to_excel(
 
             start_col += 4
 
-            print("start col after total s-curve", start_col)
-
             # get the atom names from the inner dictionary (see get_true_predicted function above)
             atom_names = natsorted(true[sheet_name].keys(), key=ignore_alpha)
             ####################################
@@ -244,8 +243,6 @@ def write_to_excel(
                 df.to_excel(writer, sheet_name=sheet_name, startrow=1, startcol=start_col)
                 writer.sheets[sheet_name].write(0, start_col, atom_name)
 
-                print("start col during one atom s-curve for loop", start_col)
-
                 atomic_s_curve.add_series(
                     {
                         "name": atom_name,
@@ -267,5 +264,5 @@ def write_to_excel(
             atomic_s_curve.set_size({'width': 650, 'height': 520})
 
             writer.sheets[sheet_name].insert_chart(
-                "A28", atomic_s_curve
+                "A27", atomic_s_curve
             )
