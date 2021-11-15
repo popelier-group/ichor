@@ -1,11 +1,6 @@
 from pathlib import Path
 from typing import List, Optional, Union
-
 import numpy as np
-from numpy.lib.arraysetops import isin
-
-from ICHOR import Trajectory
-
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
