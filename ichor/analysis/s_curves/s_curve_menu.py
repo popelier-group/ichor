@@ -4,6 +4,7 @@ from ichor.analysis.get_models import choose_model_menu, try_get_latest_models
 from ichor.analysis.get_validation_set import (
     choose_validation_set_menu, get_validation_set_from_current_dir)
 from ichor.analysis.s_curves.s_curves import calculate_s_curves
+from ichor.analysis.s_curves.newer_s_curves import calculate_newer_s_curves
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.menu import Menu
 
@@ -29,6 +30,15 @@ def s_curve_menu_refresh(menu: Menu):
         "1",
         "Calculate s-curves",
         calculate_s_curves,
+        kwargs={
+            "model_location": _model_location,
+            "validation_set_location": _validation_set_location,
+        },
+    )
+    menu.add_option(
+        "2",
+        "Calculate newer s-curves",
+        calculate_newer_s_curves,
         kwargs={
             "model_location": _model_location,
             "validation_set_location": _validation_set_location,
