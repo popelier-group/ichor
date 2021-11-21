@@ -14,3 +14,13 @@ def dict_of_list_to_dict_of_array(
     :return: dictionary mapping original keys to a numpy array converted from dict_of_list
     """
     return {key: np.array(value) for key, value in dict_of_list.items()}
+
+
+def batched_array(a: np.ndarray, batch_size: int) -> np.ndarray:
+    """
+    :param a:           list
+    :param batch_size:  size of each group
+    :return:            Yields successive group-sized lists from l.
+    """
+    for i in range(0, len(a), batch_size):
+        yield a[i:i+batch_size]
