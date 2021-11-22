@@ -38,3 +38,27 @@ from ichor.globals import GLOBALS
 from ichor.machine import MACHINE
 
 __all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM"]
+
+
+from ichor.arguments import Arguments
+from ichor.globals import GLOBALS, Globals
+from ichor.main import main_menu
+import sys
+
+
+def ichor_main():
+    from ichor import in_main
+
+    in_main.IN_MAIN = True
+
+    Arguments.read()
+    GLOBALS.init_from_config(Arguments.config_file)
+    GLOBALS.UID = Arguments.uid
+    if Arguments.call_external_function:
+        Arguments.call_external_function(
+            *Arguments.call_external_function_args
+        )
+        sys.exit(0)
+
+    main_menu()
+
