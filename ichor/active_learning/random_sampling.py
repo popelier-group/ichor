@@ -33,6 +33,6 @@ class RandomSampling(ActiveLearningMethod):
         """
         random_sampling_indices = np.random.shuffle(np.arange(len(points)))[
             :npoints
-        ]
+        ]  # todo: could be improved
 
         return random_sampling_indices

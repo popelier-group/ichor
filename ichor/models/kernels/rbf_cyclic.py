@@ -63,7 +63,7 @@ class RBFCyclic(Kernel):
     def mask(self):
         return np.arange(2, len(self._thetas), 3)
 
-    def _k(self, x1, x2):
+    def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calcualtes cyclic RBF covariance matrix from two sets of points
 
         Args:
@@ -85,29 +85,6 @@ class RBFCyclic(Kernel):
         ) - np.pi
         diff = diff * diff
         return np.exp(-np.sum(self._thetas * diff, axis=2))
-
-    def _k_batched_x1(self, x1, x2, batch_size):
-        return np.vstack([self._k(xi, x2) for xi in batched_array(x1, batch_size)])
-
-    def _k_batched_x2(self, x1, x2, batch_size):
-        return np.hstack([self._k(x1, xi) for xi in batched_array(x2, batch_size)])
-
-    def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
-        """Calcualtes cyclic RBF covariance matrix from two sets of points
-
-        Args:
-            :param: `x1` np.ndarray of shape n x ndimensions:
-                First matrix of n points
-            :param: `x2` np.ndarray of shape m x ndimensions:
-                Second marix of m points, can be identical to the first matrix `x1`
-
-        Returns:
-            :type: `np.ndarray`
-                The cyclic RBF covariance matrix matrix of shape (n, m)
-        """
-        BATCH_SIZE = 10000
-        batched_k = self._k_batched_x1 if x1.shape[0] > x2.shape[0] else self._k_batched_x2
-        return batched_k(x1, x2, BATCH_SIZE)
 
     def __repr__(self):
         return f"RBFCyclic({self._thetas})"

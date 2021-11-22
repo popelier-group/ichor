@@ -10008,8 +10008,6 @@ class Model:
         res2 = np.matmul(self.ones.T, np.matmul(self.invR, r))
         res3 = np.matmul(self.ones.T, np.matmul(self.invR, self.ones))
 
-        print(r[0], res1, res2, res3)
-
         return 1 - res1.item() + ((1 - res2.item()) ** 2) / res3.item()
 
     def distance_to_point(self, point):

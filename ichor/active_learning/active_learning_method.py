@@ -6,6 +6,7 @@ import numpy as np
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
 from ichor.models import Models
+from ichor.common.numpy import batched_array
 
 
 class ActiveLearningMethod(ABC):
@@ -24,6 +25,9 @@ class ActiveLearningMethod(ABC):
         Method which gets the indices of the points to be added from the sample pool to the training set based on active learning criteria.
         """
         pass
+
+    def batch_points(self, points: ListOfAtoms, batch_size: int = 10000):
+        return batched_array(points, batch_size)
 
     def __call__(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
         """Once an instance of an `ActiveLearningMethod` has been created, the instance can be called as a function (which will then
