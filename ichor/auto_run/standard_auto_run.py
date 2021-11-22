@@ -129,7 +129,7 @@ def submit_auto_run_iter(
     return job_id
 
 
-def get_qcp_steps():
+def get_qcp_steps():  # Gaussian / PySCF
     QCP = QUANTUM_CHEMISTRY_PROGRAM()
     if QCP is QuantumChemistryProgram.Gaussian:
         ichor_qcp_function = submit_ichor_gaussian_command_to_auto_run
@@ -152,7 +152,7 @@ def get_qcp_steps():
     return ichor_qcp_step, qcp_step
 
 
-def get_qct_steps():
+def get_qct_steps():  # AIMAll / Morfi
     QCTP = QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
     if QCTP is QuantumChemicalTopologyProgram.AIMAll:
         ichor_qct_function = submit_ichor_aimall_command_to_auto_run

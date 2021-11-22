@@ -66,20 +66,20 @@ def active_learning(
         )
         new_training_point.move(new_directory)
 
-        if Arguments.auto_run:
-            logger.info(f"Completed iteration {current_iteration} of {max_iteration}")
+    if Arguments.auto_run:
+        logger.info(f"Completed iteration {current_iteration} of {max_iteration}")
 
-            current_iteration += 1
-            write_counter(current_iteration, max_iteration)
-            if current_iteration == max_iteration:
-                remove(
-                    FILE_STRUCTURE["counter"]
-                )  # delete counter at the end of the auto run
+        current_iteration += 1
+        write_counter(current_iteration, max_iteration)
+        if current_iteration == max_iteration:
+            remove(
+                FILE_STRUCTURE["counter"]
+            )  # delete counter at the end of the auto run
 
-            if (
-                current_iteration <= max_iteration
-                and MACHINE.submit_type.submit_after_final_step
-            ):
-                logger.info(f"Submitting iteration {current_iteration}")
-                with SUBMIT_ON_COMPUTE:
-                    submit_next_iter(current_iteration)
+        if (
+            current_iteration <= max_iteration
+            and MACHINE.submit_type.submit_after_final_step
+        ):
+            logger.info(f"Submitting iteration {current_iteration}")
+            with SUBMIT_ON_COMPUTE:
+                submit_next_iter(current_iteration)
