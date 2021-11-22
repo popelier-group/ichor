@@ -16,6 +16,9 @@ from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter
+from ichor.file_structure import FILE_STRUCTURE
+from ichor.models import Model
+
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -223,37 +226,26 @@ def make_models(
 
 def move_models(model_dir: Optional[Path] = None):
     """Move model files from the ferebus directory to the models directory."""
-    from ichor.file_structure import FILE_STRUCTURE
-    from ichor.globals import GLOBALS
-    from ichor.models import Model
-
-    mkdir(FILE_STRUCTURE["models"])
-    mkdir(FILE_STRUCTURE["model_log"])
-
     if model_dir is None:
         model_dir = FILE_STRUCTURE["ferebus"]
 
     for d in model_dir.iterdir():
         if d.is_dir() and d != FILE_STRUCTURE["models"]:
-            for f in d.iterdir():
-                if f.suffix == ".model":
-                    cp(f, FILE_STRUCTURE["models"])
-                    model_log = FILE_STRUCTURE[
-                        "model_log"
-                    ] / GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
-                    logger.info(
-                        f"Moving {f} to {FILE_STRUCTURE['models']} and {model_log}"
-                    )
-                    mkdir(model_log)
-                    cp(f, model_log)
+            move_models(d)
+        elif d.is_file() and d.suffix == Model.filetype:
+            _move_model(d)
 
-        elif d.is_file() and d.suffix == ".model":
-            cp(d, FILE_STRUCTURE["models"])
-            model_log = FILE_STRUCTURE["model_log"] / (
-                GLOBALS.SYSTEM_NAME + str(Model(d).ntrain).zfill(4)
-            )
-            mkdir(model_log)
-            cp(d, model_log)
+
+def _move_model(f: Path):
+    mkdir(FILE_STRUCTURE["models"])
+    mkdir(FILE_STRUCTURE["model_log"])
+
+    cp(f, FILE_STRUCTURE["models"])
+    model_log = FILE_STRUCTURE["model_log"] / (
+            GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
+    )
+    mkdir(model_log)
+    cp(f, model_log)
 
 
 def create_ferebus_directories_and_submit(
