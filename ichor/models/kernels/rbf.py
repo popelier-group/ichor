@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, IO
 
 import numpy as np
 
@@ -18,9 +18,9 @@ class RBF(Kernel):
     """
 
     def __init__(
-        self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
+        self, name: str, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
     ):
-        super().__init__(active_dims)
+        super().__init__(name, active_dims)
         self._thetas = thetas
 
     @property
@@ -47,6 +47,13 @@ class RBF(Kernel):
         tmp_x2 = x2[:, self.active_dims] / true_lengthscales
         dist = Distance.squared_euclidean_distance(tmp_x1, tmp_x2)
         return np.exp(-0.5 * dist)
+
+    def write(self, f: IO):
+        f.write(f"[kernel.{self.name}]\n")
+        f.write("type constant\n")
+        f.write(f"number_of_dimensions {len(self.active_dims)}\n")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}")
+        f.write(f"thetas {' '.join(map(str, self._thetas))}")
 
     def __repr__(self):
         return f"{self.__class__.__name__}: thetas: {self._thetas}"

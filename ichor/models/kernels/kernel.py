@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, IO
 
 import numpy as np
 
@@ -9,7 +9,8 @@ class Kernel(ABC):
 
     # TODO: figure out a good way to say if training data is standardized, normalized, etc. because kernels can be affected (for example cyclic RBF is affected)
 
-    def __init__(self, active_dims: Optional[np.ndarray] = None):
+    def __init__(self, name: str, active_dims: Optional[np.ndarray] = None):
+        self.name = name
         self._active_dims = active_dims
 
     @property
@@ -25,8 +26,12 @@ class Kernel(ABC):
         return np.sqrt(1.0 / (2 * self._thetas))
 
     @abstractmethod
-    def params(self):
+    def params(self) -> np.ndarray:
         pass
+
+    @property
+    def nkernel(self) -> int:
+        return 1
 
     @abstractmethod
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
@@ -61,18 +66,32 @@ class Kernel(ABC):
     def __mul__(self, other):
         return KernelProd(self, other)
 
+    @abstractmethod
+    def write(self, f: IO):
+        pass
 
-class KernelSum(Kernel):
-    """Kernel addition implementation"""
 
+class CompositeKernel(ABC, Kernel):
     def __init__(self, k1: Kernel, k2: Kernel):
         self.k1 = k1
         self.k2 = k2
 
     @property
-    def params(self):
+    def params(self) -> np.ndarray:
         return np.concatenate(self.k1.params, self.k2.params)
 
+    @property
+    def nkernel(self) -> int:
+        return self.k1.nkernel + self.k2.nkernel
+
+    def write(self, f: IO):
+        self.k1.write(f)
+        f.write("\n")
+        self.k2.write(f)
+
+
+class KernelSum(CompositeKernel):
+    """Kernel addition implementation"""
     def k(self, xi, xj):
         return self.k1.k(xi, xj) + self.k2.k(xi, xj)
 
@@ -82,17 +101,16 @@ class KernelSum(Kernel):
     def R(self, x):
         return self.k1.R(x) + self.k2.R(x)
 
+    @property
+    def name(self) -> str:
+        return f"({self.k1.name}+{self.k2.name})"
+
     def __repr__(self):
         return f"({self.k1} + {self.k2})"
 
 
-class KernelProd(Kernel):
+class KernelProd(CompositeKernel):
     """Kernel multiplication implementation"""
-
-    def __init__(self, k1, k2):
-        self.k1 = k1
-        self.k2 = k2
-
     @property
     def params(self):
         return np.concatenate(self.k1.params, self.k2.params)
@@ -105,6 +123,10 @@ class KernelProd(Kernel):
 
     def R(self, x):
         return self.k1.R(x) * self.k2.R(x)
+
+    @property
+    def name(self) -> str:
+        return f"({self.k1.name}*{self.k2.name})"
 
     def __repr__(self):
         return f"({self.k1} * {self.k2})"

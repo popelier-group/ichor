@@ -1,4 +1,5 @@
 import numpy as np
+from typing import IO
 
 from ichor.models.mean.mean import Mean
 
@@ -19,3 +20,10 @@ class QuadraticMean(Mean):
         """Returns the constant mean value."""
         a = x - self._xmin
         return (np.matmul(a * a, self._beta) + self._ymin).flatten()
+
+    def write(self, f: IO):
+        f.write("[mean]\n")
+        f.write("type quadratic\n")
+        f.write(f"beta {' '.join(map(str, self._beta))}\n")
+        f.write(f"x_min {' '.join(map(str, self._xmin))}\n")
+        f.write(f"y_min {self._ymin}\n")

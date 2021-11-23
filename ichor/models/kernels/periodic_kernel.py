@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, IO
 
 import numpy as np
 
@@ -12,6 +12,7 @@ class PeriodicKernel(Kernel):
 
     def __init__(
         self,
+        name: str,
         thetas: np.ndarray,
         period_length: np.ndarray,
         active_dims: Optional[np.ndarray] = None,
@@ -32,7 +33,7 @@ class PeriodicKernel(Kernel):
             land after the features are scaled. Because the period can vary for individual phi angles for standardization, it is
             still passed in as an array that is n_features long.
         """
-        super().__init__(active_dims)
+        super().__init__(name, active_dims)
         self._thetas = thetas
         self._period_length = period_length
 
@@ -89,6 +90,13 @@ class PeriodicKernel(Kernel):
     def R(self, x_train: np.ndarray) -> np.ndarray:
         """helper method to return symmetric square matrix x_train, x_train Periodic covariance matrix K(X, X)"""
         return self.k(x_train, x_train)
+
+    def write(self, f: IO):
+        f.write(f"[kernel.{self.name}]\n")
+        f.write("type periodic\n")
+        f.write(f"number_of_dimensions {len(self.active_dims)}\n")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}")
+        f.write(f"thetas {' '.join(map(str, self._thetas))}")
 
     def __repr__(self):
         return f"'{self.__class__.__name__}', thetas: {self._thetas}, period_length: {self._period_length}"

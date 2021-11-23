@@ -4,13 +4,13 @@ import numpy as np
 
 from pathlib import Path
 
+from ichor.common.io import mkdir
 from ichor.common.functools import cached_property, classproperty
 from ichor.common.functools.buildermethod import buildermethod
 from ichor.common.str import get_digits
 from ichor.files.file import File, FileContents
-from ichor.models.kernels import RBF, Kernel, PeriodicKernel, RBFCyclic
+from ichor.models.kernels import RBF, Kernel, PeriodicKernel, RBFCyclic, ConstantKernel
 from ichor.models.kernels.interpreter import KernelInterpreter
-from ichor.models.kernels.periodic_kernel import PeriodicKernel
 from ichor.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
                                ZeroMean)
 
@@ -26,6 +26,8 @@ class Model(File):
     system: str
     atom: str
     type: str
+    alf: List[int]
+    natoms: int
     nfeats: int
     ntrain: int
     mean: Mean
@@ -42,6 +44,7 @@ class Model(File):
         self.atom = FileContents
         self.type = FileContents
         self.alf = FileContents
+        self.natoms = FileContents
         self.nfeats = FileContents
         self.ntrain = FileContents
         self.mean = FileContents
@@ -88,6 +91,10 @@ class Model(File):
 
                 if "ALF" in line:
                     self.alf = [int(a) for a in line.split()[1:]]
+                    continue
+
+                if "number_of_atoms" in line:
+                    self.natoms = int(line.split()[1])
                     continue
 
                 if "number_of_features" in line:  # number of inputs to the GP
@@ -142,30 +149,33 @@ class Model(File):
                         active_dims = np.arange(ndims)
 
                     if kernel_type == "rbf":
-                        line = next(f)
                         thetas = np.array(
-                            [float(hp) for hp in line.split()[1:]]
+                            [float(hp) for hp in next(f).split()[1:]]
                         )
                         kernel_list[kernel_name] = RBF(
-                            thetas, active_dims=active_dims
+                            kernel_name, thetas, active_dims=active_dims
                         )
                     elif kernel_type in [
                         "rbf-cyclic",
                         "rbf-cylic",
                     ]:  # Due to typo in FEREBUS 7.0
-                        line = next(f)
                         thetas = np.array(
-                            [float(hp) for hp in line.split()[1:]]
+                            [float(hp) for hp in next(f).split()[1:]]
                         )
                         kernel_list[kernel_name] = RBFCyclic(
-                            thetas, active_dims=active_dims
+                            kernel_name, thetas, active_dims=active_dims
+                        )
+                    elif kernel_type == "constant":
+                        value = float(next(f).split()[-1])
+                        kernel_list[kernel_name] = ConstantKernel(
+                            kernel_name, value, active_dims=active_dims
                         )
                     elif kernel_type == "periodic":
-                        line = next(f)
                         thetas = np.array(
-                            [float(hp) for hp in line.split()[1:]]
+                            [float(hp) for hp in next(f).split()[1:]]
                         )
                         kernel_list[kernel_name] = PeriodicKernel(
+                            kernel_name,
                             thetas,
                             np.full(thetas.shape, 2 * np.pi),
                             active_dims=active_dims,
@@ -264,9 +274,58 @@ class Model(File):
 
         return np.diag(self.kernel.R(x_test) - np.matmul(v.T, v)).flatten()
 
-    # TODO. model write method not implemented
     def write(self, path: Optional[Path] = None) -> None:
-        pass
+        from ichor import __version__
+        path = path or self.path
+
+        if not path.parent.exists():
+            mkdir(path.parent)
+        if path.is_dir():
+            path = path / f"{self.system}_{self.type}_{self.atom}{Model.filetype}"
+
+        with open(path, 'w') as f:
+            f.write("# [metadata]\n")
+            f.write("# program ichor\n")
+            f.write(f"# version {__version__}\n")
+            f.write(f"# nugget {self.nugget}\n")
+            f.write("\n")
+            f.write("[system]\n")
+            f.write(f"name {self.system}\n")
+            f.write(f"atom {self.atom}\n")
+            f.write(f"property {self.property}\n")
+            f.write(f"ALF {self.alf[0]} {self.alf[1]} {self.alf[2]}\n")
+            f.write("\n")
+            f.write("[dimensions]\n")
+            f.write(f"number_of_atoms {self.natoms}\n")
+            f.write(f"number_of_features {self.nfeats}\n")
+            f.write(f"number_of_training_points {self.ntrain}\n")
+            f.write("\n")
+            self.mean.write(f)
+            f.write("\n")
+            f.write("[kernels]\n")
+            f.write(f"number_of_kernels {self.kernel.nkernel}\n")
+            f.write(f"composition {self.kernel.name}\n")
+            f.write("\n")
+            self.kernel.write(f)
+            f.write("\n")
+            f.write("[training_data]\n")
+            f.write("units.x TODO\n")
+            f.write("units.y TODO\n")
+            f.write("scaling.x none\n")
+            f.write("scaling.y none\n")
+            f.write("\n")
+            f.write("[training_data.x]\n")
+            for xi in self.x:
+                f.write(f"{' '.join(map(str, xi))}\n")
+            f.write("\n")
+            f.write("[training_data.y]\n")
+            f.write(f"{'\n'.join(map(str, self.y))}")
+            f.write("\n")
+            f.write("[weights]\n")
+            f.write(f"{'\n'.join(map(str, self.weights))}")
+
+
+
 
     def __repr__(self):
         return f"{self.__class__.__name__}(system={self.system}, atom={self.atom}, type={self.type})"

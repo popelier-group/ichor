@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, IO
 
 import numpy as np
 
@@ -41,7 +41,7 @@ class RBFCyclic(Kernel):
     """
 
     def __init__(
-        self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
+        self, name: str, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
     ):
 
         """
@@ -52,7 +52,7 @@ class RBFCyclic(Kernel):
                 if training/test data is standardized, then `train_x_std` has to be provided. This array contains the standard
                 deviations for each feature, calculated from the training set points.
         """
-        super().__init__(active_dims)
+        super().__init__(name, active_dims)
         self._thetas = thetas  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
@@ -83,6 +83,13 @@ class RBFCyclic(Kernel):
         diff *= diff
         diff *= self._thetas
         return np.exp(-np.sum(diff, axis=2))
+
+    def write(self, f: IO):
+        f.write(f"[kernel.{self.name}]\n")
+        f.write("type rbf-cyclic\n")
+        f.write(f"number_of_dimensions {len(self.active_dims)}\n")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}")
+        f.write(f"thetas {' '.join(map(str, self._thetas))}")
 
     def __repr__(self):
         return f"RBFCyclic({self._thetas})"
