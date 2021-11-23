@@ -4,6 +4,7 @@ import numpy as np
 
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
+import sys
 
 
 class PeriodicKernel(Kernel):
@@ -71,13 +72,14 @@ class PeriodicKernel(Kernel):
         x1_ = np.expand_dims(x1_.T, -1)
         x2_ = np.expand_dims(x2_.T, -2)
         diff = x1_ - x2_
-
-        res = np.sin(diff)
-        res = res / true_lengthscales
-        res = res ** 2
-        res = np.sum(res, axis=-3)  # ntrain, ntrain
-        res = -2.0 * res
-        res = np.exp(res)
+        
+        np.sin(diff, out=diff)
+        diff /= true_lengthscales
+        np.power(diff, 2, out=diff)
+        res = np.sum(diff, axis=-3)  # get ntrain, ntrain from n_train x n_train x n_feats
+        del diff  # we do not need the diff array anymore, so remove it from memory
+        res *= -2.0
+        np.exp(res, out=res)
         return res
 
     def r(self, x_test: np.ndarray, x_train: np.ndarray) -> np.ndarray:

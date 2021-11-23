@@ -157,6 +157,8 @@ class Globals:
     N_ITERATIONS: int = 1
     POINTS_PER_ITERATION: int = 1
 
+    BATCH_SIZE: int = 5000
+
     OPTIMISE_PROPERTY: str = "iqa"
     OPTIMISE_ATOM: str = "all"
 
