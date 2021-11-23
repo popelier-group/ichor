@@ -319,10 +319,10 @@ class Model(File):
                 f.write(f"{' '.join(map(str, xi))}\n")
             f.write("\n")
             f.write("[training_data.y]\n")
-            f.write(f"{'\n'.join(map(str, self.y.flatten()))}")
+            f.write('\n'.join(map(str, self.y.flatten())))
             f.write("\n")
             f.write("[weights]\n")
-            f.write(f"{'\n'.join(map(str, self.weights.flatten()))}")
+            f.write('\n'.join(map(str, self.weights.flatten())))
 
 
 
