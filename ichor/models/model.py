@@ -292,7 +292,7 @@ class Model(File):
             f.write("[system]\n")
             f.write(f"name {self.system}\n")
             f.write(f"atom {self.atom}\n")
-            f.write(f"property {self.property}\n")
+            f.write(f"property {self.type}\n")
             f.write(f"ALF {self.alf[0]} {self.alf[1]} {self.alf[2]}\n")
             f.write("\n")
             f.write("[dimensions]\n")

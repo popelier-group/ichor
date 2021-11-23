@@ -59,7 +59,9 @@ class Var(ASTNode):
         else:
             raise NameError(f"{self.value} not defined")
 
+
 ck = 0
+
 
 class Num(ASTNode):
     def __init__(self, token):
