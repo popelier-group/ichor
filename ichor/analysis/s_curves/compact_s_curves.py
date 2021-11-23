@@ -62,9 +62,10 @@ def make_chart_settings(local_kwargs: dict):
     return x_axis_settings, y_axis_settings
 
 
-def calculate_newer_s_curves(
+def calculate_compact_s_curves(
     model_location: Path,
     validation_set_location: Path,
+    output_location: Path,
     atoms: Optional[List[str]] = None,
     types: Optional[List[str]] = None,
     **kwargs,
@@ -87,7 +88,7 @@ def calculate_newer_s_curves(
     validation_set = PointsDirectory(validation_set_location)
     true, predicted = get_true_predicted(model, validation_set, atoms, types)
 
-    write_to_excel(true, predicted, **kwargs)
+    write_to_excel(true, predicted, output_location, **kwargs)
 
 
 def write_to_excel(
