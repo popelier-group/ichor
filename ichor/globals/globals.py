@@ -1,31 +1,12 @@
-import inspect
-import os
-import platform
-from functools import lru_cache
-from pathlib import Path
-from typing import List, Optional, Union
-from uuid import UUID, uuid4
-
-from ichor import constants
-from ichor.atoms.atoms import Atoms
-from ichor.common.types import DictList, Version
-from ichor.file_structure import FILE_STRUCTURE
-from ichor.globals import checkers, formatters, parsers
-from ichor.globals.config_provider import ConfigProvider
-from ichor.globals.os import OS
-from ichor.problem_finder import PROBLEM_FINDER
-
-# todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
 """
 Global variables are the backbone of ichor and are used throughout
-
 Mutable global variables are tricky things and should be used with caution, the global variables
 defined in Globals are carefully maintained by a series of parsers, formatters and checkers to try
 and make sure that the global variable is always valid.
 
-Global Variable                 | Type            | Default Value     | Description                                                                                | Notes
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|Global Variable|Type|Default Value|Description|Notes|
+|---------------|----|-------------|-----------|-----|
 SYSTEM_NAME                     | str             | SYSTEM            | Name of the current system                                                                 |
 ALF_REFERENCE_FILE              | str             |                   | Path to file containing geometry to calculate ALF                                          | gjf or xyz                                                                                      # todo: convert to Path
 ALF                             | List[List[int]] | []                | ALF used for ichor containing atomic indices                                               | 1-index
@@ -115,6 +96,25 @@ INCLUDE_NODES                   | List[str]       | []                | Node whi
 EXCLUDE_NODES                   | List[str]       | []                | Node blacklist for ichor not to run jobs on                                                |
 """
 
+import inspect
+import os
+import platform
+from functools import lru_cache
+from pathlib import Path
+from typing import List, Optional
+from uuid import UUID, uuid4
+
+from ichor import constants
+from ichor.atoms.atoms import Atoms
+from ichor.common.functools import ntimes_cached_property
+from ichor.common.types import DictList, Version
+from ichor.file_structure import FILE_STRUCTURE
+from ichor.globals import checkers, formatters, parsers
+from ichor.globals.config_provider import ConfigProvider
+from ichor.globals.os import OS
+from ichor.problem_finder import PROBLEM_FINDER
+
+# todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
 class GlobalVariableError(Exception):
     pass
