@@ -29,7 +29,7 @@ class Model(File):
     nfeats: int
     ntrain: int
     mean: Mean
-    k: Kernel
+    kernel: Kernel
     x: np.ndarray
     y: np.ndarray
     nugget: float
@@ -45,7 +45,7 @@ class Model(File):
         self.nfeats = FileContents
         self.ntrain = FileContents
         self.mean = FileContents
-        self.k = FileContents
+        self.kernel = FileContents
         self.x = FileContents
         self.y = FileContents
         self.nugget = FileContents
@@ -57,7 +57,7 @@ class Model(File):
         kernel_composition = ""
         kernel_list = {}
 
-        self._nugget = 1e-10
+        self.nugget = 1e-10
 
         with open(self.path) as f:
             for line in f:
@@ -71,42 +71,42 @@ class Model(File):
                     continue
 
                 if "name" in line:  # system name e.g. WATER
-                    self._system = line.split()[1]
+                    self.system = line.split()[1]
                     continue
 
                 if line.startswith(
                     "atom"
                 ):  # atom for which a GP model was made eg. O1
-                    self._atom = line.split()[1]
+                    self.atom = line.split()[1]
                     continue
 
                 if (
                     "property" in line
                 ):  # property (such as iqa or particular multipole moment) for which a GP model was made
-                    self._type = line.split()[1]
+                    self.type = line.split()[1]
                     continue
 
                 if "ALF" in line:
-                    self._alf = [int(a) for a in line.split()[1:]]
+                    self.alf = [int(a) for a in line.split()[1:]]
                     continue
 
                 if "number_of_features" in line:  # number of inputs to the GP
-                    self._nfeats = int(line.split()[1])
+                    self.nfeats = int(line.split()[1])
                     continue
 
                 if (
                     "number_of_training_points" in line
                 ):  # number of training points to make the GP model
-                    self._ntrain = int(line.split()[1])
+                    self.ntrain = int(line.split()[1])
                     continue
 
                 # GP mean (mu) section
                 if "[mean]" in line:
                     mean_type = next(f).split()[-1]  # type
                     if mean_type == "constant":
-                        self._mean = ConstantMean(float(next(f).split()[1]))
+                        self.mean = ConstantMean(float(next(f).split()[1]))
                     elif mean_type == "zero":
-                        self._mean = ZeroMean()
+                        self.mean = ZeroMean()
                     elif mean_type in ["linear", "quadratic"]:
                         beta = np.array(
                             [float(b) for b in next(f).split()[1:]]
@@ -116,9 +116,9 @@ class Model(File):
                         )
                         ymin = float(next(f).split()[-1])
                         if mean_type == "linear":
-                            self._mean = LinearMean(beta, xmin, ymin)
+                            self.mean = LinearMean(beta, xmin, ymin)
                         elif mean_type == "quadratic":
-                            self._mean = QuadraticMean(beta, xmin, ymin)
+                            self.mean = QuadraticMean(beta, xmin, ymin)
                     continue
 
                 if (
@@ -175,40 +175,39 @@ class Model(File):
                 # training inputs data
                 if "[training_data.x]" in line:
                     line = next(f)
-                    x = []
+                    x = np.empty((self.ntrain, self.nfeats))
+                    i = 0
                     while line.strip() != "":
-                        x += [[float(num) for num in line.split()]]
+                        x[i, :] = np.array([float(num) for num in line.split()])
+                        i += 1
                         line = next(f)
-                    self._x = np.array(x)
-                    if self._x.ndim == 1:
-                        self._x = self._x.reshape(-1, 1)
                     continue
 
                 # training labels data
                 if "[training_data.y]" in line:
                     line = next(f)
-                    y = []
+                    y = np.empty((self.ntrain, 1))
+                    i = 0
                     while line.strip() != "":
-                        y += [float(line)]
+                        y[i, 0] = float(line)
+                        i += 1
                         line = next(f)
-                    self._y = np.array(y)[:, np.newaxis]
                     continue
 
                 if "[weights]" in line:
                     line = next(f)
-                    weights = []
+                    weights = np.empty((self.ntrain, 1))
+                    i = 0
                     while line.strip() != "":
-                        weights += [float(line)]
+                        weights[i, 0] = float(line)
+                        i += 1
                         try:
                             line = next(f)
                         except:
                             break
-                    self._weights = np.array(weights)
-                    self._weights = self._weights.reshape(-1, 1)
 
-        self._k = KernelInterpreter(
-            kernel_composition, kernel_list
-        ).interpret()
+        if kernel_composition:
+            self.kernel = KernelInterpreter(kernel_composition, kernel_list).interpret()
 
     @classproperty
     def filetype(self) -> str:
@@ -232,13 +231,13 @@ class Model(File):
 
     def r(self, x_test: np.ndarray) -> np.ndarray:
         """ Returns the n_train by n_test covariance matrix"""
-        return self.k.r(self.x, x_test)
+        return self.kernel.r(self.x, x_test)
 
     @cached_property
     def R(self) -> np.ndarray:
         """Returns the covariance matrix and adds a jitter to the diagonal for numerical stability. This jitter is a very
         small number on the order of 1e-6 to 1e-10."""
-        return self.k.R(self.x) + (self.nugget * np.identity(self.ntrain))
+        return self.kernel.R(self.x) + (self.nugget * np.identity(self.ntrain))
 
     @cached_property
     def invR(self) -> np.ndarray:
@@ -263,7 +262,7 @@ class Model(File):
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
         v = np.linalg.solve(self.lower_cholesky, train_test_covar)
 
-        return np.diag(self.k.R(x_test) - np.matmul(v.T, v)).flatten()
+        return np.diag(self.kernel.R(x_test) - np.matmul(v.T, v)).flatten()
 
     # TODO. model write method not implemented
     def write(self, path: Optional[Path] = None) -> None:
