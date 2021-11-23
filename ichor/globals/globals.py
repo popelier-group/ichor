@@ -139,6 +139,8 @@ class Globals:
     # For checking global variables after formatting
     _checkers = DictList()
 
+    _initialised = False
+
     # for saving the location the global variables were loaded from
     _config_file: Optional[Path] = None
 
@@ -153,6 +155,8 @@ class Globals:
 
     N_ITERATIONS: int = 1
     POINTS_PER_ITERATION: int = 1
+
+    BATCH_SIZE: int = 5000
 
     OPTIMISE_PROPERTY: str = "iqa"
     OPTIMISE_ATOM: str = "all"
@@ -345,6 +349,7 @@ class Globals:
         globals_instance: Optional["Globals"] = None,
         **kwargs,
     ):
+        self._initialised = False
         self._initialising = True
 
         # check types
@@ -496,7 +501,13 @@ class Globals:
 
         self._initialising = False
 
+        if not self._initialised:
+            from ichor.arguments import Arguments
+            if Arguments.config_file.exists():
+                self.init_from_config(Arguments.config_file)
+
     def init_from_config(self, config_file: Path):
+        self._initialised = True
         self._config_file = config_file
         config = ConfigProvider(source=config_file)
 
@@ -516,6 +527,7 @@ class Globals:
                 ]  # todo: implement ProblemFinder
 
     def init_from_globals(self, globals_instance: "Globals"):
+        self._initialised = True
         for key, value in globals_instance.items(show_protected=True):
             self.set(key, value)
 

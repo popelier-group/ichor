@@ -63,6 +63,21 @@ class RBFCyclic(Kernel):
     def mask(self):
         return np.arange(2, len(self._thetas), 3)
 
+    def _cov(self, x1, x2):
+        diff = x2[np.newaxis, :, self.active_dims] - x1[:, np.newaxis, self.active_dims]
+        diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (
+                2 * np.pi
+        ) - np.pi
+        diff *= diff
+        diff *= self._thetas
+        return np.exp(-np.sum(diff, axis=2))
+
+    def _batch_cov_x1(self, x1, x2, batch_size=1000):
+        return np.vstack([self._cov(xi, x2) for xi in batched_array(x1, batch_size)])
+
+    def _batch_cov_x2(self, x1, x2, batch_size=1000):
+        return np.hstack([self._cov(x1, xi) for xi in batched_array(x2, batch_size)])
+
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calcualtes cyclic RBF covariance matrix from two sets of points
 
@@ -76,15 +91,8 @@ class RBFCyclic(Kernel):
             :type: `np.ndarray`
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
-        diff = (
-                x2[np.newaxis, :, self.active_dims]
-                - x1[:, np.newaxis, self.active_dims]
-        )
-        diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (
-                2 * np.pi
-        ) - np.pi
-        diff = diff * diff
-        return np.exp(-np.sum(self._thetas * diff, axis=2))
+        batched_cov = self._batch_cov_x1 if x1.shape[0] > x2.shape[0] else self._batch_cov_x2
+        return batched_cov(x1, x2, batch_size=10000)
 
     def __repr__(self):
         return f"RBFCyclic({self._thetas})"

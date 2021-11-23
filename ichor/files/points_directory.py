@@ -80,6 +80,10 @@ class PointsDirectory(ListOfAtoms, Directory):
         for point in self:
             point.read()
 
+    def dump(self):
+        for point in self:
+            point.dump()
+
     def __iter__(self):
         """
         This method is called when iterating over an instance of `PointsDirectory`. If the current instance is empty (i.e. its length is 0),

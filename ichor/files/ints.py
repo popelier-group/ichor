@@ -32,6 +32,10 @@ class INTs(Directory, AtomicDict):
             )
         return self._parent
 
+    def dump(self):
+        for _, atom in self.items():
+            atom.dump()
+
     @parent.setter
     def parent(self, value: GeometryFile):
         if not isinstance(value, GeometryFile):

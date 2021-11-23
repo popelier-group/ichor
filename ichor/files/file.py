@@ -37,15 +37,20 @@ class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
 
     state: FileState = FileState.Unread
+    _contents: List[str] = []
 
     def __init__(self, path: Union[Path, str]):
         super().__init__(path)  # initialize PathObject init
         self.state = FileState.Unread
+        self._contents = []
 
     @buildermethod
     def read(self, *args, **kwargs) -> None:
         """Read the contents of the file. Depending on the type of file, different parts will be read in."""
         if self.path.exists() and self.state is FileState.Unread:
+            for var, inst in vars(self).items():
+                if inst is FileContents:
+                    self._contents.append(var)
             self.state = FileState.Reading
             self._read_file(
                 *args, **kwargs
@@ -62,6 +67,10 @@ class File(PathObject, ABC):
 
     def move_formatted(self, dst):
         pass
+
+    def dump(self):
+        for var in self._contents:
+            setattr(self, var, FileContents)
 
     @classproperty
     @abstractmethod
