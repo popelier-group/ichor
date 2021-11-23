@@ -27,6 +27,7 @@ ichor/units.py
 ichor.egg-info/PKG-INFO
 ichor.egg-info/SOURCES.txt
 ichor.egg-info/dependency_links.txt
+ichor.egg-info/entry_points.txt
 ichor.egg-info/top_level.txt
 test/test_alf_calculation.py
 test/test_gpr_predictions_and_variance.py
