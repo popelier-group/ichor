@@ -101,7 +101,7 @@ import os
 import platform
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID, uuid4
 
 from ichor import constants
