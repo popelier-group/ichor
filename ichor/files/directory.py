@@ -66,6 +66,9 @@ class Directory(PathObject, ABC):
                     ddst = self.path / ddst.name
                     f.replace(ddst)
 
+    def dump(self):
+        pass
+
     def iterdir(self):
         """alias to __iter__ in case child object overrides __iter__"""
         return self.path.iterdir()
@@ -124,6 +127,12 @@ class AnnotatedDirectory(Directory, ABC):
             for var in vars(self)
             if isinstance(getattr(self, var), Directory)
         ]
+
+    def dump(self):
+        for f in self.files:
+            f.dump()
+        for d in self.directories:
+            d.dump()
 
     def parse(self):
         """
