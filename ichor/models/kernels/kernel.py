@@ -71,7 +71,7 @@ class Kernel(ABC):
         pass
 
 
-class CompositeKernel(ABC, Kernel):
+class CompositeKernel(Kernel, ABC):
     def __init__(self, k1: Kernel, k2: Kernel):
         self.k1 = k1
         self.k2 = k2
