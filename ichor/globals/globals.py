@@ -106,7 +106,6 @@ from uuid import UUID, uuid4
 
 from ichor import constants
 from ichor.atoms.atoms import Atoms
-from ichor.common.functools import ntimes_cached_property
 from ichor.common.types import DictList, Version
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.globals import checkers, formatters, parsers
