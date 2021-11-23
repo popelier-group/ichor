@@ -1,13 +1,13 @@
-from functools import wraps
 from typing import List, Optional
 
 import numpy as np
+
+from pathlib import Path
 
 from ichor.common.functools import cached_property, classproperty
 from ichor.common.functools.buildermethod import buildermethod
 from ichor.common.str import get_digits
 from ichor.files.file import File, FileContents
-from ichor.itypes import F
 from ichor.models.kernels import RBF, Kernel, PeriodicKernel, RBFCyclic
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.kernels.periodic_kernel import PeriodicKernel
@@ -23,37 +23,33 @@ class Model(File):
     """
 
     # these can be accessed with __annotations__, so leave them
-    _system: Optional[str]
-    _atom: Optional[str]
-    _type: Optional[str]
-    _nfeats: Optional[int]
-    _ntrain: Optional[int]
-    _mean: Optional[Mean]
-    _k: Optional[Kernel]
-    _x: Optional[np.ndarray]
-    _y: Optional[np.ndarray]
+    system: str
+    atom: str
+    type: str
+    nfeats: int
+    ntrain: int
+    mean: Mean
+    k: Kernel
+    x: np.ndarray
+    y: np.ndarray
+    nugget: float
+    weights: np.ndarray
 
-    nugget: Optional[float] = None
-
-    def __init__(self, path):
+    def __init__(self, path: Path):
         File.__init__(self, path)
 
-        self._system: Optional[str] = FileContents
-        self._atom: Optional[str] = FileContents
-        self._type: Optional[str] = FileContents
-        self._alf: Optional[List[int]] = FileContents
-        self._nfeats: Optional[int] = FileContents
-        self._ntrain: Optional[int] = FileContents
-        self._mean: Optional[Mean] = FileContents
-        self._k: Optional[Kernel] = FileContents
-        self._x: Optional[np.ndarray] = FileContents
-        self._y: Optional[np.ndarray] = FileContents
-        self._nugget = (
-            FileContents  # todo: read this from ferebus file as well
-        )
-        self._weights = (
-            FileContents  # todo: read this from ferebus file as well
-        )
+        self.system = FileContents
+        self.atom = FileContents
+        self.type = FileContents
+        self.alf = FileContents
+        self.nfeats = FileContents
+        self.ntrain = FileContents
+        self.mean = FileContents
+        self.k = FileContents
+        self.x = FileContents
+        self.y = FileContents
+        self.nugget = FileContents
+        self.weights = FileContents
 
     @buildermethod
     def _read_file(self) -> None:
@@ -220,63 +216,8 @@ class Model(File):
         return ".model"
 
     @property
-    def system(self) -> str:
-        """Returns the system name"""
-        return self._system
-
-    @property
-    def atom_name(self) -> str:
-        """Returns the atom name for which a GP model was made"""
-        return self._atom
-
-    @property
-    def type(self) -> str:
-        """Returns the property (iqa, q00, etc) for which a GP model was made"""
-        return self._type
-
-    @property
-    def alf(self) -> List[int]:
-        return self._alf
-
-    @property
     def ialf(self) -> np.ndarray:
         return np.array(self.alf) - 1
-
-    @property
-    def nugget(self) -> float:
-        """Returns the nugget/jitter that is added to the diagonal of the train-train covariance matrix to ensure numerical stability
-        of the cholesky decomposition. This is a small number on the order of 1e-6 to 1e-10."""
-        return self._nugget
-
-    @property
-    def nfeats(self) -> int:
-        """Returns the number of features"""
-        return self._nfeats
-
-    @property
-    def ntrain(self) -> int:
-        """Returns the number of training points"""
-        return self._ntrain
-
-    @property
-    def mean(self) -> Mean:
-        """Returns the GP mean value (mu)"""
-        return self._mean
-
-    @property
-    def k(self) -> str:
-        """Returns the name of the covariance function used to calculate the covariance matrix"""
-        return self._k
-
-    @property
-    def x(self) -> np.ndarray:
-        """Returns the. training inputs numpy array Shape `n_points x n_features`"""
-        return self._x
-
-    @property
-    def y(self) -> np.ndarray:
-        """Returns the training outputs numpy array. Shape `n_points`"""
-        return self._y
 
     @property
     def atom_num(self) -> int:
@@ -289,11 +230,6 @@ class Model(File):
         This is the index of the atom in Python objects such as lists (as indeces start at 0)."""
         return self.atom_num - 1
 
-    @cached_property
-    def weights(self) -> np.ndarray:
-        """Returns an array containing the weights which can be stored prior to making predictions."""
-        return self._weights
-
     def r(self, x_test: np.ndarray) -> np.ndarray:
         """ Returns the n_train by n_test covariance matrix"""
         return self.k.r(self.x, x_test)
@@ -302,7 +238,7 @@ class Model(File):
     def R(self) -> np.ndarray:
         """Returns the covariance matrix and adds a jitter to the diagonal for numerical stability. This jitter is a very
         small number on the order of 1e-6 to 1e-10."""
-        return self.k.R(self.x) + (self.nugget * np.eye(self.ntrain))
+        return self.k.R(self.x) + (self.nugget * np.identity(self.ntrain))
 
     @cached_property
     def invR(self) -> np.ndarray:
@@ -330,7 +266,7 @@ class Model(File):
         return np.diag(self.k.R(x_test) - np.matmul(v.T, v)).flatten()
 
     # TODO. model write method not implemented
-    def write(self) -> None:
+    def write(self, path: Optional[Path] = None) -> None:
         pass
 
     def __repr__(self):
