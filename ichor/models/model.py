@@ -352,15 +352,12 @@ class Model(File):
         from ichor import __version__
         path = path or self.path
 
+        self._must_exist = False
+
         if not path.parent.exists():
             mkdir(path.parent)
         if path.is_dir():
             path = path / f"{self.system}_{self.type}_{self.atom}{Model.filetype}"
-
-        try:
-            self.read()
-        except FileNotFoundError:
-            pass
 
         self.program = self.program if self.program is not FileContents else "ichor"
         self.program_version = self.program_version if self.program_version is not FileContents else __version__

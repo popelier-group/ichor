@@ -38,11 +38,13 @@ class File(PathObject, ABC):
 
     state: FileState = FileState.Unread
     _contents: List[str] = []
+    _must_exist: bool = True
 
     def __init__(self, path: Union[Path, str]):
         super().__init__(path)  # initialize PathObject init
         self.state = FileState.Unread
         self._contents = []
+        self._must_exist = True
 
     @buildermethod
     def read(self, *args, **kwargs) -> None:
@@ -56,7 +58,7 @@ class File(PathObject, ABC):
                 *args, **kwargs
             )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             self.state = FileState.Read
-        elif not self.path.exists() and self.state is not FileState.Blocked:
+        elif not self.path.exists() and self._must_exist and self.state is not FileState.Blocked:
             raise FileNotFoundError(
                 f"File with path '{self.path}' is not found on disk."
             )
