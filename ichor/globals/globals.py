@@ -1,32 +1,11 @@
-import inspect
-import os
-import platform
-from functools import lru_cache
-from pathlib import Path
-from typing import List, Optional
-from uuid import UUID, uuid4
-
-from ichor import constants
-from ichor.atoms.atoms import Atoms
-from ichor.common.functools import ntimes_cached_property
-from ichor.common.types import DictList, Version
-from ichor.file_structure import FILE_STRUCTURE
-from ichor.globals import checkers, formatters, parsers
-from ichor.globals.config_provider import ConfigProvider
-from ichor.globals.os import OS
-from ichor.problem_finder import PROBLEM_FINDER
-
-# todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
-
 """
 Global variables are the backbone of ichor and are used throughout
-
 Mutable global variables are tricky things and should be used with caution, the global variables
 defined in Globals are carefully maintained by a series of parsers, formatters and checkers to try
 and make sure that the global variable is always valid.
 
-Global Variable                 | Type            | Default Value     | Description                                                                                | Notes
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|Global Variable|Type|Default Value|Description|Notes|
+|---------------|----|-------------|-----------|-----|
 SYSTEM_NAME                     | str             | SYSTEM            | Name of the current system                                                                 |
 ALF_REFERENCE_FILE              | str             |                   | Path to file containing geometry to calculate ALF                                          | gjf or xyz                                                                                      # todo: convert to Path
 ALF                             | List[List[int]] | []                | ALF used for ichor containing atomic indices                                               | 1-index
@@ -116,6 +95,25 @@ INCLUDE_NODES                   | List[str]       | []                | Node whi
 EXCLUDE_NODES                   | List[str]       | []                | Node blacklist for ichor not to run jobs on                                                |
 """
 
+import inspect
+import os
+import platform
+from functools import lru_cache
+from pathlib import Path
+from typing import List, Optional, Union
+from uuid import UUID, uuid4
+
+from ichor import constants
+from ichor.atoms.atoms import Atoms
+from ichor.common.types import DictList, Version
+from ichor.file_structure import FILE_STRUCTURE
+from ichor.globals import checkers, formatters, parsers
+from ichor.globals.config_provider import ConfigProvider
+from ichor.globals.os import OS
+from ichor.problem_finder import PROBLEM_FINDER
+
+# todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
+
 
 class GlobalVariableError(Exception):
     pass
@@ -139,8 +137,6 @@ class Globals:
     _formatters = DictList()
     # For checking global variables after formatting
     _checkers = DictList()
-
-    _initialised = False
 
     # for saving the location the global variables were loaded from
     _config_file: Optional[Path] = None
@@ -350,7 +346,6 @@ class Globals:
         globals_instance: Optional["Globals"] = None,
         **kwargs,
     ):
-        self._initialised = False
         self._initialising = True
 
         # check types
@@ -502,13 +497,15 @@ class Globals:
 
         self._initialising = False
 
-        if not self._initialised:
-            from ichor.arguments import Arguments
-            if Arguments.config_file.exists():
-                self.init_from_config(Arguments.config_file)
+    def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
+        if src is not None:
+            if isinstance(src, Globals):
+                self.init_from_globals(src)
+            else:
+                src = Path(src)
+                self.init_from_config(src)
 
     def init_from_config(self, config_file: Path):
-        self._initialised = True
         self._config_file = config_file
         config = ConfigProvider(source=config_file)
 
@@ -528,7 +525,6 @@ class Globals:
                 ]  # todo: implement ProblemFinder
 
     def init_from_globals(self, globals_instance: "Globals"):
-        self._initialised = True
         for key, value in globals_instance.items(show_protected=True):
             self.set(key, value)
 

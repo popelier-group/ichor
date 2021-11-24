@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import IO
 
 import numpy as np
 
@@ -8,4 +9,8 @@ class Mean(ABC):
 
     @abstractmethod
     def value(self, x: np.ndarray) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def write(self, f: IO):
         pass

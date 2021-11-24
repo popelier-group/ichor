@@ -11,7 +11,6 @@
 
     Authors: Matthew Burn (matthew.burn@postgrad.manchester.ac.uk)
              Yulian Manchev (yulian.manchev@postgrad.manchester.ac.uk)
-    Version: 3.0.0
 
     ICHOR is a gaussian process regression machine learning pipeline application
     for generating atomistic models for use in molecular dynamics simulations in
@@ -34,16 +33,19 @@
 
 
 from ichor.batch_system import BATCH_SYSTEM
+from ichor.common.types import Version
 from ichor.globals import GLOBALS
 from ichor.machine import MACHINE
 
 __all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM"]
 
+__version__ = Version("3.0.1")
+
+import sys
 
 from ichor.arguments import Arguments
-from ichor.globals import GLOBALS, Globals
+from ichor.globals import GLOBALS
 from ichor.main import main_menu
-import sys
 
 
 def ichor_main():
@@ -61,4 +63,3 @@ def ichor_main():
         sys.exit(0)
 
     main_menu()
-

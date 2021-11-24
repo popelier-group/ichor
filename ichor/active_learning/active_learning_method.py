@@ -5,9 +5,9 @@ import numpy as np
 
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
-from ichor.models import Models
 from ichor.common.numpy import batched_array
 from ichor.globals import GLOBALS
+from ichor.models import Models
 
 
 class ActiveLearningMethod(ABC):
@@ -27,7 +27,9 @@ class ActiveLearningMethod(ABC):
         """
         pass
 
-    def batch_points(self, points: ListOfAtoms, batch_size: Optional[int] = None):
+    def batch_points(
+        self, points: ListOfAtoms, batch_size: Optional[int] = None
+    ):
         batch_size = batch_size or GLOBALS.BATCH_SIZE
         return batched_array(points, batch_size)
 

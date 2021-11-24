@@ -1,7 +1,9 @@
 from abc import ABC
 from typing import Dict
 
-from ichor.models.kernels.constant import Constant
+import numpy as np
+
+from ichor.models.kernels.constant import ConstantKernel
 from ichor.models.kernels.interpreter.token_type import TokenType
 from ichor.models.kernels.kernel import Kernel
 
@@ -59,10 +61,15 @@ class Var(ASTNode):
             raise NameError(f"{self.value} not defined")
 
 
+ck = 0
+
+
 class Num(ASTNode):
     def __init__(self, token):
         self.token = token
         self.value = token.value
 
     def visit(self, global_state: Dict[str, Kernel]) -> Kernel:
-        return Constant(self.value)
+        global ck
+        ck += 1
+        return ConstantKernel(f"ck{ck}", self.value, np.array([0]))

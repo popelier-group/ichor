@@ -1,14 +1,18 @@
+from typing import IO, Optional
+
 import numpy as np
 
-from .kernel import Kernel
+from ichor.models.kernels.kernel import Kernel
 
 
-class Constant(Kernel):
-
+class ConstantKernel(Kernel):
     """Implements constant kernel, which scales by a constant factor when used in a kernel product or
     modifies the mean of the Gaussian process when used in a kernel sum"""
 
-    def __init__(self, value):
+    def __init__(
+        self, name: str, value: float, active_dims: Optional[np.ndarray]
+    ):
+        super().__init__(self, name, active_dims)
         self.value = value
 
     @property
@@ -24,32 +28,9 @@ class Constant(Kernel):
     def R(self, x):
         return np.full((len(x), len(x)), self.value)
 
-
-# @jit(nopython=True)
-# def cyclic_cdist(xa, xb):
-#     xm = xa.shape[0]
-#     xn = xb.shape[0]
-#     result = np.empty((xm, xn))
-#     for i in range(xm):
-#         for j in range(xn):
-#             diff = xa[i] - xb[j]
-#             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-#             diff[mask] = (diff[mask] + np.pi) % (2 * np.pi) - np.pi
-#             result[i, j] = np.sqrt(np.sum(diff * diff))
-#     return result
-#
-#
-# @jit(nopython=True)
-# def standardised_cyclic_cdist(xa, xb, xstd):
-#     xm = xa.shape[0]
-#     xn = xb.shape[0]
-#     result = np.empty((xm, xn))
-#     for i in range(xm):
-#         for j in range(xn):
-#             diff = xa[i] - xb[j]
-#             mask = (np.array([x for x in range(diff.shape[0])]) + 1) % 3 == 0
-#             diff[mask] = (diff[mask] + np.pi / xstd[mask]) % (
-#                 2 * np.pi / xstd[mask]
-#             ) - np.pi / xstd[mask]
-#             result[i, j] = np.sqrt(np.sum(diff * diff))
-#     return result
+    def write(self, f: IO):
+        f.write(f"[kernel.{self.name}]\n")
+        f.write("type constant\n")
+        f.write(f"number_of_dimensions {len(self.active_dims)}\n")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}\n")
+        f.write(f"value {self.value}\n")

@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List, Optional, Union
+
 import numpy as np
+
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -14,9 +16,9 @@ class ListOfAtoms(list):
     def types(self) -> List[str]:
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
-        
+
         from ichor.files import PointsDirectory, Trajectory
-        
+
         if isinstance(self, PointsDirectory):
             return self[0].atoms.types
         elif isinstance(self, Trajectory):
@@ -26,9 +28,9 @@ class ListOfAtoms(list):
     def types_extended(self) -> List[str]:
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Does not remove duplicates"""
-        
+
         from ichor.files import PointsDirectory, Trajectory
-        
+
         if isinstance(self, PointsDirectory):
             return self[0].atoms.types_extended
         elif isinstance(self, Trajectory):
@@ -38,9 +40,9 @@ class ListOfAtoms(list):
     def atom_names(self):
         """Return the atom names from the first timestep. Assumes that all timesteps have the same
         number of atoms/atom names."""
-        
+
         from ichor.files import PointsDirectory, Trajectory
-        
+
         if isinstance(self, PointsDirectory):
             return self[0].atoms.atom_names
         elif isinstance(self, Trajectory):
@@ -54,7 +56,7 @@ class ListOfAtoms(list):
             the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
         """
         from ichor.files import PointsDirectory, Trajectory
-        
+
         if isinstance(self, PointsDirectory):
             return np.array([timestep.atoms.coordinates for timestep in self])
         elif isinstance(self, Trajectory):
@@ -62,9 +64,9 @@ class ListOfAtoms(list):
 
     @property
     def connectivity(self) -> np.ndarray:
-        
+
         from ichor.files import PointsDirectory, Trajectory
-        
+
         if isinstance(self, PointsDirectory):
             return self[0].atoms.connectivity
         elif isinstance(self, Trajectory):
@@ -74,7 +76,7 @@ class ListOfAtoms(list):
     def alf(self) -> np.ndarray:
 
         from ichor.files import PointsDirectory, Trajectory
-        
+
         if isinstance(self, PointsDirectory):
             return self[0].atoms.alf
         elif isinstance(self, Trajectory):
@@ -113,12 +115,16 @@ class ListOfAtoms(list):
         """
 
         from ichor.files import PointsDirectory, trajectory
-        
+
         if isinstance(self, Trajectory):
-            features = np.array([timestep.alf_features(alf) for timestep in self])
+            features = np.array(
+                [timestep.alf_features(alf) for timestep in self]
+            )
         elif isinstance(self, PointsDirectory):
-            features = np.array([point.atoms.alf_features(alf) for point in self])
-        
+            features = np.array(
+                [point.atoms.alf_features(alf) for point in self]
+            )
+
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))
 
@@ -298,13 +304,15 @@ class ListOfAtoms(list):
                 ):
                     """Return the ndarray of features for only one atom, given an alf for that atom.
                     This is assumed to a 2D array of features for only one atom.
-                    
+
                     :param alf: A list of integers or a numpy array corresponding to the alf of one atom - The atom which the atom view is for.
                     :rtype: `np.ndarray`
                     :return: Тhe array has shape `n_timesteps` x `n_features`.
                     """
 
-                    features = np.array([atom.alf_features(alf) for atom in self])
+                    features = np.array(
+                        [atom.alf_features(alf) for atom in self]
+                    )
                     return features
 
             if hasattr(self, "_is_atom_view"):

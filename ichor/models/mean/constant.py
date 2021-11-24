@@ -1,3 +1,5 @@
+from typing import IO
+
 import numpy as np
 
 from ichor.models.mean.mean import Mean
@@ -16,3 +18,8 @@ class ConstantMean(Mean):
     def value(self, x: np.ndarray) -> np.ndarray:
         """Returns the constant mean value."""
         return np.full((x.shape[0]), self._value)
+
+    def write(self, f: IO):
+        f.write("[mean]\n")
+        f.write("type constant\n")
+        f.write(f"value {self._value}\n")

@@ -28,8 +28,8 @@ class HighestVariance(ActiveLearningMethod):
         return "highest_variance"
 
     def get_points(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
-        """ Gets points with the highest calculated variance and adds to the training set.
-        
+        """Gets points with the highest calculated variance and adds to the training set.
+
         :param points: A ListOfAtoms instance for which to calculate the variance
         :param npoints: The number of points with highest variance to add to the training set
         :return: The indices of the points which should be added to the training set.

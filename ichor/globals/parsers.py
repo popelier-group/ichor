@@ -56,6 +56,7 @@ def read_uid(uid: str) -> UUID:
 
 @parser
 def read_path(path: str) -> Path:
+    path = path.replace('"', "").replace("'", "")
     return Path(path)
 
 

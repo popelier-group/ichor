@@ -23,4 +23,4 @@ def batched_array(a: np.ndarray, batch_size: int) -> np.ndarray:
     :return:            Yields successive group-sized lists from l.
     """
     for i in range(0, len(a), batch_size):
-        yield a[i:i+batch_size]
+        yield a[i : i + batch_size]

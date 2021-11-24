@@ -1,8 +1,8 @@
-from typing import Tuple, Optional
-from ichor.file_structure import FILE_STRUCTURE
 from pathlib import Path
-from ichor.common.io import mkdir
+from typing import Optional, Tuple
 
+from ichor.common.io import mkdir
+from ichor.file_structure import FILE_STRUCTURE
 
 _counter_location = FILE_STRUCTURE["counter"]
 
@@ -16,7 +16,9 @@ def _get_counter_location(counter_location: Optional[Path] = None) -> Path:
     return counter_location
 
 
-def read_counter(counter_location: Optional[Path] = None, must_exist: bool = True) -> Tuple[int, int]:
+def read_counter(
+    counter_location: Optional[Path] = None, must_exist: bool = True
+) -> Tuple[int, int]:
     """Reads the counter file, returns current iteration and max iteration"""
     from ichor.globals import GLOBALS
 
@@ -27,7 +29,7 @@ def read_counter(counter_location: Optional[Path] = None, must_exist: bool = Tru
         current_iteration = 0
         max_iteration = GLOBALS.N_ITERATIONS
     else:
-        with open(counter_location, 'r') as f:
+        with open(counter_location, "r") as f:
             current_iteration = int(next(f))
             try:
                 max_iteration = int(next(f))
@@ -37,7 +39,11 @@ def read_counter(counter_location: Optional[Path] = None, must_exist: bool = Tru
     return current_iteration, max_iteration
 
 
-def write_counter(current_iteration: Optional[int] = None, max_iteration: Optional[int] = None, counter_location: Optional[Path] = None) -> None:
+def write_counter(
+    current_iteration: Optional[int] = None,
+    max_iteration: Optional[int] = None,
+    counter_location: Optional[Path] = None,
+) -> None:
     from ichor.globals import GLOBALS
 
     current_iteration = current_iteration or 0
@@ -47,6 +53,6 @@ def write_counter(current_iteration: Optional[int] = None, max_iteration: Option
     if not counter_location.parent.exists():
         mkdir(counter_location.parent)
 
-    with open(counter_location, 'w') as f:
+    with open(counter_location, "w") as f:
         f.write(f"{current_iteration}\n")
         f.write(f"{max_iteration}\n")

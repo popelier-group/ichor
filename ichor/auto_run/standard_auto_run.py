@@ -10,13 +10,15 @@ from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
 from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
 from ichor.auto_run.auto_run_morfi import submit_morfi_job_to_auto_run
 from ichor.auto_run.auto_run_pyscf import submit_pyscf_job_to_auto_run
+from ichor.auto_run.counter import read_counter, write_counter
 from ichor.auto_run.ichor_jobs import (
     make_models, submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,
     submit_ichor_gaussian_command_to_auto_run,
     submit_ichor_morfi_command_to_auto_run,
     submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
-from ichor.batch_system import JobID
+from ichor.auto_run.stop import start
+from ichor.batch_system import BATCH_SYSTEM, JobID, NodeType
 from ichor.common.int import truncate
 from ichor.common.io import mkdir, remove
 from ichor.common.points import get_points_location
@@ -31,9 +33,6 @@ from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
-from ichor.auto_run.counter import read_counter, write_counter
-from ichor.batch_system import BATCH_SYSTEM, NodeType
-from ichor.auto_run.stop import start
 
 
 class AutoRunAlreadyRunning(Exception):
@@ -115,7 +114,10 @@ def submit_auto_run_iter(
         # Other jobs will be IterState.Standard (apart from IterState.Last), thus we run the sequence of jobs specified in func_order
         for i, iter_step in enumerate(func_order):
             # append the modified id to the submission script name as this is how drop-in-compute holds jobs
-            if MACHINE.submit_type is SubmitType.DropCompute and BATCH_SYSTEM.current_node() is NodeType.ComputeNode:
+            if (
+                MACHINE.submit_type is SubmitType.DropCompute
+                and BATCH_SYSTEM.current_node() is NodeType.ComputeNode
+            ):
                 modify = f"+{modify_id}"
                 if i > 0:
                     modify += f"+hold_{modify_id - 1}"  # hold for the previous job (whose job id is one less than this job)
@@ -312,6 +314,7 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
         SCRIPT_NAMES.parent.value = DROP_COMPUTE_LOCATION
 
     setup_iter_args()
+    IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
 
     iter_state = (
         IterState.Last

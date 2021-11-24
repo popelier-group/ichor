@@ -1,9 +1,10 @@
 [project]
 name = "ICHOR"
-version = "0.2.1"
+version = "3.0.1"
 description = "A machine learning pipeline suite for the Popelier Group"
 authors = [
-    "Matthew Burn <matthew.burn@postgrad.manchester.ac.uk>"
+    "Matthew Burn <matthew.burn@postgrad.manchester.ac.uk>",
+    "Yulian Manchev <yulian.manchev@postgrad.manchester.ac.uk>"
 ]
 readme = "README.md"
 python = "^3.6"

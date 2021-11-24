@@ -2,18 +2,27 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from ichor.common.io import pushd
+from ichor.common.os import input_with_prefill
 from ichor.tab_completer import PathCompleter
 
 
-def get_path(startdir: Path = Path.cwd(), prompt="Enter Path: ") -> Path:
+def get_path(
+    startdir: Path = Path.cwd(), prompt="Enter Path: ", prefill: str = ""
+) -> Path:
     with PathCompleter():
         with pushd(startdir):
             while True:
-                p = Path(input(prompt))
+                p = Path(input_with_prefill(prompt, prefill))
                 if not p.exists():
                     print(f"Error: Path {p} doesn't exist")
                 else:
                     return p
+
+
+def get_generic_path(prompt="Enter Path: ", prefill: str = "") -> Path:
+    with PathCompleter():
+        p = Path(input_with_prefill(prompt, prefill))
+        return p
 
 
 def get_dir(startdir: Path = Path.cwd()) -> Path:

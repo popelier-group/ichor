@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import IO, Optional
 
 import numpy as np
 
 from ichor.common.functools import cached_property
+from ichor.common.numpy import batched_array
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
-from ichor.common.numpy import batched_array
 
 
 class RBFCyclic(Kernel):
@@ -41,7 +41,10 @@ class RBFCyclic(Kernel):
     """
 
     def __init__(
-        self, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
+        self,
+        name: str,
+        thetas: np.ndarray,
+        active_dims: Optional[np.ndarray] = None,
     ):
 
         """
@@ -52,7 +55,7 @@ class RBFCyclic(Kernel):
                 if training/test data is standardized, then `train_x_std` has to be provided. This array contains the standard
                 deviations for each feature, calculated from the training set points.
         """
-        super().__init__(active_dims)
+        super().__init__(name, active_dims)
         self._thetas = thetas  # np.power(1/(2.0 * lengthscale), 2)
 
     @property
@@ -62,21 +65,6 @@ class RBFCyclic(Kernel):
     @cached_property
     def mask(self):
         return np.arange(2, len(self._thetas), 3)
-
-    def _cov(self, x1, x2):
-        diff = x2[np.newaxis, :, self.active_dims] - x1[:, np.newaxis, self.active_dims]
-        diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (
-                2 * np.pi
-        ) - np.pi
-        diff *= diff
-        diff *= self._thetas
-        return np.exp(-np.sum(diff, axis=2))
-
-    def _batch_cov_x1(self, x1, x2, batch_size=1000):
-        return np.vstack([self._cov(xi, x2) for xi in batched_array(x1, batch_size)])
-
-    def _batch_cov_x2(self, x1, x2, batch_size=1000):
-        return np.hstack([self._cov(x1, xi) for xi in batched_array(x2, batch_size)])
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calcualtes cyclic RBF covariance matrix from two sets of points
@@ -91,8 +79,23 @@ class RBFCyclic(Kernel):
             :type: `np.ndarray`
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
-        batched_cov = self._batch_cov_x1 if x1.shape[0] > x2.shape[0] else self._batch_cov_x2
-        return batched_cov(x1, x2, batch_size=10000)
+        diff = (
+            x2[np.newaxis, :, self.active_dims]
+            - x1[:, np.newaxis, self.active_dims]
+        )
+        diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (
+            2 * np.pi
+        ) - np.pi
+        diff *= diff
+        diff *= self._thetas
+        return np.exp(-np.sum(diff, axis=2))
+
+    def write(self, f: IO):
+        f.write(f"[kernel.{self.name}]\n")
+        f.write("type rbf-cyclic\n")
+        f.write(f"number_of_dimensions {len(self.active_dims)}\n")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}\n")
+        f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):
         return f"RBFCyclic({self._thetas})"

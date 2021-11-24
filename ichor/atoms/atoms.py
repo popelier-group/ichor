@@ -197,7 +197,12 @@ class Atoms(list):
                 Return the feature matrix of this Atoms instance
         """
 
-        return np.array([atom.alf_features(alf[alf_idx]) for alf_idx, atom in enumerate(self)])
+        return np.array(
+            [
+                atom.alf_features(alf[alf_idx])
+                for alf_idx, atom in enumerate(self)
+            ]
+        )
 
     @property
     def features_dict(self) -> dict:
