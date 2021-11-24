@@ -314,6 +314,7 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
         SCRIPT_NAMES.parent.value = DROP_COMPUTE_LOCATION
 
     setup_iter_args()
+    IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
 
     iter_state = (
         IterState.Last
