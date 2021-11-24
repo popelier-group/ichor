@@ -10,7 +10,7 @@ docs:
 	python3 docs/src/make_tree_html.py
 
 test:
-	python3 -m pytest
+	python3 -m unittest discover test/
 
 install:
 	python3 -m pip install -e .
