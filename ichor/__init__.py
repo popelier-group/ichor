@@ -33,18 +33,19 @@
 
 
 from ichor.batch_system import BATCH_SYSTEM
+from ichor.common.types import Version
 from ichor.globals import GLOBALS
 from ichor.machine import MACHINE
-from ichor.common.types import Version
 
 __all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM"]
 
 __version__ = Version("3.0.1")
 
+import sys
+
 from ichor.arguments import Arguments
 from ichor.globals import GLOBALS, Globals
 from ichor.main import main_menu
-import sys
 
 
 def ichor_main():
@@ -62,4 +63,3 @@ def ichor_main():
         sys.exit(0)
 
     main_menu()
-

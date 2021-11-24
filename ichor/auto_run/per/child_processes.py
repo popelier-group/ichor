@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.auto_run import rerun_from_failed
+from ichor.auto_run.stop import stop
 from ichor.common.io import mkdir, pushd
 from ichor.common.os import kill_pid, pid_exists
 from ichor.daemon import Daemon
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.queue import delete_jobs
-from ichor.auto_run.stop import stop
 
 
 def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:

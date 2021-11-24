@@ -1,4 +1,4 @@
-from typing import Optional, IO
+from typing import IO, Optional
 
 import numpy as np
 
@@ -18,7 +18,10 @@ class RBF(Kernel):
     """
 
     def __init__(
-        self, name: str, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
+        self,
+        name: str,
+        thetas: np.ndarray,
+        active_dims: Optional[np.ndarray] = None,
     ):
         super().__init__(name, active_dims)
         self._thetas = thetas

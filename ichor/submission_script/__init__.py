@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from ichor.common.types import MutableValue
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.amber_command import AmberCommand
@@ -17,9 +18,9 @@ from ichor.submission_script.pandora_command import (PandoraCommand,
                                                      PandoraPySCFCommand)
 from ichor.submission_script.python_command import PythonCommand
 from ichor.submission_script.script_timing_manager import TimingManager
-from ichor.submission_script.submision_script import SubmissionScript, SUBMIT_ON_COMPUTE
+from ichor.submission_script.submision_script import (SUBMIT_ON_COMPUTE,
+                                                      SubmissionScript)
 from ichor.submission_script.tyche_command import TycheCommand
-from ichor.common.types import MutableValue
 
 
 def prepend_script_directory(paths):

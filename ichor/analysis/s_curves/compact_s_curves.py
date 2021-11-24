@@ -6,10 +6,10 @@ import pandas as pd
 
 from ichor.analysis.excel import num2col
 from ichor.analysis.predictions import get_true_predicted
+from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.constants import ha_to_kj_mol
 from ichor.files import PointsDirectory
 from ichor.models import Models, ModelsResult
-from ichor.common.sorting.natsort import natsorted, ignore_alpha
 
 
 def percentile(n: int) -> np.ndarray:
@@ -158,7 +158,7 @@ def write_to_excel(
             # iqa predictions are in Hartrees, convert to kJ mol-1
             if sheet_name == "iqa":
                 error[sheet_name] *= ha_to_kj_mol
-            
+
             # make graphs to plot later once data is added
             atomic_s_curve = workbook.add_chart(
                 {"type": "scatter", "subtype": "straight"}
@@ -166,11 +166,11 @@ def write_to_excel(
             total_s_curve = workbook.add_chart(
                 {"type": "scatter", "subtype": "straight"}
             )
-            
+
             ############################
             # TOTAL S-CURVE
             ############################
-            
+
             # calculate a total df that sums up all the errors for all atoms in one point and then sorts by error (ascending)
             # see ModelResult reduce method
             df = pd.DataFrame(error[sheet_name].reduce())
@@ -180,7 +180,9 @@ def write_to_excel(
             df["%"] = percentile(ndata)
             # the end row is one more because the df starts one row down
             end_row = ndata + 1
-            df.to_excel(writer, sheet_name=sheet_name, startrow=1, startcol=start_col)
+            df.to_excel(
+                writer, sheet_name=sheet_name, startrow=1, startcol=start_col
+            )
             writer.sheets[sheet_name].write(0, start_col, "Total")
 
             total_s_curve.add_series(
@@ -188,16 +190,16 @@ def write_to_excel(
                     "categories": [
                         sheet_name,
                         start_row,
-                        start_col+1,
+                        start_col + 1,
                         end_row,
-                        start_col+1,
+                        start_col + 1,
                     ],
                     "values": [
                         sheet_name,
                         start_row,
-                        start_col+2,
+                        start_col + 2,
                         end_row,
-                        start_col+2,
+                        start_col + 2,
                     ],
                     "line": {"width": 1.5},
                 }
@@ -208,12 +210,10 @@ def write_to_excel(
             total_s_curve.set_y_axis(y_axis_settings)
             total_s_curve.set_legend({"position": "none"})
             total_s_curve.set_style(excel_style)
-            total_s_curve.set_title({"name":"Total S-Curve"})
-            total_s_curve.set_size({'width': 650, 'height': 520})
+            total_s_curve.set_title({"name": "Total S-Curve"})
+            total_s_curve.set_size({"width": 650, "height": 520})
 
-            writer.sheets[sheet_name].insert_chart(
-                "A1", total_s_curve
-            )
+            writer.sheets[sheet_name].insert_chart("A1", total_s_curve)
 
             start_col += 4
 
@@ -222,7 +222,7 @@ def write_to_excel(
             ####################################
             # INDIVIDUAL ATOM OVERLAPPED S-CURVE
             ####################################
-            
+
             # write out individual atom data to sheet
             for atom_name in atom_names:
 
@@ -241,14 +241,31 @@ def write_to_excel(
                 end_row = ndata + 1
                 # add the atom name above the df
                 # write the df for individual atoms
-                df.to_excel(writer, sheet_name=sheet_name, startrow=1, startcol=start_col)
+                df.to_excel(
+                    writer,
+                    sheet_name=sheet_name,
+                    startrow=1,
+                    startcol=start_col,
+                )
                 writer.sheets[sheet_name].write(0, start_col, atom_name)
 
                 atomic_s_curve.add_series(
                     {
                         "name": atom_name,
-                        "categories": [sheet_name, start_row, start_col+3, end_row, start_col+3],
-                        "values": [sheet_name, start_row, start_col+4, end_row, start_col+4],
+                        "categories": [
+                            sheet_name,
+                            start_row,
+                            start_col + 3,
+                            end_row,
+                            start_col + 3,
+                        ],
+                        "values": [
+                            sheet_name,
+                            start_row,
+                            start_col + 4,
+                            end_row,
+                            start_col + 4,
+                        ],
                         "line": {"width": 1.5},
                     }
                 )
@@ -261,9 +278,7 @@ def write_to_excel(
             if show_legend:
                 atomic_s_curve.set_legend({"position": "right"})
             atomic_s_curve.set_style(excel_style)
-            atomic_s_curve.set_title({"name":"Individual Atom S-Curve"})
-            atomic_s_curve.set_size({'width': 650, 'height': 520})
+            atomic_s_curve.set_title({"name": "Individual Atom S-Curve"})
+            atomic_s_curve.set_size({"width": 650, "height": 520})
 
-            writer.sheets[sheet_name].insert_chart(
-                "A27", atomic_s_curve
-            )
+            writer.sheets[sheet_name].insert_chart("A27", atomic_s_curve)

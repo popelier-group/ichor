@@ -1,20 +1,20 @@
-from typing import List, Dict, Optional
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import numpy as np
 
-from pathlib import Path
-
-from ichor.common.io import mkdir
 from ichor.common.functools import cached_property, classproperty
 from ichor.common.functools.buildermethod import buildermethod
+from ichor.common.io import mkdir
 from ichor.common.str import get_digits
+from ichor.common.types import Version
 from ichor.files.file import File, FileContents
-from ichor.models.kernels import RBF, Kernel, PeriodicKernel, RBFCyclic, ConstantKernel
+from ichor.globals import GLOBALS
+from ichor.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
+                                  RBFCyclic)
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
                                ZeroMean)
-from ichor.globals import GLOBALS
-from ichor.common.types import Version
 
 
 def _get_default_input_units(nfeats: int) -> List[str]:
@@ -22,7 +22,7 @@ def _get_default_input_units(nfeats: int) -> List[str]:
     for i in range(min(nfeats, 3)):
         units += [["bohr", "bohr", "radians"][i]]
     for i in range(3, nfeats):
-        units += [["bohr", "radians", "radians"][i%3]]
+        units += [["bohr", "radians", "radians"][i % 3]]
     return units
 
 
@@ -245,7 +245,9 @@ class Model(File):
                     x = np.empty((self.ntrain, self.nfeats))
                     i = 0
                     while line.strip() != "":
-                        x[i, :] = np.array([float(num) for num in line.split()])
+                        x[i, :] = np.array(
+                            [float(num) for num in line.split()]
+                        )
                         i += 1
                         line = next(f)
                     continue
@@ -274,7 +276,9 @@ class Model(File):
                             break
 
         if kernel_composition:
-            self.kernel = KernelInterpreter(kernel_composition, kernel_list).interpret()
+            self.kernel = KernelInterpreter(
+                kernel_composition, kernel_list
+            ).interpret()
 
     @classproperty
     def filetype(self) -> str:
@@ -297,7 +301,7 @@ class Model(File):
         return self.atom_num - 1
 
     def r(self, x_test: np.ndarray) -> np.ndarray:
-        """ Returns the n_train by n_test covariance matrix"""
+        """Returns the n_train by n_test covariance matrix"""
         return self.kernel.r(self.x, x_test)
 
     @cached_property
@@ -331,7 +335,11 @@ class Model(File):
 
     def compute_likelihood(self) -> float:
         """Computes the marginal likelihood from the data given"""
-        return 0.5*np.dot(self._y_minus_mean.T, self.compute_weights()).item() - 0.5*self.logdet - 0.5*self.ntrain*np.log(2*np.pi)
+        return (
+            0.5 * np.dot(self._y_minus_mean.T, self.compute_weights()).item()
+            - 0.5 * self.logdet
+            - 0.5 * self.ntrain * np.log(2 * np.pi)
+        )
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """Returns an array containing the test point predictions."""
@@ -350,19 +358,34 @@ class Model(File):
 
     def write(self, path: Optional[Path] = None) -> None:
         from ichor import __version__
+
         path = path or self.path
 
         if not path.parent.exists():
             mkdir(path.parent)
         if path.is_dir():
-            path = path / f"{self.system}_{self.type}_{self.atom}{Model.filetype}"
+            path = (
+                path / f"{self.system}_{self.type}_{self.atom}{Model.filetype}"
+            )
 
         with self.block():
-            self.program = self.program if self.program is not FileContents else "ichor"
-            self.program_version = self.program_version if self.program_version is not FileContents else __version__
-            self.nugget = self.nugget if self.nugget is not FileContents else 1e-10
+            self.program = (
+                self.program if self.program is not FileContents else "ichor"
+            )
+            self.program_version = (
+                self.program_version
+                if self.program_version is not FileContents
+                else __version__
+            )
+            self.nugget = (
+                self.nugget if self.nugget is not FileContents else 1e-10
+            )
 
-            self.system = self.system if self.system is not FileContents else GLOBALS.SYSTEM_NAME
+            self.system = (
+                self.system
+                if self.system is not FileContents
+                else GLOBALS.SYSTEM_NAME
+            )
             self.atom = self.atom if self.atom is not FileContents else "X1"
             self.type = self.type if self.type is not FileContents else "p1"
             self.alf = self.alf if self.alf is not FileContents else [1, 1, 1]
@@ -371,14 +394,16 @@ class Model(File):
                 if self.x.ndim == 1:
                     self.x = self.x.reshape(1, -1)
                 elif self.x.ndim != 2:
-                    raise ValueError(f"Training Input (x) must be 2D, {self.x.ndim}D array encountered")
+                    raise ValueError(
+                        f"Training Input (x) must be 2D, {self.x.ndim}D array encountered"
+                    )
                 if self.nfeats is FileContents:
                     self.nfeats = self.x.shape[1]
                 if self.ntrain is FileContents:
                     self.ntrain = self.x.shape[0]
 
             if self.nfeats is FileContents and self.natoms is not FileContents:
-                self.nfeats = 3*self.natoms - 6
+                self.nfeats = 3 * self.natoms - 6
 
             if self.natoms is FileContents and self.nfeats is not FileContents:
                 self.natoms = (self.nfeats + 6) // 3
@@ -419,7 +444,7 @@ class Model(File):
             if self.weights is FileContents:
                 self.weights = self.compute_weights()
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write("# [metadata]\n")
             f.write(f"# program {self.program}\n")
             f.write(f"# version {self.program_version}\n")
@@ -458,10 +483,10 @@ class Model(File):
                 f.write(f"{' '.join(map(str, xi))}\n")
             f.write("\n")
             f.write("[training_data.y]\n")
-            f.write('\n'.join(map(str, self.y.flatten())))
+            f.write("\n".join(map(str, self.y.flatten())))
             f.write("\n\n")
             f.write("[weights]\n")
-            f.write('\n'.join(map(str, self.weights.flatten())))
+            f.write("\n".join(map(str, self.weights.flatten())))
             f.write("\n")
 
     def __repr__(self):

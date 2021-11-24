@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, IO
+from typing import IO, Optional
 
 import numpy as np
 
@@ -92,6 +92,7 @@ class CompositeKernel(Kernel, ABC):
 
 class KernelSum(CompositeKernel):
     """Kernel addition implementation"""
+
     def k(self, xi, xj):
         return self.k1.k(xi, xj) + self.k2.k(xi, xj)
 
@@ -111,6 +112,7 @@ class KernelSum(CompositeKernel):
 
 class KernelProd(CompositeKernel):
     """Kernel multiplication implementation"""
+
     @property
     def params(self):
         return np.concatenate(self.k1.params, self.k2.params)

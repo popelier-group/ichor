@@ -4,12 +4,11 @@ from typing import List, Optional, Tuple
 from ichor.batch_system import BATCH_SYSTEM, JobID
 from ichor.common.functools import classproperty
 from ichor.common.io import mkdir
+from ichor.common.types import BoolToggle
 from ichor.common.uid import set_uid
+from ichor.machine import MACHINE, SubmitType
 from ichor.submission_script.command_group import CommandGroup
 from ichor.submission_script.data_lock import DataLock
-from ichor.common.types import BoolToggle
-from ichor.machine import MACHINE, SubmitType
-
 
 SUBMIT_ON_COMPUTE = BoolToggle(False)
 
@@ -289,7 +288,11 @@ class SubmissionScript:
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
         from ichor.batch_system import BATCH_SYSTEM, NodeType
 
-        if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode or SUBMIT_ON_COMPUTE and MACHINE.submit_type is SubmitType.SubmitOnCompute:
+        if (
+            BATCH_SYSTEM.current_node() is not NodeType.ComputeNode
+            or SUBMIT_ON_COMPUTE
+            and MACHINE.submit_type is SubmitType.SubmitOnCompute
+        ):
             return BATCH_SYSTEM.submit_script(self.path, hold)
 
     def __enter__(self) -> "SubmissionScript":

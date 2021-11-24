@@ -2,11 +2,13 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from ichor.common.io import pushd
-from ichor.tab_completer import PathCompleter
 from ichor.common.os import input_with_prefill
+from ichor.tab_completer import PathCompleter
 
 
-def get_path(startdir: Path = Path.cwd(), prompt="Enter Path: ", prefill: str = "") -> Path:
+def get_path(
+    startdir: Path = Path.cwd(), prompt="Enter Path: ", prefill: str = ""
+) -> Path:
     with PathCompleter():
         with pushd(startdir):
             while True:

@@ -151,8 +151,10 @@ class MEPE(ActiveLearningMethod):
             alpha = self.alpha
             """Eq. 23"""
             # todo: get max (and max indices) from batch
-            epe.append((alpha * cv_errors - (1.0 - alpha) * variance).reduce(-1))
-            #batched_points.dump()
+            epe.append(
+                (alpha * cv_errors - (1.0 - alpha) * variance).reduce(-1)
+            )
+            # batched_points.dump()
 
         epe = np.array(epe).flatten()
 

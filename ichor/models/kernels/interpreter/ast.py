@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Dict
+
 import numpy as np
 
 from ichor.models.kernels.constant import ConstantKernel

@@ -1,11 +1,11 @@
-from typing import Optional, IO
+from typing import IO, Optional
 
 import numpy as np
 
 from ichor.common.functools import cached_property
+from ichor.common.numpy import batched_array
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
-from ichor.common.numpy import batched_array
 
 
 class RBFCyclic(Kernel):
@@ -41,7 +41,10 @@ class RBFCyclic(Kernel):
     """
 
     def __init__(
-        self, name: str, thetas: np.ndarray, active_dims: Optional[np.ndarray] = None
+        self,
+        name: str,
+        thetas: np.ndarray,
+        active_dims: Optional[np.ndarray] = None,
     ):
 
         """
@@ -76,9 +79,12 @@ class RBFCyclic(Kernel):
             :type: `np.ndarray`
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
-        diff = x2[np.newaxis, :, self.active_dims] - x1[:, np.newaxis, self.active_dims]
+        diff = (
+            x2[np.newaxis, :, self.active_dims]
+            - x1[:, np.newaxis, self.active_dims]
+        )
         diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (
-                2 * np.pi
+            2 * np.pi
         ) - np.pi
         diff *= diff
         diff *= self._thetas

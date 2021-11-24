@@ -1,5 +1,6 @@
-import numpy as np
 from typing import IO
+
+import numpy as np
 
 from ichor.models.mean.mean import Mean
 

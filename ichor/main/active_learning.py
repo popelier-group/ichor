@@ -1,12 +1,12 @@
 from pathlib import Path
 from typing import Optional
 
+from ichor.auto_run.counter import read_counter, write_counter
+from ichor.auto_run.stop import stop, stopped
 from ichor.common.io import mkdir, remove
 from ichor.files import PointsDirectory
 from ichor.logging import logger
 from ichor.models import Models
-from ichor.auto_run.counter import read_counter, write_counter
-from ichor.auto_run.stop import stop, stopped
 
 
 def active_learning(
@@ -67,7 +67,9 @@ def active_learning(
         new_training_point.move(new_directory)
 
     if Arguments.auto_run:
-        logger.info(f"Completed iteration {current_iteration} of {max_iteration}")
+        logger.info(
+            f"Completed iteration {current_iteration} of {max_iteration}"
+        )
 
         current_iteration += 1
         write_counter(current_iteration, max_iteration)

@@ -1,4 +1,3 @@
-
 """
 Global variables are the backbone of ichor and are used throughout
 Mutable global variables are tricky things and should be used with caution, the global variables
@@ -114,6 +113,7 @@ from ichor.globals.os import OS
 from ichor.problem_finder import PROBLEM_FINDER
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
+
 
 class GlobalVariableError(Exception):
     pass

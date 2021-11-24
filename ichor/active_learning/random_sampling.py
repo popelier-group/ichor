@@ -25,8 +25,8 @@ class RandomSampling(ActiveLearningMethod):
         return "random_sampling"
 
     def get_points(self, points: ListOfAtoms, npoints) -> np.ndarray:
-        """ Gets indices of random points in the sample pool and adds them to the training set.
-        
+        """Gets indices of random points in the sample pool and adds them to the training set.
+
         :param points: A ListOfAtoms instance from which to take points
         :param npoints: The number of points which to add to the training set
         :return: The indices of randomly selected points which should be added to the training set

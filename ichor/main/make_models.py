@@ -7,18 +7,17 @@ from ichor import constants
 from ichor.batch_system import JobID
 from ichor.common.io import cp, mkdir
 from ichor.common.str import get_digits
+from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import PointsDirectory
 from ichor.globals import GLOBALS
 from ichor.logging import logger
 from ichor.menu import Menu
+from ichor.models import Model
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
 from ichor.tab_completer import ListCompleter
-from ichor.file_structure import FILE_STRUCTURE
-from ichor.models import Model
-
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -213,9 +212,7 @@ def make_models(
     model_types = (
         [ty for ty in types] if types is not None else [default_model_type]
     )
-    atom_models_to_make = atoms or [
-        atom.name for atom in _model_data[0].atoms
-    ]
+    atom_models_to_make = atoms or [atom.name for atom in _model_data[0].atoms]
 
     logger.info(
         f"Making Models for {atom_models_to_make} atoms and {model_types} types with {n_training_points} training points"
@@ -242,7 +239,7 @@ def _move_model(f: Path):
 
     cp(f, FILE_STRUCTURE["models"])
     model_log = FILE_STRUCTURE["model_log"] / (
-            GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
+        GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
     )
     mkdir(model_log)
     cp(f, model_log)

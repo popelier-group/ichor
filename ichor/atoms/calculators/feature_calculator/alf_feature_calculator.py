@@ -244,13 +244,19 @@ class ALFFeatureCalculator(FeatureCalculator):
             :type: `np.ndarray`
                 A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of.
         """
-        
+
         if len(atom.parent) == 2:
-            feature_array = np.empty(1)  # if only 2 atoms are in parent, there are only 2 atoms in the system so there is only 1 feature - distance.
+            feature_array = np.empty(
+                1
+            )  # if only 2 atoms are in parent, there are only 2 atoms in the system so there is only 1 feature - distance.
         elif len(atom.parent) > 2:
-            feature_array = np.empty(3 * len(atom.parent) - 6)  # most systems have more than 2 atoms
+            feature_array = np.empty(
+                3 * len(atom.parent) - 6
+            )  # most systems have more than 2 atoms
         else:
-            raise ValueError("atom.parent needs to have more than 1 atom in order to calculate features.")
+            raise ValueError(
+                "atom.parent needs to have more than 1 atom in order to calculate features."
+            )
 
         # Convert to angstroms to make sure units are in angstroms
         # For not features are calculated in bohr, so the unit_conversion is ang2bohr
@@ -265,19 +271,19 @@ class ALFFeatureCalculator(FeatureCalculator):
             x_axis_atom.coordinates - atom.coordinates
         )
         x_bond_norm = np.linalg.norm(x_axis_vect)
-        
+
         if len(atom.parent) == 2:
-            
+
             feature_array[0] = x_bond_norm
             return feature_array
-        
+
         # this code is only needed if atom.parent is more than 2 atoms (so it has 3N-6 features)
         xy_plane_atom = cls.calculate_xy_plane_atom(atom, alf)
-        
+
         xy_plane_vect = unit_conversion * (
             xy_plane_atom.coordinates - atom.coordinates
         )
-        
+
         xy_bond_norm = np.linalg.norm(xy_plane_vect)
 
         angle = np.arccos(
@@ -319,5 +325,5 @@ class ALFFeatureCalculator(FeatureCalculator):
                 feature_array[i_feat] = np.arctan2(zeta[1], zeta[0])
 
                 i_feat += 1
-                
+
         return feature_array
