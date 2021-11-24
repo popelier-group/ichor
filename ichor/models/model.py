@@ -352,8 +352,6 @@ class Model(File):
         from ichor import __version__
         path = path or self.path
 
-        self._must_exist = False
-
         if not path.parent.exists():
             mkdir(path.parent)
         if path.is_dir():
