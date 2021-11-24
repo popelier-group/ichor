@@ -66,7 +66,7 @@ class Models(Directory, list):
         return list(
             set(
                 natsorted(
-                    [model.atom_name for model in self], key=ignore_alpha
+                    [model.atom for model in self], key=ignore_alpha
                 )
             )
         )
@@ -97,7 +97,7 @@ class Models(Directory, list):
     @property
     def ialf_dict(self) -> Dict[str, np.ndarray]:
         """Returns the zero index alf from each model file as a dictionary e.g. {'O1': [0, 1, 2], 'H2': [1, 0, 2], 'H3': [2, 0, 1]}"""
-        return {model.atom_name: model.ialf for model in self}
+        return {model.atom: model.ialf for model in self}
 
     @property
     def ntrain(self) -> int:
@@ -196,7 +196,7 @@ class ModelsView(Models):
         list.__init__(self)
         for arg in args:
             for model in models:
-                if arg in (model.atom_name, model.type):
+                if arg in (model.atom, model.type):
                     self.append(model)
 
     def __getattr__(self, item):
