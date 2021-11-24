@@ -44,7 +44,7 @@ __version__ = Version("3.0.1")
 import sys
 
 from ichor.arguments import Arguments
-from ichor.globals import GLOBALS, Globals
+from ichor.globals import GLOBALS
 from ichor.main import main_menu
 
 
