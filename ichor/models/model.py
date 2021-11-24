@@ -77,6 +77,8 @@ class Model(File):
         self.kernel = FileContents
         self.x = FileContents
         self.y = FileContents
+        self.input_units = FileContents
+        self.output_unit = FileContents
         self.likelihood = FileContents
         self.nugget = FileContents
         self.weights = FileContents
