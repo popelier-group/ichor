@@ -357,6 +357,11 @@ class Model(File):
         if path.is_dir():
             path = path / f"{self.system}_{self.type}_{self.atom}{Model.filetype}"
 
+        try:
+            self.read()
+        except FileNotFoundError:
+            pass
+
         self.program = self.program if self.program is not FileContents else "ichor"
         self.program_version = self.program_version if self.program_version is not FileContents else __version__
         self.nugget = self.nugget if self.nugget is not FileContents else 1e-10
@@ -458,9 +463,10 @@ class Model(File):
             f.write("\n")
             f.write("[training_data.y]\n")
             f.write('\n'.join(map(str, self.y.flatten())))
-            f.write("\n")
+            f.write("\n\n")
             f.write("[weights]\n")
             f.write('\n'.join(map(str, self.weights.flatten())))
+            f.write("\n")
 
     def __repr__(self):
         return f"{self.__class__.__name__}(system={self.system}, atom={self.atom}, type={self.type})"

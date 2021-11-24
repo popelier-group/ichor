@@ -52,8 +52,8 @@ class RBF(Kernel):
         f.write(f"[kernel.{self.name}]\n")
         f.write("type constant\n")
         f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}")
-        f.write(f"thetas {' '.join(map(str, self._thetas))}")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}\n")
+        f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):
         return f"{self.__class__.__name__}: thetas: {self._thetas}"

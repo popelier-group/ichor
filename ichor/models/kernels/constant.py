@@ -29,5 +29,5 @@ class ConstantKernel(Kernel):
         f.write(f"[kernel.{self.name}]\n")
         f.write("type constant\n")
         f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}\n")
         f.write(f"value {self.value}\n")
