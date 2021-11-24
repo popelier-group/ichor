@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Dict, Optional
 
 import numpy as np
 
@@ -13,6 +13,26 @@ from ichor.models.kernels import RBF, Kernel, PeriodicKernel, RBFCyclic, Constan
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
                                ZeroMean)
+from ichor.globals import GLOBALS
+from ichor.common.types import Version
+
+
+def _get_default_input_units(nfeats: int) -> List[str]:
+    units = []
+    for i in range(min(nfeats, 3)):
+        units += [["bohr", "bohr", "radians"][i]]
+    for i in range(3, nfeats):
+        units += [["bohr", "radians", "radians"][i%3]]
+    return units
+
+
+def _get_default_output_unit(property: str) -> str:
+    if property == "iqa":
+        return "Ha"
+    elif property == "q00":
+        return "e"
+    else:
+        return "unknown"
 
 
 class Model(File):
@@ -34,8 +54,14 @@ class Model(File):
     kernel: Kernel
     x: np.ndarray
     y: np.ndarray
+    input_units: List[str]
+    output_unit: str
+    likelihood: float
     nugget: float
     weights: np.ndarray
+    program: str
+    program_version: Version
+    notes: Dict[str, str]
 
     def __init__(self, path: Path):
         File.__init__(self, path)
@@ -51,8 +77,12 @@ class Model(File):
         self.kernel = FileContents
         self.x = FileContents
         self.y = FileContents
+        self.likelihood = FileContents
         self.nugget = FileContents
         self.weights = FileContents
+        self.program = FileContents
+        self.program_version = FileContents
+        self.notes = FileContents
 
     @buildermethod
     def _read_file(self) -> None:
@@ -60,14 +90,33 @@ class Model(File):
         kernel_composition = ""
         kernel_list = {}
 
+        self.notes = {}
         self.nugget = 1e-10
 
         with open(self.path) as f:
             for line in f:
+                if "program" in line:
+                    self.program = line.split()[-1]
+                    continue
+
+                if "program" in line:
+                    self.program_version = Version(line.split()[-1])
+                    continue
+
                 if (
                     "nugget" in line
                 ):  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
-                    self._nugget = float(line.split()[-1])
+                    self.nugget = float(line.split()[-1])
+                    continue
+
+                if "likelihood" in line:
+                    self.likelihood = float(line.split()[-1])
+                    continue
+
+                if "#" in line and "=" in line:
+                    line = line.lstrip("#")
+                    key, val = line.split("=")
+                    self.notes[key.strip()] = val.strip()
                     continue
 
                 if line.startswith("#"):
@@ -182,6 +231,12 @@ class Model(File):
                         )
                     continue
 
+                if "units.x" in line:
+                    self.input_units = line.split()[1:]
+
+                if "units.y" in line:
+                    self.output_unit = line.split()[-1]
+
                 # training inputs data
                 if "[training_data.x]" in line:
                     line = next(f)
@@ -259,6 +314,23 @@ class Model(File):
         """Decomposes the covariance matrix into L and L^T. Returns the lower triangular matrix L."""
         return np.linalg.cholesky(self.R)
 
+    @cached_property
+    def _y_minus_mean(self):
+        return self.y - self.mean.value(self.x)
+
+    @cached_property
+    def logdet(self):
+        sign, logdet = np.linalg.slogdet(self.R)
+        return sign * logdet
+
+    def compute_weights(self) -> np.ndarray:
+        """Computes the training weights from the data given"""
+        return np.linalg.solve(self.lower_cholesky, self._y_minus_mean)
+
+    def compute_likelihood(self) -> float:
+        """Computes the marginal likelihood from the data given"""
+        return 0.5*np.dot(self._y_minus_mean.T, self.compute_weights()) - 0.5*self.logdet - 0.5*self.ntrain*np.log(2*np.pi)
+
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """Returns an array containing the test point predictions."""
         return (
@@ -283,11 +355,75 @@ class Model(File):
         if path.is_dir():
             path = path / f"{self.system}_{self.type}_{self.atom}{Model.filetype}"
 
+        self.program = self.program if self.program is not FileContents else "ichor"
+        self.program_version = self.program_version if self.program_version is not FileContents else __version__
+        self.nugget = self.nugget if self.nugget is not FileContents else 1e-10
+
+        self.system = self.system if self.system is not FileContents else GLOBALS.SYSTEM_NAME
+        self.atom = self.atom if self.atom is not FileContents else "X1"
+        self.type = self.type if self.type is not FileContents else "p1"
+        self.alf = self.alf if self.alf is not FileContents else [1, 1, 1]
+
+        if self.x is not FileContents:
+            if self.x.ndim == 1:
+                self.x = self.x.reshape(1, -1)
+            elif self.x.ndim != 2:
+                raise ValueError(f"Training Input (x) must be 2D, {self.x.ndim}D array encountered")
+            if self.nfeats is FileContents:
+                self.nfeats = self.x.shape[1]
+            if self.ntrain is FileContents:
+                self.ntrain = self.x.shape[0]
+
+        if self.nfeats is FileContents and self.natoms is not FileContents:
+            self.nfeats = 3*self.natoms - 6
+
+        if self.natoms is FileContents and self.nfeats is not FileContents:
+            self.natoms = (self.nfeats + 6) // 3
+
+        if self.natoms is FileContents:
+            self.natoms = 1
+
+        if self.nfeats is FileContents:
+            self.nfeats = 0
+
+        if self.ntrain is FileContents:
+            self.ntrain = 0
+
+        if self.x is FileContents:
+            self.x = np.zeros((self.ntrain, self.nfeats))
+
+        if self.y is FileContents:
+            self.y = np.zeros((self.ntrain, 1))
+
+        if self.input_units is FileContents:
+            self.input_units = _get_default_input_units(self.nfeats)
+
+        if self.output_unit is FileContents:
+            self.output_unit = _get_default_output_unit(self.type)
+
+        if self.kernel is FileContents:
+            self.kernel = RBFCyclic("k1", np.ones(self.nfeats))
+
+        if self.mean is FileContents:
+            if self.ntrain == 0:
+                self.mean = ConstantMean(0.0)
+            else:
+                self.mean = ConstantMean(np.mean(self.y.flatten()))
+
+        if self.likelihood is FileContents:
+            self.likelihood = self.compute_likelihood()
+
+        if self.weights is FileContents:
+            self.weights = self.compute_weights()
+
         with open(path, 'w') as f:
             f.write("# [metadata]\n")
-            f.write("# program ichor\n")
-            f.write(f"# version {__version__}\n")
+            f.write(f"# program {self.program}\n")
+            f.write(f"# version {self.program_version}\n")
             f.write(f"# nugget {self.nugget}\n")
+            f.write(f"# nugget {self.likelihood}\n")
+            for key, val in self.notes.items():
+                f.write(f"# {key} = {val}\n")
             f.write("\n")
             f.write("[system]\n")
             f.write(f"name {self.system}\n")
@@ -309,8 +445,8 @@ class Model(File):
             self.kernel.write(f)
             f.write("\n")
             f.write("[training_data]\n")
-            f.write("units.x TODO\n")
-            f.write("units.y TODO\n")
+            f.write(f"units.x {' '.join(self.input_units)}\n")
+            f.write(f"units.y {self.output_unit}\n")
             f.write("scaling.x none\n")
             f.write("scaling.y none\n")
             f.write("\n")
@@ -323,9 +459,6 @@ class Model(File):
             f.write("\n")
             f.write("[weights]\n")
             f.write('\n'.join(map(str, self.weights.flatten())))
-
-
-
 
     def __repr__(self):
         return f"{self.__class__.__name__}(system={self.system}, atom={self.atom}, type={self.type})"
