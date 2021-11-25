@@ -3,7 +3,7 @@ from typing import IO, Optional
 import numpy as np
 
 from ichor.common.functools import cached_property
-from ichor.common.numpy import batched_array
+from ichor.common.np import batched_array
 from ichor.models.kernels.distance import Distance
 from ichor.models.kernels.kernel import Kernel
 

@@ -5,7 +5,7 @@ import numpy as np
 
 from ichor.atoms import ListOfAtoms
 from ichor.common.functools import classproperty
-from ichor.common.numpy import batched_array
+from ichor.common.np import batched_array
 from ichor.globals import GLOBALS
 from ichor.models import Models
 

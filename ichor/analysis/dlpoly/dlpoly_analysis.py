@@ -14,7 +14,7 @@ from ichor.analysis.get_models import get_models_from_path
 from ichor.analysis.opt import find_opt
 from ichor.batch_system import JobID
 from ichor.common.io import get_files_of_type
-from ichor.common.numpy import dict_of_list_to_dict_of_array
+from ichor.common.np import dict_of_list_to_dict_of_array
 from ichor.constants import ha_to_kj_mol
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, WFN
