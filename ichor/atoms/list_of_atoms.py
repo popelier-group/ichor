@@ -3,8 +3,6 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ichor.files.point_directory import PointDirectory
-
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
