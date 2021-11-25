@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from ichor.batch_system import BATCH_SYSTEM
 from ichor.common.functools import classproperty
-from ichor.logging import logger
+from ichor.log import logger
 from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.submission_script.submision_script import SubmissionScript
 
@@ -161,7 +161,7 @@ def default_check(*args, **kwargs):
     Note: Although implemented, should never be used as one should implement a function that actually checks
           whether a task has completed successfully
     """
-    from ichor.logging import logger
+    from ichor.log import logger
 
     logger.warn(
         "Default check function being used, implement a custom function to check task has completed successfully"

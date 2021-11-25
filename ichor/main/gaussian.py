@@ -5,7 +5,7 @@ from typing import List, Optional
 from ichor.batch_system import JobID
 from ichor.common.io import last_line
 from ichor.files import GJF, PointsDirectory
-from ichor.logging import logger
+from ichor.log import logger
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)
 
@@ -117,7 +117,7 @@ def scrub_gaussian(gaussian_file: str):
 
     from ichor.common.io import mkdir, move
     from ichor.file_structure import FILE_STRUCTURE
-    from ichor.logging import logger
+    from ichor.log import logger
 
     gaussian_file = Path(gaussian_file)
     wfn_file_path = Path(gaussian_file).with_suffix(".wfn")

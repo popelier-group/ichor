@@ -28,7 +28,7 @@ class ICHORCommand(PythonCommand):
         PythonCommand.__init__(
             self,
             script
-            or (Path(ichor.__file__).parent.parent / "ichor3.py").resolve(),
+            or (Path(ichor.__file__).parent).resolve(),
             args if args is not None else [],
         )
 

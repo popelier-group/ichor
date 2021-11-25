@@ -3,7 +3,7 @@ for points)."""
 
 import logging
 
-from ichor.logging.concurrent_log_handler import ConcurrentRotatingFileHandler
+from ichor.log.concurrent_log_handler import ConcurrentRotatingFileHandler
 
 LOG_LEVEL = logging.DEBUG
 

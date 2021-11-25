@@ -69,9 +69,9 @@ from contextlib import contextmanager
 from logging import LogRecord
 from logging.handlers import BaseRotatingHandler
 
-from ichor.logging.concurrent_log_handler.__version__ import (__author__,
+from ichor.log.concurrent_log_handler.__version__ import (__author__,
                                                               __version__)
-from ichor.logging.portalocker import LOCK_EX, lock, unlock
+from ichor.log.portalocker import LOCK_EX, lock, unlock
 
 try:
     import grp
