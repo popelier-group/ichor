@@ -94,7 +94,7 @@ class RBFCyclic(Kernel):
         f.write(f"[kernel.{self.name}]\n")
         f.write("type rbf-cyclic\n")
         f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(f"active_dimensions {' '.join(map(str, self.active_dims))}\n")
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n")
         f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):
