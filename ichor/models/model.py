@@ -242,10 +242,10 @@ class Model(File):
                 # training inputs data
                 if "[training_data.x]" in line:
                     line = next(f)
-                    x = np.empty((self.ntrain, self.nfeats))
+                    self.x = np.empty((self.ntrain, self.nfeats))
                     i = 0
                     while line.strip() != "":
-                        x[i, :] = np.array(
+                        self.x[i, :] = np.array(
                             [float(num) for num in line.split()]
                         )
                         i += 1
@@ -255,20 +255,20 @@ class Model(File):
                 # training labels data
                 if "[training_data.y]" in line:
                     line = next(f)
-                    y = np.empty((self.ntrain, 1))
+                    self.y = np.empty((self.ntrain, 1))
                     i = 0
                     while line.strip() != "":
-                        y[i, 0] = float(line)
+                        self.y[i, 0] = float(line)
                         i += 1
                         line = next(f)
                     continue
 
                 if "[weights]" in line:
                     line = next(f)
-                    weights = np.empty((self.ntrain, 1))
+                    self.weights = np.empty((self.ntrain, 1))
                     i = 0
                     while line.strip() != "":
-                        weights[i, 0] = float(line)
+                        self.weights[i, 0] = float(line)
                         i += 1
                         try:
                             line = next(f)
