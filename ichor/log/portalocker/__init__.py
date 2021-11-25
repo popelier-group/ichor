@@ -1,7 +1,7 @@
 """ Code vendored from portalocker  Python package (https://pypi.org/project/portalocker/) and modified to work for ICHOR to remove 
 portalocker as a dependency that needs to be downloaded separately."""
 
-from ichor.logging.portalocker import (__about__, constants, exceptions,
+from ichor.log.portalocker import (__about__, constants, exceptions,
                                        portalocker, utils)
 
 try:  # pragma: no cover

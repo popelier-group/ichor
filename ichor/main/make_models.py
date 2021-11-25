@@ -10,7 +10,7 @@ from ichor.common.str import get_digits
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import PointsDirectory
 from ichor.globals import GLOBALS
-from ichor.logging import logger
+from ichor.log import logger
 from ichor.menu import Menu
 from ichor.models import Model
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,

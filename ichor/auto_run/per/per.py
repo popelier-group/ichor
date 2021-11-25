@@ -5,7 +5,7 @@ from typing import Callable, List, Optional
 
 from ichor.auto_run.ichor_jobs import submit_ichor_collate_log_job_to_auto_run
 from ichor.batch_system import JobID
-from ichor.common.io import cp, mkdir, pushd, relpath
+from ichor.common.io import cp, mkdir, pushd, relpath, remove
 from ichor.common.points import get_points_location
 
 
@@ -61,6 +61,9 @@ def auto_run_per_value(
 
                 if points_location.suffix != ".xyz":
                     raise TypeError("Cannot find xyz for make sets")
+
+                if (path / points_location.name).exists():
+                    remove(path / points_location.name)
 
                 (path / points_location.name).symlink_to(
                     relpath(points_location, path)

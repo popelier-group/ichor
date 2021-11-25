@@ -8,7 +8,7 @@ import tempfile
 import time
 import typing
 
-from ichor.logging.portalocker import constants, exceptions, portalocker
+from ichor.log.portalocker import constants, exceptions, portalocker
 
 DEFAULT_TIMEOUT = 5
 DEFAULT_CHECK_INTERVAL = 0.25

@@ -114,7 +114,7 @@ class ListOfAtoms(list):
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x `slice` x `n_features`.
         """
 
-        from ichor.files import PointsDirectory, trajectory
+        from ichor.files import PointsDirectory, Trajectory
 
         if isinstance(self, Trajectory):
             features = np.array(
@@ -153,6 +153,62 @@ class ListOfAtoms(list):
                 # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
                 if isinstance(point, PointDirectory):
                     f.write(f"    {len(point.atoms)}\ni = {i}\n")
+                    for atom in point.atoms:
+                        f.write(
+                            f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+                        )
+                # this is used when self is a Trajectory and you are iterating over Atoms instances
+                else:
+                    f.write(f"    {len(point)}\ni = {i}\n")
+                    for atom in point:
+                        f.write(
+                            f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+                        )
+
+    def coordinates_to_xyz_with_errors(
+        self, model_path: Union[str, Path], property_:str,
+        fname: Optional[Union[str, Path]] = None, step: Optional[int] = 1, 
+    ):
+        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
+        for that timestep. The comment lines in the xyz have absolute predictions errors. These can then be plotted in 
+        ALFVisualizer as cmap to see where poor predictions happen.
+
+        :param model: The model path to one atom.
+        :param points_dir: A PointsDirectory instance where the .wfn and .int files have already been calculated.
+            This can be the validation set or any other set that we want to calculate errors for.
+        :param property_: The property for which to predict for and get errors (iqa or any multipole moment)
+        :param fname: The file name to which to write the timesteps/coordinates
+        :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
+        """
+        from ichor.files import PointDirectory
+        from ichor.models import Model
+        
+        model_path = Path(model_path)
+        model_name = model_path.name
+        atom_name = str(model_name).split("_")[-1]
+
+        all_atom_names = self.atom_names
+        if atom_name not in all_atom_names:
+            raise ValueError(f'Atom name "{atom_name}" not in atom names "{all_atom_names}".')
+
+        model = Model(model_path)
+        predictions = model.predict(self)[::step]
+        true_values = getattr(self[atom_name], property_)[::step]
+        abs_errors = abs(predictions - true_values)
+
+        if fname is None:
+            fname = Path("system_to_xyz.xyz")
+        elif isinstance(fname, str):
+            fname = Path(fname)
+
+        fname = fname.with_suffix(".xyz")
+
+        with open(fname, "w") as f:
+            for i, (point, error) in enumerate(zip(self[::step], abs_errors)):
+                # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
+                
+                if isinstance(point, PointDirectory):
+                    f.write(f"    {len(point.atoms)}\ni = {i} energy = {error}\n")
                     for atom in point.atoms:
                         f.write(
                             f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"

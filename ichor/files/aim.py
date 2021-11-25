@@ -5,7 +5,7 @@ from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
 from ichor.common.types import Version
 from ichor.files.file import File, FileContents
-from ichor.logging import logger
+from ichor.log import logger
 
 
 class AimAtom:
