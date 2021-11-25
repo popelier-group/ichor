@@ -9,9 +9,10 @@ from ichor import constants, patterns
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
 from ichor.common.io import move
-from ichor.files import FileState
 from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryData, GeometryDataFile
+from ichor.multipoles import (rotate_dipole, rotate_hexadecapole,
+                              rotate_octupole, rotate_quadrupole)
 
 
 class INT(GeometryDataFile, File):
@@ -220,227 +221,66 @@ class INT(GeometryDataFile, File):
         """Rotates dipole moment from global cartesian to local cartesian. Attributes like self.q11c, self.q11s, etc. are not
         explicitly defined here, but they can be accessed because of the GeometryData __getattr__ implementation, which allows
         accessing dictionary keys as if they were attributes."""
-        # Global cartesian dipole moment d is a simple rearrangement of the spherical form
-        d = np.array(
-            [self.q11c, self.q11s, self.q10]
-        )  # these can be accessed like this because of GeometryData __getattr__ method
-
-        # Rotation of 1D cartesian tensor from global to local frame
-        rotated_d = np.einsum("ia,a->i", self.C, d)
-
-        # Rearrange local cartesian tensor back to spherical form
-        self.q10 = rotated_d[2]
-        self.q11c = rotated_d[0]
-        self.q11s = rotated_d[1]
+        self.q10, self.q11c, self.q11s = rotate_dipole(
+            self.q10, self.q11c, self.q11s, self.C
+        )
 
     def rotate_quadrupole(self):
         """Rotates quadrupole moments from the global to local frame"""
-
-        # transform global spherical tensor to global cartesian tensor
-        q_xx = 0.5 * constants.rt3 * self.q22c - self.q20
-        q_xy = 0.5 * constants.rt3 * self.q22s
-        q_xz = 0.5 * constants.rt3 * self.q21c
-        q_yy = -0.5 * constants.rt3 * self.q22c + self.q20
-        q_yz = 0.5 * constants.rt3 * self.q21s
-        q_zz = self.q20
-
-        q = np.array(
-            [[q_xx, q_xy, q_xz], [q_xy, q_yy, q_yz], [q_xz, q_yz, q_zz]]
+        (
+            self.q20,
+            self.q21c,
+            self.q21s,
+            self.q22c,
+            self.q22s,
+        ) = rotate_quadrupole(
+            self.q20, self.q21c, self.q21s, self.q22c, self.q22s, self.C
         )
-
-        # rotate global cartesian to local cartesian frame
-        rotated_q = np.einsum("ia,jb,ab->ij", self.C, self.C, q)
-
-        # transform local cartesian to local spherical tensor
-        self.q20 = rotated_q[2, 2]
-        self.q21c = constants.rt12_3 * rotated_q[0, 2]
-        self.q21s = constants.rt12_3 * rotated_q[1, 2]
-        self.q22c = constants.rt3_3 * (rotated_q[0, 0] - rotated_q[1, 1])
-        self.q22s = constants.rt12_3 * rotated_q[0, 1]
 
     def rotate_octupole(self):
         """Rotates octupole moments from the global to local frame"""
-
-        # transform global spherical tensor to global cartesian tensor
-        o_xxx = constants.rt5_8 * self.q33c - constants.rt3_8 * self.q31c
-        o_xxy = constants.rt5_8 * self.q33s - constants.rt1_24 * self.q31s
-        o_xxz = constants.rt5_12 * self.q32c - 0.5 * self.q30
-        o_xyy = -(constants.rt5_8 * self.q33c + constants.rt1_24 * self.q31c)
-        o_xyz = constants.rt5_12 * self.q32s
-        o_xzz = constants.rt2_3 * self.q31c
-        o_yyy = -(constants.rt5_8 * self.q33s + constants.rt3_8 * self.q31s)
-        o_yyz = -(constants.rt5_12 * self.q32c + 0.5 * self.q30)
-        o_yzz = constants.rt2_3 * self.q31s
-        o_zzz = self.q30
-
-        o = np.array(
-            [
-                [
-                    [o_xxx, o_xxy, o_xxz],
-                    [o_xxy, o_xyy, o_xyz],
-                    [o_xxz, o_xyz, o_xzz],
-                ],
-                [
-                    [o_xxy, o_xyy, o_xyz],
-                    [o_xyy, o_yyy, o_yyz],
-                    [o_xyz, o_yyz, o_yzz],
-                ],
-                [
-                    [o_xxz, o_xyz, o_xzz],
-                    [o_xyz, o_yyz, o_yzz],
-                    [o_xzz, o_yzz, o_zzz],
-                ],
-            ]
-        )
-
-        # rotate global cartesian to local cartesian frame
-        rotated_o = np.einsum("ia,jb,kc,abc->ijk", self.C, self.C, self.C, o)
-
-        # transform local cartesian to local spherical tensor
-        self.q30 = rotated_o[2, 2, 2]
-        self.q31c = constants.rt_3_3 * rotated_o[0, 2, 2]
-        self.q31s = constants.rt_3_3 * rotated_o[1, 2, 2]
-        self.q32c = constants.rt_3_5 * (
-            rotated_o[0, 0, 2] - rotated_o[1, 1, 2]
-        )
-        self.q32s = 2 * constants.rt_3_5 * rotated_o[0, 1, 2]
-        self.q33c = constants.rt_1_10 * (
-            rotated_o[0, 0, 0] - 3 * rotated_o[0, 1, 1]
-        )
-        self.q33s = constants.rt_1_10 * (
-            3 * rotated_o[0, 0, 1] - rotated_o[1, 1, 1]
+        (
+            self.q30,
+            self.q31c,
+            self.q31s,
+            self.q32c,
+            self.q32s,
+            self.q33c,
+            self.q33s,
+        ) = rotate_octupole(
+            self.q30,
+            self.q31c,
+            self.q31s,
+            self.q32c,
+            self.q32s,
+            self.q33c,
+            self.q33s,
+            self.C,
         )
 
     def rotate_hexadecapole(self):
         """Rotates hexadecapole moments from the global to local frame"""
-
-        # transform global spherical tensor to global cartesian tensor
-        h_xxxx = (
-            0.375 * self.q40
-            - 0.25 * constants.rt5 * self.q42c
-            + 0.125 * constants.rt35 * self.q44c
-        )
-        h_xxxy = 0.125 * (
-            constants.rt35 * self.q44s - constants.rt5 * self.q42s
-        )
-        h_xxxz = 0.0625 * (
-            constants.rt70 * self.q43c - 3.0 * constants.rt10 * self.q41c
-        )
-        h_xxyy = 0.125 * self.q40 - 0.125 * constants.rt35 * self.q44c
-        h_xxyz = 0.0625 * (
-            constants.rt70 * self.q43s - constants.rt10 * self.q41s
-        )
-        h_xxzz = 0.5 * (0.5 * constants.rt5 * self.q42c - self.q40)
-        h_xyyy = -0.125 * (
-            constants.rt5 * self.q42s + constants.rt35 * self.q44s
-        )
-        h_xyyz = -0.0625 * (
-            constants.rt10 * self.q41c + constants.rt70 * self.q43c
-        )
-        h_xyzz = 0.25 * constants.rt5 * self.q42s
-        h_xzzz = constants.rt5_8 * self.q41c
-        h_yyyy = (
-            0.375 * self.q40
-            + 0.25 * constants.rt5 * self.q42c
-            + 0.125 * constants.rt35 * self.q44c
-        )
-        h_yyyz = -0.0625 * (
-            3.0 * constants.rt10 * self.q41s + constants.rt70 * self.q43s
-        )
-        h_yyzz = -0.5 * (0.5 * constants.rt5 * self.q42c + self.q40)
-        h_yzzz = constants.rt5_8 * self.q41s
-        h_zzzz = self.q40
-
-        h = np.array(
-            [
-                [
-                    [
-                        [h_xxxx, h_xxxy, h_xxxz],
-                        [h_xxxy, h_xxyy, h_xxyz],
-                        [h_xxxz, h_xxyz, h_xxzz],
-                    ],
-                    [
-                        [h_xxxy, h_xxyy, h_xxyz],
-                        [h_xxyy, h_xyyy, h_xyyz],
-                        [h_xxyz, h_xyyz, h_xyzz],
-                    ],
-                    [
-                        [h_xxxz, h_xxyz, h_xxzz],
-                        [h_xxyz, h_xyyz, h_xyzz],
-                        [h_xxzz, h_xyzz, h_xzzz],
-                    ],
-                ],
-                [
-                    [
-                        [h_xxxy, h_xxyy, h_xxyz],
-                        [h_xxyy, h_xyyy, h_xyyz],
-                        [h_xxyz, h_xyyz, h_xyzz],
-                    ],
-                    [
-                        [h_xxyy, h_xyyy, h_xyyz],
-                        [h_xyyy, h_yyyy, h_yyyz],
-                        [h_xyyz, h_yyyz, h_yyzz],
-                    ],
-                    [
-                        [h_xxyz, h_xyyz, h_xyzz],
-                        [h_xyyz, h_yyyz, h_yyzz],
-                        [h_xyzz, h_yyzz, h_yzzz],
-                    ],
-                ],
-                [
-                    [
-                        [h_xxxz, h_xxyz, h_xxzz],
-                        [h_xxyz, h_xyyz, h_xyzz],
-                        [h_xxzz, h_xyzz, h_xzzz],
-                    ],
-                    [
-                        [h_xxyz, h_xyyz, h_xyzz],
-                        [h_xyyz, h_yyyz, h_yyzz],
-                        [h_xyzz, h_yyzz, h_yzzz],
-                    ],
-                    [
-                        [h_xxzz, h_xyzz, h_xzzz],
-                        [h_xyzz, h_yyzz, h_yzzz],
-                        [h_xzzz, h_yzzz, h_zzzz],
-                    ],
-                ],
-            ]
-        )
-
-        # rotate global cartesian to local cartesian frame
-        h_rotated = np.einsum(
-            "ia,jb,kc,ld,abcd->ijkl", self.C, self.C, self.C, self.C, h
-        )
-
-        # transform local cartesian to local spherical tensor
-        self.q40 = h_rotated[2, 2, 2, 2]
-        self.q41c = constants.rt_8_5 * h_rotated[0, 2, 2, 2]
-        self.q41s = constants.rt_8_5 * h_rotated[1, 2, 2, 2]
-        self.q42c = (
-            2
-            * constants.rt_1_5
-            * (h_rotated[0, 0, 2, 2] - h_rotated[1, 1, 2, 2])
-        )
-        self.q42s = 4 * constants.rt_1_5 * h_rotated[0, 1, 2, 2]
-        self.q43c = (
-            2
-            * constants.rt_2_35
-            * (h_rotated[0, 0, 0, 2] - 3 * h_rotated[0, 1, 1, 2])
-        )
-        self.q43s = (
-            2
-            * constants.rt_2_35
-            * (3 * h_rotated[0, 0, 1, 2] - h_rotated[1, 1, 1, 2])
-        )
-        self.q44c = constants.rt_1_35 * (
-            h_rotated[0, 0, 0, 0]
-            - 6 * h_rotated[0, 0, 1, 1]
-            + h_rotated[1, 1, 1, 1]
-        )
-        self.q44s = (
-            4
-            * constants.rt_1_35
-            * (h_rotated[0, 0, 0, 1] - h_rotated[0, 1, 1, 1])
+        (
+            self.q40,
+            self.q41c,
+            self.q41s,
+            self.q42c,
+            self.q42s,
+            self.q43c,
+            self.q43s,
+            self.q44c,
+            self.q44s,
+        ) = rotate_octupole(
+            self.q40,
+            self.q41c,
+            self.q41s,
+            self.q42c,
+            self.q42s,
+            self.q43c,
+            self.q43s,
+            self.q44c,
+            self.q44s,
+            self.C,
         )
 
     @buildermethod

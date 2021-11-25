@@ -36,11 +36,11 @@ $(VENV_NAME)/bin/activate: setup.py
 	${PYTHON} -m pip install -e .
 	touch $(VENV_NAME)/bin/activate
 
-lint: venv
-	${PYTHON} -m pylint ichor/
-	${PYTHON} -m mypy ichor/
+lint:
+	pylint ichor/
+	mypy ichor/
 
-format: venv
+format:
 	black ichor/
 	isort ichor/
 
