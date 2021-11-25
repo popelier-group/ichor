@@ -73,8 +73,8 @@ def octupole_cartesian_to_spherical(
     o: np.ndarray,
 ) -> Tuple[float, float, float, float, float, float, float]:
     q30 = o[2, 2, 2]
-    q31c = constants.rt_3_3 * o[0, 2, 2]
-    q31s = constants.rt_3_3 * o[1, 2, 2]
+    q31c = constants.rt3_2 * o[0, 2, 2]
+    q31s = constants.rt3_2 * o[1, 2, 2]
     q32c = constants.rt_3_5 * (o[0, 0, 2] - o[1, 1, 2])
     q32s = 2 * constants.rt_3_5 * o[0, 1, 2]
     q33c = constants.rt_1_10 * (o[0, 0, 0] - 3 * o[0, 1, 1])
