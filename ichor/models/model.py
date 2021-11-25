@@ -288,14 +288,6 @@ class Model(File):
     def atom_name(self, value: str):
         self.atom = value
 
-    @property
-    def property(self) -> str:
-        return self.property
-
-    @property.setter
-    def property(self, value: str):
-        self.property = value
-
     @classproperty
     def filetype(self) -> str:
         """Returns the suffix associated with GP model files"""
