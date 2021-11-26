@@ -47,7 +47,7 @@ class INTs(Directory, AtomicDict):
     def parse(self) -> None:
         for f in self:
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f, self.parent)
+                self[f.stem.upper()] = INT(f, self._parent)
         self.sort()
 
     def sort(self):
