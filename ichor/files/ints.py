@@ -20,7 +20,7 @@ class INTs(Directory, AtomicDict):
     ):
         self._parent = None
         if parent is not None:
-            self.parent = parent
+            self._parent = parent
         dict.__init__(self)
         Directory.__init__(self, path)
 
