@@ -13,7 +13,7 @@ class MinMax(MakeSetMethod):
 
     @classmethod
     def get_npoints(cls, npoints: int, points: ListOfAtoms) -> int:
-        return 2 * len(points[0].features)
+        return 2 * points[0].features.shape[-1]
 
     def get_points(self, points: ListOfAtoms) -> List[int]:
         from ichor.globals import GLOBALS
