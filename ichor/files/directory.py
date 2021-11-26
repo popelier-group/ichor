@@ -112,7 +112,7 @@ class AnnotatedDirectory(Directory, ABC):
                     dirtypes[var] = type_
         return dirtypes
 
-    def files(self) -> list:
+    def files(self) -> List[File]:
         """Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `File` class."""
         return [
             getattr(self, var)
@@ -120,13 +120,16 @@ class AnnotatedDirectory(Directory, ABC):
             if isinstance(getattr(self, var), File)
         ]
 
-    def directories(self) -> list:
+    def directories(self) -> List[Directory]:
         """Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `Directory` class."""
         return [
             getattr(self, var)
             for var in vars(self)
             if isinstance(getattr(self, var), Directory)
         ]
+
+    def path_objects(self) -> List[PathObject]:
+        return self.files() + self.directories()
 
     def dump(self):
         for f in self.files:

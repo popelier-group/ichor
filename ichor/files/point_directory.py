@@ -46,6 +46,9 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
                         Path(self.path) / (self.path.name + XYZ.filetype),
                         atoms=f.atoms,
                     )
+        for p in self.path_objects():
+            if hasattr(p, "parent"):
+                p.parent = self
 
     @property
     def atoms(self):
