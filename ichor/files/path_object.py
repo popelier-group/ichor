@@ -11,6 +11,10 @@ class PathObject(ABC, object):
     def __init__(self, path: Union[Path, str]):
         self.path = Path(path)
 
+    @property
+    def parent(self) -> Path:
+        return self.path.parent
+
     def exists(self) -> bool:
         """Determines if the path points to an existing directory or file on the storage drive."""
         return self.path.exists()
