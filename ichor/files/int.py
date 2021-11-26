@@ -270,7 +270,7 @@ class INT(GeometryDataFile, File):
             self.q43s,
             self.q44c,
             self.q44s,
-        ) = rotate_octupole(
+        ) = rotate_hexadecapole(
             self.q40,
             self.q41c,
             self.q41s,
