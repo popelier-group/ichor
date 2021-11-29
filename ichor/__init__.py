@@ -37,9 +37,10 @@ from ichor.common.types import Version
 from ichor.globals import GLOBALS
 from ichor.machine import MACHINE
 
-__all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM"]
-
 __version__ = Version("3.0.1")
+
+__all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM", "__version__"]
+
 
 import sys
 
