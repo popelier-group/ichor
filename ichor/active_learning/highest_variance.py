@@ -35,12 +35,11 @@ class HighestVariance(ActiveLearningMethod):
         :return: The indices of the points which should be added to the training set.
         """
 
-        variance = []
+        variance = np.array([])
         for batched_points in self.batch_points(points):
             features_dict = self.models.get_features_dict(batched_points)
-            variance.append(self.models.variance(features_dict))
+            variance = np.hstack((variance, self.models.variance(features_dict)))
 
         # sort the array from smallest to largest, but give only the indeces back. Then flip the indeces, so that
         # the point index with the largest variance is first. Finally, get the desired number of points
-        variance = np.array(variance).flatten()
         return np.flip(np.argsort(variance))[:npoints]
