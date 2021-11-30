@@ -7,7 +7,7 @@ import numpy as np
 
 from ichor.atoms import Atoms, ListOfAtoms
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
-from ichor.files import Directory
+from ichor.files import Directory, GeometryFile
 from ichor.itypes import F
 from ichor.models.model import Model
 from ichor.models.result import ModelsResult
@@ -130,7 +130,7 @@ class Models(Directory, list):
         )
 
     def get_features_dict(
-        self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, dict]
+        self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, GeometryFile, dict]
     ) -> Dict[str, np.ndarray]:
         """Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
 
@@ -142,6 +142,8 @@ class Models(Directory, list):
             return self._features_from_atoms(test_x)
         elif isinstance(test_x, ListOfAtoms):
             return self._features_from_list_of_atoms(test_x)
+        elif isinstance(test_x, GeometryFile):
+            return self._features_from_geometry_file(test_x)
         elif isinstance(test_x, np.ndarray):
             return self._features_from_array(test_x)
         elif isinstance(test_x, dict):
@@ -160,6 +162,15 @@ class Models(Directory, list):
     ) -> Dict[str, np.ndarray]:
         return {
             atom: x_test[atom].alf_features(alf=self.ialf_dict[atom])
+            for atom in self.atom_names
+            if atom in x_test.atom_names
+        }
+
+    def _features_from_geometry_file(
+        self, x_test: GeometryFile
+    ) -> Dict[str, np.ndarray]:
+        return {
+            atom: x_test.atoms[atom].alf_features(alf=self.ialf_dict[atom])
             for atom in self.atom_names
             if atom in x_test.atom_names
         }

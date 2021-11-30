@@ -15,6 +15,7 @@ from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.files.trajectory import Trajectory
 from ichor.files.wfn import WFN
 from ichor.files.xyz import XYZ
+from ichor.files.geometry import GeometryFile
 
 __all__ = [
     "File",
@@ -38,4 +39,5 @@ __all__ = [
     "PandoraDirectory",
     "OptionalFile",
     "OptionalPath",
+    "GeometryFile",
 ]
