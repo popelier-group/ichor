@@ -143,7 +143,7 @@ class MEPE(ActiveLearningMethod):
         :param npoints: The number of points to add to the training set from the sample pool based on the EPE criteria.
         """
 
-        epe = []
+        epe = np.array([])
         for batched_points in self.batch_points(points):
             features_dict = self.models.get_features_dict(batched_points)
             cv_errors = self.cv_error(features_dict)
@@ -151,12 +151,8 @@ class MEPE(ActiveLearningMethod):
             alpha = self.alpha
             """Eq. 23"""
             # todo: get max (and max indices) from batch
-            epe.append(
-                (alpha * cv_errors - (1.0 - alpha) * variance).reduce(-1)
-            )
-            # batched_points.dump()
-
-        epe = np.array(epe).flatten()
-
+            epe = np.hstack((epe, (alpha * cv_errors - (1.0 - alpha) * variance).reduce(-1)))
+        
         """Eq. 25"""
         return np.flip(np.argsort(epe), axis=-1)[:npoints]
+
