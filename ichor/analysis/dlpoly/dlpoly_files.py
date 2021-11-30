@@ -226,7 +226,7 @@ def write_control(path: Path, temperature: float = 0.0):
     with open(path / "CONTROL", "w+") as f:
         f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
         f.write("\n")
-        f.write("ensemble nvt hoover 0.04\n")
+        f.write(f"ensemble nvt hoover {GLOBALS.DLPOLY_HOOVER}\n")
         f.write("\n")
         if int(temperature) == 0:
             f.write("temperature 0\n")

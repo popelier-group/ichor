@@ -268,6 +268,7 @@ class Globals:
     DLPOLY_PRINT_EVERY: int = 1  # Print trajectory and stats every n steps
     DLPOLY_TIMESTEP: float = 0.001  # in ps
     DLPOLY_LOCATION: Path = Path("PROGRAMS/DLPOLY.Z")
+    DLPOLY_HOOVER: float = 0.04
 
     DLPOLY_CHECK_CONVERGENCE: bool = False
     DLPOLY_CONVERGENCE_CRITERIA: int = -1
