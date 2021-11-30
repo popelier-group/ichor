@@ -42,8 +42,8 @@ def auto_run_per_atom(run_func: Optional[Callable] = None) -> None:
 def run_missing_models(atom_dir: Path, make_on_compute: bool = False) -> JobID:
     with pushd(atom_dir, update_cwd=True):
         models_found = []
-        if FILE_STRUCTURE["models"].exists():
-            models_found += Models(FILE_STRUCTURE["models"]).types
+        #if FILE_STRUCTURE["models"].exists():
+        #    models_found += Models(FILE_STRUCTURE["models"]).types
         models_to_make = list(set(MODEL_TYPES) - set(models_found))
         make_models_func = auto_make_models if make_on_compute else make_models
         return make_models_func(
