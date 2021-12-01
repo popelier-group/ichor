@@ -40,7 +40,7 @@ def submit_pandora_input_to_pyscf(
         ):
             if (
                 force
-                or not (pandora_input.parent / PySCFDirectory.dirname).exists()
+                or not (pandora_input.parent / PandoraDirectory.dirname / PySCFDirectory.dirname).exists()
             ):
                 submission_script.add_command(
                     PandoraPySCFCommand(pandora_input, point_directory)
