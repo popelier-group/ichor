@@ -138,6 +138,7 @@ def child_process_queue_menu() -> None:
 
 
 def control_child_processes_menu_refresh(menu: Menu) -> None:
+    from ichor.main.main_menu import main_menu
     global child_processes
     menu.clear_options()
 
@@ -147,6 +148,9 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
         "e", "Edit Child Process List", edit_list_of_child_processes
     )
     menu.add_space()
+    menu.add_option(
+        "main", "Run Main Menu Function for each Child Process", main_menu, kwargs={"subdirs": child_processes}
+    )
     menu.add_option(
         "log", "Collate Model Logs from chile processes", collate_model_log
     )

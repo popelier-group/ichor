@@ -1,14 +1,20 @@
+import inspect
 import os
 import sys
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, Optional
 from uuid import uuid4
+from pathlib import Path
 
+from ichor.common.io import pushd
 from ichor.common.int import count_digits
 from ichor.problem_finder import PROBLEM_FINDER
 from ichor.tab_completer import ListCompleter
 
 
-class Menu(object):
+_subdirs = []
+
+
+class Menu:
     """A constructor class that makes menus to be displayed in ICHOR's Command Line Interface (CLI), such as
     when `python ichor3.py` is ran.
 
@@ -40,7 +46,9 @@ class Menu(object):
         space: bool = False,
         back: bool = False,
         exit: bool = False,
+        run_in_subdirectories: Optional[List[Path]] = None
     ):
+        global _subdirs
         self.title = title
         self.options = None
         if options is None:
@@ -48,7 +56,6 @@ class Menu(object):
         self.set_options(options)
         self.is_title_enabled = title is not None
         self.message = message
-        self.is_message_enabled = message is not None
         self.refresh = None  # Note it is good practice to define all instance attributes in the __init__ function
         self.set_refresh(refresh)
         self.prompt = prompt
@@ -67,6 +74,22 @@ class Menu(object):
         self.space = space
         self.back = back
         self.exit = exit
+
+        run_in_subdirectories = run_in_subdirectories or []
+        self._subdirs = run_in_subdirectories
+        if len(run_in_subdirectories) > 0:
+            _subdirs += run_in_subdirectories
+            self._subdirs = run_in_subdirectories
+        self.run_in_subdirectories = len(_subdirs) > 0
+
+        if self.run_in_subdirectories:
+            if self.message is None:
+                self.message = ""
+            self.message += "\n".join(
+                ["Running in Sub-Directories:"] + [f"- {subdir}" for subdir in _subdirs]
+            )
+
+        self.is_message_enabled = message is not None
 
     def set_options(self, options):
         """If a list of options to be displayed in the menu is passed when an instance of the class `Menu` is made, then this method is called.
@@ -198,13 +221,18 @@ class Menu(object):
             # most of the time, this will call an empty lambda function that returns None, since this is the default value
             # if another callable function is given when the menu object is being made, then use that as the refresh
             self.refresh(self)
-            func, wait, close = self.input()
+            func, wait, close, run_in_subdirs = self.input()
             if (
                 func == Menu.CLOSE
             ):  # if self.input() returns Menu.CLOSE, then set func to self.close
                 func = self.close
             print()
-            func()
+            if run_in_subdirs:
+                for subdir in _subdirs:
+                    with pushd(subdir, update_cwd=True):
+                        func()
+            else:
+                func()
             if close or self.auto_close:
                 self.close()
             input("\nContinue... [Return]") if wait else None
@@ -281,10 +309,16 @@ class Menu(object):
                 print()
         print()
 
+    def handler_is_sub_menu(self, handler) -> bool:
+        return any(
+            f"{self.__class__.__name__}(" in line
+            for line in inspect.getsource(handler).split('\n')
+        )
+
     # show the menu
     # get the option index from the input
     # return the corresponding option handler
-    def input(self) -> Tuple[Callable, bool, bool]:
+    def input(self) -> Tuple[Callable, bool, bool, bool]:
         """Shows the menu and waits for user input into the prompt. Once a user input is detected, it returns the
         handler function (with its respective key word arguments), as well as boolean values whether depending on
         whether or not there are wait or close options associated with the handler function.
@@ -325,6 +359,7 @@ class Menu(object):
                         lambda: handler(**kwargs),
                         index in self.wait_options,  # returns True or False
                         index in self.close_options,  # returns True or False
+                        self.run_in_subdirectories and not self.handler_is_sub_menu(handler)
                     )
                 except (ValueError, IndexError):
                     return self.input, False, False
@@ -347,9 +382,12 @@ class Menu(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        global _subdirs
         """Once the `menu`'s `with` context manager block ends, this `__exit__ method is automatically called. It adds
         options to navigate to other menus as well as to exit ICHOR. Finally, the menu's `run` method is called, which
         prints out the menu to the terminal with the options that the user can select from."""
         if any([self.space, self.back, self.exit]):
             self.add_final_options(self.space, self.back, self.exit)
         self.run()
+        _subdirs = list(set(_subdirs) - set(self._subdirs))
+

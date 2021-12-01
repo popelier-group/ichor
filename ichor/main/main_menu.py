@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional, List
 
 from ichor.analysis import analysis_menu
 from ichor.main.make_models import make_models_menu
@@ -62,7 +63,7 @@ def points_directory_menu(path: Path):
         pass
 
 
-def main_menu() -> None:
+def main_menu(subdirs: Optional[List[Path]] = None) -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
     from ichor.auto_run.standard_auto_run import auto_run
     from ichor.file_structure import FILE_STRUCTURE
@@ -76,6 +77,7 @@ def main_menu() -> None:
         space=True,
         back=False,
         exit=True,
+        run_in_subdirectories=subdirs
     ) as menu:
         # add options to the instance `menu`
         menu.add_option(
