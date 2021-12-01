@@ -328,9 +328,11 @@ class Globals:
     DROP_COMPUTE_LOCATION: Path = ""
 
     PANDORA_LOCATION: Path = ""
-    PANDORA_CCSDMOD: str = "ccsdHF"
-    MORFI_ANGULAR: int = 15
-    MORFI_RADIAL: float = 20.0
+    PANDORA_CCSDMOD: str = "ccsdM"
+    MORFI_ANGULAR: int = 5
+    MORFI_RADIAL: float = 10.0
+    MORFI_ANGULAR_H: int = 5
+    MORFI_RADIAL_H: float = 8.0
 
     ADD_DISPERSION_TO_IQA: bool = True
 

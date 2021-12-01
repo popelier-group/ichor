@@ -7,21 +7,26 @@ from ichor.atoms import Atom, Atoms
 from ichor.common.functools import classproperty
 from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.globals import GLOBALS
+from ichor.files.file import FileContents
 
 
 class PandoraCCSDmod(Enum):
     CCSD = "ccsd"
     CCSD_HF = "ccsdHF"
+    CCSD_MULLER = "ccsdM"
 
 
 class PandoraInput(QuantumChemistryProgramInput):
     def __init__(self, path: Path):
         QuantumChemistryProgramInput.__init__(self, path)
 
-        self.ccsdmod: Optional[PandoraCCSDmod] = None
+        self.ccsdmod: PandoraCCSDmod = FileContents
 
-        self.morfi_grid_radial: Optional[float] = None
-        self.morfi_grid_angular: Optional[int] = None
+        self.morfi_grid_radial: float = FileContents
+        self.morfi_grid_angular: int = FileContents
+
+        self.morfi_grid_radial_h: float = FileContents
+        self.morfi_grid_angular_h: int = FileContents
 
     @classproperty
     def filetype(self) -> str:
@@ -38,6 +43,8 @@ class PandoraInput(QuantumChemistryProgramInput):
         self.basis_set = data["pyscf"]["basis"]
         self.morfi_grid_angular = data["morfi"]["grid"]["angular"]
         self.morfi_grid_radial = data["morfi"]["grid"]["radial"]
+        self.morfi_grid_angular_h = data["morfi"]["grid"]["angular_h"]
+        self.morfi_grid_radial_h = data["morfi"]["grid"]["radial_h"]
 
     def format(self):
         self.method = GLOBALS.METHOD.lower()
@@ -47,6 +54,8 @@ class PandoraInput(QuantumChemistryProgramInput):
         self.ccsdmod = PandoraCCSDmod(GLOBALS.PANDORA_CCSDMOD)
         self.morfi_grid_angular = GLOBALS.MORFI_ANGULAR
         self.morfi_grid_radial = GLOBALS.MORFI_RADIAL
+        self.morfi_grid_angular_h = GLOBALS.MORFI_ANGULAR_H
+        self.morfi_grid_radial_h = GLOBALS.MORFI_RADIAL_H
 
     def write(self):
         self.format()
@@ -68,6 +77,8 @@ class PandoraInput(QuantumChemistryProgramInput):
                 "grid": {
                     "radial": self.morfi_grid_radial,
                     "angular": self.morfi_grid_angular,
+                    "radial_h": self.morfi_grid_radial_h,
+                    "angular_h": self.morfi_grid_angular_h,
                 },
             },
         }
