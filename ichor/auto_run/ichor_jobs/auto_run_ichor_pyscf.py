@@ -28,7 +28,7 @@ def submit_ichor_pyscf_command_to_auto_run(
     )
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
-        submit_points_directory_to_pyscf, str(directory.value)
+        submit_points_directory_to_pyscf, str(directory)
     )
     with TimingManager(submission_script, message="Sumitting GJFs"):
         submission_script.add_command(ichor_command)

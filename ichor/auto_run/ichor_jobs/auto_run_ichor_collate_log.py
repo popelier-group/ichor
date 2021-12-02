@@ -16,7 +16,7 @@ def submit_ichor_collate_log_job_to_auto_run(
 
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["collate_log"])
     ichor_command = ICHORCommand(auto_run=True)
-    ichor_command.add_function_to_job("collate_model_log", str(directory.value))
+    ichor_command.add_function_to_job("collate_model_log", str(directory))
     with TimingManager(
         submission_script,
         message=f"Collating Model Log for {directory} child processes",

@@ -23,7 +23,7 @@ def make_models(
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
         "make_models",
-        str(directory.value),
+        str(directory),
         str(atoms.value),
         str(ntrain),
         str(types.value),
