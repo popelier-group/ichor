@@ -348,7 +348,8 @@ def auto_run_qct(directory: Path):
     IterArgs.TrainingSetLocation = directory
     IterArgs.Atoms.value = points[0].atoms.names
 
-    submit_auto_run_iter(qct_func_order)
+    with DataLock():
+        submit_auto_run_iter(qct_func_order)
 
 
 def auto_make_models(

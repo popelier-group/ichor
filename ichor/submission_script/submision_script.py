@@ -244,7 +244,7 @@ class SubmissionScript:
                     and GLOBALS.MAX_RUNNING_TASKS > 0
                 ):
                     f.write(
-                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}"
+                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}\n"
                     )
             else:
                 f.write(f"{BATCH_SYSTEM.TaskID}=1\n")
