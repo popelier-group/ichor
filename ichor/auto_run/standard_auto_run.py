@@ -331,7 +331,7 @@ def rerun_from_failed() -> Optional[JobID]:
 
     current_iteration, max_iteration = read_counter(must_exist=False)
 
-    if current_iteration < max_iteration and len(get_current_jobs()) == 0:
+    if FILE_STRUCTURE["counter"].exists() and current_iteration < max_iteration and len(get_current_jobs()) == 0:
         GLOBALS.N_ITERATIONS = max_iteration - current_iteration
         GLOBALS.save_to_config()
         remove(FILE_STRUCTURE["counter"])

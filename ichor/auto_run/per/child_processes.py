@@ -13,9 +13,22 @@ from ichor.main.queue import delete_jobs
 
 def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
     child_processes = []
+
+    cp_dir = None
     if (src / FILE_STRUCTURE["child_processes"]).exists():
         with open(src / FILE_STRUCTURE["child_processes"], "r") as f:
             child_processes += json.load(f)
+    elif (src / FILE_STRUCTURE["atoms"]).exists():
+        cp_dir = src / FILE_STRUCTURE["atoms"]
+    elif (src / FILE_STRUCTURE["properties"]).exists():
+        cp_dir = src / FILE_STRUCTURE["properties"]
+
+    if cp_dir is not None:
+        for d in cp_dir.iterdir():
+            if d.is_dir() and (d / FILE_STRUCTURE["data"]).exists():
+                child_processes += [d]
+        with open(src / FILE_STRUCTURE["child_processes"], "w") as f:
+            json.dump(child_processes, f)
 
     for child_process in child_processes:
         child_processes += find_child_processes_recursively(child_process)
