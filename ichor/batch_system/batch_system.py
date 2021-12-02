@@ -160,6 +160,11 @@ class BatchSystem(ABC):
         stdout, _ = run_cmd(cmd)
         return stdout
 
+    @classmethod
+    @abstractmethod
+    def node_options(cls, include_nodes: List[str], exclude_nodes: List[str]) -> str:
+        pass
+
     @classproperty
     @abstractmethod
     def delete_job_command(self) -> List[str]:
