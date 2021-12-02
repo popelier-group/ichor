@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
@@ -9,7 +9,7 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
 
 def submit_aimall_job_to_auto_run(
     npoints: MutableValue,
-    atoms: MutableValue = None,
+    atoms: Union[MutableValue, List[int]] = None,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     """Submit an AIMALL job to the workload manager. This job generates .int files."""

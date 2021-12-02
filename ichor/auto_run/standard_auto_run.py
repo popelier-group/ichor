@@ -61,10 +61,10 @@ class IterUsage(Enum):
 class IterArgs:
     """Various arguments which need to be defined for a job to run successfully."""
 
-    TrainingSetLocation = FILE_STRUCTURE["training_set"]
-    SamplePoolLocation = FILE_STRUCTURE["sample_pool"]
-    FerebusDirectory = FILE_STRUCTURE["ferebus"]
-    ModelLocation = FILE_STRUCTURE["models"]
+    TrainingSetLocation = MutableValue(FILE_STRUCTURE["training_set"])
+    SamplePoolLocation = MutableValue(FILE_STRUCTURE["sample_pool"])
+    FerebusDirectory = MutableValue(FILE_STRUCTURE["ferebus"])
+    ModelLocation = MutableValue(FILE_STRUCTURE["models"])
     nPoints = MutableValue(1)  # Overwritten Based On IterState
     Atoms = MutableValue([])  # Overwritten from GLOBALS.ATOMS
     ModelTypes = MutableValue([])
@@ -261,9 +261,9 @@ def auto_run() -> JobID:
         for i, iter_state in enumerate(iterations):
             # the first job will execute this since the first iteration is IterState.First
             if iter_state is IterState.First:
-                if IterArgs.TrainingSetLocation.exists():
+                if IterArgs.TrainingSetLocation.value.exists():
                     IterArgs.nPoints.value = len(
-                        PointsDirectory(IterArgs.TrainingSetLocation)
+                        PointsDirectory(IterArgs.TrainingSetLocation.value)
                     )
                 else:
                     points_location = (
@@ -345,7 +345,7 @@ def auto_run_qct(directory: Path):
     ]
     points = PointsDirectory(directory)
     IterArgs.nPoints.value = len(points)
-    IterArgs.TrainingSetLocation = directory
+    IterArgs.TrainingSetLocation.value = directory
     IterArgs.Atoms.value = points[0].atoms.names
 
     with DataLock():
@@ -362,7 +362,7 @@ def auto_make_models(
         *get_model_steps(),
     ]
 
-    IterArgs.TrainingSetLocation = directory
+    IterArgs.TrainingSetLocation.value = directory
     if atoms is None:
         atoms = PointsDirectory(directory)[0].atoms.names
     IterArgs.Atoms.value = atoms

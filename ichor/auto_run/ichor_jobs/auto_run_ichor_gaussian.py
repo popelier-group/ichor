@@ -1,13 +1,15 @@
-from typing import Optional
+from typing import Optional, Union
+from pathlib import Path
 
 from ichor.batch_system import JobID
 from ichor.main.gaussian import submit_points_directory_to_gaussian
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
+from ichor.common.types import MutableValue
 
 
 def submit_ichor_gaussian_command_to_auto_run(
-    directory, hold: Optional[JobID] = None
+    directory: Union[Path, MutableValue], hold: Optional[JobID] = None
 ) -> Optional[JobID]:
     """Writes out datafile that is needed for the Gaussian jobs. The actual Gaussian calculations run with the next job in the auto run sequence,
     but they need access to the datafile. This is why the datafile needs to be written prior to actually running the Gaussian job.
@@ -18,10 +20,13 @@ def submit_ichor_gaussian_command_to_auto_run(
         autorun, it is called from a compute node, so it does not submit.
 
     """
+    if isinstance(directory, MutableValue):
+        directory = directory.value
+
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["gaussian"])
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
-        submit_points_directory_to_gaussian, str(directory)
+        submit_points_directory_to_gaussian, str(directory.value)
     )
     with TimingManager(submission_script, message="Sumitting GJFs"):
         submission_script.add_command(ichor_command)

@@ -1,15 +1,16 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
+from ichor.common.types import MutableValue
 
 
 def submit_ichor_active_learning_job_to_auto_run(
-    model_directory: Path = FILE_STRUCTURE["models"],
-    sample_pool_directory: Path = FILE_STRUCTURE["sample_pool"],
+    model_directory: Union[Path, MutableValue] = FILE_STRUCTURE["models"],
+    sample_pool_directory: Union[Path, MutableValue] = FILE_STRUCTURE["sample_pool"],
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     """Submits the adaptive sampling job that ICHOR performs. After FEREBUS job (previous job in the auto run sequence) is done, ICHOR performs
@@ -19,6 +20,12 @@ def submit_ichor_active_learning_job_to_auto_run(
     :return JobID: The job ID number assigned to this job after it was submitted to the workload manager (SLURM, SGE, etc.)
     """
     from ichor.main.active_learning import active_learning
+
+    if isinstance(model_directory, MutableValue):
+        model_directory = model_directory.value
+
+    if isinstance(sample_pool_directory, MutableValue):
+        sample_pool_directory - sample_pool_directory.value
 
     submission_script = SubmissionScript(
         SCRIPT_NAMES["ichor"]["active_learning"]

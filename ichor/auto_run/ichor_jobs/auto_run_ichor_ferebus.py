@@ -1,13 +1,14 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
+from ichor.common.types import MutableValue
 
 
 def make_models(
-    directory: Path,
+    directory: Union[Path, MutableValue],
     atoms: Optional[List[str]] = None,
     types: Optional[List[str]] = None,
     ntrain: Optional[int] = None,
@@ -15,11 +16,14 @@ def make_models(
 ) -> Optional[JobID]:
     """Write out datafiles and settings needed by FEREBUS. The actual FEREBUS calculations are done in the next job. Returns the job ID of this job,
     which is assigned by the workload manager (SGE,SLURM, etc.)."""
+    if isinstance(directory, MutableValue):
+        directory = directory.value
+
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["ferebus"])
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
         "make_models",
-        str(directory),
+        str(directory.value),
         str(atoms.value),
         str(ntrain),
         str(types.value),
