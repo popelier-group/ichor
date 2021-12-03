@@ -129,4 +129,4 @@ def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
         with pushd(cp, update_cwd=True):
             ts = cp / FILE_STRUCTURE["training_set"]
             if ts.exists():
-                concatenate_points_directories(ts, dir)
+                concatenate_points_directories(ts, dir, verbose=True)
