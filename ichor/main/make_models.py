@@ -85,7 +85,7 @@ def select_model_type():
         Menu.clear_screen()
         print("Select Models To Create")
         model_type_list = MODEL_TYPES + ["multipoles"]
-        with ListCompleter(model_type_list):
+        with ListCompleter(model_type_list + ["all", "c", "clear"]):
             for ty in MODEL_TYPES:
                 print(f"[{'x' if ty in model_types else ' '}] {ty}")
             print()
@@ -100,6 +100,8 @@ def select_model_type():
                             toggle_model_type(multipole)
                 else:
                     toggle_model_type(ans)
+            elif ans == "all":
+                model_types = list(MODEL_TYPES)
             elif ans in ["c", "clear"]:
                 model_types.clear()
     models_selected = True
@@ -136,7 +138,7 @@ def select_atoms():
     global atoms_selected
     if not atoms_selected:
         atom_models_to_make = []
-    with ListCompleter(atom_names):
+    with ListCompleter(atom_names + ["all", "c", "clear"]):
         while True:
             print("Select Atoms To Create Models For")
             for atom in atom_names:
@@ -148,6 +150,8 @@ def select_atoms():
                 break
             elif ans in atom_names:
                 toggle_atom_model(ans)
+            elif ans == "all":
+                atom_models_to_make = list(atom_names)
             elif ans in ["c", "clear"]:
                 atom_models_to_make.clear()
     atoms_selected = True
