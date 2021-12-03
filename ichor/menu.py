@@ -351,7 +351,7 @@ class Menu:
                         1
                     ]  # the first value in the returned list is the function which handles the operation
                     if handler == Menu.CLOSE:
-                        return Menu.CLOSE, False, False
+                        return Menu.CLOSE, False, False, False
                     kwargs = option[
                         2
                     ]  # the second option is any key word arguments to be passed to the handler function
@@ -362,7 +362,7 @@ class Menu:
                         self.run_in_subdirectories and not self.handler_is_sub_menu(handler)
                     )
                 except (ValueError, IndexError):
-                    return self.input, False, False
+                    return self.input, False, False, False
                 except KeyError:
                     print("Error: Invalid input")
 
