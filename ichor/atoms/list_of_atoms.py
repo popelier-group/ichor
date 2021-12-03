@@ -183,6 +183,7 @@ class ListOfAtoms(list):
         from ichor.files import PointDirectory, PointsDirectory
         from ichor.models import Models
         from ichor.analysis.predictions import get_true_predicted
+        from ichor.constants import ha_to_kj_mol
 
         if not isinstance(self, PointsDirectory):
             raise NotImplementedError("This method only works for 'PointsDirectory' because it needs access to .wfn and .int data.")
@@ -196,6 +197,9 @@ class ListOfAtoms(list):
         predicted = predicted.T
         # error is still a ModelResult
         error = (true - predicted).abs()
+        # if iqa is in dictionary, convert that to kj mol-1
+        if error.get("iqa"):
+            error["iqa"] *= ha_to_kj_mol
         # sort to get properties to be ordered nicely
 
         if fname is None:
