@@ -101,7 +101,7 @@ class Model(File):
                     self.program = line.split()[-1]
                     continue
 
-                if "program" in line:
+                if "version" in line:
                     self.program_version = Version(line.split()[-1])
                     continue
 
