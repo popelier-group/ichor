@@ -23,6 +23,7 @@ def concatenate_points_directories(pd1: Path, pd2: Path, verbose: bool = False) 
         new_directory = pd1 / new_name
         if verbose:
             print(f"Copying '{point.path}' to '{new_directory}'")
+        mkdir(new_directory)
         cp(point.path, new_directory)
         recursive_rename(new_directory, point.path.name, new_name, verbose=verbose)
     return PointsDirectory(pd1)
