@@ -1,7 +1,7 @@
 from ichor.files import PointsDirectory
 from pathlib import Path
 from ichor.globals import GLOBALS
-from ichor.common.io import cp
+from ichor.common.io import cp, mkdir
 
 
 def recursive_rename(dir: Path, orig: str, updated: str, verbose: bool = False):
