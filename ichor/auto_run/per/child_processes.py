@@ -89,3 +89,18 @@ def stop_all_child_processes(
                 kill_pid(pid)
 
     delete_child_process_jobs(child_processes)
+
+
+def concat_dir_to_ts(child_processes: Optional[List[Path]] = None,):
+    from ichor.analysis.get_path import get_dir
+    from ichor.main.tools.concatenate_points_directories import concatenate_points_directories
+    print("Enter PointsDirectory Location to concatenate to training sets: ")
+    dir = get_dir().absolute()
+    if child_processes is None:
+        child_processes = find_child_processes_recursively()
+
+    for cp in child_processes:
+        with pushd(cp, update_cwd=True):
+            ts = cp / FILE_STRUCTURE["training_set"]
+            if ts.exists():
+                concatenate_points_directories(ts, dir)

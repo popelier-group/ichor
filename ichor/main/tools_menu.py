@@ -9,4 +9,5 @@ def tools_menu() -> None:
     with Menu("Tools Menu", space=True, back=True, exit=True) as menu:
         menu.add_option("m", "Make Sets Menu", make_sets_menu)
         menu.add_option("md", "Molecular Dynamics Tools", md_menu)
+        menu.add_option("concat", "Concatenate Points Directories", concatenate_points_directories_menu)
         menu.add_option("bak", "Revert INT Backups", revert_int_bak_menu)

@@ -7,6 +7,7 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 find_child_processes_recursively,
                                 make_missing_atom_models,
                                 stop_all_child_processes)
+from ichor.auto_run.per.child_processes import concat_dir_to_ts
 from ichor.main.collate_log import collate_model_log
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
@@ -158,9 +159,8 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
     menu.add_option(
         "stop", "Stop all child processes", stop_all_child_processes
     )
-    menu.add_option(
-        "q", "Queue Options For Child Processes", child_process_queue_menu
-    )
+    menu.add_space()
+    menu.add_option("concat", "Concatenate PointsDirectory to Child Processes Training Set", concat_dir_to_ts)
 
     menu.add_final_options()
 
