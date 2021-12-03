@@ -87,7 +87,7 @@ class Model(File):
         self.notes = FileContents
 
     @buildermethod
-    def _read_file(self) -> None:
+    def _read_file(self, up_to: Optional[str] = None) -> None:
         """Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
         kernel_composition = ""
         kernel_list = {}
@@ -95,8 +95,19 @@ class Model(File):
         self.notes = {}
         self.nugget = 1e-10
 
+        stopiter = False
+
         with open(self.path) as f:
             for line in f:
+                if stopiter:
+                    break
+
+                if up_to is not None and up_to in line:
+                    stopiter = True
+
+                if "<TODO>" in line:
+                    continue
+
                 if "program" in line:
                     self.program = line.split()[-1]
                     continue
@@ -364,6 +375,82 @@ class Model(File):
 
         return np.diag(self.kernel.R(x_test) - np.matmul(v.T, v)).flatten()
 
+    def validate(self):
+        self.program = (
+            self.program if self.program is not FileContents else "ichor"
+        )
+        self.program_version = (
+            self.program_version
+            if self.program_version is not FileContents
+            else __version__
+        )
+        self.nugget = (
+            self.nugget if self.nugget is not FileContents else 1e-10
+        )
+
+        self.system = (
+            self.system
+            if self.system is not FileContents
+            else GLOBALS.SYSTEM_NAME
+        )
+        self.atom = self.atom if self.atom is not FileContents else "X1"
+        self.type = self.type if self.type is not FileContents else "p1"
+        self.alf = self.alf if self.alf is not FileContents else [1, 1, 1]
+
+        if self.x is not FileContents:
+            if self.x.ndim == 1:
+                self.x = self.x.reshape(1, -1)
+            elif self.x.ndim != 2:
+                raise ValueError(
+                    f"Training Input (x) must be 2D, {self.x.ndim}D array encountered"
+                )
+            if self.nfeats is FileContents:
+                self.nfeats = self.x.shape[1]
+            if self.ntrain is FileContents:
+                self.ntrain = self.x.shape[0]
+
+        if self.nfeats is FileContents and self.natoms is not FileContents:
+            self.nfeats = 3 * self.natoms - 6
+
+        if self.natoms is FileContents and self.nfeats is not FileContents:
+            self.natoms = (self.nfeats + 6) // 3
+
+        if self.natoms is FileContents:
+            self.natoms = 1
+
+        if self.nfeats is FileContents:
+            self.nfeats = 0
+
+        if self.ntrain is FileContents:
+            self.ntrain = 0
+
+        if self.x is FileContents:
+            self.x = np.zeros((self.ntrain, self.nfeats))
+
+        if self.y is FileContents:
+            self.y = np.zeros((self.ntrain, 1))
+
+        if self.input_units is FileContents:
+            self.input_units = _get_default_input_units(self.nfeats)
+
+        if self.output_unit is FileContents:
+            self.output_unit = _get_default_output_unit(self.type)
+
+        if self.kernel is FileContents:
+            self.kernel = RBFCyclic("k1", np.ones(self.nfeats))
+
+        if self.mean is FileContents:
+            if self.ntrain == 0:
+                self.mean = ConstantMean(0.0)
+            else:
+                self.mean = ConstantMean(np.mean(self.y.flatten()))
+
+        if self.likelihood is FileContents:
+            self.likelihood = self.compute_likelihood()
+
+        if self.weights is FileContents:
+            self.weights = self.compute_weights()
+
     def write(self, path: Optional[Path] = None) -> None:
         from ichor import __version__
 
@@ -377,80 +464,7 @@ class Model(File):
             )
 
         with self.block():
-            self.program = (
-                self.program if self.program is not FileContents else "ichor"
-            )
-            self.program_version = (
-                self.program_version
-                if self.program_version is not FileContents
-                else __version__
-            )
-            self.nugget = (
-                self.nugget if self.nugget is not FileContents else 1e-10
-            )
-
-            self.system = (
-                self.system
-                if self.system is not FileContents
-                else GLOBALS.SYSTEM_NAME
-            )
-            self.atom = self.atom if self.atom is not FileContents else "X1"
-            self.type = self.type if self.type is not FileContents else "p1"
-            self.alf = self.alf if self.alf is not FileContents else [1, 1, 1]
-
-            if self.x is not FileContents:
-                if self.x.ndim == 1:
-                    self.x = self.x.reshape(1, -1)
-                elif self.x.ndim != 2:
-                    raise ValueError(
-                        f"Training Input (x) must be 2D, {self.x.ndim}D array encountered"
-                    )
-                if self.nfeats is FileContents:
-                    self.nfeats = self.x.shape[1]
-                if self.ntrain is FileContents:
-                    self.ntrain = self.x.shape[0]
-
-            if self.nfeats is FileContents and self.natoms is not FileContents:
-                self.nfeats = 3 * self.natoms - 6
-
-            if self.natoms is FileContents and self.nfeats is not FileContents:
-                self.natoms = (self.nfeats + 6) // 3
-
-            if self.natoms is FileContents:
-                self.natoms = 1
-
-            if self.nfeats is FileContents:
-                self.nfeats = 0
-
-            if self.ntrain is FileContents:
-                self.ntrain = 0
-
-            if self.x is FileContents:
-                self.x = np.zeros((self.ntrain, self.nfeats))
-
-            if self.y is FileContents:
-                self.y = np.zeros((self.ntrain, 1))
-
-            if self.input_units is FileContents:
-                self.input_units = _get_default_input_units(self.nfeats)
-
-            if self.output_unit is FileContents:
-                self.output_unit = _get_default_output_unit(self.type)
-
-            if self.kernel is FileContents:
-                self.kernel = RBFCyclic("k1", np.ones(self.nfeats))
-
-            if self.mean is FileContents:
-                if self.ntrain == 0:
-                    self.mean = ConstantMean(0.0)
-                else:
-                    self.mean = ConstantMean(np.mean(self.y.flatten()))
-
-            if self.likelihood is FileContents:
-                self.likelihood = self.compute_likelihood()
-
-            if self.weights is FileContents:
-                self.weights = self.compute_weights()
+            self.validate()
 
         with open(path, "w") as f:
             f.write("# [metadata]\n")

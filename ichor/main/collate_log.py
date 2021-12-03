@@ -1,8 +1,81 @@
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Tuple
+import itertools
 
 from ichor.common.io import cp, mkdir, pushd
+
+
+def get_child_processes() -> Optional[List[Path]]:
+    from ichor.file_structure import FILE_STRUCTURE
+    if not FILE_STRUCTURE["child_processes"].exists():
+        from ichor.auto_run.per.child_processes import find_child_processes_recursively
+        find_child_processes_recursively()
+        if not FILE_STRUCTURE["child_processes"].exists():
+            return
+
+    with open(FILE_STRUCTURE["child_processes"], "r") as f:
+        return list(map(Path, set(json.load(f))))
+
+
+def get_collate_model_log(directory: Optional[Path] = None) -> Dict[str, Tuple[Path, int]]:
+    from ichor.globals import GLOBALS
+    from ichor.file_structure import FILE_STRUCTURE
+    from ichor.models import Models
+    from ichor.common.types import DictList
+
+    if directory is None:
+        directory = GLOBALS.CWD
+
+    with pushd(directory, update_cwd=True):
+        if not FILE_STRUCTURE["model_log"].exists():
+            collate_model_log()
+        if not FILE_STRUCTURE["model_log"].exists():
+            return {}
+
+        collated_models = DictList()
+
+        for d in FILE_STRUCTURE["model_log"].iterdir():
+            if d.is_dir() and Models.check_path(d):
+                models = Models(d)
+                for model in models:
+                    model.read(up_to="number_of_training_points")
+                    collated_models[model.atom] += [(model.path, model.ntrain)]
+        return collated_models
+
+
+def link_collated_models(dir, collated_models):
+    from ichor.globals import GLOBALS
+    from ichor.common.io import ln
+    mkdir(dir)
+    for i, models in enumerate(collated_models):
+        model_dir = dir / (GLOBALS.SYSTEM_NAME + "_MODELS" + str(i+1).zfill(4))
+        mkdir(model_dir, empty=True)
+        for model in models:
+            if model is not None:
+                ln(model.absolute(), model_dir / model.name)
+
+
+def collate_model_log_bottom_up(directory: Optional[Path] = None):
+    from ichor.file_structure import FILE_STRUCTURE
+
+    collated_models = get_collate_model_log(directory)
+    sorted_models = []
+    for atom, models in collated_models.items():
+        sorted_models.append([m[0] for m in sorted(models, key=lambda x: x[1])])
+    sorted_models = list(map(list, itertools.zip_longest(*sorted_models, fillvalue=None)))
+    link_collated_models(FILE_STRUCTURE["model_log_collated_bottom_up"], sorted_models)
+
+
+def collate_model_log_top_down(directory: Optional[Path] = None):
+    from ichor.file_structure import FILE_STRUCTURE
+    
+    collated_models = get_collate_model_log(directory)
+    sorted_models = []
+    for atom, models in collated_models.items():
+        sorted_models.append([m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)])
+    sorted_models = list(reversed(list(map(list, itertools.zip_longest(*sorted_models, fillvalue=None)))))
+    link_collated_models(FILE_STRUCTURE["model_log_collated_top_down"], sorted_models)
 
 
 def collate_model_log(directory: Optional[Path] = None) -> None:
@@ -14,11 +87,9 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
         directory = GLOBALS.CWD
 
     with pushd(directory, update_cwd=True):
-        if not FILE_STRUCTURE["child_processes"].exists():
+        child_processes = get_child_processes()
+        if child_processes is None:
             return
-
-        with open(FILE_STRUCTURE["child_processes"], "r") as f:
-            child_processes = list(set(json.load(f)))
 
         parent_dir = Path(GLOBALS.CWD)
         parent_model_dir = parent_dir / FILE_STRUCTURE["model_log"]
@@ -31,6 +102,8 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
                         new_model_loc = parent_model_dir / model_log.name
                         mkdir(new_model_loc)
                         cp(model_log, new_model_loc)
+    collate_model_log_bottom_up(directory)
+    collate_model_log_top_down(directory)
 
 
 def collate_models(directory: Optional[Path] = None) -> None:
@@ -41,11 +114,9 @@ def collate_models(directory: Optional[Path] = None) -> None:
         directory = GLOBALS.CWD
 
     with pushd(directory, update_cwd=True):
-        if not FILE_STRUCTURE["child_processes"].exists():
+        child_processes = get_child_processes()
+        if child_processes is None:
             return
-
-        with open(FILE_STRUCTURE["child_processes"], "r") as f:
-            child_processes = json.load(f)
 
         parent_dir = Path(GLOBALS.CWD)
         parent_model_dir = parent_dir / FILE_STRUCTURE["models"]

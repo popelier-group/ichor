@@ -68,6 +68,28 @@ class FileStructure(FileTree):
                 model files are written out to this directory.""",
         )
         self.add(
+            "COLLATED",
+            "model_log_collated",
+            parent="model_log",
+            type_=FileType.Directory,
+            description="""Directory containing either bottom-up or top-down collated models (or both) to group the 
+            model files from model_log into models that can easily be used for system level analysis""",
+        )
+        self.add(
+            "BOTTOM_UP",
+            "model_log_collated_bottom_up",
+            parent="model_log_collated",
+            type_=FileType.Directory,
+            description="""Directory containing bottom up collated models for system level analysis""",
+        )
+        self.add(
+            "TOP_DOWN",
+            "model_log_collated_top_down",
+            parent="model_log_collated",
+            type_=FileType.Directory,
+            description="""Directory containing top down collated models for system level analysis""",
+        )
+        self.add(
             "SCRUBBED_POINTS",
             "scrubbed_points",
             type_=FileType.Directory,
