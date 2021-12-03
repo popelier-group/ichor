@@ -1,15 +1,16 @@
 from ichor.files import PointsDirectory
 from pathlib import Path
 from ichor.globals import GLOBALS
+from ichor.common.io import cp
 
 
-def recurssive_rename(dir: Path, orig: str, updated: str):
+def recursive_rename(dir: Path, orig: str, updated: str):
     for f in dir.iterdir():
         if orig in f.name:
             newf = Path(str(f).replace(f.name, f.name.replace(orig, updated)))
             f.rename(newf)
         if f.is_dir():
-            recurssive_rename(f, orig, updated)
+            recursive_rename(f, orig, updated)
 
 
 def concatenate_points_directories(pd1: Path, pd2: Path) -> PointsDirectory:
@@ -17,9 +18,9 @@ def concatenate_points_directories(pd1: Path, pd2: Path) -> PointsDirectory:
     for point in pd2:
         points = PointsDirectory(pd1)
         new_name = f"{GLOBALS.SYSTEM_NAME}{str(len(points) + 1).zfill(4)}"
-        new_directory =  pd1 / new_name
-        point.move(new_directory)
-        recurssive_rename(new_directory, point.path.name, new_name)
+        new_directory = pd1 / new_name
+        cp(point.path, new_directory)
+        recursive_rename(new_directory, point.path.name, new_name)
     return PointsDirectory(pd1)
 
 
