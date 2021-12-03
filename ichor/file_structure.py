@@ -281,11 +281,18 @@ class FileStructure(FileTree):
             type_=FileType.File,
         )
 
+        self.add(
+            "DAEMON",
+            "daemon",
+            parent="data",
+            type_=FileType.Directory,
+        )
+
         # todo: not sure what goes into these per-property folders exactly
         self.add(
             "PROPERTIES",
             "properties_daemon",
-            parent="active_learning",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(
@@ -311,7 +318,7 @@ class FileStructure(FileTree):
         self.add(
             "ATOMS",
             "atoms_daemon",
-            parent="active_learning",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(
@@ -336,7 +343,7 @@ class FileStructure(FileTree):
         self.add(
             "RERUN",
             "rerun_daemon",
-            parent="active_learning",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(
@@ -361,7 +368,7 @@ class FileStructure(FileTree):
         self.add(
             "FILES_REMOVED",
             "file_remover_daemon",
-            parent="data",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(

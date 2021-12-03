@@ -6,6 +6,8 @@ from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
 from typing import Any, List, Optional, Union
+import time
+import stat
 
 from ichor.itypes import F
 
@@ -292,3 +294,9 @@ def ln(f: Path, link: Path, force: bool = True):
     if link.exists() and force:
         link.unlink()
     link.symlink_to(f)
+
+
+@convert_to_path
+def last_modified(f: Path) -> str:
+    fstat = os.stat(f)
+    return time.ctime(fstat[stat.ST_MTIME])
