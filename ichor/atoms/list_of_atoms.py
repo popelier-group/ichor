@@ -139,8 +139,8 @@ class ListOfAtoms(list):
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
-        from ichor.files.point_directory import PointDirectory
-
+        from ichor.files import PointDirectory
+            
         if fname is None:
             fname = Path("system_to_xyz.xyz")
         elif isinstance(fname, str):
@@ -167,8 +167,7 @@ class ListOfAtoms(list):
 
     def coordinates_to_xyz_with_errors(
         self,
-        model_path: Union[str, Path],
-        property_: str,
+        models_path: Union[str, Path],
         fname: Optional[Union[str, Path]] = None,
         step: Optional[int] = 1,
     ):
@@ -176,30 +175,28 @@ class ListOfAtoms(list):
         for that timestep. The comment lines in the xyz have absolute predictions errors. These can then be plotted in
         ALFVisualizer as cmap to see where poor predictions happen.
 
-        :param model: The model path to one atom.
-        :param points_dir: A PointsDirectory instance where the .wfn and .int files have already been calculated.
-            This can be the validation set or any other set that we want to calculate errors for.
+        :param models_path: The model path to one atom.
         :param property_: The property for which to predict for and get errors (iqa or any multipole moment)
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
-        from ichor.files import PointDirectory
-        from ichor.models import Model
+        from ichor.files import PointDirectory, PointsDirectory
+        from ichor.models import Models
+        from ichor.analysis.predictions import get_true_predicted
 
-        model_path = Path(model_path)
-        model_name = model_path.name
-        atom_name = str(model_name).split("_")[-1]
+        if not isinstance(self, PointsDirectory):
+            raise NotImplementedError("This method only works for 'PointsDirectory' because it needs access to .wfn and .int data.")
 
-        all_atom_names = self.atom_names
-        if atom_name not in all_atom_names:
-            raise ValueError(
-                f'Atom name "{atom_name}" not in atom names "{all_atom_names}".'
-            )
+        models_path = Path(models_path)
 
-        model = Model(model_path)
-        predictions = model.predict(self)[::step]
-        true_values = getattr(self[atom_name], property_)[::step]
-        abs_errors = abs(predictions - true_values)
+        models = Models(models_path)
+        true, predicted = get_true_predicted(models, self)
+        # transpose to get keys to be the properties (iqa, q00, etc.) instead of them being the values
+        true = true.T
+        predicted = predicted.T
+        # error is still a ModelResult
+        error = (true - predicted).abs()
+        # sort to get properties to be ordered nicely
 
         if fname is None:
             fname = Path("system_to_xyz.xyz")
@@ -209,24 +206,18 @@ class ListOfAtoms(list):
         fname = fname.with_suffix(".xyz")
 
         with open(fname, "w") as f:
-            for i, (point, error) in enumerate(zip(self[::step], abs_errors)):
+            for i, point in enumerate(self[::step]):
                 # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
 
-                if isinstance(point, PointDirectory):
+                # {atom_name : {prop1: val, prop2: val}, atom_name2: {prop1: val, prop2: val}, ....} for one timestep
+                dict_to_write = {outer_k: {inner_k: inner_v[i] for inner_k, inner_v in outer_v.items()} for outer_k, outer_v in error.items()}
+                f.write(
+                    f"    {len(point.atoms)}\ni = {i} energy = {dict_to_write}\n"
+                )
+                for atom in point.atoms:
                     f.write(
-                        f"    {len(point.atoms)}\ni = {i} energy = {error}\n"
+                        f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
                     )
-                    for atom in point.atoms:
-                        f.write(
-                            f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
-                        )
-                # this is used when self is a Trajectory and you are iterating over Atoms instances
-                else:
-                    f.write(f"    {len(point)}\ni = {i}\n")
-                    for atom in point:
-                        f.write(
-                            f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
-                        )
 
     def features_to_csv(
         self,

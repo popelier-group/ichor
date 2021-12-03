@@ -18,3 +18,4 @@ docs*
 periodic_kernel_implementation_testing.py
 ichor.egg-info/
 debug/
+*.pyc
