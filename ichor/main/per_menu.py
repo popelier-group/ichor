@@ -158,7 +158,7 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
         kwargs={"subdirs": child_processes},
     )
     menu.add_option(
-        "log", "Collate Model Logs from chile processes", collate_model_log
+        "log", "Collate Model Logs from Child Processes", collate_model_log
     )
     menu.add_option("rerun", "Rerun failed auto-runs", ReRunDaemon().start)
     menu.add_option(
