@@ -5,7 +5,7 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 auto_run_per_property,
                                 delete_child_process_jobs,
                                 find_child_processes_recursively,
-                                make_missing_atom_models,
+                                make_models_atoms_menu,
                                 stop_all_child_processes)
 from ichor.auto_run.per.child_processes import concat_dir_to_ts, print_child_processes_status
 from ichor.main.collate_log import collate_model_log
@@ -42,7 +42,7 @@ def auto_run_per_atom_menu():
         menu.add_option("s", "Stop per-atom daemon", PerAtomDaemon().stop)
         menu.add_space()
         menu.add_option(
-            "m", "Make model for all properties", make_missing_atom_models
+            "m", "Make model for all properties", make_models_atoms_menu
         )
 
 
