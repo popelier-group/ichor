@@ -1,6 +1,6 @@
 from ichor.menu import Menu
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.files import PointsDirectory, GJF, XYZ
+from ichor.files import PointsDirectory, GJF, XYZ, WFN
 from ichor.analysis.get_path import get_file
 from ichor.globals import GLOBALS
 from ichor.common.os import input_with_prefill
@@ -9,7 +9,7 @@ from ichor.analysis.get_atoms import get_atoms_from_path
 from ichor.common.io import mkdir
 from ichor.main.gaussian import submit_gjfs
 from ichor.batch_system import JobID
-from ichor.submission_script import SCRIPT_NAMES
+from ichor.submission_script import SCRIPT_NAMES, SubmissionScript, ICHORCommand
 
 from pathlib import Path
 
@@ -40,7 +40,12 @@ def run_geometry_opt(input_file: Path, keywords: Optional[List[str]] = None) -> 
     gjf.keywords = keywords
     gjf.write()
 
-    return submit_gjfs([gjf.path], script_name=SCRIPT_NAMES["opt"])
+    ichor_command = ICHORCommand(func="convert_opt_wfn_to_xyz", func_args=[gjf.path.with_suffix(".wfn")])
+
+    jid = submit_gjfs([gjf.path], script_name=SCRIPT_NAMES["opt"]["gaussian"])
+    submission_script = SubmissionScript(SCRIPT_NAMES["opt"]["convert"])
+    submission_script.add_command(ichor_command)
+    return submission_script.submit(hold=jid)
 
 
 def _set_keywords():
@@ -51,6 +56,7 @@ def _set_keywords():
 def _gauss_opt_refresh(menu):
     menu.clear_options()
     menu.add_option("1", "Run Geometry Optimisation", run_geometry_opt, kwargs={"input_file": _geometry_file, "keywords": _keywords})
+    menu.add_option("2", "Convert Optimised WFN to XYZ", convert_opt_wfns_to_xyz)
     menu.add_space()
     menu.add_option("i", "Set Input File", _set_geometry_file)
     menu.add_option("k", "Set Keywords", _set_keywords)
@@ -63,3 +69,17 @@ def _gauss_opt_refresh(menu):
 def run_gauss_opt_menu():
     with Menu("Geometry Optimisation Menu", refresh=_gauss_opt_refresh):
         pass
+
+
+def convert_opt_wfns_to_xyz():
+    for f in FILE_STRUCTURE["opt"].iterdir():
+        if f.suffix == WFN.filetype:
+            convert_opt_wfn_to_xyz(f)
+
+
+def convert_opt_wfn_to_xyz(wfn_file: Path):
+    wfn = WFN(wfn_file)
+    xyz = XYZ(wfn_file.parent / (wfn_file.stem + "_opt" + XYZ.xyz))
+    wfn.atoms.to_angstroms()
+    xyz.atoms = wfn.atoms
+    xyz.write()
