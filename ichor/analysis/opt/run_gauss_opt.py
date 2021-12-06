@@ -97,7 +97,7 @@ def convert_opt_wfns_to_xyz():
 
 def convert_opt_wfn_to_xyz(wfn_file: Path):
     wfn = WFN(wfn_file)
-    xyz = XYZ(wfn_file.parent / (wfn_file.stem + "_opt" + XYZ.xyz))
+    xyz = XYZ(wfn_file.parent / (wfn_file.stem + "_opt" + XYZ.filetype))
     wfn.atoms.to_angstroms()
     xyz.atoms = wfn.atoms
     xyz.write()
