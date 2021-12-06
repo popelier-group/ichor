@@ -21,7 +21,7 @@ child_processes_selected = False
 def auto_run_per_menu():
     with Menu("Per-Value Menu", space=True, back=True, exit=True) as menu:
         menu.add_option("a", "Per-Atom", auto_run_per_atom_menu)
-        menu.add_option("p", "Per-Property", auto_run_per_atom_menu)
+        menu.add_option("p", "Per-Property", auto_run_per_property)
         menu.add_space()
         menu.add_option(
             "ap",
