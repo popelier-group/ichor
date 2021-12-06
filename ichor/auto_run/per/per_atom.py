@@ -13,6 +13,7 @@ from ichor.globals import GLOBALS
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
 from ichor.main import make_models
+from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM, QuantumChemicalTopologyProgram
 
 
 _atoms_to_run_on: Optional[List[Path]] = None
@@ -76,9 +77,13 @@ def make_models_menu_refresh(menu):
     menu.add_option("1", "Make Models", make_missing_atom_models, kwargs={"atoms": _selected_atoms_to_run_on})
     menu.add_space()
     menu.add_option("t", "Select Model Type", make_models.select_model_type)
+    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
+        menu.add_option("d", "Toggle Add Dispersion to IQA", make_models.toggle_add_dispersion)
     menu.add_option("a", "Select Atoms", _select_atoms_to_run_on)
     menu.add_space()
     menu.add_message(f"Model Type(s): {', '.join(make_models.model_types)}")
+    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
+        menu.add_message(f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}")
     menu.add_message("Atoms:")
     if _atoms_to_run_on is None:
         _setup_atoms_to_run_on()

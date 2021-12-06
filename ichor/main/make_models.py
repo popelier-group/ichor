@@ -75,6 +75,10 @@ def toggle_model_type(ty: str):
         model_types += [ty]
 
 
+def toggle_add_dispersion():
+    GLOBALS.ADD_DISPERSION_TO_IQA = not GLOBALS.ADD_DISPERSION_TO_IQA
+
+
 def select_model_type():
     """Select properties for which to make models - these can be any combination of multiple moments and iqa energy."""
     global model_types
@@ -175,10 +179,14 @@ def make_models_menu_refresh(menu):
         select_number_of_training_points,
     )
     menu.add_option("a", "Select Atoms", select_atoms)
+    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
+        menu.add_option("d", "Toggle Add Dispersion to IQA", toggle_add_dispersion)
     menu.add_space()
     menu.add_message(f"Model Type(s): {', '.join(model_types)}")
     menu.add_message(f"Number of Training Points: {n_training_points}")
     menu.add_message(f"Atoms: {', '.join(map(str, atom_models_to_make))}")
+    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
+        menu.add_message(f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}")
     menu.add_final_options()
 
 
