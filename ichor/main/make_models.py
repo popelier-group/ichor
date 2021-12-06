@@ -35,7 +35,6 @@ MODEL_TYPES = [
 
 if (
     QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi
-    and not GLOBALS.ADD_DISPERSION_TO_IQA
 ):
     MODEL_TYPES += [
         "dispersion"
