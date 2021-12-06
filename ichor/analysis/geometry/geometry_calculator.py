@@ -128,6 +128,13 @@ def calculate_bond(atoms: Atoms, i: int, j: int):
     return atoms[i].dist(atoms[j])
 
 
+def calculate_bonds(atoms: Atoms) -> np.ndarray:
+    connected_atoms = get_connected_atoms(atoms)
+    return np.ndarray(
+        [calculate_bond(atoms, i, j) for i, j in connected_atoms._bonds]
+    )
+
+
 def calculate_angle(atoms: Atoms, i: int, j: int, k: int):
     """
     Calculates the angle between atoms i, j, and k for atoms
@@ -138,6 +145,13 @@ def calculate_angle(atoms: Atoms, i: int, j: int, k: int):
     :return: angle between atoms i-j-k as float
     """
     return np.degrees(atoms[j].angle(atoms[i], atoms[k]))
+
+
+def calculate_angles(atoms: Atoms) -> np.ndarray:
+    connected_atoms = get_connected_atoms(atoms)
+    return np.ndarray(
+        [calculate_angle(atoms, i, j, k) for i, j, k in connected_atoms._angles]
+    )
 
 
 def calculate_dihedral(atoms: Atoms, i: int, j: int, k: int, l: int) -> float:
@@ -168,6 +182,16 @@ def calculate_dihedral(atoms: Atoms, i: int, j: int, k: int, l: int) -> float:
     return (
         np.degrees(np.arctan2(y, x)) + 180
     ) % 360  # - 180 # <- Uncomment to get angle from -180 to +180
+
+
+def calculate_dihedrals(atoms: Atoms) -> np.ndarray:
+    connected_atoms = get_connected_atoms(atoms)
+    return np.ndarray(
+        [
+            calculate_dihedral(atoms, i, j, k, l)
+            for i, j, k, l in connected_atoms._dihedrals
+        ]
+    )
 
 
 def get_connected_atoms(atoms: Atoms) -> ConnectedAtoms:
@@ -222,25 +246,7 @@ def calculate_internal_features(
     :param atoms: instance of `Atoms` to calculate the bonds, angles and dihedrals for
     :return: bonds, angles and dihedrals as a tuple of numpy arrays
     """
-    connected_atoms = get_connected_atoms(atoms)
-
-    bonds = np.ndarray(
-        [calculate_bond(atoms, i, j) for i, j in connected_atoms._bonds]
-    )
-    angles = np.ndarray(
-        [
-            calculate_angle(atoms, i, j, k)
-            for i, j, k in connected_atoms._angles
-        ]
-    )
-    dihedrals = np.ndarray(
-        [
-            calculate_dihedral(atoms, i, j, k, l)
-            for i, j, k, l in connected_atoms._dihedrals
-        ]
-    )
-
-    return bonds, angles, dihedrals
+    return calculate_bonds(atoms), calculate_angles(atoms), calculate_dihedrals(atoms)
 
 
 def bonds(atoms: Atoms) -> List[Tuple[int, int]]:
