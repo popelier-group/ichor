@@ -650,7 +650,7 @@ class Globals:
             for global_variable, global_value in self.items()
             if (
                 global_value != self._defaults[global_variable]
-                or global_variable in self._in_config
+                or not global_variable in self._in_config
             )
         }
 
