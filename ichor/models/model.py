@@ -384,9 +384,7 @@ class Model(File):
             if self.program_version is not FileContents
             else __version__
         )
-        self.nugget = (
-            self.nugget if self.nugget is not FileContents else 1e-10
-        )
+        self.nugget = self.nugget if self.nugget is not FileContents else 1e-10
 
         self.system = (
             self.system

@@ -1,3 +1,4 @@
+from ichor.analysis.geometry.geometry_analysis import geometry_analysis
 from ichor.analysis.geometry.geometry_calculator import (
     ConnectedAtom, ConnectedAtoms, angle_names, angles, bond_names, bonds,
     calculate_angle, calculate_bond, calculate_dihedral,
@@ -19,4 +20,5 @@ __all__ = [
     "angle_names",
     "dihedral_names",
     "internal_feature_names",
+    "geometry_analysis",
 ]

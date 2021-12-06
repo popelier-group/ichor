@@ -7,11 +7,11 @@ import numpy as np
 
 from ichor.atoms import Atoms, ListOfAtoms
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.common.str import get_digits
 from ichor.files import Directory, GeometryFile
 from ichor.itypes import F
 from ichor.models.model import Model
 from ichor.models.result import ModelsResult
-from ichor.common.str import get_digits
 
 
 class DimensionError(ValueError):
@@ -177,7 +177,10 @@ class Models(Directory, list):
 
     def _features_from_array(self, x_test: np.ndarray):
         if x_test.ndim == 2:
-            return {atom: x_test[get_digits(atom)-1][np.newaxis,:] for atom in self.atom_names}
+            return {
+                atom: x_test[get_digits(atom) - 1][np.newaxis, :]
+                for atom in self.atom_names
+            }
         elif x_test.ndim == 3:
             return {atom: x_test[i] for i, atom in enumerate(self.atom_names)}
         else:

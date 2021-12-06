@@ -640,7 +640,7 @@ class Globals:
         :param config_file: A string or Path to a config file to which to write config options, defaults to None. If None is given the `Arguments`
             class config file is used.
         """
-        
+
         if config_file is None:
             if self._config_file is None:
                 # if no config file is provided and the instance of globals wasn't defined from a config, default to

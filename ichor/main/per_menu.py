@@ -7,7 +7,8 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 find_child_processes_recursively,
                                 make_models_atoms_menu,
                                 stop_all_child_processes)
-from ichor.auto_run.per.child_processes import concat_dir_to_ts, print_child_processes_status
+from ichor.auto_run.per.child_processes import (concat_dir_to_ts,
+                                                print_child_processes_status)
 from ichor.main.collate_log import collate_model_log
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
@@ -140,6 +141,7 @@ def child_process_queue_menu() -> None:
 
 def control_child_processes_menu_refresh(menu: Menu) -> None:
     from ichor.main.main_menu import main_menu
+
     global child_processes
     menu.clear_options()
 
@@ -150,18 +152,30 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
     )
     menu.add_space()
     menu.add_option(
-        "main", "Run Main Menu Function for each Child Process", main_menu, kwargs={"subdirs": child_processes}
+        "main",
+        "Run Main Menu Function for each Child Process",
+        main_menu,
+        kwargs={"subdirs": child_processes},
     )
     menu.add_option(
         "log", "Collate Model Logs from chile processes", collate_model_log
     )
     menu.add_option("rerun", "Rerun failed auto-runs", ReRunDaemon().start)
-    menu.add_option("stat", "Get Status of all Child Processes", print_child_processes_status, wait=True)
+    menu.add_option(
+        "stat",
+        "Get Status of all Child Processes",
+        print_child_processes_status,
+        wait=True,
+    )
     menu.add_option(
         "stop", "Stop all child processes", stop_all_child_processes
     )
     menu.add_space()
-    menu.add_option("concat", "Concatenate PointsDirectory to Child Processes Training Set", concat_dir_to_ts)
+    menu.add_option(
+        "concat",
+        "Concatenate PointsDirectory to Child Processes Training Set",
+        concat_dir_to_ts,
+    )
 
     menu.add_final_options()
 
