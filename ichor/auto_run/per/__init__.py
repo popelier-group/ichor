@@ -1,3 +1,5 @@
+"""Per-atom auto run and per-property auto run. Each atom gets its own training set."""
+
 from ichor.auto_run.per.child_processes import (
     ReRunDaemon, delete_child_process_jobs, find_child_processes_recursively,
     rerun_failed_child_process, stop_all_child_processes)
