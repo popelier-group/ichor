@@ -96,6 +96,7 @@ SCRIPT_NAMES = ScriptNames(
         "dlpoly_gaussian": "ICHOR_DLPOLY_GAUSSIAN.sh",
         "amber": "AMBER.sh",
         "cp2k": "CP2K.sh",
+        "opt": "GEOM_OPT.sh",
     }
 )
 

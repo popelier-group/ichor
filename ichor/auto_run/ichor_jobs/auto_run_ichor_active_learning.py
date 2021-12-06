@@ -25,7 +25,7 @@ def submit_ichor_active_learning_job_to_auto_run(
         model_directory = model_directory.value
 
     if isinstance(sample_pool_directory, MutableValue):
-        sample_pool_directory - sample_pool_directory.value
+        sample_pool_directory = sample_pool_directory.value
 
     submission_script = SubmissionScript(
         SCRIPT_NAMES["ichor"]["active_learning"]
