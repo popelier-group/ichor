@@ -1,15 +1,18 @@
+import itertools
 import json
 from pathlib import Path
-from typing import Optional, List, Dict, Tuple
-import itertools
+from typing import Dict, List, Optional, Tuple
 
 from ichor.common.io import cp, mkdir, pushd
 
 
 def get_child_processes() -> Optional[List[Path]]:
     from ichor.file_structure import FILE_STRUCTURE
+
     if not FILE_STRUCTURE["child_processes"].exists():
-        from ichor.auto_run.per.child_processes import find_child_processes_recursively
+        from ichor.auto_run.per.child_processes import \
+            find_child_processes_recursively
+
         find_child_processes_recursively()
         if not FILE_STRUCTURE["child_processes"].exists():
             return
@@ -18,11 +21,13 @@ def get_child_processes() -> Optional[List[Path]]:
         return list(map(Path, set(json.load(f))))
 
 
-def get_collate_model_log(directory: Optional[Path] = None) -> Dict[str, Tuple[Path, int]]:
-    from ichor.globals import GLOBALS
-    from ichor.file_structure import FILE_STRUCTURE
-    from ichor.models import Models
+def get_collate_model_log(
+    directory: Optional[Path] = None,
+) -> Dict[str, Tuple[Path, int]]:
     from ichor.common.types import DictList
+    from ichor.file_structure import FILE_STRUCTURE
+    from ichor.globals import GLOBALS
+    from ichor.models import Models
 
     if directory is None:
         directory = GLOBALS.CWD
@@ -45,11 +50,14 @@ def get_collate_model_log(directory: Optional[Path] = None) -> Dict[str, Tuple[P
 
 
 def link_collated_models(dir, collated_models):
-    from ichor.globals import GLOBALS
     from ichor.common.io import ln
+    from ichor.globals import GLOBALS
+
     mkdir(dir)
     for i, models in enumerate(collated_models):
-        model_dir = dir / (GLOBALS.SYSTEM_NAME + "_MODELS" + str(i+1).zfill(4))
+        model_dir = dir / (
+            GLOBALS.SYSTEM_NAME + "_MODELS" + str(i + 1).zfill(4)
+        )
         mkdir(model_dir, empty=True)
         for model in models:
             if model is not None:
@@ -62,20 +70,38 @@ def collate_model_log_bottom_up(directory: Optional[Path] = None):
     collated_models = get_collate_model_log(directory)
     sorted_models = []
     for atom, models in collated_models.items():
-        sorted_models.append([m[0] for m in sorted(models, key=lambda x: x[1])])
-    sorted_models = list(map(list, itertools.zip_longest(*sorted_models, fillvalue=None)))
-    link_collated_models(FILE_STRUCTURE["model_log_collated_bottom_up"], sorted_models)
+        sorted_models.append(
+            [m[0] for m in sorted(models, key=lambda x: x[1])]
+        )
+    sorted_models = list(
+        map(list, itertools.zip_longest(*sorted_models, fillvalue=None))
+    )
+    link_collated_models(
+        FILE_STRUCTURE["model_log_collated_bottom_up"], sorted_models
+    )
 
 
 def collate_model_log_top_down(directory: Optional[Path] = None):
     from ichor.file_structure import FILE_STRUCTURE
-    
+
     collated_models = get_collate_model_log(directory)
     sorted_models = []
     for atom, models in collated_models.items():
-        sorted_models.append([m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)])
-    sorted_models = list(reversed(list(map(list, itertools.zip_longest(*sorted_models, fillvalue=None)))))
-    link_collated_models(FILE_STRUCTURE["model_log_collated_top_down"], sorted_models)
+        sorted_models.append(
+            [m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)]
+        )
+    sorted_models = list(
+        reversed(
+            list(
+                map(
+                    list, itertools.zip_longest(*sorted_models, fillvalue=None)
+                )
+            )
+        )
+    )
+    link_collated_models(
+        FILE_STRUCTURE["model_log_collated_top_down"], sorted_models
+    )
 
 
 def collate_model_log(directory: Optional[Path] = None) -> None:

@@ -150,7 +150,10 @@ def calculate_angle(atoms: Atoms, i: int, j: int, k: int):
 def calculate_angles(atoms: Atoms) -> np.ndarray:
     connected_atoms = get_connected_atoms(atoms)
     return np.ndarray(
-        [calculate_angle(atoms, i, j, k) for i, j, k in connected_atoms._angles]
+        [
+            calculate_angle(atoms, i, j, k)
+            for i, j, k in connected_atoms._angles
+        ]
     )
 
 
@@ -246,7 +249,11 @@ def calculate_internal_features(
     :param atoms: instance of `Atoms` to calculate the bonds, angles and dihedrals for
     :return: bonds, angles and dihedrals as a tuple of numpy arrays
     """
-    return calculate_bonds(atoms), calculate_angles(atoms), calculate_dihedrals(atoms)
+    return (
+        calculate_bonds(atoms),
+        calculate_angles(atoms),
+        calculate_dihedrals(atoms),
+    )
 
 
 def bonds(atoms: Atoms) -> List[Tuple[int, int]]:

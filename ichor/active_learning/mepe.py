@@ -151,8 +151,12 @@ class MEPE(ActiveLearningMethod):
             alpha = self.alpha
             """Eq. 23"""
             # todo: get max (and max indices) from batch
-            epe = np.hstack((epe, (alpha * cv_errors - (1.0 - alpha) * variance).reduce(-1)))
-        
+            epe = np.hstack(
+                (
+                    epe,
+                    (alpha * cv_errors - (1.0 - alpha) * variance).reduce(-1),
+                )
+            )
+
         """Eq. 25"""
         return np.flip(np.argsort(epe), axis=-1)[:npoints]
-

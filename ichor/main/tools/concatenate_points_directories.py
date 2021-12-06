@@ -1,10 +1,13 @@
-from ichor.files import PointsDirectory
 from pathlib import Path
-from ichor.globals import GLOBALS
+
 from ichor.common.io import cp, mkdir
+from ichor.files import PointsDirectory
+from ichor.globals import GLOBALS
 
 
-def recursive_rename(dir: Path, orig: str, updated: str, verbose: bool = False):
+def recursive_rename(
+    dir: Path, orig: str, updated: str, verbose: bool = False
+):
     for f in dir.iterdir():
         if orig in f.name:
             newf = Path(str(f).replace(f.name, f.name.replace(orig, updated)))
@@ -15,7 +18,9 @@ def recursive_rename(dir: Path, orig: str, updated: str, verbose: bool = False):
             recursive_rename(f, orig, updated)
 
 
-def concatenate_points_directories(pd1: Path, pd2: Path, verbose: bool = False) -> PointsDirectory:
+def concatenate_points_directories(
+    pd1: Path, pd2: Path, verbose: bool = False
+) -> PointsDirectory:
     pd2 = PointsDirectory(pd2)
     for point in pd2:
         points = PointsDirectory(pd1)
@@ -25,12 +30,17 @@ def concatenate_points_directories(pd1: Path, pd2: Path, verbose: bool = False) 
             print(f"Copying '{point.path}' to '{new_directory}'")
         mkdir(new_directory)
         cp(point.path, new_directory)
-        recursive_rename(new_directory, point.path.name, new_name, verbose=verbose)
+        recursive_rename(
+            new_directory, point.path.name, new_name, verbose=verbose
+        )
     return PointsDirectory(pd1)
 
 
-def concatenate_points_directories_menu(verbose: bool = True) -> PointsDirectory:
+def concatenate_points_directories_menu(
+    verbose: bool = True,
+) -> PointsDirectory:
     from ichor.analysis.get_path import get_dir
+
     print("Enter location of 1st PointsDirectory: ")
     pd1 = get_dir(Path())
     print("Enter location of 2nd PointsDirectory: ")

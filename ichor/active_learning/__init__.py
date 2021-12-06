@@ -1,7 +1,7 @@
 from ichor.active_learning.active_learning_method import ActiveLearningMethod
+from ichor.active_learning.highest_variance import HighestVariance
 # import active learning methods to be accessed in locals()
 from ichor.active_learning.mepe import MEPE
-from ichor.active_learning.highest_variance import HighestVariance
 from ichor.globals import GLOBALS
 
 # get a dictionary of key:value pairs of the active learning method name : active learning method class

@@ -140,7 +140,7 @@ class ListOfAtoms(list):
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
         from ichor.files import PointDirectory
-            
+
         if fname is None:
             fname = Path("system_to_xyz.xyz")
         elif isinstance(fname, str):
@@ -180,13 +180,15 @@ class ListOfAtoms(list):
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
-        from ichor.files import PointDirectory, PointsDirectory
-        from ichor.models import Models
         from ichor.analysis.predictions import get_true_predicted
         from ichor.constants import ha_to_kj_mol
+        from ichor.files import PointDirectory, PointsDirectory
+        from ichor.models import Models
 
         if not isinstance(self, PointsDirectory):
-            raise NotImplementedError("This method only works for 'PointsDirectory' because it needs access to .wfn and .int data.")
+            raise NotImplementedError(
+                "This method only works for 'PointsDirectory' because it needs access to .wfn and .int data."
+            )
 
         models_path = Path(models_path)
 
@@ -214,7 +216,13 @@ class ListOfAtoms(list):
                 # this is used when self is a PointsDirectory, so you are iterating over PointDirectory instances
 
                 # {atom_name : {prop1: val, prop2: val}, atom_name2: {prop1: val, prop2: val}, ....} for one timestep
-                dict_to_write = {outer_k: {inner_k: inner_v[i] for inner_k, inner_v in outer_v.items()} for outer_k, outer_v in error.items()}
+                dict_to_write = {
+                    outer_k: {
+                        inner_k: inner_v[i]
+                        for inner_k, inner_v in outer_v.items()
+                    }
+                    for outer_k, outer_v in error.items()
+                }
                 f.write(
                     f"    {len(point.atoms)}\ni = {i} energy = {dict_to_write}\n"
                 )

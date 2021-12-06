@@ -33,9 +33,7 @@ MODEL_TYPES = [
     *constants.multipole_names,
 ]
 
-if (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi
-):
+if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
     MODEL_TYPES += [
         "dispersion"
     ]  # dispersion only available when qctp is morfi
@@ -178,14 +176,24 @@ def make_models_menu_refresh(menu):
         select_number_of_training_points,
     )
     menu.add_option("a", "Select Atoms", select_atoms)
-    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
-        menu.add_option("d", "Toggle Add Dispersion to IQA", toggle_add_dispersion)
+    if (
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+        is QuantumChemicalTopologyProgram.Morfi
+    ):
+        menu.add_option(
+            "d", "Toggle Add Dispersion to IQA", toggle_add_dispersion
+        )
     menu.add_space()
     menu.add_message(f"Model Type(s): {', '.join(model_types)}")
     menu.add_message(f"Number of Training Points: {n_training_points}")
     menu.add_message(f"Atoms: {', '.join(map(str, atom_models_to_make))}")
-    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
-        menu.add_message(f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}")
+    if (
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+        is QuantumChemicalTopologyProgram.Morfi
+    ):
+        menu.add_message(
+            f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}"
+        )
     menu.add_final_options()
 
 

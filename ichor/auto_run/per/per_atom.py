@@ -10,11 +10,11 @@ from ichor.common.io import pushd
 from ichor.daemon import Daemon
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.globals import GLOBALS
-from ichor.menu import Menu
-from ichor.tab_completer import ListCompleter
 from ichor.main import make_models
-from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM, QuantumChemicalTopologyProgram
-
+from ichor.menu import Menu
+from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                       QuantumChemicalTopologyProgram)
+from ichor.tab_completer import ListCompleter
 
 _atoms_to_run_on: Optional[List[Path]] = None
 _selected_atoms_to_run_on: Optional[List[Path]] = None
@@ -47,7 +47,9 @@ def auto_run_per_atom(run_func: Optional[Callable] = None) -> None:
 
 def run_missing_models(atom_dir: Path, make_on_compute: bool = False) -> JobID:
     with pushd(atom_dir, update_cwd=True):
-        make_models_func = auto_make_models if make_on_compute else make_models.make_models
+        make_models_func = (
+            auto_make_models if make_on_compute else make_models.make_models
+        )
         return make_models_func(
             FILE_STRUCTURE["training_set"],
             atoms=[atom_dir.name],
@@ -55,13 +57,18 @@ def run_missing_models(atom_dir: Path, make_on_compute: bool = False) -> JobID:
         )
 
 
-def make_missing_atom_models(atoms: Optional[List[Path]] = None, make_on_compute: bool = True) -> JobID:
+def make_missing_atom_models(
+    atoms: Optional[List[Path]] = None, make_on_compute: bool = True
+) -> JobID:
     if atoms is None:
         if _selected_atoms_to_run_on is None:
             _setup_atoms_to_run_on()
             _setup_model_types()
         atoms = list(_selected_atoms_to_run_on)
-    job_ids = [run_missing_models(atom, make_on_compute=make_on_compute) for atom in atoms]
+    job_ids = [
+        run_missing_models(atom, make_on_compute=make_on_compute)
+        for atom in atoms
+    ]
     return submit_ichor_collate_models_to_auto_run(Path.cwd(), job_ids)
 
 
@@ -74,16 +81,33 @@ def make_models_menu_refresh(menu):
     :param menu: An instance of `class Menu` to which options are added.
     """
     menu.clear_options()
-    menu.add_option("1", "Make Models", make_missing_atom_models, kwargs={"atoms": _selected_atoms_to_run_on})
+    menu.add_option(
+        "1",
+        "Make Models",
+        make_missing_atom_models,
+        kwargs={"atoms": _selected_atoms_to_run_on},
+    )
     menu.add_space()
     menu.add_option("t", "Select Model Type", make_models.select_model_type)
-    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
-        menu.add_option("d", "Toggle Add Dispersion to IQA", make_models.toggle_add_dispersion)
+    if (
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+        is QuantumChemicalTopologyProgram.Morfi
+    ):
+        menu.add_option(
+            "d",
+            "Toggle Add Dispersion to IQA",
+            make_models.toggle_add_dispersion,
+        )
     menu.add_option("a", "Select Atoms", _select_atoms_to_run_on)
     menu.add_space()
     menu.add_message(f"Model Type(s): {', '.join(make_models.model_types)}")
-    if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
-        menu.add_message(f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}")
+    if (
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+        is QuantumChemicalTopologyProgram.Morfi
+    ):
+        menu.add_message(
+            f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}"
+        )
     menu.add_message("Atoms:")
     if _atoms_to_run_on is None:
         _setup_atoms_to_run_on()
@@ -98,9 +122,11 @@ def _select_atoms_to_run_on():
     while True:
         Menu.clear_screen()
         print("Select Child Processes")
-        atoms_options = [
-            str(i + 1) for i in range(len(_atoms_to_run_on))
-        ] + ["all", "c", "clear"]
+        atoms_options = [str(i + 1) for i in range(len(_atoms_to_run_on))] + [
+            "all",
+            "c",
+            "clear",
+        ]
         with ListCompleter(atoms_options):
             for i, cp in enumerate(_atoms_to_run_on):
                 print(

@@ -1,6 +1,7 @@
 """Implements an Enum for atomic distances to decrease the chance of spelling mistakes / typos."""
 # todo: implement conversions between units
 from enum import Enum
+
 import numpy as np
 
 
@@ -17,7 +18,8 @@ class Angle(Enum):
 
 
 def radians_to_degrees(a):
-    return 180 * a/np.pi
+    return 180 * a / np.pi
+
 
 def degrees_to_radians(a):
-    return np.pi * a/180
+    return np.pi * a / 180

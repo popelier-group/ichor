@@ -1,11 +1,11 @@
-from typing import Optional, Union
 from pathlib import Path
+from typing import Optional, Union
 
 from ichor.batch_system import JobID
+from ichor.common.types import MutableValue
 from ichor.main.pandora import submit_points_directory_to_pyscf
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)
-from ichor.common.types import MutableValue
 
 
 def submit_ichor_pyscf_command_to_auto_run(
