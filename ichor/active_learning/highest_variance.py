@@ -44,4 +44,4 @@ class HighestVariance(ActiveLearningMethod):
 
         # sort the array from smallest to largest, but give only the indeces back. Then flip the indeces, so that
         # the point index with the largest variance is first. Finally, get the desired number of points
-        return np.flip(np.argsort(variance))[:npoints]
+        return np.flip(np.argsort(variance), axis=-1)[:npoints]
