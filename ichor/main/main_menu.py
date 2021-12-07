@@ -78,7 +78,7 @@ def points_directory_menu(path: Path):
 
 def main_menu(subdirs: Optional[List[Path]] = None) -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
-    from ichor.auto_run.standard_auto_run import auto_run
+    from ichor.auto_run.standard_auto_run import auto_run_from_menu
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.main.active_learning import active_learning
     from ichor.main.per_menu import auto_run_per_menu
@@ -128,7 +128,7 @@ def main_menu(subdirs: Optional[List[Path]] = None) -> None:
         menu.add_option(
             "r",
             "Auto Run",
-            auto_run,
+            auto_run_from_menu,
         )
         menu.add_option("p", "Per-Value Auto Run", auto_run_per_menu)
         menu.add_space()

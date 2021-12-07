@@ -10,7 +10,7 @@ from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
 from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
 from ichor.auto_run.auto_run_morfi import submit_morfi_job_to_auto_run
 from ichor.auto_run.auto_run_pyscf import submit_pyscf_job_to_auto_run
-from ichor.auto_run.counter import read_counter, write_counter
+from ichor.auto_run.counter import read_counter, write_counter, counter_exists
 from ichor.auto_run.ichor_jobs import (
     make_models, submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,
@@ -228,6 +228,24 @@ def setup_iter_args():
         if isinstance(types, str):
             types = [types]
         IterArgs.ModelTypes.value = types
+
+
+def check_auto_run_running(wrkdir: Optional[Path] = None):
+    if wrkdir is None:
+        wrkdir = Path.cwd()
+    return counter_exists(wrkdir)
+
+
+def auto_run_from_menu() -> JobID:
+    if check_auto_run_running():
+        counter_location = get_counter_location()
+        current_iter, max_iter = read_counter(counter_location)
+        print(f"Auto-run may already be running, '{counter_location}' exists.")
+        print(f"Counter file suggests auto-run is on iteration {current_iter} out of {max_iter} iterations.")
+        remove_counter = check_bool(input("Remove file: {counter_location}: [Y/N] "))
+        if remove_counter:
+            remove(counter_location)
+    return auto_run()
 
 
 def auto_run() -> JobID:
