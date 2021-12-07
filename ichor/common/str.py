@@ -59,6 +59,7 @@ def split_by(
             new_si = new_si.strip()
         new_s += [new_si]
         m += ni
+    new_s += ["" for _ in range(len(n) - len(new_s))]
     if return_remainder:
         if m < len(s):
             new_s += [s[m:]]

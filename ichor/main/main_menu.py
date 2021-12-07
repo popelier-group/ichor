@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 from ichor.analysis import analysis_menu
 from ichor.main.make_models import make_models_menu
@@ -50,6 +50,19 @@ def _points_directory_menu_refresh(menu):
     menu.add_final_options()
 
 
+def custom_points_directory_menu():
+    from ichor.analysis.get_path import get_dir
+
+    global _points_directory_path
+    _points_directory_path = get_dir(Path())
+
+    with Menu(
+        f"{_points_directory_path} Menu",
+        refresh=_points_directory_menu_refresh,
+    ):
+        pass
+
+
 def points_directory_menu(path: Path):
     """Menu that shows up when the user wants to run jobs for a particular Points directory, such as the training set directory,
     validation set directory, or sample pool directory.
@@ -77,7 +90,7 @@ def main_menu(subdirs: Optional[List[Path]] = None) -> None:
         space=True,
         back=False,
         exit=True,
-        run_in_subdirectories=subdirs
+        run_in_subdirectories=subdirs,
     ) as menu:
         # add options to the instance `menu`
         menu.add_option(
@@ -119,6 +132,9 @@ def main_menu(subdirs: Optional[List[Path]] = None) -> None:
         )
         menu.add_option("p", "Per-Value Auto Run", auto_run_per_menu)
         menu.add_space()
+        menu.add_option(
+            "c", "Custom PointsDirectory Menu", custom_points_directory_menu
+        )
         menu.add_option("a", "Analysis Menu", analysis_menu)
         menu.add_option("t", "Tools Menu", tools_menu)
         menu.add_option("o", "Options Menu", options_menu)

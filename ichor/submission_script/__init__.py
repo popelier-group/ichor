@@ -96,6 +96,10 @@ SCRIPT_NAMES = ScriptNames(
         "dlpoly_gaussian": "ICHOR_DLPOLY_GAUSSIAN.sh",
         "amber": "AMBER.sh",
         "cp2k": "CP2K.sh",
+        "opt": ScriptNames(
+            {"gaussian": "GEOM_OPT.sh", "convert": "GEOM_OPT_CONVERT.sh"}
+        ),
+        "analysis": ScriptNames({"geometry": "GEOMETRY_ANALYSIS.sh"}),
     }
 )
 

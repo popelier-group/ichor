@@ -1,6 +1,8 @@
 import os
 import shutil
+import stat
 import sys
+import time
 from contextlib import contextmanager
 from functools import wraps
 from itertools import zip_longest
@@ -292,3 +294,9 @@ def ln(f: Path, link: Path, force: bool = True):
     if link.exists() and force:
         link.unlink()
     link.symlink_to(f)
+
+
+@convert_to_path
+def last_modified(f: Path) -> str:
+    fstat = os.stat(f)
+    return time.ctime(fstat[stat.ST_MTIME])

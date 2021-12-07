@@ -33,10 +33,7 @@ MODEL_TYPES = [
     *constants.multipole_names,
 ]
 
-if (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi
-    and not GLOBALS.ADD_DISPERSION_TO_IQA
-):
+if QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi:
     MODEL_TYPES += [
         "dispersion"
     ]  # dispersion only available when qctp is morfi
@@ -75,6 +72,10 @@ def toggle_model_type(ty: str):
         model_types += [ty]
 
 
+def toggle_add_dispersion():
+    GLOBALS.ADD_DISPERSION_TO_IQA = not GLOBALS.ADD_DISPERSION_TO_IQA
+
+
 def select_model_type():
     """Select properties for which to make models - these can be any combination of multiple moments and iqa energy."""
     global model_types
@@ -85,7 +86,7 @@ def select_model_type():
         Menu.clear_screen()
         print("Select Models To Create")
         model_type_list = MODEL_TYPES + ["multipoles"]
-        with ListCompleter(model_type_list):
+        with ListCompleter(model_type_list + ["all", "c", "clear"]):
             for ty in MODEL_TYPES:
                 print(f"[{'x' if ty in model_types else ' '}] {ty}")
             print()
@@ -100,6 +101,8 @@ def select_model_type():
                             toggle_model_type(multipole)
                 else:
                     toggle_model_type(ans)
+            elif ans == "all":
+                model_types = list(MODEL_TYPES)
             elif ans in ["c", "clear"]:
                 model_types.clear()
     models_selected = True
@@ -136,7 +139,7 @@ def select_atoms():
     global atoms_selected
     if not atoms_selected:
         atom_models_to_make = []
-    with ListCompleter(atom_names):
+    with ListCompleter(atom_names + ["all", "c", "clear"]):
         while True:
             print("Select Atoms To Create Models For")
             for atom in atom_names:
@@ -148,6 +151,8 @@ def select_atoms():
                 break
             elif ans in atom_names:
                 toggle_atom_model(ans)
+            elif ans == "all":
+                atom_models_to_make = list(atom_names)
             elif ans in ["c", "clear"]:
                 atom_models_to_make.clear()
     atoms_selected = True
@@ -171,10 +176,24 @@ def make_models_menu_refresh(menu):
         select_number_of_training_points,
     )
     menu.add_option("a", "Select Atoms", select_atoms)
+    if (
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+        is QuantumChemicalTopologyProgram.Morfi
+    ):
+        menu.add_option(
+            "d", "Toggle Add Dispersion to IQA", toggle_add_dispersion
+        )
     menu.add_space()
     menu.add_message(f"Model Type(s): {', '.join(model_types)}")
     menu.add_message(f"Number of Training Points: {n_training_points}")
     menu.add_message(f"Atoms: {', '.join(map(str, atom_models_to_make))}")
+    if (
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+        is QuantumChemicalTopologyProgram.Morfi
+    ):
+        menu.add_message(
+            f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}"
+        )
     menu.add_final_options()
 
 

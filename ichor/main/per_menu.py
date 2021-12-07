@@ -5,8 +5,10 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 auto_run_per_property,
                                 delete_child_process_jobs,
                                 find_child_processes_recursively,
-                                make_missing_atom_models,
+                                make_models_atoms_menu,
                                 stop_all_child_processes)
+from ichor.auto_run.per.child_processes import (concat_dir_to_ts,
+                                                print_child_processes_status)
 from ichor.main.collate_log import collate_model_log
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
@@ -20,7 +22,7 @@ child_processes_selected = False
 def auto_run_per_menu():
     with Menu("Per-Value Menu", space=True, back=True, exit=True) as menu:
         menu.add_option("a", "Per-Atom", auto_run_per_atom_menu)
-        menu.add_option("p", "Per-Property", auto_run_per_atom_menu)
+        menu.add_option("p", "Per-Property", auto_run_per_property)
         menu.add_space()
         menu.add_option(
             "ap",
@@ -41,7 +43,7 @@ def auto_run_per_atom_menu():
         menu.add_option("s", "Stop per-atom daemon", PerAtomDaemon().stop)
         menu.add_space()
         menu.add_option(
-            "m", "Make model for all properties", make_missing_atom_models
+            "m", "Make model for all properties", make_models_atoms_menu
         )
 
 
@@ -139,6 +141,7 @@ def child_process_queue_menu() -> None:
 
 def control_child_processes_menu_refresh(menu: Menu) -> None:
     from ichor.main.main_menu import main_menu
+
     global child_processes
     menu.clear_options()
 
@@ -149,17 +152,29 @@ def control_child_processes_menu_refresh(menu: Menu) -> None:
     )
     menu.add_space()
     menu.add_option(
-        "main", "Run Main Menu Function for each Child Process", main_menu, kwargs={"subdirs": child_processes}
+        "main",
+        "Run Main Menu Function for each Child Process",
+        main_menu,
+        kwargs={"subdirs": child_processes},
     )
     menu.add_option(
-        "log", "Collate Model Logs from chile processes", collate_model_log
+        "log", "Collate Model Logs from Child Processes", collate_model_log
     )
     menu.add_option("rerun", "Rerun failed auto-runs", ReRunDaemon().start)
     menu.add_option(
-        "stop", "Stop all child processes", stop_all_child_processes
+        "stat",
+        "Get Status of all Child Processes",
+        print_child_processes_status,
+        wait=True,
     )
     menu.add_option(
-        "q", "Queue Options For Child Processes", child_process_queue_menu
+        "stop", "Stop all child processes", stop_all_child_processes
+    )
+    menu.add_space()
+    menu.add_option(
+        "concat",
+        "Concatenate PointsDirectory to Child Processes Training Set",
+        concat_dir_to_ts,
     )
 
     menu.add_final_options()

@@ -634,6 +634,13 @@ class Globals:
             yaml.dump(global_variables, config)
 
     def save_to_config(self, config_file: Optional[Path] = None):
+        """Save the GLOBALS variables and values to a config file. Only the non-default options are saved. This means this function will write out
+        an empty config.properties file (with only the ichor logo present) if all the options have been left to the default options.
+
+        :param config_file: A string or Path to a config file to which to write config options, defaults to None. If None is given the `Arguments`
+            class config file is used.
+        """
+
         if config_file is None:
             if self._config_file is None:
                 # if no config file is provided and the instance of globals wasn't defined from a config, default to

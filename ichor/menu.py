@@ -1,15 +1,14 @@
 import inspect
 import os
 import sys
-from typing import Callable, Dict, List, Tuple, Optional
-from uuid import uuid4
 from pathlib import Path
+from typing import Callable, Dict, List, Optional, Tuple
+from uuid import uuid4
 
-from ichor.common.io import pushd
 from ichor.common.int import count_digits
+from ichor.common.io import pushd
 from ichor.problem_finder import PROBLEM_FINDER
 from ichor.tab_completer import ListCompleter
-
 
 _subdirs = []
 
@@ -46,7 +45,7 @@ class Menu:
         space: bool = False,
         back: bool = False,
         exit: bool = False,
-        run_in_subdirectories: Optional[List[Path]] = None
+        run_in_subdirectories: Optional[List[Path]] = None,
     ):
         global _subdirs
         self.title = title
@@ -86,7 +85,8 @@ class Menu:
             if self.message is None:
                 self.message = ""
             self.message += "\n".join(
-                ["Running in Sub-Directories:"] + [f"- {subdir}" for subdir in _subdirs]
+                ["Running in Sub-Directories:"]
+                + [f"- {subdir}" for subdir in _subdirs]
             )
 
         self.is_message_enabled = message is not None
@@ -312,7 +312,7 @@ class Menu:
     def handler_is_sub_menu(self, handler) -> bool:
         return any(
             f"{self.__class__.__name__}(" in line
-            for line in inspect.getsource(handler).split('\n')
+            for line in inspect.getsource(handler).split("\n")
         )
 
     # show the menu
@@ -351,7 +351,7 @@ class Menu:
                         1
                     ]  # the first value in the returned list is the function which handles the operation
                     if handler == Menu.CLOSE:
-                        return Menu.CLOSE, False, False
+                        return Menu.CLOSE, False, False, False
                     kwargs = option[
                         2
                     ]  # the second option is any key word arguments to be passed to the handler function
@@ -359,10 +359,11 @@ class Menu:
                         lambda: handler(**kwargs),
                         index in self.wait_options,  # returns True or False
                         index in self.close_options,  # returns True or False
-                        self.run_in_subdirectories and not self.handler_is_sub_menu(handler)
+                        self.run_in_subdirectories
+                        and not self.handler_is_sub_menu(handler),
                     )
                 except (ValueError, IndexError):
-                    return self.input, False, False
+                    return self.input, False, False, False
                 except KeyError:
                     print("Error: Invalid input")
 
@@ -390,4 +391,3 @@ class Menu:
             self.add_final_options(self.space, self.back, self.exit)
         self.run()
         _subdirs = list(set(_subdirs) - set(self._subdirs))
-

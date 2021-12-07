@@ -68,6 +68,28 @@ class FileStructure(FileTree):
                 model files are written out to this directory.""",
         )
         self.add(
+            "COLLATED",
+            "model_log_collated",
+            parent="model_log",
+            type_=FileType.Directory,
+            description="""Directory containing either bottom-up or top-down collated models (or both) to group the 
+            model files from model_log into models that can easily be used for system level analysis""",
+        )
+        self.add(
+            "BOTTOM_UP",
+            "model_log_collated_bottom_up",
+            parent="model_log_collated",
+            type_=FileType.Directory,
+            description="""Directory containing bottom up collated models for system level analysis""",
+        )
+        self.add(
+            "TOP_DOWN",
+            "model_log_collated_top_down",
+            parent="model_log_collated",
+            type_=FileType.Directory,
+            description="""Directory containing top down collated models for system level analysis""",
+        )
+        self.add(
             "SCRUBBED_POINTS",
             "scrubbed_points",
             type_=FileType.Directory,
@@ -259,11 +281,18 @@ class FileStructure(FileTree):
             type_=FileType.File,
         )
 
+        self.add(
+            "DAEMON",
+            "daemon",
+            parent="data",
+            type_=FileType.Directory,
+        )
+
         # todo: not sure what goes into these per-property folders exactly
         self.add(
             "PROPERTIES",
             "properties_daemon",
-            parent="active_learning",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(
@@ -289,7 +318,7 @@ class FileStructure(FileTree):
         self.add(
             "ATOMS",
             "atoms_daemon",
-            parent="active_learning",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(
@@ -314,7 +343,7 @@ class FileStructure(FileTree):
         self.add(
             "RERUN",
             "rerun_daemon",
-            parent="active_learning",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(
@@ -339,7 +368,7 @@ class FileStructure(FileTree):
         self.add(
             "FILES_REMOVED",
             "file_remover_daemon",
-            parent="data",
+            parent="daemon",
             type_=FileType.Directory,
         )
         self.add(
