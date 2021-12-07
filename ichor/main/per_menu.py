@@ -12,6 +12,7 @@ from ichor.auto_run.per.child_processes import (concat_dir_to_ts,
 from ichor.main.collate_log import collate_model_log
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
+from ichor.analysis.get_path import get_dir
 
 child_processes = []
 all_child_processes = []
@@ -90,7 +91,7 @@ def edit_list_of_child_processes():
         print("Select Child Processes")
         child_process_options = [
             str(i + 1) for i in range(len(all_child_processes))
-        ] + ["all", "c", "clear"]
+        ] + ["all", "c", "clear", "add"]
         with ListCompleter(child_process_options):
             for i, cp in enumerate(all_child_processes):
                 print(
@@ -111,6 +112,10 @@ def edit_list_of_child_processes():
                     child_processes += [all_child_processes[idx]]
             elif ans in ["all"]:
                 child_processes = list(all_child_processes)
+            elif ans in ["add"]:
+                new_child_process = get_dir()
+                all_child_processes += [new_child_process]
+                child_processes += [new_child_process]
             elif ans in ["c", "clear"]:
                 child_processes.clear()
             else:
