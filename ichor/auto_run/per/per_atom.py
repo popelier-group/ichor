@@ -3,7 +3,7 @@ from typing import Callable, List, Optional
 
 from ichor.auto_run.ichor_jobs.auto_run_ichor_collate_log import \
     submit_ichor_collate_models_to_auto_run
-from ichor.auto_run.per.per import auto_run_per_value
+from ichor.auto_run.per.per import auto_run_per_value, check_auto_run_per_counter
 from ichor.auto_run.standard_auto_run import auto_make_models
 from ichor.batch_system import JobID
 from ichor.common.io import pushd
@@ -34,6 +34,10 @@ class PerAtomDaemon(Daemon):
         auto_run_per_atom()
         self.stop()
 
+
+def run_per_atom_daemon():
+    check_auto_run_per_counter(FILE_STRUCTURE["atoms"], [atom.name for atom in GLOBALS.ATOMS])
+    PerAtomDaemon().start()
 
 def auto_run_per_atom(run_func: Optional[Callable] = None) -> None:
     atoms = [atom.name for atom in GLOBALS.ATOMS]

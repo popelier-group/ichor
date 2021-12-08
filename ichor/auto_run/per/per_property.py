@@ -1,7 +1,10 @@
 from typing import Callable, Optional
 
-from ichor.auto_run.per.per import auto_run_per_value
+from ichor.auto_run.per.per import auto_run_per_value, check_auto_run_per_counter
 from ichor.daemon import Daemon
+
+from ichor.file_structure import FILE_STRUCTURE
+from ichor.main.make_models import MODEL_TYPES
 
 
 class PerPropertyDaemon(Daemon):
@@ -19,11 +22,13 @@ class PerPropertyDaemon(Daemon):
         self.stop()
 
 
-def auto_run_per_property(run_func: Optional[Callable] = None) -> None:
-    from ichor.file_structure import FILE_STRUCTURE
-    from ichor.main.make_models import ModelType
+def run_per_property_daemon():
+    check_auto_run_per_counter(FILE_STRUCTURE["properties"], [ty.value for ty in MODEL_TYPES])
+    PerPropertyDaemon().start()
 
-    properties = [ty.value for ty in ModelType]
+
+def auto_run_per_property(run_func: Optional[Callable] = None) -> None:
+    properties = [ty.value for ty in MODEL_TYPES]
     auto_run_per_value(
         "OPTIMISE_PROPERTY",
         properties,

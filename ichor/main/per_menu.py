@@ -1,5 +1,5 @@
-from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
-                                PerPropertyDaemon, ReRunDaemon,
+from ichor.auto_run.per import (run_per_atom_daemon, PerAtomPerPropertyDaemon,
+                                PerPropertyDaemon, ReRunDaemon, PerAtomDaemon, run_per_property_daemon, run_per_atom_per_property_daemon,
                                 auto_run_per_atom,
                                 auto_run_per_atom_per_property,
                                 auto_run_per_property,
@@ -40,7 +40,7 @@ def auto_run_per_atom_menu():
     with Menu("Per-Atom Menu", space=True, back=True, exit=True) as menu:
         menu.add_option("r", "Run per-atom", auto_run_per_atom)
         menu.add_space()
-        menu.add_option("d", "Run per-atom daemon", PerAtomDaemon().start)
+        menu.add_option("d", "Run per-atom daemon", run_per_atom_daemon)
         menu.add_option("s", "Stop per-atom daemon", PerAtomDaemon().stop)
         menu.add_space()
         menu.add_option(
@@ -53,7 +53,7 @@ def auto_run_per_property_menu():
         menu.add_option("r", "Run per-property", auto_run_per_property)
         menu.add_space()
         menu.add_option(
-            "d", "Run per-property daemon", PerPropertyDaemon().start
+            "d", "Run per-property daemon", run_per_property_daemon
         )
         menu.add_option(
             "s", "Stop per-property daemon", PerPropertyDaemon().stop
@@ -71,7 +71,7 @@ def auto_run_per_atom_per_property_menu():
         menu.add_option(
             "d",
             "Run per-atom + per-property daemon",
-            PerAtomPerPropertyDaemon().start,
+            run_per_atom_per_property_daemon,
         )
         menu.add_option(
             "s",
