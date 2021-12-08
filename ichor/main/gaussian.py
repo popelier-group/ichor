@@ -56,7 +56,10 @@ def write_gjfs(
 
 
 def submit_gjfs(
-    gjfs: List[Path], force: bool = False, script_name: Optional[Path] = None, hold: Optional[JobID] = None
+    gjfs: List[Path],
+    force: bool = False,
+    script_name: Optional[Path] = None,
+    hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     """Function that writes out a submission script which contains an array of Gaussian jobs to be ran on compute nodes. If calling this function from
     a log-in node, it will write out the submission script, a datafile (file which contains the names of all the .gjf file that need to be ran through Gaussian),

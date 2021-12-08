@@ -38,8 +38,10 @@ class HighestVariance(ActiveLearningMethod):
         variance = np.array([])
         for batched_points in self.batch_points(points):
             features_dict = self.models.get_features_dict(batched_points)
-            variance = np.hstack((variance, self.models.variance(features_dict)))
+            variance = np.hstack(
+                (variance, self.models.variance(features_dict).reduce(-1))
+            )
 
         # sort the array from smallest to largest, but give only the indeces back. Then flip the indeces, so that
         # the point index with the largest variance is first. Finally, get the desired number of points
-        return np.flip(np.argsort(variance))[:npoints]
+        return np.flip(np.argsort(variance), axis=-1)[:npoints]

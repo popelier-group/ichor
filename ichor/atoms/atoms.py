@@ -6,6 +6,8 @@ import numpy as np
 from ichor.atoms.atom import Atom
 from ichor.atoms.calculators import ConnectivityCalculator
 
+from itertools import compress
+
 
 class AtomNotFound(Exception):
     pass
@@ -214,7 +216,7 @@ class Atoms(list):
 
         return {atom.name: atom.features for atom in self}
 
-    def __getitem__(self, item) -> Atom:
+    def __getitem__(self, item) -> Union[Atom, 'Atoms']:
         """Dunder method used to index the Atoms isinstance.
 
         e.g. we can index a variable atoms (which is an instance of Atoms) as atoms[0], or as atoms["C1"].
@@ -226,6 +228,14 @@ class Atoms(list):
                 if item == atom.name:
                     return atom
             raise KeyError(f"Atom '{item}' does not exist")
+        elif isinstance(item , (list, np.ndarray)):
+            if len(item) > 0:
+                if isinstance(item[0], (int, np.int, str)):
+                    return Atoms([self[i] for i in item])
+                elif isinstance(item[0], bool):
+                    return Atoms(list(compress(self, item)))
+            else:
+                return Atoms()
         return super().__getitem__(item)
 
     def __delitem__(self, i: Union[int, str]):

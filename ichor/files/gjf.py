@@ -114,7 +114,7 @@ class GJF(QuantumChemistryProgramInput):
         self.charge = 0
         self.multiplicity = 1
 
-        if self.keywords is FileContents:
+        if not self.path.exists() or self.keywords is FileContents:
             self.keywords = []
         required_keywords = ["nosymm", "output=wfn"]
         self.keywords = list(

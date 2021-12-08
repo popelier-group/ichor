@@ -5,9 +5,9 @@ from typing import Optional
 
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import classproperty
+from ichor.files.file import FileContents
 from ichor.files.qcp import QuantumChemistryProgramInput
 from ichor.globals import GLOBALS
-from ichor.files.file import FileContents
 
 
 class PandoraCCSDmod(Enum):

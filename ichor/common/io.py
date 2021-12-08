@@ -1,13 +1,13 @@
 import os
 import shutil
+import stat
 import sys
+import time
 from contextlib import contextmanager
 from functools import wraps
 from itertools import zip_longest
 from pathlib import Path
 from typing import Any, List, Optional, Union
-import time
-import stat
 
 from ichor.itypes import F
 
