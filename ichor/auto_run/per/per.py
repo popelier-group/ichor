@@ -3,23 +3,27 @@ import os
 from pathlib import Path
 from typing import Callable, List, Optional
 
+from ichor.auto_run.counter import counter_exists, read_counter, remove_counter
 from ichor.auto_run.ichor_jobs import submit_ichor_collate_log_job_to_auto_run
 from ichor.batch_system import JobID
+from ichor.common.bool import check_bool
 from ichor.common.io import cp, mkdir, pushd, relpath, remove
 from ichor.common.points import get_points_location
-from ichor.auto_run.counter import counter_exists, read_counter, remove_counter
-from ichor.common.bool import check_bool
 
 
 def check_auto_run_per_counter(directory: Path, values: List[str]):
     directories = [directory / value for value in values]
-    counter_file_exists = [counter_exists(directory) for directory in directories]
+    counter_file_exists = [
+        counter_exists(directory) for directory in directories
+    ]
     if any(counter_file_exists):
         print("Auto Run Counter File(s) Encountered:")
         for directory, exists in zip(directories, counter_file_exists):
             if exists:
                 current_iter, max_iter = read_counter(directory)
-                print(f" - {directory} | Current Iter: {current_iter} | Max Iter: {max_iter}")
+                print(
+                    f" - {directory} | Current Iter: {current_iter} | Max Iter: {max_iter}"
+                )
         if check_bool(input("Would you like to delete counter files? [y/n] ")):
             for directory, exists in zip(directories, counter_file_exists):
                 if exists:

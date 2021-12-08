@@ -5,16 +5,15 @@ Module responsible for locating programs that ichor uses such as:
 - DLPOLY
 """
 
-from ichor.globals import GLOBALS
-from ichor.machine import MACHINE
-import ichor
-
 from pathlib import Path
 from typing import Optional
 
-from ichor.common.io import mkdir, cp, move
-from ichor.common.os import permissions, set_permission, USER_READ, USER_EXECUTE, OTHER_READ, OTHER_EXECUTE
-
+import ichor
+from ichor.common.io import cp, mkdir, move
+from ichor.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
+                             USER_READ, permissions, set_permission)
+from ichor.globals import GLOBALS
+from ichor.machine import MACHINE
 
 _local_bin_directory = Path.home() / ".ichor" / "bin"
 
@@ -31,7 +30,9 @@ def machine_bin_directory() -> Path:
     return get_ichor_parent_directory() / "bin" / MACHINE.name
 
 
-def find_bin(name: str, bin_directory: Optional[Path] = None) -> Optional[Path]:
+def find_bin(
+    name: str, bin_directory: Optional[Path] = None
+) -> Optional[Path]:
     if bin_directory is None:
         bin_directory = machine_bin_directory()
     if bin_directory.exists():
@@ -43,16 +44,23 @@ def find_bin(name: str, bin_directory: Optional[Path] = None) -> Optional[Path]:
 def _copy_bin_to_local(bin_loc: Path) -> Path:
     mkdir(_local_bin_directory)
     new_loc = _local_bin_directory / bin_loc.name
-    if not new_loc.exists() or open(bin_loc, "rb").read() != open(new_loc, "rb").read():
+    if (
+        not new_loc.exists()
+        or open(bin_loc, "rb").read() != open(new_loc, "rb").read()
+    ):
         filepart = Path(str(new_loc) + ".filepart")
         if not filepart.exists():
             cp(bin_loc, filepart)
             move(filepart, new_loc)
-            set_permission(new_loc, USER_READ | USER_EXECUTE | OTHER_READ | OTHER_EXECUTE)
+            set_permission(
+                new_loc, USER_READ | USER_EXECUTE | OTHER_READ | OTHER_EXECUTE
+            )
     return new_loc
 
 
-def _get_path_from_globals_or_bin(global_name: str, *program_names: str) -> Path:
+def _get_path_from_globals_or_bin(
+    global_name: str, *program_names: str
+) -> Path:
     global_loc = GLOBALS.get(global_name)
     if global_loc is not None and global_loc.exists():
         return global_loc
@@ -64,7 +72,9 @@ def _get_path_from_globals_or_bin(global_name: str, *program_names: str) -> Path
             break
     if bin_loc is None:
         program_name = "|".join(program_names)
-        raise CannotFindProgram(f"Cannot find program '{program_name}'. Add program to {machine_bin_directory().absolute()} or set '{global_name}' in the config file")
+        raise CannotFindProgram(
+            f"Cannot find program '{program_name}'. Add program to {machine_bin_directory().absolute()} or set '{global_name}' in the config file"
+        )
 
     read_ok, _, execute_ok = permissions(bin_loc)
     if not (read_ok and execute_ok):
@@ -77,7 +87,9 @@ def get_ferebus_path() -> Path:
 
 
 def get_dlpoly_path() -> Path:
-    return _get_path_from_globals_or_bin("DLPOLY_LOCATION", "dlpoly", "dlpoly.z")
+    return _get_path_from_globals_or_bin(
+        "DLPOLY_LOCATION", "dlpoly", "dlpoly.z"
+    )
 
 
 def get_tyche_path() -> Path:

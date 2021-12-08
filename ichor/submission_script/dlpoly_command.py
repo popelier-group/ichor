@@ -4,8 +4,8 @@ from typing import List
 from ichor.common.functools import classproperty
 from ichor.log import logger
 from ichor.modules import DlpolyModules, Modules
-from ichor.submission_script.command_line import CommandLine
 from ichor.programs import get_dlpoly_path
+from ichor.submission_script.command_line import CommandLine
 
 
 class DlpolyCommand(CommandLine):

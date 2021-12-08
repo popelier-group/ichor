@@ -46,7 +46,9 @@ def get_collate_model_log(
                 models = Models(d)
                 for model in models:
                     model.read(up_to="number_of_training_points")
-                    collated_models[f"{model.atom}_{model.type}"] += [(model.path, model.ntrain)]
+                    collated_models[f"{model.atom}_{model.type}"] += [
+                        (model.path, model.ntrain)
+                    ]
         return collated_models
 
 
@@ -74,8 +76,12 @@ def collate_model_log_bottom_up(directory: Optional[Path] = None):
         for atom, models in collated_models.items()
     ]
 
-    sorted_models = list(map(list, itertools.zip_longest(*sorted_models, fillvalue=None)))
-    link_collated_models(FILE_STRUCTURE["model_log_collated_bottom_up"], sorted_models)
+    sorted_models = list(
+        map(list, itertools.zip_longest(*sorted_models, fillvalue=None))
+    )
+    link_collated_models(
+        FILE_STRUCTURE["model_log_collated_bottom_up"], sorted_models
+    )
 
 
 def collate_model_log_top_down(directory: Optional[Path] = None):
@@ -87,8 +93,18 @@ def collate_model_log_top_down(directory: Optional[Path] = None):
         for atom, models in collated_models.items()
     ]
 
-    sorted_models = list(reversed(list(map(list, itertools.zip_longest(*sorted_models, fillvalue=None)))))
-    link_collated_models(FILE_STRUCTURE["model_log_collated_top_down"], sorted_models)
+    sorted_models = list(
+        reversed(
+            list(
+                map(
+                    list, itertools.zip_longest(*sorted_models, fillvalue=None)
+                )
+            )
+        )
+    )
+    link_collated_models(
+        FILE_STRUCTURE["model_log_collated_top_down"], sorted_models
+    )
 
 
 def collate_model_log(directory: Optional[Path] = None) -> None:

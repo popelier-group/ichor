@@ -162,7 +162,9 @@ class BatchSystem(ABC):
 
     @classmethod
     @abstractmethod
-    def node_options(cls, include_nodes: List[str], exclude_nodes: List[str]) -> str:
+    def node_options(
+        cls, include_nodes: List[str], exclude_nodes: List[str]
+    ) -> str:
         pass
 
     @classproperty

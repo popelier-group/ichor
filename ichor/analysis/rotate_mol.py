@@ -1,16 +1,18 @@
-from ichor.menu import Menu
-from ichor.files import XYZ, Trajectory, PointsDirectory
-from ichor.analysis.get_path import get_path
-from ichor.analysis.get_input import get_files_in_cwd
 # from ichor.analysis
 from pathlib import Path
-from typing import Optional, List
-from ichor.analysis.get_atoms import get_atoms_from_path, get_trajectory_from_path
-from ichor.atoms import Atoms
-from ichor.tab_completer import ListCompleter
+from typing import List, Optional
 
-from ichor.submission_script import SubmissionScript, ICHORCommand, SCRIPT_NAMES
+from ichor.analysis.get_atoms import (get_atoms_from_path,
+                                      get_trajectory_from_path)
+from ichor.analysis.get_input import get_files_in_cwd
+from ichor.analysis.get_path import get_path
+from ichor.atoms import Atoms
 from ichor.batch_system import JobID
+from ichor.files import XYZ, PointsDirectory, Trajectory
+from ichor.menu import Menu
+from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
+                                     SubmissionScript)
+from ichor.tab_completer import ListCompleter
 
 _traj: Optional[Trajectory] = None
 _atoms: Optional[Atoms] = None
@@ -36,7 +38,9 @@ def _find_default_file():
     elif len(files) > 1:
         with Menu("Select Input File") as menu:
             for i, f in enumerate(files):
-                menu.add_option(f"{i+1}", f"{f}", _set_input_file, kwargs={"input_file": f})
+                menu.add_option(
+                    f"{i+1}", f"{f}", _set_input_file, kwargs={"input_file": f}
+                )
     else:
         _set_input_file()
 
@@ -49,7 +53,9 @@ def _set_input_file(input_file: Optional[Path] = None) -> Path:
     global _rmsd_subsystem
     _input_file = input_file if input_file is None else _get_input_file()
     if not _output_file_set:
-        _output_file = Path(_input_file.parent / (_input_file.stem + "_ROTATED" + XYZ.filetype))
+        _output_file = Path(
+            _input_file.parent / (_input_file.stem + "_ROTATED" + XYZ.filetype)
+        )
     _atoms = _first_ts_of_input()
     _centre_atoms = _atoms.names
     _rmsd_subsystem = _atoms.names
@@ -84,7 +90,9 @@ def _set_centre_atoms():
         _all_atoms = _atoms.names
         with ListCompleter(_all_atoms + ["all", "c", "clear"]):
             for atom_name in _all_atoms:
-                print(f"[{'x' if atom_name in _centre_atoms else ' '}] {atom_name}")
+                print(
+                    f"[{'x' if atom_name in _centre_atoms else ' '}] {atom_name}"
+                )
             print()
             ans = input(">> ")
             ans = ans.strip()
@@ -115,7 +123,9 @@ def _set_subsys_atoms():
         _all_atoms = _atoms.names
         with ListCompleter(_all_atoms + ["all", "c", "clear"]):
             for atom_name in _all_atoms:
-                print(f"[{'x' if atom_name in _centre_atoms else ' '}] {atom_name}")
+                print(
+                    f"[{'x' if atom_name in _centre_atoms else ' '}] {atom_name}"
+                )
             print()
             ans = input(">> ")
             ans = ans.strip()
@@ -129,7 +139,12 @@ def _set_subsys_atoms():
                 _rmsd_subsystem.clear()
 
 
-def rotate_mol(input_file: Path, output_file: Optional[Path] = None, centre_atoms: Optional[List[str]] = None, subsys: Optional[List[str]] = None):
+def rotate_mol(
+    input_file: Path,
+    output_file: Optional[Path] = None,
+    centre_atoms: Optional[List[str]] = None,
+    subsys: Optional[List[str]] = None,
+):
     trajectory = get_trajectory_from_path(input_file)
     if output_file is None:
         output_file = Path("rotated-output.xyz")
@@ -151,13 +166,30 @@ def rotate_mol(input_file: Path, output_file: Optional[Path] = None, centre_atom
     trajectory.write(output_file)
 
 
-def submit_rotate_mol(input_file: Path, output_file: Optional[Path] = None, centre_atoms: Optional[List[str]] = None, subsys: Optional[List[str]] = None) -> JobID:
-    with SubmissionScript(SCRIPT_NAMES["analysis"]["rotate-mol"]) as submission_script:
-        submission_script.add_command(ICHORCommand(func="rotate_mol", func_args=[input_file, output_file, centre_atoms, subsys]))
+def submit_rotate_mol(
+    input_file: Path,
+    output_file: Optional[Path] = None,
+    centre_atoms: Optional[List[str]] = None,
+    subsys: Optional[List[str]] = None,
+) -> JobID:
+    with SubmissionScript(
+        SCRIPT_NAMES["analysis"]["rotate-mol"]
+    ) as submission_script:
+        submission_script.add_command(
+            ICHORCommand(
+                func="rotate_mol",
+                func_args=[input_file, output_file, centre_atoms, subsys],
+            )
+        )
     return submission_script.submit()
 
 
-def run_rotate_mol(input_file: Path, output_file: Optional[Path] = None, centre_atoms: Optional[List[str]] = None, subsys: Optional[List[str]] = None):
+def run_rotate_mol(
+    input_file: Path,
+    output_file: Optional[Path] = None,
+    centre_atoms: Optional[List[str]] = None,
+    subsys: Optional[List[str]] = None,
+):
     if _submit:
         submit_rotate_mol(input_file, output_file, centre_atoms, subsys)
     else:
@@ -171,7 +203,16 @@ def _toggle_submit():
 
 def _rotate_mol_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option("1" "Run rotate-mol", run_rotate_mol, kwargs={"input_file": _input_file, "output_file": _output_file, "centre_atoms": _centre_atoms, "subsys": _rmsd_subsystem})
+    menu.add_option(
+        "1" "Run rotate-mol",
+        run_rotate_mol,
+        kwargs={
+            "input_file": _input_file,
+            "output_file": _output_file,
+            "centre_atoms": _centre_atoms,
+            "subsys": _rmsd_subsystem,
+        },
+    )
     menu.add_space()
     menu.add_option("c", "Edit Centre Atom(s)", _set_centre_atoms)
     menu.add_option("s", "Edit RMSD Subsystem", _set_subsys_atoms)

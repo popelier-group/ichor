@@ -35,7 +35,8 @@ def MODEL_TYPES() -> List[str]:
     ]
 
     if (
-        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+        is QuantumChemicalTopologyProgram.Morfi
     ):
         _model_types += [
             "dispersion"

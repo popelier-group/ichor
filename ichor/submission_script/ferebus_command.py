@@ -4,9 +4,9 @@ from typing import List
 from ichor.common.functools import classproperty
 from ichor.log import logger
 from ichor.modules import FerebusModules, Modules
+from ichor.programs import get_ferebus_path
 from ichor.submission_script.command_line import CommandLine
 from ichor.submission_script.ichor_command import ICHORCommand
-from ichor.programs import get_ferebus_path
 
 
 class FerebusCommand(CommandLine):

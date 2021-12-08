@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Optional, Union, Iterable
+from typing import Iterable, List, Optional, Union
 
 import numpy as np
 

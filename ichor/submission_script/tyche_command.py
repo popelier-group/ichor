@@ -3,9 +3,9 @@ from typing import List, Optional
 
 from ichor.common.functools import classproperty
 from ichor.modules import Modules, TycheModules
+from ichor.programs import get_tyche_path
 from ichor.submission_script.command_line import CommandLine
 from ichor.submission_script.gaussian_command import GaussianCommand
-from ichor.programs import get_tyche_path
 
 
 class TycheCommand(CommandLine):

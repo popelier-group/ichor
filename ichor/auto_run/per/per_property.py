@@ -1,8 +1,8 @@
 from typing import Callable, Optional
 
-from ichor.auto_run.per.per import auto_run_per_value, check_auto_run_per_counter
+from ichor.auto_run.per.per import (auto_run_per_value,
+                                    check_auto_run_per_counter)
 from ichor.daemon import Daemon
-
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.make_models import MODEL_TYPES
 
@@ -23,7 +23,9 @@ class PerPropertyDaemon(Daemon):
 
 
 def run_per_property_daemon():
-    check_auto_run_per_counter(FILE_STRUCTURE["properties"], [ty for ty in MODEL_TYPES()])
+    check_auto_run_per_counter(
+        FILE_STRUCTURE["properties"], [ty for ty in MODEL_TYPES()]
+    )
     PerPropertyDaemon().start()
 
 
