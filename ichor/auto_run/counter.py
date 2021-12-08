@@ -3,11 +3,12 @@ from typing import Optional, Tuple
 
 from ichor.common.io import mkdir
 from ichor.file_structure import FILE_STRUCTURE
+from ichor.common.io import remove
 
 _counter_location = FILE_STRUCTURE["counter"]
 
 
-def _get_counter_location(counter_location: Optional[Path] = None) -> Path:
+def get_counter_location(counter_location: Optional[Path] = None) -> Path:
     counter_location = counter_location or _counter_location
 
     if counter_location.is_dir():
@@ -22,7 +23,7 @@ def read_counter(
     """Reads the counter file, returns current iteration and max iteration"""
     from ichor.globals import GLOBALS
 
-    counter_location = _get_counter_location(counter_location)
+    counter_location = get_counter_location(counter_location)
     if not counter_location.exists() and must_exist:
         raise FileNotFoundError(f"'{_counter_location}' does not exist")
     elif not counter_location.exists() and not must_exist:
@@ -44,11 +45,12 @@ def write_counter(
     max_iteration: Optional[int] = None,
     counter_location: Optional[Path] = None,
 ) -> None:
+    """Writes the current and max iteration to the counter file"""
     from ichor.globals import GLOBALS
 
     current_iteration = current_iteration or 0
     max_iteration = max_iteration or GLOBALS.N_ITERATIONS
-    counter_location = _get_counter_location(counter_location)
+    counter_location = get_counter_location(counter_location)
 
     if not counter_location.parent.exists():
         mkdir(counter_location.parent)
@@ -56,3 +58,15 @@ def write_counter(
     with open(counter_location, "w") as f:
         f.write(f"{current_iteration}\n")
         f.write(f"{max_iteration}\n")
+
+
+def counter_exists(counter_location: Optional[Path] = None) -> bool:
+    """Checks whether the counter file exists and whether the current iter is less than the max iter"""
+    counter_location = get_counter_location()
+    if counter_location.exists():
+        current_iter, max_iter = read_counter(counter_location)
+        if current_iter < max_iter:
+            return True
+        else:
+            remove(counter_location)
+    return False

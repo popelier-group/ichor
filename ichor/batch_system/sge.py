@@ -153,6 +153,24 @@ class SunGridEngine(BatchSystem):
         return jobs
 
     @classmethod
+    def node_options(cls, include_nodes: List[str], exclude_nodes: List[str]) -> str:
+        node_options = []
+
+        include_nodes = "|".join(include_nodes)
+        exclude_nodes = "|".join(exclude_nodes)
+
+        if include_nodes:
+            node_options += [f"({include_nodes})"]
+        if exclude_nodes:
+            node_options += [f"!({exclude_nodes})"]
+
+        return (
+            "-l h=" + "&".join(node_options) + "\n"
+            if len(node_options) > 0
+            else ""
+        )
+
+    @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
         """Return a list containing `hold_jid` keyword and job id which is used to hold a particular job id for it to be ran at a later time."""
         jid = (

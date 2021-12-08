@@ -235,6 +235,8 @@ class SubmissionScript:
                 f.write(f"#{BATCH_SYSTEM.OptionCmd} {option}\n")
             # if writing an array jobs, then the batch system needs to know that
             # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
+            if GLOBALS.INCLUDE_NODES or GLOBALS.EXCLUDE_NODES:
+                f.write(f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(GLOBALS.INCLUDE_NODES, GLOBALS.EXCLUDE_NODES)}\n")
             if njobs > 1:
                 f.write(
                     f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"

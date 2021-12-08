@@ -1,7 +1,7 @@
 from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
 from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
-from ichor.auto_run.counter import read_counter, write_counter
+from ichor.auto_run.counter import read_counter, write_counter, counter_exists, get_counter_location
 from ichor.auto_run.ichor_jobs import (
     make_models, submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,
@@ -21,6 +21,8 @@ __all__ = [
     "rerun_from_failed",
     "read_counter",
     "write_counter",
+    "counter_exists",
+    "get_counter_location",
     "start",
     "stop",
     "stopped",
