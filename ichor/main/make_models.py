@@ -28,17 +28,20 @@ atoms_selected = False
 models_selected = False
 
 
-MODEL_TYPES = [
-    "iqa",
-    *constants.multipole_names,
-]
+def MODEL_TYPES() -> List[str]:
+    _model_types = [
+        "iqa",
+        *constants.multipole_names,
+    ]
 
-if (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi
-):
-    MODEL_TYPES += [
-        "dispersion"
-    ]  # dispersion only available when qctp is morfi
+    if (
+        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM() is QuantumChemicalTopologyProgram.Morfi
+    ):
+        _model_types += [
+            "dispersion"
+        ]  # dispersion only available when qctp is morfi
+    return _model_types
+
 
 default_model_type = "iqa"
 atom_names: List[str] = []
@@ -87,9 +90,10 @@ def select_model_type():
     while True:
         Menu.clear_screen()
         print("Select Models To Create")
-        model_type_list = MODEL_TYPES + ["multipoles"]
+        _model_types = MODEL_TYPES()
+        model_type_list = _model_types + ["multipoles"]
         with ListCompleter(model_type_list + ["all", "c", "clear"]):
-            for ty in MODEL_TYPES:
+            for ty in _model_types:
                 print(f"[{'x' if ty in model_types else ' '}] {ty}")
             print()
             ans = input(">> ")
@@ -104,7 +108,7 @@ def select_model_type():
                 else:
                     toggle_model_type(ans)
             elif ans == "all":
-                model_types = list(MODEL_TYPES)
+                model_types = list(_model_types)
             elif ans in ["c", "clear"]:
                 model_types.clear()
     models_selected = True

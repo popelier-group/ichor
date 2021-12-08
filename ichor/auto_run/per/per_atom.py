@@ -139,7 +139,7 @@ def _setup_atoms_to_run_on():
 
 
 def _setup_model_types():
-    make_models.model_types = make_models.MODEL_TYPES
+    make_models.model_types = make_models.MODEL_TYPES()
 
 
 def make_models_atoms_menu():
