@@ -33,7 +33,7 @@ def get_atoms_from_path(path: Path) -> Atoms:
 
 
 def get_trajectory_from_path(path: Path) -> Trajectory:
-    trajectory = Trajectory(OptionalPath)
+    trajectory = Trajectory("")
     if path.is_dir() and PointsDirectory.check_path(path):
         for point in PointsDirectory(path):
             trajectory.append(point.atoms)
