@@ -7,6 +7,7 @@ import ichor
 from ichor.common.functools import classproperty
 from ichor.itypes import F
 from ichor.submission_script.python_command import PythonCommand
+from ichor.programs import get_ichor_parent_directory
 
 
 class ICHORCommand(PythonCommand):
@@ -27,7 +28,7 @@ class ICHORCommand(PythonCommand):
     ):
         PythonCommand.__init__(
             self,
-            script or (Path(ichor.__file__).parent).resolve(),
+            script or get_ichor_parent_directory(),
             args if args is not None else [],
         )
 
@@ -56,5 +57,5 @@ class ICHORCommand(PythonCommand):
         """extends self.args with the function and function arguments that need to be executed to check output"""
         if not isinstance(function_to_run, str):
             function_to_run = function_to_run.__name__
-        arg_str = " ".join(f'"{str(arg)}"' for arg in args)
+        arg_str = " ".join(f'"{arg}"' for arg in args)
         self.args += [f"-f {function_to_run} {arg_str}"]

@@ -5,6 +5,7 @@ from ichor.common.functools import classproperty
 from ichor.modules import Modules, TycheModules
 from ichor.submission_script.command_line import CommandLine
 from ichor.submission_script.gaussian_command import GaussianCommand
+from ichor.programs import get_tyche_path
 
 
 class TycheCommand(CommandLine):
@@ -39,12 +40,8 @@ class TycheCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
-        from ichor.globals import GLOBALS
-
-        if not GLOBALS.TYCHE_LOCATION.exists():
-            raise ValueError(f"Cannot find tyche location")
-
-        return f"{GLOBALS.TYCHE_LOCATION.absolute()}"
+        tyche_loc = get_tyche_path()
+        return f"{tyche_loc.absolute()}"
 
     @classproperty
     def ncores(self) -> int:

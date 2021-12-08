@@ -6,6 +6,7 @@ from ichor.log import logger
 from ichor.modules import FerebusModules, Modules
 from ichor.submission_script.command_line import CommandLine
 from ichor.submission_script.ichor_command import ICHORCommand
+from ichor.programs import get_ferebus_path
 
 
 class FerebusCommand(CommandLine):
@@ -32,13 +33,8 @@ class FerebusCommand(CommandLine):
     def command(self) -> str:
         """Return the command word that is used to run FEREBUS. Since it is an executable, it can be ran by calling the path of FEREBUS followed by any
         configuration settings."""
-        from ichor.globals import GLOBALS
-
-        if not GLOBALS.FEREBUS_LOCATION.is_file():
-            logger.warning(
-                f"Cannot find FEREBUS location ({GLOBALS.FEREBUS_LOCATION})"
-            )
-        return str(GLOBALS.FEREBUS_LOCATION.absolute())
+        ferebus_path = get_ferebus_path()
+        return str(ferebus_path.absolute())
 
     @classproperty
     def ncores(self) -> int:

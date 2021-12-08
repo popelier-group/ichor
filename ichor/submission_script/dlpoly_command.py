@@ -5,6 +5,7 @@ from ichor.common.functools import classproperty
 from ichor.log import logger
 from ichor.modules import DlpolyModules, Modules
 from ichor.submission_script.command_line import CommandLine
+from ichor.programs import get_dlpoly_path
 
 
 class DlpolyCommand(CommandLine):
@@ -29,13 +30,8 @@ class DlpolyCommand(CommandLine):
     def command(self) -> str:
         """Return the command word that is used to run dlpoly. Since it is an executable, it can be ran by calling the path of dlpoly followed by any
         configuration settings."""
-        from ichor.globals import GLOBALS
-
-        if not GLOBALS.DLPOLY_LOCATION.is_file():
-            logger.warning(
-                f"Cannot find DLPOLY location ({GLOBALS.DLPOLY_LOCATION})"
-            )
-        return str(GLOBALS.DLPOLY_LOCATION.absolute())
+        dlpoly_path = get_dlpoly_path()
+        return str(dlpoly_path.absolute())
 
     @classproperty
     def ncores(self) -> int:
