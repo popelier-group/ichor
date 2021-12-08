@@ -20,7 +20,7 @@ def run_per_atom_per_property_daemon():
         for prop in MODEL_TYPES():
             per_atom_per_property_values.append(str(Path(atom.name) / FILE_STRUCTURE["properties"] / prop))
     check_auto_run_per_counter(FILE_STRUCTURE["atoms"], per_atom_per_property_values)
-    PerAtomPerPropertyDaemon.start()
+    PerAtomPerPropertyDaemon().start()
 
 
 def auto_run_per_atom_per_property() -> None:
