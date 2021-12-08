@@ -67,10 +67,10 @@ elif "ffluxlab" in machine_name:
 if MACHINE is Machine.local:
     if FILE_STRUCTURE["machine"].exists():
         with open(FILE_STRUCTURE["machine"], "r") as f:
-            _machine = f.read()
+            _machine = f.read().strip()
             if _machine not in Machine.names:
                 raise MachineNotFound(
-                    f"Unknown machine ({_machine}) in {FILE_STRUCTURE['machine']}"
+                    f"Unknown machine '{_machine}' in '{FILE_STRUCTURE['machine']}'"
                 )
             MACHINE = Machine.from_name(_machine)
     else:
