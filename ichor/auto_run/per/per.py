@@ -88,11 +88,11 @@ def auto_run_per_value(
                     relpath(points_location, path)
                 )  # can symlink as xyz won't be modified
 
-        if not (path / FILE_STRUCTURE["programs"]).exists():
-            (path / FILE_STRUCTURE["programs"]).symlink_to(
-                os.path.relpath(FILE_STRUCTURE["programs"], start=path),
-                target_is_directory=True,
-            )
+        # if not (path / FILE_STRUCTURE["programs"]).exists():
+        #     (path / FILE_STRUCTURE["programs"]).symlink_to(
+        #         os.path.relpath(FILE_STRUCTURE["programs"], start=path),
+        #         target_is_directory=True,
+        #     )
 
         save_config = Arguments.config_file
         save_value = GLOBALS.get(variable)

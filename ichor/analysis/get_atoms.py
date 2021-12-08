@@ -2,7 +2,7 @@ from pathlib import Path
 
 from ichor.atoms import Atoms, AtomsNotFoundError
 from ichor.common.io import get_files_of_type
-from ichor.files import GJF, WFN, PointDirectory, PointsDirectory, Trajectory
+from ichor.files import GJF, WFN, PointDirectory, PointsDirectory, Trajectory, XYZ, OptionalPath
 
 
 def get_atoms_from_path(path: Path) -> Atoms:
@@ -26,6 +26,18 @@ def get_atoms_from_path(path: Path) -> Atoms:
         elif path.suffix == WFN.filetype:
             return WFN(path).atoms
         elif path.suffix == Trajectory.filetype:
-            return Trajectory(path)[0]
+            return XYZ(path).atoms
 
     raise AtomsNotFoundError(f"Could not find 'Atoms' instance from {path}")
+
+
+def get_trajectory_from_path(path: Path) -> Trajectory:
+    trajectory = Trajectory(OptionalPath)
+    if path.is_dir() and PointsDirectory.check_path(path):
+        for point in PointsDirectory(path):
+            trajectory.append(point.atoms)
+    elif Trajectory.check_path(path):
+        return Trajectory(path)
+    else:
+        trajectory.append(get_atoms_from_path(path))
+    return trajectory

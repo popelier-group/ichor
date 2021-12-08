@@ -14,6 +14,11 @@ _rmsd_subsystem = []
 
 _input_file = None
 _output_file = None
+_output_file_set = False
+
+
+def _first_ts_of_input():
+
 
 
 def _find_default_file() -> Path:
@@ -30,9 +35,18 @@ def _find_default_file() -> Path:
 
 def _set_input_file(input_file: Optional[Path] = None) -> Path:
     global _input_file
+    global _output_file
     _input_file = input_file if input_file is None else _get_input_file()
-    _output_file = Path(_input_file.parent / (_input_file.stem + "_ROTATED" + XYZ.filetype))
+    if not _output_file_set:
+        _output_file = Path(_input_file.parent / (_input_file.stem + "_ROTATED" + XYZ.filetype))
     return _input_file
+
+
+def _set_output_file():
+    global _output_file
+    global _output_file_set
+    _output_file = get_path(prompt="Output File Location: ")
+    _output_file_set = True
 
 
 def _get_input_file() -> Path:
@@ -46,8 +60,8 @@ def _rotate_mol_menu_refresh(menu):
     menu.add_option("c", "Edit Centre Atom(s)")
     menu.add_option("s", "Edit RMSD Subsystem")
     menu.add_space()
-    menu.add_option("i", "Set Input File")
-    menu.add_option("o", "Set Output File")
+    menu.add_option("i", "Set Input File", _set_input_file)
+    menu.add_option("o", "Set Output File", _set_output_file)
     menu.add_space()
     menu.add_option(f"Centre Atom(s): {_centre_atoms}")
     menu.add_option(f"RMSD Subsystem: {_rmsd_subsystem}")
