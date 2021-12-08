@@ -23,12 +23,12 @@ class PerPropertyDaemon(Daemon):
 
 
 def run_per_property_daemon():
-    check_auto_run_per_counter(FILE_STRUCTURE["properties"], [ty.value for ty in MODEL_TYPES])
+    check_auto_run_per_counter(FILE_STRUCTURE["properties"], [ty for ty in MODEL_TYPES()])
     PerPropertyDaemon().start()
 
 
 def auto_run_per_property(run_func: Optional[Callable] = None) -> None:
-    properties = [ty.value for ty in MODEL_TYPES]
+    properties = [ty for ty in MODEL_TYPES()]
     auto_run_per_value(
         "OPTIMISE_PROPERTY",
         properties,
