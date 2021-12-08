@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Iterable
 
 import numpy as np
 
@@ -222,7 +222,7 @@ class Trajectory(ListOfAtoms, File):
                         f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
                     )
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Atoms:
         """Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
         remember that indeces in Python start at 0, so trajectory[2] is the 3rd timestep.
         You can use something like (np.array([traj[i].features for i in range(2)]).shape) to features of a slice of
@@ -231,7 +231,7 @@ class Trajectory(ListOfAtoms, File):
             self.read()
         return super().__getitem__(item)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Atoms]:
         """Used to iterate over timesteps (Atoms instances) in places such as for loops"""
         if self.state is not FileState.Read:
             self.read()

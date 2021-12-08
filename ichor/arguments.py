@@ -76,6 +76,7 @@ external_functions = [
     ExternalFunction("ichor.common.points", "set_points_location"),
     ExternalFunction("ichor.analysis.opt", "convert_opt_wfn_to_xyz"),
     ExternalFunction("ichor.analysis.geometry", "geometry_analysis"),
+    ExternalFunction("ichor.analysis", "rotate_mol")
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key

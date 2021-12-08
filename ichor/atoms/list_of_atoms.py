@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List, Optional, Union
+from ichor.atoms.atoms import Atoms
 
 import numpy as np
 
@@ -318,7 +319,7 @@ class ListOfAtoms(list):
         for atom in self.atom_names:
             yield self[atom]
 
-    def __getitem__(self, item: Union[int, str]):
+    def __getitem__(self, item: Union[int, str]) -> Union[Atoms, 'ListOfAtoms']:
         """Used when indexing a Trajectory instance by an integer, string, or slice."""
 
         # if ListOfAtoms instance is indexed by an integer or np.int64, then index as a list

@@ -94,8 +94,10 @@ class Atoms(list):
             atom.to_bohr()
 
     def centre(self, centre_atom=None):
-        if isinstance(centre_atom, int):
+        if isinstance(centre_atom, (int, str)):
             centre_atom = self[centre_atom]
+        elif isinstance(centre_atom, list):
+            centre_atom = self[centre_atom].centroid
         elif centre_atom is None:
             centre_atom = self.centroid
 
@@ -122,12 +124,7 @@ class Atoms(list):
         dist = sum(iatom.sq_dist(jatom) for iatom, jatom in zip(self, other))
         return np.sqrt(dist / len(self))
 
-    def rmsd(self, other):
-        if not self._centred:
-            self.centre()
-        if not other._centred:
-            other.centre()
-
+    def kabsch(self, other) -> np.ndarray:
         H = self.coordinates.T.dot(other.coordinates)
 
         V, S, W = np.linalg.svd(H)
@@ -137,7 +134,15 @@ class Atoms(list):
             S[-1] = -S[-1]
             V[:, -1] = -V[:, -1]
 
-        R = np.dot(V, W)
+        return np.dot(V, W)
+
+    def rmsd(self, other):
+        if not self._centred:
+            self.centre()
+        if not other._centred:
+            other.centre()
+
+        R = self.kabsch(other)
 
         other.rotate(R)
         return self._rmsd(other)
