@@ -71,9 +71,10 @@ def collate_model_log_bottom_up(directory: Optional[Path] = None):
     from ichor.file_structure import FILE_STRUCTURE
 
     collated_models = get_collate_model_log(directory)
-    sorted_models = [(
-            [m[0] for m in sorted(models, key=lambda x: x[1])] for models in types
-        ) for atom, types in collated_models.items()]
+    sorted_models = []
+    for atom, types in collated_models.items():
+        for type_, models in types.items():
+            sorted_models.append([m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)])
     sorted_models = list(
         map(list, itertools.zip_longest(*sorted_models, fillvalue=None))
     )
@@ -86,13 +87,10 @@ def collate_model_log_top_down(directory: Optional[Path] = None):
     from ichor.file_structure import FILE_STRUCTURE
 
     collated_models = get_collate_model_log(directory)
-    sorted_models = [
-        (
-            [m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)]
-            for models in types
-        )
-        for atom, types in collated_models.items()
-    ]
+    sorted_models = []
+    for atom, types in collated_models.items():
+        for type_, models in types.items():
+            sorted_models.append([m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)])
 
     sorted_models = list(
         reversed(

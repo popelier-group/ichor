@@ -8,7 +8,7 @@ from ichor.analysis.dlpoly.dlpoly_submit import \
 from ichor.analysis.get_input import get_first_file, get_input_menu
 from ichor.analysis.get_path import get_dir
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.files import GJF
+from ichor.files import GJF, XYZ
 from ichor.globals import GLOBALS
 from ichor.menu import Menu
 
@@ -31,7 +31,7 @@ def trajectory_analysis_menu():
 
 def _set_dlpoly_input():
     global _dlpoly_input_file
-    _dlpoly_input_file = get_input_menu(_dlpoly_input_file)
+    _dlpoly_input_file = get_input_menu(_dlpoly_input_file, [XYZ.filetype, GJF.filetype])
 
 
 def _set_model_location():
@@ -97,9 +97,9 @@ def dlpoly_menu():
     global _dlpoly_input_file
     global _model_location
 
-    _dlpoly_input_file = get_first_file(
-        FILE_STRUCTURE["validation_set"], [GJF.filetype], recursive=True
-    )
+    #_dlpoly_input_file = get_first_file(
+    #    FILE_STRUCTURE["validation_set"], [GJF.filetype], recursive=True
+    #)
     _model_location = FILE_STRUCTURE["model_log"]
 
     with Menu("DLPOLY Analysis Menu", refresh=dlpoly_menu_refresh):
