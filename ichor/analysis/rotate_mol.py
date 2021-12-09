@@ -39,7 +39,7 @@ def _find_default_file():
         with Menu("Select Input File") as menu:
             for i, f in enumerate(files):
                 menu.add_option(
-                    f"{i+1}", f"{f}", _set_input_file, kwargs={"input_file": f}
+                    f"{i+1}", f"{f}", _set_input_file, kwargs={"input_file": f}, auto_close=True
                 )
     else:
         _set_input_file()
@@ -51,7 +51,7 @@ def _set_input_file(input_file: Optional[Path] = None) -> Path:
     global _atoms
     global _centre_atoms
     global _rmsd_subsystem
-    _input_file = input_file if input_file is None else _get_input_file()
+    _input_file = input_file if input_file else _get_input_file()
     if not _output_file_set:
         _output_file = Path(
             _input_file.parent / (_input_file.stem + "_ROTATED" + XYZ.filetype)
@@ -204,7 +204,8 @@ def _toggle_submit():
 def _rotate_mol_menu_refresh(menu):
     menu.clear_options()
     menu.add_option(
-        "1" "Run rotate-mol",
+        "1",
+        "Run rotate-mol",
         run_rotate_mol,
         kwargs={
             "input_file": _input_file,
@@ -228,7 +229,8 @@ def _rotate_mol_menu_refresh(menu):
     menu.add_message(f"Input File: {_input_file}")
     menu.add_message(f"Output File: {_output_file}")
     menu.add_space()
-    menu.add_message(f"Submit {_submit}")
+    menu.add_message(f"Submit: {_submit}")
+    menu.add_final_options()
 
 
 def rotate_mol_menu():
