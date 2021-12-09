@@ -15,16 +15,30 @@ def auto_run_per_value(
     directory: Path = Path.cwd(),
     run_func: Optional[Callable] = None,
 ) -> List[Optional[JobID]]:
+    """Returns a list of job ids which to submit
+
+    :param variable: A string indicating which attribute of GLOBALS to access.
+    :param values: which atoms or properties to run separate auto-run for.
+    :param directory: The directory where to run the daemon, defaults to Path.cwd()
+    :param run_func: An optional function to run, defaults to None.
+        If no function is given, then the `ichor.auto_run.standard_auto_run.auto_run` function is ran
+    :raises TypeError: [description]
+    :return: A list of job ids which are going to run on compute nodes
+    """
+    
     from ichor.arguments import Arguments
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
 
     final_job_ids = []
 
+    # iterate over atom names
     for value in values:
+        
+        # make a separate directory for every atom in which to do auto run
         path = directory / value
         mkdir(path)
-
+        
         mkdir(FILE_STRUCTURE["child_processes"].parent)
         child_processes = []
         if FILE_STRUCTURE["child_processes"].exists():
