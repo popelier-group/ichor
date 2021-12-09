@@ -7,6 +7,7 @@ from ichor.common.functools import cached_property
 from ichor.common.io import mkdir, move
 from ichor.common.types import Enum
 from ichor.file_structure import FILE_STRUCTURE
+from ichor.common.uid import get_uid
 
 
 class MachineNotFound(Exception):
@@ -93,8 +94,7 @@ if MACHINE is Machine.local:
 # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
 if MACHINE is not Machine.local and (not FILE_STRUCTURE["machine"].exists() or (FILE_STRUCTURE["machine"].exists() and not _try_get_machine_from_file() is None)):
     mkdir(FILE_STRUCTURE["machine"].parent)
-    from ichor.globals import GLOBALS
-    machine_filepart = Path(str(FILE_STRUCTURE["machine"]) + f".{GLOBALS.UID}.filepart")
+    machine_filepart = Path(str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart")
     with open(machine_filepart, "w") as f:
         f.write(f"{MACHINE.name}")
     move(machine_filepart, FILE_STRUCTURE["machine"])
