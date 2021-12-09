@@ -30,6 +30,31 @@ def check_wfns(points: PointsDirectory) -> List[Path]:
     return wfns
 
 
+def aimall_completed(wfn: Path) -> bool:
+    aim_file = wfn.with_suffix(AIM.filetype)
+    if not aim_file.exists():
+        return False
+    aim = AIM(aim_file)
+    for atom, aimdata in aim.items():
+        if not aimdata.outfile.exists():
+            logger.error(
+                f"AIMAll for {wfn} failed to run for atom '{atom}'"
+            )
+            return False
+        else:
+            int_file = INT(aimdata.outfile)
+            try:
+                int_file.integration_error
+                int_file.q44s
+                int_file.iqa
+            except AttributeError:
+                logger.error(
+                    f"AIMAll for '{wfn}' failed to run producing invalid int file '{int_file.path}'"
+                )
+                return False
+    return True
+    
+
 def submit_wfns(
     wfns: List[Path],
     atoms: Optional[List[str]] = None,
@@ -38,7 +63,7 @@ def submit_wfns(
 ) -> Optional[JobID]:
     with SubmissionScript(SCRIPT_NAMES["aimall"]) as submission_script:
         for wfn in wfns:
-            if force or not wfn.with_suffix(".aim").exists():
+            if force or not aimall_completed(wfn):
                 submission_script.add_command(AIMAllCommand(wfn, atoms=atoms))
                 logger.debug(f"Adding {wfn} to {submission_script.path}")
 
@@ -50,6 +75,15 @@ def submit_wfns(
         return submission_script.submit(hold=hold)
 
 
+def cleanup_failed_aimall(wfn: Path):
+    atomicfiles = wfn.with_suffix("_atomicfiles")
+    if atomicfiles.exists():
+        remove(atomicfiles)
+        logger.error(
+            f"AIMAll for '{wfn}' failed, removing atomicfiles directory '{atomicfiles}'"
+        )
+
+
 def rerun_aimall(wfn_file: str):
     if not wfn_file:
         print_completed()
@@ -58,35 +92,13 @@ def rerun_aimall(wfn_file: str):
     # If this file still exists then something went wrong
     wfn_file = Path(wfn_file)
     aim_failed = False
-    aim_file = wfn_file.with_suffix(".aim")
-    int_files = []
+    aim_file = wfn_file.with_suffix(AIM.filetype)
+    
     if aim_file.exists():
-        aim = AIM(aim_file)
-        for atom, aimdata in aim.items():
-            if not aimdata.outfile.exists():
-                logger.error(
-                    f"AIMAll for {wfn_file} failed to run for atom '{atom}'"
-                )
-                aim_failed = True
-            else:
-                int_file = INT(aimdata.outfile)
-                try:
-                    int_file.integration_error
-                    int_file.q44s
-                    int_file.iqa
-                except AttributeError:
-                    logger.error(
-                        f"AIMAll for '{wfn_file}' failed to run producing invalid int file '{int_file.path}'"
-                    )
-                    aim_failed = True
+        aim_failed = not aimall_completed(wfn_file)
 
     if aim_failed:
-        atomicfiles = wfn_file.with_suffix("_atomicfiles")
-        if atomicfiles.exists():
-            remove(atomicfiles)
-            logger.error(
-                f"AIMAll for '{wfn_file}' failed, removing atomicfiles directory '{atomicfiles}'"
-            )
+        cleanup_failed_aimall(wfn_file)
     else:
         print_completed()
 
