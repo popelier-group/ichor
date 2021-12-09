@@ -1,11 +1,13 @@
 import os
 import platform
+from pathlib import Path
 from enum import auto
 
 from ichor.common.functools import cached_property
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, move
 from ichor.common.types import Enum
 from ichor.file_structure import FILE_STRUCTURE
+from ichor.common.uid import get_uid
 
 
 class MachineNotFound(Exception):
@@ -55,6 +57,18 @@ class Machine(Enum):
         return submit_type
 
 
+def _try_get_machine_from_file():
+    if FILE_STRUCTURE["machine"].exists():
+        with open(FILE_STRUCTURE["machine"], "r") as f:
+            _machine = f.read().strip()
+            if _machine:
+                if _machine not in Machine.names:
+                    raise MachineNotFound(
+                        f"Unknown machine '{_machine}' in '{FILE_STRUCTURE['machine']}'"
+                    )
+                else:
+                    return Machine.from_name(_machine)
+
 machine_name = platform.node()
 
 MACHINE = Machine.local
@@ -65,24 +79,22 @@ elif "ffluxlab" in machine_name:
 
 # if machine hasn't been identified, check whether the machine has been saved to FILE_STRUCTURE['machine']
 if MACHINE is Machine.local:
-    if FILE_STRUCTURE["machine"].exists():
-        with open(FILE_STRUCTURE["machine"], "r") as f:
-            _machine = f.read()
-            if _machine not in Machine.names:
-                raise MachineNotFound(
-                    f"Unknown machine ({_machine}) in {FILE_STRUCTURE['machine']}"
-                )
-            MACHINE = Machine.from_name(_machine)
-    else:
-        from ichor.batch_system import BATCH_SYSTEM
+    _machine = _try_get_machine_from_file()
+    if _machine is not None:
+        MACHINE = _machine
 
-        if BATCH_SYSTEM.Host in os.environ.keys():
-            host = os.environ[BATCH_SYSTEM.Host]
-            if host == "ffluxlab":
-                MACHINE = Machine.ffluxlab
+if MACHINE is Machine.local:
+    from ichor.batch_system import BATCH_SYSTEM
+
+    if BATCH_SYSTEM.Host in os.environ.keys():
+        host = os.environ[BATCH_SYSTEM.Host]
+        if host == "ffluxlab":
+            MACHINE = Machine.ffluxlab
 
 # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
-if MACHINE is not Machine.local:
+if MACHINE is not Machine.local and (not FILE_STRUCTURE["machine"].exists() or (FILE_STRUCTURE["machine"].exists() and not _try_get_machine_from_file() is None)):
     mkdir(FILE_STRUCTURE["machine"].parent)
-    with open(FILE_STRUCTURE["machine"], "w") as f:
+    machine_filepart = Path(str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart")
+    with open(machine_filepart, "w") as f:
         f.write(f"{MACHINE.name}")
+    move(machine_filepart, FILE_STRUCTURE["machine"])

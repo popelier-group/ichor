@@ -1,4 +1,5 @@
 import itertools as it
+from itertools import compress
 from typing import List, Optional, Sequence, Union
 
 import numpy as np
@@ -92,8 +93,10 @@ class Atoms(list):
             atom.to_bohr()
 
     def centre(self, centre_atom=None):
-        if isinstance(centre_atom, int):
+        if isinstance(centre_atom, (int, str)):
             centre_atom = self[centre_atom]
+        elif isinstance(centre_atom, list):
+            centre_atom = self[centre_atom].centroid
         elif centre_atom is None:
             centre_atom = self.centroid
 
@@ -120,12 +123,7 @@ class Atoms(list):
         dist = sum(iatom.sq_dist(jatom) for iatom, jatom in zip(self, other))
         return np.sqrt(dist / len(self))
 
-    def rmsd(self, other):
-        if not self._centred:
-            self.centre()
-        if not other._centred:
-            other.centre()
-
+    def kabsch(self, other) -> np.ndarray:
         H = self.coordinates.T.dot(other.coordinates)
 
         V, S, W = np.linalg.svd(H)
@@ -135,7 +133,15 @@ class Atoms(list):
             S[-1] = -S[-1]
             V[:, -1] = -V[:, -1]
 
-        R = np.dot(V, W)
+        return np.dot(V, W)
+
+    def rmsd(self, other):
+        if not self._centred:
+            self.centre()
+        if not other._centred:
+            other.centre()
+
+        R = self.kabsch(other)
 
         other.rotate(R)
         return self._rmsd(other)
@@ -214,7 +220,7 @@ class Atoms(list):
 
         return {atom.name: atom.features for atom in self}
 
-    def __getitem__(self, item) -> Atom:
+    def __getitem__(self, item) -> Union[Atom, "Atoms"]:
         """Dunder method used to index the Atoms isinstance.
 
         e.g. we can index a variable atoms (which is an instance of Atoms) as atoms[0], or as atoms["C1"].
@@ -226,6 +232,14 @@ class Atoms(list):
                 if item == atom.name:
                     return atom
             raise KeyError(f"Atom '{item}' does not exist")
+        elif isinstance(item, (list, np.ndarray)):
+            if len(item) > 0:
+                if isinstance(item[0], (int, np.int, str)):
+                    return Atoms([self[i] for i in item])
+                elif isinstance(item[0], bool):
+                    return Atoms(list(compress(self, item)))
+            else:
+                return Atoms()
         return super().__getitem__(item)
 
     def __delitem__(self, i: Union[int, str]):

@@ -153,7 +153,9 @@ class SunGridEngine(BatchSystem):
         return jobs
 
     @classmethod
-    def node_options(cls, include_nodes: List[str], exclude_nodes: List[str]) -> str:
+    def node_options(
+        cls, include_nodes: List[str], exclude_nodes: List[str]
+    ) -> str:
         node_options = []
 
         include_nodes = "|".join(include_nodes)

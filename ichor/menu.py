@@ -235,7 +235,8 @@ class Menu:
                 func()
             if close or self.auto_close:
                 self.close()
-            input("\nContinue... [Return]") if wait else None
+            if wait:
+                input("\nContinue... [Return]")
 
     def close(self) -> None:
         """Closes the menu."""

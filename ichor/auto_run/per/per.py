@@ -3,10 +3,31 @@ import os
 from pathlib import Path
 from typing import Callable, List, Optional
 
+from ichor.auto_run.counter import counter_exists, read_counter, remove_counter
 from ichor.auto_run.ichor_jobs import submit_ichor_collate_log_job_to_auto_run
 from ichor.batch_system import JobID
+from ichor.common.bool import check_bool
 from ichor.common.io import cp, mkdir, pushd, relpath, remove
 from ichor.common.points import get_points_location
+
+
+def check_auto_run_per_counter(directory: Path, values: List[str]):
+    directories = [directory / value for value in values]
+    counter_file_exists = [
+        counter_exists(directory) for directory in directories
+    ]
+    if any(counter_file_exists):
+        print("Auto Run Counter File(s) Encountered:")
+        for directory, exists in zip(directories, counter_file_exists):
+            if exists:
+                current_iter, max_iter = read_counter(directory)
+                print(
+                    f" - {directory} | Current Iter: {current_iter} | Max Iter: {max_iter}"
+                )
+        if check_bool(input("Would you like to delete counter files? [y/n] ")):
+            for directory, exists in zip(directories, counter_file_exists):
+                if exists:
+                    remove_counter(directory)
 
 
 def auto_run_per_value(
@@ -29,6 +50,8 @@ def auto_run_per_value(
     from ichor.arguments import Arguments
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
+
+    check_auto_run_per_counter(directory, values)
 
     final_job_ids = []
 
@@ -83,11 +106,11 @@ def auto_run_per_value(
                     relpath(points_location, path)
                 )  # can symlink as xyz won't be modified
 
-        if not (path / FILE_STRUCTURE["programs"]).exists():
-            (path / FILE_STRUCTURE["programs"]).symlink_to(
-                os.path.relpath(FILE_STRUCTURE["programs"], start=path),
-                target_is_directory=True,
-            )
+        # if not (path / FILE_STRUCTURE["programs"]).exists():
+        #     (path / FILE_STRUCTURE["programs"]).symlink_to(
+        #         os.path.relpath(FILE_STRUCTURE["programs"], start=path),
+        #         target_is_directory=True,
+        #     )
 
         save_config = Arguments.config_file
         save_value = GLOBALS.get(variable)

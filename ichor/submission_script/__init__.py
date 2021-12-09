@@ -99,7 +99,9 @@ SCRIPT_NAMES = ScriptNames(
         "opt": ScriptNames(
             {"gaussian": "GEOM_OPT.sh", "convert": "GEOM_OPT_CONVERT.sh"}
         ),
-        "analysis": ScriptNames({"geometry": "GEOMETRY_ANALYSIS.sh"}),
+        "analysis": ScriptNames(
+            {"geometry": "GEOMETRY_ANALYSIS.sh", "rotate-mol": "ROTATE_MOL.sh"}
+        ),
     }
 )
 

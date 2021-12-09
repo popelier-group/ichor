@@ -1,3 +1,4 @@
+from ichor.analysis.get_path import get_dir
 from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 PerPropertyDaemon, ReRunDaemon,
                                 auto_run_per_atom,
@@ -5,14 +6,15 @@ from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 auto_run_per_property,
                                 delete_child_process_jobs,
                                 find_child_processes_recursively,
-                                make_models_atoms_menu,
+                                make_models_atoms_menu, run_per_atom_daemon,
+                                run_per_atom_per_property_daemon,
+                                run_per_property_daemon,
                                 stop_all_child_processes)
 from ichor.auto_run.per.child_processes import (concat_dir_to_ts,
                                                 print_child_processes_status)
 from ichor.main.collate_log import collate_model_log
 from ichor.menu import Menu
 from ichor.tab_completer import ListCompleter
-from ichor.analysis.get_path import get_dir
 
 child_processes = []
 all_child_processes = []
@@ -40,7 +42,7 @@ def auto_run_per_atom_menu():
     with Menu("Per-Atom Menu", space=True, back=True, exit=True) as menu:
         menu.add_option("r", "Run per-atom", auto_run_per_atom)
         menu.add_space()
-        menu.add_option("d", "Run per-atom daemon", PerAtomDaemon().start)
+        menu.add_option("d", "Run per-atom daemon", run_per_atom_daemon)
         menu.add_option("s", "Stop per-atom daemon", PerAtomDaemon().stop)
         menu.add_space()
         menu.add_option(
@@ -53,7 +55,7 @@ def auto_run_per_property_menu():
         menu.add_option("r", "Run per-property", auto_run_per_property)
         menu.add_space()
         menu.add_option(
-            "d", "Run per-property daemon", PerPropertyDaemon().start
+            "d", "Run per-property daemon", run_per_property_daemon
         )
         menu.add_option(
             "s", "Stop per-property daemon", PerPropertyDaemon().stop
@@ -71,7 +73,7 @@ def auto_run_per_atom_per_property_menu():
         menu.add_option(
             "d",
             "Run per-atom + per-property daemon",
-            PerAtomPerPropertyDaemon().start,
+            run_per_atom_per_property_daemon,
         )
         menu.add_option(
             "s",

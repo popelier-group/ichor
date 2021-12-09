@@ -1,9 +1,8 @@
 from pathlib import Path
 from typing import Optional, Tuple
 
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, remove
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.common.io import remove
 
 _counter_location = FILE_STRUCTURE["counter"]
 
@@ -62,7 +61,7 @@ def write_counter(
 
 def counter_exists(counter_location: Optional[Path] = None) -> bool:
     """Checks whether the counter file exists and whether the current iter is less than the max iter"""
-    counter_location = get_counter_location()
+    counter_location = get_counter_location(counter_location)
     if counter_location.exists():
         current_iter, max_iter = read_counter(counter_location)
         if current_iter < max_iter:
@@ -70,3 +69,8 @@ def counter_exists(counter_location: Optional[Path] = None) -> bool:
         else:
             remove(counter_location)
     return False
+
+
+def remove_counter(counter_location: Optional[Path] = None):
+    counter_location = get_counter_location(counter_location)
+    remove(counter_location)

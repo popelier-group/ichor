@@ -236,15 +236,14 @@ class SubmissionScript:
             # if writing an array jobs, then the batch system needs to know that
             # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
             if GLOBALS.INCLUDE_NODES or GLOBALS.EXCLUDE_NODES:
-                f.write(f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(GLOBALS.INCLUDE_NODES, GLOBALS.EXCLUDE_NODES)}\n")
+                f.write(
+                    f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(GLOBALS.INCLUDE_NODES, GLOBALS.EXCLUDE_NODES)}\n"
+                )
             if njobs > 1:
                 f.write(
                     f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
                 )
-                if (
-                    njobs > GLOBALS.MAX_RUNNING_TASKS
-                    and GLOBALS.MAX_RUNNING_TASKS > 0
-                ):
+                if njobs > GLOBALS.MAX_RUNNING_TASKS > 0:
                     f.write(
                         f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}\n"
                     )
@@ -254,7 +253,8 @@ class SubmissionScript:
             # if job or array job is going to use more than 1 cores, then we need extra things to write.
             if self.ncores > 1:
                 f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
-                f.write(f"export OMP_PROC_BIND=true\n")  # give physical cores
+                #f.write(f"export OMP_PROC_BIND=spread\n")
+                #f.write(f"export OMP_PLACES=cores\n")
 
             # load any modules required for the job
             for module in self.modules:

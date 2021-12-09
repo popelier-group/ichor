@@ -211,7 +211,7 @@ class Globals:
         "executable"  # executable (FEREBUS) or python (FEREBUS.py)
     )
     FEREBUS_VERSION: Version = Version("7.0")
-    FEREBUS_LOCATION: Path = Path("PROGRAMS/FEREBUS")
+    FEREBUS_LOCATION: Path = None
 
     GAUSSIAN_MEMORY_LIMIT: str = "1GB"
 
@@ -267,7 +267,7 @@ class Globals:
     )
     DLPOLY_PRINT_EVERY: int = 1  # Print trajectory and stats every n steps
     DLPOLY_TIMESTEP: float = 0.001  # in ps
-    DLPOLY_LOCATION: Path = Path("PROGRAMS/DLPOLY.Z")
+    DLPOLY_LOCATION: Path = None
     DLPOLY_HOOVER: float = 0.04
 
     DLPOLY_CHECK_CONVERGENCE: bool = False
@@ -297,7 +297,7 @@ class Globals:
     # TYCHE SETTINGS
     TYCHE_TEMPERATURE: float = 300  # K
     TYCHE_STEPS: int = 10000
-    TYCHE_LOCATION: Path = FILE_STRUCTURE["programs"] / "tyche"
+    TYCHE_LOCATION: Path = None
 
     # OPTIMUM ENERGY
     OPTIMUM_ENERGY: float = None
@@ -368,6 +368,7 @@ class Globals:
             "MACHINE",
             "OS",
             "ATOMS",
+            "CWD",
         ]
 
         # Setup Parsers

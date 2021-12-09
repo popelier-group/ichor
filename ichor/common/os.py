@@ -1,12 +1,36 @@
 import errno
 import getpass
 import os
+import stat
 import subprocess
 import time
+from pathlib import Path
 from signal import SIGTERM
 from typing import List, Tuple
 
 from ichor.common.str import decode
+
+USER_READ = stat.S_IRUSR
+USER_WRITE = stat.S_IWUSR
+USER_EXECUTE = stat.S_IXUSR
+GROUP_READ = stat.S_IRGRP
+GROUP_WRITE = stat.S_IWGRP
+GROUP_EXECUTE = stat.S_IXGRP
+OTHER_READ = stat.S_IROTH
+OTHER_WRITE = stat.S_IWOTH
+OTHER_EXECUTE = stat.S_IXOTH
+
+
+def permissions(path: Path) -> Tuple[bool, bool, bool]:
+    return (
+        os.access(path, os.R_OK),
+        os.access(path, os.W_OK),
+        os.access(path, os.X_OK),
+    )
+
+
+def set_permission(path: Path, permission: int):
+    os.chmod(path, permission)
 
 
 def run_cmd(cmd) -> Tuple[str, str]:

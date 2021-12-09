@@ -39,16 +39,16 @@ def get_collate_model_log(
         if not FILE_STRUCTURE["model_log"].exists():
             return {}
 
-        collated_models = {}
+        collated_models = DictList()
 
         for d in FILE_STRUCTURE["model_log"].iterdir():
             if d.is_dir() and Models.check_path(d):
                 models = Models(d)
                 for model in models:
                     model.read(up_to="number_of_training_points")
-                    if model.atom not in collated_models.keys():
-                        collated_models[model.atom] = DictList()
-                    collated_models[model.atom][model.type] += [(model.path, model.ntrain)]
+                    collated_models[f"{model.atom}_{model.type}"] += [
+                        (model.path, model.ntrain)
+                    ]
         return collated_models
 
 
@@ -71,9 +71,11 @@ def collate_model_log_bottom_up(directory: Optional[Path] = None):
     from ichor.file_structure import FILE_STRUCTURE
 
     collated_models = get_collate_model_log(directory)
-    sorted_models = [(
-            [m[0] for m in sorted(models, key=lambda x: x[1])] for models in types
-        ) for atom, types in collated_models.items()]
+    sorted_models = [
+        [m[0] for m in sorted(models, key=lambda x: x[1])]
+        for atom, models in collated_models.items()
+    ]
+
     sorted_models = list(
         map(list, itertools.zip_longest(*sorted_models, fillvalue=None))
     )
@@ -87,11 +89,8 @@ def collate_model_log_top_down(directory: Optional[Path] = None):
 
     collated_models = get_collate_model_log(directory)
     sorted_models = [
-        (
-            [m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)]
-            for models in types
-        )
-        for atom, types in collated_models.items()
+        [m[0] for m in sorted(models, key=lambda x: x[1], reverse=True)]
+        for atom, models in collated_models.items()
     ]
 
     sorted_models = list(
