@@ -368,6 +368,7 @@ class Globals:
             "MACHINE",
             "OS",
             "ATOMS",
+            "CWD",
         ]
 
         # Setup Parsers
