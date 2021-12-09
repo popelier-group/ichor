@@ -48,7 +48,7 @@ def _copy_bin_to_local(bin_loc: Path) -> Path:
         not new_loc.exists()
         or open(bin_loc, "rb").read() != open(new_loc, "rb").read()
     ):
-        filepart = Path(str(new_loc) + ".filepart")
+        filepart = Path(str(new_loc) + f".{GLOBALS.UID}.filepart")
         if not filepart.exists():
             cp(bin_loc, filepart)
             move(filepart, new_loc)
