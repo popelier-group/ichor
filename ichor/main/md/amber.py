@@ -122,7 +122,7 @@ def submit_amber(input_file: Path) -> JobID:
     return submission_script.submit()
 
 
-def mdcrd_to_xyz(mdcrd: Path, prmtop: Path, xyz: Optional[Path] = None):
+def mdcrd_to_xyz(mdcrd: Path, prmtop: Path, xyz: Optional[Path] = None, every: int = 1):
     atom_names = []
     with open(prmtop, "r") as f:
         for line in f:
@@ -133,28 +133,28 @@ def mdcrd_to_xyz(mdcrd: Path, prmtop: Path, xyz: Optional[Path] = None):
                     atom_names += [a[0] for a in line.split()]
                     line = next(f)
 
-    natoms = len(atom_names)
-    traj = []
-    with open(mdcrd, "r") as f:
-        _ = next(f)
-        for line in f:
-            traj += [float(c) for c in line.split()]
-
-    traj = np.array(traj).reshape((len(traj) // (natoms * 3), natoms, 3))
-
     if xyz is None:
         xyz = Path(
             f"{GLOBALS.SYSTEM_NAME}-amber-{int(GLOBALS.AMBER_TEMPERATURE)}.xyz"
         )
 
-    xyz = Trajectory(xyz)
-    for ts in traj:
-        atoms = Atoms()
-        for atom_name, atom in zip(atom_names, ts):
-            atoms.add(Atom(atom_name, atom[0], atom[1], atom[2]))
-        xyz.add(atoms)
-    xyz.write()
-
+    natoms = len(atom_names)
+    with open(mdcrd, "r") as f:
+        _ = next(f)
+        traj = np.array([])
+        i = 0
+        with open(xyz, "w") as o:
+            for line in f:
+                traj = np.hstack((traj, np.array(line.split(), dtype=np.float)))
+                if len(traj) == natoms*3:
+                    if i % every == 0:
+                        traj = traj.reshape(natoms, 3)
+                        o.write(f"{natoms}\n{i}\n")
+                        for atom_name, atom in zip(atom_names, traj):
+                            o.write(f"{atom_name} {atom[0]:16.8f} {atom[1]:16.8f} {atom[2]:16.8f}\n")
+                    i += 1
+                    traj = np.array([])
+                        
 
 def set_temperature():
     while True:
