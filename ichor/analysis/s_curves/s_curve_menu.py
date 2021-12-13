@@ -7,6 +7,7 @@ from ichor.analysis.get_validation_set import (
 from ichor.analysis.s_curves.compact_s_curves import calculate_compact_s_curves
 from ichor.analysis.s_curves.s_curves import calculate_s_curves
 from ichor.menu import Menu
+from ichor.analysis.get_path import get_dir
 
 _validation_set_location = Path(".")
 _model_location = Path(".")
@@ -17,14 +18,14 @@ _compact_s_curves = True
 
 def choose_model():
     global _model_location
-    _model_location = choose_model_menu(_model_location)
+    print("Enter Model Directory: ")
+    _model_location = get_dir()
 
 
 def choose_validation_set():
     global _validation_set_location
-    _validation_set_location = choose_validation_set_menu(
-        _validation_set_location
-    )
+    print("Enter Validation Set Location: ")
+    _validation_set_location = get_dir()
 
 
 def choose_output_location():
@@ -74,9 +75,10 @@ def s_curve_menu_refresh(menu: Menu):
 def s_curve_menu():
     global _validation_set_location
     global _model_location
+    from ichor.file_structure import FILE_STRUCTURE
 
-    _validation_set_location = get_validation_set_from_current_dir()
-    _model_location = try_get_latest_models()
+    _validation_set_location = FILE_STRUCTURE["validation_set"]
+    _model_location = FILE_STRUCTURE["models"]
 
     with Menu("S-Curve Analysis Menu", refresh=s_curve_menu_refresh):
         pass
