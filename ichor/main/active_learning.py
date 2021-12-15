@@ -55,9 +55,12 @@ def active_learning(
 
     for point in points_to_add:
         training_set = PointsDirectory(FILE_STRUCTURE["training_set"])
+        next_point = len(training_set)+1
+        while (training_set.path / f"{GLOBALS.SYSTEM_NAME}{str(next_point).zfill(4)}").exists():
+            next_point += 1
         new_directory = (
             training_set.path
-            / f"{GLOBALS.SYSTEM_NAME}{str(len(training_set)+1).zfill(4)}"
+            / f"{GLOBALS.SYSTEM_NAME}{str(next_point).zfill(4)}"
         )
         new_training_point = PointsDirectory(sample_pool_directory)[point]
 
