@@ -28,6 +28,7 @@ def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
             if d.is_dir() and (d / FILE_STRUCTURE["data"]).exists():
                 child_processes += [d]
         child_processes = [str(cp.absolute()) for cp in child_processes]
+        mkdir(src / FILE_STRUCTURE["child_processes"].parent)
         with open(src / FILE_STRUCTURE["child_processes"], "w") as f:
             json.dump(child_processes, f)
 

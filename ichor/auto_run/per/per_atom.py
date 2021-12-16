@@ -16,6 +16,7 @@ from ichor.menu import Menu
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.tab_completer import ListCompleter
+from ichor.batch_system import JobID
 
 _atoms_to_run_on: Optional[List[Path]] = None
 _selected_atoms_to_run_on: Optional[List[Path]] = None
@@ -43,9 +44,9 @@ def run_per_atom_daemon():
     PerAtomDaemon().start()
 
 
-def auto_run_per_atom(run_func: Optional[Callable] = None) -> None:
+def auto_run_per_atom(run_func: Optional[Callable] = None) -> List[JobID]:
     atoms = [atom.name for atom in GLOBALS.ATOMS]
-    auto_run_per_value(
+    return auto_run_per_value(
         "OPTIMISE_ATOM",
         atoms,
         directory=FILE_STRUCTURE["atoms"],
