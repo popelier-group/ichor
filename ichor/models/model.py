@@ -377,7 +377,7 @@ class Model(File):
 
     def validate(self):
         from ichor import __version__
-        
+
         self.program = (
             self.program if self.program is not FileContents else "ichor"
         )
