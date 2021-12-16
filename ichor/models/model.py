@@ -376,6 +376,8 @@ class Model(File):
         return np.diag(self.kernel.R(x_test) - np.matmul(v.T, v)).flatten()
 
     def validate(self):
+        from ichor import __version__
+        
         self.program = (
             self.program if self.program is not FileContents else "ichor"
         )
@@ -450,8 +452,6 @@ class Model(File):
             self.weights = self.compute_weights()
 
     def write(self, path: Optional[Path] = None) -> None:
-        from ichor import __version__
-
         path = path or self.path
 
         if not path.parent.exists():
