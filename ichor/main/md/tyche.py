@@ -1,16 +1,17 @@
 from pathlib import Path
+from typing import Optional
 
 from ichor.analysis.get_input import get_first_file, get_input_menu
 from ichor.atoms import Atoms
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir
+from ichor.common.io import mkdir, get_files_of_type
 from ichor.common.os import input_with_prefill
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.files import GJF, XYZ
+from ichor.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, SubmissionScript,
-                                     TycheCommand)
+                                     TycheCommand, ICHORCommand)
 
 _input_file = None
 _input_filetypes = [XYZ.filetype, GJF.filetype]
@@ -62,7 +63,24 @@ def submit_tyche(input_file: Path) -> JobID:
 
     with SubmissionScript(SCRIPT_NAMES["tyche"]) as submission_script:
         submission_script.add_command(TycheCommand(freq_param, g09_input.path))
+        submission_script.add_command(ICHORCommand(func="tyche_to_xyz", func_args=[FILE_STRUCTURE["tyche"]]))
+        submission_script.add_command(ICHORCommand(func="set_points_location", func_args=[f"{GLOBALS.SYSTEM_NAME}-tyche-{GLOBALS.TYCHE_TEMPERATURE}{Trajectory.filetype}"]))
     return submission_script.submit()
+
+
+def tyche_to_xyz(tyche_input: Path, xyz: Optional[Path] = None) -> Path:
+    xyzs = get_files_of_type(Trajectory.filetype, tyche_input.parent)
+    if len(xyzs) == 0:
+        raise FileNotFoundError(
+            f"No trajectory files found in {tyche_input.parent}"
+        )
+    traj = Trajectory(xyzs[0])
+    if xyz is None:
+        xyz = Path(
+            f"{GLOBALS.SYSTEM_NAME}-tyche-{GLOBALS.TYCHE_TEMPERATURE}{Trajectory.filetype}"
+        )
+    traj.write(xyz)
+    return xyz
 
 
 def set_temperature():
