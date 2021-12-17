@@ -230,7 +230,7 @@ def _geometry_analysis_menu_refresh(menu):
         f"Calculate Modified Dihedrals: {_calc_modified_dihedrals}"
     )
     menu.add_space()
-    menu.add_option(f"Angle Units: {_angle_units.name}")
+    menu.add_message(f"Angle Units: {_angle_units.name}")
     menu.add_final_options()
 
 
