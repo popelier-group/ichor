@@ -13,18 +13,16 @@ from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM
 from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM
 
 _points_directory_path = None
+_force = False
 
+def _toggle_force():
+    global _force
+    _force = not _force
 
 def _points_directory_menu_refresh(menu):
     from ichor.auto_run.standard_auto_run import auto_run_qct
 
     global _points_directory_path
-
-    _force = False
-
-    def _toggle_force():
-        global _force
-        _force = not _force
 
     menu.clear_options()
     menu.add_option(
