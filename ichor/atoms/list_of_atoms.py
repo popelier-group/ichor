@@ -226,7 +226,7 @@ class ListOfAtoms(list):
                     for outer_k, outer_v in error.items()
                 }
                 f.write(
-                    f"    {len(point.atoms)}\ni = {i} energy = {dict_to_write}\n"
+                    f"    {len(point.atoms)}\ni = {i} properties_error = {dict_to_write}\n"
                 )
                 for atom in point.atoms:
                     f.write(
