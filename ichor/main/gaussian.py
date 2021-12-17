@@ -11,7 +11,7 @@ from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
 
 
 def submit_points_directory_to_gaussian(
-    directory: Path, overwrite_existing: bool = True
+    directory: Path, overwrite_existing: bool = True, force: bool = False
 ) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
@@ -25,7 +25,7 @@ def submit_points_directory_to_gaussian(
         directory
     )  # a directory which contains points (a bunch of molecular geometries)
     gjf_files = write_gjfs(points, overwrite_existing)
-    return submit_gjfs(gjf_files)
+    return submit_gjfs(gjf_files, force=force)
 
 
 def write_gjfs(

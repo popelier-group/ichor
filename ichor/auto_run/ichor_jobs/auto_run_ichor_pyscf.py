@@ -9,7 +9,7 @@ from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
 
 
 def submit_ichor_pyscf_command_to_auto_run(
-    directory: Union[Path, MutableValue], hold: Optional[JobID] = None
+    directory: Union[Path, MutableValue], force: Optional[MutableValue] = None, hold: Optional[JobID] = None
 ) -> Optional[JobID]:
     """Writes out datafile that is needed for the Gaussian jobs. The actual Gaussian calculations run with the next job in the auto run sequence,
     but they need access to the datafile. This is why the datafile needs to be written prior to actually running the Gaussian job.
@@ -22,13 +22,17 @@ def submit_ichor_pyscf_command_to_auto_run(
     """
     if isinstance(directory, MutableValue):
         directory = directory.value
+    if isinstance(force, MutableValue):
+        force = force.value
+    if force is None:
+        force = False
 
     submission_script = SubmissionScript(
         SCRIPT_NAMES["ichor"]["pandora"]["pyscf"]
     )
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
-        submit_points_directory_to_pyscf, str(directory)
+        submit_points_directory_to_pyscf, str(directory), force
     )
     with TimingManager(submission_script, message="Sumitting GJFs"):
         submission_script.add_command(ichor_command)

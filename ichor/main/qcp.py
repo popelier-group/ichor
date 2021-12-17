@@ -14,13 +14,15 @@ class CannotSubmitPointsDirectoryToQuantumChemistryProgram(
         self.message = f"{directory} not submitted to QCP ({qcp}), need to write function to submit"
 
 
-def submit_qcp(directory: Path) -> Optional[JobID]:
+def submit_qcp(directory: Path, force: bool = False) -> Optional[JobID]:
     qcp = QUANTUM_CHEMISTRY_PROGRAM()
+
     if qcp is QuantumChemistryProgram.Gaussian:
-        return submit_points_directory_to_gaussian(directory)
+        qcpf = submit_points_directory_to_gaussian
     elif qcp is QuantumChemistryProgram.PySCF:
-        return submit_points_directory_to_pyscf(directory)
+        qcpf = submit_points_directory_to_pyscf
     else:
         raise CannotSubmitPointsDirectoryToQuantumChemistryProgram(
             directory, qcp
         )
+    return qcpf(directory, force=force)

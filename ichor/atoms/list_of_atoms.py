@@ -1,3 +1,4 @@
+from os import system
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -184,12 +185,12 @@ class ListOfAtoms(list):
         """
         from ichor.analysis.predictions import get_true_predicted
         from ichor.constants import ha_to_kj_mol
-        from ichor.files import PointDirectory, PointsDirectory
+        from ichor.files import PointsDirectory
         from ichor.models import Models
 
         if not isinstance(self, PointsDirectory):
             raise NotImplementedError(
-                "This method only works for 'PointsDirectory' because it needs access to .wfn and .int data."
+                "This method only works for 'PointsDirectory' because it needs access to .wfn and .int data. Does not work for 'Trajectory' instances."
             )
 
         models_path = Path(models_path)
@@ -204,10 +205,14 @@ class ListOfAtoms(list):
         # if iqa is in dictionary, convert that to kj mol-1
         if error.get("iqa"):
             error["iqa"] *= ha_to_kj_mol
-        # sort to get properties to be ordered nicely
+        # dispersion is added onto iqa, so also calculate in kj mol-1
+        if error.get("dispersion"):
+            error["dispersion"] *= ha_to_kj_mol
+
+        system_name = models.system
 
         if fname is None:
-            fname = Path("system_to_xyz.xyz")
+            fname = Path(f"{system_name}_with_properties_error.xyz")
         elif isinstance(fname, str):
             fname = Path(fname)
 
@@ -226,7 +231,7 @@ class ListOfAtoms(list):
                     for outer_k, outer_v in error.items()
                 }
                 f.write(
-                    f"    {len(point.atoms)}\ni = {i} energy = {dict_to_write}\n"
+                    f"    {len(point.atoms)}\ni = {i} properties_error = {dict_to_write}\n"
                 )
                 for atom in point.atoms:
                     f.write(
