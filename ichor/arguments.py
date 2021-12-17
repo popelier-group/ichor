@@ -71,7 +71,7 @@ external_functions = [
         "ichor.main.pandora", "copy_aimall_wfn_to_point_directory"
     ),
     ExternalFunction("ichor.main.md", "mdcrd_to_xyz"),
-    ExternalFunction("ichor.main.md.tyche", "tyche_to_xyz")
+    ExternalFunction("ichor.main.md.tyche", "tyche_to_xyz"),
     ExternalFunction("ichor.main.pandora", "add_dispersion_to_aimall"),
     ExternalFunction("ichor.main.md.cp2k", "cp2k_to_xyz"),
     ExternalFunction("ichor.common.points", "set_points_location"),
