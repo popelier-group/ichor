@@ -149,9 +149,9 @@ def get_qcp_steps():  # Gaussian / PySCF
     ichor_qcp_step = IterStep(
         ichor_qcp_function,
         IterUsage.All,
-        [IterArgs.TrainingSetLocation],
+        [IterArgs.TrainingSetLocation, IterArgs.Force],
     )
-    qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints], IterArgs.Force)
+    qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints])
 
     return ichor_qcp_step, qcp_step
 
