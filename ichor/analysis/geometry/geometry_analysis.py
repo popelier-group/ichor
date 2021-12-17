@@ -198,7 +198,7 @@ def _toggle_angle_units():
 
 def _geometry_analysis_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option("1", "Run Geometry Analysis")
+    menu.add_option("1", "Run Geometry Analysis", run_geometry_analysis)
     menu.add_space()
     menu.add_option("i", "Set Input", _set_input)
     menu.add_option("o", "Set Output", _set_output)
