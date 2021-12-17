@@ -147,7 +147,7 @@ def run_geometry_analysis(
     if _submit:
         return submit_geometry_analysis(input_location, output_location)
     else:
-        run_geometry_analysis(input_location, output_location)
+        geometry_analysis(input_location, output_location)
 
 
 def _toggle_calc_bonds():
