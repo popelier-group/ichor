@@ -10,7 +10,7 @@ from ichor.submission_script import (SCRIPT_NAMES, MorfiCommand,
                                      PandoraPySCFCommand, SubmissionScript)
 
 
-def submit_points_directory_to_pyscf(directory: Path) -> Optional[JobID]:
+def submit_points_directory_to_pyscf(directory: Path, force: bool = False) -> Optional[JobID]:
     """Function that submits all .gjf files in a directory to Gaussian, which will output .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
@@ -20,7 +20,7 @@ def submit_points_directory_to_pyscf(directory: Path) -> Optional[JobID]:
     )  # a directory which contains points (a bunch of molecular geometries)
     pandora_inputs = write_pandora_input(points)
     point_directories = [point.path for point in points]
-    return submit_pandora_input_to_pyscf(pandora_inputs, point_directories)
+    return submit_pandora_input_to_pyscf(pandora_inputs, point_directories, force=force)
 
 
 def submit_pandora_input_to_pyscf(
@@ -103,12 +103,13 @@ def copy_aimall_wfn_to_point_directory(
 def submit_points_directory_to_morfi(
     directory: Path,
     atoms: Optional[List[str]] = None,
+    force: bool = False,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     points = PointsDirectory(directory)
     morfi_inputs, aimall_wfns, point_directories = check_pyscf_wfns(points)
     return submit_morfi(
-        morfi_inputs, aimall_wfns, point_directories, atoms=atoms, hold=hold
+        morfi_inputs, aimall_wfns, point_directories, atoms=atoms, hold=hold, force=force
     )
 
 
@@ -148,24 +149,25 @@ def submit_morfi(
         return submission_script.submit(hold=hold)
 
 
-def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path]]:
+def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path], List[Path]]:
     morfi_inputs = []
     aimall_wfns = []
     point_directories = []
     for point in points:
-        if point.pandora.exists():
-            if point.pandora_input.exists():
-                morfi_inputs.append(point.pandora_input.path)
-                if not point.wfn.exists():
-                    if point.pandora.pyscf.exists():
-                        if point.pandora.pyscf.aimall_wfn.exists():
-                            point.wfn = WFN(
-                                copy_aimall_wfn_to_point_directory(
-                                    point.pandora.path, point.path
-                                )
-                            )
-                aimall_wfns.append(point.wfn.path)
-                point_directories.append(point.path)
+        if point.pandora.exists() and point.pandora_input.exists():
+            morfi_inputs.append(point.pandora_input.path)
+            if (
+                not point.wfn.exists()
+                and point.pandora.pyscf.exists()
+                and point.pandora.pyscf.aimall_wfn.exists()
+            ):
+                point.wfn = WFN(
+                    copy_aimall_wfn_to_point_directory(
+                        point.pandora.path, point.path
+                    )
+                )
+            aimall_wfns.append(point.wfn.path)
+            point_directories.append(point.path)
 
     return morfi_inputs, aimall_wfns, point_directories
 

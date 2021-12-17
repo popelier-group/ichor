@@ -68,6 +68,7 @@ class IterArgs:
     nPoints = MutableValue(1)  # Overwritten Based On IterState
     Atoms = MutableValue([])  # Overwritten from GLOBALS.ATOMS
     ModelTypes = MutableValue([])
+    Force = MutableValue(False)
 
 
 class IterStep:
@@ -149,7 +150,7 @@ def get_qcp_steps():  # Gaussian / PySCF
         IterUsage.All,
         [IterArgs.TrainingSetLocation],
     )
-    qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints])
+    qcp_step = IterStep(qcp_function, IterUsage.All, [IterArgs.nPoints], IterArgs.Force)
 
     return ichor_qcp_step, qcp_step
 
@@ -170,7 +171,7 @@ def get_qct_steps():  # AIMAll / Morfi
     ichor_qct_step = IterStep(
         ichor_qct_function,
         IterUsage.All,
-        [IterArgs.TrainingSetLocation, IterArgs.Atoms],
+        [IterArgs.TrainingSetLocation, IterArgs.Atoms, IterArgs.Force],
     )
 
     qct_step = IterStep(
@@ -364,7 +365,7 @@ def rerun_from_failed() -> Optional[JobID]:
         return auto_run()
 
 
-def auto_run_qct(directory: Path):
+def auto_run_qct(directory: Path, force: bool = False):
     qct_func_order = [
         *get_qcp_steps(),
         *get_qct_steps(),
@@ -373,6 +374,7 @@ def auto_run_qct(directory: Path):
     IterArgs.nPoints.value = len(points)
     IterArgs.TrainingSetLocation.value = directory
     IterArgs.Atoms.value = points[0].atoms.names
+    IterArgs.Force.value = force
 
     with DataLock():
         submit_auto_run_iter(qct_func_order)

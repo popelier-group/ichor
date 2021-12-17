@@ -16,14 +16,15 @@ class CannotSubmitPointsDirectoryToQuantumChemicalTopologyProgram(
 
 
 def submit_qct(
-    directory: Path, atoms: Optional[List[str]] = None
+    directory: Path, atoms: Optional[List[str]] = None, force: bool = False
 ) -> Optional[JobID]:
     qctp = QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
     if qctp is QuantumChemicalTopologyProgram.AIMAll:
-        return submit_points_directory_to_aimall(directory, atoms=atoms)
+        qctpf = submit_points_directory_to_aimall
     elif qctp is QuantumChemicalTopologyProgram.Morfi:
-        return submit_points_directory_to_morfi(directory, atoms=atoms)
+        qctpf = submit_points_directory_to_morfi
     else:
         raise CannotSubmitPointsDirectoryToQuantumChemicalTopologyProgram(
             directory, qctp
         )
+    return qctpf(directory, atoms=atoms, force=force)
