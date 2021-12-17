@@ -100,7 +100,10 @@ def print_child_process_status(cpdir: Path):
     from ichor.file_structure import FILE_STRUCTURE
 
     with pushd(cpdir, update_cwd=True):
-        print(f"{cpdir} Status")
+        path_status = f"{cpdir} Status"
+        print("-"*len(path_status))
+        print(path_status)
+        print("-"*len(path_status))
         if FILE_STRUCTURE["counter"].exists():
             current_iteration, max_iteration = read_counter()
             print(f"Iteration {current_iteration} of {max_iteration}")
@@ -110,8 +113,9 @@ def print_child_process_status(cpdir: Path):
         from ichor.common.io import last_modified
         from ichor.log import logger
 
-        logger_path = Path(logger.root.handlers[0].baseFilename)
+        logger_path = Path('ichor.log').absolute()  # <- better way to get this?
         print(f"{logger_path} last modified: {last_modified(logger_path)}")
+        print()
 
 
 def print_child_processes_status(child_processes: Optional[List[Path]] = None):
