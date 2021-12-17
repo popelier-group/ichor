@@ -16,4 +16,4 @@ def analysis_menu():
             "opt", "geometry optimisation analysis", run_gauss_opt_menu
         )
         menu.add_option("rotate", "rotate-mol", rotate_mol_menu)
-        menu.add_option("geom", "geometry analysis", rotate_mol_menu)
+        menu.add_option("geom", "geometry analysis", geometry_analysis_menu)
