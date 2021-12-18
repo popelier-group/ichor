@@ -130,7 +130,7 @@ def calculate_bond(atoms: Atoms, i: int, j: int):
 
 def calculate_bonds(atoms: Atoms) -> np.ndarray:
     connected_atoms = get_connected_atoms(atoms)
-    return np.ndarray(
+    return np.array(
         [calculate_bond(atoms, i, j) for i, j in connected_atoms._bonds]
     )
 
@@ -149,7 +149,7 @@ def calculate_angle(atoms: Atoms, i: int, j: int, k: int):
 
 def calculate_angles(atoms: Atoms) -> np.ndarray:
     connected_atoms = get_connected_atoms(atoms)
-    return np.ndarray(
+    return np.array(
         [
             calculate_angle(atoms, i, j, k)
             for i, j, k in connected_atoms._angles
@@ -189,7 +189,7 @@ def calculate_dihedral(atoms: Atoms, i: int, j: int, k: int, l: int) -> float:
 
 def calculate_dihedrals(atoms: Atoms) -> np.ndarray:
     connected_atoms = get_connected_atoms(atoms)
-    return np.ndarray(
+    return np.array(
         [
             calculate_dihedral(atoms, i, j, k, l)
             for i, j, k, l in connected_atoms._dihedrals
