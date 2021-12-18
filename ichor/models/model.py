@@ -373,7 +373,7 @@ class Model(File):
         # temporary matrix, see Rasmussen Williams page 19 algo. 2.1
         v = np.linalg.solve(self.lower_cholesky, train_test_covar)
 
-        return np.diag(self.kernel.R(x_test) - np.matmul(v.T, v)).flatten()
+        return 1.0 - np.diag(np.matmul(v.T, v)).flatten()
 
     def validate(self):
         from ichor import __version__

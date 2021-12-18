@@ -47,7 +47,7 @@ def write_gjfs(
             )
         point.gjf.atoms = point.xyz.atoms
 
-        if overwrite_existing:
+        if not point.gjf.exists() or overwrite_existing:
             point.gjf.write()
 
         gjfs.append(point.gjf.path)
