@@ -30,7 +30,7 @@ def submit_ichor_gaussian_command_to_auto_run(
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["gaussian"])
     ichor_command = ICHORCommand(auto_run=True)
     ichor_command.add_function_to_job(
-        submit_points_directory_to_gaussian, str(directory), force
+        submit_points_directory_to_gaussian, str(directory), True, force
     )
     with TimingManager(submission_script, message="Sumitting GJFs"):
         submission_script.add_command(ichor_command)
