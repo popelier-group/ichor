@@ -102,7 +102,10 @@ class SunGridEngine(BatchSystem):
             )
             priority = float(priority)
             state = JobStatus(state).name
-            start = datetime.strptime(start, "%d/%m/%Y %H:%M:%S")
+            try:
+                start = datetime.strptime(start, "%d/%m/%Y %H:%M:%S")
+            except ValueError:
+                start = None
             slots = int(slots)
             if tasks:
                 if "-" in tasks:
