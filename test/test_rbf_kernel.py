@@ -11,7 +11,7 @@ class TestRBF(unittest.TestCase):
 
         lengthscale = np.array([4.3, 2.14, 3.06, 1.73])
         thetas = 1 / (2 * lengthscale**2)
-        kernel = RBF(thetas=thetas)
+        kernel = RBF(name="k1", thetas=thetas)
         self.assertEqual(len(kernel.params), 4)
 
     def test_k_one_lengthscale(self):
@@ -24,7 +24,7 @@ class TestRBF(unittest.TestCase):
         # ichor expects the number of lengthscale dimensions to be equal to the number of features
         lengthscale = np.array([2.0, 2.0, 2.0, 2.0])
         thetas = 1 / (2 * lengthscale**2)
-        kernel = RBF(thetas=thetas)
+        kernel = RBF(name="k1", thetas=thetas)
         cov_matrix = kernel.k(x1, x2)
 
         # sklearn 0.24.2
@@ -51,7 +51,7 @@ class TestRBF(unittest.TestCase):
         x2 = np.array([[1.3, 1.35, 2.20, 5.12], [0.81, 1.09, 1.98, 5.49], [1.61, 1.87, 3.56, 6.01]])
         lengthscale = np.array([4.3, 2.14, 3.06, 1.73])
         thetas = 1 / (2 * lengthscale**2)
-        kernel = RBF(thetas=thetas)
+        kernel = RBF(name="k1", thetas=thetas)
         cov_matrix = kernel.k(x1, x2)
 
         # sklearn 0.24.2
@@ -80,7 +80,7 @@ class TestRBF(unittest.TestCase):
         lengthscale = np.array([4.3, 2.14, 3.06])
         thetas = 1 / (2 * lengthscale**2)
         active_dims = [0,1,2]
-        kernel = RBF(thetas=thetas, active_dims=active_dims)
+        kernel = RBF(name="k1", thetas=thetas, active_dims=active_dims)
         cov_matrix = kernel.k(x1, x2)
 
         # sklearn 0.24.2

@@ -13,7 +13,7 @@ class TestPeriodicKernel(unittest.TestCase):
         lengthscale = np.array([4.3, 2.14, 3.06, 1.73])
         thetas = 1 / (2 * lengthscale**2)
         period = 2* np.pi
-        kernel = PeriodicKernel(thetas=thetas, period_length=period)
+        kernel = PeriodicKernel(name="k1", thetas=thetas, period_length=period)
         self.assertEqual(len(kernel.params), 2)
 
     def test_k_periodic_one_dimension(self):
@@ -25,7 +25,7 @@ class TestPeriodicKernel(unittest.TestCase):
         lengthscale = np.array([2.0])
         thetas = 1 / (2 * lengthscale**2)
         period_length = 2.0 * np.pi
-        kernel = PeriodicKernel(thetas=thetas, period_length=period_length)
+        kernel = PeriodicKernel(name="k1", thetas=thetas, period_length=period_length)
         cov_matrix = kernel.k(x1, x2)
 
         # sklearn 0.24.2 periodic kernel supports one lengthscale and seems to have a bug if the inputs are multi-dimensional
@@ -53,7 +53,7 @@ class TestPeriodicKernel(unittest.TestCase):
         lengthscale = np.array([1.2, 5.39, 1.73])
         thetas = 1 / (2 * lengthscale**2)
         period_length = 2.0 * np.pi
-        kernel = PeriodicKernel(thetas=thetas, period_length=period_length)
+        kernel = PeriodicKernel(name="k1", thetas=thetas, period_length=period_length)
         cov_matrix = kernel.k(x1, x2)
 
         # custom implementation using sklearn periodic kernel, where each input-dimension covariance is calculated and multiplied
@@ -91,7 +91,7 @@ class TestPeriodicKernel(unittest.TestCase):
         lengthscale = np.array([1.2, 5.39, 1.73])
         thetas = 1 / (2 * lengthscale**2)
         period_length = 2 * np.pi
-        kernel = PeriodicKernel(thetas=thetas, period_length=period_length)
+        kernel = PeriodicKernel(name="k1", thetas=thetas, period_length=period_length)
         cov_matrix = kernel.k(x1, x1)
 
         # custom implementation using sklearn periodic kernel, where each input-dimension covariance is calculated and multiplied
@@ -117,7 +117,7 @@ class TestPeriodicKernel(unittest.TestCase):
         lengthscale = np.array([1.2, 5.39, 1.73])
         thetas = 1 / ( 2 * lengthscale**2)
         period_length = 2 * np.pi
-        kernel = PeriodicKernel(thetas=thetas, period_length=period_length)
+        kernel = PeriodicKernel(name="k1", thetas=thetas, period_length=period_length)
         own_implementation_cov_matrix = kernel.k(x1, x1)
 
         # from sklearn.gaussian_process.kernels import ExpSineSquared
