@@ -13,26 +13,31 @@ from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM
 from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM
 
 _points_directory_path = None
+_force = False
 
+def _toggle_force():
+    global _force
+    _force = not _force
 
 def _points_directory_menu_refresh(menu):
     from ichor.auto_run.standard_auto_run import auto_run_qct
 
     global _points_directory_path
+
     menu.clear_options()
     menu.add_option(
         "1",
         f"Submit Points to {QUANTUM_CHEMISTRY_PROGRAM().name}",
         submit_qcp,
         kwargs={
-            "directory": _points_directory_path
+            "directory": _points_directory_path, "force": _force,
         },  # which directory to submit gjfs from (TRAINING_SET, SAMPLE_POOL, etc.). Set by GLOBALS.FILE_STRUCTURE
     )
     menu.add_option(
         "2",
         f"Submit Points to {QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM().name}",
         submit_qct,
-        kwargs={"directory": _points_directory_path},
+        kwargs={"directory": _points_directory_path, "force": _force},
     )
     menu.add_option(
         "3",
@@ -45,8 +50,11 @@ def _points_directory_menu_refresh(menu):
         "a",
         f"Auto-Run {QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM().name}",
         auto_run_qct,
-        kwargs={"directory": _points_directory_path},
+        kwargs={"directory": _points_directory_path, "force": _force},
     )
+    menu.add_option("f", "Toggle Force", _toggle_force)
+    menu.add_space()
+    menu.add_message(f"Force: {_force}")
     menu.add_final_options()
 
 

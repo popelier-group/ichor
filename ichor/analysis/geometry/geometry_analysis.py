@@ -147,7 +147,7 @@ def run_geometry_analysis(
     if _submit:
         return submit_geometry_analysis(input_location, output_location)
     else:
-        run_geometry_analysis(input_location, output_location)
+        geometry_analysis(input_location, output_location)
 
 
 def _toggle_calc_bonds():
@@ -198,7 +198,7 @@ def _toggle_angle_units():
 
 def _geometry_analysis_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option("1", "Run Geometry Analysis")
+    menu.add_option("1", "Run Geometry Analysis", run_geometry_analysis, kwargs={"input_location": _input_location, "output_location": _output_location})
     menu.add_space()
     menu.add_option("i", "Set Input", _set_input)
     menu.add_option("o", "Set Output", _set_output)
@@ -230,7 +230,7 @@ def _geometry_analysis_menu_refresh(menu):
         f"Calculate Modified Dihedrals: {_calc_modified_dihedrals}"
     )
     menu.add_space()
-    menu.add_option(f"Angle Units: {_angle_units.name}")
+    menu.add_message(f"Angle Units: {_angle_units.name}")
     menu.add_final_options()
 
 

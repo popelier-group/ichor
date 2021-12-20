@@ -11,14 +11,14 @@ from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
 
 
 def submit_points_directory_to_aimall(
-    directory: Path, atoms: Optional[List[str]] = None
+    directory: Path, atoms: Optional[List[str]] = None, force: bool = False
 ) -> Optional[JobID]:
     """Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file"""
 
     logger.info("Submitting wfns to AIMAll")
     points = PointsDirectory(directory)
     wfns = check_wfns(points)
-    return submit_wfns(wfns, atoms)
+    return submit_wfns(wfns, atoms, force=force)
 
 
 def check_wfns(points: PointsDirectory) -> List[Path]:

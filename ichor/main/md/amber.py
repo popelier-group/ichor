@@ -57,6 +57,9 @@ FORCE_EVALUATION = ForceEvaluation.Complete
 PBC = PeriodicBoundaryCondition.NoPeriodicBoundary
 _input_file = None
 _input_filetypes = [XYZ.filetype, GJF.filetype]
+_write_coord_every = 1
+_write_vel_every = 0
+_write_forces_every = 0
 
 
 def write_mdin(mdin_file: Path):
@@ -75,12 +78,12 @@ def write_mdin(mdin_file: Path):
         f.write(f"  temp0={GLOBALS.AMBER_TEMPERATURE},\n")  # temperature
         f.write("  ntpr=1,\n")  # energy info printed to mdout every ntpr steps
         f.write(
-            "  ntwx=1,\n"
+            f"  ntwx={_write_coord_every},\n"
         )  # coordinate info printed to mdout every ntwx steps
         f.write(
-            "  ntwv=0,\n"
+            f"  ntwv={_write_vel_every},\n"
         )  # velocity info printed to mdout every ntwv steps
-        f.write("  ntwf=0,\n")  # force info printed to mdout every ntwf steps
+        f.write(f"  ntwf={_write_forces_every},\n")  # force info printed to mdout every ntwf steps
         f.write("  ioutfm=0,\n")  # output formatting
         f.write("  cut=999.0,\n")  # nonbonded cutoff
         f.write(f"  ntb={PBC.value},\n")  # periodic boundary conditions
@@ -188,6 +191,20 @@ def set_input():
     _input_file = get_input_menu(_input_file, _input_filetypes)
 
 
+def set_print_every():
+    global _write_coord_every
+    while True:
+        try:
+            _write_coord_every = int(
+                input_with_prefill(
+                    "Print Every: ", prefill=f"{_write_coord_every}"
+                )
+            )
+            break
+        except ValueError:
+            print("Number to print coords every n must be an integer")
+
+
 def amber_menu_refresh(menu):
     menu.clear_options()
     menu.add_option(
@@ -197,10 +214,12 @@ def amber_menu_refresh(menu):
     menu.add_option("i", "Set input file", set_input)
     menu.add_option("t", "Set Temperature", set_temperature)
     menu.add_option("n", "Set number of timesteps", set_nsteps)
+    menu.add_option("e", "Set print every n timesteps", set_print_every)
     menu.add_space()
     menu.add_message(f"Input File: {_input_file}")
     menu.add_message(f"Temperature: {GLOBALS.AMBER_TEMPERATURE} K")
     menu.add_message(f"Number of Timesteps: {GLOBALS.AMBER_STEPS:,}")
+    menu.add_message(f"Write Output Every '{_write_coord_every}' timestep(s)")
     menu.add_final_options()
 
 
