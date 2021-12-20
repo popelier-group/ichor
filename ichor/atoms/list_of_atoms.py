@@ -1,11 +1,10 @@
 from os import system
 from pathlib import Path
-from typing import List, Optional, OrderedDict, Union
+from typing import List, Optional, Type, Union
 
 import numpy as np
 
 from ichor.atoms.atoms import Atoms
-
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -323,6 +322,52 @@ class ListOfAtoms(list):
             headings.append(f"phi{feat+3}")  # starts at phi3
 
         return headings
+
+    def features_with_properties_to_csv(self, str_to_append_to_fname: Optional[str] = "_features_with_properties.csv", atom_names: Optional[List[str]] = None,
+                                        property_types: Optional[List[str]] = None):
+        """[summary]
+
+        :param str_to_append_to_fname: a string that is appended to the default file name (which is `name_of_atom.csv`), defaults to None
+        :param atom_names: A list of atom names for which to write out csv files with properties. If None, then writes out files for all
+            atoms in the system, defaults to None
+        :param property_types: A list of property names (iqa, multipole names) for which to write columns. If None, then writes out
+            columns for all properties, defaults to None
+        :raises TypeError: This method only works for PointsDirectory instances because it needs access to AIMALL information. Does not
+            work for Trajectory instances.
+        """
+        
+        import pandas as pd
+        from ichor import constants
+        from ichor.files import PointsDirectory
+
+        if isinstance(atom_names, str):
+            atom_names = [atom_names]
+        elif atom_names is None:
+            atom_names = self.atom_names
+    
+        if not isinstance(self, PointsDirectory):
+            raise TypeError("This method only works for PointsDirectory instances because it needs access to AIMALL output data.")
+    
+        # TODO: add dispersion later if we are going to make models for it separately
+        if not property_types:
+            property_types = ["iqa"] + constants.multipole_names
+    
+        for atom_name in atom_names:
+            
+            training_data = []
+            features = self[atom_name].features
+            
+            for i, point in enumerate(self):
+                properties = [point[atom_name].get_property(ty) for ty in property_types]
+                training_data.append([*features[i], *properties])
+
+            input_headers = [f"f{i+1}" for i in range(features.shape[-1])]
+            output_headers = [f"{output}" for output in property_types]
+
+            fname = atom_name + str_to_append_to_fname
+
+            df = pd.DataFrame(training_data, columns = input_headers + output_headers, dtype=np.float64)
+            df.to_csv(fname, index=False)
 
     def iteratoms(self):
         """Returns a generator of AtomView instances for each atom stored in ListOfAtoms."""
