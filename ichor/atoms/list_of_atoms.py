@@ -1,6 +1,6 @@
 from os import system
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, OrderedDict, Union
 
 import numpy as np
 
@@ -187,6 +187,7 @@ class ListOfAtoms(list):
         from ichor.constants import ha_to_kj_mol
         from ichor.files import PointsDirectory
         from ichor.models import Models
+        from collections import OrderedDict
 
         if not isinstance(self, PointsDirectory):
             raise NotImplementedError(
@@ -208,6 +209,9 @@ class ListOfAtoms(list):
         # dispersion is added onto iqa, so also calculate in kj mol-1
         if error.get("dispersion"):
             error["dispersion"] *= ha_to_kj_mol
+
+        # order the properties: iqa, q00, q10,....
+        error = OrderedDict(sorted(error.items()))
 
         system_name = models.system
 
