@@ -52,8 +52,8 @@ def run_geometry_opt(
     )
 
     jid = submit_gjfs([gjf.path], script_name=SCRIPT_NAMES["opt"]["gaussian"])
-    submission_script = SubmissionScript(SCRIPT_NAMES["opt"]["convert"])
-    submission_script.add_command(ichor_command)
+    with SubmissionScript(SCRIPT_NAMES["opt"]["convert"]) as submission_script:
+        submission_script.add_command(ichor_command)
     return submission_script.submit(hold=jid)
 
 
