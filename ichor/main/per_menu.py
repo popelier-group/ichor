@@ -88,6 +88,7 @@ def edit_list_of_child_processes():
     global child_processes_selected
     if not child_processes_selected:
         child_processes = []
+    all_child_processes = find_child_processes_recursively()
     while True:
         Menu.clear_screen()
         print("Select Child Processes")
@@ -104,14 +105,6 @@ def edit_list_of_child_processes():
             ans = ans.strip().lower()
             if ans == "":
                 break
-            elif ans in child_process_options:
-                idx = int(ans) - 1
-                if all_child_processes[idx] in child_processes:
-                    del child_processes[
-                        child_processes.index(all_child_processes[idx])
-                    ]
-                else:
-                    child_processes += [all_child_processes[idx]]
             elif ans in ["all"]:
                 child_processes = list(all_child_processes)
             elif ans in ["add"]:
@@ -120,6 +113,14 @@ def edit_list_of_child_processes():
                 child_processes += [new_child_process]
             elif ans in ["c", "clear"]:
                 child_processes.clear()
+            elif ans in child_process_options:
+                idx = int(ans) - 1
+                if all_child_processes[idx] in child_processes:
+                    del child_processes[
+                        child_processes.index(all_child_processes[idx])
+                    ]
+                else:
+                    child_processes += [all_child_processes[idx]]
             else:
                 print("Invalid Input")
     child_processes_selected = True
