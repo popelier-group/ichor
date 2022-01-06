@@ -157,7 +157,7 @@ def rotate_mol(
         point.centre()
 
     for point in trajectory:
-        R = trajectory[0][subsys].kabsch(point)
+        R = trajectory[0][subsys].kabsch(point[subsys])
         point.rotate(R)
 
     for point in trajectory:
