@@ -88,6 +88,7 @@ def edit_list_of_child_processes():
     global child_processes_selected
     if not child_processes_selected:
         child_processes = []
+    all_child_processes = find_child_processes_recursively()
     while True:
         Menu.clear_screen()
         print("Select Child Processes")
