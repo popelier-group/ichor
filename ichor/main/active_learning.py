@@ -61,7 +61,7 @@ def active_learning(
     logger.debug(f"Points to add: {points_to_add}")
 
     if move_points:
-        for point in points_to_add:
+        for point in reversed(sorted(points_to_add)):
             training_set = PointsDirectory(FILE_STRUCTURE["training_set"])
             next_point = len(training_set)+1
             while (training_set.path / f"{GLOBALS.SYSTEM_NAME}{str(next_point).zfill(4)}").exists():
