@@ -84,22 +84,21 @@ class SunGridEngine(BatchSystem):
         # job-ID  prior   name       user         state submit/start at     queue                          slots ja-task-ID
         # -----------------------------------------------------------------------------------------------------------------
         for line in stdout.split("\n")[2:]:
-            (
-                job_id,
-                priority,
-                name,
-                user,
-                state,
-                start,
-                queue,
-                slots,
-                tasks,
-            ) = split_by(
+            tokens = split_by(
                 line,
                 [8, 8, 11, 13, 6, 20, 31, 6],
                 strip=True,
                 return_remainder=True,
             )
+            job_id = tokens[0] if len(tokens) >= 1 else None
+            priority = tokens[1] if len(tokens) >= 2 else None
+            name = tokens[2] if len(tokens) >= 3 else None
+            user = tokens[3] if len(tokens) >= 4 else None
+            state = tokens[4] if len(tokens) >= 5 else None
+            start = tokens[5] if len(tokens) >= 6 else None
+            queue = tokens[6] if len(tokens) >= 7 else None
+            slots = tokens[7] if len(tokens) >= 8 else None
+            tasks = tokens[8] if len(tokens) >= 9 else None
             priority = float(priority)
             state = JobStatus(state).name
             try:

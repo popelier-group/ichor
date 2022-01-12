@@ -51,7 +51,7 @@ def _set_input_file(input_file: Optional[Path] = None) -> Path:
     global _atoms
     global _centre_atoms
     global _rmsd_subsystem
-    _input_file = input_file if input_file else _get_input_file()
+    _input_file = input_file or _get_input_file()
     if not _output_file_set:
         _output_file = Path(
             _input_file.parent / (_input_file.stem + "_ROTATED" + XYZ.filetype)
@@ -124,7 +124,7 @@ def _set_subsys_atoms():
         with ListCompleter(_all_atoms + ["all", "c", "clear"]):
             for atom_name in _all_atoms:
                 print(
-                    f"[{'x' if atom_name in _centre_atoms else ' '}] {atom_name}"
+                    f"[{'x' if atom_name in _rmsd_subsystem else ' '}] {atom_name}"
                 )
             print()
             ans = input(">> ")
@@ -157,7 +157,7 @@ def rotate_mol(
         point.centre()
 
     for point in trajectory:
-        R = trajectory[0][subsys].kabsch(point)
+        R = trajectory[0][subsys].kabsch(point[subsys])
         point.rotate(R)
 
     for point in trajectory:
