@@ -75,7 +75,7 @@ class Atom(VarReprMixin):
     @property
     def index(self) -> int:
         if self._index is None:
-            raise TypeError(
+            raise AttributeError(
                 f"'index' is not defined for instance of '{self.type} ({self.x} {self.y} {self.z})'"
             )
         return self._index

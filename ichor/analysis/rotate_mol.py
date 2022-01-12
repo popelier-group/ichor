@@ -146,6 +146,7 @@ def rotate_mol(
     subsys: Optional[List[str]] = None,
 ):
     trajectory = get_trajectory_from_path(input_file)
+
     if output_file is None:
         output_file = Path("rotated-output.xyz")
     if centre_atoms is None:
@@ -156,9 +157,11 @@ def rotate_mol(
     for point in trajectory:
         point.centre()
 
+    i = 0
     for point in trajectory:
         R = trajectory[0][subsys].kabsch(point[subsys])
         point.rotate(R)
+        i += 50
 
     for point in trajectory:
         point.centre(centre_atoms)

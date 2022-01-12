@@ -36,7 +36,8 @@ class Atoms(list):
         Each coordinate line in the trajectory file (for one timestep) is added as a separate Atom instance.
         """
         atom._parent = self
-        atom.index = next(self._counter)
+        if not hasattr(atom, "index"):
+            atom.index = next(self._counter)
         self.append(atom)
 
     @property
@@ -231,7 +232,7 @@ class Atoms(list):
             for atom in self:
                 if item == atom.name:
                     return atom
-            raise KeyError(f"Atom '{item}' does not exist")
+            raise KeyError(f"Atom '{item}' does not exist. Atoms: {self.atoms}")
         elif isinstance(item, (list, np.ndarray)):
             if len(item) > 0:
                 if isinstance(item[0], (int, np.int, str)):
