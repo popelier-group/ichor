@@ -224,7 +224,7 @@ def setup_iter_args():
     if GLOBALS.OPTIMISE_PROPERTY == "all":
         from ichor.main.make_models import MODEL_TYPES
 
-        IterArgs.ModelTypes.value = MODEL_TYPES
+        IterArgs.ModelTypes.value = MODEL_TYPES()
     else:
         types = GLOBALS.OPTIMISE_PROPERTY
         if isinstance(types, str):
