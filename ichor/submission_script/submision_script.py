@@ -29,6 +29,7 @@ class SubmissionScript:
         self.commands = (
             []
         )  # a list of commands to be submitted to batch system
+        self._ncores = None
 
     @classproperty
     def filetype(self) -> str:
@@ -42,7 +43,11 @@ class SubmissionScript:
     @property
     def ncores(self) -> int:
         """Number of cores to be used for the job."""
-        return max(command.ncores for command in self.grouped_commands)
+        return self._ncores or max(command.ncores for command in self.grouped_commands)
+
+    @ncores.setter
+    def ncores(self, ncores: int):
+        self._ncores = ncores
 
     @property
     def default_options(self) -> List[str]:
