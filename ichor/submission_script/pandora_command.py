@@ -24,7 +24,10 @@ class PandoraCommand(PythonCommand):
 
     @classproperty
     def modules(self) -> Modules:
-        return PythonCommand.modules + PandoraModules
+        modules = PythonCommand.modules + PandoraModules
+        if self.run_morfi:
+            modules += MorfiModules
+        return modules
 
     @property
     def data(self) -> List[str]:
@@ -82,7 +85,3 @@ class PandoraPySCFCommand(PandoraCommand):
 class PandoraMorfiCommand(PandoraCommand):
     def __init__(self, config_file: Path):
         super().__init__(config_file, pyscf=False, morfi=True)
-
-    @classproperty
-    def modules(self) -> Modules:
-        return PandoraCommand.modules + MorfiModules
