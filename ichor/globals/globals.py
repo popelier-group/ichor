@@ -418,7 +418,7 @@ class Globals:
             "AIMALL_BOAQ": constants.BOAQ_VALUES,
             "AIMALL_IASMESH": constants.IASMESH_VALUES,
             "FEREBUS_TYPE": constants.FEREBUS_TYPES,
-            "OPTIMISE_PROPERTY": ["iqa"] + constants.multipole_names,
+            "OPTIMISE_PROPERTY": ["iqa"] + constants.multipole_names + ["all"],
             "KERNEL": constants.KERNELS,
         }
 
