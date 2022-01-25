@@ -11,6 +11,9 @@ from ichor.submission_script.python_command import PythonCommand
 
 
 class PandoraCommand(PythonCommand):
+    run_morfi: bool = True
+    run_pyscf: bool = True
+
     def __init__(
         self, config_file: Path, pyscf: bool = True, morfi: bool = True
     ):
