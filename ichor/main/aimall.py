@@ -157,19 +157,15 @@ def scrub_aimall(wfn_file: str):
 
         # AIMAll deletes this sh file when it has successfully completed
         sh_file = wfn_file.with_suffix(".sh")
-        # if the .sh file exists
         if sh_file.exists():
-
             new_path = move_scrubbed_point(point_dir_path)
-
             logger.error(
-                f"Moved point directory {point_dir_path} to {new_path} because AIMALL failed to run."
+                f"Moved point directory {point_dir_path} to {new_path} because AIMALL .sh file exists."
             )
 
-        # find atoms which have integration error above the threshold set in ICHOR GLOBALS
+        # find if any atoms have integration error above the threshold set in ICHOR GLOBALS
         n_integration_error = 0
         point = PointDirectory(point_dir_path)
-        # if points.ints exists
         if point.ints:
             integration_errors = point.integration_error
             for atom, integration_error in integration_errors.items():
@@ -181,30 +177,28 @@ def scrub_aimall(wfn_file: str):
                         f"{point_dir_path} | {atom} | Integration Error: {integration_error}"
                     )
                     n_integration_error += 1
-
-        # if ints do not exist, then again move the point
+        # if ints do not exist, then move point because .int file need to exist after AIMALL
         else:
             new_path = move_scrubbed_point(point_dir_path)
             logger.error(
                 f".int files for the current point {point_dir_path} do not exist. Point moved to {new_path}."
             )
-
-        # if there is an atom with larger integration error in AIMALL
+        # if any atoms have larger integration error, scrub the point
         if n_integration_error > 0:
             new_path = move_scrubbed_point(point_dir_path)
             logger.error(
                 f"Moved point directory {point_dir_path} to {new_path} because AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
             )
 
-        # move point if .aim file does not contain correct last line
+        # scrub point if .aim file does not contain correct last line
         if not ("AIMQB Job Completed" in last_line(aim_file)):
 
             new_path = move_scrubbed_point(point_dir_path)
             logger.error(
-                f".aim file with path {aim_file} was not complete. Moved point to {new_path}."
+                f"Moved point directory {point_dir_path} to {new_path} because {aim_file} did not have correct last line."
             )
-        
-        # if AIMALL calculation ran correctly, check for license to warn user if AIMALL Professional is not used 
+
+        # if AIMALL calculation ran correctly, check for license to warn user if AIMALL Professional is not used
         else:
             # check for license and log a warning message if no AIMALL Professional License was available. Do not need to move point if this is the case.
             with open(aim_file) as f:
@@ -221,5 +215,5 @@ def scrub_aimall(wfn_file: str):
     else:
         new_path = move_scrubbed_point(point_dir_path)
         logger.error(
-            f".wfn file does not exist. Moving point {point_dir_path} to {new_path}."
+            f"Moved point directory {point_dir_path} to {new_path} because .wfn file does not exist after AIMALL was ran."
         )
