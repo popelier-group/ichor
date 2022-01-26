@@ -196,24 +196,25 @@ def scrub_aimall(wfn_file: str):
                 f"Moved point directory {point_dir_path} to {new_path} because AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
             )
 
-        # check the .aim file and see if it contains correct information
-        # check for license and log a warning message if no AIMALL Professional License was available. Do not need to move point if this is the case.
-        with open(aim_file) as f:
-            if (
-                not "AIMAll Professional license check succeeded."
-                in f.readline()
-            ):
-                logger.warning(
-                    f"AIMALL Professional License was not used for this calculation {aim_file}."
-                )
-
-        # move point if .aim file
+        # move point if .aim file does not contain correct last line
         if not ("AIMQB Job Completed" in last_line(aim_file)):
 
             new_path = move_scrubbed_point(point_dir_path)
             logger.error(
                 f".aim file with path {aim_file} was not complete. Moved point to {new_path}."
             )
+        
+        # if AIMALL calculation ran correctly, check for license to warn user if AIMALL Professional is not used 
+        else:
+            # check for license and log a warning message if no AIMALL Professional License was available. Do not need to move point if this is the case.
+            with open(aim_file) as f:
+                if (
+                    not "AIMAll Professional license check succeeded."
+                    in f.readline()
+                ):
+                    logger.warning(
+                        f"AIMALL Professional License was not used for this calculation {aim_file}."
+                    )
 
     # if a wfn file does not exist for some reason, we do not want this point as well. This shouldn't really be needed as points without wfn
     # files should be cleaned up after running Gaussian. But use this as another check.
