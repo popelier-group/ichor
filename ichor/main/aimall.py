@@ -204,7 +204,7 @@ def scrub_aimall(wfn_file: str):
                 in f.readline()
             ):
                 logger.warning(
-                    "AIMALL Professional License was not used for this calculation {aim_file}."
+                    f"AIMALL Professional License was not used for this calculation {aim_file}."
                 )
 
         # move point if .aim file
