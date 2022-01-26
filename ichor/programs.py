@@ -10,8 +10,14 @@ from typing import Optional
 
 import ichor
 from ichor.common.io import cp, mkdir, move
-from ichor.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
-                             USER_READ, permissions, set_permission)
+from ichor.common.os import (
+    OTHER_EXECUTE,
+    OTHER_READ,
+    USER_EXECUTE,
+    USER_READ,
+    permissions,
+    set_permission,
+)
 from ichor.globals import GLOBALS
 from ichor.machine import MACHINE
 

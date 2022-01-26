@@ -69,6 +69,7 @@ def _try_get_machine_from_file():
                 else:
                     return Machine.from_name(_machine)
 
+
 machine_name = platform.node()
 
 MACHINE = Machine.local
@@ -92,9 +93,17 @@ if MACHINE is Machine.local:
             MACHINE = Machine.ffluxlab
 
 # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
-if MACHINE is not Machine.local and (not FILE_STRUCTURE["machine"].exists() or (FILE_STRUCTURE["machine"].exists() and not _try_get_machine_from_file() is None)):
+if MACHINE is not Machine.local and (
+    not FILE_STRUCTURE["machine"].exists()
+    or (
+        FILE_STRUCTURE["machine"].exists()
+        and not _try_get_machine_from_file() is None
+    )
+):
     mkdir(FILE_STRUCTURE["machine"].parent)
-    machine_filepart = Path(str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart")
+    machine_filepart = Path(
+        str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"
+    )
     with open(machine_filepart, "w") as f:
         f.write(f"{MACHINE.name}")
     move(machine_filepart, FILE_STRUCTURE["machine"])

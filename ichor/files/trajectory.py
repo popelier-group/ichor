@@ -82,7 +82,7 @@ class Trajectory(ListOfAtoms, File):
             ListOfAtoms.__init__(self)
 
     def _read_file(self):
-        
+
         with open(self.path, "r") as f:
 
             # make empty Atoms instance in which to store one timestep
@@ -98,16 +98,25 @@ class Trajectory(ListOfAtoms, File):
                     line = next(f)
 
                     # if the comment line properties errors, we can store these
-                    if re.match(r"^\s*?i\s*?=\s*?\d+\s*properties_error", line):
+                    if re.match(
+                        r"^\s*?i\s*?=\s*?\d+\s*properties_error", line
+                    ):
                         properties_error = line.split("=")[-1].strip()
-                        atoms.properties_error = ast.literal_eval(properties_error)
+                        atoms.properties_error = ast.literal_eval(
+                            properties_error
+                        )
 
                     # the next line after the comment line is where coordinates begin
                     for _ in range(natoms):
                         line = next(f)
-                        if re.match(r"^\s*?\w+(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}", line):
+                        if re.match(
+                            r"^\s*?\w+(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}",
+                            line,
+                        ):
                             atom_type, x, y, z = line.split()
-                            atoms.add(Atom(atom_type, float(x), float(y), float(z)))
+                            atoms.add(
+                                Atom(atom_type, float(x), float(y), float(z))
+                            )
 
                     # add the Atoms instance to the Trajectory instance
                     self.add(atoms)

@@ -1,5 +1,10 @@
-from ichor.models.kernels.interpreter.ast import (ASTNode, BinOp, Num, UnaryOp,
-                                                  Var)
+from ichor.models.kernels.interpreter.ast import (
+    ASTNode,
+    BinOp,
+    Num,
+    UnaryOp,
+    Var,
+)
 from ichor.models.kernels.interpreter.lexer import Lexer
 from ichor.models.kernels.interpreter.token_type import TokenType
 

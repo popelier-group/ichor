@@ -13,9 +13,7 @@ class AmberCommand(CommandLine):
     """
 
     def __init__(
-        self,
-        mol2_file: Path,
-        mdin_file: Path,
+        self, mol2_file: Path, mdin_file: Path,
     ):
         self.mol2_file = mol2_file
         self.mdin_file = mdin_file

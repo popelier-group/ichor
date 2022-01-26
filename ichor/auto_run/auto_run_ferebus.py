@@ -3,8 +3,12 @@ from typing import List, Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
-from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
-                                     SubmissionScript, TimingManager)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    FerebusCommand,
+    SubmissionScript,
+    TimingManager,
+)
 
 
 def submit_ferebus_job_to_auto_run(

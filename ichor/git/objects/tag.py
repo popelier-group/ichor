@@ -8,8 +8,10 @@ from typing import TYPE_CHECKING, List, Union
 
 from ichor.git.compat import defenc
 from ichor.git.objects import base
-from ichor.git.objects.util import (get_object_type_by_name,
-                                    parse_actor_and_date)
+from ichor.git.objects.util import (
+    get_object_type_by_name,
+    parse_actor_and_date,
+)
 from ichor.git.types import Literal
 from ichor.git.util import hex_to_bin
 

@@ -3,8 +3,12 @@ from typing import List, Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
-from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript, TimingManager)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    ICHORCommand,
+    SubmissionScript,
+    TimingManager,
+)
 
 
 def submit_ichor_collate_log_job_to_auto_run(
@@ -27,8 +31,7 @@ def submit_ichor_collate_log_job_to_auto_run(
 
 
 def submit_ichor_collate_models_to_auto_run(
-    directory: Path,
-    hold: Optional[Union[JobID, List[JobID]]] = None,
+    directory: Path, hold: Optional[Union[JobID, List[JobID]]] = None,
 ) -> JobID:
     submission_script = SubmissionScript(SCRIPT_NAMES["ichor"]["collate_log"])
     ichor_command = ICHORCommand(auto_run=True)

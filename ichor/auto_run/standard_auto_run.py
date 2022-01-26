@@ -10,13 +10,21 @@ from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
 from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
 from ichor.auto_run.auto_run_morfi import submit_morfi_job_to_auto_run
 from ichor.auto_run.auto_run_pyscf import submit_pyscf_job_to_auto_run
-from ichor.auto_run.counter import counter_exists, read_counter, write_counter, get_counter_location
+from ichor.auto_run.counter import (
+    counter_exists,
+    read_counter,
+    write_counter,
+    get_counter_location,
+)
 from ichor.auto_run.ichor_jobs import (
-    make_models, submit_ichor_active_learning_job_to_auto_run,
+    make_models,
+    submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,
     submit_ichor_gaussian_command_to_auto_run,
     submit_ichor_morfi_command_to_auto_run,
-    submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
+    submit_ichor_pyscf_command_to_auto_run,
+    submit_make_sets_job_to_auto_run,
+)
 from ichor.auto_run.stop import start
 from ichor.batch_system import BATCH_SYSTEM, JobID, NodeType
 from ichor.common.bool import check_bool
@@ -31,8 +39,10 @@ from ichor.machine import MACHINE, SubmitType
 from ichor.main.queue import get_current_jobs
 from ichor.make_sets import make_sets_npoints
 from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
-from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-                       QuantumChemicalTopologyProgram)
+from ichor.qct import (
+    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+    QuantumChemicalTopologyProgram,
+)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
 
 
@@ -176,9 +186,7 @@ def get_qct_steps():  # AIMAll / Morfi
     )
 
     qct_step = IterStep(
-        qct_function,
-        IterUsage.All,
-        [IterArgs.nPoints, IterArgs.Atoms],
+        qct_function, IterUsage.All, [IterArgs.nPoints, IterArgs.Atoms],
     )
 
     return ichor_qct_step, qct_step

@@ -5,26 +5,50 @@ import os.path as osp
 import stat
 import uuid
 from io import BytesIO
+
 # typing ----------------------------------------------------------------------
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Iterator, Mapping,
-                    Sequence, Union, cast)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterator,
+    Mapping,
+    Sequence,
+    Union,
+    cast,
+)
 from unittest import SkipTest
 
 import ichor.git
 from ichor.git.cmd import Git
 from ichor.git.compat import defenc, is_win
 from ichor.git.config import GitConfigParser, SectionConstraint, cp
-from ichor.git.exc import (BadName, InvalidGitRepositoryError, NoSuchPathError,
-                           RepositoryDirtyError)
+from ichor.git.exc import (
+    BadName,
+    InvalidGitRepositoryError,
+    NoSuchPathError,
+    RepositoryDirtyError,
+)
 from ichor.git.objects.base import IndexObject, Object
-from ichor.git.objects.submodule.util import (SubmoduleConfigParser,
-                                              find_first_remote_branch, mkhead,
-                                              sm_name, sm_section)
+from ichor.git.objects.submodule.util import (
+    SubmoduleConfigParser,
+    find_first_remote_branch,
+    mkhead,
+    sm_name,
+    sm_section,
+)
 from ichor.git.objects.util import TraversableIterableObj
 from ichor.git.types import TBD, Commit_ish, Literal, PathLike
-from ichor.git.util import (HIDE_WINDOWS_KNOWN_ERRORS, IterableList,
-                            RemoteProgress, join_path_native, rmtree,
-                            to_native_path_linux, unbare_repo)
+from ichor.git.util import (
+    HIDE_WINDOWS_KNOWN_ERRORS,
+    IterableList,
+    RemoteProgress,
+    join_path_native,
+    rmtree,
+    to_native_path_linux,
+    unbare_repo,
+)
 
 if TYPE_CHECKING:
     from ichor.git.index import IndexFile

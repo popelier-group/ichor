@@ -120,7 +120,10 @@ class Atoms(list):
             atom.coordinates += v
 
     def _rmsd(self, other):
-        dist = np.sum(np.sum(np.power(jatom.coordinates - iatom.coordinates, 2)) for iatom, jatom in zip(self, other))
+        dist = np.sum(
+            np.sum(np.power(jatom.coordinates - iatom.coordinates, 2))
+            for iatom, jatom in zip(self, other)
+        )
         return np.sqrt(dist / len(self))
 
     def kabsch(self, other) -> np.ndarray:
