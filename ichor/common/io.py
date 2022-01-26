@@ -218,7 +218,7 @@ def tail(path: Path, lines: int = 20) -> str:
 
     :param path: the path of the file to read last m lines of
     :param lines: specifies how many lines from the bottom of the file to return
-    :returns last n lines of file as string
+    :return: last n lines of file as string
     """
     with open(path, "rb") as f:
         total_lines_wanted = lines
@@ -251,7 +251,7 @@ def last_line(path: Path) -> str:
     """Alias for `tail` for getting the last line of a file
 
     :param path: the path of the file to read last line of
-    :returns last line of file as string
+    :return: last line of file as string
     """
     return tail(path, lines=1)
 
