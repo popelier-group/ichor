@@ -125,7 +125,7 @@ def scrub_aimall(wfn_file: str):
     def move_scrubbed_point(point_dir_path: Path):
         """ Helper function which takes in a point directory path and moves it to the corresponding scrubbed points directory.
         
-        :returns: A Path object to where the point directory was moved to.
+        :return: A Path object to where the point directory was moved to.
         """
 
         point_dir_name = point_dir_path.name
