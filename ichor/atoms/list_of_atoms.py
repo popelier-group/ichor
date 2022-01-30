@@ -37,7 +37,7 @@ class ListOfAtoms(list):
         if isinstance(self, PointsDirectory):
             return self[0].atoms.types_extended
         elif isinstance(self, Trajectory):
-            return self[0].types
+            return self[0].types_extended
 
     @property
     def atom_names(self):
@@ -307,7 +307,53 @@ class ListOfAtoms(list):
                 df.columns = self.get_headings()
                 df.to_excel(workbook, sheet_name=atom_name)
 
+    def center_geometries_on_atom_and_write_xyz(
+        self, central_atom_name, fname: Optional[Union[str, Path]] = None
+    ):
+        """ Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
+        xyz file with all geometries centered on that atom. This is essentially what the ALFVisualizier application (ALFi) does.
+        The features for the central atom are calculated, after which they are converted back into xyz coordinates (thus all geometries)
+        are now centered on the given central atom).
+        
+        :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`
+        :param fname: Optional file name in which to save the rotated geometries.
+        """
+
+        from ichor.files import Trajectory
+        from ichor.files.trajectory import features_to_coordinates
+        from ichor.atoms import Atom
+
+        if central_atom_name not in self.atom_names:
+            raise ValueError(
+                f"Central atom name {central_atom_name} not found in atom names:{self.atom_names}."
+            )
+
+        if not fname:
+            fname = f"{central_atom_name}_centered_geometries.xyz"
+            fname = Path(fname)
+        else:
+            fname = Path(fname)
+            fname = fname.with_suffix(".xyz")
+
+        # calcultate features and convert to a new Trajectory object
+        xyz_array = features_to_coordinates(self[central_atom_name].features)
+        trajectory = Trajectory()
+
+        for geometry in xyz_array:
+            # initialize empty Atoms instance
+            atoms = Atoms()
+            for ty, atom_coord in zip(self.types_extended, geometry):
+                # add Atom instances for every atom in the geometry to the Atoms instance
+                atoms.add(
+                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
+                )
+            # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
+            trajectory.add(atoms)
+
+        trajectory.write(fname)
+
     def get_headings(self):
+        """ Helper function which makes the column headings for csv or excel files in which features are going to be saved."""
         headings = ["bond1", "bond2", "angle"]
 
         remaining_features = (
