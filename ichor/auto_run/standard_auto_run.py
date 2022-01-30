@@ -179,7 +179,7 @@ def submit_auto_run_iter(
     return job_id
 
 
-def get_qcp_steps() -> Tuple(IterStep, IterStep):  # Gaussian / PySCF
+def get_qcp_steps() -> Tuple[IterStep, IterStep]:  # Gaussian / PySCF
     """ Get the quantum chemistry program (QCP) which is going to be used to generate .wfn files. This can either be Gaussian or PySCF. This program used determines which
     `submit` functions are going to be used (either submit_gaussian_job_to_auto_run or submit_pyscf_job_to_auto_run).
     
@@ -208,7 +208,7 @@ def get_qcp_steps() -> Tuple(IterStep, IterStep):  # Gaussian / PySCF
     return ichor_qcp_step, qcp_step
 
 
-def get_qct_steps() -> Tuple(IterStep, IterStep):  # AIMAll / Morfi
+def get_qct_steps() -> Tuple[IterStep, IterStep]:  # AIMAll / Morfi
     """ Get the quantum chemistry topology (QCT) This can either be AIMALL or Morfi. This program used determines which
     `submit` functions are going to be used (either submit_gaussian_job_to_auto_run or submit_pyscf_job_to_auto_run).
     
@@ -240,7 +240,7 @@ def get_qct_steps() -> Tuple(IterStep, IterStep):  # AIMAll / Morfi
     return ichor_qct_step, qct_step
 
 
-def get_model_steps() -> Tuple(IterStep, IterStep):
+def get_model_steps() -> Tuple[IterStep, IterStep]:
     """ Get the functions which are going to submit machine learning-related jobs to the queueing system.
     
     :return: A tuple of IterStep. The first IterStep is an ICHOR job which writes out FEREBUS configuration settings.
