@@ -230,69 +230,77 @@ class SubmissionScript:
 
         mkdir(self.path.parent)
 
-        with open(self.path, "w") as f:
+        if self.grouped_commands:
 
-            njobs = max(
-                len(command_group) for command_group in self.grouped_commands
+            with open(self.path, "w") as f:
+
+                njobs = max(
+                    len(command_group)
+                    for command_group in self.grouped_commands
+                )
+
+                f.write("#!/bin/bash -l\n")
+                # write any options to be given to the batch system, such as working directory, where to write outputs/errors, etc.
+                for option in self.options:
+                    f.write(f"#{BATCH_SYSTEM.OptionCmd} {option}\n")
+                # if writing an array jobs, then the batch system needs to know that
+                # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
+                if GLOBALS.INCLUDE_NODES or GLOBALS.EXCLUDE_NODES:
+                    f.write(
+                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(GLOBALS.INCLUDE_NODES, GLOBALS.EXCLUDE_NODES)}\n"
+                    )
+                if njobs > 1:
+                    f.write(
+                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
+                    )
+                    if njobs > GLOBALS.MAX_RUNNING_TASKS > 0:
+                        f.write(
+                            f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}\n"
+                        )
+                else:
+                    f.write(f"{BATCH_SYSTEM.TaskID}=1\n")
+
+                # if job or array job is going to use more than 1 cores, then we need extra things to write.
+                if self.ncores > 1:
+                    f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
+                    # f.write(f"export OMP_PROC_BIND=spread\n")
+                    # f.write(f"export OMP_PLACES=cores\n")
+
+                # load any modules required for the job
+                for module in self.modules:
+                    f.write(f"module load {module}\n")
+
+                for command_group in self.grouped_commands:
+                    command_variables = []
+                    if (
+                        command_group.data
+                    ):  # Gaussian, Ferebus, AIMALL jobs need access to datafiles, the datfile's name is the unique id that was assigned to GLOBALS
+                        datafile = FILE_STRUCTURE["datafiles"] / Path(
+                            str(GLOBALS.UID)
+                        )
+                        # get the data that is needed for each command in a command group
+                        # for example, if the command is a Gaussian command, then we need an input file (.gjf) and an output file (.gau)
+                        # command_group_data is a list of lists. Each inner list has input/output files
+                        command_group_data = [
+                            command.data for command in command_group
+                        ]
+                        # datafile_vars is a list of strings corresponding to the arrays that need to be used by the program we are running (eg. Gaussian)
+                        # datafile_str is the rest of the stuff that sets up the arrays used for the array job in the submission script
+                        datafile_vars, datafile_str = self.setup_datafile(
+                            datafile, command_group_data
+                        )
+                        command_variables += datafile_vars
+                        f.write(
+                            f"{datafile_str}\n"
+                        )  # write the array job parts to the submission script
+                    f.write(
+                        f"{command_group.repr(command_variables)}\n"
+                    )  # see class GaussianCommand for example
+
+        else:
+            raise ValueError(
+                "No tasks were added to submission script and no jobs were submitted because 'self.grouped_commands' was empty. Set 'force' argument to True, if available."
             )
-
-            f.write("#!/bin/bash -l\n")
-            # write any options to be given to the batch system, such as working directory, where to write outputs/errors, etc.
-            for option in self.options:
-                f.write(f"#{BATCH_SYSTEM.OptionCmd} {option}\n")
-            # if writing an array jobs, then the batch system needs to know that
-            # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
-            if GLOBALS.INCLUDE_NODES or GLOBALS.EXCLUDE_NODES:
-                f.write(
-                    f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(GLOBALS.INCLUDE_NODES, GLOBALS.EXCLUDE_NODES)}\n"
-                )
-            if njobs > 1:
-                f.write(
-                    f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
-                )
-                if njobs > GLOBALS.MAX_RUNNING_TASKS > 0:
-                    f.write(
-                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}\n"
-                    )
-            else:
-                f.write(f"{BATCH_SYSTEM.TaskID}=1\n")
-
-            # if job or array job is going to use more than 1 cores, then we need extra things to write.
-            if self.ncores > 1:
-                f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
-                # f.write(f"export OMP_PROC_BIND=spread\n")
-                # f.write(f"export OMP_PLACES=cores\n")
-
-            # load any modules required for the job
-            for module in self.modules:
-                f.write(f"module load {module}\n")
-
-            for command_group in self.grouped_commands:
-                command_variables = []
-                if (
-                    command_group.data
-                ):  # Gaussian, Ferebus, AIMALL jobs need access to datafiles, the datfile's name is the unique id that was assigned to GLOBALS
-                    datafile = FILE_STRUCTURE["datafiles"] / Path(
-                        str(GLOBALS.UID)
-                    )
-                    # get the data that is needed for each command in a command group
-                    # for example, if the command is a Gaussian command, then we need an input file (.gjf) and an output file (.gau)
-                    # command_group_data is a list of lists. Each inner list has input/output files
-                    command_group_data = [
-                        command.data for command in command_group
-                    ]
-                    # datafile_vars is a list of strings corresponding to the arrays that need to be used by the program we are running (eg. Gaussian)
-                    # datafile_str is the rest of the stuff that sets up the arrays used for the array job in the submission script
-                    datafile_vars, datafile_str = self.setup_datafile(
-                        datafile, command_group_data
-                    )
-                    command_variables += datafile_vars
-                    f.write(
-                        f"{datafile_str}\n"
-                    )  # write the array job parts to the submission script
-                f.write(
-                    f"{command_group.repr(command_variables)}\n"
-                )  # see class GaussianCommand for example
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
         from ichor.batch_system import BATCH_SYSTEM, NodeType
