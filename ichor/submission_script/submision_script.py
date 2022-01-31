@@ -157,6 +157,18 @@ class SubmissionScript:
     def var(cls, n):
         return f"var{n + 1}"
 
+    @classmethod
+    def test_array_not_null(cls, n):
+        """ Returns a string which is used in bash to test if an array entry is not null or empty.
+        We need to test this because there could be cases where there are 2000 SGE tasks for example,
+        but there are only 1990 jobs (because points have been scrubbed in the previous step).
+        
+        .. note::
+            the [ -n is used for the test program in bash which makes sure array entry is not null with -n
+            
+        """
+        return f"[ -n {cls.array_index(n)} ]"
+
     def write_datafile(self, datafile: Path, data: List[List[str]]) -> None:
         """Write the datafile to disk. All datafiles are stored in GLOBALS.FILE_STRUCTURE["datafiles"]. Each line of the
         datafile contains text that corresponds to the inputs and output file names. These are separated by self.separator, which is a comma.
@@ -205,6 +217,15 @@ class SubmissionScript:
         for i in range(ndata):
             read_datafile_str += f"    {self.arr(i)}+=(${self.var(i)})\n"
         read_datafile_str += f"done < ${SubmissionScript.DATAFILE}\n"
+        # checks if array entries are not empty, so that we do not get errors
+        # when points are scrubbed in Gaussian and AIMALL is ran after
+        # these errors do not cause calculation issues, but they are written to the ERRORS directory
+        # Eg. Running 2000 Gaussians, 1996 produce .wfns, but AIMALL is set to run 2000 tasks
+        # AIMALL datafile only has 1996 lines, but AIMALL tasks are set to 2000, so last 4 will fail
+        # saying that there is an ambiguous redirect because the array values are empty for them
+        read_datafile_str += "if " # space is important because if[ will cause errors because [ is the test program in bash
+        read_datafile_str += " && ". join([self.test_array_not_null(i) for i in range(ndata)])
+        read_datafile_str += "\nthen\n" # only if array entries are not empty then execute the programs
 
         return f"{datafile_str}\n{read_datafile_str}"
 
@@ -296,6 +317,8 @@ class SubmissionScript:
                     f.write(
                         f"{command_group.repr(command_variables)}\n"
                     )  # see class GaussianCommand for example
+                    # close the if statement that was started when checking if arrays have non-null entries
+                    f.write("fi")
 
         else:
             raise ValueError(
