@@ -122,6 +122,9 @@ def scrub_aimall(wfn_file: str):
     from ichor.log import logger
     from ichor.common.io import last_line
 
+    # TODO: check for license and end of aim file, then read aim file with AIM class. Then check if aim file has correct atom info for int files.
+    # TODO: then do the integration error check.
+
     def move_scrubbed_point(point_dir_path: Path):
         """ Helper function which takes in a point directory path and moves it to the corresponding scrubbed points directory.
         
