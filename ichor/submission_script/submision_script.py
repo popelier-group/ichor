@@ -317,8 +317,9 @@ class SubmissionScript:
                     f.write(
                         f"{command_group.repr(command_variables)}\n"
                     )  # see class GaussianCommand for example
-                    # close the if statement that was started when checking if arrays have non-null entries
-                    f.write("fi")
+                
+                # close the if statement that was started when checking if arrays have non-null entries (see self.setup_script_arrays)
+                f.write("fi")
 
         else:
             raise ValueError(
