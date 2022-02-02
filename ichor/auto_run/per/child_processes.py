@@ -71,12 +71,17 @@ class ReRunDaemon(Daemon):
 def rerun_failed_child_process(
     child_processes: Optional[List[Path]] = None,
 ) -> None:
+    from ichor.globals import GLOBALS, Globals
+    from ichor.arguments import Arguments
+
     if child_processes is None:
         child_processes = find_child_processes_recursively()
     for child_process in child_processes:
         # todo: ensure finished
         with pushd(child_process, update_cwd=True):
-            rerun_from_failed()
+            with Globals():
+                GLOBALS.init_from_config(Arguments.config_file)
+                rerun_from_failed()
 
 
 def stop_all_child_processes(
@@ -101,9 +106,9 @@ def print_child_process_status(cpdir: Path):
 
     with pushd(cpdir, update_cwd=True):
         path_status = f"{cpdir} Status"
-        print("-"*len(path_status))
+        print("-" * len(path_status))
         print(path_status)
-        print("-"*len(path_status))
+        print("-" * len(path_status))
         if FILE_STRUCTURE["counter"].exists():
             current_iteration, max_iteration = read_counter()
             print(f"Iteration {current_iteration} of {max_iteration}")
@@ -113,7 +118,9 @@ def print_child_process_status(cpdir: Path):
         from ichor.common.io import last_modified
         from ichor.log import logger
 
-        logger_path = Path('ichor.log').absolute()  # <- better way to get this?
+        logger_path = Path(
+            "ichor.log"
+        ).absolute()  # <- better way to get this?
         print(f"{logger_path} last modified: {last_modified(logger_path)}")
         print()
 
@@ -127,8 +134,9 @@ def print_child_processes_status(child_processes: Optional[List[Path]] = None):
 
 def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
     from ichor.analysis.get_path import get_dir
-    from ichor.main.tools.concatenate_points_directories import \
-        concatenate_points_directories
+    from ichor.main.tools.concatenate_points_directories import (
+        concatenate_points_directories,
+    )
 
     print("Enter PointsDirectory Location to concatenate to training sets: ")
     dir = get_dir().absolute()

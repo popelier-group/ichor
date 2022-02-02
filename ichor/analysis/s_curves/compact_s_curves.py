@@ -142,7 +142,7 @@ def write_to_excel(
     true = true.T
     predicted = predicted.T
     # error is still a ModelResult
-    error = (true - predicted).abs()
+    error = (true - predicted)#.abs()
     # sort to get properties to be ordered nicely
     true = {k: v for k, v in sorted(true.items())}
 
@@ -175,6 +175,7 @@ def write_to_excel(
             # see ModelResult reduce method
             df = pd.DataFrame(error[sheet_name].reduce())
             df.rename(columns={0: "Total"}, inplace=True)
+            df["Total"] = df["Total"].abs()
             df.sort_values("Total", inplace=True)
             ndata = len(df["Total"])
             df["%"] = percentile(ndata)
@@ -233,6 +234,7 @@ def write_to_excel(
                     "Error": error[sheet_name][atom_name],
                 }
                 df = pd.DataFrame(data)
+                df["Error"] = df["Error"].abs()
                 # sort whole df by error column (ascending)
                 df.sort_values("Error", inplace=True)
                 # add percentage column after sorting by error

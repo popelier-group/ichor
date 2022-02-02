@@ -5,16 +5,22 @@ import numpy as np
 import pandas as pd
 
 from ichor.analysis.geometry.geometry_calculator import (
-    calculate_angles, calculate_bonds, calculate_dihedrals,
-    internal_feature_names)
+    calculate_angles,
+    calculate_bonds,
+    calculate_dihedrals,
+    internal_feature_names,
+)
 from ichor.analysis.get_atoms import get_atoms_from_path
 from ichor.analysis.get_path import get_path
 from ichor.batch_system import JobID
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import PointsDirectory, Trajectory
 from ichor.menu import Menu
-from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    ICHORCommand,
+    SubmissionScript,
+)
 from ichor.units import Angle, degrees_to_radians
 
 _input_location = None
@@ -198,7 +204,15 @@ def _toggle_angle_units():
 
 def _geometry_analysis_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option("1", "Run Geometry Analysis", run_geometry_analysis, kwargs={"input_location": _input_location, "output_location": _output_location})
+    menu.add_option(
+        "1",
+        "Run Geometry Analysis",
+        run_geometry_analysis,
+        kwargs={
+            "input_location": _input_location,
+            "output_location": _output_location,
+        },
+    )
     menu.add_space()
     menu.add_option("i", "Set Input", _set_input)
     menu.add_option("o", "Set Output", _set_output)

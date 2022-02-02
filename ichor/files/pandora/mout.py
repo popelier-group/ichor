@@ -84,20 +84,14 @@ def read_bcp(
     line = next(f)  # n1-n2
     indices = line.split("=")[-1]
     bcp_indices = [
-        (
-            int(record.split("-")[0]),
-            int(record.split("-")[1]),
-        )
+        (int(record.split("-")[0]), int(record.split("-")[1]),)
         for record in re.findall(r"\s+\d+-\s+\d+", indices)
     ]
 
     line = next(f)  # A - B
     types = line.split("=")[-1]
     bcp_types = [
-        (
-            record.split("-")[0].strip(),
-            record.split("-")[1].strip(),
-        )
+        (record.split("-")[0].strip(), record.split("-")[1].strip(),)
         for record in re.findall(r"\s*\w+\s*-\s*\w+", types)
     ]
 
@@ -107,15 +101,7 @@ def read_bcp(
     ]
 
     (xs, ys, zs, rhos, laps, lam1s, lam2s, lam3s,) = read_cp(
-        f,
-        xs,
-        ys,
-        zs,
-        rhos,
-        laps,
-        lam1s,
-        lam2s,
-        lam3s,
+        f, xs, ys, zs, rhos, laps, lam1s, lam2s, lam3s,
     )
 
     _ = next(f)  # blank line
@@ -190,9 +176,7 @@ def read_bcp(
 
 
 def read_ncp(
-    f,
-    atom_names,
-    dNs,
+    f, atom_names, dNs,
 ):
     line = next(f)
     cpdn = []
@@ -230,37 +214,13 @@ def read_ncp(
 
 
 def read_cp_and_ncp(
-    f,
-    atom_names,
-    xs,
-    ys,
-    zs,
-    rhos,
-    laps,
-    lam1s,
-    lam2s,
-    lam3s,
-    dNs,
-    line=None,
+    f, atom_names, xs, ys, zs, rhos, laps, lam1s, lam2s, lam3s, dNs, line=None,
 ):
     (xs, ys, zs, rhos, laps, lam1s, lam2s, lam3s,) = read_cp(
-        f,
-        xs,
-        ys,
-        zs,
-        rhos,
-        laps,
-        lam1s,
-        lam2s,
-        lam3s,
-        line=line,
+        f, xs, ys, zs, rhos, laps, lam1s, lam2s, lam3s, line=line,
     )
 
-    (atom_names, dNs, line,) = read_ncp(
-        f,
-        atom_names,
-        dNs,
-    )
+    (atom_names, dNs, line,) = read_ncp(f, atom_names, dNs,)
 
     return (
         atom_names,
@@ -278,18 +238,7 @@ def read_cp_and_ncp(
 
 
 def read_rcp(
-    f,
-    atom_names,
-    xs,
-    ys,
-    zs,
-    rhos,
-    laps,
-    lam1s,
-    lam2s,
-    lam3s,
-    dNs,
-    line=None,
+    f, atom_names, xs, ys, zs, rhos, laps, lam1s, lam2s, lam3s, dNs, line=None,
 ):
     return read_cp_and_ncp(
         f,
@@ -308,18 +257,7 @@ def read_rcp(
 
 
 def read_ccp(
-    f,
-    atom_names,
-    xs,
-    ys,
-    zs,
-    rhos,
-    laps,
-    lam1s,
-    lam2s,
-    lam3s,
-    dNs,
-    line=None,
+    f, atom_names, xs, ys, zs, rhos, laps, lam1s, lam2s, lam3s, dNs, line=None,
 ):
     return read_cp_and_ncp(
         f,

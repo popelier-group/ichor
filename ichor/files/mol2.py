@@ -191,9 +191,7 @@ visited = []
 
 
 def _get_ring(
-    atom: Atom,
-    current_ring: List[Atom],
-    called_from: Atom,
+    atom: Atom, current_ring: List[Atom], called_from: Atom,
 ) -> List[Atom]:
     bonded_atoms = get_bonded_atoms(atom)
     if len(bonded_atoms) > 1:

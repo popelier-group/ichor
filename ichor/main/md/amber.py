@@ -13,8 +13,11 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ, Mol2, Trajectory
 from ichor.globals import GLOBALS
 from ichor.menu import Menu
-from ichor.submission_script import (SCRIPT_NAMES, AmberCommand,
-                                     SubmissionScript)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    AmberCommand,
+    SubmissionScript,
+)
 
 
 class AmberThermostat(Enum):
@@ -83,7 +86,9 @@ def write_mdin(mdin_file: Path):
         f.write(
             f"  ntwv={_write_vel_every},\n"
         )  # velocity info printed to mdout every ntwv steps
-        f.write(f"  ntwf={_write_forces_every},\n")  # force info printed to mdout every ntwf steps
+        f.write(
+            f"  ntwf={_write_forces_every},\n"
+        )  # force info printed to mdout every ntwf steps
         f.write("  ioutfm=0,\n")  # output formatting
         f.write("  cut=999.0,\n")  # nonbonded cutoff
         f.write(f"  ntb={PBC.value},\n")  # periodic boundary conditions
@@ -125,7 +130,9 @@ def submit_amber(input_file: Path) -> JobID:
     return submission_script.submit()
 
 
-def mdcrd_to_xyz(mdcrd: Path, prmtop: Path, xyz: Optional[Path] = None, every: int = 1):
+def mdcrd_to_xyz(
+    mdcrd: Path, prmtop: Path, xyz: Optional[Path] = None, every: int = 1
+):
     atom_names = []
     with open(prmtop, "r") as f:
         for line in f:
@@ -148,16 +155,20 @@ def mdcrd_to_xyz(mdcrd: Path, prmtop: Path, xyz: Optional[Path] = None, every: i
         i = 0
         with open(xyz, "w") as o:
             for line in f:
-                traj = np.hstack((traj, np.array(line.split(), dtype=np.float)))
-                if len(traj) == natoms*3:
+                traj = np.hstack(
+                    (traj, np.array(line.split(), dtype=np.float))
+                )
+                if len(traj) == natoms * 3:
                     if i % every == 0:
                         traj = traj.reshape(natoms, 3)
                         o.write(f"{natoms}\n{i}\n")
                         for atom_name, atom in zip(atom_names, traj):
-                            o.write(f"{atom_name} {atom[0]:16.8f} {atom[1]:16.8f} {atom[2]:16.8f}\n")
+                            o.write(
+                                f"{atom_name} {atom[0]:16.8f} {atom[1]:16.8f} {atom[2]:16.8f}\n"
+                            )
                     i += 1
                     traj = np.array([])
-                        
+
 
 def set_temperature():
     while True:

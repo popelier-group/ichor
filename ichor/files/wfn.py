@@ -44,11 +44,20 @@ class WFN(GeometryFile, GeometryDataFile, File):
                 return
             for line in f:
                 if "CHARGE" in line:
-                    record = split_by(line, [4, 4, 16, 12, 12, 12])
-                    atom_type = record[0]
-                    x = float(record[3])
-                    y = float(record[4])
-                    z = float(record[5])
+                    try:
+                        record = split_by(line, [4, 4, 16, 12, 12, 12])
+                        atom_type = record[0]
+                        x = float(record[3])
+                        y = float(record[4])
+                        z = float(record[5])
+                    except ValueError:
+                        # WFN line using free-formatting
+                        record = line.split()
+                        atom_type = record[0]
+                        x = float(record[4])
+                        y = float(record[5])
+                        z = float(record[6])
+
                     self.atoms.add(
                         Atom(atom_type, x, y, z, units=AtomicDistance.Bohr)
                     )

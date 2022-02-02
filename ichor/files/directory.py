@@ -4,8 +4,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List, Type, Union
 
-from ichor.common.functools import (buildermethod, cached_property,
-                                    classproperty)
+from ichor.common.functools import (
+    buildermethod,
+    cached_property,
+    classproperty,
+)
 from ichor.common.io import mkdir
 from ichor.files.file import File, FileState
 from ichor.files.path_object import PathObject

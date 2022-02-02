@@ -46,7 +46,7 @@ def auto_run_per_value(
     :raises TypeError: [description]
     :return: A list of job ids which are going to run on compute nodes
     """
-    
+
     from ichor.arguments import Arguments
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
@@ -57,11 +57,11 @@ def auto_run_per_value(
 
     # iterate over atom names
     for value in values:
-        
+
         # make a separate directory for every atom in which to do auto run
         path = directory / value
         mkdir(path)
-        
+
         mkdir(FILE_STRUCTURE["child_processes"].parent)
         child_processes = []
         if FILE_STRUCTURE["child_processes"].exists():
@@ -88,8 +88,7 @@ def auto_run_per_value(
                 if FILE_STRUCTURE["validation_set"].exists():
                     (path / FILE_STRUCTURE["validation_set"]).symlink_to(
                         os.path.relpath(
-                            FILE_STRUCTURE["validation_set"],
-                            start=path,
+                            FILE_STRUCTURE["validation_set"], start=path,
                         ),
                         target_is_directory=True,
                     )  # can be symlinked as all should be identical

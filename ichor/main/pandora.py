@@ -3,14 +3,27 @@ from typing import List, Optional, Tuple
 
 from ichor.batch_system import JobID
 from ichor.common.io import cp
-from ichor.files import (WFN, MorfiDirectory, PandoraDirectory, PandoraInput,
-                         PointDirectory, PointsDirectory, PySCFDirectory)
+from ichor.files import (
+    WFN,
+    MorfiDirectory,
+    PandoraDirectory,
+    PandoraInput,
+    PointDirectory,
+    PointsDirectory,
+    PySCFDirectory,
+)
 from ichor.log import logger
-from ichor.submission_script import (SCRIPT_NAMES, MorfiCommand,
-                                     PandoraPySCFCommand, SubmissionScript)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    MorfiCommand,
+    PandoraPySCFCommand,
+    SubmissionScript,
+)
 
 
-def submit_points_directory_to_pyscf(directory: Path, force: bool = False) -> Optional[JobID]:
+def submit_points_directory_to_pyscf(
+    directory: Path, force: bool = False
+) -> Optional[JobID]:
     """Function that submits all .gjf files in a directory to Gaussian, which will output .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
@@ -20,7 +33,9 @@ def submit_points_directory_to_pyscf(directory: Path, force: bool = False) -> Op
     )  # a directory which contains points (a bunch of molecular geometries)
     pandora_inputs = write_pandora_input(points)
     point_directories = [point.path for point in points]
-    return submit_pandora_input_to_pyscf(pandora_inputs, point_directories, force=force)
+    return submit_pandora_input_to_pyscf(
+        pandora_inputs, point_directories, force=force
+    )
 
 
 def submit_pandora_input_to_pyscf(
@@ -109,7 +124,12 @@ def submit_points_directory_to_morfi(
     points = PointsDirectory(directory)
     morfi_inputs, aimall_wfns, point_directories = check_pyscf_wfns(points)
     return submit_morfi(
-        morfi_inputs, aimall_wfns, point_directories, atoms=atoms, hold=hold, force=force
+        morfi_inputs,
+        aimall_wfns,
+        point_directories,
+        atoms=atoms,
+        hold=hold,
+        force=force,
     )
 
 
@@ -149,7 +169,9 @@ def submit_morfi(
         return submission_script.submit(hold=hold)
 
 
-def check_pyscf_wfns(points: PointsDirectory) -> Tuple[List[Path], List[Path], List[Path]]:
+def check_pyscf_wfns(
+    points: PointsDirectory,
+) -> Tuple[List[Path], List[Path], List[Path]]:
     morfi_inputs = []
     aimall_wfns = []
     point_directories = []

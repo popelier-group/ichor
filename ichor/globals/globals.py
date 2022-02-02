@@ -231,7 +231,7 @@ class Globals:
     AIMALL_N_TRIES: int = 10
 
     # WHETHER OR NOT TO RERUN POINTS THAT HAVE FAILED (UP TO GAUSSIAN_N_TRIES, AIMALL_N_TRIES)
-    RERUN_POINTS = True
+    RERUN_POINTS = False
     # WHETHER OR NOT TO MOVE POINTS FOR WHICH AIMALL OR GAUSSIAN HAVE FAILED OR CONTAIN BAD DATA.
     SCRUB_POINTS: bool = True
 
@@ -418,7 +418,7 @@ class Globals:
             "AIMALL_BOAQ": constants.BOAQ_VALUES,
             "AIMALL_IASMESH": constants.IASMESH_VALUES,
             "FEREBUS_TYPE": constants.FEREBUS_TYPES,
-            "OPTIMISE_PROPERTY": ["iqa"] + constants.multipole_names,
+            "OPTIMISE_PROPERTY": ["iqa"] + constants.multipole_names + ["all"],
             "KERNEL": constants.KERNELS,
         }
 

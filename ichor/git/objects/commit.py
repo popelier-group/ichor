@@ -9,16 +9,30 @@ import os
 from io import BytesIO
 from subprocess import Popen
 from time import altzone, daylight, localtime, time, timezone
-from typing import (IO, TYPE_CHECKING, Any, Iterator, List, Sequence, Tuple,
-                    Union, cast)
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Iterator,
+    List,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 from ichor.git.diff import Diffable
 from ichor.git.ext.gitdb import IStream
 from ichor.git.objects import base
 from ichor.git.objects.tree import Tree
-from ichor.git.objects.util import (Serializable, TraversableIterableObj,
-                                    altz_to_utctz_str, from_timestamp,
-                                    parse_actor_and_date, parse_date)
+from ichor.git.objects.util import (
+    Serializable,
+    TraversableIterableObj,
+    altz_to_utctz_str,
+    from_timestamp,
+    parse_actor_and_date,
+    parse_date,
+)
 from ichor.git.types import Literal, PathLike
 from ichor.git.util import Actor, Stats, finalize_process, hex_to_bin
 

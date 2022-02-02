@@ -149,9 +149,7 @@ elif os.name == "posix":  # pragma: no cover
             # every IO error
             raise exceptions.LockException(exc_value, fh=file_)
 
-    def unlock(
-        file_: typing.IO,
-    ):
+    def unlock(file_: typing.IO,):
         fcntl.flock(file_.fileno(), constants.LockFlags.UNBLOCK)
 
 

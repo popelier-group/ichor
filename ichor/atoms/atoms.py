@@ -121,7 +121,10 @@ class Atoms(list):
             atom.coordinates += v
 
     def _rmsd(self, other):
-        dist = sum(iatom.sq_dist(jatom) for iatom, jatom in zip(self, other))
+        dist = np.sum(
+            np.sum(np.power(jatom.coordinates - iatom.coordinates, 2))
+            for iatom, jatom in zip(self, other)
+        )
         return np.sqrt(dist / len(self))
 
     def kabsch(self, other) -> np.ndarray:
@@ -232,8 +235,8 @@ class Atoms(list):
             for atom in self:
                 if item == atom.name:
                     return atom
-            raise KeyError(f"Atom '{item}' does not exist. Atoms: {self.atoms}")
-        elif isinstance(item, (list, np.ndarray)):
+            raise KeyError(f"Atom '{item}' does not exist")
+        elif isinstance(item, (list, np.ndarray, tuple)):
             if len(item) > 0:
                 if isinstance(item[0], (int, np.int, str)):
                     return Atoms([self[i] for i in item])

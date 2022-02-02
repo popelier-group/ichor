@@ -84,11 +84,7 @@ class MEPE(ActiveLearningMethod):
             for model in self.models[atom]:
                 cv = cross_validation(model)
                 distances = cdist(x[model.atom_name], model.x)
-                atom_cv_errors[model.type] = cv[
-                    distances.argmin(
-                        axis=-1,
-                    )
-                ]
+                atom_cv_errors[model.type] = cv[distances.argmin(axis=-1,)]
             cv_errors[atom] = atom_cv_errors
         return cv_errors
 

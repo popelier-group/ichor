@@ -6,6 +6,7 @@ import numpy as np
 
 from ichor.atoms.atoms import Atoms
 
+
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
      like trajectory['C1'] where trajectory is an instance of class Trajectory. This way the
@@ -36,7 +37,7 @@ class ListOfAtoms(list):
         if isinstance(self, PointsDirectory):
             return self[0].atoms.types_extended
         elif isinstance(self, Trajectory):
-            return self[0].types
+            return self[0].types_extended
 
     @property
     def atom_names(self):
@@ -306,7 +307,53 @@ class ListOfAtoms(list):
                 df.columns = self.get_headings()
                 df.to_excel(workbook, sheet_name=atom_name)
 
+    def center_geometries_on_atom_and_write_xyz(
+        self, central_atom_name, fname: Optional[Union[str, Path]] = None
+    ):
+        """ Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
+        xyz file with all geometries centered on that atom. This is essentially what the ALFVisualizier application (ALFi) does.
+        The features for the central atom are calculated, after which they are converted back into xyz coordinates (thus all geometries)
+        are now centered on the given central atom).
+        
+        :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`
+        :param fname: Optional file name in which to save the rotated geometries.
+        """
+
+        from ichor.files import Trajectory
+        from ichor.files.trajectory import features_to_coordinates
+        from ichor.atoms import Atom
+
+        if central_atom_name not in self.atom_names:
+            raise ValueError(
+                f"Central atom name {central_atom_name} not found in atom names:{self.atom_names}."
+            )
+
+        if not fname:
+            fname = f"{central_atom_name}_centered_geometries.xyz"
+            fname = Path(fname)
+        else:
+            fname = Path(fname)
+            fname = fname.with_suffix(".xyz")
+
+        # calcultate features and convert to a new Trajectory object
+        xyz_array = features_to_coordinates(self[central_atom_name].features)
+        trajectory = Trajectory()
+
+        for geometry in xyz_array:
+            # initialize empty Atoms instance
+            atoms = Atoms()
+            for ty, atom_coord in zip(self.types_extended, geometry):
+                # add Atom instances for every atom in the geometry to the Atoms instance
+                atoms.add(
+                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
+                )
+            # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
+            trajectory.add(atoms)
+
+        trajectory.write(fname)
+
     def get_headings(self):
+        """ Helper function which makes the column headings for csv or excel files in which features are going to be saved."""
         headings = ["bond1", "bond2", "angle"]
 
         remaining_features = (
@@ -323,8 +370,14 @@ class ListOfAtoms(list):
 
         return headings
 
-    def features_with_properties_to_csv(self, str_to_append_to_fname: Optional[str] = "_features_with_properties.csv", atom_names: Optional[List[str]] = None,
-                                        property_types: Optional[List[str]] = None):
+    def features_with_properties_to_csv(
+        self,
+        str_to_append_to_fname: Optional[
+            str
+        ] = "_features_with_properties.csv",
+        atom_names: Optional[List[str]] = None,
+        property_types: Optional[List[str]] = None,
+    ):
         """[summary]
 
         :param str_to_append_to_fname: a string that is appended to the default file name (which is `name_of_atom.csv`), defaults to None
@@ -335,7 +388,7 @@ class ListOfAtoms(list):
         :raises TypeError: This method only works for PointsDirectory instances because it needs access to AIMALL information. Does not
             work for Trajectory instances.
         """
-        
+
         import pandas as pd
         from ichor import constants
         from ichor.files import PointsDirectory
@@ -344,21 +397,25 @@ class ListOfAtoms(list):
             atom_names = [atom_names]
         elif atom_names is None:
             atom_names = self.atom_names
-    
+
         if not isinstance(self, PointsDirectory):
-            raise TypeError("This method only works for PointsDirectory instances because it needs access to AIMALL output data.")
-    
+            raise TypeError(
+                "This method only works for PointsDirectory instances because it needs access to AIMALL output data."
+            )
+
         # TODO: add dispersion later if we are going to make models for it separately
         if not property_types:
             property_types = ["iqa"] + constants.multipole_names
-    
+
         for atom_name in atom_names:
-            
+
             training_data = []
             features = self[atom_name].features
-            
+
             for i, point in enumerate(self):
-                properties = [point[atom_name].get_property(ty) for ty in property_types]
+                properties = [
+                    point[atom_name].get_property(ty) for ty in property_types
+                ]
                 training_data.append([*features[i], *properties])
 
             input_headers = [f"f{i+1}" for i in range(features.shape[-1])]
@@ -366,7 +423,11 @@ class ListOfAtoms(list):
 
             fname = atom_name + str_to_append_to_fname
 
-            df = pd.DataFrame(training_data, columns = input_headers + output_headers, dtype=np.float64)
+            df = pd.DataFrame(
+                training_data,
+                columns=input_headers + output_headers,
+                dtype=np.float64,
+            )
             df.to_csv(fname, index=False)
 
     def iteratoms(self):

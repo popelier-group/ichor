@@ -5,6 +5,7 @@ import contextlib
 import operator
 import sys
 import typing
+
 # These are used by Protocol implementation
 # We use internal typing helpers here, but this significantly reduces
 # code duplication. (Also this is only until Protocol is in typing.)
@@ -2174,9 +2175,9 @@ elif PEP_560:
             )
 
         def __reduce__(self):
-            return operator.getitem, (
-                Annotated,
-                (self.__origin__,) + self.__metadata__,
+            return (
+                operator.getitem,
+                (Annotated, (self.__origin__,) + self.__metadata__,),
             )
 
         def __eq__(self, other):

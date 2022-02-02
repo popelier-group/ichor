@@ -70,7 +70,9 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
             try:
                 return AtomData(self.atoms[atom], self.ints[atom])
             except KeyError:
-                raise KeyError(f"No atom '{atom}' found in '{self.__class__.__name__}' instance '{self.path}'")
+                raise KeyError(
+                    f"No atom '{atom}' found in '{self.__class__.__name__}' instance '{self.path}'"
+                )
         else:
             return AtomData(self.atoms[atom])
 

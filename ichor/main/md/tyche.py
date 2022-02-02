@@ -10,8 +10,12 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.menu import Menu
-from ichor.submission_script import (SCRIPT_NAMES, SubmissionScript,
-                                     TycheCommand, ICHORCommand)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    SubmissionScript,
+    TycheCommand,
+    ICHORCommand,
+)
 
 _input_file = None
 _input_filetypes = [XYZ.filetype, GJF.filetype]
@@ -63,8 +67,19 @@ def submit_tyche(input_file: Path) -> JobID:
 
     with SubmissionScript(SCRIPT_NAMES["tyche"]) as submission_script:
         submission_script.add_command(TycheCommand(freq_param, g09_input.path))
-        submission_script.add_command(ICHORCommand(func="tyche_to_xyz", func_args=[FILE_STRUCTURE["tyche"]]))
-        submission_script.add_command(ICHORCommand(func="set_points_location", func_args=[f"{GLOBALS.SYSTEM_NAME}-tyche-{GLOBALS.TYCHE_TEMPERATURE}{Trajectory.filetype}"]))
+        submission_script.add_command(
+            ICHORCommand(
+                func="tyche_to_xyz", func_args=[FILE_STRUCTURE["tyche"]]
+            )
+        )
+        submission_script.add_command(
+            ICHORCommand(
+                func="set_points_location",
+                func_args=[
+                    f"{GLOBALS.SYSTEM_NAME}-tyche-{GLOBALS.TYCHE_TEMPERATURE}{Trajectory.filetype}"
+                ],
+            )
+        )
     return submission_script.submit()
 
 

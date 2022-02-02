@@ -1,7 +1,8 @@
 from ichor.main.md import md_menu
 from ichor.main.tools import revert_int_bak_menu
-from ichor.main.tools.concatenate_points_directories import \
-    concatenate_points_directories_menu
+from ichor.main.tools.concatenate_points_directories import (
+    concatenate_points_directories_menu,
+)
 from ichor.make_sets import make_sets_menu
 from ichor.menu import Menu
 

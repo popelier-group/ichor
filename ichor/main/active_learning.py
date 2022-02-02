@@ -12,7 +12,7 @@ from ichor.models import Models
 def active_learning(
     model_directory: Optional[Path] = None,
     sample_pool_directory: Optional[Path] = None,
-    move_points: bool = True
+    move_points: bool = True,
 ):
     """Add a new training point to the training set based on the most recent FERBUS model that was made. Adaptive sampling is
     used to add the worst performing point from the sample pool to the training set."""
@@ -63,8 +63,11 @@ def active_learning(
     if move_points:
         for point in reversed(sorted(points_to_add)):
             training_set = PointsDirectory(FILE_STRUCTURE["training_set"])
-            next_point = len(training_set)+1
-            while (training_set.path / f"{GLOBALS.SYSTEM_NAME}{str(next_point).zfill(4)}").exists():
+            next_point = len(training_set) + 1
+            while (
+                training_set.path
+                / f"{GLOBALS.SYSTEM_NAME}{str(next_point).zfill(4)}"
+            ).exists():
                 next_point += 1
             new_directory = (
                 training_set.path

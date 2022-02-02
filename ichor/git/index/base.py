@@ -11,28 +11,62 @@ import subprocess
 import tempfile
 from io import BytesIO
 from stat import S_ISLNK
-from typing import (IO, TYPE_CHECKING, Any, BinaryIO, Callable, Dict, Iterable,
-                    Iterator, List, NoReturn, Sequence, Tuple, Type, Union)
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    BinaryIO,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    NoReturn,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+)
 
 from ichor.git import diff as git_diff
 from ichor.git.compat import defenc, force_bytes
-from ichor.git.exc import (CheckoutError, GitCommandError, GitError,
-                           InvalidGitRepositoryError)
+from ichor.git.exc import (
+    CheckoutError,
+    GitCommandError,
+    GitError,
+    InvalidGitRepositoryError,
+)
 from ichor.git.ext.gitdb.base import IStream
 from ichor.git.ext.gitdb.db import MemoryDB
-from ichor.git.index.fun import (S_IFGITLINK, aggressive_tree_merge, entry_key,
-                                 read_cache, run_commit_hook,
-                                 stat_mode_to_index_mode, write_cache,
-                                 write_tree_from_cache)
+from ichor.git.index.fun import (
+    S_IFGITLINK,
+    aggressive_tree_merge,
+    entry_key,
+    read_cache,
+    run_commit_hook,
+    stat_mode_to_index_mode,
+    write_cache,
+    write_tree_from_cache,
+)
 from ichor.git.index.typ import BaseIndexEntry, IndexEntry
-from ichor.git.index.util import (TemporaryFileSwap, default_index,
-                                  git_working_dir, post_clear_cache)
+from ichor.git.index.util import (
+    TemporaryFileSwap,
+    default_index,
+    git_working_dir,
+    post_clear_cache,
+)
 from ichor.git.objects import Blob, Commit, Object, Submodule, Tree
 from ichor.git.objects.util import Serializable
 from ichor.git.types import Commit_ish, PathLike
-from ichor.git.util import (LazyMixin, LockedFD, file_contents_ro,
-                            join_path_native, to_bin_sha, to_native_path_linux,
-                            unbare_repo)
+from ichor.git.util import (
+    LazyMixin,
+    LockedFD,
+    file_contents_ro,
+    join_path_native,
+    to_bin_sha,
+    to_native_path_linux,
+    unbare_repo,
+)
 
 # typing -----------------------------------------------------------------------------
 

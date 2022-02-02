@@ -60,11 +60,9 @@ class Object(LazyMixin):
         super(Object, self).__init__()
         self.repo = repo
         self.binsha = binsha
-        assert (
-            len(binsha) == 20
-        ), "Require 20 byte binary sha, got %r, len = %i" % (
-            binsha,
-            len(binsha),
+        assert len(binsha) == 20, (
+            "Require 20 byte binary sha, got %r, len = %i"
+            % (binsha, len(binsha),)
         )
 
     @classmethod
