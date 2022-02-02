@@ -71,12 +71,17 @@ class ReRunDaemon(Daemon):
 def rerun_failed_child_process(
     child_processes: Optional[List[Path]] = None,
 ) -> None:
+    from ichor.globals import GLOBALS, Globals
+    from ichor.arguments import Arguments
+
     if child_processes is None:
         child_processes = find_child_processes_recursively()
     for child_process in child_processes:
         # todo: ensure finished
         with pushd(child_process, update_cwd=True):
-            rerun_from_failed()
+            with Globals():
+                GLOBALS.init_from_config(Arguments.config_file)
+                rerun_from_failed()
 
 
 def stop_all_child_processes(
