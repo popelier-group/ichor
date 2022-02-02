@@ -217,15 +217,18 @@ class SubmissionScript:
         for i in range(ndata):
             read_datafile_str += f"    {self.arr(i)}+=(${self.var(i)})\n"
         read_datafile_str += f"done < ${SubmissionScript.DATAFILE}\n"
+
         # checks if array entries are not empty, so that we do not get errors
         # when points are scrubbed in Gaussian and AIMALL is ran after
         # these errors do not cause calculation issues, but they are written to the ERRORS directory
         # Eg. Running 2000 Gaussians, 1996 produce .wfns, but AIMALL is set to run 2000 tasks
         # AIMALL datafile only has 1996 lines, but AIMALL tasks are set to 2000, so last 4 will fail
         # saying that there is an ambiguous redirect because the array values are empty for them
-        read_datafile_str += "if " # space is important because if[ will cause errors because [ is the test program in bash
-        read_datafile_str += " && ". join([self.test_array_not_null(i) for i in range(ndata)])
-        read_datafile_str += "\nthen\n" # only if array entries are not empty then execute the programs
+        read_datafile_str += "if "  # space is important because if[ will cause errors because [ is the test program in bash
+        read_datafile_str += " && ".join(
+            [self.test_array_not_null(i) for i in range(ndata)]
+        )
+        read_datafile_str += "\nthen\n"  # only if array entries are not empty then execute the programs
 
         return f"{datafile_str}\n{read_datafile_str}"
 
@@ -291,11 +294,14 @@ class SubmissionScript:
                 for module in self.modules:
                     f.write(f"module load {module}\n")
 
+                requires_datafile = False  # used to check if there was any command group that requires a datafile
                 for command_group in self.grouped_commands:
                     command_variables = []
-                    if (
-                        command_group.data
-                    ):  # Gaussian, Ferebus, AIMALL jobs need access to datafiles, the datfile's name is the unique id that was assigned to GLOBALS
+                    # Gaussian, Ferebus, AIMALL jobs need access to datafiles, the datfile's name is the unique id that was assigned to GLOBALS
+                    if command_group.data:
+
+                        requires_datafile = True  # if we got to this part of the code, then we definitely need to check array entries read from datafile
+
                         datafile = FILE_STRUCTURE["datafiles"] / Path(
                             str(GLOBALS.UID)
                         )
@@ -317,9 +323,11 @@ class SubmissionScript:
                     f.write(
                         f"{command_group.repr(command_variables)}\n"
                     )  # see class GaussianCommand for example
-                
+
                 # close the if statement that was started when checking if arrays have non-null entries (see self.setup_script_arrays)
-                f.write("fi")
+                # only write this if there was a command that required a datafile. Otherwise this will not be written
+                if requires_datafile:
+                    f.write("fi")
 
         else:
             raise ValueError(
