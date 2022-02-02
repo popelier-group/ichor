@@ -22,6 +22,31 @@ class GaussianJobType(Enum):
         return [ty.value for ty in GaussianJobType]
 
 
+"""
+----------------------------------------------------------
+%nproc
+%mem
+# <job_type> <method>/<basis-set> <keywords>
+
+Title
+
+0 1
+<atom-name> <x> <y> <z>
+...
+
+<todo: input-section>
+
+<wfn-name>
+-----------------------------------------------------------
+
+TODO: Add:
+- input section
+- freeze atoms
+- oniom?
+- basis-sets?
+"""
+
+
 class GJF(QuantumChemistryProgramInput):
     """Wraps around a .gjf file that is used as input to Gaussian."""
 
