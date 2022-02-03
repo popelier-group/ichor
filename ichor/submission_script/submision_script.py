@@ -327,7 +327,7 @@ class SubmissionScript:
                 # close the if statement that was started when checking if arrays have non-null entries (see self.setup_script_arrays)
                 # only write this if there was a command that required a datafile. Otherwise this will not be written
                 if requires_datafile:
-                    f.write("fi")
+                    f.write("fi\n")
 
         else:
             raise ValueError(
