@@ -453,6 +453,7 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
                 move(DROP_COMPUTE_TMP_LOCATION, DROP_COMPUTE_LOCATION)
                 break
         else:
+            remove(DROP_COMPUTE_TMP_LOCATION)
             raise DropComputeSubmitFailed(f"Failed to submit to DropCompute too many times ({DROP_COMPUTE_NTRIES})")
 
     return final_job
