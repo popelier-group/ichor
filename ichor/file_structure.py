@@ -130,7 +130,7 @@ class FileStructure(FileTree):
 
         # TODO: not sure when temp is used
         self.add(
-            "TEMP", "tmp_scripts", parent="scripts", type_=FileType.Directory
+            "TMP", "tmp", parent="scripts", type_=FileType.Directory
         )
 
         self.add(

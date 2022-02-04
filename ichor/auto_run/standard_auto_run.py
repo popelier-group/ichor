@@ -3,6 +3,7 @@
 
 from enum import Enum
 from pathlib import Path
+from time import sleep
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 
 from ichor.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
@@ -29,10 +30,10 @@ from ichor.auto_run.stop import start
 from ichor.batch_system import BATCH_SYSTEM, JobID, NodeType
 from ichor.common.bool import check_bool
 from ichor.common.int import truncate
-from ichor.common.io import mkdir, remove
+from ichor.common.io import mkdir, remove, move
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
-from ichor.drop_compute import DROP_COMPUTE_LOCATION
+from ichor.drop_compute import DROP_COMPUTE_LOCATION, DROP_COMPUTE_TMP_LOCATION, DROP_COMPUTE_MAX_JOBS, DROP_COMPUTE_NTRIES
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import PointsDirectory, Trajectory
 from ichor.machine import MACHINE, SubmitType
@@ -47,6 +48,10 @@ from ichor.submission_script import SCRIPT_NAMES, DataLock
 
 
 class AutoRunAlreadyRunning(Exception):
+    pass
+
+
+class DropComputeSubmitFailed(Exception):
     pass
 
 
@@ -419,7 +424,8 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
     from ichor.globals import GLOBALS
 
     if MACHINE.submit_type is SubmitType.DropCompute:
-        SCRIPT_NAMES.parent.value = DROP_COMPUTE_LOCATION
+        SCRIPT_NAMES.parent.value = DROP_COMPUTE_TMP_LOCATION
+        mkdir(SCRIPT_NAMES.parent.value)
 
     setup_iter_args()
     IterArgs.nPoints.value = GLOBALS.POINTS_PER_ITERATION
@@ -431,7 +437,26 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
     )
 
     with DataLock():
-        return submit_auto_run_iter(get_func_order(), None, iter_state)
+        final_job = submit_auto_run_iter(get_func_order(), None, iter_state)
+
+    if MACHINE.submit_type is SubmitType.DropCompute:
+        if not DROP_COMPUTE_LOCATION.exists():
+            mkdir(DROP_COMPUTE_LOCATION)
+
+        njobs_queued = sum(f.suffix.startswith(".sh") for f in DROP_COMPUTE_TMP_LOCATION.iterdir() if f.is_file())
+
+        for _ in range(DROP_COMPUTE_NTRIES):
+            njobs_waiting = sum(f.suffix.startswith(".sh") for f in DROP_COMPUTE_LOCATION.iterdir() if f.is_file())
+            if njobs_waiting + njobs_queued > DROP_COMPUTE_MAX_JOBS:
+                sleep(30)
+            else:
+                move(DROP_COMPUTE_TMP_LOCATION, DROP_COMPUTE_LOCATION)
+                break
+        else:
+            raise DropComputeSubmitFailed(f"Failed to submit to DropCompute too many times ({DROP_COMPUTE_NTRIES})")
+
+    return final_job
+
 
 
 def rerun_from_failed() -> Optional[JobID]:
