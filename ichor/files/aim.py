@@ -7,7 +7,6 @@ from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
 from ichor.common.types import Version
 from ichor.files.file import File, FileContents
-from ichor.log import logger
 from ichor.globals import GLOBALS
 
 
@@ -151,11 +150,6 @@ class AIM(File, dict):
                             atom_name = record[4]
                             self[atom_name].time_taken = record[6]
                             self[atom_name].integration_error = record[-1]
-
-        if not self.license_check_succeeded:
-            logger.warning(
-                f"AIMAll Pro License Check failed for {self.path}. AIMAll Pro Features will not be available."
-            )
 
     def __getitem__(self, item: Union[str, int]) -> AimAtom:
         """ If an integer is passed, it returns the atom whose index corresponds to the integer + 1. If a string is passed, it returns
