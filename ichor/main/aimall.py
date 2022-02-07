@@ -220,7 +220,7 @@ def scrub_aimall(wfn_file: str):
                     new_path = move_scrubbed_point(point_dir_path)
                     logger.error(
                         f"Moved point directory {point_dir_path} to {new_path} because "
-                        + "AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
+                        + f"AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
                     )
                     return
 
