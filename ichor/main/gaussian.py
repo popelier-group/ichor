@@ -165,10 +165,12 @@ def scrub_gaussian(gaussian_file: str):
                 logger.error(
                     f"Moved point directory {point_dir_path} to {new_path} because .wfn file was not produced."
                 )
+                return
             elif not "TOTAL ENERGY" in last_line(wfn_file_path):
                 logger.error(
                     f"Moved point directory {point_dir_path} to {new_path} because .wfn file did not have 'TOTAL_ENERGY' in last line."
                 )
+                return
 
     # if a .gjf file does not exist, we also move the point. A .gjf file should exist because this function is called when Gaussian is being ran.
     else:
@@ -194,3 +196,4 @@ def scrub_gaussian(gaussian_file: str):
 
         # move to new path and record in logger
         move(point_dir_path, new_path)
+        return
