@@ -97,7 +97,7 @@ class SubmissionScript:
             modules += command.modules[
                 MACHINE
             ]  # modules depend on which machine (CSF/FFLUXLAB) we are currently on
-        return list(set(modules))
+        return list(sorted(list(set(modules))))
 
     @property
     def grouped_commands(self) -> List[CommandGroup]:
@@ -287,7 +287,7 @@ class SubmissionScript:
                 # if job or array job is going to use more than 1 cores, then we need extra things to write.
                 if self.ncores > 1:
                     f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
-                    # f.write(f"export OMP_PROC_BIND=spread\n")
+                    # f.write(f"export OMP_PROC_BIND=true\n")
                     # f.write(f"export OMP_PLACES=cores\n")
 
                 # load any modules required for the job
