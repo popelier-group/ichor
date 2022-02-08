@@ -1,25 +1,24 @@
 from pathlib import Path
 from typing import Optional, Union
-
 from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
 from ichor.common.types import Version
 from ichor.files.file import File, FileContents
-from ichor.log import logger
+from ichor.globals import GLOBALS
 
 
 class AimAtom:
     def __init__(
         self,
-        atom: Optional[str] = None,
-        infile: Optional[Path] = None,
-        outfile: Optional[Path] = None,
-        time_taken: Optional[float] = None,
+        atom_name: Optional[str] = None,
+        inp_file: Optional[Path] = None,
+        int_file: Optional[Path] = None,
+        time_taken: Optional[int] = None,
         integration_error: Optional[float] = None,
     ):
-        self.atom = atom
-        self.infile = infile
-        self.outfile = outfile
+        self.atom_name = atom_name
+        self.inp_file = inp_file
+        self.int_file = int_file
         self.time_taken = time_taken
         self.integration_error = integration_error
 
@@ -40,6 +39,7 @@ class AIM(File, dict):
     nbcps: Optional[int] = FileContents
     nrcps: Optional[int] = FileContents
     nccps: Optional[int] = FileContents
+    output_file: Optional[Path] = FileContents
     cwd: Optional[Path] = FileContents
 
     def __init__(self, path: Path):
@@ -51,10 +51,20 @@ class AIM(File, dict):
         return ".aim"
 
     def _read_file(self):
+
         self.license_check_succeeded = False
-        aim_atoms = {}
+
         with open(self.path, "r") as f:
-            for line in f:
+
+            is_all_atom_calculation = False
+
+            lines = f.readlines()
+            for line in lines:
+                if "aimint.exe" in line:
+                    is_all_atom_calculation = True
+
+            for line in lines:
+
                 if "AIMAll Professional license check succeeded." in line:
                     self.license_check_succeeded = True
                 elif "AIMQB (Version" in line:
@@ -66,46 +76,53 @@ class AIM(File, dict):
                 elif "Number of NACPs  =" in line:
                     self.nacps = int(line.split()[-1])
                 elif "Number of NNACPs =" in line:
-                    self.nbacps = int(line.split()[-1])
-                elif "Number of NBCPs  =" in line:
+                    self.nnacps = int(line.split()[-1])
+                elif "Number of BCPs  =" in line:
                     self.nbcps = int(line.split()[-1])
-                elif "Number of NRCPs  =" in line:
+                elif "Number of RCPs  =" in line:
                     self.nrcps = int(line.split()[-1])
-                elif "Number of NCCPs  =" in line:
+                elif "Number of CCPs  =" in line:
                     self.nccps = int(line.split()[-1])
-                elif "Inp File:" in line:  # AIMAll 19
-                    inpfile = Path(line.split()[-1])
-                    self[inpfile.stem] = AimAtom(
-                        atom=inpfile.stem, inpfile=inpfile
-                    )
-                elif "aimint.exe" in line:  # AIMAll 17  # todo: check this
-                    aimatom = Path(line.split()[-1])
-                    atom = aimatom.stem
-                    inpfile = aimatom.with_suffix(".inp")
-                    outfile = aimatom.with_suffix(".int")
-                    self[atom] = AimAtom(
-                        atom=atom, inpfile=inpfile, outfile=outfile
-                    )
-                elif "Out File:" in line:  # AIMAll 19
-                    outfile = Path(line.split()[-1])
-                    self[outfile.stem].outfile = outfile
-                elif "Time Taken" in line:
-                    record = line.split()
-                    atom, time_taken, integration_error = (
-                        record[4],
-                        float(record[6]),
-                        float(record[8]),
-                    )  # todo: check these
-                    self[atom].time_taken = time_taken
-                    self[atom].integration_error = integration_error
-            # todo: add cwd
 
-        if not self.license_check_succeeded:
-            logger.warning(
-                f"AIMAll Pro License Check failed for {self.path}. AIMAll Pro Features will not be available"
-            )
+                if is_all_atom_calculation:
+
+                    # Check which .int files should be produced.
+                    # if AIMALL does the partitioning for more than 1 atom, then it does not write out a line with `Out File`
+                    if "aimint.exe" in line:
+                        # find the path to where the atom information will be stored (this is without suffix), also remove extra " in line
+                        aimatom_path = Path(line.split()[-2].strip('"'))
+                        # convert the stem to upper, eg. o1 -> O1
+                        inpfile = aimatom_path.with_suffix(".inp")
+                        outfile = aimatom_path.with_suffix(".int")
+                        atom_name = aimatom_path.stem.upper()
+                        self[atom_name] = AimAtom(
+                            atom_name=atom_name, inp_file=inpfile, int_file=outfile
+                        )
+                    elif "Total time for atom" in line:
+                        record = line.split()
+                        atom_name = record[4]
+                        self[atom_name].time_taken = int(record[6])
+                        self[atom_name].integration_error = float(record[-1])
+
+                # if AIMALL only performs partitioning for one atom there are different line in the .aim file
+                else:
+                    if "Inp File:" in line:
+                        inpfile = Path(line.split()[-1].strip('"'))
+                        outfile = inpfile.with_suffix(".int")
+                        atom_name = inpfile.stem.upper()
+                        self[atom_name] = AimAtom(
+                            atom_name=atom_name, inp_file=inpfile, int_file=outfile
+                        )
+
+                    elif "Total time for atom" in line:
+                        record = line.split()
+                        atom_name = record[4]
+                        self[atom_name].time_taken = int(record[6])
+                        self[atom_name].integration_error = float(record[-1])
 
     def __getitem__(self, item: Union[str, int]) -> AimAtom:
+        """ If an integer is passed, it returns the atom whose index corresponds to the integer + 1. If a string is passed, it returns
+        the the AimAtom which corresponds to the given key."""
         if isinstance(item, int):
             i = item + 1
             for atom, aimatom in self.items():

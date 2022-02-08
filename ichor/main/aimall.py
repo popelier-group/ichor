@@ -111,7 +111,7 @@ def scrub_aimall(wfn_file: str):
     directory and record that it has moved the point in the log file. If a .sh file exists and the integration error for the point is lower than the
     GLOBALS-specified threshold, then this checking function will not do anything.
 
-    :param wfn_file: A string that is a Path to a .gjf file
+    :param wfn_file: A string that is a Path to a .wfn file
     """
 
     from pathlib import Path
@@ -121,13 +121,14 @@ def scrub_aimall(wfn_file: str):
     from ichor.globals import GLOBALS
     from ichor.log import logger
     from ichor.common.io import last_line
+    from ichor.files.aim import AIM
 
     # TODO: check for license and end of aim file, then read aim file with AIM class. Then check if aim file has correct atom info for int files.
     # TODO: then do the integration error check.
 
     def move_scrubbed_point(point_dir_path: Path):
         """ Helper function which takes in a point directory path and moves it to the corresponding scrubbed points directory.
-        
+
         :return: A Path object to where the point directory was moved to.
         """
 
@@ -155,7 +156,7 @@ def scrub_aimall(wfn_file: str):
         wfn_file.parent
     )  # returns path to the point directory containing the wfn file
 
-    # if there is a wfn file from Gaussian and the last line contains the
+    # if there is a wfn file from Gaussian and the last line contains the TOTAL energy (so Gaussian ran successfully), then check for aimall outputs
     if wfn_file.exists() and ("TOTAL ENERGY" in last_line(wfn_file)):
 
         # AIMAll deletes this sh file when it has successfully completed
@@ -163,55 +164,82 @@ def scrub_aimall(wfn_file: str):
         if sh_file.exists():
             new_path = move_scrubbed_point(point_dir_path)
             logger.error(
-                f"Moved point directory {point_dir_path} to {new_path} because AIMALL .sh file exists."
+                f"Moved point directory {point_dir_path} to {new_path} because AIMALL .sh file exists, so AIMALL job did not run successfully."
             )
+            # return after point was moved, no need to check the rest
+            return
 
-        # find if any atoms have integration error above the threshold set in ICHOR GLOBALS
-        n_integration_error = 0
-        point = PointDirectory(point_dir_path)
-        if point.ints:
-            integration_errors = point.integration_error
-            for atom, integration_error in integration_errors.items():
-                if (
-                    abs(integration_error)
-                    > GLOBALS.INTEGRATION_ERROR_THRESHOLD
-                ):
-                    logger.error(
-                        f"{point_dir_path} | {atom} | Integration Error: {integration_error}"
+        # if aim file has correct last line, then try to parse .aim file and check corresponding .int files exist
+        if "AIMQB Job Completed" in last_line(aim_file):
+
+            try:
+                aim_instance = AIM(aim_file)
+                if not aim_instance.license_check_succeeded:
+                    logger.warning(
+                        f"AIMALL Professional License was not used for this calculation {aim_file}."
                     )
-                    n_integration_error += 1
-        # if ints do not exist, then move point because .int file need to exist after AIMALL
+
+                # get the atom names which are in the aim file (eg. {"O1", "H2", "H3"}). Make into a set to be able to compare int files.
+                atom_names_in_aim_file = set(list(aim_instance.keys()))
+                point = PointDirectory(point_dir_path)
+                if point.ints:
+                    atom_names_in_ints_dir = set(list(point.ints.keys()))
+                    if not atom_names_in_aim_file == atom_names_in_ints_dir:
+                        new_path = move_scrubbed_point(point_dir_path)
+                        logger.error(
+                            f"Atoms in aim file {aim_file} ({atom_names_in_aim_file}) do not correspond "
+                            + f"to atoms for which int files were made ({atom_names_in_ints_dir})."
+                            + f"Point moved to {new_path}."
+                        )
+                        # return after point was moved, no need to check the rest
+                        return
+
+                # if ints do not exist, then move point because .int file need to exist after AIMALL
+                else:
+                    new_path = move_scrubbed_point(point_dir_path)
+                    logger.error(
+                        f".int files for the current point {point_dir_path} do not exist. Point moved to {new_path}."
+                    )
+                    return
+
+                # find if any atoms have integration error above the threshold set in ICHOR GLOBALS
+                n_integration_error = 0
+                if point.ints:
+                    integration_errors = point.integration_error
+                    for atom, integration_error in integration_errors.items():
+                        if (
+                            abs(integration_error)
+                            > GLOBALS.INTEGRATION_ERROR_THRESHOLD
+                        ):
+                            logger.error(
+                                f"{point_dir_path} | {atom} | Integration Error: {integration_error}"
+                            )
+                            n_integration_error += 1
+                # if any atoms have larger integration error, scrub the point
+                if n_integration_error > 0:
+                    new_path = move_scrubbed_point(point_dir_path)
+                    logger.error(
+                        f"Moved point directory {point_dir_path} to {new_path} because "
+                        + f"AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
+                    )
+                    return
+
+            # TODO: more explicit except that has error type, so that logger information can be better
+            # catch if anything does not work in the steps above
+            except:
+                new_path = move_scrubbed_point(point_dir_path)
+                logger.error(
+                    f"Moved point directory {point_dir_path} to {new_path} because something failed when parsing .aim or .int files."
+                )
+                return
+
+        # if AIMALL does not have correct last line, then move point
         else:
-            new_path = move_scrubbed_point(point_dir_path)
-            logger.error(
-                f".int files for the current point {point_dir_path} do not exist. Point moved to {new_path}."
-            )
-        # if any atoms have larger integration error, scrub the point
-        if n_integration_error > 0:
-            new_path = move_scrubbed_point(point_dir_path)
-            logger.error(
-                f"Moved point directory {point_dir_path} to {new_path} because AIMALL integration error for {n_integration_error} atom(s) was greater than {GLOBALS.INTEGRATION_ERROR_THRESHOLD}."
-            )
-
-        # scrub point if .aim file does not contain correct last line
-        if not ("AIMQB Job Completed" in last_line(aim_file)):
-
             new_path = move_scrubbed_point(point_dir_path)
             logger.error(
                 f"Moved point directory {point_dir_path} to {new_path} because {aim_file} did not have correct last line."
             )
-
-        # if AIMALL calculation ran correctly, check for license to warn user if AIMALL Professional is not used
-        else:
-            # check for license and log a warning message if no AIMALL Professional License was available. Do not need to move point if this is the case.
-            with open(aim_file) as f:
-                if (
-                    not "AIMAll Professional license check succeeded."
-                    in f.readline()
-                ):
-                    logger.warning(
-                        f"AIMALL Professional License was not used for this calculation {aim_file}."
-                    )
+            return
 
     # if a wfn file does not exist for some reason, we do not want this point as well. This shouldn't really be needed as points without wfn
     # files should be cleaned up after running Gaussian. But use this as another check.
@@ -220,3 +248,4 @@ def scrub_aimall(wfn_file: str):
         logger.error(
             f"Moved point directory {point_dir_path} to {new_path} because .wfn file does not exist after AIMALL was ran."
         )
+        return
