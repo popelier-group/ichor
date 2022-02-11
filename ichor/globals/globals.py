@@ -7,7 +7,8 @@ and make sure that the global variable is always valid.
 |Global Variable|Type|Default Value|Description|Notes|
 |---------------|----|-------------|-----------|-----|
 SYSTEM_NAME                     | str             | SYSTEM            | Name of the current system                                                                 |
-ALF_REFERENCE_FILE              | str             |                   | Path to file containing geometry to calculate ALF                                          | gjf or xyz                                                                                      # todo: convert to Path
+ALF_REFERENCE_FILE              | Path            | None, set automatically if not specified | Path to file containing atom hash and alf. Can contain data for multiple systems.                                          | gjf or xyz                                                                                      # todo: convert to Path
+ATOM_REFERENCE_FILE             | Path            | None, set automatically if not specified | Path to a .xyz, .gjf, or PointsDirecotry which contains geometry for current system|
 ALF                             | List[List[int]] | []                | ALF used for ichor containing atomic indices                                               | 1-index
 ATOMS                           | Atoms           | None              | Instance of Atoms from ALF_REFERENCE_FILE                                                  |
 CWD                             | Path            | os.getcwd()       | Current working directory                                                                  |
@@ -95,22 +96,26 @@ INCLUDE_NODES                   | List[str]       | []                | Node whi
 EXCLUDE_NODES                   | List[str]       | []                | Node blacklist for ichor not to run jobs on                                                |
 """
 
+from ast import literal_eval
 import inspect
 import os
 import platform
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional, Union
+from re import S
+from typing import Any, List, Optional, Union
 from uuid import UUID, uuid4
 
 from ichor import constants
 from ichor.atoms.atoms import Atoms
-from ichor.common.types import DictList, Version
+from ichor.common.types import Version
+from collections import defaultdict
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
 from ichor.problem_finder import PROBLEM_FINDER
+from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import ALFCalculationError
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -132,21 +137,21 @@ class Globals:
     _allowed_values = {}
 
     # For parsing global variables into type
-    _parsers = DictList()
+    _parsers = defaultdict(list)
     # For formatting global variables after parsing
-    _formatters = DictList()
+    _formatters = defaultdict(list)
     # For checking global variables after formatting
-    _checkers = DictList()
+    _checkers = defaultdict(list)
 
     # for saving the location the global variables were loaded from
     _config_file: Optional[Path] = None
 
     SYSTEM_NAME: str = "SYSTEM"
-    _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined
-    _ALF: List[List[int]] = []
-    _ATOMS: Atoms = None
 
-    POINTS_LOCATION: Path = None
+    _ATOMS_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties, which then modified self._ATOMS
+    _ATOMS: Atoms = None  # set automatically if not defined
+    _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties
+    _ALF: List[List[int]] = []  # set automatically if not defined. Can be manually defined in config properties
 
     CWD: Path = Path(os.getcwd())
 
@@ -385,23 +390,17 @@ class Globals:
             elif global_type is Path:
                 self._parsers[global_variable] += [parsers.read_path]
 
+        # add these separately because these attributes have more complicated types
         self._parsers["KEYWORDS"] += [parsers.split_keywords]
-        self._parsers["ALF"] += [parsers.read_alf]
         self._parsers["FEREBUS_VERSION"] += [parsers.read_version]
         self._parsers["DLPOLY_VERSION"] += [parsers.read_version]
-
         self._parsers["INCLUDE_NODES"] += [parsers.split_keywords]
         self._parsers["EXCLUDE_NODES"] += [parsers.split_keywords]
-
         self._parsers["TRAINING_SET_METHOD"] += [parsers.split_keywords]
         self._parsers["SAMPLE_POOL_METHOD"] += [parsers.split_keywords]
         self._parsers["VALIDATION_SET_METHOD"] += [parsers.split_keywords]
-
         self._parsers["UID"] += [parsers.read_uid]
-
-        # TODO: Parsers to add
-        # - Training/Sample/Validation Set methods
-        # - Make sure List[int] is parsed correctly
+        # TODO: Make sure List[int] is parsed correctly
 
         # Setup Formatters
         for global_variable in self.global_variables:
@@ -432,17 +431,19 @@ class Globals:
         # - CP2K Method
         # - CP2K Basis Set
 
+        # set up a dictionary, whose values are functions which
+        # check if the values given to the GLOBALS options are allowed
         for variable, allowed_values in self._allowed_values.items():
             self._checkers[variable] += [
                 lambda val, av=allowed_values: checkers.check_allowed(val, av)
             ]
-
+        # adaptive sampling checks
         self._checkers["MAX_ITERATION"] += [checkers.positive]
         self._checkers["POINTS_PER_ITERATION"] += [checkers.positive]
         self._checkers["TRAINING_POINTS"] += [checkers.positive_or_zero]
         self._checkers["SAMPLE_POINTS"] += [checkers.positive_or_zero]
         self._checkers["VALIDATION_POINTS"] += [checkers.positive_or_zero]
-
+        # FEREBUS checks
         self._checkers["FEREBUS_SWARM_SIZE"] += [checkers.positive]
         self._checkers["FEREBUS_NUGGET"] += [checkers.positive]
         self._checkers["FEREBUS_INERTIA_WEIGHT"] += [checkers.positive]
@@ -454,17 +455,17 @@ class Globals:
         self._checkers["FEREBUS_STALL_ITERATIONS"] += [checkers.positive]
         self._checkers["FEREBUS_CONVERGENCE"] += [checkers.positive]
         self._checkers["FEREBUS_MAX_ITERATION"] += [checkers.positive]
-
+        # DLPOLY checks
         self._checkers["DLPOLY_NUMBER_OF_STEPS"] += [checkers.positive]
         self._checkers["DLPOLY_TEMPERATURE"] += [checkers.positive_or_zero]
         self._checkers["DLPOLY_PRINT_EVERY"] += [checkers.positive]
         self._checkers["DLPOLY_TIMESTEP"] += [checkers.positive]
-
+        # CP2K checks
         self._checkers["CP2K_TEMPERATURE"] += [checkers.positive]
         self._checkers["CP2K_STEPS"] += [checkers.positive]
         self._checkers["CP2K_TIMESTEP"] += [checkers.positive]
 
-        # Setup Defaults
+        # Setup Defaults. These can be reverted to if needed.
         for global_variable in self.global_variables:
             self._defaults[global_variable] = self.get(global_variable)
 
@@ -482,6 +483,7 @@ class Globals:
         if globals_instance is not None:
             self.init_from_globals(globals_instance)
 
+        # if an option that is not supported is passed in, raise error
         for key, value in kwargs.items():
             if key not in self.global_variables:
                 raise GlobalVariableError(
@@ -489,6 +491,7 @@ class Globals:
                 )
             self.set(key, value)
 
+        # TODO: add MAX_RUINNING_TASKS to Globals docstring
         if "MAX_RUNNING_TASKS" not in self._in_config:
             from ichor.machine import MACHINE, Machine
 
@@ -499,9 +502,22 @@ class Globals:
             elif MACHINE is Machine.csf3:
                 self.MAX_RUNNING_TASKS = -1
 
+        # TODO: add comment explaining why this is needed
         self._initialising = False
 
     def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
+        """ Uses either a config file or another instance of `Globals` from which to
+        initialize values for the current Globals instance. Essentially, it copies over
+        all the values for user-specified options, so they match the given config file
+        or `Globals` instance.
+
+        :param src: A Path object or string pointing to a valid config file
+            or another Globals instance
+
+        .. note::
+            This does not return a new `Globals` instance. It just modifies the
+            values for the options that a user can change.
+        """
         if src is not None:
             if isinstance(src, Globals):
                 self.init_from_globals(src)
@@ -510,6 +526,15 @@ class Globals:
                 self.init_from_config(src)
 
     def init_from_config(self, config_file: Path):
+        """ Reads in options from a config file and sets the values of the
+        attributes in this `Globals` instance based on the values read.
+
+        :param config_file: A config file from which to copy options
+
+        .. note::
+            This does not return a new `Globals` instance. It just modifies the
+            values for the options that a user can change.
+        """
         self._config_file = config_file
         config = ConfigProvider(source=config_file)
 
@@ -524,15 +549,31 @@ class Globals:
                 self.set("N_ITERATIONS", val)
                 self._in_config += ["N_ITERATIONS"]
             else:
-                PROBLEM_FINDER.unknown_settings += [
-                    key
-                ]  # todo: implement ProblemFinder
+                PROBLEM_FINDER.unknown_settings += [key]
 
     def init_from_globals(self, globals_instance: "Globals"):
+        """ Reads in options another `Globals` instance and sets the values of the
+        attributes in this `Globals` instance based on the values read from the other
+        `Globals` instance
+
+        :param globals_instance: A `Globals` instance from which to copy options
+
+        .. note::
+            This does not return a new `Globals` instance. It just modifies the
+            values for the options that a user can change.
+        """
         for key, value in globals_instance.items(show_protected=True):
             self.set(key, value)
 
-    def set(self, name, value):
+    def set(self, name: str, value):
+        """ Sets a value for a `Globals` variable.
+
+        :param name: Name of variable for which to set value
+        :param value: A value to set for the variable. 
+
+        .. note::
+            The type of the value is checked in the __setattr__ method
+        """
         name = name.upper()
         if name not in self.global_variables:
             PROBLEM_FINDER.unknown_settings.append(name)
@@ -545,72 +586,195 @@ class Globals:
                 PROBLEM_FINDER.incorrect_settings[name] = e
 
     @property
-    def ATOMS(self) -> Atoms:
-        if self._initialising:
-            return None
-        self._ATOMS = get_atoms(self.ALF_REFERENCE_FILE)
-        return self._ATOMS
+    def ATOMS_REFERENCE_FILE(self) -> Path:
+        """ Returns an ATOMS reference file, which is to be used to get an Atoms instance, which contains system information.
+        Only one system should be present in the ATOMS_REFERENCE file because otherwise, there is no way to check what system
+        we should be working on."""
 
-    @ATOMS.setter
-    def ATOMS(self, value: Atoms):
-        self._ATOMS = value
-        self._ALF = None
+        # if this attribute is None (the initial value)
+        if not self._ATOMS_REFERENCE_FILE:
 
-    @property
-    def ALF(self):
-        if self._initialising:
-            return None
-        self._ALF = self.ATOMS.alf
-        return self._ALF
+            from ichor.files import GJF, XYZ
 
-    @property
-    def ALF_REFERENCE_FILE(self):
-        if (
-            self._ALF_REFERENCE_FILE is None
-            or self._ALF_REFERENCE_FILE == Path()
-        ):
-            # search for ALF REFERENCE FILE
-            if self.POINTS_LOCATION is not None:
-                self._ALF_REFERENCE_FILE = self.POINTS_LOCATION
-            else:
-                from ichor.files import GJF, XYZ
+            # iterate over all files and directories in current folder (does not iterate recursively)
+            for f in Path().iterdir():
 
-                for f in Path().iterdir():
-                    if f.is_file() and f.suffix in [
-                        GJF.filetype,
-                        XYZ.filetype,
-                    ]:
-                        self._ALF_REFERENCE_FILE = f
-                        break
-                else:
+                # if a .gjf or .xyz file is found, we use that to calculate atoms
+                if f.is_file() and f.suffix in [
+                    GJF.filetype,
+                    XYZ.filetype,
+                ]:
+                    if f.suffix == GJF.filetype:
+                        gjf_instance = GJF(f)
+                        self._ATOMS_REFERENCE_FILE = gjf_instance.path.absolute()
+                        return self._ATOMS_REFERENCE_FILE
+                    # there should always be some sort of .xyz file in the current directory because we use
+                    # an .xyz file to initialize training set, validation set, etc. in most cases.
+                    elif f.suffix == XYZ.filetype:
+                        xyz_instance = XYZ(f)
+                        self._ATOMS_REFERENCE_FILE = xyz_instance.path.absolute()
+                        return self._ATOMS_REFERENCE_FILE
+                # if a directory is found and the name of the directory matches the file structure name
+                elif f.is_dir() and f.stem in [
+                    str(FILE_STRUCTURE["training_set"].name),
+                    str(FILE_STRUCTURE["sample_pool"].name),
+                    str(FILE_STRUCTURE["validation_set"].name),
+                ]:
                     from ichor.files import PointsDirectory
 
-                    for d in Path().iterdir():
-                        if d.is_dir():
-                            points = PointsDirectory(d)
-                            if len(points) > 0:
-                                self._ALF_REFERENCE_FILE = points[0].xyz.path
-                                break
-        if (
-            self._ALF_REFERENCE_FILE.exists()
-            and self._ALF_REFERENCE_FILE.is_dir()
-        ):
-            from ichor.files import PointsDirectory
+                    points = PointsDirectory(f)
+                    if len(points) > 0:
+                        self._ATOMS_REFERENCE_FILE = points[0].path.absolute()
+                        return self._ATOMS_REFERENCE_FILE
 
-            points = PointsDirectory(d)
-            if len(points) > 0:
-                self._ALF_REFERENCE_FILE = points[0].xyz.path
-        return self._ALF_REFERENCE_FILE
+        # we should have an ATOMS REFERENCE FILE by now if it was set previously or default is made
+        if not self._ATOMS_REFERENCE_FILE:
+            raise ValueError(
+                """An ATOMS reference file could not be found in the current directory.
+                Make sure a gjf, .xyz or a PointsDirectory (TS, SP, VS) exists in the directory."""
+            )
+
+        # if a file has been set already,  return it instead of making default file.
+        return self._ATOMS_REFERENCE_FILE.absolute()
+
+    @ATOMS_REFERENCE_FILE.setter
+    def ATOMS_REFERENCE_FILE(self, value: Union[str, Path]):
+        """ Setter method for ATOMS_REFERENCE_FILE. Allows another ALF_REFERENCE_FILE to be specified."""
+        value = Path(value)
+        if value.exists():
+            self._ATOMS_REFERENCE_FILE = value
+        else:
+            raise ValueError(f"ATOMS REFERENCE FILE with Path {value.absolute()} is not on disk.")
+
+    @property
+    def ATOMS(self) -> Atoms:
+        """ Returns an instance of `Atoms`. This can be used to obtain
+        the number of atoms, atom names, etc."""
+        if self._initialising:
+            return None
+        self._ATOMS = get_atoms(self.ATOMS_REFERENCE_FILE)
+        if self._ATOMS:
+            return self._ATOMS
+        else:
+            raise ValueError(f"self._ATOMS is currently {self._ATOMS}.")
+
+    @property
+    def ALF_REFERENCE_FILE(self) -> Path:
+        """ Returns a `Path` object to a file that contains the
+        atomic local frame calculated for the system."""
+
+        # if the reference file still not been set, make the default file
+        if not self._ALF_REFERENCE_FILE:
+
+            self._ALF_REFERENCE_FILE = Path(
+                FILE_STRUCTURE["alf_reference_file"]
+            )
+
+            # if the reference file is not found on disk, then calculate alf by trying to find an Atoms instance
+            if not self._ALF_REFERENCE_FILE.exists():
+
+                # check if ATOMS_REFERENCE_FILE is set and use that to generate alf first.
+                with open(self._ALF_REFERENCE_FILE, "w") as alf_reference_file:
+                    alf_reference_file.write(f"{self.ATOMS.hash} [")
+
+                    # check that ALF can be obtained because it might crash due to a bad geometry from self.ATOMS
+                    try:
+                        atoms_alf = self.ATOMS.alf
+                    except:
+                        raise ALFCalculationError("ALF could not be calculated for some reason (possibly a bad geometry). Enter ALF manually in reference file.")
+
+                    for one_atom_alf in self.ATOMS.alf.tolist():
+                        alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
+                    alf_reference_file.write("]\n")
+
+            # if an alf reference file already exists, check that stored hashes matches the hash of the current self.ATOMS
+            else:
+
+                stored_hashes = []
+
+                # read alf reference file and store the hashes to check if we already calculated alf for that system
+                with open(self._ALF_REFERENCE_FILE, "r") as alf_reference_file:
+                    for line in alf_reference_file:
+                        system_hash, system_alf = line.split(maxsplit=1)
+                        stored_hashes.append(system_hash)
+
+                # if the alf has not been stored for this system previously, append this system to the alf reference file
+                if self.ATOMS.hash not in stored_hashes:
+                    with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
+                        alf_reference_file.write(f"{self.ATOMS.hash} [")
+                        for one_atom_alf in self.ATOMS.alf.tolist():
+                            alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
+                        alf_reference_file.write("]\n")
+
+        if self._ALF_REFERENCE_FILE:
+            return self._ALF_REFERENCE_FILE.absolute()
+        else:
+            raise ValueError(
+                "An ALF reference file could not be made for the current directory. Make sure there is an .xyz or .gjf file from which to calculate ALF.")
 
     @ALF_REFERENCE_FILE.setter
-    def ALF_REFERENCE_FILE(self, value: Path):
-        self._ALF_REFERENCE_FILE = value
+    def ALF_REFERENCE_FILE(self, value: Union[str, Path]):
+        """ Set the alf reference file to a specified file."""
 
-    @ALF.setter
-    def ALF(self, value: List[List[int]]):
-        self._ALF = value
+        if isinstance(value, str):
+            value = Path(value)
 
-    def get(self, name):
+        if value.exists():
+            self._ALF_REFERENCE_FILE = value
+        else:
+            raise ValueError(
+                f"The alf reference file was not set because the specified file {value} does not exist on disk."
+            )
+
+    @property
+    def ALF(self) -> List[List[int]]:
+        """ Returns the atomic local frame for every atom in the system.
+        This is in the form of a list of lists, where each inner lists contains
+        three integers. These integers represent the central atom (the atom on
+        which the ALF is currently centered on), the x-axis atom, and the
+        xy-plane atom (if system has more than 2 atoms). Note that these
+        are 0-indexed because it makes it easier to use the ALF this way in
+        Python.
+
+        :returns: A list of lists (of ints), representing the ALF of the system.
+        """
+
+        if self._initialising:
+            return None
+
+        else:
+            _alf = {}
+
+            # read in ALF reference file if it exists
+            if self.ALF_REFERENCE_FILE:
+
+                with open(self.ALF_REFERENCE_FILE, "r") as alf_reference_file:
+                    for line in alf_reference_file:
+                        system_hash, total_alf = line.split(maxsplit=1)
+                        # read in atomic local frame and convert to list of list of int.
+                        _alf[system_hash] = literal_eval(total_alf)
+
+                # try to get the ALF from the file if the file contains alf for current atom's hash
+                self._ALF = _alf.get(self.ATOMS.hash)
+
+            # if ALF was not in the ALF reference file, then try to calculate it based on the current self.ATOMS
+            if self._ALF is None:
+                try:
+                    self._ALF = self.ATOMS.alf
+                except:
+                    raise ALFCalculationError("ALF could not be calculated. Make sure to add manually add alf to alf reference file.")
+
+                # if ALF was calculated successfully from the atoms, make sure to add it to the alf reference file
+                with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
+                    alf_reference_file.write(f"{self.ATOMS.hash} [")
+                    for one_atom_alf in self.ATOMS.alf.tolist():
+                        alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
+                    alf_reference_file.write("]\n")
+
+            return self._ALF
+
+    def get(self, name: str):
+        """Returns the value for some attribute/class variable or None if the attribute/class variable is not set."""
         return getattr(self, name, None)
 
     def items(self, show_protected=False):
@@ -674,17 +838,27 @@ class Globals:
         ]
 
     @property
-    def global_variables(self):
+    def global_variables(self) -> List[str]:
+        """ Returns a list of strings which are all the options that a user can set
+        through the GLOBALS class.
+        
+        :returns: A list of strings corresponding to all the attributes that can
+            be set through GLOBALS.
+        """
 
         try:
             return self._global_variables
         except AttributeError:
+
+            # methods implemented in Globals
             methods = [
                 f[0]
                 for f in inspect.getmembers(
                     Globals, predicate=inspect.isfunction
                 )
             ]
+
+            # properties implemented in Globals
             properties = [
                 p[0]
                 for p in inspect.getmembers(
@@ -692,6 +866,9 @@ class Globals:
                 )
             ]
             methods += properties
+
+            # get all attributes which do not start with _ (as these cannot be set by user)
+            # zand which are not methods/properties
             self._global_variables = [
                 key
                 for key in dir(self)
@@ -740,49 +917,44 @@ class NoAtomsFound(Exception):
 
 
 @lru_cache()
-def get_atoms(path: Optional[Path] = None) -> Atoms:
-    if path is not None:
-        alf_reference_file = Path(path)
-        if not alf_reference_file.exists():
-            raise ValueError(
-                f"ALF reference file: {alf_reference_file} does not exit"
-            )
-        elif alf_reference_file.is_dir():
-            raise ValueError(
-                f"ALF reference file: {alf_reference_file} is a directory."
-            )
-        if alf_reference_file.suffix == ".gjf":
-            from ichor.files import GJF
+def get_atoms(atoms_reference_path: Path) -> Atoms:
+    """ Gets an Atoms instance from an atom_reference_path that was given."""
 
-            return GJF(alf_reference_file).atoms
-        elif alf_reference_file.suffix == ".xyz":
-            from ichor.files import XYZ
+    def scan_dir(d) -> Optional[Atoms]:
+        # todo: could be slow, maybe best to search key locations first
+        dirs_to_scan = []
+        print("scanning", d)
+        for f in d.iterdir():
+            if f.is_file():
+                if f.suffix == ".gjf":
+                    from ichor.files import GJF
 
-            return XYZ(alf_reference_file).atoms
-        else:
-            raise ValueError(f"Unknown filetype ({alf_reference_file}")
+                    return GJF(f).atoms
+                elif f.suffix == ".xyz":
+                    from ichor.files import XYZ
+
+                    return XYZ(f).atoms
+            elif f.is_dir():
+                dirs_to_scan += [f]
+        for dir_to_scan in dirs_to_scan:
+            scan_dir(dir_to_scan)
+
+    if atoms_reference_path.exists():
+
+        if atoms_reference_path.is_file():
+            if atoms_reference_path.suffix == ".gjf":
+                from ichor.files import GJF
+                return GJF(atoms_reference_path).atoms
+            elif atoms_reference_path.suffix == ".xyz":
+                from ichor.files import XYZ
+                return XYZ(atoms_reference_path).atoms
+            else:
+                raise ValueError(f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file.")
+
+        elif atoms_reference_path.is_dir():
+            atoms = scan_dir(Path.cwd())
+
+        return atoms if atoms else None
+
     else:
-
-        def scan_dir(d) -> Optional[Atoms]:
-            # todo: could be slow, maybe best to search key locations first
-            dirs_to_scan = []
-            print("scanning", d)
-            for f in d.iterdir():
-                if f.is_file():
-                    if f.suffix == ".gjf":
-                        from ichor.files import GJF
-
-                        return GJF(f).atoms
-                    elif f.suffix == ".xyz":
-                        from ichor.files import XYZ
-
-                        return XYZ(f).atoms
-                elif f.is_dir():
-                    dirs_to_scan += [f]
-            for dir_to_scan in dirs_to_scan:
-                scan_dir(dir_to_scan)
-
-        atoms = scan_dir(Path.cwd())
-        if atoms is not None:
-            return atoms
-    raise NoAtomsFound("No instance of Atoms could be found")
+        raise NoAtomsFound("No instance of Atoms could be found in scanned directories and files.")
