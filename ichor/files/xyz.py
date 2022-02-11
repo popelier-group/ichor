@@ -9,7 +9,9 @@ from ichor.files.geometry import GeometryFile
 
 class XYZ(GeometryFile, File):
     """A class which wraps around a .xyz file that is contained in each PointDirectory. This .xyz file should always be there and it is
-    used to write out .gjf files. Each instance is
+    used to write out .gjf files. Each instance of `XYZ` only has one geometry. If there is a need to
+    read a `.xyz` file that contains multiple geometries (i.e. a trajectory file), the use the `Trajectory`
+    class.
 
     :param path: The path to an .xyz file
     :param atoms: Optional list of Atoms which can be used to construct a .xyz file. If a list of atoms is passed, then a new xyz file
