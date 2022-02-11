@@ -12,12 +12,16 @@ from ichor.units import AtomicDistance
 feature_unit = AtomicDistance.Bohr
 
 
+class ALFCalculationError(Exception):
+    pass
+
+
 class ALFFeatureCalculator(FeatureCalculator):
     _alf = {}
 
     @classmethod
     def calculate_alf(cls, atom: "Atom") -> list:
-        """Returns the Atomic Local Frame (ALF) of the specified atom. The ALF consists of 3 Atom instances,
+        """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
         the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
         matrix and features.
 
