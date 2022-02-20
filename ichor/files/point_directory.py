@@ -53,6 +53,12 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
     @property
     def atoms(self):
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
+        # always try to get atoms from wfn file first because the wfn file contains the final geometry.
+        # you can run into the issue where you did an optimization (so .xyz/gjf are different from wfn)
+        # then predictions - true will be way off because you are predicting on different geometries
+        for f in self.files():
+            if isinstance(f, WFN):
+                return f.atoms
         for f in self.files():
             if isinstance(f, GeometryFile):
                 return f.atoms
