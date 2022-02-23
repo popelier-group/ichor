@@ -589,7 +589,10 @@ class Globals:
     def ATOMS_REFERENCE_FILE(self) -> Path:
         """ Returns an ATOMS reference file, which is to be used to get an Atoms instance, which contains system information.
         Only one system should be present in the ATOMS_REFERENCE file because otherwise, there is no way to check what system
-        we should be working on."""
+        we should be working on.
+        The atoms reference file can either be a GJF or XYZ or a PointsDirectory folder
+        that has PointDirectory instances in it.
+        """
 
         # if this attribute is None (the initial value)
         if not self._ATOMS_REFERENCE_FILE:
@@ -663,12 +666,15 @@ class Globals:
         """ Returns a `Path` object to a file that contains the
         atomic local frame calculated for the system."""
 
-        # if the reference file still not been set, make the default file
+        from ichor.common.io import mkdir
+
+        # if the reference file still not been set (default is None), make the default file
         if not self._ALF_REFERENCE_FILE:
 
-            self._ALF_REFERENCE_FILE = Path(
-                FILE_STRUCTURE["alf_reference_file"]
-            )
+            self._ALF_REFERENCE_FILE = FILE_STRUCTURE["alf_reference_file"]
+
+            # make the parent folder of the alf reference file
+            mkdir(self._ALF_REFERENCE_FILE.parent)
 
             # if the reference file is not found on disk, then calculate alf by trying to find an Atoms instance
             if not self._ALF_REFERENCE_FILE.exists():
@@ -745,8 +751,8 @@ class Globals:
         else:
             _alf = {}
 
-            # read in ALF reference file if it exists
-            if self.ALF_REFERENCE_FILE:
+            # read in ALF reference file if it exists on disk
+            if self.ALF_REFERENCE_FILE.exists():
 
                 with open(self.ALF_REFERENCE_FILE, "r") as alf_reference_file:
                     for line in alf_reference_file:

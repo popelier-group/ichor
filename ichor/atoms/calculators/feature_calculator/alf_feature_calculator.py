@@ -8,6 +8,7 @@ from ichor.atoms.calculators.feature_calculator.feature_calculator import (
 )
 from ichor.constants import ang2bohr
 from ichor.units import AtomicDistance
+from ichor.common.functools import classproperty
 
 feature_unit = AtomicDistance.Bohr
 
@@ -17,12 +18,12 @@ class ALFCalculationError(Exception):
 
 def get_alfs_from_reference_file():
 
-    from ichor import GLOBALS
+    from ichor.globals import GLOBALS
     from ast import literal_eval
 
     alf = {}
 
-    if GLOBALS.ALF_REFERENCE_FILE:
+    if GLOBALS.ALF_REFERENCE_FILE.exists():
 
         with open(GLOBALS.ALF_REFERENCE_FILE, "r") as alf_reference_file:
             for line in alf_reference_file:
@@ -33,7 +34,16 @@ def get_alfs_from_reference_file():
     return alf
 
 class ALFFeatureCalculator(FeatureCalculator):
-    _alf = get_alfs_from_reference_file()
+
+    # needs to be implemented as a class property (property works too)
+    # otherwise if just used as a class variable, then get_alfs_from_reference_file
+    # results in a cyclic import because it uses GLOBALS (and GLOBALS imports Atoms -> Atom -> ALFFEatureCalculator)
+    @classproperty
+    def _alf(self):
+        """ Returns a dictionary of system_hash:alf."""
+        if not hasattr(self, "_reference_alf"):
+            self._reference_alf = get_alfs_from_reference_file()
+        return self._reference_alf
 
     @classmethod
     def calculate_alf(cls, atom: "Atom") -> list:
