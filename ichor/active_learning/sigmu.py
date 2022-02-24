@@ -6,7 +6,8 @@ from ichor.common.functools import classproperty
 from ichor.models import Models
 
 
-class HighestVariance(ActiveLearningMethod):
+# todo: update docstrings
+class SigMu(ActiveLearningMethod):
     """Active learning method which calculates the variance of the sample pool points (given the models) and adds
     points with the highest variance to the training set.
 
@@ -19,7 +20,7 @@ class HighestVariance(ActiveLearningMethod):
 
     @classproperty
     def name(self) -> str:
-        return "variance"
+        return "sigmu"
 
     def get_points(self, points: ListOfAtoms, npoints: int) -> np.ndarray:
         """Gets points with the highest calculated variance and adds to the training set.
@@ -29,13 +30,17 @@ class HighestVariance(ActiveLearningMethod):
         :return: The indices of the points which should be added to the training set.
         """
 
-        variance = np.array([])
+        sigmu = np.array([])
         for batched_points in self.batch_points(points):
             features_dict = self.models.get_features_dict(batched_points)
-            variance = np.hstack(
-                (variance, self.models.variance(features_dict).reduce(-1))
+            sigmu = np.hstack(
+                (
+                    sigmu,
+                    self.models.variance(features_dict).reduce(-1)
+                    * np.abs(self.models.predict(features_dict).reduce(-1)),
+                )
             )
 
         # sort the array from smallest to largest, but give only the indeces back. Then flip the indeces, so that
         # the point index with the largest variance is first. Finally, get the desired number of points
-        return np.flip(np.argsort(variance), axis=-1)[:npoints]
+        return np.flip(np.argsort(sigmu), axis=-1)[:npoints]
