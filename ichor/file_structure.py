@@ -119,6 +119,22 @@ class FileStructure(FileTree):
             description="""Directory that contains important information for jobs submitted to
             compute nodes. Submission scripts as well as job outputs among other things are stored here.""",
         )
+
+        self.add(
+            "ALF_REFERENCE_FILE",
+            "alf_reference_file",
+            parent="data",
+            type_=FileType.File,
+            description="""A reference file which contains the atomic local frame information for every atom in the system.
+
+            Example file.
+            O1,H2,H3 [[0,1,2], [1,0,2], [2,0,1]]
+            O1,H2,H3,O4,H5,H6 [[0,1,2], [1,0,2], [2,0,1], [3,4,5], [4,3,5], [5,3,4]]
+
+            Note that the file is 0 indexed (makes it easier to read)
+            """
+        )
+
         self.add(
             "SCRIPTS",
             "scripts",

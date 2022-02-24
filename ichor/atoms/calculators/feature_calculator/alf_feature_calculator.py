@@ -7,16 +7,46 @@ from ichor.atoms.calculators.feature_calculator.feature_calculator import \
     FeatureCalculator
 from ichor.constants import ang2bohr
 from ichor.units import AtomicDistance
+from ichor.common.functools import classproperty
 
 feature_unit = AtomicDistance.Bohr
 
 
+class ALFCalculationError(Exception):
+    pass
+
+def get_alfs_from_reference_file():
+
+    from ichor.globals import GLOBALS
+    from ast import literal_eval
+
+    alf = {}
+
+    if GLOBALS.ALF_REFERENCE_FILE.exists():
+
+        with open(GLOBALS.ALF_REFERENCE_FILE, "r") as alf_reference_file:
+            for line in alf_reference_file:
+                system_hash, total_alf = line.split(maxsplit=1)
+                # read in atomic local frame and convert to list of list of int.
+                alf[system_hash] = literal_eval(total_alf)
+    
+    return alf
+
 class ALFFeatureCalculator(FeatureCalculator):
-    _alf = {}
+
+    # needs to be implemented as a class property (property works too)
+    # otherwise if just used as a class variable, then get_alfs_from_reference_file
+    # results in a cyclic import because it uses GLOBALS (and GLOBALS imports Atoms -> Atom -> ALFFEatureCalculator)
+    @classproperty
+    def _alf(self):
+        """ Returns a dictionary of system_hash:alf."""
+        if not hasattr(self, "_reference_alf"):
+            self._reference_alf = get_alfs_from_reference_file()
+        return self._reference_alf
 
     @classmethod
     def calculate_alf(cls, atom: "Atom") -> list:
-        """Returns the Atomic Local Frame (ALF) of the specified atom. The ALF consists of 3 Atom instances,
+        """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
         the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
         matrix and features.
 
