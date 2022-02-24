@@ -10,20 +10,10 @@ import zlib
 from io import BytesIO
 
 from ichor.git.ext.gitdb.const import BYTE_SPACE, NULL_BYTE
-from ichor.git.ext.gitdb.fun import (
-    apply_delta_data,
-    connect_deltas,
-    delta_types,
-    msb_size,
-    stream_copy,
-)
-from ichor.git.ext.gitdb.util import (
-    LazyMixin,
-    allocate_memory,
-    close,
-    make_sha,
-    write,
-)
+from ichor.git.ext.gitdb.fun import (apply_delta_data, connect_deltas,
+                                     delta_types, msb_size, stream_copy)
+from ichor.git.ext.gitdb.util import (LazyMixin, allocate_memory, close,
+                                      make_sha, write)
 from ichor.git.ext.gitdb.utils.encoding import force_bytes
 
 has_perf_mod = False

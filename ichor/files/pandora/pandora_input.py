@@ -66,8 +66,13 @@ class PandoraInput(QuantumChemistryProgramInput):
                     [atom.type, atom.x, atom.y, atom.z] for atom in self.atoms
                 ],
             },
-            "pandora": {"ccsdmod": self.ccsdmod.value,},
-            "pyscf": {"method": self.method, "basis": self.basis_set,},
+            "pandora": {
+                "ccsdmod": self.ccsdmod.value,
+            },
+            "pyscf": {
+                "method": self.method,
+                "basis": self.basis_set,
+            },
             "morfi": {
                 "grid": {
                     "radial": self.morfi_grid_radial,

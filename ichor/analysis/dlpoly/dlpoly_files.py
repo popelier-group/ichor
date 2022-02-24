@@ -4,9 +4,8 @@ from typing import List, Optional, Sequence, Union
 
 import numpy as np
 
-from ichor.analysis.geometry.geometry_calculator import (
-    get_internal_feature_indices,
-)
+from ichor.analysis.geometry.geometry_calculator import \
+    get_internal_feature_indices
 from ichor.atoms import Atom, Atoms
 from ichor.common.conversion import try_float
 from ichor.common.io import convert_to_path, ln, mkdir, relpath

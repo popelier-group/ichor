@@ -1,15 +1,7 @@
 """Module with functions which are supposed to be as fast as possible"""
 from stat import S_ISDIR
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    List,
-    MutableSequence,
-    Sequence,
-    Tuple,
-    Union,
-    overload,
-)
+from typing import (TYPE_CHECKING, Callable, List, MutableSequence, Sequence,
+                    Tuple, Union, overload)
 
 from ichor.git.compat import defenc, safe_decode
 

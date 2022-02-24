@@ -1,5 +1,5 @@
-from hashlib import new
 import sys
+from hashlib import new
 from pathlib import Path
 from typing import List, Optional
 
@@ -7,12 +7,8 @@ from ichor.batch_system import JobID
 from ichor.common.io import remove
 from ichor.files import AIM, INT, PointsDirectory
 from ichor.log import logger
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    AIMAllCommand,
-    SubmissionScript,
-    print_completed,
-)
+from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
+                                     SubmissionScript, print_completed)
 
 
 def submit_points_directory_to_aimall(
@@ -115,19 +111,19 @@ def scrub_aimall(wfn_file: str):
     """
 
     from pathlib import Path
-    from ichor.common.io import mkdir, move
+
+    from ichor.common.io import last_line, mkdir, move
     from ichor.file_structure import FILE_STRUCTURE
+    from ichor.files.aim import AIM
     from ichor.files.point_directory import PointDirectory
     from ichor.globals import GLOBALS
     from ichor.log import logger
-    from ichor.common.io import last_line
-    from ichor.files.aim import AIM
 
     # TODO: check for license and end of aim file, then read aim file with AIM class. Then check if aim file has correct atom info for int files.
     # TODO: then do the integration error check.
 
     def move_scrubbed_point(point_dir_path: Path):
-        """ Helper function which takes in a point directory path and moves it to the corresponding scrubbed points directory.
+        """Helper function which takes in a point directory path and moves it to the corresponding scrubbed points directory.
 
         :return: A Path object to where the point directory was moved to.
         """

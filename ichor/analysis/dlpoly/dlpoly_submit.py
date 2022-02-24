@@ -4,18 +4,15 @@ from typing import List, Optional
 from ichor.analysis.get_models import get_models_from_path
 from ichor.batch_system import JobID
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    DataLock,
-    DlpolyCommand,
-    ICHORCommand,
-    SubmissionScript,
-)
+from ichor.submission_script import (SCRIPT_NAMES, DataLock, DlpolyCommand,
+                                     ICHORCommand, SubmissionScript)
 from ichor.submission_script.common import submit_gjf_files
 
 
 def submit_setup_dlpoly_directories(
-    dlpoly_input: Path, model_location: Path, hold: Optional[JobID] = None,
+    dlpoly_input: Path,
+    model_location: Path,
+    hold: Optional[JobID] = None,
 ) -> JobID:
     with SubmissionScript(
         SCRIPT_NAMES["ichor"]["dlpoly"]["setup"]
@@ -67,7 +64,8 @@ def submit_dlpoly_energies(
     ) as submission_script:
         submission_script.add_command(
             ICHORCommand(
-                func="get_dlpoly_energies", func_args=[str(dlpoly_directory)],
+                func="get_dlpoly_energies",
+                func_args=[str(dlpoly_directory)],
             )
         )
     return submission_script.submit(hold=hold)

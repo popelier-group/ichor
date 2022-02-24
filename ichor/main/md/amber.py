@@ -13,11 +13,8 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ, Mol2, Trajectory
 from ichor.globals import GLOBALS
 from ichor.menu import Menu
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    AmberCommand,
-    SubmissionScript,
-)
+from ichor.submission_script import (SCRIPT_NAMES, AmberCommand,
+                                     SubmissionScript)
 
 
 class AmberThermostat(Enum):

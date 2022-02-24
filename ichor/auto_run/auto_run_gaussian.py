@@ -3,12 +3,8 @@ from typing import Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    GaussianCommand,
-    SubmissionScript,
-    TimingManager,
-)
+from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
+                                     SubmissionScript, TimingManager)
 
 
 def submit_gaussian_job_to_auto_run(

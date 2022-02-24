@@ -21,7 +21,9 @@ class GaussianCommand(CommandLine):
     """
 
     def __init__(
-        self, gjf_file: Path, gjf_output: Optional[Path] = None,
+        self,
+        gjf_file: Path,
+        gjf_output: Optional[Path] = None,
     ):
         self.gjf_file = gjf_file
         self.gjf_output = gjf_output or gjf_file.with_suffix(

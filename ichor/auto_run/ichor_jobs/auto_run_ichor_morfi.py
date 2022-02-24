@@ -4,12 +4,8 @@ from typing import Optional, Union
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
 from ichor.main.pandora import submit_points_directory_to_morfi
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    ICHORCommand,
-    SubmissionScript,
-    TimingManager,
-)
+from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
+                                     SubmissionScript, TimingManager)
 
 
 def submit_ichor_morfi_command_to_auto_run(

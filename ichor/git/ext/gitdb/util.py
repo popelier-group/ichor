@@ -10,10 +10,8 @@ import sys
 import time
 from io import BytesIO
 
-from ichor.git.ext.gitdb.ext.smmap import (
-    SlidingWindowMapBuffer,
-    SlidingWindowMapManager,
-)
+from ichor.git.ext.gitdb.ext.smmap import (SlidingWindowMapBuffer,
+                                           SlidingWindowMapManager)
 
 # initialize our global memory manager instance
 # Use it to free cached (and unused) resources.

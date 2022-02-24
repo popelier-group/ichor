@@ -9,34 +9,16 @@ import tempfile
 from ichor.git.ext.gitdb.base import OInfo, OStream
 from ichor.git.ext.gitdb.db.base import FileDBBase, ObjectDBR, ObjectDBW
 from ichor.git.ext.gitdb.exc import AmbiguousObjectName, BadObject
-from ichor.git.ext.gitdb.fun import (
-    chunk_size,
-    loose_object_header_info,
-    stream_copy,
-    write_object,
-)
-from ichor.git.ext.gitdb.stream import (
-    DecompressMemMapReader,
-    FDCompressedSha1Writer,
-    FDStream,
-    Sha1Writer,
-)
-from ichor.git.ext.gitdb.util import (
-    ENOENT,
-    basename,
-    bin_to_hex,
-    chmod,
-    dirname,
-    exists,
-    file_contents_ro_filepath,
-    hex_to_bin,
-    isdir,
-    isfile,
-    join,
-    mkdir,
-    remove,
-    rename,
-)
+from ichor.git.ext.gitdb.fun import (chunk_size, loose_object_header_info,
+                                     stream_copy, write_object)
+from ichor.git.ext.gitdb.stream import (DecompressMemMapReader,
+                                        FDCompressedSha1Writer, FDStream,
+                                        Sha1Writer)
+from ichor.git.ext.gitdb.util import (ENOENT, basename, bin_to_hex, chmod,
+                                      dirname, exists,
+                                      file_contents_ro_filepath, hex_to_bin,
+                                      isdir, isfile, join, mkdir, remove,
+                                      rename)
 from ichor.git.ext.gitdb.utils.encoding import force_bytes
 
 __all__ = ("LooseObjectDB",)

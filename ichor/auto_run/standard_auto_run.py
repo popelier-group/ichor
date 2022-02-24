@@ -11,39 +11,31 @@ from ichor.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
 from ichor.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
 from ichor.auto_run.auto_run_morfi import submit_morfi_job_to_auto_run
 from ichor.auto_run.auto_run_pyscf import submit_pyscf_job_to_auto_run
-from ichor.auto_run.counter import (
-    counter_exists,
-    read_counter,
-    write_counter,
-    get_counter_location,
-)
+from ichor.auto_run.counter import (counter_exists, get_counter_location,
+                                    read_counter, write_counter)
 from ichor.auto_run.ichor_jobs import (
-    make_models,
-    submit_ichor_active_learning_job_to_auto_run,
+    make_models, submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,
     submit_ichor_gaussian_command_to_auto_run,
     submit_ichor_morfi_command_to_auto_run,
-    submit_ichor_pyscf_command_to_auto_run,
-    submit_make_sets_job_to_auto_run,
-)
+    submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
 from ichor.auto_run.stop import start
 from ichor.batch_system import BATCH_SYSTEM, JobID, NodeType
 from ichor.common.bool import check_bool
 from ichor.common.int import truncate
-from ichor.common.io import mkdir, remove, move
+from ichor.common.io import mkdir, move, remove
 from ichor.common.points import get_points_location
 from ichor.common.types import MutableValue
-from ichor.drop_compute import DROP_COMPUTE_LOCATION, DROP_COMPUTE_TMP_LOCATION, DROP_COMPUTE_MAX_JOBS, DROP_COMPUTE_NTRIES
+from ichor.drop_compute import (DROP_COMPUTE_LOCATION, DROP_COMPUTE_MAX_JOBS,
+                                DROP_COMPUTE_NTRIES, DROP_COMPUTE_TMP_LOCATION)
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import PointsDirectory, Trajectory
 from ichor.machine import MACHINE, SubmitType
 from ichor.main.queue import get_current_jobs
 from ichor.make_sets import make_sets_npoints
 from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
-from ichor.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
+from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                       QuantumChemicalTopologyProgram)
 from ichor.submission_script import SCRIPT_NAMES, DataLock
 
 
@@ -97,9 +89,9 @@ class IterArgs:
 
 
 class IterStep:
-    """A class which wraps around ONE step of ONE active learning iteration 
+    """A class which wraps around ONE step of ONE active learning iteration
     (each Standard iteration has Gaussian, AIMALL, FEREBUS, and ICHOR adaptive sampling steps).
-    
+
     :param func: A `submit` function which submits one type of job (eg. Gaussian or AIMALL job)
     :param usage: An IterUsage element
     :param args: Any arguments that need to be passed to the submit function, such as Training Set Locations, Sample Set Locations, Etc.
@@ -117,9 +109,9 @@ class IterStep:
     def run(
         self, wait_for_job: Optional[JobID], state: IterState
     ) -> Optional[JobID]:
-        """ Runs the submit function, which submits the specified job to the queueing system on the machine. If this job needs to wait for a previous
+        """Runs the submit function, which submits the specified job to the queueing system on the machine. If this job needs to wait for a previous
         job to finish (as it needs the outputs of the previous job), then a `wait_for_job` argument is passed as well, which is of type `JobID`
-        
+
         :param wait_for_job: A `JobID` instance, which contains job-related information, such as the job id. This is to hold the current job for the
             previous job to finish.
         :param state: An `IterState` instance
@@ -136,11 +128,11 @@ def submit_auto_run_iter(
     wait_for_job: Optional[JobID] = None,
     state: IterState = IterState.Standard,
 ) -> Optional[JobID]:
-    """ Submits all jobs required for one auto run iteration. Thus, this function submits Gaussian, AIMALL, FEREBUS, adaptive sampling jobs. 
+    """Submits all jobs required for one auto run iteration. Thus, this function submits Gaussian, AIMALL, FEREBUS, adaptive sampling jobs.
     Additionally, the first and last jobs have different programs being ran. The first job of the first iteration needs to be make sets, where
     the initial training set, validation set, sample pool sets are made. The final job of the final iteration is FEREBUS (NOT Adaptive sampling), as
     we do NOT want to add a new point in the last iteration, because then we will have a new point for which Gaussian, AIMALL, etc. have not been ran.
-    
+
     :param func_order: A List of `IterStep` which contains all the `submit`-type functions that submit the different kinds of jobs. The order of this list
         matters because this is how we need to run programs, eg. AIMALL cannot be ran before Gaussian has ran for a point (so it has to hold queue wait for
         Gaussian to finish)/
@@ -185,9 +177,9 @@ def submit_auto_run_iter(
 
 
 def get_qcp_steps() -> Tuple[IterStep, IterStep]:  # Gaussian / PySCF
-    """ Get the quantum chemistry program (QCP) which is going to be used to generate .wfn files. This can either be Gaussian or PySCF. This program used determines which
+    """Get the quantum chemistry program (QCP) which is going to be used to generate .wfn files. This can either be Gaussian or PySCF. This program used determines which
     `submit` functions are going to be used (either submit_gaussian_job_to_auto_run or submit_pyscf_job_to_auto_run).
-    
+
     :return: A tuple of two IterStep. The first IterStep is an ICHOR job, which sets up datafiles needed for a Gaussian/PySCF job.
         The second step is the actual Gaussian/PySCF job where a .wfn file is produced.
     """
@@ -214,9 +206,9 @@ def get_qcp_steps() -> Tuple[IterStep, IterStep]:  # Gaussian / PySCF
 
 
 def get_qct_steps() -> Tuple[IterStep, IterStep]:  # AIMAll / Morfi
-    """ Get the quantum chemistry topology (QCT) This can either be AIMALL or Morfi. This program used determines which
+    """Get the quantum chemistry topology (QCT) This can either be AIMALL or Morfi. This program used determines which
     `submit` functions are going to be used (either submit_gaussian_job_to_auto_run or submit_pyscf_job_to_auto_run).
-    
+
     :return: A tuple of two IterStep. The first IterStep is an ICHOR job, which sets up datafiles needed for an AIMALL/Morfi job.
         The second step is the actual AIMALL/Morfi job.
     """
@@ -239,15 +231,17 @@ def get_qct_steps() -> Tuple[IterStep, IterStep]:  # AIMAll / Morfi
     )
 
     qct_step = IterStep(
-        qct_function, IterUsage.All, [IterArgs.nPoints, IterArgs.Atoms],
+        qct_function,
+        IterUsage.All,
+        [IterArgs.nPoints, IterArgs.Atoms],
     )
 
     return ichor_qct_step, qct_step
 
 
 def get_model_steps() -> Tuple[IterStep, IterStep]:
-    """ Get the functions which are going to submit machine learning-related jobs to the queueing system.
-    
+    """Get the functions which are going to submit machine learning-related jobs to the queueing system.
+
     :return: A tuple of IterStep. The first IterStep is an ICHOR job which writes out FEREBUS configuration settings.
         The second job is the actual FEREBUS job when GPR models are made.
     """
@@ -266,14 +260,14 @@ def get_model_steps() -> Tuple[IterStep, IterStep]:
 
 
 def get_func_order() -> List[IterStep]:
-    """ Returns a list of IterSteps which tell the auto run the sequence in which jobs are to be ran (eg. ICHOR job writes out Gaussian files,
+    """Returns a list of IterSteps which tell the auto run the sequence in which jobs are to be ran (eg. ICHOR job writes out Gaussian files,
     Gaussian can then run, then ICHOR job writes out AIMALL-related files, the AIMALL runs, then ICHOR writes out FEREBUS-related files, then
     FEREBUS runs, finally, ICHOR adds a new point to the training set using adaptive sampling). These steps must be ran in the correct order as the
     output of one step is a required input to the next step.
-    
+
     :return: A list of IterStep. Each IterStep contains a `submit` function which submits a different type of job (ICHOR, Gaussian, AIMALL, etc.). Note
         that IterUsage tells IterStep if the particular jobs needs to be submitted, depending on the auto-run iteration. For example, the last
-        auto run iteration we do NOT need to run `submit_ichor_active_learning_job_to_auto_run` as we do NOT want a new point to be added on the very 
+        auto run iteration we do NOT need to run `submit_ichor_active_learning_job_to_auto_run` as we do NOT want a new point to be added on the very
         last active learning iteration. Thus this IterStep which wraps around `submit_ichor_active_learning_job_to_auto_run` has `IterUsage.AllButLast`.
     """
     # order in which to submit jobs for each of the adaptive sampling iterations.
@@ -290,7 +284,7 @@ def get_func_order() -> List[IterStep]:
 
 
 def setup_iter_args():
-    """ Sets up the IterArgs Enum values. Even though `IterArtgs` is an Enum, the values associated with the elements are type `MutableValue` because
+    """Sets up the IterArgs Enum values. Even though `IterArtgs` is an Enum, the values associated with the elements are type `MutableValue` because
     they need to be able to change values (because the GLOBALS values can change)."""
     from ichor.globals import GLOBALS
 
@@ -311,10 +305,10 @@ def setup_iter_args():
 
 
 def check_auto_run_running(wrkdir: Optional[Path] = None) -> bool:
-    """ Checks whether a file named `counter` exists. This file keeps track of the auto run iteration that is currently being ran (it just contains a number
+    """Checks whether a file named `counter` exists. This file keeps track of the auto run iteration that is currently being ran (it just contains a number
     to show which auto run iteration is currently running and the total number of iterations, as set by GLOBALS).
     This file is by default found at FILE_STRUCTURE["counter"].
-    
+
     :return: Returns True if `counter` file exists or False if a `counter` file does not exist.
     """
     if wrkdir is None:
@@ -323,7 +317,7 @@ def check_auto_run_running(wrkdir: Optional[Path] = None) -> bool:
 
 
 def auto_run_from_menu() -> JobID:
-    """ Function that interacts with ICHOR's menus. If a counter file exists, this function asks if the counter files should be deleted before
+    """Function that interacts with ICHOR's menus. If a counter file exists, this function asks if the counter files should be deleted before
     starting auto run again. Finally, the `auto_run` function is ran, which submits the jobs to the queueing system."""
 
     if check_auto_run_running():
@@ -419,8 +413,8 @@ def auto_run() -> JobID:
 
 # used for Drop-n-compute
 def submit_next_iter(current_iteration) -> Optional[JobID]:
-    """ Submits next iteration of auto run for DropCompute. The last job id of the job sequence that was submitted is optionally returned."""
-    
+    """Submits next iteration of auto run for DropCompute. The last job id of the job sequence that was submitted is optionally returned."""
+
     from ichor.globals import GLOBALS
 
     if MACHINE.submit_type is SubmitType.DropCompute:
@@ -443,10 +437,18 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
         if not DROP_COMPUTE_LOCATION.exists():
             mkdir(DROP_COMPUTE_LOCATION)
 
-        njobs_queued = sum(f.suffix.startswith(".sh") for f in DROP_COMPUTE_TMP_LOCATION.iterdir() if f.is_file())
+        njobs_queued = sum(
+            f.suffix.startswith(".sh")
+            for f in DROP_COMPUTE_TMP_LOCATION.iterdir()
+            if f.is_file()
+        )
 
         for _ in range(DROP_COMPUTE_NTRIES):
-            njobs_waiting = sum(f.suffix.startswith(".sh") for f in DROP_COMPUTE_LOCATION.iterdir() if f.is_file())
+            njobs_waiting = sum(
+                f.suffix.startswith(".sh")
+                for f in DROP_COMPUTE_LOCATION.iterdir()
+                if f.is_file()
+            )
             if njobs_waiting + njobs_queued > DROP_COMPUTE_MAX_JOBS:
                 sleep(30)
             else:
@@ -454,10 +456,11 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
                 break
         else:
             remove(DROP_COMPUTE_TMP_LOCATION)
-            raise DropComputeSubmitFailed(f"Failed to submit to DropCompute too many times ({DROP_COMPUTE_NTRIES})")
+            raise DropComputeSubmitFailed(
+                f"Failed to submit to DropCompute too many times ({DROP_COMPUTE_NTRIES})"
+            )
 
     return final_job
-
 
 
 def rerun_from_failed() -> Optional[JobID]:
@@ -477,7 +480,7 @@ def rerun_from_failed() -> Optional[JobID]:
 
 
 def auto_run_qct(directory: Path, force: bool = False):
-    """ Only submit QCP and QCT steps, Gaussian and AIMALL (or PySCF and Morfi), steps to auto run. Do not make GPR models."""
+    """Only submit QCP and QCT steps, Gaussian and AIMALL (or PySCF and Morfi), steps to auto run. Do not make GPR models."""
     qct_func_order = [
         *get_qcp_steps(),
         *get_qct_steps(),
@@ -498,8 +501,8 @@ def auto_make_models(
     types: Optional[List[str]] = None,
     hold: Optional[JobID] = None,
 ) -> JobID:
-    """ Only submit GPR-related jobs (such as FERREBUS jobs). Do not run Gaussian or AIMALL (or PySCF and Morfi).
-    
+    """Only submit GPR-related jobs (such as FERREBUS jobs). Do not run Gaussian or AIMALL (or PySCF and Morfi).
+
     :return: a JobID instance which contains information about the last job that was submitted
     """
     func_order = [

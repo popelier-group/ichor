@@ -88,7 +88,8 @@ def auto_run_per_value(
                 if FILE_STRUCTURE["validation_set"].exists():
                     (path / FILE_STRUCTURE["validation_set"]).symlink_to(
                         os.path.relpath(
-                            FILE_STRUCTURE["validation_set"], start=path,
+                            FILE_STRUCTURE["validation_set"],
+                            start=path,
                         ),
                         target_is_directory=True,
                     )  # can be symlinked as all should be identical

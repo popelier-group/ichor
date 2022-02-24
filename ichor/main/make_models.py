@@ -13,15 +13,10 @@ from ichor.globals import GLOBALS
 from ichor.log import logger
 from ichor.menu import Menu
 from ichor.models import Model
-from ichor.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    FerebusCommand,
-    SubmissionScript,
-)
+from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                       QuantumChemicalTopologyProgram)
+from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
+                                     SubmissionScript)
 from ichor.tab_completer import ListCompleter
 
 model_data_location: Path = Path()

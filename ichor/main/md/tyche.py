@@ -4,18 +4,14 @@ from typing import Optional
 from ichor.analysis.get_input import get_first_file, get_input_menu
 from ichor.atoms import Atoms
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir, get_files_of_type
+from ichor.common.io import get_files_of_type, mkdir
 from ichor.common.os import input_with_prefill
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.menu import Menu
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    SubmissionScript,
-    TycheCommand,
-    ICHORCommand,
-)
+from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
+                                     SubmissionScript, TycheCommand)
 
 _input_file = None
 _input_filetypes = [XYZ.filetype, GJF.filetype]

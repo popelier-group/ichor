@@ -4,15 +4,11 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from ichor.analysis.dlpoly.dlpoly_files import (
-    DlpolyHistory,
-    get_dlpoly_directories,
-    setup_dlpoly_directories,
-)
-from ichor.analysis.dlpoly.dlpoly_submit import (
-    submit_dlpoly_gjfs,
-    submit_dlpoly_jobs,
-)
+from ichor.analysis.dlpoly.dlpoly_files import (DlpolyHistory,
+                                                get_dlpoly_directories,
+                                                setup_dlpoly_directories)
+from ichor.analysis.dlpoly.dlpoly_submit import (submit_dlpoly_gjfs,
+                                                 submit_dlpoly_jobs)
 from ichor.analysis.get_atoms import get_atoms_from_path
 from ichor.analysis.get_models import get_models_from_path
 from ichor.analysis.opt import find_opt

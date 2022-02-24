@@ -2,15 +2,8 @@ from pathlib import Path
 
 from ichor.atoms import Atoms, AtomsNotFoundError
 from ichor.common.io import get_files_of_type
-from ichor.files import (
-    GJF,
-    WFN,
-    XYZ,
-    OptionalPath,
-    PointDirectory,
-    PointsDirectory,
-    Trajectory,
-)
+from ichor.files import (GJF, WFN, XYZ, OptionalPath, PointDirectory,
+                         PointsDirectory, Trajectory)
 
 
 def get_atoms_from_path(path: Path) -> Atoms:

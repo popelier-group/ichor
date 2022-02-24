@@ -7,15 +7,9 @@ from typing import TYPE_CHECKING, Iterator, List, Tuple, Union
 from ichor.git.compat import defenc
 from ichor.git.objects.util import Serializable, altz_to_utctz_str, parse_date
 from ichor.git.types import PathLike
-from ichor.git.util import (
-    Actor,
-    LockedFD,
-    LockFile,
-    assure_directory_exists,
-    bin_to_hex,
-    file_contents_ro_filepath,
-    to_native_path,
-)
+from ichor.git.util import (Actor, LockedFD, LockFile, assure_directory_exists,
+                            bin_to_hex, file_contents_ro_filepath,
+                            to_native_path)
 
 # typing ------------------------------------------------------------------
 
