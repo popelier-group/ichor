@@ -32,7 +32,9 @@ class TimingManager:
         python_job = ICHORCommand()
         if self.message:
             python_job.add_function_to_job(
-                "log_time", f"START:{self.identifier}", self.message,
+                "log_time",
+                f"START:{self.identifier}",
+                self.message,
             )
         else:
             python_job.add_function_to_job(

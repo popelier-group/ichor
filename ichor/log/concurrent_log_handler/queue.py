@@ -24,7 +24,6 @@ Additional code provided by Journyx, Inc. http://www.journyx.com
 
 import atexit
 import logging
-
 # noinspection PyCompatibility
 import queue
 import sys

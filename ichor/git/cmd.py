@@ -13,36 +13,15 @@ import threading
 from contextlib import contextmanager
 from subprocess import PIPE, Popen, call
 from textwrap import dedent
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    BinaryIO,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Mapping,
-    Sequence,
-    TextIO,
-    Tuple,
-    Union,
-    cast,
-    overload,
-)
+from typing import (IO, TYPE_CHECKING, Any, AnyStr, BinaryIO, Callable, Dict,
+                    Iterator, List, Mapping, Sequence, TextIO, Tuple, Union,
+                    cast, overload)
 
 from ichor.git.compat import defenc, force_bytes, is_posix, is_win, safe_decode
 from ichor.git.exc import CommandError, GitCommandError, GitCommandNotFound
 from ichor.git.types import TBD, Literal, PathLike
-from ichor.git.util import (
-    LazyMixin,
-    cygpath,
-    expand_path,
-    is_cygwin_git,
-    remove_password_if_present,
-    stream_copy,
-)
+from ichor.git.util import (LazyMixin, cygpath, expand_path, is_cygwin_git,
+                            remove_password_if_present, stream_copy)
 
 # typing ---------------------------------------------------------------------------
 
@@ -330,9 +309,8 @@ class Git(LazyMixin):
                 if mode in quiet:
                     pass
                 elif mode in warn or mode in error:
-                    err = (
-                        dedent(
-                            """\
+                    err = dedent(
+                        """\
                         %s
                         All git commands will error until this is rectified.
 
@@ -345,16 +323,14 @@ class Git(LazyMixin):
                         Example:
                             export %s=%s
                         """
-                        )
-                        % (
-                            err,
-                            cls._refresh_env_var,
-                            "|".join(quiet),
-                            "|".join(warn),
-                            "|".join(error),
-                            cls._refresh_env_var,
-                            quiet[0],
-                        )
+                    ) % (
+                        err,
+                        cls._refresh_env_var,
+                        "|".join(quiet),
+                        "|".join(warn),
+                        "|".join(error),
+                        cls._refresh_env_var,
+                        quiet[0],
                     )
 
                     if mode in warn:
@@ -362,9 +338,8 @@ class Git(LazyMixin):
                     else:
                         raise ImportError(err)
                 else:
-                    err = (
-                        dedent(
-                            """\
+                    err = dedent(
+                        """\
                         %s environment variable has been set but it has been set with an invalid value.
 
                         Use only the following values:
@@ -372,13 +347,11 @@ class Git(LazyMixin):
                             - %s: for a printed warning
                             - %s: for a raised exception
                         """
-                        )
-                        % (
-                            cls._refresh_env_var,
-                            "|".join(quiet),
-                            "|".join(warn),
-                            "|".join(error),
-                        )
+                    ) % (
+                        cls._refresh_env_var,
+                        "|".join(quiet),
+                        "|".join(warn),
+                        "|".join(error),
                     )
                     raise ImportError(err)
 

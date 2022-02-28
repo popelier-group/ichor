@@ -7,6 +7,5 @@ version_info = (4, 0, 0)
 __version__ = ".".join(str(i) for i in version_info)
 
 from ichor.git.ext.gitdb.ext.smmap.buf import *
-
 # make everything available in root package for convenience
 from ichor.git.ext.gitdb.ext.smmap.mman import *

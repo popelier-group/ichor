@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional, Union
 
 from ichor.atoms import Atom, Atoms
 from ichor.files.trajectory import Trajectory

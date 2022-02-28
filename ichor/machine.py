@@ -1,13 +1,13 @@
 import os
 import platform
-from pathlib import Path
 from enum import auto
+from pathlib import Path
 
 from ichor.common.functools import cached_property
 from ichor.common.io import mkdir, move
 from ichor.common.types import Enum
-from ichor.file_structure import FILE_STRUCTURE
 from ichor.common.uid import get_uid
+from ichor.file_structure import FILE_STRUCTURE
 
 
 class MachineNotFound(Exception):

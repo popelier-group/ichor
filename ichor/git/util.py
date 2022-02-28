@@ -20,26 +20,9 @@ import warnings
 from abc import abstractmethod
 from functools import wraps
 from sys import maxsize
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    BinaryIO,
-    Callable,
-    Dict,
-    Generator,
-    Iterator,
-    List,
-    Optional,
-    Pattern,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import (IO, TYPE_CHECKING, Any, AnyStr, BinaryIO, Callable, Dict,
+                    Generator, Iterator, List, Optional, Pattern, Sequence,
+                    Tuple, TypeVar, Union, cast, overload)
 from unittest import SkipTest
 from urllib.parse import urlsplit, urlunsplit
 
@@ -61,15 +44,8 @@ if TYPE_CHECKING:
 
 from ichor.git.types import HSH_TD  # because behind py version guards
 from ichor.git.types import Files_TD  # aliases
-from ichor.git.types import (
-    Has_id_attribute,
-    Literal,
-    PathLike,
-    Protocol,
-    SupportsIndex,
-    Total_TD,
-    runtime_checkable,
-)
+from ichor.git.types import (Has_id_attribute, Literal, PathLike, Protocol,
+                             SupportsIndex, Total_TD, runtime_checkable)
 
 T_IterableObj = TypeVar(
     "T_IterableObj",

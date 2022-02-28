@@ -6,17 +6,8 @@ import os
 import sys
 from typing import Dict  # noqa: F401
 from typing import Iterator  # noqa: F401
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    NamedTuple,
-    NoReturn,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import (TYPE_CHECKING, Any, Callable, NamedTuple, NoReturn,
+                    Sequence, Tuple, TypeVar, Union)
 
 if sys.version_info[:2] >= (3, 8):
     from typing import SupportsIndex  # noqa: F401
@@ -24,12 +15,8 @@ if sys.version_info[:2] >= (3, 8):
 else:
     from ichor.itypes_extensions import Literal  # noqa: F401
     from ichor.itypes_extensions import SupportsIndex  # noqa: F401
-    from ichor.itypes_extensions import (
-        Final,
-        Protocol,
-        TypedDict,
-        runtime_checkable,
-    )
+    from ichor.itypes_extensions import (Final, Protocol, TypedDict,
+                                         runtime_checkable)
 
 # if sys.version_info[:2] >= (3, 10):
 #     from typing import TypeGuard  # noqa: F401

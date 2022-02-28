@@ -11,66 +11,30 @@ import os.path as osp
 import re
 import shlex
 import warnings
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    BinaryIO,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Mapping,
-    NamedTuple,
-    Optional,
-    Sequence,
-    TextIO,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import (TYPE_CHECKING, Any, BinaryIO, Callable, Dict, Iterator,
+                    List, Mapping, NamedTuple, Optional, Sequence, TextIO,
+                    Tuple, Type, Union, cast)
 
 import ichor.git.ext.gitdb
 from ichor.git.cmd import Git, handle_process_output
 from ichor.git.compat import defenc, is_win, safe_decode
 from ichor.git.config import GitConfigParser
 from ichor.git.db import GitCmdObjectDB
-from ichor.git.exc import (
-    GitCommandError,
-    InvalidGitRepositoryError,
-    NoSuchPathError,
-)
+from ichor.git.exc import (GitCommandError, InvalidGitRepositoryError,
+                           NoSuchPathError)
 from ichor.git.ext.gitdb.db.loose import LooseObjectDB
 from ichor.git.ext.gitdb.exc import BadObject
 from ichor.git.index import IndexFile
 from ichor.git.objects import Commit, RootModule, Submodule
 from ichor.git.refs import HEAD, Head, Reference, TagReference
 from ichor.git.remote import Remote, add_progress, to_progress_instance
-from ichor.git.repo.fun import (
-    find_submodule_git_dir,
-    find_worktree_git_dir,
-    is_git_dir,
-    rev_parse,
-    touch,
-)
-from ichor.git.types import (
-    TBD,
-    Commit_ish,
-    ConfigLevels_Tup,
-    Lit_config_levels,
-    PathLike,
-    Tree_ish,
-    TypedDict,
-    assert_never,
-)
-from ichor.git.util import (
-    Actor,
-    decygpath,
-    expand_path,
-    finalize_process,
-    hex_to_bin,
-    remove_password_if_present,
-)
+from ichor.git.repo.fun import (find_submodule_git_dir, find_worktree_git_dir,
+                                is_git_dir, rev_parse, touch)
+from ichor.git.types import (TBD, Commit_ish, ConfigLevels_Tup,
+                             Lit_config_levels, PathLike, Tree_ish, TypedDict,
+                             assert_never)
+from ichor.git.util import (Actor, decygpath, expand_path, finalize_process,
+                            hex_to_bin, remove_password_if_present)
 
 # typing ------------------------------------------------------
 
@@ -556,7 +520,8 @@ class Repo(object):
             )
 
     def config_reader(
-        self, config_level: Optional[Lit_config_levels] = None,
+        self,
+        config_level: Optional[Lit_config_levels] = None,
     ) -> GitConfigParser:
         """
         :return:

@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Optional, Union
+
 from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
 from ichor.common.types import Version
@@ -96,7 +97,9 @@ class AIM(File, dict):
                         outfile = aimatom_path.with_suffix(".int")
                         atom_name = aimatom_path.stem.upper()
                         self[atom_name] = AimAtom(
-                            atom_name=atom_name, inp_file=inpfile, int_file=outfile
+                            atom_name=atom_name,
+                            inp_file=inpfile,
+                            int_file=outfile,
                         )
                     elif "Total time for atom" in line:
                         record = line.split()
@@ -111,7 +114,9 @@ class AIM(File, dict):
                         outfile = inpfile.with_suffix(".int")
                         atom_name = inpfile.stem.upper()
                         self[atom_name] = AimAtom(
-                            atom_name=atom_name, inp_file=inpfile, int_file=outfile
+                            atom_name=atom_name,
+                            inp_file=inpfile,
+                            int_file=outfile,
                         )
 
                     elif "Total time for atom" in line:
@@ -121,7 +126,7 @@ class AIM(File, dict):
                         self[atom_name].integration_error = float(record[-1])
 
     def __getitem__(self, item: Union[str, int]) -> AimAtom:
-        """ If an integer is passed, it returns the atom whose index corresponds to the integer + 1. If a string is passed, it returns
+        """If an integer is passed, it returns the atom whose index corresponds to the integer + 1. If a string is passed, it returns
         the the AimAtom which corresponds to the given key."""
         if isinstance(item, int):
             i = item + 1

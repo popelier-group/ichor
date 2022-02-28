@@ -137,7 +137,9 @@ def main_menu(subdirs: Optional[List[Path]] = None) -> None:
         )
         menu.add_space()  # add a blank line
         menu.add_option(
-            "r", "Auto Run", auto_run_from_menu,
+            "r",
+            "Auto Run",
+            auto_run_from_menu,
         )
         menu.add_option("p", "Per-Value Auto Run", auto_run_per_menu)
         menu.add_space()

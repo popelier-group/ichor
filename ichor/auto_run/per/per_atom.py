@@ -1,13 +1,10 @@
 from pathlib import Path
 from typing import Callable, List, Optional
 
-from ichor.auto_run.ichor_jobs.auto_run_ichor_collate_log import (
-    submit_ichor_collate_models_to_auto_run,
-)
-from ichor.auto_run.per.per import (
-    auto_run_per_value,
-    check_auto_run_per_counter,
-)
+from ichor.auto_run.ichor_jobs.auto_run_ichor_collate_log import \
+    submit_ichor_collate_models_to_auto_run
+from ichor.auto_run.per.per import (auto_run_per_value,
+                                    check_auto_run_per_counter)
 from ichor.auto_run.standard_auto_run import auto_make_models
 from ichor.batch_system import JobID
 from ichor.common.io import pushd
@@ -16,12 +13,9 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.globals import GLOBALS
 from ichor.main import make_models
 from ichor.menu import Menu
-from ichor.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
+from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                       QuantumChemicalTopologyProgram)
 from ichor.tab_completer import ListCompleter
-from ichor.batch_system import JobID
 
 _atoms_to_run_on: Optional[List[Path]] = None
 _selected_atoms_to_run_on: Optional[List[Path]] = None

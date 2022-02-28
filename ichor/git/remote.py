@@ -7,42 +7,18 @@
 # Module implementing a remote object allowing easy access to git remotes
 import logging
 import re
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    NoReturn,
-    Optional,
-    Sequence,
-    Type,
-    Union,
-    cast,
-    overload,
-)
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Iterator, List,
+                    NoReturn, Optional, Sequence, Type, Union, cast, overload)
 
 from ichor.git.cmd import Git, handle_process_output
 from ichor.git.compat import defenc, force_text
 from ichor.git.config import GitConfigParser, SectionConstraint, cp
 from ichor.git.exc import GitCommandError
-from ichor.git.refs import (
-    Head,
-    Reference,
-    RemoteReference,
-    SymbolicReference,
-    TagReference,
-)
+from ichor.git.refs import (Head, Reference, RemoteReference,
+                            SymbolicReference, TagReference)
 from ichor.git.types import Commit_ish, Literal, PathLike
-from ichor.git.util import (
-    CallableRemoteProgress,
-    IterableList,
-    IterableObj,
-    LazyMixin,
-    RemoteProgress,
-    join_path,
-)
+from ichor.git.util import (CallableRemoteProgress, IterableList, IterableObj,
+                            LazyMixin, RemoteProgress, join_path)
 
 # typing-------------------------------------------------------
 

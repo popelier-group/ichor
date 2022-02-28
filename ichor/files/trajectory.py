@@ -1,5 +1,5 @@
-import re
 import ast
+import re
 from pathlib import Path
 from typing import Iterable, List, Optional, Union
 
@@ -266,7 +266,7 @@ class Trajectory(ListOfAtoms, File):
         return super().__len__()
 
     def __repr__(self) -> str:
-        """ Make a repr otherwise doing print(trajectory_instance) will print out an empty list if the trajectory attributes have not been accessed yet,
+        """Make a repr otherwise doing print(trajectory_instance) will print out an empty list if the trajectory attributes have not been accessed yet,
         due to how how the files are being parsed using PathObject/File classes."""
         return (
             f"class {self.__class__}\n"

@@ -145,9 +145,7 @@ class FileStructure(FileTree):
         )
 
         # TODO: not sure when temp is used
-        self.add(
-            "TMP", "tmp", parent="scripts", type_=FileType.Directory
-        )
+        self.add("TMP", "tmp", parent="scripts", type_=FileType.Directory)
 
         self.add(
             "OUTPUTS",
@@ -298,7 +296,10 @@ class FileStructure(FileTree):
         )
 
         self.add(
-            "DAEMON", "daemon", parent="data", type_=FileType.Directory,
+            "DAEMON",
+            "daemon",
+            parent="data",
+            type_=FileType.Directory,
         )
 
         # todo: not sure what goes into these per-property folders exactly
@@ -329,7 +330,10 @@ class FileStructure(FileTree):
         self.add("pid", "pids", parent="data", type_=FileType.File)
 
         self.add(
-            "ATOMS", "atoms_daemon", parent="daemon", type_=FileType.Directory,
+            "ATOMS",
+            "atoms_daemon",
+            parent="daemon",
+            type_=FileType.Directory,
         )
         self.add(
             "atoms.pid",
@@ -351,7 +355,10 @@ class FileStructure(FileTree):
         )
 
         self.add(
-            "RERUN", "rerun_daemon", parent="daemon", type_=FileType.Directory,
+            "RERUN",
+            "rerun_daemon",
+            parent="daemon",
+            type_=FileType.Directory,
         )
         self.add(
             "rerun.pid",

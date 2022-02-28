@@ -142,7 +142,7 @@ def write_to_excel(
     true = true.T
     predicted = predicted.T
     # error is still a ModelResult
-    error = (true - predicted)#.abs()
+    error = true - predicted  # .abs()
     # sort to get properties to be ordered nicely
     true = {k: v for k, v in sorted(true.items())}
 

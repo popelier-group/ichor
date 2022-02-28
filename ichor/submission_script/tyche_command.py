@@ -14,7 +14,9 @@ class TycheCommand(CommandLine):
     """
 
     def __init__(
-        self, freq_param: Path, g09_input: Path,
+        self,
+        freq_param: Path,
+        g09_input: Path,
     ):
         self.freq_param = freq_param
         self.g09_input = g09_input

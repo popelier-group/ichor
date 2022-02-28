@@ -71,8 +71,8 @@ class ReRunDaemon(Daemon):
 def rerun_failed_child_process(
     child_processes: Optional[List[Path]] = None,
 ) -> None:
-    from ichor.globals import GLOBALS, Globals
     from ichor.arguments import Arguments
+    from ichor.globals import GLOBALS, Globals
 
     if child_processes is None:
         child_processes = find_child_processes_recursively()
@@ -134,9 +134,8 @@ def print_child_processes_status(child_processes: Optional[List[Path]] = None):
 
 def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
     from ichor.analysis.get_path import get_dir
-    from ichor.main.tools.concatenate_points_directories import (
-        concatenate_points_directories,
-    )
+    from ichor.main.tools.concatenate_points_directories import \
+        concatenate_points_directories
 
     print("Enter PointsDirectory Location to concatenate to training sets: ")
     dir = get_dir().absolute()

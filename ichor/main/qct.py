@@ -4,10 +4,8 @@ from typing import List, Optional
 from ichor.batch_system import JobID
 from ichor.main.aimall import submit_points_directory_to_aimall
 from ichor.main.pandora import submit_points_directory_to_morfi
-from ichor.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
+from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                       QuantumChemicalTopologyProgram)
 
 
 class CannotSubmitPointsDirectoryToQuantumChemicalTopologyProgram(

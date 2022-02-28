@@ -7,41 +7,20 @@ import os.path as osp
 import subprocess
 from io import BytesIO
 from stat import S_IFDIR, S_IFLNK, S_IFMT, S_IFREG, S_ISDIR, S_ISLNK, S_IXUSR
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import (IO, TYPE_CHECKING, Dict, List, Sequence, Tuple, Type,
+                    Union, cast)
 
 from ichor.git.cmd import PROC_CREATIONFLAGS, handle_process_output
-from ichor.git.compat import (
-    defenc,
-    force_bytes,
-    force_text,
-    is_posix,
-    safe_decode,
-)
+from ichor.git.compat import (defenc, force_bytes, force_text, is_posix,
+                              safe_decode)
 from ichor.git.exc import HookExecutionError, UnmergedEntriesError
 from ichor.git.ext.gitdb.base import IStream
 from ichor.git.ext.gitdb.typ import str_tree_type
-from ichor.git.index.typ import (
-    CE_NAMEMASK,
-    CE_STAGESHIFT,
-    BaseIndexEntry,
-    IndexEntry,
-)
+from ichor.git.index.typ import (CE_NAMEMASK, CE_STAGESHIFT, BaseIndexEntry,
+                                 IndexEntry)
 from ichor.git.index.util import pack, unpack
-from ichor.git.objects.fun import (
-    traverse_tree_recursive,
-    traverse_trees_recursive,
-    tree_to_stream,
-)
+from ichor.git.objects.fun import (traverse_tree_recursive,
+                                   traverse_trees_recursive, tree_to_stream)
 from ichor.git.types import PathLike
 from ichor.git.util import IndexFileSHA1Writer, finalize_process
 

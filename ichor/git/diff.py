@@ -5,19 +5,8 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 import re
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Iterator,
-    List,
-    Match,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import (TYPE_CHECKING, Any, Iterator, List, Match, Optional, Tuple,
+                    Type, TypeVar, Union, cast)
 
 from ichor.git.cmd import handle_process_output
 from ichor.git.compat import defenc

@@ -5,32 +5,15 @@
 """Contains PackIndexFile and PackFile implementations"""
 import zlib
 
-from ichor.git.ext.gitdb.exc import (
-    AmbiguousObjectName,
-    BadObject,
-    ParseError,
-    UnsupportedOperation,
-)
-from ichor.git.ext.gitdb.fun import (
-    OFS_DELTA,
-    REF_DELTA,
-    chunk_size,
-    create_pack_object_header,
-    delta_types,
-    is_equal_canonical_sha,
-    msb_size,
-    pack_object_header_info,
-    stream_copy,
-    type_id_to_type_map,
-    write_object,
-)
-from ichor.git.ext.gitdb.util import (
-    LazyMixin,
-    bin_to_hex,
-    byte_ord,
-    mman,
-    unpack_from,
-)
+from ichor.git.ext.gitdb.exc import (AmbiguousObjectName, BadObject,
+                                     ParseError, UnsupportedOperation)
+from ichor.git.ext.gitdb.fun import (OFS_DELTA, REF_DELTA, chunk_size,
+                                     create_pack_object_header, delta_types,
+                                     is_equal_canonical_sha, msb_size,
+                                     pack_object_header_info, stream_copy,
+                                     type_id_to_type_map, write_object)
+from ichor.git.ext.gitdb.util import (LazyMixin, bin_to_hex, byte_ord, mman,
+                                      unpack_from)
 
 try:
     from gitdb_speedups._perf import PackIndexFile_sha_to_index
@@ -46,22 +29,12 @@ from binascii import crc32
 from struct import pack
 
 from ichor.git.ext.gitdb.base import ODeltaPackInfo  # Amazing !
-from ichor.git.ext.gitdb.base import (
-    ODeltaPackStream,
-    ODeltaStream,
-    OInfo,
-    OPackInfo,
-    OPackStream,
-    OStream,
-)
+from ichor.git.ext.gitdb.base import (ODeltaPackStream, ODeltaStream, OInfo,
+                                      OPackInfo, OPackStream, OStream)
 from ichor.git.ext.gitdb.const import NULL_BYTE
-from ichor.git.ext.gitdb.stream import (
-    DecompressMemMapReader,
-    DeltaApplyReader,
-    FlexibleSha1Writer,
-    NullStream,
-    Sha1Writer,
-)
+from ichor.git.ext.gitdb.stream import (DecompressMemMapReader,
+                                        DeltaApplyReader, FlexibleSha1Writer,
+                                        NullStream, Sha1Writer)
 
 __all__ = ("PackIndexFile", "PackFile", "PackEntity")
 

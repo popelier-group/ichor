@@ -2,12 +2,8 @@
 import sys
 from functools import reduce
 
-from ichor.git.ext.gitdb.ext.smmap.util import (
-    MapRegion,
-    MapRegionList,
-    MapWindow,
-    is_64_bit,
-)
+from ichor.git.ext.gitdb.ext.smmap.util import (MapRegion, MapRegionList,
+                                                MapWindow, is_64_bit)
 
 __all__ = ["StaticWindowMapManager", "SlidingWindowMapManager", "WindowCursor"]
 # { Utilities

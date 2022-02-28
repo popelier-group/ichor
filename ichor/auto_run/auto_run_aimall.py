@@ -3,12 +3,8 @@ from typing import List, Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    AIMAllCommand,
-    SubmissionScript,
-    TimingManager,
-)
+from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
+                                     SubmissionScript, TimingManager)
 
 
 def submit_aimall_job_to_auto_run(

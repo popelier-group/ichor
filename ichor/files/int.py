@@ -6,20 +6,13 @@ from typing import Optional, Union
 import numpy as np
 
 from ichor import constants, patterns
-from ichor.common.functools import (
-    buildermethod,
-    cached_property,
-    classproperty,
-)
+from ichor.common.functools import (buildermethod, cached_property,
+                                    classproperty)
 from ichor.common.io import move
 from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryData, GeometryDataFile
-from ichor.multipoles import (
-    rotate_dipole,
-    rotate_hexadecapole,
-    rotate_octupole,
-    rotate_quadrupole,
-)
+from ichor.multipoles import (rotate_dipole, rotate_hexadecapole,
+                              rotate_octupole, rotate_quadrupole)
 
 
 class INT(GeometryDataFile, File):
@@ -200,9 +193,8 @@ class INT(GeometryDataFile, File):
 
         Eq. 25-30
         """
-        from ichor.atoms.calculators.feature_calculator import (
-            ALFFeatureCalculator,
-        )
+        from ichor.atoms.calculators.feature_calculator import \
+            ALFFeatureCalculator
 
         atom = self.parent.atoms[self.atom]
         x_axis = ALFFeatureCalculator.calculate_x_axis_atom(atom)

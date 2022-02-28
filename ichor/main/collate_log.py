@@ -11,9 +11,8 @@ def get_child_processes() -> Optional[List[Path]]:
     from ichor.file_structure import FILE_STRUCTURE
 
     if not FILE_STRUCTURE["child_processes"].exists():
-        from ichor.auto_run.per.child_processes import (
-            find_child_processes_recursively,
-        )
+        from ichor.auto_run.per.child_processes import \
+            find_child_processes_recursively
 
         find_child_processes_recursively()
         if not FILE_STRUCTURE["child_processes"].exists():

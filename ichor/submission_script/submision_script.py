@@ -159,13 +159,13 @@ class SubmissionScript:
 
     @classmethod
     def test_array_not_null(cls, n):
-        """ Returns a string which is used in bash to test if an array entry is not null or empty.
+        """Returns a string which is used in bash to test if an array entry is not null or empty.
         We need to test this because there could be cases where there are 2000 SGE tasks for example,
         but there are only 1990 jobs (because points have been scrubbed in the previous step).
-        
+
         .. note::
             the [ -n is used for the test program in bash which makes sure array entry is not null with -n
-            
+
         """
         return f"[ -n {cls.array_index(n)} ]"
 

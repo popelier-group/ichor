@@ -3,22 +3,11 @@ from typing import List, Optional, Tuple
 
 from ichor.batch_system import JobID
 from ichor.common.io import cp
-from ichor.files import (
-    WFN,
-    MorfiDirectory,
-    PandoraDirectory,
-    PandoraInput,
-    PointDirectory,
-    PointsDirectory,
-    PySCFDirectory,
-)
+from ichor.files import (WFN, MorfiDirectory, PandoraDirectory, PandoraInput,
+                         PointDirectory, PointsDirectory, PySCFDirectory)
 from ichor.log import logger
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    MorfiCommand,
-    PandoraPySCFCommand,
-    SubmissionScript,
-)
+from ichor.submission_script import (SCRIPT_NAMES, MorfiCommand,
+                                     PandoraPySCFCommand, SubmissionScript)
 
 
 def submit_points_directory_to_pyscf(

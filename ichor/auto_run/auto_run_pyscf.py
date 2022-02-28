@@ -3,12 +3,8 @@ from typing import Optional, Union
 
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
-from ichor.submission_script import (
-    SCRIPT_NAMES,
-    PandoraPySCFCommand,
-    SubmissionScript,
-    TimingManager,
-)
+from ichor.submission_script import (SCRIPT_NAMES, PandoraPySCFCommand,
+                                     SubmissionScript, TimingManager)
 
 
 def submit_pyscf_job_to_auto_run(

@@ -14,7 +14,8 @@ class CP2KCommand(CommandLine):
     """
 
     def __init__(
-        self, cp2k_input: Path,
+        self,
+        cp2k_input: Path,
     ):
         self.input = cp2k_input
 

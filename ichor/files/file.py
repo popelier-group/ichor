@@ -5,19 +5,11 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor.common.functools import (
-    buildermethod,
-    called_from_hasattr,
-    classproperty,
-    hasattr,
-)
+from ichor.common.functools import (buildermethod, called_from_hasattr,
+                                    classproperty, hasattr)
 from ichor.common.io import move
-from ichor.common.obj import (
-    object_getattribute,
-    object_getdict,
-    object_hasattr,
-    object_setattr,
-)
+from ichor.common.obj import (object_getattribute, object_getdict,
+                              object_hasattr, object_setattr)
 from ichor.files.path_object import PathObject
 
 

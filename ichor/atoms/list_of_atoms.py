@@ -183,11 +183,12 @@ class ListOfAtoms(list):
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
+        from collections import OrderedDict
+
         from ichor.analysis.predictions import get_true_predicted
         from ichor.constants import ha_to_kj_mol
         from ichor.files import PointsDirectory
         from ichor.models import Models
-        from collections import OrderedDict
 
         if not isinstance(self, PointsDirectory):
             raise NotImplementedError(
@@ -310,18 +311,18 @@ class ListOfAtoms(list):
     def center_geometries_on_atom_and_write_xyz(
         self, central_atom_name, fname: Optional[Union[str, Path]] = None
     ):
-        """ Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
+        """Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
         xyz file with all geometries centered on that atom. This is essentially what the ALFVisualizier application (ALFi) does.
         The features for the central atom are calculated, after which they are converted back into xyz coordinates (thus all geometries)
         are now centered on the given central atom).
-        
+
         :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`
         :param fname: Optional file name in which to save the rotated geometries.
         """
 
+        from ichor.atoms import Atom
         from ichor.files import Trajectory
         from ichor.files.trajectory import features_to_coordinates
-        from ichor.atoms import Atom
 
         if central_atom_name not in self.atom_names:
             raise ValueError(
@@ -353,7 +354,7 @@ class ListOfAtoms(list):
         trajectory.write(fname)
 
     def get_headings(self):
-        """ Helper function which makes the column headings for csv or excel files in which features are going to be saved."""
+        """Helper function which makes the column headings for csv or excel files in which features are going to be saved."""
         headings = ["bond1", "bond2", "angle"]
 
         remaining_features = (
@@ -390,6 +391,7 @@ class ListOfAtoms(list):
         """
 
         import pandas as pd
+
         from ichor import constants
         from ichor.files import PointsDirectory
 
