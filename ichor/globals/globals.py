@@ -148,6 +148,7 @@ class Globals:
 
     SYSTEM_NAME: str = "SYSTEM"
 
+    POINTS_LOCATION: Path = None # a file / directory which contains geometries
     _ATOMS_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties, which then modified self._ATOMS
     _ATOMS: Atoms = None  # set automatically if not defined
     _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties
