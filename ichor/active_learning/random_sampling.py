@@ -6,6 +6,7 @@ from ichor.common.functools import classproperty
 from ichor.models import Models
 
 
+# todo: rename RandomSampling to RandomQuery
 class RandomSampling(ActiveLearningMethod):
     """Method that moves a random set of points from the sample pool to the training set. This can be useful to increase
     the training set size rapidly because no extra computations need to be done, as well as many points can be added to the
@@ -26,4 +27,6 @@ class RandomSampling(ActiveLearningMethod):
         :param npoints: The number of points which to add to the training set
         :return: The indices of randomly selected points which should be added to the training set
         """
-        return np.random.shuffle(np.arange(len(points)))[:npoints]
+        arr = np.arange(len(points))
+        np.random.shuffle(arr)
+        return arr[:npoints]
