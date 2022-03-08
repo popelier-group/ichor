@@ -285,10 +285,17 @@ def create_ferebus_directories_and_submit(
         training_data = []
         features = _model_data[atom].features
         for i, point in enumerate(_model_data):
-            properties = {
-                ty: point[atom].get_property(ty) for ty in model_types
-            }
-            training_data += [(features[i], properties)]
+            # if a point does not have int files in it this will fail.
+            # point[atom] is an AtomData instance. Usually, an INT is used as self.properties attribute
+            # of AtomData. Then INT is subclasses from GeometryDataFile (where get_property is locateds)
+            try:
+                properties = {
+                    ty: point[atom].get_property(ty) for ty in model_types
+                }
+                training_data += [(features[i], properties)]
+            except:
+                logger.warning(f"Failed to get property information for point {point.path.absolute()}. Check if .int \
+                    files from AIMALL are present in it.")
 
         ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
