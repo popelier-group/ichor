@@ -503,10 +503,6 @@ def auto_make_models(
 ) -> JobID:
     """Only submit GPR-related jobs (such as FERREBUS jobs). Do not run Gaussian or AIMALL (or PySCF and Morfi).
 
-    :param directory: A directory from which to get data with which the models are to be made.
-    :param atoms: A list of atom names (with indeces)
-    :param types: A list of properties for which to make models for
-    :param hold: An optional JobID to hold queue wait for.
     :return: a JobID instance which contains information about the last job that was submitted
     """
     func_order = [
