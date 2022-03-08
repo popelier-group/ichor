@@ -58,6 +58,7 @@ def run_missing_models(atom_dir: Path, make_on_compute: bool = False) -> JobID:
         make_models_func = (
             auto_make_models if make_on_compute else make_models.make_models
         )
+        # usually use auto_make_models("TRAINING_SET", atoms=name_of_atom, types=[iqa, q00, q10, etc.])
         return make_models_func(
             FILE_STRUCTURE["training_set"],
             atoms=[atom_dir.name],
@@ -66,16 +67,16 @@ def run_missing_models(atom_dir: Path, make_on_compute: bool = False) -> JobID:
 
 
 def make_missing_atom_models(
-    atoms: Optional[List[Path]] = None, make_on_compute: bool = True
+    atom_directories: Optional[List[Path]] = None, make_on_compute: bool = True
 ) -> JobID:
-    if atoms is None:
+    if atom_directories is None:
         if _selected_atoms_to_run_on is None:
             _setup_atoms_to_run_on()
             _setup_model_types()
-        atoms = list(_selected_atoms_to_run_on)
+        atom_directories = list(_selected_atoms_to_run_on)
     job_ids = [
         run_missing_models(atom, make_on_compute=make_on_compute)
-        for atom in atoms
+        for atom in atom_directories
     ]
     return submit_ichor_collate_models_to_auto_run(Path.cwd(), job_ids)
 
@@ -162,6 +163,7 @@ def _select_atoms_to_run_on():
 
 
 def _setup_atoms_to_run_on():
+    """ Sets a global variable which contains a list of all the atom names for which models are to be made."""
     global _selected_atoms_to_run_on
     global _atoms_to_run_on
     _atoms_to_run_on = [
@@ -169,10 +171,13 @@ def _setup_atoms_to_run_on():
         for d in FILE_STRUCTURE["atoms"].iterdir()
         if d.is_dir() and d.name in GLOBALS.ATOMS.names
     ]
+    # use list here to make it into a new object instead of juts referencing the _atoms_to_run_on. That way the
+    # _selected_atoms_to_run_on can be changes without affecting _atoms_to_run_on
     _selected_atoms_to_run_on = list(_atoms_to_run_on)
 
 
 def _setup_model_types():
+    """ Set the model types to be iqa + multipole moments + dispersion if Morfi is used. This makes it so that models for all properties are made."""
     make_models.model_types = make_models.MODEL_TYPES()
 
 
@@ -181,7 +186,8 @@ def make_models_atoms_menu():
     for the points that are in the directory."""
     # use context manager here because we need to run the __enter__ and __exit__ methods.
     # Make an instance called `menu` and set its `self.refresh` to `make_models_menu_refresh`, which gets called in the menu's `run` method
-    _setup_atoms_to_run_on()
-    _setup_model_types()
+
+    _setup_atoms_to_run_on() # set a global variable _selected_atoms_to_run_on = a list of atom names to run models for
+    _setup_model_types() # set the model types to be all models (iqa + multipole moments + dispersion if Morfi is used)
     with Menu("Make Models Menu", refresh=make_models_menu_refresh) as menu:
         pass
