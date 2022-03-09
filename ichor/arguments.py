@@ -2,6 +2,7 @@ import importlib
 import sys
 from argparse import ArgumentParser
 from ast import literal_eval
+import inspect
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 from uuid import UUID
@@ -100,7 +101,7 @@ class Arguments:
 
     @staticmethod
     def read():
-        parser = ArgumentParser(description="ICHOR: A kriging training suite")
+        parser = ArgumentParser(description="ICHOR: A training suite for producing atomistic GPR models")
 
         parser.add_argument(
             "-c",
@@ -141,12 +142,45 @@ class Arguments:
             Arguments.config_file = Path(args.config_file)
 
         if args.func:
-            func = args.func[0]
-            func_args = args.func[1:] if len(args.func) > 1 else []
+            ifunc = 0
+            display_help = False
+            if args.func[0] in ["help"]:
+                ifunc = 1
+                display_help = True
+            func = args.func[ifunc]
+
+            func_args = args.func[ifunc+1:] if len(args.func) > 1 else []
             if func in external_functions.keys():
                 Arguments.call_external_function = external_functions[
                     func
                 ].import_function()
+                if display_help:
+                    print(f"Help For Function: {func}")
+                    sig = inspect.signature(Arguments.call_external_function)
+                    print()
+                    parameter_list = sig.parameters.values()
+                    if len(parameter_list) == 0:
+                        print("Function has no parameters")
+                    else:
+                        print("Parameter List:")
+                        for val in parameter_list:
+                            name = val.name
+                            defa = val.default if val.default != inspect.Parameter.empty else None
+                            ann = val.annotation.__name__ if val.annotation != inspect.Parameter.empty else None
+                            parmline = f" - Name: {name}"
+                            if defa:
+                                parmline += f" | default value: {defa}"
+                            if ann:
+                                parmline += f" | type: {ann}"
+                            print(parmline)
+                    print()
+                    doc = Arguments.call_external_function.__doc__
+                    if doc:
+                        print("Function Documentation:")
+                        print(doc)
+                    else:
+                        print("Function has no documentation")
+                    quit()
                 Arguments.call_external_function_args = parse_args(
                     func=Arguments.call_external_function, args=func_args
                 )
