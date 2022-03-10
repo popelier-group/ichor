@@ -725,36 +725,37 @@ class Globals:
         if self._initialising:
             return None
 
-        else:
-            _alf = {}
+        if not self._ALF:
+            self._ALF = self.ATOMS.alf
+        # _alf = {}
 
-            # read in ALF reference file if it exists on disk
-            if self.ALF_REFERENCE_FILE.exists():
+        # # read in ALF reference file if it exists on disk
+        # if self.ALF_REFERENCE_FILE.exists():
 
-                with open(self.ALF_REFERENCE_FILE, "r") as alf_reference_file:
-                    for line in alf_reference_file:
-                        system_hash, total_alf = line.split(maxsplit=1)
-                        # read in atomic local frame and convert to list of list of int.
-                        _alf[system_hash] = literal_eval(total_alf)
+        #     with open(self.ALF_REFERENCE_FILE, "r") as alf_reference_file:
+        #         for line in alf_reference_file:
+        #             system_hash, total_alf = line.split(maxsplit=1)
+        #             # read in atomic local frame and convert to list of list of int.
+        #             _alf[system_hash] = literal_eval(total_alf)
 
-                # try to get the ALF from the file if the file contains alf for current atom's hash
-                self._ALF = _alf.get(self.ATOMS.hash)
+        #     # try to get the ALF from the file if the file contains alf for current atom's hash
+        #     self._ALF = _alf.get(self.ATOMS.hash)
 
-            # if ALF was not in the ALF reference file, then try to calculate it based on the current self.ATOMS
-            if self._ALF is None:
-                try:
-                    self._ALF = self.ATOMS.alf
-                    if self.ATOMS.hash not in _alf.keys():
-                        # if ALF was calculated successfully from the atoms, make sure to add it to the alf reference file
-                        with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
-                            alf_reference_file.write(f"{self.ATOMS.hash} [")
-                            for one_atom_alf in self.ATOMS.alf.tolist():
-                                alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
-                            alf_reference_file.write("]\n")
-                except:
-                    raise ALFCalculationError("ALF could not be calculated. Make sure to add manually add alf to alf reference file.")
+        # # if ALF was not in the ALF reference file, then try to calculate it based on the current self.ATOMS
+        # if self._ALF is None:
+        #     try:
+        #         self._ALF = self.ATOMS.alf
+        #         if self.ATOMS.hash not in _alf.keys():
+        #             # if ALF was calculated successfully from the atoms, make sure to add it to the alf reference file
+        #             with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
+        #                 alf_reference_file.write(f"{self.ATOMS.hash} [")
+        #                 for one_atom_alf in self.ATOMS.alf.tolist():
+        #                     alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
+        #                 alf_reference_file.write("]\n")
+        #     except:
+        #         raise ALFCalculationError("ALF could not be calculated. Make sure to add manually add alf to alf reference file.")
 
-            return self._ALF[self.ATOMS.hash]
+        return self._ALF
 
     def get(self, name: str):
         """Returns the value for some attribute/class variable or None if the attribute/class variable is not set."""
