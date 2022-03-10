@@ -9,6 +9,9 @@ class OptionalFileType:
     def exists(self):
         return False
 
+    def __bool__(self):
+        return False
+
     def __nonzero__(self):
         return False
 
