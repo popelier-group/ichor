@@ -392,6 +392,7 @@ def write_ftoml(ferebus_directory: Path, atom: str):
             ftoml.write(f'kernel = "k1*k2"\n')
         if GLOBALS.STANDARDISE:
             ftoml.write(f"standardise = true\n")
+        ftoml.write(f'likelihood = "{GLOBALS.FEREBUS_LIKELIHOOD}"\n')
         ftoml.write("\n")
         ftoml.write("[optimiser]\n")
         ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")

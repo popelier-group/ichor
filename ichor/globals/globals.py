@@ -219,6 +219,8 @@ class Globals:
     FEREBUS_VERSION: Version = Version("7.0")
     FEREBUS_LOCATION: Path = None
 
+    FEREBUS_LIKELIHOOD: str = "concentrated"
+
     GAUSSIAN_MEMORY_LIMIT: str = "1GB"
 
     # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
