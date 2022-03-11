@@ -214,7 +214,7 @@ FEREBUS_TYPES: List[str] = ["executable", "python"]
 
 FEREBUS_LEGACY_CUTOFF: Version = Version("6.5.0")
 
-KERNELS: List[str] = ["rbf", "rbf-cyclic"]
+KERNELS: List[str] = ["rbf", "rbf-cyclic", "periodic"]
 
 DLPOLY_LEGACY_CUTOFF: Version = Version("4.08")
 
