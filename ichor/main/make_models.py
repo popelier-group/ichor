@@ -368,7 +368,7 @@ def write_ftoml(ferebus_directory: Path, atom: str):
     alf = list(np.array(GLOBALS.ALF[get_digits(atom) - 1]) + 1)
 
     # todo: probably best to remake this in a smarter way
-    nfeats = 3*len(GLOBALS.ALF)-6
+    nfeats = 3*len(GLOBALS.ATOMS)-6
     rbf_dims = list(range(1, nfeats+1))
     per_dims = [i for i in rbf_dims if i > 3 and i % 3 == 0]
     rbf_dims = list(set(rbf_dims) - set(per_dims))
