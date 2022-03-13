@@ -360,7 +360,10 @@ class Globals:
 
         # check types
         for global_variable in self.global_variables:
-            if global_variable not in self.__annotations__.keys():
+            # if global variable is not in annotations or global variable does not have a setter method
+            if (global_variable not in self.__annotations__.keys()) and
+                (global_variable not in
+                [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None])
                 self.__annotations__[global_variable] = type(
                     self.get(global_variable)
                 )
