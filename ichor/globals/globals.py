@@ -362,10 +362,15 @@ class Globals:
         # check types
         for global_variable in self.global_variables:
             # if variable is not in annotations or variable does not have a setter method
-            if (global_variable not in self.__annotations__.keys()) and (global_variable not in properties_with_setter_methods):
-                self.__annotations__[global_variable] = type(
-                    self.get(global_variable)
-                )
+            if (global_variable not in self.__annotations__.keys()):
+                if global_variable not in properties_with_setter_methods:
+                    self.__annotations__[global_variable] = type(
+                        self.get(global_variable)
+                    )
+                # if it is a setter method, then make the type default to Path
+                # TODO: make this inspect the output of the property and check what type it returns
+                else:
+                    self.__annotations__[global_variable] = Path
 
         # Set Protected Variables
         self._protected = [
