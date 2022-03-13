@@ -919,7 +919,7 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
         elif path.is_dir():
             for p in path.iterdir():
                 if p.is_dir():
-                    for f in p:
+                    for f in p.iterdir():
                         if f.suffix == ".gjf":
                             return path.path.resolve()
                         elif path.suffix == ".xyz":
