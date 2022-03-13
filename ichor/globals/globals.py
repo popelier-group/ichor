@@ -601,9 +601,8 @@ class Globals:
         if not self._ATOMS_REFERENCE_FILE:
             if self.POINTS_LOCATION:
                 self._ATOMS_REFERENCE_FILE = self.POINTS_LOCATION
-            if self.ALF_REFERENCE_FILE:
-                 self._ATOMS_REFERENCE_FILE = self.ALF_REFERENCE_FILE
-            #self._ATOMS_REFERENCE_FILE = get_atoms_reference_file()
+            else:
+                self._ATOMS_REFERENCE_FILE = get_atoms_reference_file()
 
         # we should have an ATOMS REFERENCE FILE by now if it was set previously or default is made
         if not self._ATOMS_REFERENCE_FILE:
@@ -613,7 +612,7 @@ class Globals:
             )
 
         # if a file has been set already,  return it instead of making default file.
-        return self._ATOMS_REFERENCE_FILE.absolute()
+        return self._ATOMS_REFERENCE_FILE.resolve()
 
     @ATOMS_REFERENCE_FILE.setter
     def ATOMS_REFERENCE_FILE(self, value: Union[str, Path]):
@@ -647,49 +646,49 @@ class Globals:
         if self._ALF_REFERENCE_FILE is None:
             return OptionalFile
 
-        # # if the reference file still not been set (default is None), make the default file
-        # if not self._ALF_REFERENCE_FILE:
+        # if the reference file still not been set (default is None), make the default file
+        if not self._ALF_REFERENCE_FILE:
 
-        #     self._ALF_REFERENCE_FILE = FILE_STRUCTURE["alf_reference_file"]
+            self._ALF_REFERENCE_FILE = FILE_STRUCTURE["alf_reference_file"]
 
-        #     # make the parent folder of the alf reference file
-        #     mkdir(self._ALF_REFERENCE_FILE.parent)
+            # make the parent folder of the alf reference file
+            mkdir(self._ALF_REFERENCE_FILE.parent)
 
-        #     # if the reference file is not found on disk, then calculate alf by trying to find an Atoms instance
-        #     if not self._ALF_REFERENCE_FILE.exists():
+            # if the reference file is not found on disk, then calculate alf by trying to find an Atoms instance
+            if not self._ALF_REFERENCE_FILE.exists():
 
-        #         # check if ATOMS_REFERENCE_FILE is set and use that to generate alf first.
-        #         with open(self._ALF_REFERENCE_FILE, "w") as alf_reference_file:
+                # check if ATOMS_REFERENCE_FILE is set and use that to generate alf first.
+                with open(self._ALF_REFERENCE_FILE, "w") as alf_reference_file:
 
-        #             # check that ALF can be obtained because it might crash due to a bad geometry from self.ATOMS
-        #             try:
-        #                 atoms_alf = self.ATOMS.alf
-        #             except:
-        #                 raise ALFCalculationError("ALF could not be calculated for some reason (possibly a bad geometry). Enter ALF manually in reference file.")
+                    # check that ALF can be obtained because it might crash due to a bad geometry from self.ATOMS
+                    try:
+                        atoms_alf = self.ATOMS.alf
+                    except:
+                        raise ALFCalculationError("ALF could not be calculated for some reason (possibly a bad geometry). Enter ALF manually in reference file.")
 
-        #             alf_reference_file.write(f"{self.ATOMS.hash} [")
-        #             for one_atom_alf in self.ATOMS.alf.tolist():
-        #                 alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
-        #             alf_reference_file.write("]\n")
+                    alf_reference_file.write(f"{self.ATOMS.hash} [")
+                    for one_atom_alf in self.ATOMS.alf.tolist():
+                        alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
+                    alf_reference_file.write("]\n")
 
-        #     # if an alf reference file already exists, check that stored hashes matches the hash of the current self.ATOMS
-        #     else:
+            # if an alf reference file already exists, check that stored hashes matches the hash of the current self.ATOMS
+            else:
 
-        #         stored_hashes = []
+                stored_hashes = []
 
-        #         # read alf reference file and store the hashes to check if we already calculated alf for that system
-        #         with open(self._ALF_REFERENCE_FILE, "r") as alf_reference_file:
-        #             for line in alf_reference_file:
-        #                 system_hash = line.split(maxsplit=1)[0].strip()
-        #                 stored_hashes.append(system_hash)
+                # read alf reference file and store the hashes to check if we already calculated alf for that system
+                with open(self._ALF_REFERENCE_FILE, "r") as alf_reference_file:
+                    for line in alf_reference_file:
+                        system_hash = line.split(maxsplit=1)[0].strip()
+                        stored_hashes.append(system_hash)
 
-        #         # if the alf has not been stored for this system previously, append this system to the alf reference file
-        #         if self.ATOMS.hash not in stored_hashes:
-        #             with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
-        #                 alf_reference_file.write(f"{self.ATOMS.hash} [")
-        #                 for one_atom_alf in self.ATOMS.alf.tolist():
-        #                     alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
-        #                 alf_reference_file.write("]\n")
+                # if the alf has not been stored for this system previously, append this system to the alf reference file
+                if self.ATOMS.hash not in stored_hashes:
+                    with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
+                        alf_reference_file.write(f"{self.ATOMS.hash} [")
+                        for one_atom_alf in self.ATOMS.alf.tolist():
+                            alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
+                        alf_reference_file.write("]\n")
 
         if self._ALF_REFERENCE_FILE:
             return self._ALF_REFERENCE_FILE
@@ -901,28 +900,10 @@ class Globals:
 class NoAtomsFound(Exception):
     pass
 
+
 @lru_cache()
 def get_atoms(atoms_reference_path: Path) -> Atoms:
     """ Gets an Atoms instance from an atom_reference_path that was given."""
-
-    def scan_dir(d) -> Optional[Atoms]:
-        # todo: could be slow, maybe best to search key locations first
-        dirs_to_scan = []
-        print("scanning", d)
-        for f in d.iterdir():
-            if f.is_file():
-                if f.suffix == ".gjf":
-                    from ichor.files import GJF
-
-                    return GJF(f).atoms
-                elif f.suffix == ".xyz":
-                    from ichor.files import XYZ
-
-                    return XYZ(f).atoms
-            elif f.is_dir():
-                dirs_to_scan += [f]
-        for dir_to_scan in dirs_to_scan:
-            scan_dir(dir_to_scan)
 
     if atoms_reference_path.exists():
 
@@ -937,51 +918,43 @@ def get_atoms(atoms_reference_path: Path) -> Atoms:
                 raise ValueError(f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file.")
 
         elif atoms_reference_path.is_dir():
-            atoms = scan_dir(Path.cwd())
-
-        return atoms if atoms else None
+            from ichor.files import PointsDirectory
+            return PointsDirectory(atoms_reference_path)[0].atoms
 
     else:
-        raise NoAtomsFound("No instance of Atoms could be found in scanned directories and files.")
+        raise FileNotFoundError(f"ATOMS reference file with path {atoms_reference_path} is not found on disk.")
 
 @lru_cache()
 def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
     """ Gets an Atoms instance from an atom_reference_path that was given."""
 
-    return
+    if not path:
+        path = Path()
 
-    # if not path:
-    #     path = Path()
+    if path.exists():
 
-    # def scan_dir(d) -> Optional[Path]:
-    #     # todo: could be slow, maybe best to search key locations first
-    #     dirs_to_scan = []
-    #     print("scanning", d)
-    #     for f in d.iterdir():
-    #         if f.is_file():
-    #             if f.suffix == ".gjf":
-    #                 return f.path.absolute()
-    #             elif f.suffix == ".xyz":
-    #                 return f.path.absolute()
-    #         elif f.is_dir():
-    #             dirs_to_scan += [f]
-    #     for dir_to_scan in dirs_to_scan:
-    #         scan_dir(dir_to_scan)
+        if path.is_file():
+            if path.suffix == ".gjf":
+                return path.path.resolve()
+            elif path.suffix == ".xyz":
+                return path.path.resolve()
+            else:
+                raise ValueError(f"Unknown filetype {path}. Make sure to choose a .gjf or .xyz file.")
 
-    # if path.exists():
+        # assume a PointsDirectory or PointDirectory-looking directory is given
+        elif path.is_dir():
+            for p in path.iterdir():
+                if p.is_dir():
+                    for f in p:
+                        if f.suffix == ".gjf":
+                            return path.path.resolve()
+                        elif path.suffix == ".xyz":
+                            return path.path.resolve()
+                elif p.is_file():
+                    if p.suffix == ".gjf":
+                        return path.path.resolve()
+                    elif path.suffix == ".xyz":
+                        return path.path.resolve()           
 
-    #     if path.is_file():
-    #         if path.suffix == ".gjf":
-    #             return path.path.absolute()
-    #         elif path.suffix == ".xyz":
-    #             return path.path.absolute()
-    #         else:
-    #             raise ValueError(f"Unknown filetype {path}. Make sure to choose a .gjf or .xyz file.")
-
-    #     elif path.is_dir():
-    #         atoms = scan_dir(Path.cwd())
-
-    #     return atoms if atoms else None
-
-    # else:
-    #     raise FileNotFoundError("The given path does not exist on disk.")
+    else:
+        raise FileNotFoundError("The given path does not exist on disk.")
