@@ -476,6 +476,9 @@ class Globals:
 
         # Setup Defaults. These can be reverted to if needed.
         for global_variable in self.global_variables:
+            # modify variables which are in global variables but also have setter methods
+            if global_variable in properties_with_setter_methods:
+                global_variable = "_" + global_variable
             self._defaults[global_variable] = self.get(global_variable)
 
         # Set OS
