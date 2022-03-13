@@ -550,7 +550,7 @@ class Globals:
         """ Setter method for ATOMS_REFERENCE_FILE. Allows another ALF_REFERENCE_FILE to be specified."""
         value = Path(value)
         if value.exists():
-            self._ATOMS_REFERENCE_FILE = value
+            self._ATOMS_REFERENCE_FILE = value.resolve()
         else:
             raise ValueError(f"ATOMS REFERENCE FILE with Path {value.resolve()} is not on disk.")
 
@@ -625,7 +625,7 @@ class Globals:
         if isinstance(value, str):
             value = Path(value)
         if value.exists():
-            self._ALF_REFERENCE_FILE = value
+            self._ALF_REFERENCE_FILE = value.resolve()
         else:
             raise ValueError(
                 f"The alf reference file was not set because the specified file {value} does not exist on disk."
