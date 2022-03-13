@@ -829,7 +829,7 @@ class Globals:
     def properties_with_setter_methods(self) -> List[str]:
         """ Returns a list of strings for properties which can be set with a setter method. The setter
         method is the same name as the property and it updates a variable begginning with an underscore _ . """
-        [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None] 
+        return [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None] 
 
     @property
     def global_variables(self) -> List[str]:
