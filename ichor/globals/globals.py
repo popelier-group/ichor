@@ -853,7 +853,7 @@ class Globals:
             methods += properties
 
             # get all attributes which do not start with _ (as these cannot be set by user)
-            # zand which are not methods/properties
+            # and which are not methods/properties
             self._global_variables = [
                 key
                 for key in dir(self)
@@ -874,16 +874,7 @@ class Globals:
             for check in self._checkers.get(name, []):
                 check(value)  # Should raise error if incorrect
 
-            if name == "ALF":
-                Atoms.ALF = (
-                    value  # Make sure Atoms.ALF and GLOBALS.ALF are synced
-                )
-
         super(Globals, self).__setattr__(name, value)
-
-    # def __call__(self):
-    #     self.__init__(*args, **kwargs)
-    #     return self.__enter__()
 
     def __enter__(self, *args, **kwargs):
         from ichor import globals
@@ -928,6 +919,7 @@ def get_atoms(atoms_reference_path: Path) -> Atoms:
 def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
     """ Gets an Atoms instance from an atom_reference_path that was given."""
 
+    # default to current directory
     if not path:
         path = Path()
 
