@@ -829,6 +829,7 @@ class Globals:
                 for p in inspect.getmembers(
                     Globals, lambda o: isinstance(o, property)
                 )
+                if p[1].fset is None
             ]
             methods += properties
 
