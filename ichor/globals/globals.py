@@ -504,86 +504,6 @@ class Globals:
             elif MACHINE is Machine.csf3:
                 self.MAX_RUNNING_TASKS = -1
 
-    def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
-        """ Uses either a config file or another instance of `Globals` from which to
-        initialize values for the current Globals instance. Essentially, it copies over
-        all the values for user-specified options, so they match the given config file
-        or `Globals` instance.
-
-        :param src: A Path object or string pointing to a valid config file
-            or another Globals instance
-
-        .. note::
-            This does not return a new `Globals` instance. It just modifies the
-            values for the options that a user can change.
-        """
-        if src is not None:
-            if isinstance(src, Globals):
-                self.init_from_globals(src)
-            else:
-                src = Path(src)
-                self.init_from_config(src)
-
-    def init_from_config(self, config_file: Path):
-        """ Reads in options from a config file and sets the values of the
-        attributes in this `Globals` instance based on the values read.
-
-        :param config_file: A config file from which to copy options
-
-        .. note::
-            This does not return a new `Globals` instance. It just modifies the
-            values for the options that a user can change.
-        """
-        self._config_file = config_file
-        config = ConfigProvider(source=config_file)
-
-        for key, val in config.items():
-            if key in self.global_variables:
-                self.set(key, val)
-                self._in_config += [key]
-            elif key in [
-                "MAX_ITERATION",
-                "N_ITERATION",
-            ]:  # Deprecated variable names
-                self.set("N_ITERATIONS", val)
-                self._in_config += ["N_ITERATIONS"]
-            else:
-                PROBLEM_FINDER.unknown_settings += [key]
-
-    def init_from_globals(self, globals_instance: "Globals"):
-        """ Reads in options another `Globals` instance and sets the values of the
-        attributes in this `Globals` instance based on the values read from the other
-        `Globals` instance
-
-        :param globals_instance: A `Globals` instance from which to copy options
-
-        .. note::
-            This does not return a new `Globals` instance. It just modifies the
-            values for the options that a user can change.
-        """
-        for key, value in globals_instance.items(show_protected=True):
-            self.set(key, value)
-
-    def set(self, name: str, value):
-        """ Sets a value for a `Globals` variable.
-
-        :param name: Name of variable for which to set value
-        :param value: A value to set for the variable. 
-
-        .. note::
-            The type of the value is checked in the __setattr__ method
-        """
-        name = name.upper()
-        if name not in self.global_variables:
-            PROBLEM_FINDER.unknown_settings.append(name)
-        elif name in self._protected:
-            PROBLEM_FINDER.protected_settings.append(name)
-        else:
-            try:
-                setattr(self, name, value)
-            except ValueError as e:
-                PROBLEM_FINDER.incorrect_settings[name] = e
-
     @property
     def ATOMS_REFERENCE_FILE(self) -> Path:
         """ Returns an ATOMS reference file, which is to be used to get an Atoms instance, which contains system information.
@@ -737,6 +657,86 @@ class Globals:
                     raise ALFCalculationError("ALF could not be calculated. Make sure to add manually add alf to alf reference file.")
 
         return self._ALF
+        
+    def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
+        """ Uses either a config file or another instance of `Globals` from which to
+        initialize values for the current Globals instance. Essentially, it copies over
+        all the values for user-specified options, so they match the given config file
+        or `Globals` instance.
+
+        :param src: A Path object or string pointing to a valid config file
+            or another Globals instance
+
+        .. note::
+            This does not return a new `Globals` instance. It just modifies the
+            values for the options that a user can change.
+        """
+        if src is not None:
+            if isinstance(src, Globals):
+                self.init_from_globals(src)
+            else:
+                src = Path(src)
+                self.init_from_config(src)
+
+    def init_from_config(self, config_file: Path):
+        """ Reads in options from a config file and sets the values of the
+        attributes in this `Globals` instance based on the values read.
+
+        :param config_file: A config file from which to copy options
+
+        .. note::
+            This does not return a new `Globals` instance. It just modifies the
+            values for the options that a user can change.
+        """
+        self._config_file = config_file
+        config = ConfigProvider(source=config_file)
+
+        for key, val in config.items():
+            if key in self.global_variables:
+                self.set(key, val)
+                self._in_config += [key]
+            elif key in [
+                "MAX_ITERATION",
+                "N_ITERATION",
+            ]:  # Deprecated variable names
+                self.set("N_ITERATIONS", val)
+                self._in_config += ["N_ITERATIONS"]
+            else:
+                PROBLEM_FINDER.unknown_settings += [key]
+
+    def init_from_globals(self, globals_instance: "Globals"):
+        """ Reads in options another `Globals` instance and sets the values of the
+        attributes in this `Globals` instance based on the values read from the other
+        `Globals` instance
+
+        :param globals_instance: A `Globals` instance from which to copy options
+
+        .. note::
+            This does not return a new `Globals` instance. It just modifies the
+            values for the options that a user can change.
+        """
+        for key, value in globals_instance.items(show_protected=True):
+            self.set(key, value)
+
+    def set(self, name: str, value):
+        """ Sets a value for a `Globals` variable.
+
+        :param name: Name of variable for which to set value
+        :param value: A value to set for the variable. 
+
+        .. note::
+            The type of the value is checked in the __setattr__ method
+        """
+        name = name.upper()
+        if name not in self.global_variables:
+            PROBLEM_FINDER.unknown_settings.append(name)
+        elif name in self._protected:
+            PROBLEM_FINDER.protected_settings.append(name)
+        else:
+            try:
+                setattr(self, name, value)
+            except ValueError as e:
+                PROBLEM_FINDER.incorrect_settings[name] = e
 
     def get(self, name: str):
         """Returns the value for some attribute/class variable or None if the attribute/class variable is not set."""
