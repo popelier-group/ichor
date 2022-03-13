@@ -419,7 +419,7 @@ def write_ftoml(ferebus_directory: Path, atom: str):
             ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
         elif GLOBALS.KERNEL.lower() == "periodic":
             ftoml.write("[kernels.k1]\n")
-            ftoml.write(f'type = "rbf"')
+            ftoml.write(f'type = "rbf"\n')
             ftoml.write(f'active_dimensions = {rbf_dims}\n')
             ftoml.write("\n")
             ftoml.write("[kernels.k2]\n")
