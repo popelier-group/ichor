@@ -422,7 +422,6 @@ class Globals:
             "OPTIMISE_PROPERTY": ["iqa"] + constants.multipole_names + ["all"],
             "KERNEL": constants.KERNELS,
         }
-
         # TODO: Checks to add
         # - Basis Set (not sure how to do this one)
         # - Optimise Atom, must be done after determining system
@@ -657,7 +656,7 @@ class Globals:
                     raise ALFCalculationError("ALF could not be calculated. Make sure to add manually add alf to alf reference file.")
 
         return self._ALF
-        
+
     def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
         """ Uses either a config file or another instance of `Globals` from which to
         initialize values for the current Globals instance. Essentially, it copies over
@@ -824,12 +823,12 @@ class Globals:
             ]
 
             # properties implemented in Globals
-            properties = [
-                p[0]
-                for p in inspect.getmembers(
-                    Globals, lambda o: isinstance(o, property)
-                )
-            ]
+            properties = []
+            for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)):
+                # check if setter method exists
+                if p[1].fset is None:
+                    properties.append(p[0])
+                
             methods += properties
 
             # get all attributes which do not start with _ (as these cannot be set by user)
