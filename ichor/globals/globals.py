@@ -360,12 +360,11 @@ class Globals:
 
         # this is needed because properties which are in self.global_variables also have setter methods
         # we do not have these properties already set like the rest of the class variables above
-        properties_with_setter_methods = [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None]
         # check types
         for global_variable in self.global_variables:
             # if variable is not in annotations or variable does not have a setter method
             if (global_variable not in self.__annotations__.keys()):
-                if global_variable not in properties_with_setter_methods:
+                if global_variable not in self.properties_with_setter_methods:
                     self.__annotations__[global_variable] = type(
                         self.get(global_variable)
                     )
@@ -482,7 +481,7 @@ class Globals:
         for global_variable in self.global_variables:
             # modify variables which are in global variables but also have setter methods
             # this then stores the underscore-beginning values which were going to be used in the setter methods
-            if global_variable in properties_with_setter_methods:
+            if global_variable in self.properties_with_setter_methods:
                 global_variable = "_" + global_variable
             self._defaults[global_variable] = self.get(global_variable)
 
@@ -797,14 +796,23 @@ class Globals:
                 config_file = self._config_file
         config_file = Path(config_file)
 
-        global_variables = {
-            global_variable: global_value
-            for global_variable, global_value in self.items()
-            if (
-                global_value != self._defaults[global_variable]
-                or global_variable in self._in_config
-            )
-        }
+
+        global_variables = {}
+        for global_variable, global_value in self.items():
+            if global_variable in self.properties_with_setter_methods:
+                # if a property with a setter method, append _ because this is the hidden variable
+                if (
+                    global_value != self._defaults["_" + global_variable]
+                    or global_variable in self._in_config
+                ):
+                    global_variables[global_variable] = global_value
+            else:
+                if (
+                    global_value != self._defaults[global_variable]
+                    or global_variable in self._in_config
+                ):
+                    global_variables[global_variable] = global_value
+
 
         if config_file.suffix == ".properties":
             self.save_to_properties_config(config_file, global_variables)
@@ -816,6 +824,12 @@ class Globals:
         return [
             g for g in self.global_variables if g in self._in_config.keys()
         ]
+
+    @property
+    def properties_with_setter_methods(self) -> List[str]:
+        """ Returns a list of strings for properties which can be set with a setter method. The setter
+        method is the same name as the property and it updates a variable begginning with an underscore _ . """
+        [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None] 
 
     @property
     def global_variables(self) -> List[str]:
