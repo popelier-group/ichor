@@ -22,10 +22,7 @@ def get_alfs_from_reference_file():
 
     alf = {}
 
-    #if GLOBALS._ATOMS is None:
-    #    return alf
-
-    if GLOBALS._ALF_REFERENCE_FILE is not None:
+    if GLOBALS.ALF_REFERENCE_FILE is not None and GLOBALS.ALF_REFERENCE_FILE.exists():
         with open(GLOBALS.ALF_REFERENCE_FILE, "r") as alf_reference_file:
             for line in alf_reference_file:
                 system_hash, total_alf = line.split(maxsplit=1)
