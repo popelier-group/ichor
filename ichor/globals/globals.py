@@ -695,10 +695,12 @@ class Globals:
             if key in self.global_variables:
                 self.set(key, val)
                 self._in_config += [key]
-            # checks if a setter method exists for the property
-            elif key in [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property))
-            if p[1].fset is not None]:
-                self._in_config += [key]
+            elif key in [
+                "MAX_ITERATION",
+                "N_ITERATION",
+            ]:  # Deprecated variable names
+                self.set("N_ITERATIONS", val)
+                self._in_config += ["N_ITERATIONS"]
             else:
                 PROBLEM_FINDER.unknown_settings += [key]
 
