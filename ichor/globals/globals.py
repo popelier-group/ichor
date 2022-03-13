@@ -358,13 +358,6 @@ class Globals:
         **kwargs,
     ):
 
-        # check types
-        for global_variable in self.global_variables:
-            if global_variable not in self.__annotations__.keys():
-                self.__annotations__[global_variable] = type(
-                    self.get(global_variable)
-                )
-
         # Set Protected Variables
         self._protected = [
             "FILE_STRUCTURE",
