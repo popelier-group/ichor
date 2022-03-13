@@ -547,7 +547,7 @@ class Globals:
         if value.exists():
             self._ATOMS_REFERENCE_FILE = value
         else:
-            raise ValueError(f"ATOMS REFERENCE FILE with Path {value.absolute()} is not on disk.")
+            raise ValueError(f"ATOMS REFERENCE FILE with Path {value.resolve()} is not on disk.")
 
     @property
     def ATOMS(self) -> Atoms:
@@ -933,14 +933,14 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
                 if p.is_dir():
                     for f in p.iterdir():
                         if f.suffix == ".gjf":
-                            return path.path.resolve()
-                        elif path.suffix == ".xyz":
-                            return path.path.resolve()
-                elif p.is_file():
+                            return f.path.resolve()
+                        elif f.suffix == ".xyz":
+                            return f.path.resolve()
+                else:
                     if p.suffix == ".gjf":
-                        return path.path.resolve()
+                        return p.path.resolve()
                     elif path.suffix == ".xyz":
-                        return path.path.resolve()           
+                        return p.path.resolve()           
 
     else:
         raise FileNotFoundError("The given path does not exist on disk.")
