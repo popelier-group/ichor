@@ -358,6 +358,8 @@ class Globals:
         **kwargs,
     ):
 
+        # this is needed because properties which are in self.global_variables also have setter methods
+        # we do not have these properties already set like the rest of the class variables above
         properties_with_setter_methods = [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None]
         # check types
         for global_variable in self.global_variables:
@@ -369,6 +371,8 @@ class Globals:
                     )
                 # if it is a setter method, then make the type default to Path
                 # TODO: make this inspect the output of the property and check what type it returns
+                # TODO: then, this is going to be added to parsers/formatters and then it will update
+                # the variable using the setter method for the property
                 else:
                     self.__annotations__[global_variable] = Path
 
@@ -477,6 +481,7 @@ class Globals:
         # Setup Defaults. These can be reverted to if needed.
         for global_variable in self.global_variables:
             # modify variables which are in global variables but also have setter methods
+            # this then stores the underscore-beginning values which were going to be used in the setter methods
             if global_variable in properties_with_setter_methods:
                 global_variable = "_" + global_variable
             self._defaults[global_variable] = self.get(global_variable)
