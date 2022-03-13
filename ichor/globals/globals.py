@@ -358,12 +358,11 @@ class Globals:
         **kwargs,
     ):
 
+        properties_with_setter_methods = [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None]
         # check types
         for global_variable in self.global_variables:
-            # if global variable is not in annotations or global variable does not have a setter method
-            if (global_variable not in self.__annotations__.keys()) and
-                (global_variable not in
-                [p[0] for p in inspect.getmembers(Globals, lambda o: isinstance(o, property)) if p[1].fset is not None])
+            # if variable is not in annotations or variable does not have a setter method
+            if (global_variable not in self.__annotations__.keys()) and (global_variable not in properties_with_setter_methods):
                 self.__annotations__[global_variable] = type(
                     self.get(global_variable)
                 )
