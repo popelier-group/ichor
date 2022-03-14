@@ -612,6 +612,8 @@ class Globals:
                                 alf_reference_file.write(f"[{','.join([str(i) for i in one_atom_alf])}],")
                             alf_reference_file.write("]\n")
 
+                return self._ALF_REFERENCE_FILE
+
         elif self._ALF_REFERENCE_FILE:
             return self._ALF_REFERENCE_FILE
         else:
