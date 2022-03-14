@@ -338,12 +338,16 @@ class ListOfAtoms(list):
 
         # calcultate features and convert to a new Trajectory object
         xyz_array = features_to_coordinates(self[central_atom_name].features)
+
+        # converting from features to coordinates might give a new ordering of the atoms, so need to adjust for that
+        # because the features to coordinates will always give the x-axis atom and the xy-plane atoms as the 2nd and 3rd atoms respectively
+        correct_atom_names = [self.types_extended[i] for i in self[central_atom_name].alf] + [self.types_extended[i] for i in range(len(self[0])) if i not in self[central_atom_name].alf]
         trajectory = Trajectory()
 
         for geometry in xyz_array:
             # initialize empty Atoms instance
             atoms = Atoms()
-            for ty, atom_coord in zip(self.types_extended, geometry):
+            for ty, atom_coord in zip(correct_atom_names, geometry):
                 # add Atom instances for every atom in the geometry to the Atoms instance
                 atoms.add(
                     Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
