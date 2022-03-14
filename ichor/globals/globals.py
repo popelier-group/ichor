@@ -938,28 +938,30 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
 
     if path.exists():
 
-        if path.is_file():
-            if path.suffix == ".gjf":
-                return path.path.resolve()
-            elif path.suffix == ".xyz":
-                return path.path.resolve()
-            else:
-                raise ValueError(f"Unknown filetype {path}. Make sure to choose a .gjf or .xyz file.")
+        for file_or_dir in path.iterdir():
+
+            if file_or_dir.is_file():
+                if file_or_dir.suffix == ".gjf":
+                    return file_or_dir.resolve()
+                elif file_or_dir.suffix == ".xyz":
+                    return file_or_dir.resolve()
+                else:
+                    raise ValueError(f"Unknown filetype {file_or_dir}. Make sure to choose a .gjf or .xyz file.")
 
         # assume a PointsDirectory or PointDirectory-looking directory is given
-        elif path.is_dir():
-            for p in path.iterdir():
-                if p.is_dir():
-                    for f in p.iterdir():
-                        if f.suffix == ".gjf":
-                            return f.path.resolve()
-                        elif f.suffix == ".xyz":
-                            return f.path.resolve()
-                else:
-                    if p.suffix == ".gjf":
-                        return p.path.resolve()
-                    elif path.suffix == ".xyz":
-                        return p.path.resolve()           
+            elif file_or_dir.is_dir():
+                for p in file_or_dir.iterdir():
+                    if p.is_dir():
+                        for f1 in p.iterdir():
+                            if f1.suffix == ".gjf":
+                                return f1.resolve()
+                            elif f1.suffix == ".xyz":
+                                return f1.resolve()
+                    else:
+                        if p.suffix == ".gjf":
+                            return p.resolve()
+                        elif path.suffix == ".xyz":
+                            return p.resolve()           
 
     else:
         raise FileNotFoundError("The given path does not exist on disk.")
