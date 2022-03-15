@@ -533,6 +533,9 @@ class Globals:
                 self._ATOMS_REFERENCE_FILE = self.POINTS_LOCATION
             else:
                 self._ATOMS_REFERENCE_FILE = get_atoms_reference_file()
+                if self._ATOMS_REFERENCE_FILE is None:
+                    raise ValueError(f"Atoms Reference File should not be None. Make sure to have \
+                    a .xyz or .gjf file in the current directory from where ichor/script is running.")
 
         # we should have an ATOMS REFERENCE FILE by now if it was set previously or default is made
         if not self._ATOMS_REFERENCE_FILE:
@@ -947,8 +950,6 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
                     return file_or_dir.resolve()
                 elif file_or_dir.suffix == ".xyz":
                     return file_or_dir.resolve()
-                else:
-                    raise ValueError(f"Unknown filetype {file_or_dir}. Make sure to choose a .gjf or .xyz file.")
 
         # assume a PointsDirectory or PointDirectory-looking directory is given
             elif file_or_dir.is_dir():
@@ -964,6 +965,9 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
                             return p.resolve()
                         elif path.suffix == ".xyz":
                             return p.resolve()           
+
+        # return None if no file that matches criteria was found.
+        return
 
     else:
         raise FileNotFoundError("The given path does not exist on disk.")
