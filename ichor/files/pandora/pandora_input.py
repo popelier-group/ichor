@@ -47,6 +47,9 @@ class PandoraInput(QuantumChemistryProgramInput):
         self.morfi_grid_radial_h = data["morfi"]["grid"]["radial_h"]
 
     def format(self):
+        self.atoms.centre()
+        # todo: ensure no atoms are at the origin (wihtin 1e-6) as this will break morfi
+
         self.method = GLOBALS.METHOD.lower()
         self.basis_set = GLOBALS.BASIS_SET.lower()
         if not self.basis_set.startswith("unc-"):
