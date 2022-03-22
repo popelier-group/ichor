@@ -190,7 +190,7 @@ class INT(GeometryDataFile, File):
         Electrostatic Forces: Formulas for the First Derivatives of a Polarizable,
         Anisotropic Electrostatic Potential Energy Function Based on Machine Learning.
         Journal of Chemical Theory and Computation 10, 3840–3856.. doi:10.1021/ct500565g
-
+    
         Eq. 25-30
         """
         from ichor.atoms.calculators.feature_calculator import \

@@ -218,6 +218,8 @@ KERNELS: List[str] = ["rbf", "rbf-cyclic"]
 
 DLPOLY_LEGACY_CUTOFF: Version = Version("4.08")
 
+# https://www.webelements.com <- excellent resource
+
 type2mass: Dict[str, float] = {
     "H": 1.007825,
     "He": 4.002603,
@@ -527,7 +529,7 @@ type2electronegativity: Dict[str, float] = {
     "Se": 2.55,
     "Br": 2.96,
     "Kr": 3.00,
-    "Sr": 10.95,
+    "Sr": 0.95,
     "Y": 1.22,
     "Zr": 1.33,
     "Mo": 2.16,

@@ -26,5 +26,13 @@ def dipole_cartesian_to_spherical(d: np.ndarray) -> Tuple[float, float, float]:
     return d[2], d[0], d[1]
 
 
+def pack_cartesian_dipole(d_x, d_y, d_z):
+    return np.array([d_x, d_y, d_z])
+
+
+def unpack_cartesian_dipole(d):
+    return d[0], d[1], d[2]
+
+
 def dipole_rotate_cartesian(d: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,a->i", C, d)
