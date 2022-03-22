@@ -285,10 +285,17 @@ def create_ferebus_directories_and_submit(
         training_data = []
         features = _model_data[atom].features
         for i, point in enumerate(_model_data):
-            properties = {
-                ty: point[atom].get_property(ty) for ty in model_types
-            }
-            training_data += [(features[i], properties)]
+            # if a point does not have int files in it this will fail.
+            # point[atom] is an AtomData instance. Usually, an INT is used as self.properties attribute
+            # of AtomData. Then INT is subclasses from GeometryDataFile (where get_property is locateds)
+            try:
+                properties = {
+                    ty: point[atom].get_property(ty) for ty in model_types
+                }
+                training_data += [(features[i], properties)]
+            except:
+                logger.warning(f"Failed to get property information for point {point.path.absolute()}. Check if .int \
+                    files from AIMALL are present in it.")
 
         ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
@@ -360,6 +367,12 @@ def write_ftoml(ferebus_directory: Path, atom: str):
     ftoml_file = ferebus_directory / "ferebus.toml"
     alf = list(np.array(GLOBALS.ALF[get_digits(atom) - 1]) + 1)
 
+    # todo: probably best to remake this in a smarter way
+    nfeats = 3*len(GLOBALS.ATOMS)-6
+    rbf_dims = list(range(1, nfeats+1))
+    per_dims = [i for i in rbf_dims if i > 3 and i % 3 == 0]
+    rbf_dims = list(set(rbf_dims) - set(per_dims))
+
     with open(ftoml_file, "w") as ftoml:
         ftoml.write("[system]\n")
         ftoml.write(f'name = "{GLOBALS.SYSTEM_NAME}"\n')
@@ -373,9 +386,13 @@ def write_ftoml(ferebus_directory: Path, atom: str):
         ftoml.write("[model]\n")
         ftoml.write(f'mean = "{GLOBALS.FEREBUS_MEAN}"\n')
         ftoml.write(f'optimiser = "{GLOBALS.FEREBUS_OPTIMISATION}"\n')
-        ftoml.write(f'kernel = "k1"\n')
+        if GLOBALS.KERNEL.lower() in ["rbf", "rbf-cyclic"]:
+            ftoml.write(f'kernel = "k1"\n')
+        elif GLOBALS.KERNEL.lower() == "periodic":
+            ftoml.write(f'kernel = "k1*k2"\n')
         if GLOBALS.STANDARDISE:
             ftoml.write(f"standardise = true\n")
+        #ftoml.write(f'likelihood = "{GLOBALS.FEREBUS_LIKELIHOOD}"\n')
         ftoml.write("\n")
         ftoml.write("[optimiser]\n")
         ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
@@ -397,8 +414,17 @@ def write_ftoml(ferebus_directory: Path, atom: str):
         ftoml.write(f"tolerance={GLOBALS.FEREBUS_TOLERANCE}\n")
         ftoml.write(f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n")
         ftoml.write("\n")
-        ftoml.write("[kernels.k1]\n")
-        ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
+        if GLOBALS.KERNEL.lower() in ["rbf", "rbf-cyclic"]:
+            ftoml.write("[kernels.k1]\n")
+            ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
+        elif GLOBALS.KERNEL.lower() == "periodic":
+            ftoml.write("[kernels.k1]\n")
+            ftoml.write(f'type = "rbf"\n')
+            ftoml.write(f'active_dimensions = {rbf_dims}\n')
+            ftoml.write("\n")
+            ftoml.write("[kernels.k2]\n")
+            ftoml.write('type = "periodic"\n')
+            ftoml.write(f'active_dimensions = {per_dims}\n')
         ftoml.write("\n")
         ftoml.write("[notes]\n")
         ftoml.write(f'method = "{GLOBALS.METHOD}"\n')

@@ -8,6 +8,7 @@ from ichor.common.io import mkdir
 from ichor.files import Directory
 from ichor.files.point_directory import PointDirectory
 
+from ichor.common.sorting.natsort import ignore_alpha, natsorted
 
 class PointsDirectory(ListOfAtoms, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).
@@ -83,6 +84,9 @@ class PointsDirectory(ListOfAtoms, Directory):
     def dump(self):
         for point in self:
             point.dump()
+
+    def iterdir(self):
+        return iter(natsorted(super().iterdir(), key=ignore_alpha))
 
     def __iter__(self):
         """

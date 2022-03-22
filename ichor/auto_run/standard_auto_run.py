@@ -452,7 +452,9 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
             if njobs_waiting + njobs_queued > DROP_COMPUTE_MAX_JOBS:
                 sleep(30)
             else:
-                move(DROP_COMPUTE_TMP_LOCATION, DROP_COMPUTE_LOCATION)
+                for script in DROP_COMPUTE_TMP_LOCATION.iterdir():
+                    move(script, DROP_COMPUTE_LOCATION / script.name)
+                remove(DROP_COMPUTE_TMP_LOCATION)
                 break
         else:
             remove(DROP_COMPUTE_TMP_LOCATION)

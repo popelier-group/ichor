@@ -22,14 +22,16 @@ def get_alfs_from_reference_file():
 
     alf = {}
 
-    if GLOBALS.ALF_REFERENCE_FILE.exists():
+    #if GLOBALS._ATOMS is None:
+    #    return alf
 
+    if GLOBALS._ALF_REFERENCE_FILE is not None:
         with open(GLOBALS.ALF_REFERENCE_FILE, "r") as alf_reference_file:
             for line in alf_reference_file:
                 system_hash, total_alf = line.split(maxsplit=1)
                 # read in atomic local frame and convert to list of list of int.
                 alf[system_hash] = literal_eval(total_alf)
-    
+
     return alf
 
 class ALFFeatureCalculator(FeatureCalculator):

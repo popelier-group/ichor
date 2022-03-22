@@ -88,6 +88,12 @@ class Model(File):
 
     @buildermethod
     def _read_file(self, up_to: Optional[str] = None) -> None:
+        try:
+            self.__read_file(up_to)
+        except:
+            raise ValueError(f"Error reading model file: {self.path}")
+
+    def __read_file(self, up_to: Optional[str] = None) -> None:
         """Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
         kernel_composition = ""
         kernel_list = {}
