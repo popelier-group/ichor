@@ -3,8 +3,12 @@ from typing import List, Optional
 
 from ichor.batch_system import JobID
 from ichor.common.types import MutableValue
-from ichor.submission_script import (SCRIPT_NAMES, MorfiCommand,
-                                     SubmissionScript, TimingManager)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    MorfiCommand,
+    SubmissionScript,
+    TimingManager,
+)
 
 
 def submit_morfi_job_to_auto_run(

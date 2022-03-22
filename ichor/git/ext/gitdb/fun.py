@@ -18,8 +18,12 @@ from io import StringIO
 from itertools import islice
 
 from ichor.git.ext.gitdb.const import BYTE_SPACE, NULL_BYTE
-from ichor.git.ext.gitdb.typ import (str_blob_type, str_commit_type,
-                                     str_tag_type, str_tree_type)
+from ichor.git.ext.gitdb.typ import (
+    str_blob_type,
+    str_commit_type,
+    str_tag_type,
+    str_tree_type,
+)
 from ichor.git.ext.gitdb.utils.encoding import force_text
 
 # INVARIANTS

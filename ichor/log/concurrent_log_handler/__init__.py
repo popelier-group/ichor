@@ -69,8 +69,10 @@ from contextlib import contextmanager
 from logging import LogRecord
 from logging.handlers import BaseRotatingHandler
 
-from ichor.log.concurrent_log_handler.__version__ import (__author__,
-                                                          __version__)
+from ichor.log.concurrent_log_handler.__version__ import (
+    __author__,
+    __version__,
+)
 from ichor.log.portalocker import LOCK_EX, lock, unlock
 
 try:

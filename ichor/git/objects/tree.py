@@ -4,8 +4,19 @@
 # This module is part of GitPython and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator,
-                    List, Tuple, Type, Union, cast)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from ichor.git import diff as git_diff
 from ichor.git.objects import util

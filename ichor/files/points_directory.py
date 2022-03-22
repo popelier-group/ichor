@@ -10,6 +10,7 @@ from ichor.files.point_directory import PointDirectory
 
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 
+
 class PointsDirectory(ListOfAtoms, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).
     Calling Directory.__init__(self, path) will call the `parse` method of PointsDirectory instead of Directory

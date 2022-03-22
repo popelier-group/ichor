@@ -48,7 +48,9 @@ def octupole_spherical_to_cartesian(
     o_yzz = constants.rt2_3 * q31s
     o_zzz = q30
 
-    return pack_cartesian_octupole(o_xxx, o_xxy, o_xxz, o_xyy, o_xyz, o_xzz, o_yyy, o_yyz, o_yzz, o_zzz)
+    return pack_cartesian_octupole(
+        o_xxx, o_xxy, o_xxz, o_xyy, o_xyz, o_xzz, o_yyy, o_yyz, o_yzz, o_zzz
+    )
 
 
 def octupole_cartesian_to_spherical(
@@ -64,7 +66,9 @@ def octupole_cartesian_to_spherical(
     return q30, q31c, q31s, q32c, q32s, q33c, q33s
 
 
-def pack_cartesian_octupole(o_xxx, o_xxy, o_xxz, o_xyy, o_xyz, o_xzz, o_yyy, o_yyz, o_yzz, o_zzz):
+def pack_cartesian_octupole(
+    o_xxx, o_xxy, o_xxz, o_xyy, o_xyz, o_xzz, o_yyy, o_yyz, o_yzz, o_zzz
+):
     return np.array(
         [
             [
@@ -87,7 +91,18 @@ def pack_cartesian_octupole(o_xxx, o_xxy, o_xxz, o_xyy, o_xyz, o_xzz, o_yyy, o_y
 
 
 def unpack_cartesian_octupole(o):
-    return o[0, 0, 0], o[0, 0, 1], o[0, 0, 2], o[0, 1, 1], o[0, 1, 2], o[0, 2, 2], o[1, 1, 1], o[1, 1, 2], o[1, 2, 2], o[2, 2, 2]
+    return (
+        o[0, 0, 0],
+        o[0, 0, 1],
+        o[0, 0, 2],
+        o[0, 1, 1],
+        o[0, 1, 2],
+        o[0, 2, 2],
+        o[1, 1, 1],
+        o[1, 1, 2],
+        o[1, 2, 2],
+        o[2, 2, 2],
+    )
 
 
 def octupole_rotate_cartesian(o: np.ndarray, C: np.ndarray) -> np.ndarray:

@@ -174,7 +174,7 @@ class Atoms(list):
 
     def reindex(self):
         for i, atom in enumerate(self):
-            atom.index = i+1
+            atom.index = i + 1
 
     @property
     def atoms(self):

@@ -17,12 +17,30 @@ import re
 import sys
 from functools import wraps
 from io import BufferedReader, IOBase
-from typing import (IO, TYPE_CHECKING, Any, Callable, Dict, Generic, List,
-                    Sequence, Tuple, TypeVar, Union, cast, overload)
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from ichor.git.compat import defenc, force_text, is_win
-from ichor.git.types import (_T, ConfigLevels_Tup, Lit_config_levels, PathLike,
-                             assert_never)
+from ichor.git.types import (
+    _T,
+    ConfigLevels_Tup,
+    Lit_config_levels,
+    PathLike,
+    assert_never,
+)
 from ichor.git.util import LockFile
 
 # typing-------------------------------------------------------

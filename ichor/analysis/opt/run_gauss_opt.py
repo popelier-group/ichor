@@ -11,8 +11,11 @@ from ichor.files import GJF, WFN, XYZ, PointsDirectory
 from ichor.globals import GLOBALS
 from ichor.main.gaussian import submit_gjfs
 from ichor.menu import Menu
-from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    ICHORCommand,
+    SubmissionScript,
+)
 
 _geometry_file = None
 _keywords = list(set(GLOBALS.KEYWORDS + ["opt"]))

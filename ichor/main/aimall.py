@@ -7,8 +7,12 @@ from ichor.batch_system import JobID
 from ichor.common.io import remove
 from ichor.files import AIM, INT, PointsDirectory
 from ichor.log import logger
-from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
-                                     SubmissionScript, print_completed)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    AIMAllCommand,
+    SubmissionScript,
+    print_completed,
+)
 
 
 def submit_points_directory_to_aimall(

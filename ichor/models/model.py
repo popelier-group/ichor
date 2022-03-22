@@ -10,11 +10,21 @@ from ichor.common.str import get_digits
 from ichor.common.types import Version
 from ichor.files.file import File, FileContents
 from ichor.globals import GLOBALS
-from ichor.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
-                                  RBFCyclic)
+from ichor.models.kernels import (
+    RBF,
+    ConstantKernel,
+    Kernel,
+    PeriodicKernel,
+    RBFCyclic,
+)
 from ichor.models.kernels.interpreter import KernelInterpreter
-from ichor.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
-                               ZeroMean)
+from ichor.models.mean import (
+    ConstantMean,
+    LinearMean,
+    Mean,
+    QuadraticMean,
+    ZeroMean,
+)
 
 
 def _get_default_input_units(nfeats: int) -> List[str]:

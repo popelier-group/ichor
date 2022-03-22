@@ -13,12 +13,30 @@ from abc import abstractmethod
 from collections import deque
 from datetime import datetime, timedelta, tzinfo
 from string import digits
-# typing ------------------------------------------------------------
-from typing import (TYPE_CHECKING, Any, Callable, Deque, Iterator, NamedTuple,
-                    Sequence, Tuple, Type, TypeVar, Union, cast, overload)
 
-from ichor.git.types import (Has_id_attribute, Literal, Protocol,
-                             runtime_checkable)
+# typing ------------------------------------------------------------
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Deque,
+    Iterator,
+    NamedTuple,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
+
+from ichor.git.types import (
+    Has_id_attribute,
+    Literal,
+    Protocol,
+    runtime_checkable,
+)
 from ichor.git.util import Actor, IterableList, IterableObj
 
 if TYPE_CHECKING:
