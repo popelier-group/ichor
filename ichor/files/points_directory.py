@@ -55,7 +55,7 @@ class PointsDirectory(ListOfAtoms, Directory):
                 self.append(PointDirectory(f))
             # otherwise if the PathObject is a file that ends in .xyz, make a new directory with its path set to self.path/f.stem
             # for example if the given path is ./TRAINING_SET/ and there is WATER001.xyz, it will make ./TRANING_SET/WATER001/
-            elif f.is_file() and f.suffix == ".xyz":
+            elif f.is_file() and (f.suffix == ".xyz" or f.suffix == ".gjf"):
                 new_dir = self.path / f.stem
                 mkdir(new_dir)
                 f.replace(new_dir / f.name)
