@@ -44,7 +44,7 @@ class INTs(Directory, AtomicDict):
         The GeometryFile contains the information (coordinates) for the whole system."""
         if self._parent is None:
             raise ValueError(
-                f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined"
+                f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined."
             )
         return self._parent
 
@@ -83,4 +83,3 @@ class INTs(Directory, AtomicDict):
         which are found in an INTs directory."""
         for INT_instance in self.values():
             yield INT_instance
-
