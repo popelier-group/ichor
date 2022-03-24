@@ -2,7 +2,7 @@ from typing import Optional
 
 from ichor.atoms import Atoms
 from ichor.files.file import FileContents
-
+from ichor.files.geometry.atom_data import AtomData
 
 class GeometryFile:
     atoms: Optional[Atoms]
@@ -17,3 +17,9 @@ class GeometryFile:
     @property
     def atom_names(self):
         return [atom.name for atom in self.atoms]
+
+    def __getitem__(self, item):
+        """ Returns all the data associated with an atom name"""
+        if isinstance(item, str) and item in self.atoms.names:
+            return AtomData(self.atoms[item], properties=self)
+        return super().__getitem__(item)

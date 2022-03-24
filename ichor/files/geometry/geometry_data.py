@@ -1,14 +1,12 @@
 from abc import ABC
 from typing import Any
 
-from ichor.files.geometry.atom_data import AtomData
-from ichor.files.geometry.geometry_file import GeometryFile
-
-
 class PropertyNotFound(Exception):
     pass
 
 class GeometryData(dict):
+    """ Used to be able to distinguish between a normal dictionary instance
+    and a GeometryData instance. Otherwise, the same as a normal dictionary."""
     pass
 
 class GeometryDataFile(ABC):
@@ -26,6 +24,10 @@ class GeometryDataFile(ABC):
             raise PropertyNotFound(f"Property {item} not found")
 
     def __getattr__(self, item: str) -> Any:
+        """ Used to make values of GeometryData instances accessible as attributes.
+        Looks into __dict__ of an instance to see if an instance of GeometryData exist.
+        If an instance of GeometryData exists, it looks at the keys of that instance
+        and the value is returned."""
         # loop over __dict__ (vars(self)) and find any attributes which are dictionaries.
         # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
         # todo: implement method for combining multiple dictionaries with identical keys
@@ -35,12 +37,6 @@ class GeometryDataFile(ABC):
         raise AttributeError(
             f"{self.__class__} object has no attribute {item}"
         )
-
-    def __getitem__(self, item):
-        if isinstance(item, str):
-            if isinstance(self, GeometryFile) and item in self.atoms.names:
-                return AtomData(self.atoms[item], properties=self)
-        return super().__getitem__(item)
 
 
 class AtomicDict(dict):
