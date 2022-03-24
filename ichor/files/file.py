@@ -27,6 +27,9 @@ class FileState(Enum):
 class FileContentsType:
     pass
 
+    def __bool__(self):
+        return False
+
 
 FileContents = FileContentsType()
 
