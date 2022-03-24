@@ -264,37 +264,14 @@ class INT(GeometryDataFile, File):
         self.rotate_octupole()
         self.rotate_hexadecapole()
 
-    @cached_property
+    @property
     def C(self):
-        """
-        Mills, M.J.L., Popelier, P.L.A., 2014.
-        Electrostatic Forces: Formulas for the First Derivatives of a Polarizable,
-        Anisotropic Electrostatic Potential Energy Function Based on Machine Learning.
-        Journal of Chemical Theory and Computation 10, 3840–3856.. doi:10.1021/ct500565g
-    
-        Eq. 25-30
-        """
-        from ichor.atoms.calculators.feature_calculator import \
-            ALFFeatureCalculator
 
+        if not self.parent:
+            raise ValueError(f"Need a parent GeometryFile because \
+                the rotation matrix requires knowing the full system. Currently, parent = {self.parent}")
         atom_inst = self.parent.atoms[self.atom_name]
-        x_axis = ALFFeatureCalculator.calculate_x_axis_atom(atom_inst)
-        xy_plane = ALFFeatureCalculator.calculate_xy_plane_atom(atom_inst)
-
-        r12 = x_axis.coordinates - atom_inst.coordinates
-        r13 = xy_plane.coordinates - atom_inst.coordinates
-
-        mod_r12 = np.linalg.norm(r12)
-
-        r12 /= mod_r12
-
-        ex = r12
-        s = sum(ex * r13)
-        ey = r13 - s * ex
-
-        ey /= np.sqrt(sum(ey * ey))
-        ez = np.cross(ex, ey)
-        return np.array([ex, ey, ez])
+        return atom_inst.C
 
     # monopole moments (point charges) do not need to be rotated because they are symmetric
 

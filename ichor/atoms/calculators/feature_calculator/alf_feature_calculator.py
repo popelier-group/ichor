@@ -153,7 +153,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         cls,
         atom: "Atom",
         alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None,
-    ):
+    ) -> "Atom":
         """Returns the Atom instance that is used as the x-axis of the ALF
 
         Args:
@@ -182,7 +182,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         cls,
         atom: "Atom",
         alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None,
-    ):
+    ) -> "Atom":
         """Returns the Atom instance that is used as the x-axis of the ALF
 
         Args:

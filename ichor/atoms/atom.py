@@ -5,6 +5,7 @@ import numpy as np
 
 from ichor import constants
 from ichor.atoms.calculators import ALFFeatureCalculator
+from ichor.common.functools.cached_property import cached_property
 from ichor.common.types import VarReprMixin
 from ichor.units import AtomicDistance
 
@@ -245,6 +246,34 @@ class Atom(VarReprMixin):
         """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
         THere indices are what are used in python lists (as they start at 0)."""
         return np.array([atom.i for atom in self.alf])
+
+    @cached_property
+    def C(self):
+        """
+        Mills, M.J.L., Popelier, P.L.A., 2014.
+        Electrostatic Forces: Formulas for the First Derivatives of a Polarizable,
+        Anisotropic Electrostatic Potential Energy Function Based on Machine Learning.
+        Journal of Chemical Theory and Computation 10, 3840-3856.. doi:10.1021/ct500565g
+    
+        Eq. 25-30
+        """
+        x_axis = ALFFeatureCalculator.calculate_x_axis_atom(self)
+        xy_plane = ALFFeatureCalculator.calculate_xy_plane_atom(self)
+
+        r12 = x_axis.coordinates - self.coordinates
+        r13 = xy_plane.coordinates - self.coordinates
+
+        mod_r12 = np.linalg.norm(r12)
+
+        r12 /= mod_r12
+
+        ex = r12
+        s = sum(ex * r13)
+        ey = r13 - s * ex
+
+        ey /= np.sqrt(sum(ey * ey))
+        ez = np.cross(ex, ey)
+        return np.array([ex, ey, ez])
 
     @property
     def features(self) -> np.ndarray:
