@@ -1,5 +1,4 @@
 import json
-from lib2to3.pgen2 import token
 import re
 from pathlib import Path
 from typing import Optional, Union
@@ -130,6 +129,7 @@ class INT(GeometryDataFile, File):
         self.iqa_data = GeometryData()
         self.dispersion_data = GeometryData()
         self.original_multipoles_data = GeometryData()
+        self.rotated_multipoles = GeometryData()
 
         with open(self.path, "r") as f:
             for line in f:
@@ -222,9 +222,11 @@ class INT(GeometryDataFile, File):
             "integration": self.integration_data,
             "iqa_data": self.iqa_data,
             "original_multipoles": self.original_multipoles_data,
-            "rotated_multipoles": self.rotated_multipoles_data or {},
-            "dispersion_data": self.dispersion_data or {},
         }
+        if self.rotated_multipoles_data:
+            int_data["rotated_multipoles"] = self.rotated_multipoles_data
+        if self.dispersion_data:
+            int_data["dispersion_data"] = self.dispersion_data
 
         with open(self.json_path, "w") as f:
             json.dump(int_data, f)
@@ -236,16 +238,11 @@ class INT(GeometryDataFile, File):
         that ICHOR needs for later steps. This speeds up reading times if the information from the .int file is needed again."""
         with open(self.json_path, "r") as f:
             int_data = json.load(f)
-            self.integration_data = GeometryData(int_data["integration"])
-            self.rotated_multipoles_data = GeometryData(int_data["rotated_multipoles"])
-            self.original_multipoles_data = GeometryData(int_data["original_multipoles"])
-            self.iqa_data = GeometryData(int_data["iqa_data"])
-            if "dispersion_data" in int_data.keys():
-                self.dispersion_data = GeometryData(
-                    int_data["dispersion_data"]
-                )
-            else:
-                self.dispersion_data = GeometryData()
+            self.integration_data = GeometryData(int_data.get("integration", None))
+            self.rotated_multipoles_data = GeometryData(int_data.get("rotated_multipoles", None))
+            self.original_multipoles_data = GeometryData(int_data.get("original_multipoles", None))
+            self.iqa_data = GeometryData(int_data.get("iqa_data", None))
+            self.dispersion_data = GeometryData(int_data.get("dispersion_data", None))
 
     def rotate_multipoles(self):
         """
@@ -259,7 +256,6 @@ class INT(GeometryDataFile, File):
         Stone, Anthony. The Theory of Intermolecular Forces,
         Oxford University Press, Incorporated, 2013.
         """
-        self.rotated_multipoles = GeometryData()
         self.rotate_dipole()
         self.rotate_quadrupole()
         self.rotate_octupole()
