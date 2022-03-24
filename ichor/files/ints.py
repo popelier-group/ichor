@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.common.functools import buildermethod, classproperty
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.files.directory import Directory
-from ichor.files.geometry import AtomicDict, GeometryFile
+from ichor.files.geometry import GeometryFile, AtomicDict
 from ichor.files.int import INT
 
 
@@ -18,37 +17,58 @@ class INTs(Directory, AtomicDict):
     def __init__(
         self, path: Union[Path, str], parent: Optional[GeometryFile] = None
     ):
-        self._parent = None
-        if parent is not None:
-            self._parent = parent
+        self._parent = parent
         dict.__init__(self)
         Directory.__init__(self, path)
 
+    def _parse(self) -> None:
+        """ Parse an *_atomicfiles directory and look for .int files. This method is
+        ran automatically when INTs is initialized. See Directory class which
+        this class subclasses from.
+        
+        .. note::
+            This method does NOT read in information from the INT files (i.e. multipoles 
+            and iqa data are not read in here). This method only finds the relevant files.
+            Once information is requested (i.e. multipoles or iqa are needed), the INT class
+            _read_file method reads in the data.
+        """
+        for f in self:
+            if f.suffix == INT.filetype:
+                self[f.stem.upper()] = INT(f, self._parent)
+        self.sort()
+
     @property
     def parent(self) -> GeometryFile:
+        """ Returns a GeometryFile instance associated with the INTs. This is needed because the
+        .int files are for individual atoms, but these atoms belong to a bigger molecule/system.
+        The GeometryFile contains the information (coordinates) for the whole system."""
         if self._parent is None:
             raise ValueError(
                 f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined"
             )
         return self._parent
 
-    def dump(self):
-        for _, atom in self.items():
-            atom.dump()
-
     @parent.setter
     def parent(self, value: GeometryFile):
+        """ Setter method for parent property."""
         if not isinstance(value, GeometryFile):
             raise TypeError(
-                f"'parent' must be of type 'GeometryFile' not of type {type(value)}"
+                f"'parent' must be of type 'GeometryFile' not of type {type(value)}."
             )
         self._parent = value
 
-    def parse(self) -> None:
-        for f in self:
-            if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f, self._parent)
-        self.sort()
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        """ Checks if the given Path instance has _atomicfiles in its name."""
+        return path.name.endswith("_atomicfiles")
+
+    def dump(self):
+        """ Removes the data from all the associated INT files, i.e. if the files
+        were read in and iqa and multipole data was stored, this method will wipe that
+        data and set all the attributes back to FileContents type.
+        """
+        for _, INT_instance in self.items():
+            INT_instance.dump()
 
     def sort(self):
         """Sorts keys of self by atom index e.g.
@@ -58,25 +78,9 @@ class INTs(Directory, AtomicDict):
         for k in natsorted(list(copy.keys()), key=ignore_alpha):
             self[k] = copy[k]
 
-    @classmethod
-    def check_path(cls, path: Path) -> bool:
-        return path.name.endswith("_atomicfiles")
-
-    def revert_backup(self):
-        """Moves original AIMALL files (which when parsed were converted to .int.bak) to .int files, deleting the json files which
-        were written out as .int"""
-        for atom, int_file in self.items():
-            int_file.revert_backup()
-
     def __iter__(self):
-        """Iterate over all .int files which are found in an INTs directory."""
-        for f in Directory.__iter__(self):
-            if INT.check_path(f):
-                yield f
+        """Iterate over all INT instances (wrap around individual .int files)
+        which are found in an INTs directory."""
+        for INT_instance in self.values():
+            yield INT_instance
 
-    def iter_backup(self):
-        """Iterate over all .bak files which are found in an INTs directory"""
-
-        for f in Directory.__iter__(self):
-            if f.suffix == INT.backup_filetype:
-                yield f
