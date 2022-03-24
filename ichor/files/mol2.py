@@ -457,10 +457,9 @@ non_metal_atoms = [
 ]
 
 
-class Mol2(File, GeometryFile):
+class Mol2(GeometryFile):
     def __init__(self, path: Union[Path, str]):
-        File.__init__(self, path)
-        GeometryFile.__init__(self)
+        super().__init__(path)
 
         self.system_name = None
         self.natoms = None
