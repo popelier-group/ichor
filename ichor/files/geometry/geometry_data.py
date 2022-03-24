@@ -8,6 +8,8 @@ from ichor.files.geometry.geometry_file import GeometryFile
 class PropertyNotFound(Exception):
     pass
 
+class GeometryData(dict):
+    pass
 
 class GeometryDataFile(ABC):
     """
@@ -24,12 +26,12 @@ class GeometryDataFile(ABC):
             raise PropertyNotFound(f"Property {item} not found")
 
     def __getattr__(self, item: str) -> Any:
-        # loop over __dict__ and find any attributes which are dictionaries.
+        # loop over __dict__ (vars(self)) and find any attributes which are dictionaries.
         # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
         # todo: implement method for combining multiple dictionaries with identical keys
-        for var, inst in vars(self).items():
-            if isinstance(inst, GeometryData) and item in inst.keys():
-                return inst[item]
+        for instance in vars(self).values():
+            if isinstance(instance, GeometryData) and item in instance.keys():
+                return instance[item]
         raise AttributeError(
             f"{self.__class__} object has no attribute {item}"
         )
@@ -39,10 +41,6 @@ class GeometryDataFile(ABC):
             if isinstance(self, GeometryFile) and item in self.atoms.names:
                 return AtomData(self.atoms[item], properties=self)
         return super().__getitem__(item)
-
-
-class GeometryData(dict):
-    pass
 
 
 class AtomicDict(dict):
