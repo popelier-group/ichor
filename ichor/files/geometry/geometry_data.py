@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Any
+from ichor.files import File
 
 class PropertyNotFound(Exception):
     pass
@@ -9,7 +10,7 @@ class GeometryData(dict):
     and a GeometryData instance. Otherwise, the same as a normal dictionary."""
     pass
 
-class GeometryDataFile(ABC):
+class GeometryDataFile(File, ABC):
     """
     Class used to describe a file containing properties/data for a particular geometry
 
@@ -34,8 +35,9 @@ class GeometryDataFile(ABC):
         for instance in vars(self).values():
             if isinstance(instance, GeometryData) and item in instance.keys():
                 return instance[item]
+
         raise AttributeError(
-            f"{self.__class__} object has no attribute {item}"
+            f"{self.__class__} object has no attribute {item}."
         )
 
 
