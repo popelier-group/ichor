@@ -1,4 +1,5 @@
 import json
+from lib2to3.pgen2 import token
 import re
 from pathlib import Path
 from typing import Optional, Union
@@ -28,11 +29,11 @@ class INT(GeometryDataFile, File):
         GeometryDataFile.__init__(self)
 
         self.parent = parent
-
         self.integration_data = FileContents
-        self.multipoles_data = FileContents
         self.iqa_data = FileContents
         self.dispersion_data = FileContents
+        self.rotated_multipoles_data = FileContents
+        self.original_multipoles_data = FileContents
 
     @classproperty
     def filetype(cls) -> str:
@@ -40,16 +41,16 @@ class INT(GeometryDataFile, File):
         return ".int"
 
     @classproperty
-    def rotated_filetype(cls) -> str:
-        """Returns the file extension of AIMALL files which are stored as backup files. These backup files are the original AIMALL files,
-        which are renamed so that a json file can be written out as .int instead."""
+    def summarized_filetype(cls) -> str:
+        """Returns the file extension of json-like files which contain the rotated data from .int files.
+        This rotation moves from global Cartesian (given by AIMAll) to local coordinates (based on ALF of atom)."""
         return ".json"
 
     @buildermethod
     def _read_file(self):
         """Read an .int file. The first time that the .int file is read successfully, a json file with the
-        important information is written in the same directory. This json file has the suffix `.int` from now on
-        and the original `.int` file is stored with suffix `.int.bak` for backup."""
+        important information is written in the same directory.
+        """
         try:
             self.read_json()
         except json.decoder.JSONDecodeError:
@@ -63,13 +64,13 @@ class INT(GeometryDataFile, File):
 
     @property
     def atom_num(self):
-        """Returns the atom index in the system. (1-index)"""
+        """Returns the atom index in the system. (atom indices in atom names start at 1)"""
         return int(re.findall("\d+", self.atom_name)[0])
 
     @property
     def json_path(self) -> Path:
         """ Returns a Path object corresponding to the json file"""
-        return self.path.with_suffix(self.rotated_filetype)
+        return self.path.with_suffix(self.summarized_filetype) 
 
     @property
     def file_contents(self):
@@ -100,32 +101,26 @@ class INT(GeometryDataFile, File):
 
     @property
     def iqa_dispersion(self):
+        # TODO: If using dispersion as well, this will be wrong because IQA will have dispersion added already.
         return self.iqa + self.dispersion
-
-    @property
-    def multipoles(self):
-        """Returns a dictionary of the multipole moments that were calculated for this particular topological atom (since 1 .int file is written for each topological atom)."""
-        multipoles = {
-            multipole: self.multipoles_data[multipole]
-            for multipole in constants.multipole_names
-        }
-        multipoles["q00"] = self.q  # replace charge with net charge
-        return multipoles
 
     @property
     def q(self):
         """Returns the point charge (monopole moment) of the topological atom."""
+        # replace charge with net charge. The Q00 value written in AIMAll does not subtract the nuclear charge.
         return self.integration_data["q"]
 
     @property
     def q00(self):
         """Returns the point charge (monopole moment) of the topological atom."""
+        # replace charge with net charge. The Q00 value written in AIMAll does not subtract the nuclear charge.
         return self.q
 
     @property
     def dipole(self):
-        """Returns the magnitude of the dipole moment of the topological atom."""
-        return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
+        """Returns the magnitude of the dipole moment of the topological atom.
+        The magnitude of the vector is not affected by the rotation of multipoles."""
+        return np.sqrt(sum([self.original_q10 ** 2, self.original_q11c ** 2, self.original_q11s ** 2]))
 
     @buildermethod
     def read_int(self):
@@ -134,7 +129,7 @@ class INT(GeometryDataFile, File):
         self.integration_data = GeometryData()
         self.iqa_data = GeometryData()
         self.dispersion_data = GeometryData()
-        self.multipoles_data = GeometryData()
+        self.original_multipoles_data = GeometryData()
 
         with open(self.path, "r") as f:
             for line in f:
@@ -166,7 +161,7 @@ class INT(GeometryDataFile, File):
                 - q00 = ...
                 - q44s = ...
                 
-                All multipoles are parsed even though only hexadecapoles are used by ichor
+                All multipoles are parsed, even though only up to hexadecapoles are used by ichor
                 again 'just in case'
                 """
                 if "Real Spherical Harmonic Moments Q[l,|m|,?]" in line:
@@ -185,9 +180,9 @@ class INT(GeometryDataFile, File):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
-                                self.multipoles_data[
-                                    multipole.lower()
-                                ] = float(tokens[-1])
+                                if multipole != "q00":
+                                    self.original_multipoles_data[
+                                    "original_" + multipole.lower()] = float(tokens[-1])
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -210,19 +205,29 @@ class INT(GeometryDataFile, File):
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
 
-        # this should call the multipoles_data.setter, which should make all the q00,q10, etc. attributes
-        # thus, the GeometryData getattr method will not look into __dict__, but __getattribute__ will be used directly
-        # self.multipoles_data = raw_multipoles_data
-        # after setting all the attributes, we rotate them and modify them as needed.
+        # rotate multipoles after, so that we also store rotated multipoles
         if self.parent:
             self.rotate_multipoles()
 
-        # overwrite the initial self.multipoles_data dict because it contains the raw data
-        # if not overwritten, the original data from the .int files is
-        for multipole_name in constants.multipole_names:
-            self.multipoles_data[multipole_name] = getattr(
-                self, multipole_name
-            )
+    def write_json(self):
+        """Write a file in json format that only contains the important information that ICHOR needs for later steps. This speeds up reading times
+        if the information needs to be accessed again.
+
+        .. note::
+            This method is used to write out both json files (one with rotated and one with original
+            non-rotated multipole data). The original json data is written right after
+            the original .int file is read in, the rotated 
+        """
+        int_data = {
+            "integration": self.integration_data,
+            "iqa_data": self.iqa_data,
+            "original_multipoles": self.original_multipoles_data,
+            "rotated_multipoles": self.rotated_multipoles_data or {},
+            "dispersion_data": self.dispersion_data or {},
+        }
+
+        with open(self.json_path, "w") as f:
+            json.dump(int_data, f)
 
     @buildermethod
     def read_json(self):
@@ -232,7 +237,8 @@ class INT(GeometryDataFile, File):
         with open(self.json_path, "r") as f:
             int_data = json.load(f)
             self.integration_data = GeometryData(int_data["integration"])
-            self.multipoles_data = GeometryData(int_data["multipoles"])
+            self.rotated_multipoles_data = GeometryData(int_data["rotated_multipoles"])
+            self.original_multipoles_data = GeometryData(int_data["original_multipoles"])
             self.iqa_data = GeometryData(int_data["iqa_data"])
             if "dispersion_data" in int_data.keys():
                 self.dispersion_data = GeometryData(
@@ -240,19 +246,6 @@ class INT(GeometryDataFile, File):
                 )
             else:
                 self.dispersion_data = GeometryData()
-
-    def write_json(self):
-        """Write the .int file in json format that only contains the important information that ICHOR needs for later steps. This speeds up reading times
-        if the information needs to be accessed again."""
-        int_data = {
-            "integration": self.integration_data,
-            "multipoles": self.multipoles_data,
-            "iqa_data": self.iqa_data,
-            "dispersion_data": self.dispersion_data or {},
-        }
-
-        with open(self.path, "w") as f:
-            json.dump(int_data, f)
 
     def rotate_multipoles(self):
         """
@@ -266,6 +259,7 @@ class INT(GeometryDataFile, File):
         Stone, Anthony. The Theory of Intermolecular Forces,
         Oxford University Press, Incorporated, 2013.
         """
+        self.rotated_multipoles = GeometryData()
         self.rotate_dipole()
         self.rotate_quadrupole()
         self.rotate_octupole()
@@ -309,65 +303,65 @@ class INT(GeometryDataFile, File):
         """Rotates dipole moment from global cartesian to local cartesian. Attributes like self.q11c, self.q11s, etc. are not
         explicitly defined here, but they can be accessed because of the GeometryData __getattr__ implementation, which allows
         accessing dictionary keys as if they were attributes."""
-        self.q10, self.q11c, self.q11s = rotate_dipole(
-            self.q10, self.q11c, self.q11s, self.C
+        self.rotated_q10, self.rotated_q11c, self.rotated_q11s = rotate_dipole(
+            self.original_q10, self.original_q11c, self.original_q11s, self.C
         )
 
     def rotate_quadrupole(self):
         """Rotates quadrupole moments from the global to local frame"""
         (
-            self.q20,
-            self.q21c,
-            self.q21s,
-            self.q22c,
-            self.q22s,
+            self.rotated_q20,
+            self.rotated_q21c,
+            self.rotated_q21s,
+            self.rotated_q22c,
+            self.rotated_q22s,
         ) = rotate_quadrupole(
-            self.q20, self.q21c, self.q21s, self.q22c, self.q22s, self.C
+            self.original_q20, self.original_q21c, self.original_q21s, self.original_q22c, self.original_q22s, self.C
         )
 
     def rotate_octupole(self):
         """Rotates octupole moments from the global to local frame"""
         (
-            self.q30,
-            self.q31c,
-            self.q31s,
-            self.q32c,
-            self.q32s,
-            self.q33c,
-            self.q33s,
+            self.rotated_q30,
+            self.rotated_q31c,
+            self.rotated_q31s,
+            self.rotated_q32c,
+            self.rotated_q32s,
+            self.rotated_q33c,
+            self.rotated_q33s,
         ) = rotate_octupole(
-            self.q30,
-            self.q31c,
-            self.q31s,
-            self.q32c,
-            self.q32s,
-            self.q33c,
-            self.q33s,
+            self.original_q30,
+            self.original_q31c,
+            self.original_q31s,
+            self.original_q32c,
+            self.original_q32s,
+            self.original_q33c,
+            self.original_q33s,
             self.C,
         )
 
     def rotate_hexadecapole(self):
         """Rotates hexadecapole moments from the global to local frame"""
         (
-            self.q40,
-            self.q41c,
-            self.q41s,
-            self.q42c,
-            self.q42s,
-            self.q43c,
-            self.q43s,
-            self.q44c,
-            self.q44s,
+            self.rotated_q40,
+            self.rotated_q41c,
+            self.rotated_q41s,
+            self.rotated_q42c,
+            self.rotated_q42s,
+            self.rotated_q43c,
+            self.rotated_q43s,
+            self.rotated_q44c,
+            self.rotated_q44s,
         ) = rotate_hexadecapole(
-            self.q40,
-            self.q41c,
-            self.q41s,
-            self.q42c,
-            self.q42s,
-            self.q43c,
-            self.q43s,
-            self.q44c,
-            self.q44s,
+            self.original_q40,
+            self.original_q41c,
+            self.original_q41s,
+            self.original_q42c,
+            self.original_q42s,
+            self.original_q43c,
+            self.original_q43s,
+            self.original_q44c,
+            self.original_q44s,
             self.C,
         )
 
@@ -383,7 +377,7 @@ class INT(GeometryDataFile, File):
                     self.atom_name
                 ].interaction_energy
                 self.dispersion_data["dispersion"] = interaction_energy
-                self.write_json()
+                self.write_json(self.json_rotated_path)
                 return interaction_energy
             raise FileNotFoundError(
                 f"Cannot find 'MorfiOutput' in {pandora_dir}"
@@ -394,7 +388,8 @@ class INT(GeometryDataFile, File):
 
     @cached_property
     def dispersion(self):
-        # TODO: Move this to a different file. Dispersion is not in original .int files.
+        # TODO: Move this to a different class. Dispersion is not in original .int files and
+        # should not be addressed in this class.
         if (
             self.dispersion_data is not None
             and "dispersion" in self.dispersion_data.keys()
