@@ -8,7 +8,6 @@ import numpy as np
 from ichor import constants, patterns
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
-from ichor.common.io import move
 from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryData, GeometryDataFile
 from ichor.multipoles import (rotate_dipole, rotate_hexadecapole,
@@ -74,7 +73,9 @@ class INT(GeometryDataFile, File):
     @property
     def file_contents(self):
         """A list of strings that this class should have accessible as attributes"""
-        return ["iqa", *constants.multipole_names]
+        original_multipole_names = [f"original_{multipole_name}" for multipole_name in constants.multipole_names]
+        rotated_multipole_names = [f"rotated_{multipole_name}" for multipole_name in constants.multipole_names]
+        return ["iqa"] + original_multipole_names + rotated_multipole_names
 
     @property
     def integration_error(self):
@@ -127,9 +128,7 @@ class INT(GeometryDataFile, File):
 
         self.integration_data = GeometryData()
         self.iqa_data = GeometryData()
-        self.dispersion_data = GeometryData()
         self.original_multipoles_data = GeometryData()
-        self.rotated_multipoles = GeometryData()
 
         with open(self.path, "r") as f:
             for line in f:
@@ -180,6 +179,7 @@ class INT(GeometryDataFile, File):
                                     .replace(",", "")
                                     .replace("]", "")
                                 )
+                                # DO NOT read in q00 because the Q[0,0] does not take into account the nuclear charge, but we need that
                                 if multipole != "q00":
                                     self.original_multipoles_data[
                                     "original_" + multipole.lower()] = float(tokens[-1])
@@ -218,11 +218,13 @@ class INT(GeometryDataFile, File):
             non-rotated multipole data). The original json data is written right after
             the original .int file is read in, the rotated 
         """
+        # this is the only data that should be written if a parent does not exist
         int_data = {
             "integration": self.integration_data,
             "iqa_data": self.iqa_data,
             "original_multipoles": self.original_multipoles_data,
         }
+        # data that can be optionally added if a parent does not exist
         if self.rotated_multipoles_data:
             int_data["rotated_multipoles"] = self.rotated_multipoles_data
         if self.dispersion_data:
@@ -238,11 +240,11 @@ class INT(GeometryDataFile, File):
         that ICHOR needs for later steps. This speeds up reading times if the information from the .int file is needed again."""
         with open(self.json_path, "r") as f:
             int_data = json.load(f)
-            self.integration_data = GeometryData(int_data.get("integration", None))
-            self.rotated_multipoles_data = GeometryData(int_data.get("rotated_multipoles", None))
-            self.original_multipoles_data = GeometryData(int_data.get("original_multipoles", None))
-            self.iqa_data = GeometryData(int_data.get("iqa_data", None))
-            self.dispersion_data = GeometryData(int_data.get("dispersion_data", None))
+            self.integration_data = GeometryData(int_data.get("integration")) if int_data.get("integration") else FileContents
+            self.rotated_multipoles_data = GeometryData(int_data.get("rotated_multipoles")) if int_data.get("rotated_multipoles") else FileContents
+            self.original_multipoles_data = GeometryData(int_data.get("original_multipoles")) if int_data.get("integration") else FileContents
+            self.iqa_data = GeometryData(int_data.get("iqa_data")) if int_data.get("iqa_data") else FileContents
+            self.dispersion_data = GeometryData(int_data.get("dispersion_data")) if int_data.get("dispersion_data") else FileContents
 
     def rotate_multipoles(self):
         """
@@ -256,6 +258,7 @@ class INT(GeometryDataFile, File):
         Stone, Anthony. The Theory of Intermolecular Forces,
         Oxford University Press, Incorporated, 2013.
         """
+        self.rotated_multipoles = GeometryData()
         self.rotate_dipole()
         self.rotate_quadrupole()
         self.rotate_octupole()
@@ -365,6 +368,8 @@ class INT(GeometryDataFile, File):
         # TODO: THIS DOES NOT NEED TO BE HERE because the pandora directory might not exist. NEED TO PASS in a path from where to get dispersion will be the proper library implementation.
         from ichor.files.pandora import PandoraDirectory
 
+        self.dispersion_data = GeometryData()
+
         pandora_path = self.path.parent.parent / PandoraDirectory.dirname
         if pandora_path.exists():
             pandora_dir = PandoraDirectory(pandora_path)
@@ -373,7 +378,7 @@ class INT(GeometryDataFile, File):
                     self.atom_name
                 ].interaction_energy
                 self.dispersion_data["dispersion"] = interaction_energy
-                self.write_json(self.json_rotated_path)
+                self.write_json(self.json_path)
                 return interaction_energy
             raise FileNotFoundError(
                 f"Cannot find 'MorfiOutput' in {pandora_dir}"
