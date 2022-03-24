@@ -87,6 +87,10 @@ class File(PathObject, ABC):
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
+        """ Checks the suffix of the given path matches the filetype associated with class that subclasses from File
+        :param path: A Path object to check
+        :return: True if the Path object has the same suffix as the class filetype, False otherwise
+        """
         return path.suffix == cls.filetype
 
     def move(self, dst) -> None:
