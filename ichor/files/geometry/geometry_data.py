@@ -11,7 +11,7 @@ class GeometryData(dict):
 
 class GeometryDataFile(ABC):
     """
-    Class used to describe a file containing properties of a geometry
+    Class used to describe a file containing properties/data for a particular geometry
 
     Adds the method `get_property` which can be used to search for a property of a geometry
     Adds the ability to search for a property using dictionaries in the inherited class
