@@ -22,3 +22,7 @@ class PathObject(ABC, object):
     @abstractmethod
     def move(self, dst) -> None:
         """An abstract method that subclasses need to implement. This is used to move files around."""
+
+    def delete(self):
+        """Delete the Path object from disk."""
+        self.path.unlink()
