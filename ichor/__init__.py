@@ -31,26 +31,19 @@
     we will be more than happy to help.
 """
 
-
-from ichor.batch_system import BATCH_SYSTEM
 from ichor.common.types import Version
-from ichor.globals import GLOBALS
-from ichor.machine import MACHINE
-
 __version__ = Version("3.0.1")
 
-__all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM", "__version__"]
-
-
-import sys
-
-from ichor.arguments import Arguments
-from ichor.globals import GLOBALS
-from ichor.main import main_menu
-
-
 def ichor_main():
+
+    from ichor.batch_system import BATCH_SYSTEM
+    from ichor.globals import GLOBALS
+    from ichor.machine import MACHINE
+    from ichor.arguments import Arguments
     from ichor import in_main
+    from ichor.main import main_menu
+    import sys
+    __all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM", "__version__"]
 
     in_main.IN_MAIN = True
 
