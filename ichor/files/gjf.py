@@ -51,13 +51,11 @@ class GJF(QuantumChemistryProgramInput):
     """Wraps around a .gjf file that is used as input to Gaussian."""
 
     def __init__(self, path: Union[Path, str]):
-        QuantumChemistryProgramInput.__init__(self, path)
+        super().__init__(self, path)
 
         self.job_type: Optional[GaussianJobType] = FileContents
-
         self.charge: Optional[int] = FileContents
         self.multiplicity: Optional[int] = FileContents
-
         self.startup_options: Optional[List[str]] = FileContents
         self.keywords: Optional[List[str]] = FileContents
 

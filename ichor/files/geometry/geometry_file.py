@@ -1,13 +1,14 @@
 from typing import Optional
 
 from ichor.atoms import Atoms
-from ichor.files.file import FileContents
+from ichor.files.file import File, FileContents
 from ichor.files.geometry.atom_data import AtomData
 
-class GeometryFile:
+class GeometryFile(File):
     atoms: Optional[Atoms]
 
-    def __init__(self):
+    def __init__(self, path):
+        super().__init__(path)
         self.atoms = FileContents
 
     @property

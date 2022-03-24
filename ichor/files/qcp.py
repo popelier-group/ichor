@@ -6,12 +6,11 @@ from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryFile
 
 
-class QuantumChemistryProgramInput(GeometryFile, File, ABC):
+class QuantumChemistryProgramInput(GeometryFile, ABC):
     """Abstract class to interface with quantum chemistry programs"""
 
     def __init__(self, path: Union[Path, str]):
-        File.__init__(self, path)
-        GeometryFile.__init__(self)
+        super().__init__(path)
 
         self.method: Optional[str] = FileContents
         self.basis_set: Optional[str] = FileContents
