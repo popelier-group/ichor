@@ -308,6 +308,15 @@ class ListOfAtoms(list):
                 df.columns = self.get_headings()
                 df.to_excel(workbook, sheet_name=atom_name)
 
+    @property
+    def natoms(self):
+        if len(self) == 0:
+            raise ValueError(f"No atoms defined")
+        if hasattr(self[0], "atoms"):
+            return len(self[0].atoms)
+        else:
+            return len(self[0])
+
     def center_geometries_on_atom_and_write_xyz(
         self, central_atom_name, fname: Optional[Union[str, Path]] = None
     ):
@@ -323,6 +332,7 @@ class ListOfAtoms(list):
         from ichor.atoms import Atom
         from ichor.files import Trajectory
         from ichor.files.trajectory import features_to_coordinates
+        from ichor.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:
             raise ValueError(
@@ -337,22 +347,25 @@ class ListOfAtoms(list):
             fname = fname.with_suffix(".xyz")
 
         # calcultate features and convert to a new Trajectory object
-        xyz_array = features_to_coordinates(self[central_atom_name].features)
+        alf = self[0][central_atom_name].alf
 
-        # converting from features to coordinates might give a new ordering of the atoms, so need to adjust for that
-        # because the features to coordinates will always give the x-axis atom and the xy-plane atoms as the 2nd and 3rd atoms respectively
-        correct_atom_names = [self.types_extended[i] for i in self[central_atom_name].alf] + [self.types_extended[i] for i in range(len(self[0])) if i not in self[central_atom_name].alf]
+        current_order = list(range(self.natoms))
+        new_order = alf + list(set(current_order) - set(alf))
+
+        xyz_array = features_to_coordinates(self[central_atom_name].features)
+        xyz_array[:,current_order] = xyz_array[:,new_order]
         trajectory = Trajectory()
 
         for geometry in xyz_array:
             # initialize empty Atoms instance
             atoms = Atoms()
-            for ty, atom_coord in zip(correct_atom_names, geometry):
+            for ty, atom_coord in zip(self.atom_names, geometry):
                 # add Atom instances for every atom in the geometry to the Atoms instance
                 atoms.add(
-                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
+                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2], units=AtomicDistance.Bohr)
                 )
             # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
+            atoms.to_angstroms()
             trajectory.add(atoms)
 
         trajectory.write(fname)

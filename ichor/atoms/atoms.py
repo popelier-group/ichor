@@ -172,6 +172,10 @@ class Atoms(list):
         """
         return np.array([atom.alf for atom in self])
 
+    def reindex(self):
+        for i, atom in enumerate(self):
+            atom.index = i+1
+
     @property
     def atoms(self):
         return [atom.name for atom in self]
@@ -179,6 +183,12 @@ class Atoms(list):
     @property
     def atom_names(self):
         return [atom.name for atom in self]
+
+    def copy(self):
+        new = Atoms()
+        for a in self:
+            new.add(Atom(a.type, a.x, a.y, a.z))
+        return new
 
     @property
     def features(self) -> np.ndarray:

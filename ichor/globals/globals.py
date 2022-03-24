@@ -212,7 +212,7 @@ class Globals:
     SAMPLE_POOL_METHOD: List[str] = ["random"]
     VALIDATION_SET_METHOD: List[str] = ["random"]
 
-    KERNEL: str = "rbf-cyclic"  # rbf or rbf-cyclic currently
+    KERNEL: str = "periodic"  # rbf or rbf-cyclic currently
     FEREBUS_TYPE: str = (
         "executable"  # executable (FEREBUS) or python (FEREBUS.py)
     )
@@ -262,7 +262,7 @@ class Globals:
     FEREBUS_OPTIMISATION: str = "pso"
 
     FEREBUS_TOLERANCE: float = 1.0e-8
-    FEREBUS_STALL_ITERATIONS: int = 50
+    FEREBUS_STALL_ITERATIONS: int = 20
     FEREBUS_CONVERGENCE: int = 20
     FEREBUS_MAX_ITERATION: int = 1000
 
@@ -280,6 +280,7 @@ class Globals:
 
     DLPOLY_CHECK_CONVERGENCE: bool = False
     DLPOLY_CONVERGENCE_CRITERIA: int = -1
+    DLPOLY_CELL_SIZE: float = 25.0
 
     DLPOLY_MAX_ENERGY: float = -1.0
     DLPOLY_MAX_FORCE: float = -1.0
