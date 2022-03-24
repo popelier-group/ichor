@@ -67,5 +67,5 @@ class Parser:
             node = BinOp(left=node, op=token, right=self.term())
         return node
 
-    def parse(self) -> ASTNode:
+    def _parse(self) -> ASTNode:
         return self.expr()

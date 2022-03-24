@@ -40,7 +40,7 @@ class Models(Directory, list):
         list.__init__(self)
         Directory.__init__(self, path)
 
-    def parse(self) -> None:
+    def _parse(self) -> None:
         """Parse a directory and add any `.model` files to the `Models` instance"""
         for f in self:
             if f.suffix == Model.filetype:

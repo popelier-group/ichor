@@ -24,7 +24,7 @@ class Directory(PathObject, ABC):
         self.parse()  # parse directory to find contents and setup the directory structure. THIS DOES NOT READ IN DIRECTORY CONTENTS
 
     @abstractmethod
-    def parse(self) -> None:
+    def _parse(self) -> None:
         """
         Abstract method to find all relevant files within the directory.
 
@@ -137,7 +137,7 @@ class AnnotatedDirectory(Directory, ABC):
         for d in self.directories:
             d.dump()
 
-    def parse(self):
+    def _parse(self):
         """
         Iterates over an `AnnotatedDirectory`'s contents (which could be files or other directories). If the content is a file,
         """

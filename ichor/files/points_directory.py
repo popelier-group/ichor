@@ -35,7 +35,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
         Directory.__init__(self, path)
 
-    def parse(self) -> None:
+    def _parse(self) -> None:
         """
         Called from Directory.__init__(self, path)
         Parse a directory (such as TRAINING_SET, TEST_SET,etc.) and make PointDirectory objects of each of the subirectories.
