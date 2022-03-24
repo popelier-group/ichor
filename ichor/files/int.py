@@ -34,21 +34,16 @@ class INT(GeometryDataFile, File):
         self.iqa_data = FileContents
         self.dispersion_data = FileContents
 
-    @property
-    def atom(self) -> str:
-        """Returns the name of the atom, including its index in the molecule. Eg. C1, H2, O3, etc."""
-        return self.path.stem.upper()
-
     @classproperty
     def filetype(cls) -> str:
         """Returns the file extension of AIMALL files which are used"""
         return ".int"
 
     @classproperty
-    def backup_filetype(cls) -> str:
+    def rotated_filetype(cls) -> str:
         """Returns the file extension of AIMALL files which are stored as backup files. These backup files are the original AIMALL files,
         which are renamed so that a json file can be written out as .int instead."""
-        return ".bak"
+        return ".json"
 
     @buildermethod
     def _read_file(self):
@@ -59,15 +54,78 @@ class INT(GeometryDataFile, File):
             self.read_json()
         except json.decoder.JSONDecodeError:
             self.read_int()
-            # Backup only if read correctly
-            # E_IQA_Inter(A) Last Line that needs to be parsed, if this is here then the
-            # rest of the values we care about should be
-            if "E_IQA_Inter(A)" in self.iqa_data.keys():
-                self.backup_int()
-                self.write_json()
-            else:
-                # Delete corrupted file so it can be regenerated
-                self.delete()
+            self.write_json()
+
+    @property
+    def atom_name(self) -> str:
+        """Returns the name of the atom, including its index in the molecule. Eg. C1, H2, O3, etc."""
+        return self.path.stem.upper()
+
+    @property
+    def atom_num(self):
+        """Returns the atom index in the system. (1-index)"""
+        return int(re.findall("\d+", self.atom_name)[0])
+
+    @property
+    def json_path(self) -> Path:
+        """ Returns a Path object corresponding to the json file"""
+        return self.path.with_suffix(self.rotated_filetype)
+
+    @property
+    def file_contents(self):
+        """A list of strings that this class should have accessible as attributes"""
+        return ["iqa", *constants.multipole_names]
+
+    @property
+    def integration_error(self):
+        """The integration error can tell you if a point has been decomposed into topological atoms correctly. A large integration error signals
+        that the point might not be suitable for training as the AIMALL IQA/multipole moments might be inaccurate."""
+        return self.integration_data["L"]
+
+    @property
+    def iqa(self):
+        """Returns the IQA energy of the topological atom that was calculated for this topological atom (since 1 .int file is written for each topological atom)."""
+        # TODO: remove the ADD_DISPERSION. This class should only be used to parse .int files and
+        # processing the data should be done somewhere else.
+        from ichor.qct import ADD_DISPERSION
+
+        iqa = self.iqa_data["E_IQA(A)"]
+        if ADD_DISPERSION():
+            iqa += self.dispersion
+        return iqa
+
+    @property
+    def e_intra(self):
+        return self.iqa_data["E_IQA_Intra(A)"]
+
+    @property
+    def iqa_dispersion(self):
+        return self.iqa + self.dispersion
+
+    @property
+    def multipoles(self):
+        """Returns a dictionary of the multipole moments that were calculated for this particular topological atom (since 1 .int file is written for each topological atom)."""
+        multipoles = {
+            multipole: self.multipoles_data[multipole]
+            for multipole in constants.multipole_names
+        }
+        multipoles["q00"] = self.q  # replace charge with net charge
+        return multipoles
+
+    @property
+    def q(self):
+        """Returns the point charge (monopole moment) of the topological atom."""
+        return self.integration_data["q"]
+
+    @property
+    def q00(self):
+        """Returns the point charge (monopole moment) of the topological atom."""
+        return self.q
+
+    @property
+    def dipole(self):
+        """Returns the magnitude of the dipole moment of the topological atom."""
+        return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
 
     @buildermethod
     def read_int(self):
@@ -166,6 +224,36 @@ class INT(GeometryDataFile, File):
                 self, multipole_name
             )
 
+    @buildermethod
+    def read_json(self):
+        """A json file is used to contain only the information needed to make the multipole moments. After reading a .int file for the first time,
+        the original .int file from AIMALL is renamed to *.int.bak, and the .int file is made into a json file which only contains the information
+        that ICHOR needs for later steps. This speeds up reading times if the information from the .int file is needed again."""
+        with open(self.json_path, "r") as f:
+            int_data = json.load(f)
+            self.integration_data = GeometryData(int_data["integration"])
+            self.multipoles_data = GeometryData(int_data["multipoles"])
+            self.iqa_data = GeometryData(int_data["iqa_data"])
+            if "dispersion_data" in int_data.keys():
+                self.dispersion_data = GeometryData(
+                    int_data["dispersion_data"]
+                )
+            else:
+                self.dispersion_data = GeometryData()
+
+    def write_json(self):
+        """Write the .int file in json format that only contains the important information that ICHOR needs for later steps. This speeds up reading times
+        if the information needs to be accessed again."""
+        int_data = {
+            "integration": self.integration_data,
+            "multipoles": self.multipoles_data,
+            "iqa_data": self.iqa_data,
+            "dispersion_data": self.dispersion_data or {},
+        }
+
+        with open(self.path, "w") as f:
+            json.dump(int_data, f)
+
     def rotate_multipoles(self):
         """
         Multipoles from AIMAll are calculated in the global spherical frame whereas DL_FFLUX requires
@@ -196,12 +284,12 @@ class INT(GeometryDataFile, File):
         from ichor.atoms.calculators.feature_calculator import \
             ALFFeatureCalculator
 
-        atom = self.parent.atoms[self.atom]
-        x_axis = ALFFeatureCalculator.calculate_x_axis_atom(atom)
-        xy_plane = ALFFeatureCalculator.calculate_xy_plane_atom(atom)
+        atom_inst = self.parent.atoms[self.atom_name]
+        x_axis = ALFFeatureCalculator.calculate_x_axis_atom(atom_inst)
+        xy_plane = ALFFeatureCalculator.calculate_xy_plane_atom(atom_inst)
 
-        r12 = x_axis.coordinates - atom.coordinates
-        r13 = xy_plane.coordinates - atom.coordinates
+        r12 = x_axis.coordinates - atom_inst.coordinates
+        r13 = xy_plane.coordinates - atom_inst.coordinates
 
         mod_r12 = np.linalg.norm(r12)
 
@@ -283,81 +371,8 @@ class INT(GeometryDataFile, File):
             self.C,
         )
 
-    @buildermethod
-    def read_json(self):
-        """A json file is used to contain only the information needed to make the multipole moments. After reading a .int file for the first time,
-        the original .int file from AIMALL is renamed to *.int.bak, and the .int file is made into a json file which only contains the information
-        that ICHOR needs for later steps. This speeds up reading times if the information from the .int file is needed again."""
-        with open(self.path, "r") as f:
-            int_data = json.load(f)
-            self.integration_data = GeometryData(int_data["integration"])
-            self.multipoles_data = GeometryData(int_data["multipoles"])
-            self.iqa_data = GeometryData(int_data["iqa_data"])
-            if "dispersion_data" in int_data.keys():
-                self.dispersion_data = GeometryData(
-                    int_data["dispersion_data"]
-                )
-            else:
-                self.dispersion_data = GeometryData()
-
-    @property
-    def file_contents(self):
-        """A list of strings that this class should have accessible as attributes"""
-        return ["iqa", *constants.multipole_names]
-
-    @property
-    def backup_path(self):
-        """The path to the renamed .int file which was made by AIMALL."""
-        return self.path.parent / (self.path.name + ".bak")
-
-    def backup_int(self):
-        """Move the original .int file that was generated by AIMALL to its new path (renames it to *.int.bak)."""
-        self.move(self.backup_path)
-
-    def revert_backup(self):
-        """Move the original .int file (which is now stored as *.int.bak) to its original path *.int"""
-        if self.backup_path.exists():
-            move(self.backup_path, self.path)
-
-    def write_json(self):
-        """Write the .int file in json format that only contains the important information that ICHOR needs for later steps. This speeds up reading times
-        if the information needs to be accessed again."""
-        int_data = {
-            "integration": self.integration_data,
-            "multipoles": self.multipoles_data,
-            "iqa_data": self.iqa_data,
-            "dispersion_data": self.dispersion_data or {},
-        }
-
-        with open(self.path, "w") as f:
-            json.dump(int_data, f)
-
-    @property
-    def num(self):
-        """Returns the atom index in the system. (1-index)"""
-        return int(re.findall("\d+", self.atom)[0])
-
-    @property
-    def integration_error(self):
-        """The integration error can tell you if a point has been decomposed into topological atoms correctly. A large integration error signals
-        that the point might not be suitable for training as the AIMALL IQA/multipole moments might be inaccurate."""
-        return self.integration_data["L"]
-
-    @property
-    def iqa(self):
-        """Returns the IQA energy of the topological atom that was calculated for this topological atom (since 1 .int file is written for each topological atom)."""
-        from ichor.qct import ADD_DISPERSION
-
-        iqa = self.iqa_data["E_IQA(A)"]
-        if ADD_DISPERSION():
-            iqa += self.dispersion
-        return iqa
-
-    @property
-    def e_intra(self):
-        return self.iqa_data["E_IQA_Intra(A)"]
-
     def get_dispersion(self) -> Optional[float]:
+        # TODO: THIS DOES NOT NEED TO BE HERE because the pandora directory might not exist. NEED TO PASS in a path from where to get dispersion will be the proper library implementation.
         from ichor.files.pandora import PandoraDirectory
 
         pandora_path = self.path.parent.parent / PandoraDirectory.dirname
@@ -365,7 +380,7 @@ class INT(GeometryDataFile, File):
             pandora_dir = PandoraDirectory(pandora_path)
             if pandora_dir.morfi.mout.exists():
                 interaction_energy = pandora_dir.morfi.mout[
-                    self.atom
+                    self.atom_name
                 ].interaction_energy
                 self.dispersion_data["dispersion"] = interaction_energy
                 self.write_json()
@@ -379,6 +394,7 @@ class INT(GeometryDataFile, File):
 
     @cached_property
     def dispersion(self):
+        # TODO: Move this to a different file. Dispersion is not in original .int files.
         if (
             self.dispersion_data is not None
             and "dispersion" in self.dispersion_data.keys()
@@ -390,36 +406,3 @@ class INT(GeometryDataFile, File):
             raise AttributeError(
                 f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute 'dispersion'"
             )
-
-    @property
-    def iqa_dispersion(self):
-        return self.iqa + self.dispersion
-
-    @property
-    def multipoles(self):
-        """Returns a dictionary of the multipole moments that were calculated for this particular topological atom (since 1 .int file is written for each topological atom)."""
-        multipoles = {
-            multipole: self.multipoles_data[multipole]
-            for multipole in constants.multipole_names
-        }
-        multipoles["q00"] = self.q  # replace charge with net charge
-        return multipoles
-
-    @property
-    def q(self):
-        """Returns the point charge (monopole moment) of the topological atom."""
-        return self.integration_data["q"]
-
-    @property
-    def q00(self):
-        """Returns the point charge (monopole moment) of the topological atom."""
-        return self.q
-
-    @property
-    def dipole(self):
-        """Returns the magnitude of the dipole moment of the topological atom."""
-        return np.sqrt(sum([self.q10 ** 2, self.q11c ** 2, self.q11s ** 2]))
-
-    def delete(self):
-        """Delete the .int file from disk."""
-        self.path.unlink()
