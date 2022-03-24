@@ -337,7 +337,7 @@ def read_ccp(
     )
 
 
-class MOUT(File, GeometryFile, GeometryDataFile, AtomicDict):
+class MOUT(GeometryFile, GeometryDataFile, AtomicDict):
     nnuc: Optional[int]
     nbcp: Optional[int]
     nrcp: Optional[int]
@@ -348,9 +348,8 @@ class MOUT(File, GeometryFile, GeometryDataFile, AtomicDict):
     cage_critical_points: Optional[List["CageCriticalPoint"]]
 
     def __init__(self, path: Path):
-        GeometryFile.__init__(self)
+        GeometryFile.__init__(self, path)
         GeometryDataFile.__init__(self)
-        File.__init__(self, path)
 
         self.nnuc = FileContents
         self.nbcp = FileContents
