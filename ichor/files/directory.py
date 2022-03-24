@@ -21,7 +21,7 @@ class Directory(PathObject, ABC):
         PathObject.__init__(
             self, path
         )  # set path attribute for Directory instance
-        self.parse()  # parse directory to find contents and setup the directory structure. THIS DOES NOT READ IN DIRECTORY CONTENTS
+        self._parse()  # parse directory to find contents and setup the directory structure. THIS DOES NOT READ IN DIRECTORY CONTENTS
 
     @abstractmethod
     def _parse(self) -> None:
