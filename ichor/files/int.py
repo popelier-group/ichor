@@ -10,7 +10,7 @@ from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
 from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryData, GeometryDataFile
-from ichor.multipoles import (rotate_dipole, rotate_hexadecapole,
+from ichor.multipoles import (quadrupole, rotate_dipole, rotate_hexadecapole,
                               rotate_octupole, rotate_quadrupole)
 
 
@@ -261,13 +261,13 @@ class INT(GeometryDataFile):
         Oxford University Press, Incorporated, 2013.
         """
         self.rotated_multipoles_data = GeometryData()
+        # technically don't need to add that here because it is not rotated
+        # but add it just in case someone wants all the rotated multipoles (including q00)
+        self.rotated_multipoles_data["q00"] = self.q00
         self.rotate_dipole()
         self.rotate_quadrupole()
         self.rotate_octupole()
         self.rotate_hexadecapole()
-        # technically don't need to add that here because it is not rotated
-        # but add it just in case someone wants all the rotated multipoles (including q00)
-        self.rotated_multipoles_data["q00"] = self.q00
 
     @property
     def C(self):
@@ -282,34 +282,36 @@ class INT(GeometryDataFile):
         """Rotates dipole moment from global cartesian to local cartesian. Attributes like self.q11c, self.q11s, etc. are not
         explicitly defined here, but they can be accessed because of the GeometryData __getattr__ implementation, which allows
         accessing dictionary keys as if they were attributes."""
-        self.rotated_multipoles_data["rotated_q10"], 
-        self.rotated_multipoles_data["rotated_q11c"],
-        self.rotated_multipoles_data["rotated_q11s"] = rotate_dipole(
+        rotated_q10, rotated_q11c, rotated_q11s = rotate_dipole(
             self.original_q10, self.original_q11c, self.original_q11s, self.C
         )
+        dipole_dict = {key:val for key,val in locals().items() if key != "self"}
+        self.rotated_multipoles_data.update(dipole_dict)
 
     def rotate_quadrupole(self):
         """Rotates quadrupole moments from the global to local frame"""
         (
-            self.rotated_multipoles_data["rotated_q20"],
-            self.rotated_multipoles_data["rotated_q21c"],
-            self.rotated_multipoles_data["rotated_q21s"],
-            self.rotated_multipoles_data["rotated_q22c"],
-            self.rotated_multipoles_data["rotated_q22s"],
+            rotated_q20,
+            rotated_q21c,
+            rotated_q21s,
+            rotated_q22c,
+            rotated_q22s,
         ) = rotate_quadrupole(
             self.original_q20, self.original_q21c, self.original_q21s, self.original_q22c, self.original_q22s, self.C
         )
+        quadrupole_dict = {key:val for key,val in locals().items() if key != "self"}
+        self.rotated_multipoles_data.update(quadrupole_dict)
 
     def rotate_octupole(self):
         """Rotates octupole moments from the global to local frame"""
         (
-            self.rotated_multipoles_data["rotated_q30"],
-            self.rotated_multipoles_data["rotated_q31c"],
-            self.rotated_multipoles_data["rotated_q31s"],
-            self.rotated_multipoles_data["rotated_q32c"],
-            self.rotated_multipoles_data["rotated_q32s"],
-            self.rotated_multipoles_data["rotated_q33c"],
-            self.rotated_multipoles_data["rotated_q33s"],
+            rotated_q30,
+            rotated_q31c,
+            rotated_q31s,
+            rotated_q32c,
+            rotated_q32s,
+            rotated_q33c,
+            rotated_q33s,
         ) = rotate_octupole(
             self.original_q30,
             self.original_q31c,
@@ -321,18 +323,21 @@ class INT(GeometryDataFile):
             self.C,
         )
 
+        octupole_dict = {key:val for key,val in locals().items() if key != "self"}
+        self.rotated_multipoles_data.update(octupole_dict)
+
     def rotate_hexadecapole(self):
         """Rotates hexadecapole moments from the global to local frame"""
         (
-            self.rotated_multipoles_data["rotated_q40"],
-            self.rotated_multipoles_data["rotated_q41c"],
-            self.rotated_multipoles_data["rotated_q41s"],
-            self.rotated_multipoles_data["rotated_q42c"],
-            self.rotated_multipoles_data["rotated_q42s"],
-            self.rotated_multipoles_data["rotated_q43c"],
-            self.rotated_multipoles_data["rotated_q43s"],
-            self.rotated_multipoles_data["rotated_q44c"],
-            self.rotated_multipoles_data["rotated_q44s"],
+            rotated_q40,
+            rotated_q41,
+            rotated_q41s,
+            rotated_q42c,
+            rotated_q42s,
+            rotated_q43c,
+            rotated_q43s,
+            rotated_q44c,
+            rotated_q44s,
         ) = rotate_hexadecapole(
             self.original_q40,
             self.original_q41c,
@@ -345,6 +350,9 @@ class INT(GeometryDataFile):
             self.original_q44s,
             self.C,
         )
+
+        hexadecapole_dict = {key:val for key,val in locals().items() if key != "self"}
+        self.rotated_multipoles_data.update(hexadecapole_dict)
 
     def get_dispersion(self) -> Optional[float]:
         # TODO: THIS DOES NOT NEED TO BE HERE because the pandora directory might not exist. NEED TO PASS in a path from where to get dispersion will be the proper library implementation.
