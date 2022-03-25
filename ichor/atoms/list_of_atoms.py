@@ -366,7 +366,7 @@ class ListOfAtoms(list):
         for geometry in xyz_array:
             # initialize empty Atoms instance
             atoms = Atoms()
-            for ty, atom_coord in zip(self.atom_names, geometry):
+            for ty, atom_coord in zip(self.types_extended, geometry):
                 # add Atom instances for every atom in the geometry to the Atoms instance
                 atoms.add(
                     Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2], units=AtomicDistance.Bohr)
