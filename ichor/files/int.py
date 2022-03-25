@@ -96,7 +96,7 @@ class INT(GeometryDataFile):
     @property
     def original_multipoles(self):
         multipoles = {
-            multipole: self.original_multipoles_data[multipole]
+            "original_" + multipole: self.original_multipoles_data["original_" + multipole]
             for multipole in constants.multipole_names
         }
         return multipoles
@@ -104,7 +104,7 @@ class INT(GeometryDataFile):
     @property
     def rotated_multipoles(self):
         multipoles = {
-            multipole: self.rotated_multipoles_data[multipole]
+            "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
             for multipole in constants.multipole_names
         }
         return multipoles
