@@ -7,7 +7,7 @@ from ichor.files.file import File, FileContents
 from ichor.files.geometry import GeometryFile
 
 
-class XYZ(GeometryFile, File):
+class XYZ(GeometryFile):
     """A class which wraps around a .xyz file that is contained in each PointDirectory. This .xyz file should always be there and it is
     used to write out .gjf files. Each instance of `XYZ` only has one geometry. If there is a need to
     read a `.xyz` file that contains multiple geometries (i.e. a trajectory file), the use the `Trajectory`
@@ -19,8 +19,7 @@ class XYZ(GeometryFile, File):
     """
 
     def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
-        File.__init__(self, path)
-        GeometryFile.__init__(self)
+        super().__init__(path)
 
         self.atoms = FileContents
         if atoms is not None:
