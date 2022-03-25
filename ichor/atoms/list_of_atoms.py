@@ -348,12 +348,19 @@ class ListOfAtoms(list):
 
         # calcultate features and convert to a new Trajectory object
         alf = self[0][central_atom_name].alf
-
-        current_order = list(range(self.natoms))
-        new_order = alf + list(set(current_order) - set(alf))
-
+        # before, ordering is 0,1,2,3,4,5,...,etc.
+        # after calculating the features and converting back, the order is going to be
+        # central atom idx, x-axis atom index, xy-plane atom index, rest of atom indices
+        n_atoms = len(self[0].atom_names)
+        previous_atom_ordering = [i for i in range(n_atoms)]
+        current_atom_ordering = alf + [i for i in range(n_atoms) if i not in alf]
+        # this will get the index that the atom was moved to after reordering.
+        reverse_alf_ordering = [current_atom_ordering.index(num) for num in range(n_atoms)]
+        # order will always be central atom(0,0,0), x-axis atom, xy-plane atom, etc.
         xyz_array = features_to_coordinates(self[central_atom_name].features)
-        xyz_array[:,current_order] = xyz_array[:,new_order]
+        # reverse the ordering, so that the rows are the same as before
+        # can now use the atom names as they were read in in initial Trajectory/PointsDirectory instance.
+        xyz_array[:, previous_atom_ordering, :] = xyz_array[:, reverse_alf_ordering, :]
         trajectory = Trajectory()
 
         for geometry in xyz_array:
