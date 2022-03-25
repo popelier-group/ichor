@@ -269,10 +269,8 @@ class INT(GeometryDataFile):
 
     @property
     def C(self):
+        """ Returns the C rotation matrix calculated for the atom. See the class Atom C method."""
 
-        if not self.parent:
-            raise ValueError(f"Need a parent GeometryFile because \
-                the rotation matrix requires knowing the full system. Currently, parent = {self.parent}")
         atom_inst = self.parent.atoms[self.atom_name]
         return atom_inst.C
 
