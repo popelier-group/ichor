@@ -98,7 +98,10 @@ class INT(GeometryDataFile):
         multipoles = {
             "original_" + multipole: self.original_multipoles_data["original_" + multipole]
             for multipole in constants.multipole_names
-        }
+            if multipole != "q00"
+            }
+        multipoles.update({"q00" : self.q})
+            
         return multipoles
 
     @property
@@ -106,7 +109,9 @@ class INT(GeometryDataFile):
         multipoles = {
             "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
             for multipole in constants.multipole_names
+            if multipole != "q00"
         }
+        multipoles.update({"q00" : self.q})
         return multipoles
 
     @property
