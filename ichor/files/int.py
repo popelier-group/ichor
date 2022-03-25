@@ -265,6 +265,8 @@ class INT(GeometryDataFile):
         self.rotate_quadrupole()
         self.rotate_octupole()
         self.rotate_hexadecapole()
+        # technically don't need to add that here because it is not rotated
+        # but add it just in case someone wants all the rotated multipoles (including q00)
         self.rotated_multipoles_data["q00"] = self.q00
 
     @property
