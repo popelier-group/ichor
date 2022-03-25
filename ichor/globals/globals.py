@@ -603,13 +603,14 @@ class Globals:
 
                 stored_hashes = []
                 # read alf reference file and store the hashes to check if we already calculated alf for that system
-                # open in append mode but with reading +
-                with open(self._ALF_REFERENCE_FILE, "a+") as alf_reference_file:
+                # cannot open in a+ mode because stream is positioned at end of file, i.e. nothing will be read in
+                with open(self._ALF_REFERENCE_FILE, "r") as alf_reference_file:
                     for line in alf_reference_file:
-                        system_hash = line.split(maxsplit=1)[0].strip()
+                        system_hash = line.strip().split(maxsplit=1)[0].strip()
                         stored_hashes.append(system_hash)
-
-                    # if the alf has not been stored for this system previously, append this system to the alf reference file
+                # opening the file for appending means stream is positioned at end.
+                with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
+                # if the alf has not been stored for this system previously, append this system to the alf reference file
                     if self.ATOMS.hash not in stored_hashes:
                             alf_reference_file.write(f"{self.ATOMS.hash} [")
                             for one_atom_alf in self.ATOMS.alf.tolist():
