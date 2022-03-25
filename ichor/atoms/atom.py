@@ -247,7 +247,7 @@ class Atom(VarReprMixin):
         THere indices are what are used in python lists (as they start at 0)."""
         return np.array([atom.i for atom in self.alf])
 
-    @cached_property
+    @property
     def C(self):
         """
         Mills, M.J.L., Popelier, P.L.A., 2014.
