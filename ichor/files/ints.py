@@ -32,7 +32,7 @@ class INTs(Directory, AtomicDict):
             Once information is requested (i.e. multipoles or iqa are needed), the INT class
             _read_file method reads in the data.
         """
-        for f in self:
+        for f in self.iterdir():
             if f.suffix == INT.filetype:
                 self[f.stem.upper()] = INT(f, self._parent)
         self.sort()
@@ -83,3 +83,6 @@ class INTs(Directory, AtomicDict):
         which are found in an INTs directory."""
         for INT_instance in self.values():
             yield INT_instance
+
+    def __str__(self):
+        return f"INTs Directory: {self.path}, containing .int for atoms names: {', '.join(self.keys())}"
