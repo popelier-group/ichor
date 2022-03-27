@@ -8,9 +8,9 @@ import numpy as np
 from ichor import constants, patterns
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
-from ichor.files.file import File, FileContents
+from ichor.files.file import FileContents
 from ichor.files.geometry import GeometryData, GeometryDataFile
-from ichor.multipoles import (quadrupole, rotate_dipole, rotate_hexadecapole,
+from ichor.multipoles import (rotate_dipole, rotate_hexadecapole,
                               rotate_octupole, rotate_quadrupole)
 
 
@@ -351,7 +351,7 @@ class INT(GeometryDataFile):
         """Rotates hexadecapole moments from the global to local frame"""
         (
             rotated_q40,
-            rotated_q41,
+            rotated_q41c,
             rotated_q41s,
             rotated_q42c,
             rotated_q42s,
