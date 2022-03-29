@@ -53,8 +53,11 @@ def mkdir(path: Path, empty: bool = False, fail_ok: bool = False) -> None:
 
 
 @convert_to_path
-def move(src: Path, dst: Path) -> None:
+def move(src: Path, dst: Path, exist_ok=False) -> None:
     """Move the object from src to dst."""
+    if dst.exists() and not exist_ok:
+        raise FileExistsError(f"{dst.resolve()} already exists. If you want to overwrite \
+        the existing directory, set exist_ok = True .")
     src.replace(dst)
 
 
