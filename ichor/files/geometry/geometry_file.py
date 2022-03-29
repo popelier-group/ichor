@@ -17,9 +17,9 @@ class GeometryFile(File):
 
     atoms: Optional[Atoms]
 
-    def __init__(self, path):
+    def __init__(self, path, atoms: Atoms = FileContents):
         super().__init__(path)
-        self.atoms = FileContents
+        self.atoms = atoms
 
     @property
     def features(self):
