@@ -64,23 +64,31 @@ class File(PathObject, ABC):
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
-        pass
-
-    def move_formatted(self, dst):
+        """ Abstract method detailing how to read contents of a file. Every type of file (gjf, int, etc.)
+        is written in a different format and contains different information, so every file reading is
+        different."""
         pass
 
     def dump(self):
+        """ Sets all attributes in self._contents to FileContents. self._contents
+        is a list of strings corresponding to attributes which are initially of type
+        FileContents (and are changed when a file is read). This method essentially resets
+        an instance to the time where the file associated with the instance is not read in yet
+        and no data has been stored. Also resets the state to FileState.Unread ."""
         for var in self._contents:
             setattr(self, var, FileContents)
+        self.state = FileState.Unread
 
     @classproperty
     @abstractmethod
     def filetype(self) -> str:
+        """ Abstract class property which returns the suffix associated with the filetype.
+        For example, for GJF class, this will return `.gjf`"""
         pass
 
     @property
     def _file_contents(self):
-        return list(self.__dir__()) + self.file_contents
+        return list(dir(self)) + self.file_contents
 
     @property
     def file_contents(self) -> List[str]:
@@ -97,19 +105,24 @@ class File(PathObject, ABC):
     def move(self, dst) -> None:
         """Move the file to a new destination.
 
-        :param dst: The new path to the file.
+        :param dst: The new path to the file. If a directory, the file is moved inside the directory.
         """
         if dst.is_dir():
             dst /= self.path.name
         move(self.path, dst)
 
     def write(self, path: Optional[Path] = None):
+        """ This write method should only be called if no other write method exists. A
+        write method is implemented for files that we typically write out (such as 
+        .xyz or .gjf files). But other files (which are outputs of a program, such as .wfn,
+        and .int), we only need to read and do not have to write out ourselves."""
         raise NotImplementedError(
             f"'write' method not implemented for {self.__class__.__name__}"
         )
 
     @contextmanager
     def block(self):
+        """ Blocks a file from being read. Contents of the file cannot be read."""
         self._save_state = self.state
         try:
             self.state = FileState.Blocked
@@ -118,6 +131,7 @@ class File(PathObject, ABC):
             self.unblock()
 
     def unblock(self):
+        """ Unblocks a blocked file."""
         if self.state is FileState.Blocked:
             self.state = self._save_state
 
