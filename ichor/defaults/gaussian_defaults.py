@@ -16,9 +16,9 @@ class GaussianJobType(Enum):
         return [ty.value for ty in GaussianJobType]
 
 job_type = GaussianJobType.SinglePointEnergy
-startup_options = ["nproc=2", "mem=2GB"]
+startup_options = ["nproc=2", "mem=2gb"]
 method = "B3LYP"
 basis_set = "6-31+g(d,p)"
 charge = 0
 multiplicity = 1
-keywords = []
+keywords = ["nosymm", "output=wfn"]
