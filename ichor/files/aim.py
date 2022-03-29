@@ -5,10 +5,13 @@ from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
 from ichor.common.types import Version
 from ichor.files.file import File, FileContents
-from ichor.globals import GLOBALS
 
 
 class AimAtom:
+    """ Helper class which stores information for each atom which was in the
+    AIMAll output file. Information such as timing required to integrate atom,
+    as well as the integration error are stored."""
+
     def __init__(
         self,
         atom_name: Optional[str] = None,
@@ -25,7 +28,8 @@ class AimAtom:
 
 
 class AIM(File, dict):
-    """AIMAll Output File"""
+    """Class which wraps around an AIMAll output file, where settings and timings are
+    written out to. The .int files are parsed separately in the INT/INTs classes."""
 
     license_check_succeeded: Optional[bool] = FileContents
     version: Optional[Version] = FileContents
@@ -49,6 +53,7 @@ class AIM(File, dict):
 
     @classproperty
     def filetype(self) -> str:
+        """ Returns the file suffix associated with AIMAll output files"""
         return ".aim"
 
     def _read_file(self):
@@ -61,11 +66,13 @@ class AIM(File, dict):
 
             lines = f.readlines()
             for line in lines:
+                # this line only exists if multiple atoms are being done at the same time.
                 if "aimint.exe" in line:
                     is_all_atom_calculation = True
 
             for line in lines:
 
+                # need this to use multiple cores for systems above certain number of atoms (see AIMAll manual)
                 if "AIMAll Professional license check succeeded." in line:
                     self.license_check_succeeded = True
                 elif "AIMQB (Version" in line:
@@ -130,8 +137,8 @@ class AIM(File, dict):
         the the AimAtom which corresponds to the given key."""
         if isinstance(item, int):
             i = item + 1
-            for atom, aimatom in self.items():
-                if i == get_digits(atom):
+            for atom_name, aimatom in self.items():
+                if i == get_digits(atom_name):
                     return aimatom
             raise IndexError(f"No atom with index {item}")
         return super().__getitem__(item)
