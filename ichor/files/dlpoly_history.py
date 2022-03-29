@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 from ichor.atoms import Atom, Atoms
+from ichor.common.io import convert_to_path
 from ichor.files.trajectory import Trajectory
 
 
@@ -30,13 +31,14 @@ class DlpolyHistory(Trajectory):
                         atoms.add(Atom(atom_type, x, y, z))
                     self.add(atoms)
 
+    @convert_to_path
     def write(self, path: Optional[Path] = None):
-        """Writes a trajectory .xyz file from the DL POLY History file."""
+        """Writes a trajectory .xyz file from the DL POLY HISTORY file."""
         if path is None:
-            path = self.path.parent / "TRAJECTORY.xyz"
+            path = Path("TRAJECTORY.xyz")
         super().write(path)
 
-    def write_to_trajectory(self, path=None) -> None:
-        """See the `DlpolyHistory` `write` method which writes a .xyz trajectory
-        from a DL POLY History File."""
+    @convert_to_path
+    def write_to_trajectory(self, path: Optional[Path] = None):
+        """ Writes a trajectory .xyz file from the DL POLY HISTORY file."""
         self.write(path=path)
