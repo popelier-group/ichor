@@ -6,8 +6,8 @@ from typing import Dict, List, Type, Union
 
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
-from ichor.common.io import mkdir
-from ichor.files.file import File, FileState
+from ichor.common.io import mkdir, move
+from ichor.files.file import File
 from ichor.files.path_object import PathObject
 
 
@@ -33,41 +33,22 @@ class Directory(PathObject, ABC):
         """
         pass
 
+    @abstractmethod
+    def dump(self):
+        """ Abstract method for resetting all attributes which store some sort of data
+        that has been read in from a file. These attributes are initially FileContents type."""
+        pass
+
     def mkdir(self):
         """Make an empty directory at the location of the `path` attribute."""
         mkdir(self.path)
 
-    def move(self, dst):
+    def move(self, dst: Path):
         """
         Move a directory object to a new location (a new path), modifies the `path` attribute and moves contents on disk
         :param dst: The new path of the directory
         """
-        self.path.replace(dst)
-        self.path = dst
-        for (
-            f
-        ) in (
-            self.path.iterdir()
-        ):  # need to use iterdir in case object overrides __iter__
-            if f.is_file():
-                fdst = self.path / f"{self.path.name}{f.suffix}"
-                f.replace(fdst)
-            else:
-                if "_atomicfiles" in f.name:
-                    from ichor.globals import GLOBALS
-
-                    ddst = Path(
-                        re.sub(
-                            rf"{GLOBALS.SYSTEM_NAME}\d+_atomicfiles",
-                            f"{self.path.name}_atomicfiles",
-                            str(f),
-                        )
-                    )
-                    ddst = self.path / ddst.name
-                    f.replace(ddst)
-
-    def dump(self):
-        pass
+        move(self.path, dst)
 
     def iterdir(self):
         """alias to __iter__ in case child object overrides __iter__"""
@@ -89,10 +70,10 @@ class AnnotatedDirectory(Directory, ABC):
         filetypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
-                if hasattr(type_, "__args__"):  # Optional
+                if hasattr(type_, "__args__"):  # Optional typing contains a list of typings
                     type_ = type_.__args__[0]
 
-                # GJF and WFN are subclasses of File
+                # GJF and WFN are subclasses of File for example
                 if issubclass(type_, File):
                     filetypes[var] = type_
         return filetypes
@@ -104,7 +85,7 @@ class AnnotatedDirectory(Directory, ABC):
         dirtypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
-                if hasattr(type_, "__args__"):  # Optional
+                if hasattr(type_, "__args__"):  # Optional typing contains a list of typings
                     type_ = type_.__args__[0]
 
                 # GJF and WFN are subclasses of File
@@ -129,17 +110,25 @@ class AnnotatedDirectory(Directory, ABC):
         ]
 
     def path_objects(self) -> List[PathObject]:
+        """ Returns a list of PathObjects corresponding to files and directories
+        that are in the instance of AnnotatedDirectory."""
         return self.files() + self.directories()
 
     def dump(self):
-        for f in self.files:
+        """ Remove all data that has been stored into the instances after the files have been
+        read in. This resets the attributes to be of type FileContents."""
+        for f in self.files():
             f.dump()
-        for d in self.directories:
+        for d in self.directories():
             d.dump()
 
     def _parse(self):
         """
-        Iterates over an `AnnotatedDirectory`'s contents (which could be files or other directories). If the content is a file,
+        Iterates over an `AnnotatedDirectory`'s contents (which are files or other sub-directories). If the content is a file,
+        then check the filetype of the file (compared to the filetype which the classes subclassing from File have). After 
+        the check succeeds, check if that filetype needs a parent (meaning that the filetype needs access to the parent directory
+        because it needs information from parent directory). For example, an .int file needs access to the parent
+        directory because it needs the whole geometry ot calculate the ALF. The same is done for directories.
         """
         if not self.exists():
             return
