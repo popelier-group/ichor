@@ -16,7 +16,8 @@ class FileReadError(Exception):
 
 
 class FileState(Enum):
-    """An enum that is used to make it easier to check the current file state."""
+    """An enum that is used to make it easier to check the current file state.
+    Blocked is actually not used currently."""
 
     Unread = 1
     Reading = 2
@@ -40,10 +41,19 @@ class File(PathObject, ABC):
     state: FileState = FileState.Unread
     _contents: List[str] = []
 
-    def __init__(self, path: Union[Path, str]):
-        super().__init__(path)  # initialize PathObject init
-        self.state = FileState.Unread
-        self._contents = []
+    def __init__(self, path: Optional[Union[Path, str]] = None):
+        # if path is not None, then we initialize super to check if path exists
+        if path is not None:
+            super().__init__(path)
+            self.state = FileState.Unread
+            self._contents = []
+        # if path is none, then we assume there is nothing to be read in.
+        # therefore, the data passed in the init method will be used to construct the file
+        # and used later if the file is being written out.
+        else:
+            self.state = FileState.Read
+
+            
 
     @buildermethod
     def read(self, *args, **kwargs) -> None:
@@ -57,10 +67,6 @@ class File(PathObject, ABC):
                 *args, **kwargs
             )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             self.state = FileState.Read
-        elif not self.path.exists() and self.state is not FileState.Blocked:
-            raise FileNotFoundError(
-                f"File with path '{self.path}' is not found on disk."
-            )
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
