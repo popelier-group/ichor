@@ -69,17 +69,8 @@ class Trajectory(ListOfAtoms, File):
     """
 
     def __init__(self, path: Union[Path, str] = None):
-
-        # if we are making a trajectory from a coordinate file (such as .xyz or dlpoly history) directly
-        if path is not None:
-            ListOfAtoms.__init__(self)
-            File.__init__(self, path)
-        # if we are building a trajectory another way without reading a file containing xyz coordinates
-        else:
-            self.state = (
-                FileState.Read
-            )  # set the state to read as we don't need to read any file
-            ListOfAtoms.__init__(self)
+        ListOfAtoms.__init__(self)
+        File.__init__(self, path)
 
     def _read_file(self):
 
