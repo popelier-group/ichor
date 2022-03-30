@@ -212,7 +212,7 @@ class Globals:
     SAMPLE_POOL_METHOD: List[str] = ["random"]
     VALIDATION_SET_METHOD: List[str] = ["random"]
 
-    KERNEL: str = "rbf-cyclic"  # rbf or rbf-cyclic currently
+    KERNEL: str = "periodic"  # rbf or rbf-cyclic currently
     FEREBUS_TYPE: str = (
         "executable"  # executable (FEREBUS) or python (FEREBUS.py)
     )
@@ -244,7 +244,7 @@ class Globals:
     SCRUB_POINTS: bool = True
 
     FEREBUS_SWARM_SIZE: int = (
-        50  # If negative >> Size dynamically allocated by FEREBUS
+        32  # If negative >> Size dynamically allocated by FEREBUS
     )
     FEREBUS_NUGGET: float = 1.0e-10  # Default value for FEREBUS nugget
     FEREBUS_THETA_MIN: float = (
@@ -261,10 +261,10 @@ class Globals:
     FEREBUS_MEAN: str = "constant"
     FEREBUS_OPTIMISATION: str = "pso"
 
-    FEREBUS_TOLERANCE: float = 1.0e-8
-    FEREBUS_STALL_ITERATIONS: int = 50
+    FEREBUS_TOLERANCE: float = 1.0e-6
+    FEREBUS_STALL_ITERATIONS: int = 20
     FEREBUS_CONVERGENCE: int = 20
-    FEREBUS_MAX_ITERATION: int = 1000
+    FEREBUS_MAX_ITERATION: int = 500
 
     # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
     DLPOLY_VERSION: Version = Version("4.09")
