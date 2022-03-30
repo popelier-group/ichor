@@ -146,7 +146,7 @@ class DlpolyHistory(Trajectory):
 
         self.trajectory_key = None
         self.periodic_boundary = None
-        self.natoms = None
+        #self.natoms = None
         self.ntimesteps = None
 
     def _read_file(self, n: int = -1):
@@ -155,7 +155,7 @@ class DlpolyHistory(Trajectory):
             record = next(f).split()
             self.trajectory_key = DlpolyTrajectoryKey(int(record[0]))
             self.periodic_boundary = DlpolyTrajectoryKey(int(record[1]))
-            self.natoms = int(record[2])
+            natoms = int(record[2])
             self.ntimesteps = int(record[3])
             timestep = None
             for line in f:
@@ -264,9 +264,9 @@ def write_config(path: Path, atoms: Atoms):
     with open(path / "CONFIG", "w+") as f:
         f.write("Frame :         1\n")
         f.write("\t0\t1\n")  # PBC Solution to temporary problem
-        f.write("25.0 0.0 0.0\n")
-        f.write("0.0 25.0 0.0\n")
-        f.write("0.0 0.0 25.0\n")
+        f.write(f"{GLOBALS.DLPOLY_CELL_SIZE} 0.0 0.0\n")
+        f.write(f"0.0 {GLOBALS.DLPOLY_CELL_SIZE} 0.0\n")
+        f.write(f"0.0 0.0 {GLOBALS.DLPOLY_CELL_SIZE}\n")
         for atom in atoms:
             f.write(
                 f"{atom.type}  {atom.num}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.num}\n"

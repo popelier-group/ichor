@@ -219,7 +219,7 @@ class Globals:
     FEREBUS_VERSION: Version = Version("7.0")
     FEREBUS_LOCATION: Path = None
 
-    FEREBUS_LIKELIHOOD: str = "concentrated"
+    FEREBUS_LIKELIHOOD: str = "marginal"
 
     GAUSSIAN_MEMORY_LIMIT: str = "1GB"
 
@@ -261,7 +261,7 @@ class Globals:
     FEREBUS_MEAN: str = "constant"
     FEREBUS_OPTIMISATION: str = "pso"
 
-    FEREBUS_TOLERANCE: float = 1.0e-6
+    FEREBUS_TOLERANCE: float = 1.0e-8
     FEREBUS_STALL_ITERATIONS: int = 20
     FEREBUS_CONVERGENCE: int = 20
     FEREBUS_MAX_ITERATION: int = 500
@@ -280,6 +280,7 @@ class Globals:
 
     DLPOLY_CHECK_CONVERGENCE: bool = False
     DLPOLY_CONVERGENCE_CRITERIA: int = -1
+    DLPOLY_CELL_SIZE: float = 25.0
 
     DLPOLY_MAX_ENERGY: float = -1.0
     DLPOLY_MAX_FORCE: float = -1.0
@@ -727,7 +728,7 @@ class Globals:
         if self._initialising:
             return None
 
-        if not self._ALF:
+        if self._ALF is None or len(self._ALF) == 0:
             self._ALF = self.ATOMS.alf
         # _alf = {}
 

@@ -20,7 +20,7 @@ def get_int(matchobj):
 
 
 def ignore_alpha(x):
-    return int_finder.sub(get_int, x)
+    return int_finder.sub(get_int, str(x))
 
 
 __all__ = [

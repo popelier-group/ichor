@@ -32,9 +32,7 @@ def quadrupole_spherical_to_cartesian(
     q_yz = 0.5 * constants.rt3 * q21s
     q_zz = q20
 
-    return np.array(
-        [[q_xx, q_xy, q_xz], [q_xy, q_yy, q_yz], [q_xz, q_yz, q_zz]]
-    )
+    return pack_cartesian_quadrupole(q_xx, q_xy, q_xz, q_yy, q_yz, q_zz)
 
 
 def quadrupole_cartesian_to_spherical(
@@ -46,6 +44,16 @@ def quadrupole_cartesian_to_spherical(
     q22c = 1 / constants.rt3 * (q[0, 0] - q[1, 1])
     q22s = 2 / constants.rt3 * q[0, 1]
     return q20, q21c, q21s, q22c, q22s
+
+
+def pack_cartesian_quadrupole(q_xx, q_xy, q_xz, q_yy, q_yz, q_zz):
+    return np.array(
+        [[q_xx, q_xy, q_xz], [q_xy, q_yy, q_yz], [q_xz, q_yz, q_zz]]
+    )
+
+
+def unpack_cartesian_quadrupole(q):
+    return q[0, 0], q[0, 1], q[0, 2], q[1, 1], q[1, 2], q[2, 2]
 
 
 def quadrupole_rotate_cartesian(q: np.ndarray, C: np.ndarray) -> np.ndarray:
