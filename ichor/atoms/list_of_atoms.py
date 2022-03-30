@@ -356,7 +356,7 @@ class ListOfAtoms(list):
         #quit()
 
         xyz_array = features_to_coordinates(self[central_atom_name].features)
-        xyz_array[:,current_order] = xyz_array[:,new_order]
+        xyz_array[:,new_order] = xyz_array[:,current_order]
         trajectory = Trajectory()
 
         for geometry in xyz_array:

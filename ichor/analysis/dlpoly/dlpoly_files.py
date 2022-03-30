@@ -146,7 +146,7 @@ class DlpolyHistory(Trajectory):
 
         self.trajectory_key = None
         self.periodic_boundary = None
-        self.natoms = None
+        #self.natoms = None
         self.ntimesteps = None
 
     def _read_file(self, n: int = -1):
@@ -155,7 +155,7 @@ class DlpolyHistory(Trajectory):
             record = next(f).split()
             self.trajectory_key = DlpolyTrajectoryKey(int(record[0]))
             self.periodic_boundary = DlpolyTrajectoryKey(int(record[1]))
-            self.natoms = int(record[2])
+            natoms = int(record[2])
             self.ntimesteps = int(record[3])
             timestep = None
             for line in f:

@@ -2,5 +2,11 @@
 but it is made to work in ICHOR without having to download the extra dependency."""
 
 from ichor.common.sorting.natsort import ignore_alpha, natsort
+from ichor.common.sorting.natsort.natsort import natsorted
 
-__all__ = ["natsort", "ignore_alpha"]
+
+def sort_atoms(atom_list):
+    return natsorted(atom_list, key=ignore_alpha)
+
+
+__all__ = ["natsort", "ignore_alpha", "natsorted", "sort_atoms"]
