@@ -94,7 +94,7 @@ class GJF(QuantumChemistryProgramInput):
                         self.startup_options = []
                     self.startup_options += [line.strip().replace("%", "")]
                 # This is the following line where key words for Gaussian (level of theory, etc.) are defined
-                if line.startswith("#"):
+                elif line.startswith("#"):
                     line = line.replace("#", "")
                     keywords = line.split()  # split keywords by whitespace
                     for keyword in keywords:
@@ -117,11 +117,11 @@ class GJF(QuantumChemistryProgramInput):
                                 self.keywords = []
                             self.keywords += [keyword]
                 # find charge and multiplicity which are given on one line in Gaussian .gjf
-                if re.match(r"^\s*\d+\s+\d+$", line):
+                elif re.match(r"^\s*\d+\s+\d+\s*$", line):
                     self.charge = int(line.split()[0])
                     self.multiplicity = int(line.split()[1])
                 # find all the types of atoms as well as their coordinates from .gjf file
-                if re.match(patterns.COORDINATE_LINE, line):
+                elif re.match(patterns.COORDINATE_LINE, line):
                     line_split = line.strip().split()
                     atom_type, x, y, z = (
                         line_split[0],
