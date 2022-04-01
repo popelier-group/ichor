@@ -10,7 +10,7 @@ class PathObject(ABC, object):
 
     def __init__(self, path: Union[Path, str]):
         self.path = Path(path)
-        if not path.exists():
+        if not self.path.exists():
             raise FileNotFoundError(f"File with path {path.resolve()} not found on disk.")
 
     def exists(self) -> bool:
