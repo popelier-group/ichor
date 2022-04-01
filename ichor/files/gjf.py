@@ -148,7 +148,7 @@ class GJF(QuantumChemistryProgramInput):
             # if there are stuff from the bottom of the file, then we have extra details to write
             # at bottom of gjf file
             if len(extra_details_list) > 0:
-                # join into string and split by whitespace to remove any potential lines with whitespace only
+                # join line into one string that can be written following coordinates
                 self.extra_details_str = "".join(extra_details_list)
 
     @classproperty
