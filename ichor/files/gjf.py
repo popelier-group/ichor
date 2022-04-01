@@ -86,38 +86,50 @@ class GJF(QuantumChemistryProgramInput):
     def _read_file(self):
         """Parse and red a .gjf file for information we need to submit a Gaussian job."""
         self.atoms = Atoms()
+        # empty list that contains extra information from bottom of file below coordinates
+        extra_details_list = []
         with open(self.path, "r") as f:
+            # very first line
+            line = next(f)
+            # These are Link 0 Commands in Gaussian, eg. %chk
+            while line.startswith("%"):
+                if self.startup_options is FileContents:
+                    self.startup_options = []
+                self.startup_options += [line.strip().replace("%", "")]
+                line = next(f)
+            # This is the following line where key words for Gaussian (level of theory, etc.) are defined
+            # comes right after the Link 0 options
+            if line.startswith("#"):
+                line = line.replace("#", "")
+                keywords = line.split()  # split keywords by whitespace
+                for keyword in keywords:
+                    if (
+                        "/" in keyword
+                    ):  # if the user has used something like B3LYP/6-31G Then split them up
+                        self.method = keyword.split("/")[0].upper()
+                        self.basis_set = keyword.split("/")[1].lower()
+                    # if the keyword is in the job enum GaussianJobType: p, opt, freq
+                    elif keyword in GaussianJobType.types():
+                        for ty in GaussianJobType:
+                            if keyword == ty:
+                                # set self.job_type to the enum value corresponding to the keyword
+                                self.job_type = ty
+                                break
+                    # if the given Gaussian keyword is not defined in GaussianJobType or is not level of theory/basis set
+                    # then add to self.keywords which is None by Default
+                    else:
+                        if self.keywords is FileContents:
+                            self.keywords = []
+                        self.keywords += [keyword]
+            # line following keywords line is a comment line that can contain anything
+            line = next(f)
+            # after comment line, we only have to find:
+            # 1. multiplicity and charge
+            # 2. all coordinates of system
+            # 3. all additional options
             for line in f:
-                # These are Link 0 Commands in Gaussian, eg. %chk
-                if line.startswith("%"):
-                    if self.startup_options is FileContents:
-                        self.startup_options = []
-                    self.startup_options += [line.strip().replace("%", "")]
-                # This is the following line where key words for Gaussian (level of theory, etc.) are defined
-                elif line.startswith("#"):
-                    line = line.replace("#", "")
-                    keywords = line.split()  # split keywords by whitespace
-                    for keyword in keywords:
-                        if (
-                            "/" in keyword
-                        ):  # if the user has used something like B3LYP/6-31G Then split them up
-                            self.method = keyword.split("/")[0].upper()
-                            self.basis_set = keyword.split("/")[1].lower()
-                        # if the keyword is in the job enum GaussianJobType: p, opt, freq
-                        elif keyword in GaussianJobType.types():
-                            for ty in GaussianJobType:
-                                if keyword == ty:
-                                    # set self.job_type to the enum value corresponding to the keyword
-                                    self.job_type = ty
-                                    break
-                        # if the given Gaussian keyword is not defined in GaussianJobType or is not level of theory/basis set
-                        # then add to self.keywords which is None by Default
-                        else:
-                            if self.keywords is FileContents:
-                                self.keywords = []
-                            self.keywords += [keyword]
                 # find charge and multiplicity which are given on one line in Gaussian .gjf
-                elif re.match(r"^\s*\d+\s+\d+\s*$", line):
+                if re.match(r"^\s*\d+\s+\d+\s*$", line):
                     self.charge = int(line.split()[0])
                     self.multiplicity = int(line.split()[1])
                 # find all the types of atoms as well as their coordinates from .gjf file
@@ -131,6 +143,13 @@ class GJF(QuantumChemistryProgramInput):
                     )
                     # add the coordinate line as an Atom instance to self.atoms (which is an Atoms instance)
                     self.atoms.add(Atom(atom_type, x, y, z))
+                else:
+                    extra_details_list.append(line)
+            # if there are stuff from the bottom of the file, then we have extra details to write
+            # at bottom of gjf file
+            if len(extra_details_list) > 0:
+                # join into string and split by whitespace to remove any potential lines with whitespace only
+                self.extra_details_str = "".join(extra_details_list)
 
     @classproperty
     def filetype(cls) -> str:
@@ -189,4 +208,6 @@ class GJF(QuantumChemistryProgramInput):
                 f.write(f"{atom.type} {atom.coordinates_string}\n")
             if self.extra_details_str:
                 f.write(f"\n{self.extra_details_str}\n")
-            f.write(f"\n{self.wfn}")
+            # write wfn if keywords contain wfn
+            if "output=wfn" in self.keywords:
+                f.write(f"\n{self.wfn}")
