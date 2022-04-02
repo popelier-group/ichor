@@ -3,6 +3,8 @@ from typing import Optional
 from ichor.atoms import Atoms
 from ichor.files.file import File, FileContents
 from ichor.files.geometry.atom_data import AtomData
+from typing import Union
+from pathlib import Path
 
 class GeometryFile(File):
     """ A class which is inherited from any file which contains the full geometry
@@ -17,7 +19,7 @@ class GeometryFile(File):
 
     atoms: Optional[Atoms]
 
-    def __init__(self, path, atoms: Atoms = FileContents):
+    def __init__(self, path: Union[Path, str], atoms: Atoms = FileContents):
         super().__init__(path)
         self.atoms = atoms
 
