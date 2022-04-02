@@ -194,7 +194,6 @@ class GJF(QuantumChemistryProgramInput):
         # TODO: can probably make a for loop here and loop over the vars which are FileContents and set to default
         # give default values to each one of these if the value is FileContents (which evaluates to False).
         self.startup_options = self.startup_options or gaussian_defaults.startup_options
-        # write a comment line
         self.comment_line = self.comment_line or self.title
         # TODO: make this into a list because can use opt and freq at the same time
         self.job_type = self.job_type or gaussian_defaults.job_type
@@ -204,6 +203,8 @@ class GJF(QuantumChemistryProgramInput):
         self.basis_set = self.basis_set or gaussian_defaults.basis_set
         self.charge = self.charge or gaussian_defaults.charge
         self.multiplicity = self.multiplicity or gaussian_defaults.multiplicity
+        # cannot use gaussian_defaults here because the wfn path depends on the gjf path
+        self.extra_details_str = self.extra_details_str or f"\n{self.path.with_suffix('.wfn')}\n"
 
         # remove whitespace from keywords and lowercase to prevent having keywords twice.
         self.keywords = ["".join(k.lower().split()) for k in self.keywords]
