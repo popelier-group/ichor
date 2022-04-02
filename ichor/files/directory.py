@@ -18,9 +18,8 @@ class Directory(PathObject, ABC):
     """
 
     def __init__(self, path: Union[Path, str]):
-        PathObject.__init__(
-            self, path
-        )  # set path attribute for Directory instance
+        
+        super().__init__(path)
         self._parse()  # parse directory to find contents and setup the directory structure. THIS DOES NOT READ IN DIRECTORY CONTENTS
 
     @abstractmethod
