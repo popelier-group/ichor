@@ -41,23 +41,28 @@ class File(PathObject, ABC):
     state: FileState = FileState.Unread
     _contents: List[str] = []
 
-    def __init__(self, path: Optional[Union[Path, str]] = None):
-        # if path is not None, then we initialize super to check if path exists
-        if path is not None:
+    def __init__(self, path: Union[Path, str]):
+        path = Path(path)
+        # need to check if path exists here because if it does, we need to read in file contents
+        if path.exists():
             super().__init__(path)
             self.state = FileState.Unread
             self._contents = []
-        # if path is none, then we assume there is nothing to be read in.
-        # therefore, the data passed in the init method will be used to construct the file
-        # and used later if the file is being written out.
+        # if path does not exist, there is no file to read in from.
+        # but can still construct file from passing in arguments / writing out default arguments
         else:
+            super().__init__(path)
             self.state = FileState.Read
 
             
 
     @buildermethod
     def read(self, *args, **kwargs) -> None:
-        """Read the contents of the file. Depending on the type of file, different parts will be read in."""
+        """Read the contents of the file. Depending on the type of file, different parts will be read in.
+        
+        .. note::
+            Only files which exist on disk can be read from. Otherwise, nothing will be read in.
+        """
         if self.path.exists() and self.state is FileState.Unread:
             for var, inst in vars(self).items():
                 if inst is FileContents:
