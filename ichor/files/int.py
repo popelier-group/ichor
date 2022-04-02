@@ -115,6 +115,24 @@ class INT(GeometryDataFile):
         return multipoles
 
     @property
+    def original_multipoles_without_q00(self):
+        multipoles = {
+            "original_" + multipole: self.original_multipoles_data["original_" + multipole]
+            for multipole in constants.multipole_names
+            if multipole != "q00"
+            }
+        return multipoles
+
+    @property
+    def rotated_multipoles_without_q00(self):
+        multipoles = {
+            "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
+            for multipole in constants.multipole_names
+            if multipole != "q00"
+        }
+        return multipoles
+
+    @property
     def e_intra(self):
         return self.iqa_data["E_IQA_Intra(A)"]
 
