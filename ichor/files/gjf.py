@@ -41,6 +41,8 @@ class GJF(QuantumChemistryProgramInput):
         then there is no file to be read, so the user has to write the file contents. If
         no contents/options are written by user, they are written as the default values in the
         `write` method.
+    :param comment_line: A string to be written between the link0 options and the keywords.
+        It can contain any information.
     :param job_type: The job type, an energy, optimization, or frequency
     :param keywords: A list of keywords to be added to the Gaussian keywords line
     :param method: The method to be used by Gaussian (e.g. B3LYP)
@@ -60,8 +62,9 @@ class GJF(QuantumChemistryProgramInput):
         in Gaussian.
     """
 
-    def __init__(self, path: Optional[Union[Path, str]],
+    def __init__(self, path: Union[Path, str],
                 startup_options: Optional[List[str]] = FileContents,
+                comment_line: Optional[str] = FileContents,
                 # TODO: job_type needs to be a list because opt freq can be used together.
                 job_type: Optional[GaussianJobType] = FileContents,
                 keywords: Optional[List[str]] = FileContents,
@@ -70,12 +73,12 @@ class GJF(QuantumChemistryProgramInput):
                 charge: Optional[int] = FileContents,
                 multiplicity: Optional[int] = FileContents,
                 atoms: Atoms = FileContents,
-                # TODO: need to read this into a list when reading gjf. Then can be written to new gjf.
                 extra_details_str: Optional[str] = FileContents
     ):
         super().__init__(path, method, basis_set, atoms)
 
         self.startup_options = startup_options
+        self.comment_line = comment_line
         self.job_type = job_type
         self.keywords = keywords
         self.charge = charge
@@ -89,7 +92,7 @@ class GJF(QuantumChemistryProgramInput):
         # empty list that contains extra information from bottom of file below coordinates
         extra_details_list = []
         with open(self.path, "r") as f:
-            # very first line
+            # go to very first line
             line = next(f)
             # These are Link 0 Commands in Gaussian, eg. %chk
             while line.startswith("%"):
@@ -121,30 +124,37 @@ class GJF(QuantumChemistryProgramInput):
                         if self.keywords is FileContents:
                             self.keywords = []
                         self.keywords += [keyword]
-            # line following keywords line is a comment line that can contain anything
+            # line following keywords line is blank line
             line = next(f)
-            # after comment line, we only have to find:
-            # 1. multiplicity and charge
-            # 2. all coordinates of system
-            # 3. all additional options
-            for line in f:
-                # find charge and multiplicity which are given on one line in Gaussian .gjf
-                if re.match(r"^\s*\d+\s+\d+\s*$", line):
-                    self.charge = int(line.split()[0])
-                    self.multiplicity = int(line.split()[1])
+            # following blank line is a comment line that can contain anything
+            line = next(f)
+            self.comment_line = line.strip()
+            # following this comment line is another blank line
+            line = next(f)
+            # next line contains charge and multiplicity
+            line = next(f)
+            if re.match(r"^\s*\d+\s+\d+\s*$", line):
+                self.charge = int(line.split()[0])
+                self.multiplicity = int(line.split()[1])
                 # find all the types of atoms as well as their coordinates from .gjf file
-                elif re.match(patterns.COORDINATE_LINE, line):
-                    line_split = line.strip().split()
-                    atom_type, x, y, z = (
-                        line_split[0],
-                        float(line_split[1]),
-                        float(line_split[2]),
-                        float(line_split[3]),
-                    )
-                    # add the coordinate line as an Atom instance to self.atoms (which is an Atoms instance)
-                    self.atoms.add(Atom(atom_type, x, y, z))
-                else:
-                    extra_details_list.append(line)
+            line = next(f)
+            while re.match(patterns.COORDINATE_LINE, line):
+                line_split = line.strip().split()
+                atom_type, x, y, z = (
+                    line_split[0],
+                    float(line_split[1]),
+                    float(line_split[2]),
+                    float(line_split[3]),
+                )
+                # add the coordinate line as an Atom instance to self.atoms (which is an Atoms instance)
+                self.atoms.add(Atom(atom_type, x, y, z))
+                line = next(f)
+            
+            # read in extra options at the bottom of file
+            extra_details_list = []
+            while line:
+                extra_details_list.append(line)
+                line = next(f, "")
             # if there are stuff from the bottom of the file, then we have extra details to write
             # at bottom of gjf file
             if len(extra_details_list) > 0:
@@ -172,20 +182,23 @@ class GJF(QuantumChemistryProgramInput):
         return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     @convert_to_path
-    def write(self, path: Path = "GJF_FILE.gjf") -> None:
+    def write(self):
         """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
         should be given to Gaussian."""
+
+        print(self.multiplicity)
 
         if not self.atoms:
             raise ValueError(f"self.atoms is currently {self.atoms}. Cannot write coordinates.")
 
         # TODO: can probably make a for loop here and loop over the vars which are FileContents and set to default
         # give default values to each one of these if the value is FileContents (which evaluates to False).
-        path = self.path or path
         self.startup_options = self.startup_options or gaussian_defaults.startup_options
+        # write a comment line
+        self.comment_line = self.comment_line or self.title
         # TODO: make this into a list because can use opt and freq at the same time
         self.job_type = self.job_type or gaussian_defaults.job_type
-        # if self.keywords evaluates to False, then default keywords are used (even if they are [])
+        # if self.keywords evaluates to False (because it is FileContents), then default keywords are used (even if defaults are are [])
         self.keywords = self.keywords or gaussian_defaults.keywords
         self.method = self.method or gaussian_defaults.method
         self.basis_set = self.basis_set or gaussian_defaults.basis_set
@@ -197,17 +210,14 @@ class GJF(QuantumChemistryProgramInput):
         # remove any duplicates by converting to set then list
         self.keywords = list(set(self.keywords))
 
-        with open(path, "w") as f:
+        with open(self.path, "w") as f:
             # TODO: the self.format() results in NoFileFound because of the `class File` implementation. So it has to be inside here.
             for startup_option in self.startup_options:
                 f.write(f"%" + startup_option + "\n")
             f.write(f"{self.header_line}\n")
-            f.write(f"{self.title}\n\n")
+            f.write(f"{self.comment_line}\n\n")
             f.write(f"{self.charge} {self.multiplicity}\n")
             for atom in self.atoms:
                 f.write(f"{atom.type} {atom.coordinates_string}\n")
             if self.extra_details_str:
-                f.write(f"\n{self.extra_details_str}\n")
-            # write wfn if keywords contain wfn
-            if "output=wfn" in self.keywords:
-                f.write(f"\n{self.wfn}")
+                f.write(f"{self.extra_details_str}")
