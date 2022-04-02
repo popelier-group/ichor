@@ -182,11 +182,18 @@ class GJF(QuantumChemistryProgramInput):
         return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
 
     @convert_to_path
-    def write(self):
+    def write(self, path: Optional[Union[str, Path]] = None):
         """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
-        should be given to Gaussian."""
-
-        print(self.multiplicity)
+        should be given to Gaussian.
+        
+        :param path: A path where to write file. If no path is given here, the value of
+        `self.path` attribute is used.
+        """
+        # where to write files
+        if path:
+            p = path
+        else:
+            p = self.path
 
         if not self.atoms:
             raise ValueError(f"self.atoms is currently {self.atoms}. Cannot write coordinates.")
@@ -208,10 +215,10 @@ class GJF(QuantumChemistryProgramInput):
 
         # remove whitespace from keywords and lowercase to prevent having keywords twice.
         self.keywords = ["".join(k.lower().split()) for k in self.keywords]
-        # remove any duplicates by converting to set then list
-        self.keywords = list(set(self.keywords))
+        # remove any duplicates by converting to set then list. Keep original ordering, so don't use set.
+        self.keywords = list(dict.fromkeys(self.keywords))
 
-        with open(self.path, "w") as f:
+        with open(p, "w") as f:
             # TODO: the self.format() results in NoFileFound because of the `class File` implementation. So it has to be inside here.
             for startup_option in self.startup_options:
                 f.write(f"%" + startup_option + "\n")
