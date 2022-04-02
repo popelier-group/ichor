@@ -211,7 +211,7 @@ class GJF(QuantumChemistryProgramInput):
         self.charge = self.charge or gaussian_defaults.charge
         self.multiplicity = self.multiplicity or gaussian_defaults.multiplicity
         # cannot use gaussian_defaults here because the wfn path depends on the gjf path
-        self.extra_details_str = self.extra_details_str or f"\n{self.path.with_suffix('.wfn')}\n"
+        self.extra_details_str = self.extra_details_str or f"\n{self.path.with_suffix('.wfn').name}\n"
 
         # remove whitespace from keywords and lowercase to prevent having keywords twice.
         self.keywords = ["".join(k.lower().split()) for k in self.keywords]
