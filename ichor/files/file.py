@@ -56,6 +56,11 @@ class File(PathObject, ABC):
             super().__init__(path)
             self.state = FileState.Read            
 
+    @property
+    def title(self):
+        """Returns the name of the WFN file (excluding the .wfn extension)"""
+        return self.path.stem
+
     @buildermethod
     def read(self, *args, **kwargs):
         """Read the contents of the file. Depending on the type of file, different parts will be read in.
