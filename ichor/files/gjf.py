@@ -154,7 +154,7 @@ class GJF(QuantumChemistryProgramInput):
             extra_details_list = []
             while line:
                 extra_details_list.append(line)
-                line = next(f, "")
+                line = next(f, "") # the empty string which is returned instead of StopIteration evaluates as False
             # if there are stuff from the bottom of the file, then we have extra details to write
             # at bottom of gjf file
             if len(extra_details_list) > 0:
