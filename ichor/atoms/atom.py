@@ -35,11 +35,8 @@ class Atom(VarReprMixin):
         self.index = index
         # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
         self._parent = parent
-
         self.coordinates = np.array([x, y, z], dtype=np.float)
-
         self.units = units
-
         self._properties = None
 
     @classmethod
