@@ -71,8 +71,9 @@ class WFN(GeometryFile, GeometryDataFile):
         self.atoms = Atoms()
         with open(self.path, "r") as f:
             lines = f.readlines()
-            next(lines)
-            self.header = next(lines)
+            lines_iterator = iter(lines)
+            next(lines_iterator)
+            self.header = next(lines_iterator)
             # modify header line to contain the method used
             self.read_header()
             for line in lines:
