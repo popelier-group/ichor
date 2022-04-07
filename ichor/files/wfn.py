@@ -129,7 +129,7 @@ class WFN(GeometryFile, GeometryDataFile):
             with open(self.path, "r") as f:
                 lines = f.readlines()
                 # if the last word of the header line lines[1] is NUCLEI, then append the method
-                if lines[1][-1] == "NUCLEI":
+                if lines[1].split()[-1] == "NUCLEI":
                     lines[1] = lines[1].strip() + "   " + self.method + "\n"
             with open(self.path, "w") as f:
                 f.writelines(lines)
