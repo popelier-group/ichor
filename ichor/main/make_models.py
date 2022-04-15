@@ -17,7 +17,7 @@ from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
                                      SubmissionScript)
-from ichor.cli.tab_completer import ListCompleter
+from ichor.tab_completer import ListCompleter
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None

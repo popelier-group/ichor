@@ -12,7 +12,7 @@ from ichor.files import XYZ, PointsDirectory, Trajectory
 from ichor.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript)
-from ichor.cli.tab_completer import ListCompleter
+from ichor.tab_completer import ListCompleter
 
 _traj: Optional[Trajectory] = None
 _atoms: Optional[Atoms] = None
