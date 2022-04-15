@@ -5,7 +5,7 @@ import numpy as np
 from ichor.lib import constants
 from ichor.atoms.calculators import ALFFeatureCalculator
 from ichor.common.types import VarReprMixin
-from ichor.lib.units import AtomicDistance
+from ichor.units import AtomicDistance
 
 
 class Atom(VarReprMixin):

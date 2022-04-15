@@ -15,7 +15,7 @@ from ichor.files import PointsDirectory, Trajectory
 from ichor.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript)
-from ichor.lib.units import Angle, degrees_to_radians
+from ichor.units import Angle, degrees_to_radians
 
 _input_location = None
 _output_location = Path("geometry.xlsx")
