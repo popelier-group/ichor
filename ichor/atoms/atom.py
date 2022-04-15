@@ -1,11 +1,9 @@
-import itertools as it
 from typing import List, Optional, Union
 
 import numpy as np
 
 from ichor import constants
 from ichor.atoms.calculators import ALFFeatureCalculator
-from ichor.common.functools.cached_property import cached_property
 from ichor.common.types import VarReprMixin
 from ichor.units import AtomicDistance
 
