@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import numpy as np
 
-from ichor import constants
+from ichor.lib import constants
 from ichor.batch_system import JobID
 from ichor.common.io import cp, mkdir
 from ichor.common.str import get_digits

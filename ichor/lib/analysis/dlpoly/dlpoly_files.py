@@ -10,7 +10,7 @@ from ichor.atoms import Atom, Atoms
 from ichor.common.conversion import try_float
 from ichor.common.io import convert_to_path, ln, mkdir, relpath
 from ichor.common.str import split_by
-from ichor.constants import dlpoly_weights
+from ichor.lib.constants import dlpoly_weights
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files.trajectory import Trajectory
 from ichor.globals import GLOBALS
