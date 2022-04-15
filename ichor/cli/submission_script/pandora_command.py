@@ -5,7 +5,7 @@ from ichor.common.functools import classproperty
 from ichor.files import PandoraDirectory
 from ichor.globals import GLOBALS
 from ichor.modules import Modules, MorfiModules, PandoraModules
-from ichor.pandora import PANDORA_LOCATION
+from ichor.cli.pandora import PANDORA_LOCATION
 from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.submission_script.python_command import PythonCommand
 

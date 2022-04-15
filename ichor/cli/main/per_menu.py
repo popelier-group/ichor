@@ -14,7 +14,7 @@ from ichor.auto_run.per.child_processes import (concat_dir_to_ts,
                                                 print_child_processes_status)
 from ichor.main.collate_log import collate_model_log
 from ichor.menu import Menu
-from ichor.tab_completer import ListCompleter
+from ichor.cli.tab_completer import ListCompleter
 
 child_processes = []
 all_child_processes = []
