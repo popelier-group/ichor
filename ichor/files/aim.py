@@ -31,25 +31,41 @@ class AIM(File, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
-    license_check_succeeded: Optional[bool] = FileContents
-    version: Optional[Version] = FileContents
-    wfn: Optional[Path] = FileContents
-    extout: Optional[Path] = FileContents
-    mgp: Optional[Path] = FileContents
-    sum: Optional[Path] = FileContents
-    sumviz: Optional[Path] = FileContents
-    nproc: Optional[int] = FileContents
-    nacps: Optional[int] = FileContents
-    nnacps: Optional[int] = FileContents
-    nbcps: Optional[int] = FileContents
-    nrcps: Optional[int] = FileContents
-    nccps: Optional[int] = FileContents
-    output_file: Optional[Path] = FileContents
-    cwd: Optional[Path] = FileContents
-
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, 
+                license_check_succeeded: Optional[bool] = FileContents,
+                version: Version = FileContents,
+                wfn_path: Path = FileContents,
+                extout_path: Optional[Path] = FileContents,
+                mgp_path: Optional[Path] = FileContents,
+                sum_path: Optional[Path] = FileContents,
+                sumviz_path: Optional[Path] = FileContents,
+                nproc: int = FileContents,
+                nacps: int = FileContents,
+                nnacps: int = FileContents,
+                nbcps: int = FileContents,
+                nrcps: int = FileContents,
+                nccps: int = FileContents,
+                output_file: Path = FileContents,
+                cwd: Path = FileContents
+                ):
         File.__init__(self, path)
         dict.__init__(self)
+
+        self.license_check_succeeded = license_check_succeeded
+        self.version = version
+        self.wfn_path = wfn_path
+        self.extout_path = extout_path
+        self.mgp_path = mgp_path
+        self.sum_path = sum_path
+        self.sumviz_path = sumviz_path
+        self.nproc = nproc
+        self.nacps = nacps
+        self.nnacps = nnacps
+        self.nbcps = nbcps
+        self.nrcps = nrcps
+        self.nccps = nccps
+        self.output_file = output_file
+        self.cwd = cwd
 
     @classproperty
     def filetype(self) -> str:
@@ -57,6 +73,12 @@ class AIM(File, dict):
         return ".aim"
 
     def _read_file(self):
+        """ Reads in AIMAll output file that contains information about the calculation.
+        
+        .. note::
+            This file does not contain IQA energies or multipole moments. That information is stored
+            in .int files (so use the INT class to parse).
+        """
 
         self.license_check_succeeded = False
 
@@ -78,7 +100,7 @@ class AIM(File, dict):
                 elif "AIMQB (Version" in line:
                     self.version = Version(line.split()[2])
                 elif "Wavefunction File:" in line:
-                    self.wfn = Path(line.split()[-1])
+                    self.wfn_path = Path(line.split()[-1])
                 elif "Number of processors used for this job =" in line:
                     self.nproc = int(line.split()[-1])
                 elif "Number of NACPs  =" in line:
@@ -133,12 +155,15 @@ class AIM(File, dict):
                         self[atom_name].integration_error = float(record[-1])
 
     def __getitem__(self, item: Union[str, int]) -> AimAtom:
-        """If an integer is passed, it returns the atom whose index corresponds to the integer + 1. If a string is passed, it returns
-        the the AimAtom which corresponds to the given key."""
+        """If an integer is passed, it returns the atom whose index corresponds to the integer (indexing starts at 1).
+        If a string is passed, it returns the the AimAtom which corresponds to the given key."""
         if isinstance(item, int):
-            i = item + 1
             for atom_name, aimatom in self.items():
-                if i == get_digits(atom_name):
+                if item == get_digits(atom_name):
                     return aimatom
             raise IndexError(f"No atom with index {item}")
-        return super().__getitem__(item)
+        elif isinstance(item, str):
+            item = item.upper()
+            return super().__getitem__(item)
+        else:
+            raise NotImplementedError(f"__getitem__ expects a str or int. Currently type is {type(item)}")
