@@ -5,11 +5,12 @@ from typing import Optional, Union
 
 import numpy as np
 
-from ichor import constants, patterns
+from ichor import constants
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
 from ichor.files.file import FileContents
 from ichor.files.geometry import GeometryData, GeometryDataFile
+from ichor.lib import patterns
 from ichor.multipoles import (rotate_dipole, rotate_hexadecapole,
                               rotate_octupole, rotate_quadrupole)
 
