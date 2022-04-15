@@ -15,7 +15,7 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.files.trajectory import Trajectory
 from ichor.globals import GLOBALS
 from ichor.models import Models
-from ichor.units import AtomicDistance
+from ichor.lib.units import AtomicDistance
 
 
 class DlpolyTrajectoryKey(Enum):

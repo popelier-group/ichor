@@ -332,7 +332,7 @@ class ListOfAtoms(list):
         from ichor.atoms import Atom
         from ichor.files import Trajectory
         from ichor.files.trajectory import features_to_coordinates
-        from ichor.units import AtomicDistance
+        from ichor.lib.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:
             raise ValueError(

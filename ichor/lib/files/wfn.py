@@ -9,7 +9,7 @@ from ichor.lib.constants import AIMALL_FUNCTIONALS
 from ichor.files.file import FileContents
 from ichor.files.geometry import GeometryFile, GeometryDataFile
 from ichor.globals import GLOBALS
-from ichor.units import AtomicDistance
+from ichor.lib.units import AtomicDistance
 import warnings
 
 

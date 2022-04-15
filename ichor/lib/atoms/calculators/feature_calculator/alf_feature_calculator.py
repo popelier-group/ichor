@@ -6,7 +6,7 @@ import numpy as np
 from ichor.atoms.calculators.feature_calculator.feature_calculator import \
     FeatureCalculator
 from ichor.lib.constants import ang2bohr
-from ichor.units import AtomicDistance
+from ichor.lib.units import AtomicDistance
 from ichor.common.functools import classproperty
 
 feature_unit = AtomicDistance.Bohr

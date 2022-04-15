@@ -11,7 +11,7 @@ from ichor.lib.constants import type2rad, type2valence
 from ichor.files.file import File
 from ichor.files.geometry import GeometryFile
 from ichor.globals import GLOBALS
-from ichor.units import AtomicDistance
+from ichor.lib.units import AtomicDistance
 
 
 class MoleculeType(Enum):
