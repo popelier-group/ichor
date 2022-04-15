@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ichor.lib.atoms.calculators.feature_calculator.feature_calculator import \
+from ichor.atoms.calculators.feature_calculator.feature_calculator import \
     FeatureCalculator
 from ichor.lib.constants import ang2bohr
 from ichor.lib.units import AtomicDistance
