@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ichor.lib import constants
+from ichor import constants
 from ichor.atoms.calculators import ALFFeatureCalculator
 from ichor.common.types import VarReprMixin
 from ichor.units import AtomicDistance

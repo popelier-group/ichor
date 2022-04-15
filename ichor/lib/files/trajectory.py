@@ -184,7 +184,7 @@ class Trajectory(ListOfAtoms, File):
 
         import pandas as pd
 
-        from ichor.lib.constants import bohr2ang
+        from ichor.constants import bohr2ang
 
         if isinstance(f, str):
             f = Path(f)

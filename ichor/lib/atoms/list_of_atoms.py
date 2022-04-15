@@ -186,7 +186,7 @@ class ListOfAtoms(list):
         from collections import OrderedDict
 
         from ichor.analysis.predictions import get_true_predicted
-        from ichor.lib.constants import ha_to_kj_mol
+        from ichor.constants import ha_to_kj_mol
         from ichor.files import PointsDirectory
         from ichor.models import Models
 
@@ -416,7 +416,7 @@ class ListOfAtoms(list):
 
         import pandas as pd
 
-        from ichor.lib import constants
+        from ichor import constants
         from ichor.files import PointsDirectory
 
         if isinstance(atom_names, str):

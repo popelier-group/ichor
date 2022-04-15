@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple, Union
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import classproperty
 from ichor.common.os import current_user
-from ichor.lib.constants import type2rad, type2valence
+from ichor.constants import type2rad, type2valence
 from ichor.files.file import File
 from ichor.files.geometry import GeometryFile
 from ichor.globals import GLOBALS
