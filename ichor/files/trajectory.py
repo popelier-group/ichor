@@ -73,6 +73,7 @@ class Trajectory(ListOfAtoms, File):
         if path is not None:
             File.__init__(self, path)
         else:
+            self.path = Path("default_trajectory_file.xyz")
             self.state = FileState.Read
 
     def _read_file(self):
