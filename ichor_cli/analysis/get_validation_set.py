@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ichor.analysis.get_path import get_dir
-from ichor.file_structure import FILE_STRUCTURE
+from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.menus.menu import Menu
 
 _current_validation_set = None

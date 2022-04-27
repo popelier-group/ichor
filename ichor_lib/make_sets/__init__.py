@@ -58,7 +58,7 @@ def make_sets(
     validation_set_size: Optional[int] = None,
     validation_set_method: Optional[List[str]] = None,
 ) -> None:
-    from ichor.file_structure import FILE_STRUCTURE
+    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
 
     if points_input.suffix == ".xyz":

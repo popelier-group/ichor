@@ -16,7 +16,7 @@ from ichor.batch_system import JobID
 from ichor.common.io import get_files_of_type
 from ichor.common.np import dict_of_list_to_dict_of_array
 from ichor_lib.constants import ha_to_kj_mol
-from ichor.file_structure import FILE_STRUCTURE
+from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, WFN
 from ichor.models import Models
 

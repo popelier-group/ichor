@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.common.io import get_files_of_type
-from ichor.file_structure import FILE_STRUCTURE
+from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.files import WFN
 from ichor.globals import GLOBALS
 

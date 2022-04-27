@@ -7,7 +7,7 @@ from ichor.analysis.dlpoly.dlpoly_submit import \
     submit_dlpoly_optimisation_analysis_auto_run
 from ichor.analysis.get_input import get_first_file, get_input_menu
 from ichor.analysis.get_path import get_dir
-from ichor.file_structure import FILE_STRUCTURE
+from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ
 from ichor.globals import GLOBALS
 from ichor.menus.menu import Menu

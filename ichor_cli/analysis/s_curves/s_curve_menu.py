@@ -74,7 +74,7 @@ def s_curve_menu_refresh(menu: Menu):
 def s_curve_menu():
     global _validation_set_location
     global _model_location
-    from ichor.file_structure import FILE_STRUCTURE
+    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
     _validation_set_location = FILE_STRUCTURE["validation_set"]
     _model_location = FILE_STRUCTURE["models"]
