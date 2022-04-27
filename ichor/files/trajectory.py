@@ -70,7 +70,8 @@ class Trajectory(ListOfAtoms, File):
 
     def __init__(self, path: Union[Path, str] = None):
         ListOfAtoms.__init__(self)
-        File.__init__(self, path)
+        if path is not None:
+            File.__init__(self, path)
 
     def _read_file(self):
 
