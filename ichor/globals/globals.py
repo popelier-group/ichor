@@ -106,7 +106,7 @@ from re import S
 from typing import Any, List, Optional, Union
 from uuid import UUID, uuid4
 
-from ichor import constants
+from ichor_lib import constants
 from ichor.atoms.atoms import Atoms
 from ichor.common.types import Version
 from collections import defaultdict

@@ -1,4 +1,4 @@
-from ichor.units import Angle, degrees_to_radians
+from ichor_lib.units import Angle, degrees_to_radians
 
 from typing import Optional
 import numpy as np

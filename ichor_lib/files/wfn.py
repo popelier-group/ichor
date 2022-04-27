@@ -5,11 +5,11 @@ from typing import Union
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.str import split_by
-from ichor.constants import AIMALL_FUNCTIONALS
+from ichor_lib.constants import AIMALL_FUNCTIONALS
 from ichor.files.file import FileContents
 from ichor.files.geometry import GeometryFile, GeometryDataFile
 from ichor.globals import GLOBALS
-from ichor.units import AtomicDistance
+from ichor_lib.units import AtomicDistance
 import warnings
 
 

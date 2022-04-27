@@ -186,7 +186,7 @@ class ListOfAtoms(list):
         from collections import OrderedDict
 
         from ichor.analysis.predictions import get_true_predicted
-        from ichor.constants import ha_to_kj_mol
+        from ichor_lib.constants import ha_to_kj_mol
         from ichor.files import PointsDirectory
         from ichor.models import Models
 
@@ -332,7 +332,7 @@ class ListOfAtoms(list):
         from ichor.atoms import Atom
         from ichor.files import Trajectory
         from ichor.files.trajectory import features_to_coordinates
-        from ichor.units import AtomicDistance
+        from ichor_lib.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:
             raise ValueError(
@@ -416,7 +416,7 @@ class ListOfAtoms(list):
 
         import pandas as pd
 
-        from ichor import constants
+        from ichor_lib import constants
         from ichor.files import PointsDirectory
 
         if isinstance(atom_names, str):

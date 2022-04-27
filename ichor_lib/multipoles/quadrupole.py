@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from ichor import constants
+from ichor_lib import constants
 
 
 def rotate_quadrupole(
