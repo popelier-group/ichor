@@ -71,7 +71,7 @@ class ReRunDaemon(Daemon):
 def rerun_failed_child_process(
     child_processes: Optional[List[Path]] = None,
 ) -> None:
-    from ichor.arguments import Arguments
+    from ichor_hpc.arguments import Arguments
     from ichor.globals import GLOBALS, Globals
 
     if child_processes is None:

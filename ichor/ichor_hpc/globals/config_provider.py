@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ichor.arguments import Arguments
+from ichor_hpc.arguments import Arguments
 from ichor_lib.constants import ichor_logo
 
 

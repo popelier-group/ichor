@@ -32,7 +32,7 @@ class ICHORCommand(PythonCommand):
             args if args is not None else [],
         )
 
-        from ichor.arguments import Arguments
+        from ichor_hpc.arguments import Arguments
         from ichor.globals import GLOBALS
 
         self.needs_uid = needs_uid

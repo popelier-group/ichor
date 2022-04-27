@@ -47,7 +47,7 @@ def auto_run_per_value(
     :return: A list of job ids which are going to run on compute nodes
     """
 
-    from ichor.arguments import Arguments
+    from ichor_hpc.arguments import Arguments
     from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
 

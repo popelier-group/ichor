@@ -44,7 +44,7 @@ __all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM", "__version__"]
 
 import sys
 
-from ichor.arguments import Arguments
+from ichor_hpc.arguments import Arguments
 from ichor.globals import GLOBALS
 from ichor.main import main_menu
 
