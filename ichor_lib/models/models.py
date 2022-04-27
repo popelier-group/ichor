@@ -9,7 +9,7 @@ from ichor.atoms import Atoms, ListOfAtoms
 from ichor.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.common.str import get_digits
 from ichor.files import Directory, GeometryFile
-from ichor.itypes import F
+from ichor_lib.itypes import F
 from ichor.models.model import Model
 from ichor.models.result import ModelsResult
 

@@ -8,7 +8,7 @@ from ichor.main.qcp import submit_qcp
 from ichor.main.qct import submit_qct
 from ichor.main.queue import queue_menu
 from ichor.main.tools_menu import tools_menu
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM
 from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM
 

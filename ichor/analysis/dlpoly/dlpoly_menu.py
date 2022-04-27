@@ -10,7 +10,7 @@ from ichor.analysis.get_path import get_dir
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ
 from ichor.globals import GLOBALS
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 
 _dlpoly_input_file = Path(".")
 _model_location = Path(".")

@@ -13,7 +13,7 @@ from ichor.common.io import cp, mkdir, move
 from ichor.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
                              USER_READ, permissions, set_permission)
 from ichor.globals import GLOBALS
-from ichor.machine import MACHINE
+from ichor.machine.machine import MACHINE
 
 _local_bin_directory = Path.home() / ".ichor" / "bin"
 

@@ -11,8 +11,8 @@ from ichor.make_sets.make_set_method import MakeSetMethod
 from ichor.make_sets.min_max import MinMax
 from ichor.make_sets.min_max_mean import MinMaxMean
 from ichor.make_sets.random import RandomPoints
-from ichor.menu import Menu
-from ichor.tab_completer import PathCompleter
+from ichor.menus.menu import Menu
+from ichor.menus.tab_completer import PathCompleter
 
 __all__ = ["make_sets", "make_sets_menu", "make_sets_npoints"]
 

@@ -3,7 +3,7 @@ from typing import Callable, List, Optional
 from ichor.auto_run.per.per import (auto_run_per_value,
                                     check_auto_run_per_counter)
 from ichor.batch_system import JobID
-from ichor.daemon import Daemon
+from ichor.daemon.daemon import Daemon
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.make_models import MODEL_TYPES
 

@@ -1,7 +1,7 @@
 import multiprocessing as mp
 
 from ichor.batch_system import ParallelEnvironments
-from ichor.machine import Machine
+from ichor.machine.machine import Machine
 
 PARALLEL_ENVIRONMENT = ParallelEnvironments()
 

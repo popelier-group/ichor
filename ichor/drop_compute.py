@@ -2,7 +2,7 @@ from pathlib import Path
 
 from ichor.common.os import current_user_groups
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.machine import MACHINE, Machine
+from ichor.machine.machine import MACHINE, Machine
 
 DROP_COMPUTE_TMP_LOCATION: Path = FILE_STRUCTURE["tmp"]
 DROP_COMPUTE_LOCATION: Path = FILE_STRUCTURE[

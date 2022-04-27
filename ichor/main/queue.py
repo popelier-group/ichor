@@ -4,7 +4,7 @@ from typing import List
 
 from ichor.batch_system import BATCH_SYSTEM, Job, JobID
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 
 
 def read_jid(jid_file: Path = FILE_STRUCTURE["jid"]) -> List[JobID]:

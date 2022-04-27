@@ -4,7 +4,7 @@ from typing import List, Optional
 from ichor.analysis.get_path import get_dir
 from ichor.common.io import get_files_of_type
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 from ichor.models import Model, Models
 
 

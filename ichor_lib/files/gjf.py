@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor import patterns
+from ichor_lib import patterns
 from ichor.atoms import Atom, Atoms
 from ichor.common.functools import buildermethod, classproperty
 from ichor.common.io import convert_to_path

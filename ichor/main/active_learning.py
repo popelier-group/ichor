@@ -21,7 +21,7 @@ def active_learning(
     from ichor.auto_run.standard_auto_run import submit_next_iter
     from ichor.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
-    from ichor.machine import MACHINE
+    from ichor.machine.machine import MACHINE
     from ichor.submission_script import SUBMIT_ON_COMPUTE
 
     logger.debug("Performing Active Learning Calculation")

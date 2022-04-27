@@ -6,7 +6,7 @@ from ichor.auto_run import rerun_from_failed
 from ichor.auto_run.stop import stop
 from ichor.common.io import mkdir, pushd
 from ichor.common.os import kill_pid, pid_exists
-from ichor.daemon import Daemon
+from ichor.daemon.daemon import Daemon
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.main.queue import delete_jobs
 

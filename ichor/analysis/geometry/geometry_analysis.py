@@ -12,7 +12,7 @@ from ichor.analysis.get_path import get_path
 from ichor.batch_system import JobID
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import PointsDirectory, Trajectory
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript)
 from ichor_lib.units import Angle, degrees_to_radians

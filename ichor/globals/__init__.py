@@ -7,7 +7,7 @@ from pathlib import Path
 from ichor.common.os import input_with_prefill
 from ichor.globals.globals import Globals
 from ichor.globals.os import OS
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 
 __all__ = ["GLOBALS", "Globals", "OS"]
 

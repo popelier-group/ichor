@@ -5,7 +5,7 @@ from ichor.analysis.get_path import get_file
 from ichor.common.io import get_files_of_type
 from ichor.common.sorting.natsort import natsorted
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 
 _input_file: Optional[Path] = None
 _input_filetypes: Optional[List[str]] = None

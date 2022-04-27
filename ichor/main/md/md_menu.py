@@ -1,7 +1,7 @@
 from ichor.main.md.amber import amber_menu
 from ichor.main.md.cp2k import cp2k_menu
 from ichor.main.md.tyche import tyche_menu
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 
 
 def md_menu() -> None:

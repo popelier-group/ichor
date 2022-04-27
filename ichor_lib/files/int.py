@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 import numpy as np
 
-from ichor import patterns
+from ichor_lib import patterns
 from ichor.common.functools import (buildermethod, cached_property,
                                     classproperty)
 from ichor.files.file import FileContents

@@ -5,7 +5,7 @@ from ichor.analysis.get_validation_set import (
     choose_validation_set_menu, get_validation_set_from_current_dir)
 from ichor.analysis.rmse.rmse import calculate_rmse
 from ichor.file_structure import FILE_STRUCTURE
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 
 _validation_set_location = Path(".")
 _model_location = Path(".")

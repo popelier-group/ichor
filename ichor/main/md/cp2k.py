@@ -9,8 +9,8 @@ from ichor.common.os import input_with_prefill
 from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
-from ichor.machine import MACHINE, Machine
-from ichor.menu import Menu
+from ichor.machine.machine import MACHINE, Machine
+from ichor.menus.menu import Menu
 from ichor.submission_script import SCRIPT_NAMES, CP2KCommand, SubmissionScript
 
 _input_file = None

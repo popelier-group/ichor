@@ -4,7 +4,7 @@ from ichor.analysis.opt import run_gauss_opt_menu
 from ichor.analysis.rmse import rmse_menu
 from ichor.analysis.rotate_mol import rotate_mol_menu
 from ichor.analysis.s_curves import s_curve_menu
-from ichor.menu import Menu
+from ichor.menus.menu import Menu
 
 
 def analysis_menu():

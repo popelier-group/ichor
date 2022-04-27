@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Any, Sequence
 
-from ichor.itypes import F, Scalar
+from ichor_lib.itypes import F, Scalar
 
 
 def run_function(order: Scalar) -> F:

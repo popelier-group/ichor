@@ -35,7 +35,7 @@
 from ichor.batch_system import BATCH_SYSTEM
 from ichor.common.types import Version
 from ichor.globals import GLOBALS
-from ichor.machine import MACHINE
+from ichor.machine.machine import MACHINE
 
 __version__ = Version("3.0.1")
 

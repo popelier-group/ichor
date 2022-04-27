@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Any, cast
 
-from ichor.itypes import F
+from ichor_lib.itypes import F
 
 
 def formatter(func: F) -> F:
