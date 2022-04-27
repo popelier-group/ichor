@@ -114,7 +114,7 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
-from ichor.problem_finder import PROBLEM_FINDER
+from ichor_cli.problem_finder import PROBLEM_FINDER
 from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import ALFCalculationError
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
