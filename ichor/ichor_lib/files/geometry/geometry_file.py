@@ -1,8 +1,8 @@
 from typing import Optional
 
-from ichor_lib.atoms import Atoms
-from ichor_lib.files.file import File, FileContents
-from ichor_lib.files.geometry.atom_data import AtomData
+from ichor.ichor_lib.atoms import Atoms
+from ichor.ichor_lib.files.file import File, FileContents
+from ichor.ichor_lib.files.geometry.atom_data import AtomData
 from typing import Union
 from pathlib import Path
 

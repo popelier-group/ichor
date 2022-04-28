@@ -3,14 +3,14 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-# from ichor_lib.analysis.geometry.geometry_calculator import bonds, calculate_bond
-from ichor_lib.atoms import Atom, Atoms
-from ichor_lib.common.functools import classproperty
-from ichor_lib.common.os import current_user
-from ichor_lib.constants import type2rad, type2valence
-from ichor_lib.files.file import File
-from ichor_lib.files.geometry import GeometryFile
-from ichor_lib.units import AtomicDistance
+# from ichor.ichor_lib.analysis.geometry.geometry_calculator import bonds, calculate_bond
+from ichor.ichor_lib.atoms import Atom, Atoms
+from ichor.ichor_lib.common.functools import classproperty
+from ichor.ichor_lib.common.os import current_user
+from ichor.ichor_lib.constants import type2rad, type2valence
+from ichor.ichor_lib.files.file import File
+from ichor.ichor_lib.files.geometry import GeometryFile
+from ichor.ichor_lib.units import AtomicDistance
 
 
 class MoleculeType(Enum):
@@ -167,7 +167,7 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
                 return BondType.Aromatic
 
             single_bond_distance = atom1.radius + atom2.radius
-            from ichor_lib.analysis.geometry import calculate_bond
+            from ichor.ichor_lib.analysis.geometry import calculate_bond
 
             bond_distance = calculate_bond(atom1.parent, atom1.i, atom2.i)
             bond_percentage = bond_distance / single_bond_distance
@@ -259,7 +259,7 @@ def bond_index_to_atom(
 
 
 def get_atom_bonds(atom: Atom) -> List[Tuple[int, int]]:
-    from ichor_lib.analysis.geometry import bonds
+    from ichor.ichor_lib.analysis.geometry import bonds
 
     """Return list of bond indices (1-index)"""
     return [bond for bond in bonds(atom.parent) if atom.index in bond]
@@ -500,7 +500,7 @@ class Mol2(GeometryFile):
                 )
 
     def write(self, system_name: str, path: Optional[Path] = None):
-        from ichor_lib.analysis.geometry import bonds
+        from ichor.ichor_lib.analysis.geometry import bonds
 
         self.format()
         b = bonds(self.atoms)

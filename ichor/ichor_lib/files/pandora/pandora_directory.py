@@ -1,13 +1,13 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor_lib.common.functools import classproperty
-from ichor_lib.files.directory import AnnotatedDirectory
-from ichor_lib.files.geometry import GeometryDataFile, GeometryFile
-from ichor_lib.files.optional_file import OptionalFile, OptionalPath
-from ichor_lib.files.pandora.morfi_output import MorfiDirectory
-from ichor_lib.files.pandora.pandora_input import PandoraInput
-from ichor_lib.files.pandora.pyscf_output import PySCFDirectory
+from ichor.ichor_lib.common.functools import classproperty
+from ichor.ichor_lib.files.directory import AnnotatedDirectory
+from ichor.ichor_lib.files.geometry import GeometryDataFile, GeometryFile
+from ichor.ichor_lib.files.optional_file import OptionalFile, OptionalPath
+from ichor.ichor_lib.files.pandora.morfi_output import MorfiDirectory
+from ichor.ichor_lib.files.pandora.pandora_input import PandoraInput
+from ichor.ichor_lib.files.pandora.pyscf_output import PySCFDirectory
 
 
 class PandoraDirectory(AnnotatedDirectory, GeometryFile, GeometryDataFile):

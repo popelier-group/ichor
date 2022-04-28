@@ -1,6 +1,6 @@
 from functools import wraps
 
-from ichor_lib.itypes import F
+from ichor.ichor_lib.itypes import F
 
 
 def run_once(func: F) -> F:

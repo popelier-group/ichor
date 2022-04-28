@@ -4,8 +4,8 @@ from typing import List, Optional, Sequence, Union
 
 import numpy as np
 
-from ichor_lib.atoms.atom import Atom
-from ichor_lib.atoms.calculators import ConnectivityCalculator
+from ichor.ichor_lib.atoms.atom import Atom
+from ichor.ichor_lib.atoms.calculators import ConnectivityCalculator
 
 
 class AtomNotFound(Exception):

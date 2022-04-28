@@ -1,6 +1,6 @@
 from typing import TypeVar, Union
 
-from ichor_lib.files.path_object import PathObject
+from ichor.ichor_lib.files.path_object import PathObject
 
 PathType = TypeVar("PathType", bound=PathObject)
 

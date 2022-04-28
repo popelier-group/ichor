@@ -5,13 +5,13 @@ from typing import Dict, List, Union
 
 import numpy as np
 
-from ichor_lib.atoms import Atoms, ListOfAtoms
-from ichor_lib.common.sorting.natsort import ignore_alpha, natsorted
-from ichor_lib.common.str import get_digits
-from ichor_lib.files import Directory, GeometryFile
-from ichor_lib.itypes import F
-from ichor_lib.models.model import Model
-from ichor_lib.models.result import ModelsResult
+from ichor.ichor_lib.atoms import Atoms, ListOfAtoms
+from ichor.ichor_lib.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.ichor_lib.common.str import get_digits
+from ichor.ichor_lib.files import Directory, GeometryFile
+from ichor.ichor_lib.itypes import F
+from ichor.ichor_lib.models.model import Model
+from ichor.ichor_lib.models.result import ModelsResult
 
 
 class DimensionError(ValueError):

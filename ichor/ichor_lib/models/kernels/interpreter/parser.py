@@ -1,7 +1,7 @@
-from ichor_lib.models.kernels.interpreter.ast import (ASTNode, BinOp, Num, UnaryOp,
+from ichor.ichor_lib.models.kernels.interpreter.ast import (ASTNode, BinOp, Num, UnaryOp,
                                                   Var)
-from ichor_lib.models.kernels.interpreter.lexer import Lexer
-from ichor_lib.models.kernels.interpreter.token_type import TokenType
+from ichor.ichor_lib.models.kernels.interpreter.lexer import Lexer
+from ichor.ichor_lib.models.kernels.interpreter.token_type import TokenType
 
 
 class Parser:

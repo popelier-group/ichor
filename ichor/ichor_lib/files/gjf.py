@@ -3,13 +3,13 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from ichor_lib import patterns
-from ichor_lib.atoms import Atom, Atoms
-from ichor_lib.common.functools import buildermethod, classproperty
-from ichor_lib.common.io import convert_to_path
-from ichor_lib.files.file import FileContents
-from ichor_lib.files.qcp import QuantumChemistryProgramInput
-from ichor_lib.defaults import gaussian_defaults
-from ichor_lib.defaults.gaussian_defaults import GaussianJobType
+from ichor.ichor_lib.atoms import Atom, Atoms
+from ichor.ichor_lib.common.functools import buildermethod, classproperty
+from ichor.ichor_lib.common.io import convert_to_path
+from ichor.ichor_lib.files.file import FileContents
+from ichor.ichor_lib.files.qcp import QuantumChemistryProgramInput
+from ichor.ichor_lib.defaults import gaussian_defaults
+from ichor.ichor_lib.defaults.gaussian_defaults import GaussianJobType
 
 
 # TODO: Add:

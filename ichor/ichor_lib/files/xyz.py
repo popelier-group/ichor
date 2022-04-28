@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor_lib.atoms import Atom, Atoms
-from ichor_lib.common.functools import classproperty
-from ichor_lib.files.file import File, FileContents
-from ichor_lib.files.geometry import GeometryFile
+from ichor.ichor_lib.atoms import Atom, Atoms
+from ichor.ichor_lib.common.functools import classproperty
+from ichor.ichor_lib.files.file import File, FileContents
+from ichor.ichor_lib.files.geometry import GeometryFile
 
 
 class XYZ(GeometryFile):

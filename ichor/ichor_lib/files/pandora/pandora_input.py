@@ -3,10 +3,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-from ichor_lib.atoms import Atom, Atoms
-from ichor_lib.common.functools import classproperty
-from ichor_lib.files.file import FileContents
-from ichor_lib.files.qcp import QuantumChemistryProgramInput
+from ichor.ichor_lib.atoms import Atom, Atoms
+from ichor.ichor_lib.common.functools import classproperty
+from ichor.ichor_lib.files.file import FileContents
+from ichor.ichor_lib.files.qcp import QuantumChemistryProgramInput
 
 class PandoraCCSDmod(Enum):
     CCSD = "ccsd"

@@ -3,16 +3,16 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from ichor_lib.common.functools import cached_property, classproperty
-from ichor_lib.common.functools.buildermethod import buildermethod
-from ichor_lib.common.io import mkdir
-from ichor_lib.common.str import get_digits
-from ichor_lib.common.types import Version
-from ichor_lib.files.file import File, FileContents
-from ichor_lib.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
+from ichor.ichor_lib.common.functools import cached_property, classproperty
+from ichor.ichor_lib.common.functools.buildermethod import buildermethod
+from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.common.str import get_digits
+from ichor.ichor_lib.common.types import Version
+from ichor.ichor_lib.files.file import File, FileContents
+from ichor.ichor_lib.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
                                   RBFCyclic)
-from ichor_lib.models.kernels.interpreter import KernelInterpreter
-from ichor_lib.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
+from ichor.ichor_lib.models.kernels.interpreter import KernelInterpreter
+from ichor.ichor_lib.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
                                ZeroMean)
 
 

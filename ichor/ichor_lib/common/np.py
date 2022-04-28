@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from ichor_lib.itypes import Scalar
+from ichor.ichor_lib.itypes import Scalar
 
 
 def dict_of_list_to_dict_of_array(

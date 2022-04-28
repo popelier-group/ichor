@@ -2,7 +2,7 @@ from typing import IO
 
 import numpy as np
 
-from ichor_lib.models.mean.mean import Mean
+from ichor.ichor_lib.models.mean.mean import Mean
 
 
 class QuadraticMean(Mean):

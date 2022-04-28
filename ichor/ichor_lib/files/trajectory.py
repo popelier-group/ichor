@@ -5,10 +5,10 @@ from typing import Iterable, List, Optional, Union
 
 import numpy as np
 
-from ichor_lib.atoms import Atom, Atoms, ListOfAtoms
-from ichor_lib.common.functools import classproperty
-from ichor_lib.common.io import mkdir
-from ichor_lib.files.file import File, FileState
+from ichor.ichor_lib.atoms import Atom, Atoms, ListOfAtoms
+from ichor.ichor_lib.common.functools import classproperty
+from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.files.file import File, FileState
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
@@ -142,7 +142,7 @@ class Trajectory(ListOfAtoms, File):
         :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
             a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
         """
-        from ichor_lib.files import XYZ
+        from ichor.ichor_lib.files import XYZ
 
         mkdir(root, empty=True)
         for i, geometry in enumerate(self):
@@ -185,7 +185,7 @@ class Trajectory(ListOfAtoms, File):
 
         import pandas as pd
 
-        from ichor_lib.constants import bohr2ang
+        from ichor.ichor_lib.constants import bohr2ang
 
         if isinstance(f, str):
             f = Path(f)

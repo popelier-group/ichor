@@ -3,11 +3,11 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ichor_lib.atoms.calculators.feature_calculator.feature_calculator import \
+from ichor.ichor_lib.atoms.calculators.feature_calculator.feature_calculator import \
     FeatureCalculator
-from ichor_lib.constants import ang2bohr
-from ichor_lib.units import AtomicDistance
-from ichor_lib.common.functools import classproperty
+from ichor.ichor_lib.constants import ang2bohr
+from ichor.ichor_lib.units import AtomicDistance
+from ichor.ichor_lib.common.functools import classproperty
 from pathlib import Path
 import warnings
 
@@ -174,7 +174,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         if alf is None:
             return atom.parent[cls.calculate_alf(atom)[1]]
         elif isinstance(alf, list):
-            from ichor_lib.atoms.atom import Atom
+            from ichor.ichor_lib.atoms.atom import Atom
 
             if isinstance(alf[1], int):
                 return atom.parent[alf[1] - 1]
@@ -203,7 +203,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         if alf is None:
             return atom.parent[cls.calculate_alf(atom)[2]]
         elif isinstance(alf, list):
-            from ichor_lib.atoms.atom import Atom
+            from ichor.ichor_lib.atoms.atom import Atom
 
             if isinstance(alf[2], int):
                 return atom.parent[alf[2] - 1]

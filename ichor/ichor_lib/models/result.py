@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union
 
 import numpy as np
 
-from ichor_lib.itypes import Scalar
+from ichor.ichor_lib.itypes import Scalar
 
 # TODO: we should aways use numpy, python lists are way slower and we only need to store numerical data anyway. No need in having lists as well
 convert_to_numpy = True

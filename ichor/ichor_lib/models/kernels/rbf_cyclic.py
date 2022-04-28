@@ -2,10 +2,10 @@ from typing import IO, Optional
 
 import numpy as np
 
-from ichor_lib.common.functools import cached_property
-from ichor_lib.common.np import batched_array
-from ichor_lib.models.kernels.distance import Distance
-from ichor_lib.models.kernels.kernel import Kernel
+from ichor.ichor_lib.common.functools import cached_property
+from ichor.ichor_lib.common.np import batched_array
+from ichor.ichor_lib.models.kernels.distance import Distance
+from ichor.ichor_lib.models.kernels.kernel import Kernel
 
 
 class RBFCyclic(Kernel):

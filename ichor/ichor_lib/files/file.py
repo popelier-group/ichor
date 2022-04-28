@@ -4,9 +4,9 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor_lib.common.functools import buildermethod, classproperty
-from ichor_lib.common.io import move
-from ichor_lib.files.path_object import PathObject
+from ichor.ichor_lib.common.functools import buildermethod, classproperty
+from ichor.ichor_lib.common.io import move
+from ichor.ichor_lib.files.path_object import PathObject
 
 class FileReadError(Exception):
     pass

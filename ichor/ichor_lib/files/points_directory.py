@@ -2,13 +2,13 @@ import re
 from pathlib import Path
 from typing import Union
 
-from ichor_lib.atoms import ListOfAtoms
-from ichor_lib.common.functools import buildermethod
-from ichor_lib.common.io import mkdir
-from ichor_lib.files import Directory
-from ichor_lib.files.point_directory import PointDirectory
+from ichor.ichor_lib.atoms import ListOfAtoms
+from ichor.ichor_lib.common.functools import buildermethod
+from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.files import Directory
+from ichor.ichor_lib.files.point_directory import PointDirectory
 
-from ichor_lib.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.ichor_lib.common.sorting.natsort import ignore_alpha, natsorted
 
 class PointsDirectory(ListOfAtoms, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).

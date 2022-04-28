@@ -3,16 +3,16 @@ import sys
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
-from ichor_lib.atoms import ListOfAtoms
-from ichor_lib.common.int import count_digits
-from ichor_lib.common.io import mkdir
-from ichor_lib.files import GJF, XYZ, PointsDirectory, Trajectory
-from ichor_lib.make_sets.make_set_method import MakeSetMethod
-from ichor_lib.make_sets.min_max import MinMax
-from ichor_lib.make_sets.min_max_mean import MinMaxMean
-from ichor_lib.make_sets.random import RandomPoints
-from ichor_lib.menus.menu import Menu
-from ichor_lib.menus.tab_completer import PathCompleter
+from ichor.ichor_lib.atoms import ListOfAtoms
+from ichor.ichor_lib.common.int import count_digits
+from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.files import GJF, XYZ, PointsDirectory, Trajectory
+from ichor.ichor_lib.make_sets.make_set_method import MakeSetMethod
+from ichor.ichor_lib.make_sets.min_max import MinMax
+from ichor.ichor_lib.make_sets.min_max_mean import MinMaxMean
+from ichor.ichor_lib.make_sets.random import RandomPoints
+from ichor.ichor_lib.menus.menu import Menu
+from ichor.ichor_lib.menus.tab_completer import PathCompleter
 
 POINTS_LOCATION: Optional[Path] = None
 

@@ -8,7 +8,7 @@ from pathlib import Path
 from signal import SIGTERM
 from typing import List, Tuple
 
-from ichor_lib.common.str import decode
+from ichor.ichor_lib.common.str import decode
 
 USER_READ = stat.S_IRUSR
 USER_WRITE = stat.S_IWUSR

@@ -4,11 +4,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List, Type, Union
 
-from ichor_lib.common.functools import (buildermethod, cached_property,
+from ichor.ichor_lib.common.functools import (buildermethod, cached_property,
                                     classproperty)
-from ichor_lib.common.io import mkdir, move
-from ichor_lib.files.file import File
-from ichor_lib.files.path_object import PathObject
+from ichor.ichor_lib.common.io import mkdir, move
+from ichor.ichor_lib.files.file import File
+from ichor.ichor_lib.files.path_object import PathObject
 
 
 class Directory(PathObject, ABC):

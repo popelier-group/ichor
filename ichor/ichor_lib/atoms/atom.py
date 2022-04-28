@@ -2,10 +2,10 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ichor_lib import constants
-from ichor_lib.atoms.calculators import ALFFeatureCalculator
-from ichor_lib.common.types import VarReprMixin
-from ichor_lib.units import AtomicDistance
+from ichor.ichor_lib import constants
+from ichor.ichor_lib.atoms.calculators import ALFFeatureCalculator
+from ichor.ichor_lib.common.types import VarReprMixin
+from ichor.ichor_lib.units import AtomicDistance
 
 
 class Atom(VarReprMixin):

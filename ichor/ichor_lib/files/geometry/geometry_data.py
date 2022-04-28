@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Any
-from ichor_lib.files import File
+from ichor.ichor_lib.files import File
 
 class PropertyNotFound(Exception):
     pass

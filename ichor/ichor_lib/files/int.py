@@ -6,11 +6,11 @@ from typing import Optional, Union
 import numpy as np
 
 from ichor_lib import patterns
-from ichor_lib.common.functools import (buildermethod, cached_property,
+from ichor.ichor_lib.common.functools import (buildermethod, cached_property,
                                     classproperty)
-from ichor_lib.files.file import FileContents
-from ichor_lib.files.geometry import GeometryData, GeometryDataFile
-from ichor_lib.multipoles import (rotate_dipole, rotate_hexadecapole,
+from ichor.ichor_lib.files.file import FileContents
+from ichor.ichor_lib.files.geometry import GeometryData, GeometryDataFile
+from ichor.ichor_lib.multipoles import (rotate_dipole, rotate_hexadecapole,
                               rotate_octupole, rotate_quadrupole)
 from ichor_lib import constants
 
@@ -87,7 +87,7 @@ class INT(GeometryDataFile):
         """Returns the IQA energy of the topological atom that was calculated for this topological atom (since 1 .int file is written for each topological atom)."""
         # TODO: remove the ADD_DISPERSION. This class should only be used to parse .int files and
         # processing the data should be done somewhere else.
-        from ichor_lib.qct import ADD_DISPERSION
+        from ichor.ichor_lib.qct import ADD_DISPERSION
 
         iqa = self.iqa_data["E_IQA(A)"]
         if ADD_DISPERSION():
@@ -396,7 +396,7 @@ class INT(GeometryDataFile):
 
     def get_dispersion(self) -> Optional[float]:
         # TODO: THIS DOES NOT NEED TO BE HERE because the pandora directory might not exist. NEED TO PASS in a path from where to get dispersion will be the proper library implementation.
-        from ichor_lib.files.pandora import PandoraDirectory
+        from ichor.ichor_lib.files.pandora import PandoraDirectory
 
         self.dispersion_data = GeometryData()
 

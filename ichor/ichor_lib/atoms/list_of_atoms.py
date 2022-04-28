@@ -4,7 +4,7 @@ from typing import List, Optional, Type, Union
 
 import numpy as np
 
-from ichor_lib.atoms.atoms import Atoms
+from ichor.ichor_lib.atoms.atoms import Atoms
 
 
 class ListOfAtoms(list):
@@ -20,7 +20,7 @@ class ListOfAtoms(list):
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
 
-        from ichor_lib.files import PointsDirectory, Trajectory
+        from ichor.ichor_lib.files import PointsDirectory, Trajectory
 
         if isinstance(self, PointsDirectory):
             return self[0].atoms.types
@@ -32,7 +32,7 @@ class ListOfAtoms(list):
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Does not remove duplicates"""
 
-        from ichor_lib.files import PointsDirectory, Trajectory
+        from ichor.ichor_lib.files import PointsDirectory, Trajectory
 
         if isinstance(self, PointsDirectory):
             return self[0].atoms.types_extended
@@ -44,7 +44,7 @@ class ListOfAtoms(list):
         """Return the atom names from the first timestep. Assumes that all timesteps have the same
         number of atoms/atom names."""
 
-        from ichor_lib.files import PointsDirectory, Trajectory
+        from ichor.ichor_lib.files import PointsDirectory, Trajectory
 
         if isinstance(self, PointsDirectory):
             return self[0].atoms.atom_names
@@ -58,7 +58,7 @@ class ListOfAtoms(list):
             :type: `np.ndarray`
             the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
         """
-        from ichor_lib.files import PointsDirectory, Trajectory
+        from ichor.ichor_lib.files import PointsDirectory, Trajectory
 
         if isinstance(self, PointsDirectory):
             return np.array([timestep.atoms.coordinates for timestep in self])
@@ -68,7 +68,7 @@ class ListOfAtoms(list):
     @property
     def connectivity(self) -> np.ndarray:
 
-        from ichor_lib.files import PointsDirectory, Trajectory
+        from ichor.ichor_lib.files import PointsDirectory, Trajectory
 
         if isinstance(self, PointsDirectory):
             return self[0].atoms.connectivity
@@ -78,7 +78,7 @@ class ListOfAtoms(list):
     @property
     def alf(self) -> np.ndarray:
 
-        from ichor_lib.files import PointsDirectory, Trajectory
+        from ichor.ichor_lib.files import PointsDirectory, Trajectory
 
         if isinstance(self, PointsDirectory):
             return self[0].atoms.alf
@@ -117,7 +117,7 @@ class ListOfAtoms(list):
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x `slice` x `n_features`.
         """
 
-        from ichor_lib.files import PointsDirectory, Trajectory
+        from ichor.ichor_lib.files import PointsDirectory, Trajectory
 
         if isinstance(self, Trajectory):
             features = np.array(
@@ -142,7 +142,7 @@ class ListOfAtoms(list):
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
-        from ichor_lib.files import PointDirectory
+        from ichor.ichor_lib.files import PointDirectory
 
         if fname is None:
             fname = Path("system_to_xyz.xyz")
@@ -185,10 +185,10 @@ class ListOfAtoms(list):
         """
         from collections import OrderedDict
 
-        from ichor_lib.analysis.predictions import get_true_predicted
-        from ichor_lib.constants import ha_to_kj_mol
-        from ichor_lib.files import PointsDirectory
-        from ichor_lib.models import Models
+        from ichor.ichor_lib.analysis.predictions import get_true_predicted
+        from ichor.ichor_lib.constants import ha_to_kj_mol
+        from ichor.ichor_lib.files import PointsDirectory
+        from ichor.ichor_lib.models import Models
 
         if not isinstance(self, PointsDirectory):
             raise NotImplementedError(
@@ -329,10 +329,10 @@ class ListOfAtoms(list):
         :param fname: Optional file name in which to save the rotated geometries.
         """
 
-        from ichor_lib.atoms import Atom
-        from ichor_lib.files import Trajectory
-        from ichor_lib.files.trajectory import features_to_coordinates
-        from ichor_lib.units import AtomicDistance
+        from ichor.ichor_lib.atoms import Atom
+        from ichor.ichor_lib.files import Trajectory
+        from ichor.ichor_lib.files.trajectory import features_to_coordinates
+        from ichor.ichor_lib.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:
             raise ValueError(
@@ -417,7 +417,7 @@ class ListOfAtoms(list):
         import pandas as pd
 
         from ichor_lib import constants
-        from ichor_lib.files import PointsDirectory
+        from ichor.ichor_lib.files import PointsDirectory
 
         if isinstance(atom_names, str):
             atom_names = [atom_names]

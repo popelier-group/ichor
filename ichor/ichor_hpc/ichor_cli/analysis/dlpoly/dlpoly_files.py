@@ -10,12 +10,12 @@ from ichor.atoms import Atom, Atoms
 from ichor.common.conversion import try_float
 from ichor.common.io import convert_to_path, ln, mkdir, relpath
 from ichor.common.str import split_by
-from ichor_lib.constants import dlpoly_weights
+from ichor.ichor_lib.constants import dlpoly_weights
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.files.trajectory import Trajectory
 from ichor.globals import GLOBALS
 from ichor.models import Models
-from ichor_lib.units import AtomicDistance
+from ichor.ichor_lib.units import AtomicDistance
 
 
 class DlpolyTrajectoryKey(Enum):

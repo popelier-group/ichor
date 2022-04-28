@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ichor_hpc.arguments import Arguments
-from ichor_lib.constants import ichor_logo
+from ichor.ichor_lib.constants import ichor_logo
 
 
 class ConfigProvider(dict):
