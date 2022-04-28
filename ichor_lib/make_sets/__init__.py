@@ -39,7 +39,7 @@ def make_sets_npoints(
     can be combined to give the total number of initial training points."""
 
     npoints = 0
-    for method in methods:  # see GLOBALS.TRAINING_SET_METHOD for example
+    for method in methods:
         for MakeSet in get_make_set_methods():
             if method == MakeSet.name():
                 npoints += MakeSet.get_npoints(set_size, points)
