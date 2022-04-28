@@ -1,10 +1,10 @@
 import re
 from pathlib import Path
 
-from ichor.common.functools import classproperty
-from ichor.files.directory import AnnotatedDirectory
-from ichor.files.optional_file import OptionalFile, OptionalPath
-from ichor.files.wfn import WFN
+from ichor_lib.common.functools import classproperty
+from ichor_lib.files.directory import AnnotatedDirectory
+from ichor_lib.files.optional_file import OptionalFile, OptionalPath
+from ichor_lib.files.wfn import WFN
 
 
 class MorfiWFN(WFN):

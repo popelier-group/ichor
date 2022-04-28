@@ -2,9 +2,9 @@ from abc import ABC
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.files.file import FileContents
-from ichor.files.geometry import GeometryFile
-from ichor.atoms import Atoms
+from ichor_lib.files.file import FileContents
+from ichor_lib.files.geometry import GeometryFile
+from ichor_lib.atoms import Atoms
 
 
 class QuantumChemistryProgramInput(GeometryFile, ABC):

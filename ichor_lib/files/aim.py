@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.common.functools import classproperty
-from ichor.common.str import get_digits
-from ichor.common.types import Version
-from ichor.files.file import File, FileContents
+from ichor_lib.common.functools import classproperty
+from ichor_lib.common.str import get_digits
+from ichor_lib.common.types import Version
+from ichor_lib.files.file import File, FileContents
 
 
 class AimAtom:

@@ -5,7 +5,7 @@ from typing import Dict, List
 
 import numpy as np
 
-from ichor.common.types import Version
+from ichor_lib.common.types import Version
 
 # old logo memorialised here for old times sake, it was a bit too big imho
 old_ichor_logo = (

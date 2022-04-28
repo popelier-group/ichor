@@ -6,11 +6,11 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from ichor.atoms import Atom, Atoms
-from ichor.common.functools import classproperty
-from ichor.common.types import VarReprMixin
-from ichor.files.file import File, FileContents
-from ichor.files.geometry import AtomicDict, GeometryDataFile, GeometryFile
+from ichor_lib.atoms import Atom, Atoms
+from ichor_lib.common.functools import classproperty
+from ichor_lib.common.types import VarReprMixin
+from ichor_lib.files.file import File, FileContents
+from ichor_lib.files.geometry import AtomicDict, GeometryDataFile, GeometryFile
 from ichor_lib.units import AtomicDistance
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])

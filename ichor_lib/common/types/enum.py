@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Any
 
-from ichor.common.functools import classproperty
-from ichor.common.str import in_sensitive
+from ichor_lib.common.functools import classproperty
+from ichor_lib.common.str import in_sensitive
 
 
 class Enum(Enum):

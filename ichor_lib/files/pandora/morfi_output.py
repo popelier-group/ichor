@@ -1,10 +1,10 @@
 import re
 from pathlib import Path
 
-from ichor.common.functools import classproperty
-from ichor.files.directory import AnnotatedDirectory
-from ichor.files.optional_file import OptionalFile, OptionalPath
-from ichor.files.pandora.mout import MOUT
+from ichor_lib.common.functools import classproperty
+from ichor_lib.files.directory import AnnotatedDirectory
+from ichor_lib.files.optional_file import OptionalFile, OptionalPath
+from ichor_lib.files.pandora.mout import MOUT
 
 
 class MorfiDirectory(AnnotatedDirectory):

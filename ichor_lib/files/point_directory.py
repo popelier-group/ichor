@@ -1,16 +1,16 @@
 from pathlib import Path
 from typing import Union
 
-from ichor.atoms import AtomsNotFoundError
-from ichor.files.directory import AnnotatedDirectory
-from ichor.files.file import FileContents
-from ichor.files.geometry import AtomData, GeometryDataFile, GeometryFile
-from ichor.files.gjf import GJF
-from ichor.files.ints import INTs
-from ichor.files.optional_file import OptionalFile, OptionalPath
-from ichor.files.pandora import PandoraDirectory, PandoraInput
-from ichor.files.wfn import WFN
-from ichor.files.xyz import XYZ
+from ichor_lib.atoms import AtomsNotFoundError
+from ichor_lib.files.directory import AnnotatedDirectory
+from ichor_lib.files.file import FileContents
+from ichor_lib.files.geometry import AtomData, GeometryDataFile, GeometryFile
+from ichor_lib.files.gjf import GJF
+from ichor_lib.files.ints import INTs
+from ichor_lib.files.optional_file import OptionalFile, OptionalPath
+from ichor_lib.files.pandora import PandoraDirectory, PandoraInput
+from ichor_lib.files.wfn import WFN
+from ichor_lib.files.xyz import XYZ
 
 
 class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):

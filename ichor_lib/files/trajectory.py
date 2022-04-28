@@ -5,10 +5,10 @@ from typing import Iterable, List, Optional, Union
 
 import numpy as np
 
-from ichor.atoms import Atom, Atoms, ListOfAtoms
-from ichor.common.functools import classproperty
-from ichor.common.io import mkdir
-from ichor.files.file import File, FileState
+from ichor_lib.atoms import Atom, Atoms, ListOfAtoms
+from ichor_lib.common.functools import classproperty
+from ichor_lib.common.io import mkdir
+from ichor_lib.files.file import File, FileState
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:

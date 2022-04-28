@@ -3,9 +3,9 @@ from typing import Dict
 
 import numpy as np
 
-from ichor.models.kernels.constant import ConstantKernel
-from ichor.models.kernels.interpreter.token_type import TokenType
-from ichor.models.kernels.kernel import Kernel
+from ichor_lib.models.kernels.constant import ConstantKernel
+from ichor_lib.models.kernels.interpreter.token_type import TokenType
+from ichor_lib.models.kernels.kernel import Kernel
 
 
 class ASTNode(ABC):

@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.atoms import Atom, Atoms
-from ichor.common.io import convert_to_path
-from ichor.files.trajectory import Trajectory
+from ichor_lib.atoms import Atom, Atoms
+from ichor_lib.common.io import convert_to_path
+from ichor_lib.files.trajectory import Trajectory
 
 
 class DlpolyHistory(Trajectory):

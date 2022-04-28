@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ichor.models.kernels.interpreter.token_type import TokenType
+from ichor_lib.models.kernels.interpreter.token_type import TokenType
 
 
 class Token:

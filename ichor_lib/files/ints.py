@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.common.sorting.natsort import ignore_alpha, natsorted
-from ichor.files.directory import Directory
-from ichor.files.geometry import GeometryFile, AtomicDict
-from ichor.files.int import INT
+from ichor_lib.common.sorting.natsort import ignore_alpha, natsorted
+from ichor_lib.files.directory import Directory
+from ichor_lib.files.geometry import GeometryFile, AtomicDict
+from ichor_lib.files.int import INT
 
 
 class INTs(Directory, AtomicDict):

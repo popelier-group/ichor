@@ -6,7 +6,7 @@ import types
     When using hasattr in ichor, it may be preferrable to use
     
     ```python
-    from ichor.common.functools import hasattr
+    from ichor_lib.common.functools import hasattr
     ```
         
     This hasattr overrides the builtin hasattr so that if hasattr is called from a hasattr statement,
@@ -18,7 +18,7 @@ import types
     __getattr__ and an infinite loop is began, with this method one can use the following:
     
     ```python
-    from ichor.common.functools import hasattr, called_from_hasattr
+    from ichor_lib.common.functools import hasattr, called_from_hasattr
     
     ...
     

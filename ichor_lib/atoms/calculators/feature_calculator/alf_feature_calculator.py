@@ -174,7 +174,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         if alf is None:
             return atom.parent[cls.calculate_alf(atom)[1]]
         elif isinstance(alf, list):
-            from ichor.atoms.atom import Atom
+            from ichor_lib.atoms.atom import Atom
 
             if isinstance(alf[1], int):
                 return atom.parent[alf[1] - 1]
@@ -203,7 +203,7 @@ class ALFFeatureCalculator(FeatureCalculator):
         if alf is None:
             return atom.parent[cls.calculate_alf(atom)[2]]
         elif isinstance(alf, list):
-            from ichor.atoms.atom import Atom
+            from ichor_lib.atoms.atom import Atom
 
             if isinstance(alf[2], int):
                 return atom.parent[alf[2] - 1]

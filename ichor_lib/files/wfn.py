@@ -2,12 +2,12 @@ import re
 from pathlib import Path
 from typing import Union
 
-from ichor.atoms import Atom, Atoms
-from ichor.common.functools import buildermethod, classproperty
-from ichor.common.str import split_by
+from ichor_lib.atoms import Atom, Atoms
+from ichor_lib.common.functools import buildermethod, classproperty
+from ichor_lib.common.str import split_by
 from ichor_lib.constants import AIMALL_FUNCTIONALS
-from ichor.files.file import FileContents
-from ichor.files.geometry import GeometryFile, GeometryDataFile
+from ichor_lib.files.file import FileContents
+from ichor_lib.files.geometry import GeometryFile, GeometryDataFile
 from ichor_lib.units import AtomicDistance
 import warnings
 
