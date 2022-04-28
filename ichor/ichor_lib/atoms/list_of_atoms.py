@@ -416,7 +416,7 @@ class ListOfAtoms(list):
 
         import pandas as pd
 
-        from ichor_lib import constants
+        from ichor.ichor_lib import constants
         from ichor.ichor_lib.files import PointsDirectory
 
         if isinstance(atom_names, str):

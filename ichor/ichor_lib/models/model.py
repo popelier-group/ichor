@@ -418,7 +418,7 @@ class Model(File):
         self.system = (
             self.system
             if self.system is not FileContents
-        )
+            else "default_system_name")
         self.atom = self.atom if self.atom is not FileContents else "X1"
         self.type = self.type if self.type is not FileContents else "p1"
         self.alf = self.alf if self.alf is not FileContents else [1, 1, 1]

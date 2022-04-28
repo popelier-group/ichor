@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from ichor_lib import constants
+from ichor.ichor_lib import constants
 
 
 def rotate_hexadecapole(
