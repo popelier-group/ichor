@@ -1,1 +1,1 @@
-from . import atoms, common, files, models, multipoles
+from ichor.ichor_lib import atoms, common, files, models, multipoles
