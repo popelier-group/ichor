@@ -1,12 +1,12 @@
-from ichor.common.functools.buildermethod import buildermethod
-from ichor.common.functools.cached_property import (
+from ichor_lib.common.functools.buildermethod import buildermethod
+from ichor_lib.common.functools.cached_property import (
     cached_property, ntimes_cached_property, threaded_cached_property,
     timed_cached_property, timed_threaded_cached_property)
-from ichor.common.functools.classproperty import classproperty
-from ichor.common.functools.hasattr import called_from_hasattr, hasattr
-from ichor.common.functools.run_function import (get_functions_to_run,
+from ichor_lib.common.functools.classproperty import classproperty
+from ichor_lib.common.functools.hasattr import called_from_hasattr, hasattr
+from ichor_lib.common.functools.run_function import (get_functions_to_run,
                                                  run_function)
-from ichor.common.functools.run_once import run_once
+from ichor_lib.common.functools.run_once import run_once
 
 __all__ = [
     "run_function",

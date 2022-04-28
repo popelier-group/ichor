@@ -1,7 +1,7 @@
 from typing import Optional
 
-from ichor.atoms import Atom
-from ichor.common.types import ClassDict
+from ichor_lib.atoms import Atom
+from ichor_lib.common.types import ClassDict
 
 
 class AtomData(Atom):
