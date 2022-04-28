@@ -4,13 +4,12 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 # from ichor.analysis.geometry.geometry_calculator import bonds, calculate_bond
-from ichor.atoms import Atom, Atoms
-from ichor.common.functools import classproperty
-from ichor.common.os import current_user
+from ichor_lib.atoms import Atom, Atoms
+from ichor_lib.common.functools import classproperty
+from ichor_lib.common.os import current_user
 from ichor_lib.constants import type2rad, type2valence
-from ichor.files.file import File
-from ichor.files.geometry import GeometryFile
-from ichor.globals import GLOBALS
+from ichor_lib.files.file import File
+from ichor_lib.files.geometry import GeometryFile
 from ichor_lib.units import AtomicDistance
 
 
@@ -500,7 +499,7 @@ class Mol2(GeometryFile):
                     units=atom.units,
                 )
 
-    def write(self, path: Optional[Path] = None):
+    def write(self, system_name: str, path: Optional[Path] = None):
         from ichor.analysis.geometry import bonds
 
         self.format()
@@ -508,12 +507,12 @@ class Mol2(GeometryFile):
 
         path = path or self.path
         with open(path, "w") as f:
-            f.write(f"# Name: {GLOBALS.SYSTEM_NAME}\n")
+            f.write(f"# Name: {system_name}\n")
             f.write(f"# Created by: {current_user()}\n")
             f.write(f"# Created on: {datetime.datetime.now()}\n")
             f.write("\n")
             f.write("@<TRIPOS>MOLECULE\n")
-            f.write(f"{GLOBALS.SYSTEM_NAME}\n")
+            f.write(f"{system_name}\n")
             f.write(f" {len(self.atoms)} {len(b)} 0 0 0\n")
             f.write(f"{self.mol_type.value}\n")
             f.write(f"{self.charge_type.value}\n")
@@ -522,7 +521,7 @@ class Mol2(GeometryFile):
             f.write("@<TRIPOS>ATOM\n")
             for atom in self.atoms:
                 f.write(
-                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {GLOBALS.SYSTEM_NAME} {gasteigger_charge(atom):6.4f}\n"
+                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {system_name} {gasteigger_charge(atom):6.4f}\n"
                 )
             f.write("@<TRIPOS>BOND\n")
             for i, (bi, bj) in enumerate(b):

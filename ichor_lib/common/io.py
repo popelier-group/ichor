@@ -170,19 +170,14 @@ def pushd(new_dir: Path, update_cwd: bool = False):
     Is good to use to temporarily change the current working directory as it is easy to return to the original location
     """
     previous_dir = os.getcwd()
-    if update_cwd:
-        from ichor.globals import GLOBALS
-
-        GLOBALS.CWD = new_dir.absolute()
-    os.chdir(new_dir)
+    if new_dir.exists():
+        os.chdir(new_dir)
+    else:
+        raise FileNotFoundError(f"Directory at {new_dir} does not exist.")
     try:
         yield
     finally:
         os.chdir(previous_dir)
-        if update_cwd:
-            from ichor.globals import GLOBALS
-
-            GLOBALS.CWD = previous_dir
 
 
 @convert_to_path

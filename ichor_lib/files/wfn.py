@@ -8,7 +8,6 @@ from ichor.common.str import split_by
 from ichor_lib.constants import AIMALL_FUNCTIONALS
 from ichor.files.file import FileContents
 from ichor.files.geometry import GeometryFile, GeometryDataFile
-from ichor.globals import GLOBALS
 from ichor_lib.units import AtomicDistance
 import warnings
 

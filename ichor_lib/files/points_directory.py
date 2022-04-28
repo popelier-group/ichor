@@ -25,7 +25,6 @@ class PointsDirectory(ListOfAtoms, Directory):
     will wrap around a SYSTEM_NAME00... folder (which only contains information about 1 point).
 
     :param path: Path to a directory which contains points. This path is typically the path to the training set, sample pool, etc.
-        These paths are defined in GLOBALS.
     """
 
     def __init__(self, path: Union[Path, str]):

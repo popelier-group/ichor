@@ -1,21 +1,21 @@
-from ichor.files.aim import AIM
-from ichor.files.directory import Directory
-from ichor.files.dlpoly_history import DlpolyHistory
-from ichor.files.file import File, FileState
-from ichor.files.geometry import GeometryFile
-from ichor.files.gjf import GJF
-from ichor.files.int import INT
-from ichor.files.ints import INTs
-from ichor.files.mol2 import Mol2
-from ichor.files.optional_file import OptionalFile, OptionalPath
-from ichor.files.pandora import (MorfiDirectory, PandoraDirectory,
+from ichor_lib.files.aim import AIM
+from ichor_lib.files.directory import Directory
+from ichor_lib.files.dlpoly_history import DlpolyHistory
+from ichor_lib.files.file import File, FileState
+from ichor_lib.files.geometry import GeometryFile
+from ichor_lib.files.gjf import GJF
+from ichor_lib.files.int import INT
+from ichor_lib.files.ints import INTs
+from ichor_lib.files.mol2 import Mol2
+from ichor_lib.files.optional_file import OptionalFile, OptionalPath
+from ichor_lib.files.pandora import (MorfiDirectory, PandoraDirectory,
                                  PandoraInput, PySCFDirectory)
-from ichor.files.point_directory import PointDirectory
-from ichor.files.points_directory import PointsDirectory
-from ichor.files.qcp import QuantumChemistryProgramInput
-from ichor.files.trajectory import Trajectory
-from ichor.files.wfn import WFN
-from ichor.files.xyz import XYZ
+from ichor_lib.files.point_directory import PointDirectory
+from ichor_lib.files.points_directory import PointsDirectory
+from ichor_lib.files.qcp import QuantumChemistryProgramInput
+from ichor_lib.files.trajectory import Trajectory
+from ichor_lib.files.wfn import WFN
+from ichor_lib.files.xyz import XYZ
 
 __all__ = [
     "File",

@@ -1,8 +1,5 @@
 from pathlib import Path
 
-from ichor.globals import GLOBALS
-
-
 def get_points_location() -> Path:
     """Find a .xyz file (and return the Path object pointing to it)
     that is somewhere in the directory from which ICHOR is executed. Use this files as the trajectory file

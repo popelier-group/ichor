@@ -3,46 +3,49 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ichor.atoms.calculators.feature_calculator.feature_calculator import \
+from ichor_lib.atoms.calculators.feature_calculator.feature_calculator import \
     FeatureCalculator
 from ichor_lib.constants import ang2bohr
 from ichor_lib.units import AtomicDistance
-from ichor.common.functools import classproperty
+from ichor_lib.common.functools import classproperty
+from pathlib import Path
+import warnings
 
 feature_unit = AtomicDistance.Bohr
-
-
 class ALFCalculationError(Exception):
     pass
 
-def get_alfs_from_reference_file():
+class ALFFeatureCalculator(FeatureCalculator):
 
-    from ichor.globals import GLOBALS
-    from ast import literal_eval
+    @classproperty
+    def _alf(self):
+        """ Returns a dictionary of system_hash:alf."""
+        if not hasattr(self, "_reference_alf"):
+            self._reference_alf = ALFFeatureCalculator.get_alfs_from_reference_file()
+        return self._reference_alf
 
-    alf = {}
+    @classmethod
+    def get_alfs_from_reference_file(cls, reference_file: Path):
+        """ Returns a dictionary as the system has as keys and alf for all atoms (a list of list)
+        as values.
+        
+        :param reference_file: A file containing the ALF references. It has the following structure:
+            O1,H2,H3 [[0,1,2],[1,0,2],[2,0,1]]
+            C1,H2,O3,H4,H5,H6 [[0,2,1],[1,0,2],[2,0,1],[3,0,2],[4,0,2],[5,2,1]]
+        """
 
-    if GLOBALS.ALF_REFERENCE_FILE is not None and GLOBALS.ALF_REFERENCE_FILE.exists():
-        with open(GLOBALS.ALF_REFERENCE_FILE, "r") as alf_reference_file:
+        from ast import literal_eval
+
+        alf = {}
+
+        with open(reference_file, "r") as alf_reference_file:
             for line in alf_reference_file:
                 system_hash, total_alf = line.split(maxsplit=1)
                 # read in atomic local frame and convert to list of list of int.
                 alf[system_hash] = literal_eval(total_alf)
 
-    return alf
-
-class ALFFeatureCalculator(FeatureCalculator):
-
-    # needs to be implemented as a class property (property works too)
-    # otherwise if just used as a class variable, then get_alfs_from_reference_file
-    # results in a cyclic import because it uses GLOBALS (and GLOBALS imports Atoms -> Atom -> ALFFEatureCalculator)
-    @classproperty
-    def _alf(self):
-        """ Returns a dictionary of system_hash:alf."""
-        if not hasattr(self, "_reference_alf"):
-            self._reference_alf = get_alfs_from_reference_file()
-        return self._reference_alf
-
+        return alf
+    
     @classmethod
     def calculate_alf(cls, atom: "Atom") -> list:
         """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
@@ -138,6 +141,9 @@ class ALFFeatureCalculator(FeatureCalculator):
         # we use a dictionary where we store a key = hash (a string with all the atom names) and value = a list of alfs for the whole system
         system_hash = atom.parent.hash
         if system_hash not in cls._alf.keys():
+            warnings.warn("The atomic local frame has not been read in from the reference file. \
+                The computed ALF might be different. If you want to make sure the same ALF is used, \
+                then specify an alf reference file.")
             # make an empty list to fill with the alfs for the system
             cls._alf[system_hash] = []
             # calculate the alf for every atom in the system and add to the list above

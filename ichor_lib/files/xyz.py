@@ -18,13 +18,11 @@ class XYZ(GeometryFile):
         with the given Atoms will be written to the given Path.
     """
 
-    def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
+    def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = FileContents):
         super().__init__(path)
 
-        self.atoms = FileContents
-        if atoms is not None:
+        if atoms is not FileContents:
             self.atoms = atoms
-            self.write()
 
     @classproperty
     def filetype(self) -> str:
