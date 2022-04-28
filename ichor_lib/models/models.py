@@ -46,12 +46,9 @@ class Models(Directory, list):
             if f.suffix == Model.filetype:
                 self.append(Model(f))
 
-    @property
-    def dirpattern(self):
+    def dirpattern(self, pattern):
         """A regex pattern used to find directories containing models."""
-        from ichor.globals import GLOBALS
-
-        return re.compile(rf"{GLOBALS.SYSTEM_NAME}\d+/")
+        return re.compile(rf"{pattern}\d+/")
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

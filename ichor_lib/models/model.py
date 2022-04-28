@@ -3,17 +3,16 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from ichor.common.functools import cached_property, classproperty
-from ichor.common.functools.buildermethod import buildermethod
-from ichor.common.io import mkdir
-from ichor.common.str import get_digits
-from ichor.common.types import Version
-from ichor.files.file import File, FileContents
-from ichor.globals import GLOBALS
-from ichor.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
+from ichor_lib.common.functools import cached_property, classproperty
+from ichor_lib.common.functools.buildermethod import buildermethod
+from ichor_lib.common.io import mkdir
+from ichor_lib.common.str import get_digits
+from ichor_lib.common.types import Version
+from ichor_lib.files.file import File, FileContents
+from ichor_lib.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
                                   RBFCyclic)
-from ichor.models.kernels.interpreter import KernelInterpreter
-from ichor.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
+from ichor_lib.models.kernels.interpreter import KernelInterpreter
+from ichor_lib.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
                                ZeroMean)
 
 
@@ -63,28 +62,48 @@ class Model(File):
     program_version: Version
     notes: Dict[str, str]
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path,
+            system = FileContents,
+            atom = FileContents,
+            type_ = FileContents,
+            alf = FileContents,
+            natoms = FileContents,
+            ntrain = FileContents,
+            nfeats = FileContents,
+            mean = FileContents,
+            kernel = FileContents,
+            x = FileContents,
+            y = FileContents,
+            input_units = FileContents,
+            output_unit = FileContents,
+            likelihood = FileContents,
+            nugget = FileContents,
+            weights = FileContents,
+            program = FileContents,
+            program_version = FileContents,
+            notes = FileContents
+    ):
         File.__init__(self, path)
 
-        self.system = FileContents
-        self.atom = FileContents
-        self.type = FileContents
-        self.alf = FileContents
-        self.natoms = FileContents
-        self.nfeats = FileContents
-        self.ntrain = FileContents
-        self.mean = FileContents
-        self.kernel = FileContents
-        self.x = FileContents
-        self.y = FileContents
-        self.input_units = FileContents
-        self.output_unit = FileContents
-        self.likelihood = FileContents
-        self.nugget = FileContents
-        self.weights = FileContents
-        self.program = FileContents
-        self.program_version = FileContents
-        self.notes = FileContents
+        self.system = system
+        self.atom = atom
+        self.type = type_
+        self.alf = alf
+        self.natoms = natoms
+        self.nfeats = nfeats
+        self.ntrain = ntrain
+        self.mean = mean
+        self.kernel = kernel
+        self.x = x
+        self.y = y
+        self.input_units = input_units
+        self.output_unit = output_unit
+        self.likelihood = likelihood
+        self.nugget = nugget
+        self.weights = weights
+        self.program = program
+        self.program_version = program_version
+        self.notes = notes
 
     @buildermethod
     def _read_file(self, up_to: Optional[str] = None) -> None:
@@ -399,7 +418,6 @@ class Model(File):
         self.system = (
             self.system
             if self.system is not FileContents
-            else GLOBALS.SYSTEM_NAME
         )
         self.atom = self.atom if self.atom is not FileContents else "X1"
         self.type = self.type if self.type is not FileContents else "p1"
