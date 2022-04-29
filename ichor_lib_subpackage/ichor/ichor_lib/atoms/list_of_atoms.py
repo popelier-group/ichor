@@ -1,11 +1,10 @@
 from os import system
 from pathlib import Path
-from typing import List, Optional, Type, Union
+from typing import List, Optional, Union
 
 import numpy as np
 
 from ichor.ichor_lib.atoms.atoms import Atoms
-
 
 class ListOfAtoms(list):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something

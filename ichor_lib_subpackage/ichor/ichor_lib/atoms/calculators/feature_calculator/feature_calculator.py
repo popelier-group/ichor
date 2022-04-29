@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+class FeatureCalculatorNotFound(Exception):
+    pass
 
 class FeatureCalculator(ABC):
     @abstractmethod

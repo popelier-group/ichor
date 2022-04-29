@@ -1,11 +1,11 @@
-from ichor.active_learning.active_learning_method import ActiveLearningMethod
-from ichor.active_learning.highest_variance import HighestVariance
-from ichor.active_learning.random_sampling import RandomSampling
-from ichor.active_learning.sigmu import SigMu
-from ichor.active_learning.uncertainty_query import UncertaintyQuery
+from ichor.ichor_hpc.active_learning.active_learning_method import ActiveLearningMethod
+from ichor.ichor_hpc.active_learning.highest_variance import HighestVariance
+from ichor.ichor_hpc.active_learning.random_sampling import RandomSampling
+from ichor.ichor_hpc.active_learning.sigmu import SigMu
+from ichor.ichor_hpc.active_learning.uncertainty_query import UncertaintyQuery
 # import active learning methods to be accessed in locals()
-from ichor.active_learning.mepe import MEPE
-from ichor.globals import GLOBALS
+from ichor.ichor_hpc.active_learning.mepe import MEPE
+from ichor.ichor_hpc.globals import GLOBALS
 
 # get a dictionary of key:value pairs of the active learning method name : active learning method class
 active_learning_methods = {

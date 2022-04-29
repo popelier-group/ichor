@@ -11,6 +11,8 @@ from ichor.ichor_lib.atoms.calculators import ConnectivityCalculator
 class AtomNotFound(Exception):
     pass
 
+class AtomsNotFoundError(Exception):
+    pass
 
 class Atoms(list):
     """

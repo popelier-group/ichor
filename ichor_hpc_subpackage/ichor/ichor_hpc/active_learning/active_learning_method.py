@@ -3,11 +3,11 @@ from typing import List, Optional
 
 import numpy as np
 
-from ichor.atoms import ListOfAtoms
-from ichor.common.functools import classproperty
-from ichor.common.np import batched_array
-from ichor.globals import GLOBALS
-from ichor.models import Models
+from ichor.ichor_lib.atoms import ListOfAtoms
+from ichor.ichor_lib.common.functools import classproperty
+from ichor.ichor_lib.common.np import batched_array
+from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_lib.models import Models
 
 
 class ActiveLearningMethod(ABC):

@@ -4,14 +4,3 @@
 from ichor.ichor_lib.atoms.atom import Atom
 from ichor.ichor_lib.atoms.atoms import Atoms
 from ichor.ichor_lib.atoms.list_of_atoms import ListOfAtoms
-
-__all__ = [
-    "Atom",
-    "Atoms",
-    "ListOfAtoms",
-    "AtomsNotFoundError",
-]
-
-
-class AtomsNotFoundError(Exception):
-    pass
