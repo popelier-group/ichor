@@ -4,3 +4,4 @@
 from ichor.ichor_lib.atoms.atom import Atom
 from ichor.ichor_lib.atoms.atoms import Atoms
 from ichor.ichor_lib.atoms.list_of_atoms import ListOfAtoms
+from ichor.ichor_lib.atoms.atoms import AtomsNotFoundError, AtomNotFound
