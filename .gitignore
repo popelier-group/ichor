@@ -21,3 +21,11 @@ debug/
 *.pyc
 *.inp
 *_atomicfiles
+ichor_cli_subpackage/ichor_cli.egg-info/PKG-INFO
+ichor_cli_subpackage/ichor_cli.egg-info/SOURCES.txt
+ichor_cli_subpackage/ichor_cli.egg-info/top_level.txt
+ichor_cli_subpackage/ichor_cli.egg-info/dependency_links.txt
+ichor_lib_subpackage/ichor_lib.egg-info/dependency_links.txt
+ichor_lib_subpackage/ichor_lib.egg-info/PKG-INFO
+ichor_lib_subpackage/ichor_lib.egg-info/SOURCES.txt
+ichor_lib_subpackage/ichor_lib.egg-info/top_level.txt
