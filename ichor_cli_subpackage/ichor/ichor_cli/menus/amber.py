@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from ichor.analysis.get_input import get_first_file, get_input_menu
+from ichor.ichor_lib.analysis.get_input import get_first_file, get_input_menu
 from ichor.atoms import Atom, Atoms
 from ichor.batch_system import JobID
 from ichor.common.io import mkdir

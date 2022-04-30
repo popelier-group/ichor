@@ -1,11 +1,11 @@
-# from ichor.analysis
+# from ichor.ichor_lib.analysis
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.analysis.get_atoms import (get_atoms_from_path,
+from ichor.ichor_lib.analysis.get_atoms import (get_atoms_from_path,
                                       get_trajectory_from_path)
-from ichor.analysis.get_input import get_files_in_cwd
-from ichor.analysis.get_path import get_path
+from ichor.ichor_lib.analysis.get_input import get_files_in_cwd
+from ichor.ichor_lib.analysis.get_path import get_path
 from ichor.atoms import Atoms
 from ichor.batch_system import JobID
 from ichor.ichor_lib.files import XYZ, PointsDirectory, Trajectory

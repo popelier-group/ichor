@@ -4,8 +4,8 @@ from typing import Dict, List, Union
 import numpy as np
 import pandas as pd
 
-from ichor.analysis.get_models import number_of_models_in_dir
-from ichor.analysis.predictions import get_true_predicted
+from ichor.ichor_lib.analysis.get_models import number_of_models_in_dir
+from ichor.ichor_lib.analysis.predictions import get_true_predicted
 from ichor.ichor_lib.files import PointsDirectory
 from ichor.models import Models, ModelsResult
 
@@ -155,7 +155,7 @@ def write_to_excel(
     # not sure if OrderedDict needed for python 3.6, but use it for now
     from collections import OrderedDict, defaultdict
 
-    from ichor.analysis.excel import num2col
+    from ichor.ichor_lib.analysis.excel import num2col
     from ichor.ichor_lib.constants import ha_to_kj_mol
 
     # use the key word arguments to construct the settings used for x and y axes

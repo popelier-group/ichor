@@ -62,11 +62,11 @@ external_functions = [
     ExternalFunction("ichor.make_sets", "make_sets"),
     ExternalFunction("ichor.submission_script", "print_completed"),
     ExternalFunction(
-        "ichor.analysis.dlpoly", "run_dlpoly_geometry_optimisations"
+        "ichor.ichor_lib.analysis.dlpoly", "run_dlpoly_geometry_optimisations"
     ),
-    ExternalFunction("ichor.analysis.dlpoly", "get_dlpoly_energies"),
+    ExternalFunction("ichor.ichor_lib.analysis.dlpoly", "get_dlpoly_energies"),
     ExternalFunction(
-        "ichor.analysis.dlpoly", "submit_final_geometry_to_gaussian"
+        "ichor.ichor_lib.analysis.dlpoly", "submit_final_geometry_to_gaussian"
     ),
     ExternalFunction(
         "ichor.main.pandora", "copy_aimall_wfn_to_point_directory"
@@ -76,9 +76,9 @@ external_functions = [
     ExternalFunction("ichor.main.pandora", "add_dispersion_to_aimall"),
     ExternalFunction("ichor.main.md.cp2k", "cp2k_to_xyz"),
     ExternalFunction("ichor.common.points", "set_points_location"),
-    ExternalFunction("ichor.analysis.opt", "convert_opt_wfn_to_xyz"),
-    ExternalFunction("ichor.analysis.geometry", "geometry_analysis"),
-    ExternalFunction("ichor.analysis", "rotate_mol"),
+    ExternalFunction("ichor.ichor_lib.analysis.opt", "convert_opt_wfn_to_xyz"),
+    ExternalFunction("ichor.ichor_lib.analysis.geometry", "geometry_analysis"),
+    ExternalFunction("ichor.ichor_lib.analysis", "rotate_mol"),
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key

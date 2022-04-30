@@ -133,7 +133,7 @@ def print_child_processes_status(child_processes: Optional[List[Path]] = None):
 
 
 def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
-    from ichor.analysis.get_path import get_dir
+    from ichor.ichor_lib.analysis.get_path import get_dir
     from ichor.main.tools.concatenate_points_directories import \
         concatenate_points_directories
 

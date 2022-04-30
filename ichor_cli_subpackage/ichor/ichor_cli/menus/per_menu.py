@@ -1,4 +1,4 @@
-from ichor.analysis.get_path import get_dir
+from ichor.ichor_lib.analysis.get_path import get_dir
 from ichor.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                 PerPropertyDaemon, ReRunDaemon,
                                 auto_run_per_atom,

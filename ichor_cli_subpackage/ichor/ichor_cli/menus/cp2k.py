@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.analysis.get_input import get_first_file, get_input_menu
+from ichor.ichor_lib.analysis.get_input import get_first_file, get_input_menu
 from ichor.atoms import Atoms
 from ichor.batch_system import JobID
 from ichor.common.io import get_files_of_type, mkdir

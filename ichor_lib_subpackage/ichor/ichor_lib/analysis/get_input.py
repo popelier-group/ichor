@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.analysis.get_path import get_file
+from ichor.ichor_lib.analysis.get_path import get_file
 from ichor.common.io import get_files_of_type
 from ichor.common.sorting.natsort import natsorted
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE

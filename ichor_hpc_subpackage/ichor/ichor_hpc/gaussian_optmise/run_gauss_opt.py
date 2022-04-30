@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.analysis.get_atoms import get_atoms_from_path
-from ichor.analysis.get_path import get_file
+from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
+from ichor.ichor_lib.analysis.get_path import get_file
 from ichor.batch_system import JobID
 from ichor.common.io import mkdir
 from ichor.common.os import input_with_prefill

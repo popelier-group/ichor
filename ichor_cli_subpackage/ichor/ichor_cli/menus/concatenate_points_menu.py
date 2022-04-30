@@ -39,7 +39,7 @@ def concatenate_points_directories(
 def concatenate_points_directories_menu(
     verbose: bool = True,
 ) -> PointsDirectory:
-    from ichor.analysis.get_path import get_dir
+    from ichor.ichor_lib.analysis.get_path import get_dir
 
     print("Enter location of 1st PointsDirectory: ")
     pd1 = get_dir(Path())

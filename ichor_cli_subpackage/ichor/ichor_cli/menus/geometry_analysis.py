@@ -4,11 +4,11 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from ichor.analysis.geometry.geometry_calculator import (
+from ichor.ichor_lib.analysis.geometry.geometry_calculator import (
     calculate_angles, calculate_bonds, calculate_dihedrals,
     internal_feature_names)
-from ichor.analysis.get_atoms import get_atoms_from_path
-from ichor.analysis.get_path import get_path
+from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
+from ichor.ichor_lib.analysis.get_path import get_path
 from ichor.batch_system import JobID
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory, Trajectory
