@@ -93,10 +93,10 @@ from ichor.daemon.daemon import Daemon
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.globals import GLOBALS
 from ichor.main import make_models
-from ichor.menus.menu import Menu
+from ichor.ichor_cli.menus.menu import Menu
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
-from ichor.menus.tab_completer import ListCompleter
+from ichor.ichor_cli.menus.tab_completer import ListCompleter
 
 _atoms_to_run_on: Optional[List[Path]] = None
 _selected_atoms_to_run_on: Optional[List[Path]] = None

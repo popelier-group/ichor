@@ -9,10 +9,10 @@ from ichor.ichor_lib.analysis.get_path import get_path
 from ichor.atoms import Atoms
 from ichor.batch_system import JobID
 from ichor.ichor_lib.files import XYZ, PointsDirectory, Trajectory
-from ichor.menus.menu import Menu
+from ichor.ichor_cli.menus.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript)
-from ichor.menus.tab_completer import ListCompleter
+from ichor.ichor_cli.menus.tab_completer import ListCompleter
 
 _traj: Optional[Trajectory] = None
 _atoms: Optional[Atoms] = None

@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 from ichor.ichor_lib.common.io import pushd
 from ichor.ichor_lib.common.os import input_with_prefill
-from ichor.menus.tab_completer import PathCompleter
+from ichor.ichor_cli.menus.tab_completer import PathCompleter
 
 
 def get_path(

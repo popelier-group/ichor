@@ -10,7 +10,7 @@ from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, WFN, XYZ, PointsDirectory
 from ichor.globals import GLOBALS
 from ichor.main.gaussian import submit_gjfs
-from ichor.menus.menu import Menu
+from ichor.ichor_cli.menus.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript)
 

@@ -10,7 +10,7 @@ from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.machine.machine import MACHINE, Machine
-from ichor.menus.menu import Menu
+from ichor.ichor_cli.menus.menu import Menu
 from ichor.submission_script import SCRIPT_NAMES, CP2KCommand, SubmissionScript
 
 _input_file = None

@@ -3,7 +3,7 @@ from typing import List
 
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import INTs, PointsDirectory
-from ichor.menus.menu import Menu
+from ichor.ichor_cli.menus.menu import Menu
 
 
 def revert_ints_backup(ints_dir: Path):

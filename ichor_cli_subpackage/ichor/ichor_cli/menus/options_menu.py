@@ -1,4 +1,4 @@
-from ichor.menus.menu import Menu
+from ichor.ichor_cli.menus.menu import Menu
 
 
 def options_menu() -> None:
