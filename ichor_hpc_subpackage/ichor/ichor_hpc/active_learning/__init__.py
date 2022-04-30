@@ -17,5 +17,3 @@ active_learning_methods = {
 }
 
 learning_method_cls = active_learning_methods[GLOBALS.ACTIVE_LEARNING_METHOD]
-
-__all__ = ["learning_method_cls"]

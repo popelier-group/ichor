@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.analysis import analysis_menu
+from ichor.ichor_cli.analysis import analysis_menu
 from ichor.main.make_models import make_models_menu
 from ichor.main.options_menu import options_menu
 from ichor.main.qcp import submit_qcp

@@ -53,6 +53,7 @@ def ichor_main():
     from ichor import in_main
 
     in_main.IN_MAIN = True
+    # TODO: need to reload package, so that other places this is imported has changes made.
 
     Arguments.read()
     GLOBALS.init_from_config(Arguments.config_file)
