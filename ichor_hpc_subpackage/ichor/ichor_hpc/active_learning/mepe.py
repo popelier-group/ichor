@@ -6,7 +6,7 @@ import numpy.linalg as la
 from scipy.spatial.distance import cdist
 
 from ichor.active_learning.active_learning_method import ActiveLearningMethod
-from ichor.atoms import ListOfAtoms
+from ichor.ichor_lib.atoms import ListOfAtoms
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.common.io import mkdir
 from ichor.models import Model, Models, ModelsResult

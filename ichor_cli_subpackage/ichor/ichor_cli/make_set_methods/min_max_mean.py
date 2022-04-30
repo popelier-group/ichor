@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from ichor.atoms import ListOfAtoms
+from ichor.ichor_lib.atoms import ListOfAtoms
 from ichor.make_sets.make_set_method import MakeSetMethod
 
 

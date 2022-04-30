@@ -8,7 +8,7 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple
 from uuid import UUID
 
 from ichor.ichor_lib.common.bool import check_bool
-from ichor.ichor_lib.common.uid import get_uid
+from ichor.ichor_hpc.uid import get_uid
 
 
 class ExternalFunction:

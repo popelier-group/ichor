@@ -177,7 +177,7 @@ class AIMAllCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
-        from ichor.machine.machine import MACHINE, Machine
+        from ichor.ichor_hpc.machine_setup.machine.machine import MACHINE, Machine
 
         if MACHINE is Machine.csf3:
             return "~/AIMAll/aimqb.ish"

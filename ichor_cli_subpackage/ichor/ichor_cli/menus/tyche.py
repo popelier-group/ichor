@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.ichor_lib.analysis.get_input import get_first_file, get_input_menu
-from ichor.atoms import Atoms
+from ichor.ichor_lib.atoms import Atoms
 from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import get_files_of_type, mkdir
 from ichor.ichor_lib.common.os import input_with_prefill

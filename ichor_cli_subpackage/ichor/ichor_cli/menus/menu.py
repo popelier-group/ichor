@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from ichor.ichor_lib.common.int import count_digits
 from ichor.ichor_lib.common.io import pushd
-from ichor_cli.problem_finder import PROBLEM_FINDER
+from ichor.ichor_cli.problem_finder import PROBLEM_FINDER
 from ichor.ichor_cli.menus.tab_completer import ListCompleter
 
 _subdirs = []

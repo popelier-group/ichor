@@ -35,7 +35,7 @@
 from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
 from ichor.ichor_lib.common.types import Version
 from ichor.ichor_hpc.globals import GLOBALS
-from ichor.ichor_hpc.machine_setup.machine import MACHINE
+from ichor.ichor_hpc.machine_setup.machine.machine import MACHINE
 
 __version__ = Version("3.0.1")
 

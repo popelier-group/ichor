@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 
 from ichor.ichor_lib.analysis.get_input import get_first_file, get_input_menu
-from ichor.atoms import Atom, Atoms
+from ichor.ichor_lib.atoms import Atom, Atoms
 from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import mkdir
 from ichor.ichor_lib.common.os import input_with_prefill
