@@ -2,15 +2,13 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.ichor_cli.analysis import analysis_menu
-from ichor.main.make_models import make_models_menu
-from ichor.main.options_menu import options_menu
-from ichor.main.qcp import submit_qcp
-from ichor.main.qct import submit_qct
-from ichor.main.queue import queue_menu
-from ichor.main.tools_menu import tools_menu
-from ichor.menus.menu import Menu
-from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM
-from ichor.qct import QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM
+from ichor.ichor_cli.menus.make_models import make_models_menu
+from ichor.ichor_cli.menus.options_menu import options_menu
+from ichor.ichor_cli.menus.queue import queue_menu
+from ichor.ichor_cli.menus.tools_menu import tools_menu
+from ichor.ichor_cli.menus.menu import Menu 
+from ichor.ichor_hpc.main.qcp import submit_qcp, QUANTUM_CHEMISTRY_PROGRAM
+from ichor.ichor_hpc.main.qct import submit_qct, QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM
 
 _points_directory_path = None
 _force = False
