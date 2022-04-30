@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.globals import GLOBALS
 from ichor.modules import Modules
 from ichor.submission_script.aimall_command import AIMAllCommand

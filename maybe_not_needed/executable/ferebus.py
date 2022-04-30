@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from ichor.cmake import CMakeLists, update_cmake
-from ichor.common.io import mkdir, pushd
-from ichor.common.os import run_cmd
+from ichor.ichor_lib.common.io import mkdir, pushd
+from ichor.ichor_lib.common.os import run_cmd
 from ichor.executable.executable import Executable
 from ichor.modules import FerebusModules, load_module
 

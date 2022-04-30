@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 from uuid import UUID
 
-from ichor.common.bool import check_bool
-from ichor.common.uid import get_uid
+from ichor.ichor_lib.common.bool import check_bool
+from ichor.ichor_lib.common.uid import get_uid
 
 
 class ExternalFunction:
@@ -75,7 +75,7 @@ external_functions = [
     ExternalFunction("ichor.main.md.tyche", "tyche_to_xyz"),
     ExternalFunction("ichor.main.pandora", "add_dispersion_to_aimall"),
     ExternalFunction("ichor.main.md.cp2k", "cp2k_to_xyz"),
-    ExternalFunction("ichor.common.points", "set_points_location"),
+    ExternalFunction("ichor.ichor_lib.common.points", "set_points_location"),
     ExternalFunction("ichor.ichor_lib.analysis.opt", "convert_opt_wfn_to_xyz"),
     ExternalFunction("ichor.ichor_lib.analysis.geometry", "geometry_analysis"),
     ExternalFunction("ichor.ichor_lib.analysis", "rotate_mol"),

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.modules import Modules, TycheModules
 from ichor.programs import get_tyche_path
 from ichor.submission_script.command_line import CommandLine

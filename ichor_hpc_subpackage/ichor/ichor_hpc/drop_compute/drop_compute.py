@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ichor.common.os import current_user_groups
+from ichor.ichor_lib.common.os import current_user_groups
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.machine.machine import MACHINE, Machine
 

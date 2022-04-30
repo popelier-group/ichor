@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ichor.common.types import MutableValue
+from ichor.ichor_lib.common.types import MutableValue
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.amber_command import AmberCommand

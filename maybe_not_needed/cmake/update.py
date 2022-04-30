@@ -6,8 +6,8 @@ from pathlib import Path
 
 import requests
 
-from ichor.common.io import recursive_move, remove
-from ichor.common.sys import access_internet
+from ichor.ichor_lib.common.io import recursive_move, remove
+from ichor.ichor_lib.common.sys import access_internet
 from ichor.globals import GLOBALS, OS
 
 

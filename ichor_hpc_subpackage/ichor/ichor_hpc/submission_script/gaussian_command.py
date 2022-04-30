@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.modules import GaussianModules, Modules
 from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError

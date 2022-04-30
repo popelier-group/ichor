@@ -3,10 +3,10 @@ import platform
 from enum import auto
 from pathlib import Path
 
-from ichor.common.functools import cached_property
-from ichor.common.io import mkdir, move
-from ichor.common.types import Enum
-from ichor.common.uid import get_uid
+from ichor.ichor_lib.common.functools import cached_property
+from ichor.ichor_lib.common.io import mkdir, move
+from ichor.ichor_lib.common.types import Enum
+from ichor.ichor_lib.common.uid import get_uid
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
 

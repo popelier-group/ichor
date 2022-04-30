@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor.common.io import pushd
-from ichor.common.os import input_with_prefill
+from ichor.ichor_lib.common.io import pushd
+from ichor.ichor_lib.common.os import input_with_prefill
 from ichor.menus.tab_completer import PathCompleter
 
 

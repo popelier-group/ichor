@@ -1,4 +1,4 @@
-from ichor.common.io import mkdir
+from ichor.ichor_lib.common.io import mkdir
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
 

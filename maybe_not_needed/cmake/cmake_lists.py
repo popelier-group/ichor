@@ -3,8 +3,8 @@ from pathlib import Path
 from ichor.cmake.parser import (Arg, BlankLine, Command, Comment,
                                 parse_cmake_lists)
 from ichor.cmake.version import cmake_current_version
-from ichor.common.functools import cached_property
-from ichor.common.types import Version
+from ichor.ichor_lib.common.functools import cached_property
+from ichor.ichor_lib.common.types import Version
 
 
 class CMakeLists(list):

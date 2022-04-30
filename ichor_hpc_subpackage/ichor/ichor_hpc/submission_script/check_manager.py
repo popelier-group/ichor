@@ -2,7 +2,7 @@ import os
 from typing import List, Optional
 
 from ichor.batch_system import BATCH_SYSTEM
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.log import logger
 from ichor.submission_script.ichor_command import ICHORCommand
 from ichor.submission_script.submision_script import SubmissionScript

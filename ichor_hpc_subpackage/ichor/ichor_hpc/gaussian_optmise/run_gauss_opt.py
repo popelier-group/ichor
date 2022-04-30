@@ -4,8 +4,8 @@ from typing import List, Optional
 from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
 from ichor.ichor_lib.analysis.get_path import get_file
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir
-from ichor.common.os import input_with_prefill
+from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.common.os import input_with_prefill
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, WFN, XYZ, PointsDirectory
 from ichor.globals import GLOBALS

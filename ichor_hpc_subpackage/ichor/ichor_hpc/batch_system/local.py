@@ -2,7 +2,7 @@ from typing import List
 
 from ichor.batch_system.node import NodeType
 from ichor.batch_system.sge import SunGridEngine
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 
 
 class LocalBatchSystem(SunGridEngine):

@@ -1,4 +1,4 @@
-from ichor.common.types import RangeDict
+from ichor.ichor_lib.common.types import RangeDict
 
 
 class ParallelEnvironment(RangeDict):

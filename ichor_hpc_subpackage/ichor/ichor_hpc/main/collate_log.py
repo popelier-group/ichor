@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from ichor.common.io import cp, mkdir, pushd
-from ichor.common.types import DictList
+from ichor.ichor_lib.common.io import cp, mkdir, pushd
+from ichor.ichor_lib.common.types import DictList
 
 
 def get_child_processes() -> Optional[List[Path]]:
@@ -25,7 +25,7 @@ def get_child_processes() -> Optional[List[Path]]:
 def get_collate_model_log(
     directory: Optional[Path] = None,
 ) -> Dict[str, Dict[str, Tuple[Path, int]]]:
-    from ichor.common.types import DictList
+    from ichor.ichor_lib.common.types import DictList
     from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.models import Models
@@ -53,7 +53,7 @@ def get_collate_model_log(
 
 
 def link_collated_models(dir, collated_models):
-    from ichor.common.io import ln
+    from ichor.ichor_lib.common.io import ln
     from ichor.globals import GLOBALS
 
     mkdir(dir)

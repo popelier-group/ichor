@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Optional
 
 import ichor
-from ichor.common.io import cp, mkdir, move
-from ichor.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
+from ichor.ichor_lib.common.io import cp, mkdir, move
+from ichor.ichor_lib.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
                              USER_READ, permissions, set_permission)
 from ichor.globals import GLOBALS
 from ichor.machine.machine import MACHINE

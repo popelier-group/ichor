@@ -5,8 +5,8 @@ import numpy as np
 
 from ichor.ichor_lib import constants
 from ichor.batch_system import JobID
-from ichor.common.io import cp, mkdir
-from ichor.common.str import get_digits
+from ichor.ichor_lib.common.io import cp, mkdir
+from ichor.ichor_lib.common.str import get_digits
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory
 from ichor.globals import GLOBALS

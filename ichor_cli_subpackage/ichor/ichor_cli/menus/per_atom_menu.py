@@ -88,7 +88,7 @@ from ichor.auto_run.per.per import (auto_run_per_value,
                                     check_auto_run_per_counter)
 from ichor.auto_run.standard_auto_run import auto_make_models
 from ichor.batch_system import JobID
-from ichor.common.io import pushd
+from ichor.ichor_lib.common.io import pushd
 from ichor.daemon.daemon import Daemon
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.globals import GLOBALS

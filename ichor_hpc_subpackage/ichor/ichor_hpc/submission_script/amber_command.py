@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.modules import AmberModules, Modules
 from ichor.submission_script.command_line import CommandLine
 from ichor.submission_script.ichor_command import ICHORCommand

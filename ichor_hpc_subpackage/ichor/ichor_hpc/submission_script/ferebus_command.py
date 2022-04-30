@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List
 
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.log import logger
 from ichor.modules import FerebusModules, Modules
 from ichor.programs import get_ferebus_path

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.modules import Modules
 
 

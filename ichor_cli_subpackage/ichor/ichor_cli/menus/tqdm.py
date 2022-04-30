@@ -2,7 +2,7 @@
 the formatting of output/error files. If GLOBALS.SUBMITTED is True (so job is submitted to compute node), then load up dummy tqdm."""
 
 from ichor.batch_system import BATCH_SYSTEM, NodeType
-from ichor.common.types.dummy_tqdm import dummy_tqdm
+from ichor.ichor_lib.common.types.dummy_tqdm import dummy_tqdm
 
 try:
     from tqdm import tqdm

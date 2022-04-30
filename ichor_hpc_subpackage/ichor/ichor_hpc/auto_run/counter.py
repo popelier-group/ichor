@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional, Tuple
 
-from ichor.common.io import mkdir, remove
+from ichor.ichor_lib.common.io import mkdir, remove
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
 _counter_location = FILE_STRUCTURE["counter"]

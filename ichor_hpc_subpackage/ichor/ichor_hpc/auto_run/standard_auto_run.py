@@ -21,11 +21,11 @@ from ichor.auto_run.ichor_jobs import (
     submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
 from ichor.auto_run.stop import start
 from ichor.batch_system import BATCH_SYSTEM, JobID, NodeType
-from ichor.common.bool import check_bool
-from ichor.common.int import truncate
-from ichor.common.io import mkdir, move, remove
-from ichor.common.points import get_points_location
-from ichor.common.types import MutableValue
+from ichor.ichor_lib.common.bool import check_bool
+from ichor.ichor_lib.common.int import truncate
+from ichor.ichor_lib.common.io import mkdir, move, remove
+from ichor.ichor_lib.common.points import get_points_location
+from ichor.ichor_lib.common.types import MutableValue
 from ichor_hpc.drop_compute.drop_compute import (DROP_COMPUTE_LOCATION, DROP_COMPUTE_MAX_JOBS,
                                 DROP_COMPUTE_NTRIES, DROP_COMPUTE_TMP_LOCATION)
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE

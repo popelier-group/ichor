@@ -1,5 +1,5 @@
 from ichor.cmake.check import cmake_present, run_cmake_version
-from ichor.common.types import Version
+from ichor.ichor_lib.common.types import Version
 
 
 class CMakeNotFound(Exception):

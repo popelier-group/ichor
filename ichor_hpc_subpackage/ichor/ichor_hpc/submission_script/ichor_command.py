@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import ichor
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.itypes import F
 from ichor.programs import get_ichor_parent_directory
 from ichor.submission_script.python_command import PythonCommand

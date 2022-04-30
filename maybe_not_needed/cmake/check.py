@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from ichor.common.os import run_cmd
+from ichor.ichor_lib.common.os import run_cmd
 
 
 def run_cmake_version() -> Tuple[str, str]:

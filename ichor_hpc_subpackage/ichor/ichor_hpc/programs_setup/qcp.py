@@ -1,7 +1,7 @@
 from typing import List, Type
 
-from ichor.common.str import in_sensitive
-from ichor.common.types import Enum
+from ichor.ichor_lib.common.str import in_sensitive
+from ichor.ichor_lib.common.types import Enum
 from ichor.ichor_lib.constants import GAUSSIAN_METHODS
 from ichor.ichor_lib.files import GJF, PandoraInput, QuantumChemistryProgramInput
 from ichor.globals import GLOBALS

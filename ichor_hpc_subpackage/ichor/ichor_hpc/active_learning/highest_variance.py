@@ -2,7 +2,7 @@ import numpy as np
 
 from ichor.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.atoms import ListOfAtoms
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 from ichor.models import Models
 
 

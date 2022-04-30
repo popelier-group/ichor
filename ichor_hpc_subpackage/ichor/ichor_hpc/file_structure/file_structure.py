@@ -1,4 +1,4 @@
-from ichor.common.types import FileTree, FileType
+from ichor.ichor_lib.common.types import FileTree, FileType
 
 
 class FileStructure(FileTree):

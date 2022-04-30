@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.batch_system import JobID
-from ichor.common.io import last_line
+from ichor.ichor_lib.common.io import last_line
 from ichor.ichor_lib.files import GJF, PointsDirectory
 from ichor.log import logger
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
@@ -122,7 +122,7 @@ def scrub_gaussian(gaussian_file: str):
     :param gaussian_file: A string that is a Path to a .gjf file
     """
 
-    from ichor.common.io import mkdir, move
+    from ichor.ichor_lib.common.io import mkdir, move
     from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.log import logger
 

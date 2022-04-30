@@ -7,8 +7,8 @@ import numpy as np
 from ichor.ichor_lib.analysis.get_input import get_first_file, get_input_menu
 from ichor.atoms import Atom, Atoms
 from ichor.batch_system import JobID
-from ichor.common.io import mkdir
-from ichor.common.os import input_with_prefill
+from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.common.os import input_with_prefill
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, XYZ, Mol2, Trajectory
 from ichor.globals import GLOBALS

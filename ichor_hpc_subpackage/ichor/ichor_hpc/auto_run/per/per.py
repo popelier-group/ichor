@@ -6,9 +6,9 @@ from typing import Callable, List, Optional
 from ichor.auto_run.counter import counter_exists, read_counter, remove_counter
 from ichor.auto_run.ichor_jobs import submit_ichor_collate_log_job_to_auto_run
 from ichor.batch_system import JobID
-from ichor.common.bool import check_bool
-from ichor.common.io import cp, mkdir, pushd, relpath, remove
-from ichor.common.points import get_points_location
+from ichor.ichor_lib.common.bool import check_bool
+from ichor.ichor_lib.common.io import cp, mkdir, pushd, relpath, remove
+from ichor.ichor_lib.common.points import get_points_location
 
 
 def check_auto_run_per_counter(directory: Path, values: List[str]):

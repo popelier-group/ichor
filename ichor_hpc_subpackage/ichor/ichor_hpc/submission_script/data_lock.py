@@ -1,4 +1,4 @@
-from ichor.common.functools import classproperty
+from ichor.ichor_lib.common.functools import classproperty
 
 _level = 0
 _locked = False

@@ -108,7 +108,7 @@ from uuid import UUID, uuid4
 
 from ichor.ichor_lib import constants
 from ichor.atoms.atoms import Atoms
-from ichor.common.types import Version
+from ichor.ichor_lib.common.types import Version
 from collections import defaultdict
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.globals import checkers, formatters, parsers
@@ -572,7 +572,7 @@ class Globals:
         """ Returns a `Path` object to a file that contains the
         atomic local frame calculated for the system."""
 
-        from ichor.common.io import mkdir
+        from ichor.ichor_lib.common.io import mkdir
 
         # if the reference file still not been set (default is None), make the default file
         if self._ALF_REFERENCE_FILE is None:

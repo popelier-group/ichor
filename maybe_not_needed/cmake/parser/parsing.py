@@ -17,7 +17,7 @@ import re
 from pathlib import Path
 
 from ichor.cmake.parser import list_utils
-from ichor.common.types import Version
+from ichor.ichor_lib.common.types import Version
 
 
 class QuotedString:

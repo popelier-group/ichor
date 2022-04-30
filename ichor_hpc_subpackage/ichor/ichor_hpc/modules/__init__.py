@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Union
 
-from ichor.common.functools import run_once
+from ichor.ichor_lib.common.functools import run_once
 from ichor.modules.aimall import AIMAllModules
 from ichor.modules.amber import AmberModules
 from ichor.modules.cp2k import CP2KModules
