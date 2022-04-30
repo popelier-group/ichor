@@ -1,9 +1,8 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.ichor_cli.analysis import analysis_menu
+from ichor.ichor_cli.menus import analysis_menu
 from ichor.ichor_cli.menus.make_models import make_models_menu
-from ichor.ichor_cli.menus.options_menu import options_menu
 from ichor.ichor_cli.menus.queue import queue_menu
 from ichor.ichor_cli.menus.tools_menu import tools_menu
 from ichor.ichor_cli.menus.menu import Menu 
@@ -20,7 +19,7 @@ def _toggle_force():
 
 
 def _points_directory_menu_refresh(menu):
-    from ichor.auto_run.standard_auto_run import auto_run_qct
+    from ichor.ichor_hpc.auto_run.standard_auto_run import auto_run_qct
 
     global _points_directory_path
 
@@ -60,7 +59,7 @@ def _points_directory_menu_refresh(menu):
 
 
 def custom_points_directory_menu():
-    from ichor.analysis.get_path import get_dir
+    from ichor.ichor_lib.analysis.get_path import get_dir
 
     global _points_directory_path
     _points_directory_path = get_dir(Path())
@@ -87,10 +86,10 @@ def points_directory_menu(path: Path):
 
 def main_menu(subdirs: Optional[List[Path]] = None) -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
-    from ichor.auto_run.standard_auto_run import auto_run_from_menu
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-    from ichor.main.active_learning import active_learning
-    from ichor.main.per_menu import auto_run_per_menu
+    from ichor.ichor_hpc.auto_run.standard_auto_run import auto_run_from_menu
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.main.active_learning import active_learning
+    from ichor.ichor_hpc.main.per_menu import auto_run_per_menu
 
     # initialize an instance of Menu called menu and add construct the menu in the context manager
     with Menu(
