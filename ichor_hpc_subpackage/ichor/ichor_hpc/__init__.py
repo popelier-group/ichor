@@ -39,9 +39,6 @@ from ichor.ichor_hpc.machine_setup.machine import MACHINE
 
 __version__ = Version("3.0.1")
 
-__all__ = ["GLOBALS", "MACHINE", "BATCH_SYSTEM", "__version__"]
-
-
 import sys
 
 from ichor_hpc.arguments import Arguments
@@ -50,9 +47,10 @@ from ichor.ichor_hpc.main import main_menu
 
 
 def ichor_main():
-    from ichor import in_main
+    from ichor.ichor_hpc import in_main
 
     in_main.IN_MAIN = True
+
     # TODO: need to reload package, so that other places this is imported has changes made.
 
     Arguments.read()
