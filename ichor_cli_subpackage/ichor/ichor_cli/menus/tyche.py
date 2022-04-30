@@ -7,7 +7,7 @@ from ichor.batch_system import JobID
 from ichor.common.io import get_files_of_type, mkdir
 from ichor.common.os import input_with_prefill
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-from ichor.files import GJF, XYZ, Trajectory
+from ichor.ichor_lib.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.menus.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,

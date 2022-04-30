@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ichor.common.io import cp, mkdir
-from ichor.files import PointsDirectory
+from ichor.ichor_lib.files import PointsDirectory
 from ichor.globals import GLOBALS
 
 

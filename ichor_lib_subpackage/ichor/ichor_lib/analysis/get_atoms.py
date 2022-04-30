@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from ichor.atoms import Atoms, AtomsNotFoundError
-from ichor.common.io import get_files_of_type
-from ichor.files import (GJF, WFN, XYZ, OptionalPath, PointDirectory,
+from ichor.ichor_lib.atoms import Atoms, AtomsNotFoundError
+from ichor.ichor_lib.common.io import get_files_of_type
+from ichor.ichor_lib.files import (GJF, WFN, XYZ, OptionalPath, PointDirectory,
                          PointsDirectory, Trajectory)
 
 

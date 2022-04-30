@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 
 from ichor.common.functools import classproperty
 from ichor.common.str import get_digits
-from ichor.files import WFN
+from ichor.ichor_lib.files import WFN
 from ichor.modules import AIMAllModules, Modules
 from ichor.submission_script.check_manager import CheckManager
 from ichor.submission_script.command_line import CommandLine, SubmissionError

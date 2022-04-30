@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from ichor.batch_system import JobID
 from ichor.common.io import remove
-from ichor.files import AIM, INT, PointsDirectory
+from ichor.ichor_lib.files import AIM, INT, PointsDirectory
 from ichor.log import logger
 from ichor.submission_script import (SCRIPT_NAMES, AIMAllCommand,
                                      SubmissionScript, print_completed)
@@ -114,8 +114,8 @@ def scrub_aimall(wfn_file: str):
 
     from ichor.common.io import last_line, mkdir, move
     from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-    from ichor.files.aim import AIM
-    from ichor.files.point_directory import PointDirectory
+    from ichor.ichor_lib.files.aim import AIM
+    from ichor.ichor_lib.files.point_directory import PointDirectory
     from ichor.globals import GLOBALS
     from ichor.log import logger
 

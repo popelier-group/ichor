@@ -8,7 +8,7 @@ from ichor.batch_system import JobID
 from ichor.common.io import cp, mkdir
 from ichor.common.str import get_digits
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-from ichor.files import PointsDirectory
+from ichor.ichor_lib.files import PointsDirectory
 from ichor.globals import GLOBALS
 from ichor.log import logger
 from ichor.menus.menu import Menu

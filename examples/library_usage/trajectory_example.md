@@ -34,7 +34,7 @@ The trajectory class allows us to work with `.xyz` files containing timesteps wi
 
 To read in a trajectory file, do 
 ```python
-from ichor.files.trajectory import Trajectory
+from ichor.ichor_lib.files.trajectory import Trajectory
 
 # Trajectory("path_to_trajectory_file")
 traj = Trajectory("METHANOL_for_testing.xyz")
@@ -260,7 +260,7 @@ Both ways will give the same 2D numpy array of shape `2, 12`. In general, the ar
 DLPOLY History Files contain the same information as `.xyz` files, with the only difference being that they need to be parsed differently initially. After that, the coordinates and features can be accessed the same way as in the `Trajectory` class.
 
 ```python
-from ichor.files.dlpoly_history import DlpolyHistory
+from ichor.ichor_lib.files.dlpoly_history import DlpolyHistory
 
 traj = DlpolyHistory("DLPOLY_history_file_location")
 ```

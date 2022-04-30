@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List
 
 from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-from ichor.files import INTs, PointsDirectory
+from ichor.ichor_lib.files import INTs, PointsDirectory
 from ichor.menus.menu import Menu
 
 

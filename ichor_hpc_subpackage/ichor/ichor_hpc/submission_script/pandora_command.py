@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.common.functools import classproperty
-from ichor.files import PandoraDirectory
+from ichor.ichor_lib.files import PandoraDirectory
 from ichor.globals import GLOBALS
 from ichor.modules import Modules, MorfiModules, PandoraModules
 from ichor.pandora import PANDORA_LOCATION

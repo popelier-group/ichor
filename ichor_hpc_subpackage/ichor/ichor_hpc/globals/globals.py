@@ -917,16 +917,16 @@ def get_atoms(atoms_reference_path: Path) -> Atoms:
 
         if atoms_reference_path.is_file():
             if atoms_reference_path.suffix == ".gjf":
-                from ichor.files import GJF
+                from ichor.ichor_lib.files import GJF
                 return GJF(atoms_reference_path).atoms
             elif atoms_reference_path.suffix == ".xyz":
-                from ichor.files import XYZ
+                from ichor.ichor_lib.files import XYZ
                 return XYZ(atoms_reference_path).atoms
             else:
                 raise ValueError(f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file.")
 
         elif atoms_reference_path.is_dir():
-            from ichor.files import PointsDirectory
+            from ichor.ichor_lib.files import PointsDirectory
             return PointsDirectory(atoms_reference_path)[0].atoms
         
         # we should have returned by now, but return None if no file matches criteria

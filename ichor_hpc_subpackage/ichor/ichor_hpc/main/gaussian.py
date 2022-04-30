@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from ichor.batch_system import JobID
 from ichor.common.io import last_line
-from ichor.files import GJF, PointsDirectory
+from ichor.ichor_lib.files import GJF, PointsDirectory
 from ichor.log import logger
 from ichor.submission_script import (SCRIPT_NAMES, GaussianCommand,
                                      SubmissionScript, print_completed)

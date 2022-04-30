@@ -7,7 +7,7 @@ The `Trajectory` class can be used to convert a trajectory file (such as a `.xyz
 ```python
 
 from ichor.main.gaussian import submit_points_directory_to_gaussian
-from ichor.files.trajectory import Trajectory
+from ichor.ichor_lib.files.trajectory import Trajectory
 
 traj = Trajectory("WATER.xyz")
 traj.to_dir("./water_no_angle_change")
@@ -37,7 +37,7 @@ For example, if we want to change the Gaussian core count that is used for the j
 ```python
 from ichor.main.gaussian import submit_points_directory_to_gaussian
 from ichor.globals import GLOBALS
-from ichor.files.trajectory import Trajectory
+from ichor.ichor_lib.files.trajectory import Trajectory
 
 GLOBALS.GAUSSIAN_CORE_COUNT = 4
 

@@ -6,14 +6,14 @@ a `.xyz` file which can be used to submit `.gjf`/`.wfn` files to Gaussian or AIM
 To convert from a features file, we do
 
 ```python
-from ichor.files.trajectory import Trajectory
+from ichor.ichor_lib.files.trajectory import Trajectory
 
 traj = Trajectory.features_file_to_trajectory("water_dimer_features_xlsx_file.xlsx", atom_types=["O", "H", "H", "O", "H", "H"])
 ```
 or
 
 ```python
-from ichor.files.trajectory import Trajectory
+from ichor.ichor_lib.files.trajectory import Trajectory
 
 traj = Trajectory.features_file_to_trajectory("water_dimer_features_csv_file.csv", atom_types=["O", "H", "H", "O", "H", "H"])
 ```
@@ -75,7 +75,7 @@ Now we have a custom trajectory and we can run it through gaussian and Aimall li
 ```python
 
 from ichor.main.gaussian import submit_points_directory_to_gaussian
-from ichor.files.trajectory import Trajectory
+from ichor.ichor_lib.files.trajectory import Trajectory
 
 traj = Trajectory.features_file_to_trajector("water_dimer_phi_change_only.csv",
                                              atom_types=["O", "H", "H", "O", "H", "H"])
@@ -93,7 +93,7 @@ We can do
 
 ```python
 
-from ichor.files import PointsDirectory
+from ichor.ichor_lib.files import PointsDirectory
 
 points = PointsDirectory("WD_phi_change_only")
 ```

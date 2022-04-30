@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ichor.files import OptionalFile
+from ichor.ichor_lib.files import OptionalFile
 from ichor.globals import GLOBALS
 from ichor.machine.machine import MACHINE, Machine
 

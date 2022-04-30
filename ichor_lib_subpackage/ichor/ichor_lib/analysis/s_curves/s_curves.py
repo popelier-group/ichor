@@ -4,11 +4,11 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 
-from ichor.analysis.excel import num2col
-from ichor.analysis.predictions import get_true_predicted
+from ichor.ichor_lib.analysis.excel import num2col
+from ichor.ichor_lib.analysis.predictions import get_true_predicted
 from ichor.ichor_lib.constants import ha_to_kj_mol
-from ichor.files import PointsDirectory
-from ichor.models import Models, ModelsResult
+from ichor.ichor_lib.files import PointsDirectory
+from ichor.ichor_lib.models import Models, ModelsResult
 
 
 def percentile(n: int) -> np.ndarray:

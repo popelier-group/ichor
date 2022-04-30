@@ -4,7 +4,7 @@ from typing import Optional
 from ichor.auto_run.counter import read_counter, write_counter
 from ichor.auto_run.stop import stop, stopped
 from ichor.common.io import mkdir, remove
-from ichor.files import PointsDirectory
+from ichor.ichor_lib.files import PointsDirectory
 from ichor.log import logger
 from ichor.models import Models
 

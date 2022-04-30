@@ -1,7 +1,7 @@
 import unittest
 import sys
 sys.path.append("../ichor/")
-from ichor.files import Trajectory
+from ichor.ichor_lib.files import Trajectory
 from pathlib import Path
 import numpy as np
 

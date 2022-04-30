@@ -6,7 +6,7 @@ import pandas as pd
 
 from ichor.analysis.get_models import number_of_models_in_dir
 from ichor.analysis.predictions import get_true_predicted
-from ichor.files import PointsDirectory
+from ichor.ichor_lib.files import PointsDirectory
 from ichor.models import Models, ModelsResult
 
 
