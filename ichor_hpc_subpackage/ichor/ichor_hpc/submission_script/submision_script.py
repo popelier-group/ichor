@@ -5,8 +5,8 @@ from ichor.ichor_hpc.batch_system import BATCH_SYSTEM, JobID
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.common.io import mkdir
 from ichor.ichor_lib.common.types import BoolToggle
-from ichor.ichor_lib.common.uid import set_uid
-from ichor.ichor_hpc.machine_setup.machine.machine import MACHINE, SubmitType
+from ichor.ichor_hpc.uid import set_uid
+from ichor.ichor_hpc.machine_setup.machine import MACHINE, SubmitType
 from ichor.submission_script.command_group import CommandGroup
 from ichor.submission_script.data_lock import DataLock
 
@@ -90,7 +90,7 @@ class SubmissionScript:
     @property
     def modules(self) -> List[str]:
         """Returns a list of modules that need to be loaded before a job can be ran."""
-        from ichor.ichor_hpc.machine_setup.machine.machine import MACHINE
+        from ichor.ichor_hpc.machine_setup.machine import MACHINE
 
         modules = []
         for command in self.grouped_commands:

@@ -2,7 +2,7 @@ from pathlib import Path
 
 from ichor.ichor_lib.files import OptionalFile
 from ichor.ichor_hpc.globals import GLOBALS
-from ichor.ichor_hpc.machine_setup.machine.machine import MACHINE, Machine
+from ichor.ichor_hpc.machine_setup.machine import MACHINE, Machine
 
 
 class CannotFindPandora(Exception):

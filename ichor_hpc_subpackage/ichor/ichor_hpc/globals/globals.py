@@ -510,7 +510,7 @@ class Globals:
 
         # TODO: add MAX_RUINNING_TASKS to Globals docstring
         if "MAX_RUNNING_TASKS" not in self._in_config:
-            from ichor.ichor_hpc.machine_setup.machine.machine import MACHINE, Machine
+            from ichor.ichor_hpc.machine_setup.machine import MACHINE, Machine
 
             if MACHINE is Machine.ffluxlab:
                 self.MAX_RUNNING_TASKS = (
