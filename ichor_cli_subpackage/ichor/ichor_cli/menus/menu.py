@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 from uuid import uuid4
 
-from ichor.common.int import count_digits
-from ichor.common.io import pushd
+from ichor.ichor_lib.common.int import count_digits
+from ichor.ichor_lib.common.io import pushd
 from ichor_cli.problem_finder import PROBLEM_FINDER
-from ichor.menus.tab_completer import ListCompleter
+from ichor.ichor_cli.menus.tab_completer import ListCompleter
 
 _subdirs = []
 
