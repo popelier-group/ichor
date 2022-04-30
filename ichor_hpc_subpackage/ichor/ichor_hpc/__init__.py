@@ -41,7 +41,7 @@ __version__ = Version("3.0.1")
 
 import sys
 
-from ichor_hpc.arguments import Arguments
+from ichor.ichor_hpc.arguments import Arguments
 from ichor.ichor_hpc.globals import GLOBALS
 from ichor.ichor_hpc.main import main_menu
 

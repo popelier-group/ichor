@@ -37,7 +37,7 @@ class JobID:
         self.instance = instance or str(GLOBALS.UID)
 
     def write(self):
-        from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+        from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
         mkdir(
             FILE_STRUCTURE["jid"].parent

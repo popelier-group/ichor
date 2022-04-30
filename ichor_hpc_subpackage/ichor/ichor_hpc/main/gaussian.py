@@ -123,7 +123,7 @@ def scrub_gaussian(gaussian_file: str):
     """
 
     from ichor.ichor_lib.common.io import mkdir, move
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.log import logger
 
     gaussian_file = Path(gaussian_file)

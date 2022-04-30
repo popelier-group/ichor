@@ -7,7 +7,7 @@ from ichor.ichor_lib.common.functools import cached_property
 from ichor.ichor_lib.common.io import mkdir, move
 from ichor.ichor_lib.common.types import Enum
 from ichor.ichor_lib.common.uid import get_uid
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
 
 class MachineNotFound(Exception):
@@ -49,7 +49,7 @@ class Machine(Enum):
         if self.submit_on_compute:
             submit_type = SubmitType.SubmitOnCompute
         elif self.drop_compute_available:
-            from ichor_hpc.drop_compute.drop_compute import drop_compute_available_for_user
+            from ichor.ichor_hpc.drop_compute.drop_compute import drop_compute_available_for_user
 
             if drop_compute_available_for_user():
                 submit_type = SubmitType.DropCompute

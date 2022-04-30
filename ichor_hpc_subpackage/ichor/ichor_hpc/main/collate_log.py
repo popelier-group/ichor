@@ -8,7 +8,7 @@ from ichor.ichor_lib.common.types import DictList
 
 
 def get_child_processes() -> Optional[List[Path]]:
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
     if not FILE_STRUCTURE["child_processes"].exists():
         from ichor.auto_run.per.child_processes import \
@@ -26,7 +26,7 @@ def get_collate_model_log(
     directory: Optional[Path] = None,
 ) -> Dict[str, Dict[str, Tuple[Path, int]]]:
     from ichor.ichor_lib.common.types import DictList
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.models import Models
 
@@ -68,7 +68,7 @@ def link_collated_models(dir, collated_models):
 
 
 def collate_model_log_bottom_up(directory: Optional[Path] = None):
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
     collated_models = get_collate_model_log(directory)
     sorted_models = [
@@ -85,7 +85,7 @@ def collate_model_log_bottom_up(directory: Optional[Path] = None):
 
 
 def collate_model_log_top_down(directory: Optional[Path] = None):
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
     collated_models = get_collate_model_log(directory)
     sorted_models = [
@@ -108,7 +108,7 @@ def collate_model_log_top_down(directory: Optional[Path] = None):
 
 
 def collate_model_log(directory: Optional[Path] = None) -> None:
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.models import Models
 
@@ -136,7 +136,7 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
 
 
 def collate_models(directory: Optional[Path] = None) -> None:
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
 
     if directory is None:

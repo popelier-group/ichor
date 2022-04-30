@@ -60,7 +60,7 @@ class ProblemFinder(list):
 
     # @run_function(2)
     def check_directories(self):
-        from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+        from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 
         dirs_to_check = ["training_set", "sample_pool"]
 

@@ -6,7 +6,7 @@ from ichor.atoms import Atoms
 from ichor.batch_system import JobID
 from ichor.ichor_lib.common.io import get_files_of_type, mkdir
 from ichor.ichor_lib.common.os import input_with_prefill
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.machine.machine import MACHINE, Machine

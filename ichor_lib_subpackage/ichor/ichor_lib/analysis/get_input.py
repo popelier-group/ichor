@@ -4,7 +4,7 @@ from typing import List, Optional
 from ichor.ichor_lib.analysis.get_path import get_file
 from ichor.ichor_lib.common.io import get_files_of_type
 from ichor.ichor_lib.common.sorting.natsort import natsorted
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_cli.menus.menu import Menu
 
 _input_file: Optional[Path] = None

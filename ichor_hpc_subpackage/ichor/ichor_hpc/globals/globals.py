@@ -110,7 +110,7 @@ from ichor.ichor_lib import constants
 from ichor.atoms.atoms import Atoms
 from ichor.ichor_lib.common.types import Version
 from collections import defaultdict
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
@@ -796,7 +796,7 @@ class Globals:
             if self._config_file is None:
                 # if no config file is provided and the instance of globals wasn't defined from a config, default to
                 # `Arguments.config_file`
-                from ichor_hpc.arguments import Arguments
+                from ichor.ichor_hpc.arguments import Arguments
 
                 config_file = Arguments.config_file
             else:

@@ -90,7 +90,7 @@ from ichor.auto_run.standard_auto_run import auto_make_models
 from ichor.batch_system import JobID
 from ichor.ichor_lib.common.io import pushd
 from ichor.daemon.daemon import Daemon
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.globals import GLOBALS
 from ichor.main import make_models
 from ichor.ichor_cli.menus.menu import Menu
@@ -104,7 +104,7 @@ _selected_atoms_to_run_on: Optional[List[Path]] = None
 
 class PerAtomDaemon(Daemon):
     def __init__(self):
-        from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+        from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
         from ichor.globals import GLOBALS
 
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["atoms_pid"]

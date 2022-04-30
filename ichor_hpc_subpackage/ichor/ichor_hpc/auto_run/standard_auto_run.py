@@ -26,9 +26,9 @@ from ichor.ichor_lib.common.int import truncate
 from ichor.ichor_lib.common.io import mkdir, move, remove
 from ichor.ichor_lib.common.points import get_points_location
 from ichor.ichor_lib.common.types import MutableValue
-from ichor_hpc.drop_compute.drop_compute import (DROP_COMPUTE_LOCATION, DROP_COMPUTE_MAX_JOBS,
+from ichor.ichor_hpc.drop_compute.drop_compute import (DROP_COMPUTE_LOCATION, DROP_COMPUTE_MAX_JOBS,
                                 DROP_COMPUTE_NTRIES, DROP_COMPUTE_TMP_LOCATION)
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory, Trajectory
 from ichor.machine.machine import MACHINE, SubmitType
 from ichor.main.queue import get_current_jobs

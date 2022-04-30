@@ -17,9 +17,9 @@ def active_learning(
     """Add a new training point to the training set based on the most recent FERBUS model that was made. Adaptive sampling is
     used to add the worst performing point from the sample pool to the training set."""
     from ichor.active_learning import learning_method_cls
-    from ichor_hpc.arguments import Arguments
+    from ichor.ichor_hpc.arguments import Arguments
     from ichor.auto_run.standard_auto_run import submit_next_iter
-    from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.globals import GLOBALS
     from ichor.machine.machine import MACHINE
     from ichor.submission_script import SUBMIT_ON_COMPUTE
