@@ -4,21 +4,17 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from ichor.analysis.dlpoly.dlpoly_files import (DlpolyHistory,
+from ichor.ichor_lib.analysis.dlpoly.dlpoly_files import (DlpolyHistory,
                                                 get_dlpoly_directories,
                                                 setup_dlpoly_directories)
-from ichor.analysis.dlpoly.dlpoly_submit import (submit_dlpoly_gjfs,
-                                                 submit_dlpoly_jobs)
-from ichor.analysis.get_atoms import get_atoms_from_path
-from ichor.analysis.get_models import get_models_from_path
-from ichor.analysis.opt import find_opt
-from ichor.batch_system import JobID
-from ichor.common.io import get_files_of_type
-from ichor.common.np import dict_of_list_to_dict_of_array
+from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
+from ichor.ichor_lib.analysis.get_models import get_models_from_path
+from ichor.ichor_lib.analysis.opt import find_opt
+from ichor.ichor_lib.common.io import get_files_of_type
+from ichor.ichor_lib.common.np import dict_of_list_to_dict_of_array
 from ichor.ichor_lib.constants import ha_to_kj_mol
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-from ichor.files import GJF, WFN
-from ichor.models import Models
+from ichor.ichor_lib.files import GJF, WFN
+from ichor.ichor_lib.models import Models
 
 
 def run_dlpoly(

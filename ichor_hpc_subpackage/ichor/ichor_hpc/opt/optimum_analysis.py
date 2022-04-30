@@ -1,11 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.common.io import get_files_of_type
-from ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-from ichor.files import WFN
-from ichor.globals import GLOBALS
-
+from ichor.ichor_lib.common.io import get_files_of_type
+from ichor.ichor_lib.files import WFN
 
 class UnknownOptimumEnergyFileType(Exception):
     pass

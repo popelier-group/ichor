@@ -2,8 +2,8 @@ from typing import List, Tuple
 
 import numpy as np
 
-from ichor.atoms import Atom, Atoms
-from ichor.common.linalg import mag
+from ichor.ichor_lib.atoms import Atom, Atoms
+from ichor.ichor_lib.common.linalg import mag
 
 
 class ConnectedAtom(Atom):
