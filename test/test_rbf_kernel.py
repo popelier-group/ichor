@@ -1,7 +1,7 @@
 import unittest
 import sys
 sys.path.append("../ichor/")
-from ichor.models.kernels import RBF
+from ichor.ichor_lib.models.kernels import RBF
 import numpy as np
 
 class TestRBF(unittest.TestCase):

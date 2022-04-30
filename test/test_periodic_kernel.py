@@ -2,7 +2,7 @@ import unittest
 import sys
 
 sys.path.append("../ichor/")
-from ichor.models.kernels.periodic_kernel import PeriodicKernel
+from ichor.ichor_lib.models.kernels.periodic_kernel import PeriodicKernel
 import numpy as np
 
 class TestPeriodicKernel(unittest.TestCase):

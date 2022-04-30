@@ -28,7 +28,7 @@ def get_collate_model_log(
     from ichor.ichor_lib.common.types import DictList
     from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.ichor_hpc.globals import GLOBALS
-    from ichor.models import Models
+    from ichor.ichor_lib.models import Models
 
     if directory is None:
         directory = GLOBALS.CWD
@@ -110,7 +110,7 @@ def collate_model_log_top_down(directory: Optional[Path] = None):
 def collate_model_log(directory: Optional[Path] = None) -> None:
     from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.ichor_hpc.globals import GLOBALS
-    from ichor.models import Models
+    from ichor.ichor_lib.models import Models
 
     if directory is None:
         directory = GLOBALS.CWD

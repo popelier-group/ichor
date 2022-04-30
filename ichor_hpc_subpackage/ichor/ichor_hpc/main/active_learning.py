@@ -6,7 +6,7 @@ from ichor.auto_run.stop import stop, stopped
 from ichor.ichor_lib.common.io import mkdir, remove
 from ichor.ichor_lib.files import PointsDirectory
 from ichor.log import logger
-from ichor.models import Models
+from ichor.ichor_lib.models import Models
 
 
 def active_learning(

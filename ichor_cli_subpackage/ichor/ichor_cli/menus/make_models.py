@@ -12,7 +12,7 @@ from ichor.ichor_lib.files import PointsDirectory
 from ichor.ichor_hpc.globals import GLOBALS
 from ichor.log import logger
 from ichor.ichor_cli.menus.menu import Menu
-from ichor.models import Model
+from ichor.ichor_lib.models import Model
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
                        QuantumChemicalTopologyProgram)
 from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,

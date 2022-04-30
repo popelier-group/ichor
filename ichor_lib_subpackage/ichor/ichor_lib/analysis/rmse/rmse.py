@@ -7,7 +7,7 @@ import pandas as pd
 from ichor.ichor_lib.analysis.get_models import number_of_models_in_dir
 from ichor.ichor_lib.analysis.predictions import get_true_predicted
 from ichor.ichor_lib.files import PointsDirectory
-from ichor.models import Models, ModelsResult
+from ichor.ichor_lib.models import Models, ModelsResult
 
 
 def calculate_rmse(

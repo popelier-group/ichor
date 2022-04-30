@@ -4,7 +4,7 @@ sys.path.append("../ichor/")
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from ichor.models import Model
+from ichor.ichor_lib.models import Model
 
 class TestGPRPredictions(unittest.TestCase):
     

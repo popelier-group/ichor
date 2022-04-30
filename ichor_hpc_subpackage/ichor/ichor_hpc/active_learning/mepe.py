@@ -9,7 +9,7 @@ from ichor.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.ichor_lib.atoms import ListOfAtoms
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.common.io import mkdir
-from ichor.models import Model, Models, ModelsResult
+from ichor.ichor_lib.models import Model, Models, ModelsResult
 
 """
     Implementation of the Maximum Expected Prediction Error (MEPE) method

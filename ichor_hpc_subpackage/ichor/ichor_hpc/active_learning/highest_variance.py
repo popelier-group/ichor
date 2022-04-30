@@ -3,7 +3,7 @@ import numpy as np
 from ichor.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.ichor_lib.atoms import ListOfAtoms
 from ichor.ichor_lib.common.functools import classproperty
-from ichor.models import Models
+from ichor.ichor_lib.models import Models
 
 
 class HighestVariance(ActiveLearningMethod):
