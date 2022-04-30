@@ -1,6 +1,6 @@
 import os
 
-from ichor.common.functools import get_functions_to_run, run_function, run_once
+from ichor.ichor_lib.common.functools import get_functions_to_run, run_function, run_once
 
 
 class Problem:
@@ -130,7 +130,7 @@ class ProblemFinder(list):
 
     @run_once
     def find(self):
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         if not GLOBALS.DISABLE_PROBLEMS:
             problems_to_find = get_functions_to_run(self)
