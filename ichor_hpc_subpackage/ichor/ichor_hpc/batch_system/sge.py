@@ -4,9 +4,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Union
 
-from ichor.batch_system.batch_system import (BatchSystem, CannotParseJobID,
+from ichor.ichor_hpc.batch_system.batch_system import (BatchSystem, CannotParseJobID,
                                              Job, JobID)
-from ichor.batch_system.node import NodeType
+from ichor.ichor_hpc.batch_system.node import NodeType
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.common.os import run_cmd
 from ichor.ichor_lib.common.str import split_by

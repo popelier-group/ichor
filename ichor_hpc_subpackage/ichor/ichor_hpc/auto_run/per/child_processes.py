@@ -55,7 +55,7 @@ def delete_child_process_jobs(
 class ReRunDaemon(Daemon):
     def __init__(self):
         from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         mkdir(FILE_STRUCTURE["rerun_daemon"])
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["rerun_pid"]
@@ -72,7 +72,7 @@ def rerun_failed_child_process(
     child_processes: Optional[List[Path]] = None,
 ) -> None:
     from ichor.ichor_hpc.arguments import Arguments
-    from ichor.globals import GLOBALS, Globals
+    from ichor.ichor_hpc.globals import GLOBALS, Globals
 
     if child_processes is None:
         child_processes = find_child_processes_recursively()

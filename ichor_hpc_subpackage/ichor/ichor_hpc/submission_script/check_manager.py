@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 
-from ichor.batch_system import BATCH_SYSTEM
+from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.log import logger
 from ichor.submission_script.ichor_command import ICHORCommand
@@ -55,7 +55,7 @@ class CheckManager:
             This does not make new jobs where it reruns the failed job. It tries to rerun the same commands `n` times in the same job.
         """
 
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         new_runcmd = ""
 

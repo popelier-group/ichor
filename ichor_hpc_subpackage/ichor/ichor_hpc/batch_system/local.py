@@ -1,7 +1,7 @@
 from typing import List
 
-from ichor.batch_system.node import NodeType
-from ichor.batch_system.sge import SunGridEngine
+from ichor.ichor_hpc.batch_system.node import NodeType
+from ichor.ichor_hpc.batch_system.sge import SunGridEngine
 from ichor.ichor_lib.common.functools import classproperty
 
 

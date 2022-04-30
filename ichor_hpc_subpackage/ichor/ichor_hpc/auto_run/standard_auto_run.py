@@ -20,7 +20,7 @@ from ichor.auto_run.ichor_jobs import (
     submit_ichor_morfi_command_to_auto_run,
     submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
 from ichor.auto_run.stop import start
-from ichor.batch_system import BATCH_SYSTEM, JobID, NodeType
+from ichor.ichor_hpc.batch_system import BATCH_SYSTEM, JobID, NodeType
 from ichor.ichor_lib.common.bool import check_bool
 from ichor.ichor_lib.common.int import truncate
 from ichor.ichor_lib.common.io import mkdir, move, remove
@@ -141,7 +141,7 @@ def submit_auto_run_iter(
         But can also be IterState.Last for the Last iteration of the auto run.
     """
 
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     # the first submitted job does not wait for previous jobs (because there are none), so job_id is None
     job_id = wait_for_job
@@ -286,7 +286,7 @@ def get_func_order() -> List[IterStep]:
 def setup_iter_args():
     """Sets up the IterArgs Enum values. Even though `IterArtgs` is an Enum, the values associated with the elements are type `MutableValue` because
     they need to be able to change values (because the GLOBALS values can change)."""
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     if GLOBALS.OPTIMISE_ATOM == "all":
         IterArgs.Atoms.value = [atom.name for atom in GLOBALS.ATOMS]
@@ -337,7 +337,7 @@ def auto_run_from_menu() -> JobID:
 
 def auto_run() -> JobID:
     """Auto run Gaussian, AIMALL, FEREBUS, and ICHOR jobs needed to make GP models."""
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     if FILE_STRUCTURE["counter"].exists():
         current_iter, max_iter = read_counter()
@@ -415,7 +415,7 @@ def auto_run() -> JobID:
 def submit_next_iter(current_iteration) -> Optional[JobID]:
     """Submits next iteration of auto run for DropCompute. The last job id of the job sequence that was submitted is optionally returned."""
 
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     if MACHINE.submit_type is SubmitType.DropCompute:
         SCRIPT_NAMES.parent.value = DROP_COMPUTE_TMP_LOCATION
@@ -466,7 +466,7 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
 
 
 def rerun_from_failed() -> Optional[JobID]:
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     current_iteration, max_iteration = read_counter(must_exist=False)
 

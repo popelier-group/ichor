@@ -20,7 +20,7 @@ def active_learning(
     from ichor.ichor_hpc.arguments import Arguments
     from ichor.auto_run.standard_auto_run import submit_next_iter
     from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
     from ichor.machine.machine import MACHINE
     from ichor.submission_script import SUBMIT_ON_COMPUTE
 

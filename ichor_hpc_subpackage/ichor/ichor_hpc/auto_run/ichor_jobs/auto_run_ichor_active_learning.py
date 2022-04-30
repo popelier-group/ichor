@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.types import MutableValue
 from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,

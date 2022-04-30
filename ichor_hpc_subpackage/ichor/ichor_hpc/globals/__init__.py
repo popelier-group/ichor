@@ -5,7 +5,7 @@ that ICHOR is being ran on."""
 from pathlib import Path
 
 from ichor.ichor_lib.common.os import input_with_prefill
-from ichor.globals.globals import Globals
-from ichor.globals.os import OS
+from ichor.ichor_hpc.globals.globals import Globals
+from ichor.ichor_hpc.globals.os import OS
 
 GLOBALS = Globals()

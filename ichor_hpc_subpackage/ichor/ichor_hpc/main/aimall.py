@@ -3,7 +3,7 @@ from hashlib import new
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import remove
 from ichor.ichor_lib.files import AIM, INT, PointsDirectory
 from ichor.log import logger
@@ -116,7 +116,7 @@ def scrub_aimall(wfn_file: str):
     from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
     from ichor.ichor_lib.files.aim import AIM
     from ichor.ichor_lib.files.point_directory import PointDirectory
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
     from ichor.log import logger
 
     # TODO: check for license and end of aim file, then read aim file with AIM class. Then check if aim file has correct atom info for int files.
@@ -198,7 +198,7 @@ def scrub_aimall(wfn_file: str):
                     )
                     return
 
-                # find if any atoms have integration error above the threshold set in ICHOR GLOBALS
+                # find if any atoms have integration error above the threshold set in ichor.ichor_hpc.globals
                 n_integration_error = 0
                 if point.ints:
                     integration_errors = point.integration_error

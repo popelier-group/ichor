@@ -33,7 +33,7 @@ class ICHORCommand(PythonCommand):
         )
 
         from ichor.ichor_hpc.arguments import Arguments
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         self.needs_uid = needs_uid
 

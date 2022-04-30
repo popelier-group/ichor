@@ -201,7 +201,7 @@ class AIMAllCommand(CommandLine):
 
     @property
     def arguments(self) -> List[str]:
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         atoms = (
             self.atoms
@@ -248,7 +248,7 @@ class AIMAllCommand(CommandLine):
 
     @classproperty
     def ncores(self) -> int:
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         return GLOBALS.AIMALL_NCORES
 
@@ -257,7 +257,7 @@ class AIMAllCommand(CommandLine):
 
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         if GLOBALS.RERUN_POINTS:
 

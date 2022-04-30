@@ -16,7 +16,7 @@ class MinMaxMean(MakeSetMethod):
         return 3 * points[0].features.shape[-1]
 
     def get_points(self, points: ListOfAtoms) -> List[int]:
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         atom = (
             GLOBALS.OPTIMISE_ATOM

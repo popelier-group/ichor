@@ -111,9 +111,9 @@ from ichor.atoms.atoms import Atoms
 from ichor.ichor_lib.common.types import Version
 from collections import defaultdict
 from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-from ichor.globals import checkers, formatters, parsers
-from ichor.globals.config_provider import ConfigProvider
-from ichor.globals.os import OS
+from ichor.ichor_hpc.globals import checkers, formatters, parsers
+from ichor.ichor_hpc.globals.config_provider import ConfigProvider
+from ichor.ichor_hpc.globals.os import OS
 from ichor_cli.problem_finder import PROBLEM_FINDER
 from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import ALFCalculationError
 

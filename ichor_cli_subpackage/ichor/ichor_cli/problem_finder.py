@@ -34,7 +34,7 @@ class ProblemFinder(list):
 
     # @run_function(1)
     def check_alf(self):
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         if len(GLOBALS.ALF) < 1:
             self.append(
@@ -47,7 +47,7 @@ class ProblemFinder(list):
 
     # @run_function(1.1)
     def check_atoms(self):
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         if not GLOBALS.ATOMS:
             self.append(
@@ -77,7 +77,7 @@ class ProblemFinder(list):
 
     @run_function(3)
     def check_system(self):
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         if GLOBALS.SYSTEM_NAME == "SYSTEM":
             self.append(
@@ -92,7 +92,7 @@ class ProblemFinder(list):
     def check_settings(self):
         import difflib
 
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         for setting in self.unknown_settings:
             close_matches = difflib.get_close_matches(

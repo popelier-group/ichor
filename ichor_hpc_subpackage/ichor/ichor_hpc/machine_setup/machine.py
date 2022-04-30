@@ -85,7 +85,7 @@ if MACHINE is Machine.local:
         MACHINE = _machine
 
 if MACHINE is Machine.local:
-    from ichor.batch_system import BATCH_SYSTEM
+    from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
 
     if BATCH_SYSTEM.Host in os.environ.keys():
         host = os.environ[BATCH_SYSTEM.Host]

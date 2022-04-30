@@ -36,7 +36,7 @@ For example, if we want to change the Gaussian core count that is used for the j
 
 ```python
 from ichor.main.gaussian import submit_points_directory_to_gaussian
-from ichor.globals import GLOBALS
+from ichor.ichor_hpc.globals import GLOBALS
 from ichor.ichor_lib.files.trajectory import Trajectory
 
 GLOBALS.GAUSSIAN_CORE_COUNT = 4
@@ -62,7 +62,7 @@ H      -0.54588097      0.94549358      0.00000000
 water_testing_globals/SYSTEM0001.wfn
 ```
 
-See `ichor/globals/globals.py` file which contains a table with all the different settings that can be changed from by GLOBALS.
+See `ichor.ichor_hpc.globals/globals.py` file which contains a table with all the different settings that can be changed from by GLOBALS.
 
 # Submitting AIMALL jobs
 

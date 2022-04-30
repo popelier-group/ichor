@@ -12,7 +12,7 @@ import ichor
 from ichor.ichor_lib.common.io import cp, mkdir, move
 from ichor.ichor_lib.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
                              USER_READ, permissions, set_permission)
-from ichor.globals import GLOBALS
+from ichor.ichor_hpc.globals import GLOBALS
 from ichor.machine.machine import MACHINE
 
 _local_bin_directory = Path.home() / ".ichor" / "bin"

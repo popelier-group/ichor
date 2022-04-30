@@ -37,7 +37,7 @@ class DlpolyCommand(CommandLine):
     def ncores(self) -> int:
         """Return the number of cores to be used for ferebus jobs."""
 
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         return GLOBALS.DLPOLY_NCORES
 

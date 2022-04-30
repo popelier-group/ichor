@@ -46,7 +46,7 @@ class TycheCommand(CommandLine):
     @classproperty
     def ncores(self) -> int:
         """Returns the number of cores that Amber should use for the job."""
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         return GLOBALS.TYCHE_NCORES
 

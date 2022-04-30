@@ -58,7 +58,7 @@ class GaussianCommand(CommandLine):
     @classproperty
     def ncores(self) -> int:
         """Returns the number of cores that Gaussian should use for the job."""
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         return GLOBALS.GAUSSIAN_NCORES
 
@@ -73,7 +73,7 @@ class GaussianCommand(CommandLine):
 
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"  # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
 
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         if GLOBALS.RERUN_POINTS:
 

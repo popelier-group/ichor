@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.main.gaussian import submit_points_directory_to_gaussian
 from ichor.main.pandora import submit_points_directory_to_pyscf
 from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram

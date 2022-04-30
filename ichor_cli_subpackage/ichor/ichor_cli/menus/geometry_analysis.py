@@ -9,7 +9,7 @@ from ichor.ichor_lib.analysis.geometry.geometry_calculator import (
     internal_feature_names)
 from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
 from ichor.ichor_lib.analysis.get_path import get_path
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory, Trajectory
 from ichor.ichor_cli.menus.menu import Menu

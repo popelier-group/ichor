@@ -6,7 +6,7 @@ from uuid import UUID
 
 from ichor.ichor_lib.common.bool import check_bool
 from ichor.ichor_lib.common.types import Version
-from ichor.globals.formatters import cleanup_str
+from ichor.ichor_hpc.globals.formatters import cleanup_str
 from ichor.ichor_lib.itypes import F
 
 

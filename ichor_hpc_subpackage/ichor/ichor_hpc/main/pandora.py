@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import cp
 from ichor.ichor_lib.files import (WFN, MorfiDirectory, PandoraDirectory, PandoraInput,
                          PointDirectory, PointsDirectory, PySCFDirectory)

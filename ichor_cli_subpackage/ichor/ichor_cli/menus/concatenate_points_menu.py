@@ -2,7 +2,7 @@ from pathlib import Path
 
 from ichor.ichor_lib.common.io import cp, mkdir
 from ichor.ichor_lib.files import PointsDirectory
-from ichor.globals import GLOBALS
+from ichor.ichor_hpc.globals import GLOBALS
 
 
 def recursive_rename(

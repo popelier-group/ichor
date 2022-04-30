@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.types import MutableValue
 from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
                                      SubmissionScript, TimingManager)

@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.files import PandoraDirectory
-from ichor.globals import GLOBALS
+from ichor.ichor_hpc.globals import GLOBALS
 from ichor.modules import Modules, MorfiModules, PandoraModules
 from ichor.pandora import PANDORA_LOCATION
 from ichor.submission_script.ichor_command import ICHORCommand

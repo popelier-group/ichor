@@ -4,12 +4,12 @@ from typing import List, Optional
 import numpy as np
 
 from ichor.ichor_lib import constants
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import cp, mkdir
 from ichor.ichor_lib.common.str import get_digits
 from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory
-from ichor.globals import GLOBALS
+from ichor.ichor_hpc.globals import GLOBALS
 from ichor.log import logger
 from ichor.ichor_cli.menus.menu import Menu
 from ichor.models import Model
@@ -327,7 +327,7 @@ def write_training_set(atom, training_data) -> Path:
         while the outputs are stored as a dictionary, containing key:value paris of property_name (eg. iqa, q00) : value
     """
     from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     # make a ferebus directory for each atom
     ferebus_directory = FILE_STRUCTURE["ferebus"] / atom
@@ -362,7 +362,7 @@ def write_ftoml(ferebus_directory: Path, atom: str):
     :param ferebus_directory: A Path object pointing to the directory where the FEREBUS job is going to be ran
     :param atom: A string corresponding to the atom's name (such as C1, H3, etc.)
     """
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     ftoml_file = ferebus_directory / "ferebus.toml"
     alf = list(np.array(GLOBALS.ALF[get_digits(atom) - 1]) + 1)

@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor.batch_system.node import NodeType
+from ichor.ichor_hpc.batch_system.node import NodeType
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.common.io import mkdir
 from ichor.ichor_lib.common.os import run_cmd
@@ -32,7 +32,7 @@ class JobID:
     ):
         self.script = str(script)
         self.id = str(id)
-        from ichor.globals import GLOBALS
+        from ichor.ichor_hpc.globals import GLOBALS
 
         self.instance = instance or str(GLOBALS.UID)
 

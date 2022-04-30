@@ -20,7 +20,7 @@ def read_counter(
     counter_location: Optional[Path] = None, must_exist: bool = True
 ) -> Tuple[int, int]:
     """Reads the counter file, returns current iteration and max iteration"""
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     counter_location = get_counter_location(counter_location)
     if not counter_location.exists() and must_exist:
@@ -45,7 +45,7 @@ def write_counter(
     counter_location: Optional[Path] = None,
 ) -> None:
     """Writes the current and max iteration to the counter file"""
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     current_iteration = current_iteration or 0
     max_iteration = max_iteration or GLOBALS.N_ITERATIONS

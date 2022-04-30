@@ -3,7 +3,7 @@ from ichor.ichor_lib.common.types import FileTree, FileType
 
 class FileStructure(FileTree):
     """A class which manages all the files/directories that ICHOR needs in order to function. It makes it easier to find
-    the full paths of files and directories (which could be subdirectories). ICHOR GLOBALS uses this class to make a tree
+    the full paths of files and directories (which could be subdirectories). ichor.ichor_hpc.globals uses this class to make a tree
     of all the directories/files. Then the full path of a directory can be obtained by doing:
 
     `self.FILE_STRUCTURE["training_set"]` to get the TRAINING_SET directory path.

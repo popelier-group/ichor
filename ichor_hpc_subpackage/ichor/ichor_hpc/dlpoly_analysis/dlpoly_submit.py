@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.ichor_lib.analysis.get_models import get_models_from_path
-from ichor.batch_system import JobID
+from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.submission_script import (SCRIPT_NAMES, DataLock, DlpolyCommand,
                                      ICHORCommand, SubmissionScript)

@@ -20,7 +20,7 @@ def ADD_DISPERSION() -> bool:
 
     :return: `True` if dispersion is to be added to IQA energies or `False` if dispersion should not be added to IQA energies.
     """
-    from ichor.globals import GLOBALS
+    from ichor.ichor_hpc.globals import GLOBALS
 
     return (
         QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
