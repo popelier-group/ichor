@@ -3,9 +3,9 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from ichor.atoms import ListOfAtoms
-from ichor.files import PointsDirectory
-from ichor.models import Models, ModelsResult
+from ichor.ichor_lib.atoms import ListOfAtoms
+from ichor.ichor_lib.files import PointsDirectory
+from ichor.ichor_lib.models import Models, ModelsResult
 
 
 def get_predicted(
