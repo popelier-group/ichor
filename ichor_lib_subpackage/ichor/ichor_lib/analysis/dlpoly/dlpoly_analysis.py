@@ -1,62 +1,12 @@
 from pathlib import Path
-from typing import Dict, List, Optional
-
+from typing import Dict
 import numpy as np
 import pandas as pd
-
-from ichor.ichor_lib.analysis.dlpoly.dlpoly_files import (DlpolyHistory,
-                                                get_dlpoly_directories,
-                                                setup_dlpoly_directories)
-from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
-from ichor.ichor_lib.analysis.get_models import get_models_from_path
-from ichor.ichor_lib.analysis.opt import find_opt
 from ichor.ichor_lib.common.io import get_files_of_type
 from ichor.ichor_lib.common.np import dict_of_list_to_dict_of_array
 from ichor.ichor_lib.constants import ha_to_kj_mol
-from ichor.ichor_lib.files import GJF, WFN
+from ichor.ichor_lib.files import WFN
 from ichor.ichor_lib.models import Models
-
-
-def run_dlpoly(
-    dlpoly_input: Path,
-    model_location: Path,
-    temperature: float = 0.0,
-    hold=Optional[JobID],
-) -> JobID:
-    dlpoly_input_atoms = get_atoms_from_path(dlpoly_input)
-    dlpoly_input_models = get_models_from_path(model_location)
-    dlpoly_directories = setup_dlpoly_directories(
-        dlpoly_input_atoms, dlpoly_input_models, temperature=temperature
-    )
-    return submit_dlpoly_jobs(dlpoly_directories, hold=hold)
-
-
-def run_dlpoly_geometry_optimisations(
-    dlpoly_input: Path, model_location: Path, hold=Optional[JobID]
-) -> JobID:
-    return run_dlpoly(dlpoly_input, model_location, temperature=0.0)
-
-
-def write_final_geometry_to_gjf(
-    dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
-) -> List[Path]:
-    gjfs = []
-    for d in dlpoly_directory.iterdir():
-        if d.is_dir() and (d / "HISTORY").exists():
-            dlpoly_history = DlpolyHistory(d / "HISTORY")
-            gjf = GJF(d / (d.name + GJF.filetype))
-            gjf.atoms = dlpoly_history[-1]
-            gjf.write()
-            gjfs += [gjf.path]
-    return gjfs
-
-
-def submit_final_geometry_to_gaussian(
-    dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
-    hold: Optional[JobID] = None,
-) -> JobID:
-    gjfs = write_final_geometry_to_gjf(dlpoly_directory)
-    return submit_dlpoly_gjfs(gjfs, hold=hold)
 
 
 def read_fflux(fflux_file: Path) -> Dict[str, np.ndarray]:
@@ -85,9 +35,13 @@ def read_wfn_energy(wfn_file: Path) -> float:
 
 
 def get_dlpoly_energies(
-    dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
-    output: Path = Path("dlpoly-energies.xlsx"),
+    optimum_energy: float,
+    dlpoly_directory: Path,
+    output: Path = None,
 ):
+    if output is None:
+        output = Path("dlpoly-energies.xlsx")
+
     data = {
         "ntrain": [],
         "fflux": [],
@@ -111,7 +65,6 @@ def get_dlpoly_energies(
     df = pd.DataFrame(data)
     df.sort_values("ntrain", inplace=True)
 
-    optimum_energy = find_opt()
     if optimum_energy is not None:
         df["fflux_diff / Ha"] = np.abs(df["fflux"] - optimum_energy)
         df["fflux_diff / kJ/mol"] = df["fflux_diff / Ha"] * ha_to_kj_mol

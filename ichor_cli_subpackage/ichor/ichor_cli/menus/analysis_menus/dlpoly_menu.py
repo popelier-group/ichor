@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from ichor.ichor_lib.analysis.dlpoly.dlpoly_analysis import (
+from ichor.ichor_hpc.dlpoly_analysis.dlpoly_submit import (
     run_dlpoly, run_dlpoly_geometry_optimisations, setup_dlpoly_directories,
     submit_final_geometry_to_gaussian)
-from ichor.ichor_lib.analysis.dlpoly.dlpoly_submit import \
+from ichor.ichor_hpc.dlpoly_analysis.dlpoly_submit import \
     submit_dlpoly_optimisation_analysis_auto_run
 from ichor.ichor_lib.analysis.get_input import get_first_file, get_input_menu
 from ichor.ichor_lib.analysis.get_path import get_dir
