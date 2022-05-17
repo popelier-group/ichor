@@ -6,16 +6,15 @@ class GaussianJobType(Enum):
 
     # this is used to print extra things in the Gaussian output file.
     # since no other job is specified, this defaults to just single point.
-    SinglePointEnergy = "p"
-
     Optimisation = "opt"
     Frequency = "freq"
+    SinglePoint = ""
 
     @classmethod
     def types(cls) -> List[str]:
         return [ty.value for ty in GaussianJobType]
 
-job_type = GaussianJobType.SinglePointEnergy
+job_type = GaussianJobType.SinglePoint
 startup_options = []
 method = "B3LYP"
 basis_set = "6-31+g(d,p)"
