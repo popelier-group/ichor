@@ -11,13 +11,6 @@ from ichor.ichor_lib.files.qcp import QuantumChemistryProgramInput
 from ichor.ichor_lib.program_defaults import gaussian_defaults
 from ichor.ichor_lib.program_defaults.gaussian_defaults import GaussianJobType
 
-
-# TODO: Add:
-# - input section
-# - freeze atoms
-# - oniom?
-# - basis-sets?
-
 class GJF(QuantumChemistryProgramInput):
     """Wraps around a .gjf file that is used as input to Gaussian. Below is the usual gjf file structure:
 
@@ -32,7 +25,7 @@ class GJF(QuantumChemistryProgramInput):
         <atom-name> <todo: add -1 for freeze> <x> <y> <z>
         ...
 
-        <todo: input-section>
+        extra_details_str (containing basis sets for individual atoms, what to freeze, etc.)
 
         <wfn-name>
         -----------------------------------------------------------
@@ -63,15 +56,15 @@ class GJF(QuantumChemistryProgramInput):
     """
 
     def __init__(self, path: Union[Path, str],
-                startup_options: Optional[List[str]] = FileContents,
+                startup_options: List[str] = FileContents,
                 comment_line: Optional[str] = FileContents,
                 # TODO: job_type needs to be a list because opt freq can be used together.
-                job_type: Optional[GaussianJobType] = FileContents,
-                keywords: Optional[List[str]] = FileContents,
-                method: Optional[str] =  FileContents,
-                basis_set: Optional[str] = FileContents,
-                charge: Optional[int] = FileContents,
-                multiplicity: Optional[int] = FileContents,
+                job_type: List[GaussianJobType] = FileContents,
+                keywords: List[str] = FileContents,
+                method: str =  FileContents,
+                basis_set: str = FileContents,
+                charge: int = FileContents,
+                multiplicity: int = FileContents,
                 atoms: Atoms = FileContents,
                 extra_details_str: Optional[str] = FileContents
     ):
@@ -88,56 +81,57 @@ class GJF(QuantumChemistryProgramInput):
     @buildermethod
     def _read_file(self):
         """Parse and red a .gjf file for information we need to submit a Gaussian job."""
-        self.atoms = Atoms()
-        # empty list that contains extra information from bottom of file below coordinates
-        extra_details_list = []
+
+        # this is a dictionary containing information from the file
+        # we only use what is necessary from it (what the user did not specify when
+        # making an instance of the class)
+        tmp_dictionary = {}
+
         with open(self.path, "r") as f:
             # go to very first line
             line = next(f)
             # These are Link 0 Commands in Gaussian, eg. %chk
+            tmp_dictionary["startup_options"] = []
             while line.startswith("%"):
-                if self.startup_options is FileContents:
-                    self.startup_options = []
-                self.startup_options += [line.strip().replace("%", "")]
+                tmp_dictionary["startup_options"] += [line.strip().replace("%", "")]
                 line = next(f)
             # This is the following line where key words for Gaussian (level of theory, etc.) are defined
             # comes right after the Link 0 options
             if line.startswith("#"):
                 line = line.replace("#", "")
                 keywords = line.split()  # split keywords by whitespace
+                # remove this as it is not a keyword, just used to print out more stuff to output file
+                keywords.pop("p")
+                tmp_dictionary["job_type"] = []
+                tmp_dictionary["keywords"] = []
                 for keyword in keywords:
                     if (
                         "/" in keyword
                     ):  # if the user has used something like B3LYP/6-31G Then split them up
-                        self.method = keyword.split("/")[0].upper()
-                        self.basis_set = keyword.split("/")[1].lower()
-                    # if the keyword is in the job enum GaussianJobType: p, opt, freq
+                        tmp_dictionary["method"] = keyword.split("/")[0].upper()
+                        tmp_dictionary["basis_set"] = keyword.split("/")[1].lower()
+                    # if the keyword is in the job enum GaussianJobType: opt, freq
                     elif keyword in GaussianJobType.types():
-                        for ty in GaussianJobType:
-                            if keyword == ty:
-                                # set self.job_type to the enum value corresponding to the keyword
-                                self.job_type = ty
-                                break
+                        tmp_dictionary["job_type"].append(GaussianJobType(keyword))
                     # if the given Gaussian keyword is not defined in GaussianJobType or is not level of theory/basis set
-                    # then add to self.keywords which is None by Default
+                    # then add to keywords which is None by Default
                     else:
-                        if self.keywords is FileContents:
-                            self.keywords = []
-                        self.keywords += [keyword]
+                        tmp_dictionary["keywords"].append(keyword)
             # line following keywords line is blank line
             line = next(f)
             # following blank line is a comment line that can contain anything
             line = next(f)
-            self.comment_line = line.strip()
+            tmp_dictionary["comment_line"] = line.strip()
             # following this comment line is another blank line
             line = next(f)
             # next line contains charge and multiplicity
             line = next(f)
             if re.match(r"^\s*\d+\s+\d+\s*$", line):
-                self.charge = int(line.split()[0])
-                self.multiplicity = int(line.split()[1])
-                # find all the types of atoms as well as their coordinates from .gjf file
+                tmp_dictionary["charge"] = int(line.split()[0])
+                tmp_dictionary["multiplicity"] = int(line.split()[1])
+            # find all the types of atoms as well as their coordinates from .gjf file
             line = next(f)
+            tmp_dictionary["atoms"] = Atoms()
             while re.match(patterns.COORDINATE_LINE, line):
                 line_split = line.strip().split()
                 atom_type, x, y, z = (
@@ -146,20 +140,23 @@ class GJF(QuantumChemistryProgramInput):
                     float(line_split[2]),
                     float(line_split[3]),
                 )
-                # add the coordinate line as an Atom instance to self.atoms (which is an Atoms instance)
-                self.atoms.add(Atom(atom_type, x, y, z))
+                # add the coordinate line as an Atom instance to atoms (which is an Atoms instance)
+                tmp_dictionary["atoms"].add(Atom(atom_type, x, y, z))
                 line = next(f)
-            
+
             # read in extra options at the bottom of file
-            extra_details_list = []
             while line:
-                extra_details_list.append(line)
+                tmp_dictionary["extra_details_str"].append(line)
                 line = next(f, "") # the empty string which is returned instead of StopIteration evaluates as False
             # if there are stuff from the bottom of the file, then we have extra details to write
             # at bottom of gjf file
-            if len(extra_details_list) > 0:
+            if len(tmp_dictionary["extra_details_str"]) > 0:
                 # join line into one string that can be written following coordinates
-                self.extra_details_str = "".join(extra_details_list)
+                tmp_dictionary["extra_details_str"] = "".join(tmp_dictionary["extra_details_str"])
+
+        for key, val in tmp_dictionary.items():
+            if getattr(self, key) is FileContents:
+                setattr(self, key, val)
 
     @classproperty
     def filetype(cls) -> str:
@@ -179,7 +176,8 @@ class GJF(QuantumChemistryProgramInput):
     @property
     def header_line(self) -> str:
         """Returns a string that is the line in the gjf file that contains all keywords."""
-        return f"#{self.job_type.value} {self.method}/{self.basis_set} {' '.join(map(str, self.keywords))}\n"
+        job_type = " ".join([val.value for val in self.job_type])
+        return f"#p {self.method}/{self.basis_set} {job_type} {' '.join(map(str, self.keywords))}\n"
 
     @convert_to_path
     def write(self, path: Optional[Union[str, Path]] = None):
