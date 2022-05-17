@@ -26,7 +26,6 @@ class AimAtom:
         self.time_taken = time_taken
         self.integration_error = integration_error
 
-
 class AIM(File, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
