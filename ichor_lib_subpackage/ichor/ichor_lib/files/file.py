@@ -81,12 +81,18 @@ class File(PathObject, ABC):
                 *args, **kwargs
             )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             self.state = FileState.Read
+            # check all the contents are not FileContents at this point
+            # TODO: add this check
+            self.check_file_contents_exist()
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
         """ Abstract method detailing how to read contents of a file. Every type of file (gjf, int, etc.)
         is written in a different format and contains different information, so every file reading is
         different."""
+        pass
+
+    def check_file_contents_exist(self):
         pass
 
     @classproperty
