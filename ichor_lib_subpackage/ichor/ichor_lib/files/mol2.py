@@ -7,8 +7,6 @@ from typing import List, Optional, Tuple, Union
 from ichor.ichor_lib.atoms import Atom, Atoms
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.common.os import current_user
-from ichor.ichor_lib.constants import type2rad, type2valence
-from ichor.ichor_lib.files.file import File
 from ichor.ichor_lib.files.geometry import GeometryFile
 from ichor.ichor_lib.units import AtomicDistance
 
