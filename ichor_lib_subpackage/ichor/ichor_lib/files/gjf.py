@@ -50,7 +50,7 @@ class GJF(QuantumChemistryProgramInput):
         for individual atoms, modredundant settings, and other settings that Gaussian handles.
     
     .. note::
-        It is up to the user to handle write the `additional_information` settings. ICHOR
+        It is up to the user to handle write the `extra_details_str` settings. ICHOR
         does NOT do checks to see if these additional settings are going to be read in correctly
         in Gaussian.
     """
