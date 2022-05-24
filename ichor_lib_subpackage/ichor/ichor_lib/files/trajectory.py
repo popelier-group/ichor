@@ -123,7 +123,7 @@ class Trajectory(ListOfAtoms, File):
         if isinstance(atoms, Atoms):
             self.append(atoms)
         else:
-            self.append(Atoms(atoms))
+            raise ValueError(f"Cannot add an instance of {type(atoms)} to self.")
 
     def rmsd(self, ref=None):
         if ref is None:
@@ -150,7 +150,7 @@ class Trajectory(ListOfAtoms, File):
             if (i % every) == 0:
 
                 path = Path(
-                    system_name + str(i + 1).zfill(4) + ".xyz"
+                    system_name + str(i+1) + ".xyz"
                 )
                 path = root / path
                 xyz_file = XYZ(path, geometry)
