@@ -11,7 +11,8 @@ class INTs(Directory, AtomicDict):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
-    :param parent: An `Atoms` instance that holds coordinate information for all the atoms in the system
+    :param parent: A GeometryFile instance that holds coordinate information for all the atoms in the system.
+        Things like XYZ and GJF hold geometry.
     """
 
     def __init__(
@@ -74,6 +75,7 @@ class INTs(Directory, AtomicDict):
         """Sorts keys of self by atom index e.g.
         {'H2': , 'H3': , 'O1': } -> {'O1': , 'H2': , 'H3': }"""
         copy = self.copy()
+        # self is a dictionary, we clear all entries in it and then sort
         self.clear()
         for k in natsorted(list(copy.keys()), key=ignore_alpha):
             self[k] = copy[k]
