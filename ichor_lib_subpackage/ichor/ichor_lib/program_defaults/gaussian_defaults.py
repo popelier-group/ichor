@@ -9,6 +9,7 @@ class GaussianJobType(Enum):
     # since no other job is specified, this defaults to just single point.
     Optimisation = "opt"
     Frequency = "freq"
+    # if no job type specified in Gaussian, Gaussian does single point calculation.
     SinglePoint = ""
 
     @classmethod
