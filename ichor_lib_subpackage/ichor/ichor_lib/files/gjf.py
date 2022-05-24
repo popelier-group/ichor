@@ -152,6 +152,9 @@ class GJF(QuantumChemistryProgramInput):
             if len(read_extra_details_string_list) > 0:
                 # join line into one string that can be written following coordinates
                 read_extra_details_str = "".join(read_extra_details_string_list)
+            else:
+                # otherwise just add 3 empty lines at bottom of file just in case to prevent read errors in Gaussian
+                read_extra_details_str = "".join(["\n" for n in range(3)])
 
             self.extra_details_str = self.extra_details_str or read_extra_details_str
 
