@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import List
+from pathlib import Path
 
 class GaussianJobType(Enum):
     """Enum that give variable names to some of the keywords used in a Gaussian job."""
@@ -13,6 +14,11 @@ class GaussianJobType(Enum):
     @classmethod
     def types(cls) -> List[str]:
         return [ty.value for ty in GaussianJobType]
+
+def extra_details_str_fnc(path: Path):
+
+    return f"\n{path.with_suffix('.wfn').name}\n"
+
 
 job_type = GaussianJobType.SinglePoint
 startup_options = []
