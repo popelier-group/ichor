@@ -82,19 +82,15 @@ class GJF(QuantumChemistryProgramInput):
     def _read_file(self):
         """Parse and red a .gjf file for information we need to submit a Gaussian job."""
 
-        # this is a dictionary containing information from the file
-        # we only use what is necessary from it (what the user did not specify when
-        # making an instance of the class)
-        tmp_dictionary = {}
-
         with open(self.path, "r") as f:
             # go to very first line
             line = next(f)
             # These are Link 0 Commands in Gaussian, eg. %chk
-            tmp_dictionary["startup_options"] = []
+            read_starup_options = []
             while line.startswith("%"):
-                tmp_dictionary["startup_options"] += [line.strip().replace("%", "")]
+                read_starup_options += [line.strip().replace("%", "")]
                 line = next(f)
+            self.startup_options = self.startup_options or read_starup_options
             # This is the following line where key words for Gaussian (level of theory, etc.) are defined
             # comes right after the Link 0 options
             if line.startswith("#"):
@@ -102,36 +98,36 @@ class GJF(QuantumChemistryProgramInput):
                 keywords = line.split()  # split keywords by whitespace
                 # remove this as it is not a keyword, just used to print out more stuff to output file
                 keywords.pop("p")
-                tmp_dictionary["job_type"] = []
-                tmp_dictionary["keywords"] = []
+                read_job_type = []
+                read_keywords = []
                 for keyword in keywords:
                     if (
                         "/" in keyword
                     ):  # if the user has used something like B3LYP/6-31G Then split them up
-                        tmp_dictionary["method"] = keyword.split("/")[0].upper()
-                        tmp_dictionary["basis_set"] = keyword.split("/")[1].lower()
+                        self.method = self.method or keyword.split("/")[0].upper()
+                        self.basis_set = self.basis_set or keyword.split("/")[1].lower()
                     # if the keyword is in the job enum GaussianJobType: opt, freq
                     elif keyword in GaussianJobType.types():
-                        tmp_dictionary["job_type"].append(GaussianJobType(keyword))
+                        read_job_type.append(GaussianJobType(keyword))
                     # if the given Gaussian keyword is not defined in GaussianJobType or is not level of theory/basis set
                     # then add to keywords which is None by Default
                     else:
-                        tmp_dictionary["keywords"].append(keyword)
+                        read_keywords.append(keyword)
             # line following keywords line is blank line
             line = next(f)
             # following blank line is a comment line that can contain anything
             line = next(f)
-            tmp_dictionary["comment_line"] = line.strip()
+            self.comment_line = self.comment_line or line.strip()
             # following this comment line is another blank line
             line = next(f)
             # next line contains charge and multiplicity
             line = next(f)
             if re.match(r"^\s*\d+\s+\d+\s*$", line):
-                tmp_dictionary["charge"] = int(line.split()[0])
-                tmp_dictionary["multiplicity"] = int(line.split()[1])
+                self.charge = self.charge or int(line.split()[0])
+                self.multiplicity = self.multiplicity or int(line.split()[1])
             # find all the types of atoms as well as their coordinates from .gjf file
             line = next(f)
-            tmp_dictionary["atoms"] = Atoms()
+            read_atoms = Atoms()
             while re.match(patterns.COORDINATE_LINE, line):
                 line_split = line.strip().split()
                 atom_type, x, y, z = (
@@ -141,22 +137,23 @@ class GJF(QuantumChemistryProgramInput):
                     float(line_split[3]),
                 )
                 # add the coordinate line as an Atom instance to atoms (which is an Atoms instance)
-                tmp_dictionary["atoms"].add(Atom(atom_type, x, y, z))
+                read_atoms.add(Atom(atom_type, x, y, z))
                 line = next(f)
 
-            # read in extra options at the bottom of file
+            self.atoms = self.atoms or read_atoms
+
+            # read in extra options at the bottom of file. These begin directly after coordinates (including blank line)
+            read_extra_details_string_list = []
             while line:
-                tmp_dictionary["extra_details_str"].append(line)
-                line = next(f, "") # the empty string which is returned instead of StopIteration evaluates as False
+                read_extra_details_string_list.append(line)
+                line = next(f, "") # the empty string which is returned instead of StopIteration, "" evaluates as False
             # if there are stuff from the bottom of the file, then we have extra details to write
             # at bottom of gjf file
-            if len(tmp_dictionary["extra_details_str"]) > 0:
+            if len(read_extra_details_string_list) > 0:
                 # join line into one string that can be written following coordinates
-                tmp_dictionary["extra_details_str"] = "".join(tmp_dictionary["extra_details_str"])
+                read_extra_details_str = "".join(read_extra_details_string_list)
 
-        for key, val in tmp_dictionary.items():
-            if getattr(self, key) is FileContents:
-                setattr(self, key, val)
+            self.extra_details_str = self.extra_details_str or read_extra_details_str
 
     @classproperty
     def filetype(cls) -> str:
@@ -208,8 +205,8 @@ class GJF(QuantumChemistryProgramInput):
         self.basis_set = self.basis_set or gaussian_defaults.basis_set
         self.charge = self.charge or gaussian_defaults.charge
         self.multiplicity = self.multiplicity or gaussian_defaults.multiplicity
-        # cannot use gaussian_defaults here because the wfn path depends on the gjf path
-        self.extra_details_str = self.extra_details_str or f"\n{self.path.with_suffix('.wfn').name}\n"
+        # use function here as the default string depends of self.path
+        self.extra_details_str = self.extra_details_str or gaussian_defaults.extra_details_str_fnc(self.path)
 
         # remove whitespace from keywords and lowercase to prevent having keywords twice.
         self.keywords = ["".join(k.lower().split()) for k in self.keywords]
