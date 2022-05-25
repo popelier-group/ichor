@@ -1,7 +1,5 @@
 import os
-import platform
 from enum import auto
-from pathlib import Path
 
 from ichor.ichor_lib.common.functools import cached_property
 from ichor.ichor_lib.common.io import mkdir, move
