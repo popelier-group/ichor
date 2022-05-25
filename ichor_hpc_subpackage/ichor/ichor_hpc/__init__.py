@@ -30,3 +30,12 @@
     code should be well documented but feel free to ask as many questions as you like
     we will be more than happy to help.
 """
+
+# initialize all things that we need for the hpc package here
+
+from ichor.ichor_hpc.batch_system.local import LocalBatchSystem
+from ichor.ichor_hpc.batch_system.sge import SunGridEngine
+
+BATCH_SYSTEM = LocalBatchSystem
+if SunGridEngine.is_present():
+    BATCH_SYSTEM = SunGridEngine
