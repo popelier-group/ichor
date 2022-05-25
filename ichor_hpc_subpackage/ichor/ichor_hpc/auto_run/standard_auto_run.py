@@ -30,7 +30,7 @@ from ichor.ichor_hpc.drop_compute.drop_compute import (DROP_COMPUTE_LOCATION, DR
                                 DROP_COMPUTE_NTRIES, DROP_COMPUTE_TMP_LOCATION)
 from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory, Trajectory
-from ichor.ichor_hpc.machine_setup.machine_setup import MACHINE, SubmitType
+from ichor.ichor_hpc.batch_system.machine_setup import MACHINE, SubmitType
 from ichor.main.queue import get_current_jobs
 from ichor.make_sets import make_sets_npoints
 from ichor.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram

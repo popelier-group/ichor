@@ -2,7 +2,7 @@ import sys
 from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
 from ichor.ichor_lib.common.types import Version
 from ichor.ichor_hpc.globals import GLOBALS
-from ichor.ichor_hpc.machine_setup.machine_setup import MACHINE
+from ichor.ichor_hpc.batch_system.machine_setup import MACHINE
 from ichor.ichor_hpc.arguments import Arguments
 from ichor.ichor_hpc.globals import GLOBALS
 from ichor.ichor_cli.menus import main_menu

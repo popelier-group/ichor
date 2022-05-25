@@ -1,4 +1,4 @@
-from ichor.ichor_hpc.machine_setup.machine_setup import Machine
+from ichor.ichor_hpc.batch_system.machine_setup import Machine
 from ichor.modules.modules import Modules
 
 AmberModules = Modules()
