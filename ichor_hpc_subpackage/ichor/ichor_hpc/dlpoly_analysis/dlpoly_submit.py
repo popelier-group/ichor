@@ -7,12 +7,18 @@ from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_hpc.submission_script import (SCRIPT_NAMES, DataLock, DlpolyCommand,
                                      ICHORCommand, SubmissionScript)
 from ichor.ichor_hpc.submission_script.common import submit_gjf_files
+from ichor.ichor_lib.atoms import Atoms
+from ichor.ichor_lib.analysis.geometry import get_internal_feature_indices
+from ichor.ichor_lib.constants import dlpoly_weights
+from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
 
-def write_control(path: Path, temperature: float = 0.0):
+def write_control(path: Path, system_name: str, hoover_number: float = 0.04, temperature: float = 0.0,
+        timestep: float = 0.001, n_steps: int = 500):
     with open(path / "CONTROL", "w+") as f:
-        f.write(f"Title: {GLOBALS.SYSTEM_NAME}\n")
+        f.write(f"Title: {system_name}\n")
         f.write("\n")
-        f.write(f"ensemble nvt hoover {GLOBALS.DLPOLY_HOOVER}\n")
+        f.write(f"ensemble nvt hoover {hoover_number}\n")
         f.write("\n")
         if int(temperature) == 0:
             f.write("temperature 0\n")
@@ -24,8 +30,8 @@ def write_control(path: Path, temperature: float = 0.0):
             f.write(f"temperature {temperature}\n")
             f.write("\n")
         f.write("\n")
-        f.write(f"timestep {GLOBALS.DLPOLY_TIMESTEP}\n")
-        f.write(f"steps {GLOBALS.DLPOLY_NUMBER_OF_STEPS}\n")
+        f.write(f"timestep {timestep}\n")
+        f.write(f"steps {n_steps}\n")
         f.write("scale 100\n")
         f.write("\n")
         f.write("cutoff  8.0\n")
@@ -44,30 +50,30 @@ def write_control(path: Path, temperature: float = 0.0):
         f.write("finish\n")
 
 
-def write_config(path: Path, atoms: Atoms):
+def write_config(path: Path, atoms: Atoms, cell_size: float, system_name: str):
     atoms.centre()
 
     with open(path / "CONFIG", "w+") as f:
         f.write("Frame :         1\n")
         f.write("\t0\t1\n")  # PBC Solution to temporary problem
-        f.write(f"{GLOBALS.DLPOLY_CELL_SIZE} 0.0 0.0\n")
-        f.write(f"0.0 {GLOBALS.DLPOLY_CELL_SIZE} 0.0\n")
-        f.write(f"0.0 0.0 {GLOBALS.DLPOLY_CELL_SIZE}\n")
+        f.write(f"{cell_size} 0.0 0.0\n")
+        f.write(f"0.0 {cell_size} 0.0\n")
+        f.write(f"0.0 0.0 {cell_size}\n")
         for atom in atoms:
             f.write(
-                f"{atom.type}  {atom.num}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.num}\n"
+                f"{atom.type}  {atom.num}  {system_name}_{atom.type}{atom.num}\n"
             )
             f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
 
 
-def write_field(path: Path, atoms: Atoms):
+def write_field(path: Path, atoms: Atoms, system_name: str):
     bonds, angles, dihedrals = get_internal_feature_indices(atoms)
 
     with open(path / "FIELD", "w") as f:
         f.write("DL_FIELD v3.00\n")
         f.write("Units kJ/mol\n")
         f.write("Molecular types 1\n")
-        f.write(f"{GLOBALS.SYSTEM_NAME}\n")
+        f.write(f"{system_name}\n")
         f.write("nummols 1\n")
         f.write(f"atoms {len(atoms)}\n")
         for atom in atoms:
@@ -147,11 +153,13 @@ def run_dlpoly_geometry_optimisations(
     dlpoly_input: Path, model_location: Path, hold=Optional[JobID]
 ) -> JobID:
     return run_dlpoly(dlpoly_input, model_location, temperature=0.0)
-  
 
 def write_final_geometry_to_gjf(
     dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
 ) -> List[Path]:
+
+    from ichor.ichor_lib.files import DlpolyHistory, GJF
+
     gjfs = []
     for d in dlpoly_directory.iterdir():
         if d.is_dir() and (d / "HISTORY").exists():
