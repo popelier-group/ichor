@@ -3,7 +3,7 @@ from pathlib import Path
 from ichor.auto_run.per.per import check_auto_run_per_counter
 from ichor.auto_run.per.per_atom import PerAtomDaemon, auto_run_per_atom
 from ichor.auto_run.per.per_property import auto_run_per_property
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_hpc.globals import GLOBALS
 from ichor.main.make_models import MODEL_TYPES
 

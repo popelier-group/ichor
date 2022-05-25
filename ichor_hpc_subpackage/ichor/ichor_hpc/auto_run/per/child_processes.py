@@ -7,7 +7,7 @@ from ichor.auto_run.stop import stop
 from ichor.ichor_lib.common.io import mkdir, pushd
 from ichor.ichor_lib.common.os import kill_pid, pid_exists
 from ichor.daemon.daemon import Daemon
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.main.queue import delete_jobs
 
 
@@ -54,7 +54,7 @@ def delete_child_process_jobs(
 
 class ReRunDaemon(Daemon):
     def __init__(self):
-        from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+        from ichor.ichor_hpc import FILE_STRUCTURE
         from ichor.ichor_hpc.globals import GLOBALS
 
         mkdir(FILE_STRUCTURE["rerun_daemon"])
@@ -102,7 +102,7 @@ def stop_all_child_processes(
 def print_child_process_status(cpdir: Path):
     from ichor.auto_run.counter import read_counter
     from ichor.ichor_lib.common.io import pushd
-    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc import FILE_STRUCTURE
 
     with pushd(cpdir, update_cwd=True):
         path_status = f"{cpdir} Status"

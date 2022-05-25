@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.git import Repo
 from ichor.git.util import get_git_credentials
 

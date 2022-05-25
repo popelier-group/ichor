@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ichor.ichor_lib.common.os import current_user_groups
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 
 class DropCompute:
     """ Drop Compute is only available on CSF3 currently. If this changes, this class

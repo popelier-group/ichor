@@ -6,7 +6,7 @@ from ichor.ichor_cli.menus.machine_learning_menus.make_models import make_models
 from ichor.ichor_cli.menus.general_menus.queue_menu import queue_menu
 from ichor.ichor_cli.menus.menu import Menu
 from ichor.ichor_hpc.auto_run.standard_auto_run import auto_run_from_menu
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_hpc.main.active_learning import active_learning
 from ichor.ichor_cli.menus.machine_learning_menus.per_menu import auto_run_per_menu
 from ichor.ichor_cli.menus.general_menus.points_directory_menu import points_directory_menu, custom_points_directory_menu

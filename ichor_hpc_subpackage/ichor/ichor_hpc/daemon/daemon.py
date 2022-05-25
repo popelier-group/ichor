@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ichor.ichor_lib.common.io import mkdir, remove
 from ichor.ichor_lib.common.os import kill_pid, pid_exists
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 
 
 class DaemonRunning(Exception):

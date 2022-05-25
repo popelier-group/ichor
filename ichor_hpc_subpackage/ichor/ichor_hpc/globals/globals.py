@@ -110,7 +110,7 @@ from ichor.ichor_lib import constants
 from ichor.ichor_lib.atoms.atoms import Atoms
 from ichor.ichor_lib.common.types import Version
 from collections import defaultdict
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_hpc.globals import checkers, formatters, parsers
 from ichor.ichor_hpc.globals.config_provider import ConfigProvider
 from ichor.ichor_hpc.globals.os import OS

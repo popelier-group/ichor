@@ -100,7 +100,7 @@ class MEPE(ActiveLearningMethod):
         For the first iteration there are no previously added points therefore alpha defaults
         to 0.5, for each subsequent iteration, equation 24 of the above cited paper is used.
         """
-        from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+        from ichor.ichor_hpc import FILE_STRUCTURE
 
         cv_errors_file = FILE_STRUCTURE["cv_errors"]
         if not cv_errors_file.exists():

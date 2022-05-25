@@ -7,7 +7,7 @@ from ichor.ichor_lib import constants
 from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import cp, mkdir
 from ichor.ichor_lib.common.str import get_digits
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory
 from ichor.ichor_hpc.globals import GLOBALS
 from ichor.log import logger
@@ -326,7 +326,7 @@ def write_training_set(atom, training_data) -> Path:
     :param training_data: A list of tuples containing the training data. Each tuple contains the (input, output) pair. The inputs are stored as a numpy array,
         while the outputs are stored as a dictionary, containing key:value paris of property_name (eg. iqa, q00) : value
     """
-    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc import FILE_STRUCTURE
     from ichor.ichor_hpc.globals import GLOBALS
 
     # make a ferebus directory for each atom

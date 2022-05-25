@@ -113,7 +113,7 @@ def scrub_aimall(wfn_file: str):
     from pathlib import Path
 
     from ichor.ichor_lib.common.io import last_line, mkdir, move
-    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc import FILE_STRUCTURE
     from ichor.ichor_lib.files.aim import AIM
     from ichor.ichor_lib.files.point_directory import PointDirectory
     from ichor.ichor_hpc.globals import GLOBALS

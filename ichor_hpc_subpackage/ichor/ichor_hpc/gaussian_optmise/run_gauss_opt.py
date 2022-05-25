@@ -6,7 +6,7 @@ from ichor.ichor_lib.analysis.get_path import get_file
 from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import mkdir
 from ichor.ichor_lib.common.os import input_with_prefill
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, WFN, XYZ, PointsDirectory
 from ichor.ichor_hpc.globals import GLOBALS
 from ichor.main.gaussian import submit_gjfs

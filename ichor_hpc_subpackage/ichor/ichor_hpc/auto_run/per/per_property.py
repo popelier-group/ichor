@@ -4,13 +4,13 @@ from ichor.auto_run.per.per import (auto_run_per_value,
                                     check_auto_run_per_counter)
 from ichor.ichor_hpc.batch_system import JobID
 from ichor.daemon.daemon import Daemon
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.main.make_models import MODEL_TYPES
 
 
 class PerPropertyDaemon(Daemon):
     def __init__(self):
-        from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+        from ichor.ichor_hpc import FILE_STRUCTURE
         from ichor.ichor_hpc.globals import GLOBALS
 
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["properties_pid"]

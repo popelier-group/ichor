@@ -7,7 +7,7 @@ from ichor.ichor_lib.common.functools import cached_property
 from ichor.ichor_lib.common.io import mkdir, move
 from ichor.ichor_lib.common.types import Enum
 from ichor.ichor_hpc.uid import get_uid
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
 
 

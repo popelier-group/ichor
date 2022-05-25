@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ichor.ichor_lib.common.types import MutableValue
-from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.submission_script.aimall_command import AIMAllCommand
 from ichor.submission_script.amber_command import AmberCommand
 from ichor.submission_script.check_manager import (CheckManager, default_check,
@@ -24,7 +24,7 @@ from ichor.submission_script.tyche_command import TycheCommand
 
 
 def prepend_script_directory(paths):
-    from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+    from ichor.ichor_hpc import FILE_STRUCTURE
 
     for key, val in paths.items():
         if isinstance(val, dict):
