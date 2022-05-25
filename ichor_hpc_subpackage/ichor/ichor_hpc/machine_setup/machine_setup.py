@@ -90,6 +90,18 @@ machine_name: str = platform.node()
 # will be Machine.Local if machine is not in list of names
 MACHINE = get_machine_from_name(machine_name)
 
+import multiprocessing as mp
+
+from ichor.ichor_hpc.batch_system import ParallelEnvironments
+from ichor.ichor_hpc.machine_setup.machine_setup import Machine
+
+PARALLEL_ENVIRONMENT = ParallelEnvironments()
+
+PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
+PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
+PARALLEL_ENVIRONMENT[Machine.local]["mp"] = 2, mp.cpu_count()
+
+
 # probably don't need that file because the platform name should match
 # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
 # if MACHINE is not Machine.local and (
