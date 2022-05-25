@@ -38,7 +38,7 @@ from ichor.ichor_hpc.batch_system.sge import SunGridEngine
 import platform
 from ichor.ichor_hpc.batch_system.machine_setup import get_machine_from_name
 from ichor.ichor_hpc.batch_system import ParallelEnvironments
-from ichor.ichor_hpc.batch_system.machine_setup import Machine
+from ichor.ichor_hpc import MACHINE
 from ichor.ichor_hpc.file_structure import FileStructure
 
 FILE_STRUCTURE = FileStructure()

@@ -1,4 +1,4 @@
-from ichor.ichor_hpc.batch_system.machine_setup import Machine
+from ichor.ichor_hpc import MACHINE
 from ichor.modules.modules import Modules
 
 GaussianModules = Modules()

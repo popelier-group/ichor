@@ -9,7 +9,7 @@ from ichor.ichor_lib.common.os import input_with_prefill
 from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, XYZ, Trajectory
 from ichor.ichor_hpc.globals import GLOBALS
-from ichor.ichor_hpc.batch_system.machine_setup import MACHINE, Machine
+from ichor.ichor_hpc import MACHINE, Machine
 from ichor.ichor_cli.menus.menu import Menu
 from ichor.submission_script import SCRIPT_NAMES, CP2KCommand, SubmissionScript
 

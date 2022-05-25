@@ -24,7 +24,7 @@ MODULES_HOME = Path("/usr/share/Modules")
 def initialise_modules():
     global MODULES_HOME
 
-    from ichor.ichor_hpc.batch_system.machine_setup import MACHINE, Machine
+    from ichor.ichor_hpc import MACHINE, Machine
 
     if MACHINE is Machine.csf3:
         MODULES_HOME = Path("/opt/clusterware/opt/modules")
@@ -43,7 +43,7 @@ def initialise_modules():
 
 
 def module(*args):
-    from ichor.ichor_hpc.batch_system.machine_setup import MACHINE, Machine
+    from ichor.ichor_hpc import MACHINE, Machine
 
     if MACHINE is Machine.local:
         return
@@ -64,7 +64,7 @@ def load_module(module_to_load: Union[str, List[str], Modules]):
     elif isinstance(module_to_load, list):
         module("load", *module_to_load)
     elif isinstance(module_to_load, Modules):
-        from ichor.ichor_hpc.batch_system.machine_setup import MACHINE
+        from ichor.ichor_hpc import MACHINE
 
         load_module(module_to_load[MACHINE])
     else:
