@@ -44,7 +44,7 @@ class AmberCommand(CommandLine):
     @classproperty
     def ncores(self) -> int:
         """Returns the number of cores that Amber should use for the job."""
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         return GLOBALS.AMBER_NCORES
 
@@ -56,7 +56,7 @@ class AmberCommand(CommandLine):
 
         The length of `variables` is defined by the length of `self.data`
         """
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         mol2_file = self.mol2_file.absolute()
         cmd = ""

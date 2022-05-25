@@ -56,7 +56,7 @@ def make_sets(
     validation_set_method: Optional[List[str]] = None,
 ) -> None:
     from ichor.ichor_hpc import FILE_STRUCTURE
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
 
     if points_input.suffix == ".xyz":
         points = Trajectory(points_input)
@@ -119,7 +119,7 @@ def make_set(
 
 
 def write_set_to_dir(path: Path, points: ListOfAtoms) -> None:
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
 
     mkdir(path)
     for i, point in enumerate(points):

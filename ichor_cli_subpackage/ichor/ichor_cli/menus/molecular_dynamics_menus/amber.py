@@ -11,7 +11,7 @@ from ichor.ichor_lib.common.io import mkdir
 from ichor.ichor_lib.common.os import input_with_prefill
 from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_lib.files import GJF, XYZ, Mol2, Trajectory
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.ichor_cli.menus.menu import Menu
 from ichor.submission_script import (SCRIPT_NAMES, AmberCommand,
                                      SubmissionScript)

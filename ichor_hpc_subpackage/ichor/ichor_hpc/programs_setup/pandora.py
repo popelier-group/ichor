@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ichor.ichor_lib.files import OptionalFile
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.ichor_hpc import MACHINE, Machine
 
 

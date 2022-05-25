@@ -116,7 +116,7 @@ def scrub_aimall(wfn_file: str):
     from ichor.ichor_hpc import FILE_STRUCTURE
     from ichor.ichor_lib.files.aim import AIM
     from ichor.ichor_lib.files.point_directory import PointDirectory
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
     from ichor.log import logger
 
     # TODO: check for license and end of aim file, then read aim file with AIM class. Then check if aim file has correct atom info for int files.

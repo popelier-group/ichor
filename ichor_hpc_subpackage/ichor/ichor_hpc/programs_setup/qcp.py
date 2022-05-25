@@ -4,7 +4,7 @@ from ichor.ichor_lib.common.str import in_sensitive
 from ichor.ichor_lib.common.types import Enum
 from ichor.ichor_lib.constants import GAUSSIAN_METHODS
 from ichor.ichor_lib.files import GJF, PandoraInput, QuantumChemistryProgramInput
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 
 
 class MethodNotFound(Exception):

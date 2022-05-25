@@ -38,8 +38,10 @@ from ichor.ichor_hpc.batch_system.sge import SunGridEngine
 import platform
 from ichor.ichor_hpc.batch_system.machine_setup import get_machine_from_name
 from ichor.ichor_hpc.batch_system import ParallelEnvironments
-from ichor.ichor_hpc import MACHINE
+from ichor.ichor_hpc.batch_system import Machine
 from ichor.ichor_hpc.file_structure import FileStructure
+from ichor.ichor_hpc.log import setup_logger
+from ichor.ichor_hpc.globals import Globals
 
 FILE_STRUCTURE = FileStructure()
 
@@ -54,6 +56,12 @@ MACHINE = get_machine_from_name(machine_name)
 PARALLEL_ENVIRONMENT = ParallelEnvironments()
 PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
 PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
+
+GLOBALS = Globals()
+
+logger = setup_logger("ICHOR", "ichor.log")
+timing_logger = setup_logger("TIMING", "ichor.timing")
+
 
 
 # probably don't need that file because the platform name should match

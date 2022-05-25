@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.ichor_lib.common.functools import classproperty
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.modules import CP2KModules, Modules
 from ichor.submission_script.command_line import CommandLine
 from ichor.submission_script.ichor_command import ICHORCommand
@@ -43,7 +43,7 @@ class CP2KCommand(CommandLine):
     @classproperty
     def ncores(self) -> int:
         """Returns the number of cores that CP2K should use for the job."""
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         return GLOBALS.CP2K_NCORES
 

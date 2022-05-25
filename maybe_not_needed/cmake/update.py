@@ -8,7 +8,7 @@ import requests
 
 from ichor.ichor_lib.common.io import recursive_move, remove
 from ichor.ichor_lib.common.sys import access_internet
-from ichor.ichor_hpc.globals import GLOBALS, OS
+from ichor.ichor_hpc import GLOBALS, OS
 
 
 def update_cmake(cmake_version):

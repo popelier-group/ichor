@@ -5,7 +5,7 @@ from ichor.ichor_hpc.active_learning.sigmu import SigMu
 from ichor.ichor_hpc.active_learning.uncertainty_query import UncertaintyQuery
 # import active learning methods to be accessed in locals()
 from ichor.ichor_hpc.active_learning.mepe import MEPE
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 
 # get a dictionary of key:value pairs of the active learning method name : active learning method class
 active_learning_methods = {

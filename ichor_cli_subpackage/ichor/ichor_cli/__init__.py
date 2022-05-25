@@ -1,10 +1,10 @@
 import sys
 from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
 from ichor.ichor_lib.common.types import Version
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.ichor_hpc import MACHINE
 from ichor.ichor_hpc.arguments import Arguments
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.ichor_cli.menus import main_menu
 
 __version__ = Version("3.0.1")

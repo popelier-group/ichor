@@ -3,15 +3,12 @@ for points)."""
 
 import logging
 
-from ichor.log.concurrent_log_handler import ConcurrentRotatingFileHandler
-
-LOG_LEVEL = logging.DEBUG
-
+from ichor.ichor_hpc.log.concurrent_log_handler import ConcurrentRotatingFileHandler
 
 def setup_logger(
     name,
     log_file,
-    level=LOG_LEVEL,
+    level=logging.DEBUG,
     formatter=logging.Formatter(
         "%(asctime)s - %(levelname)s - %(message)s", "%d-%m-%Y %H:%M:%S"
     ),
@@ -28,10 +25,5 @@ def setup_logger(
 
     return logger
 
-
-logger = setup_logger("ICHOR", "ichor.log")
-timing_logger = setup_logger("TIMING", "ichor.timing")
-
-
-def log_time(*args):
-    timing_logger.info(" | ".join(map(str, args)))
+def log_time(timing_log, *args):
+    timing_log.info(" | ".join(map(str, args)))

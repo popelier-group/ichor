@@ -11,7 +11,7 @@ from ichor.main.make_models import MODEL_TYPES
 class PerPropertyDaemon(Daemon):
     def __init__(self):
         from ichor.ichor_hpc import FILE_STRUCTURE
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["properties_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["properties_stdout"]

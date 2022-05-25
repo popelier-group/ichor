@@ -7,5 +7,3 @@ from pathlib import Path
 from ichor.ichor_lib.common.os import input_with_prefill
 from ichor.ichor_hpc.globals.globals import Globals
 from ichor.ichor_hpc.globals.os import OS
-
-GLOBALS = Globals()

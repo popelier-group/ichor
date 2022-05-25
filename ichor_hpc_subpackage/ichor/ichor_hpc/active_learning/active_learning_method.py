@@ -6,7 +6,7 @@ import numpy as np
 from ichor.ichor_lib.atoms import ListOfAtoms
 from ichor.ichor_lib.common.functools import classproperty
 from ichor.ichor_lib.common.np import batched_array
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.ichor_lib.models import Models
 
 

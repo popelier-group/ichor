@@ -36,7 +36,7 @@ For example, if we want to change the Gaussian core count that is used for the j
 
 ```python
 from ichor.main.gaussian import submit_points_directory_to_gaussian
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.ichor_lib.files.trajectory import Trajectory
 
 GLOBALS.GAUSSIAN_CORE_COUNT = 4

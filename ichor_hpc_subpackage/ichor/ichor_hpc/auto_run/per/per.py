@@ -49,7 +49,7 @@ def auto_run_per_value(
 
     from ichor.ichor_hpc.arguments import Arguments
     from ichor.ichor_hpc import FILE_STRUCTURE
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
 
     check_auto_run_per_counter(directory, values)
 

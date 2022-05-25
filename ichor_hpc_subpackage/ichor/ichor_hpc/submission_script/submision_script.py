@@ -59,7 +59,7 @@ class SubmissionScript:
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
         the system on which the job is ran, as well as on the number of cores that the job needs."""
         from ichor.ichor_hpc import FILE_STRUCTURE
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         mkdir(FILE_STRUCTURE["outputs"])
         mkdir(FILE_STRUCTURE["errors"])
@@ -250,7 +250,7 @@ class SubmissionScript:
         """Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
         are written at the top of the file. The commands to run (such as Gaussian, AIMALL, etc.) are written below the options."""
         from ichor.ichor_hpc import FILE_STRUCTURE
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         mkdir(self.path.parent)
 

@@ -27,7 +27,7 @@ def get_collate_model_log(
 ) -> Dict[str, Dict[str, Tuple[Path, int]]]:
     from ichor.ichor_lib.common.types import DictList
     from ichor.ichor_hpc import FILE_STRUCTURE
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
     from ichor.ichor_lib.models import Models
 
     if directory is None:
@@ -54,7 +54,7 @@ def get_collate_model_log(
 
 def link_collated_models(dir, collated_models):
     from ichor.ichor_lib.common.io import ln
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
 
     mkdir(dir)
     for i, models in enumerate(collated_models):
@@ -109,7 +109,7 @@ def collate_model_log_top_down(directory: Optional[Path] = None):
 
 def collate_model_log(directory: Optional[Path] = None) -> None:
     from ichor.ichor_hpc import FILE_STRUCTURE
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
     from ichor.ichor_lib.models import Models
 
     if directory is None:
@@ -137,7 +137,7 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
 
 def collate_models(directory: Optional[Path] = None) -> None:
     from ichor.ichor_hpc import FILE_STRUCTURE
-    from ichor.ichor_hpc.globals import GLOBALS
+    from ichor.ichor_hpc import GLOBALS
 
     if directory is None:
         directory = GLOBALS.CWD

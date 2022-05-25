@@ -91,7 +91,7 @@ from ichor.ichor_hpc.batch_system import JobID
 from ichor.ichor_lib.common.io import pushd
 from ichor.daemon.daemon import Daemon
 from ichor.ichor_hpc import FILE_STRUCTURE
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from ichor.main import make_models
 from ichor.ichor_cli.menus.menu import Menu
 from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
@@ -105,7 +105,7 @@ _selected_atoms_to_run_on: Optional[List[Path]] = None
 class PerAtomDaemon(Daemon):
     def __init__(self):
         from ichor.ichor_hpc import FILE_STRUCTURE
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["atoms_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["atoms_stdout"]

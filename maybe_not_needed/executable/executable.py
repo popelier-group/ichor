@@ -34,7 +34,7 @@ class Executable(ABC):
 
     @property
     def authenticated_url(self):
-        from ichor.ichor_hpc.globals import GLOBALS
+        from ichor.ichor_hpc import GLOBALS
 
         if GLOBALS.GIT_TOKEN:
             return self.authenticated_token_url(GLOBALS.GIT_TOKEN)

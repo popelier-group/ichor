@@ -1,6 +1,6 @@
 from ichor.ichor_hpc import FILE_STRUCTURE
 from ichor.ichor_lib.files import PointsDirectory
-from ichor.ichor_hpc.globals import GLOBALS
+from ichor.ichor_hpc import GLOBALS
 from pathlib import Path
 from ichor.ichor_lib.common.io import mkdir
 
