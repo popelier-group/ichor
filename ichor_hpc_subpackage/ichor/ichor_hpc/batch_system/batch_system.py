@@ -19,6 +19,7 @@ class JobID:
     """Class used to keep track of jobs submitted to compute nodes.
 
     :param script: A path to a script file such as GAUSSIAN.sh
+        that will be submitted to compute node.
     :param id: The job id given to the job when the job was submitted to a compute node.
     :instance: the unique identified (UUID) that is used for the job's datafile (containing the names of all the files needed for the job).
     """
@@ -32,9 +33,6 @@ class JobID:
     ):
         self.script = str(script)
         self.id = str(id)
-        from ichor.ichor_hpc.globals import GLOBALS
-
-        self.instance = instance or str(GLOBALS.UID)
 
     def write(self):
         from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
