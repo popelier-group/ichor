@@ -8,6 +8,7 @@ from ichor.ichor_lib.common.io import mkdir, move
 from ichor.ichor_lib.common.types import Enum
 from ichor.ichor_hpc.uid import get_uid
 from ichor.ichor_hpc.file_structure.file_structure import FILE_STRUCTURE
+from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
 
 
 class MachineNotFound(Exception):
@@ -56,8 +57,23 @@ class Machine(Enum):
 
         return submit_type
 
+def get_machine_from_name(platform_name: str):
 
-def _try_get_machine_from_file():
+    m = Machine.local
+    if "csf3." in machine_name:
+        m = Machine.csf3
+    elif "ffluxlab" in machine_name:
+        m = Machine.ffluxlab
+
+    if BATCH_SYSTEM.Host in os.environ.keys():
+        host = os.environ[BATCH_SYSTEM.Host]
+        if host == "ffluxlab":
+            m = Machine.ffluxlab
+
+    return m
+
+def get_machine_from_file():
+
     if FILE_STRUCTURE["machine"].exists():
         with open(FILE_STRUCTURE["machine"], "r") as f:
             _machine = f.read().strip()
@@ -70,40 +86,23 @@ def _try_get_machine_from_file():
                     return Machine.from_name(_machine)
 
 
-machine_name = platform.node()
+machine_name: str = platform.node()
+# will be Machine.Local if machine is not in list of names
+MACHINE = get_machine_from_name(machine_name)
 
-MACHINE = Machine.local
-if "csf3." in machine_name:
-    MACHINE = Machine.csf3
-elif "ffluxlab" in machine_name:
-    MACHINE = Machine.ffluxlab
-
-# if machine hasn't been identified, check whether the machine has been saved to FILE_STRUCTURE['machine']
-if MACHINE is Machine.local:
-    _machine = _try_get_machine_from_file()
-    if _machine is not None:
-        MACHINE = _machine
-
-if MACHINE is Machine.local:
-    from ichor.ichor_hpc.batch_system import BATCH_SYSTEM
-
-    if BATCH_SYSTEM.Host in os.environ.keys():
-        host = os.environ[BATCH_SYSTEM.Host]
-        if host == "ffluxlab":
-            MACHINE = Machine.ffluxlab
-
+# probably don't need that file because the platform name should match
 # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
-if MACHINE is not Machine.local and (
-    not FILE_STRUCTURE["machine"].exists()
-    or (
-        FILE_STRUCTURE["machine"].exists()
-        and not _try_get_machine_from_file() is None
-    )
-):
-    mkdir(FILE_STRUCTURE["machine"].parent)
-    machine_filepart = Path(
-        str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"
-    )
-    with open(machine_filepart, "w") as f:
-        f.write(f"{MACHINE.name}")
-    move(machine_filepart, FILE_STRUCTURE["machine"])
+# if MACHINE is not Machine.local and (
+#     not FILE_STRUCTURE["machine"].exists()
+#     or (
+#         FILE_STRUCTURE["machine"].exists()
+#         and not get_machine_from_file() is None
+#     )
+# ):
+#     mkdir(FILE_STRUCTURE["machine"].parent)
+#     machine_filepart = Path(
+#         str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"
+#     )
+#     with open(machine_filepart, "w") as f:
+#         f.write(f"{MACHINE.name}")
+#     move(machine_filepart, FILE_STRUCTURE["machine"])
