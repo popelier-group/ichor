@@ -11,7 +11,8 @@ class LocalBatchSystem(SunGridEngine):
 
     @staticmethod
     def is_present() -> bool:
-        from ichor.ichor_hpc import MACHINE, Machine
+        from ichor.ichor_hpc import MACHINE
+        from ichor.ichor_hpc.batch_system import Machine
 
         return MACHINE is Machine.Local
 
