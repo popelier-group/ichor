@@ -35,7 +35,37 @@
 
 from ichor.ichor_hpc.batch_system.local import LocalBatchSystem
 from ichor.ichor_hpc.batch_system.sge import SunGridEngine
+import platform
+from ichor.ichor_hpc.batch_system.machine_setup import get_machine_from_name
+from ichor.ichor_hpc.batch_system import ParallelEnvironments
+from ichor.ichor_hpc.batch_system.machine_setup import Machine
 
 BATCH_SYSTEM = LocalBatchSystem
 if SunGridEngine.is_present():
     BATCH_SYSTEM = SunGridEngine
+
+machine_name: str = platform.node()
+# will be Machine.Local if machine is not in list of names
+MACHINE = get_machine_from_name(machine_name)
+
+PARALLEL_ENVIRONMENT = ParallelEnvironments()
+PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
+PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
+
+
+# probably don't need that file because the platform name should match
+# if machine has been successfully identified, write to FILE_STRUCTURE['machine']
+# if MACHINE is not Machine.local and (
+#     not FILE_STRUCTURE["machine"].exists()
+#     or (
+#         FILE_STRUCTURE["machine"].exists()
+#         and not get_machine_from_file() is None
+#     )
+# ):
+#     mkdir(FILE_STRUCTURE["machine"].parent)
+#     machine_filepart = Path(
+#         str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"
+#     )
+#     with open(machine_filepart, "w") as f:
+#         f.write(f"{MACHINE.name}")
+#     move(machine_filepart, FILE_STRUCTURE["machine"])
