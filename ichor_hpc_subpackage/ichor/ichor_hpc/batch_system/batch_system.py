@@ -24,15 +24,12 @@ class JobID:
     :instance: the unique identified (UUID) that is used for the job's datafile (containing the names of all the files needed for the job).
     """
 
-    script: str
-    id: str
-    instance: str
-
     def __init__(
-        self, script: Union[str, Path], id: str, instance: Optional[str] = None
+        self, script: Union[str, Path], id: str, instance: str
     ):
         self.script = str(script)
-        self.id = str(id)
+        self.id = id
+        self.instance = instance
 
     def write(self):
         from ichor.ichor_hpc import FILE_STRUCTURE
