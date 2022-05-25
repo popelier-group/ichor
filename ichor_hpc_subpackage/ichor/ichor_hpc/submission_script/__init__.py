@@ -2,25 +2,25 @@ from pathlib import Path
 
 from ichor.ichor_lib.common.types import MutableValue
 from ichor.ichor_hpc import FILE_STRUCTURE
-from ichor.submission_script.aimall_command import AIMAllCommand
-from ichor.submission_script.amber_command import AmberCommand
-from ichor.submission_script.check_manager import (CheckManager, default_check,
+from ichor.ichor_hpc.submission_script.aimall_command import AIMAllCommand
+from ichor.ichor_hpc.submission_script.amber_command import AmberCommand
+from ichor.ichor_hpc.submission_script.check_manager import (CheckManager, default_check,
                                                    print_completed)
-from ichor.submission_script.cp2k_command import CP2KCommand
-from ichor.submission_script.data_lock import DataLock
-from ichor.submission_script.dlpoly_command import DlpolyCommand
-from ichor.submission_script.ferebus_command import FerebusCommand
-from ichor.submission_script.gaussian_command import GaussianCommand
-from ichor.submission_script.ichor_command import ICHORCommand
-from ichor.submission_script.morfi_command import MorfiCommand
-from ichor.submission_script.pandora_command import (PandoraCommand,
+from ichor.ichor_hpc.submission_script.cp2k_command import CP2KCommand
+from ichor.ichor_hpc.submission_script.data_lock import DataLock
+from ichor.ichor_hpc.submission_script.dlpoly_command import DlpolyCommand
+from ichor.ichor_hpc.submission_script.ferebus_command import FerebusCommand
+from ichor.ichor_hpc.submission_script.gaussian_command import GaussianCommand
+from ichor.ichor_hpc.submission_script.ichor_command import ICHORCommand
+from ichor.ichor_hpc.submission_script.morfi_command import MorfiCommand
+from ichor.ichor_hpc.submission_script.pandora_command import (PandoraCommand,
                                                      PandoraMorfiCommand,
                                                      PandoraPySCFCommand)
-from ichor.submission_script.python_command import PythonCommand
-from ichor.submission_script.script_timing_manager import TimingManager
-from ichor.submission_script.submision_script import (SUBMIT_ON_COMPUTE,
+from ichor.ichor_hpc.submission_script.python_command import PythonCommand
+from ichor.ichor_hpc.submission_script.script_timing_manager import TimingManager
+from ichor.ichor_hpc.submission_script.submision_script import (SUBMIT_ON_COMPUTE,
                                                       SubmissionScript)
-from ichor.submission_script.tyche_command import TycheCommand
+from ichor.ichor_hpc.submission_script.tyche_command import TycheCommand
 
 
 def prepend_script_directory(paths):
