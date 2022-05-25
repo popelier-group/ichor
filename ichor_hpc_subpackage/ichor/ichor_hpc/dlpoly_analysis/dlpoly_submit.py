@@ -10,7 +10,7 @@ from ichor.ichor_hpc.submission_script.common import submit_gjf_files
 from ichor.ichor_lib.atoms import Atoms
 from ichor.ichor_lib.analysis.geometry import get_internal_feature_indices
 from ichor.ichor_lib.constants import dlpoly_weights
-from ichor.ichor_lib.common.io import mkdir
+from ichor.ichor_lib.common.io import mkdir, ln
 from ichor.ichor_lib.analysis.get_atoms import get_atoms_from_path
 
 def write_control(path: Path, system_name: str, hoover_number: float = 0.04, temperature: float = 0.0,
