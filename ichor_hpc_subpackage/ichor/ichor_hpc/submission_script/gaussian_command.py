@@ -43,7 +43,7 @@ class GaussianCommand(CommandLine):
     @classproperty
     def command(self) -> str:
         """Returns the command used to run Gaussian on different machines."""
-        from ichor.ichor_hpc.machine_setup.machine import MACHINE, Machine
+        from ichor.ichor_hpc.machine_setup.machine_setup import MACHINE, Machine
 
         if MACHINE is Machine.csf3:
             return "$g09root/g09/g09"

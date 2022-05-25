@@ -1,4 +1,4 @@
-from ichor.ichor_hpc.machine_setup.machine import Machine
+from ichor.ichor_hpc.machine_setup.machine_setup import Machine
 from ichor.modules.modules import Modules
 
 InternetModules = Modules()
