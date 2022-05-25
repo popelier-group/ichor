@@ -39,6 +39,9 @@ import platform
 from ichor.ichor_hpc.batch_system.machine_setup import get_machine_from_name
 from ichor.ichor_hpc.batch_system import ParallelEnvironments
 from ichor.ichor_hpc.batch_system.machine_setup import Machine
+from ichor.ichor_hpc.file_structure import FileStructure
+
+FILE_STRUCTURE = FileStructure()
 
 BATCH_SYSTEM = LocalBatchSystem
 if SunGridEngine.is_present():

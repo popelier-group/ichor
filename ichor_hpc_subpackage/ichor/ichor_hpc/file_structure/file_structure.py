@@ -403,7 +403,3 @@ class FileStructure(FileTree):
             parent="file_remover_daemon",
             type_=FileType.File,
         )
-
-
-# this type of stuff is making sphinx execute code
-FILE_STRUCTURE = FileStructure()
