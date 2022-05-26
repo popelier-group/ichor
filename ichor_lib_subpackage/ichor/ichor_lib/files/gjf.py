@@ -113,6 +113,11 @@ class GJF(QuantumChemistryProgramInput):
                     # then add to keywords which is None by Default
                     else:
                         read_keywords.append(keyword)
+
+                # if opt or freq are not read, then assume single point type calculation
+                if len(read_job_type) == 0:
+                    read_job_type = GaussianJobType.SinglePoint
+
             # line following keywords line is blank line
             line = next(f)
             # following blank line is a comment line that can contain anything
