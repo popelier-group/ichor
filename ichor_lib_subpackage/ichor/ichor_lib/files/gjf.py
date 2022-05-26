@@ -119,6 +119,7 @@ class GJF(QuantumChemistryProgramInput):
                     read_job_type = GaussianJobType.SinglePoint
 
                 self.job_type = self.job_type or read_job_type
+                self.keywords = self.keywords or read_keywords
 
             # line following keywords line is blank line
             line = next(f)
