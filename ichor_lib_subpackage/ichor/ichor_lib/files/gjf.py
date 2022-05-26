@@ -97,7 +97,7 @@ class GJF(QuantumChemistryProgramInput):
                 line = line.replace("#", "")
                 keywords = line.split()  # split keywords by whitespace
                 # remove this as it is not a keyword, just used to print out more stuff to output file
-                keywords.pop("p")
+                keywords.remove("p")
                 read_job_type = []
                 read_keywords = []
                 for keyword in keywords:
