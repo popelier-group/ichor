@@ -42,10 +42,6 @@ class GeometryDataFile(File, ABC):
             if isinstance(instance, GeometryData) and item in instance.keys():
                 return instance[item]
 
-        raise AttributeError(
-            f"{self.__class__} object has no attribute {item}."
-        )
-
 
 class AtomicDict(dict):
     def __getattr__(self, item):
