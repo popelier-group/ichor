@@ -288,7 +288,7 @@ class INT(GeometryDataFile):
             int_data = json.load(f)
             self.integration_data = GeometryData(int_data.get("integration")) if int_data.get("integration") else FileContents
             self.rotated_multipoles_data = GeometryData(int_data.get("rotated_multipoles")) if int_data.get("rotated_multipoles") else FileContents
-            self.original_multipoles_data = GeometryData(int_data.get("original_multipoles")) if int_data.get("integration") else FileContents
+            self.original_multipoles_data = GeometryData(int_data.get("original_multipoles")) if int_data.get("original_multipoles") else FileContents
             self.iqa_data = GeometryData(int_data.get("iqa_data")) if int_data.get("iqa_data") else FileContents
             self.dispersion_data = GeometryData(int_data.get("dispersion_data")) if int_data.get("dispersion_data") else FileContents
 
