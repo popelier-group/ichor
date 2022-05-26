@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Any
-from ichor.ichor_lib.files import File
+from ichor.ichor_lib.files import File, FileState
 
 class PropertyNotFound(Exception):
     pass
@@ -32,6 +32,12 @@ class GeometryDataFile(File, ABC):
         # loop over __dict__ (vars(self)) and find any attributes which are dictionaries.
         # if the dictionary keys contain the item of interest, then return the value associated with this dictionary key.
         # todo: implement method for combining multiple dictionaries with identical keys
+
+        # need to do this check here and read the file if necessary because some attributes that might be accessed are Not FileContents type
+        # for example if you do int_file_instance.original_q32s, without the check below, it will not read in the file (because original_q32s is not FileContents)
+        if self.state is FileState.Unread:
+            self.read()
+
         for instance in vars(self).values():
             if isinstance(instance, GeometryData) and item in instance.keys():
                 return instance[item]
