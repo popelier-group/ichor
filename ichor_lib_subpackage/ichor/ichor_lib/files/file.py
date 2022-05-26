@@ -189,4 +189,4 @@ class File(PathObject, ABC):
             self.state = self._save_state
     
     def __str__(self):
-        return f"File Path: {self.path}, File Class Name: {self.__class__.__name__}"
+        return f"File Absolute Path: {self.path.absolute()}, Class Name: {self.__class__.__name__}"
