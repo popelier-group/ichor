@@ -38,7 +38,7 @@ class ALFFeatureCalculator(FeatureCalculator):
 
         alf = {}
 
-        if reference_file.exists():
+        if reference_file is not None and reference_file.exists():
             with open(reference_file, "r") as alf_reference_file:
                 for line in alf_reference_file:
                     system_hash, total_alf = line.split(maxsplit=1)
