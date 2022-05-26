@@ -87,4 +87,4 @@ class INTs(Directory, AtomicDict):
             yield INT_instance
 
     def __str__(self):
-        return f"INTs Directory: {self.path}, containing .int for atoms names: {', '.join(self.keys())}"
+        return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(self.keys())}"
