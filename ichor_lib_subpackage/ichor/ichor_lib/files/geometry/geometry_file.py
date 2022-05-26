@@ -1,12 +1,10 @@
-from typing import Optional
-
-from ichor.ichor_lib.atoms import Atoms
-from ichor.ichor_lib.files.file import File, FileContents
+from ichor.ichor_lib.files.file import File
 from ichor.ichor_lib.files.geometry.atom_data import AtomData
-from typing import Union
+from typing import Union, List
 from pathlib import Path
+from abc import ABC
 
-class GeometryFile(File):
+class GeometryFile(File, ABC):
     """ A class which is inherited from any file which contains the full geometry
     of the molecule/system. These geometries can be used to calculate connectivity
     and ALF. Files such as .xyz, .gjf, .wfn have the full geometry of the system
@@ -17,18 +15,19 @@ class GeometryFile(File):
     :param path: a path to a file
     """
 
-    atoms: Optional[Atoms]
-
-    def __init__(self, path: Union[Path, str], atoms: Atoms = FileContents):
+    def __init__(self, path: Union[Path, str]):
         super().__init__(path)
-        self.atoms = atoms
 
     @property
-    def features(self):
+    def coordinates(self) -> "np.ndarray":
+        return self.atoms.coordinates
+
+    @property
+    def features(self) -> "np.ndarray":
         return self.atoms.features
 
     @property
-    def atom_names(self):
+    def atom_names(self) -> List[str]:
         return [atom.name for atom in self.atoms]
 
     def __getitem__(self, item):

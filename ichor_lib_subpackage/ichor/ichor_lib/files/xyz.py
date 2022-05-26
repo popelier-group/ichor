@@ -18,11 +18,10 @@ class XYZ(GeometryFile):
         with the given Atoms will be written to the given Path.
     """
 
-    def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = FileContents):
+    def __init__(self, path: Union[Path, str], atoms: Atoms = FileContents):
         super().__init__(path)
 
-        if atoms is not FileContents:
-            self.atoms = atoms
+        self.atoms = atoms
 
     @classproperty
     def filetype(self) -> str:
@@ -33,10 +32,10 @@ class XYZ(GeometryFile):
         with open(self.path, "r") as f:
             natoms = int(next(f))
             _ = next(f)  # blank line
-            self.atoms = Atoms()
+            read_atoms = Atoms()
             for _ in range(natoms):
                 record = next(f).split()
-                self.atoms.add(
+                read_atoms.add(
                     Atom(
                         record[0],
                         float(record[1]),
@@ -44,6 +43,8 @@ class XYZ(GeometryFile):
                         float(record[3]),
                     )
                 )
+
+        self.atoms = self.atoms or read_atoms
 
     def write(self, path: Optional[Path] = None):
         """Write a .xyz to a given path. If no path is given, it will write it to the path given when the XYZ instance was constructed.
