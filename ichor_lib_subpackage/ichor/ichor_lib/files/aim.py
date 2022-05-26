@@ -30,7 +30,7 @@ class AIM(File, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
-    def __init__(self, path: Path, 
+    def __init__(self, path: Path,
                 license_check_succeeded: Optional[bool] = FileContents,
                 version: Version = FileContents,
                 wfn_path: Path = FileContents,

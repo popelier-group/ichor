@@ -187,3 +187,6 @@ class File(PathObject, ABC):
         """ Unblocks a blocked file."""
         if self.state is FileState.Blocked:
             self.state = self._save_state
+    
+    def __str__(self):
+        return f"File Path: {self.path}, File Class Name: {self.__class__.__name__}"
