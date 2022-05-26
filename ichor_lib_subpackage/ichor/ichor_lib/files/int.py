@@ -13,7 +13,6 @@ from ichor.ichor_lib.files.geometry import GeometryData, GeometryDataFile
 from ichor.ichor_lib.multipoles import (rotate_dipole, rotate_hexadecapole,
                               rotate_octupole, rotate_quadrupole)
 from ichor.ichor_lib import constants
-from warnings import warn
 
 
 class INT(GeometryDataFile):
@@ -24,7 +23,7 @@ class INT(GeometryDataFile):
         This information is needed to form the C matrix when rotating multipoles from the global to the local frame.
     """
 
-    def __init__(self, path: Union[Path, str], parent=None, create_json=True, give_warning=True):
+    def __init__(self, path: Union[Path, str], parent=None, create_json=True):
         super().__init__(path)
         self.parent = parent
         self.integration_data = FileContents
@@ -33,9 +32,6 @@ class INT(GeometryDataFile):
         self.rotated_multipoles_data = FileContents
         self.original_multipoles_data = FileContents
         self.create_json = create_json
-
-        if not self.parent and give_warning:
-            warn(f"Parent not specified for INT instance, multipoles will NOT be rotated.")
 
     @classproperty
     def filetype(cls) -> str:
@@ -109,13 +105,16 @@ class INT(GeometryDataFile):
 
     @property
     def rotated_multipoles(self):
-        multipoles = {
-            "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
-            for multipole in constants.multipole_names
-            if multipole != "q00"
-        }
-        multipoles.update({"q00" : self.q})
-        return multipoles
+        if self.rotated_multipoles_data:
+            multipoles = {
+                "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
+                for multipole in constants.multipole_names
+                if multipole != "q00"
+            }
+            multipoles.update({"q00" : self.q})
+            return multipoles
+        else:
+            raise ValueError("Rotated multipoles are not present. Check if parent parameter is specified.")
 
     @property
     def original_multipoles_without_q00(self):
@@ -128,12 +127,15 @@ class INT(GeometryDataFile):
 
     @property
     def rotated_multipoles_without_q00(self):
-        multipoles = {
-            "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
-            for multipole in constants.multipole_names
-            if multipole != "q00"
-        }
-        return multipoles
+        if self.rotated_multipoles_data:
+            multipoles = {
+                "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
+                for multipole in constants.multipole_names
+                if multipole != "q00"
+            }
+            return multipoles
+        else:
+            raise ValueError("Rotated multipoles are not present. Check if parent parameter is specified.")
 
     @property
     def e_intra(self):
