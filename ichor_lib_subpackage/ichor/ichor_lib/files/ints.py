@@ -16,9 +16,11 @@ class INTs(Directory, AtomicDict):
     """
 
     def __init__(
-        self, path: Union[Path, str], parent: Optional[GeometryFile] = None
+        self, path: Union[Path, str], parent: Optional[GeometryFile] = None,
+        create_json = True
     ):
         self._parent = parent
+        self.create_json = create_json
         dict.__init__(self)
         Directory.__init__(self, path)
 
@@ -35,7 +37,7 @@ class INTs(Directory, AtomicDict):
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f, self._parent)
+                self[f.stem.upper()] = INT(f, self._parent, create_json=self.create_json)
         self.sort()
 
     @property
