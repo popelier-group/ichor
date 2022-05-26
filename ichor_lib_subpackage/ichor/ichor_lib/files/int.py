@@ -23,7 +23,7 @@ class INT(GeometryDataFile):
         This information is needed to form the C matrix when rotating multipoles from the global to the local frame.
     """
 
-    def __init__(self, path: Union[Path, str], parent=None):
+    def __init__(self, path: Union[Path, str], parent=None, create_json=True):
         super().__init__(path)
         self.parent = parent
         self.integration_data = FileContents
@@ -31,6 +31,7 @@ class INT(GeometryDataFile):
         self.dispersion_data = FileContents
         self.rotated_multipoles_data = FileContents
         self.original_multipoles_data = FileContents
+        self.create_json = create_json
 
     @classproperty
     def filetype(cls) -> str:
@@ -52,7 +53,8 @@ class INT(GeometryDataFile):
             self.read_json()
         else:
             self.read_int()
-            self.write_json()
+            if self.create_json:
+                self.write_json()
 
     @property
     def atom_name(self) -> str:
