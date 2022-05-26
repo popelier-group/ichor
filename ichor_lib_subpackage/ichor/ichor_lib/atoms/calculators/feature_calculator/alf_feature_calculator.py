@@ -21,11 +21,11 @@ class ALFFeatureCalculator(FeatureCalculator):
     def _alf(self):
         """ Returns a dictionary of system_hash:alf."""
         if not hasattr(self, "_reference_alf"):
-            self._reference_alf = ALFFeatureCalculator.get_alfs_from_reference_file()
+            self._reference_alf = ALFFeatureCalculator.get_alfs()
         return self._reference_alf
 
     @classmethod
-    def get_alfs_from_reference_file(cls, reference_file: Path):
+    def get_alfs(cls, reference_file: Path = None):
         """ Returns a dictionary as the system has as keys and alf for all atoms (a list of list)
         as values.
         
@@ -38,11 +38,12 @@ class ALFFeatureCalculator(FeatureCalculator):
 
         alf = {}
 
-        with open(reference_file, "r") as alf_reference_file:
-            for line in alf_reference_file:
-                system_hash, total_alf = line.split(maxsplit=1)
-                # read in atomic local frame and convert to list of list of int.
-                alf[system_hash] = literal_eval(total_alf)
+        if reference_file.exists():
+            with open(reference_file, "r") as alf_reference_file:
+                for line in alf_reference_file:
+                    system_hash, total_alf = line.split(maxsplit=1)
+                    # read in atomic local frame and convert to list of list of int.
+                    alf[system_hash] = literal_eval(total_alf)
 
         return alf
     
