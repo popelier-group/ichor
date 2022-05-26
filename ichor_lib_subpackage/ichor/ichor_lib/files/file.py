@@ -189,4 +189,6 @@ class File(PathObject, ABC):
             self.state = self._save_state
     
     def __str__(self):
-        return f"File Absolute Path: {self.path.absolute()}, Class Name: {self.__class__.__name__}"
+        if self.path.exists():
+            return f"File Absolute Path: {self.path.absolute()}, Class Name: {self.__class__.__name__}"
+        return f"File with path {self.path.absolute()} is not found on disk."
