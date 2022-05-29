@@ -1,15 +1,9 @@
-import itertools as it
 from typing import List, Optional, Union
-
 import numpy as np
-
 from ichor.ichor_lib.atoms.calculators.feature_calculator.feature_calculator import \
     FeatureCalculator
 from ichor.ichor_lib.constants import ang2bohr
 from ichor.ichor_lib.units import AtomicDistance
-from ichor.ichor_lib.common.functools import classproperty
-from pathlib import Path
-import warnings
 
 feature_unit = AtomicDistance.Bohr
 class ALFCalculationError(Exception):
@@ -21,7 +15,7 @@ class ALFFeatureCalculator(FeatureCalculator):
     def calculate_c_matrix(
         cls,
         atom: "Atom",
-        alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None,
+        alf: Union[List[int], List["Atom"], np.ndarray],
     ) -> np.ndarray:
         """Retruns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
         See https://pubs.acs.org/doi/pdf/10.1021/ct500565g , Section 3.3 for the derivations. This matrix has 3 unit
