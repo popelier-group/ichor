@@ -3,10 +3,10 @@ from typing import List, Optional, Union
 import numpy as np
 
 from ichor.ichor_lib import constants
-from ichor.ichor_lib.atoms.calculators import ALFFeatureCalculator
 from ichor.ichor_lib.common.types import VarReprMixin
 from ichor.ichor_lib.units import AtomicDistance
-
+from ichor.ichor_lib.atoms.calculators import AtomSequenceALFCalculator
+from ichor.ichor_lib.atoms.calculators import ALFFeatureCalculator
 
 class Atom(VarReprMixin):
     """
@@ -225,8 +225,7 @@ class Atom(VarReprMixin):
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
 
-    @property
-    def alf(self) -> List[int]:
+    def alf(self, alf_calculator = AtomSequenceALFCalculator) -> List[int]:
         """Returns a list of the Atomic Local Frame (ALF). This ALF is ONLY for this Atom.
 
         e.g. If we have an Atoms instance for the water monomer, the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
@@ -234,7 +233,7 @@ class Atom(VarReprMixin):
 
         [0,1,2] contains the indeces for the central atom, x-axis atom, and xy-plane atom. These indeces start at 0 to index Python objects correctly.
         """
-        return ALFFeatureCalculator.calculate_alf(self)
+        return alf_calculator.calculate_alf(self)
 
     @property
     def ialf(self) -> np.ndarray:
@@ -270,16 +269,10 @@ class Atom(VarReprMixin):
         ez = np.cross(ex, ey)
         return np.array([ex, ey, ez])
 
-    @property
-    def features(self) -> np.ndarray:
+    def features(self, alf_calculator = AtomSequenceALFCalculator, feature_calculator = ALFFeatureCalculator) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
-        return ALFFeatureCalculator.calculate_features(self)
 
-    def alf_features(
-        self, alf: Optional[Union[List[int], List["Atom"], np.ndarray]] = None
-    ):
-        """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance using the given alf"""
-        return ALFFeatureCalculator.calculate_features(self, alf)
+        return feature_calculator.calculate_features(self, self.alf(alf_calculator))
 
     @property
     def coordinates_string(self):

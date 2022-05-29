@@ -3,6 +3,8 @@ from ichor.ichor_lib.files.geometry.atom_data import AtomData
 from typing import Union, List
 from pathlib import Path
 from abc import ABC
+from ichor.ichor_lib.atoms.calculators import AtomSequenceALFCalculator
+from ichor.ichor_lib.atoms.calculators import ALFFeatureCalculator
 
 class GeometryFile(File, ABC):
     """ A class which is inherited from any file which contains the full geometry
@@ -23,12 +25,11 @@ class GeometryFile(File, ABC):
         return self.atoms.coordinates
 
     @property
-    def features(self) -> "np.ndarray":
-        return self.atoms.features
-
-    @property
     def atom_names(self) -> List[str]:
         return [atom.name for atom in self.atoms]
+
+    def features(self, alf_calculator = AtomSequenceALFCalculator, features_calculator = ALFFeatureCalculator) -> "np.ndarray":
+        return self.atoms.features(alf_calculator, features_calculator)
 
     def __getitem__(self, item):
         """ Returns all the data associated with an atom name"""
