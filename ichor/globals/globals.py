@@ -119,6 +119,9 @@ from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import (
     ALFCalculationError,
 )
 
+
+
+
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
 
@@ -227,7 +230,7 @@ class Globals:
     FEREBUS_VERSION: Version = Version("7.0")
     FEREBUS_LOCATION: Path = None
 
-    FEREBUS_LIKELIHOOD: str = "concentrated"
+    FEREBUS_LIKELIHOOD: str = "marginal"
 
     GAUSSIAN_MEMORY_LIMIT: str = "1GB"
 
@@ -252,7 +255,7 @@ class Globals:
     SCRUB_POINTS: bool = True
 
     FEREBUS_SWARM_SIZE: int = (
-        50  # If negative >> Size dynamically allocated by FEREBUS
+        32  # If negative >> Size dynamically allocated by FEREBUS
     )
     FEREBUS_NUGGET: float = 1.0e-10  # Default value for FEREBUS nugget
     FEREBUS_THETA_MIN: float = (
@@ -272,7 +275,7 @@ class Globals:
     FEREBUS_TOLERANCE: float = 1.0e-8
     FEREBUS_STALL_ITERATIONS: int = 20
     FEREBUS_CONVERGENCE: int = 20
-    FEREBUS_MAX_ITERATION: int = 1000
+    FEREBUS_MAX_ITERATION: int = 500
 
     # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
     DLPOLY_VERSION: Version = Version("4.09")
