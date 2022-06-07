@@ -1,19 +1,103 @@
 import inspect
+import msvcrt
 import os
 import sys
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from uuid import uuid4
 
+from ichor.cli.problem_finder import PROBLEM_FINDER
 from ichor.core.common.int import count_digits
 from ichor.core.common.io import pushd
-from ichor.cli.problem_finder import PROBLEM_FINDER
-from ichor.cli.menus.tab_completer import ListCompleter
+from ichor.core.common.os import clear_screen
+from ichor.core.menu.tab_completer import ListCompleter
 
 _subdirs = []
 
 
-# todo: move to core
+from .simple_term_menu import TerminalMenu
+
+
+def make_title(title: str, title_char: str = "#") -> str:
+    char_line = title_char * (len(title) + 2 * len(title_char) + 2)
+    title_line = f"{title_char} {title} {title_char}"
+    return f"{char_line}\n{title_line}\n{char_line}\n"
+
+
+class MenuOption:
+    def __init__(self, label, name):
+        self.label = label
+        self.name = name
+
+    def __repr__(self):
+        return f"[{self.label}] {self.name}"
+
+
+class NewMenu:
+    def __init__(self, title: str):
+        self._title = make_title(title)
+        self._options = []
+        self._tty_in = open("/dev/tty", "r")
+        self._tty_out = open("/dev/tty", "w", errors="replace")
+
+    def _init_term(self) -> None:
+        # pylint: disable=unsubscriptable-object
+        assert self._codename_to_terminal_code is not None
+        self._tty_in = open("/dev/tty", "r", encoding=self._user_locale)
+        self._tty_out = open(
+            "/dev/tty", "w", encoding=self._user_locale, errors="replace"
+        )
+        self._old_term = termios.tcgetattr(self._tty_in.fileno())
+        self._new_term = termios.tcgetattr(self._tty_in.fileno())
+        # set the terminal to: unbuffered, no echo and no <CR> to <NL> translation (so <enter> sends <CR> instead of
+        # <NL, this is necessary to distinguish between <enter> and <Ctrl-j> since <Ctrl-j> generates <NL>)
+        self._new_term[3] = (
+            cast(int, self._new_term[3])
+            & ~termios.ICANON
+            & ~termios.ECHO
+            & ~termios.ICRNL
+        )
+        self._new_term[0] = cast(int, self._new_term[0]) & ~termios.ICRNL
+        termios.tcsetattr(
+            self._tty_in.fileno(),
+            termios.TCSAFLUSH,
+            cast(List[Union[int, List[Union[bytes, int]]]], self._new_term),
+        )
+        # Enter terminal application mode to get expected escape codes for arrow keys
+        self._tty_out.write(
+            self._codename_to_terminal_code["enter_application_mode"]
+        )
+        self._tty_out.write(
+            self._codename_to_terminal_code["cursor_invisible"]
+        )
+        if self._clear_screen:
+            self._tty_out.write(self._codename_to_terminal_code["clear"])
+
+    def add_option(
+        self,
+        label: str,
+        name: str,
+        handler: Callable,
+        kwargs=None,
+        wait: bool = False,
+        auto_close: bool = False,
+        hidden: bool = False,
+    ):
+        self._options.append(MenuOption(label, name))
+        self._close = False
+
+    def show(self):
+        clear_screen()
+        self._tty_out.write(self._title)
+        for option in self._options:
+            self._tty_out.write(option)
+
+    def close(self):
+        return (msvcrt.kbhit() and msvcrt.getch() == b"\x1b") or self._close
+
+    def run(self):
+        while not self.close():
+            self.show()
 
 
 class Menu:
@@ -207,8 +291,9 @@ class Menu:
         self.gap_ids.append(gap_id)
         self.options[gap_id] = ("", "", {})
 
-    def add_message(self, message, fmt={}) -> None:
+    def add_message(self, message, fmt=None) -> None:
         """Adds a text message to be displayed at the top of the menu."""
+        fmt = fmt or {}
         message_id = uuid4()
         self.message_ids.append(message_id)
         self.options[message_id] = (message, fmt, {})
@@ -248,7 +333,7 @@ class Menu:
     def print_title(self) -> None:
         """Print the title to the screen."""
         print("#" * (len(self.title) + 4))
-        print("# " + self.title + " #")
+        print(f"# {self.title} #")
         print("#" * (len(self.title) + 4))
         print()
 
@@ -303,14 +388,13 @@ class Menu:
             print()
         label_width = self.longest_label()
         for label, option in self.options.items():
-            if label not in self.gap_ids:
-                if label in self.message_ids:
-                    print(option[0].format(**option[1]))
-                elif label not in self.hidden_options:
-                    show_label = "[" + label + "] "
-                    print(f"{show_label:<{label_width + 3}s}" + option[0])
-            else:
+            if label in self.gap_ids:
                 print()
+            elif label in self.message_ids:
+                print(option[0].format(**option[1]))
+            elif label not in self.hidden_options:
+                show_label = f"[{label}] "
+                print(f"{show_label:<{label_width + 3}s}{option[0]}")
         print()
 
     def handler_is_sub_menu(self, handler) -> bool:
@@ -322,7 +406,7 @@ class Menu:
     # show the menu
     # get the option index from the input
     # return the corresponding option handler
-    def input(self) -> Tuple[Callable, bool, bool, bool]:
+    def input(self) -> Tuple[Callable[[], Any], bool, bool, bool]:
         """Shows the menu and waits for user input into the prompt. Once a user input is detected, it returns the
         handler function (with its respective key word arguments), as well as boolean values whether depending on
         whether or not there are wait or close options associated with the handler function.
@@ -345,9 +429,7 @@ class Menu:
         ):  # get the labels to be autocompleted
             while True:
                 try:
-                    index = str(
-                        input(self.prompt + " ")
-                    ).strip()  # get the index of the option
+                    index = str(input(f"{self.prompt} ")).strip()
                     option = self.options[
                         index
                     ]  # get the values from the self.options dictionary

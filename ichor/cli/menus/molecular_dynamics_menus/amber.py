@@ -4,12 +4,12 @@ from typing import Optional
 
 import numpy as np
 
-from ichor.cli.menus.menu import Menu
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.io import mkdir
 from ichor.core.common.os import input_with_prefill
 from ichor.core.files import GJF, XYZ, Mol2, Trajectory
+from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (

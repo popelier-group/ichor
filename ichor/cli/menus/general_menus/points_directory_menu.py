@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ichor.cli.menus.machine_learning_menus.make_models import make_models_menu
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu.menu import Menu
 from ichor.hpc.main.qcp import submit_qcp
 from ichor.hpc.main.qct import submit_qct
 from ichor.hpc.programs.qcp import QUANTUM_CHEMISTRY_PROGRAM

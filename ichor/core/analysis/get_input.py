@@ -4,8 +4,8 @@ from typing import List, Optional
 from ichor.core.analysis.get_path import get_file
 from ichor.core.common.io import get_files_of_type
 from ichor.core.common.sorting.natsort import natsorted
+from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE
-from ichor.cli.menus.menu import Menu
 
 _input_file: Optional[Path] = None
 _input_filetypes: Optional[List[str]] = None

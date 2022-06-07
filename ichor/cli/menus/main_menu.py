@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from pathlib import Path
 from typing import List, Optional
 
@@ -10,7 +12,7 @@ from ichor.cli.menus.general_menus.points_directory_menu import (
 from ichor.cli.menus.general_menus.queue_menu import queue_menu
 from ichor.cli.menus.machine_learning_menus.make_models import make_models_menu
 from ichor.cli.menus.machine_learning_menus.per_menu import auto_run_per_menu
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.auto_run.standard_auto_run import auto_run_from_menu
 from ichor.hpc.main.active_learning import active_learning
@@ -19,7 +21,7 @@ _points_directory_path = None
 _force = False
 
 
-def main_menu(subdirs: Optional[List[Path]] = None) -> None:
+def old_main_menu(subdirs: Optional[List[Path]] = None) -> None:
     """Initialize the main menu Command Line Interface (CLI) for ICHOR. Other menus can then be accessed from this main menu."""
 
     # initialize an instance of Menu called menu and add construct the menu in the context manager
@@ -77,3 +79,37 @@ def main_menu(subdirs: Optional[List[Path]] = None) -> None:
         menu.add_option("a", "Analysis Menu", analysis_menu)
         menu.add_option("o", "Options Menu", options_menu)
         menu.add_option("q", "Queue Menu", queue_menu)
+
+
+from ichor.core.menu.menu import NewMenu
+
+
+def main():
+    menu = NewMenu("ICHOR Main Menu")
+    menu.add_option(
+        "1",
+        "Training Set Menu",
+        # the handler function in this case is points_directory_menu. This function gets called when the user selects option 1 in the menu.
+        points_directory_menu,
+        # give key word arguments which are passed to the handler function
+        kwargs={
+            "path": FILE_STRUCTURE["training_set"]
+        },  # get the Path of the training set from GLOBALS.FILE_STRUCTURE
+    )
+    menu.add_option(
+        "2",
+        "Sample Pool Menu",
+        points_directory_menu,
+        kwargs={"path": FILE_STRUCTURE["sample_pool"]},
+    )
+    menu.add_option(
+        "3",
+        "Validation Set Menu",
+        points_directory_menu,
+        kwargs={"path": FILE_STRUCTURE["validation_set"]},
+    )
+    menu_entry_indices = menu.show()
+
+
+def main_menu():
+    main()

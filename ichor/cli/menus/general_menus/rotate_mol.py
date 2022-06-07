@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.cli.menus.menu import Menu
-from ichor.cli.menus.tab_completer import ListCompleter
 from ichor.core.analysis.get_atoms import (
     get_atoms_from_path,
     get_trajectory_from_path,
@@ -11,6 +9,8 @@ from ichor.core.analysis.get_input import get_files_in_cwd
 from ichor.core.analysis.get_path import get_path
 from ichor.core.atoms import Atoms
 from ichor.core.files import XYZ, PointsDirectory, Trajectory
+from ichor.core.menu import ListCompleter
+from ichor.core.menu.menu import Menu
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (
     SCRIPT_NAMES,

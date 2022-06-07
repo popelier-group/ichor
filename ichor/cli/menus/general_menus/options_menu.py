@@ -1,5 +1,5 @@
 from ichor.cli.menus.general_menus.edit_globals_menu import settings_menu
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu.menu import Menu
 
 
 def options_menu() -> None:

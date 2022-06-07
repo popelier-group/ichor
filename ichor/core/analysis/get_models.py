@@ -3,9 +3,9 @@ from typing import List, Optional
 
 from ichor.core.analysis.get_path import get_dir
 from ichor.core.common.io import get_files_of_type
-from ichor.hpc import FILE_STRUCTURE
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu.menu import Menu
 from ichor.core.models import Model, Models
+from ichor.hpc import FILE_STRUCTURE
 
 
 class ModelsNotFound(Exception):

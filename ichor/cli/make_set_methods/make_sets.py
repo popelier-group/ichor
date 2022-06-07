@@ -7,12 +7,12 @@ from ichor.cli.make_set_methods.make_set_method import MakeSetMethod
 from ichor.cli.make_set_methods.min_max import MinMax
 from ichor.cli.make_set_methods.min_max_mean import MinMaxMean
 from ichor.cli.make_set_methods.random import RandomPoints
-from ichor.cli.menus.menu import Menu
-from ichor.cli.menus.tab_completer import PathCompleter
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.int import count_digits
 from ichor.core.common.io import mkdir
 from ichor.core.files import GJF, XYZ, PointsDirectory, Trajectory
+from ichor.core.menu import PathCompleter
+from ichor.core.menu.menu import Menu
 
 POINTS_LOCATION: Optional[Path] = None
 

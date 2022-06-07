@@ -1,12 +1,19 @@
 from pathlib import Path
 
-from ichor.core.analysis.get_models import choose_model_menu, try_get_latest_models
+from ichor.core.analysis.get_models import (
+    choose_model_menu,
+    try_get_latest_models,
+)
 from ichor.core.analysis.get_path import get_dir, get_generic_path
 from ichor.core.analysis.get_validation_set import (
-    choose_validation_set_menu, get_validation_set_from_current_dir)
-from ichor.core.analysis.s_curves.compact_s_curves import calculate_compact_s_curves
+    choose_validation_set_menu,
+    get_validation_set_from_current_dir,
+)
+from ichor.core.analysis.s_curves.compact_s_curves import (
+    calculate_compact_s_curves,
+)
 from ichor.core.analysis.s_curves.s_curves import calculate_s_curves
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu.menu import Menu
 
 _validation_set_location = Path(".")
 _model_location = Path(".")

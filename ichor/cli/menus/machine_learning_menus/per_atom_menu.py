@@ -82,6 +82,11 @@ def _select_atoms_to_run_on():
 from pathlib import Path
 from typing import Callable, List, Optional
 
+from ichor.cli.menus.machine_learning_menus.make_models import make_models
+from ichor.core.common.io import pushd
+from ichor.core.menu import ListCompleter
+from ichor.core.menu.menu import Menu
+from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.auto_run.ichor_jobs.auto_run_ichor_collate_log import (
     submit_ichor_collate_models_to_auto_run,
 )
@@ -91,17 +96,11 @@ from ichor.hpc.auto_run.per.per import (
 )
 from ichor.hpc.auto_run.standard_auto_run import auto_make_models
 from ichor.hpc.batch_system import JobID
-from ichor.core.common.io import pushd
 from ichor.hpc.daemon.daemon import Daemon
-from ichor.hpc import FILE_STRUCTURE
-from ichor.hpc import GLOBALS
-from ichor.cli.menus.machine_learning_menus.make_models import make_models
-from ichor.cli.menus.menu import Menu
 from ichor.hpc.programs.qct import (
     QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
     QuantumChemicalTopologyProgram,
 )
-from ichor.cli.menus.tab_completer import ListCompleter
 
 _atoms_to_run_on: Optional[List[Path]] = None
 _selected_atoms_to_run_on: Optional[List[Path]] = None
@@ -109,8 +108,7 @@ _selected_atoms_to_run_on: Optional[List[Path]] = None
 
 class PerAtomDaemon(Daemon):
     def __init__(self):
-        from ichor.hpc import FILE_STRUCTURE
-        from ichor.hpc import GLOBALS
+        from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["atoms_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["atoms_stdout"]

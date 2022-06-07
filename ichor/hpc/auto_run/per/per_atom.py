@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Callable, List, Optional
 
 from ichor.cli.menus.machine_learning_menus import make_models
-from ichor.cli.menus.menu import Menu  # todo: fix this
-from ichor.cli.menus.tab_completer import ListCompleter  # todo: fix this
 from ichor.core.common.io import pushd
+from ichor.core.menu import ListCompleter  # todo: fix this
+from ichor.core.menu.menu import Menu  # todo: fix this
 from ichor.hpc.auto_run.ichor_jobs.auto_run_ichor_collate_log import (
     submit_ichor_collate_models_to_auto_run,
 )

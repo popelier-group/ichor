@@ -21,6 +21,24 @@ OTHER_WRITE = stat.S_IWOTH
 OTHER_EXECUTE = stat.S_IXOTH
 
 
+if os.name == "nt":
+    from msvcrt import getch
+else:
+    import sys
+    import termios
+    import tty
+
+    def getch():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+
 def permissions(path: Path) -> Tuple[bool, bool, bool]:
     return (
         os.access(path, os.R_OK),
@@ -139,3 +157,8 @@ def kill_pid(pid: int):
             return
         else:
             raise err
+
+
+def clear_screen():
+    """Clear the currently displayed lines in the terminal"""
+    os.system("cls" if os.name == "nt" else "clear")

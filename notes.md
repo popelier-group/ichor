@@ -23,6 +23,9 @@
 - AIMAll AB (and AA')
 - HPC 17,500 job limit?
 
+### Ideas
+- Refactor Menu to make it easier to write refreshable menus
+
 ## Architecture
 
 ### ichor.core
@@ -40,11 +43,10 @@ and `ichor.core` to provide the `ichor` functionality as an application.
 
 
 ### Possible decisions
-- Menu and TabCompleter -> core
-- Separate Model from ModelFile, ModelFile -> core.files
-- Not a fan of general_menus
-- daemon -> core
-- active_learning -> core?
-- both qcp and qct hpc.main -> hpc.programs?
-- cli menus directory structure should follow tree of main menu?
-- 
+- [x] Menu and TabCompleter -> core
+- [ ] Separate Model from ModelFile, ModelFile -> core.files
+- [ ] Not a fan of general_menus
+- [ ] daemon -> core
+- [ ] active_learning -> core?
+- [ ] both qcp and qct hpc.main -> hpc.programs?
+- [ ] cli menus directory structure should follow tree of main menu?

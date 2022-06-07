@@ -1,16 +1,17 @@
 from pathlib import Path
 
-from ichor.hpc.dlpoly_analysis.dlpoly_submit import (
-    run_dlpoly, run_dlpoly_geometry_optimisations, setup_dlpoly_directories,
-    submit_final_geometry_to_gaussian)
-from ichor.hpc.dlpoly_analysis.dlpoly_submit import \
-    submit_dlpoly_optimisation_analysis_auto_run
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.analysis.get_path import get_dir
-from ichor.hpc import FILE_STRUCTURE
 from ichor.core.files import GJF, XYZ
-from ichor.hpc import GLOBALS
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu.menu import Menu
+from ichor.hpc import FILE_STRUCTURE, GLOBALS
+from ichor.hpc.dlpoly_analysis.dlpoly_submit import (
+    run_dlpoly,
+    run_dlpoly_geometry_optimisations,
+    setup_dlpoly_directories,
+    submit_dlpoly_optimisation_analysis_auto_run,
+    submit_final_geometry_to_gaussian,
+)
 
 _dlpoly_input_file = Path(".")
 _model_location = Path(".")

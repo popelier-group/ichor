@@ -5,17 +5,23 @@ import numpy as np
 import pandas as pd
 
 from ichor.core.analysis.geometry.geometry_calculator import (
-    calculate_angles, calculate_bonds, calculate_dihedrals,
-    internal_feature_names)
+    calculate_angles,
+    calculate_bonds,
+    calculate_dihedrals,
+    internal_feature_names,
+)
 from ichor.core.analysis.get_atoms import get_atoms_from_path
 from ichor.core.analysis.get_path import get_path
-from ichor.hpc.batch_system import JobID
-from ichor.hpc import FILE_STRUCTURE
 from ichor.core.files import PointsDirectory, Trajectory
-from ichor.cli.menus.menu import Menu
-from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript)
+from ichor.core.menu.menu import Menu
 from ichor.core.units import Angle, degrees_to_radians
+from ichor.hpc import FILE_STRUCTURE
+from ichor.hpc.batch_system import JobID
+from ichor.hpc.submission_script import (
+    SCRIPT_NAMES,
+    ICHORCommand,
+    SubmissionScript,
+)
 
 _input_location = None
 _output_location = Path("geometry.xlsx")

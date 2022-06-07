@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from ichor.cli.menus.menu import Menu
 from ichor.core.common.os import input_with_prefill
+from ichor.core.menu.menu import Menu
 from ichor.hpc import GLOBALS
 
 _gv = None

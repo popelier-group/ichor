@@ -1,12 +1,12 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.cli.menus.menu import Menu
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.atoms import Atoms
 from ichor.core.common.io import get_files_of_type, mkdir
 from ichor.core.common.os import input_with_prefill
 from ichor.core.files import GJF, XYZ, Trajectory
+from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (

@@ -1,10 +1,14 @@
 from ichor.cli.menus.analysis_menus.dlpoly_menu import dlpoly_menu
-from ichor.cli.menus.analysis_menus.geometry_analysis import geometry_analysis_menu
-from ichor.cli.menus.analysis_menus.gaussian_optimisation_menu import run_gauss_opt_menu
+from ichor.cli.menus.analysis_menus.gaussian_optimisation_menu import (
+    run_gauss_opt_menu,
+)
+from ichor.cli.menus.analysis_menus.geometry_analysis import (
+    geometry_analysis_menu,
+)
 from ichor.cli.menus.analysis_menus.rmse_menu import rmse_menu
-from ichor.cli.menus.general_menus.rotate_mol import rotate_mol_menu
 from ichor.cli.menus.analysis_menus.s_curve_menu import s_curve_menu
-from ichor.cli.menus.menu import Menu
+from ichor.cli.menus.general_menus.rotate_mol import rotate_mol_menu
+from ichor.core.menu.menu import Menu
 
 
 def analysis_menu():

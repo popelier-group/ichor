@@ -1,6 +1,6 @@
-from ichor.cli.menus.menu import Menu
-from ichor.cli.menus.tab_completer import ListCompleter
 from ichor.core.analysis.get_path import get_dir
+from ichor.core.menu import ListCompleter
+from ichor.core.menu.menu import Menu
 from ichor.hpc.auto_run.per import (
     PerAtomDaemon,
     PerAtomPerPropertyDaemon,

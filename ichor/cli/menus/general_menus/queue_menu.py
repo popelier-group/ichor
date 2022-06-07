@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import List
 
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu.menu import Menu
 from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE
 from ichor.hpc.batch_system import Job, JobID
 

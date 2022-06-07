@@ -4,15 +4,15 @@ from typing import List, Optional
 import numpy as np
 
 from ichor.core import constants
-from ichor.hpc.batch_system import JobID
 from ichor.core.common.io import cp, mkdir
 from ichor.core.common.str import get_digits
-from ichor.hpc import FILE_STRUCTURE
 from ichor.core.files import PointsDirectory
-from ichor.hpc import GLOBALS
-from ichor.hpc.log import logger
-from ichor.cli.menus.menu import Menu
+from ichor.core.menu import ListCompleter
+from ichor.core.menu.menu import Menu
 from ichor.core.models import Model
+from ichor.hpc import FILE_STRUCTURE, GLOBALS
+from ichor.hpc.batch_system import JobID
+from ichor.hpc.log import logger
 from ichor.hpc.programs.qct import (
     QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
     QuantumChemicalTopologyProgram,
@@ -22,7 +22,6 @@ from ichor.hpc.submission_script import (
     FerebusCommand,
     SubmissionScript,
 )
-from ichor.cli.menus.tab_completer import ListCompleter
 
 model_data_location: Path = Path()
 _model_data: Optional[PointsDirectory] = None
@@ -336,8 +335,7 @@ def write_training_set(atom, training_data) -> Path:
     :param training_data: A list of tuples containing the training data. Each tuple contains the (input, output) pair. The inputs are stored as a numpy array,
         while the outputs are stored as a dictionary, containing key:value paris of property_name (eg. iqa, q00) : value
     """
-    from ichor.hpc import FILE_STRUCTURE
-    from ichor.hpc import GLOBALS
+    from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
     # make a ferebus directory for each atom
     ferebus_directory = FILE_STRUCTURE["ferebus"] / atom

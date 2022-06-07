@@ -1,11 +1,16 @@
 from pathlib import Path
 
-from ichor.core.analysis.get_models import choose_model_menu, try_get_latest_models
+from ichor.core.analysis.get_models import (
+    choose_model_menu,
+    try_get_latest_models,
+)
 from ichor.core.analysis.get_validation_set import (
-    choose_validation_set_menu, get_validation_set_from_current_dir)
+    choose_validation_set_menu,
+    get_validation_set_from_current_dir,
+)
 from ichor.core.analysis.rmse.rmse import calculate_rmse
+from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE
-from ichor.cli.menus.menu import Menu
 
 _validation_set_location = Path(".")
 _model_location = Path(".")

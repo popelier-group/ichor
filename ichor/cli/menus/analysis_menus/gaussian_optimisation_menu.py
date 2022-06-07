@@ -1,17 +1,20 @@
-from ichor.hpc import FILE_STRUCTURE
-from ichor.core.files import PointsDirectory, XYZ, GJF, WFN
-from ichor.hpc import GLOBALS
 from pathlib import Path
-from ichor.core.common.io import mkdir
-from typing import Optional, List
-from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import SCRIPT_NAMES
-from ichor.hpc.submission_script import ICHORCommand, SubmissionScript
-from ichor.hpc.main.gaussian import submit_gjfs
-from ichor.core.common.os import input_with_prefill
+from typing import List, Optional
+
 from ichor.core.analysis.get_atoms import get_atoms_from_path
 from ichor.core.analysis.get_input import get_file
-from ichor.cli.menus.menu import Menu
+from ichor.core.common.io import mkdir
+from ichor.core.common.os import input_with_prefill
+from ichor.core.files import GJF, WFN, XYZ, PointsDirectory
+from ichor.core.menu.menu import Menu
+from ichor.hpc import FILE_STRUCTURE, GLOBALS
+from ichor.hpc.batch_system import JobID
+from ichor.hpc.main.gaussian import submit_gjfs
+from ichor.hpc.submission_script import (
+    SCRIPT_NAMES,
+    ICHORCommand,
+    SubmissionScript,
+)
 
 _geometry_file = None
 _keywords = list(set(GLOBALS.KEYWORDS + ["opt"]))
@@ -63,8 +66,6 @@ def _set_keywords():
     ).split()
 
 
-
-
 def convert_opt_wfns_to_xyz():
     for f in FILE_STRUCTURE["opt"].iterdir():
         if f.suffix == WFN.filetype:
@@ -77,7 +78,6 @@ def convert_opt_wfn_to_xyz(wfn_file: Path):
     wfn.atoms.to_angstroms()
     xyz.atoms = wfn.atoms
     xyz.write()
-
 
 
 def _gauss_opt_refresh(menu):
