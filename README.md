@@ -123,3 +123,48 @@ This Auto-Run is controlled using the two values `MAX_ITERATION` and `POINTS_PER
 For example if I start off with 50 training points and add 10 `POINTS_PER_ITERATION` for 10 `MAX_ITERATION`, I will add 100 points (10x10) to my training set and end up with 150 training points.
 
 A log of all the models produced during the adaptive sampling run can be found in the `LOG` directory, each model will have its own directory under the naming convention of `LOG/SYSTEM_NAME####` where `SYSTEM_NAME` is the same as the `SYSTEM_NAME` specified in the config file and `####` is the number of training points in that model.
+
+
+# WIP
+
+# ICHOR Library
+
+This is the library package, containing classes and functions which read specific files (such as gjfs, ints, xyzs, etc.) that make it easier to manage and modify files.
+
+## Installation
+
+If installing from source code (i.e. the repository has been cloned locally) do
+
+```
+python -m pip install ichor_lib_subpackage/
+```
+
+You can also install from wheel file (download from release tab)
+
+```python -m pip install 
+ichor_lib-3.0.0-py37-none-any.whl
+```
+
+## Usage
+When you have installed the library portion of ichor, you can import is like so
+
+```
+import ichor.ichor_lib
+```
+
+To import specific modules, you can do
+
+```
+from ichor.ichor_lib import atoms
+
+atoms_instance = atoms.Atoms()
+```
+
+Because the `__init__.py` files in the subpackages (directories containing modules) have some classes imported already, you can do
+
+```
+from ichor.ichor_lib.atoms import Atoms
+from ichor.ichor_lib.files import WFN, GJF, XYZ
+
+atoms_instance = Atoms()
+```
