@@ -38,3 +38,4 @@ dependency_links.txt
 requires.txt
 build
 dist
+*venv*
