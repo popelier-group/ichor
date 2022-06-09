@@ -9,7 +9,7 @@ from ichor.core.menu.tab_completer import ListCompleter
 
 
 # TODO: why use a namedtuple?, also return_val and close need to be in a list. This would not work like it is now.
-# TODO: add problem messages
+# TODO: add problem messages, add docstring and comments.
 OptionReturn = namedtuple("OptionReturn", "return_val close")
 
 class MenuItem(ABC):
