@@ -55,32 +55,32 @@ class MenuOption(MenuItem):
         self._debug = debug
 
     def select(self) -> OptionReturn:
-        if self._debug:
-            for i, arg in enumerate(self.args):
-                print(
-                    ">",
-                    list(self.func.__annotations__.values())[i].__origin__,
-                    list(self.func.__annotations__.values())[i].__origin__
-                    is not MenuVar,
-                )
-                print(
-                    isinstance(arg, MenuVar)
-                    and list(self.func.__annotations__.values())[i].__origin__
-                    is not MenuVar
-                )
-            quit()
+        # Below args and kwargs unwraps instances of MenuVar with the MenuVar.var based upon function annotations
         args = [
             arg.var
             if isinstance(arg, MenuVar)
-            and list(self.func.__annotations__.values())[i].__origin__
-            is not MenuVar
+            or not hasattr(self.func, "__annotations__")
+            or (
+                len(self.func.__annotations__) > i
+                and hasattr(
+                    list(self.func.__annotations__.values())[i],
+                    "__origin__",
+                )
+                and list(self.func.__annotations__.values())[i].__origin__
+                is not MenuVar
+            )
             else arg
             for i, arg in enumerate(self.args)
         ]
         kwargs = {
             key: val.var
             if isinstance(val, MenuVar)
-            and self.func.__annotations__[key].__origin__ is not MenuVar
+            or not hasattr(self.func, "__annotations__")
+            or (
+                key in self.func.__annotations__.keys()
+                and hasattr(self.func.__annotations__[key], "__origin__")
+                and self.func.__annotations__[key].__origin__ is not MenuVar
+            )
             else val
             for key, val in self.kwargs.items()
         }
