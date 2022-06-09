@@ -125,22 +125,19 @@ def print_child_process_status(cpdir: Path):
 
 
 def print_child_processes_status(child_processes: Optional[List[Path]] = None):
-    if child_processes is None:
-        child_processes = find_child_processes_recursively()
+    child_processes = child_processes or find_child_processes_recursively()
     for cp in child_processes:
         print_child_process_status(cp)
 
 
 def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
-    from ichor.cli.menus.general_menus.concatenate_points_menu import (
-        concatenate_points_directories,
-    )
+    from ichor.cli.menus.general_menus.concatenate_points_menu import \
+        concatenate_points_directories
     from ichor.core.analysis.get_path import get_dir
 
     print("Enter PointsDirectory Location to concatenate to training sets: ")
     dir = get_dir().absolute()
-    if child_processes is None:
-        child_processes = find_child_processes_recursively()
+    child_processes = child_processes or find_child_processes_recursively()
 
     for cp in child_processes:
         with pushd(cp, update_cwd=True):

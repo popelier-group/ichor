@@ -3,10 +3,13 @@ from typing import Optional
 
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.atoms import Atoms
+from ichor.core.common.formatting import (
+    format_number_with_comma,
+    temperature_formatter,
+)
 from ichor.core.common.io import get_files_of_type, mkdir
-from ichor.core.common.os import input_with_prefill
 from ichor.core.files import GJF, XYZ, Trajectory
-from ichor.core.menu.menu import Menu
+from ichor.core.menu import Menu, MenuVar, set_number
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (
@@ -16,24 +19,21 @@ from ichor.hpc.submission_script import (
     TycheCommand,
 )
 
-_input_file = None
-_input_filetypes = [XYZ.filetype, GJF.filetype]
+INPUT_FILETYPES = [XYZ.filetype, GJF.filetype]
 
-_n_molecules = 1
-
-_solver = "periodic"
-
-_box_size = 25.0
+# todo: move this to hpc/core
 
 
-def write_freq_param(freq_param: Path, atoms: Atoms):
+def write_freq_param(
+    freq_param: Path, atoms: Atoms, temperature: float, nsteps: int
+):
     atoms.centre()
     with open(freq_param, "w") as f:
         f.write(f"{'Sampling':<24}: Vibrate\n")
         f.write(f"{'Name':<24}: {GLOBALS.SYSTEM_NAME}\n")
-        f.write(f"{'Temperature':<24}: {GLOBALS.TYCHE_TEMPERATURE}\n")
+        f.write(f"{'Temperature':<24}: {temperature}\n")
         f.write(f"{'NSeed':<24}: 1\n")
-        f.write(f"{'NSample':<24}: {GLOBALS.TYCHE_STEPS}\n")
+        f.write(f"{'NSample':<24}: {nsteps}\n")
         f.write(f"{'Natoms':<24}: {len(atoms)}\n")
         f.write(f"{'Nsteps':<24}: 1000\n")
         f.write(f"{'Interactions':<24}: 1-4\n")
@@ -42,7 +42,7 @@ def write_freq_param(freq_param: Path, atoms: Atoms):
         f.write(f"{'MCTemp':<24}: 300\n")
 
 
-def submit_tyche(input_file: Path) -> JobID:
+def submit_tyche(input_file: Path, temperature: float, nsteps: int) -> JobID:
     if input_file.suffix == XYZ.filetype:
         atoms = XYZ(input_file).atoms
     elif input_file.suffix == GJF.filetype:
@@ -62,7 +62,7 @@ def submit_tyche(input_file: Path) -> JobID:
     g09_input.write()
 
     freq_param = FILE_STRUCTURE["tyche"] / "freq.param"
-    write_freq_param(freq_param, atoms)
+    write_freq_param(freq_param, atoms, temperature, nsteps)
 
     with SubmissionScript(SCRIPT_NAMES["tyche"]) as submission_script:
         submission_script.add_command(TycheCommand(freq_param, g09_input.path))
@@ -75,7 +75,7 @@ def submit_tyche(input_file: Path) -> JobID:
             ICHORCommand(
                 func="set_points_location",
                 func_args=[
-                    f"{GLOBALS.SYSTEM_NAME}-tyche-{GLOBALS.TYCHE_TEMPERATURE}{Trajectory.filetype}"
+                    f"{GLOBALS.SYSTEM_NAME}-tyche-{temperature}{Trajectory.filetype}"
                 ],
             )
         )
@@ -97,56 +97,36 @@ def tyche_to_xyz(tyche_input: Path, xyz: Optional[Path] = None) -> Path:
     return xyz
 
 
-def set_temperature():
-    while True:
-        try:
-            GLOBALS.TYCHE_TEMPERATURE = float(
-                input_with_prefill(
-                    "Enter Temperature (K): ",
-                    prefill=f"{GLOBALS.TYCHE_TEMPERATURE}",
-                )
-            )
-            break
-        except ValueError:
-            print("Temperature must be a number")
-
-
-def set_nsteps():
-    while True:
-        try:
-            GLOBALS.TYCHE_STEPS = int(
-                input_with_prefill(
-                    "Enter Temperature (K): ", prefill=f"{GLOBALS.TYCHE_STEPS}"
-                )
-            )
-            break
-        except ValueError:
-            print("Temperature must be an integer")
-
-
-def set_input():
-    global _input_file
-    _input_file = get_input_menu(_input_file, _input_filetypes)
-
-
-def tyche_menu_refresh(menu):
-    menu.clear_options()
-    menu.add_option(
-        "1", "Run TYCHE", submit_tyche, kwargs={"input_file": _input_file}
-    )
-    menu.add_space()
-    menu.add_option("i", "Set input file", set_input)
-    menu.add_option("t", "Set Temperature", set_temperature)
-    menu.add_option("n", "Set number of timesteps", set_nsteps)
-    menu.add_space()
-    menu.add_message(f"Input File: {_input_file}")
-    menu.add_message(f"Temperature: {GLOBALS.TYCHE_TEMPERATURE} K")
-    menu.add_message(f"Number of Timesteps: {GLOBALS.TYCHE_STEPS:,}")
-    menu.add_final_options()
+def set_input(input_file: MenuVar[Path]):
+    input_file.var = get_input_menu(input_file.var, INPUT_FILETYPES)
 
 
 def tyche_menu():
-    global _input_file
-    _input_file = get_first_file(Path(), _input_filetypes)
-    with Menu("TYCHE Menu", refresh=tyche_menu_refresh):
-        pass
+    input_file = MenuVar("Input File", get_first_file(Path(), INPUT_FILETYPES))
+    temperature = MenuVar(
+        "Temperature",
+        GLOBALS.TYCHE_TEMPERATURE,
+        custom_formatter=temperature_formatter,
+    )
+    nsteps = MenuVar(
+        "Number of Timesteps",
+        GLOBALS.TYCHE_STEPS,
+        custom_formatter=format_number_with_comma,
+    )
+    with Menu("TYCHE Menu") as menu:
+        menu.add_option(
+            "1",
+            "Run TYCHE",
+            submit_tyche,
+            args=[input_file, temperature, nsteps],
+        )
+        menu.add_space()
+        menu.add_option("i", "Set input file", set_input, args=[input_file])
+        menu.add_option("t", "Set Temperature", set_number, args=[temperature])
+        menu.add_option(
+            "n", "Set number of timesteps", set_number, args=[nsteps]
+        )
+        menu.add_space()
+        menu.add_var(input_file)
+        menu.add_var(temperature)
+        menu.add_var(nsteps)

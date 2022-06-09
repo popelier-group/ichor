@@ -3,10 +3,14 @@ from typing import Optional
 
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.atoms import Atoms
+from ichor.core.common.formatting import (
+    format_number_with_comma,
+    temperature_formatter,
+)
 from ichor.core.common.io import get_files_of_type, mkdir
 from ichor.core.common.os import input_with_prefill
 from ichor.core.files import GJF, XYZ, Trajectory
-from ichor.core.menu.menu import Menu
+from ichor.core.menu import Menu, MenuVar, set_number
 from ichor.hpc import FILE_STRUCTURE, GLOBALS, MACHINE, Machine
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (
@@ -15,15 +19,7 @@ from ichor.hpc.submission_script import (
     SubmissionScript,
 )
 
-_input_file = None
-_input_filetypes = [XYZ.filetype, GJF.filetype]
-
-_n_molecules = 1
-
-_solver = "periodic"
-
-_box_size = 25.0
-
+INPUT_FILETYPES = [XYZ.filetype, GJF.filetype]
 
 datafile_location = {
     Machine.ffluxlab: Path("/home/modules/apps/cp2k/6.1.0/data"),
@@ -32,7 +28,18 @@ datafile_location = {
 }
 
 
-def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
+# todo: move to hpc/core
+
+
+def write_cp2k_input(
+    cp2k_input_file: Path,
+    atoms: Atoms,
+    temperature: float,
+    nsteps: int,
+    solver: str = "periodic",
+    n_molecules: int = 1,
+    box_size: float = 25.0,
+):
     atoms.centre()
     with open(cp2k_input_file, "w") as f:
         f.write("&GLOBAL\n")
@@ -97,11 +104,11 @@ def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
         f.write(
             "      ! PERIODIC XYZ is the default, gas phase systems should have 'NONE' and a wavelet solver\n"
         )
-        if _solver == "periodic":
+        if solver == "periodic":
             f.write("      PERIODIC XYZ\n")
         else:
             f.write("      PERIODIC NONE\n")
-        f.write(f"      POISSON_SOLVER {_solver.upper()}\n")
+        f.write(f"      POISSON_SOLVER {solver.upper()}\n")
         f.write("    &END POISSON\n")
         f.write("\n")
         f.write(
@@ -145,7 +152,7 @@ def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
         f.write(
             "      ! adding Grimme's D3 correction (by default without C9 terms)\n"
         )
-        f.write(f"      &VDW_POTENTIAL {'OFF' if _n_molecules == 1 else ''}\n")
+        f.write(f"      &VDW_POTENTIAL {'OFF' if n_molecules == 1 else ''}\n")
         f.write("        POTENTIAL_TYPE PAIR_POTENTIAL\n")
         f.write("        &PAIR_POTENTIAL\n")
         f.write(
@@ -165,8 +172,8 @@ def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
         f.write(
             "      ! unit cells that are orthorhombic are more efficient with CP2K\n"
         )
-        f.write(f"      ABC [angstrom] {_box_size} {_box_size} {_box_size}\n")
-        if _solver == "wavelet":
+        f.write(f"      ABC [angstrom] {box_size} {box_size} {box_size}\n")
+        if solver == "wavelet":
             f.write("      PERIODIC NONE\n")
         f.write("    &END CELL\n")
         f.write("\n")
@@ -213,11 +220,11 @@ def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
         f.write(
             "    ENSEMBLE NVT  ! sampling the canonical ensemble, accurate properties might need NVE\n"
         )
-        f.write(f"    TEMPERATURE [K] {GLOBALS.CP2K_TEMPERATURE}\n")
+        f.write(f"    TEMPERATURE [K] {temperature}\n")
         f.write(
             "    TIMESTEP [fs] 1.0\n"
         )  # TODO: Turn this into user defined variable
-        f.write(f"    STEPS {GLOBALS.CP2K_STEPS}\n")
+        f.write(f"    STEPS {nsteps}\n")
         f.write("    &THERMOSTAT\n")
         f.write("      TYPE NOSE\n")
         f.write("      REGION GLOBAL\n")
@@ -245,7 +252,7 @@ def write_cp2k_input(cp2k_input_file: Path, atoms: Atoms):
         f.write("&END MOTION\n")
 
 
-def submit_cp2k(input_file: Path) -> JobID:
+def submit_cp2k(input_file: Path, temperature: float, nsteps: int) -> JobID:
     if input_file.suffix == XYZ.filetype:
         atoms = XYZ(input_file).atoms
     elif input_file.suffix == GJF.filetype:
@@ -255,14 +262,18 @@ def submit_cp2k(input_file: Path) -> JobID:
 
     mkdir(FILE_STRUCTURE["cp2k"])
     cp2k_input = FILE_STRUCTURE["cp2k"] / f"{GLOBALS.SYSTEM_NAME}.inp"
-    write_cp2k_input(cp2k_input, atoms)
+    write_cp2k_input(cp2k_input, atoms, temperature, nsteps)
 
     with SubmissionScript(SCRIPT_NAMES["cp2k"]) as submission_script:
-        submission_script.add_command(CP2KCommand(cp2k_input))
+        submission_script.add_command(CP2KCommand(cp2k_input, temperature))
     return submission_script.submit()
 
 
-def cp2k_to_xyz(cp2k_input: Path, xyz: Optional[Path] = None) -> Path:
+def cp2k_to_xyz(
+    cp2k_input: Path,
+    xyz: Optional[Path] = None,
+    temperature: Optional[float] = None,
+) -> Path:
     xyzs = get_files_of_type(Trajectory.filetype, cp2k_input.parent)
     if len(xyzs) == 0:
         raise FileNotFoundError(
@@ -270,63 +281,46 @@ def cp2k_to_xyz(cp2k_input: Path, xyz: Optional[Path] = None) -> Path:
         )
     traj = Trajectory(xyzs[0])
     if xyz is None:
-        xyz = Path(
-            f"{GLOBALS.SYSTEM_NAME}-cp2k-{GLOBALS.CP2K_TEMPERATURE}{Trajectory.filetype}"
-        )
+        path = "{GLOBALS.SYSTEM_NAME}-cp2k"
+        if temperature is not None:
+            path += f"{int(temperature)}"
+        path += f"{Trajectory.filetype}"
+        xyz = Path(path)
     traj.write(xyz)
     return xyz
 
 
-def set_temperature():
-    while True:
-        try:
-            GLOBALS.CP2K_TEMPERATURE = float(
-                input_with_prefill(
-                    "Enter Temperature (K): ",
-                    prefill=f"{GLOBALS.CP2K_TEMPERATURE}",
-                )
-            )
-            break
-        except ValueError:
-            print("Temperature must be a number")
-
-
-def set_nsteps():
-    while True:
-        try:
-            GLOBALS.CP2K_STEPS = int(
-                input_with_prefill(
-                    "Enter Temperature (K): ", prefill=f"{GLOBALS.CP2K_STEPS}"
-                )
-            )
-            break
-        except ValueError:
-            print("Temperature must be an integer")
-
-
-def set_input():
-    global _input_file
-    _input_file = get_input_menu(_input_file, _input_filetypes)
-
-
-def cp2k_menu_refresh(menu):
-    menu.clear_options()
-    menu.add_option(
-        "1", "Run CP2K", submit_cp2k, kwargs={"input_file": _input_file}
-    )
-    menu.add_space()
-    menu.add_option("i", "Set input file", set_input)
-    menu.add_option("t", "Set Temperature", set_temperature)
-    menu.add_option("n", "Set number of timesteps", set_nsteps)
-    menu.add_space()
-    menu.add_message(f"Input File: {_input_file}")
-    menu.add_message(f"Temperature: {GLOBALS.CP2K_TEMPERATURE} K")
-    menu.add_message(f"Number of Timesteps: {GLOBALS.CP2K_STEPS:,}")
-    menu.add_final_options()
+def set_input(input_file: MenuVar[Path]):
+    input_file.var = get_input_menu(input_file.var, INPUT_FILETYPES)
 
 
 def cp2k_menu():
-    global _input_file
-    _input_file = get_first_file(Path(), _input_filetypes)
-    with Menu("CP2K Menu", refresh=cp2k_menu_refresh):
-        pass
+    input_file = MenuVar("Input File", get_first_file(Path(), INPUT_FILETYPES))
+    temperature = MenuVar(
+        "Temperature",
+        GLOBALS.CP2K_TEMPERATURE,
+        custom_formatter=temperature_formatter,
+    )
+    nsteps = MenuVar(
+        "Number of Timesteps",
+        GLOBALS.CP2K_STEPS,
+        custom_formatter=format_number_with_comma,
+    )
+
+    with Menu("CP2K Menu") as menu:
+        menu.add_option(
+            "1",
+            "Run CP2K",
+            submit_cp2k,
+            args=[input_file, temperature, nsteps],
+        )
+        menu.add_space()
+        menu.add_option("i", "Set input file", set_input, args=[input_file])
+        menu.add_option("t", "Set Temperature", set_number, args=[temperature])
+        menu.add_option(
+            "n", "Set number of timesteps", set_number, args=[nsteps]
+        )
+        menu.add_space()
+        menu.add_var(input_file)
+        menu.add_var(temperature)
+        menu.add_var(nsteps)

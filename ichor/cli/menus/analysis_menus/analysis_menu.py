@@ -12,7 +12,7 @@ from ichor.core.menu.menu import Menu
 
 
 def analysis_menu():
-    with Menu("Analysis Menu", space=True, back=True, exit=True) as menu:
+    with Menu("Analysis Menu") as menu:
         menu.add_option("s", "s-curve analysis", s_curve_menu)
         menu.add_option("rmse", "rmse analysis", rmse_menu)
         menu.add_option("dlpoly", "dlpoly analysis", dlpoly_menu)

@@ -7,6 +7,7 @@ from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE
 from ichor.hpc.batch_system import Job, JobID
 
 
+# todo: move these to hpc
 def read_jid(jid_file: Path = FILE_STRUCTURE["jid"]) -> List[JobID]:
     if jid_file.exists():
         with open(jid_file, "r") as f:
@@ -38,7 +39,6 @@ def delete_jobs():
         f.write("[]")
 
 
-# todo: move these to hpc
 def get_current_jobs() -> List[Job]:
     all_jobs = BATCH_SYSTEM.get_queued_jobs()
     ichor_jobs = read_jid(FILE_STRUCTURE["jid"])
@@ -68,7 +68,7 @@ def get_status_of_running_jobs():
 
 def queue_menu():
     """Handler function which opens up a menu containing options relating to jobs."""
-    with Menu("Queue Meu", space=True, back=True, exit=True) as menu:
+    with Menu("Queue Meu") as menu:
         menu.add_option("del", "Delete currently running jobs", delete_jobs)
         menu.add_option(
             "stat",

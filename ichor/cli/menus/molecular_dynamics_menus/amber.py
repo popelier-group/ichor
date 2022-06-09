@@ -6,10 +6,14 @@ import numpy as np
 
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.atoms import Atom, Atoms
+from ichor.core.common.formatting import (
+    format_number_with_comma,
+    temperature_formatter,
+)
 from ichor.core.common.io import mkdir
 from ichor.core.common.os import input_with_prefill
 from ichor.core.files import GJF, XYZ, Mol2, Trajectory
-from ichor.core.menu.menu import Menu
+from ichor.core.menu import Menu, MenuVar, set_number
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (
@@ -17,6 +21,8 @@ from ichor.hpc.submission_script import (
     AmberCommand,
     SubmissionScript,
 )
+
+# todo: put this in core
 
 
 class AmberThermostat(Enum):
@@ -57,8 +63,9 @@ THERMOSTAT = AmberThermostat.Langevin
 BOND_CONSTRAINT = BondLengthConstraint.NoConstraint
 FORCE_EVALUATION = ForceEvaluation.Complete
 PBC = PeriodicBoundaryCondition.NoPeriodicBoundary
-_input_file = None
-_input_filetypes = [XYZ.filetype, GJF.filetype]
+
+input_filetypes = [XYZ.filetype, GJF.filetype]
+
 _write_coord_every = 1
 _write_vel_every = 0
 _write_forces_every = 0
@@ -101,7 +108,7 @@ def write_mdin(mdin_file: Path):
         f.write(" /\n")
 
 
-def submit_amber(input_file: Path) -> JobID:
+def submit_amber(input_file: Path, temperature: float) -> JobID:
     if input_file.suffix == XYZ.filetype:
         atoms = XYZ(input_file).atoms
     elif input_file.suffix == GJF.filetype:
@@ -125,7 +132,9 @@ def submit_amber(input_file: Path) -> JobID:
     write_mdin(mdin)
 
     with SubmissionScript(SCRIPT_NAMES["amber"]) as submission_script:
-        submission_script.add_command(AmberCommand(mol2.path, mdin))
+        submission_script.add_command(
+            AmberCommand(mol2.path, mdin, temperature)
+        )
     return submission_script.submit()
 
 
@@ -169,72 +178,49 @@ def mdcrd_to_xyz(
                     traj = np.array([])
 
 
-def set_temperature():
-    while True:
-        try:
-            GLOBALS.AMBER_TEMPERATURE = float(
-                input_with_prefill(
-                    "Enter Temperature (K): ",
-                    prefill=f"{GLOBALS.AMBER_TEMPERATURE}",
-                )
-            )
-            break
-        except ValueError:
-            print("Temperature must be a number")
+def set_input(input_file: MenuVar[Path]):
+    input_file.var = get_input_menu(input_file.var, input_filetypes)
 
 
-def set_nsteps():
-    while True:
-        try:
-            GLOBALS.AMBER_STEPS = int(
-                input_with_prefill(
-                    "Enter Temperature (K): ", prefill=f"{GLOBALS.AMBER_STEPS}"
-                )
-            )
-            break
-        except ValueError:
-            print("Temperature must be an integer")
-
-
-def set_input():
-    global _input_file
-    _input_file = get_input_menu(_input_file, _input_filetypes)
-
-
-def set_print_every():
-    global _write_coord_every
-    while True:
-        try:
-            _write_coord_every = int(
-                input_with_prefill(
-                    "Print Every: ", prefill=f"{_write_coord_every}"
-                )
-            )
-            break
-        except ValueError:
-            print("Number to print coords every n must be an integer")
-
-
-def amber_menu_refresh(menu):
-    menu.clear_options()
-    menu.add_option(
-        "1", "Run Amber", submit_amber, kwargs={"input_file": _input_file}
-    )
-    menu.add_space()
-    menu.add_option("i", "Set input file", set_input)
-    menu.add_option("t", "Set Temperature", set_temperature)
-    menu.add_option("n", "Set number of timesteps", set_nsteps)
-    menu.add_option("e", "Set print every n timesteps", set_print_every)
-    menu.add_space()
-    menu.add_message(f"Input File: {_input_file}")
-    menu.add_message(f"Temperature: {GLOBALS.AMBER_TEMPERATURE} K")
-    menu.add_message(f"Number of Timesteps: {GLOBALS.AMBER_STEPS:,}")
-    menu.add_message(f"Write Output Every '{_write_coord_every}' timestep(s)")
-    menu.add_final_options()
+def timestep_formatter(write_every: int) -> str:
+    return f"'{write_every}' timestep(s)"
 
 
 def amber_menu():
-    global _input_file
-    _input_file = get_first_file(Path(), _input_filetypes)
-    with Menu("Amber Menu", refresh=amber_menu_refresh):
-        pass
+    input_file = MenuVar("Input File", get_first_file(Path(), input_filetypes))
+    temperature = MenuVar(
+        "Temperature",
+        GLOBALS.AMBER_TEMPERATURE,
+        custom_formatter=temperature_formatter,
+    )
+    nsteps = MenuVar(
+        "Number of Timesteps",
+        GLOBALS.AMBER_STEPS,
+        custom_formatter=format_number_with_comma,
+    )
+    write_coord_every = MenuVar(
+        "Write Output Every",
+        GLOBALS.AMBER_STEPS,
+        custom_formatter=timestep_formatter,
+    )
+    with Menu("Amber Menu") as menu:
+        menu.add_option(
+            "1", "Run Amber", submit_amber, args=[input_file, temperature]
+        )
+        menu.add_space()
+        menu.add_option("i", "Set input file", set_input, args=[input_file])
+        menu.add_option("t", "Set Temperature", set_number, args=[temperature])
+        menu.add_option(
+            "n", "Set number of timesteps", set_number, args=[nsteps]
+        )
+        menu.add_option(
+            "e",
+            "Set print every n timesteps",
+            set_number,
+            args=[write_coord_every],
+        )
+        menu.add_space()
+        menu.add_var(input_file)
+        menu.add_var(temperature)
+        menu.add_var(nsteps)
+        menu.add_var(write_coord_every)

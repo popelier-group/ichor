@@ -11,8 +11,9 @@ def get_child_processes() -> Optional[List[Path]]:
     from ichor.hpc import FILE_STRUCTURE
 
     if not FILE_STRUCTURE["child_processes"].exists():
-        from ichor.hpc.auto_run.per.child_processes import \
-            find_child_processes_recursively
+        from ichor.hpc.auto_run.per.child_processes import (
+            find_child_processes_recursively,
+        )
 
         find_child_processes_recursively()
         if not FILE_STRUCTURE["child_processes"].exists():
@@ -26,9 +27,8 @@ def get_collate_model_log(
     directory: Optional[Path] = None,
 ) -> Dict[str, Dict[str, Tuple[Path, int]]]:
     from ichor.core.common.types import DictList
-    from ichor.hpc import FILE_STRUCTURE
-    from ichor.hpc import GLOBALS
     from ichor.core.models import Models
+    from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
     if directory is None:
         directory = GLOBALS.CWD
@@ -107,16 +107,18 @@ def collate_model_log_top_down(directory: Optional[Path] = None):
     )
 
 
-def collate_model_log(directory: Optional[Path] = None) -> None:
-    from ichor.hpc import FILE_STRUCTURE
-    from ichor.hpc import GLOBALS
+def collate_model_log(
+    directory: Optional[Path] = None,
+    child_processes: Optional[List[Path]] = None,
+) -> None:
     from ichor.core.models import Models
+    from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
     if directory is None:
         directory = GLOBALS.CWD
 
     with pushd(directory, update_cwd=True):
-        child_processes = get_child_processes()
+        child_processes = child_processes or get_child_processes()
         if child_processes is None:
             return
 
@@ -135,15 +137,17 @@ def collate_model_log(directory: Optional[Path] = None) -> None:
     collate_model_log_top_down(directory)
 
 
-def collate_models(directory: Optional[Path] = None) -> None:
-    from ichor.hpc import FILE_STRUCTURE
-    from ichor.hpc import GLOBALS
+def collate_models(
+    directory: Optional[Path] = None,
+    child_processes: Optional[List[Path]] = None,
+) -> None:
+    from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
     if directory is None:
         directory = GLOBALS.CWD
 
     with pushd(directory, update_cwd=True):
-        child_processes = get_child_processes()
+        child_processes = child_processes or get_child_processes()
         if child_processes is None:
             return
 

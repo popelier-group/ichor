@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -7,8 +7,12 @@ from ichor.core import constants
 from ichor.core.common.io import cp, mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.files import PointsDirectory
-from ichor.core.menu import ListCompleter
-from ichor.core.menu.menu import Menu
+from ichor.core.menu import (
+    Menu,
+    MenuVar,
+    select_multiple_from_list,
+    toggle_bool_var,
+)
 from ichor.core.models import Model
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
@@ -23,17 +27,11 @@ from ichor.hpc.submission_script import (
     SubmissionScript,
 )
 
-model_data_location: Path = Path()
-_model_data: Optional[PointsDirectory] = None
-n_training_points: int = 0
-atom_models_to_make: List[str] = []
-
-atoms_selected = False
-models_selected = False
+default_model_type = "iqa"
 
 
 def MODEL_TYPES() -> List[str]:
-    _model_types = [
+    model_types = [
         "iqa",
         *constants.multipole_names,
     ]
@@ -42,180 +40,104 @@ def MODEL_TYPES() -> List[str]:
         QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
         is QuantumChemicalTopologyProgram.Morfi
     ):
-        _model_types += [
+        model_types += [
             "dispersion"
         ]  # dispersion only available when qctp is morfi
-    return _model_types
+    return model_types
 
 
-default_model_type = "iqa"
-atom_names: List[str] = []
-
-model_types = [default_model_type]
-
-
-def setup(directory: Path):
-    """
-    Setup the global variables defining what GPR models to make
-    Implemented with global variables to allow for calling from the menu and from the command line
-    during auto run, having one setup function for both allows for less code duplication
-    """
-
-    global model_data_location
-    global _model_data
-    global n_training_points
-    global atom_names
-    global atom_models_to_make
-
-    model_data_location = directory
-    _model_data = PointsDirectory(directory)
-    n_training_points = len(_model_data)
-    atom_names = [atom.name for atom in _model_data[0].atoms]
-    atom_models_to_make = list(atom_names)
-
-
-def toggle_model_type(ty: str):
-    global model_types
-    if ty in model_types:
-        del model_types[model_types.index(ty)]
-    else:
-        model_types += [ty]
-
-
-def toggle_add_dispersion():
-    GLOBALS.ADD_DISPERSION_TO_IQA = not GLOBALS.ADD_DISPERSION_TO_IQA
-
-
-def select_model_type():
-    """Select properties for which to make models - these can be any combination of multiple moments and iqa energy."""
-    global model_types
-    global models_selected
-    if not models_selected:
-        model_types = []
-    while True:
-        Menu.clear_screen()
-        print("Select Models To Create")
-        _model_types = MODEL_TYPES()
-        model_type_list = _model_types + ["multipoles"]
-        with ListCompleter(model_type_list + ["all", "c", "clear"]):
-            for ty in _model_types:
-                print(f"[{'x' if ty in model_types else ' '}] {ty}")
-            print()
-            ans = input(">> ")
-            ans = ans.strip().lower()
-            if ans == "":
-                break
-            elif ans in model_type_list:
-                if ans == "multipoles":
-                    for multipole in constants.multipole_names:
-                        if multipole in model_type_list:
-                            toggle_model_type(multipole)
-                else:
-                    toggle_model_type(ans)
-            elif ans == "all":
-                model_types = list(_model_types)
-            elif ans in ["c", "clear"]:
-                model_types.clear()
-    models_selected = True
-
-
-def select_number_of_training_points():
-    global n_training_points
-    print(f"Input Number of Training Points (1-{len(_model_data)})")
+def select_number_of_training_points(
+    n_training_points: MenuVar[int], model_data: MenuVar[PointsDirectory]
+):
+    max_training_points = len(model_data.var)
+    print(f"Input Number of Training Points (1-{max_training_points})")
     while True:
         ans = input(">> ")
         try:
             ans = int(ans)
-            if not 1 <= ans <= len(_model_data):
+            if not 1 <= ans <= max_training_points:
                 print(
-                    f"Error: Answer must be between 1 and {len(_model_data)}"
+                    f"Error: Answer must be between 1 and {max_training_points}"
                 )
             else:
-                n_training_points = ans
+                n_training_points.var = ans
                 break
         except TypeError:
             print("Error: Answer must be an integer")
 
 
-def toggle_atom_model(atom: str):
-    global atom_models_to_make
-    if atom in atom_models_to_make:
-        del atom_models_to_make[atom_models_to_make.index(atom)]
-    else:
-        atom_models_to_make += [atom]
-
-
-def select_atoms():
-    global atom_models_to_make
-    global atoms_selected
-    if not atoms_selected:
-        atom_models_to_make = []
-    with ListCompleter(atom_names + ["all", "c", "clear"]):
-        while True:
-            print("Select Atoms To Create Models For")
-            for atom in atom_names:
-                print(f"[{'x'if atom in atom_models_to_make else ' '}] {atom}")
-            print()
-            ans = input(">> ")
-            ans = ans.strip()
-            if ans == "":
-                break
-            elif ans in atom_names:
-                toggle_atom_model(ans)
-            elif ans == "all":
-                atom_models_to_make = list(atom_names)
-            elif ans in ["c", "clear"]:
-                atom_models_to_make.clear()
-    atoms_selected = True
-
-
-def make_models_menu_refresh(menu):
-    """
-    This is a `refresh` function that takes in an instance of a menu and add options to it. See `class Menu` `refresh` attrubute.
-    By defining a custom refresh function, when the menu refreshes we can clear the menu options to refresh the messages so they
-    update when changed by the user
-
-    :param menu: An instance of `class Menu` to which options are added.
-    """
-    menu.clear_options()
-    menu.add_option("1", "Make Models", create_ferebus_directories_and_submit)
-    menu.add_space()
-    menu.add_option("t", "Select Model Type", select_model_type)
-    menu.add_option(
-        "n",
-        "Select Number of Training Points",
-        select_number_of_training_points,
-    )
-    menu.add_option("a", "Select Atoms", select_atoms)
-    if (
-        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
-        is QuantumChemicalTopologyProgram.Morfi
-    ):
-        menu.add_option(
-            "d", "Toggle Add Dispersion to IQA", toggle_add_dispersion
-        )
-    menu.add_space()
-    menu.add_message(f"Model Type(s): {', '.join(model_types)}")
-    menu.add_message(f"Number of Training Points: {n_training_points}")
-    menu.add_message(f"Atoms: {', '.join(map(str, atom_models_to_make))}")
-    if (
-        QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
-        is QuantumChemicalTopologyProgram.Morfi
-    ):
-        menu.add_message(
-            f"Add Dispersion to IQA: {GLOBALS.ADD_DISPERSION_TO_IQA}"
-        )
-    menu.add_final_options()
-
-
 def make_models_menu(directory: Path):
     """The handler function for making models from a specific directory. To make the models, both Gaussian and AIMALL have to be ran
     for the points that are in the directory."""
-    setup(directory)
-    # use context manager here because we need to run the __enter__ and __exit__ methods.
-    # Make an instance called `menu` and set its `self.refresh` to `make_models_menu_refresh`, which gets called in the menu's `run` method
-    with Menu("Make Models Menu", refresh=make_models_menu_refresh) as menu:
-        pass
+
+    model_data = MenuVar("Model Data", PointsDirectory(directory))
+    n_training_points = MenuVar(
+        "Number of Training Points", len(model_data.var)
+    )
+    atom_names = MenuVar(
+        "Atoms", [atom.name for atom in model_data.var[0].atoms]
+    )
+    selected_atoms = MenuVar("Atoms", atom_names.var)
+
+    model_types = MenuVar("Model Types", [default_model_type])
+
+    add_dispersion_to_iqa = MenuVar(
+        "Add Dispersion to IQA", GLOBALS.ADD_DISPERSION_TO_IQA
+    )
+
+    with Menu("Make Models Menu") as menu:
+        menu.add_option(
+            "1",
+            "Make Models",
+            create_ferebus_directories_and_submit,
+            args=[model_data, atom_names, model_types],
+        )
+        menu.add_space()
+        menu.add_option(
+            "t",
+            "Select Model Type",
+            select_multiple_from_list,
+            args=[
+                MODEL_TYPES(),
+                model_types,
+                "Select Models To Create",
+            ],
+        )
+        menu.add_option(
+            "n",
+            "Select Number of Training Points",
+            select_number_of_training_points,
+            args=[n_training_points, model_data],
+        )
+        menu.add_option(
+            "a",
+            "Select Atoms",
+            select_multiple_from_list,
+            args=[
+                atom_names.var,
+                selected_atoms,
+                "Select Atoms To Create Models For",
+            ],
+        )
+        if (
+            QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+            is QuantumChemicalTopologyProgram.Morfi
+        ):
+            menu.add_option(
+                "d",
+                "Toggle Add Dispersion to IQA",
+                toggle_bool_var,
+                args=[add_dispersion_to_iqa],
+            )
+        menu.add_space()
+        menu.add_var(model_types)
+        menu.add_var(n_training_points)
+        menu.add_var(atom_names)
+        if (
+            QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
+            is QuantumChemicalTopologyProgram.Morfi
+        ):
+            menu.add_var(add_dispersion_to_iqa)
 
 
 # todo: from here below should at least be in hpc
@@ -232,20 +154,12 @@ def make_models(
 
     :return: The job id of the submitted job
     """
-    global model_data_location
-    global _model_data
-    global n_training_points
-    global atom_models_to_make
-    global model_types
 
-    model_data_location = directory
-    _model_data = PointsDirectory(directory)
+    model_data = PointsDirectory(directory)
 
-    n_training_points = ntrain or len(_model_data)
-    model_types = (
-        [ty for ty in types] if types is not None else [default_model_type]
-    )
-    atom_models_to_make = atoms or [atom.name for atom in _model_data[0].atoms]
+    n_training_points = ntrain or len(model_data)
+    model_types = list(types) if types is not None else [default_model_type]
+    atom_models_to_make = atoms or [atom.name for atom in model_data[0].atoms]
 
     logger.info(
         f"Making Models for {atom_models_to_make} atoms and {model_types} types with {n_training_points} training points"
@@ -279,6 +193,10 @@ def _move_model(f: Path):
 
 
 def create_ferebus_directories_and_submit(
+    model_data: PointsDirectory,
+    atoms: List[str],
+    model_types: List[str],
+    n_training_points: Optional[int] = None,
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     """Makes the training set file in a separate directory for each topological atom. Calls `make_ferebus_script` which writes out the ferebus
@@ -287,11 +205,12 @@ def create_ferebus_directories_and_submit(
     :return: The job id of the submitted job
     """
     ferebus_directories = []
+    n_training_points = n_training_points or len(model_data)
 
-    for atom in atom_models_to_make:
+    for atom in atoms:
         training_data = []
-        features = _model_data[atom].features
-        for i, point in enumerate(_model_data):
+        features = model_data[atom].features
+        for i, point in enumerate(model_data):
             # if a point does not have int files in it this will fail.
             # point[atom] is an AtomData instance. Usually, an INT is used as self.properties attribute
             # of AtomData. Then INT is subclasses from GeometryDataFile (where get_property is locateds)
@@ -299,14 +218,16 @@ def create_ferebus_directories_and_submit(
                 properties = {
                     ty: point[atom].get_property(ty) for ty in model_types
                 }
-                training_data += [(features[i], properties)]
-            except:
+                training_data.append((features[i], properties))
+            except AttributeError:
                 logger.warning(
                     f"Failed to get property information for point {point.path.absolute()}. Check if .int \
                     files from AIMALL are present in it."
                 )
 
-        ferebus_directory = write_training_set(atom, training_data)
+        ferebus_directory = write_training_set(
+            atom, training_data, n_training_points
+        )
         ferebus_directories += [ferebus_directory]
 
     return make_ferebus_script(ferebus_directories, hold=hold)
@@ -327,13 +248,18 @@ def make_ferebus_script(
     return ferebus_script.submit(hold=hold)
 
 
-def write_training_set(atom, training_data) -> Path:
+def write_training_set(
+    atom: str,
+    training_data: List[Tuple[np.ndarray, Dict[str, float]]],
+    n_training_points: int,
+) -> Path:
     """Write training set, containing inputs (such as r, theta, phi features), and outputs (IQA and multipole moments) for one atom.
     Returns the directory in which the training set was written as each atom has its own directory.
 
     :param atom: The name of the atom for which the training set is made (e.g. C1)
     :param training_data: A list of tuples containing the training data. Each tuple contains the (input, output) pair. The inputs are stored as a numpy array,
         while the outputs are stored as a dictionary, containing key:value paris of property_name (eg. iqa, q00) : value
+    :param n_training_points: Number of training points to use of the training_data
     """
     from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
@@ -345,12 +271,13 @@ def write_training_set(atom, training_data) -> Path:
         ferebus_directory / f"{GLOBALS.SYSTEM_NAME}_{atom}_TRAINING_SET.csv"
     )
     # write config for ferebus
-    write_ftoml(ferebus_directory, atom)
+    model_types = list(training_data[0][1].keys()) if training_data else []
+    write_ftoml(ferebus_directory, atom, model_types)
     with open(training_set_file, "w") as ts:
         if n_training_points > 0:
             # this part is to get headers for the columns (so f1,f2,f3....,q00,q10,....)
             inputs, outputs = training_data[0]
-            input_headers = [f"f{i+1}" for i in range(len(inputs))]
+            input_headers = [f"f{i + 1}" for i in range(len(inputs))]
             output_headers = [f"{output}" for output in outputs.keys()]
             ts.write(
                 f",{','.join(input_headers)},{','.join(output_headers)}\n"
@@ -364,11 +291,12 @@ def write_training_set(atom, training_data) -> Path:
     return ferebus_directory
 
 
-def write_ftoml(ferebus_directory: Path, atom: str):
+def write_ftoml(ferebus_directory: Path, atom: str, model_types: List[str]):
     """Write the toml file which holds settings for FEREBUS.
 
     :param ferebus_directory: A Path object pointing to the directory where the FEREBUS job is going to be ran
     :param atom: A string corresponding to the atom's name (such as C1, H3, etc.)
+    :param model_types: List of model types (str) being trained
     """
     from ichor.hpc import GLOBALS
 

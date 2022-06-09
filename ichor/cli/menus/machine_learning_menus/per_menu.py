@@ -1,6 +1,7 @@
-from ichor.core.analysis.get_path import get_dir
-from ichor.core.menu import ListCompleter
-from ichor.core.menu.menu import Menu
+from pathlib import Path
+from typing import List
+
+from ichor.core.menu import Menu, MenuVar, select_multiple_from_list
 from ichor.hpc.auto_run.per import (
     PerAtomDaemon,
     PerAtomPerPropertyDaemon,
@@ -23,14 +24,9 @@ from ichor.hpc.auto_run.per.child_processes import (
 )
 from ichor.hpc.main.collate_log import collate_model_log
 
-child_processes = []
-all_child_processes = []
-
-child_processes_selected = False
-
 
 def auto_run_per_menu():
-    with Menu("Per-Value Menu", space=True, back=True, exit=True) as menu:
+    with Menu("Per-Value Menu") as menu:
         menu.add_option("a", "Per-Atom", auto_run_per_atom_menu)
         menu.add_option("p", "Per-Property", auto_run_per_property)
         menu.add_space()
@@ -46,7 +42,7 @@ def auto_run_per_menu():
 
 
 def auto_run_per_atom_menu():
-    with Menu("Per-Atom Menu", space=True, back=True, exit=True) as menu:
+    with Menu("Per-Atom Menu") as menu:
         menu.add_option("r", "Run per-atom", auto_run_per_atom)
         menu.add_space()
         menu.add_option("d", "Run per-atom daemon", run_per_atom_daemon)
@@ -58,7 +54,7 @@ def auto_run_per_atom_menu():
 
 
 def auto_run_per_property_menu():
-    with Menu("Per-Property Menu", space=True, back=True, exit=True) as menu:
+    with Menu("Per-Property Menu") as menu:
         menu.add_option("r", "Run per-property", auto_run_per_property)
         menu.add_space()
         menu.add_option(
@@ -70,9 +66,7 @@ def auto_run_per_property_menu():
 
 
 def auto_run_per_atom_per_property_menu():
-    with Menu(
-        "Per-Atom + Per-Property Menu", space=True, back=True, exit=True
-    ) as menu:
+    with Menu("Per-Atom + Per-Property Menu") as menu:
         menu.add_option(
             "r", "Run per-atom + per-property", auto_run_per_atom_per_property
         )
@@ -89,62 +83,9 @@ def auto_run_per_atom_per_property_menu():
         )
 
 
-def edit_list_of_child_processes():
-    # todo: make this a general purpose routine, it is a repeat of main/make_models.py
-    global child_processes
-    global child_processes_selected
-    if not child_processes_selected:
-        child_processes = []
-    all_child_processes = find_child_processes_recursively()
-    while True:
-        Menu.clear_screen()
-        print("Select Child Processes")
-        child_process_options = [
-            str(i + 1) for i in range(len(all_child_processes))
-        ] + ["all", "c", "clear", "add"]
-        with ListCompleter(child_process_options):
-            for i, cp in enumerate(all_child_processes):
-                print(
-                    f"[{i+1}] [{'x' if cp in child_processes else ' '}] {cp}"
-                )
-            print()
-            ans = input(">> ")
-            ans = ans.strip().lower()
-            if ans == "":
-                break
-            elif ans in ["all"]:
-                child_processes = list(all_child_processes)
-            elif ans in ["add"]:
-                new_child_process = get_dir()
-                all_child_processes += [new_child_process]
-                child_processes += [new_child_process]
-            elif ans in ["c", "clear"]:
-                child_processes.clear()
-            elif ans in child_process_options:
-                idx = int(ans) - 1
-                if all_child_processes[idx] in child_processes:
-                    del child_processes[
-                        child_processes.index(all_child_processes[idx])
-                    ]
-                else:
-                    child_processes += [all_child_processes[idx]]
-            else:
-                print("Invalid Input")
-    child_processes_selected = True
-
-
-def add_child_processes_to_menu(menu: Menu) -> Menu:
-    menu.add_message("Child Processes:")
-    for child_process in child_processes:
-        menu.add_message(f"- {child_process}")
-    return menu
-
-
-def child_process_queue_menu() -> None:
-    with Menu(
-        "Child Process Queue Menu", space=True, back=True, exit=True
-    ) as menu:
-        menu = add_child_processes_to_menu(menu)
+def child_process_queue_menu(child_processes: MenuVar[List[Path]]) -> None:
+    with Menu("Child Process Queue Menu") as menu:
+        menu.add_var(child_processes)
         menu.add_space()
         menu.add_option(
             "del",
@@ -154,53 +95,61 @@ def child_process_queue_menu() -> None:
         )
 
 
-def control_child_processes_menu_refresh(menu: Menu) -> None:
-    from ichor.cli.menus.main_menu import main_menu
-
-    global child_processes
-    menu.clear_options()
-
-    menu = add_child_processes_to_menu(menu)
-    menu.add_space()
-    menu.add_option(
-        "e", "Edit Child Process List", edit_list_of_child_processes
-    )
-    menu.add_space()
-    menu.add_option(
-        "main",
-        "Run Main Menu Function for each Child Process",
-        main_menu,
-        kwargs={"subdirs": child_processes},
-    )
-    menu.add_option(
-        "log", "Collate Model Logs from Child Processes", collate_model_log
-    )
-    menu.add_option("rerun", "Rerun failed auto-runs", ReRunDaemon().start)
-    menu.add_option(
-        "stat",
-        "Get Status of all Child Processes",
-        print_child_processes_status,
-        wait=True,
-    )
-    menu.add_option(
-        "stop", "Stop all child processes", stop_all_child_processes
-    )
-    menu.add_space()
-    menu.add_option(
-        "concat",
-        "Concatenate PointsDirectory to Child Processes Training Set",
-        concat_dir_to_ts,
-    )
-
-    menu.add_final_options()
+def child_processes_formatter(child_processes: List[Path]) -> str:
+    result = "\n\n"
+    for child_process in child_processes:
+        result += f"- {child_process}\n"
+    result += "\n"
+    return result
 
 
 def control_child_processes_menu() -> None:
-    global child_processes
-    global all_child_processes
-    child_processes = find_child_processes_recursively()
-    all_child_processes = list(child_processes)
-    with Menu(
-        "Child Processes Menu", refresh=control_child_processes_menu_refresh
-    ):
-        pass
+    all_child_processes = find_child_processes_recursively()
+    child_processes = MenuVar(
+        "Child Processes",
+        list(all_child_processes),
+        custom_formatter=child_processes_formatter,
+    )
+    with Menu("Child Processes Menu") as menu:
+        menu.add_var(child_processes)
+        menu.add_space()
+        menu.add_option(
+            "e",
+            "Edit Child Process List",
+            select_multiple_from_list,
+            args=[
+                all_child_processes,
+                child_processes,
+                "Select Child Processes",
+            ],
+        )
+        menu.add_space()
+        menu.add_option(
+            "log",
+            "Collate Model Logs from Child Processes",
+            collate_model_log,
+            kwargs={"child_processes": child_processes},
+        )
+        menu.add_option(
+            "rerun", "Rerun failed auto-runs", ReRunDaemon().start
+        )  # todo: this probably needs child processes as an argument?
+        menu.add_option(
+            "stat",
+            "Get Status of Child Processes",
+            print_child_processes_status,
+            kwargs={"child_processes": child_processes},
+            wait=True,
+        )
+        menu.add_option(
+            "stop",
+            "Stop child processes",
+            stop_all_child_processes,
+            kwargs={"child_processes": child_processes},
+        )
+        menu.add_space()
+        menu.add_option(
+            "concat",
+            "Concatenate PointsDirectory to Child Processes Training Set",
+            concat_dir_to_ts,
+            kwargs={"child_processes": child_processes},
+        )

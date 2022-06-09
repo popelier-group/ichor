@@ -50,3 +50,4 @@ and `ichor.core` to provide the `ichor` functionality as an application.
 - [ ] active_learning -> core?
 - [ ] both qcp and qct hpc.main -> hpc.programs?
 - [ ] cli menus directory structure should follow tree of main menu?
+- [ ] DLPOLY -> DL_FFLUX

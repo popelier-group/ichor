@@ -8,9 +8,14 @@ from ichor.core.analysis.get_atoms import (
 from ichor.core.analysis.get_input import get_files_in_cwd
 from ichor.core.analysis.get_path import get_path
 from ichor.core.atoms import Atoms
-from ichor.core.files import XYZ, PointsDirectory, Trajectory
-from ichor.core.menu import ListCompleter
-from ichor.core.menu.menu import Menu
+from ichor.core.files import XYZ
+from ichor.core.menu import (
+    Menu,
+    MenuVar,
+    return_arg,
+    select_multiple_from_list,
+    toggle_bool_var,
+)
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (
     SCRIPT_NAMES,
@@ -18,134 +23,61 @@ from ichor.hpc.submission_script import (
     SubmissionScript,
 )
 
-_traj: Optional[Trajectory] = None
-_atoms: Optional[Atoms] = None
-
-_centre_atoms: List[str] = []
-_rmsd_subsystem: List[str] = []
-
-_input_file: Optional[Path] = None
-_output_file: Optional[Path] = None
-_output_file_set: bool = False
-
-_submit = False
-
-
-def _first_ts_of_input() -> Atoms:
-    return get_atoms_from_path(_input_file)
-
-
-def _find_default_file():
-    files = get_files_in_cwd([XYZ.filetype])
-    if len(files) == 1:
-        _set_input_file(files[0])
-    elif len(files) > 1:
-        with Menu("Select Input File") as menu:
-            for i, f in enumerate(files):
-                menu.add_option(
-                    f"{i+1}",
-                    f"{f}",
-                    _set_input_file,
-                    kwargs={"input_file": f},
-                    auto_close=True,
-                )
-    else:
-        _set_input_file()
-
-
-def _set_input_file(input_file: Optional[Path] = None) -> Path:
-    global _input_file
-    global _output_file
-    global _atoms
-    global _centre_atoms
-    global _rmsd_subsystem
-    _input_file = input_file or _get_input_file()
-    if not _output_file_set:
-        _output_file = Path(
-            _input_file.parent / f"{_input_file.stem}_ROTATED{XYZ.filetype}"
-        )
-
-    _atoms = _first_ts_of_input()
-    _centre_atoms = _atoms.names
-    _rmsd_subsystem = _atoms.names
-    return _input_file
-
-
-def _set_output_file():
-    global _output_file
-    global _output_file_set
-    _output_file = get_path(prompt="Output File Location: ")
-    _output_file_set = True
-
 
 def _get_input_file() -> Path:
+    files = get_files_in_cwd([XYZ.filetype])
+    if len(files) == 1:
+        return files[0]
+    elif len(files) > 1:
+        menu = Menu("Select Input File")
+        for i, f in enumerate(files):
+            menu.add_option(
+                f"{i+1}",
+                f"{f}",
+                return_arg,
+                args=[f],
+                auto_close=True,
+            )
+        return menu.run()
+    else:
+        return _get_custom_input_file()
+
+
+def _get_custom_input_file() -> Path:
     return get_path(prompt="Input File Location: ")
 
 
-def _set_centre_atoms():
-    global _centre_atoms
-    _centre_atoms = []
+def _set_input_file(
+    input_file: MenuVar[Path],
+    output_file: MenuVar[Path],
+    input_file_set: MenuVar[bool],
+    output_file_set: MenuVar[bool],
+    atoms: MenuVar[List[str]],
+    centre_atoms: MenuVar[List[str]],
+    rmsd_subsystem: MenuVar[List[str]],
+):
+    if not input_file_set.var:
+        input_file.var = _get_input_file()
+        input_file_set.var = True
+    else:
+        input_file.var = _get_custom_input_file()
 
-    def toggle_centre_atom(atom: str):
-        global _centre_atoms
-        if atom in _centre_atoms:
-            del _centre_atoms[_centre_atoms.index(atom)]
-        else:
-            _centre_atoms += [atom]
+    if not output_file_set.var:
+        output_file.var = Path(
+            input_file.var.parent
+            / f"{input_file.var.stem}_ROTATED{XYZ.filetype}"
+        )
 
-    while True:
-        Menu.clear_screen()
-        print("Select Atoms To Centre On")
-        _all_atoms = _atoms.names
-        with ListCompleter(_all_atoms + ["all", "c", "clear"]):
-            for atom_name in _all_atoms:
-                print(
-                    f"[{'x' if atom_name in _centre_atoms else ' '}] {atom_name}"
-                )
-            print()
-            ans = input(">> ")
-            ans = ans.strip()
-            if ans == "":
-                break
-            elif ans in _all_atoms:
-                toggle_centre_atom(ans)
-            elif ans == "all":
-                _centre_atoms = list(_all_atoms)
-            elif ans in ["c", "clear"]:
-                _centre_atoms.clear()
+    atoms.var = get_atoms_from_path(input_file.var).names
+    centre_atoms.var = atoms.var
+    rmsd_subsystem.var = atoms.var
 
 
-def _set_subsys_atoms():
-    global _rmsd_subsystem
-    _rmsd_subsystem = []
-
-    def toggle_subsys_atom(atom: str):
-        global _rmsd_subsystem
-        if atom in _rmsd_subsystem:
-            del _rmsd_subsystem[_rmsd_subsystem.index(atom)]
-        else:
-            _rmsd_subsystem += [atom]
-
-    while True:
-        Menu.clear_screen()
-        print("Select Atoms Use as Subsystem")
-        _all_atoms = _atoms.names
-        with ListCompleter(_all_atoms + ["all", "c", "clear"]):
-            for atom_name in _all_atoms:
-                print(
-                    f"[{'x' if atom_name in _rmsd_subsystem else ' '}] {atom_name}"
-                )
-            print()
-            ans = input(">> ")
-            ans = ans.strip()
-            if ans == "":
-                break
-            elif ans in _all_atoms:
-                toggle_subsys_atom(ans)
-            elif ans == "all":
-                _rmsd_subsystem = list(_all_atoms)
-            elif ans in ["c", "clear"]:
-                _rmsd_subsystem.clear()
+def _set_output_file(
+    output_file: MenuVar[Path], output_file_set: MenuVar[bool]
+):
+    output_file.var = get_path(prompt="Output File Location: ")
+    output_file_set.var = True
 
 
 def rotate_mol(
@@ -190,7 +122,9 @@ def submit_rotate_mol(
         submission_script.add_command(
             ICHORCommand(
                 func="rotate_mol",
-                func_args=[input_file, output_file, centre_atoms, subsys],
+                func_args=list(
+                    map(str, [input_file, output_file, centre_atoms, subsys])
+                ),
             )
         )
     return submission_script.submit()
@@ -201,51 +135,89 @@ def run_rotate_mol(
     output_file: Optional[Path] = None,
     centre_atoms: Optional[List[str]] = None,
     subsys: Optional[List[str]] = None,
+    submit: bool = False,
 ):
-    if _submit:
+    if submit:
         submit_rotate_mol(input_file, output_file, centre_atoms, subsys)
     else:
         rotate_mol(input_file, output_file, centre_atoms, subsys)
 
 
-def _toggle_submit():
-    global _submit
-    _submit = not _submit
-
-
-def _rotate_mol_menu_refresh(menu):
-    menu.clear_options()
-    menu.add_option(
-        "1",
-        "Run rotate-mol",
-        run_rotate_mol,
-        kwargs={
-            "input_file": _input_file,
-            "output_file": _output_file,
-            "centre_atoms": _centre_atoms,
-            "subsys": _rmsd_subsystem,
-        },
-    )
-    menu.add_space()
-    menu.add_option("c", "Edit Centre Atom(s)", _set_centre_atoms)
-    menu.add_option("s", "Edit RMSD Subsystem", _set_subsys_atoms)
-    menu.add_space()
-    menu.add_option("i", "Set Input File", _set_input_file)
-    menu.add_option("o", "Set Output File", _set_output_file)
-    menu.add_space()
-    menu.add_option("submit", "Toggle Submit", _toggle_submit)
-    menu.add_space()
-    menu.add_message(f"Centre Atom(s): {_centre_atoms}")
-    menu.add_message(f"RMSD Subsystem: {_rmsd_subsystem}")
-    menu.add_space()
-    menu.add_message(f"Input File: {_input_file}")
-    menu.add_message(f"Output File: {_output_file}")
-    menu.add_space()
-    menu.add_message(f"Submit: {_submit}")
-    menu.add_final_options()
-
-
 def rotate_mol_menu():
-    _find_default_file()
-    with Menu("Rotate-Mol Menu", refresh=_rotate_mol_menu_refresh):
-        pass
+    input_file_set = MenuVar("Input File Set", False)
+    output_file_set = MenuVar("Output File Set", False)
+
+    input_file = MenuVar("Input File", Path())
+    output_file = MenuVar("Output File", Path())
+    atoms = MenuVar("Atoms", Atoms().names)
+    centre_atoms = MenuVar("Centre Atoms", atoms.var)
+    rmsd_subsystem = MenuVar("RMSD Subsystem", atoms.var)
+
+    _set_input_file(
+        input_file,
+        output_file,
+        input_file_set,
+        output_file_set,
+        atoms,
+        centre_atoms,
+        rmsd_subsystem,
+    )
+
+    submit = MenuVar("Submit", False)
+
+    with Menu("Rotate-Mol Menu") as menu:
+        menu.add_option(
+            "1",
+            "Run rotate-mol",
+            run_rotate_mol,
+            kwargs={
+                "input_file": input_file,
+                "output_file": output_file,
+                "centre_atoms": centre_atoms,
+                "subsys": rmsd_subsystem,
+                "submit": submit,
+            },
+        )
+        menu.add_space()
+        menu.add_option(
+            "c",
+            "Edit Centre Atom(s)",
+            select_multiple_from_list,
+            args=[atoms, centre_atoms, "Select Atoms To Centre On"],
+        )
+        menu.add_option(
+            "s",
+            "Edit RMSD Subsystem",
+            select_multiple_from_list,
+            args=[atoms, rmsd_subsystem, "Select Atoms Use as Subsystem"],
+        )
+        menu.add_space()
+        menu.add_option(
+            "i",
+            "Set Input File",
+            _set_input_file,
+            args=[
+                input_file,
+                output_file,
+                input_file_set,
+                output_file_set,
+                atoms,
+                centre_atoms,
+                rmsd_subsystem,
+            ],
+        )
+        menu.add_option(
+            "o", "Set Output File", _set_output_file, args=[output_file]
+        )
+        menu.add_space()
+        menu.add_option(
+            "submit", "Toggle Submit", toggle_bool_var, args=[submit]
+        )
+        menu.add_space()
+        menu.add_var(centre_atoms)
+        menu.add_var(rmsd_subsystem)
+        menu.add_space()
+        menu.add_var(input_file)
+        menu.add_var(output_file)
+        menu.add_space()
+        menu.add_var(submit)

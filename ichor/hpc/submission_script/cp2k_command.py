@@ -16,8 +16,10 @@ class CP2KCommand(CommandLine):
     def __init__(
         self,
         cp2k_input: Path,
+        temperature: float,
     ):
         self.input = cp2k_input
+        self.temperature = temperature
 
     @classproperty
     def group(self) -> bool:
@@ -62,9 +64,7 @@ class CP2KCommand(CommandLine):
         cmd += f"{CP2KCommand.command} -i {input} -o {input.with_suffix('.out')}\n"
         cmd += "popd\n"
 
-        xyz = (
-            f"{GLOBALS.SYSTEM_NAME}-amber-{int(GLOBALS.AMBER_TEMPERATURE)}.xyz"
-        )
+        xyz = f"{GLOBALS.SYSTEM_NAME}-cp2k-{int(self.temperature)}.xyz"
         ichor_command = ICHORCommand(
             func="cp2k_to_xyz", func_args=[input, xyz]
         )

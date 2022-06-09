@@ -16,9 +16,11 @@ class AmberCommand(CommandLine):
         self,
         mol2_file: Path,
         mdin_file: Path,
+        temperature: float,
     ):
         self.mol2_file = mol2_file
         self.mdin_file = mdin_file
+        self.temperature = temperature
 
     @classproperty
     def group(self) -> bool:
@@ -36,10 +38,11 @@ class AmberCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
-        if self.ncores == 1:
-            return "sander"
-        else:
-            return f"mpirun -n {self.ncores} sander.MPI"
+        return (
+            "sander"
+            if self.ncores == 1
+            else f"mpirun -n {self.ncores} sander.MPI"
+        )
 
     @classproperty
     def ncores(self) -> int:
@@ -76,7 +79,7 @@ class AmberCommand(CommandLine):
             f.write(f"mol = loadmol2 {mol2_file}\n")
             f.write(f"loadamberparams {frcmod_file}\n")
             f.write(f"saveamberparm mol {prmtop_file} {inpcrd_file}\n")
-            f.write(f"quit")
+            f.write("quit")
         cmd += f"tleap -f {tleap_script}\n"
         # run amber
         cmd += f"{AmberCommand.command} -O -i {self.mdin_file.absolute()} -o md.out -p {prmtop_file} -c {inpcrd_file} -inf md.info\n"
@@ -84,9 +87,7 @@ class AmberCommand(CommandLine):
         cmd += "popd\n"
 
         mdcrd = (self.mol2_file.parent / "mdcrd").absolute()
-        xyz = (
-            f"{GLOBALS.SYSTEM_NAME}-amber-{int(GLOBALS.AMBER_TEMPERATURE)}.xyz"
-        )
+        xyz = f"{GLOBALS.SYSTEM_NAME}-amber-{int(self.temperature)}.xyz"
         ichor_command = ICHORCommand(
             func="mdcrd_to_xyz", func_args=[mdcrd, prmtop_file, xyz]
         )

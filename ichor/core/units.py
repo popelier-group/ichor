@@ -17,6 +17,11 @@ class Angle(Enum):
     Degrees = "deg"
 
 
+class Temperature(Enum):
+    Kelvin = "K"
+    Celsius = "C"
+
+
 def radians_to_degrees(a):
     return 180 * a / np.pi
 

@@ -11,9 +11,8 @@ from ichor.core.analysis.geometry.geometry_calculator import (
     internal_feature_names,
 )
 from ichor.core.analysis.get_atoms import get_atoms_from_path
-from ichor.core.analysis.get_path import get_path
 from ichor.core.files import PointsDirectory, Trajectory
-from ichor.core.menu.menu import Menu
+from ichor.core.menu import Menu, MenuVar, set_path_var, toggle_bool_var
 from ichor.core.units import Angle, degrees_to_radians
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID
@@ -23,17 +22,7 @@ from ichor.hpc.submission_script import (
     SubmissionScript,
 )
 
-_input_location = None
-_output_location = Path("geometry.xlsx")
-
-_submit = False
-
-_calc_bonds = True
-_calc_angles = True
-_calc_dihedrals = True
-_calc_modified_dihedrals = True
-
-_angle_units = Angle.Degrees
+# todo: move to hpc
 
 
 def _write_to_excel(writer, sheet_name, data, create_summary=False):
@@ -58,7 +47,15 @@ def _write_to_excel(writer, sheet_name, data, create_summary=False):
             summary_df.to_excel(writer, sheet_name=f"{sheet_name}_Summary")
 
 
-def geometry_analysis(input_location: Path, output_location: Path):
+def geometry_analysis(
+    input_location: Path,
+    output_location: Path,
+    calc_bonds: bool = True,
+    calc_angles: bool = True,
+    calc_dihedrals: bool = True,
+    calc_modified_dihedrals: bool = True,
+    angle_units: Angle = Angle.Degrees,
+):
     if input_location.suffix == Trajectory.filetype:
         points = Trajectory(input_location)
     elif PointsDirectory.check_path(input_location):
@@ -71,16 +68,16 @@ def geometry_analysis(input_location: Path, output_location: Path):
     dihedrals = []
     modified_dihedrals = []
     for point in points:
-        if _calc_bonds:
+        if calc_bonds:
             bonds.append(calculate_bonds(point))
-        if _calc_angles:
+        if calc_angles:
             angles.append(calculate_angles(point))
-        if _calc_dihedrals:
+        if calc_dihedrals:
             dihedrals.append(calculate_dihedrals(point))
-        if _calc_modified_dihedrals:
+        if calc_modified_dihedrals:
             dihedral = (
                 calculate_dihedrals(point)
-                if not _calc_dihedrals
+                if not calc_dihedrals
                 else dihedrals[-1]
             )
             if not modified_dihedrals:
@@ -94,7 +91,7 @@ def geometry_analysis(input_location: Path, output_location: Path):
     dihedrals = np.array(dihedrals)
     modified_dihedrals = np.array(modified_dihedrals)
 
-    if _angle_units is Angle.Radians:
+    if angle_units is Angle.Radians:
         angles = degrees_to_radians(angles)
         dihedrals = degrees_to_radians(dihedrals)
         modified_dihedrals = degrees_to_radians(modified_dihedrals)
@@ -133,7 +130,13 @@ def geometry_analysis(input_location: Path, output_location: Path):
 
 
 def submit_geometry_analysis(
-    input_location: Path, output_location: Path
+    input_location: Path,
+    output_location: Path,
+    calc_bonds: bool = True,
+    calc_angles: bool = True,
+    calc_dihedrals: bool = True,
+    calc_modified_dihedrals: bool = True,
+    angle_units: Angle = Angle.Degrees,
 ) -> JobID:
     with SubmissionScript(
         SCRIPT_NAMES["analysis"]["geometry"]
@@ -141,117 +144,144 @@ def submit_geometry_analysis(
         submission_script.add_command(
             ICHORCommand(
                 func="geometry_analysis",
-                func_args=[input_location, output_location],
+                func_args=list(
+                    map(
+                        str,
+                        [
+                            input_location,
+                            output_location,
+                            calc_bonds,
+                            calc_angles,
+                            calc_dihedrals,
+                            calc_modified_dihedrals,
+                            angle_units,
+                        ],
+                    )
+                ),
             )
         )
     return submission_script.submit()
 
 
 def run_geometry_analysis(
-    input_location: Path, output_location: Path
+    input_location: Path,
+    output_location: Path,
+    calc_bonds: bool = True,
+    calc_angles: bool = True,
+    calc_dihedrals: bool = True,
+    calc_modified_dihedrals: bool = True,
+    angle_units: Angle = Angle.Degrees,
+    submit: bool = False,
 ) -> Optional[JobID]:
-    if _submit:
-        return submit_geometry_analysis(input_location, output_location)
+    if submit:
+        return submit_geometry_analysis(
+            input_location,
+            output_location,
+            calc_bonds,
+            calc_angles,
+            calc_dihedrals,
+            calc_modified_dihedrals,
+            angle_units,
+        )
     else:
-        geometry_analysis(input_location, output_location)
+        geometry_analysis(
+            input_location,
+            output_location,
+            calc_bonds,
+            calc_angles,
+            calc_dihedrals,
+            calc_modified_dihedrals,
+            angle_units,
+        )
 
 
-def _toggle_calc_bonds():
-    global _calc_bonds
-    _calc_bonds = not _calc_bonds
-
-
-def _toggle_calc_angles():
-    global _calc_angles
-    _calc_angles = not _calc_angles
-
-
-def _toggle_calc_calc_dihedrals():
-    global _calc_dihedrals
-    _calc_dihedrals = not _calc_dihedrals
-
-
-def _toggle_calc_modified_dihedrals():
-    global _calc_modified_dihedrals
-    _calc_modified_dihedrals = not _calc_modified_dihedrals
-
-
-def _set_input():
-    global _input_location
-    _input_location = get_path(
-        prompt="Enter Input Location", prefill=_input_location
-    )
-
-
-def _set_output():
-    global _output_location
-    _output_location = get_path(
-        prompt="Enter Output Location", prefill=_output_location
-    )
-
-
-def _toggle_submit():
-    global _submit
-    _submit = not _submit
-
-
-def _toggle_angle_units():
-    global _angle_units
-    _angle_units = (
-        Angle.Radians if _angle_units is Angle.Degrees else Angle.Degrees
+def _toggle_angle_units(angle_units: MenuVar[Angle]):
+    angle_units.var = (
+        Angle.Radians if angle_units.var is Angle.Degrees else Angle.Degrees
     )
 
 
 def _geometry_analysis_menu_refresh(menu):
     menu.clear_options()
-    menu.add_option(
-        "1",
-        "Run Geometry Analysis",
-        run_geometry_analysis,
-        kwargs={
-            "input_location": _input_location,
-            "output_location": _output_location,
-        },
-    )
-    menu.add_space()
-    menu.add_option("i", "Set Input", _set_input)
-    menu.add_option("o", "Set Output", _set_output)
-    menu.add_option("submit", "Toggle Submit Analysis", _toggle_submit)
-    menu.add_space()
-    menu.add_option("b", "Toggle Calculate Bonds", _toggle_calc_bonds)
-    menu.add_option("a", "Toggle Calculate Angles", _toggle_calc_angles)
-    menu.add_option(
-        "d", "Toggle Calculate Dihedrals", _toggle_calc_calc_dihedrals
-    )
-    menu.add_option(
-        "m",
-        "Toggle Calculate Modified Dihedrals",
-        _toggle_calc_modified_dihedrals,
-    )
-    menu.add_space()
-    menu.add_option(
-        "u", "Toggle Angle Units", _toggle_angle_units, _toggle_angle_units
-    )
-    menu.add_space()
-    menu.add_message(f"Input Location: {_input_location}")
-    menu.add_message(f"Output Location: {_output_location}")
-    menu.add_message(f"Submit Analysis: {_submit}")
-    menu.add_space()
-    menu.add_message(f"Calculate Bonds: {_calc_bonds}")
-    menu.add_message(f"Calculate Angles: {_calc_angles}")
-    menu.add_message(f"Calculate Dihedrals: {_calc_dihedrals}")
-    menu.add_message(
-        f"Calculate Modified Dihedrals: {_calc_modified_dihedrals}"
-    )
-    menu.add_space()
-    menu.add_message(f"Angle Units: {_angle_units.name}")
     menu.add_final_options()
 
 
 def geometry_analysis_menu():
-    global _input_location
-    _input_location = FILE_STRUCTURE["training_set"]
-    with Menu(
-        "Geometry Analysis Menu", refresh=_geometry_analysis_menu_refresh
-    ):
-        pass
+    input_location = MenuVar("Input Location", FILE_STRUCTURE["training_set"])
+    output_location = MenuVar("Output Location", Path("geometry.xlsx"))
+
+    submit = MenuVar("Submit Analysis", False)
+
+    calc_bonds = MenuVar("Calculate Bonds", True)
+    calc_angles = MenuVar("Calculate Angles", True)
+    calc_dihedrals = MenuVar("Calculate Dihedrals", True)
+    calc_modified_dihedrals = MenuVar("Calculate Modified Dihedrals", True)
+
+    angle_units = MenuVar("Angle Units", Angle.Degrees)
+
+    with Menu("Geometry Analysis Menu") as menu:
+        menu.add_option(
+            "1",
+            "Run Geometry Analysis",
+            run_geometry_analysis,
+            args=[
+                input_location,
+                output_location,
+                calc_bonds,
+                calc_angles,
+                calc_dihedrals,
+                calc_modified_dihedrals,
+                angle_units,
+                submit,
+            ],
+        )
+        menu.add_space()
+        menu.add_option(
+            "i",
+            "Set Input",
+            set_path_var,
+            args=[input_location, "Set Input Location"],
+        )
+        menu.add_option(
+            "o",
+            "Set Output",
+            set_path_var,
+            args=[output_location, "Set Output Location"],
+        )
+        menu.add_option(
+            "submit", "Toggle Submit Analysis", toggle_bool_var, args=[submit]
+        )
+        menu.add_space()
+        menu.add_option(
+            "b", "Toggle Calculate Bonds", toggle_bool_var, args=[calc_bonds]
+        )
+        menu.add_option(
+            "a", "Toggle Calculate Angles", toggle_bool_var, args=[calc_angles]
+        )
+        menu.add_option(
+            "d",
+            "Toggle Calculate Dihedrals",
+            toggle_bool_var,
+            args=[calc_dihedrals],
+        )
+        menu.add_option(
+            "m",
+            "Toggle Calculate Modified Dihedrals",
+            toggle_bool_var,
+            args=[calc_modified_dihedrals],
+        )
+        menu.add_space()
+        menu.add_option(
+            "u", "Toggle Angle Units", _toggle_angle_units, args=[angle_units]
+        )
+        menu.add_space()
+        menu.add_var(input_location)
+        menu.add_var(output_location)
+        menu.add_var(submit)
+        menu.add_space()
+        menu.add_var(calc_bonds)
+        menu.add_var(calc_angles)
+        menu.add_var(calc_dihedrals)
+        menu.add_var(calc_modified_dihedrals)
+        menu.add_space()
+        menu.add_var(angle_units)
