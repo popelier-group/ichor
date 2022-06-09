@@ -39,3 +39,4 @@ requires.txt
 build
 dist
 *venv*
+*egg-info*
