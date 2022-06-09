@@ -17,7 +17,7 @@ def set_path_var(path_var: MenuVar[Path], prompt: str = "Enter Path"):
     path_var.var = get_path(prompt=prompt, prefill=str(path_var.var))
 
 
-def choose_dir_var(dir_var: MenuVar[Path], prompt: "Enter Directory"):
+def choose_dir_var(dir_var: MenuVar[Path], prompt: str = "Enter Directory"):
     from ichor.core.analysis.get_path import get_dir
 
     print(prompt)
