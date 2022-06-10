@@ -5,10 +5,10 @@ from typing import List, Optional
 from ichor.cli.menus.general_menus.queue_menu import delete_jobs
 from ichor.core.common.io import mkdir, pushd
 from ichor.core.common.os import kill_pid, pid_exists
+from ichor.core.daemon import Daemon
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.auto_run.standard_auto_run import rerun_from_failed
 from ichor.hpc.auto_run.stop import stop
-from ichor.hpc.daemon.daemon import Daemon
 
 
 def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
@@ -60,7 +60,12 @@ class ReRunDaemon(Daemon):
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["rerun_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["rerun_stdout"]
         stderr = GLOBALS.CWD / FILE_STRUCTURE["rerun_stderr"]
-        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+        super().__init__(
+            pidfile,
+            stdout=stdout,
+            stderr=stderr,
+            pid_store=FILE_STRUCTURE["pids"],
+        )
 
     def run(self):
         rerun_failed_child_process()
@@ -131,8 +136,9 @@ def print_child_processes_status(child_processes: Optional[List[Path]] = None):
 
 
 def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
-    from ichor.cli.menus.general_menus.concatenate_points_menu import \
-        concatenate_points_directories
+    from ichor.cli.menus.general_menus.concatenate_points_menu import (
+        concatenate_points_directories,
+    )
     from ichor.core.analysis.get_path import get_dir
 
     print("Enter PointsDirectory Location to concatenate to training sets: ")

@@ -5,10 +5,10 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Optional
 
 from ichor.core.common.io import mkdir, remove
 from ichor.core.common.os import kill_pid, pid_exists
-from ichor.hpc import FILE_STRUCTURE
 
 
 class DaemonRunning(Exception):
@@ -30,11 +30,13 @@ class Daemon(ABC):
         stdin: Path = Path("/dev/null"),
         stdout: Path = Path("/dev/null"),
         stderr: Path = Path("/dev/null"),
+        pid_store: Optional[Path] = None,
     ):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
+        self.pid_store = pid_store
 
         mkdir(pidfile.parent)
         mkdir(stdin.parent)
@@ -92,8 +94,9 @@ class Daemon(ABC):
         pid = str(os.getpid())
         with open(self.pidfile, "w+") as pf:
             pf.write(f"{pid}\n")
-        with open(FILE_STRUCTURE["pids"], "a") as f:
-            f.write(f"{pid}\n")
+        if self.pid_store is not None:
+            with open(self.pid_store, "a") as f:
+                f.write(f"{pid}\n")
 
     def delpid(self):
         if os.path.exists(self.pidfile):

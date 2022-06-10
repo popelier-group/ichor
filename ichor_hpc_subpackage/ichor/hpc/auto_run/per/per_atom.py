@@ -3,6 +3,7 @@ from typing import Callable, List, Optional
 
 from ichor.cli.menus.machine_learning_menus import make_models
 from ichor.core.common.io import pushd
+from ichor.core.daemon import Daemon
 from ichor.core.menu import ListCompleter  # todo: fix this
 from ichor.core.menu.menu import Menu  # todo: fix this
 from ichor.hpc.auto_run.ichor_jobs.auto_run_ichor_collate_log import (
@@ -14,7 +15,6 @@ from ichor.hpc.auto_run.per.per import (
 )
 from ichor.hpc.auto_run.standard_auto_run import auto_make_models
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.daemon import Daemon
 from ichor.hpc.programs.qct import (
     QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
     QuantumChemicalTopologyProgram,
@@ -31,7 +31,12 @@ class PerAtomDaemon(Daemon):
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["atoms_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["atoms_stdout"]
         stderr = GLOBALS.CWD / FILE_STRUCTURE["atoms_stderr"]
-        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+        super().__init__(
+            pidfile,
+            stdout=stdout,
+            stderr=stderr,
+            pid_store=FILE_STRUCTURE["pids"],
+        )
 
     def run(self):
         auto_run_per_atom()
