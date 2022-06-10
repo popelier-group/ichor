@@ -24,7 +24,10 @@
 - HPC 17,500 job limit?
 
 ### Ideas
+- !!!!!!!!!!! Need Tests !!!!!!!!!!!
 - Refactor Menu to make it easier to write refreshable menus
+- Need to get the time to initialise down
+- ichor.core.common -> ichor.core.util
 
 ## Architecture
 
