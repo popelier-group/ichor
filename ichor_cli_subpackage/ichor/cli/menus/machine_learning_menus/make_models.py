@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-
 from ichor.core import constants
 from ichor.core.common.io import cp, mkdir
 from ichor.core.common.str import get_digits
@@ -74,10 +73,8 @@ def make_models_menu(directory: Path):
     n_training_points = MenuVar(
         "Number of Training Points", len(model_data.var)
     )
-    atom_names = MenuVar(
-        "Atoms", [atom.name for atom in model_data.var[0].atoms]
-    )
-    selected_atoms = MenuVar("Atoms", atom_names.var)
+    atom_names = [atom.name for atom in model_data.var[0].atoms]
+    selected_atoms = MenuVar("Atoms", list(atom_names))
 
     model_types = MenuVar("Model Types", [default_model_type])
 
@@ -114,7 +111,7 @@ def make_models_menu(directory: Path):
             "Select Atoms",
             select_multiple_from_list,
             args=[
-                atom_names.var,
+                atom_names,
                 selected_atoms,
                 "Select Atoms To Create Models For",
             ],
@@ -132,7 +129,7 @@ def make_models_menu(directory: Path):
         menu.add_space()
         menu.add_var(model_types)
         menu.add_var(n_training_points)
-        menu.add_var(atom_names)
+        menu.add_var(selected_atoms)
         if (
             QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
             is QuantumChemicalTopologyProgram.Morfi

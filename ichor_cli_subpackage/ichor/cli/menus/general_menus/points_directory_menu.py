@@ -54,6 +54,7 @@ def points_directory_menu(path: Path, title: Optional[str] = None):
             "Make Models",
             make_models_menu,
             args=[points_directory_path],
+            # debug=True,
         )
         menu.add_space()
         menu.add_option(
@@ -65,4 +66,3 @@ def points_directory_menu(path: Path, title: Optional[str] = None):
         menu.add_option("f", "Toggle Force", toggle_bool_var, args=[force])
         menu.add_space()
         menu.add_var(force)
-        menu.add_final_options()
