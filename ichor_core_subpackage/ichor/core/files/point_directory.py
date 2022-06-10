@@ -33,12 +33,18 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
     pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path: Union[Path, str]):
-        GeometryFile.__init__(self)
-        GeometryDataFile.__init__(self)
+        GeometryFile.__init__(self, path, atoms=FileContents)
+        GeometryDataFile.__init__(self, path)
         AnnotatedDirectory.__init__(self, path)
 
+    def _read_file(self, *args, **kwargs):
+        for file in self.files():
+            file._read_file(*args, **kwargs)
+        for directory in self.directories():
+            directory._read_file(*args, **kwargs)
+
     def _parse(self):
-        super().parse()  # call AnnotatedDirectory.parse method
+        super()._parse()  # call AnnotatedDirectory.parse method
         if not self.xyz:
             for f in self.files():
                 if isinstance(f, GeometryFile):

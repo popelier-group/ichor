@@ -17,7 +17,7 @@ class Directory(PathObject, ABC):
     """
 
     def __init__(self, path: Union[Path, str]):
-        
+
         super().__init__(path)
         self._parse()  # parse directory to find contents and setup the directory structure. THIS DOES NOT READ IN DIRECTORY CONTENTS
 
@@ -33,7 +33,7 @@ class Directory(PathObject, ABC):
 
     @abstractmethod
     def dump(self):
-        """ Abstract method for resetting all attributes which store some sort of data
+        """Abstract method for resetting all attributes which store some sort of data
         that has been read in from a file. These attributes are initially FileContents type."""
         pass
 
@@ -68,7 +68,9 @@ class AnnotatedDirectory(Directory, ABC):
         filetypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
-                if hasattr(type_, "__args__"):  # Optional typing contains a list of typings
+                if hasattr(
+                    type_, "__args__"
+                ):  # Optional typing contains a list of typings
                     type_ = type_.__args__[0]
 
                 # GJF and WFN are subclasses of File for example
@@ -83,7 +85,9 @@ class AnnotatedDirectory(Directory, ABC):
         dirtypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
-                if hasattr(type_, "__args__"):  # Optional typing contains a list of typings
+                if hasattr(
+                    type_, "__args__"
+                ):  # Optional typing contains a list of typings
                     type_ = type_.__args__[0]
 
                 # GJF and WFN are subclasses of File
@@ -108,12 +112,12 @@ class AnnotatedDirectory(Directory, ABC):
         ]
 
     def path_objects(self) -> List[PathObject]:
-        """ Returns a list of PathObjects corresponding to files and directories
+        """Returns a list of PathObjects corresponding to files and directories
         that are in the instance of AnnotatedDirectory."""
         return self.files() + self.directories()
 
     def dump(self):
-        """ Remove all data that has been stored into the instances after the files have been
+        """Remove all data that has been stored into the instances after the files have been
         read in. This resets the attributes to be of type FileContents."""
         for f in self.files():
             f.dump()
@@ -123,7 +127,7 @@ class AnnotatedDirectory(Directory, ABC):
     def _parse(self):
         """
         Iterates over an `AnnotatedDirectory`'s contents (which are files or other sub-directories). If the content is a file,
-        then check the filetype of the file (compared to the filetype which the classes subclassing from File have). After 
+        then check the filetype of the file (compared to the filetype which the classes subclassing from File have). After
         the check succeeds, check if that filetype needs a parent (meaning that the filetype needs access to the parent directory
         because it needs information from parent directory). For example, an .int file needs access to the parent
         directory because it needs the whole geometry ot calculate the ALF. The same is done for directories.
