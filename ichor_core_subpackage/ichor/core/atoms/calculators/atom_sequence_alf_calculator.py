@@ -1,5 +1,6 @@
 from ichor.core.atoms.calculators.alf_calculator import ALFCalculator
 
+
 class AtomSequenceALFCalculator(ALFCalculator):
 
     """Calculates the ALF for every atom based on the sequence of how the atoms were read in
@@ -8,7 +9,7 @@ class AtomSequenceALFCalculator(ALFCalculator):
     the same atomic local frame atoms (the same x-axis and same xy-plane atom) for every
     geometry (this class does not depend on connectivity between atoms, just the sequence of
     the atoms in the geometry file).
-    
+
     For the first atom in the sequence, the next two atoms are the x-axis and xy-plane atoms.
     For middle atoms, the previous atom and the next atoms are the x-axis and xy-plane atoms.
     For the last atom, the previous two atoms are the x-axis and xy-plane atoms.
@@ -34,9 +35,19 @@ class AtomSequenceALFCalculator(ALFCalculator):
         system_hash = atom.parent.hash
         # calculate the alf for every atom in the system and add to the list above
         for atm in atom.parent:
-            cls.alf[system_hash].append([atm.i, cls.calculate_x_axis_atom(atm), cls.calculate_xy_plane_atom(atm)])
+            cls.alf[system_hash].append(
+                [
+                    atm.i,
+                    cls.calculate_x_axis_atom(atm),
+                    cls.calculate_xy_plane_atom(atm),
+                ]
+            )
 
-        return [atom.i, cls.calculate_x_axis_atom(atm), cls.calculate_xy_plane_atom(atm)]
+        return [
+            atom.i,
+            cls.calculate_x_axis_atom(atm),
+            cls.calculate_xy_plane_atom(atm),
+        ]
 
     @classmethod
     def _calculate_x_axis_atom(cls, atom):
@@ -61,13 +72,13 @@ class AtomSequenceALFCalculator(ALFCalculator):
             # if first atom, then return 1 as x-axis
             else:
                 return 1
-        
+
     @classmethod
     def _calculate_xy_plane_atom(cls, atom):
 
         # if we have 3 atoms or more
         if len(atom.parent) > 2:
-            # if the last atom in the sequence, return the previous i, as this is xy-plane atom 
+            # if the last atom in the sequence, return the previous i, as this is xy-plane atom
             if atom.i + 1 == len(atom.parent):
                 return atom.i - 1
             # if the first atom in sequence return the next next atom (2 away)

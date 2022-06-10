@@ -34,12 +34,21 @@
 # initialize all things that we need for the hpc package here
 
 import platform
-from ichor.hpc.batch_system import LocalBatchSystem, SunGridEngine, ParallelEnvironments
-from ichor.hpc.machine import get_machine_from_name, Machine
-from ichor.hpc.file_structure import FileStructure
-from ichor.hpc.log import setup_logger
-from ichor.hpc.globals import Globals
+
 from ichor.hpc.arguments import Arguments
+from ichor.hpc.machine import Machine, get_machine_from_name
+
+from ichor.core.common.types import Version
+from ichor.hpc.batch_system import (
+    LocalBatchSystem,
+    ParallelEnvironments,
+    SunGridEngine,
+)
+from ichor.hpc.file_structure import FileStructure
+from ichor.hpc.globals import Globals
+from ichor.hpc.log import setup_logger
+
+__version__ = Version("3.1.0")
 
 FILE_STRUCTURE = FileStructure()
 
@@ -59,7 +68,6 @@ GLOBALS = Globals()
 
 logger = setup_logger("ICHOR", "ichor.log")
 timing_logger = setup_logger("TIMING", "ichor.timing")
-
 
 
 # probably don't need that file because the platform name should match

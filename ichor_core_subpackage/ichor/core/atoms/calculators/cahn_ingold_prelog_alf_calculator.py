@@ -1,13 +1,15 @@
 import itertools as it
-from typing import List, Optional, Union
-import numpy as np
-from ichor.core.common.functools import classproperty
-from pathlib import Path
 import warnings
+from pathlib import Path
+from typing import List, Optional, Union
+
+import numpy as np
 from ichor.core.atoms.calculators.alf_calculator import ALFCalculator
 
+from ichor.core.common.functools import classproperty
+
+
 class CahnIngoldPrelogALFCalculator(ALFCalculator):
-    
     @classmethod
     def calculate_alf(cls, atom: "Atom") -> list:
         """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
@@ -82,6 +84,7 @@ class CahnIngoldPrelogALFCalculator(ALFCalculator):
             alf = [atom]
             # we need to get 2 atoms - one for x-axis and one for xy-plane. If the molecule is 2d (like HCl), then we only need 1 atom.
             n_atoms_in_alf = 2 if len(atom.parent) > 2 else 1
+
             for _ in range(n_atoms_in_alf):
                 # make a list of atoms to which the central atom is bonded to that are not in alf
                 queue = [a for a in atom.bonded_atoms if a not in alf]
@@ -103,9 +106,11 @@ class CahnIngoldPrelogALFCalculator(ALFCalculator):
         # we use a dictionary where we store a key = hash (a string with all the atom names) and value = a list of alfs for the whole system
         system_hash = atom.parent.hash
         if system_hash not in cls._alf.keys():
-            warnings.warn("The atomic local frame has not been read in from the reference file. \
+            warnings.warn(
+                "The atomic local frame has not been read in from the reference file. \
                 The computed ALF might be different. If you want to make sure the same ALF is used, \
-                then specify an alf reference file.")
+                then specify an alf reference file."
+            )
             # make an empty list to fill with the alfs for the system
             cls._alf[system_hash] = []
             # calculate the alf for every atom in the system and add to the list above

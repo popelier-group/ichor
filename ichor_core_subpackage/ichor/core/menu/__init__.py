@@ -1,11 +1,3 @@
-from ichor.core.menu.menu import (
-    BLANK,
-    Menu,
-    MenuBlank,
-    MenuMessage,
-    MenuOption,
-    MenuVar,
-)
 from ichor.core.menu.submenu import (
     choose_dir_var,
     return_arg,
@@ -18,4 +10,12 @@ from ichor.core.menu.tab_completer import (
     ListCompleter,
     PathCompleter,
     TabCompleter,
+)
+
+from ichor.core.menu.menu import (
+    Menu,
+    MenuBlank,
+    MenuMessage,
+    MenuOption,
+    MenuVar,
 )

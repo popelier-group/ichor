@@ -1,20 +1,21 @@
+from collections import deque
+from heapq import heappop, heappush
 from typing import (
-    TypeVar,
-    Iterable,
-    Sequence,
-    Generic,
-    List,
+    Any,
     Callable,
-    Set,
     Deque,
     Dict,
-    Any,
+    Generic,
+    Iterable,
+    List,
     Optional,
+    Sequence,
+    Set,
     Tuple,
+    TypeVar,
 )
-from collections import deque
+
 from typing_extensions import Protocol
-from heapq import heappush, heappop
 
 T = TypeVar("T")
 
@@ -57,6 +58,32 @@ def binary_contains(sequence: Sequence[C], key: C) -> bool:
     return False
 
 
+class Node(Generic[T]):
+    def __init__(
+        self,
+        state: T,
+        parent: Optional["Node"],
+        cost: float = 0.0,
+        heuristic: float = 0.0,
+    ) -> None:
+        self.state: T = state
+        self.parent: Optional[Node] = parent
+        self.cost: float = cost
+        self.heuristic: float = heuristic
+
+    def __lt__(self, other: "Node") -> bool:
+        return (self.cost + self.heuristic) < (other.cost + other.heuristic)
+
+
+def node_to_path(node: Node[T]) -> List[T]:
+    path: List[T] = [node.state]
+    while node.parent is not None:
+        node = node.parent
+        path.append(node.state)
+    path.reverse()
+    return path
+
+
 class Stack(Generic[T]):
     def __init__(self) -> None:
         self._container: List[T] = []
@@ -73,32 +100,6 @@ class Stack(Generic[T]):
 
     def __repr__(self) -> str:
         return repr(self._container)
-
-
-class Node(Generic[T]):
-    def __init__(
-        self,
-        state: T,
-        parent: Optional['Node'],
-        cost: float = 0.0,
-        heuristic: float = 0.0,
-    ) -> None:
-        self.state: T = state
-        self.parent: Optional[Node] = parent
-        self.cost: float = cost
-        self.heuristic: float = heuristic
-
-    def __lt__(self, other: 'Node') -> bool:
-        return (self.cost + self.heuristic) < (other.cost + other.heuristic)
-
-
-def node_to_path(node: Node[T]) -> List[T]:
-    path: List[T] = [node.state]
-    while node.parent is not None:
-        node = node.parent
-        path.append(node.state)
-    path.reverse()
-    return path
 
 
 class Queue(Generic[T]):
@@ -159,14 +160,18 @@ def _first_search(
 
 
 def dfs(
-    initial: T, goal_test: Callable[[T], bool], successors: Callable[[T], List[T]]
+    initial: T,
+    goal_test: Callable[[T], bool],
+    successors: Callable[[T], List[T]],
 ) -> Tuple[Optional[Node[T]], int]:
     frontier: Stack[Node[T]] = Stack()
     return _first_search(frontier, initial, goal_test, successors)
 
 
 def bfs(
-    initial: T, goal_test: Callable[[T], bool], successors: Callable[[T], List[T]]
+    initial: T,
+    goal_test: Callable[[T], bool],
+    successors: Callable[[T], List[T]],
 ) -> Tuple[Optional[Node[T]], int]:
     frontier: Queue[Node[T]] = Queue()
     return _first_search(frontier, initial, goal_test, successors)
@@ -191,5 +196,7 @@ def astar(
             new_cost: float = current_node.cost + 1
             if child not in explored or explored[child] > new_cost:
                 explored[child] = new_cost
-                frontier.push(Node(child, current_node, new_cost, heuristic(child)))
+                frontier.push(
+                    Node(child, current_node, new_cost, heuristic(child))
+                )
     return None, len(explored)

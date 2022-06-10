@@ -107,18 +107,19 @@ from re import S
 from typing import Any, List, Optional, Union
 from uuid import UUID, uuid4
 
-from ichor.cli.problem_finder import PROBLEM_FINDER
-from ichor.core import constants
-from ichor.core.atoms.atoms import Atoms
 from ichor.core.atoms.calculators.feature_calculator.alf_feature_calculator import (
     ALFCalculationError,
 )
+from ichor.hpc.globals.config_provider import ConfigProvider
+from ichor.hpc.globals.os import OS
+
+# from ichor.cli.problem_finder import PROBLEM_FINDER
+from ichor.core import constants
+from ichor.core.atoms.atoms import Atoms
 from ichor.core.common.types import Version
 
 # from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.globals import checkers, formatters, parsers
-from ichor.hpc.globals.config_provider import ConfigProvider
-from ichor.hpc.globals.os import OS
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -588,6 +589,7 @@ class Globals:
         atomic local frame calculated for the system."""
 
         from ichor.core.common.io import mkdir
+
         from ichor.hpc import FILE_STRUCTURE
 
         # # if the reference file still not been set (default is None), make the default file
@@ -754,7 +756,8 @@ class Globals:
                 self.set("N_ITERATIONS", val)
                 self._in_config += ["N_ITERATIONS"]
             else:
-                PROBLEM_FINDER.unknown_settings += [key]
+                # PROBLEM_FINDER.unknown_settings += [key]
+                pass  # todo: fix this
 
     def init_from_globals(self, globals_instance: "Globals"):
         """Reads in options another `Globals` instance and sets the values of the
@@ -781,14 +784,17 @@ class Globals:
         """
         name = name.upper()
         if name not in self.global_variables:
-            PROBLEM_FINDER.unknown_settings.append(name)
+            # PROBLEM_FINDER.unknown_settings.append(name)
+            pass  # todo: fix this
         elif name in self._protected:
-            PROBLEM_FINDER.protected_settings.append(name)
+            # PROBLEM_FINDER.protected_settings.append(name)
+            pass  # todo: fix this
         else:
             try:
                 setattr(self, name, value)
             except ValueError as e:
-                PROBLEM_FINDER.incorrect_settings[name] = e
+                # PROBLEM_FINDER.incorrect_settings[name] = e
+                pass  # todo: fix this
 
     def get(self, name: str):
         """Returns the value for some attribute/class variable or None if the attribute/class variable is not set."""

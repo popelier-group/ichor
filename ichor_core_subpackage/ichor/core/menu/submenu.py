@@ -3,8 +3,11 @@ from typing import Any, Sequence
 
 from ichor.core.common.os import input_with_prefill
 from ichor.core.itypes import Scalar, T
-from ichor.core.menu.menu import MenuVar, make_title
 from ichor.core.menu.simple_term_menu import TerminalMenu
+
+from ichor.core.menu.menu import MenuVar, make_title
+
+# todo: document
 
 
 def toggle_bool_var(bool_var: MenuVar[bool]):
