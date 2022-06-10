@@ -1,11 +1,29 @@
-from pathlib import Path
-from ichor.core.common.functools import classproperty
 from abc import ABC, abstractmethod
-from typing import Optional, Union, List
-import numpy as np
+from pathlib import Path
+from typing import List, Optional, Union
 
-class ALFCalculator:#(ABC):
-    """ Abstract base class for calculating atomic local frame of atoms in a system.
+import numpy as np
+from ichor.core.atoms.atom import Atom
+
+from ichor.core.atoms.atoms import Atoms
+from ichor.core.common.functools import classproperty
+
+
+class ALF:
+    def __init__(self, origin: int, x_axis: int, xy_plane: int):
+        self.origin_idx = origin
+        self.x_axis_idx = x_axis
+        self.xy_plane_idx = xy_plane
+
+    def get_x_axis_atom(self, atoms: Atoms) -> Atom:
+        return atoms[self.x_axis_idx]
+
+    def get_xy_plane_atom(self, atoms: Atoms) -> Atom:
+        return atoms[self.xy_plane_idx]
+
+
+class ALFCalculator:  # (ABC):
+    """Abstract base class for calculating atomic local frame of atoms in a system.
     The atomic local frame can then be used to calculate features (the features are
     different depending on the local frame that is chosen).
     """
@@ -87,14 +105,14 @@ class ALFCalculator:#(ABC):
 
     @classproperty
     def alf(cls):
-        """ Returns a dictionary of system_hash:alf."""
+        """Returns a dictionary of system_hash:alf."""
         if not hasattr(cls, "_reference_alf"):
             cls._reference_alf = ALFCalculator.get_alfs()
         return cls._reference_alf
 
     @classmethod
     def get_alfs(cls, reference_file: Path = None):
-        """ Returns a dictionary as the system has as keys and alf for all atoms (a list of list)
+        """Returns a dictionary as the system has as keys and alf for all atoms (a list of list)
         as values.
 
         :param reference_file: A file containing the ALF references. It has the following structure:
