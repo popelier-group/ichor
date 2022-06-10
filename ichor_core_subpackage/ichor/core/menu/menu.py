@@ -7,10 +7,19 @@ from ichor.core.common.os import clear_screen
 from ichor.core.itypes import F, T
 from ichor.core.menu.tab_completer import ListCompleter
 
+# todo: document
+
+
+def make_title(title: str, title_char: str = "#") -> str:
+    char_line = title_char * (len(title) + 2 * len(title_char) + 2)
+    title_line = f"{title_char} {title} {title_char}"
+    return f"{char_line}\n{title_line}\n{char_line}\n"
+
 
 # TODO: why use a namedtuple?, also return_val and close need to be in a list. This would not work like it is now.
 # TODO: add problem messages, add docstring and comments.
-OptionReturn = namedtuple("OptionReturn", "return_val close")
+OptionReturn = namedtuple("OptionReturn", ["return_val", "close"])
+
 
 class MenuItem(ABC):
     def __init__(self, name: str, hidden: bool = False):
@@ -20,6 +29,7 @@ class MenuItem(ABC):
     @abstractmethod
     def __repr__(self):
         pass
+
 
 class MenuOption(MenuItem):
     def __init__(
@@ -89,6 +99,7 @@ class MenuOption(MenuItem):
         name = self.name.var if isinstance(self.name, MenuVar) else self.name
         return f"[{self.label}] {name}"
 
+
 class MenuMessage(MenuItem):
     def __init__(self, name, message, hidden: bool = False):
         super().__init__(name, hidden)
@@ -96,6 +107,7 @@ class MenuMessage(MenuItem):
 
     def __repr__(self):
         return self.message
+
 
 class MenuVar(MenuMessage, Generic[T]):
     def __init__(
@@ -118,15 +130,19 @@ class MenuVar(MenuMessage, Generic[T]):
         )
         return f"{self.message}: {var}"
 
+
 class MenuBlank(MenuMessage):
     def __init__(self):
         super().__init__("__blank__", "")
 
+
 class OptionInMenuError(Exception):
     pass
 
+
 class OptionNotFoundError(Exception):
     pass
+
 
 class Menu:
     def __init__(
@@ -252,14 +268,9 @@ class Menu:
     def update_var(self, name: str, val: Any):
         self.get_var(name).var = val
 
-    def make_title(self, title: str, title_char: str = "#") -> str:
-        char_line = title_char * (len(title) + 2 * len(title_char) + 2)
-        title_line = f"{title_char} {title} {title_char}"
-        return f"{char_line}\n{title_line}\n{char_line}\n"
-
     def show(self):
         clear_screen()
-        print(self.make_title(self._title))
+        print(make_title(self._title))
         for item in self._items:
             if not item.hidden:
                 print(item)
