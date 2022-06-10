@@ -15,19 +15,23 @@
 - INTs replace with ordered dictionary
 - GLOBALS -> config (remove globals in favour of config that gets passed to other places)
 - Add SLURM support
+- Add CONDOR support
+- AIMAll should be on RDS
 
 ### Long-Term
 - Know how the ALF affects the models
 - Remove parent from INT
 - ReadFile, WriteFile
 - AIMAll AB (and AA')
-- HPC 17,500 job limit?
+- HPC 17,500 job limit? (need to check)
+- GLOBALS | ichor.hpc -> ichor.cli
 
 ### Ideas
 - !!!!!!!!!!! Need Tests !!!!!!!!!!!
-- Refactor Menu to make it easier to write refreshable menus
 - Need to get the time to initialise down
 - ichor.core.common -> ichor.core.util
+- Sort out ModelResult (maybe switch to pandas.DataFrame)
+- Remove ichor.hpc.main
 
 ## Architecture
 
@@ -47,10 +51,31 @@ and `ichor.core` to provide the `ichor` functionality as an application.
 
 ### Possible decisions
 - [x] Menu and TabCompleter -> core
-- [ ] Separate Model from ModelFile, ModelFile -> core.files
+- [ ] Separate Model from ModelFile, ModelFile -> core.files (low priority)
 - [ ] Not a fan of general_menus
 - [ ] daemon -> core
 - [ ] active_learning -> core?
 - [ ] both qcp and qct hpc.main -> hpc.programs?
 - [ ] cli menus directory structure should follow tree of main menu?
-- [ ] DLPOLY -> DL_FFLUX
+- [ ] DLPOLY -> DL_FFLUX (low priority)
+- [ ] ModelResult -> DataFrame
+- [ ] Look at best way to package binary files
+
+### Tests
+- Connectivity Testing 
+- ALF Testing
+- Feature Calculator
+- Multipole Testing
+- Models
+  - Predictions
+- File Reading
+  - GJF
+    - Method
+    - Keywords
+    - Coordinates
+    - etc.
+  - Trajectories
+    - Extended XYZ (maybe)
+- Submission Scripts
+- Command Line Testing (qsub ...) ?
+- 
