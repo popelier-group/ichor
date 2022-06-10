@@ -11,6 +11,7 @@ from ichor.core.files.qcp import QuantumChemistryProgramInput
 from ichor.core.program_defaults import gaussian_defaults
 from ichor.core.program_defaults.gaussian_defaults import GaussianJobType
 
+
 class GJF(QuantumChemistryProgramInput):
     """Wraps around a .gjf file that is used as input to Gaussian. Below is the usual gjf file structure:
 
@@ -29,7 +30,7 @@ class GJF(QuantumChemistryProgramInput):
 
         <wfn-name>
         -----------------------------------------------------------
-    
+
     :param path: A string or Path to the .gjf file. If a path is not give,
         then there is no file to be read, so the user has to write the file contents. If
         no contents/options are written by user, they are written as the default values in the
@@ -48,25 +49,27 @@ class GJF(QuantumChemistryProgramInput):
     :param extra_details_str: A string (can contain multiple lines separated with new line character).
         These will be added to the bottom of the gjf file. This is done in order to handle different basis sets
         for individual atoms, modredundant settings, and other settings that Gaussian handles.
-    
+
     .. note::
         It is up to the user to handle write the `extra_details_str` settings. ICHOR
         does NOT do checks to see if these additional settings are going to be read in correctly
         in Gaussian.
     """
 
-    def __init__(self, path: Union[Path, str],
-                startup_options: List[str] = FileContents,
-                comment_line: Optional[str] = FileContents,
-                # TODO: job_type needs to be a list because opt freq can be used together.
-                job_type: List[GaussianJobType] = FileContents,
-                keywords: List[str] = FileContents,
-                method: str =  FileContents,
-                basis_set: str = FileContents,
-                charge: int = FileContents,
-                multiplicity: int = FileContents,
-                atoms: Atoms = FileContents,
-                extra_details_str: Optional[str] = FileContents
+    def __init__(
+        self,
+        path: Union[Path, str],
+        startup_options: List[str] = FileContents,
+        comment_line: Optional[str] = FileContents,
+        # TODO: job_type needs to be a list because opt freq can be used together.
+        job_type: List[GaussianJobType] = FileContents,
+        keywords: List[str] = FileContents,
+        method: str = FileContents,
+        basis_set: str = FileContents,
+        charge: int = FileContents,
+        multiplicity: int = FileContents,
+        atoms: Atoms = FileContents,
+        extra_details_str: Optional[str] = FileContents,
     ):
         super().__init__(path, method, basis_set, atoms)
 
@@ -97,15 +100,19 @@ class GJF(QuantumChemistryProgramInput):
                 line = line.replace("#", "")
                 keywords = line.split()  # split keywords by whitespace
                 # remove this as it is not a keyword, just used to print out more stuff to output file
-                keywords.remove("p")
+                if "p" in keywords:
+                    keywords.remove("p")
                 read_job_type = []
                 read_keywords = []
                 for keyword in keywords:
                     if (
                         "/" in keyword
                     ):  # if the user has used something like B3LYP/6-31G Then split them up
-                        self.method = self.method or keyword.split("/")[0].upper()
-                        self.basis_set = self.basis_set or keyword.split("/")[1].lower()
+                        self.method = self.method or keyword.split("/")[0]
+                        self.basis_set = (
+                            self.basis_set or keyword.split("/")[1]
+                        )
+
                     # if the keyword is in the job enum GaussianJobType: opt, freq
                     elif keyword in GaussianJobType.types():
                         read_job_type.append(GaussianJobType(keyword))
@@ -154,17 +161,23 @@ class GJF(QuantumChemistryProgramInput):
             read_extra_details_string_list = []
             while line:
                 read_extra_details_string_list.append(line)
-                line = next(f, "") # the empty string which is returned instead of StopIteration, "" evaluates as False
+                line = next(
+                    f, ""
+                )  # the empty string which is returned instead of StopIteration, "" evaluates as False
             # if there are stuff from the bottom of the file, then we have extra details to write
             # at bottom of gjf file
             if len(read_extra_details_string_list) > 0:
                 # join line into one string that can be written following coordinates
-                read_extra_details_str = "".join(read_extra_details_string_list)
+                read_extra_details_str = "".join(
+                    read_extra_details_string_list
+                )
             else:
                 # otherwise just add 3 empty lines at bottom of file just in case to prevent read errors in Gaussian
                 read_extra_details_str = "".join(["\n" for n in range(3)])
 
-            self.extra_details_str = self.extra_details_str or read_extra_details_str
+            self.extra_details_str = (
+                self.extra_details_str or read_extra_details_str
+            )
 
     @classproperty
     def filetype(cls) -> str:
@@ -191,7 +204,7 @@ class GJF(QuantumChemistryProgramInput):
     def write(self, path: Optional[Union[str, Path]] = None):
         """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
         should be given to Gaussian.
-        
+
         :param path: A path where to write file. If no path is given here, the value of
         `self.path` attribute is used.
         """
@@ -202,11 +215,15 @@ class GJF(QuantumChemistryProgramInput):
             p = self.path
 
         if not self.atoms:
-            raise ValueError(f"self.atoms is currently {self.atoms}. Cannot write coordinates.")
+            raise ValueError(
+                f"self.atoms is currently {self.atoms}. Cannot write coordinates."
+            )
 
         # TODO: can probably make a for loop here and loop over the vars which are FileContents and set to default
         # give default values to each one of these if the value is FileContents (which evaluates to False).
-        self.startup_options = self.startup_options or gaussian_defaults.startup_options
+        self.startup_options = (
+            self.startup_options or gaussian_defaults.startup_options
+        )
         self.comment_line = self.comment_line or self.title
         # TODO: make this into a list because can use opt and freq at the same time
         self.job_type = self.job_type or gaussian_defaults.job_type
@@ -217,7 +234,10 @@ class GJF(QuantumChemistryProgramInput):
         self.charge = self.charge or gaussian_defaults.charge
         self.multiplicity = self.multiplicity or gaussian_defaults.multiplicity
         # use function here as the default string depends of self.path
-        self.extra_details_str = self.extra_details_str or gaussian_defaults.extra_details_str_fnc(self.path)
+        self.extra_details_str = (
+            self.extra_details_str
+            or gaussian_defaults.extra_details_str_fnc(self.path)
+        )
 
         # remove whitespace from keywords and lowercase to prevent having keywords twice.
         self.keywords = ["".join(k.lower().split()) for k in self.keywords]
