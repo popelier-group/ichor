@@ -3,23 +3,23 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
-from ichor.core.atoms.atom import Atom
 
-from ichor.core.atoms.atoms import Atoms
+# from ichor.core.atoms.atom import Atom
+#
+# from ichor.core.atoms.atoms import Atoms
 from ichor.core.common.functools import classproperty
 
-
-class ALF:
-    def __init__(self, origin: int, x_axis: int, xy_plane: int):
-        self.origin_idx = origin
-        self.x_axis_idx = x_axis
-        self.xy_plane_idx = xy_plane
-
-    def get_x_axis_atom(self, atoms: Atoms) -> Atom:
-        return atoms[self.x_axis_idx]
-
-    def get_xy_plane_atom(self, atoms: Atoms) -> Atom:
-        return atoms[self.xy_plane_idx]
+# class ALF:
+#     def __init__(self, origin: int, x_axis: int, xy_plane: int):
+#         self.origin_idx = origin
+#         self.x_axis_idx = x_axis
+#         self.xy_plane_idx = xy_plane
+#
+#     def get_x_axis_atom(self, atoms: Atoms) -> Atom:
+#         return atoms[self.x_axis_idx]
+#
+#     def get_xy_plane_atom(self, atoms: Atoms) -> Atom:
+#         return atoms[self.xy_plane_idx]
 
 
 class ALFCalculator:  # (ABC):
