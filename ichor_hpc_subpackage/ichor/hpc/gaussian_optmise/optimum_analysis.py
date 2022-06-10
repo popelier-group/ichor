@@ -4,14 +4,17 @@ from typing import Optional
 from ichor.core.common.io import get_files_of_type
 from ichor.core.files import WFN
 
+
 class UnknownOptimumEnergyFileType(Exception):
     pass
+
 
 def get_wfn_energy_from_dir(d: Path) -> Optional[float]:
     wfns = get_files_of_type(WFN.filetype, d)
     if len(wfns) > 0:
         return WFN(wfns[0]).energy
     return None
+
 
 def get_wfn_energy_from_file(wfn_file: Path) -> Optional[float]:
     """

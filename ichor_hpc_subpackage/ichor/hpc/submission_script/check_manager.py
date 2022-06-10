@@ -118,6 +118,7 @@ class CheckManager:
 
 def print_completed():
     from ichor.hpc import BATCH_SYSTEM
+
     """Logs information about completed jobs/tasks into ICHOR log file. It also exports some environment variables which are used
     to rerun tasks from a job if they failed the first time."""
     ntasks = 0

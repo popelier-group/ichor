@@ -3,12 +3,12 @@ from hashlib import new
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.hpc.batch_system import JobID
 from ichor.core.common.io import remove
 from ichor.core.files import AIM, INT, PointsDirectory
+from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script import (SCRIPT_NAMES, AIMAllCommand,
-                                     SubmissionScript, print_completed)
+                                         SubmissionScript, print_completed)
 
 
 def submit_points_directory_to_aimall(
@@ -113,10 +113,9 @@ def scrub_aimall(wfn_file: str):
     from pathlib import Path
 
     from ichor.core.common.io import last_line, mkdir, move
-    from ichor.hpc import FILE_STRUCTURE
     from ichor.core.files.aim import AIM
     from ichor.core.files.point_directory import PointDirectory
-    from ichor.hpc import GLOBALS
+    from ichor.hpc import FILE_STRUCTURE, GLOBALS
     from ichor.hpc.log import logger
 
     # TODO: check for license and end of aim file, then read aim file with AIM class. Then check if aim file has correct atom info for int files.

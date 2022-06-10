@@ -17,7 +17,7 @@ class CannotSubmitPointsDirectoryToQuantumChemicalTopologyProgram(
 
 
 def submit_qct(
-        directory: Path, atoms: Optional[List[str]] = None, force: bool = False
+    directory: Path, atoms: Optional[List[str]] = None, force: bool = False
 ) -> Optional[JobID]:
     qctp = QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
     if qctp is QuantumChemicalTopologyProgram.AIMAll:

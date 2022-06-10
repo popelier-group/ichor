@@ -9,7 +9,7 @@ from ichor.core.files.ints import INTs
 from ichor.core.files.mol2 import Mol2
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora import (MorfiDirectory, PandoraDirectory,
-                                 PandoraInput, PySCFDirectory)
+                                      PandoraInput, PySCFDirectory)
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.points_directory import PointsDirectory
 from ichor.core.files.qcp import QuantumChemistryProgramInput

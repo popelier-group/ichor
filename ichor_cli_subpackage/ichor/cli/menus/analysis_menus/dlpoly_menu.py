@@ -6,12 +6,9 @@ from ichor.core.files import GJF, XYZ
 from ichor.core.menu import Menu, MenuVar
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.dlpoly_analysis.dlpoly_submit import (
-    run_dlpoly,
-    run_dlpoly_geometry_optimisations,
-    setup_dlpoly_directories,
+    run_dlpoly, run_dlpoly_geometry_optimisations, setup_dlpoly_directories,
     submit_dlpoly_optimisation_analysis_auto_run,
-    submit_final_geometry_to_gaussian,
-)
+    submit_final_geometry_to_gaussian)
 
 
 def trajectory_analysis_menu():

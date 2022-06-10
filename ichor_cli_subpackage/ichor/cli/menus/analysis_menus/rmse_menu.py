@@ -2,9 +2,7 @@ from pathlib import Path
 
 from ichor.core.analysis.get_models import choose_model_menu
 from ichor.core.analysis.get_validation_set import (
-    choose_validation_set_menu,
-    get_validation_set_from_current_dir,
-)
+    choose_validation_set_menu, get_validation_set_from_current_dir)
 from ichor.core.analysis.rmse.rmse import calculate_rmse
 from ichor.core.menu import Menu, MenuVar
 from ichor.hpc import FILE_STRUCTURE

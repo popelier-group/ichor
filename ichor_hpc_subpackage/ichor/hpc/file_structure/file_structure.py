@@ -132,7 +132,7 @@ class FileStructure(FileTree):
             O1,H2,H3,O4,H5,H6 [[0,1,2], [1,0,2], [2,0,1], [3,4,5], [4,3,5], [5,3,4]]
 
             Note that the file is 0 indexed (makes it easier to read)
-            """
+            """,
         )
 
         self.add(

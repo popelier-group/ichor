@@ -2,10 +2,8 @@ from typing import List, Optional, Union
 
 import numpy as np
 from ichor.core import constants
-from ichor.core.atoms.calculators import (
-    ALFFeatureCalculator,
-    AtomSequenceALFCalculator,
-)
+from ichor.core.atoms.calculators import (ALFFeatureCalculator,
+                                          AtomSequenceALFCalculator)
 from ichor.core.common.types import VarReprMixin
 from ichor.core.units import AtomicDistance
 

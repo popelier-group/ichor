@@ -1,7 +1,6 @@
 from typing import IO
 
 import numpy as np
-
 from ichor.core.models.mean.mean import Mean
 
 

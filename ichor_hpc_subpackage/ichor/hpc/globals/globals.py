@@ -107,19 +107,16 @@ from re import S
 from typing import Any, List, Optional, Union
 from uuid import UUID, uuid4
 
-from ichor.core.atoms.calculators.feature_calculator.alf_feature_calculator import (
-    ALFCalculationError,
-)
-from ichor.hpc.globals.config_provider import ConfigProvider
-from ichor.hpc.globals.os import OS
-
 # from ichor.cli.problem_finder import PROBLEM_FINDER
 from ichor.core import constants
 from ichor.core.atoms.atoms import Atoms
+from ichor.core.atoms.calculators.feature_calculator.alf_feature_calculator import \
+    ALFCalculationError
 from ichor.core.common.types import Version
-
 # from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.globals import checkers, formatters, parsers
+from ichor.hpc.globals.config_provider import ConfigProvider
+from ichor.hpc.globals.os import OS
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -589,7 +586,6 @@ class Globals:
         atomic local frame calculated for the system."""
 
         from ichor.core.common.io import mkdir
-
         from ichor.hpc import FILE_STRUCTURE
 
         # # if the reference file still not been set (default is None), make the default file

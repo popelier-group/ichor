@@ -1,12 +1,12 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.hpc.auto_run.counter import read_counter, write_counter
-from ichor.hpc.auto_run.stop import stop, stopped
 from ichor.core.common.io import mkdir, remove
 from ichor.core.files import PointsDirectory
-from ichor.hpc.log import logger
 from ichor.core.models import Models
+from ichor.hpc.auto_run.counter import read_counter, write_counter
+from ichor.hpc.auto_run.stop import stop, stopped
+from ichor.hpc.log import logger
 
 
 def active_learning(
@@ -16,12 +16,10 @@ def active_learning(
 ):
     """Add a new training point to the training set based on the most recent FERBUS model that was made. Adaptive sampling is
     used to add the worst performing point from the sample pool to the training set."""
+    from ichor.hpc import FILE_STRUCTURE, GLOBALS, MACHINE
     from ichor.hpc.active_learning import learning_method_cls
     from ichor.hpc.arguments import Arguments
     from ichor.hpc.auto_run.standard_auto_run import submit_next_iter
-    from ichor.hpc import FILE_STRUCTURE
-    from ichor.hpc import GLOBALS
-    from ichor.hpc import MACHINE
     from ichor.hpc.submission_script import SUBMIT_ON_COMPUTE
 
     logger.debug("Performing Active Learning Calculation")

@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files.directory import Directory
-from ichor.core.files.geometry import GeometryFile, AtomicDict
+from ichor.core.files.geometry import AtomicDict, GeometryFile
 from ichor.core.files.int import INT
 
 
@@ -16,8 +16,10 @@ class INTs(Directory, AtomicDict):
     """
 
     def __init__(
-        self, path: Union[Path, str], parent: Optional[GeometryFile] = None,
-        create_json = True
+        self,
+        path: Union[Path, str],
+        parent: Optional[GeometryFile] = None,
+        create_json=True,
     ):
         self._parent = parent
         self.create_json = create_json
@@ -25,24 +27,26 @@ class INTs(Directory, AtomicDict):
         Directory.__init__(self, path)
 
     def _parse(self) -> None:
-        """ Parse an *_atomicfiles directory and look for .int files. This method is
+        """Parse an *_atomicfiles directory and look for .int files. This method is
         ran automatically when INTs is initialized. See Directory class which
         this class subclasses from.
-        
+
         .. note::
-            This method does NOT read in information from the INT files (i.e. multipoles 
+            This method does NOT read in information from the INT files (i.e. multipoles
             and iqa data are not read in here). This method only finds the relevant files.
             Once information is requested (i.e. multipoles or iqa are needed), the INT class
             _read_file method reads in the data.
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f, self._parent, create_json=self.create_json)
+                self[f.stem.upper()] = INT(
+                    f, self._parent, create_json=self.create_json
+                )
         self.sort()
 
     @property
     def parent(self) -> GeometryFile:
-        """ Returns a GeometryFile instance associated with the INTs. This is needed because the
+        """Returns a GeometryFile instance associated with the INTs. This is needed because the
         .int files are for individual atoms, but these atoms belong to a bigger molecule/system.
         The GeometryFile contains the information (coordinates) for the whole system."""
         if self._parent is None:
@@ -53,7 +57,7 @@ class INTs(Directory, AtomicDict):
 
     @parent.setter
     def parent(self, value: GeometryFile):
-        """ Setter method for parent property."""
+        """Setter method for parent property."""
         if not isinstance(value, GeometryFile):
             raise TypeError(
                 f"'parent' must be of type 'GeometryFile' not of type {type(value)}."
@@ -62,11 +66,11 @@ class INTs(Directory, AtomicDict):
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
-        """ Checks if the given Path instance has _atomicfiles in its name."""
+        """Checks if the given Path instance has _atomicfiles in its name."""
         return path.name.endswith("_atomicfiles")
 
     def dump(self):
-        """ Removes the data from all the associated INT files, i.e. if the files
+        """Removes the data from all the associated INT files, i.e. if the files
         were read in and iqa and multipole data was stored, this method will wipe that
         data and set all the attributes back to FileContents type.
         """

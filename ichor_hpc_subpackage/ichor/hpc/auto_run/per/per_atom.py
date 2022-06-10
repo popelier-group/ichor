@@ -6,19 +6,14 @@ from ichor.core.common.io import pushd
 from ichor.core.daemon import Daemon
 from ichor.core.menu import ListCompleter  # todo: fix this
 from ichor.core.menu.menu import Menu  # todo: fix this
-from ichor.hpc.auto_run.ichor_jobs.auto_run_ichor_collate_log import (
-    submit_ichor_collate_models_to_auto_run,
-)
-from ichor.hpc.auto_run.per.per import (
-    auto_run_per_value,
-    check_auto_run_per_counter,
-)
+from ichor.hpc.auto_run.ichor_jobs.auto_run_ichor_collate_log import \
+    submit_ichor_collate_models_to_auto_run
+from ichor.hpc.auto_run.per.per import (auto_run_per_value,
+                                        check_auto_run_per_counter)
 from ichor.hpc.auto_run.standard_auto_run import auto_make_models
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.programs.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
+from ichor.hpc.programs.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                                    QuantumChemicalTopologyProgram)
 
 _atoms_to_run_on: Optional[List[Path]] = None
 _selected_atoms_to_run_on: Optional[List[Path]] = None

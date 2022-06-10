@@ -2,7 +2,7 @@
 portalocker as a dependency that needs to be downloaded separately."""
 
 from ichor.hpc.log.portalocker import (__about__, constants, exceptions,
-                                   portalocker, utils)
+                                       portalocker, utils)
 
 try:  # pragma: no cover
     from .redis import RedisLock

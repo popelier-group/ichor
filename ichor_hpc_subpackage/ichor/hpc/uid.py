@@ -12,8 +12,8 @@ def get_uid() -> UUID:
 
 def set_uid(uid=None):
     """Set the GLOBALS Unique ID to one given by get_uid()"""
+    from ichor.hpc import BATCH_SYSTEM, GLOBALS
     from ichor.hpc.batch_system import NodeType
-    from ichor.hpc import GLOBALS, BATCH_SYSTEM
 
     """ if GLOBALS.SUBMITTED is true then we are running on the compute node, when running on a compute node, it is important
     not to change the UID if it has already been set as this is what is used to write and read to datafiles"""

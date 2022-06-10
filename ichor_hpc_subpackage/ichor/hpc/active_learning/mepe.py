@@ -3,13 +3,13 @@ from typing import Dict
 
 import numpy as np
 import numpy.linalg as la
-from scipy.spatial.distance import cdist
-
-from ichor.hpc.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.models import Model, Models, ModelsResult
+from ichor.hpc.active_learning.active_learning_method import \
+    ActiveLearningMethod
+from scipy.spatial.distance import cdist
 
 """
     Implementation of the Maximum Expected Prediction Error (MEPE) method

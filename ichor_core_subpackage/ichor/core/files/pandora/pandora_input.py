@@ -8,6 +8,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents
 from ichor.core.files.qcp import QuantumChemistryProgramInput
 
+
 class PandoraCCSDmod(Enum):
     CCSD = "ccsd"
     CCSD_HF = "ccsdHF"
@@ -15,14 +16,16 @@ class PandoraCCSDmod(Enum):
 
 
 class PandoraInput(QuantumChemistryProgramInput):
-    def __init__(self, path: Path,
+    def __init__(
+        self,
+        path: Path,
         ccsdmod: PandoraCCSDmod = FileContents,
         morfi_grid_radial: float = FileContents,
         morfi_grid_angular: int = FileContents,
         morfi_grid_radial_h: float = FileContents,
         morfi_grid_angular_h: int = FileContents,
         method: str = FileContents,
-        basis_set: str = FileContents
+        basis_set: str = FileContents,
     ):
         QuantumChemistryProgramInput.__init__(self, path)
 

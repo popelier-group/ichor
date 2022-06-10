@@ -3,10 +3,8 @@ from pathlib import Path
 from typing import List, Union
 
 from ichor.core.atoms import Atoms
-from ichor.core.atoms.calculators import (
-    ALFFeatureCalculator,
-    AtomSequenceALFCalculator,
-)
+from ichor.core.atoms.calculators import (ALFFeatureCalculator,
+                                          AtomSequenceALFCalculator)
 from ichor.core.files.file import File
 from ichor.core.files.geometry.atom_data import AtomData
 

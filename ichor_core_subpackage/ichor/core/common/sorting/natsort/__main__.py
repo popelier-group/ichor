@@ -257,11 +257,11 @@ def sort_and_print_entries(entries, args):
     is_float = args.number_type in ("float", "real", "f", "r")
     signed = args.signed or args.number_type in ("real", "r")
     alg = (
-            natsort.ns.FLOAT * is_float
-            | natsort.ns.SIGNED * signed
-            | natsort.ns.NOEXP * (not args.exp)
-            | natsort.ns.PATH * args.paths
-            | natsort.ns.LOCALE * args.locale
+        natsort.ns.FLOAT * is_float
+        | natsort.ns.SIGNED * signed
+        | natsort.ns.NOEXP * (not args.exp)
+        | natsort.ns.PATH * args.paths
+        | natsort.ns.LOCALE * args.locale
     )
 
     # Pre-remove entries that don't pass the filtering criteria
@@ -270,9 +270,9 @@ def sort_and_print_entries(entries, args):
     do_filter = args.filter is not None or args.reverse_filter is not None
     if do_filter or args.exclude:
         inp_options = (
-                natsort.ns.FLOAT * is_float
-                | natsort.ns.SIGNED * signed
-                | natsort.ns.NOEXP * (not args.exp)
+            natsort.ns.FLOAT * is_float
+            | natsort.ns.SIGNED * signed
+            | natsort.ns.NOEXP * (not args.exp)
         )
         regex = regex_chooser(inp_options)
         if args.filter is not None:

@@ -1,7 +1,6 @@
 from typing import IO, Optional
 
 import numpy as np
-
 from ichor.core.common.functools import cached_property
 from ichor.core.common.np import batched_array
 from ichor.core.models.kernels.distance import Distance

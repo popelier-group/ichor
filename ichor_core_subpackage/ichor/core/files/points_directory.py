@@ -5,10 +5,10 @@ from typing import Union
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import buildermethod
 from ichor.core.common.io import mkdir
+from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files import Directory
 from ichor.core.files.point_directory import PointDirectory
 
-from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 
 class PointsDirectory(ListOfAtoms, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).

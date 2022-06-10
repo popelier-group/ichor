@@ -15,23 +15,9 @@ import subprocess
 import sys
 from locale import getlocale
 from types import FrameType
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Iterator,
-    List,
-    Match,
-    Optional,
-    Pattern,
-    Sequence,
-    Set,
-    TextIO,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import (Any, Callable, Dict, Iterable, Iterator, List, Match,
+                    Optional, Pattern, Sequence, Set, TextIO, Tuple, Union,
+                    cast)
 
 try:
     import termios

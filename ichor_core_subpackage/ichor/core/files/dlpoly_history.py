@@ -40,5 +40,5 @@ class DlpolyHistory(Trajectory):
 
     @convert_to_path
     def write_to_trajectory(self, path: Optional[Path] = None):
-        """ Writes a trajectory .xyz file from the DL POLY HISTORY file."""
+        """Writes a trajectory .xyz file from the DL POLY HISTORY file."""
         self.write(path=path)

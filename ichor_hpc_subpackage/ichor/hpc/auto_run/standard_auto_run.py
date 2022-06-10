@@ -15,41 +15,28 @@ from ichor.core.common.types import MutableValue
 from ichor.core.files import PointsDirectory, Trajectory
 from ichor.hpc.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.hpc.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
-from ichor.hpc.auto_run.auto_run_gaussian import (
-    submit_gaussian_job_to_auto_run,
-)
+from ichor.hpc.auto_run.auto_run_gaussian import \
+    submit_gaussian_job_to_auto_run
 from ichor.hpc.auto_run.auto_run_morfi import submit_morfi_job_to_auto_run
 from ichor.hpc.auto_run.auto_run_pyscf import submit_pyscf_job_to_auto_run
-from ichor.hpc.auto_run.counter import (
-    counter_exists,
-    get_counter_location,
-    read_counter,
-    write_counter,
-)
+from ichor.hpc.auto_run.counter import (counter_exists, get_counter_location,
+                                        read_counter, write_counter)
 from ichor.hpc.auto_run.ichor_jobs import (
-    make_models,
-    submit_ichor_active_learning_job_to_auto_run,
+    make_models, submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,
     submit_ichor_gaussian_command_to_auto_run,
     submit_ichor_morfi_command_to_auto_run,
-    submit_ichor_pyscf_command_to_auto_run,
-    submit_make_sets_job_to_auto_run,
-)
+    submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
 from ichor.hpc.auto_run.stop import start
-
 # from ichor.hpc import FILE_STRUCTURE, MACHINE
 from ichor.hpc.batch_system import JobID, NodeType
 from ichor.hpc.drop_compute.drop_compute import DropCompute
 from ichor.hpc.machine import SubmitType
 from ichor.hpc.points import get_points_location
-from ichor.hpc.programs.qcp import (
-    QUANTUM_CHEMISTRY_PROGRAM,
-    QuantumChemistryProgram,
-)
-from ichor.hpc.programs.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
+from ichor.hpc.programs.qcp import (QUANTUM_CHEMISTRY_PROGRAM,
+                                    QuantumChemistryProgram)
+from ichor.hpc.programs.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                                    QuantumChemicalTopologyProgram)
 from ichor.hpc.submission_script import SCRIPT_NAMES, DataLock
 
 
@@ -310,9 +297,8 @@ def setup_iter_args():
         IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
     if GLOBALS.OPTIMISE_PROPERTY == "all":
-        from ichor.cli.menus.machine_learning_menus.make_models import (
-            MODEL_TYPES,
-        )
+        from ichor.cli.menus.machine_learning_menus.make_models import \
+            MODEL_TYPES
 
         IterArgs.ModelTypes.value = MODEL_TYPES()
     else:
@@ -534,9 +520,8 @@ def auto_make_models(
         atoms = PointsDirectory(directory)[0].atoms.names
     IterArgs.Atoms.value = atoms
     if types is None:
-        from ichor.cli.menus.machine_learning_menus.make_models import (
-            default_model_type,
-        )
+        from ichor.cli.menus.machine_learning_menus.make_models import \
+            default_model_type
 
         types = [default_model_type]
     IterArgs.ModelTypes.value = types

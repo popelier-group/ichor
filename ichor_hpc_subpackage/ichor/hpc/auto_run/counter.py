@@ -8,6 +8,7 @@ _counter_location = None
 
 def _check_counter_location():
     from ichor.hpc import FILE_STRUCTURE
+
     global _counter_location
     if _counter_location is None:
         _counter_location = FILE_STRUCTURE["counter"]

@@ -6,25 +6,16 @@ from ichor.core import constants
 from ichor.core.common.io import cp, mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.files import PointsDirectory
-from ichor.core.menu import (
-    Menu,
-    MenuVar,
-    select_multiple_from_list,
-    toggle_bool_var,
-)
+from ichor.core.menu import (Menu, MenuVar, select_multiple_from_list,
+                             toggle_bool_var)
 from ichor.core.models import Model
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.programs.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    FerebusCommand,
-    SubmissionScript,
-)
+from ichor.hpc.programs.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                                    QuantumChemicalTopologyProgram)
+from ichor.hpc.submission_script import (SCRIPT_NAMES, FerebusCommand,
+                                         SubmissionScript)
 
 default_model_type = "iqa"
 

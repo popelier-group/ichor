@@ -1,14 +1,19 @@
 from abc import ABC
 from typing import Any
+
 from ichor.core.files import File, FileState
+
 
 class PropertyNotFound(Exception):
     pass
 
+
 class GeometryData(dict):
-    """ Used to be able to distinguish between a normal dictionary instance
+    """Used to be able to distinguish between a normal dictionary instance
     and a GeometryData instance. Otherwise, the same as a normal dictionary."""
+
     pass
+
 
 class GeometryDataFile(File, ABC):
     """
@@ -25,7 +30,7 @@ class GeometryDataFile(File, ABC):
             raise PropertyNotFound(f"Property {item} not found")
 
     def __getattr__(self, item: str) -> Any:
-        """ Used to make values of GeometryData instances accessible as attributes.
+        """Used to make values of GeometryData instances accessible as attributes.
         Looks into __dict__ of an instance to see if an instance of GeometryData exist.
         If an instance of GeometryData exists, it looks at the keys of that instance
         and the value is returned."""
@@ -55,7 +60,10 @@ class AtomicDict(dict):
         ```
         """
         try:
-            return {atom_name: getattr(int_, item) for atom_name, int_ in self.items()}
+            return {
+                atom_name: getattr(int_, item)
+                for atom_name, int_ in self.items()
+            }
         except AttributeError:
             raise AttributeError(
                 f"'{self.__class__.__name__}' object has no attribute '{item}'"

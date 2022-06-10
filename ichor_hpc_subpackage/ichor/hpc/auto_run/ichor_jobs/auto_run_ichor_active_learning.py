@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.hpc.batch_system import JobID
 from ichor.core.common.types import MutableValue
 from ichor.hpc import FILE_STRUCTURE
+from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript, TimingManager)
+                                         SubmissionScript, TimingManager)
 
 
 def submit_ichor_active_learning_job_to_auto_run(

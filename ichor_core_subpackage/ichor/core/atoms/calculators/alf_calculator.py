@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
-
 # from ichor.core.atoms.atom import Atom
 #
 # from ichor.core.atoms.atoms import Atoms

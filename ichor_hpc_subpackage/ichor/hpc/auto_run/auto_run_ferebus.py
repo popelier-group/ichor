@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor.hpc.batch_system import JobID
 from ichor.core.common.types import MutableValue
+from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (SCRIPT_NAMES, FerebusCommand,
-                                     SubmissionScript, TimingManager)
+                                         SubmissionScript, TimingManager)
 
 
 def submit_ferebus_job_to_auto_run(

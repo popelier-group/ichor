@@ -29,8 +29,8 @@ class Distance:
 
         result = (
             -2 * np.dot(x1, x2.T)
-            + np.sum(x2 ** 2, axis=1)
-            + np.sum(x1 ** 2, axis=1)[:, np.newaxis]
+            + np.sum(x2**2, axis=1)
+            + np.sum(x1**2, axis=1)[:, np.newaxis]
         )
         result = result.clip(
             0

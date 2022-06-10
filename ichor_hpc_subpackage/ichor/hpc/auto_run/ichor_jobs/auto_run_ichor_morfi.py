@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.hpc.batch_system import JobID
 from ichor.core.common.types import MutableValue
+from ichor.hpc.batch_system import JobID
 from ichor.hpc.main.pandora import submit_points_directory_to_morfi
 from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript, TimingManager)
+                                         SubmissionScript, TimingManager)
 
 
 def submit_ichor_morfi_command_to_auto_run(

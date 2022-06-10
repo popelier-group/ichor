@@ -1,7 +1,6 @@
 from typing import List
 
 import numpy as np
-
 from ichor.cli.make_set_methods.make_set_method import MakeSetMethod
 from ichor.core.atoms import ListOfAtoms
 

@@ -3,10 +3,8 @@ from typing import Callable, List, Optional
 from ichor.cli.menus.machine_learning_menus.make_models import MODEL_TYPES
 from ichor.core.daemon import Daemon
 from ichor.hpc import FILE_STRUCTURE
-from ichor.hpc.auto_run.per.per import (
-    auto_run_per_value,
-    check_auto_run_per_counter,
-)
+from ichor.hpc.auto_run.per.per import (auto_run_per_value,
+                                        check_auto_run_per_counter)
 from ichor.hpc.batch_system import JobID
 
 

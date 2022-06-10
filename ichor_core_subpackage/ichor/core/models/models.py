@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import numpy as np
-
 from ichor.core.atoms import Atoms, ListOfAtoms
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.common.str import get_digits

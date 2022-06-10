@@ -44,7 +44,8 @@ class Machine(Enum):
         if self.submit_on_compute:
             submit_type = SubmitType.SubmitOnCompute
         elif self.drop_compute_available:
-            from ichor.hpc.drop_compute.drop_compute import drop_compute_available_for_user
+            from ichor.hpc.drop_compute.drop_compute import \
+                drop_compute_available_for_user
 
             if drop_compute_available_for_user():
                 submit_type = SubmitType.DropCompute
@@ -71,6 +72,7 @@ def get_machine_from_name(platform_name: str):
 
 def get_machine_from_file():
     from ichor.hpc import FILE_STRUCTURE
+
     if FILE_STRUCTURE["machine"].exists():
         with open(FILE_STRUCTURE["machine"], "r") as f:
             _machine = f.read().strip()

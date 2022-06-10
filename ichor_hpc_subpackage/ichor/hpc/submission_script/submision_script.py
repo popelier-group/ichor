@@ -1,14 +1,14 @@
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from ichor.hpc.batch_system import JobID
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.types import BoolToggle
-from ichor.hpc.uid import set_uid
-from ichor.hpc.machine import  SubmitType
+from ichor.hpc.batch_system import JobID
+from ichor.hpc.machine import SubmitType
 from ichor.hpc.submission_script.command_group import CommandGroup
 from ichor.hpc.submission_script.data_lock import DataLock
+from ichor.hpc.uid import set_uid
 
 SUBMIT_ON_COMPUTE = BoolToggle(False)
 
@@ -54,13 +54,13 @@ class SubmissionScript:
     @property
     def default_options(self) -> List[str]:
         from ichor.hpc import BATCH_SYSTEM
+
         """Returns a list of default options to use in a submission script for a job.
         This list contaning the current working directory, the output directory (where .o files are written),
         the errors directory (where .e files are witten). If the number of cores is more than 1, the keyword
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
         the system on which the job is ran, as well as on the number of cores that the job needs."""
-        from ichor.hpc import FILE_STRUCTURE
-        from ichor.hpc import GLOBALS
+        from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
         mkdir(FILE_STRUCTURE["outputs"])
         mkdir(FILE_STRUCTURE["errors"])
@@ -145,6 +145,7 @@ class SubmissionScript:
     @classmethod
     def array_index(cls, n):
         from ichor.hpc import BATCH_SYSTEM
+
         """Returns the keywords used to run an array job through a program such as Gaussian.
 
         .. note::
@@ -251,7 +252,7 @@ class SubmissionScript:
     def write(self):
         """Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
         are written at the top of the file. The commands to run (such as Gaussian, AIMALL, etc.) are written below the options."""
-        from ichor.hpc import FILE_STRUCTURE, GLOBALS, BATCH_SYSTEM
+        from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE, GLOBALS
 
         mkdir(self.path.parent)
 

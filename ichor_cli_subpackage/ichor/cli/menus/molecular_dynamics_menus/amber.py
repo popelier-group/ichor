@@ -3,24 +3,18 @@ from pathlib import Path
 from typing import Optional
 
 import numpy as np
-
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.formatting import (
-    format_number_with_comma,
-    temperature_formatter,
-)
+from ichor.core.common.formatting import (format_number_with_comma,
+                                          temperature_formatter)
 from ichor.core.common.io import mkdir
 from ichor.core.common.os import input_with_prefill
 from ichor.core.files import GJF, XYZ, Mol2, Trajectory
 from ichor.core.menu import Menu, MenuVar, set_number
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    AmberCommand,
-    SubmissionScript,
-)
+from ichor.hpc.submission_script import (SCRIPT_NAMES, AmberCommand,
+                                         SubmissionScript)
 
 # todo: put this in core
 

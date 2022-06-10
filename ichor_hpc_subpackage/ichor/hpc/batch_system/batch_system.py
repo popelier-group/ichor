@@ -4,11 +4,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor.hpc.batch_system.node import NodeType
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.os import run_cmd
 from ichor.core.common.types import VarReprMixin
+from ichor.hpc.batch_system.node import NodeType
 
 
 class CannotParseJobID(Exception):
@@ -24,9 +24,7 @@ class JobID:
     :instance: the unique identified (UUID) that is used for the job's datafile (containing the names of all the files needed for the job).
     """
 
-    def __init__(
-        self, script: Union[str, Path], id: str, instance: str
-    ):
+    def __init__(self, script: Union[str, Path], id: str, instance: str):
         self.script = str(script)
         self.id = id
         self.instance = instance

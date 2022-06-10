@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+
 import numpy as np
 from ichor.core.atoms.calculators.feature_calculator.feature_calculator import \
     FeatureCalculator
@@ -6,11 +7,13 @@ from ichor.core.constants import ang2bohr
 from ichor.core.units import AtomicDistance
 
 feature_unit = AtomicDistance.Bohr
+
+
 class ALFCalculationError(Exception):
     pass
 
-class ALFFeatureCalculator(FeatureCalculator):
 
+class ALFFeatureCalculator(FeatureCalculator):
     @classmethod
     def calculate_c_matrix(
         cls,
