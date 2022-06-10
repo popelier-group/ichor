@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Union
 
 import numpy as np
-
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
@@ -123,7 +122,9 @@ class Trajectory(ListOfAtoms, File):
         if isinstance(atoms, Atoms):
             self.append(atoms)
         else:
-            raise ValueError(f"Cannot add an instance of {type(atoms)} to self.")
+            raise ValueError(
+                f"Cannot add an instance of {type(atoms)} to self."
+            )
 
     def rmsd(self, ref=None):
         if ref is None:
@@ -136,7 +137,7 @@ class Trajectory(ListOfAtoms, File):
     def to_dir(self, system_name: str, root: Path, every: int = 1):
         """Writes out every nth timestep to a separate .xyz file to a given directory
 
-        :param system_name: The name of the 
+        :param system_name: The name of the
         :param root: A Path to a directory where to write the .xyz files. An empty directory is made for the given Path and
             overwrites an existing directory for the given Path.
         :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
@@ -149,9 +150,7 @@ class Trajectory(ListOfAtoms, File):
 
             if (i % every) == 0:
 
-                path = Path(
-                    system_name + str(i+1) + ".xyz"
-                )
+                path = Path(system_name + str(i + 1) + ".xyz")
                 path = root / path
                 xyz_file = XYZ(path, geometry)
                 xyz_file.write()
@@ -184,7 +183,6 @@ class Trajectory(ListOfAtoms, File):
         from pathlib import Path
 
         import pandas as pd
-
         from ichor.core.constants import bohr2ang
 
         if isinstance(f, str):

@@ -2,17 +2,16 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-
 from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
 from ichor.core.files.file import File, FileContents
-from ichor.core.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
-                                  RBFCyclic)
+from ichor.core.models.kernels import (RBF, ConstantKernel, Kernel,
+                                       PeriodicKernel, RBFCyclic)
 from ichor.core.models.kernels.interpreter import KernelInterpreter
-from ichor.core.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
-                               ZeroMean)
+from ichor.core.models.mean import (ConstantMean, LinearMean, Mean,
+                                    QuadraticMean, ZeroMean)
 
 
 def _get_default_input_units(nfeats: int) -> List[str]:
@@ -40,26 +39,28 @@ class Model(File):
         Another program can be used for the machine learning as long as it outputs files of the same format as the FEREBUS outputs.
     """
 
-    def __init__(self, path: Path,
-            system_name: str = FileContents,
-            atom_name: str = FileContents,
-            prop: str = FileContents,
-            alf: List[int] = FileContents,
-            natoms: int = FileContents,
-            ntrain: int = FileContents,
-            nfeats: int = FileContents,
-            mean: Mean = FileContents,
-            kernel: Kernel = FileContents,
-            x: np.ndarray = FileContents,
-            y: np.ndarray = FileContents,
-            input_units: List[str] = FileContents,
-            output_unit: str = FileContents,
-            likelihood: float = FileContents,
-            jitter: float = FileContents,
-            weights: np.ndarray = FileContents,
-            program: str = FileContents,
-            program_version: Version = FileContents,
-            notes: Dict[str, str] = FileContents
+    def __init__(
+        self,
+        path: Path,
+        system_name: str = FileContents,
+        atom_name: str = FileContents,
+        prop: str = FileContents,
+        alf: List[int] = FileContents,
+        natoms: int = FileContents,
+        ntrain: int = FileContents,
+        nfeats: int = FileContents,
+        mean: Mean = FileContents,
+        kernel: Kernel = FileContents,
+        x: np.ndarray = FileContents,
+        y: np.ndarray = FileContents,
+        input_units: List[str] = FileContents,
+        output_unit: str = FileContents,
+        likelihood: float = FileContents,
+        jitter: float = FileContents,
+        weights: np.ndarray = FileContents,
+        program: str = FileContents,
+        program_version: Version = FileContents,
+        notes: Dict[str, str] = FileContents,
     ):
         File.__init__(self, path)
 
@@ -110,7 +111,9 @@ class Model(File):
                     continue
 
                 if "likelihood" in line:
-                    self.likelihood = self.likelihood or float(line.split()[-1])
+                    self.likelihood = self.likelihood or float(
+                        line.split()[-1]
+                    )
                     continue
 
                 if "#" in line and "=" in line:
@@ -233,9 +236,12 @@ class Model(File):
                             active_dims=active_dims,
                         )
 
-                        self.kernel = self.kernel or KernelInterpreter(
-                            kernel_composition, kernel_dict
-                        ).interpret()
+                        self.kernel = (
+                            self.kernel
+                            or KernelInterpreter(
+                                kernel_composition, kernel_dict
+                            ).interpret()
+                        )
 
                     continue
 
@@ -292,8 +298,8 @@ class Model(File):
 
     @property
     def ialf(self) -> np.ndarray:
-        """ Returns the atomic local frame, indices start at 0 (as in Python).
-        
+        """Returns the atomic local frame, indices start at 0 (as in Python).
+
         :return: The 0-indexed np.ndarray corresponding to the alf of the atom.
         """
         return np.array(self.alf) - 1
@@ -319,7 +325,7 @@ class Model(File):
         """Returns the covariance matrix and adds a jitter to the diagonal for numerical stability. This jitter is a very
         small number on the order of 1e-6 to 1e-10."""
         return self.kernel.R(self.x) + (self.jitter * np.identity(self.ntrain))
-    
+
     @property
     def invR(self) -> np.ndarray:
         """Returns the inverse of the covariance matrix R"""
@@ -376,7 +382,8 @@ class Model(File):
             mkdir(path.parent)
         if path.is_dir():
             path = (
-                path / f"{self.system_name}_{self.prop}_{self.atom_name}{Model.filetype}"
+                path
+                / f"{self.system_name}_{self.prop}_{self.atom_name}{Model.filetype}"
             )
 
         with open(path, "w") as f:

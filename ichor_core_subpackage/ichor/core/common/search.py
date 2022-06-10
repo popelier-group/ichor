@@ -1,19 +1,7 @@
 from collections import deque
 from heapq import heappop, heappush
-from typing import (
-    Any,
-    Callable,
-    Deque,
-    Dict,
-    Generic,
-    Iterable,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    TypeVar,
-)
+from typing import (Any, Callable, Deque, Dict, Generic, Iterable, List,
+                    Optional, Sequence, Set, Tuple, TypeVar)
 
 from typing_extensions import Protocol
 

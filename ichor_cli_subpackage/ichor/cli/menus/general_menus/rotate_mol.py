@@ -1,27 +1,17 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.core.analysis.get_atoms import (
-    get_atoms_from_path,
-    get_trajectory_from_path,
-)
+from ichor.core.analysis.get_atoms import (get_atoms_from_path,
+                                           get_trajectory_from_path)
 from ichor.core.analysis.get_input import get_files_in_cwd
 from ichor.core.analysis.get_path import get_path
 from ichor.core.atoms import Atoms
 from ichor.core.files import XYZ
-from ichor.core.menu import (
-    Menu,
-    MenuVar,
-    return_arg,
-    select_multiple_from_list,
-    toggle_bool_var,
-)
+from ichor.core.menu import (Menu, MenuVar, return_arg,
+                             select_multiple_from_list, toggle_bool_var)
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    ICHORCommand,
-    SubmissionScript,
-)
+from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,
+                                         SubmissionScript)
 
 
 def _get_input_file() -> Path:

@@ -2,7 +2,6 @@ from abc import ABC
 from typing import Dict
 
 import numpy as np
-
 from ichor.core.models.kernels.constant import ConstantKernel
 from ichor.core.models.kernels.interpreter.token_type import TokenType
 from ichor.core.models.kernels.kernel import Kernel

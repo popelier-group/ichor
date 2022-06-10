@@ -2,12 +2,11 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 import numpy as np
-
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.np import batched_array
-from ichor.hpc import GLOBALS
 from ichor.core.models import Models
+from ichor.hpc import GLOBALS
 
 
 class ActiveLearningMethod(ABC):

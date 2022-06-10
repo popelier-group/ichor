@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 import numpy as np
-
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.linalg import mag
 

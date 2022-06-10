@@ -4,7 +4,6 @@ from enum import Enum
 from typing import Dict, List
 
 import numpy as np
-
 from ichor.core.common.types import Version
 
 # old logo memorialised here for old times sake, it was a bit too big imho

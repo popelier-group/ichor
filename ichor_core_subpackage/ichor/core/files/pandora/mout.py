@@ -5,12 +5,12 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import numpy as np
-
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.types import VarReprMixin
 from ichor.core.files.file import File, FileContents
-from ichor.core.files.geometry import AtomicDict, GeometryDataFile, GeometryFile
+from ichor.core.files.geometry import (AtomicDict, GeometryDataFile,
+                                       GeometryFile)
 from ichor.core.units import AtomicDistance
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])

@@ -17,7 +17,7 @@ if os.name == "nt":  # pragma: no cover
     if sys.version_info.major == 2:
         lock_length = -1
     else:
-        lock_length = int(2 ** 31 - 1)
+        lock_length = int(2**31 - 1)
 
     def lock(file_: typing.IO, flags: constants.LockFlags):
         if flags & constants.LockFlags.SHARED:
@@ -131,7 +131,6 @@ if os.name == "nt":  # pragma: no cover
                 exceptions.LockException.LOCK_FAILED, exc.strerror, fh=file_
             )
 
-
 elif os.name == "posix":  # pragma: no cover
     import fcntl
 
@@ -153,7 +152,6 @@ elif os.name == "posix":  # pragma: no cover
         file_: typing.IO,
     ):
         fcntl.flock(file_.fileno(), constants.LockFlags.UNBLOCK)
-
 
 else:  # pragma: no cover
     raise RuntimeError("PortaLocker only defined for nt and posix platforms")

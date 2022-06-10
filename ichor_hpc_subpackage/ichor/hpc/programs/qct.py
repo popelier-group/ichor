@@ -1,5 +1,6 @@
 from ichor.core.common.types import Enum
-from ichor.hpc.programs.qcp import QUANTUM_CHEMISTRY_PROGRAM, QuantumChemistryProgram
+from ichor.hpc.programs.qcp import (QUANTUM_CHEMISTRY_PROGRAM,
+                                    QuantumChemistryProgram)
 
 
 class QuantumChemicalTopologyProgram(Enum):

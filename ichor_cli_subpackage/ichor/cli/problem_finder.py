@@ -1,6 +1,7 @@
 import os
 
-from ichor.core.common.functools import get_functions_to_run, run_function, run_once
+from ichor.core.common.functools import (get_functions_to_run, run_function,
+                                         run_once)
 
 
 class Problem:

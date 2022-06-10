@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import numpy as np
-
 from ichor.core import constants
 
 

@@ -4,8 +4,9 @@ from ichor.core.common.types import MutableValue
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.submission_script.aimall_command import AIMAllCommand
 from ichor.hpc.submission_script.amber_command import AmberCommand
-from ichor.hpc.submission_script.check_manager import (CheckManager, default_check,
-                                                   print_completed)
+from ichor.hpc.submission_script.check_manager import (CheckManager,
+                                                       default_check,
+                                                       print_completed)
 from ichor.hpc.submission_script.cp2k_command import CP2KCommand
 from ichor.hpc.submission_script.data_lock import DataLock
 from ichor.hpc.submission_script.dlpoly_command import DlpolyCommand
@@ -14,12 +15,12 @@ from ichor.hpc.submission_script.gaussian_command import GaussianCommand
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
 from ichor.hpc.submission_script.morfi_command import MorfiCommand
 from ichor.hpc.submission_script.pandora_command import (PandoraCommand,
-                                                     PandoraMorfiCommand,
-                                                     PandoraPySCFCommand)
+                                                         PandoraMorfiCommand,
+                                                         PandoraPySCFCommand)
 from ichor.hpc.submission_script.python_command import PythonCommand
 from ichor.hpc.submission_script.script_timing_manager import TimingManager
 from ichor.hpc.submission_script.submision_script import (SUBMIT_ON_COMPUTE,
-                                                      SubmissionScript)
+                                                          SubmissionScript)
 from ichor.hpc.submission_script.tyche_command import TycheCommand
 
 

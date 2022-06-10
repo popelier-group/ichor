@@ -1,21 +1,28 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.core.analysis.get_models import get_models_from_path
-from ichor.hpc.batch_system import JobID
-from ichor.hpc import FILE_STRUCTURE
-from ichor.hpc.submission_script import (SCRIPT_NAMES, DataLock, DlpolyCommand,
-                                     ICHORCommand, SubmissionScript)
-from ichor.hpc.submission_script.common import submit_gjf_files
-from ichor.core.atoms import Atoms
 from ichor.core.analysis.geometry import get_internal_feature_indices
-from ichor.core.constants import dlpoly_weights
-from ichor.core.common.io import mkdir, ln, convert_to_path
 from ichor.core.analysis.get_atoms import get_atoms_from_path
+from ichor.core.analysis.get_models import get_models_from_path
+from ichor.core.atoms import Atoms
+from ichor.core.common.io import convert_to_path, ln, mkdir
+from ichor.core.constants import dlpoly_weights
 from ichor.core.models import Models
+from ichor.hpc import FILE_STRUCTURE
+from ichor.hpc.batch_system import JobID
+from ichor.hpc.submission_script import (SCRIPT_NAMES, DataLock, DlpolyCommand,
+                                         ICHORCommand, SubmissionScript)
+from ichor.hpc.submission_script.common import submit_gjf_files
 
-def write_control(path: Path, system_name: str, hoover_number: float = 0.04, temperature: float = 0.0,
-        timestep: float = 0.001, n_steps: int = 500):
+
+def write_control(
+    path: Path,
+    system_name: str,
+    hoover_number: float = 0.04,
+    temperature: float = 0.0,
+    timestep: float = 0.001,
+    n_steps: int = 500,
+):
     with open(path / "CONTROL", "w+") as f:
         f.write(f"Title: {system_name}\n")
         f.write("\n")
@@ -26,10 +33,9 @@ def write_control(path: Path, system_name: str, hoover_number: float = 0.04, tem
             f.write("\n")
             f.write("#perform zero temperature run (really set to 10K)\n")
             f.write("zero\n")
-            f.write("\n")
         else:
             f.write(f"temperature {temperature}\n")
-            f.write("\n")
+        f.write("\n")
         f.write("\n")
         f.write(f"timestep {timestep}\n")
         f.write(f"steps {n_steps}\n")
@@ -155,11 +161,12 @@ def run_dlpoly_geometry_optimisations(
 ) -> JobID:
     return run_dlpoly(dlpoly_input, model_location, temperature=0.0)
 
+
 def write_final_geometry_to_gjf(
     dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
 ) -> List[Path]:
 
-    from ichor.core.files import DlpolyHistory, GJF
+    from ichor.core.files import GJF, DlpolyHistory
 
     gjfs = []
     for d in dlpoly_directory.iterdir():

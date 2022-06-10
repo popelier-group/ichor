@@ -19,9 +19,7 @@ class XYZ(GeometryFile):
     """
 
     def __init__(self, path: Union[Path, str], atoms: Atoms = FileContents):
-        super().__init__(path)
-
-        self.atoms = atoms
+        super().__init__(path, atoms)
 
     @classproperty
     def filetype(self) -> str:

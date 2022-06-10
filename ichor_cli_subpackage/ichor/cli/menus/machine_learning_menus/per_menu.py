@@ -2,26 +2,20 @@ from pathlib import Path
 from typing import List
 
 from ichor.core.menu import Menu, MenuVar, select_multiple_from_list
-from ichor.hpc.auto_run.per import (
-    PerAtomDaemon,
-    PerAtomPerPropertyDaemon,
-    PerPropertyDaemon,
-    ReRunDaemon,
-    auto_run_per_atom,
-    auto_run_per_atom_per_property,
-    auto_run_per_property,
-    delete_child_process_jobs,
-    find_child_processes_recursively,
-    make_models_atoms_menu,
-    run_per_atom_daemon,
-    run_per_atom_per_property_daemon,
-    run_per_property_daemon,
-    stop_all_child_processes,
-)
+from ichor.hpc.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
+                                    PerPropertyDaemon, ReRunDaemon,
+                                    auto_run_per_atom,
+                                    auto_run_per_atom_per_property,
+                                    auto_run_per_property,
+                                    delete_child_process_jobs,
+                                    find_child_processes_recursively,
+                                    make_models_atoms_menu,
+                                    run_per_atom_daemon,
+                                    run_per_atom_per_property_daemon,
+                                    run_per_property_daemon,
+                                    stop_all_child_processes)
 from ichor.hpc.auto_run.per.child_processes import (
-    concat_dir_to_ts,
-    print_child_processes_status,
-)
+    concat_dir_to_ts, print_child_processes_status)
 from ichor.hpc.main.collate_log import collate_model_log
 
 

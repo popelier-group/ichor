@@ -3,21 +3,15 @@ from typing import Optional
 
 from ichor.core.analysis.get_input import get_first_file, get_input_menu
 from ichor.core.atoms import Atoms
-from ichor.core.common.formatting import (
-    format_number_with_comma,
-    temperature_formatter,
-)
+from ichor.core.common.formatting import (format_number_with_comma,
+                                          temperature_formatter)
 from ichor.core.common.io import get_files_of_type, mkdir
 from ichor.core.files import GJF, XYZ, Trajectory
 from ichor.core.menu import Menu, MenuVar, set_number
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    ICHORCommand,
-    SubmissionScript,
-    TycheCommand,
-)
+from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,
+                                         SubmissionScript, TycheCommand)
 
 INPUT_FILETYPES = [XYZ.filetype, GJF.filetype]
 

@@ -3,7 +3,6 @@ from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
-
 from ichor.core.analysis.get_models import number_of_models_in_dir
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.files import PointsDirectory
@@ -104,7 +103,7 @@ def calculate_error(data: np.array, error_type: str):
     if error_type == "mae":
         return np.mean(data).item()
     elif error_type == "rmse":
-        return np.sqrt(np.mean(data ** 2)).item()
+        return np.sqrt(np.mean(data**2)).item()
     else:
         raise ValueError("error_type value can either be 'rmse' or 'mae'")
 

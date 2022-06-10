@@ -4,15 +4,13 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
-
-from ichor.core import patterns
+from ichor.core import constants, patterns
 from ichor.core.common.functools import (buildermethod, cached_property,
-                                    classproperty)
+                                         classproperty)
 from ichor.core.files.file import FileContents
 from ichor.core.files.geometry import GeometryData, GeometryDataFile
 from ichor.core.multipoles import (rotate_dipole, rotate_hexadecapole,
-                              rotate_octupole, rotate_quadrupole)
-from ichor.core import constants
+                                   rotate_octupole, rotate_quadrupole)
 
 
 class INT(GeometryDataFile):
@@ -68,14 +66,20 @@ class INT(GeometryDataFile):
 
     @property
     def json_path(self) -> Path:
-        """ Returns a Path object corresponding to the json file"""
-        return self.path.with_suffix(self.summarized_filetype) 
+        """Returns a Path object corresponding to the json file"""
+        return self.path.with_suffix(self.summarized_filetype)
 
     @property
     def file_contents(self):
         """A list of strings that this class should have accessible as attributes"""
-        original_multipole_names = [f"original_{multipole_name}" for multipole_name in constants.multipole_names]
-        rotated_multipole_names = [f"rotated_{multipole_name}" for multipole_name in constants.multipole_names]
+        original_multipole_names = [
+            f"original_{multipole_name}"
+            for multipole_name in constants.multipole_names
+        ]
+        rotated_multipole_names = [
+            f"rotated_{multipole_name}"
+            for multipole_name in constants.multipole_names
+        ]
         return ["iqa"] + original_multipole_names + rotated_multipole_names
 
     @property
@@ -95,47 +99,59 @@ class INT(GeometryDataFile):
     @property
     def original_multipoles(self):
         multipoles = {
-            "original_" + multipole: self.original_multipoles_data["original_" + multipole]
+            "original_"
+            + multipole: self.original_multipoles_data["original_" + multipole]
             for multipole in constants.multipole_names
             if multipole != "q00"
-            }
-        multipoles.update({"q00" : self.q})
-            
+        }
+        multipoles.update({"q00": self.q})
+
         return multipoles
 
     @property
     def rotated_multipoles(self):
         if self.rotated_multipoles_data:
             multipoles = {
-                "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
+                "rotated_"
+                + multipole: self.rotated_multipoles_data[
+                    "rotated_" + multipole
+                ]
                 for multipole in constants.multipole_names
                 if multipole != "q00"
             }
-            multipoles.update({"q00" : self.q})
+            multipoles.update({"q00": self.q})
             return multipoles
         else:
-            raise ValueError("Rotated multipoles are not present. Check if parent parameter is specified.")
+            raise ValueError(
+                "Rotated multipoles are not present. Check if parent parameter is specified."
+            )
 
     @property
     def original_multipoles_without_q00(self):
         multipoles = {
-            "original_" + multipole: self.original_multipoles_data["original_" + multipole]
+            "original_"
+            + multipole: self.original_multipoles_data["original_" + multipole]
             for multipole in constants.multipole_names
             if multipole != "q00"
-            }
+        }
         return multipoles
 
     @property
     def rotated_multipoles_without_q00(self):
         if self.rotated_multipoles_data:
             multipoles = {
-                "rotated_" + multipole: self.rotated_multipoles_data["rotated_" + multipole]
+                "rotated_"
+                + multipole: self.rotated_multipoles_data[
+                    "rotated_" + multipole
+                ]
                 for multipole in constants.multipole_names
                 if multipole != "q00"
             }
             return multipoles
         else:
-            raise ValueError("Rotated multipoles are not present. Check if parent parameter is specified.")
+            raise ValueError(
+                "Rotated multipoles are not present. Check if parent parameter is specified."
+            )
 
     @property
     def e_intra(self):
@@ -162,7 +178,15 @@ class INT(GeometryDataFile):
     def dipole(self):
         """Returns the magnitude of the dipole moment of the topological atom.
         The magnitude of the vector is not affected by the rotation of multipoles."""
-        return np.sqrt(sum([self.original_q10 ** 2, self.original_q11c ** 2, self.original_q11s ** 2]))
+        return np.sqrt(
+            sum(
+                [
+                    self.original_q10**2,
+                    self.original_q11c**2,
+                    self.original_q11s**2,
+                ]
+            )
+        )
 
     @buildermethod
     def read_int(self):
@@ -188,7 +212,9 @@ class INT(GeometryDataFile):
                             try:
                                 # q00 (net charge, with charge of nucleus included) is written here
                                 if "q" == tokens[0].strip():
-                                    self.original_multipoles_data["q00"] = float(tokens[-1])
+                                    self.original_multipoles_data[
+                                        "q00"
+                                    ] = float(tokens[-1])
                                 else:
                                     self.integration_data[
                                         tokens[0].strip()
@@ -228,7 +254,8 @@ class INT(GeometryDataFile):
                                 # DO NOT read in q00 because the Q[0,0] does not take into account the nuclear charge, but we need that
                                 if multipole != "q00":
                                     self.original_multipoles_data[
-                                    "original_" + multipole] = float(tokens[-1])
+                                        "original_" + multipole
+                                    ] = float(tokens[-1])
                             except ValueError:
                                 print(f"Cannot convert {tokens[-1]} to float")
                         line = next(f)
@@ -262,7 +289,7 @@ class INT(GeometryDataFile):
         .. note::
             This method is used to write out both json files (one with rotated and one with original
             non-rotated multipole data). The original json data is written right after
-            the original .int file is read in, the rotated 
+            the original .int file is read in, the rotated
         """
         # this is the only data that should be written if a parent does not exist
         int_data = {
@@ -286,11 +313,31 @@ class INT(GeometryDataFile):
         that ICHOR needs for later steps. This speeds up reading times if the information from the .int file is needed again."""
         with open(self.json_path, "r") as f:
             int_data = json.load(f)
-            self.integration_data = GeometryData(int_data.get("integration")) if int_data.get("integration") else FileContents
-            self.rotated_multipoles_data = GeometryData(int_data.get("rotated_multipoles")) if int_data.get("rotated_multipoles") else FileContents
-            self.original_multipoles_data = GeometryData(int_data.get("original_multipoles")) if int_data.get("original_multipoles") else FileContents
-            self.iqa_data = GeometryData(int_data.get("iqa_data")) if int_data.get("iqa_data") else FileContents
-            self.dispersion_data = GeometryData(int_data.get("dispersion_data")) if int_data.get("dispersion_data") else FileContents
+            self.integration_data = (
+                GeometryData(int_data.get("integration"))
+                if int_data.get("integration")
+                else FileContents
+            )
+            self.rotated_multipoles_data = (
+                GeometryData(int_data.get("rotated_multipoles"))
+                if int_data.get("rotated_multipoles")
+                else FileContents
+            )
+            self.original_multipoles_data = (
+                GeometryData(int_data.get("original_multipoles"))
+                if int_data.get("original_multipoles")
+                else FileContents
+            )
+            self.iqa_data = (
+                GeometryData(int_data.get("iqa_data"))
+                if int_data.get("iqa_data")
+                else FileContents
+            )
+            self.dispersion_data = (
+                GeometryData(int_data.get("dispersion_data"))
+                if int_data.get("dispersion_data")
+                else FileContents
+            )
 
     def rotate_multipoles(self):
         """
@@ -315,7 +362,7 @@ class INT(GeometryDataFile):
 
     @property
     def C(self):
-        """ Returns the C rotation matrix calculated for the atom. See the class Atom C method."""
+        """Returns the C rotation matrix calculated for the atom. See the class Atom C method."""
 
         atom_inst = self.parent.atoms[self.atom_name]
         return atom_inst.C
@@ -329,7 +376,9 @@ class INT(GeometryDataFile):
         rotated_q10, rotated_q11c, rotated_q11s = rotate_dipole(
             self.original_q10, self.original_q11c, self.original_q11s, self.C
         )
-        dipole_dict = {key:val for key,val in locals().items() if key != "self"}
+        dipole_dict = {
+            key: val for key, val in locals().items() if key != "self"
+        }
         self.rotated_multipoles_data.update(dipole_dict)
 
     def rotate_quadrupole(self):
@@ -341,9 +390,16 @@ class INT(GeometryDataFile):
             rotated_q22c,
             rotated_q22s,
         ) = rotate_quadrupole(
-            self.original_q20, self.original_q21c, self.original_q21s, self.original_q22c, self.original_q22s, self.C
+            self.original_q20,
+            self.original_q21c,
+            self.original_q21s,
+            self.original_q22c,
+            self.original_q22s,
+            self.C,
         )
-        quadrupole_dict = {key:val for key,val in locals().items() if key != "self"}
+        quadrupole_dict = {
+            key: val for key, val in locals().items() if key != "self"
+        }
         self.rotated_multipoles_data.update(quadrupole_dict)
 
     def rotate_octupole(self):
@@ -367,7 +423,9 @@ class INT(GeometryDataFile):
             self.C,
         )
 
-        octupole_dict = {key:val for key,val in locals().items() if key != "self"}
+        octupole_dict = {
+            key: val for key, val in locals().items() if key != "self"
+        }
         self.rotated_multipoles_data.update(octupole_dict)
 
     def rotate_hexadecapole(self):
@@ -395,7 +453,9 @@ class INT(GeometryDataFile):
             self.C,
         )
 
-        hexadecapole_dict = {key:val for key,val in locals().items() if key != "self"}
+        hexadecapole_dict = {
+            key: val for key, val in locals().items() if key != "self"
+        }
         self.rotated_multipoles_data.update(hexadecapole_dict)
 
     def get_dispersion(self) -> Optional[float]:

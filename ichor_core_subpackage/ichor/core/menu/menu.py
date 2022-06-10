@@ -60,34 +60,69 @@ class MenuOption(MenuItem):
 
     def select(self) -> OptionReturn:
         # Below args and kwargs unwraps instances of MenuVar with the MenuVar.var based upon function annotations
-        args = [
-            arg.var
-            if isinstance(arg, MenuVar)
-            or not hasattr(self.func, "__annotations__")
-            or (
-                len(self.func.__annotations__) > i
-                and hasattr(
-                    list(self.func.__annotations__.values())[i],
-                    "__origin__",
+        args = []
+        for i, arg in enumerate(self.args):
+            if self._debug:
+                print(isinstance(arg, MenuVar))
+                print(hasattr(self.func, "__annotations__"))
+                if hasattr(self.func, "__annotations__"):
+                    print(len(self.func.__annotations__) > i)
+                    print(
+                        hasattr(
+                            list(self.func.__annotations__.values())[i],
+                            "__origin__",
+                        )
+                    )
+                    print(list(self.func.__annotations__.values())[i])
+                    if hasattr(
+                        list(self.func.__annotations__.values())[i],
+                        "__origin__",
+                    ):
+                        print(
+                            list(self.func.__annotations__.values())[
+                                i
+                            ].__origin__
+                            is not MenuVar
+                        )
+                    else:
+                        print("no origin")
+                else:
+                    print("no annotations")
+            unwrap = False
+            if (
+                isinstance(arg, MenuVar)
+                and hasattr(self.func, "__annotations__")
+                and len(self.func.__annotations__) > i
+            ):
+                unwrap = (
+                    not hasattr(
+                        list(self.func.__annotations__.values())[i],
+                        "__origin__",
+                    )
+                    or list(self.func.__annotations__.values())[i].__origin__
+                    is not MenuVar
                 )
-                and list(self.func.__annotations__.values())[i].__origin__
-                is not MenuVar
-            )
-            else arg
-            for i, arg in enumerate(self.args)
-        ]
-        kwargs = {
-            key: val.var
-            if isinstance(val, MenuVar)
-            or not hasattr(self.func, "__annotations__")
-            or (
-                key in self.func.__annotations__.keys()
-                and hasattr(self.func.__annotations__[key], "__origin__")
-                and self.func.__annotations__[key].__origin__ is not MenuVar
-            )
-            else val
-            for key, val in self.kwargs.items()
-        }
+
+            args.append(arg.var if unwrap else arg)
+
+        kwargs = {}
+        for key, arg in self.kwargs.items():
+            unwrap = False
+            if (
+                isinstance(arg, MenuVar)
+                and hasattr(self.func, "__annotations__")
+                and key in self.func.__annotations__.keys()
+            ):
+                unwrap = (
+                    not hasattr(
+                        self.func.__annotations__[key],
+                        "__origin__",
+                    )
+                    or self.func.__annotations__[key].__origin__ is not MenuVar
+                )
+
+            kwargs[key] = arg.var if unwrap else arg
+
         option_return = OptionReturn(
             self.func(*args, **kwargs), self.auto_close
         )

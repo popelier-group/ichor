@@ -1,5 +1,6 @@
-from ichor.core.itypes import F
 from functools import wraps
+
+from ichor.core.itypes import F
 
 
 class ClassPropertyDescriptor:

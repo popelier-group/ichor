@@ -1,8 +1,7 @@
 from pathlib import Path
 
 from ichor.core.files import OptionalFile
-from ichor.hpc import GLOBALS
-from ichor.hpc import MACHINE, Machine
+from ichor.hpc import GLOBALS, MACHINE, Machine
 
 
 class CannotFindPandora(Exception):

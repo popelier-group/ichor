@@ -1,4 +1,5 @@
 import re
+import warnings
 from pathlib import Path
 from typing import Union
 
@@ -7,15 +8,14 @@ from ichor.core.common.functools import buildermethod, classproperty
 from ichor.core.common.str import split_by
 from ichor.core.constants import AIMALL_FUNCTIONALS
 from ichor.core.files.file import FileContents
-from ichor.core.files.geometry import GeometryFile, GeometryDataFile
+from ichor.core.files.geometry import GeometryDataFile, GeometryFile
 from ichor.core.units import AtomicDistance
-import warnings
 
 
 class WFN(GeometryFile, GeometryDataFile):
     """Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
     an output file, so it does not have a write method.
-    
+
     :param path: Path object or string to the .wfn file
     :param method: The method (eg. B3LYP) which was used in the Gaussian calculation
         that created the .wfn file. The method is not initially written to the .wfn
@@ -32,24 +32,29 @@ class WFN(GeometryFile, GeometryDataFile):
         Note that the units of the .wfn file are in Bohr.
     """
 
-    def __init__(self, path: Union[Path, str],
-    method: str,
-    header: str = FileContents,
-    mol_orbitals: int = FileContents,
-    primitives: int = FileContents,
-    nuclei: int = FileContents,
-    energy: float = FileContents,
-    virial: float = FileContents,
-    atoms: Atoms = FileContents
+    def __init__(
+        self,
+        path: Union[Path, str],
+        method: str = FileContents,
+        header: str = FileContents,
+        mol_orbitals: int = FileContents,
+        primitives: int = FileContents,
+        nuclei: int = FileContents,
+        energy: float = FileContents,
+        virial: float = FileContents,
+        atoms: Atoms = FileContents,
     ):
-        super().__init__(path)
+        GeometryFile.__init__(self, path, atoms)
+        GeometryDataFile.__init__(self, path)
 
-        method = method.upper()
+        method = method.upper() if method != FileContents else method
         if method not in AIMALL_FUNCTIONALS:
-            warnings.warn("method is not in AIMAll functionals. This will lead to \
+            warnings.warn(
+                "method is not in AIMAll functionals. This will lead to \
                     wrong IQA energies / multipole moments calculated by AIMAll as it \
                     does not determine the method automatically and assumes Hartree-Fock \
-                    exchange functional is used..")
+                    exchange functional is used.."
+            )
 
         self.header = header
         self.mol_orbitals = mol_orbitals
@@ -58,7 +63,6 @@ class WFN(GeometryFile, GeometryDataFile):
         self.method = method
         self.energy = energy
         self.virial = virial
-        self.atoms = atoms
 
         # need to call it here, so that it is always modified when a WFN instance is created
         self.modify_header()
@@ -122,7 +126,7 @@ class WFN(GeometryFile, GeometryDataFile):
         self.nuclei = int(data[2])
 
     def modify_header(self):
-        """ Adds the method (eg. B3LYP) to the header line of the .wfn file to make sure
+        """Adds the method (eg. B3LYP) to the header line of the .wfn file to make sure
         that AIMAll uses the correct settings."""
 
         if self.path.exists():
@@ -134,4 +138,6 @@ class WFN(GeometryFile, GeometryDataFile):
             with open(self.path, "w") as f:
                 f.writelines(lines)
         else:
-            raise FileNotFoundError(f"WFN file with path {self.path} does not exist.")
+            raise FileNotFoundError(
+                f"WFN file with path {self.path} does not exist."
+            )

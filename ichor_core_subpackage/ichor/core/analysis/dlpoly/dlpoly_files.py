@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Union
 
 import numpy as np
-
 from ichor.core.analysis.geometry.geometry_calculator import \
     get_internal_feature_indices
 from ichor.core.atoms import Atom, Atoms

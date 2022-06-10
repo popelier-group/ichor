@@ -1,9 +1,9 @@
 import numpy as np
-
-from ichor.hpc.active_learning.active_learning_method import ActiveLearningMethod
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.models import Models
+from ichor.hpc.active_learning.active_learning_method import \
+    ActiveLearningMethod
 
 
 # todo: update docstrings

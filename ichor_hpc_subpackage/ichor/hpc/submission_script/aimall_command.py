@@ -7,7 +7,8 @@ from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
 from ichor.hpc.modules import AIMAllModules, Modules
 from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_script.command_line import CommandLine, SubmissionError
+from ichor.hpc.submission_script.command_line import (CommandLine,
+                                                      SubmissionError)
 
 
 class BasinIntegrationMethod(Enum):

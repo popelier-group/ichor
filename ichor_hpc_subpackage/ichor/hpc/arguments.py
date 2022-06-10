@@ -1,8 +1,8 @@
 import importlib
+import inspect
 import sys
 from argparse import ArgumentParser
 from ast import literal_eval
-import inspect
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 from uuid import UUID
@@ -101,7 +101,9 @@ class Arguments:
 
     @staticmethod
     def read():
-        parser = ArgumentParser(description="ICHOR: A training suite for producing atomistic GPR models")
+        parser = ArgumentParser(
+            description="ICHOR: A training suite for producing atomistic GPR models"
+        )
 
         parser.add_argument(
             "-c",
@@ -149,7 +151,7 @@ class Arguments:
                 display_help = True
             func = args.func[ifunc]
 
-            func_args = args.func[ifunc+1:] if len(args.func) > 1 else []
+            func_args = args.func[ifunc + 1 :] if len(args.func) > 1 else []
             if func in external_functions.keys():
                 Arguments.call_external_function = external_functions[
                     func
@@ -165,8 +167,16 @@ class Arguments:
                         print("Parameter List:")
                         for val in parameter_list:
                             name = val.name
-                            defa = val.default if val.default != inspect.Parameter.empty else None
-                            ann = val.annotation.__name__ if val.annotation != inspect.Parameter.empty else None
+                            defa = (
+                                val.default
+                                if val.default != inspect.Parameter.empty
+                                else None
+                            )
+                            ann = (
+                                val.annotation.__name__
+                                if val.annotation != inspect.Parameter.empty
+                                else None
+                            )
                             parmline = f" - Name: {name}"
                             if defa:
                                 parmline += f" | default value: {defa}"

@@ -1,33 +1,21 @@
 from pathlib import Path
 from typing import Callable, List, Optional
 
-from ichor.cli.menus.machine_learning_menus.make_models import (
-    MODEL_TYPES,
-    make_models,
-)
+from ichor.cli.menus.machine_learning_menus.make_models import (MODEL_TYPES,
+                                                                make_models)
 from ichor.core.common.io import pushd
-from ichor.core.menu import (
-    ListCompleter,
-    Menu,
-    MenuVar,
-    select_multiple_from_list,
-    toggle_bool_var,
-)
+from ichor.core.daemon import Daemon
+from ichor.core.menu import (ListCompleter, Menu, MenuVar,
+                             select_multiple_from_list, toggle_bool_var)
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
-from ichor.hpc.auto_run.ichor_jobs.auto_run_ichor_collate_log import (
-    submit_ichor_collate_models_to_auto_run,
-)
-from ichor.hpc.auto_run.per.per import (
-    auto_run_per_value,
-    check_auto_run_per_counter,
-)
+from ichor.hpc.auto_run.ichor_jobs.auto_run_ichor_collate_log import \
+    submit_ichor_collate_models_to_auto_run
+from ichor.hpc.auto_run.per.per import (auto_run_per_value,
+                                        check_auto_run_per_counter)
 from ichor.hpc.auto_run.standard_auto_run import auto_make_models
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.daemon.daemon import Daemon
-from ichor.hpc.programs.qct import (
-    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-    QuantumChemicalTopologyProgram,
-)
+from ichor.hpc.programs.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+                                    QuantumChemicalTopologyProgram)
 
 
 class PerAtomDaemon(Daemon):
@@ -37,7 +25,12 @@ class PerAtomDaemon(Daemon):
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["atoms_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["atoms_stdout"]
         stderr = GLOBALS.CWD / FILE_STRUCTURE["atoms_stderr"]
-        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+        super().__init__(
+            pidfile,
+            stdout=stdout,
+            stderr=stderr,
+            pid_store=FILE_STRUCTURE["pids"],
+        )
 
     def run(self):
         auto_run_per_atom()
@@ -64,9 +57,8 @@ def auto_run_per_atom(run_func: Optional[Callable] = None) -> List[JobID]:
 def run_missing_models(
     atom_dir: Path, model_types: List[str], make_on_compute: bool = False
 ) -> JobID:
-    from ichor.cli.menus.machine_learning_menus.make_models import (
-        make_models as mm_func,
-    )
+    from ichor.cli.menus.machine_learning_menus.make_models import \
+        make_models as mm_func
 
     with pushd(atom_dir, update_cwd=True):
         make_models_func = auto_make_models if make_on_compute else mm_func

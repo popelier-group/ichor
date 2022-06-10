@@ -8,6 +8,7 @@ from ichor.core.common.functools import buildermethod, classproperty
 from ichor.core.common.io import move
 from ichor.core.files.path_object import PathObject
 
+
 class FileReadError(Exception):
     pass
 
@@ -23,19 +24,22 @@ class FileState(Enum):
 
 
 class FileContentsType:
-    """ A class whose instance is used for class attributes that are read in from a file.
+    """A class whose instance is used for class attributes that are read in from a file.
     If a class attribute is FileContents type, then we read the file and store the read in value.
     This class allows for lazily reading files (i.e. files are not directly read in when
     an instance of a File (or its subclasses) is made, but only when attributes of that
     instance (which are FileContents) are being accessed."""
+
     pass
 
     def __bool__(self):
-        """ FileContents instances must evaluate to False (as NoneType)."""
+        """FileContents instances must evaluate to False (as NoneType)."""
         return False
+
 
 # make an instance of FileContentsType which to use everywhere.
 FileContents = FileContentsType()
+
 
 class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
@@ -54,7 +58,7 @@ class File(PathObject, ABC):
         # but can still construct file from passing in arguments / writing out default arguments
         else:
             super().__init__(path)
-            self.state = FileState.Read            
+            self.state = FileState.Read
 
     @property
     def title(self):
@@ -64,12 +68,14 @@ class File(PathObject, ABC):
     @buildermethod
     def read(self, *args, **kwargs):
         """Read the contents of the file. Depending on the type of file, different parts will be read in.
-        
+
         .. note::
             Only files which exist on disk can be read from. Otherwise, nothing will be read in.
         """
         if not self.path.exists():
-            raise ValueError("Cannot read file when self.path does not exist on disk.")
+            raise ValueError(
+                "Cannot read file when self.path does not exist on disk."
+            )
 
         if self.state is FileState.Unread:
             # TODO: remove this as some things might not be FileContents type as they can be set by user
@@ -87,7 +93,7 @@ class File(PathObject, ABC):
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
-        """ Abstract method detailing how to read contents of a file. Every type of file (gjf, int, etc.)
+        """Abstract method detailing how to read contents of a file. Every type of file (gjf, int, etc.)
         is written in a different format and contains different information, so every file reading is
         different."""
         pass
@@ -98,13 +104,13 @@ class File(PathObject, ABC):
     @classproperty
     @abstractmethod
     def filetype(self) -> str:
-        """ Abstract class property which returns the suffix associated with the filetype.
+        """Abstract class property which returns the suffix associated with the filetype.
         For example, for GJF class, this will return `.gjf`"""
         pass
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
-        """ Checks the suffix of the given path matches the filetype associated with class that subclasses from File
+        """Checks the suffix of the given path matches the filetype associated with class that subclasses from File
         :param path: A Path object to check
         :return: True if the Path object has the same suffix as the class filetype, False otherwise
         """
@@ -155,7 +161,7 @@ class File(PathObject, ABC):
         move(self.path, dst)
 
     def dump(self):
-        """ Sets all attributes in self._contents to FileContents. self._contents
+        """Sets all attributes in self._contents to FileContents. self._contents
         is a list of strings corresponding to attributes which are initially of type
         FileContents (and are changed when a file is read). This method essentially resets
         an instance to the time where the file associated with the instance is not read in yet
@@ -165,8 +171,8 @@ class File(PathObject, ABC):
         self.state = FileState.Unread
 
     def write(self, path: Optional[Path] = None):
-        """ This write method should only be called if no other write method exists. A
-        write method is implemented for files that we typically write out (such as 
+        """This write method should only be called if no other write method exists. A
+        write method is implemented for files that we typically write out (such as
         .xyz or .gjf files). But other files (which are outputs of a program, such as .wfn,
         and .int), we only need to read and do not have to write out ourselves."""
         raise NotImplementedError(
@@ -175,7 +181,7 @@ class File(PathObject, ABC):
 
     @contextmanager
     def block(self):
-        """ Blocks a file from being read. Contents of the file cannot be read."""
+        """Blocks a file from being read. Contents of the file cannot be read."""
         self._save_state = self.state
         try:
             self.state = FileState.Blocked
@@ -184,10 +190,10 @@ class File(PathObject, ABC):
             self.unblock()
 
     def unblock(self):
-        """ Unblocks a blocked file."""
+        """Unblocks a blocked file."""
         if self.state is FileState.Blocked:
             self.state = self._save_state
-    
+
     def __str__(self):
         if self.path.exists():
             return f"File Absolute Path: {self.path.absolute()}, Class Name: {self.__class__.__name__}"

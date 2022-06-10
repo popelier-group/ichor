@@ -1,8 +1,9 @@
 from ichor.hpc.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.hpc.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
-from ichor.hpc.auto_run.auto_run_gaussian import submit_gaussian_job_to_auto_run
+from ichor.hpc.auto_run.auto_run_gaussian import \
+    submit_gaussian_job_to_auto_run
 from ichor.hpc.auto_run.counter import (counter_exists, get_counter_location,
-                                    read_counter, write_counter)
+                                        read_counter, write_counter)
 from ichor.hpc.auto_run.ichor_jobs import (
     make_models, submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,

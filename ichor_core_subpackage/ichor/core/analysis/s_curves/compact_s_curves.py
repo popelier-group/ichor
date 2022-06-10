@@ -3,7 +3,6 @@ from typing import List, Optional
 
 import numpy as np
 import pandas as pd
-
 from ichor.core.analysis.excel import num2col
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted

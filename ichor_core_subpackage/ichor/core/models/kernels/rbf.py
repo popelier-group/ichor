@@ -1,7 +1,6 @@
 from typing import IO, Optional
 
 import numpy as np
-
 from ichor.core.models.kernels.distance import Distance
 from ichor.core.models.kernels.kernel import Kernel
 

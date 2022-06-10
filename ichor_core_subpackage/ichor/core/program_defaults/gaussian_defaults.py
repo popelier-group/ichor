@@ -1,6 +1,7 @@
 from enum import Enum
-from typing import List
 from pathlib import Path
+from typing import List
+
 
 class GaussianJobType(Enum):
     """Enum that give variable names to some of the keywords used in a Gaussian job."""
@@ -15,6 +16,7 @@ class GaussianJobType(Enum):
     @classmethod
     def types(cls) -> List[str]:
         return [ty.value for ty in GaussianJobType]
+
 
 def extra_details_str_fnc(path: Path):
 

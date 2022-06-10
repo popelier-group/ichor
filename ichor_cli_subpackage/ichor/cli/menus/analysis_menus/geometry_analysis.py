@@ -3,24 +3,17 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-
 from ichor.core.analysis.geometry.geometry_calculator import (
-    calculate_angles,
-    calculate_bonds,
-    calculate_dihedrals,
-    internal_feature_names,
-)
+    calculate_angles, calculate_bonds, calculate_dihedrals,
+    internal_feature_names)
 from ichor.core.analysis.get_atoms import get_atoms_from_path
 from ichor.core.files import PointsDirectory, Trajectory
 from ichor.core.menu import Menu, MenuVar, set_path_var, toggle_bool_var
 from ichor.core.units import Angle, degrees_to_radians
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    ICHORCommand,
-    SubmissionScript,
-)
+from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,
+                                         SubmissionScript)
 
 # todo: move to hpc
 

@@ -1,9 +1,8 @@
 from pathlib import Path
 
 from ichor.core.analysis.get_path import get_generic_path
-from ichor.core.analysis.s_curves.compact_s_curves import (
-    calculate_compact_s_curves,
-)
+from ichor.core.analysis.s_curves.compact_s_curves import \
+    calculate_compact_s_curves
 from ichor.core.analysis.s_curves.s_curves import calculate_s_curves
 from ichor.core.menu import Menu, MenuVar, choose_dir_var
 

@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import numpy as np
-
 from ichor.core import constants
 
 
@@ -63,7 +62,23 @@ def hexadecapole_spherical_to_cartesian(
     h_yzzz = constants.rt5_8 * q41s
     h_zzzz = q40
 
-    return pack_cartesian_hexadecapole(h_xxxx, h_xxxy, h_xxxz, h_xxyy, h_xxyz, h_xxzz, h_xyyy, h_xyyz, h_xyzz, h_xzzz, h_yyyy, h_yyyz, h_yyzz, h_yzzz, h_zzzz)
+    return pack_cartesian_hexadecapole(
+        h_xxxx,
+        h_xxxy,
+        h_xxxz,
+        h_xxyy,
+        h_xxyz,
+        h_xxzz,
+        h_xyyy,
+        h_xyyz,
+        h_xyzz,
+        h_xzzz,
+        h_yyyy,
+        h_yyyz,
+        h_yyzz,
+        h_yzzz,
+        h_zzzz,
+    )
 
 
 def hexadecapole_cartesian_to_spherical(
@@ -83,7 +98,23 @@ def hexadecapole_cartesian_to_spherical(
     return q40, q41c, q41s, q42c, q42s, q43c, q43s, q44c, q44s
 
 
-def pack_cartesian_hexadecapole(h_xxxx, h_xxxy, h_xxxz, h_xxyy, h_xxyz, h_xxzz, h_xyyy, h_xyyz, h_xyzz, h_xzzz, h_yyyy, h_yyyz, h_yyzz, h_yzzz, h_zzzz):
+def pack_cartesian_hexadecapole(
+    h_xxxx,
+    h_xxxy,
+    h_xxxz,
+    h_xxyy,
+    h_xxyz,
+    h_xxzz,
+    h_xyyy,
+    h_xyyz,
+    h_xyzz,
+    h_xzzz,
+    h_yyyy,
+    h_yyyz,
+    h_yyzz,
+    h_yzzz,
+    h_zzzz,
+):
     return np.array(
         [
             [
@@ -143,7 +174,23 @@ def pack_cartesian_hexadecapole(h_xxxx, h_xxxy, h_xxxz, h_xxyy, h_xxyz, h_xxzz, 
 
 def unpack_cartesian_hexadecapole(h):
     # h_xxxx, h_xxxy, h_xxxz, h_xxyy, h_xxyz, h_xxzz, h_xyyy, h_xyyz, h_xyzz, h_xzzz, h_yyyy, h_yyyz, h_yyzz, h_yzzz, h_zzzz
-    return h[0, 0, 0, 0], h[0, 0, 0, 1], h[0, 0, 0, 2], h[0, 0, 1, 1], h[0, 0, 1, 2], h[0, 0, 2, 2], h[0, 1, 1, 1], h[0, 1, 1, 2], h[0, 1, 2, 2], h[0, 2, 2, 2], h[1, 1, 1, 1], h[1, 1, 1, 2], h[1, 1, 2, 2], h[1, 2, 2, 2], h[2, 2, 2, 2]
+    return (
+        h[0, 0, 0, 0],
+        h[0, 0, 0, 1],
+        h[0, 0, 0, 2],
+        h[0, 0, 1, 1],
+        h[0, 0, 1, 2],
+        h[0, 0, 2, 2],
+        h[0, 1, 1, 1],
+        h[0, 1, 1, 2],
+        h[0, 1, 2, 2],
+        h[0, 2, 2, 2],
+        h[1, 1, 1, 1],
+        h[1, 1, 1, 2],
+        h[1, 1, 2, 2],
+        h[1, 2, 2, 2],
+        h[2, 2, 2, 2],
+    )
 
 
 def hexadecapole_rotate_cartesian(h: np.ndarray, C: np.ndarray) -> np.ndarray:

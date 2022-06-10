@@ -11,9 +11,8 @@ from typing import Optional
 import ichor
 from ichor.core.common.io import cp, mkdir, move
 from ichor.core.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
-                             USER_READ, permissions, set_permission)
-from ichor.hpc import GLOBALS
-from ichor.hpc import MACHINE
+                                  USER_READ, permissions, set_permission)
+from ichor.hpc import GLOBALS, MACHINE
 
 _local_bin_directory = Path.home() / ".ichor" / "bin"
 

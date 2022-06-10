@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import numpy as np
-
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models, ModelsResult

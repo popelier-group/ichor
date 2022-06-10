@@ -10,11 +10,8 @@ from ichor.core.menu import Menu, MenuVar
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.main.gaussian import submit_gjfs
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    ICHORCommand,
-    SubmissionScript,
-)
+from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,
+                                         SubmissionScript)
 
 
 def _setup_globals():

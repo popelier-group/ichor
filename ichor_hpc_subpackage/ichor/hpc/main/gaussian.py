@@ -2,12 +2,12 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.hpc.batch_system import JobID
 from ichor.core.common.io import last_line
 from ichor.core.files import GJF, PointsDirectory
+from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script import (SCRIPT_NAMES, GaussianCommand,
-                                     SubmissionScript, print_completed)
+                                         SubmissionScript, print_completed)
 
 
 def submit_points_directory_to_gaussian(

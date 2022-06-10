@@ -5,14 +5,10 @@ from typing import Callable, List, Optional
 
 from ichor.core.common.bool import check_bool
 from ichor.core.common.io import cp, mkdir, pushd, relpath, remove
-from ichor.hpc.auto_run.counter import (
-    counter_exists,
-    read_counter,
-    remove_counter,
-)
-from ichor.hpc.auto_run.ichor_jobs import (
-    submit_ichor_collate_log_job_to_auto_run,
-)
+from ichor.hpc.auto_run.counter import (counter_exists, read_counter,
+                                        remove_counter)
+from ichor.hpc.auto_run.ichor_jobs import \
+    submit_ichor_collate_log_job_to_auto_run
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.points import get_points_location
 

@@ -8,7 +8,7 @@ from ichor.core.files.file import File, FileContents
 
 
 class AimAtom:
-    """ Helper class which stores information for each atom which was in the
+    """Helper class which stores information for each atom which was in the
     AIMAll output file. Information such as timing required to integrate atom,
     as well as the integration error are stored."""
 
@@ -26,27 +26,30 @@ class AimAtom:
         self.time_taken = time_taken
         self.integration_error = integration_error
 
+
 class AIM(File, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
-    def __init__(self, path: Path,
-                license_check_succeeded: Optional[bool] = FileContents,
-                version: Version = FileContents,
-                wfn_path: Path = FileContents,
-                extout_path: Optional[Path] = FileContents,
-                mgp_path: Optional[Path] = FileContents,
-                sum_path: Optional[Path] = FileContents,
-                sumviz_path: Optional[Path] = FileContents,
-                nproc: int = FileContents,
-                nacps: int = FileContents,
-                nnacps: int = FileContents,
-                nbcps: int = FileContents,
-                nrcps: int = FileContents,
-                nccps: int = FileContents,
-                output_file: Path = FileContents,
-                cwd: Path = FileContents
-                ):
+    def __init__(
+        self,
+        path: Path,
+        license_check_succeeded: Optional[bool] = FileContents,
+        version: Version = FileContents,
+        wfn_path: Path = FileContents,
+        extout_path: Optional[Path] = FileContents,
+        mgp_path: Optional[Path] = FileContents,
+        sum_path: Optional[Path] = FileContents,
+        sumviz_path: Optional[Path] = FileContents,
+        nproc: int = FileContents,
+        nacps: int = FileContents,
+        nnacps: int = FileContents,
+        nbcps: int = FileContents,
+        nrcps: int = FileContents,
+        nccps: int = FileContents,
+        output_file: Path = FileContents,
+        cwd: Path = FileContents,
+    ):
         File.__init__(self, path)
         dict.__init__(self)
 
@@ -68,12 +71,12 @@ class AIM(File, dict):
 
     @classproperty
     def filetype(self) -> str:
-        """ Returns the file suffix associated with AIMAll output files"""
+        """Returns the file suffix associated with AIMAll output files"""
         return ".aim"
 
     def _read_file(self):
-        """ Reads in AIMAll output file that contains information about the calculation.
-        
+        """Reads in AIMAll output file that contains information about the calculation.
+
         .. note::
             This file does not contain IQA energies or multipole moments. That information is stored
             in .int files (so use the INT class to parse).
@@ -165,4 +168,6 @@ class AIM(File, dict):
             item = item.upper()
             return super().__getitem__(item)
         else:
-            raise NotImplementedError(f"__getitem__ expects a str or int. Currently type is {type(item)}")
+            raise NotImplementedError(
+                f"__getitem__ expects a str or int. Currently type is {type(item)}"
+            )

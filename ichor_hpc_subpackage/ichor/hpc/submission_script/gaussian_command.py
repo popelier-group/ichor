@@ -4,7 +4,8 @@ from typing import List, Optional
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import GaussianModules, Modules
 from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_script.command_line import CommandLine, SubmissionError
+from ichor.hpc.submission_script.command_line import (CommandLine,
+                                                      SubmissionError)
 
 
 class GaussianCommand(CommandLine):

@@ -1,13 +1,11 @@
 from typing import Callable, List, Optional
 
 from ichor.cli.menus.machine_learning_menus.make_models import MODEL_TYPES
+from ichor.core.daemon import Daemon
 from ichor.hpc import FILE_STRUCTURE
-from ichor.hpc.auto_run.per.per import (
-    auto_run_per_value,
-    check_auto_run_per_counter,
-)
+from ichor.hpc.auto_run.per.per import (auto_run_per_value,
+                                        check_auto_run_per_counter)
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.daemon.daemon import Daemon
 
 
 class PerPropertyDaemon(Daemon):
@@ -17,7 +15,12 @@ class PerPropertyDaemon(Daemon):
         pidfile = GLOBALS.CWD / FILE_STRUCTURE["properties_pid"]
         stdout = GLOBALS.CWD / FILE_STRUCTURE["properties_stdout"]
         stderr = GLOBALS.CWD / FILE_STRUCTURE["properties_stderr"]
-        super().__init__(pidfile, stdout=stdout, stderr=stderr)
+        super().__init__(
+            pidfile,
+            stdout=stdout,
+            stderr=stderr,
+            pid_store=FILE_STRUCTURE["pids"],
+        )
 
     def run(self):
         auto_run_per_property()

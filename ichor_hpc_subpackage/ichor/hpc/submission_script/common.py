@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (SCRIPT_NAMES, AIMAllCommand,
-                                     GaussianCommand, SubmissionScript)
+                                         GaussianCommand, SubmissionScript)
 
 
 def submit_gjf_files(
