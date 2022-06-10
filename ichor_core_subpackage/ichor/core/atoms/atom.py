@@ -1,14 +1,13 @@
 from typing import List, Optional, Union
 
 import numpy as np
-from ichor.core.units import AtomicDistance
-
 from ichor.core import constants
 from ichor.core.atoms.calculators import (
     ALFFeatureCalculator,
     AtomSequenceALFCalculator,
 )
 from ichor.core.common.types import VarReprMixin
+from ichor.core.units import AtomicDistance
 
 
 class Atom(VarReprMixin):
@@ -36,7 +35,7 @@ class Atom(VarReprMixin):
         self.index = index
         # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
         self._parent = parent
-        self.coordinates = np.array([x, y, z], dtype=np.float)
+        self.coordinates = np.array([x, y, z], dtype=float)
         self.units = units
         self._properties = None
 
