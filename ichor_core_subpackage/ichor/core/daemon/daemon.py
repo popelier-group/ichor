@@ -95,6 +95,7 @@ class Daemon(ABC):
         with open(self.pidfile, "w+") as pf:
             pf.write(f"{pid}\n")
         if self.pid_store is not None:
+            mkdir(self.pid_store.parent)
             with open(self.pid_store, "a") as f:
                 f.write(f"{pid}\n")
 
