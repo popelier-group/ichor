@@ -49,8 +49,8 @@ docs: venv
 	${PYTHON} docs/src/make_globals_table.py
 	${PYTHON} docs/src/make_tree_html.py
 
-test: venv
-	${PYTHON} -m unittest discover test/
+test:
+	pytest ichor_core_subpackage/tests/
 
 install:
 	python3 -m pip install -e ichor_core_subpackage

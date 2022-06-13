@@ -25,6 +25,7 @@
 - AIMAll AB (and AA')
 - HPC 17,500 job limit? (need to check)
 - GLOBALS | ichor.hpc -> ichor.cli
+- iqa+dispersion s-curve
 
 ### Ideas
 - !!!!!!!!!!! Need Tests !!!!!!!!!!!
@@ -79,4 +80,4 @@ and `ichor.core` to provide the `ichor` functionality as an application.
     - Extended XYZ (maybe)
 - Submission Scripts
 - Command Line Testing (qsub ...) ?
-- 
+- ...

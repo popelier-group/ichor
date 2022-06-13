@@ -1,31 +1,19 @@
 from pathlib import Path
 from typing import List, Optional
 
-import pytest
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.files import GJF
 from ichor.core.itypes import T
 from ichor.core.program_defaults.gaussian_defaults import GaussianJobType
+from tests.atoms import _test_atoms_coords_optional
+from tests.path import get_cwd
 
-example_dir = Path(__file__).parent / "example_gjfs"
+example_dir = get_cwd(__file__) / "example_gjfs"
 
 
 def _assert_val_optional(value: T, expected_value: Optional[T]):
     if expected_value is not None:
         assert value == expected_value
-
-
-def _test_atoms_optional(atoms: Atoms, expected_atoms: Optional[Atoms]):
-    if expected_atoms is None:
-        return
-
-    assert len(atoms) == len(expected_atoms)
-    for atom, expected_atom in zip(atoms, expected_atoms):
-        assert atom.type == expected_atom.type
-        assert atom.name == expected_atom.name
-        assert atom.x == pytest.approx(expected_atom.x)
-        assert atom.y == pytest.approx(expected_atom.y)
-        assert atom.z == pytest.approx(expected_atom.z)
 
 
 def _test_gjf(
@@ -50,7 +38,7 @@ def _test_gjf(
     _assert_val_optional(gjf.job_type, job_type)
     _assert_val_optional(gjf.charge, charge)
     _assert_val_optional(gjf.multiplicity, multiplicity)
-    _test_atoms_optional(gjf.atoms, atoms)
+    _test_atoms_coords_optional(gjf.atoms, atoms)
 
 
 def test_water_standard():
