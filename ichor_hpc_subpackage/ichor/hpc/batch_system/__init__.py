@@ -4,3 +4,4 @@ from ichor.hpc.batch_system.node import NodeType
 from ichor.hpc.batch_system.parallel_environment import (ParallelEnvironment,
                                                          ParallelEnvironments)
 from ichor.hpc.batch_system.sge import SunGridEngine
+from ichor.hpc.batch_system.slurm import SLURM

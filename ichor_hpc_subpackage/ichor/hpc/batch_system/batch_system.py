@@ -180,19 +180,19 @@ class BatchSystem(ABC):
 
     @classmethod
     @abstractmethod
-    def output_directory(cls, path: Path) -> str:
+    def output_directory(cls, path: Path, task_array: bool = False) -> str:
         """Changes the output directory where (these are .o files)"""
         pass
 
     @classmethod
     @abstractmethod
-    def error_directory(cls, path: Path) -> str:
+    def error_directory(cls, path: Path, task_array: bool = False) -> str:
         """Changes the error directory where (these are .e files)"""
         pass
 
     @classmethod
     @abstractmethod
-    def parallel_environment(cls, ncores: int) -> str:
+    def parallel_environment(cls, ncores: int) -> Optional[str]:
         """Returns the flag to set the parallel environment for the job"""
         pass
 

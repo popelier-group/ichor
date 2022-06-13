@@ -5,3 +5,4 @@ TycheModules = Modules()
 
 TycheModules[Machine.ffluxlab] = ["compilers/intel/18.0.3"]
 TycheModules[Machine.csf3] = ["compilers/intel/18.0.3"]
+TycheModules[Machine.csf4] = ["iomkl/2020.02"]

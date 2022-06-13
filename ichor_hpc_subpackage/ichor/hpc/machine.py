@@ -25,6 +25,7 @@ class Machine(Enum):
     """Enum which is used to define any machines that ICHOR is running on. This needs to be done because commands and settings change between different machines."""
 
     csf3 = "csf3.itservices.manchester.ac.uk", False, True
+    csf4 = "csf4.itservices.manchester.ac.uk", False, True
     ffluxlab = "ffluxlab.mib.manchester.ac.uk", True, False
     local = "local", False, False
 
@@ -59,6 +60,8 @@ def get_machine_from_name(platform_name: str):
     m = Machine.local
     if "csf3." in platform_name:
         m = Machine.csf3
+    elif "csf4." in platform_name:
+        m = Machine.csf4
     elif "ffluxlab" in platform_name:
         m = Machine.ffluxlab
 

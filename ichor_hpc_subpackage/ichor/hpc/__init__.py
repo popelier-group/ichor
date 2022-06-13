@@ -38,7 +38,7 @@ import platform
 from ichor.core.common.types import Version
 from ichor.hpc.arguments import Arguments
 from ichor.hpc.batch_system import (LocalBatchSystem, ParallelEnvironments,
-                                    SunGridEngine)
+                                    SunGridEngine, SLURM)
 from ichor.hpc.file_structure import FileStructure
 from ichor.hpc.globals import Globals
 from ichor.hpc.log import setup_logger
@@ -51,6 +51,8 @@ FILE_STRUCTURE = FileStructure()
 BATCH_SYSTEM = LocalBatchSystem
 if SunGridEngine.is_present():
     BATCH_SYSTEM = SunGridEngine
+if SLURM.is_present():
+    BATCH_SYSTEM = SLURM
 
 machine_name: str = platform.node()
 # will be Machine.Local if machine is not in list of names
@@ -58,6 +60,8 @@ MACHINE = get_machine_from_name(machine_name)
 
 PARALLEL_ENVIRONMENT = ParallelEnvironments()
 PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
+PARALLEL_ENVIRONMENT[Machine.csf4]["serial"] = 1, 1
+PARALLEL_ENVIRONMENT[Machine.csf4]["multicore"] = 2, 32
 PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
 
 GLOBALS = Globals()

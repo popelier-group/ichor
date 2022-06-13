@@ -51,7 +51,6 @@ class SubmissionScript:
     def ncores(self, ncores: int):
         self._ncores = ncores
 
-    @property
     def default_options(self) -> List[str]:
         from ichor.hpc import BATCH_SYSTEM
 
@@ -65,17 +64,20 @@ class SubmissionScript:
         mkdir(FILE_STRUCTURE["outputs"])
         mkdir(FILE_STRUCTURE["errors"])
 
+        task_array = any(len(grouped_command) > 1 for grouped_command in self.grouped_commands)
+
         # change current working directory to directory from which ICHOR is launched.
         # make the paths to outputs and errors absolute
         options = [
             BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
-            BATCH_SYSTEM.output_directory(FILE_STRUCTURE["outputs"].resolve()),
-            BATCH_SYSTEM.error_directory(FILE_STRUCTURE["errors"].resolve()),
+            BATCH_SYSTEM.output_directory(FILE_STRUCTURE["outputs"].resolve(), task_array),
+            BATCH_SYSTEM.error_directory(FILE_STRUCTURE["errors"].resolve(), task_array),
         ]
 
         # if the number of cores is more than 1, have to add additional options
-        if self.ncores > 1:
-            options += [BATCH_SYSTEM.parallel_environment(self.ncores)]
+        pe = BATCH_SYSTEM.parallel_environment(self.ncores)
+        if pe is not None:
+            options.append(pe)
 
         return options
 

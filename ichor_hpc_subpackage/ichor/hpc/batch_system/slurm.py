@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Optional
 
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import run_cmd
@@ -11,67 +11,57 @@ from ichor.core.common.types import EnumStrList
 from ichor.hpc.batch_system.batch_system import (BatchSystem, CannotParseJobID,
                                                  Job, JobID)
 from ichor.hpc.batch_system.node import NodeType
-from typing import Optional
+from ichor.core.common.os import current_user
 
 
+# todo: Make this enum available to all batch systems and each value must be specified
 class JobStatus(EnumStrList):
-    Running = ["r"]
-    Pending = ["qw"]
-    Holding = ["hqw", "hRqw"]
-    Transferring = ["t"]
-    Resubmit = ["Rr", "Rt"]
-    Suspended = ["s"]
-    Deleting = [
-        "dr",
-        "dt",
-        "dRr",
-        "dRt",
-        "ds",
-        "dS",
-        "dT",
-        "dRs",
-        "dRS",
-        "dRT",
-    ]
-    Error = ["Eqw", "Ehqw", "EhRqw"]
+    Running = ["R"]
+    Pending = ["PD"]
+    Holding = ["RH"]
+    Transferring = []
+    Resubmit = []
+    Suspended = ["S"]
+    Deleting = ["RD", "CG"]
+    Error = ["F", "ST", "TO", "OOM", "NF", "BF", "CA"]
 
 
-class SunGridEngine(BatchSystem):
+class SLURM(BatchSystem):
     """A class that implements methods ICHOR uses to submit jobs to the Sun Grid Engine (SGE) batch system. These methods/properties
     are used to construct job scripts for any program we want to run on SGE."""
 
     @staticmethod
     def is_present() -> bool:
-        """Check if SGE is present on the current machine ICHOR is running on."""
-        return "SGE_ROOT" in os.environ.keys()
+        """Check if SLURM is present on the current machine ICHOR is running on."""
+        return "SLURMDIR" in os.environ.keys()
 
     @staticmethod
     def current_node() -> NodeType:
         """Return the current type of node ichor is running on
-        SGE defines the SGE_O_HOST when running on a compute node
+        SLURM defines the SLURM_SUBMIT_HOST when running on a compute node
         """
         return (
             NodeType.ComputeNode
-            if "SGE_O_HOST" in os.environ.keys()
+            if "SLURM_SUBMIT_HOST" in os.environ.keys()
             else NodeType.LoginNode
         )
 
     @classproperty
     def submit_script_command(self) -> List[str]:
         """Return a list containing command used to submit jobs to SGE batch system."""
-        return ["qsub"]
+        return ["sbatch"]
 
     @classmethod
     def parse_job_id(cls, stdout) -> str:
         """
-        Example script submission using SGE:
-            $ qsub test.sh
-            > Your job 518753 ("test.sh") has been submitted
-                       ^^^^^^
-        Our job id is given by the number, this is parsed by finding the number in the return string
+        Example script submission using SLURM:
+            $ sbatch test.sh
+            > Submitted batch job 345234
+                                  ^^^^^^
+        Our job id is the final number in the stdout
         """
         try:
-            return re.findall(r"\d+", stdout)[0]
+            return stdout.split()[-1]
         except IndexError:
             raise CannotParseJobID(
                 f"Cannot parse job id from output: '{stdout}'"
@@ -79,80 +69,50 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def get_queued_jobs(cls) -> List[Job]:
-        stdout, _ = run_cmd(["qstat"])
+        stdout, _ = run_cmd(cls.status() + ["--array-unique", "-r"])
 
         jobs = []
-        # job-ID  prior   name       user         state submit/start at     queue                          slots ja-task-ID
-        # -----------------------------------------------------------------------------------------------------------------
+        #     JOBID PRIORITY  PARTITION NAME            USER     ACCOUNT ST SUBMIT_TIME    START_TIME     TIME        NODES  CPUS NODELIST(REASON)
         for line in stdout.split("\n")[2:]:
-            tokens = split_by(
-                line,
-                [8, 8, 11, 13, 6, 20, 31, 6],
-                strip=True,
-                return_remainder=True,
-            )
+            tokens = line.split()
             job_id = tokens[0] if len(tokens) >= 1 else None
             priority = tokens[1] if len(tokens) >= 2 else None
-            name = tokens[2] if len(tokens) >= 3 else None
-            user = tokens[3] if len(tokens) >= 4 else None
-            state = tokens[4] if len(tokens) >= 5 else None
-            start = tokens[5] if len(tokens) >= 6 else None
-            queue = tokens[6] if len(tokens) >= 7 else None
-            slots = tokens[7] if len(tokens) >= 8 else None
-            tasks = tokens[8] if len(tokens) >= 9 else None
+            partition = tokens[2] if len(tokens) >= 3 else None
+            name = tokens[3] if len(tokens) >= 4 else None
+            user = tokens[4] if len(tokens) >= 5 else None
+            account = tokens[5] if len(tokens) >= 6 else None
+            state = tokens[6] if len(tokens) >= 7 else None
+            submit_time = tokens[7] if len(tokens) >= 8 else None
+            start_time = tokens[8] if len(tokens) >= 9 else None
+            time_taken = tokens[9] if len(tokens) >= 10 else None
+            nodes = tokens[10] if len(tokens) >= 11 else None
+            cpus = tokens[11] if len(tokens) >= 12 else None
+            nodelist = tokens[12] if len(tokens) >= 13 else None
+
+            task_id = None
+            if "_" in job_id:
+                job_id, task_id = job_id.split("_")
             priority = float(priority)
             state = JobStatus(state).name
             try:
-                start = datetime.strptime(start, "%d/%m/%Y %H:%M:%S")
+                start_time = datetime.strptime(start_time, os.environ["SLURM_TIME_FORMAT"])
             except ValueError:
-                start = None
-            slots = int(slots)
-            if tasks:
-                if "-" in tasks:
-                    s, f = tasks.split(":")[0].split("-")
-                    s, f = int(s), int(f)
-                    jobs += [
-                        Job(
-                            job_id,
-                            priority,
-                            name,
-                            user,
-                            state,
-                            start,
-                            queue,
-                            slots,
-                            task_id=str(i),
-                        )
-                        for i in range(s, f)
-                    ]
-                else:
-                    jobs += [
-                        Job(
-                            job_id,
-                            priority,
-                            name,
-                            user,
-                            state,
-                            start,
-                            queue,
-                            slots,
-                            task_id=tasks,
-                        )
-                    ]
-            else:
-                jobs += [
-                    Job(
-                        job_id,
-                        priority,
-                        name,
-                        user,
-                        state,
-                        start,
-                        queue,
-                        slots,
-                        task_id="1",
-                    )
-                ]
+                start_time = None
+
+            cpus = int(cpus)
+
+            jobs.append(Job(
+                job_id,
+                priority,
+                name,
+                user,
+                state,
+                start_time,
+                partition,
+                cpus,
+                task_id=task_id
+            ))
+
         return jobs
 
     @classmethod
@@ -161,19 +121,12 @@ class SunGridEngine(BatchSystem):
     ) -> str:
         node_options = []
 
-        include_nodes = "|".join(include_nodes)
-        exclude_nodes = "|".join(exclude_nodes)
-
         if include_nodes:
-            node_options += [f"({include_nodes})"]
+            node_options.append(f"-w {','.join(include_nodes)}")
         if exclude_nodes:
-            node_options += [f"!({exclude_nodes})"]
+            node_options.append(f"-x {','.join(exclude_nodes)}")
 
-        return (
-            "-l h=" + "&".join(node_options) + "\n"
-            if len(node_options) > 0
-            else ""
-        )
+        return f"\n#{cls.OptionCmd} ".join(node_options)
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
@@ -181,35 +134,43 @@ class SunGridEngine(BatchSystem):
         jid = (
             job_id.id
             if isinstance(job_id, JobID)
-            else ",".join(map(str, [j.id for j in job_id if j is not None]))
+            else ":".join(map(str, [j.id for j in job_id if j is not None]))
         )
-        return ["-hold_jid", f"{jid}"]
+        return [f"--depend=after:{jid}"]
 
     @classproperty
     def delete_job_command(self) -> List[str]:
         """Return a list containing command used to delete jobs on SGE batch system."""
-        return ["qdel"]
+        return ["scancel"]
 
     @staticmethod
     def status() -> List[str]:
         """Return a list containing command used to check status of jobs on SGE batch system."""
-        return ["qstat"]
+        return ["squeue", "-u", f"{current_user()}"]
 
     @classmethod
     def change_working_directory(cls, path: Path) -> str:
         """Return the line in the job script definning the working directory from where the job is going to run."""
-        return f"-wd {path}"
+        return f"-D {path}"
+
+    @classmethod
+    def _get_output_fmt_str(cls, suffix: str = "o", task_array: bool = False) -> str:
+        return f"%x.{suffix}%A.%a" if task_array else f"%x.{suffix}%j"
 
     @classmethod
     def output_directory(cls, path: Path, task_array: bool = False) -> str:
         """Return the line in the job script defining the output directory where the output of the job should be written to.
         These files end in `.o{job_id}`."""
+        fmt_str = cls._get_output_fmt_str('o', task_array)
+        path = path / fmt_str
         return f"-o {path}"
 
     @classmethod
     def error_directory(cls, path: Path, task_array: bool = False) -> str:
         """Return the line in the job script defining the error directory where any errors from the job should be written to.
         These files end in `.e{job_id}`."""
+        fmt_str = cls._get_output_fmt_str('e', task_array)
+        path = path / fmt_str
         return f"-e {path}"
 
     @classmethod
@@ -217,45 +178,48 @@ class SunGridEngine(BatchSystem):
         """Returns the line in the job script defining the number of corest to be used for the job."""
         from ichor.hpc import MACHINE, PARALLEL_ENVIRONMENT
 
-        return f"-pe {PARALLEL_ENVIRONMENT[MACHINE][ncores]} {ncores}" if ncores > 1 else None
+        return f"-p {PARALLEL_ENVIRONMENT[MACHINE][ncores]}\n#{cls.OptionCmd} -n {ncores}"
 
     @classmethod
-    def array_job(cls, njobs: int) -> str:
+    def array_job(cls, njobs: int, max_running_tasks: Optional[int] = None) -> str:
         """Returns the line in the job script that specifies this job is an array job. These jobs are run at the same time in parallel
         as they do not depend on one another. An example will be running 50 Gaussian or AIMALL jobs at the same time without having to submit
         50 separate jobs. Instead 1 array job can be submitted."""
-        return f"-t 1-{njobs}"
+        array_str = f"-a 1-{njobs}"
+        if max_running_tasks is not None:
+            array_str += f"{min(njobs-1, max_running_tasks)}"
+        return array_str
 
     @classmethod
     def max_running_tasks(cls, max_running_tasks: int) -> str:
-        return f"-tc {max_running_tasks}"
+        raise NotImplementedError(f"No such command for '{cls.__class__.__name__}'")
 
     @classproperty
     def JobID(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
-        return "JOB_ID"
+        return "SLURM_JOBID"
 
     @classproperty
     def TaskID(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
-        return "SGE_TASK_ID"
+        return "SLURM_ARRAY_TASK_ID"
 
     @classproperty
     def Host(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
-        return "SGE_O_HOST"
+        return "SLURM_SUBMIT_HOST"
 
     @classproperty
     def TaskLast(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
-        return "SGE_TASK_LAST"
+        return "SLURM_ARRAY_TASK_COUNT"
 
     @classproperty
     def NumProcs(self) -> str:
         """https://docs.oracle.com/cd/E19957-01/820-0699/chp4-21/index.html"""
-        return "NSLOTS"
+        return "SLURM_NPROCS"
 
     @classproperty
     def OptionCmd(self) -> str:
         """Returns the character used to define SGE options (defined at the top of the file)."""
-        return "$"
+        return "SBATCH"
