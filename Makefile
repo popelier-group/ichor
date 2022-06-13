@@ -53,9 +53,9 @@ test: venv
 	${PYTHON} -m unittest discover test/
 
 install:
-	python3 -m pip install --no-use-pep517 -e ichor_core_subpackage
-	python3 -m pip install --no-use-pep517 -e ichor_hpc_subpackage
-	python3 -m pip install --no-use-pep517 -e ichor_cli_subpackage
+	python3 -m pip install -e ichor_core_subpackage
+	python3 -m pip install -e ichor_hpc_subpackage
+	python3 -m pip install -e ichor_cli_subpackage
 
 run: venv
 	${PYTHON} ichor3.py

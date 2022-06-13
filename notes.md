@@ -32,6 +32,7 @@
 - ichor.core.common -> ichor.core.util
 - Sort out ModelResult (maybe switch to pandas.DataFrame)
 - Remove ichor.hpc.main
+- ichor shoould always run on Windows and UNIX (need to fix termios dependency for multi-select menu)
 
 ## Architecture
 
