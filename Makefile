@@ -41,8 +41,8 @@ lint:
 	mypy ichor/
 
 format:
-	black ichor_core_subpackage/ichor/ ichor_hpc_subpackage/ichor/ ichor_cli_subpackage/ichor/
-	isort ichor_core_subpackage/ichor/ ichor_hpc_subpackage/ichor/ ichor_cli_subpackage/ichor/
+	black ichor_core_subpackage/ichor/ ichor_hpc_subpackage/ichor/ ichor_cli_subpackage/ichor/ ichor_core_subpackage/tests/
+	isort ichor_core_subpackage/ichor/ ichor_hpc_subpackage/ichor/ ichor_cli_subpackage/ichor/ ichor_core_subpackage/tests/
 
 docs: venv
 	$(VENV_ACTIVATE) && cd docs; make html

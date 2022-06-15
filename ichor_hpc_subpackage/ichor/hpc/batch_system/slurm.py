@@ -2,16 +2,15 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 from ichor.core.common.functools import classproperty
-from ichor.core.common.os import run_cmd
+from ichor.core.common.os import current_user, run_cmd
 from ichor.core.common.str import split_by
 from ichor.core.common.types import EnumStrList
 from ichor.hpc.batch_system.batch_system import (BatchSystem, CannotParseJobID,
                                                  Job, JobID)
 from ichor.hpc.batch_system.node import NodeType
-from ichor.core.common.os import current_user
 
 
 # todo: Make this enum available to all batch systems and each value must be specified
@@ -95,23 +94,27 @@ class SLURM(BatchSystem):
             priority = float(priority)
             state = JobStatus(state).name
             try:
-                start_time = datetime.strptime(start_time, os.environ["SLURM_TIME_FORMAT"])
+                start_time = datetime.strptime(
+                    start_time, os.environ["SLURM_TIME_FORMAT"]
+                )
             except ValueError:
                 start_time = None
 
             cpus = int(cpus)
 
-            jobs.append(Job(
-                job_id,
-                priority,
-                name,
-                user,
-                state,
-                start_time,
-                partition,
-                cpus,
-                task_id=task_id
-            ))
+            jobs.append(
+                Job(
+                    job_id,
+                    priority,
+                    name,
+                    user,
+                    state,
+                    start_time,
+                    partition,
+                    cpus,
+                    task_id=task_id,
+                )
+            )
 
         return jobs
 
@@ -154,14 +157,16 @@ class SLURM(BatchSystem):
         return f"-D {path}"
 
     @classmethod
-    def _get_output_fmt_str(cls, suffix: str = "o", task_array: bool = False) -> str:
+    def _get_output_fmt_str(
+        cls, suffix: str = "o", task_array: bool = False
+    ) -> str:
         return f"%x.{suffix}%A.%a" if task_array else f"%x.{suffix}%j"
 
     @classmethod
     def output_directory(cls, path: Path, task_array: bool = False) -> str:
         """Return the line in the job script defining the output directory where the output of the job should be written to.
         These files end in `.o{job_id}`."""
-        fmt_str = cls._get_output_fmt_str('o', task_array)
+        fmt_str = cls._get_output_fmt_str("o", task_array)
         path = path / fmt_str
         return f"-o {path}"
 
@@ -169,7 +174,7 @@ class SLURM(BatchSystem):
     def error_directory(cls, path: Path, task_array: bool = False) -> str:
         """Return the line in the job script defining the error directory where any errors from the job should be written to.
         These files end in `.e{job_id}`."""
-        fmt_str = cls._get_output_fmt_str('e', task_array)
+        fmt_str = cls._get_output_fmt_str("e", task_array)
         path = path / fmt_str
         return f"-e {path}"
 
@@ -181,7 +186,9 @@ class SLURM(BatchSystem):
         return f"-p {PARALLEL_ENVIRONMENT[MACHINE][ncores]}\n#{cls.OptionCmd} -n {ncores}"
 
     @classmethod
-    def array_job(cls, njobs: int, max_running_tasks: Optional[int] = None) -> str:
+    def array_job(
+        cls, njobs: int, max_running_tasks: Optional[int] = None
+    ) -> str:
         """Returns the line in the job script that specifies this job is an array job. These jobs are run at the same time in parallel
         as they do not depend on one another. An example will be running 50 Gaussian or AIMALL jobs at the same time without having to submit
         50 separate jobs. Instead 1 array job can be submitted."""
@@ -192,7 +199,9 @@ class SLURM(BatchSystem):
 
     @classmethod
     def max_running_tasks(cls, max_running_tasks: int) -> str:
-        raise NotImplementedError(f"No such command for '{cls.__class__.__name__}'")
+        raise NotImplementedError(
+            f"No such command for '{cls.__class__.__name__}'"
+        )
 
     @classproperty
     def JobID(self) -> str:

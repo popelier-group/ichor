@@ -37,8 +37,8 @@ import platform
 
 from ichor.core.common.types import Version
 from ichor.hpc.arguments import Arguments
-from ichor.hpc.batch_system import (LocalBatchSystem, ParallelEnvironments,
-                                    SunGridEngine, SLURM)
+from ichor.hpc.batch_system import (SLURM, LocalBatchSystem,
+                                    ParallelEnvironments, SunGridEngine)
 from ichor.hpc.file_structure import FileStructure
 from ichor.hpc.globals import Globals
 from ichor.hpc.log import setup_logger

@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import run_cmd
@@ -11,7 +11,6 @@ from ichor.core.common.types import EnumStrList
 from ichor.hpc.batch_system.batch_system import (BatchSystem, CannotParseJobID,
                                                  Job, JobID)
 from ichor.hpc.batch_system.node import NodeType
-from typing import Optional
 
 
 class JobStatus(EnumStrList):
@@ -217,7 +216,11 @@ class SunGridEngine(BatchSystem):
         """Returns the line in the job script defining the number of corest to be used for the job."""
         from ichor.hpc import MACHINE, PARALLEL_ENVIRONMENT
 
-        return f"-pe {PARALLEL_ENVIRONMENT[MACHINE][ncores]} {ncores}" if ncores > 1 else None
+        return (
+            f"-pe {PARALLEL_ENVIRONMENT[MACHINE][ncores]} {ncores}"
+            if ncores > 1
+            else None
+        )
 
     @classmethod
     def array_job(cls, njobs: int) -> str:
