@@ -608,6 +608,7 @@ class Globals:
 
         # we should have an ATOMS REFERENCE FILE by now if it was set previously or default is made
         if not self._ATOMS_REFERENCE_FILE:
+            return None
             raise ValueError(
                 """An ATOMS reference file could not be found in the current directory.
                 Make sure a gjf, .xyz or a PointsDirectory (TS, SP, VS) exists in the directory."""
@@ -643,10 +644,10 @@ class Globals:
         atomic local frame calculated for the system."""
 
         from ichor.common.io import mkdir
-        from ichor.files import OptionalFile
 
-        if self._ALF_REFERENCE_FILE is None:
-            return OptionalFile
+        #if self._ALF_REFERENCE_FILE is None:
+        #    from ichor.files import OptionalFile
+        #    return OptionalFile
 
         # # if the reference file still not been set (default is None), make the default file
         # if not self._ALF_REFERENCE_FILE:
@@ -695,6 +696,8 @@ class Globals:
         if self._ALF_REFERENCE_FILE:
             return self._ALF_REFERENCE_FILE
         else:
+            return None
+            return self._ATOMS_REFERENCE_FILE
             raise ValueError(
                 "An ALF reference file could not be made for the current directory. Make sure there is an .xyz or .gjf file from which to calculate ALF.")
 
@@ -845,11 +848,11 @@ class Globals:
                 )
             ]
 
-            # properties implemented in Globals
+            # properties without setter implemented in Globals
             properties = [
                 p[0]
                 for p in inspect.getmembers(
-                    Globals, lambda o: isinstance(o, property)
+                    Globals, lambda o: isinstance(o, property) and o.fset is None
                 )
             ]
             methods += properties

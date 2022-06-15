@@ -503,6 +503,7 @@ class Mol2(File, GeometryFile):
 
     def write(self, path: Optional[Path] = None):
         from ichor.analysis.geometry import bonds
+        from ichor.globals import GLOBALS
 
         self.format()
         b = bonds(self.atoms)
