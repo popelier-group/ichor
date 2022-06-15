@@ -103,17 +103,12 @@ from ast import literal_eval
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
-from re import S
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 from uuid import UUID, uuid4
 
-# from ichor.cli.problem_finder import PROBLEM_FINDER
 from ichor.core import constants
 from ichor.core.atoms.atoms import Atoms
-from ichor.core.atoms.calculators.feature_calculator.alf_feature_calculator import \
-    ALFCalculationError
 from ichor.core.common.types import Version
-# from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.globals import checkers, formatters, parsers
 from ichor.hpc.globals.config_provider import ConfigProvider
 from ichor.hpc.globals.os import OS
@@ -702,7 +697,7 @@ class Globals:
                             )
                         alf_reference_file.write("]\n")
                 except:
-                    raise ALFCalculationError(
+                    raise ValueError(
                         "ALF could not be calculated. Make sure to add manually add alf to alf reference file."
                     )
 
@@ -812,7 +807,10 @@ class Globals:
                 config.write(f"{key}={val}\n")
 
     def save_to_yaml_config(self, config_file: Path, global_variables):
-        import yaml
+        try:
+            import yaml
+        except ImportError as e:
+            raise ImportError(f"Must have 'yaml' module installed to save to yaml file ({config_file})")
 
         with open(config_file, "w") as config:
             yaml.dump(global_variables, config)
@@ -931,13 +929,13 @@ class Globals:
         super(Globals, self).__setattr__(name, value)
 
     def __enter__(self, *args, **kwargs):
-        from ichor import globals
+        from ichor.hpc import globals
 
         self._save_globals = Globals(globals_instance=globals.GLOBALS)
         globals.GLOBALS.init_from_globals(self)
 
     def __exit__(self, type, value, traceback):
-        from ichor import globals
+        from ichor.hpc import globals
 
         globals.GLOBALS.init_from_globals(self._save_globals)
 
