@@ -1,6 +1,7 @@
-from ichor.core.atoms import Atoms
 from typing import Optional
+
 import pytest
+from ichor.core.atoms import Atoms
 
 
 def _test_atoms_coords(atoms: Atoms, expected_atoms: Atoms):

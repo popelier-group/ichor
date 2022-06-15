@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional, Union
 
 import numpy as np
-
 from ichor.core.itypes import Scalar
 
 # TODO: we should aways use numpy, python lists are way slower and we only need to store numerical data anyway. No need in having lists as well
