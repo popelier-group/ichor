@@ -4,9 +4,9 @@ from typing import List, Optional, Sequence, Union
 
 import numpy as np
 from ichor.core.atoms.atom import Atom
-from ichor.core.atoms.calculators import (ALFFeatureCalculator,
-                                          AtomSequenceALFCalculator,
-                                          ConnectivityCalculator)
+from ichor.core.atoms.calculators import (FeatureCalculatorFunction,
+                                          calculate_connectivity,
+                                          default_feature_calculator)
 
 
 class AtomNotFound(Exception):
@@ -82,7 +82,7 @@ class Atoms(list):
             :type: `np.ndarray` of shape n_atoms x n_atoms
         """
 
-        return ConnectivityCalculator.calculate_connectivity(self)
+        return calculate_connectivity(self)
 
     def to_angstroms(self):
         """
@@ -195,11 +195,9 @@ class Atoms(list):
             new.add(Atom(a.type, a.x, a.y, a.z))
         return new
 
-    @property
     def features(
         self,
-        alf_calculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
@@ -211,15 +209,10 @@ class Atoms(list):
                 Return the feature matrix of this Atoms instance
         """
 
-        return np.array(
-            [
-                atom.features(alf_calculator, features_calculator)
-                for atom in self
-            ]
-        )
+        return np.array([atom.features(feature_calculator) for atom in self])
 
     def alf_features(
-        self, alf: Optional[Union[List[List[int]], np.ndarray]] = None
+        self, alf: Union[List[List[int]], np.ndarray]
     ) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
@@ -240,8 +233,7 @@ class Atoms(list):
 
     def features_dict(
         self,
-        alf_calculator=AtomSequenceALFCalculator,
-        feature_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ) -> dict:
         """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
@@ -249,10 +241,7 @@ class Atoms(list):
         e.g. {"C1": np.array, "H2": np.array}
         """
 
-        return {
-            atom.name: atom.features(alf_calculator, feature_calculator)
-            for atom in self
-        }
+        return {atom.name: atom.features(feature_calculator) for atom in self}
 
     def __getitem__(self, item) -> Union[Atom, "Atoms"]:
         """Dunder method used to index the Atoms isinstance.
@@ -267,13 +256,12 @@ class Atoms(list):
                     return atom
             raise KeyError(f"Atom '{item}' does not exist")
         elif isinstance(item, (list, np.ndarray, tuple)):
-            if len(item) > 0:
-                if isinstance(item[0], (int, np.int, str)):
-                    return Atoms([self[i] for i in item])
-                elif isinstance(item[0], bool):
-                    return Atoms(list(compress(self, item)))
-            else:
+            if len(item) <= 0:
                 return Atoms()
+            if isinstance(item[0], (int, np.int, str)):
+                return Atoms([self[i] for i in item])
+            elif isinstance(item[0], bool):
+                return Atoms(list(compress(self, item)))
         return super().__getitem__(item)
 
     def __delitem__(self, i: Union[int, str]):

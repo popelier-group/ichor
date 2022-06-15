@@ -2,8 +2,13 @@ from typing import List, Optional, Union
 
 import numpy as np
 from ichor.core import constants
-from ichor.core.atoms.calculators import (ALFFeatureCalculator,
-                                          AtomSequenceALFCalculator)
+# from ichor.core.atoms.calculators import (ALFFeatureCalculator,
+#                                           AtomSequenceALFCalculator)
+from ichor.core.atoms.calculators import (ALF, ALFCalculatorFunction,
+                                          FeatureCalculatorFunction,
+                                          calculate_c_matrix,
+                                          default_alf_calculator,
+                                          default_feature_calculator)
 from ichor.core.common.types import VarReprMixin
 from ichor.core.units import AtomicDistance
 
@@ -225,7 +230,10 @@ class Atom(VarReprMixin):
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
 
-    def alf(self, alf_calculator=AtomSequenceALFCalculator) -> List[int]:
+    def alf(
+        self,
+        alf_calculator: ALFCalculatorFunction = default_alf_calculator,  # =AtomSequenceALFCalculator
+    ) -> ALF:
         """Returns a list of the Atomic Local Frame (ALF). This ALF is ONLY for this Atom.
 
         e.g. If we have an Atoms instance for the water monomer, the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
@@ -233,13 +241,14 @@ class Atom(VarReprMixin):
 
         [0,1,2] contains the indeces for the central atom, x-axis atom, and xy-plane atom. These indeces start at 0 to index Python objects correctly.
         """
-        return alf_calculator.calculate_alf(self)
+        return alf_calculator(self)
 
     @property
     def ialf(self) -> np.ndarray:
         """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
         THere indices are what are used in python lists (as they start at 0)."""
-        return np.array([atom.i for atom in self.alf])
+        alf = self.alf()
+        return np.array([alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx])
 
     @property
     def C(self):
@@ -251,34 +260,14 @@ class Atom(VarReprMixin):
 
         Eq. 25-30
         """
-        x_axis = ALFFeatureCalculator.calculate_x_axis_atom(self)
-        xy_plane = ALFFeatureCalculator.calculate_xy_plane_atom(self)
-
-        r12 = x_axis.coordinates - self.coordinates
-        r13 = xy_plane.coordinates - self.coordinates
-
-        mod_r12 = np.linalg.norm(r12)
-
-        r12 /= mod_r12
-
-        ex = r12
-        s = sum(ex * r13)
-        ey = r13 - s * ex
-
-        ey /= np.sqrt(sum(ey * ey))
-        ez = np.cross(ex, ey)
-        return np.array([ex, ey, ez])
+        return calculate_c_matrix(self, self.alf())
 
     def features(
         self,
-        alf_calculator=AtomSequenceALFCalculator,
-        feature_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
-        # todo: look into this
-        return feature_calculator.calculate_features(
-            self, self.alf(alf_calculator)
-        )
+        return feature_calculator(self)
 
     @property
     def coordinates_string(self):
@@ -290,7 +279,7 @@ class Atom(VarReprMixin):
     def xyz_string(self):
         """Returns the atom type and coordinates for one Atom instance. This is used to write out an xyz file, which expects
         entries in the form of atom_type x_coordinate, y_coordinate, z_coordinate"""
-        return f"{self.atom_type:<3s}{self.coordinates_string}"
+        return f"{self.type:<3s}{self.coordinates_string}"
 
     def __str__(self):
         """Print out the atom name (containing atom type and index as used in model making), as well as

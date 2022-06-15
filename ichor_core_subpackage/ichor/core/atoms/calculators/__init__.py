@@ -1,4 +1,11 @@
-from ichor.core.atoms.calculators.connectivity_calculator import calculate_connectivity
-from ichor.core.atoms.calculators.alf_calculators import ALF, calculate_atom_sequence_alf, calculate_cahn_ingold_prelog_alf
-from ichor.core.atoms.calculators.c_matrix_calculator import calculate_c_matrix
-from ichor.core.atoms.calculators.feature_calculators import calculate_alf_features
+from ichor.core.atoms.calculators.alf import (ALF, ALFCalculatorFunction,
+                                              alf_calculators,
+                                              calculate_alf_atom_sequence,
+                                              calculate_alf_cahn_ingold_prelog,
+                                              default_alf_calculator)
+from ichor.core.atoms.calculators.c_matrix import calculate_c_matrix
+from ichor.core.atoms.calculators.connectivity import calculate_connectivity
+from ichor.core.atoms.calculators.features import (FeatureCalculatorFunction,
+                                                   calculate_alf_features,
+                                                   default_feature_calculator,
+                                                   feature_calculators)

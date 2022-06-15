@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calculate_connectivity(atoms) -> np.ndarray:
     """
     Calculates the connectivity matrix (showing which atoms are bonded as 1 and those that are not bonded as 0.

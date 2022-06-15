@@ -2,9 +2,13 @@ from abc import ABC
 from pathlib import Path
 from typing import List, Union
 
+import numpy as np
+
 from ichor.core.atoms import Atoms
-from ichor.core.atoms.calculators import (ALFFeatureCalculator,
-                                          AtomSequenceALFCalculator)
+from ichor.core.atoms.calculators import (
+    FeatureCalculatorFunction,
+    default_feature_calculator,
+)
 from ichor.core.files.file import File
 from ichor.core.files.geometry.atom_data import AtomData
 
@@ -34,10 +38,9 @@ class GeometryFile(File, ABC):
 
     def features(
         self,
-        alf_calculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
-    ) -> "np.ndarray":
-        return self.atoms.features(alf_calculator, features_calculator)
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
+    ) -> np.ndarray:
+        return self.atoms.features(feature_calculator)
 
     def __getitem__(self, item):
         """Returns all the data associated with an atom name"""

@@ -4,8 +4,11 @@ from typing import List, Optional, Union
 
 import numpy as np
 from ichor.core.atoms.atoms import Atoms
-from ichor.core.atoms.calculators import (ALFFeatureCalculator,
-                                          AtomSequenceALFCalculator)
+from ichor.core.atoms.calculators import (ALF, FeatureCalculatorFunction,
+                                          default_feature_calculator)
+
+# from ichor.core.atoms.calculators import (ALFFeatureCalculator,
+#                                           AtomSequenceALFCalculator)
 
 
 class ListOfAtoms(list):
@@ -88,8 +91,7 @@ class ListOfAtoms(list):
 
     def features(
         self,
-        alf_calculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ):
         """Return the ndarray of features. This is assumed to be either 2D or 3D array.
         If the dimensionality of the feature array is 3, the array is transposed to transform a
@@ -102,16 +104,12 @@ class ListOfAtoms(list):
             If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
         """
-        features = np.array(
-            [i.features(alf_calculator, features_calculator) for i in self]
-        )
+        features = np.array([i.features(feature_calculator) for i in self])
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))
         return features
 
-    def alf_features(
-        self, alf: Optional[Union[List[List[int]], np.ndarray]] = None
-    ):
+    def alf_features(self, alf: Union[List[List[int]], np.ndarray, ALF]):
         """Return the ndarray of features. This is assumed to be either a 3D array.
         The given alf is the alf for the full system, not just one individual atom.
 
@@ -132,6 +130,10 @@ class ListOfAtoms(list):
         elif isinstance(self, PointsDirectory):
             features = np.array(
                 [point.atoms.alf_features(alf) for point in self]
+            )
+        else:
+            raise ValueError(
+                f"'alf_features' undefined for instance of '{self.__class__.__name__}'"
             )
 
         if features.ndim == 3:
@@ -253,8 +255,7 @@ class ListOfAtoms(list):
         self,
         fname: Optional[Union[str, Path]] = None,
         atom_names: Optional[List[str]] = None,
-        alf_calculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ):
         """Writes csv files containing features for every atom in the system. Optionally a list can be passed in to get csv files for only a subset of atoms
 
@@ -272,9 +273,7 @@ class ListOfAtoms(list):
             atom_names = self.atom_names
 
         for atom_name in atom_names:
-            atom_features = self[atom_name].features(
-                alf_calculator, features_calculator
-            )
+            atom_features = self[atom_name].features(feature_calculator)
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             if fname is None:
                 df.to_csv(f"{atom_name}_features.csv")
@@ -285,8 +284,7 @@ class ListOfAtoms(list):
         self,
         fname: Optional[Union[str, Path]] = None,
         atom_names: List[str] = None,
-        alf_calculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ):
         """Writes out one excel file which contains a sheet with features for every atom in the system. Optionally a list of atom names can be
         passed in to only make sheets for certain atoms
@@ -311,9 +309,7 @@ class ListOfAtoms(list):
         dataframes = {}
 
         for atom_name in atom_names:
-            atom_features = self[atom_name].features(
-                alf_calculator, features_calculator
-            )
+            atom_features = self[atom_name].features(feature_calculator)
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             dataframes[atom_name] = df
 
@@ -325,18 +321,16 @@ class ListOfAtoms(list):
     @property
     def natoms(self):
         if len(self) == 0:
-            raise ValueError(f"No atoms defined")
-        if hasattr(self[0], "atoms"):
-            return len(self[0].atoms)
-        else:
-            return len(self[0])
+            raise ValueError("No atoms defined")
+        return (
+            len(self[0].atoms) if hasattr(self[0], "atoms") else len(self[0])
+        )
 
     def center_geometries_on_atom_and_write_xyz(
         self,
         central_atom_name,
         fname: Optional[Union[str, Path]] = None,
-        alf_calculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ):
         """Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
         xyz file with all geometries centered on that atom. This is essentially what the ALFVisualizier application (ALFi) does.
@@ -370,7 +364,7 @@ class ListOfAtoms(list):
         # after calculating the features and converting back, the order is going to be
         # central atom idx, x-axis atom index, xy-plane atom index, rest of atom indices
         n_atoms = len(self[0].atom_names)
-        previous_atom_ordering = [i for i in range(n_atoms)]
+        previous_atom_ordering = list(range(n_atoms))
         current_atom_ordering = alf + [
             i for i in range(n_atoms) if i not in alf
         ]
@@ -380,9 +374,7 @@ class ListOfAtoms(list):
         ]
         # order will always be central atom(0,0,0), x-axis atom, xy-plane atom, etc.
         xyz_array = features_to_coordinates(
-            self[central_atom_name].features(
-                alf_calculator, features_calculator
-            )
+            self[central_atom_name].features(feature_calculator)
         )
         # reverse the ordering, so that the rows are the same as before
         # can now use the atom names as they were read in in initial Trajectory/PointsDirectory instance.
@@ -413,24 +405,20 @@ class ListOfAtoms(list):
 
     def get_headings(
         self,
-        alf_caculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ):
         """Helper function which makes the column headings for csv or excel files in which features are going to be saved."""
         headings = ["bond1", "bond2", "angle"]
 
         remaining_features = (
-            len(self[0].features(alf_caculator, features_calculator)[-1]) - 3
+            len(self[0].features(feature_calculator)[-1]) - 3
         )  # Removes bond1, bond 2, angle
         remaining_features = int(
             remaining_features / 3
         )  # each feature has r, theta, phi component
 
         for feat in range(remaining_features):
-            headings.append(f"r{feat+3}")  # starts at r3
-            headings.append(f"theta{feat+3}")  # starts at theta3
-            headings.append(f"phi{feat+3}")  # starts at phi3
-
+            headings.extend((f"r{feat+3}", f"theta{feat+3}", f"phi{feat+3}"))
         return headings
 
     def features_with_properties_to_csv(
@@ -440,8 +428,7 @@ class ListOfAtoms(list):
         ] = "_features_with_properties.csv",
         atom_names: Optional[List[str]] = None,
         property_types: Optional[List[str]] = None,
-        alf_calculator=AtomSequenceALFCalculator,
-        features_calculator=ALFFeatureCalculator,
+        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
     ):
         """[summary]
 
@@ -475,9 +462,7 @@ class ListOfAtoms(list):
         for atom_name in atom_names:
 
             training_data = []
-            features = self[atom_name].features(
-                alf_calculator, features_calculator
-            )
+            features = self[atom_name].features(feature_calculator)
 
             for i, point in enumerate(self):
                 properties = [
@@ -551,9 +536,7 @@ class ListOfAtoms(list):
                     """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
                     return [self[0].type]
 
-                def alf_features(
-                    self, alf: Optional[Union[List[int], np.ndarray]] = None
-                ):
+                def alf_features(self, alf: Union[List[int], np.ndarray]):
                     """Return the ndarray of features for only one atom, given an alf for that atom.
                     This is assumed to a 2D array of features for only one atom.
 
@@ -562,10 +545,7 @@ class ListOfAtoms(list):
                     :return: Тhe array has shape `n_timesteps` x `n_features`.
                     """
 
-                    features = np.array(
-                        [atom.alf_features(alf) for atom in self]
-                    )
-                    return features
+                    return np.array([atom.alf_features(alf) for atom in self])
 
             if hasattr(self, "_is_atom_view"):
                 return self
