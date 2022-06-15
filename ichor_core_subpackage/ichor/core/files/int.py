@@ -62,7 +62,7 @@ class INT(GeometryDataFile):
     @property
     def atom_num(self):
         """Returns the atom index in the system. (atom indices in atom names start at 1)"""
-        return int(re.findall("\d+", self.atom_name)[0])
+        return int(re.findall(r"\d+", self.atom_name)[0])
 
     @property
     def json_path(self) -> Path:
