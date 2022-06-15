@@ -3,12 +3,9 @@ from pathlib import Path
 from typing import List, Union
 
 import numpy as np
-
 from ichor.core.atoms import Atoms
-from ichor.core.atoms.calculators import (
-    FeatureCalculatorFunction,
-    default_feature_calculator,
-)
+from ichor.core.atoms.calculators import (FeatureCalculatorFunction,
+                                          default_feature_calculator)
 from ichor.core.files.file import File
 from ichor.core.files.geometry.atom_data import AtomData
 
