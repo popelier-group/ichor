@@ -101,6 +101,7 @@ class PeriodicKernel(Kernel):
             f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
         )
         f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
+        f.write(f"period {' '.join(map(str, self._period_length))}\n")
 
     def __repr__(self):
         return f"'{self.__class__.__name__}', thetas: {self._thetas}, period_length: {self._period_length}"

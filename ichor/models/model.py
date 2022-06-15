@@ -11,7 +11,7 @@ from ichor.common.types import Version
 from ichor.files.file import File, FileContents
 from ichor.globals import GLOBALS
 from ichor.models.kernels import (RBF, ConstantKernel, Kernel, PeriodicKernel,
-                                  RBFCyclic)
+                                  RBFCyclic, LinearKernel)
 from ichor.models.kernels.interpreter import KernelInterpreter
 from ichor.models.mean import (ConstantMean, LinearMean, Mean, QuadraticMean,
                                ZeroMean)
