@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 import numpy as np
 from ichor.core.atoms.calculators.alf import (ALF, ALFCalculatorFunction,
-                                              default_alf_calculator)
+                                              default_alf_calculator, alf_calculators)
 from ichor.core.atoms.calculators.c_matrix import calculate_c_matrix
 from ichor.core.atoms.calculators.features.features import \
     FeatureCalculatorFunction
@@ -13,7 +13,7 @@ default_distance_unit: AtomicDistance = AtomicDistance.Bohr
 
 
 def get_alf_feature_calculator(
-    alf_calculator: ALFCalculatorFunction = default_alf_calculator,
+    alf_calculator: Union[str, ALF, ALFCalculatorFunction] = default_alf_calculator,
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> FeatureCalculatorFunction:
     """Returns a FeatureCalculatorFunction for the given alf calculator
@@ -26,6 +26,8 @@ def get_alf_feature_calculator(
         :type: FeatureCalculatorFunction
             An instance of the calculate_alf_features function with a predefined ALFCalculatorFunction and distance unit
     """
+    if isinstance(alf_calculator, str):
+        alf_calculator = alf_calculators[alf_calculator]
     return lambda x: calculate_alf_features(x, alf_calculator, distance_unit)
 
 
