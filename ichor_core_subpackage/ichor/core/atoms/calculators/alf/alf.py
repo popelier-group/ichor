@@ -1,4 +1,5 @@
-from typing import NamedTuple, Optional, Protocol
+from typing import NamedTuple, Optional
+from typing_extensions import Protocol
 
 
 class ALF(NamedTuple):

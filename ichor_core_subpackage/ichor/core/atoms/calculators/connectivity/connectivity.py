@@ -24,7 +24,7 @@ def calculate_connectivity(atoms) -> np.ndarray:
     for i, iatom in enumerate(atoms):
         for j, jatom in enumerate(atoms):
             if iatom != jatom:
-                max_dist = 1.2 * (iatom.radius + jatom.radius)
+                max_dist = 1.25 * (iatom.radius + jatom.radius)
 
                 if iatom.dist(jatom) < max_dist:
                     connectivity[i, j] = 1
