@@ -223,16 +223,20 @@ class Trajectory(ListOfAtoms, File):
 
         return trajectory
 
-    def write(self, path: Optional[Path] = None):
+    def write(self, path: Optional[Path] = None, every: int = 1):
         _path = path or self.path
         with open(_path, "w") as f:
+            n = 0
             for i, frame in enumerate(self):
-                f.write(f"{len(frame)}\n")
-                f.write(f"i = {i}\n")
-                for atom in frame:
-                    f.write(
-                        f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
-                    )
+                n += 1
+                if n == every:
+                    f.write(f"{len(frame)}\n")
+                    f.write(f"i = {i}\n")
+                    for atom in frame:
+                        f.write(
+                            f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+                        )
+                    n = 0
 
     def __getitem__(self, item) -> Atoms:
         """Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
