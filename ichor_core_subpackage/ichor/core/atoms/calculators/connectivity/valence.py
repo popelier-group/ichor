@@ -24,6 +24,9 @@ def calculate_connectivity_valence(atoms) -> np.ndarray:
 
     for atom in atoms:
         while sum(connectivity[atom.i]) > atom.valence:
-            connectivity[np.argmax([atom.dist(atoms[i]) for i in connectivity])] = 0
-    
+            connected_atoms = [i for i, c in enumerate(connectivity[atom.i]) if c == 1]
+            incorrect_atom_idx = connected_atoms[np.argmax([atom.dist(atoms[i]) for i in connected_atoms])]
+            connectivity[atom.i, incorrect_atom_idx] = 0
+            connectivity[incorrect_atom_idx, atom.i] = 0
+
     return connectivity

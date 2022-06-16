@@ -1,6 +1,7 @@
 import sys
 from ichor.core.files import Trajectory
 import numpy as np
+from ichor.core.atoms.calculators.connectivity import calculate_connectivity
 
 glucose_connectivity = np.array(
         [  # 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
@@ -32,7 +33,7 @@ glucose_connectivity = np.array(
     )
 
 traj = Trajectory("GLUCOSE-amber-300.xyz")
-# np.testing.assert_equal(traj[3997].connectivity, glucose_connectivity)
-# np.savetxt('glu-con', traj[3997].connectivity, fmt='%1i')
-print(traj[3997][23].dist(traj[3997][22]))
-print(traj[3997][23].dist(traj[3997][10]))
+np.testing.assert_equal(calculate_connectivity(traj[3997]), glucose_connectivity)
+np.savetxt('glu-con',  calculate_connectivity(traj[3997]), fmt='%1i')
+# print(traj[3997][23].dist(traj[3997][22]))
+# print(traj[3997][23].dist(traj[3997][10]))
