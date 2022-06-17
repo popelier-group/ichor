@@ -18,20 +18,9 @@ from ichor.hpc import GLOBALS, Arguments
 __version__ = Version("3.1.0")
 
 
-def ichor_main():
-    from ichor.hpc import in_main
+def ichor_cli():
+    from ichor.hpc import ichor_main, in_main
 
-    in_main.IN_MAIN = True
-
-    # TODO: need to reload package, so that other places this is imported has changes made.
-
-    Arguments.read()
-    GLOBALS.init_from_config(Arguments.config_file)
-    GLOBALS.UID = Arguments.uid
-    if Arguments.call_external_function:
-        Arguments.call_external_function(
-            *Arguments.call_external_function_args
-        )
-        sys.exit(0)
+    ichor_main()
 
     main_menu()

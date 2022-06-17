@@ -22,7 +22,7 @@ class CannotFindProgram(Exception):
 
 
 def get_ichor_parent_directory() -> Path:
-    return Path(ichor.__file__).parent.resolve()
+    return Path(ichor.core.__file__).parent.resolve()
 
 
 def machine_bin_directory() -> Path:
