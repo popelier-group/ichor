@@ -72,10 +72,10 @@ class File(PathObject, ABC):
         .. note::
             Only files which exist on disk can be read from. Otherwise, nothing will be read in.
         """
-        if not self.path.exists():
-            raise ValueError(
-                f"Cannot read file when self.path ('{self.path}') does not exist on disk."
-            )
+        # if not self.path.exists():
+        #     raise ValueError(
+        #         f"Cannot read file when self.path ('{self.path}') does not exist on disk."
+        #     )
 
         if self.state is FileState.Unread:
             # TODO: remove this as some things might not be FileContents type as they can be set by user
