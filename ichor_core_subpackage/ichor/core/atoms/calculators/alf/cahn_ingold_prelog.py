@@ -1,6 +1,7 @@
 from ichor.core.atoms.calculators.alf.alf import ALF
 
 
+# todo: this could be better
 def calculate_alf_cahn_ingold_prelog(atom: "Atom") -> ALF:
     """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
     the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
@@ -97,4 +98,4 @@ def calculate_alf_cahn_ingold_prelog(atom: "Atom") -> ALF:
         return alf
 
     # return a list of the index (starts at 0 because we use this alf to index lists) of central atom, the x_axis and xy_plane atoms
-    return ALF(*_calculate_alf(atom))
+    return ALF(*[a.i for a in _calculate_alf(atom)])

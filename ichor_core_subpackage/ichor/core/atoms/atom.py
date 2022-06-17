@@ -293,9 +293,9 @@ class Atom(VarReprMixin):
     def __eq__(self, other: Union["Atom", int]):
         """Check if"""
         if isinstance(other, Atom):
-            return self.index == other.index
-        elif isinstance(other, int):
-            return self.index == other
+            return self.name == other.name  # <- is this how we want to compare equality?
+        # elif isinstance(other, int):  # <- this is a bit stupid and caused a lot of errors
+        #     return self.index == other
         else:
             raise ValueError(
                 f"Cannot compare type({type(other)}) with type({type(self)})"
