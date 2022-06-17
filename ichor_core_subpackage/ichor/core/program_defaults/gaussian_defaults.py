@@ -23,7 +23,7 @@ def extra_details_str_fnc(path: Path):
     return f"\n{path.with_suffix('.wfn').name}\n"
 
 
-job_type = GaussianJobType.SinglePoint
+job_type = [GaussianJobType.SinglePoint]
 startup_options = []
 method = "B3LYP"
 basis_set = "6-31+g(d,p)"
