@@ -15,12 +15,11 @@ from ichor.cli.molecular_dynamics_menus import amber, cp2k, md_menu, tyche
 from ichor.core.common.types import Version
 from ichor.hpc import GLOBALS, Arguments
 
+from ichor.hpc import ichor_main
+
 __version__ = Version("3.1.0")
 
 
 def ichor_cli():
-    from ichor.hpc import ichor_main, in_main
-
     ichor_main()
-
     main_menu()
