@@ -1,3 +1,4 @@
+import contextlib
 import json
 from abc import ABC, abstractmethod
 from datetime import datetime
@@ -9,6 +10,7 @@ from ichor.core.common.io import mkdir
 from ichor.core.common.os import run_cmd
 from ichor.core.common.types import VarReprMixin
 from ichor.hpc.batch_system.node import NodeType
+from ichor.hpc.uid import get_uid
 
 
 class CannotParseJobID(Exception):
@@ -24,10 +26,10 @@ class JobID:
     :instance: the unique identified (UUID) that is used for the job's datafile (containing the names of all the files needed for the job).
     """
 
-    def __init__(self, script: Union[str, Path], id: str, instance: str):
+    def __init__(self, script: Union[str, Path], id: str, instance: Optional[str] = None):
         self.script = str(script)
         self.id = id
-        self.instance = instance
+        self.instance = instance or get_uid()
 
     def write(self):
         from ichor.hpc import FILE_STRUCTURE
@@ -40,11 +42,8 @@ class JobID:
         # if the jid file exists (which contains queued jobs), then read it and append to job_ids list
         if FILE_STRUCTURE["jid"].exists():
             with open(FILE_STRUCTURE["jid"], "r") as f:
-                try:
+                with contextlib.suppress(json.JSONDecodeError):
                     job_ids += json.load(f)
-                except json.JSONDecodeError:
-                    pass
-
         job_ids += [
             {
                 "script": self.script,
