@@ -6,7 +6,7 @@ from pathlib import Path
 from time import sleep
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 
-from ichor.cli.make_set_methods.make_sets import make_sets_npoints
+from ichor.hpc.make_sets import make_sets_npoints
 from ichor.cli.general_menus.queue_menu import get_current_jobs
 from ichor.core.common.bool import check_bool
 from ichor.core.common.int import truncate
