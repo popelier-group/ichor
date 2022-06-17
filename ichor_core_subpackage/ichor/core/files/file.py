@@ -74,7 +74,7 @@ class File(PathObject, ABC):
         """
         if not self.path.exists():
             raise ValueError(
-                "Cannot read file when self.path does not exist on disk."
+                f"Cannot read file when self.path ('{self.path}') does not exist on disk."
             )
 
         if self.state is FileState.Unread:
