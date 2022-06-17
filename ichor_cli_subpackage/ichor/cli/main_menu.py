@@ -3,13 +3,13 @@ from __future__ import print_function
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.cli.menus.analysis_menus.analysis_menu import analysis_menu
-from ichor.cli.menus.general_menus.options_menu import options_menu
-from ichor.cli.menus.general_menus.points_directory_menu import (
+from ichor.cli.analysis_menus.analysis_menu import analysis_menu
+from ichor.cli.general_menus.options_menu import options_menu
+from ichor.cli.points_directory_menu import (
     custom_points_directory_menu, points_directory_menu)
-from ichor.cli.menus.general_menus.queue_menu import queue_menu
-from ichor.cli.menus.machine_learning_menus.make_models import make_models_menu
-from ichor.cli.menus.machine_learning_menus.per_menu import auto_run_per_menu
+from ichor.cli.general_menus.queue_menu import queue_menu
+from ichor.cli.machine_learning_menus.make_models import make_models_menu
+from ichor.cli.machine_learning_menus.per_menu import auto_run_per_menu
 from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.auto_run.standard_auto_run import auto_run_from_menu
