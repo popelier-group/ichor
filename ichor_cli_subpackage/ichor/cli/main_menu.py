@@ -6,10 +6,10 @@ from typing import List, Optional
 from ichor.cli.analysis_menus.analysis_menu import analysis_menu
 from ichor.cli.general_menus.options_menu import options_menu
 from ichor.cli.general_menus.queue_menu import queue_menu
-from ichor.cli.machine_learning_menus.make_models import make_models_menu
 from ichor.cli.machine_learning_menus.per_menu import auto_run_per_menu
 from ichor.cli.points_directory_menu import (custom_points_directory_menu,
                                              points_directory_menu)
+from ichor.cli.tools_menu import tools_menu
 from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.auto_run.standard_auto_run import auto_run_from_menu
@@ -125,6 +125,7 @@ def main():
     )
     menu.add_option("a", "Analysis Menu", analysis_menu)
     menu.add_option("o", "Options Menu", options_menu)
+    menu.add_option("t", "Tools Menu", tools_menu)
     menu.add_option("q", "Queue Menu", queue_menu)
     menu.add_final_options(back=False)
     menu.run()
