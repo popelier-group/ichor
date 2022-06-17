@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.cli.menus.machine_learning_menus.make_models import make_models_menu
+from ichor.cli.machine_learning_menus.make_models import make_models_menu
 from ichor.core.menu import Menu, MenuVar, toggle_bool_var
 from ichor.hpc.auto_run.standard_auto_run import auto_run_qct
 from ichor.hpc.main.qcp import submit_qcp

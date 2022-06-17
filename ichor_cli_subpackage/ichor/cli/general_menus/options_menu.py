@@ -1,4 +1,4 @@
-from ichor.cli.menus.general_menus.edit_globals_menu import settings_menu
+from ichor.cli.general_menus.edit_globals_menu import settings_menu
 from ichor.core.menu import Menu
 
 

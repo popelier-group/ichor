@@ -7,7 +7,7 @@ from time import sleep
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 
 from ichor.cli.make_set_methods.make_sets import make_sets_npoints
-from ichor.cli.menus.general_menus.queue_menu import get_current_jobs
+from ichor.cli.general_menus.queue_menu import get_current_jobs
 from ichor.core.common.bool import check_bool
 from ichor.core.common.int import truncate
 from ichor.core.common.io import mkdir, move, remove
@@ -297,7 +297,7 @@ def setup_iter_args():
         IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
     if GLOBALS.OPTIMISE_PROPERTY == "all":
-        from ichor.cli.menus.machine_learning_menus.make_models import \
+        from ichor.cli.machine_learning_menus.make_models import \
             MODEL_TYPES
 
         IterArgs.ModelTypes.value = MODEL_TYPES()
@@ -520,7 +520,7 @@ def auto_make_models(
         atoms = PointsDirectory(directory)[0].atoms.names
     IterArgs.Atoms.value = atoms
     if types is None:
-        from ichor.cli.menus.machine_learning_menus.make_models import \
+        from ichor.cli.machine_learning_menus.make_models import \
             default_model_type
 
         types = [default_model_type]

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ichor.cli.menus.machine_learning_menus.make_models import MODEL_TYPES
+from ichor.cli.machine_learning_menus.make_models import MODEL_TYPES
 from ichor.hpc import FILE_STRUCTURE, GLOBALS
 from ichor.hpc.auto_run.per.per import check_auto_run_per_counter
 from ichor.hpc.auto_run.per.per_atom import PerAtomDaemon, auto_run_per_atom

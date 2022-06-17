@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.cli.menus.general_menus.queue_menu import delete_jobs
+from ichor.cli.general_menus.queue_menu import delete_jobs
 from ichor.core.common.io import mkdir, pushd
 from ichor.core.common.os import kill_pid, pid_exists
 from ichor.core.daemon import Daemon
@@ -136,7 +136,7 @@ def print_child_processes_status(child_processes: Optional[List[Path]] = None):
 
 
 def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
-    from ichor.cli.menus.general_menus.concatenate_points_menu import \
+    from ichor.cli.general_menus.concatenate_points_menu import \
         concatenate_points_directories
     from ichor.core.analysis.get_path import get_dir
 

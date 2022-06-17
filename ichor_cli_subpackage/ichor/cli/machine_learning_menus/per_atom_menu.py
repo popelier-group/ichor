@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable, List, Optional
 
-from ichor.cli.menus.machine_learning_menus.make_models import (MODEL_TYPES,
+from ichor.cli.machine_learning_menus.make_models import (MODEL_TYPES,
                                                                 make_models)
 from ichor.core.common.io import pushd
 from ichor.core.daemon import Daemon
@@ -57,7 +57,7 @@ def auto_run_per_atom(run_func: Optional[Callable] = None) -> List[JobID]:
 def run_missing_models(
     atom_dir: Path, model_types: List[str], make_on_compute: bool = False
 ) -> JobID:
-    from ichor.cli.menus.machine_learning_menus.make_models import \
+    from ichor.cli.machine_learning_menus.make_models import \
         make_models as mm_func
 
     with pushd(atom_dir, update_cwd=True):

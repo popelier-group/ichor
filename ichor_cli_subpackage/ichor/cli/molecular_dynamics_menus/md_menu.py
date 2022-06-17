@@ -1,6 +1,6 @@
-from ichor.cli.menus.molecular_dynamics_menus.amber import amber_menu
-from ichor.cli.menus.molecular_dynamics_menus.cp2k import cp2k_menu
-from ichor.cli.menus.molecular_dynamics_menus.tyche import tyche_menu
+from ichor.cli.molecular_dynamics_menus.amber import amber_menu
+from ichor.cli.molecular_dynamics_menus.cp2k import cp2k_menu
+from ichor.cli.molecular_dynamics_menus.tyche import tyche_menu
 from ichor.core.menu import Menu
 
 

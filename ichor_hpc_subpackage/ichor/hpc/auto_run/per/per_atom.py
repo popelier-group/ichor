@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable, List, Optional
 
-from ichor.cli.menus.machine_learning_menus import make_models
+from ichor.cli.machine_learning_menus import make_models
 from ichor.core.common.io import pushd
 from ichor.core.daemon import Daemon
 from ichor.core.menu import ListCompleter  # todo: fix this

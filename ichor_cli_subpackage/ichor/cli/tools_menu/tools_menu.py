@@ -1,4 +1,4 @@
-from ichor.cli.menus.tools_menu.make_sets_menu import make_sets_menu
+from ichor.cli.tools_menu.make_sets_menu import make_sets_menu
 from ichor.core.menu import Menu
 
 
