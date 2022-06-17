@@ -1,5 +1,4 @@
 from enum import Enum
-from pathlib import Path
 from typing import List
 
 
@@ -16,11 +15,6 @@ class GaussianJobType(Enum):
     @classmethod
     def types(cls) -> List[str]:
         return [ty.value for ty in GaussianJobType]
-
-
-def extra_details_str_fnc(path: Path):
-
-    return f"\n{path.with_suffix('.wfn').name}\n"
 
 
 job_type = [GaussianJobType.SinglePoint]

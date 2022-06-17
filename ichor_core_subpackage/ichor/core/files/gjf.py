@@ -200,6 +200,18 @@ class GJF(QuantumChemistryProgramInput):
         job_type = " ".join([val.value for val in self.job_type])
         return f"#p {self.method}/{self.basis_set} {job_type} {' '.join(map(str, self.keywords))}\n"
 
+    def check_output_wfn(self):
+        from ichor.core.files.wfn import WFN
+        if "output=wfn" in self.keywords:
+            extra_lines = self.extra_details_str.split("\n")
+            wfn_line = next((i for i, line in enumerate(extra_lines) if line.endswith(WFN.filetype)), -1)
+            wfn_output = self.path.with_suffix(WFN.filetype)
+            if wfn_line >= 0:
+                extra_lines[wfn_line] = wfn_output
+            else:
+                extra_lines.append(wfn_output)
+            self.extra_details_str = "\n".join(extra_lines)
+
     @convert_to_path
     def write(self, path: Optional[Union[str, Path]] = None):
         """Write the .gjf file to disk. This overwrites .gjf files that currently exist in the path to add any extra options that
@@ -230,10 +242,7 @@ class GJF(QuantumChemistryProgramInput):
         self.charge = self.charge or gaussian_defaults.charge
         self.multiplicity = self.multiplicity or gaussian_defaults.multiplicity
         # use function here as the default string depends of self.path
-        self.extra_details_str = (
-            self.extra_details_str
-            or gaussian_defaults.extra_details_str_fnc(self.path)
-        )
+        self.check_output_wfn()
 
         # remove whitespace from keywords and lowercase to prevent having keywords twice.
         self.keywords = ["".join(k.lower().split()) for k in self.keywords]
