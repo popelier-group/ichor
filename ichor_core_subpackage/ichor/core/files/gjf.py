@@ -122,8 +122,8 @@ class GJF(QuantumChemistryProgramInput):
                         read_keywords.append(keyword)
 
                 # if opt or freq are not read, then assume single point type calculation
-                if len(read_job_type) == 0:
-                    read_job_type = GaussianJobType.SinglePoint
+                if not read_job_type:
+                    read_job_type = [GaussianJobType.SinglePoint]
 
                 self.job_type = self.job_type or read_job_type
                 self.keywords = self.keywords or read_keywords
@@ -166,14 +166,14 @@ class GJF(QuantumChemistryProgramInput):
                 )  # the empty string which is returned instead of StopIteration, "" evaluates as False
             # if there are stuff from the bottom of the file, then we have extra details to write
             # at bottom of gjf file
-            if len(read_extra_details_string_list) > 0:
+            if read_extra_details_string_list:
                 # join line into one string that can be written following coordinates
                 read_extra_details_str = "".join(
                     read_extra_details_string_list
                 )
             else:
                 # otherwise just add 3 empty lines at bottom of file just in case to prevent read errors in Gaussian
-                read_extra_details_str = "".join(["\n" for n in range(3)])
+                read_extra_details_str = "".join(["\n" for _ in range(3)])
 
             self.extra_details_str = (
                 self.extra_details_str or read_extra_details_str
@@ -209,11 +209,7 @@ class GJF(QuantumChemistryProgramInput):
         `self.path` attribute is used.
         """
         # where to write files
-        if path:
-            p = path
-        else:
-            p = self.path
-
+        p = path or self.path
         if not self.atoms:
             raise ValueError(
                 f"self.atoms is currently {self.atoms}. Cannot write coordinates."
@@ -247,7 +243,7 @@ class GJF(QuantumChemistryProgramInput):
         with open(p, "w") as f:
             # TODO: the self.format() results in NoFileFound because of the `class File` implementation. So it has to be inside here.
             for startup_option in self.startup_options:
-                f.write(f"%" + startup_option + "\n")
+                f.write(f"%{startup_option}" + "\n")
             f.write(f"{self.header_line}\n")
             f.write(f"{self.comment_line}\n\n")
             f.write(f"{self.charge} {self.multiplicity}\n")
