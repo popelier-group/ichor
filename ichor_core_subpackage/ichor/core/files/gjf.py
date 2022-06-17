@@ -242,12 +242,12 @@ class GJF(QuantumChemistryProgramInput):
         self.charge = self.charge or gaussian_defaults.charge
         self.multiplicity = self.multiplicity or gaussian_defaults.multiplicity
         # use function here as the default string depends of self.path
+        self.extra_details_str = self.extra_details_str or ""
         self.check_output_wfn()
 
         # remove whitespace from keywords and lowercase to prevent having keywords twice.
         self.keywords = ["".join(k.lower().split()) for k in self.keywords]
         # remove any duplicates by converting to set then list. Keep original ordering, so don't use set.
-        self.extra_details_str = self.extra_details_str or ""
         self.keywords = list(dict.fromkeys(self.keywords))
 
         with open(p, "w") as f:
