@@ -205,7 +205,7 @@ class GJF(QuantumChemistryProgramInput):
         if "output=wfn" in self.keywords:
             extra_lines = self.extra_details_str.split("\n")
             wfn_line = next((i for i, line in enumerate(extra_lines) if line.endswith(WFN.filetype)), -1)
-            wfn_output = self.path.with_suffix(WFN.filetype)
+            wfn_output = str(self.path.with_suffix(WFN.filetype).absolute())
             if wfn_line >= 0:
                 extra_lines[wfn_line] = wfn_output
             else:
