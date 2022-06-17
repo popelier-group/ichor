@@ -1,16 +1,16 @@
 import inspect
 import sys
-from typing import List, Any, Optional, Tuple
+from pathlib import Path
+from typing import Any, List, Optional, Tuple
 
+from ichor.core.atoms import ListOfAtoms
+from ichor.core.common.int import count_digits
+from ichor.core.common.io import mkdir
+from ichor.core.files import XYZ, PointsDirectory, Trajectory
 from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 from ichor.hpc.make_sets.min_max import MinMax
 from ichor.hpc.make_sets.min_max_mean import MinMaxMean
 from ichor.hpc.make_sets.random_points import RandomPoints
-from pathlib import Path
-from ichor.core.files import PointsDirectory, Trajectory, XYZ
-from ichor.core.atoms import ListOfAtoms
-from ichor.core.common.io import mkdir
-from ichor.core.common.int import count_digits
 
 
 # todo: improve typehint
@@ -25,6 +25,7 @@ def get_make_set_methods() -> List[Any]:
         if issubclass(obj, MakeSetMethod)
     ]
 
+
 def make_sets_npoints(
     points: ListOfAtoms, set_size: int, methods: List[str]
 ) -> int:
@@ -37,6 +38,7 @@ def make_sets_npoints(
             if method == MakeSet.name():
                 npoints += MakeSet.get_npoints(set_size, points)
     return npoints
+
 
 def make_sets(
     points_input: Path,

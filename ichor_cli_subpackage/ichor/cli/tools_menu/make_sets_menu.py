@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.core.files import PointsDirectory
-from ichor.core.menu import PathCompleter
-from ichor.core.menu import Menu, MenuVar
-from ichor.hpc.make_sets import make_training_set, make_sample_pool, make_validation_set, make_sets
+from ichor.core.menu import Menu, MenuVar, PathCompleter
+from ichor.hpc.make_sets import (make_sample_pool, make_sets,
+                                 make_training_set, make_validation_set)
 
 
 def set_points_location(points_location: MenuVar[Path]):
@@ -14,7 +14,11 @@ def set_points_location(points_location: MenuVar[Path]):
 
 def find_points_location() -> Optional[Path]:
     from ichor.hpc import GLOBALS
-    if GLOBALS.POINTS_LOCATION is not None and GLOBALS.POINTS_LOCATION.exists():
+
+    if (
+        GLOBALS.POINTS_LOCATION is not None
+        and GLOBALS.POINTS_LOCATION.exists()
+    ):
         return GLOBALS.POINTS_LOCATION
     for f in Path(".").iterdir():
         if f.suffix == ".xyz":
@@ -53,6 +57,11 @@ def make_sets_menu():
             kwargs={"points_input": points_location},
         )
         menu.add_space()
-        menu.add_option("p", "Choose points location", set_points_location, args=[points_location])
+        menu.add_option(
+            "p",
+            "Choose points location",
+            set_points_location,
+            args=[points_location],
+        )
         menu.add_space()
         menu.add_var(points_location)

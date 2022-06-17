@@ -810,7 +810,9 @@ class Globals:
         try:
             import yaml
         except ImportError as e:
-            raise ImportError(f"Must have 'yaml' module installed to save to yaml file ({config_file})")
+            raise ImportError(
+                f"Must have 'yaml' module installed to save to yaml file ({config_file})"
+            )
 
         with open(config_file, "w") as config:
             yaml.dump(global_variables, config)

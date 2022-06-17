@@ -1,8 +1,8 @@
 import random
 from typing import List
 
-from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 from ichor.core.atoms import ListOfAtoms
+from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 
 
 class RandomPoints(MakeSetMethod):

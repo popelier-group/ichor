@@ -1,6 +1,5 @@
-from typing_extensions import Protocol
-
 import numpy as np
+from typing_extensions import Protocol
 
 
 class FeatureCalculatorFunction(Protocol):

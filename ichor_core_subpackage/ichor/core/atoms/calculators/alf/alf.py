@@ -1,4 +1,5 @@
 from typing import NamedTuple, Optional
+
 from typing_extensions import Protocol
 
 

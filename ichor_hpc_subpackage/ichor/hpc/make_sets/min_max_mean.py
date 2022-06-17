@@ -1,8 +1,8 @@
 from typing import List
 
 import numpy as np
-from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 from ichor.core.atoms import ListOfAtoms
+from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 
 
 class MinMaxMean(MakeSetMethod):
