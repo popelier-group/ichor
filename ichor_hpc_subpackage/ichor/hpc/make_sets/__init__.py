@@ -1,25 +1,19 @@
 import inspect
 import sys
+from typing import List, Any, Optional, Tuple
+
+from ichor.hpc.make_sets.make_set_method import MakeSetMethod
+from ichor.hpc.make_sets.min_max import MinMax
+from ichor.hpc.make_sets.min_max_mean import MinMaxMean
+from ichor.hpc.make_sets.random_points import RandomPoints
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
-
-from ichor.cli.make_set_methods.make_set_method import MakeSetMethod
-from ichor.cli.make_set_methods.min_max import MinMax
-from ichor.cli.make_set_methods.min_max_mean import MinMaxMean
-from ichor.cli.make_set_methods.random import RandomPoints
+from ichor.core.files import PointsDirectory, Trajectory, XYZ
 from ichor.core.atoms import ListOfAtoms
-from ichor.core.common.int import count_digits
 from ichor.core.common.io import mkdir
-from ichor.core.files import GJF, XYZ, PointsDirectory, Trajectory
-from ichor.core.menu import PathCompleter
-from ichor.core.menu.menu import Menu
-
-POINTS_LOCATION: Optional[Path] = None
+from ichor.core.common.int import count_digits
 
 
-# todo: should be in hpc or core
-
-
+# todo: improve typehint
 def get_make_set_methods() -> List[Any]:
     """Returns a list of classes which are used to initialize a training set. These are classes such as MinMaxMean, RandomPoints, etc."""
 
@@ -30,7 +24,6 @@ def get_make_set_methods() -> List[Any]:
         )
         if issubclass(obj, MakeSetMethod)
     ]
-
 
 def make_sets_npoints(
     points: ListOfAtoms, set_size: int, methods: List[str]
@@ -44,7 +37,6 @@ def make_sets_npoints(
             if method == MakeSet.name():
                 npoints += MakeSet.get_npoints(set_size, points)
     return npoints
-
 
 def make_sets(
     points_input: Path,
@@ -100,6 +92,19 @@ def make_sets(
         write_set_to_dir(FILE_STRUCTURE["validation_set"], validation_set)
 
 
+def make_set_with_method(
+    points: ListOfAtoms, method: MakeSetMethod
+) -> Tuple[ListOfAtoms, ListOfAtoms]:
+    points_to_get = list(
+        set(method.get_points(points))
+    )  # Get points and remove duplicates
+    new_set = ListOfAtoms()
+    for i in sorted(points_to_get, reverse=True):
+        new_set += [points[i]]
+        del points[i]
+    return new_set, points
+
+
 def make_set(
     points: ListOfAtoms, npoints: int, methods: List[str]
 ) -> Tuple[ListOfAtoms, ListOfAtoms]:
@@ -134,25 +139,6 @@ def write_set_to_dir(path: Path, points: ListOfAtoms) -> None:
         xyz.write()
 
 
-def make_set_with_method(
-    points: ListOfAtoms, method: MakeSetMethod
-) -> Tuple[ListOfAtoms, ListOfAtoms]:
-    points_to_get = list(
-        set(method.get_points(points))
-    )  # Get points and remove duplicates
-    new_set = ListOfAtoms()
-    for i in sorted(points_to_get, reverse=True):
-        new_set += [points[i]]
-        del points[i]
-    return new_set, points
-
-
-def set_points_location():
-    global POINTS_LOCATION
-    with PathCompleter():
-        POINTS_LOCATION = input("Enter Points Location: ")
-
-
 def make_training_set(points_input: Path) -> None:
     make_sets(
         points_input,
@@ -178,53 +164,3 @@ def make_validation_set(points_input: Path) -> None:
         make_sample_pool=False,
         make_validation_set=True,
     )
-
-
-def make_sets_menu_refresh(menu):
-    menu.clear_options()
-    menu.add_option(
-        "1",
-        "Make Training Set",
-        make_training_set,
-        kwargs={"points_input": POINTS_LOCATION},
-    )
-    menu.add_option(
-        "2",
-        "Make Sample Pool",
-        make_sample_pool,
-        kwargs={"points_input": POINTS_LOCATION},
-    )
-    menu.add_option(
-        "3",
-        "Make Validation Set",
-        make_validation_set,
-        kwargs={"points_input": POINTS_LOCATION},
-    )
-    menu.add_space()
-    menu.add_option(
-        "a",
-        "Make All Sets",
-        make_sets,
-        kwargs={"points_input": POINTS_LOCATION},
-    )
-    menu.add_space()
-    menu.add_option("p", "Choose points location", set_points_location)
-    menu.add_space()
-    menu.add_message(f"Points Location: {POINTS_LOCATION}")
-    menu.add_final_options()
-
-
-def find_points_location() -> Optional[Path]:
-    for f in Path(".").iterdir():
-        if f.suffix == ".xyz":
-            return f
-    for d in Path(".").iterdir():
-        if d.is_dir() and len(PointsDirectory(d)) > 1:
-            return d
-
-
-def make_sets_menu():
-    global POINTS_LOCATION
-    POINTS_LOCATION = find_points_location()
-    with Menu("Make Set Menu", refresh=make_sets_menu_refresh):
-        pass

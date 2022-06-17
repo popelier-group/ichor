@@ -1,7 +1,7 @@
 import random
 from typing import List
 
-from ichor.cli.make_set_methods.make_set_method import MakeSetMethod
+from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 from ichor.core.atoms import ListOfAtoms
 
 
