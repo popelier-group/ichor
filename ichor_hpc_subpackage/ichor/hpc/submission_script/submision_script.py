@@ -93,9 +93,9 @@ class SubmissionScript:
         """Return the complete list of options (default options + other options that are specific to the job)."""
         options = []
         for command in self.grouped_commands:
-            options += command.options
+            options.extend(command.options)
         # do not duplicate commands
-        return list(set(options + self.default_options))
+        return list(set(options + self.default_options()))
 
     @property
     def modules(self) -> List[str]:
