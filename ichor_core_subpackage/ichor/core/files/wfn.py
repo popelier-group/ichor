@@ -1,7 +1,7 @@
 import re
 import warnings
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import buildermethod, classproperty
@@ -129,15 +129,16 @@ class WFN(GeometryFile, GeometryDataFile):
         """Adds the method (eg. B3LYP) to the header line of the .wfn file to make sure
         that AIMAll uses the correct settings."""
 
-        if self.path.exists():
-            with open(self.path, "r") as f:
-                lines = f.readlines()
-                # if the last word of the header line lines[1] is NUCLEI, then append the method
-                if lines[1].split()[-1] == "NUCLEI":
-                    lines[1] = lines[1].strip() + "   " + self.method + "\n"
-            with open(self.path, "w") as f:
-                f.writelines(lines)
-        else:
+        if not self.path.exists():
             raise FileNotFoundError(
                 f"WFN file with path {self.path} does not exist."
             )
+        if self.method is FileContents:
+            raise ValueError(f"'method' attribute of '{self.path}' instance of '{self.__class__.__name__}' is not set.")
+        with open(self.path, "r") as f:
+            lines = f.readlines()
+                # if the last word of the header line lines[1] is NUCLEI, then append the method
+            if lines[1].split()[-1] == "NUCLEI":
+                lines[1] = f"{lines[1].strip()}   {self.method}" + "\n"
+        with open(self.path, "w") as f:
+            f.writelines(lines)

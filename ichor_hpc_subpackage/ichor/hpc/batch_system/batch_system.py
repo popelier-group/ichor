@@ -29,7 +29,7 @@ class JobID:
     def __init__(self, script: Union[str, Path], id: str, instance: Optional[str] = None):
         self.script = str(script)
         self.id = id
-        self.instance = instance or get_uid()
+        self.instance = instance or str(get_uid())
 
     def write(self):
         from ichor.hpc import FILE_STRUCTURE
