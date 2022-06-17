@@ -76,7 +76,7 @@ timing_logger = setup_logger("TIMING", "ichor.timing")
 
 def init_machine():
     # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
-    if MACHINE is not Machine.local and (not FILE_STRUCTURE["machine"].exists() or FILE_STRUCTURE["machine"].exists() and get_machine_from_file() is not None):
+    if MACHINE is not Machine.local and (not FILE_STRUCTURE["machine"].exists() or FILE_STRUCTURE["machine"].exists() and get_machine_from_file() != MACHINE):
         mkdir(FILE_STRUCTURE["machine"].parent)
         machine_filepart = Path(
             str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"
