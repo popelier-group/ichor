@@ -58,7 +58,7 @@ def test_water_standard():
         keywords=["output=wfn", "nosymm"],
         comment_line="WATER0001",
         startup_options=["nproc=2", "mem=1GB"],
-        job_type=GaussianJobType.SinglePoint,
+        job_type=[GaussianJobType.SinglePoint],
         charge=0,
         multiplicity=1,
         atoms=expected_atoms,
@@ -82,7 +82,7 @@ def test_water_aug_cc_pVTZ():
         keywords=["nosymm", "output=wfn"],
         comment_line="WATER0001",
         startup_options=["nproc=2", "mem=1GB"],
-        job_type=GaussianJobType.SinglePoint,
+        job_type=[GaussianJobType.SinglePoint],
         charge=0,
         multiplicity=1,
         atoms=expected_atoms,
@@ -110,7 +110,7 @@ def test_water_ccsd():
             "nproc=2",
             "mem=1GB",
         ],
-        job_type=GaussianJobType.SinglePoint,
+        job_type=[GaussianJobType.SinglePoint],
         charge=0,
         multiplicity=1,
         atoms=expected_atoms,
@@ -135,7 +135,7 @@ def test_ammonia_standard():
         keywords=["nosymm", "output=wfn"],
         comment_line="AMMONIA0001",
         startup_options=["nproc=2", "mem=1GB"],
-        job_type=GaussianJobType.SinglePoint,
+        job_type=[GaussianJobType.SinglePoint],
         charge=0,
         multiplicity=1,
         atoms=expected_atoms,
@@ -167,7 +167,7 @@ def test_formamide_standard():
         ],
         comment_line="FORMAMIDE0001",
         startup_options=["nproc=2", "mem=1GB"],
-        job_type=GaussianJobType.SinglePoint,
+        job_type=[GaussianJobType.SinglePoint],
         charge=0,
         multiplicity=1,
         atoms=expected_atoms,
@@ -208,7 +208,30 @@ def test_paracetamol_standard():
         keywords=["output=wfn", "nosymm"],
         comment_line="PARACETAMOL0001",
         startup_options=["nproc=2", "mem=1GB"],
-        job_type=GaussianJobType.SinglePoint,
+        job_type=[GaussianJobType.SinglePoint],
+        charge=0,
+        multiplicity=1,
+        atoms=expected_atoms,
+    )
+
+def test_water_opt_freq():
+
+    expected_atoms = Atoms(
+        [
+            Atom("O", -0.99873211, 3.65062916, 0.00994269),
+            Atom("H", -0.62416886, 4.26690992, -0.45055934),
+            Atom("H", -0.54401474, 2.89586390, 0.23152816),
+        ]
+    )
+
+    _test_gjf(
+        example_dir / "water_opt_freq.gjf",
+        method="B3LYP",
+        basis_set="6-31+g(d,p)",
+        keywords=["output=wfn", "nosymm"],
+        comment_line="WATER0001",
+        startup_options=["nproc=2", "mem=1GB"],
+        job_type=[GaussianJobType.Optimisation, GaussianJobType.Frequency],
         charge=0,
         multiplicity=1,
         atoms=expected_atoms,
