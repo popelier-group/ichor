@@ -39,12 +39,20 @@ from pathlib import Path
 
 from ichor.core.common.types import Version
 from ichor.hpc.arguments import Arguments
-from ichor.hpc.batch_system import (SLURM, LocalBatchSystem,
-                                    ParallelEnvironments, SunGridEngine)
+from ichor.hpc.batch_system import (
+    SLURM,
+    LocalBatchSystem,
+    ParallelEnvironments,
+    SunGridEngine,
+)
 from ichor.hpc.file_structure import FileStructure
 from ichor.hpc.globals import Globals
 from ichor.hpc.log import setup_logger
-from ichor.hpc.machine import Machine, get_machine_from_name, get_machine_from_file
+from ichor.hpc.machine import (
+    Machine,
+    get_machine_from_name,
+    get_machine_from_file,
+)
 from ichor.core.common.io import mkdir, move
 from ichor.hpc.uid import get_uid
 
@@ -76,7 +84,11 @@ timing_logger = setup_logger("TIMING", "ichor.timing")
 
 def init_machine():
     # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
-    if MACHINE is not Machine.local and (not FILE_STRUCTURE["machine"].exists() or FILE_STRUCTURE["machine"].exists() and get_machine_from_file() != MACHINE):
+    if MACHINE is not Machine.local and (
+        not FILE_STRUCTURE["machine"].exists()
+        or FILE_STRUCTURE["machine"].exists()
+        and get_machine_from_file() != MACHINE
+    ):
         mkdir(FILE_STRUCTURE["machine"].parent)
         machine_filepart = Path(
             str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"

@@ -6,12 +6,22 @@ from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import File, FileContents
-from ichor.core.models.kernels import (RBF, ConstantKernel, Kernel,
-                                       PeriodicKernel, RBFCyclic)
+from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
+from ichor.core.models.kernels import (
+    RBF,
+    ConstantKernel,
+    Kernel,
+    PeriodicKernel,
+    RBFCyclic,
+)
 from ichor.core.models.kernels.interpreter import KernelInterpreter
-from ichor.core.models.mean import (ConstantMean, LinearMean, Mean,
-                                    QuadraticMean, ZeroMean)
+from ichor.core.models.mean import (
+    ConstantMean,
+    LinearMean,
+    Mean,
+    QuadraticMean,
+    ZeroMean,
+)
 
 
 def _get_default_input_units(nfeats: int) -> List[str]:
@@ -32,7 +42,7 @@ def _get_default_output_unit(property: str) -> str:
         return "unknown"
 
 
-class Model(File):
+class Model(ReadFile, WriteFile, File):
     """A model file that is returned back from our machine learning program FEREBUS.
 
     .. note::
@@ -374,10 +384,7 @@ class Model(File):
         # here it can only be used to compare points to figure out which point has the largest variance.
         return 1.0 - np.diag(np.matmul(v.T, v)).flatten()
 
-    def write(self, path: Optional[Path] = None) -> None:
-
-        path = path or self.path
-
+    def _write_file(self, path: Path) -> None:
         if not path.parent.exists():
             mkdir(path.parent)
         if path.is_dir():
