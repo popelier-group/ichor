@@ -1,19 +1,21 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, Any
 
 from ichor.core.atoms import AtomsNotFoundError
 from ichor.core.files.directory import AnnotatedDirectory
-from ichor.core.files.file import FileContents
-from ichor.core.files.geometry import AtomData, GeometryDataFile, GeometryFile
+from ichor.core.files.file import FileContents, ReadFile
+
+from ichor.core.files.file_data import HasAtoms, DataFile
 from ichor.core.files.gjf import GJF
 from ichor.core.files.ints import INTs
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.wfn import WFN
 from ichor.core.files.xyz import XYZ
+from ichor.core.common.dict import merge
 
 
-class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
+class PointDirectory(HasAtoms, DataFile, AnnotatedDirectory):
     """
     A helper class that wraps around ONE directory which contains ONE point (one molecular geometry).
 
@@ -33,21 +35,20 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
     pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path: Union[Path, str]):
-        GeometryFile.__init__(self, path, atoms=FileContents)
-        GeometryDataFile.__init__(self, path)
+        # AtomicData.__init__(self, path, atoms=FileContents)
+        # GeometryDataFile.__init__(self, path)
         AnnotatedDirectory.__init__(self, path)
 
     def _read_file(self, *args, **kwargs):
-        for file in self.files():
-            file._read_file(*args, **kwargs)
-        for directory in self.directories():
-            directory._read_file(*args, **kwargs)
+        for f in self.path_objects():
+            if isinstance(f, ReadFile):
+                f.read(*args, **kwargs)
 
     def _parse(self):
         super()._parse()  # call AnnotatedDirectory.parse method
         if not self.xyz:
             for f in self.files():
-                if isinstance(f, GeometryFile):
+                if isinstance(f, HasAtoms):
                     self.xyz = XYZ(
                         Path(self.path) / (self.path.name + XYZ.filetype),
                         atoms=f.atoms,
@@ -66,7 +67,7 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
             if isinstance(f, WFN):
                 return f.atoms
         for f in self.files():
-            if isinstance(f, GeometryFile):
+            if isinstance(f, HasAtoms):
                 return f.atoms
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
@@ -77,16 +78,26 @@ class PointDirectory(GeometryFile, GeometryDataFile, AnnotatedDirectory):
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
             self.xyz = XYZ(self.xyz.path, value)
 
-    def get_atom_data(self, atom) -> AtomData:
+    def get_atom_data(self, atom):
         if self.ints.exists():
             try:
-                return AtomData(self.atoms[atom], self.ints[atom])
-            except KeyError:
+                return None  # AtomData(self.atoms[atom], self.ints[atom]) # todo: fix this
+            except KeyError as e:
                 raise KeyError(
                     f"No atom '{atom}' found in '{self.__class__.__name__}' instance '{self.path}'"
-                )
+                ) from e
         else:
-            return AtomData(self.atoms[atom])
+            return None  # AtomData(self.atoms[atom])
+
+    @property
+    def properties(self) -> Dict[str, Any]:
+        return merge(
+            *[
+                f.properties
+                for f in self.path_objects()
+                if isinstance(f, DataFile)
+            ]
+        )
 
     def get_property(self, item: str):
         return getattr(self.ints, item)

@@ -4,9 +4,11 @@ from typing import List, Optional, Sequence, Union
 
 import numpy as np
 from ichor.core.atoms.atom import Atom
-from ichor.core.atoms.calculators import (FeatureCalculatorFunction,
-                                          calculate_connectivity,
-                                          default_feature_calculator)
+from ichor.core.atoms.calculators import (
+    FeatureCalculatorFunction,
+    calculate_connectivity,
+    default_feature_calculator,
+)
 
 
 class AtomNotFound(Exception):
@@ -84,19 +86,17 @@ class Atoms(list):
 
         return calculate_connectivity(self)
 
-    def to_angstroms(self):
+    def to_angstroms(self) -> "Atoms":
         """
         Convert the x, y, z coordiantes of all Atom instances held in an Atoms instance to angstroms
         """
-        for atom in self:
-            atom.to_angstroms()
+        return Atoms([atom.to_angstroms() for atom in self])
 
-    def to_bohr(self):
+    def to_bohr(self) -> "Atoms":
         """
         Convert the x, y, z coordiantes of all Atom instances held in an Atoms instance to bohr
         """
-        for atom in self:
-            atom.to_bohr()
+        return Atoms([atom.to_bohr() for atom in self])
 
     def centre(self, centre_atom=None):
         if isinstance(centre_atom, (int, str)):

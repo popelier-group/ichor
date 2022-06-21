@@ -31,14 +31,13 @@ class DlpolyHistory(Trajectory):
                         atoms.add(Atom(atom_type, x, y, z))
                     self.add(atoms)
 
-    @convert_to_path
-    def write(self, path: Optional[Path] = None):
+    def _write_file(self, path: Path):
         """Writes a trajectory .xyz file from the DL POLY HISTORY file."""
-        if path is None:
-            path = Path("TRAJECTORY.xyz")
         super().write(path)
 
     @convert_to_path
     def write_to_trajectory(self, path: Optional[Path] = None):
         """Writes a trajectory .xyz file from the DL POLY HISTORY file."""
-        self.write(path=path)
+        if path is None:
+            path = Path("TRAJECTORY.xyz")
+        self.write(path)

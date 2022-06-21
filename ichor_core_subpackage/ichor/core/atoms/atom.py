@@ -1,19 +1,25 @@
 from typing import List, Optional, Union
+from copy import deepcopy
 
 import numpy as np
 from ichor.core import constants
+from ichor.core.common.types import Coordinates3D
+
 # from ichor.core.atoms.calculators import (ALFFeatureCalculator,
 #                                           AtomSequenceALFCalculator)
-from ichor.core.atoms.calculators import (ALF, ALFCalculatorFunction,
-                                          FeatureCalculatorFunction,
-                                          calculate_c_matrix,
-                                          default_alf_calculator,
-                                          default_feature_calculator)
+from ichor.core.atoms.calculators import (
+    ALF,
+    ALFCalculatorFunction,
+    FeatureCalculatorFunction,
+    calculate_c_matrix,
+    default_alf_calculator,
+    default_feature_calculator,
+)
 from ichor.core.common.types import VarReprMixin
 from ichor.core.units import AtomicDistance
 
 
-class Atom(VarReprMixin):
+class Atom(VarReprMixin, Coordinates3D):
     """
     The Atom class is used for ONE atom in ONE timestep.
 
@@ -29,6 +35,7 @@ class Atom(VarReprMixin):
         z: float,
         index: Optional[int] = None,
         parent: Optional["Atoms"] = None,
+        charge: Optional[float] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
         # to be read in from coordinate line
@@ -38,9 +45,9 @@ class Atom(VarReprMixin):
         self.index = index
         # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
         self._parent = parent
-        self.coordinates = np.array([x, y, z], dtype=float)
+        Coordinates3D.__init__(self, x, y, z)
         self.units = units
-        self._properties = None
+        self._charge = charge
 
     @classmethod
     def from_atom(cls, atom: "Atom") -> "Atom":
@@ -51,20 +58,23 @@ class Atom(VarReprMixin):
             atom.z,
             atom.index,
             atom.parent,
+            atom.charge,
             atom.units,
         )
 
-    def to_angstroms(self):
+    def to_angstroms(self) -> "Atom":
         """Convert the coordiantes to Angstroms"""
-        if self.units != AtomicDistance.Angstroms:
-            self.coordinates *= constants.bohr2ang
-            self.units = AtomicDistance.Angstroms
+        new_atom = Atom.from_atom(self)
+        if new_atom.units == AtomicDistance.Bohr:
+            new_atom.coordinates *= constants.bohr2ang
+        return new_atom
 
-    def to_bohr(self):
+    def to_bohr(self) -> "Atom":
         """Convert the coordiantes to Bohr"""
-        if self.units != AtomicDistance.Bohr:
-            self.coordinates *= constants.ang2bohr
-            self.units = AtomicDistance.Bohr
+        new_atom = Atom.from_atom(self)
+        if new_atom.units == AtomicDistance.Angstroms:
+            new_atom.coordinates *= constants.ang2bohr
+        return new_atom
 
     @property
     def parent(self) -> "Atoms":
@@ -72,7 +82,14 @@ class Atom(VarReprMixin):
             raise TypeError(f"'parent' is not defined for '{self.name}'")
         return self._parent
 
-    # todo: have a think about how indexing is going to work best. Either index by 0 and add 1 when using the atom indeces which are in their name or index starting at 1 and subtract when working in python lists
+    @property
+    def charge(self) -> float:
+        return self._charge or constants.type2charge[self.type]
+
+    @charge.setter
+    def charge(self, val: float):
+        self._charge = val
+
     @property
     def index(self) -> int:
         if self._index is None:
@@ -109,23 +126,6 @@ class Atom(VarReprMixin):
         return f"{self.type}{self.index}"
 
     @property
-    def x(self) -> np.float64:
-        return self.coordinates[0]
-
-    @property
-    def y(self) -> np.float64:
-        return self.coordinates[1]
-
-    @property
-    def z(self) -> np.float64:
-        return self.coordinates[2]
-
-    # @property
-    # def atom_type(self) -> str:
-    #     """Returns the type (i.e. element) of the Atom instance."""
-    #     return self.type
-
-    @property
     def mass(self) -> float:
         """Returns the mass of the atom"""
         return round(constants.type2mass[self.type], 6)
@@ -136,7 +136,7 @@ class Atom(VarReprMixin):
         return round(constants.type2rad[self.type], 2)
 
     @property
-    def vdwr(self):
+    def vdwr(self):  # todo: fix
         """Returns the Van der Waals radius of the given Atom instance."""
         return round(constants.type2vdwr[self.type], 2)
 
@@ -186,6 +186,11 @@ class Atom(VarReprMixin):
             self.parent[connected_atom].name
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
+
+    def C(
+        self, alf: Optional[Union[ALF, ALFCalculatorFunction]] = None
+    ) -> np.ndarray:
+        return calculate_c_matrix(self, alf=alf)
 
     def vec_to(self, other: "Atom") -> np.ndarray:
         """
@@ -250,17 +255,17 @@ class Atom(VarReprMixin):
         alf = self.alf()
         return np.array([alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx])
 
-    @property
-    def C(self):
-        """
-        Mills, M.J.L., Popelier, P.L.A., 2014.
-        Electrostatic Forces: Formulas for the First Derivatives of a Polarizable,
-        Anisotropic Electrostatic Potential Energy Function Based on Machine Learning.
-        Journal of Chemical Theory and Computation 10, 3840-3856.. doi:10.1021/ct500565g
-
-        Eq. 25-30
-        """
-        return calculate_c_matrix(self, self.alf())
+    # @property
+    # def C(self):
+    #     """
+    #     Mills, M.J.L., Popelier, P.L.A., 2014.
+    #     Electrostatic Forces: Formulas for the First Derivatives of a Polarizable,
+    #     Anisotropic Electrostatic Potential Energy Function Based on Machine Learning.
+    #     Journal of Chemical Theory and Computation 10, 3840-3856.. doi:10.1021/ct500565g
+    #
+    #     Eq. 25-30
+    #     """
+    #     return calculate_c_matrix(self, self.alf())
 
     def features(
         self,
@@ -293,7 +298,9 @@ class Atom(VarReprMixin):
     def __eq__(self, other: Union["Atom", int]):
         """Check if"""
         if isinstance(other, Atom):
-            return self.name == other.name  # <- is this how we want to compare equality?
+            return (
+                self.name == other.name
+            )  # <- is this how we want to compare equality?
         # elif isinstance(other, int):  # <- this is a bit stupid and caused a lot of errors
         #     return self.index == other
         else:

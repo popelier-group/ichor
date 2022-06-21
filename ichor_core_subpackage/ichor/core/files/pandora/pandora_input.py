@@ -7,6 +7,8 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents
 from ichor.core.files.qcp import QuantumChemistryProgramInput
+from ichor.core.files.file import File, ReadFile, WriteFile
+from ichor.core.files.file_data import HasAtoms
 
 
 class PandoraCCSDmod(Enum):
@@ -15,10 +17,11 @@ class PandoraCCSDmod(Enum):
     CCSD_MULLER = "ccsdM"
 
 
-class PandoraInput(QuantumChemistryProgramInput):
+class PandoraInput(HasAtoms, ReadFile, WriteFile, File):
     def __init__(
         self,
         path: Path,
+        atoms: Optional[Atoms] = None,
         ccsdmod: PandoraCCSDmod = FileContents,
         morfi_grid_radial: float = FileContents,
         morfi_grid_angular: int = FileContents,
@@ -27,7 +30,8 @@ class PandoraInput(QuantumChemistryProgramInput):
         method: str = FileContents,
         basis_set: str = FileContents,
     ):
-        QuantumChemistryProgramInput.__init__(self, path)
+        File.__init__(self, path)
+        HasAtoms.__init__(self, atoms)
 
         self.ccsdmod: PandoraCCSDmod = ccsdmod
         self.morfi_grid_radial: float = morfi_grid_radial
@@ -60,9 +64,9 @@ class PandoraInput(QuantumChemistryProgramInput):
         # todo: ensure no atoms are at the origin (wihtin 1e-6) as this will break morfi
 
         if not self.basis_set.startswith("unc-"):
-            self.basis_set = "unc-" + self.basis_set
+            self.basis_set = f"unc-{self.basis_set}"
 
-    def write(self, system_name: str):
+    def _write_file(self, path: Path, system_name: str):
         self.format()
         data = {
             "system": {
@@ -88,5 +92,5 @@ class PandoraInput(QuantumChemistryProgramInput):
             },
         }
 
-        with open(self.path, "w") as f:
+        with open(path, "w") as f:
             json.dump(data, f, indent=4)

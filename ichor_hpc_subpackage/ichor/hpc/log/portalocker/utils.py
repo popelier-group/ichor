@@ -64,7 +64,7 @@ def open_atomic(filename: Filename, binary: bool = True):
     ...     os.remove(filename)
 
     >>> with open_atomic(filename) as fh:
-    ...     written = fh.write(b'test')
+    ...     written = fh._write_file(b'test')
     >>> assert os.path.exists(filename)
     >>> os.remove(filename)
 
@@ -72,7 +72,7 @@ def open_atomic(filename: Filename, binary: bool = True):
     >>> path_filename = pathlib.Path('test_file.txt')
 
     >>> with open_atomic(path_filename) as fh:
-    ...     written = fh.write(b'test')
+    ...     written = fh._write_file(b'test')
     >>> assert path_filename.exists()
     >>> path_filename.unlink()
     """

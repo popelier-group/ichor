@@ -4,10 +4,10 @@ from typing import Optional, Union
 
 from ichor.core.atoms import Atoms
 from ichor.core.files.file import FileContents
-from ichor.core.files.geometry import GeometryFile
+from ichor.core.files.file_data import HasAtoms
 
 
-class QuantumChemistryProgramInput(GeometryFile, ABC):
+class QuantumChemistryProgramInput(HasAtoms, ABC):
     """Abstract class to interface with quantum chemistry programs"""
 
     def __init__(

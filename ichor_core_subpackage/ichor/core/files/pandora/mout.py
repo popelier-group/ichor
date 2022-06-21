@@ -2,15 +2,17 @@ import re
 from abc import ABC
 from collections import namedtuple
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.types import VarReprMixin
-from ichor.core.files.file import File, FileContents
-from ichor.core.files.geometry import (AtomicDict, GeometryDataFile,
-                                       GeometryFile)
+from ichor.core.files.file import File, ReadFile, FileContents
+
+# from ichor.core.files.geometry import (AtomicDict, GeometryDataFile,
+#                                        AtomicData)
+from ichor.core.files.file_data import HasAtoms, DataFile
 from ichor.core.units import AtomicDistance
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])
@@ -337,7 +339,9 @@ def read_ccp(
     )
 
 
-class MOUT(GeometryFile, GeometryDataFile, AtomicDict):
+class MOUT(
+    HasAtoms, DataFile, ReadFile, File
+):  # GeometryDataFile, AtomicDict, File): # todo sort this
     nnuc: Optional[int]
     nbcp: Optional[int]
     nrcp: Optional[int]
@@ -347,9 +351,9 @@ class MOUT(GeometryFile, GeometryDataFile, AtomicDict):
     ring_critical_points: Optional[List["RingCriticalPoint"]]
     cage_critical_points: Optional[List["CageCriticalPoint"]]
 
-    def __init__(self, path: Path):
-        GeometryFile.__init__(self, path)
-        GeometryDataFile.__init__(self)
+    def __init__(self, path: Path, atoms: Optional[Atoms] = None):
+        File.__init__(self, path)
+        HasAtoms.__init__(self, atoms)
 
         self.nnuc = FileContents
         self.nbcp = FileContents
@@ -718,10 +722,14 @@ class MOUT(GeometryFile, GeometryDataFile, AtomicDict):
     def filetype(self) -> str:
         return ".mout"
 
+    @property
+    def properties(self) -> Dict[str, Dict[str, float]]:
+        return {atom: {"dispersion": atom.interaction_energy} for atom in self}
+
     def items(self):
         return [(atom.name, atom) for atom in self.atoms]
 
-    def __getitem__(self, item) -> "AtomicMorfiOutput":
+    def __getitem__(self, item: str) -> "AtomicMorfiOutput":
         return self.atoms[item]
 
 

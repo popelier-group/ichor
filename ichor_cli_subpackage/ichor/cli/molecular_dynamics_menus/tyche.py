@@ -53,7 +53,7 @@ def submit_tyche(input_file: Path, temperature: float, nsteps: int) -> JobID:
     g09_input = GJF(g09_input)
     g09_input.atoms = atoms
     g09_input.keywords += ["punch=derivatives"]
-    g09_input.write()
+    g09_input._write_file()
 
     freq_param = FILE_STRUCTURE["tyche"] / "freq.param"
     write_freq_param(freq_param, atoms, temperature, nsteps)

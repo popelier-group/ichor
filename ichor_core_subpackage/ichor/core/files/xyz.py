@@ -3,11 +3,11 @@ from typing import Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
-from ichor.core.files.file import File, FileContents
-from ichor.core.files.geometry import GeometryFile
+from ichor.core.files.file import File, ReadFile, WriteFile
+from ichor.core.files.file_data import HasAtoms
 
 
-class XYZ(GeometryFile):
+class XYZ(HasAtoms, ReadFile, WriteFile, File):
     """A class which wraps around a .xyz file that is contained in each PointDirectory. This .xyz file should always be there and it is
     used to write out .gjf files. Each instance of `XYZ` only has one geometry. If there is a need to
     read a `.xyz` file that contains multiple geometries (i.e. a trajectory file), the use the `Trajectory`
@@ -18,8 +18,9 @@ class XYZ(GeometryFile):
         with the given Atoms will be written to the given Path.
     """
 
-    def __init__(self, path: Union[Path, str], atoms: Atoms = FileContents):
-        super().__init__(path, atoms)
+    def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
+        File.__init__(self, path)
+        HasAtoms.__init__(self, atoms)
 
     @classproperty
     def filetype(self) -> str:
@@ -44,13 +45,11 @@ class XYZ(GeometryFile):
 
         self.atoms = self.atoms or read_atoms
 
-    def write(self, path: Optional[Path] = None):
+    def _write_file(self, path: Path):
         """Write a .xyz to a given path. If no path is given, it will write it to the path given when the XYZ instance was constructed.
 
         :param path: An optional path to which to write the .xyz file
         """
-        if path is None:
-            path = self.path
         with open(path, "w") as f:
             f.write(f"{len(self.atoms)}\n")
             f.write("\n")

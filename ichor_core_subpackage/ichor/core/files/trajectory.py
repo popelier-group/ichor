@@ -7,7 +7,7 @@ import numpy as np
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
-from ichor.core.files.file import File, FileState
+from ichor.core.files.file import File, FileState, ReadFile, WriteFile
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
@@ -58,7 +58,7 @@ def features_to_coordinates(features: np.ndarray) -> np.ndarray:
     return np.array(all_points)
 
 
-class Trajectory(ListOfAtoms, File):
+class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
     atoms. A user can also initialize an empty trajectory and append `Atoms` instances to it without reading in a .xyz file. This allows
     the user to build custom trajectories containing any sort of geometries.
@@ -72,21 +72,15 @@ class Trajectory(ListOfAtoms, File):
         File.__init__(self, path)
 
     def _read_file(self):
-
         with open(self.path, "r") as f:
-
             # make empty Atoms instance in which to store one timestep
             atoms = Atoms()
-
             for line in f:
-
                 # match the line containing the number of atoms in timestep
                 if re.match(r"^\s*\d+$", line):
                     natoms = int(line)
-
                     # this is the comment line of xyz files. It can be empty or contain some useful information that can be stored.
                     line = next(f)
-
                     # if the comment line properties errors, we can store these
                     if re.match(
                         r"^\s*?i\s*?=\s*?\d+\s*properties_error", line
@@ -95,7 +89,6 @@ class Trajectory(ListOfAtoms, File):
                         atoms.properties_error = ast.literal_eval(
                             properties_error
                         )
-
                     # the next line after the comment line is where coordinates begin
                     for _ in range(natoms):
                         line = next(f)
@@ -223,9 +216,8 @@ class Trajectory(ListOfAtoms, File):
 
         return trajectory
 
-    def write(self, path: Optional[Path] = None, every: int = 1):
-        _path = path or self.path
-        with open(_path, "w") as f:
+    def _write_file(self, path: Path, every: int = 1):
+        with open(path, "w") as f:
             n = 0
             for i, frame in enumerate(self):
                 n += 1

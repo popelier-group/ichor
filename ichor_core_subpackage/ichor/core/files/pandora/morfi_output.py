@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 
 from ichor.core.common.functools import classproperty

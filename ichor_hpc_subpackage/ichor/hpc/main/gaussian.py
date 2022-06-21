@@ -6,8 +6,12 @@ from ichor.core.common.io import last_line
 from ichor.core.files import GJF, PointsDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import (SCRIPT_NAMES, GaussianCommand,
-                                         SubmissionScript, print_completed)
+from ichor.hpc.submission_script import (
+    SCRIPT_NAMES,
+    GaussianCommand,
+    SubmissionScript,
+    print_completed,
+)
 
 
 def submit_points_directory_to_gaussian(
@@ -39,6 +43,8 @@ def write_gjfs(
         If this is False, then any existing `.gjf` files in the directory will not be overwritten (thus they would not be using the GLOBALS Gaussian settings.)
     :return: A list of Path objects which point to `.gjf` files in each PointDirectory that is contained in the PointsDirectory.
     """
+    from ichor.hpc import GLOBALS
+
     gjfs = []
     for point in points:
         if not point.gjf.exists():
@@ -48,6 +54,12 @@ def write_gjfs(
         point.gjf.atoms = point.xyz.atoms
 
         if not point.gjf.exists() or overwrite_existing:
+            point.gjf.set_nproc(GLOBALS.GAUSSIAN_NCORES)
+            point.gjf.set_mem(GLOBALS.GAUSSIAN_MEMORY_LIMIT)
+            point.gjf.method = GLOBALS.METHOD
+            point.gjf.basis_set = GLOBALS.BASIS_SET
+            point.gjf.add_keywords(GLOBALS.KEYWORDS)
+            point.gjf.output_wfn()
             point.gjf.write()
 
         gjfs.append(point.gjf.path)
@@ -124,7 +136,7 @@ def scrub_gaussian(gaussian_file: str):
 
     from ichor.core.common.io import mkdir, move
     from ichor.hpc import FILE_STRUCTURE
-    from ichor.log import logger
+    from ichor.hpc.log import logger
 
     gaussian_file = Path(gaussian_file)
     wfn_file_path = Path(gaussian_file).with_suffix(".wfn")
@@ -132,8 +144,8 @@ def scrub_gaussian(gaussian_file: str):
     if gaussian_file.exists():
 
         # if the wfn file path does not exist or the "TOTAL ENERGY" is not in the last line of the .wfn file
-        if (not wfn_file_path.exists()) or (
-            not "TOTAL ENERGY" in last_line(wfn_file_path)
+        if not wfn_file_path.exists() or "TOTAL ENERGY" not in last_line(
+            wfn_file_path
         ):
 
             point_dir_path = wfn_file_path.parent
@@ -149,7 +161,7 @@ def scrub_gaussian(gaussian_file: str):
             # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
             # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
             while new_path.exists():
-                point_dir_name = point_dir_name + "~"
+                point_dir_name = f"{point_dir_name}~"
                 new_path = (
                     FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
                 )
@@ -162,13 +174,12 @@ def scrub_gaussian(gaussian_file: str):
                     f"Moved point directory {point_dir_path} to {new_path} because .wfn file was not produced."
                 )
                 return
-            elif not "TOTAL ENERGY" in last_line(wfn_file_path):
+            elif "TOTAL ENERGY" not in last_line(wfn_file_path):
                 logger.error(
                     f"Moved point directory {point_dir_path} to {new_path} because .wfn file did not have 'TOTAL_ENERGY' in last line."
                 )
                 return
 
-    # if a .gjf file does not exist, we also move the point. A .gjf file should exist because this function is called when Gaussian is being ran.
     else:
         logger.error(
             f"Gaussian .gjf file {gaussian_file} for which output needs to be checked does not exist."
@@ -185,7 +196,7 @@ def scrub_gaussian(gaussian_file: str):
         # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
         # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
         while new_path.exists():
-            point_dir_name = point_dir_name + "~"
+            point_dir_name = f"{point_dir_name}~"
             new_path = (
                 FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
             )

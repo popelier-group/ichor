@@ -256,21 +256,19 @@ def write_to_excel(
             n_rows = df.shape[0]
             # write out the RMSE row for every third column.
             col_idx = 0
-            writer.sheets[sheet_name].write(n_rows + 1, col_idx, error_type)
+            writer.sheets[sheet_name]._write_file(n_rows + 1)
             col_idx += 3
             for error in errors_to_write[:-1]:
-                writer.sheets[sheet_name].write(n_rows + 1, col_idx, error)
+                writer.sheets[sheet_name]._write_file(n_rows + 1)
                 col_idx += 3
             # subtract two columns as we need to write out the Total absError MAE, but that should be written right next to the previous RMSE
             col_idx -= 2
-            writer.sheets[sheet_name].write(
-                n_rows + 1, col_idx, errors_to_write[-1]
-            )
+            writer.sheets[sheet_name]._write_file(n_rows + 1)
 
         # make the sheet that only contains RMSE information, pandas df can accept a dictionary of dictionaries
         df = pd.DataFrame(all_errors_dict)
         df.to_excel(writer, sheet_name=error_type)
-        writer.sheets[error_type].write(0, 0, "n_train")
+        writer.sheets[error_type]._write_file(0)
 
         # RMSE plot for IQA energies
         rmse_plot1 = workbook.add_chart(

@@ -1177,7 +1177,7 @@ class Submodule(IndexObject, TraversableIterableObj):
             except KeyError:
                 pass
             # END delete entry
-            parent_index.write()
+            parent_index._write_file()
 
             # now git config - need the config intact, otherwise we can't query
             # information anymore

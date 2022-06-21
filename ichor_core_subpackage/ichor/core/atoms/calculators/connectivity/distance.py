@@ -19,6 +19,8 @@ def calculate_connectivity_distance(atoms) -> np.ndarray:
         timesteps in a trajectory.
     """
 
+    atoms = atoms.to_angstroms()
+
     connectivity = np.zeros((len(atoms), len(atoms)), dtype=int)
 
     for i, iatom in enumerate(atoms):

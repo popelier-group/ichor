@@ -169,7 +169,7 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
                     # be smaller than the compressed version
                     stream_copy(
                         istream.read,
-                        writer.write,
+                        writer._write_file,
                         sys.maxsize,
                         self.stream_chunk_size,
                     )
@@ -179,7 +179,7 @@ class LooseObjectDB(FileDBBase, ObjectDBR, ObjectDBW):
                         istream.type,
                         istream.size,
                         istream.read,
-                        writer.write,
+                        writer._write_file,
                         chunk_size=self.stream_chunk_size,
                     )
                 # END handle direct stream copies

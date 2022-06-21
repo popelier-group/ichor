@@ -174,7 +174,7 @@ def write_final_geometry_to_gjf(
             dlpoly_history = DlpolyHistory(d / "HISTORY")
             gjf = GJF(d / (d.name + GJF.filetype))
             gjf.atoms = dlpoly_history[-1]
-            gjf.write()
+            gjf._write_file()
             gjfs += [gjf.path]
     return gjfs
 

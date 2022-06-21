@@ -1,13 +1,16 @@
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, Union
+from collections import OrderedDict
 
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files.directory import Directory
-from ichor.core.files.geometry import AtomicDict, GeometryFile
+
+# from ichor.core.files.geometry import AtomicDict, AtomicData
 from ichor.core.files.int import INT
+from ichor.core.files.file_data import DataFile
 
 
-class INTs(Directory, AtomicDict):
+class INTs(DataFile, OrderedDict, Directory):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
@@ -18,13 +21,9 @@ class INTs(Directory, AtomicDict):
     def __init__(
         self,
         path: Union[Path, str],
-        parent: Optional[GeometryFile] = None,
-        create_json=True,
     ):
-        self._parent = parent
-        self.create_json = create_json
-        dict.__init__(self)
         Directory.__init__(self, path)
+        OrderedDict.__init__(self)
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
@@ -39,58 +38,29 @@ class INTs(Directory, AtomicDict):
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(
-                    f, self._parent, create_json=self.create_json
-                )
+                self[f.stem.upper()] = INT(f)
         self.sort()
-
-    @property
-    def parent(self) -> GeometryFile:
-        """Returns a GeometryFile instance associated with the INTs. This is needed because the
-        .int files are for individual atoms, but these atoms belong to a bigger molecule/system.
-        The GeometryFile contains the information (coordinates) for the whole system."""
-        if self._parent is None:
-            raise ValueError(
-                f"'parent' attribute for {self.path} instance of {self.__class__.__name__} is not defined."
-            )
-        return self._parent
-
-    @parent.setter
-    def parent(self, value: GeometryFile):
-        """Setter method for parent property."""
-        if not isinstance(value, GeometryFile):
-            raise TypeError(
-                f"'parent' must be of type 'GeometryFile' not of type {type(value)}."
-            )
-        self._parent = value
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
         """Checks if the given Path instance has _atomicfiles in its name."""
         return path.name.endswith("_atomicfiles")
 
-    def dump(self):
-        """Removes the data from all the associated INT files, i.e. if the files
-        were read in and iqa and multipole data was stored, this method will wipe that
-        data and set all the attributes back to FileContents type.
-        """
-        for _, INT_instance in self.items():
-            INT_instance.dump()
-
     def sort(self):
         """Sorts keys of self by atom index e.g.
         {'H2': , 'H3': , 'O1': } -> {'O1': , 'H2': , 'H3': }"""
-        copy = self.copy()
-        # self is a dictionary, we clear all entries in it and then sort
-        self.clear()
-        for k in natsorted(list(copy.keys()), key=ignore_alpha):
-            self[k] = copy[k]
+        OrderedDict.__init__(
+            self, sorted(self.items(), key=lambda x: ignore_alpha(x[0]))
+        )
+
+    @property
+    def properties(self) -> Dict[str, Dict[str, float]]:
+        return {atom: i.properties for atom, i in self.items()}
 
     def __iter__(self):
         """Iterate over all INT instances (wrap around individual .int files)
         which are found in an INTs directory."""
-        for INT_instance in self.values():
-            yield INT_instance
+        yield from self.values()
 
     def __str__(self):
         return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(self.keys())}"

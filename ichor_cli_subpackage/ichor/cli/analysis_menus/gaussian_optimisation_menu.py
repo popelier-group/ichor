@@ -41,7 +41,7 @@ def run_geometry_opt(
     )
     gjf.atoms = atoms
     gjf.keywords = keywords
-    gjf.write()
+    gjf._write_file()
 
     ichor_command = ICHORCommand(
         func="convert_opt_wfn_to_xyz", func_args=[gjf.path.with_suffix(".wfn")]

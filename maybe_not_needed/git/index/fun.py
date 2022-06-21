@@ -130,7 +130,7 @@ def write_cache(
     stream_sha = ShaStreamCls(stream)
 
     tell = stream_sha.tell
-    write = stream_sha.write
+    write = stream_sha._write_file
 
     # header
     version = 2
@@ -171,7 +171,7 @@ def write_cache(
 
     # write previously cached extensions data
     if extension_data is not None:
-        stream_sha.write(extension_data)
+        stream_sha._write_file(extension_data)
 
     # write the sha over the content
     stream_sha.write_sha()

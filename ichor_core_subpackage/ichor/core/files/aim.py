@@ -4,7 +4,7 @@ from typing import Optional, Union
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import File, FileContents
+from ichor.core.files.file import File, ReadFile, FileContents
 
 
 class AimAtom:
@@ -27,7 +27,7 @@ class AimAtom:
         self.integration_error = integration_error
 
 
-class AIM(File, dict):
+class AIM(ReadFile, File, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
@@ -86,14 +86,10 @@ class AIM(File, dict):
 
         with open(self.path, "r") as f:
 
-            is_all_atom_calculation = False
-
             lines = f.readlines()
-            for line in lines:
-                # this line only exists if multiple atoms are being done at the same time.
-                if "aimint.exe" in line:
-                    is_all_atom_calculation = True
-
+            is_all_atom_calculation = any(
+                "aimint.exe" in line for line in lines
+            )
             for line in lines:
 
                 # need this to use multiple cores for systems above certain number of atoms (see AIMAll manual)
@@ -116,45 +112,39 @@ class AIM(File, dict):
                 elif "Number of CCPs  =" in line:
                     self.nccps = int(line.split()[-1])
 
-                if is_all_atom_calculation:
+                if is_all_atom_calculation and "aimint.exe" in line:
+                    # find the path to where the atom information will be stored (this is without suffix), also remove extra " in line
+                    aimatom_path = Path(line.split()[-2].strip('"'))
+                    # convert the stem to upper, eg. o1 -> O1
+                    inpfile = aimatom_path.with_suffix(".inp")
+                    outfile = aimatom_path.with_suffix(".int")
+                    atom_name = aimatom_path.stem.upper()
+                    self[atom_name] = AimAtom(
+                        atom_name=atom_name,
+                        inp_file=inpfile,
+                        int_file=outfile,
+                    )
+                elif (
+                    is_all_atom_calculation
+                    and "Total time for atom" in line
+                    or not is_all_atom_calculation
+                    and "Inp File:" not in line
+                    and "Total time for atom" in line
+                ):
+                    record = line.split()
+                    atom_name = record[4]
+                    self[atom_name].time_taken = int(record[6])
+                    self[atom_name].integration_error = float(record[-1])
 
-                    # Check which .int files should be produced.
-                    # if AIMALL does the partitioning for more than 1 atom, then it does not write out a line with `Out File`
-                    if "aimint.exe" in line:
-                        # find the path to where the atom information will be stored (this is without suffix), also remove extra " in line
-                        aimatom_path = Path(line.split()[-2].strip('"'))
-                        # convert the stem to upper, eg. o1 -> O1
-                        inpfile = aimatom_path.with_suffix(".inp")
-                        outfile = aimatom_path.with_suffix(".int")
-                        atom_name = aimatom_path.stem.upper()
-                        self[atom_name] = AimAtom(
-                            atom_name=atom_name,
-                            inp_file=inpfile,
-                            int_file=outfile,
-                        )
-                    elif "Total time for atom" in line:
-                        record = line.split()
-                        atom_name = record[4]
-                        self[atom_name].time_taken = int(record[6])
-                        self[atom_name].integration_error = float(record[-1])
-
-                # if AIMALL only performs partitioning for one atom there are different line in the .aim file
-                else:
-                    if "Inp File:" in line:
-                        inpfile = Path(line.split()[-1].strip('"'))
-                        outfile = inpfile.with_suffix(".int")
-                        atom_name = inpfile.stem.upper()
-                        self[atom_name] = AimAtom(
-                            atom_name=atom_name,
-                            inp_file=inpfile,
-                            int_file=outfile,
-                        )
-
-                    elif "Total time for atom" in line:
-                        record = line.split()
-                        atom_name = record[4]
-                        self[atom_name].time_taken = int(record[6])
-                        self[atom_name].integration_error = float(record[-1])
+                elif not is_all_atom_calculation and "Inp File:" in line:
+                    inpfile = Path(line.split()[-1].strip('"'))
+                    outfile = inpfile.with_suffix(".int")
+                    atom_name = inpfile.stem.upper()
+                    self[atom_name] = AimAtom(
+                        atom_name=atom_name,
+                        inp_file=inpfile,
+                        int_file=outfile,
+                    )
 
     def __getitem__(self, item: Union[str, int]) -> AimAtom:
         """If an integer is passed, it returns the atom whose index corresponds to the integer (indexing starts at 1).

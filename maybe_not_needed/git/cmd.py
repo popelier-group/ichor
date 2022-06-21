@@ -1318,7 +1318,7 @@ class Git(LazyMixin):
         self, cmd: "Git.AutoInterrupt", ref: AnyStr
     ) -> Tuple[str, str, int]:
         if cmd.stdin and cmd.stdout:
-            cmd.stdin.write(self._prepare_ref(ref))
+            cmd.stdin._write_file(self._prepare_ref(ref))
             cmd.stdin.flush()
             return self._parse_object_header(cmd.stdout.readline())
         else:

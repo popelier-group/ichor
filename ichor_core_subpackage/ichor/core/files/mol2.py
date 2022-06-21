@@ -1,13 +1,13 @@
 import datetime
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Any
 
-# from ichor.core.analysis.geometry.geometry_calculator import bonds, calculate_bond
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import current_user
-from ichor.core.files.geometry import GeometryFile
+from ichor.core.files.file import File, WriteFile, ReadFile
+from ichor.core.files.file_data import HasAtoms
 from ichor.core.units import AtomicDistance
 
 
@@ -141,9 +141,12 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
         catom = atom1 if atom1.type == "C" else atom2
         natom = atom1 if atom1.type == "N" else atom2
 
-        if get_valence(catom) == 3 and get_valence(natom) == 3:
-            if "O" in [atom.type for atom in get_bonded_atoms(catom)]:
-                return BondType.Amide
+        if (
+            get_valence(catom) == 3
+            and get_valence(natom) == 3
+            and "O" in [atom.type for atom in get_bonded_atoms(catom)]
+        ):
+            return BondType.Amide
 
     atom1_valence = get_valence(atom1)
     atom2_valence = get_valence(atom2)
@@ -177,11 +180,6 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
                 return BondType.Aromatic
 
         return BondType.Double
-    if (
-        atom1.valence - 1 == atom1_valence
-        or atom2_valence - 1 == atom2.valence
-    ):
-        return BondType.Triple
 
 
 visited = []
@@ -191,7 +189,7 @@ def _get_ring(
     atom: Atom,
     current_ring: List[Atom],
     called_from: Atom,
-) -> List[Atom]:
+) -> Union[Tuple[Any, Any], Tuple[List[Atom], bool]]:
     bonded_atoms = get_bonded_atoms(atom)
     if len(bonded_atoms) > 1:
         for bonded_atom in bonded_atoms:
@@ -201,10 +199,7 @@ def _get_ring(
                 )
                 if found:
                     return ring, found
-            if (
-                bonded_atom == current_ring[0]
-                and not bonded_atom == called_from
-            ):
+            if bonded_atom == current_ring[0] and bonded_atom != called_from:
                 return current_ring, True
     return [current_ring[0]], False
 
@@ -236,7 +231,7 @@ def n_bonds_of_type(atom, parent, bond_type):
 def get_bond_types(atom, parent) -> List[BondType]:
     return [
         get_bond_type(parent[i - 1], parent[j - 1])
-        for i, j in get_atom_bonds(atom, parent)
+        for i, j in get_atom_bonds(atom)
     ]
 
 
@@ -284,6 +279,7 @@ def nonmet(atom) -> List[Atom]:
 
 
 def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
+    # sourcery skip: low-code-quality
     if atom.type in simple_types.keys():
         return simple_types[atom.type]
 
@@ -301,13 +297,10 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
                 acyclic_bond(parent[i - 1], parent[j - 1])
                 for i, j in atom_bonds
             )
-            and all([atom.type == "N" for atom in get_bonded_atoms(atom)])
+            and all(atom.type == "N" for atom in get_bonded_atoms(atom))
             and all(
-                [
-                    len(other_atom_bonds(atom, parent[i - 1], parent[j - 1]))
-                    == 2
-                    for i, j in atom_bonds
-                ]
+                len(other_atom_bonds(atom, parent[i - 1], parent[j - 1])) == 2
+                for i, j in atom_bonds
             )
             and sum(
                 other_atom(parent[k - 1], parent[k - 1], parent[l - 1]).type
@@ -330,10 +323,14 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
             >= 2
         ):
             return AtomType.CAr
-        elif (len(atom_bonds) == 1 or len(atom_bonds) == 2) and sum(
-            get_bond_type(parent[i - 1], parent[j - 1]) == BondType.Triple
-            for i, j in atom_bonds
-        ) >= 1:
+        elif (
+            len(atom_bonds) in {1, 2}
+            and sum(
+                get_bond_type(parent[i - 1], parent[j - 1]) == BondType.Triple
+                for i, j in atom_bonds
+            )
+            >= 1
+        ):
             return AtomType.C1
         return AtomType.C2
     elif atom.type == "O":
@@ -454,9 +451,11 @@ non_metal_atoms = [
 ]
 
 
-class Mol2(GeometryFile):
-    def __init__(self, path: Union[Path, str]):
-        super().__init__(path)
+# todo?: Would it be useful to be able to read Mol2?
+class Mol2(HasAtoms, WriteFile, File):
+    def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
+        File.__init__(self, path)
+        HasAtoms.__init__(self, atoms)
 
         self.system_name = None
         self.natoms = None
@@ -471,14 +470,6 @@ class Mol2(GeometryFile):
     @classproperty
     def filetype(self) -> str:
         return ".mol2"
-
-    def _read_file(self):
-        with open(self.path, "r") as f:
-            for line in f:
-                if line.startswith("#"):
-                    continue
-                if "@<TRIPOS>MOLECULE" in line:
-                    system_name = next(f).strip()
 
     def format(self):
         self.mol_type = MoleculeType.Small
@@ -497,13 +488,12 @@ class Mol2(GeometryFile):
                     units=atom.units,
                 )
 
-    def write(self, system_name: str, path: Optional[Path] = None):
+    def _write_file(self, path: Path, system_name: str):
         from ichor.core.analysis.geometry import bonds
 
         self.format()
         b = bonds(self.atoms)
 
-        path = path or self.path
         with open(path, "w") as f:
             f.write(f"# Name: {system_name}\n")
             f.write(f"# Created by: {current_user()}\n")

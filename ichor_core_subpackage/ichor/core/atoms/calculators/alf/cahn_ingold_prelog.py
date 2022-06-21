@@ -1,8 +1,46 @@
-from ichor.core.atoms.calculators.alf.alf import ALF
+from typing import Union, Optional
+
+import numpy as np
+
+from ichor.core.atoms.calculators.alf.alf import ALF, ALFCalculatorFunction
+from ichor.core.atoms.calculators.connectivity import (
+    ConnectivityCalculatorFunction,
+    connectivity_calculators,
+    calculate_connectivity,
+)
+
+
+def get_cahn_ingold_prelog_alf_calculator(
+    connectivity_calculator: Union[
+        str, np.ndarray, ConnectivityCalculatorFunction
+    ] = calculate_connectivity,
+) -> ALFCalculatorFunction:
+    """Returns a FeatureCalculatorFunction for the given alf calculator
+
+    Args:
+        :param: `alf_calculator` the ALFCalculatorFunction to use in calculate_alf_features:
+        :param: `distance_unit` the distance unit to use in calculate_alf_features:
+
+    Returns:
+        :type: FeatureCalculatorFunction
+            An instance of the calculate_alf_features function with a predefined ALFCalculatorFunction and distance unit
+    """
+    if isinstance(connectivity_calculator, str):
+        connectivity_calculator = connectivity_calculators[
+            connectivity_calculator
+        ]
+    return lambda x: calculate_alf_cahn_ingold_prelog(
+        x, connectivity_calculator
+    )
 
 
 # todo: this could be better
-def calculate_alf_cahn_ingold_prelog(atom: "Atom") -> ALF:
+def calculate_alf_cahn_ingold_prelog(
+    atom: "Atom",
+    connectivity: Optional[
+        Union[np.ndarray, ConnectivityCalculatorFunction]
+    ] = None,
+) -> ALF:
     """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
     the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
     matrix and features.
@@ -20,6 +58,14 @@ def calculate_alf_cahn_ingold_prelog(atom: "Atom") -> ALF:
 
     import itertools as it
     from typing import List
+
+    if connectivity is None:
+        connectivity = calculate_connectivity
+
+    if not isinstance(connectivity, np.ndarray):
+        connectivity = connectivity(
+            atom.parent
+        )  # todo!: use this to setup AtomicGraph then perform BFS
 
     def _priority_by_mass(atoms: List["Atom"]) -> float:
         """Returns the sum of masses of a list of Atom instances

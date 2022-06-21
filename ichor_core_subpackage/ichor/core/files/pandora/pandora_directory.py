@@ -3,14 +3,17 @@ from typing import Optional
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files.directory import AnnotatedDirectory
-from ichor.core.files.geometry import GeometryDataFile, GeometryFile
+
+# from ichor.core.files.geometry import GeometryDataFile, AtomicData
+from ichor.core.files.file_data import HasAtoms
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora.morfi_output import MorfiDirectory
 from ichor.core.files.pandora.pandora_input import PandoraInput
 from ichor.core.files.pandora.pyscf_output import PySCFDirectory
 
 
-class PandoraDirectory(AnnotatedDirectory, GeometryFile, GeometryDataFile):
+class PandoraDirectory(HasAtoms, AnnotatedDirectory):
+    input: OptionalPath[PandoraInput] = OptionalFile
     pyscf: OptionalPath[PySCFDirectory] = OptionalFile
     morfi: OptionalPath[MorfiDirectory] = OptionalFile
 

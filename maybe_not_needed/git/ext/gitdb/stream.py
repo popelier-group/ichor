@@ -417,13 +417,13 @@ class DeltaApplyReader(LazyMixin):
         bbuf = allocate_memory(self._bstream.size)
         stream_copy(
             self._bstream.read,
-            bbuf.write,
+            bbuf._write_file,
             self._bstream.size,
             256 * mmap.PAGESIZE,
         )
 
         # APPLY CHUNKS
-        write = self._mm_target.write
+        write = self._mm_target._write_file
         dcl.apply(bbuf, write)
 
         self._mm_target.seek(0)
@@ -460,7 +460,7 @@ class DeltaApplyReader(LazyMixin):
         # We need random access to it
         bbuf = allocate_memory(base_size)
         stream_copy(
-            self._bstream.read, bbuf.write, base_size, 256 * mmap.PAGESIZE
+            self._bstream.read, bbuf._write_file, base_size, 256 * mmap.PAGESIZE
         )
 
         # allocate memory map large enough for the largest (intermediate) target
@@ -483,17 +483,17 @@ class DeltaApplyReader(LazyMixin):
             # The dbuf buffer contains commands after the first two MSB sizes, the
             # offset specifies the amount of bytes read to get the sizes.
             ddata = allocate_memory(dstream.size - offset)
-            ddata.write(dbuf)
+            ddata._write_file(dbuf)
             # read the rest from the stream. The size we give is larger than necessary
             stream_copy(
-                dstream.read, ddata.write, dstream.size, 256 * mmap.PAGESIZE
+                dstream.read, ddata._write_file, dstream.size, 256 * mmap.PAGESIZE
             )
 
             #######################################################################
             if "c_apply_delta" in globals():
                 c_apply_delta(bbuf, ddata, tbuf)
             else:
-                apply_delta_data(bbuf, src_size, ddata, len(ddata), tbuf.write)
+                apply_delta_data(bbuf, src_size, ddata, len(ddata), tbuf._write_file)
             #######################################################################
 
             # finally, swap out source and target buffers. The target is now the

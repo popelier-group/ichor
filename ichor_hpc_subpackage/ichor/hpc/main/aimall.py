@@ -4,11 +4,15 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.core.common.io import remove
-from ichor.core.files import AIM, INT, PointsDirectory
+from ichor.core.files import AIM, INT, PointsDirectory, FileContents
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import (SCRIPT_NAMES, AIMAllCommand,
-                                         SubmissionScript, print_completed)
+from ichor.hpc.submission_script import (
+    SCRIPT_NAMES,
+    AIMAllCommand,
+    SubmissionScript,
+    print_completed,
+)
 
 
 def submit_points_directory_to_aimall(
@@ -23,10 +27,14 @@ def submit_points_directory_to_aimall(
 
 
 def check_wfns(points: PointsDirectory) -> List[Path]:
+    from ichor.hpc import GLOBALS
+
     wfns = []
     for point in points:
         if point.wfn.exists():
-            point.wfn.check_header()
+            if point.wfn.method != GLOBALS.METHOD:
+                point.wfn.method = GLOBALS.METHOD
+                point.wfn.write()
             wfns.append(point.wfn.path)
     return wfns
 
@@ -43,9 +51,9 @@ def aimall_completed(wfn: Path) -> bool:
         else:
             int_file = INT(aimdata.outfile)
             try:
-                int_file.integration_error
-                int_file.q44s
-                int_file.iqa
+                assert int_file.integration_error is not FileContents
+                assert int_file.q44s is not FileContents
+                assert int_file.iqa is not FileContents
             except AttributeError:
                 logger.error(
                     f"AIMAll for '{wfn}' failed to run producing invalid int file '{int_file.path}'"

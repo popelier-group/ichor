@@ -332,6 +332,23 @@ type2rad: Dict[str, float] = {
     "Rn": 1.45,
 }
 
+type2charge: Dict[str, float] = {
+    "H": 1.0,
+    "He": 2.0,
+    "Li": 3.0,
+    "Be": 4.0,
+    "B": 5.0,
+    "C": 6.0,
+    "N": 7.0,
+    "O": 8.0,
+    "F": 9.0,
+    "Ne": 10.0,
+    "Na": 11.0,
+    "Mg": 12.0,
+    "Al": 13.0,
+    "Si": 14.0,
+}
+
 
 type2vdwr: Dict[str, float] = {
     "H": 0.430,
@@ -673,16 +690,26 @@ dlpoly_weights: Dict[str, float] = {
     "Mo": 95.95,
 }
 
-multipole_names: List[str] = [
+
+spherical_monopole_labels: List[str] = [
     "q00",
+]
+
+spherical_dipole_labels: List[str] = [
     "q10",
     "q11c",
     "q11s",
+]
+
+spherical_quadrupole_labels: List[str] = [
     "q20",
     "q21c",
     "q21s",
     "q22c",
     "q22s",
+]
+
+spherical_octupole_labels: List[str] = [
     "q30",
     "q31c",
     "q31s",
@@ -690,6 +717,9 @@ multipole_names: List[str] = [
     "q32s",
     "q33c",
     "q33s",
+]
+
+spherical_hexadecapole_labels: List[str] = [
     "q40",
     "q41c",
     "q41s",
@@ -700,6 +730,14 @@ multipole_names: List[str] = [
     "q44c",
     "q44s",
 ]
+
+multipole_names: List[str] = (
+    spherical_monopole_labels
+    + spherical_dipole_labels
+    + spherical_quadrupole_labels
+    + spherical_octupole_labels
+    + spherical_hexadecapole_labels
+)
 
 # ha_to_kj_mol = 2625.5
 ha_to_kj_mol: float = (

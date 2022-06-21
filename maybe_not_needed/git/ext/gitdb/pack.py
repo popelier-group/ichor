@@ -177,7 +177,7 @@ class IndexWriter(object):
         self._objs.sort(key=lambda o: o[0])
 
         sha_writer = FlexibleSha1Writer(write)
-        sha_write = sha_writer.write
+        sha_write = sha_writer._write_file
         sha_write(PackIndexFile.index_v2_signature)
         sha_write(pack(">L", PackIndexFile.index_version_default))
 
@@ -576,7 +576,7 @@ class PackFile(LazyMixin):
             # scrub the stream to the end - this decompresses the object, but yields
             # the amount of compressed bytes we need to get to the next offset
 
-            stream_copy(ostream.read, null.write, ostream.size, chunk_size)
+            stream_copy(ostream.read, null._write_file, ostream.size, chunk_size)
             assert ostream.stream._br == ostream.size
             cur_offset += (
                 data_offset - ostream.pack_offset
@@ -889,7 +889,7 @@ class PackEntity(LazyMixin):
             stream = self._object(sha, as_stream=True)
             # write a loose object, which is the basis for the sha
             write_object(
-                stream.type, stream.size, stream.read, shawriter.write
+                stream.type, stream.size, stream.read, shawriter._write_file
             )
 
             assert shawriter.sha(as_hex=False) == sha
@@ -1000,7 +1000,7 @@ class PackEntity(LazyMixin):
         # END handle object
 
         pack_writer = FlexibleSha1Writer(pack_write)
-        pwrite = pack_writer.write
+        pwrite = pack_writer._write_file
         ofs = 0  # current offset into the pack file
         index = None
         wants_index = index_write is not None
