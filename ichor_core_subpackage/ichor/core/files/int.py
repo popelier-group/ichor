@@ -8,7 +8,7 @@ from ichor.core import constants, patterns
 from ichor.core.common.functools import (buildermethod, cached_property,
                                          classproperty)
 from ichor.core.files.file import FileContents
-from ichor.core.files.geometry import GeometryData, GeometryDataFile
+from ichor.core.files.geometry import GeometryData, GeometryDataFile, GeometryFile
 from ichor.core.multipoles import (rotate_dipole, rotate_hexadecapole,
                                    rotate_octupole, rotate_quadrupole)
 
@@ -21,7 +21,7 @@ class INT(GeometryDataFile):
         This information is needed to form the C matrix when rotating multipoles from the global to the local frame.
     """
 
-    def __init__(self, path: Union[Path, str], parent=None, create_json=True):
+    def __init__(self, path: GeometryFile, parent=None, create_json=True, read_data_from_json=True):
         super().__init__(path)
         self.parent = parent
         self.integration_data = FileContents
@@ -30,6 +30,7 @@ class INT(GeometryDataFile):
         self.rotated_multipoles_data = FileContents
         self.original_multipoles_data = FileContents
         self.create_json = create_json
+        self.read_data_from_json = read_data_from_json
 
     @classproperty
     def filetype(cls) -> str:
@@ -47,7 +48,7 @@ class INT(GeometryDataFile):
         """Read an .int file. The first time that the .int file is read successfully, a json file with the
         important information is written in the same directory.
         """
-        if self.json_path.exists():
+        if self.json_path.exists() and self.read_data_from_json:
             self.read_json()
         else:
             self.read_int()
