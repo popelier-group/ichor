@@ -113,14 +113,19 @@ class ReadFile(File, ABC):
         if self.state is FileState.Unread:
             self.state = FileState.Reading
             try:
-                self._read_file(
-                    *args, **kwargs
-                )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
+                self._initialise_file_contents()
+                if self.path.exists():
+                    self._read_file(
+                        *args, **kwargs
+                    )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
             except Exception as e:
                 raise FileReadError(
                     f"Error occured while reading file '{self.path}'"
                 ) from e
             self.state = FileState.Read
+
+    def _initialise_file_contents(self):
+        pass
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
@@ -145,10 +150,7 @@ class ReadFile(File, ABC):
         # check if the attribute has value FileContents, if not read file
 
         with suppress(AttributeError):
-            if (
-                object.__getattribute__(self, item) is FileContents
-                and self.path.exists()
-            ):
+            if (object.__getattribute__(self, item) is FileContents):
                 self.read()
 
         try:

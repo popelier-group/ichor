@@ -155,8 +155,7 @@ class AIMAllCommand(CommandLine):
         atoms: Optional[Union[str, List[str]]] = None,
         aimall_output: Optional[Path] = None,
     ):
-        from ichor.hpc import GLOBALS
-        self.wfn_file = WFN(wfn_file, method=GLOBALS.METHOD)
+        self.wfn_file = WFN(wfn_file)
         self.aimall_output = aimall_output or wfn_file.with_suffix(".aim")
         self.atoms = atoms or "all"
         if (
