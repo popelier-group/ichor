@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Optional
 from enum import Enum
 
 from ichor.core.common.str import get_digits
@@ -64,7 +64,7 @@ class INT(DataFile, ReadFile, File):
         self.current_directory: Path = FileContents
         self.input_file_path: Path = FileContents
         self.wfn_file_path: Path = FileContents
-        self.out_file_path: Path = FileContents
+        self.output_file_path: Path = FileContents
 
         self.atom_name: str = FileContents
         self.title: str = FileContents
@@ -126,13 +126,13 @@ class INT(DataFile, ReadFile, File):
             if not self.current_directory.exists():
                 self.current_directory = self.path.parent.parent
             next(f)
-            self.inp_file_path = self.current_directory / Path(
+            self.input_file_path = self.current_directory / Path(
                 next(f).split()[-1]
             )
             self.wfn_file_path = self.current_directory / Path(
                 next(f).split()[-1]
             )
-            self.out_file_path = self.current_directory / Path(
+            self.output_file_path = self.current_directory / Path(
                 next(f).split()[-1]
             )
             next(f)
@@ -274,15 +274,29 @@ class INT(DataFile, ReadFile, File):
             )
         )
 
-    @cached_property
+    @property
     def wfn(self) -> "WFN":
         from ichor.core.files.wfn import WFN
 
         return WFN(self.wfn_file_path)
 
-    @cached_property
-    def local_spherical_multipoles(self) -> Dict[str, float]:
-        C = self.wfn.atoms[self.atom_name].C()
+    def local_spherical_multipoles(self, C_matrix: Optional[np.ndarray] = None) -> Dict[str, float]:
+        """ Rotates global spherical multipoles into local spherical multipoles. Optionally
+        a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
+        (as read in from the int file) will be used (if it exists).
+        
+        :param C_matrix: Optional rotation matrix to be used to rotate multipoles.
+        :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
+            with the int file does not exist. Then we cannot calculate multipoles.
+        """
+
+        if C_matrix:
+            C = C_matrix
+        else:
+            if self.wfn.exists():
+                C = self.wfn.atoms[self.atom_name].C()
+            else:
+                raise FileNotFoundError(f"Wfn file at specified path: {self.wfn.path} does not exist. Cannot proceed with calculating local multipole moments.")
 
         local_spherical_multipoles = {spherical_monopole_labels[0]: self.q00}
 
