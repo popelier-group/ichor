@@ -184,7 +184,7 @@ class WFN(HasAtoms, DataFile, ReadFile, WriteFile, File):
         return ".wfn"
 
     @property
-    def properties(self) -> Dict[str, float]:
+    def data(self) -> Dict[str, float]:
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
 
     def _write_file(self, path: Path):
