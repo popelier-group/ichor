@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict
 from ichor.core.files import INT
-from ichor.core.files.geometry import GeometryFile
+from ichor.core.files.int import CriticalPoint
 from ichor.core.itypes import T
-from tests.atoms import _test_atoms_coords_optional
 from tests.path import get_cwd
 import numpy as np
+from ichor.core.atoms import Atoms
+from ichor.core.files.int import CriticalPoint, CriticalPointType
 
 example_dir = get_cwd(__file__) / "example_ints"
 
@@ -17,76 +18,121 @@ def _assert_np_array_optional(arr1: np.ndarray, expected_array: Optional[np.ndar
     if expected_array is not None:
         np.allclose(arr1, expected_array)
 
-def _test_int_no_json(
-    int_file: Path,
+def _test_int(
+    int_file_path: Path,
+    parent: Atoms = None,
+    # current_directory: Path = None,
+    # inp_file_path: Path = None,
+    # wfn_file_path: Path = None,
+    # out_file_path: Path = None,
     atom_name: str = None,
     atom_num: int = None,
-    parent: Optional[GeometryFile] = None,
-    json_path: Path = None,
+    title: str = None,
+
+    dft_model: str = None,
+    basin_integration_results: Dict[str, float] = None,
     integration_error: float = None,
+    
+    critical_points: List[CriticalPoint] = None,
+    bond_critical_points: List[CriticalPoint] = None,
+    ring_critical_points: List[CriticalPoint] = None,
+    cage_critical_points: List[CriticalPoint] = None,
+
+    data: Dict[str, float] = None,
+    net_charge: float = None,
+    global_spherical_multipoles: Dict[str, float] = None,
+    local_spherical_multipoles: Dict[str, float] = None,
+
+    iqa_energy_components: Dict[str, float] = None,
     iqa: float = None,
-    original_multipoles: dict = None,
-    original_multipoles_without_q00: dict = None,
-    rotated_multipoles: Optional[dict] = None,
-    rotated_multipoles_without_q00: Optional[dict] = None,
     e_intra: float = None,
     q: float = None,
     q00: float = None,
-    dipole: float = None,
-    C: np.ndarray = None,
-    rotated_dipole: dict = None,
-    rotated_quadrupole: dict = None,
-    rotated_octupole: dict = None,
-    rotated_hexadecapole: dict = None
+    dipole_mag: float = None,
+
+    total_time: int = None,
 ):
     """ Tests original .int file from AIMALL is being read in correctly. No json
     file is generated. json is checked in another test."""
 
-    int_file = INT(int_file, parent, create_json=False, read_data_from_json=False)
+    int_file_instance = INT(int_file_path)
 
-    _assert_val_optional(int_file.atom_name, atom_name)
-    _assert_val_optional(int_file.atom_num, atom_num)
-    _assert_val_optional(int_file.json_path, json_path)
-    _assert_val_optional(int_file.integration_error, integration_error)
-    _assert_val_optional(int_file.iqa, iqa)
-    _assert_val_optional(int_file.original_multipoles, original_multipoles)
-    _assert_val_optional(int_file.original_multipoles_without_q00, original_multipoles_without_q00)
-    _assert_val_optional(int_file.e_intra, e_intra)
-    _assert_val_optional(int_file.q, q)
-    _assert_val_optional(int_file.q00, q00)
-    _assert_val_optional(int_file.dipole, dipole)
+    _assert_val_optional(int_file_instance.parent, parent)
+    # _assert_val_optional(int_file_instance.current_directory, current_directory)
+    # _assert_val_optional(int_file_instance.inp_file_path, inp_file_path)
+    # _assert_val_optional(int_file_instance.wfn_file_path, wfn_file_path)
+    # _assert_val_optional(int_file_instance.out_file_path, out_file_path)
 
-    if parent is not None:
-        _assert_val_optional(int_file.parent, parent)
-        _assert_np_array_optional(int_file.C, C)
-        _assert_val_optional(int_file.rotated_multipoles, rotated_multipoles)
-        _assert_val_optional(int_file.rotated_multipoles_without_q00, rotated_multipoles_without_q00)
-        _assert_val_optional(int_file.rotated_dipole, rotated_dipole)
-        _assert_val_optional(int_file.rotated_quadrupole, rotated_quadrupole)
-        _assert_val_optional(int_file.rotated_octupole, rotated_octupole)
-        _assert_val_optional(int_file.rotated_hexadecapole, rotated_hexadecapole)
+    _assert_val_optional(int_file_instance.atom_name, atom_name)
+    _assert_val_optional(int_file_instance.atom_num, atom_num)
+    _assert_val_optional(int_file_instance.title, title)
+
+    _assert_val_optional(int_file_instance.dft_model, dft_model)
+    _assert_val_optional(int_file_instance.basin_integration_results, basin_integration_results)
+    _assert_val_optional(int_file_instance.integration_error, integration_error)
+
+    _assert_val_optional(int_file_instance.critical_points, critical_points)
+    _assert_val_optional(int_file_instance.bond_critical_points, bond_critical_points)
+    _assert_val_optional(int_file_instance.ring_critical_points, ring_critical_points)
+    _assert_val_optional(int_file_instance.cage_critical_points, cage_critical_points)
+
+    _assert_val_optional(int_file_instance.data, data)
+    _assert_val_optional(int_file_instance.net_charge, net_charge)
+    _assert_val_optional(int_file_instance.global_spherical_multipoles, global_spherical_multipoles)
+
+    _assert_val_optional(int_file_instance.iqa_energy_components, iqa_energy_components)
+    _assert_val_optional(int_file_instance.iqa, iqa)
+    _assert_val_optional(int_file_instance.e_intra, e_intra)
+    _assert_val_optional(int_file_instance.q, q)
+    _assert_val_optional(int_file_instance.q00, q00)
+
+    # these require having the parent attribute because we need the C matrix to rotate multipoles
+    # TODO: If dipole magnitude stays the same since we are rotating only (does it?), technically can use original multipoles.
+    if int_file_instance.parent:
+        _assert_val_optional(int_file_instance.local_spherical_multipoles(), local_spherical_multipoles)
+        _assert_val_optional(int_file_instance.dipole_mag, dipole_mag)
+
+    _assert_val_optional(int_file_instance.total_time, total_time)
 
 def test_no_parent_int():
 
-    _test_int_no_json(
-        int_file=example_dir / "o1.int",
+    file_bond_critical_points = [CriticalPoint(index=1, ty=CriticalPointType("BCP"), x=-7.6381542088E-01, y=1.1484931659E-01, z=8.4198108911E-01, connecting_atoms=["H2"]),
+    CriticalPoint(index=2, ty=CriticalPointType("BCP"), x=7.5472805821E-01, y=1.6630947183E-01, z=-8.0755694711E-01, connecting_atoms=["H3"])]
+
+    _test_int(
+        int_file_path=example_dir / "o1.int",
+        parent=None,
+        # current_directory=Path("/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001"),
+        # inp_file_path=Path("WATER_MONOMER0001_atomicfiles/o1.inp"),
+        # wfn_file_path=Path("WATER_MONOMER0001.wfn"),
+        # out_file_path=Path("WATER_MONOMER0001_atomicfiles/o1.int"),
         atom_name="O1",
         atom_num=1,
-        parent=None,
-        json_path=example_dir / "o1.json",
+        title="WATER_MONOMER0001",
+
+        dft_model="Restricted B3LYP",
+        basin_integration_results={'N': 9.0762060817, 'G': 75.038982117, 'K': 75.03894204, 'L': -4.0077877571e-05, 'WeizKE': 56.664620514, 'TFKE': 68.244617363, 'I': 2.6389848033, '<Rho/r**2>': 256.01273421, '<Rho/r>': 22.954908618, '<Rho*r>': 9.4998961933, '<Rho*r**2>': 15.172894906, '<Rho*r**4>': 80.51045651, 'GR(-2)': -255.50489747, 'GR(-1)': -44.988821679, 'GR0': -25.507286293, 'GR1': -34.656605556, 'GR2': -69.046214277, 'VenO': -183.63926895, 'VenT': -192.68868344, 'Dipole X': -0.0016461566576, 'Dipole Y': -0.25708969568, 'Dipole Z': -0.020646892538, '|Dipole|': 0.25792269313},
         integration_error=-4.0077877571e-05,
+
+        # there are only bond critical points in water monomer
+        # critical_points=file_bond_critical_points,
+        # bond_critical_points=file_bond_critical_points,
+        # ring_critical_points=[],
+        # cage_critical_points=[],
+
+        # TODO: check int_instance.data raises an error if accessed when no parent is present.
+        # no data as there is no parent, so cannot rotate multipoles
+        data=None,
+        net_charge=-1.0762060817,
+        global_spherical_multipoles={'q00': -1.0762060817, 'q10': -0.020646892538, 'q11c': -0.0016461566576, 'q11s': -0.25708969568, 'q20': -0.021700469782, 'q21c': -0.75018382635, 'q21s': 0.017792037022, 'q22c': -0.16232546581, 'q22s': 0.065122302165, 'q30': 0.044683217585, 'q31c': -0.089287472207, 'q31s': 0.30596239543, 'q32c': -0.063395331291, 'q32s': -1.391653952, 'q33c': -0.067954891804, 'q33s': 0.20594440588, 'q40': -1.9609913177, 'q41c': 1.1488477959, 'q41s': 0.26702238434, 'q42c': -0.75531442849, 'q42s': -0.39080307859, 'q43c': 3.6310817472, 'q43s': -0.24247145429, 'q44c': -1.7369385615, 'q44s': 0.072615449798, 'q50': -0.41836505357, 'q51c': 0.53462091556, 'q51s': -2.2325774531, 'q52c': -0.13994550028, 'q52s': 1.5489383968, 'q53c': 0.84062227501, 'q53s': -1.567560763, 'q54c': -0.41193097157, 'q54s': 3.1313064283, 'q55c': -0.31126569086, 'q55s': -2.3600710711},
+        local_spherical_multipoles=None,
+    
+        iqa_energy_components={'T(A)': 75.03894204, 'Vneen(A,A)/2 = Vne(A,A)': -183.63926895, 'Vne(A,Mol)/2': -93.400150506, 'Ven(A,Mol)/2': -96.344341721, 'Vneen(A,Mol)/2': -189.74449223, "Vne(A,A')/2": -1.5805160326, "Ven(A,A')/2": -4.5247072473, "Vneen(A,A')/2": -6.1052232799, "Vee0(A,A) + Vee0(A,A')/2": 35.538139035, "Vee(A,A) + Vee(A,A')/2": 35.145962157, "VeeC(A,A) + VeeC(A,A')/2": 44.071057668, "VeeX0(A,A) + VeeX0(A,A')/2": -8.5329186324, "VeeX(A,A) + VeeX(A,A')/2": -8.9250955109, 'Vnn(A,Mol)/2': 4.0753183136, 'Vee0(A,A)': 33.972313611, 'Vee(A,A)': 33.580136733, 'VeeC(A,A)': 42.300500739, 'VeeX0(A,A)': -8.3281871282, 'VeeX(A,A)': -8.7203640066, "Vee0(A,A')/2": 1.5658254241, "Vee(A,A')/2": 1.5658254241, "VeeC(A,A')/2": 1.7705569283, "VeeX0(A,A')/2": -0.20473150425, "VeeX(A,A')/2": -0.20473150425, 'V_IQA(A)': -150.52321176, 'VC_IQA(A)': -141.59811625, 'VX_IQA(A)': -8.9250955109, 'V_IQA(A,A)': -150.05913221, 'VC_IQA(A,A)': -141.33876821, 'VX_IQA(A,A)': -8.7203640066, "V_IQA(A,A')/2": -0.46407954221, "VC_IQA(A,A')/2": -0.25934803796, "VX_IQA(A,A')/2": -0.20473150425, 'E_IQA0(A)': -75.092092839, 'E_IQA(A)': -75.484269717, 'E_IQA_Intra0(A)': -74.628013297, 'E_IQA_Intra(A)': -75.020190175, 'E_IQA_Inter0(A)': -0.46407954221, 'E_IQA_Inter(A)': -0.46407954221},
         iqa=-7.5484269717e+01,
-        original_multipoles={'original_q10': -0.020646892538, 'original_q11c': -0.0016461566576, 'original_q11s': -0.25708969568, 'original_q20': -0.021700469782, 'original_q21c': -0.75018382635, 'original_q21s': 0.017792037022, 'original_q22c': -0.16232546581, 'original_q22s': 0.065122302165, 'original_q30': 0.044683217585, 'original_q31c': -0.089287472207, 'original_q31s': 0.30596239543, 'original_q32c': -0.063395331291, 'original_q32s': -1.391653952, 'original_q33c': -0.067954891804, 'original_q33s': 0.20594440588, 'original_q40': -1.9609913177, 'original_q41c': 1.1488477959, 'original_q41s': 0.26702238434, 'original_q42c': -0.75531442849, 'original_q42s': -0.39080307859, 'original_q43c': 3.6310817472, 'original_q43s': -0.24247145429, 'original_q44c': -1.7369385615, 'original_q44s': 0.072615449798, 'q00': -1.0762060817},
-        original_multipoles_without_q00={'original_q10': -0.020646892538, 'original_q11c': -0.0016461566576, 'original_q11s': -0.25708969568, 'original_q20': -0.021700469782, 'original_q21c': -0.75018382635, 'original_q21s': 0.017792037022, 'original_q22c': -0.16232546581, 'original_q22s': 0.065122302165, 'original_q30': 0.044683217585, 'original_q31c': -0.089287472207, 'original_q31s': 0.30596239543, 'original_q32c': -0.063395331291, 'original_q32s': -1.391653952, 'original_q33c': -0.067954891804, 'original_q33s': 0.20594440588, 'original_q40': -1.9609913177, 'original_q41c': 1.1488477959, 'original_q41s': 0.26702238434, 'original_q42c': -0.75531442849, 'original_q42s': -0.39080307859, 'original_q43c': 3.6310817472, 'original_q43s': -0.24247145429, 'original_q44c': -1.7369385615, 'original_q44s': 0.072615449798},
-        rotated_multipoles=None,
-        rotated_multipoles_without_q00=None,
         e_intra=-75.020190175,
         q=-1.0762060817,
         q00=-1.0762060817,
-        dipole=0.2579226931234475,
-        C=None,
-        rotated_dipole=None,
-        rotated_quadrupole=None,
-        rotated_octupole=None,
-        rotated_hexadecapole=None
+        dipole_mag=0.2579226931234475,
+
+        total_time=184
     )
