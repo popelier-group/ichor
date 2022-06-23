@@ -196,15 +196,15 @@ class AIMAllCommand(CommandLine):
 
         return aimall_commands[MACHINE]
 
-    @classproperty
-    def options(self) -> List[str]:
-        """Options taken from GAIA to run AIMAll likely not necessary as we specifiy /bin/bash at the top of the
-        submission script
-
-        Note: '-j y' removed from these options from the GAIA version as this outputted both stdout and stderr to
-              stdout whereas we want them to be put in the files we specify with the -o and -e flags separately
-        """
-        return ["-S /bin/bash"]
+    # @classproperty
+    # def options(self) -> List[str]:
+    #     """Options taken from GAIA to run AIMAll likely not necessary as we specifiy /bin/bash at the top of the
+    #     submission script
+    #
+    #     Note: '-j y' removed from these options from the GAIA version as this outputted both stdout and stderr to
+    #           stdout whereas we want them to be put in the files we specify with the -o and -e flags separately
+    #     """
+    #     return ["-S /bin/bash"]
 
     @property
     def arguments(self) -> List[str]:
