@@ -4,8 +4,10 @@ from typing import List, Optional
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import GaussianModules, Modules
 from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_script.command_line import (CommandLine,
-                                                      SubmissionError)
+from ichor.hpc.submission_script.command_line import (
+    CommandLine,
+    SubmissionError,
+)
 
 
 class GaussianCommand(CommandLine):
@@ -46,15 +48,19 @@ class GaussianCommand(CommandLine):
         """Returns the command used to run Gaussian on different machines."""
         from ichor.hpc import MACHINE, Machine
 
-        if MACHINE is Machine.csf3:
-            return "$g09root/g09/g09"
-        elif MACHINE is Machine.ffluxlab:
-            return "g09"
-        elif MACHINE is Machine.local:
-            return "g09_test"
-        raise SubmissionError(
-            f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
-        )
+        gaussian_commands = {
+            Machine.csf3: "$g09root/g09/g09",
+            Machine.csf4: "$g16root/g16/g16",
+            Machine.ffluxlab: "g09",
+            Machine.local: "g09",
+        }
+
+        if MACHINE not in gaussian_commands.keys():
+            raise SubmissionError(
+                f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
+            )
+
+        return gaussian_commands[MACHINE]
 
     @classproperty
     def ncores(self) -> int:
