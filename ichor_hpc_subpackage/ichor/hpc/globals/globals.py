@@ -591,7 +591,7 @@ class Globals:
         return get_atoms(self.ATOMS_REFERENCE_FILE)
 
     @property
-    def ALF(self) -> List[ALF]:
+    def ALF(self) -> List["ALF"]:
         """Returns the atomic local frame for every atom in the system.
         This is in the form of a list of lists, where each inner lists contains
         three integers. These integers represent the central atom (the atom on
@@ -609,7 +609,7 @@ class Globals:
         return self._ALF
 
     @ALF.setter
-    def ALF(self, alf: List[ALF]):
+    def ALF(self, alf: List["ALF"]):
         self._ALF = read_alf(alf)
 
     def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
