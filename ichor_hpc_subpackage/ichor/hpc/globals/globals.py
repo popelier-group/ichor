@@ -529,7 +529,10 @@ class Globals:
     @property
     def POINTS_LOCATION(self):
         if self._POINTS_LOCATION is None:
-            raise ValueError("Define 'GLOBALS.POINTS_LOCATION'")
+            try:
+                self._POINTS_LOCATION = get_atoms_reference_file(Path.cwd())
+            except FileNotFoundError as e:
+                raise ValueError("Define 'GLOBALS.POINTS_LOCATION'") from e
         if not self._POINTS_LOCATION.exists():
             raise FileNotFoundError(
                 f"'POINTS_LOCATION' '{self._POINTS_LOCATION}' was not found"
@@ -897,33 +900,20 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
     if not path:
         path = Path()
 
-    if path.exists():
-
-        for file_or_dir in path.iterdir():
-
-            if file_or_dir.is_file():
-                if file_or_dir.suffix == ".gjf":
-                    return file_or_dir.resolve()
-                elif file_or_dir.suffix == ".xyz":
-                    return file_or_dir.resolve()
-
-            # assume a PointsDirectory or PointDirectory-looking directory is given
-            elif file_or_dir.is_dir():
-                for p in file_or_dir.iterdir():
-                    if p.is_dir():
-                        for f1 in p.iterdir():
-                            if f1.suffix == ".gjf":
-                                return f1.resolve()
-                            elif f1.suffix == ".xyz":
-                                return f1.resolve()
-                    else:
-                        if p.suffix == ".gjf":
-                            return p.resolve()
-                        elif path.suffix == ".xyz":
-                            return p.resolve()
-
-        # return None if no file that matches criteria was found.
-        raise FileNotFoundError("Could not find atoms reference file")
-
-    else:
+    if not path.exists():
         raise FileNotFoundError("The given path does not exist on disk.")
+    for file_or_dir in path.iterdir():
+
+        if file_or_dir.is_file():
+            if file_or_dir.suffix in [".gjf", ".xyz"]:
+                return file_or_dir.resolve()
+        elif file_or_dir.is_dir():
+            for p in file_or_dir.iterdir():
+                if p.is_dir():
+                    for f1 in p.iterdir():
+                        if f1.suffix in [".gjf", ".xyz"]:
+                            return f1.resolve()
+                elif p.suffix == ".gjf" or path.suffix == ".xyz":
+                    return p.resolve()
+    # return None if no file that matches criteria was found.
+    raise FileNotFoundError("Could not find atoms reference file")
