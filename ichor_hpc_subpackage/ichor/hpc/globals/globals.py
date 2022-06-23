@@ -548,7 +548,7 @@ class Globals:
 
     @property
     def ATOMS_REFERENCE_FILE(self) -> Path:
-        if self.ATOMS_REFERENCE_FILE is None:
+        if self._ATOMS_REFERENCE_FILE is None:
             return self.POINTS_LOCATION
         if not self._ATOMS_REFERENCE_FILE.exists():
             raise FileNotFoundError(
