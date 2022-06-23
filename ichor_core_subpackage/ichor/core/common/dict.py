@@ -111,14 +111,19 @@ def unwrap_item(
         >>> unwrap_single_item({"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}, "iqa")
         {"O1": -75.40, "H2": -0.52}
     """
-    d = {}
+    result = {}
     for key, val in d.items():
         if key == item:
-            return val
-        d[key] = (
+            if isinstance(val, MutableMapping):
+                result = {**result, **unwrap_item(val, item)}
+            else:
+                raise ValueError(
+                    f"Cannot unwrap item '{item}' from mapping '{d}'"
+                )
+        result[key] = (
             unwrap_item(val, item) if isinstance(val, MutableMapping) else val
         )
-    return d
+    return result
 
 
 def remove_items(

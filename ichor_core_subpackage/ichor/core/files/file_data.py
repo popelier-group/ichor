@@ -92,14 +92,6 @@ class AtomicData(Atom, HasProperties):
             atom.charge,
             atom.units,
         )
-        print(properties)
-        print(
-            remove_items(
-                properties, set(self._parent.atom_names) - {self.name}
-            )
-        )
-        print(self._select_properties(properties))
-        quit()
         self._properties = self._select_properties(properties)
 
     @property

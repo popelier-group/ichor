@@ -22,6 +22,7 @@ from ichor.core.constants import (
     spherical_hexadecapole_labels,
 )
 from ichor.core.atoms import Atoms
+from ichor.core.common.io import relpath, convert_to_path
 
 
 class CriticalPointType(Enum):
@@ -66,10 +67,10 @@ class INT(HasProperties, ReadFile):
         self._parent = parent
 
         # we can use this to figure out the
-        # self.current_directory: Path = FileContents
-        # self.inp_file_path: Path = FileContents
-        # self.wfn_file_path: Path = FileContents
-        # self.out_file_path: Path = FileContents
+        self.current_directory: Path = FileContents
+        self.inp_file_path: Path = FileContents
+        self.wfn_file_path: Path = FileContents
+        self.out_file_path: Path = FileContents
 
         self.atom_name: str = FileContents
         self.title: str = FileContents
@@ -92,14 +93,23 @@ class INT(HasProperties, ReadFile):
     @property
     def parent(self) -> Atoms:
         if self._parent is None:
-            raise ParentNotDefined(
-                f"'parent' not defined for '{self.path}' instance of '{self.__class__.__name__}'"
-            )
+            if not self.wfn.path.exists():
+                raise ParentNotDefined(
+                    f"'parent' not defined for '{self.path}' instance of '{self.__class__.__name__}'"
+                ) from FileNotFoundError(f"No Such File '{self.wfn.path}'")
+            else:
+                return self.wfn.atoms
         return self._parent
 
     @parent.setter
     def parent(self, parent: Atoms):
         self._parent = parent
+
+    @property
+    def wfn(self) -> "WFN":
+        from ichor.core.files import WFN
+
+        return WFN(self.wfn_file_path)
 
     @property
     def properties(self) -> Dict[str, float]:
@@ -129,6 +139,11 @@ class INT(HasProperties, ReadFile):
             if cp.type is CriticalPointType.Cage
         ]
 
+    def _path_relative_to_aimall(self, int_path: Path, other: Path) -> Path:
+        return relpath(self.path.parent, Path.cwd()) / relpath(
+            other, int_path.parent
+        )
+
     def _read_file(self):
         """Read an .int file. The first time that the .int file is read successfully, a json file with the
         important information is written in the same directory.
@@ -139,12 +154,23 @@ class INT(HasProperties, ReadFile):
                 line = next(f)
 
             # TODO: don't really need these paths as they are relative. add later if needed
-            # self.current_directory = Path(line.split()[-1])
+            self.current_directory = Path(line.split()[-1])
             next(f)  # blank line
 
-            next(f)  # self.inp_file_path = Path(next(f).split()[-1])
-            next(f)  # self.wfn_file_path = Path(next(f).split()[-1])
-            next(f)  # self.out_file_path = Path(next(f).split()[-1])
+            inp_file_path = self.current_directory / Path(next(f).split()[-1])
+            wfn_file_path = self.current_directory / Path(next(f).split()[-1])
+            out_file_path = self.current_directory / Path(next(f).split()[-1])
+
+            self.inp_file_path = self._path_relative_to_aimall(
+                out_file_path, inp_file_path
+            )
+            self.wfn_file_path = self._path_relative_to_aimall(
+                out_file_path, wfn_file_path
+            )
+            self.out_file_path = self._path_relative_to_aimall(
+                out_file_path, out_file_path
+            )
+
             next(f)  # blank line
             self.title = next(f).split()[-1].strip()
 
