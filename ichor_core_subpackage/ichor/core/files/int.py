@@ -230,17 +230,16 @@ class INT(HasProperties, ReadFile):
 
             self.global_spherical_multipoles = {}
             line = next(f)
-            while "Molecular Orbital" not in line:
-                if "=" in line:
-                    record = line.split("=")
-                    multipole_name = "".join(
-                        c
-                        for c in record[0].lower().strip()
-                        if c not in {"[", "]", ","}
-                    )
-                    self.global_spherical_multipoles[multipole_name] = float(
-                        record[1]
-                    )
+            while "=" in line:
+                record = line.split("=")
+                multipole_name = "".join(
+                    c
+                    for c in record[0].lower().strip()
+                    if c not in {"[", "]", ","}
+                )
+                self.global_spherical_multipoles[multipole_name] = float(
+                    record[1]
+                )
                 line = next(f)
 
             # replace q00 so that it subtracts the nuclear charge
@@ -253,10 +252,9 @@ class INT(HasProperties, ReadFile):
 
             self.iqa_energy_components = {}
             line = next(f)
-            while "2EDM" not in line:
-                if "=" in line:
-                    name, _, value = line.rpartition("=")
-                    self.iqa_energy_components[name.strip()] = float(value)
+            while "=" in line:
+                name, _, value = line.rpartition("=")
+                self.iqa_energy_components[name.strip()] = float(value)
                 line = next(f)
 
             while "Total time" not in line:
