@@ -43,24 +43,30 @@ class ExternalFunction:
 # List of all ichor external functions, add functions to the list. Note: a checker for these has not been implemented
 external_functions = [
     ExternalFunction("ichor.log", "log_time"),
-    ExternalFunction("ichor.main.active_learning", "active_learning"),
-    ExternalFunction("ichor.main.collate_log", "collate_model_log"),
-    ExternalFunction("ichor.main.collate_log", "collate_models"),
-    ExternalFunction("ichor.main.make_models", "make_models"),
-    ExternalFunction("ichor.main.make_models", "move_models"),
+    ExternalFunction("ichor.hpc.main.active_learning", "active_learning"),
+    ExternalFunction("ichor.hpc.main.collate_log", "collate_model_log"),
+    ExternalFunction("ichor.hpc.main.collate_log", "collate_models"),
+    ExternalFunction("ichor.hpc.main.make_models", "make_models"),
+    ExternalFunction("ichor.hpc.main.make_models", "move_models"),
     ExternalFunction(
-        "ichor.main.gaussian", "submit_points_directory_to_gaussian"
+        "ichor.hpc.main.gaussian", "submit_points_directory_to_gaussian"
     ),
-    ExternalFunction("ichor.main.pandora", "submit_points_directory_to_pyscf"),
-    ExternalFunction("ichor.main.pandora", "submit_points_directory_to_morfi"),
-    ExternalFunction("ichor.main.gaussian", "rerun_gaussian"),
-    ExternalFunction("ichor.main.gaussian", "scrub_gaussian"),
-    ExternalFunction("ichor.main.aimall", "rerun_aimall"),
-    ExternalFunction("ichor.main.aimall", "scrub_aimall"),
-    ExternalFunction("ichor.main.aimall", "submit_points_directory_to_aimall"),
-    ExternalFunction("ichor.main.aimall", "check_aimall_output"),
-    ExternalFunction("ichor.make_sets", "make_sets"),
-    ExternalFunction("ichor.submission_script", "print_completed"),
+    ExternalFunction(
+        "ichor.hpc.main.pandora", "submit_points_directory_to_pyscf"
+    ),
+    ExternalFunction(
+        "ichor.hpc.main.pandora", "submit_points_directory_to_morfi"
+    ),
+    ExternalFunction("ichor.hpc.main.gaussian", "rerun_gaussian"),
+    ExternalFunction("ichor.hpc.main.gaussian", "scrub_gaussian"),
+    ExternalFunction("ichor.hpc.main.aimall", "rerun_aimall"),
+    ExternalFunction("ichor.hpc.main.aimall", "scrub_aimall"),
+    ExternalFunction(
+        "ichor.hpc.main.aimall", "submit_points_directory_to_aimall"
+    ),
+    ExternalFunction("ichor.hpc.main.aimall", "check_aimall_output"),
+    ExternalFunction("ichor.hpc.make_sets", "make_sets"),
+    ExternalFunction("ichor.hpc.submission_script", "print_completed"),
     ExternalFunction(
         "ichor.core.analysis.dlpoly", "run_dlpoly_geometry_optimisations"
     ),
@@ -71,10 +77,12 @@ external_functions = [
     ExternalFunction(
         "ichor.main.pandora", "copy_aimall_wfn_to_point_directory"
     ),
-    ExternalFunction("ichor.main.md", "mdcrd_to_xyz"),
+    # todo: fix these
+    ExternalFunction("ichor.cli.main.md", "mdcrd_to_xyz"),
     ExternalFunction("ichor.main.md.tyche", "tyche_to_xyz"),
     ExternalFunction("ichor.main.pandora", "add_dispersion_to_aimall"),
     ExternalFunction("ichor.main.md.cp2k", "cp2k_to_xyz"),
+    # ^^^^^^^^^^^^^^
     ExternalFunction("ichor.core.common.points", "set_points_location"),
     ExternalFunction("ichor.core.analysis.opt", "convert_opt_wfn_to_xyz"),
     ExternalFunction("ichor.core.analysis.geometry", "geometry_analysis"),
