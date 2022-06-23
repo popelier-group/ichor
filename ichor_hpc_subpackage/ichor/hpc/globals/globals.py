@@ -108,10 +108,12 @@ from uuid import UUID, uuid4
 
 from ichor.core import constants
 from ichor.core.atoms.atoms import Atoms
+from ichor.core.atoms.calculators import ALF
 from ichor.core.common.types import Version
 from ichor.hpc.globals import checkers, formatters, parsers
 from ichor.hpc.globals.config_provider import ConfigProvider
 from ichor.hpc.globals.os import OS
+from ichor.hpc.globals.parsers import read_alf
 
 # todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
@@ -121,6 +123,7 @@ class GlobalVariableError(Exception):
 
 
 class Globals:
+    # format: off
     _types = []
 
     # Variables that can't be set from config file
@@ -144,14 +147,14 @@ class Globals:
 
     SYSTEM_NAME: str = "SYSTEM"
 
-    POINTS_LOCATION: Path = (
+    _POINTS_LOCATION: Path = (
         None  # a file / directory which contains geometries
     )
     _ATOMS_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties, which then modified self._ATOMS
     _ATOMS: Atoms = None  # set automatically if not defined
     _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties
     _ALF: List[
-        List[int]
+        ALF
     ] = (
         []
     )  # set automatically if not defined. Can be manually defined in config properties
@@ -354,6 +357,8 @@ class Globals:
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
 
+    # format: on
+
     def __init__(
         self,
         config_file: Optional[Path] = None,
@@ -485,11 +490,11 @@ class Globals:
             # modify variables which are in global variables but also have setter methods
             # this then stores the underscore-beginning values which were going to be used in the setter methods
             if global_variable in self.properties_with_setter_methods:
-                global_variable = "_" + global_variable
+                global_variable = f"_{global_variable}"
             self._defaults[global_variable] = self.get(global_variable)
 
         # Set OS
-        if platform == "linux" or platform == "linux2":
+        if platform in {"linux", "linux2"}:
             self.OS = OS.Linux
         elif platform == "darwin":
             self.OS = OS.MacOS
@@ -522,141 +527,71 @@ class Globals:
                 self.MAX_RUNNING_TASKS = -1
 
     @property
-    def ATOMS_REFERENCE_FILE(self) -> Path:
-        """Returns an ATOMS reference file, which is to be used to get an Atoms instance, which contains system information.
-        Only one system should be present in the ATOMS_REFERENCE file because otherwise, there is no way to check what system
-        we should be working on.
-        The atoms reference file can either be a GJF or XYZ or a PointsDirectory folder
-        that has PointDirectory instances in it.
-        """
-
-        # if this attribute is None (the initial value)
-        if not self._ATOMS_REFERENCE_FILE:
-            if self.POINTS_LOCATION:
-                self._ATOMS_REFERENCE_FILE = self.POINTS_LOCATION
-            else:
-                self._ATOMS_REFERENCE_FILE = get_atoms_reference_file()
-                if self._ATOMS_REFERENCE_FILE is None:
-                    raise ValueError(
-                        f"Atoms Reference File should not be None. Make sure to have \
-                    a .xyz or .gjf file in the current directory from where ichor/script is running."
-                    )
-
-        # we should have an ATOMS REFERENCE FILE by now if it was set previously or default is made
-        if not self._ATOMS_REFERENCE_FILE:
-            raise ValueError(
-                """An ATOMS reference file could not be found in the current directory.
-                Make sure a gjf, .xyz or a PointsDirectory (TS, SP, VS) exists in the directory."""
+    def POINTS_LOCATION(self):
+        if self._POINTS_LOCATION is None:
+            raise ValueError("Define 'GLOBALS.POINTS_LOCATION'")
+        if not self._POINTS_LOCATION.exists():
+            raise FileNotFoundError(
+                f"'POINTS_LOCATION' '{self._POINTS_LOCATION}' was not found"
             )
+        return self._POINTS_LOCATION
 
-        # if a file has been set already,  return it instead of making default file.
-        return self._ATOMS_REFERENCE_FILE.resolve()
+    @POINTS_LOCATION.setter
+    def POINTS_LOCATION(self, value: Union[str, Path]):
+        """Set the alf reference file to a specified file."""
+        value = Path(value)
+        if not value.exists():
+            raise FileNotFoundError(
+                f"'POINTS_LOCATION: '{value}' was not found"
+            )
+        self._POINTS_LOCATION = value.resolve()
+
+    @property
+    def ATOMS_REFERENCE_FILE(self) -> Path:
+        if self.ATOMS_REFERENCE_FILE is None:
+            return self.POINTS_LOCATION
+        if not self._ATOMS_REFERENCE_FILE.exists():
+            raise FileNotFoundError(
+                f"'ATOMS_REFERENCE_FILE: '{self._ATOMS_REFERENCE_FILE}' was not found"
+            )
+        return self.ATOMS_REFERENCE_FILE.resolve()
 
     @ATOMS_REFERENCE_FILE.setter
     def ATOMS_REFERENCE_FILE(self, value: Union[str, Path]):
-        """Setter method for ATOMS_REFERENCE_FILE. Allows another ALF_REFERENCE_FILE to be specified."""
+        """Set the alf reference file to a specified file."""
         value = Path(value)
-        if value.exists():
-            self._ATOMS_REFERENCE_FILE = value.resolve()
-        else:
-            raise ValueError(
-                f"ATOMS REFERENCE FILE with Path {value.resolve()} is not on disk."
+        if not value.exists():
+            raise FileNotFoundError(
+                f"'ATOMS_REFERENCE_FILE: '{value}' was not found"
             )
-
-    @property
-    def ATOMS(self) -> Atoms:
-        """Returns an instance of `Atoms`. This can be used to obtain
-        the number of atoms, atom names, etc."""
-        self._ATOMS = get_atoms(self.ATOMS_REFERENCE_FILE)
-        if self._ATOMS:
-            return self._ATOMS
-        else:
-            raise ValueError(
-                f"{__class__.__name__} instance has attribute ATOMS set to {self._ATOMS}."
-            )
+        self._ALF_REFERENCE_FILE = value.resolve()
 
     @property
     def ALF_REFERENCE_FILE(self) -> Path:
-        """Returns a `Path` object to a file that contains the
-        atomic local frame calculated for the system."""
-
-        from ichor.core.common.io import mkdir
-        from ichor.hpc import FILE_STRUCTURE
-
-        # # if the reference file still not been set (default is None), make the default file
-        # if self._ALF_REFERENCE_FILE is None:
-        #
-        #     # make the parent folder of the alf reference file
-        #     self._ALF_REFERENCE_FILE = FILE_STRUCTURE[
-        #         "alf_reference_file"
-        #     ].resolve()
-        #     mkdir(self._ALF_REFERENCE_FILE.parent)
-        #
-        #     # if the reference file is not found on disk, then calculate alf by trying to find an Atoms instance
-        #     if not self._ALF_REFERENCE_FILE.exists():
-        #
-        #         # check if ATOMS_REFERENCE_FILE is set and use that to generate alf first.
-        #         with open(self._ALF_REFERENCE_FILE, "w") as alf_reference_file:
-        #
-        #             # check that ALF can be obtained because it might crash due to a bad geometry from self.ATOMS
-        #             try:
-        #                 atoms_alf = self.ATOMS.alf
-        #             except:
-        #                 raise ALFCalculationError(
-        #                     "ALF could not be calculated for some reason (possibly a bad geometry). Enter ALF manually in reference file."
-        #                 )
-        #
-        #             alf_reference_file.write(f"{self.ATOMS.hash} [")
-        #             for one_atom_alf in self.ATOMS.alf.tolist():
-        #                 alf_reference_file.write(
-        #                     f"[{','.join([str(i) for i in one_atom_alf])}],"
-        #                 )
-        #             alf_reference_file.write("]\n")
-        #
-        #     # if an alf reference file already exists, check that stored hashes matches the hash of the current self.ATOMS
-        #     else:
-        #
-        #         stored_hashes = []
-        #         # read alf reference file and store the hashes to check if we already calculated alf for that system
-        #         # cannot open in a+ mode because stream is positioned at end of file, i.e. nothing will be read in
-        #         with open(self._ALF_REFERENCE_FILE, "r") as alf_reference_file:
-        #             for line in alf_reference_file:
-        #                 system_hash = line.strip().split(maxsplit=1)[0].strip()
-        #                 stored_hashes.append(system_hash)
-        #         # opening the file for appending means stream is positioned at end.
-        #         with open(self._ALF_REFERENCE_FILE, "a") as alf_reference_file:
-        #             # if the alf has not been stored for this system previously, append this system to the alf reference file
-        #             if self.ATOMS.hash not in stored_hashes:
-        #                 alf_reference_file.write(f"{self.ATOMS.hash} [")
-        #                 for one_atom_alf in self.ATOMS.alf.tolist():
-        #                     alf_reference_file.write(
-        #                         f"[{','.join([str(i) for i in one_atom_alf])}],"
-        #                     )
-        #                 alf_reference_file.write("]\n")
-        #
-        #         return self._ALF_REFERENCE_FILE
         if self._ALF_REFERENCE_FILE is None:
-            self._ALF_REFERENCE_FILE = self.ATOMS_REFERENCE_FILE
-        return self._ALF_REFERENCE_FILE
-        # else:
-        #     raise ValueError(
-        #         "An ALF reference file could not be made for the current directory. Make sure there is an .xyz or .gjf file from which to calculate ALF."
-        #     )
+            return self.ATOMS_REFERENCE_FILE
+        if not self._ALF_REFERENCE_FILE.exists():
+            raise FileNotFoundError(
+                f"'ALF_REFERENCE_FILE: '{self._ALF_REFERENCE_FILE}' was not found"
+            )
+        return self._ALF_REFERENCE_FILE.resolve()
 
     @ALF_REFERENCE_FILE.setter
     def ALF_REFERENCE_FILE(self, value: Union[str, Path]):
         """Set the alf reference file to a specified file."""
-        if isinstance(value, str):
-            value = Path(value)
-        if value.exists():
-            self._ALF_REFERENCE_FILE = value.resolve()
-        else:
-            raise ValueError(
-                f"The alf reference file was not set because the specified file {value} does not exist on disk."
+        value = Path(value)
+        if not value.exists():
+            raise FileNotFoundError(
+                f"'ALF_REFERENCE_FILE: '{value}' was not found"
             )
+        self._ALF_REFERENCE_FILE = value.resolve()
 
     @property
-    def ALF(self) -> List[List[int]]:
+    def ATOMS(self) -> Atoms:
+        return get_atoms(self.ATOMS_REFERENCE_FILE)
+
+    @property
+    def ALF(self) -> List[ALF]:
         """Returns the atomic local frame for every atom in the system.
         This is in the form of a list of lists, where each inner lists contains
         three integers. These integers represent the central atom (the atom on
@@ -667,41 +602,15 @@ class Globals:
 
         :returns: A list of lists (of ints), representing the ALF of the system.
         """
-
-        _alf = {}
-
-        # read in ALF reference file if it exists on disk
-        if self.ALF_REFERENCE_FILE.exists():
-
-            with open(self.ALF_REFERENCE_FILE, "r") as alf_reference_file:
-                for line in alf_reference_file:
-                    system_hash, total_alf = line.split(maxsplit=1)
-                    # read in atomic local frame and convert to list of list of int.
-                    _alf[system_hash] = literal_eval(total_alf)
-
-            # try to get the ALF from the file if the file contains alf for current atom's hash
-            self._ALF = _alf.get(self.ATOMS.hash)
-
-            # if ALF was not in the ALF reference file, then try to calculate it based on the current self.ATOMS
-            if self._ALF is None:
-                try:
-                    self._ALF = self.ATOMS.alf
-                    # if ALF was calculated successfully from the atoms, make sure to add it to the alf reference file
-                    with open(
-                        self._ALF_REFERENCE_FILE, "a"
-                    ) as alf_reference_file:
-                        alf_reference_file.write(f"{self.ATOMS.hash} [")
-                        for one_atom_alf in self.ATOMS.alf.tolist():
-                            alf_reference_file.write(
-                                f"[{','.join([str(i) for i in one_atom_alf])}],"
-                            )
-                        alf_reference_file.write("]\n")
-                except:
-                    raise ValueError(
-                        "ALF could not be calculated. Make sure to add manually add alf to alf reference file."
-                    )
-
+        if self._ALF is None:
+            self._ALF = [
+                atom.alf() for atom in get_atoms(self.ALF_REFERENCE_FILE)
+            ]
         return self._ALF
+
+    @ALF.setter
+    def ALF(self, alf: List[ALF]):
+        self._ALF = read_alf(alf)
 
     def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
         """Uses either a config file or another instance of `Globals` from which to
@@ -1014,7 +923,7 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
                             return p.resolve()
 
         # return None if no file that matches criteria was found.
-        return
+        raise FileNotFoundError("Could not find atoms reference file")
 
     else:
         raise FileNotFoundError("The given path does not exist on disk.")

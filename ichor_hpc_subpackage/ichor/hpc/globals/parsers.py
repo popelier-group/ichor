@@ -8,6 +8,7 @@ from ichor.core.common.bool import check_bool
 from ichor.core.common.types import Version
 from ichor.core.itypes import F
 from ichor.hpc.globals.formatters import cleanup_str
+from ichor.core.atoms.calculators import ALF
 
 
 def parser(func: F) -> F:
@@ -39,7 +40,7 @@ def read_alf(alf: Union[str, List[List[int]]]):
     if isinstance(alf, str):
         alf = ast.literal_eval(alf)
     if isinstance(alf, list):
-        alf = [[int(i) for i in j] for j in alf]
+        alf = [ALF(*[int(i) for i in j]) for j in alf]
     return alf
 
 
