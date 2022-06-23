@@ -10,8 +10,14 @@ from typing import Optional
 
 import ichor
 from ichor.core.common.io import cp, mkdir, move
-from ichor.core.common.os import (OTHER_EXECUTE, OTHER_READ, USER_EXECUTE,
-                                  USER_READ, permissions, set_permission)
+from ichor.core.common.os import (
+    OTHER_EXECUTE,
+    OTHER_READ,
+    USER_EXECUTE,
+    USER_READ,
+    permissions,
+    set_permission,
+)
 from ichor.hpc import GLOBALS, MACHINE
 
 _local_bin_directory = Path.home() / ".ichor" / "bin"
@@ -22,11 +28,11 @@ class CannotFindProgram(Exception):
 
 
 def get_ichor_parent_directory() -> Path:
-    return Path(ichor.core.__file__).parent.resolve()
+    return Path(ichor.hpc.__file__).parent.resolve()
 
 
 def machine_bin_directory() -> Path:
-    return get_ichor_parent_directory() / "bin" / MACHINE.name
+    return get_ichor_parent_directory() / "programs" / "bin" / MACHINE.name
 
 
 def find_bin(
@@ -47,7 +53,7 @@ def _copy_bin_to_local(bin_loc: Path) -> Path:
         not new_loc.exists()
         or open(bin_loc, "rb").read() != open(new_loc, "rb").read()
     ):
-        filepart = Path(str(new_loc) + f".{GLOBALS.UID}.filepart")
+        filepart = Path(f"{str(new_loc)}.{GLOBALS.UID}.filepart")
         if not filepart.exists():
             cp(bin_loc, filepart)
             move(filepart, new_loc)
