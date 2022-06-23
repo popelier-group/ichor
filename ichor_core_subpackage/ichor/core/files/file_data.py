@@ -66,6 +66,9 @@ class DataFile(File, ABC):
             f"'properties' not defined for '{self.__class__.__name__}'"
         )
 
+    def get_property(self, _property: str) -> Any:
+        return self.properties[_property]
+
     def __getattr__(self, item: str) -> Any:
         """Used to make values of GeometryData instances accessible as attributes.
         Looks into __dict__ of an instance to see if an instance of GeometryData exist.
