@@ -111,11 +111,13 @@ class Model(ReadFile, WriteFile, File):
                     continue
 
                 if "version" in line:
-                    self.version = self.version or Version(line.split()[-1])
+                    self.program_version = self.program_version or Version(
+                        line.split()[-1]
+                    )
                     continue
 
                 if (
-                    "jitter" in line
+                    "jitter" in line or "nugget" in line
                 ):  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
                     self.jitter = self.jitter or float(line.split()[-1])
                     continue
@@ -281,7 +283,7 @@ class Model(ReadFile, WriteFile, File):
                     y = np.empty((self.ntrain, 1))
                     i = 0
                     while line.strip() != "":
-                        self.y[i, 0] = float(line)
+                        y[i, 0] = float(line)
                         i += 1
                         line = next(f)
                     self.y = self.y or y
