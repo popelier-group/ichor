@@ -320,7 +320,7 @@ class SubmissionScript:
                         # for example, if the command is a Gaussian command, then we need an input file (.gjf) and an output file (.gau)
                         # command_group_data is a list of lists. Each inner list has input/output files
                         command_group_data = [
-                            command.properties for command in command_group
+                            command.data for command in command_group
                         ]
                         # datafile_vars is a list of strings corresponding to the arrays that need to be used by the program we are running (eg. Gaussian)
                         # datafile_str is the rest of the stuff that sets up the arrays used for the array job in the submission script

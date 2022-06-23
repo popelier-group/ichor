@@ -22,7 +22,7 @@ class CommandGroup(CommandLine, list):
     def data(self) -> Tuple[str]:
         """Returns the data that a job needs.
         This is usually a set of files which are the input files and the output files to be written by the job."""
-        return self[0].properties
+        return self[0].data
 
     @property
     def modules(self) -> Modules:
