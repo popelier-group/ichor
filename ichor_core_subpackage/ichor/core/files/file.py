@@ -114,11 +114,11 @@ class ReadFile(File, ABC):
             self.state = FileState.Reading
             self._initialise_file_contents()
             if self.path.exists():
-                 self._read_file(
+                self._read_file(
                     *args, **kwargs
-                    )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
-            else:
-                raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.")
+                )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
+            # else:
+            #     raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.") # todo: talk to yulian about this
             self.state = FileState.Read
 
     def _initialise_file_contents(self):
@@ -151,7 +151,7 @@ class ReadFile(File, ABC):
         # check if the attribute has value FileContents, if not read file
 
         with suppress(AttributeError):
-            if (object.__getattribute__(self, item) is FileContents):
+            if object.__getattribute__(self, item) is FileContents:
                 self.read()
 
         try:
