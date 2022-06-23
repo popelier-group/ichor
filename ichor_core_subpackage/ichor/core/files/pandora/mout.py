@@ -723,7 +723,7 @@ class MOUT(
         return ".mout"
 
     @property
-    def properties(self) -> Dict[str, Dict[str, float]]:
+    def data(self) -> Dict[str, Dict[str, float]]:
         return {atom: {"dispersion": atom.interaction_energy} for atom in self}
 
     def items(self):

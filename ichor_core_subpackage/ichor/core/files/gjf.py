@@ -113,8 +113,8 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         else:
             self.link0[n] = nproc
 
-    def set_mem(self, mem: int):
-        mem = f"mem={mem}GB"
+    def set_mem(self, mem: str):
+        mem = f"mem={mem}"
         n = self._find_in_link("mem")
         if n is None:
             self.link0.append(mem)
@@ -153,6 +153,16 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
             else:
                 keywords.append(keyword)
         return RouteCard(method, basis_set, keywords)
+
+    def _initialise_file_contents(self):
+        self.link0 = self.link0 or []
+        self.method = self.method or ""
+        self.basis_set = self.basis_set or ""
+        self.keywords = self.keywords or []
+        self.charge = self.charge or 0
+        self.spin_multiplicity = self.spin_multiplicity or 0
+        self.atoms = self.atoms or Atoms()
+
 
     def _read_file(self):
         link0 = []
@@ -193,12 +203,12 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
 
         self.link0 = self.link0 or link0
         route_card = self.parse_route_card(route)
-        self.method = route_card.method.upper()
-        self.basis_set = route_card.basis_set
-        self.keywords = route_card.keywords
-        self.charge = charge
-        self.spin_multiplicity = spin_multiplicity
-        self.atoms = atoms
+        self.method = self.method or route_card.method
+        self.basis_set = self.basis_set or route_card.basis_set
+        self.keywords = self.keywords or route_card.keywords
+        self.charge = self.charge or charge
+        self.spin_multiplicity = self.spin_multiplicity or spin_multiplicity
+        self.atoms = self.atoms if len(self.atoms) > 0 else atoms
 
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"

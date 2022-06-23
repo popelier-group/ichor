@@ -90,7 +90,7 @@ class PointDirectory(HasAtoms, DataFile, AnnotatedDirectory):
             return None  # AtomData(self.atoms[atom])
 
     @property
-    def properties(self) -> Dict[str, Any]:
+    def data(self) -> Dict[str, Any]:
         return merge(
             *[
                 f.properties

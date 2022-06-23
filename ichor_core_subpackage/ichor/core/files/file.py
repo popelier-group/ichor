@@ -47,7 +47,7 @@ class File(PathObject, ABC):
 
     def __init__(self, path: Union[Path, str]):
         # need to check if path exists here because if it does, we need to read in file contents
-        PathObject.__init__(self, path)
+        super().__init__(path)
         self.state = FileState.Unread
 
     @property
@@ -112,15 +112,21 @@ class ReadFile(File, ABC):
         """
         if self.state is FileState.Unread:
             self.state = FileState.Reading
-            try:
-                self._read_file(
+            self._initialise_file_contents()
+            if self.path.exists():
+                 self._read_file(
                     *args, **kwargs
-                )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
-            except Exception as e:
-                raise FileReadError(
-                    f"Error occured while reading file '{self.path}'"
-                ) from e
+                    )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
+            else:
+                raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.")
             self.state = FileState.Read
+
+    def _initialise_file_contents(self):
+        """Method used to initialize some attributes to default values if no values were passed in
+        when initializing the instance. These default values override the FileContents
+        value that is originally given to the attributes.
+        """
+        pass
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
@@ -145,10 +151,7 @@ class ReadFile(File, ABC):
         # check if the attribute has value FileContents, if not read file
 
         with suppress(AttributeError):
-            if (
-                object.__getattribute__(self, item) is FileContents
-                and self.path.exists()
-            ):
+            if (object.__getattribute__(self, item) is FileContents):
                 self.read()
 
         try:

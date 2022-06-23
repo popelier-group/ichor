@@ -54,8 +54,8 @@ class INTs(DataFile, OrderedDict, Directory):
         )
 
     @property
-    def properties(self) -> Dict[str, Dict[str, float]]:
-        return {atom: i.properties for atom, i in self.items()}
+    def data(self) -> Dict[str, Dict[str, float]]:
+        return {atom: int_file_instance.properties for atom, int_file_instance in self.items()}
 
     def __iter__(self):
         """Iterate over all INT instances (wrap around individual .int files)

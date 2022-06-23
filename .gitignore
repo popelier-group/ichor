@@ -5,8 +5,6 @@ venv/
 *.csv
 wily*
 rmsd*
-*.int
-*.json
 *.log
 *DATA*/
 makeSets.py

@@ -184,7 +184,7 @@ class WFN(HasAtoms, DataFile, ReadFile, WriteFile, File):
         return ".wfn"
 
     @property
-    def properties(self) -> Dict[str, float]:
+    def data(self) -> Dict[str, float]:
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
 
     def _write_file(self, path: Path):
@@ -211,7 +211,7 @@ class WFN(HasAtoms, DataFile, ReadFile, WriteFile, File):
 
             for exponents in chunker(self.primitive_exponents, 5):
                 exponents = "".join(
-                    map(lambda x: f"{Decimal(x):14.7E}", exponents)
+                    map(lambda x: f"{x:14.7E}", exponents)
                 ).replace("E", "D")
                 f.write(f"EXPONENTS {exponents}\n")
 
@@ -221,7 +221,7 @@ class WFN(HasAtoms, DataFile, ReadFile, WriteFile, File):
                 )
                 for primitives in chunker(molecular_orbital.primitives, 5):
                     primitives = "".join(
-                        map(lambda x: f"{Decimal(x):14.7E}", primitives)
+                        map(lambda x: f"{x:16.8E}", primitives)
                     ).replace("E", "D")
                     f.write(f"{primitives}\n")
 

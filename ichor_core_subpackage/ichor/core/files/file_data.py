@@ -1,16 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
-
-from ichor.core.files import File, FileState
-
-import typing
-from collections.abc import MutableMapping
-
-
 from abc import ABC
-from pathlib import Path
 from typing import List, Optional
-
 import numpy as np
 
 from ichor.core.common.dict import find, unwrap_single_item
@@ -19,8 +10,7 @@ from ichor.core.atoms.calculators import (
     FeatureCalculatorFunction,
     default_feature_calculator,
 )
-from ichor.core.files.file import FileContents
-
+from ichor.core.files.file import FileContents, File
 
 class HasAtoms(ABC):
     """A class which is inherited from any file which contains the full geometry
@@ -61,9 +51,9 @@ class DataFile(File, ABC):
 
     @property
     @abstractmethod
-    def properties(self) -> Dict[str, Any]:
+    def data(self) -> Dict[str, Any]:
         raise NotImplementedError(
-            f"'properties' not defined for '{self.__class__.__name__}'"
+            f"'data' not defined for '{self.__class__.__name__}'"
         )
 
     def get_property(self, _property: str) -> Any:
@@ -76,7 +66,7 @@ class DataFile(File, ABC):
         and the value is returned."""
 
         try:
-            return unwrap_single_item(find(item, self.properties), item)
+            return unwrap_single_item(find(item, self.data), item)
         except KeyError as e:
             raise AttributeError(
                 f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}'"

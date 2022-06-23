@@ -183,7 +183,7 @@ def write_to_excel(
             df.to_excel(
                 writer, sheet_name=sheet_name, startrow=1, startcol=start_col
             )
-            writer.sheets[sheet_name]._write_file(0)
+            writer.sheets[sheet_name].write(0, start_col, "Total")
 
             total_s_curve.add_series(
                 {
@@ -248,7 +248,7 @@ def write_to_excel(
                     startrow=1,
                     startcol=start_col,
                 )
-                writer.sheets[sheet_name]._write_file(0)
+                writer.sheets[sheet_name].write(0, start_col, atom_name)
 
                 atomic_s_curve.add_series(
                     {
