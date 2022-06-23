@@ -14,9 +14,18 @@ def _assert_val_optional(value: T, expected_value: Optional[T]):
     if expected_value is not None:
         assert value == expected_value
 
-def _assert_np_array_optional(arr1: np.ndarray, expected_array: Optional[np.ndarray]):
-    if expected_array is not None:
-        np.allclose(arr1, expected_array)
+def _assert_critical_point_instances(list_of_critical_points: T, expected_list_of_critical_points: Optional[T]):
+
+    assert len(list_of_critical_points) == len(expected_list_of_critical_points)
+
+    if expected_list_of_critical_points is not None:
+        for cp, other_cp in zip(list_of_critical_points, expected_list_of_critical_points):
+            assert cp.index == other_cp.index
+            assert cp.type == other_cp.type
+            assert cp.x == other_cp.x
+            assert cp.y == other_cp.y
+            assert cp.z == other_cp.z
+            assert cp.connecting_atoms == other_cp.connecting_atoms
 
 def _test_int(
     int_file_path: Path,
@@ -71,10 +80,10 @@ def _test_int(
     _assert_val_optional(int_file_instance.basin_integration_results, basin_integration_results)
     _assert_val_optional(int_file_instance.integration_error, integration_error)
 
-    _assert_val_optional(int_file_instance.critical_points, critical_points)
-    _assert_val_optional(int_file_instance.bond_critical_points, bond_critical_points)
-    _assert_val_optional(int_file_instance.ring_critical_points, ring_critical_points)
-    _assert_val_optional(int_file_instance.cage_critical_points, cage_critical_points)
+    _assert_critical_point_instances(int_file_instance.critical_points, critical_points)
+    _assert_critical_point_instances(int_file_instance.bond_critical_points, bond_critical_points)
+    _assert_critical_point_instances(int_file_instance.ring_critical_points, ring_critical_points)
+    _assert_critical_point_instances(int_file_instance.cage_critical_points, cage_critical_points)
 
     _assert_val_optional(int_file_instance.data, data)
     _assert_val_optional(int_file_instance.net_charge, net_charge)
@@ -115,10 +124,10 @@ def test_no_parent_int():
         integration_error=-4.0077877571e-05,
 
         # there are only bond critical points in water monomer
-        # critical_points=file_bond_critical_points,
-        # bond_critical_points=file_bond_critical_points,
-        # ring_critical_points=[],
-        # cage_critical_points=[],
+        critical_points=file_bond_critical_points,
+        bond_critical_points=file_bond_critical_points,
+        ring_critical_points=[],
+        cage_critical_points=[],
 
         # TODO: check int_instance.data raises an error if accessed when no parent is present.
         # no data as there is no parent, so cannot rotate multipoles
