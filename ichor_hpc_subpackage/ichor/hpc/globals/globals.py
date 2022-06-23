@@ -153,11 +153,7 @@ class Globals:
     _ATOMS_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties, which then modified self._ATOMS
     _ATOMS: Atoms = None  # set automatically if not defined
     _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties
-    _ALF: List[
-        ALF
-    ] = (
-        []
-    )  # set automatically if not defined. Can be manually defined in config properties
+    _ALF: List[ALF] = None
 
     CWD: Path = Path(os.getcwd())
 
