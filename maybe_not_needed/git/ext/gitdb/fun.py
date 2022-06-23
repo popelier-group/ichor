@@ -18,8 +18,12 @@ from io import StringIO
 from itertools import islice
 
 from ichor.git.ext.gitdb.const import BYTE_SPACE, NULL_BYTE
-from ichor.git.ext.gitdb.typ import (str_blob_type, str_commit_type,
-                                     str_tag_type, str_tree_type)
+from ichor.git.ext.gitdb.typ import (
+    str_blob_type,
+    str_commit_type,
+    str_tag_type,
+    str_tree_type,
+)
 from ichor.git.ext.gitdb.utils.encoding import force_text
 
 # INVARIANTS
@@ -92,32 +96,32 @@ def _move_delta_lbound(d, bytes):
     d.to += bytes
     d.so += bytes
     d.ts -= bytes
-    if d.data is not None:
-        d.data = d.data[bytes:]
+    if d.properties is not None:
+        d.properties = d.properties[bytes:]
     # END handle data
 
     return d
 
 
 def delta_duplicate(src):
-    return DeltaChunk(src.to, src.ts, src.so, src.data)
+    return DeltaChunk(src.to, src.ts, src.so, src.properties)
 
 
 def delta_chunk_apply(dc, bbuf, write):
     """Apply own data to the target buffer
     :param bbuf: buffer providing source bytes for copy operations
     :param write: write method to call with data to write"""
-    if dc.data is None:
+    if dc.properties is None:
         # COPY DATA FROM SOURCE
         write(bbuf[dc.so : dc.so + dc.ts])
     else:
         # APPEND DATA
         # whats faster: if + 4 function calls or just a write with a slice ?
         # Considering data can be larger than 127 bytes now, it should be worth it
-        if dc.ts < len(dc.data):
-            write(dc.data[: dc.ts])
+        if dc.ts < len(dc.properties):
+            write(dc.properties[: dc.ts])
         else:
-            write(dc.data)
+            write(dc.properties)
         # END handle truncation
     # END handle chunk mode
 
@@ -204,7 +208,7 @@ def delta_list_slice(dcl, absofs, size, ndcl):
     lappend = ndcl.append
 
     if cd.to != absofs:
-        tcd = DeltaChunk(cd.to, cd.ts, cd.so, cd.data)
+        tcd = DeltaChunk(cd.to, cd.ts, cd.so, cd.properties)
         _move_delta_lbound(tcd, absofs - cd.to)
         tcd.ts = min(tcd.ts, size)
         lappend(tcd)
@@ -216,10 +220,10 @@ def delta_list_slice(dcl, absofs, size, ndcl):
         # are we larger than the current block
         cd = dcl[cdi]
         if cd.ts <= size:
-            lappend(DeltaChunk(cd.to, cd.ts, cd.so, cd.data))
+            lappend(DeltaChunk(cd.to, cd.ts, cd.so, cd.properties))
             size -= cd.ts
         else:
-            tcd = DeltaChunk(cd.to, cd.ts, cd.so, cd.data)
+            tcd = DeltaChunk(cd.to, cd.ts, cd.so, cd.properties)
             tcd.ts = size
             lappend(tcd)
             size -= tcd.ts
@@ -273,7 +277,7 @@ class DeltaChunkList(list):
         while i < slen:
             dc = self[i]
             i += 1
-            if dc.data is None:
+            if dc.properties is None:
                 if (
                     first_data_index is not None
                     and i - 2 - first_data_index > 1
@@ -285,7 +289,7 @@ class DeltaChunkList(list):
                     ].to  # start offset in target buffer
                     for x in range(first_data_index, i - 1):
                         xdc = self[x]
-                        nd.write(xdc.data[: xdc.ts])
+                        nd.write(xdc.properties[: xdc.ts])
                     # END collect data
 
                     del self[first_data_index : i - 1]
@@ -330,7 +334,7 @@ class DeltaChunkList(list):
         for dc in self:
             assert dc.ts > 0
             if dc.has_data():
-                assert len(dc.data) >= dc.ts
+                assert len(dc.properties) >= dc.ts
         # END for each dc
 
         left = islice(self, 0, len(self) - 1)
@@ -369,7 +373,7 @@ class TopdownDeltaChunkList(DeltaChunkList):
             dci += 1
 
             # all add-chunks which are already topmost don't need additional processing
-            if dc.data is not None:
+            if dc.properties is not None:
                 nfc += 1
                 continue
             # END skip add chunks

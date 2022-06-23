@@ -12,7 +12,7 @@ from ichor.core.files.file import File, ReadFile, FileContents
 
 # from ichor.core.files.geometry import (AtomicDict, GeometryDataFile,
 #                                        AtomicData)
-from ichor.core.files.file_data import HasAtoms, DataFile
+from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.units import AtomicDistance
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])
@@ -340,7 +340,7 @@ def read_ccp(
 
 
 class MOUT(
-    HasAtoms, DataFile, ReadFile, File
+    HasAtoms, HasProperties, ReadFile, File
 ):  # GeometryDataFile, AtomicDict, File): # todo sort this
     nnuc: Optional[int]
     nbcp: Optional[int]
@@ -723,7 +723,7 @@ class MOUT(
         return ".mout"
 
     @property
-    def data(self) -> Dict[str, Dict[str, float]]:
+    def properties(self) -> Dict[str, Dict[str, float]]:
         return {atom: {"dispersion": atom.interaction_energy} for atom in self}
 
     def items(self):

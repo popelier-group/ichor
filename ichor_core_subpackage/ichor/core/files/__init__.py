@@ -2,7 +2,7 @@ from ichor.core.files.aim import AIM
 from ichor.core.files.directory import Directory
 from ichor.core.files.dlpoly_history import DlpolyHistory
 from ichor.core.files.file import File, FileState, FileContents
-from ichor.core.files.file_data import HasAtoms, DataFile
+from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.files.gjf import GJF
 from ichor.core.files.int import INT
 from ichor.core.files.ints import INTs
@@ -44,6 +44,6 @@ __all__ = [
     "OptionalFile",
     "OptionalPath",
     "HasAtoms",
-    "DataFile",
+    "HasProperties",
     "FileContents",
 ]

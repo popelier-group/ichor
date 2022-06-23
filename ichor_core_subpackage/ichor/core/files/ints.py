@@ -7,10 +7,10 @@ from ichor.core.files.directory import Directory
 
 # from ichor.core.files.geometry import AtomicDict, AtomicData
 from ichor.core.files.int import INT
-from ichor.core.files.file_data import DataFile
+from ichor.core.files.file_data import HasProperties
 
 
-class INTs(DataFile, OrderedDict, Directory):
+class INTs(HasProperties, OrderedDict, Directory):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
@@ -54,8 +54,11 @@ class INTs(DataFile, OrderedDict, Directory):
         )
 
     @property
-    def data(self) -> Dict[str, Dict[str, float]]:
-        return {atom: int_file_instance.properties for atom, int_file_instance in self.items()}
+    def properties(self) -> Dict[str, Dict[str, float]]:
+        return {
+            atom: int_file_instance.properties
+            for atom, int_file_instance in self.items()
+        }
 
     def __iter__(self):
         """Iterate over all INT instances (wrap around individual .int files)

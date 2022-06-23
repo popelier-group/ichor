@@ -5,7 +5,7 @@ from ichor.core.atoms import AtomsNotFoundError
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file import FileContents, ReadFile
 
-from ichor.core.files.file_data import HasAtoms, DataFile
+from ichor.core.files.file_data import HasAtoms, HasProperties, AtomicData
 from ichor.core.files.gjf import GJF
 from ichor.core.files.ints import INTs
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
@@ -15,7 +15,7 @@ from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
 
 
-class PointDirectory(HasAtoms, DataFile, AnnotatedDirectory):
+class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     """
     A helper class that wraps around ONE directory which contains ONE point (one molecular geometry).
 
@@ -78,46 +78,35 @@ class PointDirectory(HasAtoms, DataFile, AnnotatedDirectory):
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
             self.xyz = XYZ(self.xyz.path, value)
 
-    def get_atom_data(self, atom):
-        if self.ints.exists():
-            try:
-                return None  # AtomData(self.atoms[atom], self.ints[atom]) # todo: fix this
-            except KeyError as e:
-                raise KeyError(
-                    f"No atom '{atom}' found in '{self.__class__.__name__}' instance '{self.path}'"
-                ) from e
-        else:
-            return None  # AtomData(self.atoms[atom])
+    def get_atom_data(self, atom) -> AtomicData:
+        return AtomicData(self.atoms[atom], self.properties)
 
     @property
-    def data(self) -> Dict[str, Any]:
+    def properties(self) -> Dict[str, Any]:
         return merge(
             *[
                 f.properties
                 for f in self.path_objects()
-                if isinstance(f, DataFile)
+                if isinstance(f, HasProperties)
             ]
         )
 
-    def get_property(self, item: str):
-        return getattr(self.ints, item)
-
-    def __getattr__(self, item):
-        tried = []
-        for d in self.directories():
-            try:
-                return getattr(d, item)
-            except AttributeError:
-                tried.append(d.path)
-        for f in self.files():
-            try:
-                return getattr(f, item)
-            except AttributeError:
-                tried.append(f.path)
-
-        raise AttributeError(
-            f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'"
-        )
+    # def __getattr__(self, item):
+    #     tried = []
+    #     for d in self.directories():
+    #         try:
+    #             return getattr(d, item)
+    #         except AttributeError:
+    #             tried.append(d.path)
+    #     for f in self.files():
+    #         try:
+    #             return getattr(f, item)
+    #         except AttributeError:
+    #             tried.append(f.path)
+    #
+    #     raise AttributeError(
+    #         f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'"
+    #     )
 
     def __repr__(self):
         return str(self.path)

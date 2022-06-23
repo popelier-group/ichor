@@ -7,7 +7,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.str import split_by
 from ichor.core.constants import AIMALL_FUNCTIONALS
 from ichor.core.files.file import FileContents, ReadFile, WriteFile, File
-from ichor.core.files.file_data import HasAtoms, DataFile
+from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.units import AtomicDistance
 from ichor.core.common.itertools import chunker
 from decimal import Decimal
@@ -30,7 +30,7 @@ class MolecularOrbital:
         self.primitives: np.ndarray = primitives
 
 
-class WFN(HasAtoms, DataFile, ReadFile, WriteFile, File):
+class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
     """Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
     an output file, so it does not have a write method.
 
@@ -184,7 +184,7 @@ class WFN(HasAtoms, DataFile, ReadFile, WriteFile, File):
         return ".wfn"
 
     @property
-    def data(self) -> Dict[str, float]:
+    def properties(self) -> Dict[str, float]:
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
 
     def _write_file(self, path: Path):

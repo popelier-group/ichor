@@ -40,14 +40,16 @@ class Atom(VarReprMixin, Coordinates3D):
     ):
         # to be read in from coordinate line
         # element of atom
-        self.type = ty
+        self.type: str = ty
         # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
-        self.index = index
+        self.index: int = index
         # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
-        self._parent = parent
+        from ichor.core.atoms.atoms import Atoms
+
+        self._parent: Atoms = parent
         Coordinates3D.__init__(self, x, y, z)
-        self.units = units
-        self._charge = charge
+        self.units: AtomicDistance = units
+        self._charge: float = charge
 
     @classmethod
     def from_atom(cls, atom: "Atom") -> "Atom":

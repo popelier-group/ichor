@@ -9,8 +9,10 @@ from ichor.git.ext.gitdb.base import IStream, OStream
 from ichor.git.ext.gitdb.db.base import ObjectDBR, ObjectDBW
 from ichor.git.ext.gitdb.db.loose import LooseObjectDB
 from ichor.git.ext.gitdb.exc import BadObject, UnsupportedOperation
-from ichor.git.ext.gitdb.stream import (DecompressMemMapReader,
-                                        ZippedStoreShaWriter)
+from ichor.git.ext.gitdb.stream import (
+    DecompressMemMapReader,
+    ZippedStoreShaWriter,
+)
 
 __all__ = ("MemoryDB",)
 
@@ -92,7 +94,7 @@ class MemoryDB(ObjectDBR, ObjectDBW):
 
             ostream = self.stream(sha)
             # compressed data including header
-            sio = BytesIO(ostream.stream.data())
+            sio = BytesIO(ostream.stream.properties())
             istream = IStream(ostream.type, ostream.size, sio, sha)
 
             odb.store(istream)

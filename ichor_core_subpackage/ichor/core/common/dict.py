@@ -1,4 +1,4 @@
-from typing import TypeVar, Union, MutableMapping, Any
+from typing import TypeVar, Union, MutableMapping, Set, Callable
 from functools import reduce
 from collections import abc
 from contextlib import suppress
@@ -57,6 +57,22 @@ def find(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
     return result
 
 
+def _unwrap(
+    d: MutableMapping[KT, VT],
+    predicate: Callable[[MutableMapping[KT, VT]], bool],
+) -> MutableMapping[KT, VT]:
+    if predicate(d):
+        return {
+            k: _unwrap(v, predicate)
+            if isinstance(v, abc.MutableMapping)
+            else v
+            for k, v in d.items()
+        }
+
+    v = next(iter(d.values()))
+    return _unwrap(v, predicate) if isinstance(v, abc.MutableMapping) else v
+
+
 def unwrap_single_entry(
     d: MutableMapping[KT, VT]
 ) -> Union[MutableMapping[KT, VT], VT]:
@@ -69,14 +85,7 @@ def unwrap_single_entry(
         >>> unwrap_single_entry({"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}})
         {"O1": -75.40, "H2": -0.52}
     """
-    if len(d) > 1:
-        return {
-            k: unwrap_single_entry(v) if isinstance(v, MutableMapping) else v
-            for k, v in d.items()
-        }
-
-    v = next(iter(d))
-    return unwrap_single_entry(v) if isinstance(v, MutableMapping) else v
+    return _unwrap(d, lambda x: len(x) > 1)
 
 
 def unwrap_single_item(
@@ -89,15 +98,30 @@ def unwrap_single_item(
         >>> unwrap_single_item({"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}, "iqa")
         {"O1": -75.40, "H2": -0.52}
     """
-    if len(d) > 1 or item not in d.keys():
-        return {
-            k: unwrap_single_item(v, item)
-            if isinstance(v, abc.MutableMapping)
-            else v
-            for k, v in d.items()
-        }
+    return _unwrap(d, lambda x: len(x) > 1 or item not in x.keys())
 
-    v = next(iter(d.values()))
-    return (
-        unwrap_single_item(v, item) if isinstance(v, abc.MutableMapping) else v
-    )
+
+def unwrap_item(
+    d: MutableMapping[KT, VT], item: KT
+) -> Union[MutableMapping[KT, VT], VT]:
+    """Unwraps the dictionary if the given 'item' is the only item in the dictionary
+    e.g.
+        >>> unwrap_single_item({"energy": -76.54}, "energy")
+        -76.54
+        >>> unwrap_single_item({"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}, "iqa")
+        {"O1": -75.40, "H2": -0.52}
+    """
+    d = {}
+    for key, val in d.items():
+        if key == item:
+            return val
+        d[key] = (
+            unwrap_item(val, item) if isinstance(val, MutableMapping) else val
+        )
+    return d
+
+
+def remove_items(
+    d: MutableMapping[KT, VT], items: Set[KT]
+) -> MutableMapping[KT, VT]:
+    return {key: val for key, val in d.items() if key not in items}
