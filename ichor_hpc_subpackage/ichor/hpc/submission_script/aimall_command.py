@@ -7,8 +7,10 @@ from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
 from ichor.hpc.modules import AIMAllModules, Modules
 from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_script.command_line import (CommandLine,
-                                                      SubmissionError)
+from ichor.hpc.submission_script.command_line import (
+    CommandLine,
+    SubmissionError,
+)
 
 
 class BasinIntegrationMethod(Enum):
@@ -180,15 +182,19 @@ class AIMAllCommand(CommandLine):
     def command(self) -> str:
         from ichor.hpc import MACHINE, Machine
 
-        if MACHINE is Machine.csf3:
-            return "~/AIMAll/aimqb.ish"
-        elif MACHINE is Machine.ffluxlab:
-            return "aimall"
-        elif MACHINE is Machine.local:
-            return "aimall_test"
-        raise SubmissionError(
-            f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
-        )
+        aimall_commands = {
+            Machine.csf3: "~/AIMAll/aimqb.ish",
+            Machine.csf4: "~/AIMAll/aimqb.ish",
+            Machine.ffluxlab: "aimall",
+            Machine.local: "aimall",
+        }
+
+        if MACHINE not in aimall_commands.keys():
+            raise SubmissionError(
+                f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
+            )
+
+        return aimall_commands[MACHINE]
 
     @classproperty
     def options(self) -> List[str]:
