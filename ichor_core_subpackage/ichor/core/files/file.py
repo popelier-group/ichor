@@ -100,7 +100,6 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
-
     @buildermethod
     def read(self, *args, **kwargs):
         """Read the contents of the file. Depending on the type of file, different parts will be read in.
@@ -114,9 +113,11 @@ class ReadFile(File, ABC):
                 self._read_file(
                     *args, **kwargs
                 )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
-            # else:
-            #     raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.") # todo: talk to yulian about this
-            self.state = FileState.Read
+                # else:
+                #     raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.") # todo: talk to yulian about this
+                self.state = FileState.Read
+            else:
+                self.state = FileState.Unread
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
@@ -168,7 +169,6 @@ class FileWriteError(Exception):
 
 
 class WriteFile(File, ABC):
-
     @abstractmethod
     def _write_file(self, path: Path, *args, **kwargs):
         raise NotImplementedError(
