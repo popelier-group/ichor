@@ -89,7 +89,7 @@ class Atom(VarReprMixin, Coordinates3D):
 
     @index.setter
     def index(self, idx: int):
-        self.index = idx
+        self._index = idx
 
     @property
     def parent(self) -> "Atoms":
