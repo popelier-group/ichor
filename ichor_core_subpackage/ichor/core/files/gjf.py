@@ -161,6 +161,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.method = self.method or ""
         self.basis_set = self.basis_set or ""
         self.keywords = self.keywords or []
+        self.comment_line = self.comment_line or ""
         self.charge = self.charge or 0
         self.spin_multiplicity = self.spin_multiplicity or 0
         self.atoms = self.atoms or Atoms()
@@ -169,23 +170,22 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         with open(self.path, "r") as f:
             line = next(f)
             link0 = []
+
             while line.startswith(r"%"):
                 link0.append(line.strip().replace("%", ""))
                 line = next(f)
 
             route_lines = []
+            # last loop line is set to a blank line (because a blank line terminates route section)
             while line.strip():
                 route_lines.append(line.strip())
                 line = next(f)
             route = " ".join(route_lines)
 
+            # the comment line can be a blank line
+            comment_line = next(f).strip()
+            # another blank line follows before moving to system definitions
             line = next(f)
-
-            comment_lines_list = []
-            while line.strip():
-                comment_lines_list.append(line.strip())
-                line = next(f)
-            comment_line = " ".join(comment_lines_list)
 
             charge, spin_multiplicity = map(int, next(f).split())
 
@@ -258,7 +258,5 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
                 f.write(
                     f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
                 )
-            f.write("\n")
             if "output=wfn" in self.keywords:
-                f.write(f"{self.path.with_suffix('.wfn')}")
-            f.write("\n\n\n")
+                f.write(f"\n{self.path.with_suffix('.wfn')}")
