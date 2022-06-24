@@ -100,7 +100,17 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
+
+
     def _initialise_contents(self):
+        """ Initialize contents of a file to default values. This is needed in the case
+        a file does not exist on disk yet (so the file cannot be read from). This means
+        that the read method (and subsequently self._read_file) is not called.
+        
+        Example: If a gjf file does not exist, then gjf_file.link0 will be FileContents.
+        But then we cannot do things like gjf_file.set_nproc(2) because it will try to add
+        an element to FileContents and will crash.
+        """
         pass
 
     @buildermethod
@@ -208,5 +218,5 @@ class WriteFile(File, ABC):
             if path.exists():
                 remove(path)
             raise FileWriteError(
-                f"Exception occurred while writing file '{path}'"
+                f"Exception occurred while writing file '{path.absolute()}'"
             ) from e
