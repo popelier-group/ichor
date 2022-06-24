@@ -173,6 +173,21 @@ class FileWriteError(Exception):
 
 
 class WriteFile(File, ABC):
+
+    @abstractmethod
+    def _set_write_defaults_if_needed():
+        """Set default values for attributes if bool(self.attribute) evaluates to False.
+        So if an attribute is still FileContents, an empty string, an empty list, etc.,
+        then default values will be used."""
+        pass
+
+    @abstractmethod
+    def _check_values_before_writing():
+        """ Method used to check the values prior to writing. If the values do not meet
+        the requirements, an error is thrown out. This is to prevent writing out files
+        that are then going to crash in calculations with other programs."""
+        pass
+
     @abstractmethod
     def _write_file(self, path: Path, *args, **kwargs):
         raise NotImplementedError(
@@ -186,6 +201,8 @@ class WriteFile(File, ABC):
         and .int), we only need to read and do not have to write out ourselves."""
         path = Path(path or self.path)
         try:
+            self._set_write_defaults_if_needed()
+            self._check_values_before_writing()
             self._write_file(path, *args, **kwargs)
         except Exception as e:
             if path.exists():
