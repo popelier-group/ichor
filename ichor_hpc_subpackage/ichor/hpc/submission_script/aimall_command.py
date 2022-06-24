@@ -12,6 +12,7 @@ from ichor.hpc.submission_script.command_line import (
     CommandLine,
     SubmissionError,
 )
+from ichor.hpc.log import logger
 
 
 class BasinIntegrationMethod(Enum):
@@ -212,6 +213,8 @@ class AIMAllCommand(CommandLine):
     @property
     def arguments(self) -> List[str]:
         from ichor.hpc import GLOBALS
+
+        logger.debug(f"atoms: {self.atoms}")        
 
         atoms = (
             self.atoms

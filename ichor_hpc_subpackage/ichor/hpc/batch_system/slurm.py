@@ -15,6 +15,7 @@ from ichor.hpc.batch_system.batch_system import (
     JobID,
 )
 from ichor.hpc.batch_system.node import NodeType
+from ichor.hpc.log import logger
 
 
 # todo: Make this enum available to all batch systems and each value must be specified

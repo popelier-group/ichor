@@ -11,6 +11,7 @@ from ichor.core.common.os import run_cmd
 from ichor.core.common.types import VarReprMixin
 from ichor.hpc.batch_system.node import NodeType
 from ichor.hpc.uid import get_uid
+from ichor.hpc.log import logger
 
 
 class CannotParseJobID(Exception):
@@ -108,12 +109,16 @@ class BatchSystem(ABC):
             cmd += cls.hold_job(hold)
         cmd += [job_script]
 
+        logger.debug(f"Submitting Script Using Command: {' '.join(map(str, cmd))}")
+
         stdout, stderr = run_cmd(
             cmd
         )  # this is the part which actually submits the job to  the queuing system
+        logger.debug(f"- stdout: '{stdout}' | stderr: '{stderr}'")
         job_id = JobID(
             job_script, cls.parse_job_id(stdout)
         )  # stdout is parsed because this is where the job id is printed once a job is submitted
+        logger.debug(f"- job_id: {job_id}")
         job_id.write()
         return job_id
 
