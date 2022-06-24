@@ -2,6 +2,7 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
 
+from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
@@ -166,6 +167,8 @@ class AIMAllCommand(CommandLine):
             and len(self.atoms) == len(self.wfn_file.atoms)
         ):
             self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
+        if isinstance(self.atoms, Atoms):
+            self.atoms = list(self.atoms.names)
 
     @property
     def data(self) -> List[str]:
