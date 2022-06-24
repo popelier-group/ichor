@@ -55,7 +55,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             # a PointDirectory instance and add to self
             if PointDirectory.check_path(f) and f not in ignore_files:
                 point = PointDirectory(f)
-                if not point.ignore:
+                if not point.should_ignore:
                     self.append(point)
             elif f.is_file() and f.suffix in {XYZ.filetype, GJF.filetype}:
                 new_dir = self.path / f.stem

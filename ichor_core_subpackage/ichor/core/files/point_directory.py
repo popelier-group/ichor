@@ -124,7 +124,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         return self.path / PointDirectory.ignore_file_path
 
     @property
-    def ignore(self) -> bool:
+    def should_ignore(self) -> bool:
         return self.ignore_path.exists()
 
     def __repr__(self):
