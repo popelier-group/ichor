@@ -5,7 +5,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, File, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
-from ichor.core.constants import GAUSSIAN_METHODS, 
+from ichor.core.constants import GAUSSIAN_METHODS
 
 # from enum import Enum
 from ichor.core.common.types.enum import Enum
@@ -62,13 +62,12 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         This is either read in (if an existing gjf path is given) or
         an error is thrown when attempting to write the gjf file (because no gjf file or `Atoms` instance was given)
 
-    # todo: fix below docstring
-    :param extra_details_str: A string (can contain multiple lines separated with new line character).
-        These will be added to the bottom of the gjf file. This is done in order to handle different basis sets
+    :param extra_calculation_details: A list of strings to be added to the bottom of the gjf file 
+        (after atoms section containing atom names and coordinates). This is done in order to handle different basis sets
         for individual atoms, modredundant settings, and other settings that Gaussian handles.
 
     .. note::
-        It is up to the user to handle write the `extra_details_str` settings. ICHOR
+        It is up to the user to handle write the `extra_calculation_details` settings. ICHOR
         does NOT do checks to see if these additional settings are going to be read in correctly
         in Gaussian.
     """
@@ -85,7 +84,6 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
         atoms: Optional[Atoms] = None,
-        extra_calculation_details: List[str] = None,
         output_chk: bool = False,
     ):
         File.__init__(self, path)
@@ -102,7 +100,6 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.charge: int = charge or FileContents
         self.spin_multiplicity: int = spin_multiplicity or FileContents
         self.atoms = atoms or FileContents
-        self.extra_calculation_details = FileContents
 
         self._output_chk: bool = output_chk
 
@@ -200,6 +197,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
                     line = next(f)
                 except StopIteration:
                     break
+            
 
         self.link0 = self.link0 or link0
         route_card = self.parse_route_card(route)
@@ -250,15 +248,17 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
             for link0 in self.link0:
                 f.write(f"%{link0}\n")
             f.write(
-                f"{self.print_level.name} {self.method}/{self.basis_set} {' '.join(self.keywords)}\n"
+                f"#{self.print_level.value} {self.method}/{self.basis_set} {' '.join(self.keywords)}\n"
             )
             f.write("\n")
-            f.write(f"{self.path.stem}\n")
+            f.write(f"{self.comment_line}\n")
             f.write("\n")
             f.write(f"{self.charge}   {self.spin_multiplicity}\n")
             for atom in self.atoms:
                 f.write(
                     f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
                 )
+            f.write("\n")
             if "output=wfn" in self.keywords:
-                f.write(f"\n{self.path.with_suffix('.wfn')}")
+                f.write(f"{self.path.with_suffix('.wfn')}")
+            f.write("\n\n\n")
