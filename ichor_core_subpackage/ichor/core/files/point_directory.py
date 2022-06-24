@@ -13,6 +13,7 @@ from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.wfn import WFN
 from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
+from ichor.core.common.functools import classproperty
 
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
@@ -107,6 +108,24 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     #     raise AttributeError(
     #         f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'"
     #     )
+
+    @classmethod
+    def check_path(
+        cls, path: Path
+    ) -> bool:  # todo: make this more robust, check for any of the files inside
+        return path.exists() and path.is_dir()
+
+    @classproperty
+    def ignore_file_path(self) -> Path:
+        return Path("ignore")
+
+    @property
+    def ignore_path(self) -> Path:
+        return self.path / PointDirectory.ignore_file_path
+
+    @property
+    def ignore(self) -> bool:
+        return self.ignore_path.exists()
 
     def __repr__(self):
         return str(self.path)

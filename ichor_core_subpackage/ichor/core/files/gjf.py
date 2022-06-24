@@ -156,7 +156,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
                 keywords.append(keyword)
         return RouteCard(print_level, method, basis_set, keywords)
 
-    def _set_defaults(self):
+    def _initialise_contents(self):
         self.link0 = self.link0 or []
         self.method = self.method or ""
         self.basis_set = self.basis_set or ""
