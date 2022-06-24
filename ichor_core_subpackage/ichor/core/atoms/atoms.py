@@ -47,7 +47,7 @@ class Atoms(list):
 
     def append(self, atom: Atom):
         atom.parent = self
-        if not hasattr(atom, "index") or atom.index is None:
+        if atom._index is None:
             atom.index = next(self._counter)
         super().append(atom)
 
