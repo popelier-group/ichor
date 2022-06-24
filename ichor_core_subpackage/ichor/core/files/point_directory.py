@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Dict, Any
+from typing import Union, Dict, Any, Optional
 
 from ichor.core.atoms import AtomsNotFoundError
 from ichor.core.files.directory import AnnotatedDirectory
@@ -14,6 +14,7 @@ from ichor.core.files.wfn import WFN
 from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
+from ichor.core.common.io import remove
 
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
@@ -116,16 +117,25 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         return path.exists() and path.is_dir()
 
     @classproperty
-    def ignore_file_path(self) -> Path:
+    def ignore_file_stem(self) -> Path:
         return Path("ignore")
 
     @property
-    def ignore_path(self) -> Path:
-        return self.path / PointDirectory.ignore_file_path
+    def ignore_file(self) -> Path:
+        return self.path / PointDirectory.ignore_file_stem
 
     @property
     def should_ignore(self) -> bool:
-        return self.ignore_path.exists()
+        return self.ignore_file.exists()
+
+    def ignore(self, reason: Optional[str] = None):
+        with open(self.ignore_file, "a") as f:
+            if reason is not None:
+                f.write(reason)
+
+    def stop_ignore(self):
+        if self.ignore_file.exists():
+            remove(self.ignore_file)
 
     def __repr__(self):
         return str(self.path)
