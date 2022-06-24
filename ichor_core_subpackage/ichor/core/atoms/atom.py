@@ -82,7 +82,9 @@ class Atom(VarReprMixin, Coordinates3D):
     @property
     def index(self) -> int:
         if self._index is None:
-            raise ValueError(f"'index' is not defined for '{self}'")
+            raise ValueError(
+                f"'index' is not defined for '{self.__class__.__name__}({self.type} {self.x} {self.y} {self.z})'"
+            )
         return self._index
 
     @index.setter
@@ -92,7 +94,9 @@ class Atom(VarReprMixin, Coordinates3D):
     @property
     def parent(self) -> "Atoms":
         if self._parent is None:
-            raise ValueError(f"'parent' is not defined for '{self}'")
+            raise ValueError(
+                f"'parent' is not defined for '{self.__class__.__name__}({self.type} {self.x} {self.y} {self.z})'"
+            )
         return self._parent
 
     @parent.setter
