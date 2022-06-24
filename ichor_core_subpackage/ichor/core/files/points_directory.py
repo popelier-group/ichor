@@ -47,13 +47,11 @@ class PointsDirectory(ListOfAtoms, Directory):
         directory. This method makes them in separate directories.
         """
 
-        ignore_files = self.ignore_files
-
         # if current instance is empty, then iterate over the contents of the directory (see __iter__ method below)
         for f in self:
             # if the current PathObject is a directory that matches the given regex pattern, then wrap the directory in
             # a PointDirectory instance and add to self
-            if PointDirectory.check_path(f) and f not in ignore_files:
+            if PointDirectory.check_path(f):
                 point = PointDirectory(f)
                 if not point.should_ignore:
                     self.append(point)
