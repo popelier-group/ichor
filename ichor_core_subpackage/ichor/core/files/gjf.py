@@ -5,6 +5,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, File, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
+from ichor.core.constants import GAUSSIAN_METHODS, 
 
 # from enum import Enum
 from ichor.core.common.types.enum import Enum
@@ -84,6 +85,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
         atoms: Optional[Atoms] = None,
+        extra_calculation_details: List[str] = None,
         output_chk: bool = False,
     ):
         File.__init__(self, path)
@@ -100,6 +102,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.charge: int = charge or FileContents
         self.spin_multiplicity: int = spin_multiplicity or FileContents
         self.atoms = atoms or FileContents
+        self.extra_calculation_details = FileContents
 
         self._output_chk: bool = output_chk
 
@@ -209,7 +212,11 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.spin_multiplicity = self.spin_multiplicity or spin_multiplicity
         self.atoms = self.atoms or atoms
 
-    def set_write_defaults(self):
+    def _set_write_defaults_if_needed(self):
+        """ Set default values for attributes if bool(self.attribute) evaluates to False.
+        So if an attribute is still FileContents, an empty string, an empty list, etc.,
+        then default values will be used."""
+
         self.link0 = self.link0 or []
         if self._output_chk and any("chk" in l0 for l0 in self.link0):
             self.link0.append(f"chk={self.path.with_suffix('.chk')}")
@@ -222,9 +229,22 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.charge = self.charge or 0
         self.spin_multiplicity = self.spin_multiplicity or 1
 
+    def _check_values_before_writing(self):
+        """ Basic checks done prior to writing file.
+        
+        .. note:: Not everything written to file can be checked for, so
+        there is still the need for a user to check out what is being written.
+        """
+
+        if self.method.upper() not in GAUSSIAN_METHODS:
+            raise ValueError(f"{self.method} is not available in Gaussian.")
+        if self.spin_multiplicity < 1:
+            raise ValueError(f"Spin multiplicity cannot be {self.spin_multiplicity}.")
+        if len(self.atoms) == 0:
+            raise ValueError(f"There are no atoms to write to gjf file.")
+
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"
-        self.set_write_defaults()
 
         with open(path, "w") as f:
             for link0 in self.link0:
