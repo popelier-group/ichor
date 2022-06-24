@@ -100,13 +100,11 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
-
-
     def _initialise_contents(self):
-        """ Initialize contents of a file to default values. This is needed in the case
+        """Initialize contents of a file to default values. This is needed in the case
         a file does not exist on disk yet (so the file cannot be read from). This means
         that the read method (and subsequently self._read_file) is not called.
-        
+
         Example: If a gjf file does not exist, then gjf_file.link0 will be FileContents.
         But then we cannot do things like gjf_file.set_nproc(2) because it will try to add
         an element to FileContents and will crash.
@@ -183,17 +181,14 @@ class FileWriteError(Exception):
 
 
 class WriteFile(File, ABC):
-
-    @abstractmethod
-    def _set_write_defaults_if_needed():
+    def _set_write_defaults_if_needed(self):
         """Set default values for attributes if bool(self.attribute) evaluates to False.
         So if an attribute is still FileContents, an empty string, an empty list, etc.,
         then default values will be used."""
         pass
 
-    @abstractmethod
-    def _check_values_before_writing():
-        """ Method used to check the values prior to writing. If the values do not meet
+    def _check_values_before_writing(self):
+        """Method used to check the values prior to writing. If the values do not meet
         the requirements, an error is thrown out. This is to prevent writing out files
         that are then going to crash in calculations with other programs."""
         pass
