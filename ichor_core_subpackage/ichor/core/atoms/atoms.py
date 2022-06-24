@@ -9,6 +9,7 @@ from ichor.core.atoms.calculators import (
     calculate_connectivity,
     default_feature_calculator,
 )
+from ichor.core.atoms.calculators import ALF
 
 
 class AtomNotFound(Exception):
@@ -42,10 +43,13 @@ class Atoms(list):
         Add Atom instances for each atom in the timestep to the self._atoms list.
         Each coordinate line in the trajectory file (for one timestep) is added as a separate Atom instance.
         """
-        atom.parent = self
-        if not hasattr(atom, "index"):
-            atom.index = next(self._counter)
         self.append(atom)
+
+    def append(self, atom: Atom):
+        atom.parent = self
+        if not hasattr(atom, "index") or atom.index is None:
+            atom.index = next(self._counter)
+        super().append(atom)
 
     @property
     def natoms(self) -> int:
@@ -59,7 +63,7 @@ class Atoms(list):
     def names(self) -> List[str]:
         """Return a list of atom names that are held in the instance of Atoms."""
 
-        return [atom.name for atom in self]
+        return self.atom_names
 
     @property
     def types(self) -> List[str]:
@@ -98,7 +102,12 @@ class Atoms(list):
         """
         return Atoms([atom.to_bohr() for atom in self])
 
-    def centre(self, centre_atom=None):
+    def centre(
+        self,
+        centre_atom: Optional[
+            Union[int, str, List[Union[Atom, str, int]]]
+        ] = None,
+    ):
         if isinstance(centre_atom, (int, str)):
             centre_atom = self[centre_atom]
         elif isinstance(centre_atom, list):
@@ -111,7 +120,7 @@ class Atoms(list):
 
         self._centred = True
 
-    def rotate(self, R):
+    def rotate(self, R: np.ndarray):
         """Perform a rotation in 3D space with a matrix R. This rotates all atoms in the system the same amount.
         This method also changes the coordinates of the Atom instances held in the Atoms instance."""
 
@@ -121,18 +130,18 @@ class Atoms(list):
             atom.coordinates = R.dot(atom.coordinates.T).T
         self.translate(centroid)
 
-    def translate(self, v):
+    def translate(self, v: np.ndarray):
         for atom in self:
             atom.coordinates += v
 
-    def _rmsd(self, other):
+    def _rmsd(self, other: "Atoms") -> float:
         dist = np.sum(
             np.sum(np.power(jatom.coordinates - iatom.coordinates, 2))
             for iatom, jatom in zip(self, other)
         )
         return np.sqrt(dist / len(self))
 
-    def kabsch(self, other) -> np.ndarray:
+    def kabsch(self, other: "Atoms") -> np.ndarray:
         H = self.coordinates.T.dot(other.coordinates)
 
         V, S, W = np.linalg.svd(H)
@@ -144,7 +153,7 @@ class Atoms(list):
 
         return np.dot(V, W)
 
-    def rmsd(self, other):
+    def rmsd(self, other: "Atoms"):
         if not self._centred:
             self.centre()
         if not other._centred:
@@ -156,7 +165,7 @@ class Atoms(list):
         return self._rmsd(other)
 
     @property
-    def centroid(self):
+    def centroid(self) -> np.ndarray:
         coordinates = self.coordinates.T
 
         x = np.mean(coordinates[0])
@@ -166,33 +175,33 @@ class Atoms(list):
         return np.array([x, y, z])
 
     @property
-    def masses(self) -> list:
+    def masses(self) -> List[float]:
         """Returns a list of the masses of the Atom instances held in the Atoms instance."""
         return [atom.mass for atom in self]
 
     @property
-    def alf(self):
+    def alf(self) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
         """
-        return np.array([atom.alf for atom in self])
+        return [atom.alf() for atom in self]
 
     def reindex(self):
         for i, atom in enumerate(self):
             atom.index = i + 1
 
     @property
-    def atoms(self):
-        return [atom.name for atom in self]
+    def atoms(self) -> List[str]:
+        return self.atom_names
 
     @property
-    def atom_names(self):
+    def atom_names(self) -> List[str]:
         return [atom.name for atom in self]
 
-    def copy(self):
+    def copy(self) -> "Atoms":
         new = Atoms()
         for a in self:
-            new.add(Atom(a.type, a.x, a.y, a.z))
+            new.add(Atom.from_atom(a))
         return new
 
     def features(
