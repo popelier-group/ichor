@@ -5,13 +5,15 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, File, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
-from enum import Enum
+
+# from enum import Enum
+from ichor.core.common.types.enum import Enum
 
 
 class PrintLevel(Enum):
-    Normal = "#n"
-    Verbose = "#p"
-    Terse = "#t"
+    Normal = "n"
+    Verbose = "p"
+    Terse = "t"
 
 
 class RouteCard(NamedTuple):
@@ -135,38 +137,33 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         for keyword in keywords:
             self.add_keyword(keyword)
 
+    @classmethod
     def parse_route_card(cls, route_card: str) -> RouteCard:
-
         method = None
         basis_set = None
         keywords = []
-
         # default the print level to verbose
         print_level = PrintLevel.Verbose
 
-        # look to see 
-        if "#t" in route_card or "#T" in route_card:
-            print_level = PrintLevel.Terse
-            route_card = route_card.replace("#t", "")
-            route_card = route_card.replace("#T", "")
-        elif "#n" in route_card or "#N" in route_card:
-            route_card = route_card.replace("#n", "")
-            route_card = route_card.replace("#N", "")
-            print_level = PrintLevel.Normal
-        elif "#p" in route_card or "#P" in route_card:
-            route_card = route_card.replace("#p", "")
-
-        # in case none of the above print options are given, but just # is used
         route_card = route_card.replace("#", "")
 
         for keyword in route_card.split():
             if r"/" in keyword:
                 method, basis_set = keyword.split(r"/")
+            elif keyword.lower() in PrintLevel.values:
+                print_level = PrintLevel(keyword.lower())
             else:
                 keywords.append(keyword)
         return RouteCard(print_level, method, basis_set, keywords)
 
     def _read_file(self):
+        self.link0 = self.link0 or []
+        self.method = self.method or ""
+        self.basis_set = self.basis_set or ""
+        self.keywords = self.keywords or []
+        self.charge = self.charge or 0
+        self.spin_multiplicity = self.spin_multiplicity or 0
+        self.atoms = self.atoms or Atoms()
 
         with open(self.path, "r") as f:
             line = next(f)
@@ -212,7 +209,6 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.atoms = self.atoms or atoms
 
     def set_write_defaults(self):
-
         self.link0 = self.link0 or []
         if self._output_chk and any("chk" in l0 for l0 in self.link0):
             self.link0.append(f"chk={self.path.with_suffix('.chk')}")
