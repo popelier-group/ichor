@@ -16,7 +16,7 @@ def _assert_val_optional(value: T, expected_value: Optional[T]):
         assert value == expected_value
 
 
-def _test_gjf(
+def _test_read_gjf(
     gjf_file: Path,
     link0: Optional[List[str]] = None,
     method: Optional[str] = None,
@@ -49,7 +49,7 @@ def test_water_standard():
         ]
     )
 
-    _test_gjf(
+    _test_read_gjf(
         example_dir / "water_standard.gjf",
         method="B3LYP",
         basis_set="6-31+g(d,p)",
@@ -72,7 +72,7 @@ def test_water_aug_cc_pVTZ():
         ]
     )
 
-    _test_gjf(
+    _test_read_gjf(
         example_dir / "water_aug-cc-pVTZ.gjf",
         method="B3LYP",
         basis_set="aug-cc-pVTZ",
@@ -95,7 +95,7 @@ def test_water_ccsd():
         ]
     )
 
-    _test_gjf(
+    _test_read_gjf(
         example_dir / "water_ccsd.gjf",
         method="CCSD(T)",
         basis_set="aug-cc-pVDZ",
@@ -123,7 +123,7 @@ def test_ammonia_standard():
         ]
     )
 
-    _test_gjf(
+    _test_read_gjf(
         example_dir / "ammonia_standard.gjf",
         method="B3LYP",
         basis_set="6-31+g(d,p)",
@@ -149,7 +149,7 @@ def test_formamide_standard():
         ]
     )
 
-    _test_gjf(
+    _test_read_gjf(
         example_dir / "formamide_standard.gjf",
         method="B3LYP",
         basis_set="6-31+g(d,p)",
@@ -194,7 +194,7 @@ def test_paracetamol_standard():
         ]
     )
 
-    _test_gjf(
+    _test_read_gjf(
         example_dir / "paracetamol_standard.gjf",
         method="B3LYP",
         basis_set="6-31+g(d,p)",
@@ -216,7 +216,7 @@ def test_water_opt_freq():
         ]
     )
 
-    _test_gjf(
+    _test_read_gjf(
         example_dir / "water_opt_freq.gjf",
         method="B3LYP",
         basis_set="6-31+g(d,p)",
