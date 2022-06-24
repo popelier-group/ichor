@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.core.common.io import last_line
-from ichor.core.files import GJF, PointsDirectory
+from ichor.core.files import GJF, PointsDirectory, PointDirectory, WFN
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script import (
@@ -12,6 +12,7 @@ from ichor.hpc.submission_script import (
     SubmissionScript,
     print_completed,
 )
+from ichor.hpc.log import logger
 
 
 def submit_points_directory_to_gaussian(
@@ -134,73 +135,17 @@ def scrub_gaussian(gaussian_file: str):
     :param gaussian_file: A string that is a Path to a .gjf file
     """
 
-    from ichor.core.common.io import mkdir, move
-    from ichor.hpc import FILE_STRUCTURE
-    from ichor.hpc.log import logger
-
     gaussian_file = Path(gaussian_file)
-    wfn_file_path = Path(gaussian_file).with_suffix(".wfn")
+    point = PointDirectory(gaussian_file.parent)
 
-    if gaussian_file.exists():
+    reason: Optional[str] = None
+    if not gaussian_file.exists():
+        reason = f"{gaussian_file} does not exist"
+    elif not point.wfn.exists():
+        reason = f"No WFN file found in directory {point.path}"
+    elif "TOTAL ENERGY" not in last_line(point.wfn.path):
+        reason = f"Incomplete WFN ('{point.wfn.path}') file found"
 
-        # if the wfn file path does not exist or the "TOTAL ENERGY" is not in the last line of the .wfn file
-        if not wfn_file_path.exists() or "TOTAL ENERGY" not in last_line(
-            wfn_file_path
-        ):
-
-            point_dir_path = wfn_file_path.parent
-
-            mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
-            # get the name of the directory only containing the .gjf file
-            point_dir_name = wfn_file_path.parent.name
-            # get the Path to the Parent directory
-            new_path = (
-                FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
-            )
-
-            # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
-            # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
-            while new_path.exists():
-                point_dir_name = f"{point_dir_name}~"
-                new_path = (
-                    FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
-                )
-
-            # move to new path and record in logger
-            move(point_dir_path, new_path)
-
-            if not wfn_file_path.exists():
-                logger.error(
-                    f"Moved point directory {point_dir_path} to {new_path} because .wfn file was not produced."
-                )
-                return
-            elif "TOTAL ENERGY" not in last_line(wfn_file_path):
-                logger.error(
-                    f"Moved point directory {point_dir_path} to {new_path} because .wfn file did not have 'TOTAL_ENERGY' in last line."
-                )
-                return
-
-    else:
-        logger.error(
-            f"Gaussian .gjf file {gaussian_file} for which output needs to be checked does not exist."
-        )
-
-        point_dir_path = wfn_file_path.parent
-
-        mkdir(FILE_STRUCTURE["gaussian_scrubbed_points"])
-        # get the name of the directory only containing the .gjf file
-        point_dir_name = wfn_file_path.parent.name
-        # get the Path to the Parent directory
-        new_path = FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
-
-        # if a point with the same name already exists in the SCRUBBED_POINTS directory, then add a ~ at the end
-        # this can happen for example if Gaussian fails for two points with the exact same directory name (one from training set, one from validation set or sample pool)
-        while new_path.exists():
-            point_dir_name = f"{point_dir_name}~"
-            new_path = (
-                FILE_STRUCTURE["gaussian_scrubbed_points"] / point_dir_name
-            )
-
-        # move to new path and record in logger
-        move(point_dir_path, new_path)
-        return
+    if reason is not None:
+        logger.error(f"'{point.path}' will be ignored | Reason: {reason}")
+        point.ignore(reason)
