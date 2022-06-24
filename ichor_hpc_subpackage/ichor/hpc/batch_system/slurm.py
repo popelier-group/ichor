@@ -8,8 +8,12 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.os import current_user, run_cmd
 from ichor.core.common.str import split_by
 from ichor.core.common.types import EnumStrList
-from ichor.hpc.batch_system.batch_system import (BatchSystem, CannotParseJobID,
-                                                 Job, JobID)
+from ichor.hpc.batch_system.batch_system import (
+    BatchSystem,
+    CannotParseJobID,
+    Job,
+    JobID,
+)
 from ichor.hpc.batch_system.node import NodeType
 
 
@@ -133,13 +137,14 @@ class SLURM(BatchSystem):
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
-        """Return a list containing `hold_jid` keyword and job id which is used to hold a particular job id for it to be ran at a later time."""
+        """Return a list containing `hold_jid` keyword and job id which is used to hold a particular job id for it to be ran at a later time.
+        https://hpc.nih.gov/docs/job_dependencies.html"""
         jid = (
             job_id.id
             if isinstance(job_id, JobID)
             else ":".join(map(str, [j.id for j in job_id if j is not None]))
         )
-        return [f"--depend=after:{jid}"]
+        return [f"--depend=afterany:{jid}"]
 
     @classproperty
     def delete_job_command(self) -> List[str]:
