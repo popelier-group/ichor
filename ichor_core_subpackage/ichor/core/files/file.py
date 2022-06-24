@@ -100,7 +100,7 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
-    def _set_defaults(self):
+    def _initialise_contents(self):
         pass
 
     @buildermethod
@@ -112,7 +112,7 @@ class ReadFile(File, ABC):
         """
         if self.state is FileState.Unread:
             self.state = FileState.Reading
-            self._set_defaults()
+            self._initialise_contents()
             if self.path.exists():
                 self._read_file(
                     *args, **kwargs

@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Union
+from typing import Union, Set
 
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import buildermethod
@@ -8,6 +8,8 @@ from ichor.core.common.io import mkdir
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files import Directory
 from ichor.core.files.point_directory import PointDirectory
+from ichor.core.files.gjf import GJF
+from ichor.core.files.xyz import XYZ
 
 
 class PointsDirectory(ListOfAtoms, Directory):
@@ -45,17 +47,17 @@ class PointsDirectory(ListOfAtoms, Directory):
         directory. This method makes them in separate directories.
         """
 
+        ignore_files = self.ignore_files
+
         # if current instance is empty, then iterate over the contents of the directory (see __iter__ method below)
         for f in self:
             # if the current PathObject is a directory that matches the given regex pattern, then wrap the directory in
             # a PointDirectory instance and add to self
-            if (
-                f.is_dir()
-            ):  # todo: add method to determine if f is a PointDirectory
-                self.append(PointDirectory(f))
-            # otherwise if the PathObject is a file that ends in .xyz, make a new directory with its path set to self.path/f.stem
-            # for example if the given path is ./TRAINING_SET/ and there is WATER001.xyz, it will make ./TRANING_SET/WATER001/
-            elif f.is_file() and (f.suffix == ".xyz" or f.suffix == ".gjf"):
+            if PointDirectory.check_path(f) and f not in ignore_files:
+                point = PointDirectory(f)
+                if not point.ignore:
+                    self.append(point)
+            elif f.is_file() and f.suffix in {XYZ.filetype, GJF.filetype}:
                 new_dir = self.path / f.stem
                 mkdir(new_dir)
                 f.replace(new_dir / f.name)
@@ -64,9 +66,6 @@ class PointsDirectory(ListOfAtoms, Directory):
                 )  # wrap the new directory as a PointDirectory instance and add to self
         # sort by the names of the directories (by the numbers in their name) since the system name is always the same
         self.sort(key=lambda x: x.path.name)
-
-    def dirpattern(self):
-        return re.compile(r".+")
 
     @buildermethod
     def read(self):
