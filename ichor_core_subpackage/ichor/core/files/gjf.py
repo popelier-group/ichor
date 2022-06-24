@@ -156,7 +156,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
                 keywords.append(keyword)
         return RouteCard(print_level, method, basis_set, keywords)
 
-    def _read_file(self):
+    def _set_defaults(self):
         self.link0 = self.link0 or []
         self.method = self.method or ""
         self.basis_set = self.basis_set or ""
@@ -165,6 +165,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.spin_multiplicity = self.spin_multiplicity or 0
         self.atoms = self.atoms or Atoms()
 
+    def _read_file(self):
         with open(self.path, "r") as f:
             line = next(f)
             link0 = []

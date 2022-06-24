@@ -100,6 +100,9 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
+    def _set_defaults(self):
+        pass
+
     @buildermethod
     def read(self, *args, **kwargs):
         """Read the contents of the file. Depending on the type of file, different parts will be read in.
@@ -109,6 +112,7 @@ class ReadFile(File, ABC):
         """
         if self.state is FileState.Unread:
             self.state = FileState.Reading
+            self._set_defaults()
             if self.path.exists():
                 self._read_file(
                     *args, **kwargs
