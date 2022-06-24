@@ -5,9 +5,17 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, File, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
+from enum import Enum
+
+
+class PrintLevel(Enum):
+    Normal = "#n"
+    Verbose = "#p"
+    Terse = "#t"
 
 
 class RouteCard(NamedTuple):
+    print_level: PrintLevel
     method: str
     basis_set: str
     keywords: List[str]
@@ -65,13 +73,15 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
     def __init__(
         self,
         path: Union[Path, str],
-        atoms: Optional[Atoms] = None,
+        link0: Optional[List[str]] = None,
+        print_level: PrintLevel = None,
         method: Optional[str] = None,
         basis_set: Optional[str] = None,
         keywords: Optional[List[str]] = None,
-        link0: Optional[List[str]] = None,
+        comment_line: Optional[str] = None,
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
+        atoms: Optional[Atoms] = None,
         output_chk: bool = False,
     ):
         File.__init__(self, path)
@@ -79,25 +89,21 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
 
         self.link0: List[str] = link0 or FileContents
 
+        self.print_level = print_level or FileContents
         self.method: str = method or FileContents
         self.basis_set: str = basis_set or FileContents
         self.keywords: List[str] = keywords or FileContents
+        self.comment_line = comment_line or FileContents
 
         self.charge: int = charge or FileContents
         self.spin_multiplicity: int = spin_multiplicity or FileContents
+        self.atoms = atoms or FileContents
 
         self._output_chk: bool = output_chk
 
-    def set_defaults(self):
-        self.link0 = self.link0 or []
-        if self._output_chk and any("chk" in link0 for link0 in self.link0):
-            self.link0.append(f"chk={self.path.with_suffix('.chk')}")
-
-        self.keywords = self.keywords or []
-        self.add_keyword("nosymm")
-
-        self.charge = self.charge or 0
-        self.spin_multiplicity = self.spin_multiplicity or 1
+    @classproperty
+    def filetype(self) -> str:
+        return ".gjf"
 
     def _find_in_link(self, val: str) -> Optional[int]:
         return next(
@@ -129,52 +135,44 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         for keyword in keywords:
             self.add_keyword(keyword)
 
-    def output_chk(self):
-        self._output_chk = True
-
-    def output_wfn(self):
-        if "output=wfn" not in self.keywords:
-            self.keywords.append("output=wfn")
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".gjf"
-
-    @classmethod
     def parse_route_card(cls, route_card: str) -> RouteCard:
+
         method = None
         basis_set = None
         keywords = []
 
+        # default the print level to verbose
+        print_level = PrintLevel.Verbose
+
+        # look to see 
+        if "#t" in route_card or "#T" in route_card:
+            print_level = PrintLevel.Terse
+            route_card = route_card.replace("#t", "")
+            route_card = route_card.replace("#T", "")
+        elif "#n" in route_card or "#N" in route_card:
+            route_card = route_card.replace("#n", "")
+            route_card = route_card.replace("#N", "")
+            print_level = PrintLevel.Normal
+        elif "#p" in route_card or "#P" in route_card:
+            route_card = route_card.replace("#p", "")
+
+        # in case none of the above print options are given, but just # is used
         route_card = route_card.replace("#", "")
+
         for keyword in route_card.split():
             if r"/" in keyword:
                 method, basis_set = keyword.split(r"/")
             else:
                 keywords.append(keyword)
-        return RouteCard(method, basis_set, keywords)
-
-    def _initialise_file_contents(self):
-        self.link0 = self.link0 or []
-        self.method = self.method or ""
-        self.basis_set = self.basis_set or ""
-        self.keywords = self.keywords or []
-        self.charge = self.charge or 0
-        self.spin_multiplicity = self.spin_multiplicity or 0
-        self.atoms = self.atoms or Atoms()
-
+        return RouteCard(print_level, method, basis_set, keywords)
 
     def _read_file(self):
-        link0 = []
-        route = ""
-        title = ""
-        charge = 0
-        spin_multiplicity = 0
-        atoms = Atoms()
+
         with open(self.path, "r") as f:
             line = next(f)
+            link0 = []
             while line.startswith(r"%"):
-                link0.append(line)
+                link0.append(line.strip().replace("%", ""))
                 line = next(f)
 
             route_lines = []
@@ -185,15 +183,16 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
 
             line = next(f)
 
-            title_lines = []
+            comment_lines_list = []
             while line.strip():
-                title_lines.append(line.strip())
+                comment_lines_list.append(line.strip())
                 line = next(f)
-            title = " ".join(title_lines)
+            comment_line = " ".join(comment_lines_list)
 
             charge, spin_multiplicity = map(int, next(f).split())
 
             line = next(f)
+            atoms = Atoms()
             while line.strip():
                 atoms.append(Atom(*line.split()))
                 try:
@@ -203,22 +202,38 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
 
         self.link0 = self.link0 or link0
         route_card = self.parse_route_card(route)
+        self.print_level = self.print_level or route_card.print_level
         self.method = self.method or route_card.method
         self.basis_set = self.basis_set or route_card.basis_set
+        self.comment_line = self.comment_line or comment_line
         self.keywords = self.keywords or route_card.keywords
         self.charge = self.charge or charge
         self.spin_multiplicity = self.spin_multiplicity or spin_multiplicity
-        self.atoms = self.atoms if len(self.atoms) > 0 else atoms
+        self.atoms = self.atoms or atoms
+
+    def set_write_defaults(self):
+
+        self.link0 = self.link0 or []
+        if self._output_chk and any("chk" in l0 for l0 in self.link0):
+            self.link0.append(f"chk={self.path.with_suffix('.chk')}")
+
+        self.print_level = self.print_level or PrintLevel.Verbose
+        self.method = self.method or "b3lyp"
+        self.basis_set = self.basis_set or "6-31+g(d,p)"
+        self.keywords = self.keywords or ["nosymm", "output=wfn"]
+
+        self.charge = self.charge or 0
+        self.spin_multiplicity = self.spin_multiplicity or 1
 
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"
-        self.set_defaults()
+        self.set_write_defaults()
 
         with open(path, "w") as f:
             for link0 in self.link0:
                 f.write(f"%{link0}\n")
             f.write(
-                f"# {self.method}/{self.basis_set} {' '.join(self.keywords)}\n"
+                f"{self.print_level.name} {self.method}/{self.basis_set} {' '.join(self.keywords)}\n"
             )
             f.write("\n")
             f.write(f"{self.path.stem}\n")

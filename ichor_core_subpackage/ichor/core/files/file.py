@@ -100,8 +100,6 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
-    def set_defaults(self):
-        pass
 
     @buildermethod
     def read(self, *args, **kwargs):
@@ -112,7 +110,6 @@ class ReadFile(File, ABC):
         """
         if self.state is FileState.Unread:
             self.state = FileState.Reading
-            self._initialise_file_contents()
             if self.path.exists():
                 self._read_file(
                     *args, **kwargs
@@ -120,13 +117,6 @@ class ReadFile(File, ABC):
             # else:
             #     raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.") # todo: talk to yulian about this
             self.state = FileState.Read
-
-    def _initialise_file_contents(self):
-        """Method used to initialize some attributes to default values if no values were passed in
-        when initializing the instance. These default values override the FileContents
-        value that is originally given to the attributes.
-        """
-        pass
 
     @abstractmethod
     def _read_file(self, *args, **kwargs):
@@ -178,6 +168,7 @@ class FileWriteError(Exception):
 
 
 class WriteFile(File, ABC):
+
     @abstractmethod
     def _write_file(self, path: Path, *args, **kwargs):
         raise NotImplementedError(

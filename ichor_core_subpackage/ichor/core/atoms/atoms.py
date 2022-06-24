@@ -42,7 +42,7 @@ class Atoms(list):
         Add Atom instances for each atom in the timestep to the self._atoms list.
         Each coordinate line in the trajectory file (for one timestep) is added as a separate Atom instance.
         """
-        atom._parent = self
+        atom.parent = self
         if not hasattr(atom, "index"):
             atom.index = next(self._counter)
         self.append(atom)

@@ -43,10 +43,10 @@ class Atom(VarReprMixin, Coordinates3D):
         self.type: str = ty
         # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
         self.index: int = index
+
         # we need the parent Atoms because we need to know what other atoms are in the system to calcualte ALF/features
         from ichor.core.atoms.atoms import Atoms
-
-        self._parent: Atoms = parent
+        self.parent: Atoms = parent
         Coordinates3D.__init__(self, x, y, z)
         self.units: AtomicDistance = units
         self._charge: float = charge
@@ -79,30 +79,12 @@ class Atom(VarReprMixin, Coordinates3D):
         return new_atom
 
     @property
-    def parent(self) -> "Atoms":
-        if self._parent is None:
-            raise TypeError(f"'parent' is not defined for '{self.name}'")
-        return self._parent
-
-    @property
     def charge(self) -> float:
         return self._charge or constants.type2charge[self.type]
 
     @charge.setter
     def charge(self, val: float):
         self._charge = val
-
-    @property
-    def index(self) -> int:
-        if self._index is None:
-            raise AttributeError(
-                f"'index' is not defined for instance of '{self.type} ({self.x} {self.y} {self.z})'"
-            )
-        return self._index
-
-    @index.setter
-    def index(self, index: int) -> None:
-        self._index = index
 
     @property
     def atom_number(self) -> int:

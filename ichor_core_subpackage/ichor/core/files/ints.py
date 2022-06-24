@@ -6,24 +6,38 @@ from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files.directory import Directory
 
 # from ichor.core.files.geometry import AtomicDict, AtomicData
-from ichor.core.files.int import INT
+from ichor.core.files.int import INT, ParentNotDefined
 from ichor.core.files.file_data import HasProperties
+from ichor.core.atoms import Atoms
 
 
 class INTs(HasProperties, OrderedDict, Directory):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
-    :param parent: A GeometryFile instance that holds coordinate information for all the atoms in the system.
+    :param parent: An Atoms instance that holds coordinate information for all the atoms in the system.
         Things like XYZ and GJF hold geometry.
     """
 
     def __init__(
         self,
         path: Union[Path, str],
+        parent: Atoms = None,
     ):
         Directory.__init__(self, path)
         OrderedDict.__init__(self)
+        self._parent = parent
+
+    @property
+    def parent(self) -> Atoms:
+        # do not error out here if parent is not passed. Error is in INT class
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent: Atoms):
+        self._parent = parent
+        # need to parse the ints again to set the new parent
+        self._parse()
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
@@ -38,7 +52,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f)
+                self[f.stem.upper()] = INT(f, parent=self._parent)
         self.sort()
 
     @classmethod
