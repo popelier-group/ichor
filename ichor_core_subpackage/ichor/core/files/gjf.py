@@ -137,6 +137,10 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         for keyword in keywords:
             self.add_keyword(keyword)
 
+    def output_wfn(self):
+        """Helper method to add 'output=wfn' to the GJF keyword list"""
+        self.add_keyword("output=wfn")
+
     @classmethod
     def parse_route_card(cls, route_card: str) -> RouteCard:
         method = None

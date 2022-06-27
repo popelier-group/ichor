@@ -27,9 +27,10 @@ def setup_logger(
     return logger
 
 
-def log_time(timing_log, *args):
-    timing_log.info(" | ".join(map(str, args)))
-
-
 logger = setup_logger("ichor_logger", "ichor.log")
 timing_log = setup_logger("timing_logger", "ichor.timing")
+
+
+def log_time(*args):
+    global timing_log
+    timing_log.info(" | ".join(map(str, args)))
