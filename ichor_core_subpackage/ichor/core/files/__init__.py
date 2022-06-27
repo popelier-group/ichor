@@ -1,7 +1,13 @@
 from ichor.core.files.aim import AIM
 from ichor.core.files.directory import Directory
 from ichor.core.files.dlpoly_history import DlpolyHistory
-from ichor.core.files.file import File, FileState, FileContents
+from ichor.core.files.file import (
+    File,
+    FileState,
+    FileContents,
+    ReadFile,
+    WriteFile,
+)
 from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.files.gjf import GJF
 from ichor.core.files.int import INT
@@ -46,4 +52,6 @@ __all__ = [
     "HasAtoms",
     "HasProperties",
     "FileContents",
+    "ReadFile",
+    "WriteFile",
 ]
