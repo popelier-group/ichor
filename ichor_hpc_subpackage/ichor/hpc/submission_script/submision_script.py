@@ -258,6 +258,10 @@ class SubmissionScript:
         set_uid()
         return datafile_variables, datafile_str
 
+    @classproperty
+    def BASH_NOW(self) -> str:
+        return "$(date)"
+
     def write(self):
         """Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
         are written at the top of the file. The commands to run (such as Gaussian, AIMALL, etc.) are written below the options."""
@@ -301,9 +305,13 @@ class SubmissionScript:
                     # f.write(f"export OMP_PROC_BIND=true\n")
                     # f.write(f"export OMP_PLACES=cores\n")
 
+                f.write(f"echo \"Loading Modules | {self.BASH_NOW}\"\n")
+
                 # load any modules required for the job
                 for module in self.modules:
                     f.write(f"module load {module}\n")
+
+                f.write(f"echo \"Starting Job | {self.BASH_NOW}\"\n")
 
                 requires_datafile = False  # used to check if there was any command group that requires a datafile
                 for command_group in self.grouped_commands:
@@ -339,6 +347,8 @@ class SubmissionScript:
                 # only write this if there was a command that required a datafile. Otherwise this will not be written
                 if requires_datafile:
                     f.write("fi\n")
+
+                f.write(f"echo \"Finished Job | {self.BASH_NOW}\"\n")
 
         else:
             raise ValueError(

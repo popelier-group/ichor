@@ -19,8 +19,15 @@ class TimingManager:
         self.submission_script = submission_script
         self.message = message
 
-        self.job_id = "$JOB_ID"
-        self.task_id = "$SGE_TASK_ID"
+    @property
+    def job_id(self) -> str:
+        from ichor.hpc import BATCH_SYSTEM
+        return f"${BATCH_SYSTEM.JobID}"
+    
+    @property
+    def task_id(self) -> str:
+        from ichor.hpc import BATCH_SYSTEM
+        return f"${BATCH_SYSTEM.TaskID}"
 
     @property
     def identifier(self):

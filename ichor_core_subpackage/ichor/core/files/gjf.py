@@ -50,7 +50,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         then there is no file to be read, so the user has to write the file contents. If
         no contents/options are written by user, they are written as the default values in the
         `write` method.
-    :param comment_line: A string to be written between the link0 options and the keywords.
+    :param title: A string to be written between the link0 options and the keywords.
         It can contain any information.
     :param job_type: The job type, an energy, optimization, or frequency
     :param keywords: A list of keywords to be added to the Gaussian keywords line
@@ -80,7 +80,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         method: Optional[str] = None,
         basis_set: Optional[str] = None,
         keywords: Optional[List[str]] = None,
-        comment_line: Optional[str] = None,
+        title: Optional[str] = None,
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
         atoms: Optional[Atoms] = None,
@@ -95,7 +95,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.method: str = method or FileContents
         self.basis_set: str = basis_set or FileContents
         self.keywords: List[str] = keywords or FileContents
-        self.comment_line = comment_line or FileContents
+        self.title = title or FileContents
 
         self.charge: int = charge or FileContents
         self.spin_multiplicity: int = spin_multiplicity or FileContents
@@ -165,7 +165,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.method = self.method or ""
         self.basis_set = self.basis_set or ""
         self.keywords = self.keywords or []
-        self.comment_line = self.comment_line or ""
+        self.title = self.title or ""
         self.charge = self.charge or 0
         self.spin_multiplicity = self.spin_multiplicity or 0
         self.atoms = self.atoms or Atoms()
@@ -187,7 +187,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
             route = " ".join(route_lines)
 
             # the comment line can be a blank line
-            comment_line = next(f).strip()
+            title = next(f).strip()
             # another blank line follows before moving to system definitions
             line = next(f)
 
@@ -208,7 +208,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.print_level = self.print_level or route_card.print_level
         self.method = self.method or route_card.method
         self.basis_set = self.basis_set or route_card.basis_set
-        self.comment_line = self.comment_line or comment_line
+        self.title = self.title or title
         self.keywords = self.keywords or route_card.keywords
         self.charge = self.charge or charge
         self.spin_multiplicity = self.spin_multiplicity or spin_multiplicity
@@ -227,6 +227,8 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.method = self.method or "b3lyp"
         self.basis_set = self.basis_set or "6-31+g(d,p)"
         self.keywords = self.keywords or ["nosymm", "output=wfn"]
+
+        self.title = self.title or str(self.path.stem)
 
         self.charge = self.charge or 0
         self.spin_multiplicity = self.spin_multiplicity or 1
@@ -255,7 +257,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
                 f"#{self.print_level.value} {self.method}/{self.basis_set} {' '.join(self.keywords)}\n"
             )
             f.write("\n")
-            f.write(f"{self.comment_line}\n")
+            f.write(f"{self.title}\n")
             f.write("\n")
             f.write(f"{self.charge}   {self.spin_multiplicity}\n")
             for atom in self.atoms:

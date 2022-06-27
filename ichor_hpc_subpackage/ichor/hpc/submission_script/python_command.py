@@ -22,6 +22,13 @@ class PythonCommand(CommandLine):
         """Returns a `Modules` instance which contains modules that need to be loaded on the machine for Python to function."""
         return PythonModules
 
+    # temporary fix
+    @classproperty
+    def ncores(self) -> int:
+        """Returns the number of cores that Gaussian should use for the job."""
+        from ichor.hpc import MACHINE, Machine
+        return 2 if MACHINE is Machine.csf4 else 1
+
     @classproperty
     def command(self) -> str:
         """Returns the command(program) which is ran in the job."""
