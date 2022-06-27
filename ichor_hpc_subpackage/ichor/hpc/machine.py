@@ -24,6 +24,7 @@ class SubmitType(Enum):
 class Machine(Enum):
     """Enum which is used to define any machines that ICHOR is running on. This needs to be done because commands and settings change between different machines."""
 
+    # Machine Name = Machine Address, Can Submit on Compute, DropCompute available
     csf3 = "csf3.itservices.manchester.ac.uk", False, True
     csf4 = "csf4.itservices.manchester.ac.uk", False, True
     ffluxlab = "ffluxlab.mib.manchester.ac.uk", True, False
@@ -45,8 +46,9 @@ class Machine(Enum):
         if self.submit_on_compute:
             submit_type = SubmitType.SubmitOnCompute
         elif self.drop_compute_available:
-            from ichor.hpc.drop_compute.drop_compute import \
-                drop_compute_available_for_user
+            from ichor.hpc.drop_compute.drop_compute import (
+                drop_compute_available_for_user,
+            )
 
             if drop_compute_available_for_user():
                 submit_type = SubmitType.DropCompute

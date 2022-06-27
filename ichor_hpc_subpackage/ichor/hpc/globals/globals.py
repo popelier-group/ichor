@@ -123,7 +123,7 @@ class GlobalVariableError(Exception):
 
 
 class Globals:
-    # format: off
+    # fmt: off
     _types = []
 
     # Variables that can't be set from config file
@@ -336,6 +336,7 @@ class Globals:
 
     DROP_COMPUTE: bool = False
     DROP_COMPUTE_LOCATION: Path = ""
+    DROP_COMPUTE_NTRIES: int = 1000
 
     PANDORA_LOCATION: Path = ""
     PANDORA_CCSDMOD: str = "ccsdM"
@@ -353,7 +354,7 @@ class Globals:
     INCLUDE_NODES: List[str] = []
     EXCLUDE_NODES: List[str] = []
 
-    # format: on
+    # fmt: on
 
     def __init__(
         self,
@@ -377,7 +378,9 @@ class Globals:
                 # TODO: then, this is going to be added to parsers/formatters and then it will update
                 # the variable using the setter method for the property
                 else:
-                    self.__annotations__[global_variable] = Path
+                    self.__annotations__[
+                        global_variable
+                    ] = Path  # todo: is this right? need a reason
 
         # Set Protected Variables
         self._protected = [
@@ -515,12 +518,7 @@ class Globals:
         if "MAX_RUNNING_TASKS" not in self._in_config:
             from ichor.hpc import MACHINE, Machine
 
-            if MACHINE is Machine.ffluxlab:
-                self.MAX_RUNNING_TASKS = (
-                    25  # <- might be a bit conservative, increase in future?
-                )
-            elif MACHINE is Machine.csf3:
-                self.MAX_RUNNING_TASKS = -1
+            self.MAX_RUNNING_TASKS = 25 if MACHINE is Machine.ffluxlab else -1
 
     @property
     def POINTS_LOCATION(self):

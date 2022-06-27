@@ -15,28 +15,41 @@ from ichor.core.common.types import MutableValue
 from ichor.core.files import PointsDirectory, Trajectory
 from ichor.hpc.auto_run.auto_run_aimall import submit_aimall_job_to_auto_run
 from ichor.hpc.auto_run.auto_run_ferebus import submit_ferebus_job_to_auto_run
-from ichor.hpc.auto_run.auto_run_gaussian import \
-    submit_gaussian_job_to_auto_run
+from ichor.hpc.auto_run.auto_run_gaussian import (
+    submit_gaussian_job_to_auto_run,
+)
 from ichor.hpc.auto_run.auto_run_morfi import submit_morfi_job_to_auto_run
 from ichor.hpc.auto_run.auto_run_pyscf import submit_pyscf_job_to_auto_run
-from ichor.hpc.auto_run.counter import (counter_exists, get_counter_location,
-                                        read_counter, write_counter)
+from ichor.hpc.auto_run.counter import (
+    counter_exists,
+    get_counter_location,
+    read_counter,
+    write_counter,
+)
 from ichor.hpc.auto_run.ichor_jobs import (
-    make_models, submit_ichor_active_learning_job_to_auto_run,
+    make_models,
+    submit_ichor_active_learning_job_to_auto_run,
     submit_ichor_aimall_command_to_auto_run,
     submit_ichor_gaussian_command_to_auto_run,
     submit_ichor_morfi_command_to_auto_run,
-    submit_ichor_pyscf_command_to_auto_run, submit_make_sets_job_to_auto_run)
+    submit_ichor_pyscf_command_to_auto_run,
+    submit_make_sets_job_to_auto_run,
+)
 from ichor.hpc.auto_run.stop import start
+
 # from ichor.hpc import FILE_STRUCTURE, MACHINE
 from ichor.hpc.batch_system import JobID, NodeType
-from ichor.hpc.drop_compute.drop_compute import DropCompute
+from ichor.hpc.drop_compute import get_drop_compute
 from ichor.hpc.machine import SubmitType
 from ichor.hpc.points import get_points_location
-from ichor.hpc.programs.qcp import (QUANTUM_CHEMISTRY_PROGRAM,
-                                    QuantumChemistryProgram)
-from ichor.hpc.programs.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-                                    QuantumChemicalTopologyProgram)
+from ichor.hpc.programs.qcp import (
+    QUANTUM_CHEMISTRY_PROGRAM,
+    QuantumChemistryProgram,
+)
+from ichor.hpc.programs.qct import (
+    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+    QuantumChemicalTopologyProgram,
+)
 from ichor.hpc.submission_script import SCRIPT_NAMES, DataLock
 
 
@@ -297,8 +310,7 @@ def setup_iter_args():
         IterArgs.Atoms.value = [GLOBALS.OPTIMISE_ATOM]
 
     if GLOBALS.OPTIMISE_PROPERTY == "all":
-        from ichor.cli.machine_learning_menus.make_models import \
-            MODEL_TYPES
+        from ichor.cli.machine_learning_menus.make_models import MODEL_TYPES
 
         IterArgs.ModelTypes.value = MODEL_TYPES()
     else:
@@ -421,8 +433,10 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
 
     from ichor.hpc import GLOBALS, MACHINE
 
+    drop_compute = get_drop_compute()
+
     if MACHINE.submit_type is SubmitType.DropCompute:
-        SCRIPT_NAMES.parent.value = DropCompute.TMP_LOCATION
+        SCRIPT_NAMES.parent.value = drop_compute.TMP_LOCATION
         mkdir(SCRIPT_NAMES.parent.value)
 
     setup_iter_args()
@@ -438,32 +452,29 @@ def submit_next_iter(current_iteration) -> Optional[JobID]:
         final_job = submit_auto_run_iter(get_func_order(), None, iter_state)
 
     if MACHINE.submit_type is SubmitType.DropCompute:
-        if not DropCompute.LOCATION.exists():
-            mkdir(DropCompute.LOCATION)
-
         njobs_queued = sum(
             f.suffix.startswith(".sh")
-            for f in DropCompute.TMP_LOCATION.iterdir()
+            for f in drop_compute.TMP_LOCATION.iterdir()
             if f.is_file()
         )
 
-        for _ in range(DropCompute.NTRIES):
+        for _ in range(drop_compute.ntries):
             njobs_waiting = sum(
                 f.suffix.startswith(".sh")
-                for f in DropCompute.LOCATION.iterdir()
+                for f in drop_compute.location.iterdir()
                 if f.is_file()
             )
-            if njobs_waiting + njobs_queued > DropCompute.MAX_JOBS:
+            if njobs_waiting + njobs_queued > drop_compute.max_jobs:
                 sleep(30)
             else:
-                for script in DropCompute.TMP_LOCATION.iterdir():
-                    move(script, DropCompute.LOCATION / script.name)
-                remove(DropCompute.TMP_LOCATION)
+                for script in drop_compute.TMP_LOCATION.iterdir():
+                    move(script, drop_compute.location / script.name)
+                remove(drop_compute.TMP_LOCATION)
                 break
         else:
-            remove(DropCompute.TMP_LOCATION)
+            remove(drop_compute.TMP_LOCATION)
             raise DropComputeSubmitFailed(
-                f"Failed to submit to DropCompute too many times ({DropCompute.NTRIES})"
+                f"Failed to submit to DropCompute too many times ({drop_compute.ntries})"
             )
 
     return final_job
@@ -520,8 +531,9 @@ def auto_make_models(
         atoms = PointsDirectory(directory)[0].atoms.names
     IterArgs.Atoms.value = atoms
     if types is None:
-        from ichor.cli.machine_learning_menus.make_models import \
-            default_model_type
+        from ichor.cli.machine_learning_menus.make_models import (
+            default_model_type,
+        )
 
         types = [default_model_type]
     IterArgs.ModelTypes.value = types
