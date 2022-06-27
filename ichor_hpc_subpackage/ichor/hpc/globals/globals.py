@@ -174,7 +174,7 @@ class Globals:
 
     METHOD: str = "B3LYP"
     BASIS_SET: str = "6-31+g(d,p)"
-    KEYWORDS: List[str] = []
+    KEYWORDS: List[str] = ["nosymm"]
 
     AIMALL_ENCOMP: int = 3
     AIMALL_BOAQ: str = "gs20"
