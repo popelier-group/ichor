@@ -5,11 +5,11 @@ from typing import List, Optional, Sequence, Union
 import numpy as np
 from ichor.core.atoms.atom import Atom
 from ichor.core.atoms.calculators import (
+    ALF,
     FeatureCalculatorFunction,
     calculate_connectivity,
     default_feature_calculator,
 )
-from ichor.core.atoms.calculators import ALF
 
 
 class AtomNotFound(Exception):
@@ -50,6 +50,10 @@ class Atoms(list):
         if atom._index is None:
             atom.index = next(self._counter)
         super().append(atom)
+
+    @property
+    def charge(self) -> int:
+        return sum(atom.charge for atom in self)
 
     @property
     def natoms(self) -> int:
