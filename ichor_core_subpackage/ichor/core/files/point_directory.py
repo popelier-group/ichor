@@ -73,6 +73,12 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                 return f.atoms
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
+    def atoms_from_specific_file(self, file_with_atoms: HasAtoms):
+        for f in self.files():
+            if isinstance(f, file_with_atoms):
+                return f.atoms
+        raise AtomsNotFoundError(f" {file_with_atoms.__class__.__name__} file does not contain atoms.")
+
     @atoms.setter
     def atoms(self, value: Atoms):
         if value is not FileContents:
