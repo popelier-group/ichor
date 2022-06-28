@@ -22,7 +22,7 @@ def _test_read_gjf(
     method: Optional[str] = None,
     basis_set: Optional[str] = None,
     keywords: Optional[List[str]] = None,
-    comment_line: Optional[str] = None,
+    title: Optional[str] = None,
     charge: Optional[int] = None,
     spin_multiplicity: Optional[int] = None,
     atoms: Optional[Atoms] = None,
@@ -33,7 +33,7 @@ def _test_read_gjf(
     _assert_val_optional(gjf.method, method)
     _assert_val_optional(gjf.basis_set, basis_set)
     _assert_val_optional(gjf.keywords, keywords)
-    _assert_val_optional(gjf.comment_line, comment_line)
+    _assert_val_optional(gjf.title, title)
     _assert_val_optional(gjf.charge, charge)
     _assert_val_optional(gjf.spin_multiplicity, spin_multiplicity)
     _test_atoms_coords_optional(gjf.atoms, atoms)
@@ -54,7 +54,7 @@ def test_water_standard():
         method="B3LYP",
         basis_set="6-31+g(d,p)",
         keywords=["output=wfn", "nosymm"],
-        comment_line="WATER0001",
+        title="WATER0001",
         link0=["nproc=2", "mem=1GB"],
         charge=0,
         spin_multiplicity=1,
@@ -77,7 +77,7 @@ def test_water_aug_cc_pVTZ():
         method="B3LYP",
         basis_set="aug-cc-pVTZ",
         keywords=["nosymm", "output=wfn"],
-        comment_line="WATER0001",
+        title="WATER0001",
         link0=["nproc=2", "mem=1GB"],
         charge=0,
         spin_multiplicity=1,
@@ -100,7 +100,7 @@ def test_water_ccsd():
         method="CCSD(T)",
         basis_set="aug-cc-pVDZ",
         keywords=["nosymm"],
-        comment_line="WATER0001",
+        title="WATER0001",
         link0=[
             "chk=TRAINING_SET/WATER0001/WATER0001.chk",
             "nproc=2",
@@ -128,7 +128,7 @@ def test_ammonia_standard():
         method="B3LYP",
         basis_set="6-31+g(d,p)",
         keywords=["nosymm", "output=wfn"],
-        comment_line="AMMONIA0001",
+        title="AMMONIA0001",
         link0=["nproc=2", "mem=1GB"],
         charge=0,
         spin_multiplicity=1,
@@ -159,7 +159,7 @@ def test_formamide_standard():
             "INT(GRID=ULTRAFINE)",
             "nosymm",
         ],
-        comment_line="FORMAMIDE0001",
+        title="FORMAMIDE0001",
         link0=["nproc=2", "mem=1GB"],
         charge=0,
         spin_multiplicity=1,
@@ -199,7 +199,7 @@ def test_paracetamol_standard():
         method="B3LYP",
         basis_set="6-31+g(d,p)",
         keywords=["output=wfn", "nosymm"],
-        comment_line="PARACETAMOL0001",
+        title="PARACETAMOL0001",
         link0=["nproc=2", "mem=1GB"],
         charge=0,
         spin_multiplicity=1,
@@ -221,7 +221,7 @@ def test_water_opt_freq():
         method="B3LYP",
         basis_set="6-31+g(d,p)",
         keywords=["output=wfn", "nosymm", "opt", "freq"],
-        comment_line="WATER0001",
+        title="WATER0001",
         link0=["nproc=2", "mem=1GB"],
         charge=0,
         spin_multiplicity=1,
