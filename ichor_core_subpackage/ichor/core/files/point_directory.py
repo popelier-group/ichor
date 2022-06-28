@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Union, Dict, Any, Optional
 
-from ichor.core.atoms import AtomsNotFoundError
+from ichor.core.atoms import AtomsNotFoundError, Atoms
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file import FileContents, ReadFile
 
@@ -74,7 +74,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
     @atoms.setter
-    def atoms(self, value):
+    def atoms(self, value: Atoms):
         if value is not FileContents:
             if not self.xyz.exists():
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
