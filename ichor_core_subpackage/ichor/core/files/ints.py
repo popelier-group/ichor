@@ -22,9 +22,11 @@ class INTs(HasProperties, OrderedDict, Directory):
     def __init__(
         self,
         path: Union[Path, str],
+        parent: Atoms = None
     ):
         Directory.__init__(self, path)
         OrderedDict.__init__(self)
+        self.parent = parent
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
@@ -39,7 +41,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.capitalize()] = INT(f)
+                self[f.stem.capitalize()] = INT(f, parent=self.parent)
         self.sort()
 
     @classmethod
