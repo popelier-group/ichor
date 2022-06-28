@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Dict, Union
 
 from ichor.core.atoms import Atoms
-from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasProperties
 
 # from ichor.core.files.geometry import AtomicDict, AtomicData
-from ichor.core.files.int import INT, ParentNotDefined
+from ichor.core.files.int import INT
 
 
 class INTs(HasProperties, OrderedDict, Directory):
@@ -24,9 +24,10 @@ class INTs(HasProperties, OrderedDict, Directory):
         path: Union[Path, str],
         parent: Atoms = None
     ):
+        # parent above __init__s because Directory.__init__ calls self._parse
+        self.parent = parent
         Directory.__init__(self, path)
         OrderedDict.__init__(self)
-        self.parent = parent
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
