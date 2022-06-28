@@ -80,8 +80,8 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
             self.xyz = XYZ(self.xyz.path, value)
 
-    def get_atom_data(self, atom) -> AtomicData:
-        return AtomicData(self.atoms[atom], self.properties)
+    def get_atom_data(self, atom_name) -> AtomicData:
+        return AtomicData(self.atoms[atom_name], self.properties)
 
     @property
     def properties(self) -> Dict[str, Any]:

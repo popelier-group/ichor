@@ -200,7 +200,7 @@ class INT(HasProperties, ReadFile):
             line = next(f)
             while "Integration is over atom" not in line:
                 line = next(f)
-            self.atom_name = line.split()[-1].strip()
+            self.atom_name = line.split()[-1].strip().capitalize()
 
             line = next(f)
             while "Results of the basin integration" not in line:

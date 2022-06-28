@@ -39,7 +39,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f)
+                self[f.stem.capitalize()] = INT(f)
         self.sort()
 
     @classmethod
@@ -57,8 +57,8 @@ class INTs(HasProperties, OrderedDict, Directory):
     @property
     def properties(self) -> Dict[str, Dict[str, float]]:
         return {
-            atom: int_file_instance.properties
-            for atom, int_file_instance in self.items()
+            atom_name: int_file_instance.properties
+            for atom_name, int_file_instance in self.items()
         }
 
     def __iter__(self):

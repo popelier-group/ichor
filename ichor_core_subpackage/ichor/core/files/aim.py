@@ -118,7 +118,7 @@ class AIM(ReadFile, File, dict):
                     # convert the stem to upper, eg. o1 -> O1
                     inpfile = aimatom_path.with_suffix(".inp")
                     outfile = aimatom_path.with_suffix(".int")
-                    atom_name = aimatom_path.stem.upper()
+                    atom_name = aimatom_path.stem.capitalize()
                     self[atom_name] = AimAtom(
                         atom_name=atom_name,
                         inp_file=inpfile,
@@ -132,14 +132,14 @@ class AIM(ReadFile, File, dict):
                     and "Total time for atom" in line
                 ):
                     record = line.split()
-                    atom_name = record[4]
+                    atom_name = record[4].capitalize()
                     self[atom_name].time_taken = int(record[6])
                     self[atom_name].integration_error = float(record[-1])
 
                 elif not is_all_atom_calculation and "Inp File:" in line:
                     inpfile = Path(line.split()[-1].strip('"'))
                     outfile = inpfile.with_suffix(".int")
-                    atom_name = inpfile.stem.upper()
+                    atom_name = inpfile.stem.capitalize()
                     self[atom_name] = AimAtom(
                         atom_name=atom_name,
                         inp_file=inpfile,
@@ -155,7 +155,7 @@ class AIM(ReadFile, File, dict):
                     return aimatom
             raise IndexError(f"No atom with index {item}")
         elif isinstance(item, str):
-            item = item.upper()
+            item = item.capitalize()
             return super().__getitem__(item)
         else:
             raise NotImplementedError(

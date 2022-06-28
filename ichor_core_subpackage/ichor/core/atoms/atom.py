@@ -132,7 +132,7 @@ class Atom(VarReprMixin, Coordinates3D):
         """Returns the name of the Atom instance, which is later used to distinguish atoms when making GPR models.
         The number in the name starts at 1 (inclusive).
         e.g. O1"""
-        return f"{self.type}{self.index}"
+        return f"{self.type.capitalize()}{self.index}"
 
     @property
     def mass(self) -> float:

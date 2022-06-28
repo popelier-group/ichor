@@ -398,7 +398,7 @@ class MOUT(
                     line = next(f)
                     while "Atom" in line:
                         record = line.split()
-                        atom_name = f"{record[2]}{record[1]}"
+                        atom_name = f"{record[2]}{record[1]}".capitalize()
                         self[atom_name].quadin = Quadrature(
                             int(record[3]), int(record[4]), int(record[5])
                         )
