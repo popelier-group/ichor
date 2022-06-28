@@ -52,8 +52,8 @@ class Atoms(list):
         super().append(atom)
 
     @property
-    def charge(self) -> int:
-        return sum(atom.charge for atom in self)
+    def atomic_number(self) -> int:
+        return sum(atom.atomic_number for atom in self)
 
     @property
     def natoms(self) -> int:

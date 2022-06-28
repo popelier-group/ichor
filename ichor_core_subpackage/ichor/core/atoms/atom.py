@@ -35,12 +35,11 @@ class Atom(VarReprMixin, Coordinates3D):
         z: float,
         index: Optional[int] = None,
         parent: Optional["Atoms"] = None,
-        charge: Optional[float] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
         # to be read in from coordinate line
         # element of atom
-        self.type: str = ty
+        self.type: str = ty.capitalize()
         # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
         self._index: Optional[int] = index
 
@@ -50,7 +49,6 @@ class Atom(VarReprMixin, Coordinates3D):
         self._parent: Optional[Atoms] = parent
         Coordinates3D.__init__(self, x, y, z)
         self.units: AtomicDistance = units
-        self._charge: float = charge
 
     @classmethod
     def from_atom(cls, atom: "Atom") -> "Atom":
@@ -61,7 +59,6 @@ class Atom(VarReprMixin, Coordinates3D):
             atom.z,
             atom._index,
             atom.parent,
-            atom.charge,
             atom.units,
         )
 
@@ -104,12 +101,8 @@ class Atom(VarReprMixin, Coordinates3D):
         self._parent = parent
 
     @property
-    def charge(self) -> float:
-        return self._charge or constants.type2charge[self.type]
-
-    @charge.setter
-    def charge(self, val: float):
-        self._charge = val
+    def atomic_number(self) -> float:
+        return constants.type2atomic_number[self.type]
 
     @property
     def atom_number(self) -> int:
@@ -132,7 +125,7 @@ class Atom(VarReprMixin, Coordinates3D):
         """Returns the name of the Atom instance, which is later used to distinguish atoms when making GPR models.
         The number in the name starts at 1 (inclusive).
         e.g. O1"""
-        return f"{self.type.capitalize()}{self.index}"
+        return f"{self.type}{self.index}"
 
     @property
     def mass(self) -> float:

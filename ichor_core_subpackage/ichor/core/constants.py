@@ -332,7 +332,7 @@ type2rad: Dict[str, float] = {
     "Rn": 1.45,
 }
 
-type2charge: Dict[str, float] = {
+type2atomic_number: Dict[str, float] = {
     "H": 1.0,
     "He": 2.0,
     "Li": 3.0,
@@ -347,7 +347,35 @@ type2charge: Dict[str, float] = {
     "Mg": 12.0,
     "Al": 13.0,
     "Si": 14.0,
+    "P": 15.0,
+    "S": 16.0,
+    "Cl": 17.0,
+    "Ar": 18.0,
+    "K": 19.0,
+    "Ca": 20.0,
+    "Sc": 21.0,
+    "Ti": 22.0,
+    "V": 23.0,
+    "Cr": 24.0,
+    "Mn": 25.0,
+    "Fe": 26.0,
+    "Co": 27.0,
+    "Ni": 28.0,
+    "Cu": 29.0,
+    "Zn": 30.0,
+    "Ga": 31.0,
+    "Ge": 32.0,
+    "As": 33.0,
+    "Se": 34.0,
+    "Br": 35.0,
+    "Kr": 35.0,
+    "Rb": 37.0,
+    "Sr": 38.0,
+    "Y": 39.0,
+    "Zr": 40.0
 }
+
+
 
 
 type2vdwr: Dict[str, float] = {
