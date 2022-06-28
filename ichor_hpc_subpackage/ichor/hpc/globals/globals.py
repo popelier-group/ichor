@@ -99,7 +99,6 @@ EXCLUDE_NODES                   | List[str]       | []                | Node bla
 import inspect
 import os
 import platform
-from ast import literal_eval
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
@@ -837,15 +836,15 @@ class Globals:
         super(Globals, self).__setattr__(name, value)
 
     def __enter__(self, *args, **kwargs):
-        from ichor.hpc import globals
+        from ichor import hpc
 
-        self._save_globals = Globals(globals_instance=globals.GLOBALS)
-        globals.GLOBALS.init_from_globals(self)
+        self._save_globals = Globals(globals_instance=hpc.GLOBALS)
+        hpc.GLOBALS.init_from_globals(self)
 
     def __exit__(self, type, value, traceback):
-        from ichor.hpc import globals
+        from ichor import hpc
 
-        globals.GLOBALS.init_from_globals(self._save_globals)
+        hpc.GLOBALS.init_from_globals(self._save_globals)
 
 
 class NoAtomsFound(Exception):
@@ -856,34 +855,32 @@ class NoAtomsFound(Exception):
 def get_atoms(atoms_reference_path: Path) -> Atoms:
     """Gets an Atoms instance from an atom_reference_path that was given."""
 
-    if atoms_reference_path.exists():
-
-        if atoms_reference_path.is_file():
-            if atoms_reference_path.suffix == ".gjf":
-                from ichor.core.files import GJF
-
-                return GJF(atoms_reference_path).atoms
-            elif atoms_reference_path.suffix == ".xyz":
-                from ichor.core.files import XYZ
-
-                return XYZ(atoms_reference_path).atoms
-            else:
-                raise ValueError(
-                    f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file."
-                )
-
-        elif atoms_reference_path.is_dir():
-            from ichor.core.files import PointsDirectory
-
-            return PointsDirectory(atoms_reference_path)[0].atoms
-
-        # we should have returned by now, but return None if no file matches criteria
-        return
-
-    else:
+    if not atoms_reference_path.exists():
         raise FileNotFoundError(
             f"ATOMS reference file with path {atoms_reference_path} is not found on disk."
         )
+
+    if atoms_reference_path.is_file():
+        if atoms_reference_path.suffix == ".gjf":
+            from ichor.core.files import GJF
+
+            return GJF(atoms_reference_path).atoms
+        elif atoms_reference_path.suffix == ".xyz":
+            from ichor.core.files import XYZ
+
+            return XYZ(atoms_reference_path).atoms
+        else:
+            raise ValueError(
+                f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file."
+            )
+
+    elif atoms_reference_path.is_dir():
+        from ichor.core.files import PointsDirectory
+
+        return PointsDirectory(atoms_reference_path)[0].atoms
+
+    # we should have returned by now, but return None if no file matches criteria
+    return
 
 
 @lru_cache()
