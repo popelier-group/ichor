@@ -898,16 +898,15 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
         raise FileNotFoundError("The given path does not exist on disk.")
     for file_or_dir in path.iterdir():
 
-        if file_or_dir.is_file():
-            if file_or_dir.suffix in [".gjf", ".xyz"]:
-                return file_or_dir.resolve()
-        # elif file_or_dir.is_dir():
-        #     for p in file_or_dir.iterdir():
-        #         if p.is_dir():
-        #             for f1 in p.iterdir():
-        #                 if f1.suffix in [".gjf", ".xyz"]:
-        #                     return f1.resolve()
-        #         elif p.suffix == ".gjf" or path.suffix == ".xyz":
-        #             return p.resolve()
+        if file_or_dir.is_file() and file_or_dir.suffix in [".gjf", ".xyz"]:
+            return file_or_dir.resolve()
+            # elif file_or_dir.is_dir():
+            #     for p in file_or_dir.iterdir():
+            #         if p.is_dir():
+            #             for f1 in p.iterdir():
+            #                 if f1.suffix in [".gjf", ".xyz"]:
+            #                     return f1.resolve()
+            #         elif p.suffix == ".gjf" or path.suffix == ".xyz":
+            #             return p.resolve()
     # return None if no file that matches criteria was found.
     raise FileNotFoundError("Could not find atoms reference file")
