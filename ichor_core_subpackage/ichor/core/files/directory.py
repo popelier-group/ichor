@@ -31,12 +31,6 @@ class Directory(PathObject, ABC):
         """
         pass
 
-    @abstractmethod
-    def dump(self):
-        """Abstract method for resetting all attributes which store some sort of data
-        that has been read in from a file. These attributes are initially FileContents type."""
-        pass
-
     def mkdir(self):
         """Make an empty directory at the location of the `path` attribute."""
         mkdir(self.path)
@@ -60,6 +54,10 @@ class Directory(PathObject, ABC):
 
 class AnnotatedDirectory(Directory, ABC):
     """Abstract method for adding a parser for a Directory that has annotated files (such as GJF, INT, WFN). For example, look at the `PointDirectory` class."""
+
+    @cached_property
+    def pathtypes(self) -> Dict[str, Type[PathObject]]:
+        return {**self.filetypes, **self.dirtypes}
 
     @cached_property
     def filetypes(self) -> Dict[str, Type[File]]:
@@ -116,14 +114,6 @@ class AnnotatedDirectory(Directory, ABC):
         that are in the instance of AnnotatedDirectory."""
         return self.files() + self.directories()
 
-    def dump(self):
-        """Remove all data that has been stored into the instances after the files have been
-        read in. This resets the attributes to be of type FileContents."""
-        for f in self.files():
-            f.dump()
-        for d in self.directories():
-            d.dump()
-
     def _parse(self):
         """
         Iterates over an `AnnotatedDirectory`'s contents (which are files or other sub-directories). If the content is a file,
@@ -135,42 +125,11 @@ class AnnotatedDirectory(Directory, ABC):
         if not self.exists():
             return
 
-        filetypes = self.filetypes
-        dirtypes = self.dirtypes
-
         for f in self.path.iterdir():
-
-            # if the content is a file. This is true for any files (everything other than directories)
-            if f.is_file():
-                # iterate over the filetypes dictionary {"gjf": GJF, "wfn": WFN,......}
-                for var, filetype in filetypes.items():
-                    # if the suffix of the file matches the suffix of the class
-                    if filetype.check_path(f):
-
-                        # set attributes for the object which wrap around a file (such as .gjf, .wfn, etc.)
-                        # if this type of file needs access to the parent (the `AnnotatedDirectory`'s path)
-                        if (
-                            "parent"
-                            in inspect.signature(filetype.__init__).parameters
-                        ):
-                            setattr(self, var, filetype(f, parent=self))
-                        else:
-                            setattr(self, var, filetype(f))
-                        break
-
-            # if the content is a directory. This is true for any directories (everything other than files)
-            elif f.is_dir():
-
-                # iterate over the dirtypes dictionary {"ints": INTs, ....}
-                for var, dirtype in dirtypes.items():
-                    # checks to see if the name of the directory matches a pattern
-                    if dirtype.check_path(f):
-                        if (
-                            "parent"
-                            in inspect.signature(dirtype.__init__).parameters
-                        ):
-                            # sets the .ints attribute to INTs(path_to_directory, parent=PointDirecotry_instance)
-                            setattr(self, var, dirtype(f, parent=self))
-                        else:
-                            setattr(self, var, dirtype(f))
-                        break
+            # iterate over the filetypes dictionary {"gjf": GJF, "wfn": WFN,......}
+            for var, pathtype in self.pathtypes:
+                # if the suffix of the file matches the suffix of the class
+                if pathtype.check_path(f):
+                    # set attributes for the object which wrap around a file (such as .gjf, .wfn, etc.)
+                    setattr(self, var, pathtype(f))
+                    break
