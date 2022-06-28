@@ -23,6 +23,7 @@ from ichor.core.constants import (
 )
 from ichor.core.atoms import Atoms
 from ichor.core.common.io import relpath, convert_to_path
+from warnings import warn
 
 
 class CriticalPointType(Enum):
@@ -57,6 +58,8 @@ class INT(HasProperties, ReadFile):
     :param path: The Path object corresponding to an .int file
     :param parent: An `Atoms` instance which holds the coordinate information for all atoms in the system.
         This information is needed to form the C matrix when rotating multipoles from the global to the local frame.
+        Note that the `Atoms` instance must contain the same atom name (i.e. atom type + atom index), so that
+        rotating of the multipoles can happen.
     """
 
     def __init__(self, path: Union[Path, str], parent: Atoms = None):
@@ -278,12 +281,21 @@ class INT(HasProperties, ReadFile):
         """Returns the IQA energy of the topological atom that was calculated for this topological atom (since 1 .int file is written for each topological atom)."""
         # YulianM: removed the ADD_DISPERSION. This class should only be used to parse .int files and
         # processing the data should be done somewhere else.
-
-        return self.iqa_energy_components["E_IQA(A)"]
+        # TODO: Check the -encomp setting somehow from the .int file?
+        try:
+            return self.iqa_energy_components["E_IQA(A)"]
+        except KeyError:
+            warn("E_IQA(A) energy is not present in the .int file. Check AIMALL -encomp setting.")
+            return None
 
     @property
     def e_intra(self) -> float:
-        return self.iqa_energy_components["E_IQA_Intra(A)"]
+        # TODO: Check the -encomp setting somehow from the .int file?
+        try:
+            return self.iqa_energy_components["E_IQA_Intra(A)"]
+        except KeyError:
+            warn("E_IQA_Intra(A) energy is not present in the .int file. Check AIMALL -encomp setting.")
+            return None
 
     @property
     def q(self) -> float:
