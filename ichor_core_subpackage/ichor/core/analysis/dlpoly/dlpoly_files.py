@@ -266,7 +266,7 @@ def write_config(path: Path, atoms: Atoms):
         f.write(f"0.0 0.0 {GLOBALS.DLPOLY_CELL_SIZE}\n")
         for atom in atoms:
             f.write(
-                f"{atom.type}  {atom.num}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.num}\n"
+                f"{atom.type}  {atom.index}  {GLOBALS.SYSTEM_NAME}_{atom.type}{atom.index}\n"
             )
             f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
 

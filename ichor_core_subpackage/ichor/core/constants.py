@@ -332,7 +332,7 @@ type2rad: Dict[str, float] = {
     "Rn": 1.45,
 }
 
-type2atomic_number: Dict[str, float] = {
+type2nuclear_charge: Dict[str, float] = {
     "H": 1.0,
     "He": 2.0,
     "Li": 3.0,

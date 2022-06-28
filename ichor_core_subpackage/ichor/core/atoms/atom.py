@@ -78,6 +78,8 @@ class Atom(VarReprMixin, Coordinates3D):
 
     @property
     def index(self) -> int:
+        """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
+        This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
         if self._index is None:
             raise ValueError(
                 f"'index' is not defined for '{self.__class__.__name__}({self.type} {self.x} {self.y} {self.z})'"
@@ -101,19 +103,8 @@ class Atom(VarReprMixin, Coordinates3D):
         self._parent = parent
 
     @property
-    def atomic_number(self) -> float:
-        return constants.type2atomic_number[self.type]
-
-    @property
-    def atom_number(self) -> int:
-        """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
-        This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
-        return self.index
-
-    @property
-    def num(self):
-        """See `atom_number` method."""
-        return self.atom_number
+    def nuclear_charge(self) -> float:
+        return constants.type2nuclear_charge[self.type]
 
     @property
     def i(self) -> int:
@@ -311,7 +302,7 @@ class Atom(VarReprMixin, Coordinates3D):
             )
 
     def __hash__(self):
-        return hash(str(self.num) + str(self.coordinates_string))
+        return hash(str(self.index) + str(self.coordinates_string))
 
     def __sub__(self, other):
         self.coordinates -= other.coordinates
