@@ -210,7 +210,7 @@ class Atoms(list):
 
     def features(
         self,
-        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
+        feature_calculator: Union[List[ALF], FeatureCalculatorFunction] = default_feature_calculator,
     ) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
@@ -221,6 +221,9 @@ class Atoms(list):
             :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
                 Return the feature matrix of this Atoms instance
         """
+
+        if isinstance(feature_calculator, list):
+            return np.array([self[alf[0]].features(alf) for alf in feature_calculator])
 
         return np.array([atom.features(feature_calculator) for atom in self])
 

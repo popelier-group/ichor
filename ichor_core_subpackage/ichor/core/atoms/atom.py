@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 from ichor.core import constants
 from ichor.core.common.types import Coordinates3D
+from ichor.core.atoms.calculators.features import get_alf_feature_calculator
 
 # from ichor.core.atoms.calculators import (ALFFeatureCalculator,
 #                                           AtomSequenceALFCalculator)
@@ -262,9 +263,12 @@ class Atom(VarReprMixin, Coordinates3D):
 
     def features(
         self,
-        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
+        feature_calculator: Union[ALF, FeatureCalculatorFunction] = default_feature_calculator,
     ) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
+        if isinstance(feature_calculator, ALF):
+            feature_calculator = get_alf_feature_calculator(feature_calculator)
+
         return feature_calculator(self)
 
     @property
