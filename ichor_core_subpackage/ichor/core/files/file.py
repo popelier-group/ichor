@@ -168,8 +168,8 @@ class ReadFile(File, ABC):
         """Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
         read the file and try to access the item again. If the item still does not exist, then throw a KeyError."""
         try:
-            return object.__getitem__(self, item)
-        except KeyError:
+            return super().__getitem__(item)
+        except (KeyError, AttributeError):
             if self.state is FileState.Unread:
                 self.read()
                 return self.__getitem__(item)

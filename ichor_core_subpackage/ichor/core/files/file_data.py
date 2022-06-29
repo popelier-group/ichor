@@ -46,6 +46,11 @@ class HasAtoms(ABC):
     ) -> np.ndarray:
         return self.atoms.features(feature_calculator)
 
+    def __getitem__(self, s: str):
+        if isinstance(s, str) and s in self.atom_names:
+            return self.atoms[s]
+        # raises error message
+        return super().__getitem__(s)
 
 class HasProperties(ABC):
     """
