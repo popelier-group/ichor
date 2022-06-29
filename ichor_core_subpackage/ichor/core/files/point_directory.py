@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Dict, Any, Optional
+from typing import Union, Dict, Any, Optional, Type
 
 from ichor.core.atoms import AtomsNotFoundError, Atoms
 from ichor.core.files.directory import AnnotatedDirectory
@@ -60,20 +60,27 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                 p.parent = self
 
     @property
-    def atoms(self):
+    def atoms(self) -> Atoms:
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
         # always try to get atoms from wfn file first because the wfn file contains the final geometry.
         # you can run into the issue where you did an optimization (so .xyz/gjf are different from wfn)
         # then predictions - true will be way off because you are predicting on different geometries
-        for f in self.files():
-            if isinstance(f, WFN):
-                return f.atoms
+
+        file_priorities = [XYZ, WFN, GJF]
+
+        for f in file_priorities:
+            for f_inst in self.files():
+                if isinstance(f_inst, f):
+                    return f_inst.atoms
+
+        # in case file priorities does not have the class
         for f in self.files():
             if isinstance(f, HasAtoms):
                 return f.atoms
+
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
-    def atoms_from_specific_file(self, file_with_atoms: HasAtoms):
+    def atoms_from_file(self, file_with_atoms: Type[HasAtoms]) -> Atoms:
         for f in self.files():
             if isinstance(f, file_with_atoms):
                 return f.atoms
