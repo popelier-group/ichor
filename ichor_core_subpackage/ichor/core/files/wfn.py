@@ -105,7 +105,6 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
                         x,
                         y,
                         z,
-                        charge=charge,
                         units=AtomicDistance.Bohr,
                     )
                 )
@@ -196,7 +195,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
             f.write(f"{header_line}\n")
             for i, atom in enumerate(self.atoms):
                 f.write(
-                    f"{atom.type:3s} {i+1:4d}    (CENTRE {i+1:2d}) {atom.x:12.8f}{atom.y:12.8f}{atom.z:12.8f}  CHARGE = {atom.charge:3.1f}\n"
+                    f"{atom.type:3s} {i+1:4d}    (CENTRE {i+1:2d}) {atom.x:12.8f}{atom.y:12.8f}{atom.z:12.8f}  CHARGE = {atom.nuclear_charge:3.1f}\n"
                 )
 
             for centre_assignments in chunker(self.centre_assignments, 20):

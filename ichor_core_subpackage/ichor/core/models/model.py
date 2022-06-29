@@ -145,7 +145,7 @@ class Model(ReadFile, WriteFile, File):
                 if line.startswith(
                     "atom"
                 ):  # atom for which a GP model was made eg. O1
-                    self.atom_name = self.atom_name or line.split()[1]
+                    self.atom_name = self.atom_name or line.split()[1].capitalize()
                     continue
 
                 if (

@@ -68,7 +68,7 @@ def write_config(path: Path, atoms: Atoms, cell_size: float, system_name: str):
         f.write(f"0.0 0.0 {cell_size}\n")
         for atom in atoms:
             f.write(
-                f"{atom.type}  {atom.num}  {system_name}_{atom.type}{atom.num}\n"
+                f"{atom.type}  {atom.index}  {system_name}_{atom.type}{atom.index}\n"
             )
             f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
 

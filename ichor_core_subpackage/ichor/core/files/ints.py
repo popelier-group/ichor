@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Dict, Union
 
 from ichor.core.atoms import Atoms
-from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasProperties
 
 # from ichor.core.files.geometry import AtomicDict, AtomicData
-from ichor.core.files.int import INT, ParentNotDefined
+from ichor.core.files.int import INT
 
 
 class INTs(HasProperties, OrderedDict, Directory):
@@ -22,7 +22,10 @@ class INTs(HasProperties, OrderedDict, Directory):
     def __init__(
         self,
         path: Union[Path, str],
+        parent: Atoms = None
     ):
+        # parent above __init__s because Directory.__init__ calls self._parse
+        self.parent = parent
         Directory.__init__(self, path)
         OrderedDict.__init__(self)
 
@@ -39,7 +42,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.upper()] = INT(f)
+                self[f.stem.capitalize()] = INT(f, parent=self.parent)
         self.sort()
 
     @classmethod
@@ -57,8 +60,8 @@ class INTs(HasProperties, OrderedDict, Directory):
     @property
     def properties(self) -> Dict[str, Dict[str, float]]:
         return {
-            atom: int_file_instance.properties
-            for atom, int_file_instance in self.items()
+            atom_name: int_file_instance.properties
+            for atom_name, int_file_instance in self.items()
         }
 
     def __iter__(self):

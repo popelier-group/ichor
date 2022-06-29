@@ -127,7 +127,7 @@ class AnnotatedDirectory(Directory, ABC):
 
         for f in self.path.iterdir():
             # iterate over the filetypes dictionary {"gjf": GJF, "wfn": WFN,......}
-            for var, pathtype in self.pathtypes:
+            for var, pathtype in self.pathtypes.items():
                 # if the suffix of the file matches the suffix of the class
                 if pathtype.check_path(f):
                     # set attributes for the object which wrap around a file (such as .gjf, .wfn, etc.)

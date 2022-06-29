@@ -35,12 +35,11 @@ class Atom(VarReprMixin, Coordinates3D):
         z: float,
         index: Optional[int] = None,
         parent: Optional["Atoms"] = None,
-        charge: Optional[float] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
         # to be read in from coordinate line
         # element of atom
-        self.type: str = ty
+        self.type: str = ty.capitalize()
         # these are used for the actual names, eg. O1 H2 H3, so the atom_number starts at 1
         self._index: Optional[int] = index
 
@@ -50,7 +49,6 @@ class Atom(VarReprMixin, Coordinates3D):
         self._parent: Optional[Atoms] = parent
         Coordinates3D.__init__(self, x, y, z)
         self.units: AtomicDistance = units
-        self._charge: float = charge
 
     @classmethod
     def from_atom(cls, atom: "Atom") -> "Atom":
@@ -61,7 +59,6 @@ class Atom(VarReprMixin, Coordinates3D):
             atom.z,
             atom._index,
             atom.parent,
-            atom.charge,
             atom.units,
         )
 
@@ -81,6 +78,8 @@ class Atom(VarReprMixin, Coordinates3D):
 
     @property
     def index(self) -> int:
+        """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
+        This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
         if self._index is None:
             raise ValueError(
                 f"'index' is not defined for '{self.__class__.__name__}({self.type} {self.x} {self.y} {self.z})'"
@@ -104,23 +103,8 @@ class Atom(VarReprMixin, Coordinates3D):
         self._parent = parent
 
     @property
-    def charge(self) -> float:
-        return self._charge or constants.type2charge[self.type]
-
-    @charge.setter
-    def charge(self, val: float):
-        self._charge = val
-
-    @property
-    def atom_number(self) -> int:
-        """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
-        This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
-        return self.index
-
-    @property
-    def num(self):
-        """See `atom_number` method."""
-        return self.atom_number
+    def nuclear_charge(self) -> float:
+        return constants.type2nuclear_charge[self.type]
 
     @property
     def i(self) -> int:
@@ -318,7 +302,7 @@ class Atom(VarReprMixin, Coordinates3D):
             )
 
     def __hash__(self):
-        return hash(str(self.num) + str(self.coordinates_string))
+        return hash(str(self.index) + str(self.coordinates_string))
 
     def __sub__(self, other):
         self.coordinates -= other.coordinates

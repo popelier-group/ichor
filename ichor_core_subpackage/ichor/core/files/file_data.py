@@ -89,7 +89,6 @@ class AtomicData(Atom, HasProperties):
             atom.z,
             atom.index,
             atom.parent,
-            atom.charge,
             atom.units,
         )
         self._properties = self._select_properties(properties)

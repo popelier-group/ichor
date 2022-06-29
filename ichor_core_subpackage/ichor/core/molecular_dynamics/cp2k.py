@@ -110,7 +110,7 @@ class CP2KInput(ReadFile, WriteFile, File, HasAtoms):
             )
             f.write("\n")
             f.write("    ! Charge and multiplicity\n")
-            f.write(f"    CHARGE {self.atoms.charge}\n")
+            f.write(f"    CHARGE {self.atoms.nuclear_charge}\n")
             f.write("    MULTIPLICITY 1\n")
             f.write("\n")
             f.write("    &MGRID\n")

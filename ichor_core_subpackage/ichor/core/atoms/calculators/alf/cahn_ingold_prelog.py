@@ -126,6 +126,8 @@ def calculate_alf_cahn_ingold_prelog(
         alf = [atom]
         # we need to get 2 atoms - one for x-axis and one for xy-plane. If the molecule is 2d (like HCl), then we only need 1 atom.
         n_atoms_in_alf = 2 if len(atom.parent) > 2 else 1
+        if len(atom.parent) == 1:
+            raise ValueError("ALF cannot be calculated because there is only 1 atom. Two or more atoms are necessary.")
 
         for _ in range(n_atoms_in_alf):
             # make a list of atoms to which the central atom is bonded to that are not in alf
