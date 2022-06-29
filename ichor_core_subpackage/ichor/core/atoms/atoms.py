@@ -190,6 +190,10 @@ class Atoms(list):
         """
         return [atom.alf() for atom in self]
 
+    @property
+    def alf_list(self) -> list:
+        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf]
+
     def reindex(self):
         for i, atom in enumerate(self):
             atom.index = i + 1
