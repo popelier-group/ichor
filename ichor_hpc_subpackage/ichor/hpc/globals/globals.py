@@ -4,102 +4,12 @@ Mutable global variables are tricky things and should be used with caution, the 
 defined in Globals are carefully maintained by a series of parsers, formatters and checkers to try
 and make sure that the global variable is always valid.
 
-|Global Variable|Type|Default Value|Description|Notes|
-|---------------|----|-------------|-----------|-----|
-SYSTEM_NAME                     | str             | SYSTEM            | Name of the current system                                                                 |
-ALF_REFERENCE_FILE              | Path            | None, set automatically if not specified | Path to file containing atom hash and alf. Can contain data for multiple systems.                                          | gjf or xyz                                                                                      # todo: convert to Path
-ATOM_REFERENCE_FILE             | Path            | None, set automatically if not specified | Path to a .xyz, .gjf, or PointsDirecotry which contains geometry for current system|
-ALF                             | List[List[int]] | []                | ALF used for ichor containing atomic indices                                               | 1-index
-ATOMS                           | Atoms           | None              | Instance of Atoms from ALF_REFERENCE_FILE                                                  |
-CWD                             | Path            | os.getcwd()       | Current working directory                                                                  |
-N_ITERATIONS                    | int             | 1                 | Number of iterations to run adaptive sampling for                                          |
-POINTS_PER_ITERATION            | int             | 1                 | Number of points to add to training set per iteration                                      |
-OPTIMISE_PROPERTY               | str             | iqa               | Atomic property to optimise in adaptive sampling                                           |
-OPTIMISE_ATOM                   | str             | all               | Atom to optimise in adaptive sampling                                                      | Can be all or a specific atom
-ACTIVE_LEARNING_METHOD          | str             | epe               | Active learning method to use                                                              | Currently only epe is implemented
-NORMALISE                       | bool            | False             | Whether to normalise data before running through ferebus                                   | No longer implemented
-STANDARDISE                     | bool            | False             | Whether to standardise data before running through ferebus                                 | No longer implemented
-METHOD                          | str             | B3LYP             | Quantum mechanics method to use in Gaussian calculation                                    |
-BASIS_SET                       | str             | 6-31+g(d,p)       | Basis set to use in Gaussian calculation                                                   |
-KEYWORDS                        | List[str]       | []                | Keywords used to run Gaussian                                                              | 
-ENCOMP                          | int             | 3                 | Encomp setting to use for AIMAll                                                           | Can be 3 or 4
-BOAQ                            | str             | gs20              | Boaq setting used for AIMAll                                                               |
-IASMESH                         | str             | fine              | Iasmesh setting used for AIMAll                                                            |
-TRAINING_POINTS                 | int             | 500               | Number of training points to initialise training set with                                  | Not used by min_max or min_max_mean
-SAMPLE_POINTS                   | int             | 9000              | Number of sample points to initialise sample pool with                                     |
-VALIDATION_POINTS               | int             | 500               | Number of validation points to initialise validation set with                              |
-TRAINING_SET_METHOD             | List[str]       | [min_max_mean]    | Methods to initialise training set                                                         | Ran in order of the list                                                                        # todo: implement parser for reading from config
-SAMPLE_POOL_METHOD              | List[str]       | [random]          | Methods to initialise sample pool                                                          | Ran in order of the list                                                                        # todo: implement parser for reading from config
-VALIDATION_SET_METHOD           | List[str]       | [random]          | Methods to initialise validation set                                                       | Ran in order of the list                                                                        # todo: implement parser for reading from config
-KERNEL                          | str             | rbf-cyclic        | Kernel to use in ferebus                                                                   | Can only use rbf-cyclic currently
-FEREBUS_TYPE                    | str             | executable        | Tells ichor to run FEREBUS or FEREBUS.py                                                   | Currently executable implemented only                                                           # todo: implement python variant and convert to enum
-FEREBUS_VERSION                 | Version         | 7.0               | Current ferebus version                                                                    | Older versions use different training set and config files                                      # todo: reimplement older style for v3
-FEREBUS_LOCATION                | Path            | PROGRAMS/FEREBUS  | Path to ferebus executable                                                                 |
-GAUSSIAN_MEMORY_LIMIT           | str             | 1GB               | Memory limit for runnning Gaussian
-GAUSSIAN_NCORES             | int             | 2                 | Number of cores to run Gaussian                                                            |
-AIMALL_NCORES               | int             | 2                 | Number of cores to run AIMAll                                                              |
-FEREBUS_NCORES              | int             | 4                 | Number of cores to run FEREBUS                                                             |
-DLPOLY_NCORES               | int             | 1                 | Number of cores to run DLPOLY                                                              |
-CP2K_CORE_COUNT                 | int             | 8                 | Number of cores to run CP2K                                                                |
-GAUSSIAN_N_TRIES                | int             | 10                | Number of tries to run Gaussian job before giving up                                       | If negative will run infinitely
-AIMALL_N_TRIES                  | int             | 10                | Number of tries to run AIMAll job before giving up                                         | If negative will run infinitely
-SCRUB_POINTS                    | bool            | False             | Whether or not to remove any bad/failed points after Gaussian or AIMALL are ran            | Only implemented for Gaussian and Aimall currently. Default is false.
-FEREBUS_SWARM_SIZE              | int             | 50                | Swarm size for FEREBUS PSO                                                                 |
-FEREBUS_NUGGET                  | float           | 1.0e-10           | Nugget parameter for FEREBUS                                                               |
-FEREBUS_THETA_MIN               | float           | 0.0               | Min theta value for PSO initialisation in FEREBUS                                          |
-FEREBUS_THETA_MAX               | float           | 3.0               | Max theta value for PSO initialisation in FEREBUS                                          |
-MAX_NUGGET                      | float           | 1e-4              | ICHOR v2 iteratively increased nugget value when near singular matrix was encountered      | Can probably delete this # todo: delete MAX_NUGGET
-FEREBUS_INERTIA_WEIGHT          | float           | 0.72900           | Inertia weight for FEREBUS PSO                                                             |
-FEREBUS_COGNITIVE_LEARNING_RATE | float           | 1.49400           | Cognitive learning rate for FEREBUS PSO                                                    |
-FEREBUS_SOCIAL_LEARNING_RATE    | float           | 1.49400           | Social learning rate for FEREBUS PSO                                                       |
-FEREBUS_MEAN                    | str             | constant          | Mean function for ferebus to use                                                           | Currently only constant implemented
-FEREBUS_OPTIMISATION            | str             | pso               | Optimiser for ferebus                                                                      | Currently only PSO implemented
-FEREBUS_TOLERANCE               | float           | 1.0e-8            | Tolerance for relative difference calculation in ferebus PSO                               | 1e-8 is reasonably strict convergence criteria
-FEREBUS_STALL_ITERATIONS        | int             | 50                | Stall iterations for relative difference calculation in ferebus PSO                        | 50 is reasonably strict convergence criteria
-FEREBUS_CONVERGENCE             | int             | 20                | Old version of FEREBUS_STALL_ITERATIONS                                                    | Can probably delete # todo: delete FEREBUS_CONVERGENCE
-FEREBUS_MAX_ITERATION           | int             | 1000              | Number of iterations FEREBUS PSO should run for                                            |
-DLPOLY_VERSION                  | Version         | 4.09              | Current DLPOLY version                                                                     | Older versions of DLPOLY used different inputs # todo: reimplement older dlpoly version
-DLPOLY_NUMBER_OF_STEPS          | int             | 500               | Number of steps to run DLPOLY simulation for                                               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_TEMPERATURE              | int             | 0                 | Temperature to run DLPOLY simulation (K)                                                   | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_PRINT_EVERY              | int             | 1                 | DLPOLY output prints every `DLPOLY_PRINT_EVERY` timesteps                                  | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_TIMESTEP                 | float           | 0.001             | Length of timestep in DLPOLY simulation (ps)                                               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_LOCATION                 | Path            | PROGRAMS/DLPOLY.Z | Path to DLPOLY executable                                                                  | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_CHECK_CONVERGENCE        | bool            | False             | Older DLPOLY version allowed for convergence check in geometry optimisations               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_CONVERGENCE_CRITERIA     | int             | -1                | Older DLPOLY version allowed for convergence check in geometry optimisations               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_MAX_ENERGY               | float           | -1.0              | Older DLPOLY version allowed for convergence check in geometry optimisations               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_MAX_FORCE                | float           | -1.0              | Older DLPOLY version allowed for convergence check in geometry optimisations               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_RMS_FORCE                | float           | -1.0              | Older DLPOLY version allowed for convergence check in geometry optimisations               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_MAX_DISP                 | float           | -1.0              | Older DLPOLY version allowed for convergence check in geometry optimisations               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-DLPOLY_RMS_DISP                 | float           | -1.0              | Older DLPOLY version allowed for convergence check in geometry optimisations               | DLPOLY currently not implemented in v3                                                         # todo: implement interface to DLPOLY
-CP2K_INPUT                      | str             |                   | CP2K input geometry file                                                                   | CP2K interface not implemented in v3                                                           # todo: implement CP2K interface for v3
-CP2K_TEMPERATURE                | int             | 300               | Temperature to run CP2K simulation (K)                                                     | CP2K interface not implemented in v3                                                           # todo: implement CP2K interface for v3
-CP2K_STEPS                      | int             | 10000             | Number of timesteps to run CP2K simulation for                                             | CP2K interface not implemented in v3                                                           # todo: implement CP2K interface for v3
-CP2K_TIMESTEP                   | float           | 1.0               | Length of timestep in CP2K simulation (ps)                                                 | CP2K interface not implemented in v3                                                           # todo: implement CP2K interface for v3
-CP2K_METHOD                     | str             | BLYP              | QM method for CP2K simulation                                                              | CP2K interface not implemented in v3                                                           # todo: implement CP2K interface for v3
-CP2K_BASIS_SET                  | str             | 6-31G*            | Basis set for CP2K simulation                                                              | CP2K interface not implemented in v3                                                           # todo: implement CP2K interface for v3
-CP2K_DATA_DIR                   | str             |                   | Path to CP2K data directory                                                                | CP2K interface not implemented in v3                                                           # todo: implement CP2K interface for v3
-WARN_RECOVERY_ERROR             | bool            | True              | Switch on warnings for large recovery errors                                               | Warnings not currently implemented in v3                                                       # todo: implement recovery error warning for v3
-RECOVERY_ERROR_THRESHOLD        | float           | 0.00038           | Threshold to warn user about large recover errors (Ha)                                     | Warnings not currently implemented in v3                                                       # todo: implement recovery error warning for v3
-WARN_INTEGRATION_ERROR          | bool            | True              | Switch on warnings for large integration errors                                            | Warnings not currently implemented in v3                                                       # todo: implement integration error warning for v3
-INTEGRATION_ERROR_THRESHOLD     | float           | 0.001             | Threshold to warn user about large integration erorrs                                      | Warnings not currently implemented in v3                                                       # todo: implement integrations error warning for v3
-LOG_WARNINGS                    | bool            | False             | Switch to write warnings to log file                                                       | Warnings not currently implemented in v3                                                       # todo: implement warnings for v3
-OS                              | OS              | OS.Linux          | Current operating system                                                                   | Should automatically detect between linux, macos and windows
-DISABLE_PROBLEMS                | bool            | False             | Disables showing problems at the top of the main menu                                      | Problems currently not implemented for v3                                                      # todo: implement problems for v3
-UID                             | UUID            | Arguments.uid     | Unique ID for ichor instance                                                               | Very important variable for making sure ichor reads and writes data to the correct location
-IQA_MODELS                      | bool            | False             | Deprecated variable for older ferebus version to toggle whether ichor is making iqa models | No longer required # todo: delete `IQA_MODELS`
-DROP_COMPUTE                  | bool            | False             | Toggle whether to use drop-n-compute                                                       | Drop-n-compute not currently implemented for v3                                                # todo: implement drop-n-compute interface for v3
-DROP_COMPUTE_LOCATION         | Path            |                   | Location of drop-n-compute directory                                                       | Drop-n-compute not currently implemented for v3                                                # todo: implement drop-n-compute interface for v3
-GIT_USERNAME                    | str             |                   | Git username for cloning popelier-group repositories                                       | Shouldn't be needed if GIT_TOKEN is defined
-GIT_PASSWORD                    | str             |                   | Git password for cloning popelier-group repositories                                       | Git has deprecated use of passwords on remote machines                                         # todo: delete `GIT_PASSWORD`
-GIT_TOKEN                       | str             | ghp_...           | Git token for cloning popelier-group repositories                                          |
-INCLUDE_NODES                   | List[str]       | []                | Node whitelist for ichor to run jobs on                                                    |
-EXCLUDE_NODES                   | List[str]       | []                | Node blacklist for ichor not to run jobs on                                                |
+docs: globals.md
 """
 
 import inspect
 import os
 import platform
-from ast import literal_eval
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
@@ -114,8 +24,6 @@ from ichor.hpc.globals import checkers, formatters, parsers
 from ichor.hpc.globals.config_provider import ConfigProvider
 from ichor.hpc.globals.os import OS
 from ichor.hpc.globals.parsers import read_alf
-
-# todo: automatically generate md table from global variables into 'doc/GLOBALS.md'
 
 
 class GlobalVariableError(Exception):
@@ -145,40 +53,40 @@ class Globals:
     # for saving the location the global variables were loaded from
     _config_file: Optional[Path] = None
 
-    SYSTEM_NAME: str = "SYSTEM"
+    SYSTEM_NAME: str = "SYSTEM" # Name of the current system
 
-    _POINTS_LOCATION: Path = (
-        None  # a file / directory which contains geometries
+    _POINTS_LOCATION: Path = ( # a file / directory which contains geometries
+        None
     )
-    _ATOMS_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties, which then modified self._ATOMS
-    _ATOMS: Atoms = None  # set automatically if not defined
-    _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties
-    _ALF: List[ALF] = None
+    _ATOMS_REFERENCE_FILE: Path = None  # Path to a .xyz, .gjf, or PointsDirecotry which contains geometry for current system, set automatically if not defined. Can be manually defined in config properties, which then modified self._ATOMS
+    _ATOMS: Atoms = None  # Instance of Atoms from ALF_REFERENCE_FILE, set automatically if not defined
+    _ALF_REFERENCE_FILE: Path = None  # Path to file containing atom hash and alf. Can contain data for multiple systems, set automatically if not defined. Can be manually defined in config properties
+    _ALF: List[ALF] = None  # ALF used for ichor containing atomic indices
 
-    CWD: Path = Path(os.getcwd())
+    CWD: Path = Path(os.getcwd())  # Current working directory
 
-    N_ITERATIONS: int = 1
-    POINTS_PER_ITERATION: int = 1
+    N_ITERATIONS: int = 1  # Number of iterations to run adaptive sampling for
+    POINTS_PER_ITERATION: int = 1  # Number of points to add to training set per iteration
 
-    BATCH_SIZE: int = 5000
+    BATCH_SIZE: int = 5000  # Some calculations will split up sample set calculations into batches to save memory
 
-    OPTIMISE_PROPERTY: str = "iqa"
-    OPTIMISE_ATOM: str = "all"
+    OPTIMISE_PROPERTY: str = "iqa"  # Atomic property to optimise in adaptive sampling
+    OPTIMISE_ATOM: str = "all"  # Atom to optimise in adaptive sampling
 
-    ACTIVE_LEARNING_METHOD: str = "epe"
+    ACTIVE_LEARNING_METHOD: str = "epe"  # Active learning method to use
 
-    MAX_RUNNING_TASKS: int = -1  # set to <= 0 for unlimited tasks
+    MAX_RUNNING_TASKS: int = -1  # Number of concurrent tasks to run in queueing system, set to <= 0 for unlimited tasks
 
-    NORMALISE: bool = False
-    STANDARDISE: bool = False
+    NORMALISE: bool = False  # Whether to normalise data before running through ferebus, currently not used
+    STANDARDISE: bool = False  # Whether to standardise data before running through ferebus, currently not used
 
-    METHOD: str = "B3LYP"
-    BASIS_SET: str = "6-31+g(d,p)"
-    KEYWORDS: List[str] = ["nosymm"]
+    METHOD: str = "B3LYP"  # Quantum mechanics method to use in quantum calculations
+    BASIS_SET: str = "6-31+g(d,p)"  # Basis set to use in quantum calculations
+    KEYWORDS: List[str] = ["nosymm"]  # Keywords used to run Gaussian
 
-    AIMALL_ENCOMP: int = 3
-    AIMALL_BOAQ: str = "gs20"
-    AIMALL_IASMESH: str = "fine"
+    AIMALL_ENCOMP: int = 3  # Encomp setting to use for AIMAll
+    AIMALL_BOAQ: str = "gs20"  # Boaq setting used for AIMAll
+    AIMALL_IASMESH: str = "fine"  # Iasmesh setting used for AIMAll
     AIMALL_BIM: str = "auto"
     AIMALL_CAPTURE: str = "auto"
     AIMALL_EHREN: int = 0
@@ -205,98 +113,98 @@ class Globals:
     AIMALL_SAW: bool = False
     AIMALL_AUTONNACPS: bool = True
 
-    TRAINING_POINTS: int = 500
-    SAMPLE_POINTS: int = 9000
-    VALIDATION_POINTS: int = 500
+    TRAINING_POINTS: int = 500  # Number of training points to initialise training set with
+    SAMPLE_POINTS: int = 9000  # Number of sample points to initialise sample pool with
+    VALIDATION_POINTS: int = 500  # Number of validation points to initialise validation set with
 
-    TRAINING_SET_METHOD: List[str] = ["min_max_mean"]
-    SAMPLE_POOL_METHOD: List[str] = ["random"]
-    VALIDATION_SET_METHOD: List[str] = ["random"]
+    TRAINING_SET_METHOD: List[str] = ["min_max_mean"]  # Methods to initialise training set
+    SAMPLE_POOL_METHOD: List[str] = ["random"]  # Methods to initialise sample pool
+    VALIDATION_SET_METHOD: List[str] = ["random"]  # Methods to initialise validation set
 
-    KERNEL: str = "periodic"  # rbf or rbf-cyclic currently
-    FEREBUS_TYPE: str = (
+    KERNEL: str = "periodic"  # Kernel to use in ferebus
+    FEREBUS_TYPE: str = (  # Tells ichor to run FEREBUS or FEREBUS.py
         "executable"  # executable (FEREBUS) or python (FEREBUS.py)
     )
-    FEREBUS_VERSION: Version = Version("7.0")
-    FEREBUS_LOCATION: Path = None
+    FEREBUS_VERSION: Version = Version("7.0")  # Current ferebus version, currently does nothing
+    FEREBUS_LOCATION: Path = None  # Path to custom ferebus executable
 
-    FEREBUS_LIKELIHOOD: str = "concentrated"
+    FEREBUS_LIKELIHOOD: str = "concentrated"  # Likelihood function to use in ferebus
 
-    GAUSSIAN_MEMORY_LIMIT: str = "1GB"
+    GAUSSIAN_MEMORY_LIMIT: str = "1GB"  # Memory limit for runnning Gaussian
 
     # CORE COUNT SETTINGS FOR RUNNING PROGRAMS (SUFFIX CORE_COUNT)
-    GAUSSIAN_NCORES: int = 2
-    AIMALL_NCORES: int = 2
-    FEREBUS_NCORES: int = 4
-    DLPOLY_NCORES: int = 1
-    CP2K_NCORES: int = 8
-    PYSCF_NCORES: int = 2
-    MORFI_NCORES: int = 4
-    AMBER_NCORES: int = 1
-    TYCHE_NCORES: int = 1
+    GAUSSIAN_NCORES: int = 2  # Number of cores to run Gaussian
+    AIMALL_NCORES: int = 2  # Number of cores to run AIMAll
+    FEREBUS_NCORES: int = 4  # Number of cores to run FEREBUS
+    DLPOLY_NCORES: int = 1  # Number of cores to run DLPOLY
+    CP2K_NCORES: int = 8  # Number of cores to run CP2K
+    PYSCF_NCORES: int = 2  # Number of cores to run PySCF
+    MORFI_NCORES: int = 4  # Number of cores to run Morfi
+    AMBER_NCORES: int = 1  # Number of cores to run AMBER
+    TYCHE_NCORES: int = 1  # Number of cores to run TYCHE
 
     # N TRIES SETTINGS FOR RETRYING TO RUN PROGRAMS
-    GAUSSIAN_N_TRIES: int = 10
-    AIMALL_N_TRIES: int = 10
+    GAUSSIAN_N_TRIES: int = 10  # Number of tries to run Gaussian job before giving up, currently not used
+    AIMALL_N_TRIES: int = 10  # Number of tries to run AIMAll job before giving up, currently not used
 
     # WHETHER OR NOT TO RERUN POINTS THAT HAVE FAILED (UP TO GAUSSIAN_N_TRIES, AIMALL_N_TRIES)
-    RERUN_POINTS = False
+    RERUN_POINTS = False  # Whether to rerun points that have failed, currently not used
     # WHETHER OR NOT TO MOVE POINTS FOR WHICH AIMALL OR GAUSSIAN HAVE FAILED OR CONTAIN BAD DATA.
-    SCRUB_POINTS: bool = True
+    SCRUB_POINTS: bool = True  # Whether to use points scrubbing
 
-    FEREBUS_SWARM_SIZE: int = (
+    FEREBUS_SWARM_SIZE: int = (  # Swarm size for FEREBUS PSO
         50  # If negative >> Size dynamically allocated by FEREBUS
     )
-    FEREBUS_NUGGET: float = 1.0e-10  # Default value for FEREBUS nugget
-    FEREBUS_THETA_MIN: float = (
+    FEREBUS_NUGGET: float = 1.0e-10  # Nugget parameter for FEREBUS
+    FEREBUS_THETA_MIN: float = (  # Min theta value for PSO initialisation in FEREBUS
         0.0  # Minimum theta value for initialisation (best to keep 0)
     )
-    FEREBUS_THETA_MAX: float = 3.0  # Maximum theta value for initialisation
+    FEREBUS_THETA_MAX: float = 3.0  # Max theta value for PSO initialisation in FEREBUS
 
-    MAX_NUGGET: float = 1e-4
+    MAX_NUGGET: float = 1e-4  # ICHOR v2 iteratively increased nugget value when near singular matrix was encountered, not currently used
 
-    FEREBUS_INERTIA_WEIGHT: float = 0.72900
-    FEREBUS_COGNITIVE_LEARNING_RATE: float = 1.49400
-    FEREBUS_SOCIAL_LEARNING_RATE: float = 1.49400
+    FEREBUS_INERTIA_WEIGHT: float = 0.72900  # Inertia weight for FEREBUS PSO
+    FEREBUS_COGNITIVE_LEARNING_RATE: float = 1.49400  # Cognitive learning rate for FEREBUS PSO
+    FEREBUS_SOCIAL_LEARNING_RATE: float = 1.49400  # Social learning rate for FEREBUS PSO
 
-    FEREBUS_MEAN: str = "constant"
-    FEREBUS_OPTIMISATION: str = "pso"
+    FEREBUS_MEAN: str = "constant"  # Mean function for ferebus to use
+    FEREBUS_OPTIMISATION: str = "pso"  # Optimiser for ferebus
 
-    FEREBUS_TOLERANCE: float = 1.0e-8
-    FEREBUS_STALL_ITERATIONS: int = 20
-    FEREBUS_CONVERGENCE: int = 20
-    FEREBUS_MAX_ITERATION: int = 1000
+    FEREBUS_TOLERANCE: float = 1.0e-8  # Tolerance for relative difference calculation in ferebus PSO
+    FEREBUS_STALL_ITERATIONS: int = 20  # Stall iterations for relative difference calculation in ferebus PSO
+    FEREBUS_CONVERGENCE: int = 20  # Old version of FEREBUS_STALL_ITERATIONS, not currently used
+    FEREBUS_MAX_ITERATION: int = 1000  # Number of iterations FEREBUS PSO should run for
 
     # DLPOLY RUNTIME SETTINGS (PREFIX DLPOLY)
-    DLPOLY_VERSION: Version = Version("4.09")
+    DLPOLY_VERSION: Version = Version("4.09")  # Current DLPOLY version, no longer support < 4.09
 
     DLPOLY_NUMBER_OF_STEPS: int = 500  # Number of steps to run simulation for
-    DLPOLY_TEMPERATURE: int = (
+    DLPOLY_TEMPERATURE: int = (  # Temperature to run DLPOLY simulation (K)
         0  # If set to 0, will perform geom opt but default to 10 K
     )
-    DLPOLY_PRINT_EVERY: int = 1  # Print trajectory and stats every n steps
-    DLPOLY_TIMESTEP: float = 0.001  # in ps
-    DLPOLY_LOCATION: Path = None
-    DLPOLY_HOOVER: float = 0.04
+    DLPOLY_PRINT_EVERY: int = 1  # DLPOLY output prints every `DLPOLY_PRINT_EVERY` timesteps
+    DLPOLY_TIMESTEP: float = 0.001  # Length of timestep in DLPOLY simulation (ps)
+    DLPOLY_LOCATION: Path = None  # Path to custom DLPOLY executable
+    DLPOLY_HOOVER: float = 0.04  # Parameter for timecon parameter of Nose-Hoover thermostat in DLPOLY
 
-    DLPOLY_CHECK_CONVERGENCE: bool = False
-    DLPOLY_CONVERGENCE_CRITERIA: int = -1
-    DLPOLY_CELL_SIZE: float = 25.0
+    DLPOLY_CHECK_CONVERGENCE: bool = False  # Flag to check for convergence in DLPOLY geometry optimisations
+    DLPOLY_CONVERGENCE_CRITERIA: int = -1  # Predefined convergence criteria taken from: https://psicode.org/psi4manual/master/optking.html#table-optkingconv (criteria number is index of table row starting at 1, <= 0 criteria must be defined explicitly)
+    DLPOLY_CELL_SIZE: float = 25.0  # Cell size for DLPOLY simulation
 
-    DLPOLY_MAX_ENERGY: float = -1.0
-    DLPOLY_MAX_FORCE: float = -1.0
-    DLPOLY_RMS_FORCE: float = -1.0
-    DLPOLY_MAX_DISP: float = -1.0
-    DLPOLY_RMS_DISP: float = -1.0
+    DLPOLY_MAX_ENERGY: float = -1.0  # Max energy threshold for convergence criteria in DLPOLY geometry optimisations
+    DLPOLY_MAX_FORCE: float = -1.0  # Max force threshold for convergence criteria in DLPOLY geometry optimisations
+    DLPOLY_RMS_FORCE: float = -1.0  # RMS force threshold for convergence criteria in DLPOLY geometry optimisations
+    DLPOLY_MAX_DISP: float = -1.0  # Max displacement threshold for convergence criteria in DLPOLY geometry optimisations
+    DLPOLY_RMS_DISP: float = -1.0  # RMS displacement threshold for convergence criteria in DLPOLY geometry optimisations
 
     # CP2K SETTINGS
-    CP2K_INPUT: str = ""
-    CP2K_TEMPERATURE: int = 300  # K
-    CP2K_STEPS: int = 10000
-    CP2K_TIMESTEP: float = 1.0  # fs
-    CP2K_METHOD: str = "BLYP"
-    CP2K_BASIS_SET: str = "6-31G*"
-    CP2K_DATA_DIR: str = ""
+    CP2K_INPUT: str = ""  # CP2K input geometry file, not currently used
+    CP2K_TEMPERATURE: int = 300  # Temperature to run CP2K simulation (K)
+    CP2K_STEPS: int = 10000  # Number of timesteps to run CP2K simulation for
+    CP2K_TIMESTEP: float = 1.0  # Length of timestep in CP2K simulation (fs)
+    CP2K_METHOD: str = "BLYP"  # QM method for CP2K simulation
+    CP2K_BASIS_SET: str = "6-31G*"  # Basis set for CP2K simulation
+    CP2K_DATA_DIR: str = ""  # Path to CP2K data directory
 
     # AMBER SETTINGS
     AMBER_TEMPERATURE: float = 300  # K
@@ -314,45 +222,41 @@ class Globals:
     OPTIMUM_ENERGY_FILE: Path = None
 
     # Recovery and Integration Errors
-    WARN_RECOVERY_ERROR: bool = True
-    RECOVERY_ERROR_THRESHOLD: float = (
+    WARN_RECOVERY_ERROR: bool = True  # Switch on warnings for large recovery errors
+    RECOVERY_ERROR_THRESHOLD: float = (  # Threshold to warn user about large recover errors (Ha)
         1.0 / constants.ha_to_kj_mol
     )  # Ha (1.0 kJ/mol)
 
-    WARN_INTEGRATION_ERROR: bool = True
-    INTEGRATION_ERROR_THRESHOLD: float = 0.001
+    WARN_INTEGRATION_ERROR: bool = True  # Switch on warnings for large integration errors
+    INTEGRATION_ERROR_THRESHOLD: float = 0.001  # Threshold to warn user about large integration erorrs
 
     # Activate Warnings when making models
-    LOG_WARNINGS: bool = (
+    LOG_WARNINGS: bool = (  # Switch to write warnings to log file
         False  # Gets set in create_ferebus_directories_and_submit
     )
 
-    OS: OS = OS.Linux
+    OS: OS = OS.Linux  # Current operating system
 
-    DISABLE_PROBLEMS: bool = False
-    UID: UUID = uuid4()
+    DISABLE_PROBLEMS: bool = False  # Disables showing problems at the top of the main menu
+    UID: UUID = uuid4()  # Unique ID for ichor instance
 
-    IQA_MODELS: bool = False
+    IQA_MODELS: bool = False  # Deprecated variable for older ferebus version to toggle whether ichor is making iqa models
 
-    DROP_COMPUTE: bool = False
-    DROP_COMPUTE_LOCATION: Path = ""
+    DROP_COMPUTE: bool = False  # Toggle whether to use drop-n-compute
+    DROP_COMPUTE_LOCATION: Path = ""  # Location of drop-n-compute directory
     DROP_COMPUTE_NTRIES: int = 1000
 
-    PANDORA_LOCATION: Path = ""
-    PANDORA_CCSDMOD: str = "ccsdM"
-    MORFI_ANGULAR: int = 5
-    MORFI_RADIAL: float = 10.0
+    PANDORA_LOCATION: Path = ""  # Location of pandora script
+    PANDORA_CCSDMOD: str = "ccsdM"  # CCSD modification algorithm for pandora
+    MORFI_ANGULAR: int = 5  # Angular parameter for atomic integration in morfi
+    MORFI_RADIAL: float = 10.0  # Radial parameter for atomic integration in morfi
     MORFI_ANGULAR_H: int = 5
     MORFI_RADIAL_H: float = 8.0
 
     ADD_DISPERSION_TO_IQA: bool = True
 
-    GIT_USERNAME: str = ""
-    GIT_PASSWORD: str = ""
-    GIT_TOKEN: str = " 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"
-
-    INCLUDE_NODES: List[str] = []
-    EXCLUDE_NODES: List[str] = []
+    INCLUDE_NODES: List[str] = []  # Include node list for running ichor jobs
+    EXCLUDE_NODES: List[str] = []  # Exclude node list for running ichor jobs
 
     # fmt: on
 
@@ -837,15 +741,15 @@ class Globals:
         super(Globals, self).__setattr__(name, value)
 
     def __enter__(self, *args, **kwargs):
-        from ichor.hpc import globals
+        from ichor import hpc
 
-        self._save_globals = Globals(globals_instance=globals.GLOBALS)
-        globals.GLOBALS.init_from_globals(self)
+        self._save_globals = Globals(globals_instance=hpc.GLOBALS)
+        hpc.GLOBALS.init_from_globals(self)
 
     def __exit__(self, type, value, traceback):
-        from ichor.hpc import globals
+        from ichor import hpc
 
-        globals.GLOBALS.init_from_globals(self._save_globals)
+        hpc.GLOBALS.init_from_globals(self._save_globals)
 
 
 class NoAtomsFound(Exception):
@@ -856,34 +760,32 @@ class NoAtomsFound(Exception):
 def get_atoms(atoms_reference_path: Path) -> Atoms:
     """Gets an Atoms instance from an atom_reference_path that was given."""
 
-    if atoms_reference_path.exists():
-
-        if atoms_reference_path.is_file():
-            if atoms_reference_path.suffix == ".gjf":
-                from ichor.core.files import GJF
-
-                return GJF(atoms_reference_path).atoms
-            elif atoms_reference_path.suffix == ".xyz":
-                from ichor.core.files import XYZ
-
-                return XYZ(atoms_reference_path).atoms
-            else:
-                raise ValueError(
-                    f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file."
-                )
-
-        elif atoms_reference_path.is_dir():
-            from ichor.core.files import PointsDirectory
-
-            return PointsDirectory(atoms_reference_path)[0].atoms
-
-        # we should have returned by now, but return None if no file matches criteria
-        return
-
-    else:
+    if not atoms_reference_path.exists():
         raise FileNotFoundError(
             f"ATOMS reference file with path {atoms_reference_path} is not found on disk."
         )
+
+    if atoms_reference_path.is_file():
+        if atoms_reference_path.suffix == ".gjf":
+            from ichor.core.files import GJF
+
+            return GJF(atoms_reference_path).atoms
+        elif atoms_reference_path.suffix == ".xyz":
+            from ichor.core.files import XYZ
+
+            return XYZ(atoms_reference_path).atoms
+        else:
+            raise ValueError(
+                f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file."
+            )
+
+    elif atoms_reference_path.is_dir():
+        from ichor.core.files import PointsDirectory
+
+        return PointsDirectory(atoms_reference_path)[0].atoms
+
+    # we should have returned by now, but return None if no file matches criteria
+    return
 
 
 @lru_cache()
@@ -898,16 +800,15 @@ def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
         raise FileNotFoundError("The given path does not exist on disk.")
     for file_or_dir in path.iterdir():
 
-        if file_or_dir.is_file():
-            if file_or_dir.suffix in [".gjf", ".xyz"]:
-                return file_or_dir.resolve()
-        elif file_or_dir.is_dir():
-            for p in file_or_dir.iterdir():
-                if p.is_dir():
-                    for f1 in p.iterdir():
-                        if f1.suffix in [".gjf", ".xyz"]:
-                            return f1.resolve()
-                elif p.suffix == ".gjf" or path.suffix == ".xyz":
-                    return p.resolve()
+        if file_or_dir.is_file() and file_or_dir.suffix in [".gjf", ".xyz"]:
+            return file_or_dir.resolve()
+            # elif file_or_dir.is_dir():
+            #     for p in file_or_dir.iterdir():
+            #         if p.is_dir():
+            #             for f1 in p.iterdir():
+            #                 if f1.suffix in [".gjf", ".xyz"]:
+            #                     return f1.resolve()
+            #         elif p.suffix == ".gjf" or path.suffix == ".xyz":
+            #             return p.resolve()
     # return None if no file that matches criteria was found.
     raise FileNotFoundError("Could not find atoms reference file")
