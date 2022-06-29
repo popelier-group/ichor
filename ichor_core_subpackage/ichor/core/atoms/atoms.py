@@ -191,7 +191,8 @@ class Atoms(list):
         return [atom.alf() for atom in self]
 
     @property
-    def alf_list(self) -> list:
+    def alf_list(self) -> List[List[int]]:
+        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
         return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf]
 
     def reindex(self):
