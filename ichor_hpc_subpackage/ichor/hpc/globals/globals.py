@@ -1,3 +1,5 @@
+# TODO: maybe move to cli?
+
 """
 Global variables are the backbone of ichor and are used throughout
 Mutable global variables are tricky things and should be used with caution, the global variables
