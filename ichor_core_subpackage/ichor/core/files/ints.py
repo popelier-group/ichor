@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Union, Optional
+import numpy as np
 
 from ichor.core.atoms import Atoms
 from ichor.core.common.sorting.natsort import ignore_alpha
@@ -61,6 +62,25 @@ class INTs(HasProperties, OrderedDict, Directory):
     def properties(self) -> Dict[str, Dict[str, float]]:
         return {
             atom_name: int_file_instance.properties
+            for atom_name, int_file_instance in self.items()
+        }
+
+    def local_spherical_multipoles(
+        self, C_matrix: Optional[np.ndarray] = None
+    ) -> Dict[str, float]:
+        """Rotates global spherical multipoles into local spherical multipoles. Optionally
+        a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
+        (as read in from the int file) will be used (if it exists).
+
+        :param C_matrix: Optional rotation matrix to be used to rotate multipoles.
+        :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
+            with the int file does not exist. Then we cannot calculate multipoles.
+        """
+
+        # if C_matrix is None, then the self.parent will be used by default in INT class
+        # to calculate the C matrix
+        return {
+            atom_name: int_file_instance.local_spherical_multipoles(C_matrix)
             for atom_name, int_file_instance in self.items()
         }
 
