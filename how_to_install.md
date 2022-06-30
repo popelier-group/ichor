@@ -9,8 +9,9 @@ To install the core subpackage, you will need to first have to make a new conda 
 ## Loading in anaconda on csf3
 
 ```
-module load apps/binapps/anaconda3/2020.07
+module load apps/binapps/anaconda3/2021.11
 ```
+**Make sure to load in this version of anaconda, as older versions might cause problems when installing.**
 
 Then you will need to do
 
@@ -24,6 +25,7 @@ If the terminal tells you that `conda has not been properly initialized`, then d
 ```
 conda init
 ```
+
 
 ## Making new conda environment
 
