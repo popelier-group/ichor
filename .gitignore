@@ -39,3 +39,4 @@ dist
 *venv*
 *egg-info*
 test.*
+.pytest_cache
