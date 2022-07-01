@@ -6,7 +6,7 @@ from ichor.core.common.str import get_digits
 import numpy as np
 from ichor.core.common.functools import classproperty
 from ichor.core.common.types import Coordinates3D
-from ichor.core.files.file import FileContents, ReadFile, File
+from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasProperties
 from ichor.core.multipoles import (
     rotate_dipole,
@@ -22,7 +22,7 @@ from ichor.core.constants import (
     spherical_hexadecapole_labels,
 )
 from ichor.core.atoms import Atoms
-from ichor.core.common.io import relpath, convert_to_path
+from ichor.core.common.io import relpath
 from warnings import warn
 
 
@@ -63,7 +63,16 @@ class INT(HasProperties, ReadFile):
     """
 
     def __init__(self, path: Union[Path, str], parent: Atoms = None):
+
+        # calls File.__init__(), which subsequently calls PathObject.__init__()
         super().__init__(path)
+
+        # for backwards compatibility with old ICHOR
+        # if a .bak file exists (which contains the original AIMALL output)
+        # read the .int.bak instead of the .int (because the .int is overwritten to be in json format)
+        # TODO: remove this once json is no longer needed
+        if self.path.with_suffix(f"{self.filetype}.bak").exists():
+            self.path = self.path.with_suffix(f"{self.filetype}.bak")
 
         # need to have this to rotate multipole moments as they require
         # the whole molecular geometry (int files do not contain that.)
@@ -151,6 +160,7 @@ class INT(HasProperties, ReadFile):
         """Read an .int file. The first time that the .int file is read successfully, a json file with the
         important information is written in the same directory.
         """
+
         with open(self.path, "r") as f:
             line = next(f)
             while "Current Directory" not in line:
