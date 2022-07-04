@@ -104,26 +104,20 @@ class Models(Directory, list):
 
     @x_to_features
     def predict(self, x_test) -> Dict[str, Dict[str, np.ndarray]]:
-        return ModelsResult(
-            {
-                atom: {
-                    model.type: model.predict(features) for model in self[atom]
-                }
-                for atom, features in x_test.items()
-            }
-        )
+        """Returns dictionary of {"atom": {"property": [values]}}"""
+        return {
+            atom: {model.type: model.predict(features) for model in self[atom]}
+            for atom, features in x_test.items()
+        }
 
     @x_to_features
     def variance(self, x_test) -> Dict[str, Dict[str, np.ndarray]]:
-        return ModelsResult(
-            {
-                atom: {
-                    model.type: model.variance(features)
-                    for model in self[atom]
-                }
-                for atom, features in x_test.items()
+        return {
+            atom: {
+                model.type: model.variance(features) for model in self[atom]
             }
-        )
+            for atom, features in x_test.items()
+        }
 
     def get_features_dict(
         self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, HasAtoms, dict]
@@ -191,10 +185,9 @@ class Models(Directory, list):
             return list.__getitem__(self, args)
 
     def __iter__(self):
-        if len(self) == 0:
-            return Directory.__iter__(self)
-        else:
-            return list.__iter__(self)
+        return (
+            Directory.__iter__(self) if len(self) == 0 else list.__iter__(self)
+        )
 
 
 class ModelsView(Models):
