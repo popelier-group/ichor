@@ -145,7 +145,9 @@ class Model(ReadFile, WriteFile, File):
                 if line.startswith(
                     "atom"
                 ):  # atom for which a GP model was made eg. O1
-                    self.atom_name = self.atom_name or line.split()[1].capitalize()
+                    self.atom_name = (
+                        self.atom_name or line.split()[1].capitalize()
+                    )
                     continue
 
                 if (
@@ -315,6 +317,11 @@ class Model(ReadFile, WriteFile, File):
         :return: The 0-indexed np.ndarray corresponding to the alf of the atom.
         """
         return np.array(self.alf) - 1
+
+    @property
+    def atom(self) -> str:
+        """alias for atom_name"""
+        return self.atom_name
 
     @property
     def atom_num(self) -> int:
