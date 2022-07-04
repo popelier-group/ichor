@@ -1,9 +1,11 @@
 import numpy as np
+import pandas as pd
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.models import Models
-from ichor.hpc.active_learning.active_learning_method import \
-    ActiveLearningMethod
+from ichor.hpc.active_learning.active_learning_method import (
+    ActiveLearningMethod,
+)
 
 
 # todo: update docstrings
@@ -37,12 +39,16 @@ class UncertaintyQuery(ActiveLearningMethod):
                 (
                     unc,
                     np.abs(
-                        self.models.predict(features_dict).reduce(-1)
+                        pd.DataFrame(self.models.predict(features_dict))
+                        .sum()
+                        .sum()
                         / np.sqrt(
-                            self.models.variance(features_dict).reduce(-1)
+                            pd.DataFrame(self.models.variance(features_dict))
+                            .sum()
+                            .sum()
                         )
                     ),
-                )
+                ),
             )
 
         # sort the array from smallest to largest, but give only the indeces back. Then flip the indeces, so that

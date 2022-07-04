@@ -3,12 +3,13 @@ from typing import Dict
 
 import numpy as np
 import numpy.linalg as la
+import pandas as pd
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
-from ichor.core.common.io import mkdir
-from ichor.core.models import Model, Models, ModelsResult
-from ichor.hpc.active_learning.active_learning_method import \
-    ActiveLearningMethod
+from ichor.core.models import Model, Models
+from ichor.hpc.active_learning.active_learning_method import (
+    ActiveLearningMethod,
+)
 from scipy.spatial.distance import cdist
 
 """
@@ -76,11 +77,11 @@ class MEPE(ActiveLearningMethod):
     def name(self) -> str:
         return "epe"
 
-    def cv_error(self, x: Dict[str, np.ndarray]) -> ModelsResult:
+    def cv_error(self, x: Dict[str, np.ndarray]) -> pd.DataFrame:
         """Eq. 20. Calculate cross validation error."""
-        cv_errors = ModelsResult()
+        cv_errors = {}
         for atom in self.models.atom_names:
-            atom_cv_errors = ModelsResult()
+            atom_cv_errors = {}
             for model in self.models[atom]:
                 cv = cross_validation(model)
                 distances = cdist(x[model.atom_name], model.x)
@@ -90,7 +91,7 @@ class MEPE(ActiveLearningMethod):
                     )
                 ]
             cv_errors[atom] = atom_cv_errors
-        return cv_errors
+        return pd.DataFrame(cv_errors)
 
     @property
     def alpha(self) -> float:
@@ -112,8 +113,8 @@ class MEPE(ActiveLearningMethod):
             ) as f:  # the previous iterations data is stored as json in cv_errors_file
                 obj = json.load(f)
                 npoints = obj["added_points"]
-                cv_errors = ModelsResult(obj["cv_errors"])
-                predictions = ModelsResult(obj["predictions"])
+                cv_errors = pd.DataFrame(obj["cv_errors"])
+                predictions = pd.DataFrame(obj["predictions"])
         except json.JSONDecodeError:
             return 0.5
 
@@ -147,14 +148,14 @@ class MEPE(ActiveLearningMethod):
         for batched_points in self.batch_points(points):
             features_dict = self.models.get_features_dict(batched_points)
             cv_errors = self.cv_error(features_dict)
-            variance = self.models.variance(features_dict)
+            variance = pd.DataFrame(self.models.variance(features_dict))
             alpha = self.alpha
             """Eq. 23"""
             # todo: get max (and max indices) from batch
             epe = np.hstack(
                 (
                     epe,
-                    (alpha * cv_errors - (1.0 - alpha) * variance).reduce(-1),
+                    (alpha * cv_errors - (1.0 - alpha) * variance).sum().sum(),
                 )
             )
 

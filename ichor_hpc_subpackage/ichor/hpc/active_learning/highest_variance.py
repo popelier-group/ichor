@@ -1,9 +1,11 @@
 import numpy as np
+import pandas as pd
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.models import Models
-from ichor.hpc.active_learning.active_learning_method import \
-    ActiveLearningMethod
+from ichor.hpc.active_learning.active_learning_method import (
+    ActiveLearningMethod,
+)
 
 
 class HighestVariance(ActiveLearningMethod):
@@ -33,7 +35,12 @@ class HighestVariance(ActiveLearningMethod):
         for batched_points in self.batch_points(points):
             features_dict = self.models.get_features_dict(batched_points)
             variance = np.hstack(
-                (variance, self.models.variance(features_dict).reduce(-1))
+                (
+                    variance,
+                    pd.DataFrame(self.models.variance(features_dict))
+                    .sum()
+                    .sum(),
+                )
             )
 
         # sort the array from smallest to largest, but give only the indeces back. Then flip the indeces, so that

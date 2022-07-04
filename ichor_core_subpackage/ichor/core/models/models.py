@@ -10,7 +10,6 @@ from ichor.core.common.str import get_digits
 from ichor.core.files import Directory, HasAtoms
 from ichor.core.itypes import F
 from ichor.core.models.model import Model
-from ichor.core.models.result import ModelsResult
 
 
 class DimensionError(ValueError):
