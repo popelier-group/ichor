@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import numpy as np
+import pandas as pd
 from ichor.core.atoms import Atoms, ListOfAtoms
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.common.str import get_digits
@@ -102,21 +103,28 @@ class Models(Directory, list):
         return self[0].system
 
     @x_to_features
-    def predict(self, x_test) -> Dict[str, Dict[str, np.ndarray]]:
+    def predict(self, x_test) -> pd.DataFrame:
         """Returns dictionary of {"atom": {"property": [values]}}"""
-        return {
-            atom: {model.type: model.predict(features) for model in self[atom]}
-            for atom, features in x_test.items()
-        }
+        return pd.DataFrame(
+            {
+                atom: {
+                    model.type: model.predict(features) for model in self[atom]
+                }
+                for atom, features in x_test.items()
+            }
+        )
 
     @x_to_features
-    def variance(self, x_test) -> Dict[str, Dict[str, np.ndarray]]:
-        return {
-            atom: {
-                model.type: model.variance(features) for model in self[atom]
+    def variance(self, x_test) -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                atom: {
+                    model.type: model.variance(features)
+                    for model in self[atom]
+                }
+                for atom, features in x_test.items()
             }
-            for atom, features in x_test.items()
-        }
+        )
 
     def get_features_dict(
         self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, HasAtoms, dict]

@@ -148,7 +148,7 @@ class MEPE(ActiveLearningMethod):
         for batched_points in self.batch_points(points):
             features_dict = self.models.get_features_dict(batched_points)
             cv_errors = self.cv_error(features_dict)
-            variance = pd.DataFrame(self.models.variance(features_dict))
+            variance = self.models.variance(features_dict)
             alpha = self.alpha
             """Eq. 23"""
             # todo: get max (and max indices) from batch

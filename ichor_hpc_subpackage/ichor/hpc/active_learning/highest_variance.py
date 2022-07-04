@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.models import Models
@@ -37,9 +36,7 @@ class HighestVariance(ActiveLearningMethod):
             variance = np.hstack(
                 (
                     variance,
-                    pd.DataFrame(self.models.variance(features_dict))
-                    .sum()
-                    .sum(),
+                    self.models.variance(features_dict).sum().sum(),
                 )
             )
 

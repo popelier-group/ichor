@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.models import Models
@@ -38,14 +37,8 @@ class SigMu(ActiveLearningMethod):
             sigmu = np.hstack(
                 (
                     sigmu,
-                    pd.DataFrame(self.models.variance(features_dict))
-                    .sum()
-                    .sum()
-                    * np.abs(
-                        pd.DataFrame(
-                            self.models.predict(features_dict).sum().sum()
-                        )
-                    ),
+                    self.models.variance(features_dict).sum().sum()
+                    * np.abs(self.models.predict(features_dict).sum().sum()),
                 )
             )
 
