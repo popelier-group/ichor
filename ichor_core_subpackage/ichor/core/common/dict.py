@@ -35,7 +35,7 @@ def merge(*dicts):
         >>> {"total_energy": -76.4}, {"O1": {"iqa": -75.2}}, {"O1": {"dispersion": -1.0}}
         {"total_energy": -76.4, "O1": {"iqa": -75.2, "dispersion": -1.0}}
     """
-    return reduce(merge_mutable, map(dict, dicts))
+    return reduce(merge_mutable, map(dict, dicts), {})
 
 
 def find(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:

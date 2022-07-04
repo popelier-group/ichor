@@ -6,6 +6,7 @@ from typing import Dict, List, Union
 import numpy as np
 import pandas as pd
 from ichor.core.atoms import Atoms, ListOfAtoms
+from ichor.core.atoms.calculators import ALF
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.common.str import get_digits
 from ichor.core.files import Directory, HasAtoms
@@ -70,7 +71,7 @@ class Models(Directory, list):
         return list({model.type for model in self})
 
     @property
-    def alf(self) -> List[List[int]]:
+    def alf(self) -> List[ALF]:
         """Returns the alf taken straight from each model file e.g. [[1, 2, 3], [2, 1, 3], [3, 1, 2]]"""
         return sorted([model.alf for model in self])
 
@@ -158,7 +159,7 @@ class Models(Directory, list):
         self, x_test: ListOfAtoms
     ) -> Dict[str, np.ndarray]:
         return {
-            atom: x_test[atom].alf_features(alf=self.ialf_dict[atom])
+            atom: x_test[atom].alf_features(alf=self.alf)
             for atom in self.atom_names
             if atom in x_test.atom_names
         }
@@ -167,7 +168,7 @@ class Models(Directory, list):
         self, x_test: HasAtoms
     ) -> Dict[str, np.ndarray]:
         return {
-            atom: x_test.atoms[atom].alf_features(alf=self.ialf_dict[atom])
+            atom: x_test.atoms[atom].alf_features(alf=self.alf)
             for atom in self.atom_names
             if atom in x_test.atom_names
         }

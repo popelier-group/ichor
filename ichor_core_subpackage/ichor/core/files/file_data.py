@@ -78,9 +78,9 @@ class HasProperties(ABC):
 
         try:
             return unwrap_single_item(find(item, self.properties), item)
-        except KeyError as e:
+        except (KeyError, TypeError) as e:
             raise AttributeError(
-                f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}'"
+                f"instance of '{self.__class__.__name__}' has no attribute '{item}'"
             ) from e
 
 

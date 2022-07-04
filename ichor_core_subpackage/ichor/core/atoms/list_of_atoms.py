@@ -536,7 +536,7 @@ class ListOfAtoms(list):
                     """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
                     return [self[0].type]
 
-                def alf_features(self, alf: Union[List[int], np.ndarray]):
+                def alf_features(self, alf: List[ALF]):
                     """Return the ndarray of features for only one atom, given an alf for that atom.
                     This is assumed to a 2D array of features for only one atom.
 
@@ -545,7 +545,7 @@ class ListOfAtoms(list):
                     :return: Тhe array has shape `n_timesteps` x `n_features`.
                     """
 
-                    return np.array([atom.alf_features(alf) for atom in self])
+                    return np.array([self[atom_alf.origin_idx].features(atom_alf) for atom_alf in alf])
 
             if hasattr(self, "_is_atom_view"):
                 return self
@@ -559,16 +559,18 @@ class ListOfAtoms(list):
                     self.__dict__ = parent.__dict__.copy()
                     self._is_atom_slice = True
                     list.__init__(self)
-                    # set this attribute because the next line is going to slice the parent instance, which will then call this part of ListOfAtoms.__getitem__() again
-                    # which will cause an infinite recursion
-                    setattr(parent, "get_slice", True)
-                    # extend the AtomSlice (which is an empty list) with the slice from parent
-                    self.extend(parent[sl])
-                    # remove the get_slice attribute again, so that an AtomSlice can be indexed again
-                    delattr(parent, "get_slice")
+                    # # set this attribute because the next line is going to slice the parent instance, which will then call this part of ListOfAtoms.__getitem__() again
+                    # # which will cause an infinite recursion
+                    # setattr(parent, "get_slice", True)
+                    # # extend the AtomSlice (which is an empty list) with the slice from parent
+                    # self.extend(parent[sl])
+                    # # remove the get_slice attribute again, so that an AtomSlice can be indexed again
+                    # delattr(parent, "get_slice")
 
-            if hasattr(self, "get_slice"):
-                return super().__getitem__(item)
+                    self.extend(list.__getitem__(parent, sl))
+
+            # if hasattr(self, "get_slice"):
+            #     return super().__getitem__(item)
             return AtomSlice(self, item)
 
         # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice

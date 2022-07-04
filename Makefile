@@ -53,9 +53,9 @@ test:
 	pytest ichor_core_subpackage/tests/
 
 install:
-	python3 -m pip install -e ichor_core_subpackage
-	python3 -m pip install -e ichor_hpc_subpackage
-	python3 -m pip install -e ichor_cli_subpackage
+	python3 -m pip install --user -e ichor_core_subpackage
+	python3 -m pip install --user -e ichor_hpc_subpackage
+	python3 -m pip install --user -e ichor_cli_subpackage
 
 run: venv
 	${PYTHON} ichor3.py

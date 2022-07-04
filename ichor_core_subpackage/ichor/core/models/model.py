@@ -6,7 +6,7 @@ from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
+from ichor.core.files.file import File, FileContents, FileState, ReadFile, WriteFile
 from ichor.core.models.kernels import (
     RBF,
     ConstantKernel,
@@ -22,6 +22,7 @@ from ichor.core.models.mean import (
     QuadraticMean,
     ZeroMean,
 )
+from ichor.core.atoms.calculators import ALF
 
 
 def _get_default_input_units(nfeats: int) -> List[str]:
@@ -55,7 +56,7 @@ class Model(ReadFile, WriteFile, File):
         system_name: str = FileContents,
         atom_name: str = FileContents,
         prop: str = FileContents,
-        alf: List[int] = FileContents,
+        alf: ALF = FileContents,
         natoms: int = FileContents,
         ntrain: int = FileContents,
         nfeats: int = FileContents,
@@ -100,9 +101,8 @@ class Model(ReadFile, WriteFile, File):
         kernel_dict = {}
         notes = {}
 
-        with open(self.path) as f:
+        with open(self.path, 'r') as f:
             for line in f:
-
                 if "<TODO>" in line:
                     continue
 
@@ -157,7 +157,7 @@ class Model(ReadFile, WriteFile, File):
                     continue
 
                 if "ALF" in line:
-                    self.alf = self.alf or [int(a) for a in line.split()[1:]]
+                    self.alf = self.alf or ALF(*[int(a)-1 for a in line.split()[1:]])
                     continue
 
                 if "number_of_atoms" in line:
@@ -250,13 +250,6 @@ class Model(ReadFile, WriteFile, File):
                             active_dims=active_dims,
                         )
 
-                        self.kernel = (
-                            self.kernel
-                            or KernelInterpreter(
-                                kernel_composition, kernel_dict
-                            ).interpret()
-                        )
-
                     continue
 
                 if "units.x" in line:
@@ -305,6 +298,8 @@ class Model(ReadFile, WriteFile, File):
 
                     self.weights = self.weights or weights
 
+        self.kernel = self.kernel if self.kernel else KernelInterpreter(kernel_composition, kernel_dict).interpret()
+
     @classproperty
     def filetype(self) -> str:
         """Returns the suffix associated with GP model files"""
@@ -316,7 +311,12 @@ class Model(ReadFile, WriteFile, File):
 
         :return: The 0-indexed np.ndarray corresponding to the alf of the atom.
         """
-        return np.array(self.alf) - 1
+        return np.array(self.alf)
+
+    @property
+    def type(self) -> str:
+        """alias for prop"""
+        return self.prop
 
     @property
     def atom(self) -> str:
@@ -334,7 +334,6 @@ class Model(ReadFile, WriteFile, File):
         This is the index of the atom in Python objects such as lists (as indeces start at 0)."""
         return self.atom_num - 1
 
-    @property
     def r(self, x_test: np.ndarray) -> np.ndarray:
         """Returns the n_train by n_test covariance matrix"""
         return self.kernel.r(self.x, x_test)
@@ -415,7 +414,7 @@ class Model(ReadFile, WriteFile, File):
             f.write(f"name {self.system_name}\n")
             f.write(f"atom {self.atom_name}\n")
             f.write(f"property {self.prop}\n")
-            f.write(f"ALF {self.alf[0]} {self.alf[1]} {self.alf[2]}\n")
+            f.write(f"ALF {self.alf[0]+1} {self.alf[1]+1} {self.alf[2]+1}\n")
             f.write("\n")
             f.write("[dimensions]\n")
             f.write(f"number_of_atoms {self.natoms}\n")

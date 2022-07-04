@@ -249,12 +249,10 @@ def write_ftoml(ferebus_directory: Path, atom: str, model_types: List[str]):
         ftoml.write(f"tolerance={GLOBALS.FEREBUS_TOLERANCE}\n")
         ftoml.write(f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n")
         ftoml.write("\n")
-        if GLOBALS.KERNEL.lower() in ["rbf", "rbf-cyclic"] or nfeats < 6:
-            ftoml.write("[kernels.k1]\n")
-            ftoml.write(f'type = "{GLOBALS.KERNEL}"\n')
-        elif GLOBALS.KERNEL.lower() == "periodic":
-            ftoml.write("[kernels.k1]\n")
-            ftoml.write(f'type = "rbf"\n')
+        kernel = "rbf-cyclic" if GLOBALS.KERNEL == "rbf-cyclic" else "rbf"
+        ftoml.write("[kernels.k1]\n")
+        ftoml.write(f'type = "{kernel}"\n')
+        if nfeats > 6 and GLOBALS.KERNEL == "periodic":
             ftoml.write(f"active_dimensions = {rbf_dims}\n")
             ftoml.write("\n")
             ftoml.write("[kernels.k2]\n")
