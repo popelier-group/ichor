@@ -60,7 +60,7 @@ def make_models(
         f"Making Models for {atom_models_to_make} atoms and {model_types} types with {n_training_points} training points"
     )
 
-    return create_ferebus_directories_and_submit(hold=hold)
+    return create_ferebus_directories_and_submit(model_data, atoms, types, n_training_points, hold=hold)
 
 
 def move_models(model_dir: Optional[Path] = None):
