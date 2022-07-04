@@ -6,7 +6,7 @@ import pandas as pd
 from ichor.core.analysis.get_models import number_of_models_in_dir
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.files import PointsDirectory
-from ichor.core.models import Models, ModelsResult
+from ichor.core.models import Models
 
 
 def calculate_rmse(
@@ -109,8 +109,8 @@ def calculate_error(data: np.array, error_type: str):
 
 
 def write_to_excel(
-    true_values: Dict[int, ModelsResult],
-    predicted_values: Dict[int, ModelsResult],
+    true_values: Dict[int, pd.DataFrame],
+    predicted_values: Dict[int, pd.DataFrame],
     output_name: Path = "rmse.xlsx",
     error_type: Union["mae", "rmse"] = "rmse",
     only_every_nth_model: Union[int, None] = None,
@@ -263,7 +263,9 @@ def write_to_excel(
                 col_idx += 3
             # subtract two columns as we need to write out the Total absError MAE, but that should be written right next to the previous RMSE
             col_idx -= 2
-            writer.sheets[sheet_name].write(n_rows + 1, col_idx, errors_to_write[-1])
+            writer.sheets[sheet_name].write(
+                n_rows + 1, col_idx, errors_to_write[-1]
+            )
 
         # make the sheet that only contains RMSE information, pandas df can accept a dictionary of dictionaries
         df = pd.DataFrame(all_errors_dict)

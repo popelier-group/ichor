@@ -7,7 +7,7 @@ from ichor.core.analysis.excel import num2col
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.constants import ha_to_kj_mol
 from ichor.core.files import PointsDirectory
-from ichor.core.models import Models, ModelsResult
+from ichor.core.models import Models
 
 
 def percentile(n: int) -> np.ndarray:
@@ -90,8 +90,8 @@ def calculate_s_curves(
 
 
 def write_to_excel(
-    true: ModelsResult,
-    predicted: ModelsResult,
+    true: pd.DataFrame,
+    predicted: pd.DataFrame,
     output_name: Path = "s-curves.xlsx",
     x_axis_name: str = "Absolute Prediction Error",
     x_log_scale: bool = True,

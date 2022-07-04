@@ -2,9 +2,10 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.files import PointsDirectory
-from ichor.core.models import Models, ModelsResult
+from ichor.core.models import Models
 
 
 def get_predicted(
@@ -12,7 +13,7 @@ def get_predicted(
     points: ListOfAtoms,
     atoms: Optional[List[str]] = None,
     types: Optional[List[str]] = None,
-) -> ModelsResult:
+) -> pd.DataFrame:
     """
     Returns the predicted values for a given ListOfAtoms given Models
     :param models: the models to use for predicting the values of points
@@ -34,12 +35,12 @@ def get_predicted(
                 models[atom][type_].predict(points).array()
             )
 
-    return ModelsResult(predicted)
+    return pd.DataFrame(predicted)
 
 
 def get_true(
     validation_set: PointsDirectory, atoms: List[str], types: List[str]
-) -> ModelsResult:
+) -> pd.DataFrame:
     """
     Returns the true values for a given PointsDirectory as a ModelsResult
     :param validation_set: the PointsDirectory containing the true values
@@ -53,7 +54,7 @@ def get_true(
         for type_ in types:
             true[atom][type_] = np.array(getattr(validation_set[atom], type_))
 
-    return ModelsResult(true)
+    return pd.DataFrame(true)
 
 
 def get_true_predicted(
@@ -61,7 +62,7 @@ def get_true_predicted(
     validation_set: PointsDirectory,
     atoms: Optional[List[str]] = None,
     types: Optional[List[str]] = None,
-) -> Tuple[ModelsResult, ModelsResult]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Returns the true and predicted values of the given model and validation set for each of the specified atoms and types
     :param models: models to use for the predictions
