@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 import numpy as np
 from ichor.core.atoms.atoms import Atoms
 from ichor.core.atoms.calculators import (ALF, FeatureCalculatorFunction,
-                                          default_feature_calculator)
+                                          default_feature_calculator, get_alf)
 
 # from ichor.core.atoms.calculators import (ALFFeatureCalculator,
 #                                           AtomSequenceALFCalculator)
@@ -545,7 +545,7 @@ class ListOfAtoms(list):
                     :return: Тhe array has shape `n_timesteps` x `n_features`.
                     """
 
-                    return np.array([self[atom_alf.origin_idx].features(atom_alf) for atom_alf in alf])
+                    return np.array([atom.features(get_alf(alf, atom)) for atom in self])
 
             if hasattr(self, "_is_atom_view"):
                 return self
@@ -559,19 +559,23 @@ class ListOfAtoms(list):
                     self.__dict__ = parent.__dict__.copy()
                     self._is_atom_slice = True
                     list.__init__(self)
-                    # # set this attribute because the next line is going to slice the parent instance, which will then call this part of ListOfAtoms.__getitem__() again
-                    # # which will cause an infinite recursion
-                    # setattr(parent, "get_slice", True)
-                    # # extend the AtomSlice (which is an empty list) with the slice from parent
-                    # self.extend(parent[sl])
-                    # # remove the get_slice attribute again, so that an AtomSlice can be indexed again
-                    # delattr(parent, "get_slice")
 
                     self.extend(list.__getitem__(parent, sl))
 
-            # if hasattr(self, "get_slice"):
-            #     return super().__getitem__(item)
             return AtomSlice(self, item)
+        
+        elif isinstance(item, (list, np.ndarray)):
+
+            class ListOfAtomsSlice(self.__class__):
+                def __init__(self, parent, sl):
+                    self.__dict__ = parent.__dict__.copy()
+                    self._is_list_of_atoms_slice = True
+                    list.__init__(self)
+
+                    for i in sl:
+                        self.append(list.__getitem__(parent, i))
+
+            return ListOfAtomsSlice(self, item)
 
         # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
         raise TypeError(

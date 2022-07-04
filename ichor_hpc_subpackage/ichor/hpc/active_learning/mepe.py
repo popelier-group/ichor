@@ -11,6 +11,8 @@ from ichor.hpc.active_learning.active_learning_method import (
     ActiveLearningMethod,
 )
 from scipy.spatial.distance import cdist
+from ichor.core.common.io import mkdir
+from ichor.core.common.np import ensure_array
 
 """
     Implementation of the Maximum Expected Prediction Error (MEPE) method
@@ -109,14 +111,19 @@ class MEPE(ActiveLearningMethod):
 
         try:
             with open(
-                cv_errors_file, "r"
+                cv_errors_file, 'r'
             ) as f:  # the previous iterations data is stored as json in cv_errors_file
                 obj = json.load(f)
                 npoints = obj["added_points"]
-                cv_errors = pd.DataFrame(obj["cv_errors"])
-                predictions = pd.DataFrame(obj["predictions"])
+                cv_errors = obj["cv_errors"]
+                predictions = obj["predictions"]
         except json.JSONDecodeError:
             return 0.5
+
+        for atom, pred in predictions.items():
+            for prop in pred.keys():
+                predictions[atom][prop] = np.array(predictions[atom][prop])
+                cv_errors[atom][prop] = np.array(cv_errors[atom][prop])
 
         alpha_sum = 0.0
         nalpha = 0
@@ -160,4 +167,32 @@ class MEPE(ActiveLearningMethod):
             )
 
         """Eq. 25"""
-        return np.flip(np.argsort(epe), axis=-1)[:npoints]
+        mepe = np.flip(np.argsort(epe), axis=-1)[:npoints]
+
+        mepe_points = points[mepe]
+
+        features_dict = self.models.get_features_dict(mepe_points)
+        cv_errors = self.cv_error(features_dict).to_dict()
+        predictions = self.models.predict(features_dict).to_dict()
+
+        for atom, pred in predictions.items():
+            for prop in pred.keys():
+                predictions[atom][prop] = list(predictions[atom][prop])
+                cv_errors[atom][prop] = list(cv_errors[atom][prop])
+
+        from ichor.hpc import FILE_STRUCTURE
+        cv_file = FILE_STRUCTURE["cv_errors"]
+        mkdir(cv_file.parent)
+        if cv_file.exists():
+            cv_file.unlink()  # delete previous cv_errors to prevent bug where extra closing brackets were present
+        with open(cv_file, 'w') as f:  # store data as json for next iterations alpha calculation
+            json.dump(
+                {
+                    "added_points": npoints,
+                    "cv_errors": cv_errors,
+                    "predictions": predictions,
+                },
+                f,
+            )
+
+        return mepe

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import numpy as np
 from ichor.core.itypes import Scalar
@@ -23,3 +23,13 @@ def batched_array(a: np.ndarray, batch_size: int) -> np.ndarray:
     """
     for i in range(0, len(a), batch_size):
         yield a[i : i + batch_size]
+
+
+def ensure_array(a: Union[Scalar, List[Scalar], np.ndarray]) -> np.ndarray:
+    if isinstance(a, (int, float)):
+        return np.array([a])
+    elif isinstance(a, list):
+        return np.array(a)
+    elif isinstance(a, np.ndarray):
+        return a
+    raise TypeError(f"Cannot convert '{a}' of type '{type(a)}' into numpy array")
