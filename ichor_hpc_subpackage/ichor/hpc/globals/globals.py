@@ -17,6 +17,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Union
 from uuid import UUID, uuid4
+from contextlib import contextmanager
 
 from ichor.core import constants
 from ichor.core.atoms.atoms import Atoms
@@ -26,6 +27,7 @@ from ichor.hpc.globals import checkers, formatters, parsers
 from ichor.hpc.globals.config_provider import ConfigProvider
 from ichor.hpc.globals.os import OS
 from ichor.hpc.globals.parsers import read_alf
+from ichor.core.common.io import pushd
 
 
 class GlobalVariableError(Exception):
@@ -752,6 +754,16 @@ class Globals:
         from ichor import hpc
 
         hpc.GLOBALS.init_from_globals(self._save_globals)
+
+    @contextmanager
+    def pushd(self, path: Path):
+        save_cwd = self.CWD
+        self.CWD = path.resolve()
+        with pushd(path) as p:
+            try:
+                yield [p]
+            finally:
+                self.CWD = save_cwd
 
 
 class NoAtomsFound(Exception):

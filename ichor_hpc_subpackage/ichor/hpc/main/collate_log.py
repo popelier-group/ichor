@@ -32,7 +32,7 @@ def get_collate_model_log(
     if directory is None:
         directory = GLOBALS.CWD
 
-    with pushd(directory, update_cwd=True):
+    with GLOBALS.pushd(directory):
         if not FILE_STRUCTURE["model_log"].exists():
             collate_model_log()
         if not FILE_STRUCTURE["model_log"].exists():
@@ -116,7 +116,7 @@ def collate_model_log(
     if directory is None:
         directory = GLOBALS.CWD
 
-    with pushd(directory, update_cwd=True):
+    with GLOBALS.pushd(directory):
         child_processes = child_processes or get_child_processes()
         if child_processes is None:
             return
@@ -126,7 +126,7 @@ def collate_model_log(
         mkdir(parent_model_dir)
 
         for child_process in child_processes:
-            with pushd(child_process, update_cwd=True):
+            with GLOBALS.pushd(child_process):
                 for model_log in FILE_STRUCTURE["model_log"].iterdir():
                     if model_log.is_dir() and Models.check_path(model_log):
                         new_model_loc = parent_model_dir / model_log.name
@@ -145,7 +145,7 @@ def collate_models(
     if directory is None:
         directory = GLOBALS.CWD
 
-    with pushd(directory, update_cwd=True):
+    with GLOBALS.pushd(directory):
         child_processes = child_processes or get_child_processes()
         if child_processes is None:
             return
@@ -155,7 +155,7 @@ def collate_models(
         mkdir(parent_model_dir)
 
         for child_process in child_processes:
-            with pushd(child_process, update_cwd=True):
+            with GLOBALS.pushd(child_process):
                 if FILE_STRUCTURE["models"].exists():
                     for f in FILE_STRUCTURE["models"].iterdir():
                         cp(f, parent_model_dir)

@@ -152,7 +152,7 @@ def remove_with_suffix(
 
 @contextmanager
 @convert_to_path
-def pushd(new_dir: Path, update_cwd: bool = False):
+def pushd(new_dir: Path):
     """
     Works like the UNIX `pushd` commmand whereby it changes the current directory and stores the previous directory on the stack
     By exiting the context manager, the equivalent of `popd` is called and the location is reverted to the previous e.g.

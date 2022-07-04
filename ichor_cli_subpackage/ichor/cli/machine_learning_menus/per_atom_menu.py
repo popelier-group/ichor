@@ -69,7 +69,7 @@ def run_missing_models(
         make_models as mm_func,
     )
 
-    with pushd(atom_dir, update_cwd=True):
+    with GLOBALS.pushd(atom_dir):
         make_models_func = auto_make_models if make_on_compute else mm_func
         return make_models_func(
             FILE_STRUCTURE["training_set"],

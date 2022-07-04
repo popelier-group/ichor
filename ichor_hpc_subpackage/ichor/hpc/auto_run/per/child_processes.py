@@ -44,10 +44,11 @@ def find_child_processes_recursively(src: Path = Path.cwd()) -> List[Path]:
 def delete_child_process_jobs(
     child_processes: Optional[List[Path]] = None,
 ) -> None:
+    from ichor.hpc import GLOBALS
     if child_processes is None:
         child_processes = find_child_processes_recursively()
     for child_process in child_processes:
-        with pushd(child_process, update_cwd=True):
+        with GLOBALS.pushd(child_process):
             delete_jobs()
             stop()
 
@@ -82,7 +83,7 @@ def rerun_failed_child_process(
         child_processes = find_child_processes_recursively()
     for child_process in child_processes:
         # todo: ensure finished
-        with pushd(child_process, update_cwd=True):
+        with GLOBALS.pushd(child_process):
             with Globals():
                 GLOBALS.init_from_config(Arguments.config_file)
                 rerun_from_failed()
@@ -105,10 +106,10 @@ def stop_all_child_processes(
 
 def print_child_process_status(cpdir: Path):
     from ichor.core.common.io import pushd
-    from ichor.hpc import FILE_STRUCTURE
+    from ichor.hpc import FILE_STRUCTURE, GLOBALS
     from ichor.hpc.auto_run.counter import read_counter
 
-    with pushd(cpdir, update_cwd=True):
+    with GLOBALS.pushd(cpdir):
         path_status = f"{cpdir} Status"
         print("-" * len(path_status))
         print(path_status)
@@ -139,13 +140,14 @@ def concat_dir_to_ts(child_processes: Optional[List[Path]] = None):
     from ichor.cli.general_menus.concatenate_points_menu import \
         concatenate_points_directories
     from ichor.core.analysis.get_path import get_dir
+    from ichor.hpc import GLOBALS
 
     print("Enter PointsDirectory Location to concatenate to training sets: ")
     dir = get_dir().absolute()
     child_processes = child_processes or find_child_processes_recursively()
 
     for cp in child_processes:
-        with pushd(cp, update_cwd=True):
+        with GLOBALS.pushd(cp):
             ts = cp / FILE_STRUCTURE["training_set"]
             if ts.exists():
                 concatenate_points_directories(ts, dir, verbose=True)

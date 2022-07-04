@@ -15,6 +15,7 @@ default_alf_calculator: ALFCalculatorFunction = alf_calculators[
     "cahn_ingold_prelog"
 ]
 
+
 def get_alf(alf: List[ALF], atom: "Atom") -> ALF:
     for atom_alf in alf:
         if atom_alf.origin_idx == atom.i:

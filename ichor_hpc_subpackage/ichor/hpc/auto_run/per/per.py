@@ -121,7 +121,7 @@ def auto_run_per_value(
         GLOBALS.set(variable, value)
         GLOBALS.save_to_config(config_path)
 
-        with pushd(path, update_cwd=True):
+        with GLOBALS.pushd(path):
             if run_func is None:
                 from ichor.hpc.auto_run.standard_auto_run import auto_run
 

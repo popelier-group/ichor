@@ -60,7 +60,8 @@ def auto_run_per_atom(run_func: Optional[Callable] = None) -> List[JobID]:
 
 
 def run_missing_models(atom_dir: Path, make_on_compute: bool = False) -> JobID:
-    with pushd(atom_dir, update_cwd=True):
+    from ichor.hpc import GLOBALS
+    with GLOBALS.pushd(atom_dir):
         from ichor.hpc import FILE_STRUCTURE
 
         make_models_func = (
