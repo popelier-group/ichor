@@ -125,7 +125,7 @@ class INT(HasProperties, ReadFile):
 
     @property
     def properties(self) -> Dict[str, float]:
-        return {**{"iqa": self.iqa}, **self.local_spherical_multipoles()}
+        return {**{"integration_error": self.integration_error, "iqa": self.iqa}, **self.local_spherical_multipoles()}
 
     @property
     def bond_critical_points(self) -> List[CriticalPoint]:

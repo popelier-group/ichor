@@ -1,4 +1,5 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
+import inspect
 
 
 def object_getattribute(obj: object, attr: str):
@@ -19,3 +20,9 @@ def object_getdict(obj: object) -> Dict[str, Any]:
 
 def object_setattr(obj: object, attr: str, value: Any):
     object.__setattr__(obj, attr, value)
+
+def object_get_properties(obj: object) -> List[str]:
+    return [p for p in dir(obj) if isinstance(getattr(obj.__class__, p), property)]
+
+def object_get_properties_and_values(obj: object) -> Dict[str, Any]:
+    return {prop: object_getattribute(obj, prop) for prop in object_get_properties(obj)}
