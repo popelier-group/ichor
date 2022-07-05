@@ -105,7 +105,8 @@ class Models(Directory, list):
 
     @x_to_features
     def predict(self, x_test) -> pd.DataFrame:
-        """Returns dictionary of {"atom": {"property": [values]}}"""
+        # todo: update docs
+        """Returns dictionary of DataFrame({"atom": {"property": [values]}})"""
         return pd.DataFrame(
             {
                 atom: {

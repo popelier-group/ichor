@@ -1,8 +1,8 @@
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Union, Optional
-import numpy as np
+from typing import Dict, List, Optional, Union
 
+import numpy as np
 from ichor.core.atoms import Atoms
 from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.directory import Directory
@@ -20,11 +20,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         Things like XYZ and GJF hold geometry.
     """
 
-    def __init__(
-        self,
-        path: Union[Path, str],
-        parent: Atoms = None
-    ):
+    def __init__(self, path: Union[Path, str], parent: Atoms = None):
         # parent above __init__s because Directory.__init__ calls self._parse
         self.parent = parent
         Directory.__init__(self, path)
@@ -66,8 +62,8 @@ class INTs(HasProperties, OrderedDict, Directory):
         }
 
     def local_spherical_multipoles(
-        self, C_matrix: Optional[np.ndarray] = None
-    ) -> Dict[str, float]:
+        self, C_matrix: Optional[List[np.ndarray]] = None
+    ) -> Dict[str, Dict[str, float]]:
         """Rotates global spherical multipoles into local spherical multipoles. Optionally
         a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
         (as read in from the int file) will be used (if it exists).
@@ -80,7 +76,9 @@ class INTs(HasProperties, OrderedDict, Directory):
         # if C_matrix is None, then the self.parent will be used by default in INT class
         # to calculate the C matrix
         return {
-            atom_name: int_file_instance.local_spherical_multipoles(C_matrix)
+            atom_name: int_file_instance.local_spherical_multipoles(
+                C_matrix[int_file_instance.i]
+            )
             for atom_name, int_file_instance in self.items()
         }
 

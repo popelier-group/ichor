@@ -36,7 +36,9 @@ class HighestVariance(ActiveLearningMethod):
             variance = np.hstack(
                 (
                     variance,
-                    self.models.variance(features_dict).sum().sum(),
+                    self.models.variance(features_dict)
+                    .sum()
+                    .sum(),  # todo: fix for
                 )
             )
 

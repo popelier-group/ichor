@@ -1,11 +1,21 @@
-from pathlib import Path
-from typing import Union, List, Dict, Optional
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Union
+from warnings import warn
 
-from ichor.core.common.str import get_digits
 import numpy as np
+from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
+from ichor.core.common.io import relpath
+from ichor.core.common.str import get_digits
 from ichor.core.common.types import Coordinates3D
+from ichor.core.constants import (
+    spherical_dipole_labels,
+    spherical_hexadecapole_labels,
+    spherical_monopole_labels,
+    spherical_octupole_labels,
+    spherical_quadrupole_labels,
+)
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasProperties
 from ichor.core.multipoles import (
@@ -14,16 +24,6 @@ from ichor.core.multipoles import (
     rotate_octupole,
     rotate_quadrupole,
 )
-from ichor.core.constants import (
-    spherical_monopole_labels,
-    spherical_dipole_labels,
-    spherical_quadrupole_labels,
-    spherical_octupole_labels,
-    spherical_hexadecapole_labels,
-)
-from ichor.core.atoms import Atoms
-from ichor.core.common.io import relpath
-from warnings import warn
 
 
 class CriticalPointType(Enum):
@@ -125,7 +125,10 @@ class INT(HasProperties, ReadFile):
 
     @property
     def properties(self) -> Dict[str, float]:
-        return {**{"integration_error": self.integration_error, "iqa": self.iqa}, **self.local_spherical_multipoles()}
+        return {
+            **{"integration_error": self.integration_error, "iqa": self.iqa},
+            **self.local_spherical_multipoles(),
+        }
 
     @property
     def bond_critical_points(self) -> List[CriticalPoint]:
@@ -166,7 +169,7 @@ class INT(HasProperties, ReadFile):
             while "Current Directory" not in line:
                 line = next(f)
 
-            # TODO: don't really need these paths as they are relative. add later if needed
+            # TODO: document what this is doing and why
             self.current_directory = Path(line.split()[-1])
             next(f)  # blank line
 
@@ -281,6 +284,11 @@ class INT(HasProperties, ReadFile):
         return get_digits(self.atom_name)
 
     @property
+    def i(self) -> int:
+        """Returns the atom index in the system. (atom indices in atom names start at 1)"""
+        return self.atom_num - 1
+
+    @property
     def integration_error(self) -> float:
         """The integration error can tell you if a point has been decomposed into topological atoms correctly. A large integration error signals
         that the point might not be suitable for training as the AIMALL IQA/multipole moments might be inaccurate."""
@@ -295,7 +303,9 @@ class INT(HasProperties, ReadFile):
         try:
             return self.iqa_energy_components["E_IQA(A)"]
         except KeyError:
-            warn("E_IQA(A) energy is not present in the .int file. Check AIMALL -encomp setting.")
+            warn(
+                "E_IQA(A) energy is not present in the .int file. Check AIMALL -encomp setting."
+            )
             return None
 
     @property
@@ -304,7 +314,9 @@ class INT(HasProperties, ReadFile):
         try:
             return self.iqa_energy_components["E_IQA_Intra(A)"]
         except KeyError:
-            warn("E_IQA_Intra(A) energy is not present in the .int file. Check AIMALL -encomp setting.")
+            warn(
+                "E_IQA_Intra(A) energy is not present in the .int file. Check AIMALL -encomp setting."
+            )
             return None
 
     @property
