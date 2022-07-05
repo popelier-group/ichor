@@ -1,8 +1,12 @@
 import os
+from typing import Optional
 from enum import auto
+from pathlib import Path
 
 from ichor.core.common.functools import cached_property
 from ichor.core.common.types import Enum
+from ichor.core.common.io import mkdir, move
+from ichor.hpc.uid import get_uid
 
 
 class MachineNotFound(Exception):
@@ -46,11 +50,11 @@ class Machine(Enum):
         if self.submit_on_compute:
             submit_type = SubmitType.SubmitOnCompute
         elif self.drop_compute_available:
-            from ichor.hpc.drop_compute.drop_compute import (
-                drop_compute_available_for_user,
+            from ichor.hpc.drop_compute import (
+                get_drop_compute,
             )
 
-            if drop_compute_available_for_user():
+            if get_drop_compute(self).is_available_to_user:
                 submit_type = SubmitType.DropCompute
 
         return submit_type
@@ -75,11 +79,14 @@ def get_machine_from_name(platform_name: str):
     return m
 
 
-def get_machine_from_file():
+def get_machine_from_file(machine_file: Optional[Path] = None) -> Machine:
     from ichor.hpc import FILE_STRUCTURE
+    if machine_file is None:
+        machine_file = FILE_STRUCTURE["machine"]
 
-    if FILE_STRUCTURE["machine"].exists():
-        with open(FILE_STRUCTURE["machine"], "r") as f:
+
+    if machine_file.exists():
+        with open(machine_file, "r") as f:
             _machine = f.read().strip()
             if _machine:
                 if _machine not in Machine.names:
@@ -88,3 +95,30 @@ def get_machine_from_file():
                     )
                 else:
                     return Machine.from_name(_machine)
+
+
+def init_machine(machine_name: str, machine_file: Optional[Path] = None) -> Machine:
+    machine = get_machine_from_name(machine_name)
+
+    if machine_file is None:
+        from ichor.hpc import FILE_STRUCTURE
+        machine_file = FILE_STRUCTURE["machine"]
+
+    if machine is Machine.local and machine_file.exists():
+        machine = get_machine_from_file(machine_file)
+
+    # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
+    if machine is not Machine.local and (
+        not machine_file.exists()
+        or machine_file.exists()
+        and get_machine_from_file() != machine
+    ):
+        mkdir(machine_file.parent)
+        machine_filepart = Path(
+            str(machine_file) + f".{get_uid()}.filepart"
+        )
+        with open(machine_filepart, "w") as f:
+            f.write(f"{machine.name}")
+        move(machine_filepart, machine_file)
+    
+    return machine

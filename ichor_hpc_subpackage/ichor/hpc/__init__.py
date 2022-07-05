@@ -50,11 +50,8 @@ from ichor.hpc.globals import Globals
 from ichor.hpc.log import setup_logger
 from ichor.hpc.machine import (
     Machine,
-    get_machine_from_name,
-    get_machine_from_file,
+    init_machine,
 )
-from ichor.core.common.io import mkdir, move
-from ichor.hpc.uid import get_uid
 
 __version__ = Version("3.1.0")
 
@@ -66,9 +63,9 @@ if SunGridEngine.is_present():
 if SLURM.is_present():
     BATCH_SYSTEM = SLURM
 
-machine_name: str = platform.node()
 # will be Machine.Local if machine is not in list of names
-MACHINE = get_machine_from_name(machine_name)
+machine_name: str = platform.node()
+MACHINE = init_machine(machine_name)
 
 PARALLEL_ENVIRONMENT = ParallelEnvironments()
 PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
@@ -82,50 +79,16 @@ logger = setup_logger("ICHOR", "ichor.log")
 timing_logger = setup_logger("TIMING", "ichor.timing")
 
 
-def init_machine():
-    # if machine has been successfully identified, write to FILE_STRUCTURE['machine']
-    if MACHINE is not Machine.local and (
-        not FILE_STRUCTURE["machine"].exists()
-        or FILE_STRUCTURE["machine"].exists()
-        and get_machine_from_file() != MACHINE
-    ):
-        mkdir(FILE_STRUCTURE["machine"].parent)
-        machine_filepart = Path(
-            str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"
-        )
-        with open(machine_filepart, "w") as f:
-            f.write(f"{MACHINE.name}")
-        move(machine_filepart, FILE_STRUCTURE["machine"])
-
-
 def ichor_main():
     global GLOBALS
-    global MACHINE
 
     Arguments.read()
+
     GLOBALS.init_from_config(Arguments.config_file)
     GLOBALS.UID = Arguments.uid
-    init_machine()
+
     if Arguments.call_external_function:
         Arguments.call_external_function(
             *Arguments.call_external_function_args
         )
         sys.exit(0)
-
-
-# probably don't need that file because the platform name should match
-# if machine has been successfully identified, write to FILE_STRUCTURE['machine']
-# if MACHINE is not Machine.local and (
-#     not FILE_STRUCTURE["machine"].exists()
-#     or (
-#         FILE_STRUCTURE["machine"].exists()
-#         and not get_machine_from_file() is None
-#     )
-# ):
-#     mkdir(FILE_STRUCTURE["machine"].parent)
-#     machine_filepart = Path(
-#         str(FILE_STRUCTURE["machine"]) + f".{get_uid()}.filepart"
-#     )
-#     with open(machine_filepart, "w") as f:
-#         f.write(f"{MACHINE.name}")
-#     move(machine_filepart, FILE_STRUCTURE["machine"])
