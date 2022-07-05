@@ -105,10 +105,15 @@ class Model(ReadFile, WriteFile, File):
         kernel_dict = {}
         notes = {}
 
+        stop_reading = False
+
         with open(self.path, "r") as f:
             for line in f:
-                if up_to is not None and up_to in line:
+                if stop_reading:
                     break
+
+                if up_to is not None and up_to in line:
+                    stop_reading = True
 
                 if "<TODO>" in line:
                     continue
@@ -427,7 +432,9 @@ class Model(ReadFile, WriteFile, File):
             f.write(f"name {self.system_name}\n")
             f.write(f"atom {self.atom_name}\n")
             f.write(f"property {self.prop}\n")
-            f.write(f"ALF {self.alf[0]+1} {self.alf[1]+1} {self.alf[2]+1}\n")
+            f.write(
+                f"ALF {self.alf[0] + 1} {self.alf[1] + 1} {self.alf[2] + 1}\n"
+            )
             f.write("\n")
             f.write("[dimensions]\n")
             f.write(f"number_of_atoms {self.natoms}\n")
