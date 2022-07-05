@@ -38,9 +38,11 @@ def split_keywords(keywords: Union[str, List[str]]):
 def read_alf(alf: Union[str, List[List[int]]]):
     """Read in ALF from config file as a string and then convert to Python list of lists because this is the typing given in Globals.__annotations__ for the ALF class variable"""
     if isinstance(alf, str):
+        alf = alf.replace("ALF", "").replace("origin_idx=", "").replace("x_axis_idx=", "").replace("xy_plane_idx=", "")
         alf = ast.literal_eval(alf)
     if isinstance(alf, list):
-        alf = [ALF(*[int(i) for i in j]) for j in alf]
+        modify = 1 if alf[0][0] == 1 else 0
+        alf = [ALF(*[int(i) - modify for i in j]) for j in alf]
     return alf
 
 

@@ -285,10 +285,10 @@ class Globals:
                 # TODO: make this inspect the output of the property and check what type it returns
                 # TODO: then, this is going to be added to parsers/formatters and then it will update
                 # the variable using the setter method for the property
-                else:
+                elif global_variable in self.properties_with_setter_methods:
                     self.__annotations__[
                         global_variable
-                    ] = Path  # todo: is this right? need a reason
+                    ] = inspect.signature(inspect.getattr_static(self, global_variable).fget).return_annotation
 
         # Set Protected Variables
         self._protected = [
@@ -327,6 +327,7 @@ class Globals:
         self._parsers["SAMPLE_POOL_METHOD"] += [parsers.split_keywords]
         self._parsers["VALIDATION_SET_METHOD"] += [parsers.split_keywords]
         self._parsers["UID"] += [parsers.read_uid]
+        self._parsers["ALF"] += [parsers.read_alf]
         # TODO: Make sure List[int] is parsed correctly
 
         # Setup Formatters
@@ -429,7 +430,7 @@ class Globals:
             self.MAX_RUNNING_TASKS = 25 if MACHINE is Machine.ffluxlab else -1
 
     @property
-    def POINTS_LOCATION(self):
+    def POINTS_LOCATION(self) -> Path:
         if self._POINTS_LOCATION is None:
             try:
                 self._POINTS_LOCATION = get_atoms_reference_file(Path.cwd())
