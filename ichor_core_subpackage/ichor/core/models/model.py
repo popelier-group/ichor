@@ -2,11 +2,18 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
+from ichor.core.atoms.calculators import ALF
 from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import File, FileContents, FileState, ReadFile, WriteFile
+from ichor.core.files.file import (
+    File,
+    FileContents,
+    FileState,
+    ReadFile,
+    WriteFile,
+)
 from ichor.core.models.kernels import (
     RBF,
     ConstantKernel,
@@ -22,13 +29,10 @@ from ichor.core.models.mean import (
     QuadraticMean,
     ZeroMean,
 )
-from ichor.core.atoms.calculators import ALF
 
 
 def _get_default_input_units(nfeats: int) -> List[str]:
-    units = []
-    for i in range(min(nfeats, 3)):
-        units += [["bohr", "bohr", "radians"][i]]
+    units = [["bohr", "bohr", "radians"][i] for i in range(min(nfeats, 3))]
     for i in range(3, nfeats):
         units += [["bohr", "radians", "radians"][i % 3]]
     return units
@@ -95,14 +99,17 @@ class Model(ReadFile, WriteFile, File):
         self.program_version = program_version
         self.notes = notes
 
-    def _read_file(self):
+    def _read_file(self, up_to: Optional[str] = None):
         """Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
         kernel_composition = ""
         kernel_dict = {}
         notes = {}
 
-        with open(self.path, 'r') as f:
+        with open(self.path, "r") as f:
             for line in f:
+                if up_to is not None and up_to in line:
+                    break
+
                 if "<TODO>" in line:
                     continue
 
@@ -157,7 +164,9 @@ class Model(ReadFile, WriteFile, File):
                     continue
 
                 if "ALF" in line:
-                    self.alf = self.alf or ALF(*[int(a)-1 for a in line.split()[1:]])
+                    self.alf = self.alf or ALF(
+                        *[int(a) - 1 for a in line.split()[1:]]
+                    )
                     continue
 
                 if "number_of_atoms" in line:
@@ -298,7 +307,11 @@ class Model(ReadFile, WriteFile, File):
 
                     self.weights = self.weights or weights
 
-        self.kernel = self.kernel if self.kernel else KernelInterpreter(kernel_composition, kernel_dict).interpret()
+        self.kernel = (
+            self.kernel
+            if self.kernel or not kernel_composition
+            else KernelInterpreter(kernel_composition, kernel_dict).interpret()
+        )
 
     @classproperty
     def filetype(self) -> str:
