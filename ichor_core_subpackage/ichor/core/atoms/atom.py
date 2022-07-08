@@ -59,7 +59,7 @@ class Atom(VarReprMixin, Coordinates3D):
             atom.y,
             atom.z,
             atom._index,
-            atom.parent,
+            atom._parent,
             atom.units,
         )
 
