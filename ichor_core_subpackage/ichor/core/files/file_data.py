@@ -1,6 +1,6 @@
-import json
 from abc import ABC, abstractmethod
 from typing import Any, Dict
+from abc import ABC
 from typing import List, Optional
 import numpy as np
 
@@ -16,7 +16,6 @@ from ichor.core.atoms.calculators import (
     default_feature_calculator,
 )
 from ichor.core.files.file import FileContents, File
-from pathlib import Path
 
 
 class HasAtoms(ABC):
@@ -114,25 +113,3 @@ class AtomicData(Atom, HasProperties):
             ),
             self.name,
         )
-
-
-class Cacheable(ABC):
-    def __init__(self, cache_path: Optional[Path] = None):
-        self.cache_path: Path = cache_path or Path("cache")
-        self._cache_attributes: bool = True
-        self._cache_properties: bool = True
-
-    @property
-    def cacheable_objects(self) -> Dict[str, Any]:
-        objects = {}
-        if self._cache_attributes:
-            for attr, value in var(self).items():
-                objects[attr] = value
-
-    def _serialize_cache(self):
-        with open(self.cache_path, 'w') as f:
-            json.dump(self.cacheable_objects, f)
-
-    @abstractmethod
-    def _deserialize_cache(self):
-        raise NotImplementedError(f"'_deserialize_cache' not implemented for type '{self.__class__.__name__}'")
