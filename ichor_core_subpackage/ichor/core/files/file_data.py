@@ -15,7 +15,7 @@ from ichor.core.atoms.calculators import (
     FeatureCalculatorFunction,
     default_feature_calculator,
 )
-from ichor.core.files.file import FileContents, File
+from ichor.core.files.file import FileContents, File, FileState, FileContentsType
 from pathlib import Path
 
 
@@ -116,6 +116,38 @@ class AtomicData(Atom, HasProperties):
         )
 
 
+def null(item):
+    return None
+
+
+def jsonable(item):
+    type_conversions = {
+        Path: str,
+        FileState: str,
+        FileContentsType: null,
+    }
+
+    try:
+        json.dumps(item)
+        return item
+    except TypeError as e:
+        for ty in type_conversions:
+            if isinstance(item, ty):
+                return type_conversions[ty](item)
+        raise e
+
+
+class Serde(ABC): # (Ser)ialize/(De)serialize
+    @abstractmethod
+    def serialize(self) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    @classmethod
+    def deserialize(cls, data: Dict[str, Any]) -> "Serde":
+        pass
+
+
 class Cacheable(ABC):
     def __init__(self, cache_path: Optional[Path] = None):
         self.cache_path: Path = cache_path or Path("cache")
@@ -126,12 +158,18 @@ class Cacheable(ABC):
     def cacheable_objects(self) -> Dict[str, Any]:
         objects = {}
         if self._cache_attributes:
-            for attr, value in var(self).items():
-                objects[attr] = value
+            for attr, value in vars(self).items():
+                if value is FileContents:
+                    value = getattr(self, attr)
+                objects[attr] = jsonable(value)
+        return objects
+
+    def cache(self):
+        self._serialize_cache()
 
     def _serialize_cache(self):
         with open(self.cache_path, 'w') as f:
-            json.dump(self.cacheable_objects, f)
+            json.dump(self.cacheable_objects, f, indent=4)
 
     @abstractmethod
     def _deserialize_cache(self):
