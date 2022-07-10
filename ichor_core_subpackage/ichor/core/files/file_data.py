@@ -138,11 +138,11 @@ def jsonable(item):
 
 
 class Serde(ABC): # (Ser)ialize/(De)serialize
-    @abstractmethod
+#    @abstractmethod
     def serialize(self) -> Dict[str, Any]:
         pass
 
-    @abstractmethod
+#    @abstractmethod
     @classmethod
     def deserialize(cls, data: Dict[str, Any]) -> "Serde":
         pass

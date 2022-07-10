@@ -59,6 +59,9 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
             if hasattr(p, "parent"):
                 p.parent = self
 
+            if hasattr(p, "wfn") and self.wfn.exists():
+                p.wfn = self.wfn
+
     @property
     def atoms(self) -> Atoms:
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""

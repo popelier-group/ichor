@@ -33,7 +33,7 @@ class CriticalPointType(Enum):
     Cage = "CCP"
 
 
-class CriticalPoint(Coordinates3D, Serde):
+class CriticalPoint(Coordinates3D):
     def __init__(
         self,
         index: int,
@@ -47,7 +47,7 @@ class CriticalPoint(Coordinates3D, Serde):
         self.index: int = index
         self.type: CriticalPointType = ty
         self.connecting_atoms: List[str] = connecting_atoms
-    
+
     def serialize(self):
         return {
             "coordinates": [self.x, self.y, self.z],
@@ -119,6 +119,8 @@ class INT(HasProperties, ReadFile, Cacheable):
 
         self.total_time: int = FileContents
 
+        self._wfn_instance: Optional["WFN"] = None
+
     @property
     def cacheable_objects(self) -> Dict[str, Any]:
         return {
@@ -180,7 +182,16 @@ class INT(HasProperties, ReadFile, Cacheable):
     def wfn(self) -> "WFN":
         from ichor.core.files import WFN
 
-        return WFN(self.wfn_file_path)
+        if self._wfn_instance is None:
+            self._wfn_instance = WFN(self.wfn_file_path)
+
+        return self._wfn_instance
+
+    @wfn.setter
+    def wfn(self, wfn: Union[Path, "WFN"]):
+        if isinstance(wfn, Path):
+            wfn = WFN(wfn)
+        self._wfn_instance = wfn
 
     @property
     def properties(self) -> Dict[str, float]:

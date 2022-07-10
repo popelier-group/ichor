@@ -41,11 +41,27 @@ class INTs(HasProperties, OrderedDict, Directory):
             if f.suffix == INT.filetype:
                 self[f.stem.capitalize()] = INT(f, parent=self.parent)
         self.sort()
+        self._wfn_instance: Optional["WFN"] = None
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
         """Checks if the given Path instance has _atomicfiles in its name."""
         return path.name.endswith("_atomicfiles")
+
+    @property
+    def wfn(self) -> "WFN":
+        if self._wfn_instance is None:
+            self._wfn_instance = self[list(self.keys())[0]].wfn
+        return self._wfn_instance
+
+    @wfn.setter
+    def wfn(self, wfn: Union[Path, "WFN"]):
+        from ichor.core.files.wfn import WFN
+        if isinstance(wfn, Path):
+            wfn = WFN(wfn)
+        self._wfn_instance = wfn
+        for intf in self.values():
+            intf.wfn = self._wfn_instance
 
     def sort(self):
         """Sorts keys of self by atom index e.g.
