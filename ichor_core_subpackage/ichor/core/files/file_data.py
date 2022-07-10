@@ -15,7 +15,8 @@ from ichor.core.atoms.calculators import (
     FeatureCalculatorFunction,
     default_feature_calculator,
 )
-from ichor.core.files.file import FileContents, File, FileState, FileContentsType
+from ichor.core.files.file import FileContents, ReadFile, FileState, FileContentsType
+from ichor.core.common.io import remove
 from pathlib import Path
 
 
@@ -148,11 +149,27 @@ class Serde(ABC): # (Ser)ialize/(De)serialize
         pass
 
 
-class Cacheable(ABC):
+class CacheReadError(Exception):
+    pass
+
+
+class Cacheable(ReadFile, ABC):
     def __init__(self, cache_path: Optional[Path] = None):
         self.cache_path: Path = cache_path or Path("cache")
-        self._cache_attributes: bool = True
-        self._cache_properties: bool = True
+
+    def _read_file(self, *args, **kwargs):
+        if self.cache_path.exists():
+            try:
+                self._deserialize_cache()
+                return
+            except CacheReadError:
+                self.invalidate_cache()
+        self._read_file_uncached(*args, **kwargs)
+        self._serialize_cache()
+
+    @abstractmethod
+    def _read_file_uncached(self, *args, **kwargs):
+        pass
 
     @property
     def cacheable_objects(self) -> Dict[str, Any]:
@@ -174,3 +191,6 @@ class Cacheable(ABC):
     @abstractmethod
     def _deserialize_cache(self):
         raise NotImplementedError(f"'_deserialize_cache' not implemented for type '{self.__class__.__name__}'")
+
+    def invalidate_cache(self):
+        remove(self.cache_path)
