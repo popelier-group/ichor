@@ -5,6 +5,8 @@ from ichor.core.atoms import AtomsNotFoundError, Atoms
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file import FileContents, ReadFile
 
+import numpy as np
+
 from ichor.core.files.file_data import HasAtoms, HasProperties, AtomicData
 from ichor.core.files.gjf import GJF
 from ichor.core.files.ints import INTs
@@ -15,6 +17,7 @@ from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
+from ichor.core.atoms.calculators.features.features import FeatureCalculatorFunction
 
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
@@ -37,8 +40,6 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path: Union[Path, str]):
-        # AtomicData.__init__(self, path, atoms=FileContents)
-        # GeometryDataFile.__init__(self, path)
         AnnotatedDirectory.__init__(self, path)
 
     def _read_file(self, *args, **kwargs):
@@ -96,6 +97,10 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
             self.xyz = XYZ(self.xyz.path, value)
 
+    @property
+    def features_file(self) -> Path:
+        return self.path / (self.path.name + ".features")
+
     def get_atom_data(self, atom_name) -> AtomicData:
         return AtomicData(self.atoms[atom_name], self.properties)
 
@@ -108,23 +113,6 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                 if isinstance(f, HasProperties)
             ]
         )
-
-    # def __getattr__(self, item):
-    #     tried = []
-    #     for d in self.directories():
-    #         try:
-    #             return getattr(d, item)
-    #         except AttributeError:
-    #             tried.append(d.path)
-    #     for f in self.files():
-    #         try:
-    #             return getattr(f, item)
-    #         except AttributeError:
-    #             tried.append(f.path)
-    #
-    #     raise AttributeError(
-    #         f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'"
-    #     )
 
     @classmethod
     def check_path(

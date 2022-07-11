@@ -18,7 +18,7 @@ from ichor.core.constants import (
     spherical_quadrupole_labels,
 )
 from ichor.core.files.file import FileContents, ReadFile
-from ichor.core.files.file_data import HasProperties, Cacheable, Serde
+from ichor.core.files.file_data import HasProperties, Cacheable, Serde, CacheReadError
 from ichor.core.multipoles import (
     rotate_dipole,
     rotate_hexadecapole,
@@ -33,7 +33,7 @@ class CriticalPointType(Enum):
     Cage = "CCP"
 
 
-class CriticalPoint(Coordinates3D):
+class CriticalPoint(Coordinates3D, Serde):
     def __init__(
         self,
         index: int,
@@ -143,20 +143,23 @@ class INT(HasProperties, Cacheable):
     def _deserialize_cache(self):
         with open(self.cache_path, 'r') as f:
             cached_data = json.load(f)
-        self.path = Path(cached_data["path"])
-        self.current_directory = Path(cached_data["current_directory"])
-        self.inp_file_path = Path(cached_data["inp_file_path"])
-        self.wfn_file_path = Path(cached_data["wfn_file_path"])
-        self.out_file_path = Path(cached_data["out_file_path"])
-        self.atom_name = cached_data["atom_name"]
-        self.title = cached_data["title"]
-        self.critical_points = [CriticalPoint.deserialize(critical_point) for critical_point in cached_data["critical_points"]]
-        self.dft_model = cached_data["dft_model"]
-        self.net_charge = cached_data["net_charge"]
-        self.basin_integration_results = cached_data["basin_integration_results"]
-        self.global_spherical_multipoles = cached_data["global_spherical_multipoles"]
-        self.iqa_energy_components = cached_data["iqa_energy_components"]
-        self.total_time = cached_data["total_time"]
+        try:
+            self.path = Path(cached_data["path"])
+            self.current_directory = Path(cached_data["current_directory"])
+            self.inp_file_path = Path(cached_data["inp_file_path"])
+            self.wfn_file_path = Path(cached_data["wfn_file_path"])
+            self.out_file_path = Path(cached_data["out_file_path"])
+            self.atom_name = cached_data["atom_name"]
+            self.title = cached_data["title"]
+            self.critical_points = [CriticalPoint.deserialize(critical_point) for critical_point in cached_data["critical_points"]]
+            self.dft_model = cached_data["dft_model"]
+            self.net_charge = cached_data["net_charge"]
+            self.basin_integration_results = cached_data["basin_integration_results"]
+            self.global_spherical_multipoles = cached_data["global_spherical_multipoles"]
+            self.iqa_energy_components = cached_data["iqa_energy_components"]
+            self.total_time = cached_data["total_time"]
+        except KeyError as e:
+            raise CacheReadError(f"Failed reading cache '{self.cache_path}' for '{self.path}' instance of '{self.__class__.__name__}'") from e
 
     @classproperty
     def filetype(cls) -> str:
