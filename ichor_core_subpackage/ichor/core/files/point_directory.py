@@ -62,6 +62,9 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
             if hasattr(p, "wfn") and self.wfn.exists():
                 p.wfn = self.wfn
+            
+            if self.has_atoms() and self.ints.exists():
+                self.ints.atoms = self.atoms
 
     @property
     def atoms(self) -> Atoms:
@@ -83,6 +86,13 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                 return f.atoms
 
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
+    
+    def has_atoms(self):
+        try:
+            self.atoms
+            return True
+        except AtomsNotFoundError:
+            return False
 
     def atoms_from_file(self, file_with_atoms: Type[HasAtoms]) -> Atoms:
         for f in self.files():

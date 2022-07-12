@@ -54,6 +54,15 @@ class INTs(HasProperties, OrderedDict, Directory):
             self._wfn_instance = self[list(self.keys())[0]].wfn
         return self._wfn_instance
 
+    @property
+    def atoms(self) -> Atoms:
+        return next(iter(self.values())).atoms
+
+    @atoms.setter
+    def atoms(self, atoms: Atoms):
+        for i in self.values():
+            i.atoms = atoms
+
     @wfn.setter
     def wfn(self, wfn: Union[Path, "WFN"]):
         from ichor.core.files.wfn import WFN

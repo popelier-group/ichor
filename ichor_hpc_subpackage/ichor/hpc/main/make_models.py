@@ -103,14 +103,20 @@ def create_ferebus_directories_and_submit(
 
     :return: The job id of the submitted job
     """
-    from ichor.core.atoms.calculators import get_alf_feature_calculator
+    from ichor.core.atoms.calculators.features import get_default_feature_calculator
+
+    print("----------------------------------------")
 
     ferebus_directories = []
     n_training_points = n_training_points or len(model_data)
 
+    model_data.set_alf(model_data[0].atoms.alf())
+
     for atom in atoms:
         training_data = []
-        features = model_data[atom].features(feature_calculator=get_alf_feature_calculator(model_data[atom][0].alf()))
+
+        features = model_data[atom].features()
+
         for i, point in enumerate(model_data):
             # if a point does not have int files in it this will fail.
             # point[atom] is an AtomData instance. Usually, an INT is used as self.properties attribute

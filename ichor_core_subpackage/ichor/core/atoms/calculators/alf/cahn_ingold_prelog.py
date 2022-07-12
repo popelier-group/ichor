@@ -6,14 +6,14 @@ from ichor.core.atoms.calculators.alf.alf import ALF, ALFCalculatorFunction
 from ichor.core.atoms.calculators.connectivity import (
     ConnectivityCalculatorFunction,
     connectivity_calculators,
-    calculate_connectivity,
+    default_connectivity_calculator,
 )
 
 
 def get_cahn_ingold_prelog_alf_calculator(
-    connectivity_calculator: Union[
+    connectivity_calculator: Optional[Union[
         str, np.ndarray, ConnectivityCalculatorFunction
-    ] = calculate_connectivity,
+    ]] = None,
 ) -> ALFCalculatorFunction:
     """Returns a FeatureCalculatorFunction for the given alf calculator
 
@@ -25,6 +25,9 @@ def get_cahn_ingold_prelog_alf_calculator(
         :type: FeatureCalculatorFunction
             An instance of the calculate_alf_features function with a predefined ALFCalculatorFunction and distance unit
     """
+    if connectivity_calculator is None:
+        connectivity_calculator = default_connectivity_calculator
+
     if isinstance(connectivity_calculator, str):
         connectivity_calculator = connectivity_calculators[
             connectivity_calculator
@@ -59,13 +62,8 @@ def calculate_alf_cahn_ingold_prelog(
     import itertools as it
     from typing import List
 
-    if connectivity is None:
-        connectivity = calculate_connectivity
-
     if not isinstance(connectivity, np.ndarray):
-        connectivity = connectivity(
-            atom.parent
-        )  # todo!: use this to setup AtomicGraph then perform BFS
+        connectivity = atom.parent.connectivity(connectivity) # todo!: use this to setup AtomicGraph then perform BFS
 
     def _priority_by_mass(atoms: List["Atom"]) -> float:
         """Returns the sum of masses of a list of Atom instances

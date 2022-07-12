@@ -1,13 +1,17 @@
 import itertools as it
 from itertools import compress
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union, Any
+from ichor.core.atoms.calculators.alf.alf import ALFCalculatorFunction
+from ichor.core.atoms.calculators.connectivity.connectivity import ConnectivityCalculatorFunction
+from functools import lru_cache
 
 import numpy as np
+from ichor.core.common.functools import modifiable_cache, with_setter
 from ichor.core.atoms.atom import Atom
 from ichor.core.atoms.calculators import (
     ALF,
     FeatureCalculatorFunction,
-    calculate_connectivity,
+    default_connectivity_calculator,
     default_feature_calculator,
 )
 
@@ -37,6 +41,7 @@ class Atoms(list):
         if atoms is not None:
             for atom in atoms:
                 self.add(atom)
+        self._source = None
 
     def add(self, atom: Atom):
         """
@@ -50,6 +55,19 @@ class Atoms(list):
         if atom._index is None:
             atom.index = next(self._counter)
         super().append(atom)
+
+    @property
+    def source(self) -> Any:
+        if self._source is None:
+            raise ValueError(f"Source not defined for '{self}'")
+        return self._source
+
+    @source.setter
+    def source(self, source: Any):
+        self.set_source(source)
+    
+    def set_source(self, source: Any):
+        self._source = source
 
     @property
     def nuclear_charge_sum(self) -> int:
@@ -84,15 +102,18 @@ class Atoms(list):
         """Returns an array that contains the coordiantes for each Atom isntance held in the Atoms instance."""
         return np.array([atom.coordinates for atom in self])
 
-    @property
-    def connectivity(self) -> np.ndarray:
+    @modifiable_cache
+    def connectivity(self, connectivity_calculator: Optional[ConnectivityCalculatorFunction] = None) -> np.ndarray:
         """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
         Returns:
             :type: `np.ndarray` of shape n_atoms x n_atoms
         """
 
-        return calculate_connectivity(self)
+        if connectivity_calculator is None:
+            connectivity_calculator = default_connectivity_calculator
+
+        return connectivity_calculator(self)
 
     def to_angstroms(self) -> "Atoms":
         """
@@ -183,17 +204,21 @@ class Atoms(list):
         """Returns a list of the masses of the Atom instances held in the Atoms instance."""
         return [atom.mass for atom in self]
 
-    @property
-    def alf(self) -> List[ALF]:
+    @with_setter("alf_setter")
+    def alf(self, alf_calculator: Optional[ALFCalculatorFunction] = None) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
         """
-        return [atom.alf() for atom in self]
+        return [atom.alf(alf_calculator) for atom in self]
 
-    @property
-    def alf_list(self) -> List[List[int]]:
+    def alf_setter(self, alf: List[ALF]):
+        for ialf in alf:
+            self[ialf.origin_idx].alf = ALF(*ialf)
+
+    @lru_cache()
+    def alf_list(self, alf_calculator: Optional[ALFCalculatorFunction] = None) -> List[List[int]]:
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
-        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf]
+        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf(alf_calculator)]
 
     def reindex(self):
         for i, atom in enumerate(self):
@@ -213,6 +238,7 @@ class Atoms(list):
             new.add(Atom.from_atom(a))
         return new
 
+    @lru_cache()
     def features(
         self,
         feature_calculator: Union[List[ALF], FeatureCalculatorFunction] = default_feature_calculator,
@@ -232,6 +258,7 @@ class Atoms(list):
 
         return np.array([atom.features(feature_calculator) for atom in self])
 
+    @lru_cache()
     def alf_features(
         self, alf: Union[List[List[int]], np.ndarray]
     ) -> np.ndarray:
@@ -323,3 +350,6 @@ class Atoms(list):
 
     def __bool__(self):
         return bool(len(self))
+
+    def __hash__(self):
+        return hash(tuple(hash(atom) for atom in self))

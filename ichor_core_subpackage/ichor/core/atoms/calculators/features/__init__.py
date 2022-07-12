@@ -10,3 +10,7 @@ feature_calculators: Dict[str, FeatureCalculatorFunction] = {
 }
 
 default_feature_calculator = feature_calculators["alf"]
+
+
+def get_default_feature_calculator(self, atoms: "Atoms") -> FeatureCalculatorFunction:
+    return get_alf_feature_calculator(atoms.alf(atoms.connectivity()))

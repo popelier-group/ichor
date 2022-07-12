@@ -32,7 +32,17 @@ class HasAtoms(ABC):
     """
 
     def __init__(self, atoms: Optional[Atoms] = None):
-        self.atoms = FileContents if atoms is None else atoms
+        self._atoms = FileContents if atoms is None else atoms
+
+    @property
+    def atoms(self) -> Atoms:
+        if self._atoms is not FileContents:
+            self._atoms.source = self
+        return self._atoms
+
+    @atoms.setter
+    def atoms(self, atoms: Atoms):
+        self._atoms = atoms
 
     @property
     def coordinates(self) -> np.ndarray:

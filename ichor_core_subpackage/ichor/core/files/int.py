@@ -161,6 +161,16 @@ class INT(HasProperties, Cacheable):
         except KeyError as e:
             raise CacheReadError(f"Failed reading cache '{self.cache_path}' for '{self.path}' instance of '{self.__class__.__name__}'") from e
 
+    @property
+    def atoms(self) -> Atoms:
+        if self._atoms is not None:
+            return self._atoms
+        return self.wfn.atoms
+
+    @atoms.setter
+    def atoms(self, atoms: Atoms):
+        self._atoms = atoms
+
     @classproperty
     def filetype(cls) -> str:
         """Returns the file extension of AIMALL files which are used"""
@@ -429,6 +439,9 @@ class INT(HasProperties, Cacheable):
         :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
             with the int file does not exist. Then we cannot calculate multipoles.
         """
+
+        # print(self.atoms.source)
+        # quit()
 
         C = (
             C_matrix
