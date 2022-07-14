@@ -13,29 +13,33 @@ from ichor.hpc.submission_script import (
     print_completed,
 )
 from ichor.hpc.log import logger
+from typing import Union
 
 
 def submit_points_directory_to_gaussian(
-    directory: Path, overwrite_existing: bool = True, force: bool = False
-) -> Optional[JobID]:
+    directory: Union[Path, PointsDirectory], overwrite_existing_gjf: bool = True, force_calculate_wfn: bool = False,
+    **kwargs) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
     :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True.
         If this is False, then any existing `.gjf` files in the directory will not be overwritten
-        (thus they would not be using the Gaussian settings from GLOBALS.)
+    :param force_calculate_wfn: Run Gaussian calculations on given .gjf files, even if .wfn files already exist. Defaults to False.
+    :param kwargs: Key word arguments to pass to GJF class. These are things like number of cores, basis set,
+        level of theory, spin multiplicity, charge, etc. These will get used if overwrite_existing_gjf is True or if the gjf path does
+        not exist yet.
     """
-    points = PointsDirectory(
-        directory
-    )  # a directory which contains points (a bunch of molecular geometries)
-    gjf_files = write_gjfs(points, overwrite_existing)
-    return submit_gjfs(gjf_files, force=force)
+    if not isinstance(directory, PointsDirectory):
+        points_directory = PointsDirectory(
+            directory
+        )  # a directory which contains points (a bunch of molecular geometries)
+    gjf_files = write_gjfs(points_directory, overwrite_existing_gjf, **kwargs)
+    return submit_gjfs(gjf_files, force_calculate_wfn=force_calculate_wfn)
 
 
 def write_gjfs(
-    points: PointsDirectory, overwrite_existing: bool
-) -> List[Path]:
+    points_directory: PointsDirectory, overwrite_existing_gjf: bool, **kwargs) -> List[Path]:
     """Writes out .gjf files in every PointDirectory which is contained in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
     which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf` file in the PointDirectory (if it does not exist already).
 
@@ -44,34 +48,29 @@ def write_gjfs(
         If this is False, then any existing `.gjf` files in the directory will not be overwritten (thus they would not be using the GLOBALS Gaussian settings.)
     :return: A list of Path objects which point to `.gjf` files in each PointDirectory that is contained in the PointsDirectory.
     """
-    from ichor.hpc import GLOBALS
 
     gjfs = []
-    for point in points:
-        if not point.gjf.exists():
-            point.gjf = GJF(
-                Path(point.path / (point.path.name + GJF.filetype))
-            )
-        point.gjf.atoms = point.xyz.atoms
+    
+    for point_directory in points_directory:
+        
+        # use key word arguments to make gjf if gjf file does not exist or overwrite_existing flag is set
+        if not point_directory.gjf.exists() or overwrite_existing_gjf:
+            point_directory.gjf = GJF(
+                Path(point_directory.path / (point_directory.path.name + GJF.filetype)), **kwargs)
+        # if gjf path exists or overwrite_existing_gjf is False, then do not modify existing GJF file.
+        else:
+            point_directory.gjf = GJF(Path(point_directory.path / (point_directory.path.name + GJF.filetype)))
+        point_directory.gjf.atoms = point_directory.xyz.atoms
 
-        if not point.gjf.exists() or overwrite_existing:
-            point.gjf.set_nproc(GLOBALS.GAUSSIAN_NCORES)
-            point.gjf.set_mem(GLOBALS.GAUSSIAN_MEMORY_LIMIT)
-            point.gjf.method = GLOBALS.METHOD
-            point.gjf.basis_set = GLOBALS.BASIS_SET
-            point.gjf.add_keywords(GLOBALS.KEYWORDS)
-            point.gjf.output_wfn()
-            point.gjf.write()
-
-        gjfs.append(point.gjf.path)
+        gjfs.append(point_directory.gjf.path)
 
     return gjfs
 
 
 def submit_gjfs(
     gjfs: List[Path],
-    force: bool = False,
-    script_name: Optional[Path] = None,
+    force_calculate_wfn: bool = False,
+    script_name: Optional[Path] = SCRIPT_NAMES["gaussian"],
     hold: Optional[JobID] = None,
 ) -> Optional[JobID]:
     """Function that writes out a submission script which contains an array of Gaussian jobs to be ran on compute nodes. If calling this function from
@@ -81,20 +80,18 @@ def submit_gjfs(
     from the compute node (as you cannot submit jobs from compute nodes on CSF3.)
 
     :param gjfs: A list of Path objects pointing to .gjf files
-    :param force: Run Gaussian calculations on given .gjf files, even if .wfn files already exist. Defaults to False.
+    :param force_calculate_wfn: Run Gaussian calculations on given .gjf files, even if .wfn files already exist. Defaults to False.
     :script_name: Path to write submission script out to defaults to SCRIPT_NAMES["gaussian"]
     :param hold: An optional JobID for which this job to hold. This is used in auto-run to hold this job for the previous job to finish, defaults to None
     :return: The JobID of this job given by the submission system.
     """
 
-    if script_name is None:
-        script_name = SCRIPT_NAMES["gaussian"]
-
-    # make a SubmissionScript instance which is going to house all the jobs that are going to be ran
+    # make a SubmissionScript instance which is going to contain all the jobs that are going to be ran
     # the submission_script object can be accessed even after the context manager
     with SubmissionScript(script_name) as submission_script:
         for gjf in gjfs:
-            if force or not gjf.with_suffix(".wfn").exists():
+            # append to submission script if we want to rerun the calculation (even if wfn file exits) or a wfn file does not exist
+            if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
                 submission_script.add_command(
                     GaussianCommand(gjf)
                 )  # make a list of GaussianCommand instances.
@@ -104,9 +101,10 @@ def submit_gjfs(
         logger.info(
             f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
         )
-        # submit the final submission script to the queuing system, so that job is ran on compute nodes.
+        # submit the final submission script to the queuing system, and return the job id. hold for other jobs if needed.
         return submission_script.submit(hold=hold)
 
+# Below are functions used by autorun to check if stuff exists and reruns if necessary.
 
 def rerun_gaussian(gaussian_file: str):
     """Used by `CheckManager`. Checks if Gaussian jobs ran correctly and a full .wfn file is returned. If there is no .wfn file or it does not
