@@ -8,6 +8,5 @@ from ichor.core.atoms.calculators.c_matrix import calculate_c_matrix
 from ichor.core.atoms.calculators.connectivity import calculate_connectivity
 from ichor.core.atoms.calculators.features import (FeatureCalculatorFunction,
                                                    calculate_alf_features,
-                                                   get_alf_feature_calculator,
                                                    default_feature_calculator,
                                                    feature_calculators)
