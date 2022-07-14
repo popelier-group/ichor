@@ -280,10 +280,6 @@ class ListOfAtoms(list):
             else:
                 df.to_csv(f"{fname}_{atom_name}_features.csv")
 
-    def set_alf(self, alf: List[ALF]):
-        for i in self:
-            i.atoms.alf = alf
-
     def features_to_excel(
         self,
         fname: Optional[Union[str, Path]] = None,
@@ -498,7 +494,7 @@ class ListOfAtoms(list):
 
         # if ListOfAtoms instance is indexed by an integer or np.int64, then index as a list
         if isinstance(item, (int, np.int64)):
-            return list.__getitem__(self, item)
+            return super().__getitem__(item)
 
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
@@ -549,7 +545,6 @@ class ListOfAtoms(list):
                     :return: Тhe array has shape `n_timesteps` x `n_features`.
                     """
 
-                    print(">>>")
                     return np.array([atom.features(get_alf(alf, atom)) for atom in self])
 
             if hasattr(self, "_is_atom_view"):

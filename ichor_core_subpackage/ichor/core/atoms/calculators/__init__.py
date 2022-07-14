@@ -5,7 +5,7 @@ from ichor.core.atoms.calculators.alf import (ALF, ALFCalculatorFunction,
                                               default_alf_calculator,
                                               get_alf)
 from ichor.core.atoms.calculators.c_matrix import calculate_c_matrix
-from ichor.core.atoms.calculators.connectivity import default_connectivity_calculator
+from ichor.core.atoms.calculators.connectivity import calculate_connectivity
 from ichor.core.atoms.calculators.features import (FeatureCalculatorFunction,
                                                    calculate_alf_features,
                                                    get_alf_feature_calculator,

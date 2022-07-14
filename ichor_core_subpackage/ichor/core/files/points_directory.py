@@ -48,7 +48,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
 
         # if current instance is empty, then iterate over the contents of the directory (see __iter__ method below)
-        for f in self.iterdir():
+        for f in self:
             # if the current PathObject is a directory that matches the given regex pattern, then wrap the directory in
             # a PointDirectory instance and add to self
             if PointDirectory.check_path(f):
@@ -83,6 +83,20 @@ class PointsDirectory(ListOfAtoms, Directory):
 
     def iterdir(self):
         return iter(natsorted(super().iterdir(), key=ignore_alpha))
+
+    def __iter__(self):
+        """
+        This method is called when iterating over an instance of `PointsDirectory`. If the current instance is empty (i.e. its length is 0),
+        then iterate over the directory set as `self.path` (`self.path` attribute is inherited from PathObject and because PointsDirectory
+        subclasses from Directory and the Directory `__init__` method is called, then the PointsDirectory object will
+        also have this attribute). If the current instance is not empty, then iterate over the `PointDirectory` objects
+        which are in `self`. Because `PointsDirectory` inherits from Points, which
+        inherits from `ListofAtoms` (which subsequently inherits from `list`), then `self` can be used as a list itself.
+        """
+        if len(self) == 0:
+            return Directory.__iter__(self)
+        else:
+            return ListOfAtoms.__iter__(self)
 
     def __getattr__(self, item):
         try:

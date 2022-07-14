@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from ichor.core.atoms.calculators.alf.alf import ALF, ALFCalculatorFunction
 from ichor.core.atoms.calculators.alf.cahn_ingold_prelog import \
-    calculate_alf_cahn_ingold_prelog, get_cahn_ingold_prelog_alf_calculator
+    calculate_alf_cahn_ingold_prelog
 from ichor.core.atoms.calculators.alf.sequence import \
     calculate_alf_atom_sequence
 

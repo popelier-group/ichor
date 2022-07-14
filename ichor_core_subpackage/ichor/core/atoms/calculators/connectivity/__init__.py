@@ -15,4 +15,4 @@ connectivity_calculators: Dict[str, ConnectivityCalculatorFunction] = {
     "valence": calculate_connectivity_valence,
 }
 
-default_connectivity_calculator = connectivity_calculators["valence"]
+calculate_connectivity = connectivity_calculators["valence"]

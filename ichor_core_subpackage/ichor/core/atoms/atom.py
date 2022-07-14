@@ -1,12 +1,13 @@
-from typing import Optional, Union
-from functools import lru_cache
-from ichor.core.atoms.calculators.connectivity.connectivity import ConnectivityCalculatorFunction
+from typing import List, Optional, Union
+from copy import deepcopy
 
 import numpy as np
 from ichor.core import constants
 from ichor.core.common.types import Coordinates3D
 from ichor.core.atoms.calculators.features import get_alf_feature_calculator
 
+# from ichor.core.atoms.calculators import (ALFFeatureCalculator,
+#                                           AtomSequenceALFCalculator)
 from ichor.core.atoms.calculators import (
     ALF,
     ALFCalculatorFunction,
@@ -16,7 +17,6 @@ from ichor.core.atoms.calculators import (
     default_feature_calculator,
 )
 from ichor.core.common.types import VarReprMixin
-from ichor.core.common.functools import modifiable_cache
 from ichor.core.units import AtomicDistance
 
 
@@ -146,14 +146,14 @@ class Atom(VarReprMixin, Coordinates3D):
     def unpaired_electrons(self):
         return constants.type2orbital[self.type].value - self.valence
 
-    @lru_cache()
-    def connectivity(self, connectivity_calculator: Optional[ConnectivityCalculatorFunction] = None) -> np.ndarray:
+    @property
+    def connectivity(self) -> np.ndarray:
         """
         Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
         instances that are held in an Atoms instance.
         This is only one row of the full connectivity matrix of the Atoms instance that is self._parent.
         """
-        return self.parent.connectivity(connectivity_calculator)[self.i]
+        return self.parent.connectivity[self.i]
 
     @property
     def bonded_atoms(self) -> list:
@@ -162,7 +162,7 @@ class Atom(VarReprMixin, Coordinates3D):
         Returns:
             :type: `list` of `Atom` instances
         """
-        connectivity_matrix_row = self.connectivity()
+        connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom]
             for connected_atom in connectivity_matrix_row.nonzero()[0]
@@ -175,7 +175,7 @@ class Atom(VarReprMixin, Coordinates3D):
         Returns:
             :type: `list` of `str`
         """
-        connectivity_matrix_row = self.connectivity()
+        connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom].name
             for connected_atom in connectivity_matrix_row.nonzero()[0]
@@ -184,8 +184,6 @@ class Atom(VarReprMixin, Coordinates3D):
     def C(
         self, alf: Optional[Union[ALF, ALFCalculatorFunction]] = None
     ) -> np.ndarray:
-        if alf is None:
-            alf = self.alf()
         return calculate_c_matrix(self, alf=alf)
 
     def vec_to(self, other: "Atom") -> np.ndarray:
@@ -225,16 +223,15 @@ class Atom(VarReprMixin, Coordinates3D):
         Returns:
             :type: `list` of `int`, coresponding to the Atom instances indeces, as used in python lists (starting at 0).
         """
-        connectivity_matrix_row = self.connectivity()
+        connectivity_matrix_row = self.connectivity
         return [
             self.parent[connected_atom].i
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
 
-    @modifiable_cache
     def alf(
         self,
-        alf_calculator: Optional[ALFCalculatorFunction] = None,  # =AtomSequenceALFCalculator
+        alf_calculator: ALFCalculatorFunction = default_alf_calculator,  # =AtomSequenceALFCalculator
     ) -> ALF:
         """Returns a list of the Atomic Local Frame (ALF). This ALF is ONLY for this Atom.
 
@@ -243,17 +240,13 @@ class Atom(VarReprMixin, Coordinates3D):
 
         [0,1,2] contains the indeces for the central atom, x-axis atom, and xy-plane atom. These indeces start at 0 to index Python objects correctly.
         """
-
-        if alf_calculator is None:
-            alf_calculator = default_alf_calculator
-
         return alf_calculator(self)
 
-    @lru_cache()
-    def ialf(self, alf_calculator: Optional[ALFCalculatorFunction] = None) -> np.ndarray:
+    @property
+    def ialf(self) -> np.ndarray:
         """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
         THere indices are what are used in python lists (as they start at 0)."""
-        alf = self.alf(alf_calculator)
+        alf = self.alf()
         return np.array([alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx])
 
     # @property

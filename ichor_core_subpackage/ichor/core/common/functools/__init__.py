@@ -7,5 +7,3 @@ from ichor.core.common.functools.hasattr import called_from_hasattr, hasattr
 from ichor.core.common.functools.run_function import (get_functions_to_run,
                                                       run_function)
 from ichor.core.common.functools.run_once import run_once
-from ichor.core.common.functools.modifiable_cache import modifiable_cache, NotSet
-from ichor.core.common.functools.with_setter import with_setter, WithSetter
