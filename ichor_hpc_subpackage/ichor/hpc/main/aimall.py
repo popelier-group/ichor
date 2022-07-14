@@ -1,5 +1,4 @@
 import sys
-from hashlib import new
 from pathlib import Path
 from typing import List, Optional
 
@@ -13,33 +12,68 @@ from ichor.hpc.submission_script import (
     SubmissionScript,
     print_completed,
 )
+from typing import Union
+from ichor.core.constants import AIMALL_FUNCTIONALS
 
 
 def submit_points_directory_to_aimall(
-    directory: Path, atoms: Optional[List[str]] = None, force: bool = False
-) -> Optional[JobID]:
+    points_directory: Union[PointsDirectory, Path], method = "B3LYP", aimall_atoms: Optional[List[str]] = None, force: bool = False) -> Optional[JobID]:
     """Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file"""
 
+    method = method.upper()
+
     logger.info("Submitting wfns to AIMAll")
-    points = PointsDirectory(directory)
-    wfns = check_wfns(points)
-    return submit_wfns(wfns, atoms, force=force)
+    if not isinstance(points_directory, PointsDirectory):
+        points = PointsDirectory(points_directory)
+    list_of_wfn_paths = check_method_in_wfns(points, method)
+    return submit_wfns(list_of_wfn_paths, aimall_atoms, force=force)
 
 
-def check_wfns(points: PointsDirectory) -> List[Path]:
-    from ichor.hpc import GLOBALS
-
+def check_method_in_wfns(points: PointsDirectory, method) -> List[Path]:
+    """ AIMALL needs to know the method from the wfn file. The method needs to be added in the wfn file, otherwise AIMALL gets the method wrong and
+    gives the wrong results."""
+    
     wfns = []
     for point in points:
+        # write out the wfn file with the method modified as needed
         if point.wfn.exists():
-            if point.wfn.method != GLOBALS.METHOD:
-                point.wfn.method = GLOBALS.METHOD
+            if point.wfn.method != method:
+                point.wfn.method = method
                 point.wfn.write()
             wfns.append(point.wfn.path)
     return wfns
 
+def submit_wfns(
+    wfns: List[Path],
+    aimall_atoms: Optional[List[str]] = None,
+    force: bool = False,
+    hold: Optional[JobID] = None,
+) -> Optional[JobID]:
+    """ Write out submission script and submit wavefunctions to AIMALL on a cluster.
+    
+    :param wfns: a list of wavefunction paths which to write to the submission script
+    :param atoms: a list of stings corresponding to atom names. These will be the atoms for which AIMALL computes properties.
+    :param force: Whether or not to compute AIMALL for this wfn. If force is True, AIMALL will be ran again
+    :param hold: An optional JobID to hold for. The AIMALL job will not run until that other job is finished.
+    
+    """
+    with SubmissionScript(SCRIPT_NAMES["aimall"]) as submission_script:
+        
+        for wfn in wfns:
+            if force or not aimall_completed(wfn):
+                submission_script.add_command(AIMAllCommand(wfn, atoms=aimall_atoms))
+                logger.debug(f"Adding {wfn} to {submission_script.path}")
+
+    if len(submission_script.commands) > 0:
+        # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
+        logger.info(
+            f"Submitting {len(submission_script.commands)} WFN(s) to AIMAll"
+        )
+        return submission_script.submit(hold=hold)
+
 
 def aimall_completed(wfn: Path) -> bool:
+    """ This function is used when checking if AIMALL ran successfully. The .aim file as well as if the .int files contain the required information."""
     aim_file = wfn.with_suffix(AIM.filetype)
     if not aim_file.exists():
         return False
@@ -61,28 +95,11 @@ def aimall_completed(wfn: Path) -> bool:
                 return False
     return True
 
-
-def submit_wfns(
-    wfns: List[Path],
-    atoms: Optional[List[str]] = None,
-    force: bool = False,
-    hold: Optional[JobID] = None,
-) -> Optional[JobID]:
-    with SubmissionScript(SCRIPT_NAMES["aimall"]) as submission_script:
-        for wfn in wfns:
-            if force or not aimall_completed(wfn):
-                submission_script.add_command(AIMAllCommand(wfn, atoms=atoms))
-                logger.debug(f"Adding {wfn} to {submission_script.path}")
-
-    if len(submission_script.commands) > 0:
-        # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
-        logger.info(
-            f"Submitting {len(submission_script.commands)} WFN(s) to AIMAll"
-        )
-        return submission_script.submit(hold=hold)
-
-
 def cleanup_failed_aimall(wfn: Path):
+    """ Removes atomicfiles directories in a given directory where the wfn is.
+    
+    :param wfn: A path to a wfn file. The _atomicfiles directory is in the same directory as the .wfn
+    """
     atomicfiles = wfn.with_suffix("_atomicfiles")
     if atomicfiles.exists():
         remove(atomicfiles)
