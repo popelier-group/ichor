@@ -36,7 +36,7 @@ def get_alf_feature_calculator(
 
 def calculate_alf_features(
     atom: "Atom",
-    alf: Optional[Union[ALF, ALFCalculatorFunction]] = None,
+    alf: Optional[Union[ALF, ALFCalculatorFunction]] = default_alf_calculator,
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> np.ndarray:
     # todo: update doc
@@ -52,9 +52,7 @@ def calculate_alf_features(
             A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of.
     """
 
-    if alf is None:
-        alf = default_alf_calculator
-
+    # cannot check for ALFCalculatorFunction as that is a Protocol and does not work with isinstance so check if isinstance of ALF instead
     if not isinstance(alf, ALF):
         alf = alf(atom)
 
@@ -71,11 +69,11 @@ def calculate_alf_features(
             "atom.parent needs to have more than 1 atom in order to calculate features."
         )
 
-    # Convert to angstroms to make sure units are in angstroms
-    # For not features are calculated in bohr, so the unit_conversion is ang2bohr
-    # TODO: this is not ideal because it changes the instance coordinates directly, so it might cause bugs
-    atom.to_angstroms()
-    atom.parent.to_angstroms()
+    # Convert to angstroms to make sure units are in angstroms to begin with
+    # to_angstroms creates new instances which we use here to calculate features.
+    atom = atom.to_angstroms()
+    atom.parent = atom.parent.to_angstroms()
+    
     unit_conversion = (
         1.0 if distance_unit is AtomicDistance.Angstroms else ang2bohr
     )

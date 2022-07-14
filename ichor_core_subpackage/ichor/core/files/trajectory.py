@@ -96,7 +96,8 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
                             r"^\s*?\w+(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}",
                             line,
                         ):
-                            atom_type, x, y, z = line.split()
+                            # add *_ to work for extended xyz which contain extra information after x,y,z coordinates
+                            atom_type, x, y, z, *_ = line.split()
                             atoms.add(
                                 Atom(atom_type, float(x), float(y), float(z))
                             )
