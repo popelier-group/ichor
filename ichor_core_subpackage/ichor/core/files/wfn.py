@@ -1,3 +1,4 @@
+from optparse import Option
 from pathlib import Path
 from typing import Union, Optional, List, Dict
 import numpy as np
@@ -35,6 +36,8 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
     an output file, so it does not have a write method.
 
     :param path: Path object or string to the .wfn file
+    :param atoms: an Atoms instance which is read in from the top of the .wfn file.
+        Note that the units of the .wfn file are in Bohr.
     :param method: The method (eg. B3LYP) which was used in the Gaussian calculation
         that created the .wfn file. The method is not initially written to the .wfn
         file by Gaussian, but it is necessary to add it to the .wfn file because
@@ -46,34 +49,48 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
     :param nuclei: The number of nuclei in the system to be read in from the .wfn file.
     :param energy: The molecular energy read in from the bottom of the .wfn file
     :param virial: The virial read in from the bottom of the .wfn file
-    :param atoms: an Atoms instance which is read in from the top of the .wfn file.
-        Note that the units of the .wfn file are in Bohr.
+    .. note::
+        Since the wfn file is written out by Gaussian, we do not really have to modify it when writing out except
+        we need to add the method used, so that AIMALL can use the correct method. Otherwise AIMALL assumes Hartree-Fock
+        was used, which might be wrong.
     """
 
     def __init__(
         self,
         path: Union[Path, str],
+        method: Optional[str] = None,
         atoms: Optional[Atoms] = None,
+
+        # these should really not be changed as Gaussian writes out the wfn file. We only modify the method so aimall uses the correct method.
+        title: str = None,
+        program: str = None,
+        n_orbitals: int = None,
+        n_primitives: int = None,
+        n_nuclei: int = None,
+        centre_assignments: List[int] = None,
+        type_assignments: List[int] = None,
+        primitive_exponents: np.ndarray = None,
+        molecular_orbitals: List[MolecularOrbital] = None,
+        total_energy: float = None,
+        virial_ratio: float = None
     ):
         File.__init__(self, path)
         HasAtoms.__init__(self, atoms)
 
-        self.title: str = FileContents
-        self.program: str = FileContents
+        self.method = method or FileContents
+        self.atoms = atoms or FileContents
 
-        self.n_orbitals: int = FileContents
-        self.n_primitives: int = FileContents
-        self.n_nuclei: int = FileContents
-        self.method: str = FileContents
-
-        self.centre_assignments: List[int] = FileContents
-        self.type_assignments: List[int] = FileContents
-
-        self.primitive_exponents: np.ndarray = FileContents
-        self.molecular_orbitals: List[MolecularOrbital] = FileContents
-
-        self.total_energy: float = FileContents
-        self.virial_ratio: float = FileContents
+        self.title = title or FileContents
+        self.program = program or FileContents
+        self.n_orbitals = n_orbitals or FileContents
+        self.n_primitives = n_primitives or FileContents
+        self.n_nuclei = n_nuclei or FileContents
+        self.centre_assignments = centre_assignments or FileContents
+        self.type_assignments = type_assignments or FileContents
+        self.primitive_exponents = primitive_exponents or FileContents
+        self.molecular_orbitals = molecular_orbitals or FileContents
+        self.total_energy = total_energy or FileContents
+        self.virial_ratio = virial_ratio or FileContents
 
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
@@ -190,7 +207,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
         with open(path, "w") as f:
             f.write(f"{self.title}\n")
             header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"
-            if self.method in AIMALL_FUNCTIONALS:
+            if self.method.upper() in AIMALL_FUNCTIONALS:
                 header_line += f"   {self.method}"
             f.write(f"{header_line}\n")
             for i, atom in enumerate(self.atoms):
