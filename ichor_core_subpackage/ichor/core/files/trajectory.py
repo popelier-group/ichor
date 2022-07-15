@@ -152,7 +152,8 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
     @classmethod
     def features_file_to_trajectory(
         cls,
-        f: "Path",
+        f: Union[str, Path],
+        trajectory_path: Union[str, Path],
         atom_types: List[str],
         header=0,
         index_col=0,
@@ -202,7 +203,7 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
         xyz_array = features_to_coordinates(features_array)
         xyz_array = bohr2ang * xyz_array
 
-        trajectory = Trajectory()
+        trajectory = Trajectory(trajectory_path)
 
         for geometry in xyz_array:
             # initialize empty Atoms instance
