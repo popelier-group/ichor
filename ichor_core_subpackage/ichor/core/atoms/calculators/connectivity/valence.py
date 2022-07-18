@@ -1,6 +1,14 @@
 import numpy as np
-from ichor.core.atoms.calculators.connectivity.distance import \
-    calculate_connectivity_distance
+from ichor.core.atoms.calculators.connectivity.distance import (
+    calculate_connectivity_distance,
+)
+
+
+def atom_hash(atoms) -> int:
+    return hash(tuple(atoms.atom_names))
+
+
+connectivity_cache = {}
 
 
 def calculate_connectivity_valence(atoms) -> np.ndarray:
@@ -20,6 +28,11 @@ def calculate_connectivity_valence(atoms) -> np.ndarray:
         This is a class method because the connectivity only needs to be calculated once per trajectory. The connectivity remains the same for all
         timesteps in a trajectory.
     """
+    global connectivity_cache
+
+    atoms_hash = atom_hash(atoms)
+    if atoms_hash in connectivity_cache:
+        return connectivity_cache[atoms_hash]
 
     connectivity = calculate_connectivity_distance(atoms)
 
@@ -33,5 +46,7 @@ def calculate_connectivity_valence(atoms) -> np.ndarray:
             ]
             connectivity[atom.i, incorrect_atom_idx] = 0
             connectivity[incorrect_atom_idx, atom.i] = 0
+
+    connectivity_cache[atoms_hash] = connectivity
 
     return connectivity
