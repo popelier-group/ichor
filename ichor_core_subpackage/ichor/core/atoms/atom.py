@@ -1,24 +1,21 @@
-from typing import List, Optional, Union
-from copy import deepcopy
+from typing import Optional, Union
 
 import numpy as np
 from ichor.core import constants
 from ichor.core.common.types import Coordinates3D
-from ichor.core.atoms.calculators.features import get_alf_feature_calculator
-
-# from ichor.core.atoms.calculators import (ALFFeatureCalculator,
-#                                           AtomSequenceALFCalculator)
 from ichor.core.atoms.calculators import (
     ALF,
-    ALFCalculatorFunction,
-    FeatureCalculatorFunction,
-    calculate_c_matrix,
     default_alf_calculator,
     default_feature_calculator,
+    default_connectivity_calculator,
+    get_atom_alf,
+    get_atom_c_matrix,
+    get_atom_features,
+    get_atom_connectivity
 )
 from ichor.core.common.types import VarReprMixin
 from ichor.core.units import AtomicDistance
-
+from typing import Callable
 
 class Atom(VarReprMixin, Coordinates3D):
     """
@@ -146,46 +143,6 @@ class Atom(VarReprMixin, Coordinates3D):
     def unpaired_electrons(self):
         return constants.type2orbital[self.type].value - self.valence
 
-    @property
-    def connectivity(self) -> np.ndarray:
-        """
-        Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
-        instances that are held in an Atoms instance.
-        This is only one row of the full connectivity matrix of the Atoms instance that is self._parent.
-        """
-        return self.parent.connectivity[self.i]
-
-    @property
-    def bonded_atoms(self) -> list:
-        """Returns a list of Atom instances to which this Atom instance is connected
-
-        Returns:
-            :type: `list` of `Atom` instances
-        """
-        connectivity_matrix_row = self.connectivity
-        return [
-            self.parent[connected_atom]
-            for connected_atom in connectivity_matrix_row.nonzero()[0]
-        ]
-
-    @property
-    def bonded_atoms_names(self) -> list:
-        """Returns a list of the names of Atom instances to which this Atom instance is connected
-
-        Returns:
-            :type: `list` of `str`
-        """
-        connectivity_matrix_row = self.connectivity
-        return [
-            self.parent[connected_atom].name
-            for connected_atom in connectivity_matrix_row.nonzero()[0]
-        ]
-
-    def C(
-        self, alf: Optional[Union[ALF, ALFCalculatorFunction]] = None
-    ) -> np.ndarray:
-        return calculate_c_matrix(self, alf=alf)
-
     def vec_to(self, other: "Atom") -> np.ndarray:
         """
         Calculates the vector from self to other
@@ -216,14 +173,45 @@ class Atom(VarReprMixin, Coordinates3D):
             d1.dot(d2) / (np.sqrt(d1.dot(d1)) * np.sqrt(d2.dot(d2)))
         )
 
-    @property
-    def bonded_atoms_i(self) -> list:
-        """Returns a list of Atom indeces to which this Atom instance is connected
+    def connectivity(self, connectivity_calculator: Union[np.ndarray, Callable] = default_connectivity_calculator) -> np.ndarray:
+        """
+        Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
+        instances that are held in an Atoms instance.
+        This is only one row of the full connectivity matrix of the Atoms instance that is self._parent.
+        """
+        return get_atom_connectivity(connectivity_calculator)
+
+    def bonded_atoms(self, connectivity_calculator: Union[np.ndarray, Callable] = default_connectivity_calculator) -> list:
+        """Returns a list of Atom instances to which this Atom instance is connected
 
         Returns:
-            :type: `list` of `int`, coresponding to the Atom instances indeces, as used in python lists (starting at 0).
+            :type: `list` of `Atom` instances
         """
-        connectivity_matrix_row = self.connectivity
+        connectivity_matrix_row = self.connectivity(connectivity_calculator)
+        return [
+            self.parent[connected_atom]
+            for connected_atom in connectivity_matrix_row.nonzero()[0]
+        ]
+
+    def bonded_atoms_names(self, connectivity_calculator: Union[np.ndarray, Callable] = default_connectivity_calculator) -> list:
+        """Returns a list of the names of Atom instances to which this Atom instance is connected
+
+        Returns:
+            :type: `list` of `str`
+        """
+        connectivity_matrix_row = self.connectivity(connectivity_calculator)
+        return [
+            self.parent[connected_atom].name
+            for connected_atom in connectivity_matrix_row.nonzero()[0]
+        ]
+
+    def bonded_atoms_i(self, connectivity_calculator: Union[np.ndarray, Callable] = default_connectivity_calculator) -> list:
+        """Returns a list of Atom indices to which this Atom instance is connected
+
+        Returns:
+            :type: `list` of `int`, corresponding to the Atom instances indices, as used in python lists (starting at 0).
+        """
+        connectivity_matrix_row = self.connectivity(connectivity_calculator)
         return [
             self.parent[connected_atom].i
             for connected_atom in connectivity_matrix_row.nonzero()[0]
@@ -231,45 +219,42 @@ class Atom(VarReprMixin, Coordinates3D):
 
     def alf(
         self,
-        alf_calculator: ALFCalculatorFunction = default_alf_calculator,  # =AtomSequenceALFCalculator
-    ) -> ALF:
-        """Returns a list of the Atomic Local Frame (ALF). This ALF is ONLY for this Atom.
+        alf_calculator: Union[Callable, ALF] = default_alf_calculator) -> ALF:
+        """Returns an instance of ALF. This ALF is ONLY for this Atom.
 
         e.g. If we have an Atoms instance for the water monomer, the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
         while the ALF for the first atom only is [0,1,2]
 
-        [0,1,2] contains the indeces for the central atom, x-axis atom, and xy-plane atom. These indeces start at 0 to index Python objects correctly.
+        [0,1,2] contains the indices for the central atom, x-axis atom, and xy-plane atom. These indices start at 0 to index Python objects correctly.
         """
-        return alf_calculator(self)
+        return get_atom_alf(alf_calculator, self)
 
-    @property
-    def ialf(self) -> np.ndarray:
+    def alf_array(self, alf_calculator: Union[Callable, ALF] = default_alf_calculator) -> np.ndarray:
         """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
         THere indices are what are used in python lists (as they start at 0)."""
-        alf = self.alf()
+        alf = self.alf(alf_calculator)
         return np.array([alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx])
 
-    # @property
-    # def C(self):
-    #     """
-    #     Mills, M.J.L., Popelier, P.L.A., 2014.
-    #     Electrostatic Forces: Formulas for the First Derivatives of a Polarizable,
-    #     Anisotropic Electrostatic Potential Energy Function Based on Machine Learning.
-    #     Journal of Chemical Theory and Computation 10, 3840-3856.. doi:10.1021/ct500565g
-    #
-    #     Eq. 25-30
-    #     """
-    #     return calculate_c_matrix(self, self.alf())
+    def C(self, alf_calculator: Union[Callable, ALF] = default_alf_calculator) -> np.ndarray:
+        """
+        Mills, M.J.L., Popelier, P.L.A., 2014.
+        Electrostatic Forces: Formulas for the First Derivatives of a Polarizable,
+        Anisotropic Electrostatic Potential Energy Function Based on Machine Learning.
+        Journal of Chemical Theory and Computation 10, 3840-3856.. doi:10.1021/ct500565g
+    
+        Eq. 25-30
+        """
+        return get_atom_c_matrix(alf_calculator, self)
 
     def features(
         self,
-        feature_calculator: Union[ALF, FeatureCalculatorFunction] = default_feature_calculator,
-    ) -> np.ndarray:
-        """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance."""
-        if isinstance(feature_calculator, ALF):
-            feature_calculator = get_alf_feature_calculator(feature_calculator)
-
-        return feature_calculator(self)
+        feature_calculator: Union[ALF, Callable] = default_feature_calculator,
+        **kwargs) -> np.ndarray:
+        """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance.
+        
+        :param kwargs: key word arguments to pass to the feature calculator function.
+        """
+        return get_atom_features(feature_calculator, self, **kwargs)
 
     @property
     def coordinates_string(self):

@@ -37,8 +37,6 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path: Union[Path, str]):
-        # AtomicData.__init__(self, path, atoms=FileContents)
-        # GeometryDataFile.__init__(self, path)
         AnnotatedDirectory.__init__(self, path)
 
     def _read_file(self, *args, **kwargs):
@@ -88,45 +86,27 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
     @atoms.setter
     def atoms(self, value: Atoms):
-        if value is not FileContents:
+        if value:
             if not self.xyz.exists():
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
             self.xyz = XYZ(self.xyz.path, value)
+        else:
+            raise ValueError(f"Cannot set `atoms` to the given value: {value}.")
 
     def get_atom_data(self, atom_name) -> AtomicData:
         return AtomicData(self.atoms[atom_name], self.properties)
 
-    @property
-    def properties(self) -> Dict[str, Any]:
-        return merge(
-            *[
-                f.properties
-                for f in self.path_objects()
-                if isinstance(f, HasProperties)
-            ]
-        )
+    def properties(self, C_list) -> Dict[str, Any]:
+        # grab properties from WFN
+        wfn_properties = self.wfn.properties
+        # grab properties from INTs directory
+        ints_properties = self.ints.properties(C_list)
+        
+        return merge(wfn_properties, ints_properties)
 
-    # def __getattr__(self, item):
-    #     tried = []
-    #     for d in self.directories():
-    #         try:
-    #             return getattr(d, item)
-    #         except AttributeError:
-    #             tried.append(d.path)
-    #     for f in self.files():
-    #         try:
-    #             return getattr(f, item)
-    #         except AttributeError:
-    #             tried.append(f.path)
-    #
-    #     raise AttributeError(
-    #         f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'"
-    #     )
-
+    # todo: make this more robust, check for any of the files inside
     @classmethod
-    def check_path(
-        cls, path: Path
-    ) -> bool:  # todo: make this more robust, check for any of the files inside
+    def check_path(cls, path: Path) -> bool:
         return path.exists() and path.is_dir()
 
     @classproperty

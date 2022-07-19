@@ -62,7 +62,7 @@ class INT(HasProperties, ReadFile):
         rotating of the multipoles can happen.
     """
 
-    def __init__(self, path: Union[Path, str], parent: Atoms = None):
+    def __init__(self, path: Union[Path, str]):
 
         # calls File.__init__(), which subsequently calls PathObject.__init__()
         super().__init__(path)
@@ -74,11 +74,7 @@ class INT(HasProperties, ReadFile):
         if self.path.with_suffix(f"{self.filetype}.bak").exists():
             self.path = self.path.with_suffix(f"{self.filetype}.bak")
 
-        # need to have this to rotate multipole moments as they require
-        # the whole molecular geometry (int files do not contain that.)
-        self._parent = parent
-
-        # we can use this to figure out the
+        # we can use this to figure out the contents which need to be read in
         self.current_directory: Path = FileContents
         self.inp_file_path: Path = FileContents
         self.wfn_file_path: Path = FileContents
@@ -103,31 +99,16 @@ class INT(HasProperties, ReadFile):
         return ".int"
 
     @property
-    def parent(self) -> Atoms:
-        if self._parent is None:
-            if not self.wfn.path.exists():
-                raise ParentNotDefined(
-                    f"'parent' not defined for '{self.path}' instance of '{self.__class__.__name__}'"
-                ) from FileNotFoundError(f"No Such File '{self.wfn.path}'")
-            else:
-                return self.wfn.atoms
-        return self._parent
-
-    @parent.setter
-    def parent(self, parent: Atoms):
-        self._parent = parent
-
-    @property
     def wfn(self) -> "WFN":
         from ichor.core.files import WFN
 
         return WFN(self.wfn_file_path)
 
-    @property
-    def properties(self) -> Dict[str, float]:
+    def properties(self, C: np.ndarray) -> Dict[str, float]:
+        """ Get properties which we are interested in machine learning from the INT file. Rotate multipoles using a given C matrix."""
         return {
             **{"integration_error": self.integration_error, "iqa": self.iqa},
-            **self.local_spherical_multipoles(),
+            **self.local_spherical_multipoles(C),
         }
 
     @property
@@ -345,23 +326,15 @@ class INT(HasProperties, ReadFile):
             )
         )
 
-    def local_spherical_multipoles(
-        self, C_matrix: Optional[np.ndarray] = None
-    ) -> Dict[str, float]:
+    def local_spherical_multipoles(self, C: np.ndarray) -> Dict[str, float]:
         """Rotates global spherical multipoles into local spherical multipoles. Optionally
         a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
         (as read in from the int file) will be used (if it exists).
 
-        :param C_matrix: Optional rotation matrix to be used to rotate multipoles.
+        :param C: Rotation matrix to be used to rotate multipoles.
         :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
             with the int file does not exist. Then we cannot calculate multipoles.
         """
-
-        C = (
-            C_matrix
-            if C_matrix is not None
-            else self.parent[self.atom_name].C()
-        )
 
         local_spherical_multipoles = {spherical_monopole_labels[0]: self.q00}
 

@@ -1,11 +1,11 @@
+from typing import Callable
 from typing import Dict
 
-from ichor.core.atoms.calculators.features.alf import (
-    calculate_alf_features, get_alf_feature_calculator)
-from ichor.core.atoms.calculators.features.features import \
-    FeatureCalculatorFunction
 
-feature_calculators: Dict[str, FeatureCalculatorFunction] = {
+from ichor.core.atoms.calculators.features.alf_features import calculate_alf_features
+from ichor.core.atoms.calculators.alf.alf import ALF
+
+feature_calculators: Dict[str, Callable] = {
     "alf": calculate_alf_features
 }
 

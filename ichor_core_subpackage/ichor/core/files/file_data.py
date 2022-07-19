@@ -60,29 +60,15 @@ class HasProperties(ABC):
     Adds the ability to search for a property using dictionaries in the inherited class
     """
 
-    @property
+    # can be used to make sure either a method or property with name `properties` exists
     @abstractmethod
     def properties(self) -> Dict[str, Any]:
         raise NotImplementedError(
             f"'data' not defined for '{self.__class__.__name__}'"
         )
 
-    def get_property(self, _property: str) -> Any:
-        return self.properties[_property]
-
-    def __getattr__(self, item: str) -> Any:
-        """Used to make values of GeometryData instances accessible as attributes.
-        Looks into __dict__ of an instance to see if an instance of GeometryData exist.
-        If an instance of GeometryData exists, it looks at the keys of that instance
-        and the value is returned."""
-
-        try:
-            return unwrap_single_item(find(item, self.properties), item)
-        except (KeyError, TypeError) as e:
-            raise AttributeError(
-                f"instance of '{self.__class__.__name__}' has no attribute '{item}'"
-            ) from e
-
+    def get_property(self, _property: str, *args, **kwargs) -> Any:
+        return self.properties(*args, **kwargs)[_property]
 
 class AtomicData(Atom, HasProperties):
     def __init__(self, atom: Atom, properties: Dict[str, Any]):

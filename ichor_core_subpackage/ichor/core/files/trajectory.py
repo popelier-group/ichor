@@ -8,6 +8,7 @@ from ichor.core.atoms import Atom, Atoms, ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.files.file import File, FileState, ReadFile, WriteFile
+from ichor.core.atoms.calculators.alf import ALF
 
 
 def spherical_to_cartesian(r, theta, phi) -> List[float]:
@@ -111,6 +112,49 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
     def filetype(self) -> str:
         return ".xyz"
 
+    @property
+    def types(self):
+        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
+        Removes duplicates."""
+        return self[0].types
+    
+    @property
+    def types_extended(self):
+        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
+        Removes duplicates."""
+        return self[0].types_extended
+    
+    @property
+    def atom_names(self):
+        """Return the atom names from the first timestep. Assumes that all timesteps have the same
+        number of atoms/atom names."""
+        return self[0].atom_names
+    
+    @property
+    def natoms(self):
+        """ Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
+        return len(self[0])
+    
+    @property
+    def coordinates(self) -> np.ndarray:
+        """
+        Returns:
+            :type: `np.ndarray`
+            the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
+        """
+
+        return np.array([timestep.coordinates for timestep in self])
+
+    @property
+    def connectivity(self) -> np.ndarray:
+        """ Returns the connectivity matrix of the first timestep."""
+        
+        return self[0].connectivity
+
+    @property
+    def alf(self) -> ALF:
+        return self[0].alf
+
     def add(self, atoms):
         """Add a list of Atoms (corresponding to one timestep) to the end of the trajectory list"""
         if isinstance(atoms, Atoms):
@@ -148,6 +192,18 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
                 path = root / path
                 xyz_file = XYZ(path, geometry)
                 xyz_file.write()
+
+    def coordinates_to_xyz(
+        self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
+    ):
+        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
+        for that timestep.
+
+        :param fname: The file name to which to write the timesteps/coordinates
+        :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
+        """
+        return self.write(path=fname, every=step)
+
 
     @classmethod
     def features_file_to_trajectory(

@@ -54,30 +54,36 @@ class INTs(HasProperties, OrderedDict, Directory):
             self, sorted(self.items(), key=lambda x: ignore_alpha(x[0]))
         )
 
-    @property
-    def properties(self) -> Dict[str, Dict[str, float]]:
-        return {
-            atom_name: int_file_instance.properties
-            for atom_name, int_file_instance in self.items()
-        }
+    def properties(self, C_list: List[np.ndarray]) -> Dict[str, Dict[str, float]]:
+        """
+        Returns a dictionary of dictionaries containing atom names as keys an a dictionary
+        as value. The value dictionary contains the properties we are interested in machine learning
+        as keys and the values of these properties as floats. A list of C matrices needs to be
+        passed in because we must rotate the multipoles.
 
-    def local_spherical_multipoles(
-        self, C_matrix: Optional[List[np.ndarray]] = None
-    ) -> Dict[str, Dict[str, float]]:
-        """Rotates global spherical multipoles into local spherical multipoles. Optionally
-        a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
-        (as read in from the int file) will be used (if it exists).
-
-        :param C_matrix: Optional rotation matrix to be used to rotate multipoles.
+        :param C_list: A list of rotation matrices, each of the atoms
         :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
             with the int file does not exist. Then we cannot calculate multipoles.
         """
 
-        # if C_matrix is None, then the self.parent will be used by default in INT class
-        # to calculate the C matrix
         return {
-            atom_name: int_file_instance.local_spherical_multipoles(
-                C_matrix[int_file_instance.i]
+            atom_name: int_file_instance.properties(C_list[int_file_instance.i])
+            for atom_name, int_file_instance in self.items()
+        }
+
+    def local_spherical_multipoles(self, C_list: List[np.ndarray]) -> Dict[str, Dict[str, float]]:
+        
+        """Rotates global spherical multipoles into local spherical multipoles. Optionally
+        a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
+        (as read in from the int file) will be used (if it exists).
+
+        :param C_list: A list of rotation matrices, each of the atoms
+        :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
+            with the int file does not exist. Then we cannot calculate multipoles.
+        """
+
+        return {
+            atom_name: int_file_instance.local_spherical_multipoles(C_list[int_file_instance.i]
             )
             for atom_name, int_file_instance in self.items()
         }

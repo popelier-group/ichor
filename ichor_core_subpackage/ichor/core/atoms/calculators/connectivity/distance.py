@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def calculate_connectivity_distance(atoms) -> np.ndarray:
+def default_connectivity_calculator_distance(atoms) -> np.ndarray:
     """
     Calculates the connectivity matrix (showing which atoms are bonded as 1 and those that are not bonded as 0.
     It uses the Van Der Waals radius an Atom (see `Atom` class) to determine if atoms should be bonded or not.
@@ -20,8 +20,9 @@ def calculate_connectivity_distance(atoms) -> np.ndarray:
     """
 
     atoms = atoms.to_angstroms()
+    natoms = atoms.natoms
 
-    connectivity = np.zeros((len(atoms), len(atoms)), dtype=int)
+    connectivity = np.zeros((natoms, natoms), dtype=int)
 
     for i, iatom in enumerate(atoms):
         for j, jatom in enumerate(atoms):

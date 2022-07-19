@@ -1,6 +1,8 @@
+from ast import Call
+from ctypes import Union
+from re import L
 from typing import NamedTuple, Optional
-
-from typing_extensions import Protocol
+from typing import List, Callable
 
 
 class ALF(NamedTuple):
@@ -12,7 +14,8 @@ class ALF(NamedTuple):
     x_axis_idx: int
     xy_plane_idx: Optional[int] = None
 
-
-class ALFCalculatorFunction(Protocol):
-    def __call__(self, atom: "Atom", *args, **kwargs) -> ALF:
-        ...
+def get_atom_alf_from_list_of_alfs(alf: List[ALF], atom_instance: "Atom") -> ALF:
+    for atom_alf in alf:
+        if atom_alf.origin_idx == atom_instance.i:
+            return atom_alf
+    raise IndexError(f"No index '{atom_instance.i}' in ALF: '{alf}'")

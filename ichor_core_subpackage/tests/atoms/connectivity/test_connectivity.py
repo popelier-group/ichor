@@ -4,7 +4,7 @@ from typing import NamedTuple
 import numpy as np
 import pytest
 from ichor.core.atoms import Atoms
-from ichor.core.atoms.calculators import calculate_connectivity
+from ichor.core.atoms.calculators import default_connectivity_calculator
 from ichor.core.files import Trajectory
 from tests.path import get_cwd
 
@@ -114,7 +114,7 @@ water_path = example_dir / "WATER-3000.xyz"
 )
 def test_water_3000(timestep: TimeStep):
     np.testing.assert_equal(
-        calculate_connectivity(timestep.atoms), water_connectivity
+        default_connectivity_calculator(timestep.atoms), water_connectivity
     )
     np.testing.assert_equal(timestep.atoms.connectivity, water_connectivity)
 
@@ -131,7 +131,7 @@ ammonia_path = example_dir / "AMMONIA-1000.xyz"
 )
 def test_ammonia_1000(timestep: TimeStep):
     np.testing.assert_equal(
-        calculate_connectivity(timestep.atoms), ammonia_connectivity
+        default_connectivity_calculator(timestep.atoms), ammonia_connectivity
     )
     np.testing.assert_equal(timestep.atoms.connectivity, ammonia_connectivity)
 
@@ -148,7 +148,7 @@ methanol_path = example_dir / "METHANOL-1000.xyz"
 )
 def test_ammonia_1000(timestep: TimeStep):
     np.testing.assert_equal(
-        calculate_connectivity(timestep.atoms), methanol_connectivity
+        default_connectivity_calculator(timestep.atoms), methanol_connectivity
     )
     np.testing.assert_equal(timestep.atoms.connectivity, methanol_connectivity)
 
@@ -165,7 +165,7 @@ paracetamol_path = example_dir / "PARACETAMOL-amber-300.xyz"
 )
 def test_paracetamol_300(timestep: TimeStep):
     np.testing.assert_equal(
-        calculate_connectivity(timestep.atoms), paracetamol_connectivity
+        default_connectivity_calculator(timestep.atoms), paracetamol_connectivity
     )
     np.testing.assert_equal(
         timestep.atoms.connectivity, paracetamol_connectivity
@@ -184,6 +184,6 @@ glucose_path = example_dir / "GLUCOSE-amber-300.xyz"
 )
 def test_glucose_300(timestep: TimeStep):
     np.testing.assert_equal(
-        calculate_connectivity(timestep.atoms), glucose_connectivity
+        default_connectivity_calculator(timestep.atoms), glucose_connectivity
     )
     np.testing.assert_equal(timestep.atoms.connectivity, glucose_connectivity)

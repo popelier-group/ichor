@@ -6,10 +6,11 @@ import numpy as np
 from ichor.core.atoms.atom import Atom
 from ichor.core.atoms.calculators import (
     ALF,
-    FeatureCalculatorFunction,
-    calculate_connectivity,
+    default_connectivity_calculator,
     default_feature_calculator,
 )
+from typing import Callable
+from ichor.core.atoms.calculators import get_atoms_alf, get_atoms_c_matrix, get_atoms_connectivity, get_atoms_features, get_atoms_features_dict
 
 
 class AtomNotFound(Exception):
@@ -45,11 +46,30 @@ class Atoms(list):
         """
         self.append(atom)
 
+
     def append(self, atom: Atom):
         atom.parent = self
         if atom._index is None:
             atom.index = next(self._counter)
         super().append(atom)
+
+    def copy(self) -> "Atoms":
+        new = Atoms()
+        for a in self:
+            new.add(Atom.from_atom(a))
+        return new
+
+    def to_angstroms(self) -> "Atoms":
+        """
+        Convert the x, y, z coordiantes of all Atom instances held in an Atoms instance to angstroms
+        """
+        return Atoms([atom.to_angstroms() for atom in self])
+
+    def to_bohr(self) -> "Atoms":
+        """
+        Convert the x, y, z coordiantes of all Atom instances held in an Atoms instance to bohr
+        """
+        return Atoms([atom.to_bohr() for atom in self])
 
     @property
     def nuclear_charge_sum(self) -> int:
@@ -85,26 +105,32 @@ class Atoms(list):
         return np.array([atom.coordinates for atom in self])
 
     @property
-    def connectivity(self) -> np.ndarray:
-        """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
+    def centroid(self) -> np.ndarray:
+        coordinates = self.coordinates.T
 
-        Returns:
-            :type: `np.ndarray` of shape n_atoms x n_atoms
-        """
+        x = np.mean(coordinates[0])
+        y = np.mean(coordinates[1])
+        z = np.mean(coordinates[2])
 
-        return calculate_connectivity(self)
+        return np.array([x, y, z])
 
-    def to_angstroms(self) -> "Atoms":
-        """
-        Convert the x, y, z coordiantes of all Atom instances held in an Atoms instance to angstroms
-        """
-        return Atoms([atom.to_angstroms() for atom in self])
+    @property
+    def masses(self) -> List[float]:
+        """Returns a list of the masses of the Atom instances held in the Atoms instance."""
+        return [atom.mass for atom in self]
 
-    def to_bohr(self) -> "Atoms":
-        """
-        Convert the x, y, z coordiantes of all Atom instances held in an Atoms instance to bohr
-        """
-        return Atoms([atom.to_bohr() for atom in self])
+    @property
+    def atom_names(self) -> List[str]:
+        return [atom.name for atom in self]
+
+    @property
+    def xyz_string(self):
+        """Returns a string contaning all atoms and their coordinates stored in the Atoms instance"""
+        return "\n".join(atom.xyz_string for atom in self)
+
+    @property
+    def hash(self):
+        return ",".join(self.atom_names)
 
     def centre(
         self,
@@ -168,93 +194,45 @@ class Atoms(list):
         other.rotate(R)
         return self._rmsd(other)
 
-    @property
-    def centroid(self) -> np.ndarray:
-        coordinates = self.coordinates.T
+    def connectivity(self, connectivity_calculator: Union[np.ndarray, Callable] = default_connectivity_calculator) -> np.ndarray:
+        """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
-        x = np.mean(coordinates[0])
-        y = np.mean(coordinates[1])
-        z = np.mean(coordinates[2])
+        Returns:
+            :type: `np.ndarray` of shape n_atoms x n_atoms
+        """
 
-        return np.array([x, y, z])
+        return get_atoms_connectivity(connectivity_calculator, self)
 
-    @property
-    def masses(self) -> List[float]:
-        """Returns a list of the masses of the Atom instances held in the Atoms instance."""
-        return [atom.mass for atom in self]
-
-    @property
-    def alf(self) -> List[ALF]:
+    def alf(self, alf_calculator: Union[List[ALF], Callable]) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
         """
-        return [atom.alf() for atom in self]
+        return get_atoms_alf(alf_calculator, self)
 
-    @property
-    def alf_list(self) -> List[List[int]]:
+    def alf_list(self, alf_calculator_function: Union[List[ALF], Callable]) -> List[List[int]]:
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
-        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf]
-
-    def reindex(self):
-        for i, atom in enumerate(self):
-            atom.index = i + 1
-
-    @property
-    def atoms(self) -> List[str]:
-        return self.atom_names
-
-    @property
-    def atom_names(self) -> List[str]:
-        return [atom.name for atom in self]
-
-    def copy(self) -> "Atoms":
-        new = Atoms()
-        for a in self:
-            new.add(Atom.from_atom(a))
-        return new
+        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf(alf_calculator_function)]
 
     def features(
         self,
-        feature_calculator: Union[List[ALF], FeatureCalculatorFunction] = default_feature_calculator,
-    ) -> np.ndarray:
+        feature_calculator: Union[List[ALF], Callable] = default_feature_calculator,
+        **kwargs) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
         The array shape is n_atoms x n_features (3*n_atoms - 6)
+        
+        param: kwargs: key word arguments to be passed to the feature calculator function.
 
         Returns:
             :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
                 Return the feature matrix of this Atoms instance
         """
-
-        if isinstance(feature_calculator, list):
-            return np.array([self[alf[0]].features(alf) for alf in feature_calculator])
-
-        return np.array([atom.features(feature_calculator) for atom in self])
-
-    def alf_features(
-        self, alf: Union[List[List[int]], np.ndarray]
-    ) -> np.ndarray:
-        """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
-        Features are calculated in the Atom class and concatenated to a 2d array here.
-
-        The array shape is n_atoms x n_features (3*n_atoms - 6)
-
-        Returns:
-            :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
-                Return the feature matrix of this Atoms instance
-        """
-
-        return np.array(
-            [
-                atom.alf_features(alf[alf_idx])
-                for alf_idx, atom in enumerate(self)
-            ]
-        )
+        return get_atoms_features(feature_calculator, self, **kwargs)
 
     def features_dict(
         self,
-        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
+        feature_calculator: Union[List[ALF], Callable] = default_feature_calculator, **kwargs
     ) -> dict:
         """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
@@ -262,7 +240,7 @@ class Atoms(list):
         e.g. {"C1": np.array, "H2": np.array}
         """
 
-        return {atom.name: atom.features(feature_calculator) for atom in self}
+        return get_atoms_features_dict(feature_calculator, self)
 
     def __getitem__(self, item) -> Union[Atom, "Atoms"]:
         """Dunder method used to index the Atoms isinstance.
@@ -291,22 +269,9 @@ class Atoms(list):
         del atoms["C1"] will delete the Atom instance with the name attribute of 'C1'."""
 
         if not isinstance(i, (int, str)):
-
-            raise TypeError(
-                f"Index {i} has to be of type int. Currently index is type {type(i)}"
-            )
-
+            raise TypeError(f"Index {i} has to be of type int. Currently index is type {type(i)}")
         else:
             del self[i]
-
-    @property
-    def xyz_string(self):
-        """Returns a string contaning all atoms and their coordinates stored in the Atoms instance"""
-        return "\n".join(atom.xyz_string for atom in self)
-
-    @property
-    def hash(self):
-        return ",".join(self.atom_names)
 
     def __str__(self):
         return "\n".join(str(atom) for atom in self)
@@ -322,4 +287,5 @@ class Atoms(list):
         return self
 
     def __bool__(self):
+        """ Atoms instance evaluates as true if it contains Atom instances in it. If empty, the Atoms instance evaluates to False."""
         return bool(len(self))

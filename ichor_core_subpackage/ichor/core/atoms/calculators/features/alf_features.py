@@ -1,59 +1,33 @@
-from typing import Optional, Union
-
 import numpy as np
-from ichor.core.atoms.calculators.alf import (ALF, ALFCalculatorFunction,
-                                              alf_calculators,
-                                              default_alf_calculator)
-from ichor.core.atoms.calculators.c_matrix import calculate_c_matrix
-from ichor.core.atoms.calculators.features.features import \
-    FeatureCalculatorFunction
+from typing import Callable
+from ichor.core.atoms.calculators.alf import ALF
+from ichor.core.atoms.calculators.c_matrix_calculator import calculate_c_matrix
 from ichor.core.constants import ang2bohr
 from ichor.core.units import AtomicDistance
 
 default_distance_unit: AtomicDistance = AtomicDistance.Bohr
 
-
-def get_alf_feature_calculator(
-    alf_calculator: Union[
-        str, ALF, ALFCalculatorFunction
-    ] = default_alf_calculator,
-    distance_unit: AtomicDistance = default_distance_unit,
-) -> FeatureCalculatorFunction:
-    """Returns a FeatureCalculatorFunction for the given alf calculator
-
-    Args:
-        :param: `alf_calculator` the ALFCalculatorFunction to use in calculate_alf_features:
-        :param: `distance_unit` the distance unit to use in calculate_alf_features:
-
-    Returns:
-        :type: FeatureCalculatorFunction
-            An instance of the calculate_alf_features function with a predefined ALFCalculatorFunction and distance unit
-    """
-    if isinstance(alf_calculator, str):
-        alf_calculator = alf_calculators[alf_calculator]
-    return lambda x: calculate_alf_features(x, alf_calculator, distance_unit)
-
-
 def calculate_alf_features(
     atom: "Atom",
-    alf: Optional[Union[ALF, ALFCalculatorFunction]] = default_alf_calculator,
+    alf: ALF,
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> np.ndarray:
-    # todo: update doc
     """Calculates the features for the given central atom.
 
     Args:
-        :param: `cls` the class ALFFeatureCalculator:
-        :param: `atom` an instance of the `Atom` class:
+        :param atom: an instance of the `Atom` class:
             This atom is the central atom for which we want to calculate the C rotation matrix.
+        :param alf: A callable or instance of `ALF` that is used to calculate the atomic local frame for the atom. This atomic local frame then defines the
+            features which are going to be calculated. If no ALF is passed by user, then the default way of calculating ALF is used.
+        :param distance_unit: The distance units to use for the calculated distances which are part of the features. The default distance is Bohr.
 
     Returns:
         :type: `np.ndarray`
-            A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of.
+            A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of. If there are only two atoms,
+            then there is only 1 feature (the distance between the atoms).
     """
 
-    # cannot check for ALFCalculatorFunction as that is a Protocol and does not work with isinstance so check if isinstance of ALF instead
-    if not isinstance(alf, ALF):
+    if isinstance(alf, Callable):
         alf = alf(atom)
 
     if len(atom.parent) == 2:
@@ -71,6 +45,7 @@ def calculate_alf_features(
 
     # Convert to angstroms to make sure units are in angstroms to begin with
     # to_angstroms creates new instances which we use here to calculate features.
+    # the atom outside of the function scope should remain the same as before
     atom = atom.to_angstroms()
     atom.parent = atom.parent.to_angstroms()
     

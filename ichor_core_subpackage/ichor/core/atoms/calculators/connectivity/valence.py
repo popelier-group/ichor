@@ -1,9 +1,9 @@
 import numpy as np
 from ichor.core.atoms.calculators.connectivity.distance import \
-    calculate_connectivity_distance
+    default_connectivity_calculator_distance
 
 
-def calculate_connectivity_valence(atoms) -> np.ndarray:
+def default_connectivity_calculator_valence(atoms) -> np.ndarray:
     """
     Calculates the connectivity matrix (showing which atoms are bonded as 1 and those that are not bonded as 0.
     It uses the Van Der Waals radius an Atom (see `Atom` class) to determine if atoms should be bonded or not.
@@ -21,7 +21,7 @@ def calculate_connectivity_valence(atoms) -> np.ndarray:
         timesteps in a trajectory.
     """
 
-    connectivity = calculate_connectivity_distance(atoms)
+    connectivity = default_connectivity_calculator_distance(atoms)
 
     for atom in atoms:
         while sum(connectivity[atom.i]) > atom.valence:

@@ -1,15 +1,20 @@
 import numpy as np
-from typing import Union, Optional
+from typing import Callable, Union, Optional
 from ichor.core.atoms.calculators.alf import (
     ALF,
-    ALFCalculatorFunction,
-    default_alf_calculator,
 )
 
 
+def get_c_matrix(atom_instance, alf: Union[ALF, Callable]):
+    
+    if isinstance(alf, Callable):
+        alf: ALF = alf(atom_instance)
+
+    return calculate_c_matrix(alf)
+
 def calculate_c_matrix(
     atom: "Atom",
-    alf: Optional[Union[ALF, ALFCalculatorFunction]] = None,
+    alf: ALF,
 ) -> np.ndarray:
 
     """Retruns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
@@ -25,12 +30,6 @@ def calculate_c_matrix(
         :type: `np.ndarray`
             A 3x3 numpy array which is the C rotation matrix.
     """
-
-    if alf is None:
-        alf = default_alf_calculator
-
-    if not isinstance(alf, ALF):
-        alf = alf(atom)
 
     c_matrix = np.empty((3, 3))
 

@@ -1,4 +1,4 @@
-from ichor.core.atoms.calculators.alf.alf import ALF
+from ichor.core.atoms.calculators.alf import ALF
 
 
 def calculate_alf_atom_sequence(atom: "Atom") -> ALF:

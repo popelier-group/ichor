@@ -1,18 +1,15 @@
-from typing import Dict
+from typing import Dict, Callable
 
 from ichor.core.atoms.calculators.connectivity.distance import (
-    calculate_connectivity_distance,
+    default_connectivity_calculator_distance,
 )
 from ichor.core.atoms.calculators.connectivity.valence import (
-    calculate_connectivity_valence,
-)
-from ichor.core.atoms.calculators.connectivity.connectivity import (
-    ConnectivityCalculatorFunction,
+    default_connectivity_calculator_valence,
 )
 
-connectivity_calculators: Dict[str, ConnectivityCalculatorFunction] = {
-    "distance": calculate_connectivity_distance,
-    "valence": calculate_connectivity_valence,
+connectivity_calculators: Dict[str, Callable] = {
+    "distance": default_connectivity_calculator_distance,
+    "valence": default_connectivity_calculator_valence,
 }
 
-calculate_connectivity = connectivity_calculators["valence"]
+default_connectivity_calculator = connectivity_calculators["valence"]
