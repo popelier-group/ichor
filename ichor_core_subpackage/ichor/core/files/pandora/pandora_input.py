@@ -66,6 +66,19 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile, File):
         if not self.basis_set.startswith("unc-"):
             self.basis_set = f"unc-{self.basis_set}"
 
+    def _set_write_defaults_if_needed(self):
+        """ Set default values for attributes if bool(self.attribute) evaluates to False.
+        So if an attribute is still FileContents, an empty string, an empty list, etc.,
+        then default values will be used."""
+
+        self.ccsdmod = self.ccsdmod or PandoraCCSDmod.CCSD_MULLER
+        self.method = self.method or "CCSD"
+        self.basis_set = self.basis_set or "6-31G*"
+        self.morfi_grid_radial = self.morfi_grid_radial or 10.0
+        self.morfi_grid_angular = self.morfi_grid_angular or 5.0
+        self.morfi_grid_radial_h = self.morfi_grid_radial_h or 10.0
+        self.morfi_grid_angular_h = self.morfi_grid_angular_h or 5.0
+
     def _write_file(self, path: Path, system_name: str):
         self.format()
         data = {
