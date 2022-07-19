@@ -75,14 +75,12 @@ external_functions = [
         "ichor.core.analysis.dlpoly", "submit_final_geometry_to_gaussian"
     ),
     ExternalFunction(
-        "ichor.main.pandora", "copy_aimall_wfn_to_point_directory"
+        "ichor.hpc.main.pandora", "copy_aimall_wfn_to_point_directory"
     ),
-    # todo: fix these
-    ExternalFunction("ichor.cli.main.md", "mdcrd_to_xyz"),
-    ExternalFunction("ichor.main.md.tyche", "tyche_to_xyz"),
-    ExternalFunction("ichor.main.pandora", "add_dispersion_to_aimall"),
-    ExternalFunction("ichor.main.md.cp2k", "cp2k_to_xyz"),
-    # ^^^^^^^^^^^^^^
+    ExternalFunction("ichor.hpc.md.amber", "mdcrd_to_xyz"),
+    ExternalFunction("ichor.hpc.md.tyche", "tyche_to_xyz"),
+    ExternalFunction("ichor.hpc.md.cp2k", "cp2k_to_xyz"),
+    # ExternalFunction("ichor.hpc.main.pandora", "add_dispersion_to_aimall"),
     ExternalFunction("ichor.core.common.points", "set_points_location"),
     ExternalFunction("ichor.core.analysis.opt", "convert_opt_wfn_to_xyz"),
     ExternalFunction("ichor.core.analysis.geometry", "geometry_analysis"),

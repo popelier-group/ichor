@@ -195,14 +195,14 @@ def check_pyscf_wfns(
     return morfi_inputs, aimall_wfns, point_directories
 
 
-def add_dispersion_to_aimall(point_directory: Path):
-    point = PointDirectory(point_directory)
-    point.read()
-    dispersion_data = point.pandora.morfi.mout.interaction_energy
-    for atom, int_ in point.ints.items():
-        dispersion = dispersion_data[atom]
-        int_.dispersion_data = {
-            "dispersion": dispersion,
-            # "iqa_dispersion": int_.iqa + dispersion,  # no longer needed
-        }
-        int_.write_json()
+# def add_dispersion_to_aimall(point_directory: Path):
+#     point = PointDirectory(point_directory)
+#     point.read()
+#     dispersion_data = point.pandora.morfi.mout.interaction_energy
+#     for atom, int_ in point.ints.items():
+#         dispersion = dispersion_data[atom]
+#         int_.dispersion_data = {
+#             "dispersion": dispersion,
+#             # "iqa_dispersion": int_.iqa + dispersion,  # no longer needed
+#         }
+#         int_.write_json()
