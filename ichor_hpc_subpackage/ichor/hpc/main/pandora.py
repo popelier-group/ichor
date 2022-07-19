@@ -84,7 +84,7 @@ def write_pandora_input(points: PointsDirectory) -> List[Path]:
             point.pandora_input.morfi_grid_angular = GLOBALS.MORFI_ANGULAR
             point.pandora_input.morfi_grid_radial_h = GLOBALS.MORFI_RADIAL_H
             point.pandora_input.morfi_grid_angular_h = GLOBALS.MORFI_ANGULAR_H
-            
+
         point.pandora_input.write(system_name=GLOBALS.SYSTEM_NAME)
         pandora_inputs.append(point.pandora_input.path)
     return pandora_inputs
