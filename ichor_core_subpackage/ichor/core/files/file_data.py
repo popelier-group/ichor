@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 from abc import ABC
-from typing import List, Optional
+from typing import List, Optional, Union, Callable
 import numpy as np
 
 from ichor.core.common.dict import (
@@ -10,12 +10,9 @@ from ichor.core.common.dict import (
     unwrap_item,
     remove_items,
 )
-from ichor.core.atoms import Atoms, Atom
-from ichor.core.atoms.calculators import (
-    FeatureCalculatorFunction,
-    default_feature_calculator,
-)
-from ichor.core.files.file import FileContents, File
+from ichor.core.atoms import Atoms, Atom, ALF
+from ichor.core.atoms.calculators import default_feature_calculator
+from ichor.core.files.file import FileContents
 
 
 class HasAtoms(ABC):
@@ -42,8 +39,9 @@ class HasAtoms(ABC):
 
     def features(
         self,
-        feature_calculator: FeatureCalculatorFunction = default_feature_calculator,
+        feature_calculator: Union[ALF, Callable] = default_feature_calculator,
     ) -> np.ndarray:
+        
         return self.atoms.features(feature_calculator)
 
     def __getitem__(self, s: str):

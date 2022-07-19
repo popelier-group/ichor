@@ -254,6 +254,7 @@ class Atom(VarReprMixin, Coordinates3D):
         
         :param kwargs: key word arguments to pass to the feature calculator function.
         """
+        
         return get_atom_features(feature_calculator, self, **kwargs)
 
     @property

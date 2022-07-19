@@ -39,7 +39,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         """
         for f in self.iterdir():
             if f.suffix == INT.filetype:
-                self[f.stem.capitalize()] = INT(f, parent=self.parent)
+                self[f.stem.capitalize()] = INT(f)
         self.sort()
 
     @classmethod

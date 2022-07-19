@@ -4,5 +4,5 @@
 from ichor.core.atoms.atom import Atom
 from ichor.core.atoms.atoms import AtomNotFound, Atoms, AtomsNotFoundError
 from ichor.core.atoms.list_of_atoms import ListOfAtoms
-from ichor.core.atoms.calculators.alf import ALF, ALFCalculatorFunction
+from ichor.core.atoms.calculators.alf import ALF
 

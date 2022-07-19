@@ -1,4 +1,4 @@
-import numpy as n
+import numpy as np
 from ichor.core.atoms.calculators.alf import ALF
 
 # todo: this could be better

@@ -30,7 +30,7 @@ class ListOfAtoms(list, ABC):
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
         """
         
-        features = np.array([i.features(feature_calculator=feature_calculator) for i in self])
+        features = np.array([timestep.features(feature_calculator=feature_calculator) for timestep in self])
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))
         return features
