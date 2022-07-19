@@ -67,6 +67,7 @@ def submit_pandora_input_to_pyscf(
 
 
 def write_pandora_input(points: PointsDirectory) -> List[Path]:
+    from ichor.hpc import GLOBALS
     pandora_inputs = []
     for point in points:
         if not point.pandora_input.exists():
@@ -74,7 +75,7 @@ def write_pandora_input(points: PointsDirectory) -> List[Path]:
                 point.path / f"{point.path.name}{PandoraInput.filetype}"
             )
             point.pandora_input.atoms = point.xyz.atoms
-        point.pandora_input.write()
+        point.pandora_input.write(system_name=GLOBALS.SYSTEM_NAME)
         pandora_inputs.append(point.pandora_input.path)
     return pandora_inputs
 
