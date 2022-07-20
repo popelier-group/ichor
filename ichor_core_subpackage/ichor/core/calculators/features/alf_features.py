@@ -26,8 +26,6 @@ def calculate_alf_features(
             then there is only 1 feature (the distance between the atoms).
     """
 
-    check_alf(atom, alf)
-
     if len(atom.parent) == 2:
         feature_array = np.empty(
             1
