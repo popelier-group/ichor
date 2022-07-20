@@ -24,7 +24,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         -- SYSTEM_NAME002
         -- SYSTEM_NAME003
         ........
-    Each of the subdirectories contains Gaussain files (such as .gjf), as well as an `atomic_files` directory, which then contains the AIMALL files.
+    Each of the subdirectories contains Gaussian files (such as .gjf), as well as an `atomic_files` directory, which then contains the AIMALL files.
     A `PointsDirectory` will wrap around the whole TRAINING_SET directory (which contains multiple points), while a `PointDirectory`
     will wrap around a SYSTEM_NAME00... folder (which only contains information about 1 point).
 
