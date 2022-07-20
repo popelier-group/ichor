@@ -34,6 +34,7 @@ def MODEL_TYPES() -> List[str]:
     ):
         model_types += [
             "dispersion"
+            "iqa+dispersion"
         ]  # dispersion only available when qctp is morfi
     return model_types
 
