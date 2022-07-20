@@ -351,7 +351,7 @@ class ListOfAtoms(list, ABC):
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
 
-            class AtomView(self.__class__):
+            class ListOfAtomsAtomView(self.__class__):
                 """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
                 a user to get information (such as coordinates or features) for one atom.
 
@@ -401,24 +401,25 @@ class ListOfAtoms(list, ABC):
 
             if hasattr(self, "_is_atom_view"):
                 return self
-            return AtomView(self, item)
+            return ListOfAtomsAtomView(self, item)
 
         # if ListOfAtoms is indexed by a slice e.g. [:50], [20:40], etc.
         elif isinstance(item, slice):
 
-            class AtomSlice(self.__class__):
+            class ListofAtomsSlice(self.__class__):
                 def __init__(self, parent, sl):
                     self.__dict__ = parent.__dict__.copy()
                     self._is_atom_slice = True
                     list.__init__(self)
 
+                    # slicing out of range does not raise an error. This is by design in Python
                     self.extend(list.__getitem__(parent, sl))
 
-            return AtomSlice(self, item)
+            return ListofAtomsSlice(self, item)
         
         elif isinstance(item, (list, np.ndarray)):
 
-            class ListOfAtomsSlice(self.__class__):
+            class ListOfAtomsIndexed(self.__class__):
                 def __init__(self, parent, sl):
                     self.__dict__ = parent.__dict__.copy()
                     self._is_list_of_atoms_slice = True
@@ -427,7 +428,7 @@ class ListOfAtoms(list, ABC):
                     for i in sl:
                         self.append(list.__getitem__(parent, i))
 
-            return ListOfAtomsSlice(self, item)
+            return ListOfAtomsIndexed(self, item)
 
         # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
         raise TypeError(
