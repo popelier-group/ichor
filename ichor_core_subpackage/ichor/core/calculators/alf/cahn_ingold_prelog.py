@@ -1,7 +1,6 @@
 import numpy as np
 from ichor.core.calculators.alf import ALF
 from ichor.core.calculators.connectivity import default_connectivity_calculator
-from ichor.core.calculators import default_connectivity_calculator, default_feature_calculator, default_alf_calculator
 
 # TODO: use connectivity here instead of connectivity calculator.
 def calculate_alf_cahn_ingold_prelog(
