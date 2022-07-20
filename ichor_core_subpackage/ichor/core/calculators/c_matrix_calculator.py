@@ -1,5 +1,4 @@
 import numpy as np
-from typing import Callable, Union
 from ichor.core.calculators.alf import (
     ALF,
 )
