@@ -32,7 +32,7 @@ def calculate_alf_atom_sequence(atom: "Atom") -> ALF:
         if atom.i + 1 == len(atom.parent):
             x_axis_idx = atom.i - 2
         # if the first atom in sequence return the next index
-        elif atom.index == 0:
+        elif atom.i == 0:
             x_axis_idx = atom.i + 1
         # otherwise return the atom that is one away (previous atom in sequence)
         else:
@@ -55,7 +55,7 @@ def calculate_alf_atom_sequence(atom: "Atom") -> ALF:
         if atom.i + 1 == len(atom.parent):
             xy_plane_idx = atom.i - 1
         # if the first atom in sequence return the next next atom (2 away)
-        elif atom.index == 0:
+        elif atom.i == 0:
             xy_plane_idx = atom.i + 2
         # otherwise return the atom that is one away (next atom in sequence)
         else:
