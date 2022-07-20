@@ -5,7 +5,7 @@ from warnings import warn
 
 import numpy as np
 from ichor.core.atoms import Atoms
-from ichor.core.common.functools import classproperty
+from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import relpath
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Coordinates3D
@@ -123,7 +123,7 @@ class INT(HasProperties, ReadFile):
 
         return WFN(self.wfn_file_path)
 
-    @property
+    @cached_property
     def properties(self) -> Dict[str, float]:
         return {
             **{"integration_error": self.integration_error, "iqa": self.iqa},
