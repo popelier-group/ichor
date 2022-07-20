@@ -14,7 +14,7 @@ default_distance_unit: AtomicDistance = AtomicDistance.Bohr
 
 def calculate_alf_features(
     atom: "Atom",
-    alf: Union[ALF, List[ALF]],
+    alf: Union[ALF, List[ALF], List[List[int, int, int]]],
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> np.ndarray:
     """Calculates the features for the given central atom.

@@ -20,8 +20,10 @@ def get_atom_alf(atom: "Atom", alf: Union[ALF, List[ALF]]):
     else:
         alf_found = False
         for a in alf:
-            if a.origin_idx == atom.i:
+            if a[0] == atom.i:
                 return a
         
         if not alf_found:
             raise ValueError(f"The list of ALFs does not contain the alf of the atom with index {atom.i}")
+        
+    raise NotImplementedError("Can onlty give an instance of `ALF` or list of `ALF`.")
