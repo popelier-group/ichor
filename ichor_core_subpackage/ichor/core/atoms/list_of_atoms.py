@@ -23,7 +23,6 @@ class ListOfAtoms(list, ABC):
         """ Returns the atomic local frame for the first timestep."""
         ...
 
-
     @property
     @abstractmethod
     def types(self) -> List[str]:
@@ -122,26 +121,25 @@ class ListOfAtoms(list, ABC):
         """
         import pandas as pd
 
-        if isinstance(atom_names, str):
-            atom_names = [atom_names]
-
         # whether to write csvs for all atoms or subset
         if atom_names is None:
             atom_names = self.atom_names
+        elif isinstance(atom_names, str):
+            atom_names = [atom_names]
 
         for atom_name in atom_names:
             atom_features = self[atom_name].features(feature_calculator, *args, **kwargs)
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             if fname is None:
-                df.to_csv(f"{atom_name}_features.csv")
+                df.to_csv(f"{atom_name}_features.csv", index=None)
             else:
-                df.to_csv(f"{fname}_{atom_name}_features.csv")
+                df.to_csv(f"{fname}_{atom_name}_features.csv", index=None)
 
     def features_to_excel(
         self,
         feature_calculator: Union[ALF, Callable],
         *args,
-        fname: Optional[Union[str, Path]] = Path("features_to_excel.xlsx"),
+        fname: Union[str, Path] = Path("features_to_excel.xlsx"),
         atom_names: List[str] = None,
         **kwargs
     ):
@@ -351,6 +349,7 @@ class ListOfAtoms(list, ABC):
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
 
+            # TODO: maybe this can be removed to another file instead of being defined here
             class ListOfAtomsAtomView(self.__class__):
                 """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
                 a user to get information (such as coordinates or features) for one atom.
@@ -377,6 +376,19 @@ class ListOfAtoms(list, ABC):
                 def atom_name(self):
                     """Returns the name of the atom, e.g. 'C1', 'H2', etc."""
                     return self._atom
+                
+                # this has to return the name of the atom in a list, so that other methods work correctly
+                @property
+                def atom_names(self):
+                    """Returns a list containing the name of the atom (so contains 1 element)"""
+                    return [self.atom_name]
+
+                # this has to return the natoms in the original class instance so that methods work correctly
+                # even though there is really only 1 atom in the AtomView object
+                @property
+                def natoms(self):
+                    """Returns the name of the atom, e.g. 'C1', 'H2', etc."""
+                    return self._super.natoms
 
                 @property
                 def type(self):
@@ -385,6 +397,7 @@ class ListOfAtoms(list, ABC):
 
                 def connectivity(self, connectivity_calculator: Callable):
                     """ Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
+                    # get the connectivity for the first Atom instance
                     return connectivity_calculator(self[0].parent)[self[0].i]
 
                 def alf(self, alf_calculator: Callable, *args, **kwargs):
