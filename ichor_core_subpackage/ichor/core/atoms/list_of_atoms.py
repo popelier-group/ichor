@@ -13,6 +13,54 @@ class ListOfAtoms(list, ABC):
     def __init__(self):
         list.__init__(self)
 
+    @abstractmethod
+    def connectivity(self) -> np.ndarray:
+        """ Returns the connectivity matrix of the first timestep."""
+        ...
+
+    @abstractmethod
+    def alf(self) -> ALF:
+        """ Returns the atomic local frame for the first timestep."""
+        ...
+
+
+    @property
+    @abstractmethod
+    def types(self) -> List[str]:
+        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
+        Removes duplicates."""
+        ...
+
+    @property
+    @abstractmethod
+    def types_extended(self) -> List[str]:
+        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
+        Does not remove duplicates"""
+        ...
+
+    @property
+    @abstractmethod
+    def atom_names(self):
+        """Return the atom names from the first timestep. Assumes that all timesteps have the same
+        number of atoms/atom names."""
+        ...
+        
+    @property
+    @abstractmethod
+    def natoms(self):
+        """ Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
+        ...
+
+    @property
+    @abstractmethod
+    def coordinates(self) -> np.ndarray:
+        """
+        Returns:
+            :type: `np.ndarray`
+            the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
+        """
+        ...
+
     def features(
         self,
         feature_calculator: Callable[..., np.ndarray],
@@ -210,67 +258,6 @@ class ListOfAtoms(list, ABC):
 
         trajectory.write()
 
-    @property
-    @abstractmethod
-    def types(self) -> List[str]:
-        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
-        Removes duplicates."""
-        ...
-
-    @property
-    @abstractmethod
-    def types_extended(self) -> List[str]:
-        """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
-        Does not remove duplicates"""
-        ...
-
-    @property
-    @abstractmethod
-    def atom_names(self):
-        """Return the atom names from the first timestep. Assumes that all timesteps have the same
-        number of atoms/atom names."""
-        ...
-        
-    @property
-    @abstractmethod
-    def natoms(self):
-        """ Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
-        ...
-
-    @property
-    @abstractmethod
-    def coordinates(self) -> np.ndarray:
-        """
-        Returns:
-            :type: `np.ndarray`
-            the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
-        """
-        ...
-
-    @property
-    @abstractmethod
-    def connectivity(self) -> np.ndarray:
-        """ Returns the connectivity matrix of the first timestep."""
-        ...
-
-    @property
-    @abstractmethod
-    def alf(self) -> ALF:
-        """ Returns the atomic local frame for the first timestep."""
-        ...
-
-    @abstractmethod
-    def coordinates_to_xyz(
-        self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
-    ):
-        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
-        for that timestep.
-
-        :param fname: The file name to which to write the timesteps/coordinates
-        :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
-        """
-        ...
-
     def features_with_properties_to_csv(
         self,
         feature_calculator: Callable,
@@ -335,6 +322,17 @@ class ListOfAtoms(list, ABC):
                 dtype=np.float64,
             )
             df.to_csv(fname, index=False)
+
+    def coordinates_to_xyz(
+        self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
+    ):
+        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
+        for that timestep.
+
+        :param fname: The file name to which to write the timesteps/coordinates
+        :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
+        """
+        ...
 
     def iteratoms(self):
         """Returns a generator of AtomView instances for each atom stored in ListOfAtoms."""
