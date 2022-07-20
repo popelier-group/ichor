@@ -30,7 +30,8 @@ class CP2KInput(ReadFile, WriteFile, File, HasAtoms):
         box_size: float = 25.0,
     ):
         File.__init__(self, path)
-        HasAtoms.__init__(self, atoms)
+        
+        self.atoms = atoms
         self.temperature = temperature
         self.nsteps = nsteps
         self.datafile_location = datafile_location

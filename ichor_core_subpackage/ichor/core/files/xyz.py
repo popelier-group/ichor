@@ -20,7 +20,7 @@ class XYZ(HasAtoms, ReadFile, WriteFile, File):
 
     def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
         File.__init__(self, path)
-        HasAtoms.__init__(self, atoms)
+        self.atoms = atoms
 
     @classproperty
     def filetype(self) -> str:

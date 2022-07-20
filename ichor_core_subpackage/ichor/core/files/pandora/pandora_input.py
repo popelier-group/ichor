@@ -31,8 +31,8 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile, File):
         basis_set: str = FileContents,
     ):
         File.__init__(self, path)
-        HasAtoms.__init__(self, atoms)
-
+        
+        self.atoms = atoms
         self.ccsdmod: PandoraCCSDmod = ccsdmod
         self.morfi_grid_radial: float = morfi_grid_radial
         self.morfi_grid_angular: int = morfi_grid_angular

@@ -353,7 +353,7 @@ class MOUT(
 
     def __init__(self, path: Path, atoms: Optional[Atoms] = None):
         File.__init__(self, path)
-        HasAtoms.__init__(self, atoms)
+        self.atoms = atoms
 
         self.nnuc = FileContents
         self.nbcp = FileContents

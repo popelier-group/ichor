@@ -75,7 +75,6 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
         virial_ratio: float = None
     ):
         File.__init__(self, path)
-        HasAtoms.__init__(self, atoms)
 
         self.method = method or FileContents
         self.atoms = atoms or FileContents

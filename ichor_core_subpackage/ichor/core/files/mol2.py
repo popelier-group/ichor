@@ -455,8 +455,8 @@ non_metal_atoms = [
 class Mol2(HasAtoms, WriteFile, File):
     def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
         File.__init__(self, path)
-        HasAtoms.__init__(self, atoms)
 
+        self.atoms = atoms
         self.system_name = None
         self.natoms = None
         self.nbonds = None

@@ -87,7 +87,6 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         output_chk: bool = False,
     ):
         File.__init__(self, path)
-        HasAtoms.__init__(self, atoms)
 
         self.link0: List[str] = link0 or FileContents
 
@@ -100,7 +99,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.charge: int = charge or FileContents
         self.spin_multiplicity: int = spin_multiplicity or FileContents
         self.atoms = atoms or FileContents
-
+        
         self._output_chk: bool = output_chk
 
     @classproperty
