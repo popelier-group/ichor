@@ -1,18 +1,8 @@
 from typing import Optional, Union
-
 import numpy as np
 from ichor.core import constants
 from ichor.core.common.types import Coordinates3D
-from ichor.core.calculators import (
-    ALF,
-    default_alf_calculator,
-    default_feature_calculator,
-    default_connectivity_calculator,
-    get_atom_alf,
-    get_atom_c_matrix,
-    get_atom_features,
-    get_atom_connectivity
-)
+from ichor.core.calculators import ALF
 from ichor.core.common.types import VarReprMixin
 from ichor.core.units import AtomicDistance
 from typing import Callable

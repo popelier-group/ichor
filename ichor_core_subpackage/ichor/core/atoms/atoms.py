@@ -10,8 +10,6 @@ from ichor.core.calculators import (
     default_feature_calculator,
 )
 from typing import Callable
-from ichor.core.calculators import get_atoms_alf, get_atoms_c_matrix, get_atoms_connectivity, get_atoms_features, get_atoms_features_dict
-
 
 class AtomNotFound(Exception):
     pass
