@@ -1,10 +1,12 @@
 import numpy as np
 from ichor.core.calculators.alf import ALF
+from ichor.core.calculators.connectivity import default_connectivity_calculator
+from ichor.core.calculators import default_connectivity_calculator, default_feature_calculator, default_alf_calculator
 
-# todo: this could be better
+# TODO: use connectivity here instead of connectivity calculator.
 def calculate_alf_cahn_ingold_prelog(
     atom: "Atom",
-    connectivity: np.ndarray,
+    connectivity_calculator = default_connectivity_calculator,
 ) -> ALF:
     """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
     the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
@@ -44,7 +46,7 @@ def calculate_alf_cahn_ingold_prelog(
             for a in atoms:
                 atoms_to_add.extend(
                     bonded_atom
-                    for bonded_atom in a.bonded_atoms
+                    for bonded_atom in a.bonded_atoms(connectivity_calculator)
                     if bonded_atom not in atoms
                 )
 
@@ -88,12 +90,12 @@ def calculate_alf_cahn_ingold_prelog(
 
         for _ in range(n_atoms_in_alf):
             # make a list of atoms to which the central atom is bonded to that are not in alf
-            queue = [a for a in atom.bonded_atoms if a not in alf]
+            queue = [a for a in atom.bonded_atoms(connectivity_calculator) if a not in alf]
             # if queue is empty, then we add the bonded atoms of the atoms that the atom of interest is connected to
             if not queue:
                 queue = list(
                     it.chain.from_iterable(
-                        a.bonded_atoms for a in atom.bonded_atoms
+                        a.bonded_atoms(connectivity_calculator) for a in atom.bonded_atoms(connectivity_calculator)
                     )
                 )
                 # again remove atoms if they are already in alf
