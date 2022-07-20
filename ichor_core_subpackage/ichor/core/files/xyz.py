@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
-from ichor.core.files.file import File, ReadFile, WriteFile
+from ichor.core.files.file import File, ReadFile, WriteFile, FileContents
 from ichor.core.files.file_data import HasAtoms
 
 
@@ -20,7 +20,7 @@ class XYZ(HasAtoms, ReadFile, WriteFile, File):
 
     def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
         File.__init__(self, path)
-        self.atoms = atoms
+        self.atoms = atoms or FileContents
 
     @classproperty
     def filetype(self) -> str:
