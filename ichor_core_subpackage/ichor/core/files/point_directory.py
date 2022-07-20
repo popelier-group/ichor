@@ -94,7 +94,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
             raise ValueError(f"Cannot set `atoms` to the given value: {value}.")
 
     def get_atom_data(self, atom_name) -> AtomicData:
-        return AtomicData(self.atoms[atom_name], self.properties)
+        return AtomicData(self.atoms[atom_name])
 
     def properties(self, C_list) -> Dict[str, Any]:
         # grab properties from WFN
