@@ -1,14 +1,20 @@
 import numpy as np
-from ichor.core.calculators.alf import ALF
+from ichor.core.calculators.alf import ALF, get_atom_alf
 from ichor.core.calculators.c_matrix_calculator import calculate_c_matrix
 from ichor.core.constants import ang2bohr
 from ichor.core.units import AtomicDistance
+from typing import Union, List
+
+
+
+
+
 
 default_distance_unit: AtomicDistance = AtomicDistance.Bohr
 
 def calculate_alf_features(
     atom: "Atom",
-    alf: ALF,
+    alf: Union[ALF, List[ALF]],
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> np.ndarray:
     """Calculates the features for the given central atom.
@@ -25,6 +31,8 @@ def calculate_alf_features(
             A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of. If there are only two atoms,
             then there is only 1 feature (the distance between the atoms).
     """
+    
+    alf = get_atom_alf(atom, alf)
 
     if len(atom.parent) == 2:
         feature_array = np.empty(

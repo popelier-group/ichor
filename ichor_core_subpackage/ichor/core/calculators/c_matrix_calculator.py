@@ -1,7 +1,5 @@
 import numpy as np
-from ichor.core.calculators.alf import (
-    ALF,
-)
+from ichor.core.calculators.alf import ALF, get_atom_alf
 
 def calculate_c_matrix(
     atom: "Atom",
@@ -21,6 +19,8 @@ def calculate_c_matrix(
         :type: `np.ndarray`
             A 3x3 numpy array which is the C rotation matrix.
     """
+    
+    alf = get_atom_alf(atom, alf)
 
     # check that ALF central atom matches the atom index (0-indexed)
     if alf.origin_idx != atom.i:

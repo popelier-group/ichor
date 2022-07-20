@@ -1,8 +1,5 @@
-from ast import Call
-from ctypes import Union
-from re import L
-from typing import NamedTuple, Optional
-from typing import List, Callable
+
+from typing import NamedTuple, Optional, List, Union
 
 
 class ALF(NamedTuple):
@@ -14,8 +11,17 @@ class ALF(NamedTuple):
     x_axis_idx: int
     xy_plane_idx: Optional[int] = None
 
-def get_atom_alf_from_list_of_alfs(alf: List[ALF], atom_instance: "Atom") -> ALF:
-    for atom_alf in alf:
-        if atom_alf.origin_idx == atom_instance.i:
-            return atom_alf
-    raise IndexError(f"No index '{atom_instance.i}' in ALF: '{alf}'")
+def get_atom_alf(atom: "Atom", alf: Union[ALF, List[ALF]]):
+    
+    if isinstance(alf, ALF):
+        if alf.origin_idx != atom.i:
+            raise ValueError(f"The passed ALF origin index {alf.origin_idx} does not match atom index {atom.i} (0-indexed).")
+        return alf
+    else:
+        alf_found = False
+        for a in alf:
+            if a.origin_idx == atom.i:
+                return a
+        
+        if not alf_found:
+            raise ValueError(f"The list of ALFs does not contain the alf of the atom with index {atom.i}")
