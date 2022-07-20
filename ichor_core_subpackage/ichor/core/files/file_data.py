@@ -10,10 +10,7 @@ from ichor.core.common.dict import (
     unwrap_item,
     remove_items,
 )
-from ichor.core.atoms import Atoms, Atom, ALF
-from ichor.core.calculators import default_feature_calculator
-from ichor.core.files.file import FileContents
-
+from ichor.core.atoms import Atom
 
 class HasAtoms(ABC):
     """A class which is inherited from any file which contains the full geometry
@@ -27,16 +24,13 @@ class HasAtoms(ABC):
     """
 
     @property
-    @abstractmethod
     def coordinates(self) -> np.ndarray:
         return self.atoms.coordinates
 
     @property
-    @abstractmethod
     def atom_names(self) -> List[str]:
         return [atom.name for atom in self.atoms]
 
-    @abstractmethod
     def features(
         self,
         feature_calculator: Callable,
