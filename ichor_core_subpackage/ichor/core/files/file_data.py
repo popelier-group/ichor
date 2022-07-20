@@ -26,17 +26,17 @@ class HasAtoms(ABC):
     :param path: a path to a file
     """
 
-    def __init__(self, atoms: Optional[Atoms] = None):
-        self.atoms = FileContents if atoms is None else atoms
-
     @property
+    @abstractmethod
     def coordinates(self) -> np.ndarray:
         return self.atoms.coordinates
 
     @property
+    @abstractmethod
     def atom_names(self) -> List[str]:
         return [atom.name for atom in self.atoms]
 
+    @abstractmethod
     def features(
         self,
         feature_calculator: Callable,
@@ -47,7 +47,7 @@ class HasAtoms(ABC):
         return self.atoms.features(feature_calculator, *args, **kwargs)
 
     def __getitem__(self, s: str):
-        if isinstance(s, str) and s in self.atom_names:
+        if isinstance(s, str):
             return self.atoms[s]
         # raises error message
         return super().__getitem__(s)
