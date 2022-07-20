@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Callable
+from typing import Callable, Union, List
 from ichor.core.atoms.calculators.alf import ALF
 from ichor.core.atoms.calculators.c_matrix_calculator import calculate_c_matrix
 from ichor.core.constants import ang2bohr
@@ -7,9 +7,25 @@ from ichor.core.units import AtomicDistance
 
 default_distance_unit: AtomicDistance = AtomicDistance.Bohr
 
+def check_alf(atom: "Atom", alf: Union[ALF, List[ALF]],):
+
+    alf_found = False
+
+    if isinstance(alf, ALF):
+        alf = [alf]
+
+    for a in alf:
+        if a.origin_idx == atom.i:
+            alf = a
+            alf_found = True
+            break       
+
+    if not alf_found:
+        raise ValueError("An ALF corresponding to the current atom could not be found.")
+
 def calculate_alf_features(
     atom: "Atom",
-    alf: ALF,
+    alf: Union[ALF, List[ALF]],
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> np.ndarray:
     """Calculates the features for the given central atom.
@@ -27,8 +43,7 @@ def calculate_alf_features(
             then there is only 1 feature (the distance between the atoms).
     """
 
-    if isinstance(alf, Callable):
-        alf = alf(atom)
+    check_alf(atom, alf)
 
     if len(atom.parent) == 2:
         feature_array = np.empty(

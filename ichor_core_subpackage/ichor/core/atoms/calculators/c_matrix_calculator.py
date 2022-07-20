@@ -1,16 +1,8 @@
 import numpy as np
-from typing import Callable, Union, Optional
+from typing import Callable, Union
 from ichor.core.atoms.calculators.alf import (
     ALF,
 )
-
-
-def get_c_matrix(atom_instance, alf: Union[ALF, Callable]):
-    
-    if isinstance(alf, Callable):
-        alf: ALF = alf(atom_instance)
-
-    return calculate_c_matrix(alf)
 
 def calculate_c_matrix(
     atom: "Atom",
@@ -22,14 +14,18 @@ def calculate_c_matrix(
     vectors.
 
     Args:
-        :param: `cls` the class ALFFeatureCalculator:
         :param: `atom` an instance of the `Atom` class:
             This atom is the central atom for which we want to calculate the C rotation matrix.
+        :param alf: An Atomic Local Frame instance for the particular atom.
 
     Returns:
         :type: `np.ndarray`
             A 3x3 numpy array which is the C rotation matrix.
     """
+
+    # check that ALF central atom matches the atom index (0-indexed)
+    if alf.origin_idx != atom.i:
+        raise ValueError(f"The ALF central atom index {alf.origin_idx} does not match the atom index {atom.i}")
 
     c_matrix = np.empty((3, 3))
 
