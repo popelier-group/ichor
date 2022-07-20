@@ -361,8 +361,8 @@ class ListOfAtoms(list, ABC):
 
                 def __init__(self, parent, atom):
                     list.__init__(self)
-                    self.__dict__ = parent.__dict__.copy()
                     self._atom = atom
+                    # do not copy the self.__dict__ as some of the methods will not work in ListOfAtomsAtomView
                     self._is_atom_view = True
                     self._super = parent
 
@@ -374,19 +374,29 @@ class ListOfAtoms(list, ABC):
                         self.append(a)
 
                 @property
-                def name(self):
+                def atom_name(self):
                     """Returns the name of the atom, e.g. 'C1', 'H2', etc."""
                     return self._atom
 
                 @property
-                def atom_names(self):
-                    """Returns a list of atom names, since the AtomView only stores information for one atom, this list has one element."""
-                    return [self._atom]
-
-                @property
-                def types(self):
+                def type(self):
                     """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
                     return [self[0].type]
+
+                def connectivity(self, connectivity_calculator: Callable):
+                    """ Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
+                    return connectivity_calculator(self[0].parent)[self[0].i]
+
+                def alf(self, alf_calculator: Callable, *args, **kwargs):
+                    """ Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
+                    return alf_calculator(self[0], *args, **kwargs)
+
+                def C(self, alf: Union[ALF, List[int]]):
+                    """ Returns the C matrix for every Atom instance in the ListOfAtomsAtomView.
+                    
+                    Thus, the shape is n_timesteps x 3 x 3
+                    """
+                    return np.array([atm.C(alf) for atm in self])
 
                 def features(self, feature_calculator: Callable, *args, **kwargs):
                     """Return the ndarray of features for only one atom, given an alf for that atom.
@@ -398,7 +408,7 @@ class ListOfAtoms(list, ABC):
                     """
 
                     return np.array([atom.features(feature_calculator, *args, **kwargs) for atom in self])
-
+                
             if hasattr(self, "_is_atom_view"):
                 return self
             return ListOfAtomsAtomView(self, item)
