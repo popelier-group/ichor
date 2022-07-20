@@ -40,10 +40,11 @@ class HasAtoms(ABC):
     def features(
         self,
         feature_calculator: Callable,
+        *args,
         **kwargs
     ) -> np.ndarray:
         
-        return self.atoms.features(feature_calculator, **kwargs)
+        return self.atoms.features(feature_calculator, *args, **kwargs)
 
     def __getitem__(self, s: str):
         if isinstance(s, str) and s in self.atom_names:
@@ -70,7 +71,7 @@ class HasProperties(ABC):
         return self.properties(*args, **kwargs)[_property]
 
 class AtomicData(Atom, HasProperties):
-    def __init__(self, atom: Atom, properties: Dict[str, Any]):
+    def __init__(self, atom: Atom, properties: Dict[str, Any] = None):
         Atom.__init__(
             self,
             atom.type,
@@ -81,20 +82,8 @@ class AtomicData(Atom, HasProperties):
             atom.parent,
             atom.units,
         )
-        self._properties = self._select_properties(properties)
+        self._properties = properties
 
     @property
     def properties(self):
         return self._properties
-
-    @properties.setter
-    def properties(self, properties: Dict[str, Any]):
-        self._properties = self._select_properties(properties)
-
-    def _select_properties(self, _properties: Dict[str, Any]):
-        return unwrap_item(
-            remove_items(
-                _properties, set(self._parent.atom_names) - {self.name}
-            ),
-            self.name,
-        )
