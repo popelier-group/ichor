@@ -187,6 +187,8 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
 
     def _write_file(self, path: Path):
+        if self.path.exists():
+            self.read()
         with open(path, "w") as f:
             f.write(f"{self.title}\n")
             header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"

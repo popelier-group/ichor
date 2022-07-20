@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Union, Dict, Any, Optional, Type
+from xml.dom.minidom import Attr
 
 from ichor.core.atoms import AtomsNotFoundError, Atoms
 from ichor.core.files.directory import AnnotatedDirectory
@@ -12,7 +13,7 @@ from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.wfn import WFN
 from ichor.core.files.xyz import XYZ
-from ichor.core.common.dict import merge
+from ichor.core.common.dict import merge, find
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
 
@@ -106,22 +107,17 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
             ]
         )
 
-    # def __getattr__(self, item):
-    #     tried = []
-    #     for d in self.directories():
-    #         try:
-    #             return getattr(d, item)
-    #         except AttributeError:
-    #             tried.append(d.path)
-    #     for f in self.files():
-    #         try:
-    #             return getattr(f, item)
-    #         except AttributeError:
-    #             tried.append(f.path)
-    #
-    #     raise AttributeError(
-    #         f"'{self.path}' instance of '{self.__class__.__name__}' has no attribute '{item}', searched: '{tried}'"
-    #     )
+    def get_property(self, _property: str):
+        if '+' in _property:
+            return {key: sum(val.values()) for key, val in merge(*[self.get_property(p.strip()) for p in _property.split('+')]).items()}
+        return find(_property, self.properties)
+
+    # def get_property(self, _property: str) -> Any:
+    #     if "+" in _property:
+    #         properties = _property.split('+')
+    #         print([HasProperties.get_property(self, p) for p in properties])
+    #         quit()
+    #     return HasProperties.get_property(self, _property)
 
     @classmethod
     def check_path(
