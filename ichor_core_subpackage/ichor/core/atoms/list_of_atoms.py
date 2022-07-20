@@ -16,6 +16,7 @@ class ListOfAtoms(list, ABC):
     def features(
         self,
         feature_calculator: Callable[..., np.ndarray],
+        *args,
         **kwargs
     )-> np.ndarray:
         """Return the ndarray of features. This is assumed to be either 2D or 3D array.
@@ -30,7 +31,7 @@ class ListOfAtoms(list, ABC):
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
         """
         
-        features = np.array([timestep.features(feature_calculator, **kwargs) for timestep in self])
+        features = np.array([timestep.features(feature_calculator, *args, **kwargs) for timestep in self])
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))
         return features
@@ -57,6 +58,7 @@ class ListOfAtoms(list, ABC):
     def features_to_csv(
         self,
         feature_calculator: Callable[..., np.ndarray],
+        *args,
         fname: Optional[Union[str, Path]] = None,
         atom_names: Optional[List[str]] = None,
         **kwargs
@@ -67,6 +69,7 @@ class ListOfAtoms(list, ABC):
         :param fname: A string to be appended to the default csv file names. A .csv file is written out for every atom with default name `atom_name`_features.csv
             If an fname is given, the name becomes `fname`_`atom_name`_features.csv
         :param atom_names: A list of atom names for which to write csv files. If None, then write out the features for every atom in the system.
+        :param *args: positional arguments to pass to calculator function
         :param **kwargs: key word arguments to be passed to the feature calculator function
         """
         import pandas as pd
@@ -79,7 +82,7 @@ class ListOfAtoms(list, ABC):
             atom_names = self.atom_names
 
         for atom_name in atom_names:
-            atom_features = self[atom_name].features(feature_calculator, **kwargs)
+            atom_features = self[atom_name].features(feature_calculator, *args, **kwargs)
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             if fname is None:
                 df.to_csv(f"{atom_name}_features.csv")
@@ -89,6 +92,7 @@ class ListOfAtoms(list, ABC):
     def features_to_excel(
         self,
         feature_calculator: Union[ALF, Callable],
+        *args,
         fname: Optional[Union[str, Path]] = Path("features_to_excel.xlsx"),
         atom_names: List[str] = None,
         **kwargs
@@ -97,6 +101,9 @@ class ListOfAtoms(list, ABC):
         passed in to only make sheets for certain atoms
 
         :param atom_names: A list of atom names for which to calculate features and write in excel spreadsheet
+        :param *args: positional arguments to pass to calculator function
+        :param **kwargs: key word arguments to be passed to the feature calculator function
+        :param fname: File name to save features to
         """
         import pandas as pd
 
@@ -112,7 +119,7 @@ class ListOfAtoms(list, ABC):
         dataframes = {}
 
         for atom_name in atom_names:
-            atom_features = self[atom_name].features(feature_calculator, **kwargs)
+            atom_features = self[atom_name].features(feature_calculator, *args, **kwargs)
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             dataframes[atom_name] = df
 
@@ -124,6 +131,7 @@ class ListOfAtoms(list, ABC):
     def center_geometries_on_atom_and_write_xyz(
         self,
         feature_calculator: Callable,
+        *args,
         central_atom_name: str,
         fname: Optional[Union[str, Path]] = None,
         **kwargs
@@ -136,6 +144,7 @@ class ListOfAtoms(list, ABC):
         :param feature_calculator: Function which calculates features
         :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`
         :param fname: Optional file name in which to save the rotated geometries.
+        :param *args: Positional arguments to pass to calculator function
         :param **kwargs: Key word arguments to pass to calculator function
         """
 
@@ -172,7 +181,7 @@ class ListOfAtoms(list, ABC):
         ]
         # order will always be central atom(0,0,0), x-axis atom, xy-plane atom, etc.
         xyz_array = features_to_coordinates(
-            self[central_atom_name].features(feature_calculator, **kwargs)
+            self[central_atom_name].features(feature_calculator, *args, **kwargs)
         )
         # reverse the ordering, so that the rows are the same as before
         # can now use the atom names as they were read in in initial Trajectory/PointsDirectory instance.
@@ -265,6 +274,7 @@ class ListOfAtoms(list, ABC):
     def features_with_properties_to_csv(
         self,
         feature_calculator: Callable,
+        *args,
         str_to_append_to_fname: Optional[
             str
         ] = "_features_with_properties.csv",
@@ -279,6 +289,8 @@ class ListOfAtoms(list, ABC):
             atoms in the system, defaults to None
         :param property_types: A list of property names (iqa, multipole names) for which to write columns. If None, then writes out
             columns for all properties, defaults to None
+        :param *args: positional arguments to pass to calculator function
+        :param **kwargs: key word arguments to be passed to the feature calculator function
         :raises TypeError: This method only works for PointsDirectory instances because it needs access to AIMALL information. Does not
             work for Trajectory instances.
         """
@@ -304,7 +316,7 @@ class ListOfAtoms(list, ABC):
         for atom_name in atom_names:
 
             training_data = []
-            features = self[atom_name].features(feature_calculator, **kwargs)
+            features = self[atom_name].features(feature_calculator, *args, **kwargs)
 
             for i, point in enumerate(self):
                 properties = [
@@ -378,7 +390,7 @@ class ListOfAtoms(list, ABC):
                     """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
                     return [self[0].type]
 
-                def features(self, feature_calculator: Callable, **kwargs):
+                def features(self, feature_calculator: Callable, *args, **kwargs):
                     """Return the ndarray of features for only one atom, given an alf for that atom.
                     This is assumed to a 2D array of features for only one atom.
 
@@ -387,7 +399,7 @@ class ListOfAtoms(list, ABC):
                     :return: Тhe array has shape `n_timesteps` x `n_features`.
                     """
 
-                    return np.array([atom.features(feature_calculator, **kwargs) for atom in self])
+                    return np.array([atom.features(feature_calculator, *args, **kwargs) for atom in self])
 
             if hasattr(self, "_is_atom_view"):
                 return self

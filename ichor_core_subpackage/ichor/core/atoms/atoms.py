@@ -201,17 +201,17 @@ class Atoms(list):
 
         return connectivity_calculator(self)
 
-    def alf(self, alf_calculator: Callable[..., ALF], **kwargs) -> List[ALF]:
+    def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
         """
-        return [alf_calculator(atom_instance, **kwargs) for atom_instance in self]
+        return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self]
 
-    def alf_list(self, alf_calculator: Callable[..., ALF], **kwargs) -> List[List[int]]:
+    def alf_list(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
-        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf(alf_calculator, **kwargs)]
+        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf(alf_calculator, *args, **kwargs)]
 
-    def features(self, feature_calculator:  Callable[..., np.ndarray], **kwargs) -> np.ndarray:
+    def features(self, feature_calculator:  Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
@@ -223,16 +223,16 @@ class Atoms(list):
             :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
                 Return the feature matrix of this Atoms instance
         """
-        return np.array([atom_instance.features(feature_calculator, **kwargs) for atom_instance in self])
+        return np.array([atom_instance.features(feature_calculator, *args, **kwargs) for atom_instance in self])
 
-    def features_dict(self, feature_calculator: Callable[..., np.ndarray], **kwargs) -> dict:
+    def features_dict(self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs) -> dict:
         """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
         e.g. {"C1": np.array, "H2": np.array}
         """
 
-        return {atom_instance.name: atom_instance.features(feature_calculator, **kwargs) for atom_instance in self}
+        return {atom_instance.name: atom_instance.features(feature_calculator, *args, **kwargs) for atom_instance in self}
 
     def __getitem__(self, item) -> Union[Atom, "Atoms"]:
         """ Used to index the Atoms isinstance with various types of `item`.

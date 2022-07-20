@@ -170,7 +170,7 @@ class Atom(VarReprMixin, Coordinates3D):
         instances that are held in an Atoms instance.
         This is only one row of the full connectivity matrix of the Atoms instance that is self._parent.
         """
-        return connectivity_calculator(self)
+        return connectivity_calculator(self.parent)[self.i]
 
     def bonded_atoms(self, connectivity_calculator: Callable[..., list]) -> list:
         """Returns a list of Atom instances to which this Atom instance is connected
@@ -208,7 +208,7 @@ class Atom(VarReprMixin, Coordinates3D):
             for connected_atom in connectivity_matrix_row.nonzero()[0]
         ]
 
-    def alf(self, alf_calculator: Callable[..., ALF], **kwargs) -> ALF:
+    def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> ALF:
         """Returns an instance of ALF. This ALF is ONLY for this Atom.
 
         e.g. If we have an Atoms instance for the water monomer, the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
@@ -216,12 +216,12 @@ class Atom(VarReprMixin, Coordinates3D):
 
         [0,1,2] contains the indices for the central atom, x-axis atom, and xy-plane atom. These indices start at 0 to index Python objects correctly.
         """
-        return alf_calculator(self, **kwargs)
+        return alf_calculator(self, *args, **kwargs)
 
-    def alf_array(self, alf_calculator: Callable[..., np.ndarray], **kwargs) -> np.ndarray:
+    def alf_array(self, alf_calculator: Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
         THere indices are what are used in python lists (as they start at 0)."""
-        alf = self.alf(alf_calculator, **kwargs)
+        alf = self.alf(alf_calculator, *args, **kwargs)
         return np.array([alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx])
 
     def C(self, alf: ALF) -> np.ndarray:
@@ -235,7 +235,7 @@ class Atom(VarReprMixin, Coordinates3D):
         """
         return calculate_c_matrix(self, alf)
 
-    def features(self, feature_calculator: Callable[..., np.ndarray], **kwargs) -> np.ndarray:
+    def features(self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance.
 
         :param kwargs: key word arguments to pass to the feature calculator function. Check the feature calculator
@@ -246,7 +246,7 @@ class Atom(VarReprMixin, Coordinates3D):
             calculator that is being used, as well as pass in new key word arguments to the given calculator.
         """
         
-        return feature_calculator(self, **kwargs)
+        return feature_calculator(self, *args, **kwargs)
 
     @property
     def coordinates_string(self):
