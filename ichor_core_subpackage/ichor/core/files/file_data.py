@@ -39,10 +39,11 @@ class HasAtoms(ABC):
 
     def features(
         self,
-        feature_calculator: Union[ALF, Callable] = default_feature_calculator,
+        feature_calculator: Callable,
+        **kwargs
     ) -> np.ndarray:
         
-        return self.atoms.features(feature_calculator)
+        return self.atoms.features(feature_calculator, **kwargs)
 
     def __getitem__(self, s: str):
         if isinstance(s, str) and s in self.atom_names:

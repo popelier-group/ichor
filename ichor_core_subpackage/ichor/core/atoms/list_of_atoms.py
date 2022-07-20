@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional, Union, Callable
 import numpy as np
 from ichor.core.atoms.atoms import Atoms
-from ichor.core.calculators import ALF, get_atom_alf_from_list_of_alfs
+from ichor.core.calculators import ALF
 
 class ListOfAtoms(list, ABC):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -88,9 +88,10 @@ class ListOfAtoms(list, ABC):
 
     def features_to_excel(
         self,
+        feature_calculator: Union[ALF, Callable],
         fname: Optional[Union[str, Path]] = Path("features_to_excel.xlsx"),
         atom_names: List[str] = None,
-        feature_calculator: Union[ALF, Callable] = default_feature_calculator,
+        **kwargs
     ):
         """Writes out one excel file which contains a sheet with features for every atom in the system. Optionally a list of atom names can be
         passed in to only make sheets for certain atoms
@@ -111,7 +112,7 @@ class ListOfAtoms(list, ABC):
         dataframes = {}
 
         for atom_name in atom_names:
-            atom_features = self[atom_name].features(feature_calculator)
+            atom_features = self[atom_name].features(feature_calculator, **kwargs)
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             dataframes[atom_name] = df
 
@@ -263,12 +264,13 @@ class ListOfAtoms(list, ABC):
 
     def features_with_properties_to_csv(
         self,
+        feature_calculator: Callable,
         str_to_append_to_fname: Optional[
             str
         ] = "_features_with_properties.csv",
         atom_names: Optional[List[str]] = None,
         property_types: Optional[List[str]] = None,
-        feature_calculator: Callable,
+        **kwargs
     ):
         """
 
