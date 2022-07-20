@@ -9,21 +9,15 @@ from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import relpath
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Coordinates3D
-from ichor.core.constants import (
-    spherical_dipole_labels,
-    spherical_hexadecapole_labels,
-    spherical_monopole_labels,
-    spherical_octupole_labels,
-    spherical_quadrupole_labels,
-)
+from ichor.core.constants import (spherical_dipole_labels,
+                                  spherical_hexadecapole_labels,
+                                  spherical_monopole_labels,
+                                  spherical_octupole_labels,
+                                  spherical_quadrupole_labels)
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasProperties
-from ichor.core.multipoles import (
-    rotate_dipole,
-    rotate_hexadecapole,
-    rotate_octupole,
-    rotate_quadrupole,
-)
+from ichor.core.multipoles import (rotate_dipole, rotate_hexadecapole,
+                                   rotate_octupole, rotate_quadrupole)
 
 
 class CriticalPointType(Enum):
@@ -96,6 +90,12 @@ class INT(HasProperties, ReadFile):
         self.iqa_energy_components: Dict[str, float] = FileContents
 
         self.total_time: int = FileContents
+
+        self.interactions: Dict[str, ABInt] = {}
+
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return path.suffix == cls.filetype and "_" not in path.name
 
     @classproperty
     def filetype(cls) -> str:
@@ -414,3 +414,64 @@ class INT(HasProperties, ReadFile):
             local_spherical_multipoles[hexadecapole_name] = hexadecapole_value
 
         return local_spherical_multipoles
+
+
+class ABInt(HasProperties, ReadFile):
+    def __init__(self, path: Union[str, Path]):
+        ReadFile.__init__(self, path)
+        HasProperties.__init__(self)
+
+        self.a: str = FileContents
+        self.b: str = FileContents
+
+        self.iqa_diatomic_contributions: Dict[str, float] = FileContents
+
+        self.total_time: int = FileContents
+
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return path.suffix == cls.filetype and "_" in path.name
+
+    @classproperty
+    def filetype(self) -> str:
+        return ".int"
+
+    @property
+    def properties(self) -> Dict[str, float]:
+        return self.iqa_diatomic_contributions
+
+    def _read_file(self):
+        self.a = ""
+        self.b = ""
+        self.iqa_diatomic_contributions = {}
+        self.total_time = 0
+
+        with open(self.path, "r") as f:
+            line = next(f)
+            while "IQA Atomic and Diatomic Contributions" not in line:
+                line = next(f)
+
+            next(f)  # ---------
+            self.a = next(f).split()[-1]
+            self.b = next(f).split()[-1]
+
+            diatomic_contributions = {}
+            line = next(f)
+            while "=" in line:
+                record = line.split()
+                key = record[0].split("(")[0]
+                value = float(record[1])
+                if key in diatomic_contributions.keys():
+                    diatomic_contributions[key] = (
+                        diatomic_contributions[key] + value
+                    ) / 2
+                else:
+                    diatomic_contributions[key] = value
+                line = next(f)
+
+            self.iqa_diatomic_contributions = diatomic_contributions
+
+            while "Total time" not in line:
+                line = next(f)
+
+            self.total_time = int(line.split()[-2])

@@ -9,7 +9,7 @@ from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasProperties
 
 # from ichor.core.files.geometry import AtomicDict, AtomicData
-from ichor.core.files.int import INT
+from ichor.core.files.int import INT, ABInt
 
 
 class INTs(HasProperties, OrderedDict, Directory):
@@ -25,6 +25,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         self.parent = parent
         Directory.__init__(self, path)
         OrderedDict.__init__(self)
+        self.interaction_ints = OrderedDict()
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
@@ -38,8 +39,18 @@ class INTs(HasProperties, OrderedDict, Directory):
             _read_file method reads in the data.
         """
         for f in self.iterdir():
-            if f.suffix == INT.filetype:
+            if INT.check_path(f):
                 self[f.stem.capitalize()] = INT(f, parent=self.parent)
+            elif ABInt.check_path(f):
+                a, b = f.stem.split()
+                a = a.capitalize()
+                b = b.capitalize()
+                self.interaction_ints[(a, b)] = ABInt(f)
+
+        for (a, b), i in self.interaction_ints.values():
+            self[a].interactions[b] = i
+            self[b].interactions[a] = i
+
         self.sort()
 
     @classmethod
