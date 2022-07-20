@@ -11,7 +11,7 @@ from ichor.core.common.dict import (
     remove_items,
 )
 from ichor.core.atoms import Atoms, Atom, ALF
-from ichor.core.atoms.calculators import default_feature_calculator
+from ichor.core.calculators import default_feature_calculator
 from ichor.core.files.file import FileContents
 
 

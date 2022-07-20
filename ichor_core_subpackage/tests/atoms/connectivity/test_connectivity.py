@@ -4,7 +4,7 @@ from typing import NamedTuple
 import numpy as np
 import pytest
 from ichor.core.atoms import Atoms
-from ichor.core.atoms.calculators import default_connectivity_calculator
+from ichor.core.calculators import default_connectivity_calculator
 from ichor.core.files import Trajectory
 from tests.path import get_cwd
 

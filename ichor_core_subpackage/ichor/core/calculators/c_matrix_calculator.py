@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Callable, Union
-from ichor.core.atoms.calculators.alf import (
+from ichor.core.calculators.alf import (
     ALF,
 )
 

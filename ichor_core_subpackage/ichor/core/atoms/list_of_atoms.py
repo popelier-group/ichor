@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional, Union, Callable
 import numpy as np
 from ichor.core.atoms.atoms import Atoms
-from ichor.core.atoms.calculators import ALF, get_atom_alf_from_list_of_alfs
+from ichor.core.calculators import ALF, get_atom_alf_from_list_of_alfs
 
 class ListOfAtoms(list, ABC):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something

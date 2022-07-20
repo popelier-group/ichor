@@ -21,7 +21,7 @@ from contextlib import contextmanager
 
 from ichor.core import constants
 from ichor.core.atoms.atoms import Atoms
-from ichor.core.atoms.calculators import ALF
+from ichor.core.calculators import ALF
 from ichor.core.common.types import Version
 from ichor.hpc.globals import checkers, formatters, parsers
 from ichor.hpc.globals.config_provider import ConfigProvider

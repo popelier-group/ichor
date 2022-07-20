@@ -1,5 +1,5 @@
 import numpy as np
-from ichor.core.atoms.calculators.connectivity.distance import \
+from ichor.core.calculators.connectivity.distance import \
     default_connectivity_calculator_distance
 
 

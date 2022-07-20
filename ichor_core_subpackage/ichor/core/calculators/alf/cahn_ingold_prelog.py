@@ -1,5 +1,5 @@
 import numpy as np
-from ichor.core.atoms.calculators.alf import ALF
+from ichor.core.calculators.alf import ALF
 
 # todo: this could be better
 def calculate_alf_cahn_ingold_prelog(

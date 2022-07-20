@@ -4,13 +4,13 @@ from typing import List, Optional, Sequence, Union
 
 import numpy as np
 from ichor.core.atoms.atom import Atom
-from ichor.core.atoms.calculators import (
+from ichor.core.calculators import (
     ALF,
     default_connectivity_calculator,
     default_feature_calculator,
 )
 from typing import Callable
-from ichor.core.atoms.calculators import get_atoms_alf, get_atoms_c_matrix, get_atoms_connectivity, get_atoms_features, get_atoms_features_dict
+from ichor.core.calculators import get_atoms_alf, get_atoms_c_matrix, get_atoms_connectivity, get_atoms_features, get_atoms_features_dict
 
 
 class AtomNotFound(Exception):

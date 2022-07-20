@@ -1,5 +1,5 @@
 from ichor.core.atoms import Atoms, Atom
-from ichor.core.atoms.calculators import ALF, calculate_alf_cahn_ingold_prelog, calculate_alf_atom_sequence
+from ichor.core.calculators import ALF, calculate_alf_cahn_ingold_prelog, calculate_alf_atom_sequence
 
 
 def test_water():
