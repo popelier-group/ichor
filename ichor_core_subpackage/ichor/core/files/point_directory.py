@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Dict, Any, Optional, Type, List
+from typing import Union, Dict, Optional, Type, List
 
 from ichor.core.atoms import AtomsNotFoundError, Atoms
 from ichor.core.files.directory import AnnotatedDirectory
@@ -16,7 +16,7 @@ from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
 from ichor.core.calculators.alf import ALF
-from ichor.core.calculators import default_feature_calculator, default_connectivity_calculator, default_alf_calculator
+from ichor.core.calculators import default_alf_calculator
 
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
@@ -55,13 +55,14 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                         Path(self.path) / (self.path.name + XYZ.filetype),
                         atoms=f.atoms,
                     )
-        for p in self.path_objects():
-            if hasattr(p, "parent"):
-                p.parent = self.atoms
 
     @classproperty
     def property_names(self) -> List[str]:
         return INTs.property_names + WFN.property_names
+
+    @property
+    def name(self):
+        return self.path.name
 
     @property
     def atoms(self) -> Atoms:
@@ -84,7 +85,6 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
-
     def atoms_from_file(self, file_with_atoms: Type[HasAtoms]) -> Atoms:
         for f in self.files():
             if isinstance(f, file_with_atoms):
@@ -103,7 +103,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     def get_atom_with_properties(self, atom_name, system_alf: List[ALF] = None) -> AtomWithProperties:
         return AtomWithProperties(self.atoms[atom_name], self.properties(system_alf), )
 
-    def properties(self, system_alf: Optional[List[ALF]] = None) -> Dict[str, Any]:
+    def properties(self, system_alf: Optional[List[ALF]] = None) -> Dict[str, Union[float, Dict[str, float]]]:
         """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
         
         :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
@@ -114,7 +114,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
             alf = self.alf(default_alf_calculator)
         
         c_matrix_dict = self.C_matrix_dict(alf)
-        
+
         # grab properties from WFN
         wfn_properties = self.wfn.properties
         # grab properties from INTs directory
