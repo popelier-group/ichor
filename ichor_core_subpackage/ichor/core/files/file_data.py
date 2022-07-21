@@ -3,6 +3,7 @@ from typing import Any, Dict
 from abc import ABC
 from typing import List, Optional, Union, Callable
 import numpy as np
+from ichor.core.calculators.alf import ALF
 
 from ichor.core.common.dict import (
     find,
@@ -13,14 +14,8 @@ from ichor.core.common.dict import (
 from ichor.core.atoms import Atom
 
 class HasAtoms(ABC):
-    """A class which is inherited from any file which contains the full geometry
-    of the molecule/system. These geometries can be used to calculate connectivity
-    and ALF. Files such as .xyz, .gjf, .wfn have the full geometry of the system
-    (i.e. they have x,y,z coordinates for every atom in the system, but each file
-    might have different units!). We can use any of these files to determine the
-    connectivity or calculate the ALF.
-
-    :param path: a path to a file
+    """
+    Abstract base class for classes which either have a property or attribute of `atoms` that gives back an `Atoms` instance.
     """
 
     @property
@@ -31,6 +26,37 @@ class HasAtoms(ABC):
     def atom_names(self) -> List[str]:
         return [atom.name for atom in self.atoms]
 
+    def connectivity(self, connectivity_calculator: Callable[..., np.ndarray]) -> np.ndarray:
+        """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
+
+        Returns:
+            :type: `np.ndarray` of shape n_atoms x n_atoms
+        """
+
+        return connectivity_calculator(self.atoms)
+    
+    def C_matrix_dict(self, system_alf: List[ALF]) -> Dict[str, np.ndarray]:
+        """ Returns a dictionary of key (atom name), value (C matrix np array) for every atom"""
+        return {atom_instance.name: atom_instance.C(system_alf) for atom_instance in self.atoms}
+    
+    def C_matrix_list(self, system_alf: List[ALF]) -> List[np.ndarray]:
+        """ Returns a list C matrix np array for every atom"""
+        return [atom_instance.C(system_alf) for atom_instance in self.atoms]
+
+    def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
+        """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
+        e.g. [[0,1,2],[1,0,2], [2,0,1]]
+        """
+        return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self.atoms]
+
+    def alf_list(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
+        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
+        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.atoms.alf(alf_calculator, *args, **kwargs)]
+
+    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
+        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
+        return {atom_instance.name: atom_instance.alf(alf_calculator) for atom_instance in self.atoms}
+
     def features(
         self,
         feature_calculator: Callable,
@@ -39,6 +65,15 @@ class HasAtoms(ABC):
     ) -> np.ndarray:
         
         return self.atoms.features(feature_calculator, *args, **kwargs)
+    
+    def features_dict(self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs) -> dict:
+        """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
+        Features are calculated in the Atom class and concatenated to a 2d array here.
+
+        e.g. {"C1": np.array, "H2": np.array}
+        """
+
+        return {atom_instance.name: atom_instance.features(feature_calculator, *args, **kwargs) for atom_instance in self.atoms}
 
     def __getitem__(self, s: str):
         if isinstance(s, str):
@@ -54,6 +89,22 @@ class HasProperties(ABC):
     Adds the ability to search for a property using dictionaries in the inherited class
     """
 
+    # @property
+    # @abstractmethod
+    # def property_names(self) -> List[str]:
+    #     """ Returns a list of strings corresponding to property names"""
+    #     pass
+    
+    # @property
+    # @abstractmethod
+    # def easy_to_get_properties(self) -> List[str]:
+    #     """ Returns a list of strings corresponding to properties which do not require any extra computations to get."""
+
+    # @property
+    # @abstractmethod
+    # def hard_to_get_properties(self) -> List[str]:
+    #     """ Returns a list of strings corresponding to properties which do not require any extra computations to get."""
+
     # can be used to make sure either a method or property with name `properties` exists
     @abstractmethod
     def properties(self) -> Dict[str, Any]:
@@ -64,7 +115,8 @@ class HasProperties(ABC):
     def get_property(self, _property: str, *args, **kwargs) -> Any:
         return self.properties(*args, **kwargs)[_property]
 
-class AtomicData(Atom, HasProperties):
+
+class AtomWithProperties(Atom, HasProperties):
     def __init__(self, atom: Atom, properties: Dict[str, Any] = None):
         Atom.__init__(
             self,
