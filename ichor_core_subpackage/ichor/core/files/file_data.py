@@ -89,32 +89,16 @@ class HasProperties(ABC):
     Adds the ability to search for a property using dictionaries in the inherited class
     """
 
-    # @property
-    # @abstractmethod
-    # def property_names(self) -> List[str]:
-    #     """ Returns a list of strings corresponding to property names"""
-    #     pass
-    
-    # @property
-    # @abstractmethod
-    # def easy_to_get_properties(self) -> List[str]:
-    #     """ Returns a list of strings corresponding to properties which do not require any extra computations to get."""
-
-    # @property
-    # @abstractmethod
-    # def hard_to_get_properties(self) -> List[str]:
-    #     """ Returns a list of strings corresponding to properties which do not require any extra computations to get."""
+    @property
+    @abstractmethod
+    def property_names(self) -> List[str]:
+        """ Returns a list of strings corresponding to property names that the object should have"""
+        ...
 
     # can be used to make sure either a method or property with name `properties` exists
     @abstractmethod
     def properties(self) -> Dict[str, Any]:
-        raise NotImplementedError(
-            f"'data' not defined for '{self.__class__.__name__}'"
-        )
-
-    def get_property(self, _property: str, *args, **kwargs) -> Any:
-        return self.properties(*args, **kwargs)[_property]
-
+        ...
 
 class AtomWithProperties(Atom, HasProperties):
     def __init__(self, atom: Atom, properties: Dict[str, Any] = None):

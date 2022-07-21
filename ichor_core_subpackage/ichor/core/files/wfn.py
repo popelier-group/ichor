@@ -198,6 +198,10 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
         """Returns the file extension of a WFN file"""
         return ".wfn"
 
+    @classproperty
+    def property_names(self) -> List[str]:
+        return ["energy", "wfn"]
+
     @property
     def properties(self) -> Dict[str, float]:
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}

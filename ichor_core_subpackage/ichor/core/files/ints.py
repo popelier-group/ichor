@@ -51,6 +51,10 @@ class INTs(HasProperties, OrderedDict, Directory):
             self, sorted(self.items(), key=lambda x: ignore_alpha(x[0]))
         )
 
+    @classproperty
+    def property_names(self) -> List[str]:
+        return INT.property_names
+
     def properties(self, C_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, float]]:
         """
         Returns a dictionary of dictionaries containing atom names as keys an a dictionary

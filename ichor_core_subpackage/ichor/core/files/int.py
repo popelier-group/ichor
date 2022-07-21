@@ -15,6 +15,7 @@ from ichor.core.constants import (
     spherical_monopole_labels,
     spherical_octupole_labels,
     spherical_quadrupole_labels,
+    multipole_names
 )
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasProperties
@@ -97,6 +98,10 @@ class INT(HasProperties, ReadFile):
     def filetype(cls) -> str:
         """Returns the file extension of AIMALL files which are used"""
         return ".int"
+
+    @classproperty
+    def property_names(self) -> List[str]:
+        return ["iqa, integration_error"] + multipole_names
 
     @property
     def wfn(self) -> "WFN":
