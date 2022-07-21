@@ -4,7 +4,6 @@ from typing import Optional
 from ichor.core.common.functools import classproperty
 from ichor.core.files.directory import AnnotatedDirectory
 
-# from ichor.core.files.geometry import GeometryDataFile, AtomicData
 from ichor.core.files.file_data import HasAtoms
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora.morfi_output import MorfiDirectory
