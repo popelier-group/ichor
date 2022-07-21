@@ -348,108 +348,21 @@ class ListOfAtoms(list, ABC):
 
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
-
-            # TODO: maybe this can be removed to another file instead of being defined here
-            class ListOfAtomsAtomView(self.__class__):
-                """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
-                a user to get information (such as coordinates or features) for one atom.
-
-                :param parent: An instance of a class that subclasses from ListOfAtoms
-                :param atom: A string representing the name of an atom, e.g. 'C1', 'H2', etc.
-                """
-
-                def __init__(self, parent, atom):
-                    list.__init__(self)
-                    self._atom = atom
-                    # do not copy the self.__dict__ as some of the methods will not work in ListOfAtomsAtomView
-                    self._is_atom_view = True
-                    self._super = parent
-
-                    # this usually iterates over Atoms instances that are stored in a ListofAtoms instance and only adds the information for the
-                    # specified atom. Thus AtomView is essentially a list of Atom instances for only one atom
-                    # also iterates over PointDirectory instances because PointsDirectory subclasses from ListofAtoms
-                    for element in parent:
-                        a = element[atom]
-                        self.append(a)
-
-                @property
-                def atom_name(self):
-                    """Returns the name of the atom, e.g. 'C1', 'H2', etc."""
-                    return self._atom
-                
-                # this has to return the name of the atom in a list, so that other methods work correctly
-                @property
-                def atom_names(self):
-                    """Returns a list containing the name of the atom (so contains 1 element)"""
-                    return [self.atom_name]
-
-                # this has to return the natoms in the original class instance so that methods work correctly
-                # even though there is really only 1 atom in the AtomView object
-                @property
-                def natoms(self):
-                    """Returns the name of the atom, e.g. 'C1', 'H2', etc."""
-                    return self._super.natoms
-
-                @property
-                def type(self):
-                    """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
-                    return [self[0].type]
-
-                def connectivity(self, connectivity_calculator: Callable):
-                    """ Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
-                    # get the connectivity for the first Atom instance
-                    return connectivity_calculator(self[0].parent)[self[0].i]
-
-                def alf(self, alf_calculator: Callable, *args, **kwargs):
-                    """ Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
-                    return alf_calculator(self[0], *args, **kwargs)
-
-                def C(self, alf: Union[ALF, List[int]]):
-                    """ Returns the C matrix for every Atom instance in the ListOfAtomsAtomView.
-                    
-                    Thus, the shape is n_timesteps x 3 x 3
-                    """
-                    return np.array([atm.C(alf) for atm in self])
-
-                def features(self, feature_calculator: Callable, *args, **kwargs):
-                    """Return the ndarray of features for only one atom, given an alf for that atom.
-                    This is assumed to a 2D array of features for only one atom.
-
-                    :param alf: A list of integers or a numpy array corresponding to the alf of one atom - The atom which the atom view is for.
-                    :rtype: `np.ndarray`
-                    :return: Тhe array has shape `n_timesteps` x `n_features`.
-                    """
-
-                    return np.array([atom.features(feature_calculator, *args, **kwargs) for atom in self])
-                
+            from ichor.core.atoms.list_of_atoms_atom_view import ListOfAtomsAtomView
+    
             if hasattr(self, "_is_atom_view"):
                 return self
             return ListOfAtomsAtomView(self, item)
 
         # if ListOfAtoms is indexed by a slice e.g. [:50], [20:40], etc.
         elif isinstance(item, slice):
-
-            class ListofAtomsSlice(self.__class__):
-                def __init__(self, parent, sl):
-                    self.__dict__ = parent.__dict__.copy()
-                    self._is_atom_slice = True
-                    list.__init__(self)
-
-                    # slicing out of range does not raise an error. This is by design in Python
-                    self.extend(list.__getitem__(parent, sl))
-
+            from ichor.core.atoms.list_of_atoms_slice import ListofAtomsSlice
+            
             return ListofAtomsSlice(self, item)
         
         elif isinstance(item, (list, np.ndarray)):
-
-            class ListOfAtomsIndexed(self.__class__):
-                def __init__(self, parent, sl):
-                    self.__dict__ = parent.__dict__.copy()
-                    self._is_list_of_atoms_slice = True
-                    list.__init__(self)
-
-                    for i in sl:
-                        self.append(list.__getitem__(parent, i))
+            
+            from ichor.core.atoms.list_of_atoms_indexed import ListOfAtomsIndexed
 
             return ListOfAtomsIndexed(self, item)
 
