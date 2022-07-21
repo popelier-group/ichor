@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Union, Dict, Any, Optional, Type
+from typing import Union, Dict, Any, Optional, Type, List
 
 from ichor.core.atoms import AtomsNotFoundError, Atoms
 from ichor.core.files.directory import AnnotatedDirectory
-from ichor.core.files.file import FileContents, ReadFile
+from ichor.core.files.file import ReadFile
 
-from ichor.core.files.file_data import HasAtoms, HasProperties, AtomicData
+from ichor.core.files.file_data import HasAtoms, HasProperties, AtomWithProperties
 from ichor.core.files.gjf import GJF
 from ichor.core.files.ints import INTs
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
@@ -15,6 +15,8 @@ from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
+from ichor.core.calculators.alf import ALF
+from ichor.core.calculators import default_feature_calculator, default_connectivity_calculator, default_alf_calculator
 
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
@@ -55,7 +57,11 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                     )
         for p in self.path_objects():
             if hasattr(p, "parent"):
-                p.parent = self
+                p.parent = self.atoms
+
+    @classproperty
+    def property_names(self) -> List[str]:
+        return INTs.property_names + WFN.property_names
 
     @property
     def atoms(self) -> Atoms:
@@ -78,6 +84,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
         raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
+
     def atoms_from_file(self, file_with_atoms: Type[HasAtoms]) -> Atoms:
         for f in self.files():
             if isinstance(f, file_with_atoms):
@@ -93,14 +100,25 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         else:
             raise ValueError(f"Cannot set `atoms` to the given value: {value}.")
 
-    def get_atom_data(self, atom_name) -> AtomicData:
-        return AtomicData(self.atoms[atom_name])
+    def get_atom_data(self, atom_name) -> AtomWithProperties:
+        return AtomWithProperties(self.atoms[atom_name])
 
-    def properties(self, C_list) -> Dict[str, Any]:
+    def properties(self, system_alf: Optional[List[ALF]] = None) -> Dict[str, Any]:
+        """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
+        
+        :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
+        """
+        
+        if not system_alf:
+            # connectivity = self.connectivity(default_connectivity_calculator)
+            alf = self.alf(default_alf_calculator)
+        
+        c_matrix_dict = self.C_matrix_dict(alf)
+        
         # grab properties from WFN
         wfn_properties = self.wfn.properties
         # grab properties from INTs directory
-        ints_properties = self.ints.properties(C_list)
+        ints_properties = self.ints.properties(c_matrix_dict)
         
         return merge(wfn_properties, ints_properties)
 
@@ -132,8 +150,3 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
     def __repr__(self):
         return str(self.path)
-
-    def __getitem__(self, item):
-        if isinstance(item, str):
-            return self.get_atom_data(item)
-        return super().__getitem__(item)
