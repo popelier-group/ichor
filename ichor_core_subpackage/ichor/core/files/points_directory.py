@@ -1,17 +1,15 @@
 import re
 from pathlib import Path
-from typing import Union, Set
-
+from typing import Union, List, Optional, Dict, Callable
 from ichor.core.atoms import ListOfAtoms
-from ichor.core.common.functools import buildermethod
 from ichor.core.common.io import mkdir
-from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files import Directory
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.gjf import GJF
 from ichor.core.files.xyz import XYZ
 import numpy as np
-from typing import Optional
+from ichor.core.calculators.alf import ALF, default_alf_calculator
+from ichor.core.common.dict import merge
 
 
 class PointsDirectory(ListOfAtoms, Directory):
@@ -49,9 +47,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         directory. This method makes them in separate directories.
         """
 
-        # if current instance is empty, then iterate over the contents of the directory (see __iter__ method below)
-        for f in self:
-            # if the current PathObject is a directory that matches the given regex pattern, then wrap the directory in
+        # iterdir sorts by name, see Directory class
+        for f in self.iterdir():
+            # if the current PathObject is a directory that matches
             # a PointDirectory instance and add to self
             if PointDirectory.check_path(f):
                 point = PointDirectory(f)
@@ -65,47 +63,70 @@ class PointsDirectory(ListOfAtoms, Directory):
                     PointDirectory(new_dir)
                 )  # wrap the new directory as a PointDirectory instance and add to self
         # sort by the names of the directories (by the numbers in their name) since the system name is always the same
-        self.sort(key=lambda x: x.path.name)
+        self = self.sort(key=lambda x: x.path.name)
 
-    @buildermethod
-    def read(self):
-        """Read each of the PointDirectory instances inside a PointsDirectory instance and store relevant information into attributes.
+    def connectivity(self, connectivity_calculator: Callable[..., np.ndarray]) -> np.ndarray:
+        """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
-        .. note::
-            This method does not need to be called explicitly because if an the state of the file is `FileState.Unread` and the attribute
-            does not exist, the `__getattribute__` method defined in `class PathObject` will be called which automatically reads the file
-            if a non existing attribute is being accessed.
+        Returns:
+            :type: `np.ndarray` of shape n_atoms x n_atoms
         """
-        for point in self:
-            point.read()
 
-    def dump(self):
-        for point in self:
-            point.dump()
+        return connectivity_calculator(self[0].atoms)
+    
+    def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
+        """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
+        e.g. [[0,1,2],[1,0,2], [2,0,1]]
+        :param *args: positional arguments to pass to alf calculator
+        :param **kwargs: key word arguments to pass to alf calculator
+        """
+        return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0].atoms]
 
-    def iterdir(self):
-        return iter(natsorted(super().iterdir(), key=ignore_alpha))
+    def properties(self, alf: Optional[List[ALF]] = None, specific_property: str = None) -> Dict[str, Dict[str, Union[float, Dict[str, float]]]]:
+        """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
+        
+        :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
+        """
+        
+        if not alf:
+            # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
+            alf = self.alf(default_alf_calculator)
+        
+        points_dir_properties = {}
+        
+        for point in self:
+
+            c_matrix_dict = point.C_matrix_dict(alf)
+            # grab properties from WFN
+            if point.wfn:
+                wfn_properties = point.wfn.properties
+            # grab properties from INTs directory
+            if point.ints:
+                ints_properties = point.ints.properties(c_matrix_dict)
+            points_dir_properties[point.name] = merge(wfn_properties, ints_properties)
+            
+        return points_dir_properties
 
     @property
-    def types(self):
+    def types(self) -> List[str]:
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
         return self[0].atoms.types
     
     @property
-    def types_extended(self):
+    def types_extended(self) -> List[str]:
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
         return self[0].atoms.types_extended
 
     @property
-    def atom_names(self):
+    def atom_names(self) -> List[str]:
         """Return the atom names from the first timestep. Assumes that all timesteps have the same
         number of atoms/atom names."""
         return self[0].atoms.atom_names
 
     @property
-    def natoms(self):
+    def natoms(self) -> int:
         """ Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
         return len(self[0].atoms)
 
@@ -117,17 +138,6 @@ class PointsDirectory(ListOfAtoms, Directory):
             the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
         """
         return np.array([timestep.atoms.coordinates for timestep in self])
-
-    @property
-    def connectivity(self) -> np.ndarray:
-        """ Returns the connectivity matrix of the first timestep."""
-
-        return self[0].atoms.connectivity
-
-    @property
-    def alf(self) -> np.ndarray:
-        """ Returns the atomic local frame for the first timestep."""
-        return self[0].atoms.alf
 
     def coordinates_to_xyz(
         self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
@@ -191,8 +201,6 @@ class PointsDirectory(ListOfAtoms, Directory):
         # order the properties: iqa, q00, q10,....
         error = OrderedDict(sorted(error.items()))
 
-        system_name = models.system
-
         fname = fname.with_suffix(".xyz")
 
         with open(fname, "w") as f:
@@ -214,25 +222,3 @@ class PointsDirectory(ListOfAtoms, Directory):
                     f.write(
                         f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
                     )
-
-    def __iter__(self):
-        """
-        This method is called when iterating over an instance of `PointsDirectory`. If the current instance is empty (i.e. its length is 0),
-        then iterate over the directory set as `self.path` (`self.path` attribute is inherited from PathObject and because PointsDirectory
-        subclasses from Directory and the Directory `__init__` method is called, then the PointsDirectory object will
-        also have this attribute). If the current instance is not empty, then iterate over the `PointDirectory` objects
-        which are in `self`. Because `PointsDirectory` inherits from Points, which
-        inherits from `ListofAtoms` (which subsequently inherits from `list`), then `self` can be used as a list itself.
-        """
-        if len(self) == 0:
-            return Directory.__iter__(self)
-        else:
-            return ListOfAtoms.__iter__(self)
-
-    def __getattr__(self, item):
-        try:
-            return [getattr(point, item) for point in self]
-        except AttributeError:
-            raise AttributeError(
-                f"'{self.__class__.__name__}' has no attribute '{item}'"
-            )
