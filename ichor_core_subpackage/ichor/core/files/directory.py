@@ -8,6 +8,7 @@ from ichor.core.common.functools import cached_property
 from ichor.core.common.io import mkdir, move
 from ichor.core.files.file import File
 from ichor.core.files.path_object import PathObject
+from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 
 
 class Directory(PathObject, ABC):
@@ -41,10 +42,10 @@ class Directory(PathObject, ABC):
         :param dst: The new path of the directory
         """
         move(self.path, dst)
-
+    
     def iterdir(self):
         """alias to __iter__ in case child object overrides __iter__"""
-        return self.path.iterdir()
+        return iter(natsorted(self.path.iterdir(), key=ignore_alpha))
 
     def __iter__(self):
         """When code iterates over an instance of a directory, it calls the pathlib iterdir() method which yields
