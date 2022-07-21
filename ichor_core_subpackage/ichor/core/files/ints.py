@@ -7,8 +7,6 @@ from ichor.core.atoms import Atoms
 from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasProperties
-
-# from ichor.core.files.geometry import AtomicDict, AtomicData
 from ichor.core.files.int import INT
 
 
@@ -20,9 +18,8 @@ class INTs(HasProperties, OrderedDict, Directory):
         Things like XYZ and GJF hold geometry.
     """
 
-    def __init__(self, path: Union[Path, str], parent: Atoms = None):
+    def __init__(self, path: Union[Path, str]):
         # parent above __init__s because Directory.__init__ calls self._parse
-        self.parent = parent
         Directory.__init__(self, path)
         OrderedDict.__init__(self)
 
@@ -54,7 +51,7 @@ class INTs(HasProperties, OrderedDict, Directory):
             self, sorted(self.items(), key=lambda x: ignore_alpha(x[0]))
         )
 
-    def properties(self, C_list: List[np.ndarray]) -> Dict[str, Dict[str, float]]:
+    def properties(self, C_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, float]]:
         """
         Returns a dictionary of dictionaries containing atom names as keys an a dictionary
         as value. The value dictionary contains the properties we are interested in machine learning
@@ -67,11 +64,11 @@ class INTs(HasProperties, OrderedDict, Directory):
         """
 
         return {
-            atom_name: int_file_instance.properties(C_list[int_file_instance.i])
+            atom_name: int_file_instance.properties(C_dict[int_file_instance.atom_name])
             for atom_name, int_file_instance in self.items()
         }
 
-    def local_spherical_multipoles(self, C_list: List[np.ndarray]) -> Dict[str, Dict[str, float]]:
+    def local_spherical_multipoles(self, C_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, float]]:
         
         """Rotates global spherical multipoles into local spherical multipoles. Optionally
         a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
@@ -83,7 +80,7 @@ class INTs(HasProperties, OrderedDict, Directory):
         """
 
         return {
-            atom_name: int_file_instance.local_spherical_multipoles(C_list[int_file_instance.i]
+            atom_name: int_file_instance.local_spherical_multipoles(C_dict[int_file_instance.atom_name]
             )
             for atom_name, int_file_instance in self.items()
         }
