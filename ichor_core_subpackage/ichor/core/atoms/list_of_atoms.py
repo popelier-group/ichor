@@ -321,17 +321,6 @@ class ListOfAtoms(list, ABC):
             )
             df.to_csv(fname, index=False)
 
-    def coordinates_to_xyz(
-        self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
-    ):
-        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
-        for that timestep.
-
-        :param fname: The file name to which to write the timesteps/coordinates
-        :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
-        """
-        ...
-
     def iteratoms(self):
         """Returns a generator of AtomView instances for each atom stored in ListOfAtoms."""
         for atom in self.atom_names:
