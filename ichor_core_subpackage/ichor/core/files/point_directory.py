@@ -100,8 +100,8 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         else:
             raise ValueError(f"Cannot set `atoms` to the given value: {value}.")
 
-    def get_atom_data(self, atom_name) -> AtomWithProperties:
-        return AtomWithProperties(self.atoms[atom_name])
+    def get_atom_with_properties(self, atom_name, system_alf: List[ALF] = None) -> AtomWithProperties:
+        return AtomWithProperties(self.atoms[atom_name], self.properties(system_alf), )
 
     def properties(self, system_alf: Optional[List[ALF]] = None) -> Dict[str, Any]:
         """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
@@ -110,7 +110,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         """
         
         if not system_alf:
-            # connectivity = self.connectivity(default_connectivity_calculator)
+            # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
             alf = self.alf(default_alf_calculator)
         
         c_matrix_dict = self.C_matrix_dict(alf)
