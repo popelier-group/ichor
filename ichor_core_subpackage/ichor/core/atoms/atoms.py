@@ -1,6 +1,6 @@
 import itertools as it
 from itertools import compress
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union, Dict
 
 import numpy as np
 from ichor.core.atoms.atom import Atom
@@ -210,6 +210,19 @@ class Atoms(list):
     def alf_list(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
         return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf(alf_calculator, *args, **kwargs)]
+
+    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
+        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
+        return {atom_instance.name: atom_instance.alf(alf_calculator) for atom_instance in self}
+
+    def C_matrix_dict(self, system_alf: List[ALF]) -> Dict[str, np.ndarray]:
+        """ Returns a dictionary of key (atom name), value (C matrix np array) for every atom"""
+        return {atom_instance.name: atom_instance.C(system_alf) for atom_instance in self}
+    
+    def C_matrix_list(self, system_alf: List[ALF]) -> List[np.ndarray]:
+        """ Returns a list C matrix np array for every atom"""
+        return [atom_instance.C(system_alf) for atom_instance in self]
+
 
     def features(self, feature_calculator:  Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
