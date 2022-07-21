@@ -223,7 +223,6 @@ class Atoms(list):
         """ Returns a list C matrix np array for every atom"""
         return [atom_instance.C(system_alf) for atom_instance in self]
 
-
     def features(self, feature_calculator:  Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
@@ -256,7 +255,7 @@ class Atoms(list):
 
         if isinstance(item, str):
             for atom in self:
-                if item == atom.name:
+                if item.capitalize() == atom.name:
                     return atom
             raise KeyError(f"Atom '{item}' does not exist")
         elif isinstance(item, (list, np.ndarray, tuple)):
