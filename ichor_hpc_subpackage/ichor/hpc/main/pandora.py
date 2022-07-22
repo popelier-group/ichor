@@ -5,6 +5,7 @@ from ichor.core.common.io import cp
 from ichor.core.files import (WFN, MorfiDirectory, PandoraDirectory,
                               PandoraInput, PointDirectory, PointsDirectory,
                               PySCFDirectory)
+from ichor.core.files.pandora.pandora_input import PandoraCCSDmod
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script import (SCRIPT_NAMES, MorfiCommand,
@@ -67,6 +68,7 @@ def submit_pandora_input_to_pyscf(
 
 
 def write_pandora_input(points: PointsDirectory) -> List[Path]:
+    from ichor.hpc import GLOBALS
     pandora_inputs = []
     for point in points:
         if not point.pandora_input.exists():
@@ -74,7 +76,16 @@ def write_pandora_input(points: PointsDirectory) -> List[Path]:
                 point.path / f"{point.path.name}{PandoraInput.filetype}"
             )
             point.pandora_input.atoms = point.xyz.atoms
-        point.pandora_input.write()
+
+            point.pandora_input.ccsdmod = PandoraCCSDmod(GLOBALS.PANDORA_CCSDMOD)
+            point.pandora_input.method = GLOBALS.METHOD
+            point.pandora_input.basis_set = GLOBALS.BASIS_SET
+            point.pandora_input.morfi_grid_radial = GLOBALS.MORFI_RADIAL
+            point.pandora_input.morfi_grid_angular = GLOBALS.MORFI_ANGULAR
+            point.pandora_input.morfi_grid_radial_h = GLOBALS.MORFI_RADIAL_H
+            point.pandora_input.morfi_grid_angular_h = GLOBALS.MORFI_ANGULAR_H
+
+        point.pandora_input.write(system_name=GLOBALS.SYSTEM_NAME)
         pandora_inputs.append(point.pandora_input.path)
     return pandora_inputs
 
@@ -184,14 +195,14 @@ def check_pyscf_wfns(
     return morfi_inputs, aimall_wfns, point_directories
 
 
-def add_dispersion_to_aimall(point_directory: Path):
-    point = PointDirectory(point_directory)
-    point.read()
-    dispersion_data = point.pandora.morfi.mout.interaction_energy
-    for atom, int_ in point.ints.items():
-        dispersion = dispersion_data[atom]
-        int_.dispersion_data = {
-            "dispersion": dispersion,
-            # "iqa_dispersion": int_.iqa + dispersion,  # no longer needed
-        }
-        int_.write_json()
+# def add_dispersion_to_aimall(point_directory: Path):
+#     point = PointDirectory(point_directory)
+#     point.read()
+#     dispersion_data = point.pandora.morfi.mout.interaction_energy
+#     for atom, int_ in point.ints.items():
+#         dispersion = dispersion_data[atom]
+#         int_.dispersion_data = {
+#             "dispersion": dispersion,
+#             # "iqa_dispersion": int_.iqa + dispersion,  # no longer needed
+#         }
+#         int_.write_json()

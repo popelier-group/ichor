@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files.directory import AnnotatedDirectory
 
-# from ichor.core.files.geometry import GeometryDataFile, AtomicData
+from ichor.core.atoms import Atoms
 from ichor.core.files.file_data import HasAtoms
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora.morfi_output import MorfiDirectory
@@ -16,6 +16,10 @@ class PandoraDirectory(HasAtoms, AnnotatedDirectory):
     input: OptionalPath[PandoraInput] = OptionalFile
     pyscf: OptionalPath[PySCFDirectory] = OptionalFile
     morfi: OptionalPath[MorfiDirectory] = OptionalFile
+
+    def __init__(self, path: Union[str, Path], atoms: Optional[Atoms] = None):
+        AnnotatedDirectory.__init__(self, path)
+        HasAtoms.__init__(self, atoms)
 
     def write(self):
         if not self.exists():

@@ -1,12 +1,11 @@
-from typing import Union, Optional
+from typing import Optional, Union
 
 import numpy as np
-
 from ichor.core.atoms.calculators.alf.alf import ALF, ALFCalculatorFunction
 from ichor.core.atoms.calculators.connectivity import (
     ConnectivityCalculatorFunction,
-    connectivity_calculators,
     calculate_connectivity,
+    connectivity_calculators,
 )
 
 
@@ -34,6 +33,13 @@ def get_cahn_ingold_prelog_alf_calculator(
     )
 
 
+alf_cache = {}
+
+
+def atom_cacher(atom):
+    return hash(tuple([atom, tuple(atom.parent.atom_names)]))
+
+
 # todo: this could be better
 def calculate_alf_cahn_ingold_prelog(
     atom: "Atom",
@@ -56,8 +62,14 @@ def calculate_alf_cahn_ingold_prelog(
             the 1st element is the x-axis Atom instance, and the 2nd element is the xy-plane Atom instance.
     """
 
+    global alf_cache
+
     import itertools as it
     from typing import List
+
+    atom_hash = atom_cacher(atom)
+    if atom_hash in alf_cache:
+        return alf_cache[atom_hash]
 
     if connectivity is None:
         connectivity = calculate_connectivity
@@ -127,7 +139,9 @@ def calculate_alf_cahn_ingold_prelog(
         # we need to get 2 atoms - one for x-axis and one for xy-plane. If the molecule is 2d (like HCl), then we only need 1 atom.
         n_atoms_in_alf = 2 if len(atom.parent) > 2 else 1
         if len(atom.parent) == 1:
-            raise ValueError("ALF cannot be calculated because there is only 1 atom. Two or more atoms are necessary.")
+            raise ValueError(
+                "ALF cannot be calculated because there is only 1 atom. Two or more atoms are necessary."
+            )
 
         for _ in range(n_atoms_in_alf):
             # make a list of atoms to which the central atom is bonded to that are not in alf
@@ -146,4 +160,8 @@ def calculate_alf_cahn_ingold_prelog(
         return alf
 
     # return a list of the index (starts at 0 because we use this alf to index lists) of central atom, the x_axis and xy_plane atoms
-    return ALF(*[a.i for a in _calculate_alf(atom)])
+    alf = ALF(*[a.i for a in _calculate_alf(atom)])
+
+    alf_cache[atom_hash] = alf
+
+    return alf
