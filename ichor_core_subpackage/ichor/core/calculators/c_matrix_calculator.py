@@ -22,10 +22,6 @@ def calculate_c_matrix(
     
     alf = get_atom_alf(atom, alf)
 
-    # check that ALF central atom matches the atom index (0-indexed)
-    if alf.origin_idx != atom.i:
-        raise ValueError(f"The ALF central atom index {alf.origin_idx} does not match the atom index {atom.i}")
-
     c_matrix = np.empty((3, 3))
 
     x_axis_atom_instance = atom.parent[alf.x_axis_idx]
