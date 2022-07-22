@@ -197,7 +197,7 @@ def write_to_excel(
 
             # also make a sheet with total errors for the whole system (for every property)
             df = pd.DataFrame(error[type_])
-            df["Total"] = error[type_].reduce()
+            df["Total"] = error[type_].sum()
             df.sort_values("Total", inplace=True)
             ndata = len(df["Total"])
             df["%"] = percentile(ndata)

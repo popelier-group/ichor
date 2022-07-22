@@ -172,7 +172,7 @@ def write_to_excel(
 
             # calculate a total df that sums up all the errors for all atoms in one point and then sorts by error (ascending)
             # see ModelResult reduce method
-            df = pd.DataFrame(error[sheet_name].reduce())
+            df = pd.DataFrame(error[sheet_name].sum())
             df.rename(columns={0: "Total"}, inplace=True)
             df["Total"] = df["Total"].abs()
             df.sort_values("Total", inplace=True)
