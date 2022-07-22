@@ -96,8 +96,13 @@ class PointsDirectory(ListOfAtoms, Directory):
         
         for point in self:
             points_dir_properties[point.name] = point.properties(system_alf)
+        
+        points_dir_properties = PointsDirectoryProperties(points_dir_properties)
+        
+        if specific_property:
+            return points_dir_properties[specific_property]
             
-        return PointsDirectoryProperties(points_dir_properties)
+        return points_dir_properties
 
     @property
     def types(self) -> List[str]:
