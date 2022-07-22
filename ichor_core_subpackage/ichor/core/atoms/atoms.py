@@ -44,14 +44,15 @@ class Atoms(list):
         """
         self.append(atom)
 
-
     def append(self, atom: Atom):
+        """ Appends an `Atom` instance to self."""
         atom.parent = self
         if atom._index is None:
             atom.index = next(self._counter)
         super().append(atom)
 
     def copy(self) -> "Atoms":
+        """ Creates a new atoms instance (different object) from the current `Atoms` instance."""
         new = Atoms()
         for a in self:
             new.add(Atom.from_atom(a))
@@ -71,6 +72,7 @@ class Atoms(list):
 
     @property
     def nuclear_charge_sum(self) -> int:
+        """ Returns the sum of nuclear charges of `Atoms` instance"""
         return sum(atom.nuclear_charge for atom in self)
 
     @property
@@ -104,6 +106,7 @@ class Atoms(list):
 
     @property
     def centroid(self) -> np.ndarray:
+        """ Returns the centroid of the system (the mean of the x,y,z coordinates of the atoms)."""
         coordinates = self.coordinates.T
 
         x = np.mean(coordinates[0])
@@ -119,6 +122,7 @@ class Atoms(list):
 
     @property
     def atom_names(self) -> List[str]:
+        """ Returns the atom names as a list (['O1', 'H2'...])."""
         return [atom.name for atom in self]
 
     @property
@@ -128,6 +132,7 @@ class Atoms(list):
 
     @property
     def hash(self):
+        """ Returns a hash for the system which is just the atom names joined by a comma. """
         return ",".join(self.atom_names)
 
     def centre(
@@ -136,6 +141,8 @@ class Atoms(list):
             Union[int, str, List[Union[Atom, str, int]]]
         ] = None,
     ):
+        """ Centers the geometry on some atom. But this is still in GLOBAL Cartesian coordinates.
+        """
         if isinstance(centre_atom, (int, str)):
             centre_atom = self[centre_atom]
         elif isinstance(centre_atom, list):
@@ -148,57 +155,16 @@ class Atoms(list):
 
         self._centred = True
 
-    def rotate(self, R: np.ndarray):
-        """Perform a rotation in 3D space with a matrix R. This rotates all atoms in the system the same amount.
-        This method also changes the coordinates of the Atom instances held in the Atoms instance."""
-
-        centroid = self.centroid
-        self.centre()
-        for atom in self:
-            atom.coordinates = R.dot(atom.coordinates.T).T
-        self.translate(centroid)
-
-    def translate(self, v: np.ndarray):
-        for atom in self:
-            atom.coordinates += v
-
-    def _rmsd(self, other: "Atoms") -> float:
-        dist = np.sum(
-            np.sum(np.power(jatom.coordinates - iatom.coordinates, 2))
-            for iatom, jatom in zip(self, other)
-        )
-        return np.sqrt(dist / len(self))
-
-    def kabsch(self, other: "Atoms") -> np.ndarray:
-        H = self.coordinates.T.dot(other.coordinates)
-
-        V, S, W = np.linalg.svd(H)
-        d = (np.linalg.det(V) * np.linalg.det(W)) < 0.0
-
-        if d:
-            S[-1] = -S[-1]
-            V[:, -1] = -V[:, -1]
-
-        return np.dot(V, W)
-
-    def rmsd(self, other: "Atoms"):
-        if not self._centred:
-            self.centre()
-        if not other._centred:
-            other.centre()
-
-        R = self.kabsch(other)
-
-        other.rotate(R)
-        return self._rmsd(other)
-
     def connectivity(self, connectivity_calculator: Callable[..., np.ndarray]) -> np.ndarray:
         """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
-        Returns:
-            :type: `np.ndarray` of shape n_atoms x n_atoms
+        :param connectivity_calculator: connectivity calculator function that calculates connectivity
+        :type connectivity_calculator: Callable[..., np.ndarray]
+        :return: `np.ndarray` of shape n_atoms x n_atoms
+        :rtype: np.ndarray
         """
-
+        
+        
         return connectivity_calculator(self)
 
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
@@ -261,6 +227,48 @@ class Atoms(list):
 
         return {atom_instance.name: atom_instance.features(feature_calculator, *args, **kwargs) for atom_instance in self}
 
+    def kabsch(self, other: "Atoms") -> np.ndarray:
+        H = self.coordinates.T.dot(other.coordinates)
+
+        V, S, W = np.linalg.svd(H)
+        d = (np.linalg.det(V) * np.linalg.det(W)) < 0.0
+
+        if d:
+            S[-1] = -S[-1]
+            V[:, -1] = -V[:, -1]
+
+        return np.dot(V, W)
+
+    def rmsd(self, other: "Atoms"):
+        if not self._centred:
+            self.centre()
+        if not other._centred:
+            other.centre()
+
+        R = self.kabsch(other)
+
+        other.rotate(R)
+        return self._rmsd(other)
+
+    def rotate(self, R: np.ndarray):
+        """Perform a rotation in 3D space with a matrix R. This rotates all atoms in the system the same amount.
+        This method also changes the coordinates of the Atom instances held in the Atoms instance.
+        """
+
+        centroid = self.centroid
+        self.centre()
+        for atom in self:
+            atom.coordinates = R.dot(atom.coordinates.T).T
+        self.translate(centroid)
+
+    def translate(self, v: np.ndarray):
+        """ Translates a system in 3D space.
+        
+        :param v: numpy array of shape (3,) which is added to the coordinates of each atom.
+        """
+        for atom in self:
+            atom.coordinates += v
+
     def __getitem__(self, item) -> Union[Atom, "Atoms"]:
         """ Used to index the Atoms isinstance with various types of `item`.
 
@@ -308,3 +316,11 @@ class Atoms(list):
     def __bool__(self):
         """ Atoms instance evaluates as true if it contains Atom instances in it. If empty, the Atoms instance evaluates to False."""
         return bool(len(self))
+
+
+    def _rmsd(self, other: "Atoms") -> float:
+        dist = np.sum(
+            np.sum(np.power(jatom.coordinates - iatom.coordinates, 2))
+            for iatom, jatom in zip(self, other)
+        )
+        return np.sqrt(dist / len(self))
