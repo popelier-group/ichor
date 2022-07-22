@@ -86,6 +86,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
         
         :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
+        :param key: return only a specific key from the returned PointsDirectoryProperties dictionary
         """
         
         if not system_alf:

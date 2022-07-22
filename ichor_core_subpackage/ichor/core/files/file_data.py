@@ -108,10 +108,12 @@ class PointDirectoryProperties(dict):
         
     def __getitem__(self, key: str) -> dict:
         
+        # if in keys, we can directly return it
         if key in self.keys():
             return super().__getitem__(key)
         
-        # if key is not found, it should throw a KeyError
+        # if not in keys, then recursively search.
+        # cannot use find function because that results in recursion (as find calls this __getitem__)
         return unwrap_single_entry(find_in_inner_dicts(key, self))
     
 class PointsDirectoryProperties(dict):
@@ -122,6 +124,11 @@ class PointsDirectoryProperties(dict):
         super().__init__(data)
         
     def __getitem__(self, key: str) -> dict:
+        
+        # if in keys, we can directly return it
+        # this will be used if key is a directory name in PointsDirectory
+        if key in self.keys():
+            return super().__getitem__(key)
         
         res = {}
         for point_dir_name, point_dir_properties in self.items():
