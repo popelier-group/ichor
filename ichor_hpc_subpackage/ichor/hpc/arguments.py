@@ -77,11 +77,11 @@ external_functions = [
     ExternalFunction(
         "ichor.hpc.main.pandora", "copy_aimall_wfn_to_point_directory"
     ),
-    ExternalFunction("ichor.hpc.md.amber", "mdcrd_to_xyz"),
-    ExternalFunction("ichor.hpc.md.tyche", "tyche_to_xyz"),
-    ExternalFunction("ichor.hpc.md.cp2k", "cp2k_to_xyz"),
+    ExternalFunction("ichor.core.molecular_dynamics.amber", "mdcrd_to_xyz"),
+    ExternalFunction("ichor.hpc.molecular_dynamics.tyche", "tyche_to_xyz"),
+    ExternalFunction("ichor.core.molecular_dynamics.cp2k", "cp2k_to_xyz"),
     # ExternalFunction("ichor.hpc.main.pandora", "add_dispersion_to_aimall"),
-    ExternalFunction("ichor.core.common.points", "set_points_location"),
+    ExternalFunction("ichor.hpc.points", "set_points_location"),
     ExternalFunction("ichor.core.analysis.opt", "convert_opt_wfn_to_xyz"),
     ExternalFunction("ichor.core.analysis.geometry", "geometry_analysis"),
     ExternalFunction("ichor.core.analysis", "rotate_mol"),

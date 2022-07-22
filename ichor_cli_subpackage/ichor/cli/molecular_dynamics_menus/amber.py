@@ -31,11 +31,7 @@ def amber_menu():
         GLOBALS.AMBER_STEPS,
         custom_formatter=format_number_with_comma,
     )
-    write_coord_every = MenuVar(
-        "Write Output Every",
-        GLOBALS.AMBER_STEPS,
-        custom_formatter=timestep_formatter,
-    )
+    write_coord_every = MenuVar("Write Output Every", 1)
     with Menu("Amber Menu") as menu:
         menu.add_option(
             "1", "Run Amber", submit_amber, args=[input_file, temperature, nsteps, write_coord_every]
