@@ -1,7 +1,7 @@
 
 from ichor.core.atoms import ListOfAtoms
 
-class ListofAtomsSlice(ListOfAtoms):
+class ListOfAtomsSlice(ListOfAtoms):
     def __init__(self, parent, sl):
         self.__dict__ = parent.__dict__.copy()
         self._is_atom_slice = True

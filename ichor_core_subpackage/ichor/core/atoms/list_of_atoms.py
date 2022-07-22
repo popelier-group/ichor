@@ -345,9 +345,9 @@ class ListOfAtoms(list, ABC):
 
         # if ListOfAtoms is indexed by a slice e.g. [:50], [20:40], etc.
         elif isinstance(item, slice):
-            from ichor.core.atoms.list_of_atoms_slice import ListofAtomsSlice
+            from ichor.core.atoms.list_of_atoms_slice import ListOfAtomsSlice
             
-            return ListofAtomsSlice(self, item)
+            return ListOfAtomsSlice(self, item)
         
         elif isinstance(item, (list, np.ndarray)):
             
