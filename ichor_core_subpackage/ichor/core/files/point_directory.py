@@ -5,7 +5,7 @@ from ichor.core.atoms import AtomsNotFoundError, Atoms
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file import ReadFile
 
-from ichor.core.files.file_data import HasAtoms, HasProperties, AtomWithProperties
+from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.files.gjf import GJF
 from ichor.core.files.ints import INTs
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
@@ -17,7 +17,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
 from ichor.core.calculators.alf import ALF
 from ichor.core.calculators import default_alf_calculator
-
+from ichor.core.files.file_data import PointDirectoryProperties
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     """
@@ -100,10 +100,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         else:
             raise ValueError(f"Cannot set `atoms` to the given value: {value}.")
 
-    def get_atom_with_properties(self, atom_name, system_alf: List[ALF] = None) -> AtomWithProperties:
-        return AtomWithProperties(self.atoms[atom_name], self.properties(system_alf), )
-
-    def properties(self, system_alf: Optional[List[ALF]] = None) -> Dict[str, Union[float, Dict[str, float]]]:
+    def properties(self, system_alf: Optional[List[ALF]] = None) -> PointDirectoryProperties:
         """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
         
         :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
@@ -111,16 +108,16 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         
         if not system_alf:
             # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
-            alf = self.alf(default_alf_calculator)
+            system_alf = self.alf(default_alf_calculator)
         
-        c_matrix_dict = self.C_matrix_dict(alf)
+        c_matrix_dict = self.C_matrix_dict(system_alf)
 
         # grab properties from WFN
         wfn_properties = self.wfn.properties
         # grab properties from INTs directory
         ints_properties = self.ints.properties(c_matrix_dict)
         
-        return merge(wfn_properties, ints_properties)
+        return PointDirectoryProperties(merge(wfn_properties, ints_properties))
 
     # todo: make this more robust, check for any of the files inside
     @classmethod

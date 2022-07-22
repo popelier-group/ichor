@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 from typing import Union, List, Optional, Dict, Callable
 from ichor.core.atoms import ListOfAtoms
@@ -10,6 +9,7 @@ from ichor.core.files.xyz import XYZ
 import numpy as np
 from ichor.core.calculators.alf import ALF, default_alf_calculator
 from ichor.core.common.dict import merge
+from ichor.core.files.file_data import PointsDirectoryProperties
 
 
 class PointsDirectory(ListOfAtoms, Directory):
@@ -82,30 +82,22 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0].atoms]
 
-    def properties(self, alf: Optional[List[ALF]] = None, specific_property: str = None) -> Dict[str, Dict[str, Union[float, Dict[str, float]]]]:
+    def properties(self, system_alf: Optional[List[ALF]] = None, specific_property: str = None) -> PointsDirectoryProperties:
         """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
         
         :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
         """
         
-        if not alf:
+        if not system_alf:
             # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
-            alf = self.alf(default_alf_calculator)
+            system_alf = self.alf(default_alf_calculator)
         
         points_dir_properties = {}
         
         for point in self:
-
-            c_matrix_dict = point.C_matrix_dict(alf)
-            # grab properties from WFN
-            if point.wfn:
-                wfn_properties = point.wfn.properties
-            # grab properties from INTs directory
-            if point.ints:
-                ints_properties = point.ints.properties(c_matrix_dict)
-            points_dir_properties[point.name] = merge(wfn_properties, ints_properties)
+            points_dir_properties[point.name] = point.properties(system_alf)
             
-        return points_dir_properties
+        return PointsDirectoryProperties(points_dir_properties)
 
     @property
     def types(self) -> List[str]:

@@ -1,15 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 from abc import ABC
-from typing import List, Optional, Union, Callable
+from typing import List, Callable
 import numpy as np
 from ichor.core.calculators.alf import ALF
 
 from ichor.core.common.dict import (
-    find,
+    find_in_inner_dicts,
     unwrap_single_item,
-    unwrap_item,
-    remove_items,
+    unwrap_single_entry
 )
 from ichor.core.atoms import Atom
 
@@ -100,20 +99,37 @@ class HasProperties(ABC):
     def properties(self) -> Dict[str, Any]:
         ...
 
-class AtomWithProperties(Atom, HasProperties):
-    def __init__(self, atom: Atom, properties: Dict[str, Any] = None):
-        Atom.__init__(
-            self,
-            atom.type,
-            atom.x,
-            atom.y,
-            atom.z,
-            atom.index,
-            atom.parent,
-            atom.units,
-        )
-        self._properties = properties
+class PointDirectoryProperties(dict):
+    """ Wraps around a PointDirectory Dictionary to be able to index it in a certain way"""
+    
+    def __init__(self, data: dict):
+        
+        super().__init__(data)
+        
+    def __getitem__(self, key: str) -> dict:
+        
+        if key in self.keys():
+            return super().__getitem__(key)
+        
+        # if key is not found, it should throw a KeyError
+        return unwrap_single_entry(find_in_inner_dicts(key, self))
+    
+class PointsDirectoryProperties(dict):
+    """ Wraps around a PointDirectory Dictionary to be able to index it in a certain way"""
+    
+    def __init__(self, data: dict):
+        
+        super().__init__(data)
+        
+    def __getitem__(self, key: str) -> dict:
+        
+        res = {}
+        for point_dir_name, point_dir_properties in self.items():
 
-    @property
-    def properties(self):
-        return self._properties
+            if key in point_dir_properties.keys():
+                res[point_dir_name] = point_dir_properties[key]
+            
+            else:
+                res[point_dir_name] = unwrap_single_entry(find_in_inner_dicts(key, point_dir_properties))
+            
+        return res
