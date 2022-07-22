@@ -140,6 +140,7 @@ def write_to_excel(
     # transpose to get keys to be the properties (iqa, q00, etc.) instead of them being the values
     true = true.T
     predicted = predicted.T
+
     # error is still a ModelResult
     error = true - predicted  # .abs()
     # sort to get properties to be ordered nicely
@@ -172,7 +173,7 @@ def write_to_excel(
 
             # calculate a total df that sums up all the errors for all atoms in one point and then sorts by error (ascending)
             # see ModelResult reduce method
-            df = pd.DataFrame(error[sheet_name].reduce())
+            df = pd.DataFrame(error[sheet_name].sum())
             df.rename(columns={0: "Total"}, inplace=True)
             df["Total"] = df["Total"].abs()
             df.sort_values("Total", inplace=True)
