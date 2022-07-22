@@ -9,15 +9,21 @@ from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import relpath
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Coordinates3D
-from ichor.core.constants import (spherical_dipole_labels,
-                                  spherical_hexadecapole_labels,
-                                  spherical_monopole_labels,
-                                  spherical_octupole_labels,
-                                  spherical_quadrupole_labels)
+from ichor.core.constants import (
+    spherical_dipole_labels,
+    spherical_hexadecapole_labels,
+    spherical_monopole_labels,
+    spherical_octupole_labels,
+    spherical_quadrupole_labels,
+)
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasProperties
-from ichor.core.multipoles import (rotate_dipole, rotate_hexadecapole,
-                                   rotate_octupole, rotate_quadrupole)
+from ichor.core.multipoles import (
+    rotate_dipole,
+    rotate_hexadecapole,
+    rotate_octupole,
+    rotate_quadrupole,
+)
 
 
 class CriticalPointType(Enum):
@@ -301,7 +307,7 @@ class INT(HasProperties, ReadFile):
         # processing the data should be done somewhere else.
         # TODO: Check the -encomp setting somehow from the .int file?
         try:
-            return self.iqa_energy_components["E_IQA(A)"]
+            return self.e_intra + self.e_inter
         except KeyError:
             warn(
                 "E_IQA(A) energy is not present in the .int file. Check AIMALL -encomp setting."
@@ -318,6 +324,13 @@ class INT(HasProperties, ReadFile):
                 "E_IQA_Intra(A) energy is not present in the .int file. Check AIMALL -encomp setting."
             )
             return None
+
+    @property
+    def e_inter(self) -> float:
+        if len(self.interactions) > 0:
+            return self.iqa_energy_components["E_IQA_Inter(A)"]
+        else:
+            return sum(i.e_inter for i in self.interactions.values())
 
     @property
     def q(self) -> float:
@@ -439,6 +452,10 @@ class ABInt(HasProperties, ReadFile):
     @property
     def properties(self) -> Dict[str, float]:
         return self.iqa_diatomic_contributions
+
+    @property
+    def e_inter(self):
+        return self.iqa_diatomic_contributions["E_IQA_Inter"]
 
     def _read_file(self):
         self.a = ""
