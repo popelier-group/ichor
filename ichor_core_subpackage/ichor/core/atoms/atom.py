@@ -67,7 +67,7 @@ class Atom(VarReprMixin, Coordinates3D):
 
     @property
     def index(self) -> int:
-        """Returns the integer assigned to the atom, calculated from the trajectory file. Indeces start at 1.
+        """Returns the integer assigned to the atom, calculated from the trajectory file. Indices start at 1.
         This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
         if self._index is None:
             raise ValueError(
@@ -77,10 +77,18 @@ class Atom(VarReprMixin, Coordinates3D):
 
     @index.setter
     def index(self, idx: int):
+        """Sets the index of the atom (this is 1-indexed by default)."""
         self._index = idx
 
     @property
     def parent(self) -> "Atoms":
+        """Returns the parent instance (an instance of `Atoms` class) that holds self (an instance of `Atom`).
+
+        :raises ValueError: if parent is not defined
+        :return: parent instance of type `Atoms`
+        :rtype: Atoms
+        """
+        
         if self._parent is None:
             raise ValueError(
                 f"'parent' is not defined for '{self.__class__.__name__}({self.type} {self.x} {self.y} {self.z})'"
@@ -89,61 +97,117 @@ class Atom(VarReprMixin, Coordinates3D):
 
     @parent.setter
     def parent(self, parent: "Atoms"):
+        """Setter method for ._parent attribute.
+
+        :param parent: The parent instance (of type `Atoms`) which holds self (an `Atom` instance)
+        :type parent: Atoms
+        """
         self._parent = parent
 
     @property
     def nuclear_charge(self) -> float:
+        """Returns the nuclear charge of the atom as a float
+
+        :return: the nuclear change of the atom
+        :rtype: float
+        """
         return constants.type2nuclear_charge[self.type]
 
     @property
     def i(self) -> int:
-        """Returns the index of the atom, if used in any arrays/list in Python."""
+        """Returns the index of the atom, if used in any arrays/list in Python.
+
+        :return: the index of the atom (0-indexed)
+        :rtype: int
+        """
         return self.index - 1
 
     @property
     def name(self) -> str:
         """Returns the name of the Atom instance, which is later used to distinguish atoms when making GPR models.
         The number in the name starts at 1 (inclusive).
-        e.g. O1"""
+        e.g. O1
+        
+        :return: the name of the atom (the type + the index of the atom (the indices start from 1))
+        :rtype: str
+        """
         return f"{self.type}{self.index}"
 
     @property
     def mass(self) -> float:
-        """Returns the mass of the atom"""
+        """Returns the mass of the atom
+
+        :return: The atomic mass of the atom
+        :rtype: float
+        """
         return round(constants.type2mass[self.type], 6)
 
     @property
     def radius(self):
-        """Returns the Van der Waals radius of the given Atom instance."""
+        """Returns the covalent radius of the given Atom instance.
+        
+        :return: Covalent radius of the Atom instance (as defined by the atom type)
+        :rtype: float
+        """
         return round(constants.type2rad[self.type], 2)
 
     @property
     def vdwr(self):  # todo: fix
-        """Returns the Van der Waals radius of the given Atom instance."""
+        """Returns the Van der Waals radius of the given Atom instance.
+        
+        :return: The Van der Waals radius of the atom (as defined by the atom type)
+        :rtype: float
+        """
         return round(constants.type2vdwr[self.type], 2)
 
     @property
-    def electronegativity(self):
+    def electronegativity(self) -> float:
+        """Returns the electronegativity of the Atom instance
+
+        :return: The electronegativity of the atom (as defined by the atom type)
+        :rtype: float
+        """
         return constants.type2electronegativity[self.type]
 
     @property
-    def valence(self):
+    def valence(self) -> int:
+        """Returns the valence of the `Atom` instance
+
+        :return: the valence of the atom (as defined by the atom type)
+        :rtype: int
+        """
         return constants.type2valence[self.type]
 
-    @property
-    def unpaired_electrons(self):
-        return constants.type2orbital[self.type].value - self.valence
+    # TODO: this is not correct as we only need to look at the outer shell.
+    # @property
+    # def unpaired_electrons(self):
+    #     """Returns the number of unpaired electrons of the atom
+
+    #     :return: _description_
+    #     :rtype: _type_
+    #     """
+        
+    #     return constants.type2orbital[self.type].value - self.valence
 
     @property
-    def coordinates_string(self):
+    def coordinates_string(self) -> str:
+        """Returns the coordinate string representation of the atom
+
+        :return: coordinate string of atom (x, y, z coordinates)
+        :rtype: str
+        """
         width = str(16)
         precision = str(8)
         return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
 
     @property
-    def xyz_string(self):
+    def xyz_string(self) -> str:
         """Returns the atom type and coordinates for one Atom instance. This is used to write out an xyz file, which expects
-        entries in the form of atom_type x_coordinate, y_coordinate, z_coordinate"""
+        entries in the form of atom_type x_coordinate, y_coordinate, z_coordinate
+        
+        :return: coordinate string of atom with atom type (atom.type x, y, z)
+        :rtype: str
+        """
         return f"{self.type:<3s}{self.coordinates_string}"
 
     def vec_to(self, other: "Atom") -> np.ndarray:
@@ -180,15 +244,18 @@ class Atom(VarReprMixin, Coordinates3D):
         """
         Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
         instances that are held in an Atoms instance.
-        This is only one row of the full connectivity matrix of the Atoms instance that is self._parent.
+        For an `Atom` instance, this is only one row of the full connectivity matrix of the Atoms instance that is self.parent.
+        However, to compute the connectivity in the first place, we need access to the `Atoms` instance (self.parent).
+        
+        :param connectivity_calculator: function which calculates connectivity for given atom.
         """
         return connectivity_calculator(self.parent)[self.i]
 
     def bonded_atoms(self, connectivity_calculator: Callable[..., list]) -> list:
         """Returns a list of Atom instances to which this Atom instance is connected
 
-        Returns:
-            :type: `list` of `Atom` instances
+        :param connectivity_calculator: function which calculates connectivity for given atom.
+        :return: A list of `Atom` instances to which this atom is bonded to
         """
         connectivity_matrix_row = self.connectivity(connectivity_calculator)
         return [
@@ -199,8 +266,8 @@ class Atom(VarReprMixin, Coordinates3D):
     def bonded_atoms_names(self, connectivity_calculator: Callable[..., list]) -> list:
         """Returns a list of the names of Atom instances to which this Atom instance is connected
 
-        Returns:
-            :type: `list` of `str`
+        :param connectivity_calculator: function which calculates connectivity for given atom.
+        :return: A list of atom names (str) to which this atom is bonded to
         """
         connectivity_matrix_row = self.connectivity(connectivity_calculator)
         return [
@@ -211,8 +278,8 @@ class Atom(VarReprMixin, Coordinates3D):
     def bonded_atoms_i(self, connectivity_calculator: Callable[..., list]) -> list:
         """Returns a list of Atom indices to which this Atom instance is connected
 
-        Returns:
-            :type: `list` of `int`, corresponding to the Atom instances indices, as used in python lists (starting at 0).
+        :param connectivity_calculator: function which calculates connectivity for given atom.
+        :return: A list of atom indices to which this atom is bonded to (these are 0-indexed)
         """
         connectivity_matrix_row = self.connectivity(connectivity_calculator)
         return [
@@ -227,12 +294,20 @@ class Atom(VarReprMixin, Coordinates3D):
         while the ALF for the first atom only is [0,1,2]
 
         [0,1,2] contains the indices for the central atom, x-axis atom, and xy-plane atom. These indices start at 0 to index Python objects correctly.
+        
+        :param alf_calculator: function which calculates Atomic Local Frame for given atom.
+        :return: An `ALF` instance which contains the origin atom index (self.i) as well as the x-axis and optionally xy-plane index.
+            For two-atom systems, there is only an x-axis index.
         """
         return alf_calculator(self, *args, **kwargs)
 
     def alf_array(self, alf_calculator: Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns a list containing the index of the central atom, the x-axis atom, and the xy-plane atom.
-        THere indices are what are used in python lists (as they start at 0)."""
+        THere indices are what are used in python lists (as they start at 0).
+        
+        :param alf_calculator: function which calculates Atomic Local Frame for given atom.
+        :return: A numpy array containing the central atom index (self.i), as well as the x-axis and xy-plane indices.
+        """
         alf = self.alf(alf_calculator, *args, **kwargs)
         return np.array([alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx])
 
@@ -244,15 +319,22 @@ class Atom(VarReprMixin, Coordinates3D):
         Journal of Chemical Theory and Computation 10, 3840-3856.. doi:10.1021/ct500565g
     
         Eq. 25-30
+        
+        :param alf: An atomic local frame (ALF instance) which is then used to calculate the C matrix for a given ALF.
+        :return: A 3x3 rotation matrix (C matrix) which rotates from Global cartesian to local frame
+            where the origin (0,0,0) is the current atom, the x-axis is the x-axis atom, the xy-plane is defined by the
+            xy-plane atom, and the z-axis is orthogonal to the xy-plane.
         """
         return calculate_c_matrix(self, alf)
 
     def features(self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance.
 
+        :param feature_calculator: A function used to calculate features from the `Atom` instance
         :param args: positional arguments to pass to feature calculator function.
         :param kwargs: key word arguments to pass to the feature calculator function. Check the feature calculator
         to see what required key word arguments the calculator needs to function.
+        :return: The features associated with self.
 
         .. note::
             The current implementation allows us to fairly easily switch between features as we can change the
@@ -270,8 +352,16 @@ class Atom(VarReprMixin, Coordinates3D):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.name:<3s}{self.coordinates_string})"
 
-    def __eq__(self, other: Union["Atom", int]):
-        """Check if"""
+    def __eq__(self, other: "Atom") -> bool:
+        """Equality check for two `Atom` instances
+
+        :param other: other instance of `Atom`
+        :type other: `Atom`
+        :raises ValueError: If both objects are not instance of `Atom`
+        :return: True if the atom names are the same, false otherwise
+        :rtype: bool
+        """
+        # TODO: figure out a good way to check equality, but why do we need this in the first place?
         if isinstance(other, Atom):
             return (
                 self.name == other.name
@@ -286,6 +376,13 @@ class Atom(VarReprMixin, Coordinates3D):
     def __hash__(self):
         return hash(str(self.index) + str(self.coordinates_string))
 
-    def __sub__(self, other):
+    def __sub__(self, other: "Atom"):
+        """Implements subtraction for two `Atom` instances
+
+        :param other: `Atom` instance
+        :type other: `Atom`
+        :return: self with the coordinates of the other `Atom` instance subtracted
+        :rtype: `Atom`
+        """
         self.coordinates -= other.coordinates
         return self
