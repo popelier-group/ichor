@@ -38,7 +38,7 @@ def amber_menu():
     )
     with Menu("Amber Menu") as menu:
         menu.add_option(
-            "1", "Run Amber", submit_amber, args=[input_file, temperature]
+            "1", "Run Amber", submit_amber, args=[input_file, temperature, nsteps, write_coord_every]
         )
         menu.add_space()
         menu.add_option("i", "Set input file", set_input, args=[input_file])
