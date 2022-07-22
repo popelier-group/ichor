@@ -56,6 +56,21 @@ def find(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
         raise KeyError(f"'{key}' not found.")
     return result
 
+def find_in_inner_dicts(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
+    """Recursively searches dictionary 'd' for the given 'key'
+    e.g.
+        >>> find("iqa", {"energy": -76.54, "O1": {"iqa": -75.40, "q00": -0.22}, "H2": {"iqa": -0.52, "q00": 0.15}})
+        {"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}
+    """
+    result = {}
+    for k, v in d.items():
+        if isinstance(v, MutableMapping):
+            with suppress(KeyError):
+                result[k] = find(key, v)
+    if not result:
+        raise KeyError(f"'{key}' not found.")
+    return result
+
 
 def _unwrap(
     d: MutableMapping[KT, VT],
