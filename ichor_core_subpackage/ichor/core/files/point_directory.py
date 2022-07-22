@@ -51,10 +51,15 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         if not self.xyz:
             for f in self.files():
                 if isinstance(f, HasAtoms):
-                    self.xyz = XYZ(
-                        Path(self.path) / (self.path.name + XYZ.filetype),
-                        atoms=f.atoms,
-                    )
+                    if isinstance(f, WFN):
+                        atoms = f.atoms.to_angstroms()
+                        self.xyz = XYZ(Path(self.path) / (self.path.name + XYZ.filetype),
+                        atoms=atoms)
+                    else:
+                        self.xyz = XYZ(
+                            Path(self.path) / (self.path.name + XYZ.filetype),
+                            atoms=f.atoms,
+                        )
 
     @classproperty
     def property_names(self) -> List[str]:
