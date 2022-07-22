@@ -204,16 +204,27 @@ class Atoms(list):
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
+        
+        :param args: positional arguments to pass to alf calculator
+        :param kwargs: key word arguments to pass to alf calculator
         """
         return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self]
 
     def alf_list(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
-        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
+        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed).
+        
+        :param args: positional arguments to pass to alf calculator
+        :param kwargs: key word arguments to pass to alf calculator
+        """
         return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.alf(alf_calculator, *args, **kwargs)]
 
     def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
-        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
-        return {atom_instance.name: atom_instance.alf(alf_calculator) for atom_instance in self}
+        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed).
+        
+        :param args: positional arguments to pass to alf calculator
+        :param kwargs: key word arguments to pass to alf calculator
+        """
+        return {atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs) for atom_instance in self}
 
     def C_matrix_dict(self, system_alf: List[ALF]) -> Dict[str, np.ndarray]:
         """ Returns a dictionary of key (atom name), value (C matrix np array) for every atom"""
@@ -229,7 +240,8 @@ class Atoms(list):
 
         The array shape is n_atoms x n_features (3*n_atoms - 6)
         
-        param: kwargs: key word arguments to be passed to the feature calculator function.
+        :param args: positional arguments to pass to feature calculator
+        :param kwargs: key word arguments to pass to feature calculator
 
         Returns:
             :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
@@ -240,6 +252,9 @@ class Atoms(list):
     def features_dict(self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs) -> dict:
         """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
+        
+        :param args: positional arguments to pass to feature calculator
+        :param kwargs: key word arguments to pass to feature calculator
 
         e.g. {"C1": np.array, "H2": np.array}
         """
