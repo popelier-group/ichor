@@ -134,6 +134,18 @@ class Atom(VarReprMixin, Coordinates3D):
     def unpaired_electrons(self):
         return constants.type2orbital[self.type].value - self.valence
 
+    @property
+    def coordinates_string(self):
+        width = str(16)
+        precision = str(8)
+        return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
+
+    @property
+    def xyz_string(self):
+        """Returns the atom type and coordinates for one Atom instance. This is used to write out an xyz file, which expects
+        entries in the form of atom_type x_coordinate, y_coordinate, z_coordinate"""
+        return f"{self.type:<3s}{self.coordinates_string}"
+
     def vec_to(self, other: "Atom") -> np.ndarray:
         """
         Calculates the vector from self to other
@@ -238,6 +250,7 @@ class Atom(VarReprMixin, Coordinates3D):
     def features(self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
         """Returns a 1D 3N-6 np.ndarray of the features for the current Atom instance.
 
+        :param args: positional arguments to pass to feature calculator function.
         :param kwargs: key word arguments to pass to the feature calculator function. Check the feature calculator
         to see what required key word arguments the calculator needs to function.
 
@@ -247,18 +260,6 @@ class Atom(VarReprMixin, Coordinates3D):
         """
         
         return feature_calculator(self, *args, **kwargs)
-
-    @property
-    def coordinates_string(self):
-        width = str(16)
-        precision = str(8)
-        return f"{self.x:{width}.{precision}f}{self.y:{width}.{precision}f}{self.z:{width}.{precision}f}"
-
-    @property
-    def xyz_string(self):
-        """Returns the atom type and coordinates for one Atom instance. This is used to write out an xyz file, which expects
-        entries in the form of atom_type x_coordinate, y_coordinate, z_coordinate"""
-        return f"{self.type:<3s}{self.coordinates_string}"
 
     def __str__(self):
         """Print out the atom name (containing atom type and index as used in model making), as well as
