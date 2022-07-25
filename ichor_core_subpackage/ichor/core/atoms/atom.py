@@ -56,6 +56,7 @@ class Atom(VarReprMixin, Coordinates3D):
         new_atom = Atom.from_atom(self)
         if new_atom.units == AtomicDistance.Bohr:
             new_atom.coordinates *= constants.bohr2ang
+            new_atom.units = AtomicDistance.Angstroms
         return new_atom
 
     def to_bohr(self) -> "Atom":
@@ -63,6 +64,7 @@ class Atom(VarReprMixin, Coordinates3D):
         new_atom = Atom.from_atom(self)
         if new_atom.units == AtomicDistance.Angstroms:
             new_atom.coordinates *= constants.ang2bohr
+            new_atom.units = AtomicDistance.Bohr
         return new_atom
 
     @property
