@@ -17,6 +17,12 @@ def get_atom_alf(atom: "Atom", alf: Union[ALF, List[ALF]]):
         if alf.origin_idx != atom.i:
             raise ValueError(f"The passed ALF origin index {alf.origin_idx} does not match atom index {atom.i} (0-indexed).")
         return alf
+    
+    elif isinstance(alf, dict):
+        for atom_name, a in alf.items():
+            if a[0] == atom.i:
+                return a
+    
     else:
         alf_found = False
         for a in alf:
