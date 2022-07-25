@@ -60,6 +60,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                             Path(self.path) / (self.path.name + XYZ.filetype),
                             atoms=f.atoms,
                         )
+                    self.xyz.write()
 
     @classproperty
     def property_names(self) -> List[str]:
