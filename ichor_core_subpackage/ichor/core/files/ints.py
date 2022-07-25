@@ -35,7 +35,7 @@ class INTs(HasProperties, OrderedDict, Directory):
             _read_file method reads in the data.
         """
         for f in self.iterdir():
-            if f.suffix == INT.filetype:
+            if INT.check_path(f):
                 self[f.stem.capitalize()] = INT(f)
         self.sort()
 

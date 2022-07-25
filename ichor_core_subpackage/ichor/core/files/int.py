@@ -94,6 +94,10 @@ class INT(HasProperties, ReadFile):
 
         self.total_time: int = FileContents
 
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return path.suffix == cls.filetype and "_" not in path.name
+
     @classproperty
     def filetype(cls) -> str:
         """Returns the file extension of AIMALL files which are used"""
