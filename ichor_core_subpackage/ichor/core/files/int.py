@@ -328,9 +328,9 @@ class INT(HasProperties, ReadFile):
     @property
     def e_inter(self) -> float:
         if len(self.interactions) > 0:
-            return self.iqa_energy_components["E_IQA_Inter(A)"]
-        else:
             return sum(i.e_inter for i in self.interactions.values())
+        else:
+            return self.iqa_energy_components["E_IQA_Inter(A)"]
 
     @property
     def q(self) -> float:
