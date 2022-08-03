@@ -28,7 +28,7 @@ def submit_amber(
         FILE_STRUCTURE["amber"] / (GLOBALS.SYSTEM_NAME + Mol2.filetype)
     )
     mol2.atoms = atoms
-    mol2.write()
+    mol2.write(system_name=GLOBALS.SYSTEM_NAME)
 
     mdin = FILE_STRUCTURE["amber"] / "md.in"
     write_mdin(

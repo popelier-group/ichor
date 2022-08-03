@@ -18,7 +18,7 @@ class QuantumChemistryInputNotFound(Exception):
 
 
 class QuantumChemistryProgram(Enum):
-    PySCF = ["CCSD"], PandoraInput
+    PySCF = ["CCSD", "CCSD(T)"], PandoraInput
     Gaussian = GAUSSIAN_METHODS, GJF
 
     def __init__(self, methods: List[str], input_file: Type):
