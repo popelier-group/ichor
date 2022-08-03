@@ -33,7 +33,8 @@ def MODEL_TYPES() -> List[str]:
         is QuantumChemicalTopologyProgram.Morfi
     ):
         model_types += [
-            "dispersion"
+            "dispersion",
+            "iqa+dispersion"
         ]  # dispersion only available when qctp is morfi
     return model_types
 

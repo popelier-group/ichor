@@ -536,6 +536,11 @@ class ListOfAtoms(list):
                     """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
                     return [self[0].type]
 
+                def get_property(self, _property):
+                    if '+' in _property:
+                        return [sum(i) for i in zip(*[self.get_property(p.strip()) for p in _property.split('+')])]
+                    return super().get_property(_property)
+
                 def alf_features(self, alf: List[ALF]):
                     """Return the ndarray of features for only one atom, given an alf for that atom.
                     This is assumed to a 2D array of features for only one atom.

@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Union, Set
+from typing import Union, Set, List, Any
 
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.functools import buildermethod
@@ -10,9 +10,10 @@ from ichor.core.files import Directory
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.gjf import GJF
 from ichor.core.files.xyz import XYZ
+from ichor.core.files.file_data import HasProperties
 
 
-class PointsDirectory(ListOfAtoms, Directory):
+class PointsDirectory(ListOfAtoms, HasProperties, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).
     Calling Directory.__init__(self, path) will call the `parse` method of PointsDirectory instead of Directory
     (because Python looks for the method in this class first before looking at parent class methods.) A typical ICHOR
@@ -97,6 +98,9 @@ class PointsDirectory(ListOfAtoms, Directory):
             return Directory.__iter__(self)
         else:
             return ListOfAtoms.__iter__(self)
+
+    def get_property(self, _property: str) -> List[Any]:
+        return [point.get_property(_property) for point in self]
 
     def __getattr__(self, item):
         try:

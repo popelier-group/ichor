@@ -52,6 +52,15 @@ class HasAtoms(ABC):
         # raises error message
         return super().__getitem__(s)
 
+
+def addable(vals):
+    try:
+        sum(*vals)
+        return True
+    except ValueError:
+        return False
+
+
 class HasProperties(ABC):
     """
     Class used to describe a file containing properties/data for a particular geometry
@@ -68,6 +77,11 @@ class HasProperties(ABC):
         )
 
     def get_property(self, _property: str) -> Any:
+        if '+' in _property:
+            print(_property)
+            props = [self.get_property(p.strip()) for p in _property.split('+')]
+            if addable(props):
+                return sum(*props)
         return self.properties[_property]
 
     def __getattr__(self, item: str) -> Any:
@@ -105,6 +119,11 @@ class AtomicData(Atom, HasProperties):
     @properties.setter
     def properties(self, properties: Dict[str, Any]):
         self._properties = self._select_properties(properties)
+    
+    def get_property(self, _property: str) -> Any:
+        if '+' in _property:
+            return sum([self.get_property(p.strip()) for p in _property.split('+')])
+        return super().get_property(_property)
 
     def _select_properties(self, _properties: Dict[str, Any]):
         return unwrap_item(

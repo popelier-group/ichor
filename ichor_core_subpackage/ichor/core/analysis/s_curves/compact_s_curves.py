@@ -140,6 +140,7 @@ def write_to_excel(
     # transpose to get keys to be the properties (iqa, q00, etc.) instead of them being the values
     true = true.T
     predicted = predicted.T
+
     # error is still a ModelResult
     error = true - predicted  # .abs()
     # sort to get properties to be ordered nicely
