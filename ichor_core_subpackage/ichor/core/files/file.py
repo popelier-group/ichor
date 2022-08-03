@@ -99,6 +99,10 @@ class File(PathObject, ABC):
         return f"{self.__class__.__name__}({self.path})"
 
 
+class FileReadError(Exception):
+    pass
+
+
 class ReadFile(File, ABC):
     def _initialise_contents(self):
         """Initialize contents of a file to default values. This is needed in the case
@@ -122,9 +126,12 @@ class ReadFile(File, ABC):
             self.state = FileState.Reading
             self._initialise_contents()
             if self.path.exists():
-                self._read_file(
-                    *args, **kwargs
-                )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
+                try:
+                    self._read_file(
+                        *args, **kwargs
+                    )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
+                except Exception as e:
+                    raise FileReadError(f"Failed to read '{self.path}' instance of '{self.__class__.__name__}'") from e
                 # else:
                 #     raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.") # todo: talk to yulian about this
                 self.state = FileState.Read
