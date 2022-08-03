@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from ichor.core.analysis.excel import num2col
 from ichor.core.analysis.predictions import get_true_predicted
+from ichor.core.analysis.properties import is_energy_property
 from ichor.core.constants import ha_to_kj_mol
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
@@ -149,7 +150,7 @@ def write_to_excel(
         for type_ in true.keys():
 
             # iqa predictions are in Hartrees, convert to kJ mol-1
-            if type_ == "iqa":
+            if is_energy_property(type_):
                 error[type_] *= ha_to_kj_mol
             atom_sheets = {}
 
