@@ -349,9 +349,10 @@ def write_training_set(atom, training_data) -> Path:
             )
             # this part is for writing out the features and output values for each point.
             for i, (inputs, outputs) in enumerate(training_data):
-                ts.write(
-                    f"{i},{','.join(map(str, inputs))},{','.join(map(str, outputs.values()))}\n"
-                )
+                if i < n_training_points:
+                    ts.write(
+                        f"{i},{','.join(map(str, inputs))},{','.join(map(str, outputs.values()))}\n"
+                    )
 
     return ferebus_directory
 
