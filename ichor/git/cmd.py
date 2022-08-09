@@ -13,15 +13,36 @@ import threading
 from contextlib import contextmanager
 from subprocess import PIPE, Popen, call
 from textwrap import dedent
-from typing import (IO, TYPE_CHECKING, Any, AnyStr, BinaryIO, Callable, Dict,
-                    Iterator, List, Mapping, Sequence, TextIO, Tuple, Union,
-                    cast, overload)
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    AnyStr,
+    BinaryIO,
+    Callable,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    Sequence,
+    TextIO,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 from ichor.git.compat import defenc, force_bytes, is_posix, is_win, safe_decode
 from ichor.git.exc import CommandError, GitCommandError, GitCommandNotFound
 from ichor.git.types import TBD, Literal, PathLike
-from ichor.git.util import (LazyMixin, cygpath, expand_path, is_cygwin_git,
-                            remove_password_if_present, stream_copy)
+from ichor.git.util import (
+    LazyMixin,
+    cygpath,
+    expand_path,
+    is_cygwin_git,
+    remove_password_if_present,
+    stream_copy,
+)
 
 # typing ---------------------------------------------------------------------------
 

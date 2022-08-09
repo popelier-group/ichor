@@ -4,8 +4,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Union
 
-from ichor.batch_system.batch_system import (BatchSystem, CannotParseJobID,
-                                             Job, JobID)
+from ichor.batch_system.batch_system import (
+    BatchSystem,
+    CannotParseJobID,
+    Job,
+    JobID,
+)
 from ichor.batch_system.node import NodeType
 from ichor.common.functools import classproperty
 from ichor.common.os import run_cmd

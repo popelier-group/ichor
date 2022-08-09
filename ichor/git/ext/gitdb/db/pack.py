@@ -8,8 +8,11 @@ import os
 from functools import reduce
 
 from ichor.git.ext.gitdb.db.base import CachingDB, FileDBBase, ObjectDBR
-from ichor.git.ext.gitdb.exc import (AmbiguousObjectName, BadObject,
-                                     UnsupportedOperation)
+from ichor.git.ext.gitdb.exc import (
+    AmbiguousObjectName,
+    BadObject,
+    UnsupportedOperation,
+)
 from ichor.git.ext.gitdb.pack import PackEntity
 from ichor.git.ext.gitdb.util import LazyMixin
 

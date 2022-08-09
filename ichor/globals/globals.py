@@ -115,7 +115,9 @@ from ichor.globals import checkers, formatters, parsers
 from ichor.globals.config_provider import ConfigProvider
 from ichor.globals.os import OS
 from ichor.problem_finder import PROBLEM_FINDER
-from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import ALFCalculationError
+from ichor.atoms.calculators.feature_calculator.alf_feature_calculator import (
+    ALFCalculationError,
+)
 
 
 
@@ -151,11 +153,17 @@ class Globals:
 
     SYSTEM_NAME: str = "SYSTEM"
 
-    POINTS_LOCATION: Path = None # a file / directory which contains geometries
+    POINTS_LOCATION: Path = (
+        None  # a file / directory which contains geometries
+    )
     _ATOMS_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties, which then modified self._ATOMS
     _ATOMS: Atoms = None  # set automatically if not defined
     _ALF_REFERENCE_FILE: Path = None  # set automatically if not defined. Can be manually defined in config properties
-    _ALF: List[List[int]] = []  # set automatically if not defined. Can be manually defined in config properties
+    _ALF: List[
+        List[int]
+    ] = (
+        []
+    )  # set automatically if not defined. Can be manually defined in config properties
 
     CWD: Path = Path(os.getcwd())
 
@@ -513,7 +521,7 @@ class Globals:
         self._initialising = False
 
     def init(self, src: Optional[Union[Union[Path, str], "Globals"]] = None):
-        """ Uses either a config file or another instance of `Globals` from which to
+        """Uses either a config file or another instance of `Globals` from which to
         initialize values for the current Globals instance. Essentially, it copies over
         all the values for user-specified options, so they match the given config file
         or `Globals` instance.
@@ -533,7 +541,7 @@ class Globals:
                 self.init_from_config(src)
 
     def init_from_config(self, config_file: Path):
-        """ Reads in options from a config file and sets the values of the
+        """Reads in options from a config file and sets the values of the
         attributes in this `Globals` instance based on the values read.
 
         :param config_file: A config file from which to copy options
@@ -559,7 +567,7 @@ class Globals:
                 PROBLEM_FINDER.unknown_settings += [key]
 
     def init_from_globals(self, globals_instance: "Globals"):
-        """ Reads in options another `Globals` instance and sets the values of the
+        """Reads in options another `Globals` instance and sets the values of the
         attributes in this `Globals` instance based on the values read from the other
         `Globals` instance
 
@@ -573,10 +581,10 @@ class Globals:
             self.set(key, value)
 
     def set(self, name: str, value):
-        """ Sets a value for a `Globals` variable.
+        """Sets a value for a `Globals` variable.
 
         :param name: Name of variable for which to set value
-        :param value: A value to set for the variable. 
+        :param value: A value to set for the variable.
 
         .. note::
             The type of the value is checked in the __setattr__ method
@@ -594,7 +602,7 @@ class Globals:
 
     @property
     def ATOMS_REFERENCE_FILE(self) -> Path:
-        """ Returns an ATOMS reference file, which is to be used to get an Atoms instance, which contains system information.
+        """Returns an ATOMS reference file, which is to be used to get an Atoms instance, which contains system information.
         Only one system should be present in the ATOMS_REFERENCE file because otherwise, there is no way to check what system
         we should be working on.
         The atoms reference file can either be a GJF or XYZ or a PointsDirectory folder
@@ -606,8 +614,8 @@ class Globals:
             if self.POINTS_LOCATION:
                 self._ATOMS_REFERENCE_FILE = self.POINTS_LOCATION
             if self.ALF_REFERENCE_FILE:
-                 self._ATOMS_REFERENCE_FILE = self.ALF_REFERENCE_FILE
-            #self._ATOMS_REFERENCE_FILE = get_atoms_reference_file()
+                self._ATOMS_REFERENCE_FILE = self.ALF_REFERENCE_FILE
+            # self._ATOMS_REFERENCE_FILE = get_atoms_reference_file()
 
         # we should have an ATOMS REFERENCE FILE by now if it was set previously or default is made
         if not self._ATOMS_REFERENCE_FILE:
@@ -621,16 +629,18 @@ class Globals:
 
     @ATOMS_REFERENCE_FILE.setter
     def ATOMS_REFERENCE_FILE(self, value: Union[str, Path]):
-        """ Setter method for ATOMS_REFERENCE_FILE. Allows another ALF_REFERENCE_FILE to be specified."""
+        """Setter method for ATOMS_REFERENCE_FILE. Allows another ALF_REFERENCE_FILE to be specified."""
         value = Path(value)
         if value.exists():
             self._ATOMS_REFERENCE_FILE = value
         else:
-            raise ValueError(f"ATOMS REFERENCE FILE with Path {value.absolute()} is not on disk.")
+            raise ValueError(
+                f"ATOMS REFERENCE FILE with Path {value.absolute()} is not on disk."
+            )
 
     @property
     def ATOMS(self) -> Atoms:
-        """ Returns an instance of `Atoms`. This can be used to obtain
+        """Returns an instance of `Atoms`. This can be used to obtain
         the number of atoms, atom names, etc."""
         if self._initialising:
             return None
@@ -642,7 +652,7 @@ class Globals:
 
     @property
     def ALF_REFERENCE_FILE(self) -> Path:
-        """ Returns a `Path` object to a file that contains the
+        """Returns a `Path` object to a file that contains the
         atomic local frame calculated for the system."""
 
         from ichor.common.io import mkdir
@@ -699,11 +709,12 @@ class Globals:
             return self._ALF_REFERENCE_FILE
         else:
             raise ValueError(
-                "An ALF reference file could not be made for the current directory. Make sure there is an .xyz or .gjf file from which to calculate ALF.")
+                "An ALF reference file could not be made for the current directory. Make sure there is an .xyz or .gjf file from which to calculate ALF."
+            )
 
     @ALF_REFERENCE_FILE.setter
     def ALF_REFERENCE_FILE(self, value: Union[str, Path]):
-        """ Set the alf reference file to a specified file."""
+        """Set the alf reference file to a specified file."""
 
         if isinstance(value, str):
             value = Path(value)
@@ -717,7 +728,7 @@ class Globals:
 
     @property
     def ALF(self) -> List[List[int]]:
-        """ Returns the atomic local frame for every atom in the system.
+        """Returns the atomic local frame for every atom in the system.
         This is in the form of a list of lists, where each inner lists contains
         three integers. These integers represent the central atom (the atom on
         which the ALF is currently centered on), the x-axis atom, and the
@@ -829,9 +840,9 @@ class Globals:
 
     @property
     def global_variables(self) -> List[str]:
-        """ Returns a list of strings which are all the options that a user can set
+        """Returns a list of strings which are all the options that a user can set
         through the GLOBALS class.
-        
+
         :returns: A list of strings corresponding to all the attributes that can
             be set through GLOBALS.
         """
@@ -905,9 +916,10 @@ class Globals:
 class NoAtomsFound(Exception):
     pass
 
+
 @lru_cache()
 def get_atoms(atoms_reference_path: Path) -> Atoms:
-    """ Gets an Atoms instance from an atom_reference_path that was given."""
+    """Gets an Atoms instance from an atom_reference_path that was given."""
 
     def scan_dir(d) -> Optional[Atoms]:
         # todo: could be slow, maybe best to search key locations first
@@ -933,12 +945,16 @@ def get_atoms(atoms_reference_path: Path) -> Atoms:
         if atoms_reference_path.is_file():
             if atoms_reference_path.suffix == ".gjf":
                 from ichor.files import GJF
+
                 return GJF(atoms_reference_path).atoms
             elif atoms_reference_path.suffix == ".xyz":
                 from ichor.files import XYZ
+
                 return XYZ(atoms_reference_path).atoms
             else:
-                raise ValueError(f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file.")
+                raise ValueError(
+                    f"Unknown filetype {atoms_reference_path}. Make sure to choose a .gjf or .xyz file."
+                )
 
         elif atoms_reference_path.is_dir():
             atoms = scan_dir(Path.cwd())
@@ -946,11 +962,14 @@ def get_atoms(atoms_reference_path: Path) -> Atoms:
         return atoms if atoms else None
 
     else:
-        raise NoAtomsFound("No instance of Atoms could be found in scanned directories and files.")
+        raise NoAtomsFound(
+            "No instance of Atoms could be found in scanned directories and files."
+        )
+
 
 @lru_cache()
 def get_atoms_reference_file(path: Union[Path, str] = None) -> Path:
-    """ Gets an Atoms instance from an atom_reference_path that was given."""
+    """Gets an Atoms instance from an atom_reference_path that was given."""
 
     return
 

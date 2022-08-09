@@ -13,10 +13,15 @@ from ichor.globals import GLOBALS
 from ichor.log import logger
 from ichor.menu import Menu
 from ichor.models import Model
-from ichor.qct import (QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
-                       QuantumChemicalTopologyProgram)
-from ichor.submission_script import (SCRIPT_NAMES, FerebusCommand,
-                                     SubmissionScript)
+from ichor.qct import (
+    QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
+    QuantumChemicalTopologyProgram,
+)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    FerebusCommand,
+    SubmissionScript,
+)
 from ichor.tab_completer import ListCompleter
 
 model_data_location: Path = Path()
@@ -294,8 +299,10 @@ def create_ferebus_directories_and_submit(
                 }
                 training_data += [(features[i], properties)]
             except:
-                logger.warning(f"Failed to get property information for point {point.path.absolute()}. Check if .int \
-                    files from AIMALL are present in it.")
+                logger.warning(
+                    f"Failed to get property information for point {point.path.absolute()}. Check if .int \
+                    files from AIMALL are present in it."
+                )
 
         ferebus_directory = write_training_set(atom, training_data)
         ferebus_directories += [ferebus_directory]
@@ -369,8 +376,8 @@ def write_ftoml(ferebus_directory: Path, atom: str):
     alf = list(np.array(GLOBALS.ALF[get_digits(atom) - 1]) + 1)
 
     # todo: probably best to remake this in a smarter way
-    nfeats = 3*len(GLOBALS.ATOMS)-6
-    rbf_dims = list(range(1, nfeats+1))
+    nfeats = 3 * len(GLOBALS.ATOMS) - 6
+    rbf_dims = list(range(1, nfeats + 1))
     per_dims = [i for i in rbf_dims if i > 3 and i % 3 == 0]
     rbf_dims = list(set(rbf_dims) - set(per_dims))
 
@@ -393,7 +400,7 @@ def write_ftoml(ferebus_directory: Path, atom: str):
             ftoml.write(f'kernel = "k1*k2"\n')
         if GLOBALS.STANDARDISE:
             ftoml.write(f"standardise = true\n")
-        #ftoml.write(f'likelihood = "{GLOBALS.FEREBUS_LIKELIHOOD}"\n')
+        # ftoml.write(f'likelihood = "{GLOBALS.FEREBUS_LIKELIHOOD}"\n')
         ftoml.write("\n")
         ftoml.write("[optimiser]\n")
         ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
@@ -421,11 +428,11 @@ def write_ftoml(ferebus_directory: Path, atom: str):
         elif GLOBALS.KERNEL.lower() == "periodic":
             ftoml.write("[kernels.k1]\n")
             ftoml.write(f'type = "rbf"\n')
-            ftoml.write(f'active_dimensions = {rbf_dims}\n')
+            ftoml.write(f"active_dimensions = {rbf_dims}\n")
             ftoml.write("\n")
             ftoml.write("[kernels.k2]\n")
             ftoml.write('type = "periodic"\n')
-            ftoml.write(f'active_dimensions = {per_dims}\n')
+            ftoml.write(f"active_dimensions = {per_dims}\n")
         ftoml.write("\n")
         ftoml.write("[notes]\n")
         ftoml.write(f'method = "{GLOBALS.METHOD}"\n')

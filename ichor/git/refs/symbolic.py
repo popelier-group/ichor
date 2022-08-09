@@ -1,7 +1,15 @@
 import os
 from typing import Type  # NOQA
-from typing import (TYPE_CHECKING, Any, Iterator, List, Tuple, TypeVar, Union,
-                    cast)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Iterator,
+    List,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from ichor.git.compat import defenc
 from ichor.git.ext.gitdb.exc import BadName, BadObject
@@ -9,8 +17,14 @@ from ichor.git.objects import Object
 from ichor.git.objects.commit import Commit
 from ichor.git.refs.log import RefLog
 from ichor.git.types import Commit_ish, PathLike  # NOQA
-from ichor.git.util import (LockedFD, assure_directory_exists, hex_to_bin,
-                            join_path, join_path_native, to_native_path_linux)
+from ichor.git.util import (
+    LockedFD,
+    assure_directory_exists,
+    hex_to_bin,
+    join_path,
+    join_path_native,
+    to_native_path_linux,
+)
 
 # typing ------------------------------------------------------------------
 

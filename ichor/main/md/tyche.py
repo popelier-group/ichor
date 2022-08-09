@@ -10,8 +10,12 @@ from ichor.file_structure import FILE_STRUCTURE
 from ichor.files import GJF, XYZ, Trajectory
 from ichor.globals import GLOBALS
 from ichor.menu import Menu
-from ichor.submission_script import (SCRIPT_NAMES, ICHORCommand,
-                                     SubmissionScript, TycheCommand)
+from ichor.submission_script import (
+    SCRIPT_NAMES,
+    ICHORCommand,
+    SubmissionScript,
+    TycheCommand,
+)
 
 _input_file = None
 _input_filetypes = [XYZ.filetype, GJF.filetype]
