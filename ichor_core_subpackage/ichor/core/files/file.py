@@ -43,12 +43,11 @@ FileContents = FileContentsType()
 class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
 
-    state: FileState = FileState.Unread
-
     def __init__(self, path: Union[Path, str]):
+
+        self.state = FileState.Unread
         # need to check if path exists here because if it does, we need to read in file contents
         super().__init__(path)
-        self.state = FileState.Unread
 
     @property
     def stem(self):
@@ -205,6 +204,8 @@ class WriteFile(File, ABC):
         .xyz or .gjf files). But other files (which are outputs of a program, such as .wfn,
         and .int), we only need to read and do not have to write out ourselves."""
         path = Path(path or self.path)
+        if not path:
+            raise ValueError(f"Path where contents will be written is not allowed, value of path: {path}.")
         try:
             self._set_write_defaults_if_needed()
             self._check_values_before_writing()
