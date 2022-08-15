@@ -1,5 +1,5 @@
 
-from typing import NamedTuple, Optional, List, Union
+from typing import NamedTuple, Optional, List, Union, Dict
 
 
 class ALF(NamedTuple):
@@ -11,7 +11,7 @@ class ALF(NamedTuple):
     x_axis_idx: int
     xy_plane_idx: Optional[int] = None
 
-def get_atom_alf(atom: "Atom", alf: Union[ALF, List[ALF]]):
+def get_atom_alf(atom: "Atom", alf: Union[ALF, List[ALF], Dict[str, ALF]]):
     
     if isinstance(alf, ALF):
         if alf.origin_idx != atom.i:
@@ -32,4 +32,4 @@ def get_atom_alf(atom: "Atom", alf: Union[ALF, List[ALF]]):
         if not alf_found:
             raise ValueError(f"The list of ALFs does not contain the alf of the atom with index {atom.i}")
         
-    raise NotImplementedError("Can onlty give an instance of `ALF` or list of `ALF`.")
+    raise NotImplementedError("Can only give an instance of `ALF` or list of `ALF`.")
