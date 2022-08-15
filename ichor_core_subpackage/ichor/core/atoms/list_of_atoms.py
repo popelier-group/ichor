@@ -10,8 +10,8 @@ class ListOfAtoms(list, ABC):
      like trajectory['C1'] where trajectory is an instance of class Trajectory. This way the
     user can also do trajectory['C1'].features, trajectory['C1'].coordinates, etc."""
 
-    def __init__(self):
-        list.__init__(self)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @abstractmethod
     def connectivity(self) -> np.ndarray:
@@ -320,42 +320,3 @@ class ListOfAtoms(list, ABC):
                 dtype=np.float64,
             )
             df.to_csv(fname, index=False)
-
-    def iteratoms(self):
-        """Returns a generator of AtomView instances for each atom stored in ListOfAtoms."""
-        for atom in self.atom_names:
-            yield self[atom]
-
-    def __getitem__(
-        self, item: Union[int, str]
-    ) -> Union[Atoms, "ListOfAtoms"]:
-        """Used when indexing a Trajectory instance by an integer, string, or slice."""
-
-        # if ListOfAtoms instance is indexed by an integer or np.int64, then index as a list
-        if isinstance(item, (int, np.int64)):
-            return super().__getitem__(item)
-
-        # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
-        elif isinstance(item, str):
-            from ichor.core.atoms.list_of_atoms_atom_view import ListOfAtomsAtomView
-    
-            if hasattr(self, "_is_atom_view"):
-                return self
-            return ListOfAtomsAtomView(self, item)
-
-        # if ListOfAtoms is indexed by a slice e.g. [:50], [20:40], etc.
-        elif isinstance(item, slice):
-            from ichor.core.atoms.list_of_atoms_slice import ListOfAtomsSlice
-            
-            return ListOfAtomsSlice(self, item)
-        
-        elif isinstance(item, (list, np.ndarray)):
-            
-            from ichor.core.atoms.list_of_atoms_indexed import ListOfAtomsIndexed
-
-            return ListOfAtomsIndexed(self, item)
-
-        # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
-        raise TypeError(
-            f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
-        )

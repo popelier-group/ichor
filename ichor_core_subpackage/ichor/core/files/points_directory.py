@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Union, List, Optional, Dict, Callable
-from ichor.core.atoms import ListOfAtoms
+from ichor.core.atoms import ListOfAtoms, Atoms
 from ichor.core.common.io import mkdir
 from ichor.core.files import Directory
 from ichor.core.files.point_directory import PointDirectory
@@ -29,12 +29,13 @@ class PointsDirectory(ListOfAtoms, Directory):
     :param path: Path to a directory which contains points. This path is typically the path to the training set, sample pool, etc.
     """
 
-    def __init__(self, path: Union[Path, str]):
+    def __init__(self, path: Union[Path, str], needs_parsing = True, *args, **kwargs):
         # Initialise `list` parent class of `ListOfAtoms`
-        ListOfAtoms.__init__(self)
-        # this will call Directory __init__ method (which then calls self.parse)
-        # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
-        Directory.__init__(self, path)
+        ListOfAtoms.__init__(self,  *args, **kwargs)
+        if needs_parsing:
+            # this will call Directory __init__ method (which then calls self.parse)
+            # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
+            Directory.__init__(self, path)
 
     def _parse(self) -> None:
         """
@@ -220,3 +221,33 @@ class PointsDirectory(ListOfAtoms, Directory):
                     f.write(
                         f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
                     )
+                    
+    def __getitem__(
+        self, item: Union[int, str]
+    ) -> Union[Atoms, ListOfAtoms]:
+        """Used when indexing a Trajectory instance by an integer, string, or slice."""
+
+        # if ListOfAtoms instance is indexed by an integer or np.int64, then index as a list
+        if isinstance(item, (int, np.int64)):
+            return list.__getitem__(item)
+
+        # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
+        elif isinstance(item, str):
+            from ichor.core.atoms.list_of_atoms_atom_view import AtomView
+            
+            return AtomView(self, item)
+
+        # if PointsDirectory is indexed by a slice e.g. [:50], [20:40], etc.
+        elif isinstance(item, slice):
+            
+            return PointsDirectory(self.path, False, list.__getitem__(self, item))
+        
+        # if PointsDirectory is indexed by a list, e.g. [0, 5, 10]
+        elif isinstance(item, (list, np.ndarray)):
+            
+            return PointsDirectory(self.path, False, [list.__getitem__(self, i) for i in item])
+
+        # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
+        raise TypeError(
+            f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
+        )

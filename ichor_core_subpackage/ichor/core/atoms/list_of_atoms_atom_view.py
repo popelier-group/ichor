@@ -2,9 +2,7 @@ from ichor.core.atoms import ListOfAtoms
 from typing import Callable, List, Union
 import numpy as np
 from ichor.core.calculators.alf import ALF
-
-# TODO: maybe this can be removed to another file instead of being defined here
-class ListOfAtomsAtomView(ListOfAtoms):
+class AtomView(ListOfAtoms):
     """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
     a user to get information (such as coordinates or features) for one atom.
 
@@ -19,7 +17,7 @@ class ListOfAtomsAtomView(ListOfAtoms):
         self._is_atom_view = True
         self._super = parent
 
-        # this usually iterates over Atoms instances that are stored in a ListofAtoms instance and only adds the information for the
+        # this usually iterates over Atoms instances that are stored instance and only adds the information for the
         # specified atom. Thus AtomView is essentially a list of Atom instances for only one atom
         # also iterates over PointDirectory instances because PointsDirectory subclasses from ListofAtoms
         for element in parent:

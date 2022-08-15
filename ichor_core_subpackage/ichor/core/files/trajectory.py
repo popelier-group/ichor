@@ -68,8 +68,8 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
         themselves
     """
 
-    def __init__(self, path: Union[Path, str] = None):
-        ListOfAtoms.__init__(self)
+    def __init__(self, path: Union[Path, str], *args, **kwargs):
+        ListOfAtoms.__init__(self, *args, **kwargs)
         File.__init__(self, path)
 
     def _read_file(self):
@@ -295,7 +295,31 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
         a trajectory as slice is not implemented in __getitem__"""
         if self.state is not FileState.Read:
             self.read()
-        return super().__getitem__(item)
+
+        # if ListOfAtoms instance is indexed by an integer or np.int64, then index as a list
+        if isinstance(item, (int, np.int64)):
+            return list.__getitem__(item)
+
+        # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
+        elif isinstance(item, str):
+            from ichor.core.atoms.list_of_atoms_atom_view import AtomView
+            
+            return AtomView(self, item)
+
+        # if PointsDirectory is indexed by a slice e.g. [:50], [20:40], etc.
+        elif isinstance(item, slice):
+            
+            return Trajectory(self.path, list.__getitem__(self, item))
+        
+        # if PointsDirectory is indexed by a list, e.g. [0, 5, 10]
+        elif isinstance(item, (list, np.ndarray)):
+            
+            return Trajectory(self.path, [list.__getitem__(self, i) for i in item])
+
+        # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
+        raise TypeError(
+            f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
+        )
 
     def __iter__(self) -> Iterable[Atoms]:
         """Used to iterate over timesteps (Atoms instances) in places such as for loops"""
