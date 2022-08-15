@@ -10,4 +10,4 @@ alf_calculators: Dict[str, Callable] = {
     "sequence": calculate_alf_atom_sequence,
 }
 
-default_alf_calculator: Callable = calculate_alf_cahn_ingold_prelog
+default_alf_calculator: Callable = calculate_alf_atom_sequence
