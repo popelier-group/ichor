@@ -207,9 +207,13 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
 
     def _write_file(self, path: Path):
+        """ Write method needs to be implemented because the correct functional needs to be added to the .wfn file,
+        so that AIMAll can then use it when it does calculations. Otherwise, the wrong results are obtained with AIMAll.
+        """
         with open(path, "w") as f:
             f.write(f"{self.title}\n")
             header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"
+            # add method here, so that AIMAll works correctly
             if self.method.upper() in AIMALL_FUNCTIONALS:
                 header_line += f"   {self.method}"
             f.write(f"{header_line}\n")
