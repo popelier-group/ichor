@@ -1,0 +1,89 @@
+
+gaussian
+aimall
+ferebus
+repeat above
+
+
+cannot submit on compute
+
+gaussian
+aimall
+ferebus
+submit_next_iter
+gaussian
+aimall
+ferebus
+submit_next_iter
+....
+
+.xyz -> a lot of geometries
+
+Very 1st active learning iteration:
+
+1. TRAINING_SET -> MakeSets -> makes a directory that has a subset of geometries from trajectory file
+2. Gaussian for all the points in that directory -> .wfn files.
+2.1 ICHOR again, checks if .wfn files exist and also modifies WFN file to add method
+3. Run AIMALL with generated WATER.wfn files -> WATER_atomicfiles directory (typically do -encomp=3)
+
+For water:
+encomp = 3
+WATER_atomicfiles directory:
+o1.int
+h2.int
+h3.int
+
+For water:
+encomp = 4
+WATER_atomicfiles directory:
+o1_h2.int
+o1_h3.int
+h2_h3.int
+o1.int
+h2.int
+h3.int
+
+3.1 ICHOR - Check integration errors: above 1e-4 is bad integration -> If any atom is above integration error, then we move point (remove from training set)
+
+4. Take the points from the training set and make GPR models
+4.1 Calculate features from the geometries. Define an ALF for each atom -> Calculate C matrix -> Calculate 3N-6 features describing the molecule)
+4.2 Make .csv files containing features, outputs (f1,f2,f3,f4....,q00, q10, q11s, q11c, iqa)
+4.3 Run gpytorch/ferebus -> produce .model files (which are to be used by DL FFLUX)
+
+FEREBUS
+inputs (features -> distances and angles)
+outputs (property such as iqa)
+optimizes hyperparameters (lengthscale, noise, outputscale)
+writes out model files
+
+
+.model files
+# when was the model produced
+# basis set and method
+
+alf 
+
+kernels
+
+training data
+
+inputs
+p1. f1, f2, f3,f4 ..
+p2. f1, f2, f3,f4 ..
+p3. f1, f2, f3,f4 ..
+...
+pn. f1, f2, f3,f4 ..
+
+outputs
+p1. iqa
+p2. iqa
+...
+pn-1. iqa
+pn. iqa
+
+weights
+(K + σ2nI)−1y
+
+5. run ICHOR and calculate best points to add from sample pool to training set
+SAMPLE POOL geometries + model files -> calculate best point to add to training set
+
