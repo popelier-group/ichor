@@ -6,7 +6,7 @@ def calculate_c_matrix(
     alf: ALF,
 ) -> np.ndarray:
 
-    """Retruns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
+    """Returns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
     See https://pubs.acs.org/doi/pdf/10.1021/ct500565g , Section 3.3 for the derivations. This matrix has 3 unit
     vectors.
 
