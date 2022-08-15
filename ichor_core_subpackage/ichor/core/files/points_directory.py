@@ -229,7 +229,7 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         # if ListOfAtoms instance is indexed by an integer or np.int64, then index as a list
         if isinstance(item, (int, np.int64)):
-            return list.__getitem__(item)
+            return list.__getitem__(self, item)
 
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
