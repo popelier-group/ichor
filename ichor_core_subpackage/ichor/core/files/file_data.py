@@ -167,10 +167,6 @@ class HasAtoms(ABC):
 
         trajectory.write()
 
-
-
-
-
     def __getitem__(self, s: str):
         if isinstance(s, str):
             return self.atoms[s]
