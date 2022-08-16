@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.linalg import mag
-
+from ichor.core.calculators import default_connectivity_calculator
 
 class ConnectedAtom(Atom):
     def __init__(self, atom: Atom, parent: "ConnectedAtoms"):
@@ -40,13 +40,15 @@ class ConnectedAtoms(Atoms):
         self._angles = []
         self._dihedrals = []
 
-        bonds = np.array(self.connectivity)
+        bonds = np.array(self.connectivity(default_connectivity_calculator))
         angles = np.matmul(bonds, bonds)
         dihedrals = np.matmul(angles, bonds)
 
         bond_list = []
         angle_list = []
         dihedral_list = []
+        
+        # iterate over upper triangular matrix to avoid double counting
         for i in range(bonds.shape[0]):
             for j in range(i + 1, bonds.shape[1]):
                 if bonds[i, j] == 1:
@@ -111,9 +113,6 @@ class ConnectedAtoms(Atoms):
             self.angle_names(),
             self.dihedral_names(),
         )
-
-
-_connected_atoms = {}
 
 
 def calculate_bond(atoms: Atoms, i: int, j: int):
@@ -197,9 +196,9 @@ def calculate_dihedrals(atoms: Atoms) -> np.ndarray:
 
 
 def get_connected_atoms(atoms: Atoms) -> ConnectedAtoms:
-    if atoms.hash not in _connected_atoms.keys():
-        _connected_atoms[atoms.hash] = ConnectedAtoms(atoms)
-    return _connected_atoms[atoms.hash]
+
+    connected_atoms = ConnectedAtoms(atoms)
+    return connected_atoms
 
 
 def bond_names(atoms: Atoms) -> List[str]:
