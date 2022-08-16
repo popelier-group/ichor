@@ -3,9 +3,9 @@ from itertools import compress
 from typing import List, Optional, Sequence, Union, Dict
 
 import numpy as np
-from ichor.core.atoms.atom import Atom
+from ichor.core.atoms.atom import Atom, ConnectedAtom
+from ichor.core.atoms.alf import ALF
 from ichor.core.calculators import (
-    ALF,
     default_connectivity_calculator,
     default_feature_calculator,
 )
@@ -324,3 +324,89 @@ class Atoms(list):
             for iatom, jatom in zip(self, other)
         )
         return np.sqrt(dist / len(self))
+
+
+
+class ConnectedAtoms(Atoms):
+    def __init__(self, atoms):
+        super().__init__()
+        for atom in atoms:
+            self.add(ConnectedAtom(atom, self))
+
+        self._bonds = []
+        self._angles = []
+        self._dihedrals = []
+
+        bonds = np.array(self.connectivity(default_connectivity_calculator))
+        angles = np.matmul(bonds, bonds)
+        dihedrals = np.matmul(angles, bonds)
+
+        bond_list = []
+        angle_list = []
+        dihedral_list = []
+        
+        # iterate over upper triangular matrix to avoid double counting
+        for i in range(bonds.shape[0]):
+            for j in range(i + 1, bonds.shape[1]):
+                if bonds[i, j] == 1:
+                    bond_list += [(i, j)]
+                elif angles[i, j] == 1:
+                    angle_list += [(i, j)]
+                elif dihedrals[i, j] == 1:
+                    dihedral_list += [(i, j)]
+
+        for i, j in bond_list:
+            self[i].set_bond(self[j])
+            self[j].set_bond(self[i])
+            self._bonds.append((i, j))
+
+        for i, j in angle_list:
+            for k in list(set(self[i].bond_list) & set(self[j].bond_list)):
+                self[i].set_angle(self[j])
+                self[j].set_angle(self[i])
+                self._angles.append((i, k.i, j))
+
+        for i, j in dihedral_list:
+            iatoms = list(set(self[i].bond_list) & set(self[j].angle_list))
+            jatoms = list(set(self[j].bond_list) & set(self[i].angle_list))
+            for k in iatoms:
+                for l in jatoms:
+                    if k in self[l.i].bond_list:
+                        self[i].set_dihedral(self[j])
+                        self[j].set_dihedral(self[i])
+                        self._dihedrals.append((i, k.i, l.i, j))
+                        break
+
+    @property
+    def bonds(self):
+        return [(i + 1, j + 1) for i, j in self._bonds]
+
+    @property
+    def angles(self):
+        return [(i + 1, j + 1, k + 1) for i, j, k in self._angles]
+
+    @property
+    def dihedrals(self):
+        return [(i + 1, j + 1, k + 1, l + 1) for i, j, k, l in self._dihedrals]
+
+    def bond_names(self) -> List[str]:
+        return [f"{self[i].name}-{self[j].name}" for i, j in self._bonds]
+
+    def angle_names(self) -> List[str]:
+        return [
+            f"{self[i].name}-{self[j].name}-{self[k].name}"
+            for i, j, k in self._angles
+        ]
+
+    def dihedral_names(self) -> List[str]:
+        return [
+            f"{self[i].name}-{self[j].name}-{self[k].name}-{self[l].name}"
+            for i, j, k, l in self._dihedrals
+        ]
+
+    def names(self):
+        return (
+            self.bond_names(),
+            self.angle_names(),
+            self.dihedral_names(),
+        )

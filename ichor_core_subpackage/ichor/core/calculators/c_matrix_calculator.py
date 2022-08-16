@@ -1,9 +1,9 @@
 import numpy as np
-from ichor.core.calculators.alf import ALF, get_atom_alf
+from ichor.core.calculators.alf import get_atom_alf
 
 def calculate_c_matrix(
     atom: "Atom",
-    alf: ALF,
+    alf: "ALF",
 ) -> np.ndarray:
 
     """Returns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.

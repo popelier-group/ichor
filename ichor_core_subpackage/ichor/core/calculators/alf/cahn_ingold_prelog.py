@@ -1,5 +1,4 @@
-import numpy as np
-from ichor.core.calculators.alf import ALF
+from ichor.core.atoms.alf import ALF
 from ichor.core.calculators.connectivity import default_connectivity_calculator
 
 # TODO: use connectivity here instead of connectivity calculator.

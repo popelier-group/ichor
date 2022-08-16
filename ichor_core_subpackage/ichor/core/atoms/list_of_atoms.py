@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Optional, Union, Callable
 import numpy as np
 from ichor.core.atoms.atoms import Atoms
-from ichor.core.calculators import ALF
 
 class ListOfAtoms(list, ABC):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -19,7 +18,7 @@ class ListOfAtoms(list, ABC):
         ...
 
     @abstractmethod
-    def alf(self) -> ALF:
+    def alf(self) -> "ALF":
         """ Returns the atomic local frame for the first timestep."""
         ...
 
@@ -137,7 +136,7 @@ class ListOfAtoms(list, ABC):
 
     def features_to_excel(
         self,
-        feature_calculator: Union[ALF, Callable],
+        feature_calculator: Union["ALF", Callable],
         *args,
         fname: Union[str, Path] = Path("features_to_excel.xlsx"),
         atom_names: List[str] = None,
