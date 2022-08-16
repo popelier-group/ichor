@@ -9,7 +9,6 @@ from ichor.core.atoms import Atoms
 from ichor.core.files.int import (
     CriticalPoint,
     CriticalPointType,
-    ParentNotDefined,
 )
 import pytest
 
@@ -110,15 +109,15 @@ def _test_int(
     _assert_val_optional(int_file_instance.q, q)
     _assert_val_optional(int_file_instance.q00, q00)
 
-    # these require having the parent attribute because we need the C matrix to rotate multipoles
-    # TODO: If dipole magnitude stays the same since we are rotating only (does it?), technically can use original multipoles.
-    if C_matrix and local_spherical_multipoles:
+    # these require having a C matrix to rotate multipoles
+    # TODO: If dipole magnitude stays the same since we are rotating only, technically can use original multipoles.
+    if C_matrix is not None and local_spherical_multipoles is not None:
         _assert_val_optional(
             int_file_instance.local_spherical_multipoles(C_matrix),
             local_spherical_multipoles,
         )
         _assert_val_optional(int_file_instance.dipole_mag, dipole_mag)
-        _assert_val_optional(int_file_instance.properties, properties)
+        _assert_val_optional(int_file_instance.properties(C_matrix), properties)
 
     _assert_val_optional(int_file_instance.total_time, total_time)
 
@@ -280,9 +279,9 @@ def test_int_with_parent():
         example_dir / "example_parent_water_monomer_geometry.xyz"
     )
     
-    # calculate system alf and also calculate C matrices for all atoms
+    # calculate system alf and also calculate C matrix for atom of interest (O1)
     system_alf = xyz_file_inst.alf(calculate_alf_cahn_ingold_prelog)
-    C_matrices_dict = xyz_file_inst.C_matrix_dict(system_alf)
+    o1_C_matrix = xyz_file_inst.C_matrix_dict(system_alf)["O1"]
 
     file_bond_critical_points = [
         CriticalPoint(
@@ -442,7 +441,7 @@ def test_int_with_parent():
             },
             abs=1e-6,
         ),
-        C_matrix=C_matrices_dict,
+        C_matrix=o1_C_matrix,
         iqa_energy_components={
             "T(A)": 75.03894204,
             "Vneen(A,A)/2 = Vne(A,A)": -183.63926895,
