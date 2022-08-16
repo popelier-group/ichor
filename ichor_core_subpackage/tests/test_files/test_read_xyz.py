@@ -1,6 +1,6 @@
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.files import XYZ
-from tests.atoms import _test_atoms_coords
+from tests.test_atoms import _test_atoms_coords
 from tests.path import get_cwd
 
 example_dir = get_cwd(__file__) / "example_xyzs"

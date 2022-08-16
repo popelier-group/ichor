@@ -5,7 +5,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.files import GJF
 from ichor.core.itypes import T
 from ichor.core.program_defaults.gaussian_defaults import GaussianJobType
-from tests.atoms import _test_atoms_coords_optional
+from tests.test_atoms import _test_atoms_coords_optional
 from tests.path import get_cwd
 
 example_dir = get_cwd(__file__) / "example_gjfs"

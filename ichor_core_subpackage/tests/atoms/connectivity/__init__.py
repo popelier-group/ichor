@@ -1,1 +1,0 @@
-from tests.atoms.connectivity.test_connectivity import water_connectivity, ammonia_connectivity, methanol_connectivity, glucose_connectivity, paracetamol_connectivity
