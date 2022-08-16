@@ -1,10 +1,10 @@
-from ichor.core.files.file import WriteFile
-from ichor.core.common.io import convert_to_path
-from typing import Union
-from pathlib import Path
-from ichor.core.atoms import Atoms
-from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
-from ichor.core.constants import dlpoly_weights
+# from ichor.core.files.file import WriteFile
+# from ichor.core.common.io import convert_to_path
+# from typing import Union
+# from pathlib import Path
+# from ichor.core.atoms import Atoms
+# from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
+# from ichor.core.constants import dlpoly_weights
 
 
 # TODO: move these to menus

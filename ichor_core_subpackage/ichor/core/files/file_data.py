@@ -4,7 +4,7 @@ from pathlib import Path
 from abc import ABC
 from typing import List, Callable
 import numpy as np
-from ichor.core.calculators.alf import ALF
+from ichor.core.atoms.alf import ALF
 
 from ichor.core.common.dict import (
     find_in_inner_dicts,

@@ -15,7 +15,7 @@ from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
-from ichor.core.calculators.alf import ALF
+from ichor.core.atoms.alf import ALF
 from ichor.core.calculators import default_alf_calculator
 from ichor.core.files.file_data import PointDirectoryProperties
 

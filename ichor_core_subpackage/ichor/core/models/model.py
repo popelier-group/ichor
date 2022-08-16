@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-from ichor.core.calculators import ALF
+from ichor.core.atoms import ALF
 from ichor.core.common.functools import cached_property, classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits

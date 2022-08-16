@@ -1,7 +1,7 @@
 from ichor.core.files.file import WriteFile
 from typing import Union
 from pathlib import Path
-from ichor.core.analysis.geometry import get_internal_feature_indices
+from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
 from ichor.core.constants import dlpoly_weights
 
 class DlPolyField(WriteFile):

@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 import numpy as np
 import pandas as pd
 from ichor.core.atoms import Atoms, ListOfAtoms
-from ichor.core.calculators import ALF
+from ichor.core.atoms import ALF
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.common.str import get_digits
 from ichor.core.files import Directory, HasAtoms

@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
-from ichor.core.analysis.get_models import number_of_models_in_dir
+from ichor.core.useful_functions import number_of_models_in_dir
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
