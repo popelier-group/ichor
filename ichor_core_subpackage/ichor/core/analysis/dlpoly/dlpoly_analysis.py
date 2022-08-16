@@ -38,10 +38,8 @@ def read_wfn_energy(wfn_file: Path) -> float:
 def get_dlpoly_energies(
     optimum_energy: float,
     dlpoly_directory: Path,
-    output: Path = None,
+    output: Path =  Path("dlpoly-energies.xlsx"),
 ):
-    if output is None:
-        output = Path("dlpoly-energies.xlsx")
 
     data = {
         "ntrain": [],
