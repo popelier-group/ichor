@@ -45,8 +45,8 @@ def get_atoms_from_path(path: Path) -> Atoms:
     raise AtomsNotFoundError(f"Could not find 'Atoms' instance from {path}")
 
 
-def get_trajectory_from_path(path: Path) -> Trajectory:
-    trajectory = Trajectory("")
+def get_trajectory_from_path(path: Path, trajectory_name: str = "new_trajectory.xyz") -> Trajectory:
+    trajectory = Trajectory(trajectory_name)
     if path.is_dir() and PointsDirectory.check_path(path):
         for point in PointsDirectory(path):
             trajectory.append(point.atoms)

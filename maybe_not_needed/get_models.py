@@ -5,7 +5,6 @@ from ichor.core.analysis.get_path import get_dir
 from ichor.core.common.io import get_files_of_type
 from ichor.core.menu.menu import Menu
 from ichor.core.models import Model, Models
-from ichor.hpc import FILE_STRUCTURE
 
 
 class ModelsNotFound(Exception):
@@ -16,11 +15,11 @@ def number_of_models_in_dir(path: Path) -> int:
     return len(get_files_of_type(Model.filetype, path)) if path.exists() else 0
 
 
-def get_latest_models_from_log() -> Path:
-    if FILE_STRUCTURE["model_log"].exists():
+def get_latest_models_from_log(model_log_path: Path) -> Path:
+    if model_log_path.exists():
         largest_ntrain = -1
         largest_model_found = None
-        for model_dir in FILE_STRUCTURE["model_log"].iterdir():
+        for model_dir in model_log_path.iterdir():
             if number_of_models_in_dir(model_dir) > 0:
                 if Models(model_dir).ntrain > largest_ntrain:
                     largest_model_found = model_dir
@@ -29,12 +28,12 @@ def get_latest_models_from_log() -> Path:
     raise ModelsNotFound()
 
 
-def get_latest_models() -> Path:
+def get_latest_models(models_path: Path) -> Path:
     if (
-        FILE_STRUCTURE["models"].exists()
-        and number_of_models_in_dir(FILE_STRUCTURE["models"]) > 0
+        models_path.exists()
+        and number_of_models_in_dir(models_path) > 0
     ):
-        return FILE_STRUCTURE["models"]
+        return models_path
     else:
         return get_latest_models_from_log()
 
@@ -47,12 +46,12 @@ def set_current_model(model: Path):
     _current_model = model
 
 
-def select_from_log():
+def select_from_log(model_log_path: Path):
     i = 1
     with Menu(
         "Select Model From Log", space=True, back=True, exit=True
     ) as menu:
-        for model_dir in FILE_STRUCTURE["model_log"]:
+        for model_dir in model_log_path:
             if number_of_models_in_dir(model_dir) > 0:
                 menu.add_option(
                     f"{i}",

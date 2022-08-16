@@ -5,7 +5,6 @@ from ichor.core.analysis.get_path import get_file
 from ichor.core.common.io import get_files_of_type
 from ichor.core.common.sorting.natsort import natsorted
 from ichor.core.menu.menu import Menu
-from ichor.hpc import FILE_STRUCTURE
 
 _input_file: Optional[Path] = None
 _input_filetypes: Optional[List[str]] = None
@@ -25,9 +24,9 @@ def get_first_file(
     return None
 
 
-def get_default_files(filetypes: List[str]) -> List[Path]:
-    vs_file = get_first_file(FILE_STRUCTURE["validation_set"], filetypes)
-    sp_file = get_first_file(FILE_STRUCTURE["sample_pool"], filetypes)
+def get_default_files(filetypes: List[str], vs_path: Path, sp_path: Path) -> List[Path]:
+    vs_file = get_first_file(vs_path, filetypes)
+    sp_file = get_first_file(sp_path, filetypes)
     files = []
     if vs_file is not None:
         files.append(vs_file)
