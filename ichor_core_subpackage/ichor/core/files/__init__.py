@@ -26,6 +26,7 @@ from ichor.core.files.qcp import QuantumChemistryProgramInput
 from ichor.core.files.trajectory import Trajectory
 from ichor.core.files.wfn import WFN
 from ichor.core.files.xyz import XYZ
+from ichor.core.files.gaussian_out import GaussianOut
 
 __all__ = [
     "File",
