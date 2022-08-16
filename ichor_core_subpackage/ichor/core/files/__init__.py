@@ -1,6 +1,6 @@
 from ichor.core.files.aim import AIM
 from ichor.core.files.directory import Directory
-from ichor.core.files.dlpoly_history import DlpolyHistory
+from ichor.core.files.dl_poly import DlpolyHistory, DlPolyField, DlPolyConfig, DlPolyControl
 from ichor.core.files.file import (
     File,
     FileState,
