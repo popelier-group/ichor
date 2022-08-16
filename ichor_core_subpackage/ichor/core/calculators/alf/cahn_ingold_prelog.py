@@ -1,11 +1,13 @@
-from ichor.core.atoms.alf import ALF
 from ichor.core.calculators.connectivity import default_connectivity_calculator
 
 # TODO: use connectivity here instead of connectivity calculator.
 def calculate_alf_cahn_ingold_prelog(
     atom: "Atom",
     connectivity_calculator = default_connectivity_calculator,
-) -> ALF:
+) -> "ALF":
+
+    from ichor.core.atoms.alf import ALF
+    
     """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
     the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
     matrix and features.

@@ -43,11 +43,6 @@ def _assert_critical_point_instances(
 
 def _test_int(
     int_file_path: Path,
-    parent: Atoms = None,
-    # current_directory: Path = None,
-    # inp_file_path: Path = None,
-    # wfn_file_path: Path = None,
-    # out_file_path: Path = None,
     atom_name: str = None,
     atom_num: int = None,
     title: str = None,
@@ -62,24 +57,19 @@ def _test_int(
     net_charge: float = None,
     global_spherical_multipoles: Dict[str, float] = None,
     local_spherical_multipoles: Dict[str, float] = None,
+    C_matrix = None,
     iqa_energy_components: Dict[str, float] = None,
     iqa: float = None,
     e_intra: float = None,
     q: float = None,
     q00: float = None,
     dipole_mag: float = None,
-    total_time: int = None,
+    total_time: int = None
 ):
     """Tests original .int file from AIMALL is being read in correctly. No json
     file is generated. json is checked in another test."""
 
-    int_file_instance = INT(int_file_path, parent=parent)
-
-    _assert_val_optional(int_file_instance._parent, parent)
-    # _assert_val_optional(int_file_instance.current_directory, current_directory)
-    # _assert_val_optional(int_file_instance.inp_file_path, inp_file_path)
-    # _assert_val_optional(int_file_instance.wfn_file_path, wfn_file_path)
-    # _assert_val_optional(int_file_instance.out_file_path, out_file_path)
+    int_file_instance = INT(int_file_path)
 
     _assert_val_optional(int_file_instance.atom_name, atom_name)
     _assert_val_optional(int_file_instance.atom_num, atom_num)
@@ -122,16 +112,15 @@ def _test_int(
 
     # these require having the parent attribute because we need the C matrix to rotate multipoles
     # TODO: If dipole magnitude stays the same since we are rotating only (does it?), technically can use original multipoles.
-    if int_file_instance._parent is not None:
+    if C_matrix and local_spherical_multipoles:
         _assert_val_optional(
-            int_file_instance.local_spherical_multipoles(),
+            int_file_instance.local_spherical_multipoles(C_matrix),
             local_spherical_multipoles,
         )
         _assert_val_optional(int_file_instance.dipole_mag, dipole_mag)
         _assert_val_optional(int_file_instance.properties, properties)
 
     _assert_val_optional(int_file_instance.total_time, total_time)
-
 
 def test_no_parent_int():
 
@@ -156,11 +145,6 @@ def test_no_parent_int():
 
     _test_int(
         int_file_path=example_dir / "o1.int",
-        parent=None,
-        # current_directory=Path("/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001"),
-        # inp_file_path=Path("WATER_MONOMER0001_atomicfiles/o1.inp"),
-        # wfn_file_path=Path("WATER_MONOMER0001.wfn"),
-        # out_file_path=Path("WATER_MONOMER0001_atomicfiles/o1.int"),
         atom_name="O1",
         atom_num=1,
         title="WATER_MONOMER0001",
@@ -196,8 +180,6 @@ def test_no_parent_int():
         bond_critical_points=file_bond_critical_points,
         ring_critical_points=[],
         cage_critical_points=[],
-        # TODO: check int_instance.data raises an error if accessed when no parent is present.
-        # no data as there is no parent, so cannot rotate multipoles
         properties=None,
         net_charge=-1.0762060817,
         global_spherical_multipoles={
@@ -239,6 +221,7 @@ def test_no_parent_int():
             "q55s": -2.3600710711,
         },
         local_spherical_multipoles=None,
+        C_matrix=None,
         iqa_energy_components={
             "T(A)": 75.03894204,
             "Vneen(A,A)/2 = Vne(A,A)": -183.63926895,
@@ -290,10 +273,16 @@ def test_no_parent_int():
 
 
 def test_int_with_parent():
+    
+    from ichor.core.calculators.alf import calculate_alf_cahn_ingold_prelog
 
-    xyz_file_atoms = XYZ(
+    xyz_file_inst = XYZ(
         example_dir / "example_parent_water_monomer_geometry.xyz"
     )
+    
+    # calculate system alf and also calculate C matrices for all atoms
+    system_alf = xyz_file_inst.alf(calculate_alf_cahn_ingold_prelog)
+    C_matrices_dict = xyz_file_inst.C_matrix_dict(system_alf)
 
     file_bond_critical_points = [
         CriticalPoint(
@@ -315,12 +304,9 @@ def test_int_with_parent():
     ]
 
     _test_int(
+        # since only o1 int, only need rotation matrix for O1 atom, but we can pass in dictionary for whole molecule
+        # as the code is written to be able to rotate single atoms using a list of ALFs (as long as the alf for the specific atom is in the list)
         int_file_path=example_dir / "o1.int",
-        parent=xyz_file_atoms.atoms,
-        # current_directory=Path("/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001"),
-        # inp_file_path=Path("WATER_MONOMER0001_atomicfiles/o1.inp"),
-        # wfn_file_path=Path("WATER_MONOMER0001.wfn"),
-        # out_file_path=Path("WATER_MONOMER0001_atomicfiles/o1.int"),
         atom_name="O1",
         atom_num=1,
         title="WATER_MONOMER0001",
@@ -356,8 +342,6 @@ def test_int_with_parent():
         bond_critical_points=file_bond_critical_points,
         ring_critical_points=[],
         cage_critical_points=[],
-        # TODO: check int_instance.data raises an error if accessed when no parent is present.
-        # no data as there is no parent, so cannot rotate multipoles
         properties=pytest.approx(
             {
                 "iqa": -7.5484269717e01,
@@ -458,6 +442,7 @@ def test_int_with_parent():
             },
             abs=1e-6,
         ),
+        C_matrix=C_matrices_dict,
         iqa_energy_components={
             "T(A)": 75.03894204,
             "Vneen(A,A)/2 = Vne(A,A)": -183.63926895,

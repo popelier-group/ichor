@@ -15,7 +15,7 @@ def get_atom_alf(atom: "Atom", alf: Union["ALF", List["ALF"], Dict[str, "ALF"]])
     
     from ichor.core.atoms.alf import ALF
     
-    if isinstance(alf, "ALF"):
+    if isinstance(alf, ALF):
         if alf.origin_idx != atom.i:
             raise ValueError(f"The passed ALF origin index {alf.origin_idx} does not match atom index {atom.i} (0-indexed).")
         return alf
