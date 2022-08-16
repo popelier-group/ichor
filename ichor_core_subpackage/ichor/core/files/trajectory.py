@@ -59,7 +59,7 @@ def features_to_coordinates(features: np.ndarray) -> np.ndarray:
     return np.array(all_points)
 
 
-class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
+class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
     atoms. A user can also initialize an empty trajectory and append `Atoms` instances to it without reading in a .xyz file. This allows
     the user to build custom trajectories containing any sort of geometries.
@@ -70,9 +70,10 @@ class Trajectory(ListOfAtoms, ReadFile, WriteFile, File):
 
     def __init__(self, path: Union[Path, str], *args, **kwargs):
         ListOfAtoms.__init__(self, *args, **kwargs)
-        File.__init__(self, path)
+        super(ReadFile, self).__init__(path)
 
     def _read_file(self):
+        
         with open(self.path, "r") as f:
             # make empty Atoms instance in which to store one timestep
             atoms = Atoms()
