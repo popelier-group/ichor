@@ -5,7 +5,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, File, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
-from ichor.core.constants import GAUSSIAN_METHODS
+from ichor.core.common.constants import GAUSSIAN_METHODS
 
 # from enum import Enum
 from ichor.core.common.types.enum import Enum

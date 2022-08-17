@@ -9,7 +9,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.io import relpath
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Coordinates3D
-from ichor.core.constants import (
+from ichor.core.common.constants import (
     spherical_dipole_labels,
     spherical_hexadecapole_labels,
     spherical_monopole_labels,

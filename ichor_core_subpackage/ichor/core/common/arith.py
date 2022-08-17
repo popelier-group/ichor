@@ -1,6 +1,6 @@
 import math
 
-from ichor.core.itypes import Scalar
+from ichor.core.common.types.itypes import Scalar
 
 
 def order_of_magnitude(n: Scalar) -> int:

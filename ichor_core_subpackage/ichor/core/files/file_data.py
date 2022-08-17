@@ -106,7 +106,7 @@ class HasAtoms(ABC):
         from ichor.core.files import XYZ
         from ichor.core.files.trajectory import features_to_coordinates
         from ichor.core.calculators import calculate_alf_features
-        from ichor.core.units import AtomicDistance
+        from ichor.core.common.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:
             raise ValueError(

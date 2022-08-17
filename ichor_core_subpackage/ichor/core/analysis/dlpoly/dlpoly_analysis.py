@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from ichor.core.common.io import get_files_of_type
 from ichor.core.common.np import dict_of_list_to_dict_of_array
-from ichor.core.constants import ha_to_kj_mol
+from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.files import WFN
 from ichor.core.models import Models
 

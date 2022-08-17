@@ -1,10 +1,10 @@
 from typing import Optional, Union
 import numpy as np
-from ichor.core import constants
+from ichor.core.common import constants
 from ichor.core.common.types import Coordinates3D
 from ichor.core.atoms.alf import ALF
 from ichor.core.common.types import VarReprMixin
-from ichor.core.units import AtomicDistance
+from ichor.core.common.units import AtomicDistance
 from typing import Callable
 from ichor.core.calculators.c_matrix_calculator import calculate_c_matrix
 

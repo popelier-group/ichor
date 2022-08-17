@@ -19,7 +19,7 @@ from typing import List, Optional, Union
 from uuid import UUID, uuid4
 from contextlib import contextmanager
 
-from ichor.core import constants
+from ichor.core.common import constants
 from ichor.core.atoms.atoms import Atoms
 from ichor.core.atoms import ALF
 from ichor.core.common.types import Version

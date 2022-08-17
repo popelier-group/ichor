@@ -13,7 +13,7 @@ from ichor.hpc.submission_script import (
     print_completed,
 )
 from typing import Union
-from ichor.core.constants import AIMALL_FUNCTIONALS
+from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
 
 def submit_points_directory_to_aimall(

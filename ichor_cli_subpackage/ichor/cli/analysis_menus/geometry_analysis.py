@@ -9,7 +9,7 @@ from ichor.core.analysis.geometry.geometry_calculator import (
 from ichor.core.analysis.get_atoms import get_atoms_from_path
 from ichor.core.files import PointsDirectory, Trajectory
 from ichor.core.menu import Menu, MenuVar, set_path_var, toggle_bool_var
-from ichor.core.units import Angle, degrees_to_radians
+from ichor.core.common.units import Angle, degrees_to_radians
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_script import (SCRIPT_NAMES, ICHORCommand,

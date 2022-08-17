@@ -1,5 +1,5 @@
-from ichor.core.itypes import Scalar
-from ichor.core.units import Temperature
+from ichor.core.common.types.itypes import Scalar
+from ichor.core.common.units import Temperature
 
 
 def format_number_with_comma(n: Scalar) -> str:

@@ -196,7 +196,7 @@ class ListOfAtoms(list, ABC):
         from ichor.core.atoms import Atom
         from ichor.core.files import Trajectory
         from ichor.core.files.trajectory import features_to_coordinates
-        from ichor.core.units import AtomicDistance
+        from ichor.core.common.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:
             raise ValueError(
@@ -280,7 +280,7 @@ class ListOfAtoms(list, ABC):
         """
 
         import pandas as pd
-        from ichor.core import constants
+        from ichor.core.common import constants
         from ichor.core.files import PointsDirectory
 
         if isinstance(atom_names, str):

@@ -155,7 +155,7 @@ def write_to_excel(
     from collections import OrderedDict, defaultdict
 
     from ichor.core.analysis.excel import num2col
-    from ichor.core.constants import ha_to_kj_mol
+    from ichor.core.common.constants import ha_to_kj_mol
 
     # use the key word arguments to construct the settings used for x and y axes
     x_axis_settings, y_axis_settings = make_rmse_chart_settings(locals())

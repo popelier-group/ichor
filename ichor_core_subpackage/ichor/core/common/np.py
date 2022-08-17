@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Union
 
 import numpy as np
-from ichor.core.itypes import Scalar
+from ichor.core.common.types.itypes import Scalar
 
 
 def dict_of_list_to_dict_of_array(

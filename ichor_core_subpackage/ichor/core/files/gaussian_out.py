@@ -6,7 +6,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.str import split_by
 from ichor.core.files.file import FileContents, ReadFile, File
 from ichor.core.files.file_data import HasAtoms, HasProperties
-from ichor.core.units import AtomicDistance
+from ichor.core.common.units import AtomicDistance
 
 class GaussianOut(HasAtoms, HasProperties, ReadFile):
     """Wraps around a .wfn file that is the output of Gaussian. The .wfn file is

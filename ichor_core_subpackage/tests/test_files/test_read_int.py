@@ -3,7 +3,7 @@ from typing import List, Optional, Dict
 from contextlib import suppress
 from ichor.core.files import INT, XYZ
 from ichor.core.files.int import CriticalPoint
-from ichor.core.itypes import T
+from ichor.core.common.types.itypes import T
 from tests.path import get_cwd
 from ichor.core.atoms import Atoms
 from ichor.core.files.int import (

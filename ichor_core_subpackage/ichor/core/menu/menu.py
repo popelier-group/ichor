@@ -4,7 +4,7 @@ from collections import namedtuple
 from typing import Any, Callable, Dict, Generic, List, Optional, Union
 
 from ichor.core.common.os import clear_screen
-from ichor.core.itypes import F, T
+from ichor.core.common.types.itypes import F, T
 from ichor.core.menu.tab_completer import ListCompleter
 
 # todo: document

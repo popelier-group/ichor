@@ -6,10 +6,10 @@ import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import split_by
-from ichor.core.constants import AIMALL_FUNCTIONALS
+from ichor.core.common.constants import AIMALL_FUNCTIONALS
 from ichor.core.files.file import FileContents, ReadFile, WriteFile, File
 from ichor.core.files.file_data import HasAtoms, HasProperties
-from ichor.core.units import AtomicDistance
+from ichor.core.common.units import AtomicDistance
 from ichor.core.common.itertools import chunker
 from decimal import Decimal
 from ichor.core.common.float import from_scientific_double

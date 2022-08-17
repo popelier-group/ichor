@@ -235,7 +235,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         from pathlib import Path
 
         import pandas as pd
-        from ichor.core.constants import bohr2ang
+        from ichor.core.common.constants import bohr2ang
 
         if isinstance(f, str):
             f = Path(f)

@@ -16,7 +16,7 @@ from ichor.hpc.programs.qct import (
     QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
     QuantumChemicalTopologyProgram,
 )
-from ichor.core import constants
+from ichor.core.common import constants
 
 
 default_model_type = "iqa"

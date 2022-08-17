@@ -179,7 +179,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         from collections import OrderedDict
 
         from ichor.core.analysis.predictions import get_true_predicted
-        from ichor.core.constants import ha_to_kj_mol
+        from ichor.core.common.constants import ha_to_kj_mol
         from ichor.core.models import Models
 
         models_path = Path(models_path)

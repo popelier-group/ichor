@@ -6,7 +6,7 @@ from ichor.core.analysis.get_atoms import get_atoms_from_path
 from ichor.core.analysis.get_models import get_models_from_path
 from ichor.core.atoms import Atoms
 from ichor.core.common.io import convert_to_path, ln, mkdir
-from ichor.core.constants import dlpoly_weights
+from ichor.core.common.constants import dlpoly_weights
 from ichor.core.models import Models
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID

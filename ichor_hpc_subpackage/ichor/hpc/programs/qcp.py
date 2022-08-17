@@ -2,7 +2,7 @@ from typing import List, Type
 
 from ichor.core.common.str import in_sensitive
 from ichor.core.common.types import Enum
-from ichor.core.constants import GAUSSIAN_METHODS
+from ichor.core.common.constants import GAUSSIAN_METHODS
 from ichor.core.files import GJF, PandoraInput, QuantumChemistryProgramInput
 from ichor.hpc import GLOBALS
 

@@ -1,8 +1,8 @@
 import numpy as np
 from ichor.core.calculators.alf import get_atom_alf
 from ichor.core.calculators.c_matrix_calculator import calculate_c_matrix
-from ichor.core.constants import ang2bohr
-from ichor.core.units import AtomicDistance
+from ichor.core.common.constants import ang2bohr
+from ichor.core.common.units import AtomicDistance
 from typing import Union, List, Dict
 
 

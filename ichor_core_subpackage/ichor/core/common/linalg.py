@@ -1,7 +1,7 @@
 from typing import Optional
 
 import numpy as np
-from ichor.core.units import Angle, degrees_to_radians
+from ichor.core.common.units import Angle, degrees_to_radians
 
 
 def mag(x: np.ndarray) -> float:

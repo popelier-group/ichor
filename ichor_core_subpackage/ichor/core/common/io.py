@@ -9,7 +9,7 @@ from itertools import zip_longest
 from pathlib import Path
 from typing import Any, List, Optional, Union
 
-from ichor.core.itypes import F
+from ichor.core.common.types.itypes import F
 
 
 def convert_to_path(func: F) -> F:

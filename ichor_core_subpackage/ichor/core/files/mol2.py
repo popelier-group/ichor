@@ -8,7 +8,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.os import current_user
 from ichor.core.files.file import File, WriteFile, ReadFile
 from ichor.core.files.file_data import HasAtoms
-from ichor.core.units import AtomicDistance
+from ichor.core.common.units import AtomicDistance
 
 
 class MoleculeType(Enum):
