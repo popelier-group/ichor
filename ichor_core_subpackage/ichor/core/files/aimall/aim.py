@@ -39,6 +39,7 @@ class AIM(ReadFile, dict):
         wfn_path: Path = FileContents,
         extout_path: Optional[Path] = FileContents,
         mgp_path: Optional[Path] = FileContents,
+        mgpviz_path: Optional[Path] = FileContents,
         sum_path: Optional[Path] = FileContents,
         sumviz_path: Optional[Path] = FileContents,
         nproc: int = FileContents,
@@ -58,6 +59,7 @@ class AIM(ReadFile, dict):
         self.wfn_path = wfn_path
         self.extout_path = extout_path
         self.mgp_path = mgp_path
+        self.mgpviz_path = mgpviz_path
         self.sum_path = sum_path
         self.sumviz_path = sumviz_path
         self.nproc = nproc
@@ -111,6 +113,18 @@ class AIM(ReadFile, dict):
                     self.nrcps = int(line.split()[-1])
                 elif "Number of CCPs" in line:
                     self.nccps = int(line.split()[-1])
+                elif "ExtOut File:" in line:
+                    self.extout_path = Path(line.split()[-1])
+                elif "Mgp File:" in line:
+                    self.mgp_path = Path(line.split()[-1])
+                elif "MgpViz File:" in line:
+                    self.mgpviz_path = Path(line.split()[-1])
+                elif "Sum File:" in line:
+                    self.sum_path = Path(line.split()[-1])
+                elif "SumViz File:" in line:
+                    self.sumviz_path = Path(line.split()[-1])
+                elif "Current Directory:" in line:
+                    self.cwd = Path(line.split()[-1])
 
                 if is_all_atom_calculation and "aimint.exe" in line:
                     # find the path to where the atom information will be stored (this is without suffix), also remove extra " in line
