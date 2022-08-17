@@ -6,4 +6,4 @@ from ichor.core.atoms.atoms import Atoms
 from ichor.core.atoms.list_of_atoms import ListOfAtoms
 from ichor.core.atoms.list_of_atoms_atom_view import AtomView
 from ichor.core.atoms.alf import ALF
-from ichor.core.atoms.atoms_not_found import AtomNotFound, AtomsNotFoundError
+from ichor.core.atoms.atoms_not_found_exception import AtomNotFound, AtomsNotFoundError

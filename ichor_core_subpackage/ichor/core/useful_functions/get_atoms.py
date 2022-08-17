@@ -1,7 +1,5 @@
 from pathlib import Path
 
-from ichor.core.common.io import get_files_of_type
-
 def get_atoms_from_path(path: Path) -> "Atoms":
     """
     Returns first instance of `Atoms` found from `path`
@@ -9,6 +7,7 @@ def get_atoms_from_path(path: Path) -> "Atoms":
     :return: the instance of `Atoms` found from path
     :raises: AtomsNotFoundError if no atoms are found
     """
+    from ichor.core.common.io import get_files_of_type
     from ichor.core.atoms import AtomsNotFoundError
     from ichor.core.files import (
         GJF,

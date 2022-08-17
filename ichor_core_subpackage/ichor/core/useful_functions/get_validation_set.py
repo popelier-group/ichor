@@ -1,15 +1,15 @@
 from pathlib import Path
 
-from ichor.core.analysis.get_path import get_dir
+from ichor.core.useful_functions.get_path import get_dir
 from ichor.core.menu.menu import Menu
 from ichor.hpc import FILE_STRUCTURE
 
 _current_validation_set = None
 
 
-def get_validation_set_from_current_dir():
-    if FILE_STRUCTURE["validation_set"].exists():
-        return FILE_STRUCTURE["validation_set"]
+def get_validation_set_from_current_dir(validation_set_path: Path):
+    if validation_set_path.exists():
+        return validation_set_path
     return None
 
 
