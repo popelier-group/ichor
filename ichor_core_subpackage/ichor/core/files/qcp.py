@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Optional, Union
 
 from ichor.core.atoms import Atoms
-from ichor.core.files import FileContents
-from ichor.core.files import HasAtoms
+from ichor.core.files.file import FileContents
+from ichor.core.files.file_data import HasAtoms
 
 
 class QuantumChemistryProgramInput(HasAtoms, ABC):

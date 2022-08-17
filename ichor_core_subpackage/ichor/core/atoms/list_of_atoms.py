@@ -195,7 +195,7 @@ class ListOfAtoms(list, ABC):
 
         from ichor.core.atoms import Atom
         from ichor.core.files import Trajectory
-        from ichor.core.files.xyz.trajectory import features_to_coordinates
+        from ichor.core.files.trajectory import features_to_coordinates
         from ichor.core.common.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:

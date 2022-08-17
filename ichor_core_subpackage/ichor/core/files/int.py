@@ -17,8 +17,8 @@ from ichor.core.common.constants import (
     spherical_quadrupole_labels,
     multipole_names
 )
-from ichor.core.files import FileContents, ReadFile
-from ichor.core.files import HasProperties
+from ichor.core.files.file import FileContents, ReadFile
+from ichor.core.files.file_data import HasProperties
 from ichor.core.multipoles import (
     rotate_dipole,
     rotate_hexadecapole,

@@ -4,8 +4,8 @@ from typing import Union, List, Dict
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import split_by
-from ichor.core.files import FileContents, ReadFile, File
-from ichor.core.files import HasAtoms, HasProperties
+from ichor.core.files.file import FileContents, ReadFile, File
+from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.common.units import AtomicDistance
 
 class GaussianOut(HasAtoms, HasProperties, ReadFile):

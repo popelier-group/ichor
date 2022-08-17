@@ -1,4 +1,4 @@
-from ichor.core.files import WriteFile
+from ichor.core.files.file import WriteFile
 from typing import Union
 from pathlib import Path
 

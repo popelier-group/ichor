@@ -2,10 +2,14 @@ from pathlib import Path
 from typing import List, Optional, Dict
 from contextlib import suppress
 from ichor.core.files import INT, XYZ
-from ichor.core.files.aimall.int import CriticalPoint, CriticalPointType
+from ichor.core.files.int import CriticalPoint
 from ichor.core.common.types.itypes import T
 from tests.path import get_cwd
 from ichor.core.atoms import Atoms
+from ichor.core.files.int import (
+    CriticalPoint,
+    CriticalPointType,
+)
 import pytest
 
 example_dir = get_cwd(__file__) / "example_ints"

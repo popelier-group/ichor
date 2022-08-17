@@ -2,16 +2,16 @@ from pathlib import Path
 from typing import Union, Dict, Optional, Type, List
 
 from ichor.core.atoms import AtomsNotFoundError, Atoms
-from ichor.core.files import AnnotatedDirectory
-from ichor.core.files import ReadFile
+from ichor.core.files.directory import AnnotatedDirectory
+from ichor.core.files.file import ReadFile
 
-from ichor.core.files import HasAtoms, HasProperties
-from ichor.core.files import GJF
-from ichor.core.files import INTs
-from ichor.core.files import OptionalFile, OptionalPath
-from ichor.core.files import PandoraDirectory, PandoraInput
-from ichor.core.files import WFN
-from ichor.core.files import XYZ
+from ichor.core.files.file_data import HasAtoms, HasProperties
+from ichor.core.files.gjf import GJF
+from ichor.core.files.ints import INTs
+from ichor.core.files.optional_file import OptionalFile, OptionalPath
+from ichor.core.files.pandora import PandoraDirectory, PandoraInput
+from ichor.core.files.wfn import WFN
+from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove

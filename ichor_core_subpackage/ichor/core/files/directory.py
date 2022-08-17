@@ -6,8 +6,8 @@ from typing import Dict, List, Type, Union
 
 from ichor.core.common.functools import cached_property
 from ichor.core.common.io import mkdir, move
-from ichor.core.files import File
-from ichor.core.files import PathObject
+from ichor.core.files.file import File
+from ichor.core.files.path_object import PathObject
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 
 

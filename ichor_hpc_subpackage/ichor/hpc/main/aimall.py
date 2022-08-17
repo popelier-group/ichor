@@ -134,8 +134,8 @@ def scrub_aimall(wfn_file: str):
     from pathlib import Path
 
     from ichor.core.common.io import last_line
-    from ichor.core.files import AIM
-    from ichor.core.files import PointDirectory
+    from ichor.core.files.aim import AIM
+    from ichor.core.files.point_directory import PointDirectory
     from ichor.hpc import GLOBALS
     from ichor.hpc.log import logger
 

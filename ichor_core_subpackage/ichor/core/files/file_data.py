@@ -104,7 +104,7 @@ class HasAtoms(ABC):
 
         from ichor.core.atoms import Atoms
         from ichor.core.files import XYZ
-        from ichor.core.files.xyz.trajectory import features_to_coordinates
+        from ichor.core.files.trajectory import features_to_coordinates
         from ichor.core.calculators import calculate_alf_features
         from ichor.core.common.units import AtomicDistance
 

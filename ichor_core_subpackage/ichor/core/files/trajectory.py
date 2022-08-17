@@ -7,7 +7,7 @@ import numpy as np
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
-from ichor.core.files import FileState, ReadFile, WriteFile
+from ichor.core.files.file import File, FileState, ReadFile, WriteFile
 from ichor.core.atoms.alf import ALF
 
 

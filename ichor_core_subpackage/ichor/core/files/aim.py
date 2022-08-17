@@ -4,7 +4,7 @@ from typing import Optional, Union
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files import File, ReadFile, FileContents
+from ichor.core.files.file import File, ReadFile, FileContents
 
 
 class AimAtom:

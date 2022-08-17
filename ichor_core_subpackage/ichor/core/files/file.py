@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 
 from ichor.core.common.functools import buildermethod, classproperty
 from ichor.core.common.io import move, remove
-from ichor.core.files import PathObject
+from ichor.core.files.path_object import PathObject
 from ichor.core.common.types import NoStr
 
 
