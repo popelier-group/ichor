@@ -1,9 +1,9 @@
 import numpy as np
-from ichor.core.calculators.connectivity.distance import \
+from ichor.core.calculators.connectivity.distance_connectivity_calculator import \
     default_connectivity_calculator_distance
 
 
-def default_connectivity_calculator_valence(atoms) -> np.ndarray:
+def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:
     """
     Calculates the connectivity matrix (showing which atoms are bonded as 1 and those that are not bonded as 0.
     It uses the Van Der Waals radius an Atom (see `Atom` class) to determine if atoms should be bonded or not.
