@@ -9,7 +9,8 @@ from ichor.core.atoms import Atoms, ListOfAtoms
 from ichor.core.atoms import ALF
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.common.str import get_digits
-from ichor.core.files import Directory, HasAtoms
+from ichor.core.files.directory import Directory
+from ichor.core.files.file_data import HasAtoms
 from ichor.core.common.types.itypes import F
 from ichor.core.models.model import Model
 

@@ -1,15 +1,14 @@
 from pathlib import Path
-from typing import Union, List, Optional, Dict, Callable
+from typing import Union, List, Optional, Callable
 from ichor.core.atoms import ListOfAtoms, Atoms
 from ichor.core.common.io import mkdir
-from ichor.core.files import Directory
+from ichor.core.files.directory import Directory
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files import GJF
 from ichor.core.files.xyz import XYZ
 import numpy as np
 from ichor.core.calculators.alf import default_alf_calculator
 from ichor.core.atoms import ALF
-from ichor.core.common.dict import merge
 from ichor.core.files.file_data import PointsDirectoryProperties
 
 
