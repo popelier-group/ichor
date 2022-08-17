@@ -4,8 +4,8 @@ from typing import Optional, Union
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import File, ReadFile, FileContents
-
+from ichor.core.files.file import ReadFile, FileContents
+from ichor.core.files.file import FileState
 
 class AimAtom:
     """Helper class which stores information for each atom which was in the
@@ -27,7 +27,7 @@ class AimAtom:
         self.integration_error = integration_error
 
 
-class AIM(ReadFile, File, dict):
+class AIM(ReadFile, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
@@ -50,7 +50,7 @@ class AIM(ReadFile, File, dict):
         output_file: Path = FileContents,
         cwd: Path = FileContents,
     ):
-        File.__init__(self, path)
+        super(ReadFile, self).__init__(path)
         dict.__init__(self)
 
         self.license_check_succeeded = license_check_succeeded
@@ -149,6 +149,10 @@ class AIM(ReadFile, File, dict):
     def __getitem__(self, item: Union[str, int]) -> AimAtom:
         """If an integer is passed, it returns the atom whose index corresponds to the integer (indexing starts at 1).
         If a string is passed, it returns the the AimAtom which corresponds to the given key."""
+        
+        if self.state is not FileState.Read:
+            self.read()
+        
         if isinstance(item, int):
             for atom_name, aimatom in self.items():
                 if item == get_digits(atom_name):
