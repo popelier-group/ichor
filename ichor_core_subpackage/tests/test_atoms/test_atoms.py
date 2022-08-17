@@ -2,9 +2,10 @@ from typing import Optional
 
 import pytest
 from ichor.core.atoms import Atoms
+from ichor.core.common.units import AtomicDistance
 
 
-def _test_atoms_coords(atoms: Atoms, expected_atoms: Atoms):
+def _test_atoms_coords(atoms: Atoms, expected_atoms: Atoms, units: AtomicDistance):
     if expected_atoms is None:
         return
 
@@ -15,8 +16,9 @@ def _test_atoms_coords(atoms: Atoms, expected_atoms: Atoms):
         assert atom.x == pytest.approx(expected_atom.x)
         assert atom.y == pytest.approx(expected_atom.y)
         assert atom.z == pytest.approx(expected_atom.z)
+        # assume the same units for all atoms
+        assert atom.units == units
 
-
-def _test_atoms_coords_optional(atoms: Atoms, expected_atoms: Optional[Atoms]):
+def _test_atoms_coords_optional(atoms: Atoms, expected_atoms: Optional[Atoms], units: AtomicDistance):
     if expected_atoms is not None:
         _test_atoms_coords(atoms, expected_atoms)

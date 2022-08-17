@@ -2,6 +2,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.files import XYZ
 from tests.test_atoms import _test_atoms_coords
 from tests.path import get_cwd
+from ichor.core.common.units import AtomicDistance
 
 example_dir = get_cwd(__file__) / "example_xyzs"
 
@@ -50,4 +51,4 @@ def test_water_dimer():
         ]
     )
 
-    _test_atoms_coords(xyz.atoms, expected_atoms)
+    _test_atoms_coords(xyz.atoms, expected_atoms, AtomicDistance.Angstroms)

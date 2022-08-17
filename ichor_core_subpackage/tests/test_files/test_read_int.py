@@ -1,20 +1,16 @@
 from pathlib import Path
 from typing import List, Optional, Dict
 from ichor.core.files import INT, XYZ
-from ichor.core.common.types.itypes import T
 from tests.path import get_cwd
 from ichor.core.files.aimall.int import (
     CriticalPoint,
     CriticalPointType,
 )
 import pytest
+from tests.test_files import _assert_val_optional
+from ichor.core.common.types.itypes import T
 
 example_dir = get_cwd(__file__) / "example_ints"
-
-
-def _assert_val_optional(value: T, expected_value: Optional[T]):
-    if expected_value is not None:
-        assert value == expected_value
 
 
 def _assert_critical_point_instances(

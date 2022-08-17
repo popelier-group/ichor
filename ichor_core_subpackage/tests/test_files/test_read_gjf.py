@@ -4,16 +4,12 @@ from typing import List, Optional
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.files import GJF
 from ichor.core.common.types.itypes import T
-from tests.test_atoms import _test_atoms_coords_optional
+from tests.test_atoms import _test_atoms_coords
+from tests.test_files import _assert_val_optional
 from tests.path import get_cwd
+from ichor.core.common.units import AtomicDistance
 
 example_dir = get_cwd(__file__) / "example_gjfs"
-
-
-def _assert_val_optional(value: T, expected_value: Optional[T]):
-    if expected_value is not None:
-        assert value == expected_value
-
 
 def _test_read_gjf(
     gjf_file: Path,
@@ -35,7 +31,7 @@ def _test_read_gjf(
     _assert_val_optional(gjf.title, title)
     _assert_val_optional(gjf.charge, charge)
     _assert_val_optional(gjf.spin_multiplicity, spin_multiplicity)
-    _test_atoms_coords_optional(gjf.atoms, atoms)
+    _test_atoms_coords(gjf.atoms, atoms, AtomicDistance.Angstroms)
 
 
 def test_water_standard():

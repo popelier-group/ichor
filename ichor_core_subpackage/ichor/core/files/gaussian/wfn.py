@@ -21,13 +21,13 @@ class MolecularOrbital:
         eigen_value: float,
         occupation_number: float,
         energy: float,
-        primitives: np.ndarray,
+        primitives: list,
     ):
-        self.index: int = index
-        self.eigen_value: float = eigen_value
-        self.occupation_number: float = occupation_number
-        self.energy: float = energy
-        self.primitives: np.ndarray = primitives
+        self.index = index
+        self.eigen_value = eigen_value
+        self.occupation_number = occupation_number
+        self.energy = energy
+        self.primitives = primitives
 
 
 class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
@@ -102,7 +102,9 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
             n_orbitals = int(header[1])
             n_primitives = int(header[4])
             n_nuclei = int(header[6])
-            method = header[7] if len(header) >= 8 else "HF"
+            # method is not written by Gaussian in wfn file, we have to modify wfn file so that aimall knows
+            # what method was used in Gaussian calculation
+            method = header[-1] if header[-1] != "NUCLEI" else FileContents
 
             line = next(f)
             while not line.startswith(r"CENTRE ASSIGNMENTS"):
@@ -113,7 +115,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
                 x = float(record[3])
                 y = float(record[4])
                 z = float(record[5])
-                charge = float(record[-1])
+                nuclear_charge = float(record[-1])
                 atoms.add(
                     Atom(
                         atom_type,
@@ -129,21 +131,18 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
             while not line.startswith(r"TYPE ASSIGNMENTS"):
                 centre_assignments.extend(list(map(int, line.split()[2:])))
                 line = next(f)
-            centre_assignments = np.array(centre_assignments)
 
             type_assignments = []
             while not line.startswith(r"EXPONENTS"):
                 type_assignments.extend(list(map(int, line.split()[2:])))
                 line = next(f)
-            type_assignments = np.array(type_assignments)
 
-            exponents = []
+            primitive_exponents = []
             while not line.startswith(r"MO"):
-                exponents.extend(
+                primitive_exponents.extend(
                     list(map(from_scientific_double, line.split()[1:]))
                 )
                 line = next(f)
-            primitive_exponents = np.array(exponents)
 
             molecular_orbitals = []
             while not line.startswith(r"END DATA"):
@@ -168,7 +167,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
                         eigen_value,
                         occupation_number,
                         energy,
-                        np.array(primitives),
+                        primitives,
                     )
                 )
 
@@ -186,7 +185,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile, File):
         self.atoms = self.atoms or atoms
         self.centre_assignments = self.centre_assignments or centre_assignments
         self.type_assignments = self.type_assignments or type_assignments
-        self.primitive_exponents = self.primitive_exponents or exponents
+        self.primitive_exponents = self.primitive_exponents or primitive_exponents
         self.molecular_orbitals = self.molecular_orbitals or molecular_orbitals
 
         self.total_energy = self.total_energy or total_energy
