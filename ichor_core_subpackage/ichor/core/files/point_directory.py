@@ -7,7 +7,7 @@ from ichor.core.files.file import ReadFile
 
 from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.files.gjf import GJF
-from ichor.core.files.ints import INTs
+from ichor.core.files import INTs
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.wfn import WFN

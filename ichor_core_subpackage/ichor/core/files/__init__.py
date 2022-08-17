@@ -1,4 +1,4 @@
-from ichor.core.files.aim import AIM
+from ichor.core.files.aimall.aim import AIM
 from ichor.core.files.directory import Directory
 from ichor.core.files.dl_poly import DlpolyHistory, DlPolyField, DlPolyConfig, DlPolyControl
 from ichor.core.files.file import (
@@ -10,8 +10,8 @@ from ichor.core.files.file import (
 )
 from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.files.gjf import GJF
-from ichor.core.files.int import INT
-from ichor.core.files.ints import INTs
+from ichor.core.files.aimall.int import INT
+from ichor.core.files.aimall.ints import INTs
 from ichor.core.files.mol2 import Mol2
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora import (
