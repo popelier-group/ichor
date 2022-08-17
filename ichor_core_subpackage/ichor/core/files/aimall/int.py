@@ -1,10 +1,8 @@
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 from warnings import warn
-
 import numpy as np
-from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import relpath
 from ichor.core.common.str import get_digits

@@ -1,13 +1,11 @@
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, List, Optional, Union
-
+from typing import Dict, List, Union
 import numpy as np
-from ichor.core.atoms import Atoms
 from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasProperties
-from ichor.core.files import INT
+from ichor.core.files.aimall import INT
 from ichor.core.common.functools import classproperty
 
 class INTs(HasProperties, OrderedDict, Directory):

@@ -4,7 +4,7 @@ from ichor.core.atoms import ListOfAtoms, Atoms
 from ichor.core.common.io import mkdir
 from ichor.core.files import Directory
 from ichor.core.files.point_directory import PointDirectory
-from ichor.core.files.gjf import GJF
+from ichor.core.files import GJF
 from ichor.core.files.xyz import XYZ
 import numpy as np
 from ichor.core.calculators.alf import default_alf_calculator
