@@ -13,3 +13,5 @@ from ichor.core.calculators.geometry_calculator import (
     calculate_angle, calculate_bond, calculate_dihedral,
     calculate_internal_features, dihedral_names, dihedrals,
     get_internal_feature_indices, internal_feature_names)
+from ichor.core.calculators.alf_features_to_coordinates_calculator import alf_features_to_coordinates
+from ichor.core.calculators.spherical_to_cartesian_calculator import spherical_to_cartesian

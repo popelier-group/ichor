@@ -10,53 +10,7 @@ from ichor.core.common.io import mkdir
 from ichor.core.files.file import FileState, ReadFile, WriteFile
 from ichor.core.atoms.alf import ALF
 
-def spherical_to_cartesian(r, theta, phi) -> List[float]:
-    """
-    Spherical to cartesian transformation, where r ∈ [0, ∞), θ ∈ [0, π], φ ∈ [-π, π).
-        x = rsinθcosϕ
-        y = rsinθsinϕ
-        z = rcosθ
-    """
-    x = r * np.sin(theta) * np.cos(phi)
-    y = r * np.sin(phi) * np.sin(theta)
-    z = r * np.cos(theta)
-    return [x, y, z]
-
-
-def features_to_coordinates(features: np.ndarray) -> np.ndarray:
-    """Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
-    n_points x n_atoms x 3
-
-    :param features: a numpy array of shape n_points x n_features
-    """
-
-    if features.ndim == 1:
-        features = np.expand_dims(features, axis=0)
-
-    all_points = []  # 3d array
-    one_point = []  # 2d array
-
-    for row in features:  # iterate over rows, which are individual points
-
-        # origin and x-axis and xy-plane atoms
-        one_point.append([0, 0, 0])
-        one_point.append([row[0], 0, 0])
-        one_point.append(
-            spherical_to_cartesian(row[1], np.pi / 2, row[2])
-        )  # theta is always pi/2 because it is in the xy plane
-
-        # all other atoms
-        for i in range(3, features.shape[-1], 3):
-            r = row[i]
-            theta = row[i + 1]
-            phi = row[i + 2]
-            one_point.append(spherical_to_cartesian(r, theta, phi))
-
-        all_points.append(one_point)
-        one_point = []
-
-    return np.array(all_points)
-
+from ichor.core.calculators import alf_features_to_coordinates
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
@@ -256,7 +210,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         features_array = features_array[:, :n_features]
 
         # xyz coordinates are currently in bohr, so convert them to angstroms
-        xyz_array = features_to_coordinates(features_array)
+        xyz_array = alf_features_to_coordinates(features_array)
         xyz_array = bohr2ang * xyz_array
 
         trajectory = Trajectory(trajectory_path)

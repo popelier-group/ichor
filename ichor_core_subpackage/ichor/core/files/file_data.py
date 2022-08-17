@@ -104,7 +104,7 @@ class HasAtoms(ABC):
 
         from ichor.core.atoms import Atoms
         from ichor.core.files import XYZ
-        from ichor.core.files.xyz.trajectory import features_to_coordinates
+        from ichor.core.useful_functions import alf_features_to_coordinates
         from ichor.core.calculators import calculate_alf_features
         from ichor.core.common.units import AtomicDistance
 
@@ -136,7 +136,7 @@ class HasAtoms(ABC):
         # order will always be central atom(0,0,0), x-axis atom, xy-plane atom, etc.
         
         central_atom_features = self.atoms[central_atom_name].features(calculate_alf_features, central_atom_alf)
-        xyz_array = features_to_coordinates(central_atom_features)
+        xyz_array = alf_features_to_coordinates(central_atom_features)
 
         # reverse the ordering, so that the rows are the same as before
         # can now use the atom names as they were read in in initial Trajectory/PointsDirectory instance.

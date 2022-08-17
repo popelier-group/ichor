@@ -195,7 +195,7 @@ class ListOfAtoms(list, ABC):
 
         from ichor.core.atoms import Atom
         from ichor.core.files import Trajectory
-        from ichor.core.files.trajectory import features_to_coordinates
+        from ichor.core.useful_functions import alf_features_to_coordinates
         from ichor.core.common.units import AtomicDistance
 
         if central_atom_name not in self.atom_names:
@@ -225,7 +225,7 @@ class ListOfAtoms(list, ABC):
             current_atom_ordering.index(num) for num in range(n_atoms)
         ]
         # order will always be central atom(0,0,0), x-axis atom, xy-plane atom, etc.
-        xyz_array = features_to_coordinates(
+        xyz_array = alf_features_to_coordinates(
             self[central_atom_name].features(feature_calculator, *args, **kwargs)
         )
         # reverse the ordering, so that the rows are the same as before
