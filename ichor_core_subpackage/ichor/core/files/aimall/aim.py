@@ -98,7 +98,7 @@ class AIM(ReadFile, dict):
                 if "AIMAll Professional license check succeeded." in line:
                     self.license_check_succeeded = True
                 elif "AIMQB (Version" in line:
-                    self.version = Version(line.split()[2])
+                    self.version = Version(line.replace(",", "").split()[2])
                 elif "Wavefunction File:" in line:
                     self.wfn_path = Path(line.split()[-1])
                 elif "Number of processors used for this job =" in line:
@@ -125,6 +125,8 @@ class AIM(ReadFile, dict):
                     self.sumviz_path = Path(line.split()[-1])
                 elif "Current Directory:" in line:
                     self.cwd = Path(line.split()[-1])
+                elif "Out File:" in line:
+                    self.output_file = Path(line.split()[-1])
 
                 if is_all_atom_calculation and "aimint.exe" in line:
                     # find the path to where the atom information will be stored (this is without suffix), also remove extra " in line
