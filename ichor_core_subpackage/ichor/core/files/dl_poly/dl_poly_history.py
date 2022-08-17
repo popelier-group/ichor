@@ -6,7 +6,7 @@ import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.io import convert_to_path
 from ichor.core.common.str import split_by
-from ichor.core.files.trajectory import Trajectory
+from ichor.core.files.xyz import Trajectory
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents
 
