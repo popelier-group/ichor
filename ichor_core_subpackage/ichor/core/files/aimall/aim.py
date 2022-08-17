@@ -101,15 +101,15 @@ class AIM(ReadFile, dict):
                     self.wfn_path = Path(line.split()[-1])
                 elif "Number of processors used for this job =" in line:
                     self.nproc = int(line.split()[-1])
-                elif "Number of NACPs  =" in line:
+                elif "Number of NACPs" in line:
                     self.nacps = int(line.split()[-1])
-                elif "Number of NNACPs =" in line:
+                elif "Number of NNACPs" in line:
                     self.nnacps = int(line.split()[-1])
-                elif "Number of BCPs  =" in line:
+                elif "Number of BCPs" in line:
                     self.nbcps = int(line.split()[-1])
-                elif "Number of RCPs  =" in line:
+                elif "Number of RCPs" in line:
                     self.nrcps = int(line.split()[-1])
-                elif "Number of CCPs  =" in line:
+                elif "Number of CCPs" in line:
                     self.nccps = int(line.split()[-1])
 
                 if is_all_atom_calculation and "aimint.exe" in line:
