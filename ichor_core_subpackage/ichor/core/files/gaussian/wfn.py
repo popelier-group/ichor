@@ -11,7 +11,6 @@ from ichor.core.files.file import FileContents, ReadFile, WriteFile, File
 from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.common.units import AtomicDistance
 from ichor.core.common.itertools import chunker
-from decimal import Decimal
 from ichor.core.common.float import from_scientific_double
 
 
