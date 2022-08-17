@@ -97,7 +97,7 @@ def test_water_monomer_gau_file_with_forces():
         molecular_hexadecapole=MolecularHexadecapole(xxxx=-6.9726, yyyy=-7.2644, zzzz=-8.0431, xxxy=-0.1772, xxxz=0.0, yyyx=-0.4713, yyyz=0.0, zzzx=0.0, zzzy=0.0, xxyy=-3.2206, xxzz=-2.9078, yyzz=-3.0768, xxyz=0.0, yyxz=0.0, zzxy=-0.0352)
     )
     
-def test_water_monomer_gau_file_with_forces():
+def test_glycine_gau_file_with_forces():
     
     gau_file_path = example_dir / "glycine_with_forces.log"
     
