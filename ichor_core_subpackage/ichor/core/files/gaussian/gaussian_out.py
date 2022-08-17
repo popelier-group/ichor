@@ -54,7 +54,6 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
                     line = next(f)
                     
                     while line.strip():
-                        print(line)
                         l = line.split()
                         atom_type = l[0]
                         x = float(l[1])
@@ -72,11 +71,16 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
                         line = next(f)
                         
                 elif "Forces (Hartrees/Bohr)" in line:
+                    
+                    #  Number     Number              X              Y              Z
+                    line = next(f)
+                    # -----------------------------------------
                     line = next(f)
                     
                     for atom_name in atoms.names:
                         line = next(f).split()
-                        forces[atom_name] = AtomForce(float(line[3]), float(line[4]), float(line[5]))
+                        print(line)
+                        forces[atom_name] = AtomForce(float(line[2]), float(line[3]), float(line[4]))
                 elif "Dipole moment (field-independent basis, Debye)" in line:
                     # dipoles are on one line
                     dipole_line_split = next(f).split()
