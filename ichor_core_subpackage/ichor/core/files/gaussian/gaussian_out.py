@@ -16,27 +16,10 @@ MolecularOctapole = namedtuple("MolecularOctapole", "xxx yyy zzz xyy xxy xxz xzz
 MolecularHexadecapole = namedtuple("MolecularHexadecapole", "xxxx yyyy zzzz xxxy xxxz yyyx yyyz zzzx zzzy xxyy xxzz yyzz xxyz yyxz zzxy")
 
 class GaussianOut(HasAtoms, HasProperties, ReadFile):
-    """Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
-    an output file, so it does not have a write method.
+    """Wraps around a .gau/.log file that is the output of Gaussian. This file contains coordinates (in Angstroms),
+    forces, as well as molecular multipole moments.
 
-    :param path: Path object or string to the .wfn file
-    :param atoms: an Atoms instance which is read in from the top of the .wfn file.
-        Note that the units of the .wfn file are in Bohr.
-    :param method: The method (eg. B3LYP) which was used in the Gaussian calculation
-        that created the .wfn file. The method is not initially written to the .wfn
-        file by Gaussian, but it is necessary to add it to the .wfn file because
-        AIMAll does not automatically determine the method itself, so it can lead
-        to wrong IQA/multipole moments results. To make sure AIMAll results are correct,
-        the method is a required argument.
-    :param mol_orbitals: The number of molecular orbitals to be read in from the .wfn file.
-    :param primitives: The number of primitives to be read in from the .wfn file.
-    :param nuclei: The number of nuclei in the system to be read in from the .wfn file.
-    :param energy: The molecular energy read in from the bottom of the .wfn file
-    :param virial: The virial read in from the bottom of the .wfn file
-    .. note::
-        Since the wfn file is written out by Gaussian, we do not really have to modify it when writing out except
-        we need to add the method used, so that AIMALL can use the correct method. Otherwise AIMALL assumes Hartree-Fock
-        was used, which might be wrong.
+    :param path: Path object or string to the .gau or .log file that are Gaussian output files
     """
 
     def __init__(
