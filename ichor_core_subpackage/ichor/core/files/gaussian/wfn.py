@@ -58,13 +58,13 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
     def __init__(
         self,
         path: Union[Path, str],
-        method: str,
+        method: str = None,
     ):
         super(ReadFile, self).__init__(path)
 
-        self.method = method
-        self.atoms = FileContents
+        self.method = method or FileContents
 
+        self.atoms = FileContents
         self.title = FileContents
         self.program = FileContents
         self.n_orbitals = FileContents
