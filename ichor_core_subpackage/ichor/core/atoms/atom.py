@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional
 import numpy as np
 from ichor.core.common import constants
 from ichor.core.common.types import Coordinates3D
@@ -388,28 +388,3 @@ class Atom(VarReprMixin, Coordinates3D):
         """
         self.coordinates -= other.coordinates
         return self
-
-
-class ConnectedAtom(Atom):
-    def __init__(self, atom: Atom, parent: "ConnectedAtoms"):
-        super().__init__(
-            atom.type,
-            atom.x,
-            atom.y,
-            atom.z,
-            index=atom.index,
-            parent=parent,
-            units=atom.units,
-        )
-        self.bond_list = []
-        self.angle_list = []
-        self.dihedral_list = []
-
-    def set_bond(self, other: Atom):
-        self.bond_list += [other]
-
-    def set_angle(self, other: Atom):
-        self.angle_list += [other]
-
-    def set_dihedral(self, other: Atom):
-        self.dihedral_list += [other]
