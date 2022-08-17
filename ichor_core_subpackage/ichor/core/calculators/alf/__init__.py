@@ -1,8 +1,8 @@
 from typing import Dict, Callable, Union, List
 
-from ichor.core.calculators.alf.cahn_ingold_prelog import \
+from ichor.core.calculators.alf.cahn_ingold_prelog_alf_calculator import \
     calculate_alf_cahn_ingold_prelog
-from ichor.core.calculators.alf.sequence import calculate_alf_atom_sequence
+from ichor.core.calculators.alf.sequence_alf_calculator import calculate_alf_atom_sequence
     
 alf_calculators: Dict[str, Callable] = {
     "cahn_ingold_prelog": calculate_alf_cahn_ingold_prelog,

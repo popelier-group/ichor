@@ -1,6 +1,5 @@
 import numpy as np
-from ichor.core.calculators.connectivity.distance_connectivity_calculator import \
-    default_connectivity_calculator_distance
+from ichor.core.calculators.connectivity.distance_connectivity_calculator import connectivity_calculator_distance
 
 
 def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:
@@ -21,7 +20,7 @@ def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:
         timesteps in a trajectory.
     """
 
-    connectivity = default_connectivity_calculator_distance(atoms)
+    connectivity = connectivity_calculator_distance(atoms)
 
     for atom in atoms:
         while sum(connectivity[atom.i]) > atom.valence:

@@ -1,7 +1,7 @@
 from ichor.core.atoms import ListOfAtoms
 from typing import Callable, List, Union
 import numpy as np
-from ichor.core.calculators.alf import ALF
+from ichor.core.atoms.alf import ALF
 class AtomView(ListOfAtoms):
     """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
     a user to get information (such as coordinates or features) for one atom.
