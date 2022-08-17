@@ -6,8 +6,7 @@ from typing import Optional
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents
-from ichor.core.files.qcp import QuantumChemistryProgramInput
-from ichor.core.files.file import File, ReadFile, WriteFile
+from ichor.core.files.file import ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
 
@@ -17,7 +16,7 @@ class PandoraCCSDmod(Enum):
     CCSD_MULLER = "ccsdM"
 
 
-class PandoraInput(HasAtoms, ReadFile, WriteFile, File):
+class PandoraInput(HasAtoms, ReadFile, WriteFile):
     def __init__(
         self,
         path: Path,
@@ -30,7 +29,7 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile, File):
         method: str = FileContents,
         basis_set: str = FileContents,
     ):
-        File.__init__(self, path)
+        super(ReadFile, self).__init__(path)
         
         self.atoms = atoms
         self.ccsdmod: PandoraCCSDmod = ccsdmod
