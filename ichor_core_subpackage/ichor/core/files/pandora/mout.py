@@ -8,8 +8,8 @@ import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.types import VarReprMixin
-from ichor.core.files.file import File, ReadFile, FileContents
-from ichor.core.files.file_data import HasAtoms, HasProperties
+from ichor.core.files import File, ReadFile, FileContents
+from ichor.core.files import HasAtoms, HasProperties
 from ichor.core.common.units import AtomicDistance
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])
