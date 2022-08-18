@@ -22,6 +22,9 @@ def _test_read_gjf(
     spin_multiplicity: Optional[int] = None,
     atoms: Optional[Atoms] = None,
 ):
+    
+    "Test function for .gjf Gaussian input file."
+    
     gjf = GJF(gjf_file)
 
     _assert_val_optional(gjf.link0, link0)

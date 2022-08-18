@@ -1,13 +1,10 @@
 from pathlib import Path
 from typing import Dict
-
 from ichor.core.files import AIM
 from ichor.core.files.aimall.aim import AimAtom
 from ichor.core.common.types import Version
-from ichor.core.common.types.itypes import T
 from tests.path import get_cwd
 from tests.test_files import _assert_val_optional
-
 import pytest
 
 example_dir = get_cwd(__file__) / "example_aims"
@@ -16,6 +13,9 @@ def _assert_version(
         aim_version: Version,
         reference_version: Version
     ):
+    
+    """ Asserts that version is equal to reference version"""
+    
     assert aim_version.major == reference_version.major
     assert aim_version.minor == reference_version.minor
     assert aim_version.patch == reference_version.patch
@@ -25,6 +25,9 @@ def _assert_aim_atoms(
         aim_file_atoms: Dict[str, AimAtom],
         reference_aim_atoms: Dict[str, AimAtom]
     ):
+    
+    """ Asserts that AIM atoms (containing info for an atom in aimall such as time taken, etc.) is equal to reference AIM atoms"""
+    
     # compare the aim atom attributes to reference values
     for reference_aim_atom_name, reference_aim_atom in reference_aim_atoms.items():
         assert aim_file_atoms[reference_aim_atom_name].atom_name == reference_aim_atom.atom_name
@@ -52,6 +55,8 @@ def _test_read_aim(
     cwd: Path = None,
     reference_aim_atoms: Dict[str, AimAtom] = None
 ):
+    
+    """Test for .aim AIMAll file."""
     
     aim = AIM(aim_path)
     

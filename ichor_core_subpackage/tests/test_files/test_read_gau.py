@@ -16,6 +16,8 @@ example_dir = get_cwd(__file__) / "example_gaus"
 
 def _assert_atomic_forces(gau_file_forces: Dict[str, AtomForce], reference_file_forces: Dict[str, AtomForce]):
     
+    """ Asserts that dictionary of Gaussian calcualted forces is equal to another dictionary of reference forces."""
+    
     # forces might not be present in the gau file because forces are only calculated when using "force" keyword in .gjf file
     if gau_file_forces and reference_file_forces:
         for reference_atom_name, reference_atom_forces in reference_file_forces.items():
@@ -36,6 +38,7 @@ def _test_read_gau(
     molecular_octapole: MolecularOctapole = None,
     molecular_hexadecapole: MolecularHexadecapole = None,
 ):
+    """ Test function for .gau/.log Gaussian output file."""
     
     gau_file = GaussianOut(gau_path)
     

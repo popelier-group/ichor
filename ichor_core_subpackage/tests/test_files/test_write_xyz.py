@@ -1,7 +1,9 @@
 from ichor.core.atoms import Atoms, Atom
 from ichor.core.files import XYZ
 
-def _test_write_xyz(xyz_file, xyz_file_contents): 
+def _test_write_xyz(xyz_file, xyz_file_contents):
+    
+    """ Asserts that the contents of a written out file are the same as a reference string that should contain the same contents."""
 
     assert xyz_file.path.read_text() == xyz_file_contents
 

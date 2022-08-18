@@ -16,6 +16,8 @@ example_dir = get_cwd(__file__) / "example_ints"
 def _assert_critical_point_instances(
     list_of_critical_points: T, expected_list_of_critical_points: Optional[T]
 ):
+    
+    """ Asserts that a list of CriticalPoint instances is equal to a reference list of Critical Point Instances."""
 
     assert len(list_of_critical_points) == len(
         expected_list_of_critical_points
@@ -59,7 +61,7 @@ def _test_int(
     total_time: int = None
 ):
     """Tests original .int file from AIMALL is being read in correctly. No json
-    file is generated. json is checked in another test."""
+    file is generated anymore for .int files, so this is not tested."""
 
     int_file_instance = INT(int_file_path)
 

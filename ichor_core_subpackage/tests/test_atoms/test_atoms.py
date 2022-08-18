@@ -6,6 +6,10 @@ from ichor.core.common.units import AtomicDistance
 
 
 def _test_atoms_coords(atoms: Atoms, expected_atoms: Atoms, units: AtomicDistance):
+    
+    """ Asserts that an instance of Atoms is equal to a reference Atoms instance. Atomic Units are also needed
+    to check that files containing Atoms instances have the correct units defined."""
+    
     if expected_atoms is None:
         return
 

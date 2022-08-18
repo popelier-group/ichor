@@ -4,6 +4,8 @@ from ichor.core.atoms import Atoms, Atom
 # TODO: the wfn path that is written to file is relative, so cannot have that part in the gjfs (as tmp directory path is random)
 
 def _test_write_gjf(gjf_file, gjf_file_contents): 
+    
+    """ Asserts that the contents of a written out file are the same as a reference string that should contain the same contents."""
 
     assert gjf_file.path.read_text() == gjf_file_contents
 

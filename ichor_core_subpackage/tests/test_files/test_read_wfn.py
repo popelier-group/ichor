@@ -20,12 +20,15 @@ def _test_molecular_orbitals(
         wfn_file_molecular_orbitals: List[MolecularOrbital],
         reference_molecular_orbitals: List[MolecularOrbital]
     ):
-        for mo, ref_mo in zip(wfn_file_molecular_orbitals, reference_molecular_orbitals):
-            assert mo.index == ref_mo.index
-            assert mo.eigen_value == pytest.approx(ref_mo.eigen_value)
-            assert mo.occupation_number == pytest.approx(ref_mo.occupation_number)
-            assert mo.energy == pytest.approx(ref_mo.energy)
-            assert mo.primitives ==  ref_mo.primitives
+    
+    """ Asserts that a MolecularOrbital instance is equal to a reference MolecularOrbital instance"""
+    
+    for mo, ref_mo in zip(wfn_file_molecular_orbitals, reference_molecular_orbitals):
+        assert mo.index == ref_mo.index
+        assert mo.eigen_value == pytest.approx(ref_mo.eigen_value)
+        assert mo.occupation_number == pytest.approx(ref_mo.occupation_number)
+        assert mo.energy == pytest.approx(ref_mo.energy)
+        assert mo.primitives ==  ref_mo.primitives
 
 
 def _test_read_wfn(

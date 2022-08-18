@@ -1,3 +1,5 @@
+"""Tests if the atoms contains in the .xyz file are the same as reference Atoms."""
+
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.files import XYZ
 from tests.test_atoms import _test_atoms_coords
