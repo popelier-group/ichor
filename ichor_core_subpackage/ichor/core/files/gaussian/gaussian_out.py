@@ -37,6 +37,10 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
         self.molecular_hexadecapole = FileContents
         super(ReadFile, self).__init__(path)
 
+    @classproperty
+    def filetype(self) -> str:
+        return ".gau"
+
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
         FileState of the file is FileState.Unread"""
