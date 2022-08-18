@@ -75,7 +75,7 @@ class INTs(HasProperties, dict, Directory):
         a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
         (as read in from the int file) will be used (if it exists).
 
-        :param C_list: A list of rotation matrices, each of the atoms
+        :param C_dict: A dictionary of rotation matrices, each of the atoms. This ensures that the correct C matrix is used for each atom.
         :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
             with the int file does not exist. Then we cannot calculate multipoles.
         """
@@ -93,3 +93,9 @@ class INTs(HasProperties, dict, Directory):
 
     def __str__(self):
         return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(self.keys())}"
+    
+    def __getattr__(self, item):
+        return {
+            atom_name: getattr(int_file_instance, item)
+            for atom_name, int_file_instance in self.items()
+        }
