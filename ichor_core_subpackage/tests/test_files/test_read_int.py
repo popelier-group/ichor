@@ -114,7 +114,7 @@ def _test_int(
 
     _assert_val_optional(int_file_instance.total_time, total_time)
 
-def test_no_parent_int():
+def test_int_without_reference_geometry():
 
     file_bond_critical_points = [
         CriticalPoint(
@@ -264,7 +264,7 @@ def test_no_parent_int():
     )
 
 
-def test_int_with_parent():
+def test_int_with_reference_geometry():
     
     from ichor.core.calculators.alf import calculate_alf_cahn_ingold_prelog
 
