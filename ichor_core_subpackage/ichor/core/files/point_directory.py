@@ -6,12 +6,9 @@ from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file import ReadFile
 
 from ichor.core.files.file_data import HasAtoms, HasProperties
-from ichor.core.files import GJF
-from ichor.core.files import WFN
-from ichor.core.files import INTs
+from ichor.core.files import GJF, WFN, INTs, XYZ, GaussianOut, AIM
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora import PandoraDirectory, PandoraInput
-from ichor.core.files.xyz import XYZ
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
@@ -33,6 +30,8 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
     xyz: OptionalPath[XYZ] = OptionalFile
     gjf: OptionalPath[GJF] = OptionalFile
+    gaussian_out: OptionalPath[GaussianOut] = OptionalFile,
+    aim: OptionalPath[AIM] = OptionalFile
     wfn: OptionalPath[WFN] = OptionalFile
     ints: OptionalPath[INTs] = OptionalFile
     pandora_input: OptionalPath[PandoraInput] = OptionalFile
