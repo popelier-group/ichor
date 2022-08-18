@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, List, Union
 import numpy as np
@@ -8,7 +7,7 @@ from ichor.core.files.file_data import HasProperties
 from ichor.core.files.aimall.int import INT
 from ichor.core.common.functools import classproperty
 
-class INTs(HasProperties, OrderedDict, Directory):
+class INTs(HasProperties, dict, Directory):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
@@ -19,7 +18,7 @@ class INTs(HasProperties, OrderedDict, Directory):
     def __init__(self, path: Union[Path, str]):
         # parent above __init__s because Directory.__init__ calls self._parse
         Directory.__init__(self, path)
-        OrderedDict.__init__(self)
+        dict.__init__(self)
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
@@ -45,7 +44,7 @@ class INTs(HasProperties, OrderedDict, Directory):
     def sort(self):
         """Sorts keys of self by atom index e.g.
         {'H2': , 'H3': , 'O1': } -> {'O1': , 'H2': , 'H3': }"""
-        OrderedDict.__init__(
+        dict.__init__(
             self, sorted(self.items(), key=lambda x: ignore_alpha(x[0]))
         )
 
