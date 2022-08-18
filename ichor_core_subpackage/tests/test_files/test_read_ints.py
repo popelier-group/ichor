@@ -1,14 +1,12 @@
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import List, Dict
 from ichor.core.files import INTs, GJF
 from tests.path import get_cwd
 from ichor.core.files.aimall.int import (
     CriticalPoint,
     CriticalPointType,
 )
-import pytest
 from tests.test_files import _assert_val_optional
-from ichor.core.common.types.itypes import T
 from tests.test_files.test_read_int import _assert_critical_point_instances
 from ichor.core.calculators import calculate_alf_atom_sequence
 import numpy as np
@@ -17,6 +15,7 @@ example_dir = get_cwd(__file__) / "example_ints_dir"
 
 
 def _assert_dict_of_critical_points(critical_points_dict, reference_critical_points_dict):
+    """ Asserts that a dictionary of critical points is equal to another reference dict of critical points."""
     
     for atom_name, critical_point_list in critical_points_dict.items():
         
@@ -49,6 +48,9 @@ def _test_ints(
     dipole_mag: Dict[str, float] = None,
     total_time: Dict[str, int] = None
     ):
+    
+    """Test function for INTs directory
+    """
     
     int_dir_instance = INTs(int_dir_path)
 
@@ -103,8 +105,6 @@ def _test_ints(
         _assert_val_optional(int_dir_instance.properties(C_matrix_dict), properties)
 
     _assert_val_optional(int_dir_instance.total_time, total_time)
-    
-    
     
 def test_methanol_ints_dir():
     
