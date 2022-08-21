@@ -29,9 +29,9 @@ def _assert_critical_point_instances(
         ):
             assert cp.index == other_cp.index
             assert cp.type == other_cp.type
-            assert cp.x == other_cp.x
-            assert cp.y == other_cp.y
-            assert cp.z == other_cp.z
+            assert cp.x == pytest.approx(other_cp.x)
+            assert cp.y == pytest.approx(other_cp.y)
+            assert cp.z == pytest.approx(other_cp.z)
             assert cp.connecting_atoms == other_cp.connecting_atoms
 
 
