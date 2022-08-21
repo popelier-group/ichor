@@ -41,6 +41,15 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
     def filetype(self) -> str:
         return ".gau"
 
+
+    @classproperty
+    def property_names(self) -> List[str]:
+        return ["forces"]
+
+    @property
+    def properties(self) -> Dict[str, float]:
+        return {"forces": self.forces}
+
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
         FileState of the file is FileState.Unread"""
@@ -114,16 +123,3 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
 
         self.forces = forces
         self.atoms = atoms
-
-    @classproperty
-    def filetype(cls) -> str:
-        """Returns the file extension of a WFN file"""
-        return ".wfn"
-
-    @classproperty
-    def property_names(self) -> List[str]:
-        return ["forces"]
-
-    @property
-    def properties(self) -> Dict[str, float]:
-        return {"forces": self.forces}
