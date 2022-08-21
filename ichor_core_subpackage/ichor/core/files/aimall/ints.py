@@ -5,6 +5,7 @@ from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasProperties
 from ichor.core.files.aimall.int import INT
+from ichor.core.files.aimall.ab_int import ABINT
 from ichor.core.common.functools import classproperty
 
 class INTs(HasProperties, dict, Directory):
@@ -16,9 +17,9 @@ class INTs(HasProperties, dict, Directory):
     """
 
     def __init__(self, path: Union[Path, str]):
-        # parent above __init__s because Directory.__init__ calls self._parse
         Directory.__init__(self, path)
         dict.__init__(self)
+        self.interaction_ints = {}
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
@@ -34,6 +35,13 @@ class INTs(HasProperties, dict, Directory):
         for f in self.iterdir():
             if INT.check_path(f):
                 self[f.stem.capitalize()] = INT(f)
+
+            elif ABINT.check_path(f):
+                a_atom, b_atom = f.stem.split()
+                a = a_atom.capitalize()
+                b = b_atom.capitalize()
+                self.interaction_ints[(a, b)] = ABINT(f)
+            
         self.sort()
 
     @classmethod
