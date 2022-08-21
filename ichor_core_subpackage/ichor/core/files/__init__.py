@@ -1,5 +1,5 @@
 # aimall files
-from ichor.core.files.aimall import AIM, INT, INTs
+from ichor.core.files.aimall import AIM, INT, INTs, ABINT
 
 # gaussian files
 from ichor.core.files.gaussian import GJF, WFN, GaussianOut

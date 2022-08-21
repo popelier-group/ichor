@@ -3,6 +3,7 @@ from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasProperties
 from pathlib import Path
 from typing import Dict, Union
+from ichor.core.common.functools import classproperty
 
 
 class ABINT(HasProperties, ReadFile):
