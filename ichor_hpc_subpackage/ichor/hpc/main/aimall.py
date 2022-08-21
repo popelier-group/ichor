@@ -126,17 +126,18 @@ def rerun_aimall(wfn_file: str):
 def scrub_aimall(wfn_file: str):
     """Used by `CheckManager`. Checks if AIMALL job ran correctly. If it did not, it will move the Point to the `FILE_STRUCTURE["aimall_scrubbed_points"]`
     directory and record that it has moved the point in the log file. If a .sh file exists and the integration error for the point is lower than the
-    GLOBALS-specified threshold, then this checking function will not do anything.
+    threshold (1e-4), then this checking function will not do anything.
 
     :param wfn_file: A string that is a Path to a .wfn file
     """
+    
+    INTEGRATION_ERROR_THRESHOLD = 1e-4
 
     from pathlib import Path
 
     from ichor.core.common.io import last_line
-    from ichor.core.files.aim import AIM
+    from ichor.core.files.aimall import AIM
     from ichor.core.files.point_directory import PointDirectory
-    from ichor.hpc import GLOBALS
     from ichor.hpc.log import logger
 
     wfn_file = Path(wfn_file)
@@ -171,7 +172,7 @@ def scrub_aimall(wfn_file: str):
         integration_errors = {
             atom: error
             for atom, error in point.ints.integration_error.items()
-            if abs(error) > GLOBALS.INTEGRATION_ERROR_THRESHOLD
+            if abs(error) > INTEGRATION_ERROR_THRESHOLD
         }
         if len(integration_errors) > 0:
             reason = (
@@ -179,7 +180,7 @@ def scrub_aimall(wfn_file: str):
                     f"{point.ints.path} | {atom} | Integration Error: {error}"
                     for atom, error in integration_errors.items()
                 )
-                + f"\n'{len(integration_errors)}' atom(s) have a greater than integration error threshold ('{GLOBALS.INTEGRATION_ERROR_THRESHOLD}')"
+                + f"\n'{len(integration_errors)}' atom(s) have a greater than integration error threshold ('{INTEGRATION_ERROR_THRESHOLD}')"
             )
 
     if reason is not None:
