@@ -2,7 +2,7 @@ from tests.test_files.test_read_gjf import _test_read_gjf
 from tests.test_files.test_read_ints import _test_ints
 from tests.test_files.test_read_wfn import _test_read_wfn
 from tests.test_files.test_read_aim import _test_read_aim
-from tests.test_files.test_read_gau import _test_read_gau, _assert_atomic_forces
+from tests.test_files.test_read_gau import _test_read_gau
 from tests.test_atoms import _test_atoms_coords
 
 from pathlib import Path
@@ -10,21 +10,16 @@ from typing import Dict, Optional, List
 from ichor.core.files import PointDirectory
 from ichor.core.files.aimall.aim import AimAtom
 from ichor.core.common.types import Version
-from ichor.core.common.types.itypes import T
 from tests.path import get_cwd
-from tests.test_files import _assert_val_optional
 from ichor.core.atoms import Atoms, Atom
-
 from ichor.core.files.gaussian.gaussian_out import AtomForce, MolecularDipole, MolecularHexadecapole, MolecularOctapole, MolecularQuadrupole, TracelessMolecularQuadrupole
 from ichor.core.files.gaussian.wfn import MolecularOrbital
 from ichor.core.common.units import AtomicDistance
 import numpy as np
-
 from ichor.core.files.aimall.int import (
     CriticalPoint,
     CriticalPointType,
 )
-
 from ichor.core.atoms import ALF
 from ichor.core.files import XYZ
 
