@@ -2,10 +2,10 @@
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasProperties
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 
-class ABInt(HasProperties, ReadFile):
+class ABINT(HasProperties, ReadFile):
     def __init__(self, path: Union[str, Path]):
         ReadFile.__init__(self, path)
         HasProperties.__init__(self)
