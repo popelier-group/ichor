@@ -1,6 +1,6 @@
 from tests.test_files.test_read_gjf import _test_read_gjf
 from tests.test_files.test_read_ints import _test_ints
-from tests.test_files.test_read_wfn import _test_read_wfn, _test_molecular_orbitals, MolecularOrbital
+from tests.test_files.test_read_wfn import _test_read_wfn
 from tests.test_files.test_read_aim import _test_read_aim
 from tests.test_files.test_read_gau import _test_read_gau, _assert_atomic_forces
 from tests.test_atoms import _test_atoms_coords
@@ -93,19 +93,41 @@ def _test_point_directory(
     ints_q: Dict[str, float] = None,
     ints_q00: Dict[str, float] = None,
     ints_dipole_mag: Dict[str, float] = None,
-    ints_total_time: Dict[str, int] = None
+    ints_total_time: Dict[str, int] = None,
+    
+    # AIMAll .aim file
+    aim_license_check_succeeded: bool = None,
+    aim_version: Version = None,
+    aim_wfn_path: Path = None,
+    aim_extout_path: Path = None,
+    aim_mgp_path: Path = None,
+    aim_sum_path: Path = None,
+    aim_sumviz_path: Path = None,
+    aim_nproc: int = None,
+    aim_nacps: int = None,
+    aim_nnacps: int = None,
+    aim_nbcps: int = None,
+    aim_nrcps: int = None,
+    aim_nccps: int = None,
+    aim_output_file: Path = None,
+    aim_cwd: Path = None,
+    aim_reference_aim_atoms: Dict[str, AimAtom] = None,
+    
+    # .xyz Atoms
+    xyz_atoms: Atoms = None
     ):
     
     point_dir_inst = PointDirectory(point_dir_path)
 
     gjf_path = point_dir_inst.gjf.path
     gaussian_out_path = point_dir_inst.gaussian_out.path
-    xyz_path = point_dir_inst.xyz.path
+    xyz_inst = point_dir_inst.xyz
     ints_path = point_dir_inst.ints.path
     aim_path = point_dir_inst.aim.path
+    wfn_path = point_dir_inst.wfn.path
     
     _test_read_gjf(
-        gjf_path = gjf_path,
+        gjf_file = gjf_path,
         link0 = gjf_link0,
         method = gjf_method,
         basis_set = gjf_basis_set,
@@ -129,6 +151,7 @@ def _test_point_directory(
     )
 
     _test_read_wfn(
+        wfn_file = wfn_path,
         method = wfn_method,
         atoms = wfn_atoms,
         title = wfn_title,
@@ -145,6 +168,7 @@ def _test_point_directory(
     )
     
     _test_ints(
+        int_dir_path = ints_path,
         atom_name = ints_atom_name,
         atom_num = ints_atom_num,
         title = ints_title,
@@ -169,6 +193,27 @@ def _test_point_directory(
         total_time = ints_total_time
         )
     
+    _test_read_aim(
+        aim_path=aim_path,
+        license_check_succeeded = aim_license_check_succeeded,
+        version = aim_version,
+        wfn_path = aim_wfn_path,
+        extout_path = aim_extout_path,
+        mgp_path = aim_mgp_path,
+        sum_path = aim_sum_path,
+        sumviz_path = aim_sumviz_path,
+        nproc = aim_nproc,
+        nacps = aim_nacps,
+        nnacps = aim_nnacps,
+        nbcps = aim_nbcps,
+        nrcps = aim_nrcps,
+        nccps = aim_nccps,
+        output_file = aim_output_file,
+        cwd = aim_cwd,
+        reference_aim_atoms = aim_reference_aim_atoms
+    )
+    
+    _test_atoms_coords(xyz_inst.atoms, xyz_atoms, units=AtomicDistance.Angstroms)
 
 def test_water_monomer_point_directory1():
     
@@ -188,6 +233,12 @@ def test_water_monomer_point_directory1():
         [Atom("O", -0.06328188, -0.88230871, -0.00802954, units=AtomicDistance.Bohr), 
         Atom("H", -0.95295537, 0.38291891, 1.07137738, units=AtomicDistance.Bohr),
         Atom("H", 1.01623725, 0.49938980, -1.06334784, units=AtomicDistance.Bohr)]
+    )
+    
+    reference_xyz_atoms = Atoms(
+        [Atom("O", -0.03348733, -0.46689766, -0.00424905), 
+        Atom("H", -0.50428226, 0.20263196, 0.56694849),
+        Atom("H", 0.53776959, 0.26426570, -0.56269944)]
     )
     
     wfn_expected_molecular_orbitals = [
@@ -215,6 +266,15 @@ def test_water_monomer_point_directory1():
     # calculate system alf and also calculate C matrices for all atoms
     C_matrices_dict = xyz_file_inst.C_matrix_dict(water_monomer_alf)
     
+    
+    aim_reference_atoms = {"O1":
+        AimAtom("O1", Path('WATER_MONOMER0001_atomicfiles/o1.inp'),
+                Path('WATER_MONOMER0001_atomicfiles/o1.int'),
+                184,
+                -4e-05
+                )
+                           }
+    
     _test_point_directory(
     point_dir_path = example_dir / "WATER_MONOMER0001",
     
@@ -231,57 +291,74 @@ def test_water_monomer_point_directory1():
     gjf_spin_multiplicity = 1,
     gjf_atoms = reference_gjf_atoms,
     # .gau Gaussian output
-    forces = {},
-    charge = 0,
-    multiplicity = 1,
-    atoms = reference_gau_atoms,
-    molecular_dipole = MolecularDipole(x=0.1426, y=2.3942, z=0.0535, total=2.3991),
-    molecular_quadrupole = MolecularQuadrupole(xx=-6.4806, yy=-7.7366, zz=-6.204, xy=0.0721, xz=-1.6772, yz=-0.0534),
-    traceless_molecular_quadrupole = TracelessMolecularQuadrupole(xx=0.3265, yy=-0.9296, zz=0.6031, xy=0.0721, xz=-1.6772, yz=-0.0534),
-    molecular_octapole = MolecularOctapole(xxx=0.5715, yyy=8.4307, zzz=0.1809, xyy=0.1988, xxy=3.0691, xxz=0.0434, xzz=0.1882, yzz=3.0845, yyz=0.0037, xyz=-0.1253),
-    molecular_hexadecapole = MolecularHexadecapole(xxxx=-8.4442, yyyy=-15.1828, zzzz=-8.3154, xxxy=-0.284, xxxz=-0.1887, yyyx=-0.2953, yyyz=0.0517, zzzx=-0.264, zzzy=0.0379, xxyy=-3.8874, xxzz=-2.4725, yyzz=-3.8541, xxyz=-0.0366, yyxz=-0.1597, zzxy=-0.0788),
+    gau_forces = {},
+    gau_charge = 0,
+    gau_multiplicity = 1,
+    gau_atoms = reference_gau_atoms,
+    gau_molecular_dipole = MolecularDipole(x=0.1426, y=2.3942, z=0.0535, total=2.3991),
+    gau_molecular_quadrupole = MolecularQuadrupole(xx=-6.4806, yy=-7.7366, zz=-6.204, xy=0.0721, xz=-1.6772, yz=-0.0534),
+    gau_traceless_molecular_quadrupole = TracelessMolecularQuadrupole(xx=0.3265, yy=-0.9296, zz=0.6031, xy=0.0721, xz=-1.6772, yz=-0.0534),
+    gau_molecular_octapole = MolecularOctapole(xxx=0.5715, yyy=8.4307, zzz=0.1809, xyy=0.1988, xxy=3.0691, xxz=0.0434, xzz=0.1882, yzz=3.0845, yyz=0.0037, xyz=-0.1253),
+    gau_molecular_hexadecapole = MolecularHexadecapole(xxxx=-8.4442, yyyy=-15.1828, zzzz=-8.3154, xxxy=-0.284, xxxz=-0.1887, yyyx=-0.2953, yyyz=0.0517, zzzx=-0.264, zzzy=0.0379, xxyy=-3.8874, xxzz=-2.4725, yyzz=-3.8541, xxyz=-0.0366, yyxz=-0.1597, zzxy=-0.0788),
     # .wfn Gaussian wavefunction file
-    method = "B3LYP",
-    atoms = reference_wfn_atoms,
-    title = 'WATER_MONOMER0001',
-    program = 'GAUSSIAN',
-    n_orbitals = 5,
-    n_primitives = 126,
-    n_nuclei = 3,
-    centre_assignments= [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-    type_assignments = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 5, 6, 7, 8, 9, 10, 5, 6, 7, 8, 9, 10, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 14, 15, 18, 19, 16, 20, 11, 12, 13, 17, 14, 15, 18, 19, 16, 20, 1, 1, 1, 1, 1, 1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 5, 6, 7, 8, 9, 10, 5, 6, 7, 8, 9, 10, 1, 1, 1, 
+    wfn_method = "B3LYP",
+    wfn_atoms = reference_wfn_atoms,
+    wfn_title = 'WATER_MONOMER0001',
+    wfn_program = 'GAUSSIAN',
+    wfn_n_orbitals = 5,
+    wfn_n_primitives = 126,
+    wfn_n_nuclei = 3,
+    wfn_centre_assignments= [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    wfn_type_assignments = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 5, 6, 7, 8, 9, 10, 5, 6, 7, 8, 9, 10, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 14, 15, 18, 19, 16, 20, 11, 12, 13, 17, 14, 15, 18, 19, 16, 20, 1, 1, 1, 1, 1, 1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 5, 6, 7, 8, 9, 10, 5, 6, 7, 8, 9, 10, 1, 1, 1, 
 1, 1, 1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 5, 6, 7, 8, 9, 10, 5, 6, 7, 8, 9, 10],
-    primitive_exponents = [15330.0, 2299.0, 522.4, 147.3, 47.55, 16.76, 6.207, 522.4, 147.3, 47.55, 16.76, 6.207, 0.6882, 1.752, 0.2384, 0.07376, 34.46, 7.749, 2.28, 34.46, 7.749, 2.28, 34.46, 7.749, 2.28, 0.7156, 0.7156, 0.7156, 0.214, 0.214, 0.214, 0.05974, 0.05974, 0.05974, 2.314, 2.314, 2.314, 2.314, 2.314, 2.314, 0.645, 0.645, 0.645, 0.645, 0.645, 0.645, 0.214, 0.214, 0.214, 0.214, 0.214, 0.214, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 33.87, 5.095, 1.159, 0.3258, 0.1027, 0.02526, 1.407, 1.407, 1.407, 0.388, 0.388, 0.388, 0.102, 0.102, 0.102, 1.057, 1.057, 1.057, 1.057, 1.057, 1.057, 0.247, 0.247, 0.247, 0.247, 0.247, 0.247, 33.87, 5.095, 1.159, 0.3258, 0.1027, 0.02526, 1.407, 1.407, 1.407, 0.388, 0.388, 0.388, 0.102, 0.102, 0.102, 1.057, 1.057, 1.057, 1.057, 1.057, 1.057, 0.247, 0.247, 0.247, 0.247, 0.247, 0.247],
-    molecular_orbitals = wfn_expected_molecular_orbitals,
-    total_energy = -76.460540818734,
-    virial_ratio = 2.00902678,
-    
+    wfn_primitive_exponents = [15330.0, 2299.0, 522.4, 147.3, 47.55, 16.76, 6.207, 522.4, 147.3, 47.55, 16.76, 6.207, 0.6882, 1.752, 0.2384, 0.07376, 34.46, 7.749, 2.28, 34.46, 7.749, 2.28, 34.46, 7.749, 2.28, 0.7156, 0.7156, 0.7156, 0.214, 0.214, 0.214, 0.05974, 0.05974, 0.05974, 2.314, 2.314, 2.314, 2.314, 2.314, 2.314, 0.645, 0.645, 0.645, 0.645, 0.645, 0.645, 0.214, 0.214, 0.214, 0.214, 0.214, 0.214, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 1.428, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 33.87, 5.095, 1.159, 0.3258, 0.1027, 0.02526, 1.407, 1.407, 1.407, 0.388, 0.388, 0.388, 0.102, 0.102, 0.102, 1.057, 1.057, 1.057, 1.057, 1.057, 1.057, 0.247, 0.247, 0.247, 0.247, 0.247, 0.247, 33.87, 5.095, 1.159, 0.3258, 0.1027, 0.02526, 1.407, 1.407, 1.407, 0.388, 0.388, 0.388, 0.102, 0.102, 0.102, 1.057, 1.057, 1.057, 1.057, 1.057, 1.057, 0.247, 0.247, 0.247, 0.247, 0.247, 0.247],
+    wfn_molecular_orbitals = wfn_expected_molecular_orbitals,
+    wfn_total_energy = -76.460540818734,
+    wfn_virial_ratio = 2.00902678,
     ######
     # INTs
     ######
-    atom_name = {'O1': 'O1'},
-    atom_num = {'O1': 1},
-    title = {'O1': 'WATER_MONOMER0001'},
-    dft_model = {'O1': 'Restricted B3LYP'},
-    basin_integration_results = {'O1': {'N': 9.0762060817, 'G': 75.038982117, 'K': 75.03894204, 'L': -4.0077877571e-05, 'WeizKE': 56.664620514, 'TFKE': 68.244617363, 'I': 2.6389848033, '<Rho/r**2>': 256.01273421, '<Rho/r>': 22.954908618, '<Rho*r>': 9.4998961933, '<Rho*r**2>': 15.172894906, '<Rho*r**4>': 80.51045651, 'GR(-2)': -255.50489747, 'GR(-1)': -44.988821679, 'GR0': -25.507286293, 'GR1': -34.656605556, 'GR2': -69.046214277, 'VenO': -183.63926895, 'VenT': -192.68868344, 'Dipole X': -0.0016461566576, 'Dipole Y': -0.25708969568, 'Dipole Z': -0.020646892538, '|Dipole|': 0.25792269313}},
-    integration_error = {'O1': -4.0077877571e-05},
-    critical_points = ints_critical_points,
-    bond_critical_points = ints_critical_points,
-    ring_critical_points = {"O1": []},
-    cage_critical_points = {"O1": []},
-    properties = {'O1': {'iqa': -75.484269717, 'q00': -1.0762060817, 'q10': 1.0692266615609444e-05, 'q11c': -0.18349803115198798, 'q11s': -0.18125282915604815, 'q20': -0.7306931079097068, 'q21c': 4.623931513580379e-05, 'q21s': 6.704284971342138e-05, 'q22c': -0.0072513073463865265, 'q22s': -0.24533386504758276, 'q30': -0.00015693584687446506, 'q31c': -0.6029724012139631, 'q31s': -0.6667364017324746, 'q32c': -3.203842693814914e-05, 'q32s': 0.00022118204528320972, 'q33c': 0.8817616491730934, 'q33s': -0.7111368780157797, 'q40': 2.1290443376840233, 'q41c': -0.00021688230028195056, 'q41s': -3.0547019421551455e-05, 'q42c': -0.08077252353757391, 'q42s': 0.23264809990535876, 'q43c': 0.0005243358460912961, 'q43s': 0.0005797603423474216, 'q44c': 4.139038974866185, 'q44s': 0.7074731781578308}},
-    net_charge = {'O1': -1.0762060817},
-    global_spherical_multipoles = {'O1': {'q00': -1.0762060817, 'q10': -0.020646892538, 'q11c': -0.0016461566576, 'q11s': -0.25708969568, 'q20': -0.021700469782, 'q21c': -0.75018382635, 'q21s': 0.017792037022, 'q22c': -0.16232546581, 'q22s': 0.065122302165, 'q30': 0.044683217585, 'q31c': -0.089287472207, 'q31s': 0.30596239543, 'q32c': -0.063395331291, 'q32s': -1.391653952, 'q33c': -0.067954891804, 'q33s': 0.20594440588, 'q40': -1.9609913177, 'q41c': 1.1488477959, 'q41s': 0.26702238434, 'q42c': -0.75531442849, 'q42s': -0.39080307859, 'q43c': 3.6310817472, 'q43s': -0.24247145429, 'q44c': -1.7369385615, 'q44s': 0.072615449798, 'q50': -0.41836505357, 'q51c': 0.53462091556, 'q51s': -2.2325774531, 'q52c': -0.13994550028, 'q52s': 1.5489383968, 'q53c': 0.84062227501, 'q53s': -1.567560763, 'q54c': -0.41193097157, 'q54s': 3.1313064283, 'q55c': -0.31126569086, 'q55s': -2.3600710711}},
-    local_spherical_multipoles = {'O1': {'q00': -1.0762060817, 'q10': 1.0692266615609444e-05, 'q11c': -0.18349803115198798, 'q11s': -0.18125282915604815, 'q20': -0.7306931079097068, 'q21c': 
+    ints_atom_name = {'O1': 'O1'},
+    ints_atom_num = {'O1': 1},
+    ints_title = {'O1': 'WATER_MONOMER0001'},
+    ints_dft_model = {'O1': 'Restricted B3LYP'},
+    ints_basin_integration_results = {'O1': {'N': 9.0762060817, 'G': 75.038982117, 'K': 75.03894204, 'L': -4.0077877571e-05, 'WeizKE': 56.664620514, 'TFKE': 68.244617363, 'I': 2.6389848033, '<Rho/r**2>': 256.01273421, '<Rho/r>': 22.954908618, '<Rho*r>': 9.4998961933, '<Rho*r**2>': 15.172894906, '<Rho*r**4>': 80.51045651, 'GR(-2)': -255.50489747, 'GR(-1)': -44.988821679, 'GR0': -25.507286293, 'GR1': -34.656605556, 'GR2': -69.046214277, 'VenO': -183.63926895, 'VenT': -192.68868344, 'Dipole X': -0.0016461566576, 'Dipole Y': -0.25708969568, 'Dipole Z': -0.020646892538, '|Dipole|': 0.25792269313}},
+    ints_integration_error = {'O1': -4.0077877571e-05},
+    ints_critical_points = ints_critical_points,
+    ints_bond_critical_points = ints_critical_points,
+    ints_ring_critical_points = {"O1": []},
+    ints_cage_critical_points = {"O1": []},
+    ints_properties = {'O1': {'iqa': -75.484269717, 'q00': -1.0762060817, 'q10': 1.0692266615609444e-05, 'q11c': -0.18349803115198798, 'q11s': -0.18125282915604815, 'q20': -0.7306931079097068, 'q21c': 4.623931513580379e-05, 'q21s': 6.704284971342138e-05, 'q22c': -0.0072513073463865265, 'q22s': -0.24533386504758276, 'q30': -0.00015693584687446506, 'q31c': -0.6029724012139631, 'q31s': -0.6667364017324746, 'q32c': -3.203842693814914e-05, 'q32s': 0.00022118204528320972, 'q33c': 0.8817616491730934, 'q33s': -0.7111368780157797, 'q40': 2.1290443376840233, 'q41c': -0.00021688230028195056, 'q41s': -3.0547019421551455e-05, 'q42c': -0.08077252353757391, 'q42s': 0.23264809990535876, 'q43c': 0.0005243358460912961, 'q43s': 0.0005797603423474216, 'q44c': 4.139038974866185, 'q44s': 0.7074731781578308}},
+    ints_net_charge = {'O1': -1.0762060817},
+    ints_global_spherical_multipoles = {'O1': {'q00': -1.0762060817, 'q10': -0.020646892538, 'q11c': -0.0016461566576, 'q11s': -0.25708969568, 'q20': -0.021700469782, 'q21c': -0.75018382635, 'q21s': 0.017792037022, 'q22c': -0.16232546581, 'q22s': 0.065122302165, 'q30': 0.044683217585, 'q31c': -0.089287472207, 'q31s': 0.30596239543, 'q32c': -0.063395331291, 'q32s': -1.391653952, 'q33c': -0.067954891804, 'q33s': 0.20594440588, 'q40': -1.9609913177, 'q41c': 1.1488477959, 'q41s': 0.26702238434, 'q42c': -0.75531442849, 'q42s': -0.39080307859, 'q43c': 3.6310817472, 'q43s': -0.24247145429, 'q44c': -1.7369385615, 'q44s': 0.072615449798, 'q50': -0.41836505357, 'q51c': 0.53462091556, 'q51s': -2.2325774531, 'q52c': -0.13994550028, 'q52s': 1.5489383968, 'q53c': 0.84062227501, 'q53s': -1.567560763, 'q54c': -0.41193097157, 'q54s': 3.1313064283, 'q55c': -0.31126569086, 'q55s': -2.3600710711}},
+    ints_local_spherical_multipoles = {'O1': {'q00': -1.0762060817, 'q10': 1.0692266615609444e-05, 'q11c': -0.18349803115198798, 'q11s': -0.18125282915604815, 'q20': -0.7306931079097068, 'q21c': 
 4.623931513580379e-05, 'q21s': 6.704284971342138e-05, 'q22c': -0.0072513073463865265, 'q22s': -0.24533386504758276, 'q30': -0.00015693584687446506, 'q31c': -0.6029724012139631, 'q31s': -0.6667364017324746, 'q32c': -3.203842693814914e-05, 'q32s': 0.00022118204528320972, 'q33c': 0.8817616491730934, 'q33s': -0.7111368780157797, 'q40': 2.1290443376840233, 'q41c': -0.00021688230028195056, 'q41s': -3.0547019421551455e-05, 'q42c': -0.08077252353757391, 'q42s': 0.23264809990535876, 'q43c': 0.0005243358460912961, 'q43s': 0.0005797603423474216, 'q44c': 4.139038974866185, 'q44s': 0.7074731781578308}},
-    C_matrix_dict = C_matrices_dict,
-    iqa_energy_components = {'O1': {'T(A)': 75.03894204, 'Vneen(A,A)/2 = Vne(A,A)': -183.63926895, 'Vne(A,Mol)/2': -93.400150506, 'Ven(A,Mol)/2': -96.344341721, 'Vneen(A,Mol)/2': -189.74449223, "Vne(A,A')/2": -1.5805160326, "Ven(A,A')/2": -4.5247072473, "Vneen(A,A')/2": -6.1052232799, "Vee0(A,A) + Vee0(A,A')/2": 35.538139035, "Vee(A,A) + Vee(A,A')/2": 35.145962157, "VeeC(A,A) + VeeC(A,A')/2": 44.071057668, "VeeX0(A,A) + VeeX0(A,A')/2": -8.5329186324, "VeeX(A,A) + VeeX(A,A')/2": -8.9250955109, 'Vnn(A,Mol)/2': 4.0753183136, 'Vee0(A,A)': 33.972313611, 'Vee(A,A)': 33.580136733, 'VeeC(A,A)': 42.300500739, 'VeeX0(A,A)': -8.3281871282, 'VeeX(A,A)': -8.7203640066, "Vee0(A,A')/2": 1.5658254241, "Vee(A,A')/2": 1.5658254241, "VeeC(A,A')/2": 1.7705569283, "VeeX0(A,A')/2": -0.20473150425, "VeeX(A,A')/2": -0.20473150425, 'V_IQA(A)': -150.52321176, 'VC_IQA(A)': -141.59811625, 'VX_IQA(A)': -8.9250955109, 'V_IQA(A,A)': -150.05913221, 'VC_IQA(A,A)': -141.33876821, 'VX_IQA(A,A)': -8.7203640066, "V_IQA(A,A')/2": -0.46407954221, "VC_IQA(A,A')/2": -0.25934803796, "VX_IQA(A,A')/2": -0.20473150425, 'E_IQA0(A)': -75.092092839, 'E_IQA(A)': -75.484269717, 'E_IQA_Intra0(A)': -74.628013297, 'E_IQA_Intra(A)': -75.020190175, 'E_IQA_Inter0(A)': -0.46407954221, 'E_IQA_Inter(A)': -0.46407954221}},
-    iqa = {'O1': -75.484269717},
-    e_intra = {'O1': -75.020190175},
-    q = {'O1': -1.0762060817},
-    q00 = {'O1': -1.0762060817},
-    dipole_mag = {'O1': 0.2579226931234475},
-    total_time = {'O1': 184},
+    ints_C_matrix_dict = C_matrices_dict,
+    ints_iqa_energy_components = {'O1': {'T(A)': 75.03894204, 'Vneen(A,A)/2 = Vne(A,A)': -183.63926895, 'Vne(A,Mol)/2': -93.400150506, 'Ven(A,Mol)/2': -96.344341721, 'Vneen(A,Mol)/2': -189.74449223, "Vne(A,A')/2": -1.5805160326, "Ven(A,A')/2": -4.5247072473, "Vneen(A,A')/2": -6.1052232799, "Vee0(A,A) + Vee0(A,A')/2": 35.538139035, "Vee(A,A) + Vee(A,A')/2": 35.145962157, "VeeC(A,A) + VeeC(A,A')/2": 44.071057668, "VeeX0(A,A) + VeeX0(A,A')/2": -8.5329186324, "VeeX(A,A) + VeeX(A,A')/2": -8.9250955109, 'Vnn(A,Mol)/2': 4.0753183136, 'Vee0(A,A)': 33.972313611, 'Vee(A,A)': 33.580136733, 'VeeC(A,A)': 42.300500739, 'VeeX0(A,A)': -8.3281871282, 'VeeX(A,A)': -8.7203640066, "Vee0(A,A')/2": 1.5658254241, "Vee(A,A')/2": 1.5658254241, "VeeC(A,A')/2": 1.7705569283, "VeeX0(A,A')/2": -0.20473150425, "VeeX(A,A')/2": -0.20473150425, 'V_IQA(A)': -150.52321176, 'VC_IQA(A)': -141.59811625, 'VX_IQA(A)': -8.9250955109, 'V_IQA(A,A)': -150.05913221, 'VC_IQA(A,A)': -141.33876821, 'VX_IQA(A,A)': -8.7203640066, "V_IQA(A,A')/2": -0.46407954221, "VC_IQA(A,A')/2": -0.25934803796, "VX_IQA(A,A')/2": -0.20473150425, 'E_IQA0(A)': -75.092092839, 'E_IQA(A)': -75.484269717, 'E_IQA_Intra0(A)': -74.628013297, 'E_IQA_Intra(A)': -75.020190175, 'E_IQA_Inter0(A)': -0.46407954221, 'E_IQA_Inter(A)': -0.46407954221}},
+    ints_iqa = {'O1': -75.484269717},
+    ints_e_intra = {'O1': -75.020190175},
+    ints_q = {'O1': -1.0762060817},
+    ints_q00 = {'O1': -1.0762060817},
+    ints_dipole_mag = {'O1': 0.2579226931234475},
+    ints_total_time = {'O1': 184},
     
+    # AIMAll .aim file
+    aim_license_check_succeeded = True,
+    aim_version = Version("19.10.12"),
+    aim_wfn_path = Path('/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.wfn'),
+    aim_extout_path = Path('/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.extout'),
+    aim_mgp_path = Path('/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.mgp'),
+    aim_sum_path = Path('/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.sum'),
+    aim_sumviz_path = Path('/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.sumviz'),
+    aim_nproc = 2,
+    aim_nacps = 3,
+    aim_nnacps = 0,
+    aim_nbcps = 2,
+    aim_nrcps = 0,
+    aim_nccps = 0,
+    aim_output_file = Path('WATER_MONOMER0001_atomicfiles/o1.int'),
+    aim_cwd = Path('/net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001'),
+    aim_reference_aim_atoms = aim_reference_atoms,
     
+    xyz_atoms=reference_xyz_atoms
     )
