@@ -89,6 +89,8 @@ class INT(HasProperties, ReadFile):
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
+        """ Checks the path is the same as for .int file. The _ in the .int file indicates AB interactions, which
+        have to be read in differently because the file is strucutred differently."""
         return path.suffix == cls.filetype and "_" not in path.name
 
     @classproperty
