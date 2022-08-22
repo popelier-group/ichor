@@ -1,17 +1,15 @@
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
-from ichor.core.common.types import BoolToggle
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.machine import SubmitType
 from ichor.hpc.submission_script.command_group import CommandGroup
 from ichor.hpc.submission_script.data_lock import DataLock
-from ichor.hpc.uid import set_uid
-
-SUBMIT_ON_COMPUTE = BoolToggle(False)
-
+from ichor.hpc.uid import set_uid, get_uid
+from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE, MACHINE
+from ichor.hpc.batch_system import NodeType
 
 class SubmissionScript:
     """
@@ -24,12 +22,18 @@ class SubmissionScript:
     SEPARATOR = ","  # separator which is used to separate names of files in the datafiles (files with random UID names) which are written by ICHOR.
     DATAFILE = "ICHOR_DATFILE"  # name of the bash variable which is used to store the location of the datafile for the given job.
 
-    def __init__(self, path: Path):
-        self.path = Path(path)
-        self.commands = (
-            []
-        )  # a list of commands to be submitted to batch system
-        self._ncores = None
+    def __init__(self, submission_script_name: Union[str, Path], cwd: Path = None, ncores: int = None, include_nodes: List[str] = None, exclude_nodes: List[str] = None,
+                 max_running_tasks = -1):
+
+        self.path = Path(submission_script_name)
+        self.cwd = cwd or Path.cwd()
+        self.uid = get_uid()
+        self._ncores = ncores
+        self.include_nodes = include_nodes or []
+        self.exclude_nodes = exclude_nodes or []
+        self.max_running_tasks = max_running_tasks
+
+        self.commands = [] # a list of commands to be submitted to batch system
 
     @classproperty
     def filetype(self) -> str:
@@ -52,14 +56,12 @@ class SubmissionScript:
         self._ncores = ncores
 
     def default_options(self) -> List[str]:
-        from ichor.hpc import BATCH_SYSTEM
 
         """Returns a list of default options to use in a submission script for a job.
         This list contaning the current working directory, the output directory (where .o files are written),
         the errors directory (where .e files are witten). If the number of cores is more than 1, the keyword
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
         the system on which the job is ran, as well as on the number of cores that the job needs."""
-        from ichor.hpc import FILE_STRUCTURE, GLOBALS
 
         mkdir(FILE_STRUCTURE["outputs"])
         mkdir(FILE_STRUCTURE["errors"])
@@ -72,7 +74,7 @@ class SubmissionScript:
         # change current working directory to directory from which ICHOR is launched.
         # make the paths to outputs and errors absolute
         options = [
-            BATCH_SYSTEM.change_working_directory(GLOBALS.CWD),
+            BATCH_SYSTEM.change_working_directory(self.cwd),
             BATCH_SYSTEM.output_directory(
                 FILE_STRUCTURE["outputs"].resolve(), task_array
             ),
@@ -182,11 +184,11 @@ class SubmissionScript:
         return f"[ -n {cls.array_index(n)} ]"
 
     def write_datafile(self, datafile: Path, data: List[List[str]]) -> None:
-        """Write the datafile to disk. All datafiles are stored in GLOBALS.FILE_STRUCTURE["datafiles"]. Each line of the
+        """Write the datafile to disk. All datafiles are stored in FILE_STRUCTURE["datafiles"]. Each line of the
         datafile contains text that corresponds to the inputs and output file names. These are separated by self.separator, which is a comma.
 
         .. note::
-            For example, a datafile, which has a random name (which is the GLOBALS.UID) contains lines in the form of:
+            For example, a datafile, which has a random name (which is set by self.uid) contains lines in the form of:
             WATER0001.gjf,WATER0001.gau
             WATER0002.gjf,WATER0002.gau
             ...
@@ -207,7 +209,7 @@ class SubmissionScript:
         tasks in the array job and things like that. Easiest to see if you have GAUSSIAN.sh or another submission script opened.
         """
 
-        # number of files needeed for one of the tasks in the array job
+        # number of files needed for one of the tasks in the array job
         ndata = len(data[0])
 
         # absolute location of datafile on disk
@@ -265,7 +267,6 @@ class SubmissionScript:
     def write(self):
         """Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
         are written at the top of the file. The commands to run (such as Gaussian, AIMALL, etc.) are written below the options."""
-        from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE, GLOBALS
 
         mkdir(self.path.parent)
 
@@ -282,19 +283,22 @@ class SubmissionScript:
                 # write any options to be given to the batch system, such as working directory, where to write outputs/errors, etc.
                 for option in self.options:
                     f.write(f"#{BATCH_SYSTEM.OptionCmd} {option}\n")
+
+                # compute nodes to include or exclude for job
+                if self.include_nodes or self.exclude_nodes:
+                    f.write(
+                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(self.include_nodes, self.exclude_nodes)}\n"
+                    )
+                    
                 # if writing an array jobs, then the batch system needs to know that
                 # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
-                if GLOBALS.INCLUDE_NODES or GLOBALS.EXCLUDE_NODES:
-                    f.write(
-                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(GLOBALS.INCLUDE_NODES, GLOBALS.EXCLUDE_NODES)}\n"
-                    )
                 if njobs > 1:
                     f.write(
                         f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
                     )
-                    if njobs > GLOBALS.MAX_RUNNING_TASKS > 0:
+                    if njobs > self.max_running_tasks > 0:
                         f.write(
-                            f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(GLOBALS.MAX_RUNNING_TASKS)}\n"
+                            f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(self.max_running_tasks)}\n"
                         )
                 else:
                     f.write(f"{BATCH_SYSTEM.TaskID}=1\n")
@@ -316,13 +320,13 @@ class SubmissionScript:
                 requires_datafile = False  # used to check if there was any command group that requires a datafile
                 for command_group in self.grouped_commands:
                     command_variables = []
-                    # Gaussian, Ferebus, AIMALL jobs need access to datafiles, the datfile's name is the unique id that was assigned to GLOBALS
+                    # Gaussian, Ferebus, AIMALL jobs need access to datafiles
+                    # the datafile's name is the unique id that was assigned to the submission script
                     if command_group.data:
-
                         requires_datafile = True  # if we got to this part of the code, then we definitely need to check array entries read from datafile
 
                         datafile = FILE_STRUCTURE["datafiles"] / Path(
-                            str(GLOBALS.UID)
+                            str(self.uid)
                         )
                         # get the data that is needed for each command in a command group
                         # for example, if the command is a Gaussian command, then we need an input file (.gjf) and an output file (.gau)
@@ -356,12 +360,9 @@ class SubmissionScript:
             )
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
-        from ichor.hpc import BATCH_SYSTEM, MACHINE
-        from ichor.hpc.batch_system import NodeType
 
         if (
             BATCH_SYSTEM.current_node() is not NodeType.ComputeNode
-            or SUBMIT_ON_COMPUTE
             and MACHINE.submit_type is SubmitType.SubmitOnCompute
         ):
             return BATCH_SYSTEM.submit_script(self.path, hold)

@@ -12,54 +12,44 @@ class SubmissionError(Exception):
 class CommandLine(ABC):
     """Abstract Base Class for job types (such as Gaussian, AIMALL, and FEREBUS jobs.)"""
 
+    def __init__(self, ncores=1, scrub: bool = False, rerun: bool = False,):
+        
+        self.ncores = ncores
+        self.scrub = scrub
+        self.rerun = rerun
+
     @classproperty
     @abstractmethod
     def command(self) -> str:
         pass
 
     @classproperty
+    @abstractmethod
+    def modules(self) -> Modules:
+        pass
+
+    @property
+    @abstractmethod
     def group(self) -> bool:
         return True
 
-    @classproperty
-    def ncores(self) -> int:
-        return 1
-
-    @classproperty
-    def rerun(self) -> bool:
-        """Whether to rerun points if they fail, up to GLOBALS.GAUSSIAN_N_TRIES"""
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.RERUN_POINTS
-
-    @classproperty
-    def scrub(self) -> bool:
-        """Whether to remove failed points from a PointsDirectory and move them to a separate location, so they are not
-        used in training/validating."""
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.SCRUB_POINTS
-
     @property
-    def ndata(self) -> int:
-        return len(self.data)
-
-    @property
+    @abstractmethod
     def data(self) -> List[str]:
-        return []
+        pass
 
-    @classproperty
-    def modules(self) -> Modules:
-        return Modules()
-
-    @classproperty
+    @property
     def arguments(self) -> List[str]:
         return []
 
-    @classproperty
+    @property
     def options(self) -> List[str]:
         return []
 
-    @abstractmethod
+    @property
     def repr(self, variables: List[str]) -> str:
         pass
+    
+    @property
+    def ndata(self) -> int:
+        return len(self.data)

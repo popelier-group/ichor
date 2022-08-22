@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.core.common.io import last_line
-from ichor.core.files import GJF, PointsDirectory, PointDirectory, WFN
+from ichor.core.files import GJF, PointsDirectory, PointDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script import (
@@ -15,10 +15,9 @@ from ichor.hpc.submission_script import (
 from ichor.hpc.log import logger
 from typing import Union
 
-
 def submit_points_directory_to_gaussian(
     directory: Union[Path, PointsDirectory], overwrite_existing_gjf: bool = True, force_calculate_wfn: bool = False,
-    **kwargs) -> Optional[JobID]:
+    rerun_points: bool = False, scrub_points: bool = False, **kwargs) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
@@ -26,6 +25,8 @@ def submit_points_directory_to_gaussian(
     :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True.
         If this is False, then any existing `.gjf` files in the directory will not be overwritten
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files, even if .wfn files already exist. Defaults to False.
+    :param rerun_points: Whether to attempt to rerun failed points. Default False
+    :param scrub_points: Whether to scrub (move) failed points to another directory for scrubbed points. Default False
     :param kwargs: Key word arguments to pass to GJF class. These are things like number of cores, basis set,
         level of theory, spin multiplicity, charge, etc. These will get used if overwrite_existing_gjf is True or if the gjf path does
         not exist yet.
@@ -65,7 +66,6 @@ def write_gjfs(
         gjfs.append(point_directory.gjf.path)
 
     return gjfs
-
 
 def submit_gjfs(
     gjfs: List[Path],

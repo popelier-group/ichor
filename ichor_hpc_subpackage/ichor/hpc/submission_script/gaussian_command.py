@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List, Optional
+from ichor.core.files import GaussianOut
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import GaussianModules, Modules
@@ -8,7 +9,14 @@ from ichor.hpc.submission_script.command_line import (
     CommandLine,
     SubmissionError,
 )
+from ichor.hpc import MACHINE, Machine
 
+GAUSSIAN_COMMANDS = {
+    Machine.csf3: "$g09root/g09/g09",
+    Machine.csf4: "$g16root/g16/g16",
+    Machine.ffluxlab: "g09",
+    Machine.local: "g09",
+}
 
 class GaussianCommand(CommandLine):
 
@@ -27,71 +35,57 @@ class GaussianCommand(CommandLine):
         self,
         gjf_file: Path,
         gjf_output: Optional[Path] = None,
+        ncores = 2,
+        scrub = False,
+        rerun = False
     ):
         self.gjf_file = gjf_file
-        self.gjf_output = gjf_output or gjf_file.with_suffix(
-            ".gau"
-        )  # .gau file used to store the output from Gaussian
+        self.gjf_output = gjf_output or gjf_file.with_suffix(GaussianOut.filetype)  # .gau file used to store the output from Gaussian
+        super.__init__(ncores, scrub, rerun)
 
-    @property
-    def data(self) -> List[str]:
-        """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau)"""
-        return [str(self.gjf_file.absolute()), str(self.gjf_output.absolute())]
+    @classproperty
+    def command(self) -> str:
+        """Returns the command used to run Gaussian on different machines."""
+
+        if MACHINE not in GAUSSIAN_COMMANDS.keys():
+            raise SubmissionError(
+                f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
+            )
+
+        return GAUSSIAN_COMMANDS[MACHINE]
 
     @classproperty
     def modules(self) -> Modules:
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
         return GaussianModules
-
-    @classproperty
-    def command(self) -> str:
-        """Returns the command used to run Gaussian on different machines."""
-        from ichor.hpc import MACHINE, Machine
-
-        gaussian_commands = {
-            Machine.csf3: "$g09root/g09/g09",
-            Machine.csf4: "$g16root/g16/g16",
-            Machine.ffluxlab: "g09",
-            Machine.local: "g09",
-        }
-
-        if MACHINE not in gaussian_commands.keys():
-            raise SubmissionError(
-                f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
-            )
-
-        return gaussian_commands[MACHINE]
-
-    @classproperty
-    def ncores(self) -> int:
-        """Returns the number of cores that Gaussian should use for the job."""
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.GAUSSIAN_NCORES
+    
+    @property
+    def data(self) -> List[str]:
+        """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau).
+        This is the data that is going to be written to the datafile."""
+        return [str(self.gjf_file.absolute()), str(self.gjf_output.absolute())]
 
     def repr(self, variables: List[str]) -> str:
         """
         Returns a strings which is then written out to the final submission script file.
         If the outputs of the job need to be checked (by default self.rerun is set to True, so job outputs are checked),
-        then the corresponsing strings are appended to the initial commands string.
+        then the corresponding strings are appended to the initial commands string.
 
         The length of `variables` is defined by the length of `self.data`
         """
 
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"  # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
 
-        from ichor.hpc import GLOBALS
-
-        if GLOBALS.RERUN_POINTS:
+        if self.scrub:
 
             cm = CheckManager(
                 check_function="rerun_gaussian",
                 args_for_check_function=[variables[0]],
-                ntimes=GLOBALS.GAUSSIAN_N_TRIES,
+                ntimes=5,
             )
             cmd = cm.rerun_if_job_failed(cmd)
 
-        if GLOBALS.SCRUB_POINTS:
+        if self.rerun:
             cm = CheckManager(
                 check_function="scrub_gaussian",
                 args_for_check_function=[variables[0]],
