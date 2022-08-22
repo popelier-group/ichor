@@ -1,7 +1,7 @@
 import ast
 import re
 from pathlib import Path
-from typing import Iterable, List, Optional, Union, Callable
+from typing import Iterable, List, Optional, Union, Callable, Dict
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
@@ -115,6 +115,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         """
         return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0]]
 
+    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[List[int]]:
+            """ Returns a dictionary with the atomic local frame indices for every atom (0-indexed)."""
+            return {atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs) for atom_instance in self[0]}
 
     def add(self, atoms):
         """Add a list of Atoms (corresponding to one timestep) to the end of the trajectory list"""
