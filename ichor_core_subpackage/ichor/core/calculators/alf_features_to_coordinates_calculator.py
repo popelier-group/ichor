@@ -17,18 +17,20 @@ def alf_features_to_coordinates(features: np.ndarray) -> np.ndarray:
     for row in features:  # iterate over rows, which are individual points
 
         # origin and x-axis and xy-plane atoms
-        one_point.append([0, 0, 0])
-        one_point.append([row[0], 0, 0])
-        one_point.append(
-            spherical_to_cartesian(row[1], np.pi / 2, row[2])
-        )  # theta is always pi/2 because it is in the xy plane
+        one_point.append([0.0, 0.0, 0.0])
+        one_point.append([row[0], 0.0, 0.0])
+        # only have xy plane atom and others if molecule is not diatomic
+        if len(row) > 1:
+            one_point.append(
+                spherical_to_cartesian(row[1], np.pi / 2, row[2])
+            )  # theta is always pi/2 because it is in the xy plane
 
-        # all other atoms
-        for i in range(3, features.shape[-1], 3):
-            r = row[i]
-            theta = row[i + 1]
-            phi = row[i + 2]
-            one_point.append(spherical_to_cartesian(r, theta, phi))
+            # all other atoms
+            for i in range(3, features.shape[-1], 3):
+                r = row[i]
+                theta = row[i + 1]
+                phi = row[i + 2]
+                one_point.append(spherical_to_cartesian(r, theta, phi))
 
         all_points.append(one_point)
         one_point = []
