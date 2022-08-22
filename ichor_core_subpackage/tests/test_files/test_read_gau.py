@@ -42,7 +42,7 @@ def _test_read_gau(
     
     gau_file = GaussianOut(gau_path)
     
-    _assert_atomic_forces(gau_file.forces, forces)
+    _assert_atomic_forces(gau_file.global_forces, forces)
     _assert_val_optional(gau_file.charge, charge)
     _assert_val_optional(gau_file.multiplicity, multiplicity)
     _test_atoms_coords(gau_file.atoms, atoms, AtomicDistance.Angstroms)
