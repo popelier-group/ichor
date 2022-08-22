@@ -30,7 +30,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
     xyz: OptionalPath[XYZ] = OptionalFile
     gjf: OptionalPath[GJF] = OptionalFile
-    gaussian_out: OptionalPath[GaussianOut] = OptionalFile,
+    gaussian_out: OptionalPath[GaussianOut] = OptionalFile
     aim: OptionalPath[AIM] = OptionalFile
     wfn: OptionalPath[WFN] = OptionalFile
     ints: OptionalPath[INTs] = OptionalFile
