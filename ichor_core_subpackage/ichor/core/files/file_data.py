@@ -190,7 +190,8 @@ class HasProperties(ABC):
         ...
 
 class PointDirectoryProperties(dict):
-    """ Wraps around a PointDirectory Dictionary to be able to index it in a certain way"""
+    """ Wraps around a PointDirectory dictionary containing properties (things we plan to machine learn)
+        to be able to index it in a certain way"""
     
     def __init__(self, data: dict):
         
@@ -207,7 +208,8 @@ class PointDirectoryProperties(dict):
         return unwrap_single_entry(find_in_inner_dicts(key, self))
     
 class PointsDirectoryProperties(dict):
-    """ Wraps around a PointDirectory Dictionary to be able to index it in a certain way"""
+    """ Wraps around a PointsDirectory dictionary containing properties (things we plan to machine learn)
+        to be able to index it in a certain way"""
     
     def __init__(self, data: dict):
         
