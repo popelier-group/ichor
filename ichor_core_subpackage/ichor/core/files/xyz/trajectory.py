@@ -1,7 +1,7 @@
 import ast
 import re
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional, Union, Callable
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
@@ -99,15 +99,22 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return np.array([timestep.coordinates for timestep in self])
 
-    @property
-    def connectivity(self) -> np.ndarray:
-        """ Returns the connectivity matrix of the first timestep."""
-        
-        return self[0].connectivity
+    def connectivity(self, connectivity_calculator: Callable[..., np.ndarray]) -> np.ndarray:
+        """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
-    @property
-    def alf(self) -> ALF:
-        return self[0].alf
+        Returns:
+            :type: `np.ndarray` of shape n_atoms x n_atoms
+        """
+        return connectivity_calculator(self[0])
+    
+    def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
+        """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
+        e.g. [[0,1,2],[1,0,2], [2,0,1]]
+        :param *args: positional arguments to pass to alf calculator
+        :param **kwargs: key word arguments to pass to alf calculator
+        """
+        return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0]]
+
 
     def add(self, atoms):
         """Add a list of Atoms (corresponding to one timestep) to the end of the trajectory list"""
