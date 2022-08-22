@@ -7,6 +7,7 @@ from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.common.units import AtomicDistance
 from collections import namedtuple
+import numpy as np
 
 AtomForce = namedtuple("AtomForce", "x y z")
 MolecularDipole = namedtuple("MolecularDipole", "x y z total")
@@ -26,7 +27,7 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
         self,
         path: Union[Path, str],
     ):
-        self.forces = FileContents
+        self.global_forces = FileContents
         self.charge = FileContents
         self.multiplicity = FileContents
         self.atoms = FileContents
@@ -41,14 +42,46 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
     def filetype(self) -> str:
         return ".gau"
 
-
     @classproperty
     def property_names(self) -> List[str]:
         return ["forces"]
 
-    @property
-    def properties(self) -> Dict[str, float]:
-        return {"forces": self.forces}
+    def properties(self, C_matrix_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, AtomForce]]:
+        """Returns the machine learning labels which are in this file. The atomic forces need to be rotated by a C matrix
+        (each atom has its own C matrix) prior to machine learning. This method is primarily here to be used by
+        `PointDirectory`/`PointsDirectory` classes.
+
+        :param C_matrix_dict: A dictionary of C matrices for each atom in the system.
+        :type C_matrix_dict: Dict[str, np.ndarray]
+        :return: A dictionary of dictionaries. The inner dictionary
+            has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).
+        :rtype: Dict[str, Dict[str, `AtomForce`]]
+        """
+        
+        return {"forces": self.local_forces(C_matrix_dict)}
+    
+    def local_forces(self, C_matrix_dict: Dict[str, np.ndarray]) -> Dict[str, AtomForce]:
+        """ Rotates the force vector by the C matrix (which defines a new coordinate frame). The C matrix is dependent on
+        the atomic local frame calculated for each atom. Each atom has its own C rotation matrix, so each atomic force is
+        rotated by the atom's specific C matrix.
+        
+        :param C_matrix_dict: A dictionary of C matrices for each atom in the system.
+        :type C_matrix_dict: Dict[str, np.ndarray]
+        :return: A dictionary of dictionaries. The inner dictionary
+            has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).
+        :rtype: Dict[str, float]
+        """
+
+        local_forces = {}
+
+        for atom_name, global_force in self.global_forces.items():
+            
+            # multiply the force by C matrix for that specific atom, giving local forces
+            tmp = np.matmul(C_matrix_dict[atom_name], np.array(global_force))
+            # convert to AtomForce type and save to dict
+            local_forces[atom_name] = AtomForce(*tmp)
+        
+        return local_forces
 
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
@@ -92,7 +125,6 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
                     
                     for atom_name in atoms.names:
                         line = next(f).split()
-                        print(line)
                         forces[atom_name] = AtomForce(float(line[2]), float(line[3]), float(line[4]))
                 elif "Dipole moment (field-independent basis, Debye)" in line:
                     # dipoles are on one line
@@ -121,5 +153,5 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
                     values = [float(hexadecapole_lines_split[i]) for i in range(len(hexadecapole_lines_split)) if i%2 != 0]
                     self.molecular_hexadecapole = MolecularHexadecapole(*values)
 
-        self.forces = forces
+        self.global_forces = forces
         self.atoms = atoms
