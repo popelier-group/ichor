@@ -115,7 +115,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         """
         return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0]]
 
-    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[List[int]]:
+    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[str, ALF]:
             """ Returns a dictionary with the atomic local frame indices for every atom (0-indexed)."""
             return {atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs) for atom_instance in self[0]}
 
