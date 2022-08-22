@@ -217,7 +217,7 @@ class ListOfAtoms(list, ABC):
         # central atom idx, x-axis atom index, xy-plane atom index, rest of atom indices
         n_atoms = self.natoms
         previous_atom_ordering = list(range(n_atoms))
-        current_atom_ordering = alf + [
+        current_atom_ordering = list(*alf) + [
             i for i in range(n_atoms) if i not in alf
         ]
         # this will get the index that the atom was moved to after reordering.
@@ -229,7 +229,8 @@ class ListOfAtoms(list, ABC):
             self[central_atom_name].features(feature_calculator, *args, **kwargs)
         )
         # reverse the ordering, so that the rows are the same as before
-        # can now use the atom names as they were read in in initial Trajectory/PointsDirectory instance.
+        # can now use the atom names sequence as they were read in
+        # in initial Trajectory/PointsDirectory instance.
         xyz_array[:, previous_atom_ordering, :] = xyz_array[
             :, reverse_alf_ordering, :
         ]
