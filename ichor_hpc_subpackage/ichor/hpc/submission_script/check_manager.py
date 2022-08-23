@@ -4,11 +4,11 @@ from typing import List, Optional
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
 from ichor.hpc.submission_script.submision_script import SubmissionScript
-
+from ichor.hpc import BATCH_SYSTEM
 
 class CheckManager:
     """
-    Class used to check if the jobs submitted to the compute nodes via the sumbission system have ran correctly/have the correct outputs.
+    Class used to check if the jobs submitted to the compute nodes via the submission system have ran correctly/have the correct outputs.
     Since each type of job has different outputs, each type of job has its own `check_function` which looks at the output of the job to check if
     the job has ran successfully. This class is also used to append extra lines to a submission script, which have to do with rerunning failed jobs
     as well as removing points which did not run successfully.
@@ -52,8 +52,6 @@ class CheckManager:
         .. note::
             This does not make new jobs where it reruns the failed job. It tries to rerun the same commands `n` times in the same job.
         """
-
-        from ichor.hpc import GLOBALS
 
         new_runcmd = ""
 
@@ -117,7 +115,6 @@ class CheckManager:
 
 
 def print_completed():
-    from ichor.hpc import BATCH_SYSTEM
 
     """Logs information about completed jobs/tasks into ICHOR log file. It also exports some environment variables which are used
     to rerun tasks from a job if they failed the first time."""
@@ -161,7 +158,6 @@ def default_check(*args, **kwargs):
     Note: Although implemented, should never be used as one should implement a function that actually checks
           whether a task has completed successfully
     """
-    from ichor.hpc.log import logger
 
     logger.warn(
         "Default check function being used, implement a custom function to check task has completed successfully"
