@@ -40,4 +40,3 @@ dist
 *egg-info*
 test.*
 .pytest_cache
-./*.xyz
