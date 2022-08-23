@@ -14,11 +14,6 @@ class CommandGroup(CommandLine, list):
         return self[0].command
 
     @property
-    def ncores(self) -> int:
-        """Returns the number of cores to be used for the job or each task in a job array."""
-        return self[0].ncores
-
-    @property
     def data(self) -> Tuple[str]:
         """Returns the data that a job needs.
         This is usually a set of files which are the input files and the output files to be written by the job."""
@@ -38,6 +33,11 @@ class CommandGroup(CommandLine, list):
     def options(self) -> List[str]:
         """Returns the options to write at the top of the submission script"""
         return self[0].options
+
+    @property
+    def ntypes(self) -> int:
+        """Returns the number of types of jobs that are in the command group."""
+        list(set([type(c) for c in self]))
 
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Return a string which represents the line in the job script which runs the program (Gaussian, AIMALL, etc.) with
