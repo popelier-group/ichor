@@ -35,23 +35,14 @@
 
 import platform
 import sys
-from pathlib import Path
 
 from ichor.core.common.types import Version
 from ichor.hpc.arguments import Arguments
-from ichor.hpc.batch_system import (
-    SLURM,
-    LocalBatchSystem,
-    ParallelEnvironments,
-    SunGridEngine,
-)
+from ichor.hpc.batch_system import SLURM, LocalBatchSystem, ParallelEnvironments, SunGridEngine
 from ichor.hpc.file_structure import FileStructure
 from ichor.hpc.globals import Globals
 from ichor.hpc.log import setup_logger
-from ichor.hpc.machine import (
-    Machine,
-    init_machine,
-)
+from ichor.hpc.machine import Machine, init_machine
 
 __version__ = Version("3.1.0")
 
@@ -72,23 +63,9 @@ PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
 PARALLEL_ENVIRONMENT[Machine.csf4]["serial"] = 1, 1
 PARALLEL_ENVIRONMENT[Machine.csf4]["multicore"] = 2, 32
 PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
+PARALLEL_ENVIRONMENT[Machine.local]["smp"] = 1, 100
 
 GLOBALS = Globals()
 
 logger = setup_logger("ICHOR", "ichor.log")
 timing_logger = setup_logger("TIMING", "ichor.timing")
-
-
-def ichor_main():
-    global GLOBALS
-
-    Arguments.read()
-
-    GLOBALS.init_from_config(Arguments.config_file)
-    GLOBALS.UID = Arguments.uid
-
-    if Arguments.call_external_function:
-        Arguments.call_external_function(
-            *Arguments.call_external_function_args
-        )
-        sys.exit(0)

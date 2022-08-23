@@ -7,7 +7,7 @@ from ichor.hpc.batch_system import JobID
 from ichor.hpc.machine import SubmitType
 from ichor.hpc.submission_script.command_group import CommandGroup
 from ichor.hpc.submission_script.data_lock import DataLock
-from ichor.hpc.uid import set_uid, get_uid
+from ichor.hpc.uid import get_uid
 from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE, MACHINE
 from ichor.hpc.batch_system import NodeType
 
@@ -25,7 +25,7 @@ class SubmissionScript:
 
     def __init__(self, submission_script_name: Union[str, Path], ncores: int, cwd: Path = None,
                  include_nodes: List[str] = None, exclude_nodes: List[str] = None,
-                 max_running_tasks: int = -1, options=List[str]):
+                 max_running_tasks: int = -1):
 
         self.path = Path(submission_script_name)
         self.uid = get_uid()
@@ -34,7 +34,7 @@ class SubmissionScript:
         self.include_nodes = include_nodes or []
         self.exclude_nodes = exclude_nodes or []
         self.max_running_tasks = max_running_tasks
-        self._options = options
+        self._options = []
         self._commands = [] # a list of commands to be submitted to batch system
 
     @classproperty
@@ -45,6 +45,10 @@ class SubmissionScript:
     def add_command(self, command):
         """Add a command to the list of commands."""
         self._commands.append(command)
+        
+    def add_option(self, command):
+        """Add a command to the list of commands."""
+        self._options.append(command)
 
     @property
     def grouped_commands(self) -> List[CommandGroup]:
@@ -80,10 +84,7 @@ class SubmissionScript:
         mkdir(FILE_STRUCTURE["outputs"])
         mkdir(FILE_STRUCTURE["errors"])
 
-        task_array = any(
-            len(grouped_command) > 1
-            for grouped_command in self.grouped_commands
-        )
+        task_array = len(self.grouped_commands) > 1
 
         # change current working directory to directory from which ICHOR is launched.
         # make the paths to outputs and errors absolute

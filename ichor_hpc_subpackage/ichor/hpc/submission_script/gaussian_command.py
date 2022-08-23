@@ -83,7 +83,7 @@ class GaussianCommand(CommandLine):
         # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"
 
-        if self.scrub:
+        if self.rerun:
 
             cm = CheckManager(
                 check_function="rerun_gaussian",
@@ -92,7 +92,7 @@ class GaussianCommand(CommandLine):
             )
             cmd = cm.rerun_if_job_failed(cmd)
 
-        if self.rerun:
+        if self.scrub:
             cm = CheckManager(
                 check_function="scrub_gaussian",
                 args_for_check_function=[variables[0]],

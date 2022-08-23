@@ -19,8 +19,7 @@ from ichor.hpc.submission_script.pandora_command import (PandoraCommand,
                                                          PandoraPySCFCommand)
 from ichor.hpc.submission_script.python_command import PythonCommand
 from ichor.hpc.submission_script.script_timing_manager import TimingManager
-from ichor.hpc.submission_script.submision_script import (SUBMIT_ON_COMPUTE,
-                                                          SubmissionScript)
+from ichor.hpc.submission_script.submision_script import SubmissionScript
 from ichor.hpc.submission_script.tyche_command import TycheCommand
 
 

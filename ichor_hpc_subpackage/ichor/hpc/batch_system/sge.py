@@ -213,7 +213,7 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def parallel_environment(cls, ncores: int) -> Optional[str]:
-        """Returns the line in the job script defining the number of corest to be used for the job."""
+        """Returns the line in the job script defining the number of cores to be used for the job."""
         from ichor.hpc import MACHINE, PARALLEL_ENVIRONMENT
 
         return (

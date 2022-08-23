@@ -37,7 +37,7 @@ class CommandGroup(CommandLine, list):
     @property
     def ntypes(self) -> int:
         """Returns the number of types of jobs that are in the command group."""
-        list(set([type(c) for c in self]))
+        return len(set([type(c) for c in self]))
 
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Return a string which represents the line in the job script which runs the program (Gaussian, AIMALL, etc.) with

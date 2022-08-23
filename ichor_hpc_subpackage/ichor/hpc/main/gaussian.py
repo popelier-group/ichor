@@ -100,12 +100,11 @@ def submit_gjfs(
                 )  # make a list of GaussianCommand instances.
                 logger.debug(f"Adding {gjf} to {submission_script.path}")
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
-    if len(submission_script.commands) > 0:
-        logger.info(
-            f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
-        )
-        # submit the final submission script to the queuing system, and return the job id. hold for other jobs if needed.
-        return submission_script.submit(hold=hold)
+    logger.info(
+        f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
+    )
+    # submit the final submission script to the queuing system, and return the job id. hold for other jobs if needed.
+    return submission_script.submit(hold=hold)
 
 # Below are functions used by autorun to check if stuff exists and reruns if necessary.
 
