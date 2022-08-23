@@ -17,7 +17,7 @@ from typing import Union
 
 def submit_points_directory_to_gaussian(
     directory: Union[Path, PointsDirectory], overwrite_existing_gjf: bool = True, force_calculate_wfn: bool = False,
-    rerun_points: bool = False, scrub_points: bool = False, **kwargs) -> Optional[JobID]:
+    rerun: bool = False, scrub: bool = False, ncores=2,**kwargs) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
@@ -25,8 +25,8 @@ def submit_points_directory_to_gaussian(
     :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True.
         If this is False, then any existing `.gjf` files in the directory will not be overwritten
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files, even if .wfn files already exist. Defaults to False.
-    :param rerun_points: Whether to attempt to rerun failed points. Default False
-    :param scrub_points: Whether to scrub (move) failed points to another directory for scrubbed points. Default False
+    :param rerun: Whether to attempt to rerun failed points. Default False
+    :param scrub: Whether to scrub (move) failed points to another directory for scrubbed points. Default False
     :param kwargs: Key word arguments to pass to GJF class. These are things like number of cores, basis set,
         level of theory, spin multiplicity, charge, etc. These will get used if overwrite_existing_gjf is True or if the gjf path does
         not exist yet.
@@ -36,7 +36,7 @@ def submit_points_directory_to_gaussian(
             directory
         )  # a directory which contains points (a bunch of molecular geometries)
     gjf_files = write_gjfs(points_directory, overwrite_existing_gjf, **kwargs)
-    return submit_gjfs(gjf_files, force_calculate_wfn=force_calculate_wfn)
+    return submit_gjfs(gjf_files, force_calculate_wfn=force_calculate_wfn, rerun_points=rerun, scrub_points=scrub, ncores=ncores)
 
 
 def write_gjfs(
@@ -72,6 +72,9 @@ def submit_gjfs(
     force_calculate_wfn: bool = False,
     script_name: Optional[Path] = SCRIPT_NAMES["gaussian"],
     hold: Optional[JobID] = None,
+    rerun = False,
+    scrub = False,
+    ncores = 2,
 ) -> Optional[JobID]:
     """Function that writes out a submission script which contains an array of Gaussian jobs to be ran on compute nodes. If calling this function from
     a log-in node, it will write out the submission script, a datafile (file which contains the names of all the .gjf file that need to be ran through Gaussian),
@@ -88,12 +91,12 @@ def submit_gjfs(
 
     # make a SubmissionScript instance which is going to contain all the jobs that are going to be ran
     # the submission_script object can be accessed even after the context manager
-    with SubmissionScript(script_name) as submission_script:
+    with SubmissionScript(script_name, ncores=ncores) as submission_script:
         for gjf in gjfs:
             # append to submission script if we want to rerun the calculation (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
                 submission_script.add_command(
-                    GaussianCommand(gjf)
+                    GaussianCommand(gjf, rerun=rerun, scrub=scrub)
                 )  # make a list of GaussianCommand instances.
                 logger.debug(f"Adding {gjf} to {submission_script.path}")
     # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
