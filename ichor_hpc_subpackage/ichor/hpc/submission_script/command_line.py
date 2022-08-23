@@ -12,12 +12,6 @@ class SubmissionError(Exception):
 class CommandLine(ABC):
     """Abstract Base Class for job types (such as Gaussian, AIMALL, and FEREBUS jobs.)"""
 
-    def __init__(self, ncores=1, scrub: bool = False, rerun: bool = False,):
-        
-        self.ncores = ncores
-        self.scrub = scrub
-        self.rerun = rerun
-
     @classproperty
     @abstractmethod
     def command(self) -> str:
@@ -28,14 +22,22 @@ class CommandLine(ABC):
     def modules(self) -> Modules:
         pass
 
-    @property
+    @classproperty
     @abstractmethod
     def group(self) -> bool:
-        return True
+        pass
 
     @property
     @abstractmethod
     def data(self) -> List[str]:
+        pass
+    
+    @property
+    def ndata(self) -> int:
+        return len(self.data)
+
+    @abstractmethod
+    def repr(self, variables: List[str], *args, **kwargs) -> str:
         pass
 
     @property
@@ -45,11 +47,3 @@ class CommandLine(ABC):
     @property
     def options(self) -> List[str]:
         return []
-
-    @property
-    def repr(self, variables: List[str]) -> str:
-        pass
-    
-    @property
-    def ndata(self) -> int:
-        return len(self.data)
