@@ -35,13 +35,14 @@ class GaussianCommand(CommandLine):
         self,
         gjf_file: Path,
         gjf_output: Optional[Path] = None,
-        ncores = 2,
         scrub = False,
         rerun = False
     ):
         self.gjf_file = gjf_file
-        self.gjf_output = gjf_output or gjf_file.with_suffix(GaussianOut.filetype)  # .gau file used to store the output from Gaussian
-        super.__init__(ncores, scrub, rerun)
+        # .gau file used to store the output from Gaussian
+        self.gjf_output = gjf_output or gjf_file.with_suffix(GaussianOut.filetype)
+        self.scrub = scrub
+        self.rerun = rerun
 
     @classproperty
     def command(self) -> str:
@@ -58,7 +59,12 @@ class GaussianCommand(CommandLine):
     def modules(self) -> Modules:
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
         return GaussianModules
-    
+
+    @classproperty
+    def group(self) -> bool:
+        """Group jobs into an array job."""
+        return True
+
     @property
     def data(self) -> List[str]:
         """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau).
@@ -73,8 +79,9 @@ class GaussianCommand(CommandLine):
 
         The length of `variables` is defined by the length of `self.data`
         """
-
-        cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"  # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
+    
+        # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
+        cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"
 
         if self.scrub:
 
