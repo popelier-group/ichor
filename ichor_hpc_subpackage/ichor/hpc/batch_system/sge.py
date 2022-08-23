@@ -197,7 +197,7 @@ class SunGridEngine(BatchSystem):
     @classmethod
     def change_working_directory(cls, path: Path) -> str:
         """Return the line in the job script definning the working directory from where the job is going to run."""
-        return f"-wd {path}"
+        return f"-wd {path.absolute()}"
 
     @classmethod
     def output_directory(cls, path: Path, task_array: bool = False) -> str:
