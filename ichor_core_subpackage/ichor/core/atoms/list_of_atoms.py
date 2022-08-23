@@ -1,8 +1,9 @@
 from abc import abstractmethod, ABC
 from pathlib import Path
-from typing import List, Optional, Union, Callable
+from typing import List, Optional, Union, Callable, Dict
 import numpy as np
-from ichor.core.atoms.atoms import Atoms
+from ichor.core.atoms.atoms import Atoms, ALF
+from ichor.core.calculators import calculate_alf_features
 
 class ListOfAtoms(list, ABC):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -175,11 +176,9 @@ class ListOfAtoms(list, ABC):
 
     def center_geometries_on_atom_and_write_xyz(
         self,
-        feature_calculator: Callable,
-        *args,
         central_atom_name: str,
+        system_alf: Dict[str, ALF],
         fname: Optional[Union[str, Path]] = None,
-        **kwargs
     ):
         """Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
         xyz file with all geometries centered on that atom. This is essentially what the ALFVisualizier application (ALFi) does.
@@ -211,14 +210,14 @@ class ListOfAtoms(list, ABC):
             fname = fname.with_suffix(".xyz")
 
         # calcultate features and convert to a new Trajectory object
-        alf = self[0][central_atom_name].alf()
+        central_atom_alf = system_alf[central_atom_name]
         # before, ordering is 0,1,2,3,4,5,...,etc.
         # after calculating the features and converting back, the order is going to be
         # central atom idx, x-axis atom index, xy-plane atom index, rest of atom indices
         n_atoms = self.natoms
         previous_atom_ordering = list(range(n_atoms))
-        current_atom_ordering = list(*alf) + [
-            i for i in range(n_atoms) if i not in alf
+        current_atom_ordering = list(central_atom_alf) + [
+            i for i in range(n_atoms) if i not in central_atom_alf
         ]
         # this will get the index that the atom was moved to after reordering.
         reverse_alf_ordering = [
@@ -226,7 +225,7 @@ class ListOfAtoms(list, ABC):
         ]
         # order will always be central atom(0,0,0), x-axis atom, xy-plane atom, etc.
         xyz_array = alf_features_to_coordinates(
-            self[central_atom_name].features(feature_calculator, *args, **kwargs)
+            self[central_atom_name].features(calculate_alf_features, system_alf)
         )
         # reverse the ordering, so that the rows are the same as before
         # can now use the atom names sequence as they were read in
