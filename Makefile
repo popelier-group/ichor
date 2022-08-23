@@ -41,7 +41,7 @@ lint:
 	mypy ichor/
 
 format:
-	black ichor_core_subpackage/ichor/ ichor_hpc_subpackage/ichor/ ichor_cli_subpackage/ichor/ ichor_core_subpackage/tests/
+	black --line-length 120 ichor_core_subpackage/ichor/ ichor_hpc_subpackage/ichor/ ichor_cli_subpackage/ichor/ ichor_core_subpackage/tests/
 	isort ichor_core_subpackage/ichor/ ichor_hpc_subpackage/ichor/ ichor_cli_subpackage/ichor/ ichor_core_subpackage/tests/
 
 docs: venv
