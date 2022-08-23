@@ -26,7 +26,7 @@ class DataLock:
     node. Consequently, when Job2 runs on the compute node, the data it would read from DF1 wouldn't be the
     correct data written by Job1 but instead garbage data written whilst submitting Job2 from the login node.
 
-    To prevent this data race from occuring, DataLock prevents writing datafiles from the login node which
+    To prevent this data race from occurring, DataLock prevents writing datafiles from the login node which
     turns our above scenario into the following
 
       | Login                     | Datafile                   | Compute
