@@ -12,28 +12,30 @@ from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE, MACHINE
 from ichor.hpc.batch_system import NodeType
 
 class SubmissionScript:
-    """
-    A class that can be used to construct submission scripts for various programs such as Gaussian and AIMALL.
+    """A class that can be used to construct submission scripts for various programs such as Gaussian and AIMALL.
     :param path: A path to a submission script (such as GAUSSIAN.sh and AIMALL.sh). These .sh files are submitted as jobs to CSF3/FFLUXLAB.
     These job scripts will have different contents depending on the number of cores selected, the number of tasks to do (if running an array job), etc.,
     so they need to be written out dynamically depending on what is going to be ran.
     """
 
-    SEPARATOR = ","  # separator which is used to separate names of files in the datafiles (files with random UID names) which are written by ICHOR.
-    DATAFILE = "ICHOR_DATFILE"  # name of the bash variable which is used to store the location of the datafile for the given job.
+    # separator which is used to separate names of files in the datafiles (files with random UID names) which are written by ICHOR.
+    SEPARATOR = ","
+    # name of the bash variable which is used to store the location of the datafile for the given job.
+    DATAFILE = "ICHOR_DATFILE"
 
-    def __init__(self, submission_script_name: Union[str, Path], cwd: Path = None, ncores: int = None, include_nodes: List[str] = None, exclude_nodes: List[str] = None,
-                 max_running_tasks = -1):
+    def __init__(self, submission_script_name: Union[str, Path], ncores: int, cwd: Path = None,
+                 include_nodes: List[str] = None, exclude_nodes: List[str] = None,
+                 max_running_tasks: int = -1, options=List[str]):
 
         self.path = Path(submission_script_name)
-        self.cwd = cwd or Path.cwd()
         self.uid = get_uid()
-        self._ncores = ncores
+        self.cwd = cwd or Path.cwd()
+        self.ncores = ncores
         self.include_nodes = include_nodes or []
         self.exclude_nodes = exclude_nodes or []
         self.max_running_tasks = max_running_tasks
-
-        self.commands = [] # a list of commands to be submitted to batch system
+        self._options = options
+        self._commands = [] # a list of commands to be submitted to batch system
 
     @classproperty
     def filetype(self) -> str:
@@ -42,74 +44,7 @@ class SubmissionScript:
 
     def add_command(self, command):
         """Add a command to the list of commands."""
-        self.commands += [command]
-
-    @property
-    def ncores(self) -> int:
-        """Number of cores to be used for the job."""
-        return self._ncores or max(
-            command.ncores for command in self.grouped_commands
-        )
-
-    @ncores.setter
-    def ncores(self, ncores: int):
-        self._ncores = ncores
-
-    def default_options(self) -> List[str]:
-
-        """Returns a list of default options to use in a submission script for a job.
-        This list contaning the current working directory, the output directory (where .o files are written),
-        the errors directory (where .e files are witten). If the number of cores is more than 1, the keyword
-        needed when specifying more than 1 cores is also written to the options list. This keyword depends on
-        the system on which the job is ran, as well as on the number of cores that the job needs."""
-
-        mkdir(FILE_STRUCTURE["outputs"])
-        mkdir(FILE_STRUCTURE["errors"])
-
-        task_array = any(
-            len(grouped_command) > 1
-            for grouped_command in self.grouped_commands
-        )
-
-        # change current working directory to directory from which ICHOR is launched.
-        # make the paths to outputs and errors absolute
-        options = [
-            BATCH_SYSTEM.change_working_directory(self.cwd),
-            BATCH_SYSTEM.output_directory(
-                FILE_STRUCTURE["outputs"].resolve(), task_array
-            ),
-            BATCH_SYSTEM.error_directory(
-                FILE_STRUCTURE["errors"].resolve(), task_array
-            ),
-        ]
-
-        # if the number of cores is more than 1, have to add additional options
-        pe = BATCH_SYSTEM.parallel_environment(self.ncores)
-        if pe is not None:
-            options.append(pe)
-
-        return options
-
-    @property
-    def options(self) -> List[str]:
-        """Return the complete list of options (default options + other options that are specific to the job)."""
-        options = []
-        for command in self.grouped_commands:
-            options.extend(command.options)
-        # do not duplicate commands
-        return list(set(options + self.default_options()))
-
-    @property
-    def modules(self) -> List[str]:
-        """Returns a list of modules that need to be loaded before a job can be ran."""
-        from ichor.hpc import MACHINE
-
-        modules = []
-        for command in self.grouped_commands:
-            modules += command.modules[
-                MACHINE
-            ]  # modules depend on which machine (CSF/FFLUXLAB) we are currently on
-        return list(sorted(list(set(modules))))
+        self._commands.append(command)
 
     @property
     def grouped_commands(self) -> List[CommandGroup]:
@@ -125,38 +60,75 @@ class SubmissionScript:
 
         The groupings are then used to allocate a task array to the batch system
         """
-        commands = []
-        command_group = CommandGroup()  # make a new command group
-        command_type = None
+        # command group just allows us to get attributes of group commands
+        command_group = CommandGroup(self._commands)
+        
+        if command_group.ntypes > 1:
+            raise ValueError("Only one type of jobs can be submitted in one submission script.")
 
-        # iterate over each command instance that has been added to self.commands
-        for command in self.commands:
-            # if the command is not equal to command_type or commands.group is set to False (group method defined in CommandLine class, default True)
-            if (
-                type(command) != command_type or not command.group
-            ):  # .group flag used by command if it doesn't want to be grouped
-                if (
-                    len(command_group) > 0
-                ):  # just for first iteration of the loop
-                    commands += [command_group]
-                    command_group = CommandGroup()
-                command_type = type(command)
-            command_group += [command]
+        return command_group
 
-        if len(command_group) > 0:
-            commands += [command_group]
-        return commands
+    @property
+    def default_options(self) -> List[str]:
 
-    @classmethod
+        """Returns a list of default options to use in a submission script for a job.
+        This list containing the current working directory, the output directory (where .o files are written),
+        the errors directory (where .e files are written). If the number of cores is more than 1, the keyword
+        needed when specifying more than 1 cores is also written to the options list. This keyword depends on
+        the system on which the job is ran, as well as on the number of cores that the job needs."""
+
+        mkdir(FILE_STRUCTURE["outputs"])
+        mkdir(FILE_STRUCTURE["errors"])
+
+        task_array = any(
+            len(grouped_command) > 1
+            for grouped_command in self.grouped_commands
+        )
+
+        # change current working directory to directory from which ICHOR is launched.
+        # make the paths to outputs and errors absolute
+        script_options = [
+            BATCH_SYSTEM.change_working_directory(self.cwd),
+            BATCH_SYSTEM.output_directory(
+                FILE_STRUCTURE["outputs"].absolute(), task_array
+            ),
+            BATCH_SYSTEM.error_directory(
+                FILE_STRUCTURE["errors"].absolute(), task_array
+            ),
+        ]
+
+        # if the number of cores is more than 1, have to add additional options
+        pe = BATCH_SYSTEM.parallel_environment(self.ncores)
+        if pe is not None:
+            script_options.append(pe)
+
+        return script_options
+
+    @property
+    def options(self) -> List[str]:
+        """Return the complete list of options (default options + other options that are specific to the job)."""
+        return list(set(self._options + self.default_options))
+
+    @property
+    def modules(self) -> List[str]:
+        """Returns a list of modules that need to be loaded before a job can be ran."""
+
+        modules = []
+        for command in self.grouped_commands:
+            # modules depend on which machine (CSF/FFLUXLAB) we are currently on
+            modules += command.modules[MACHINE]
+        return list(set(modules))
+
+    @property
+    def bash_date(self) -> str:
+        return "$(date)"
+
     def arr(cls, n):
         """Returns the keyword which is used to select array jobs. Since array jobs start at 1 instead of 0, 1 needs to be added
         to the array size."""
         return f"arr{n + 1}"
 
-    @classmethod
     def array_index(cls, n):
-        from ichor.hpc import BATCH_SYSTEM
-
         """Returns the keywords used to run an array job through a program such as Gaussian.
 
         .. note::
@@ -167,11 +139,9 @@ class SubmissionScript:
         # Note: double {{ }} is python notation for writing a curly brace in an f-string
         return f"${{{cls.arr(n)}[${BATCH_SYSTEM.TaskID}-1]}}"
 
-    @classmethod
     def var(cls, n):
         return f"var{n + 1}"
 
-    @classmethod
     def test_array_not_null(cls, n):
         """Returns a string which is used in bash to test if an array entry is not null or empty.
         We need to test this because there could be cases where there are 2000 SGE tasks for example,
@@ -202,7 +172,7 @@ class SubmissionScript:
                         f"{SubmissionScript.SEPARATOR.join(map(str, cmd_data))}\n"
                     )
 
-    def setup_script_arrays(
+    def generate_str_for_reading_datafile(
         self, datafile: Path, data: List[List[str]]
     ) -> str:
         """Forms the strings for array jobs which are then written to the submission script to specify the number of
@@ -215,21 +185,21 @@ class SubmissionScript:
         # absolute location of datafile on disk
         datafile_str = f"{SubmissionScript.DATAFILE}={datafile.absolute()}"
 
-        # writes out the number of arrays needed for the job
+        # writes out the strings which correspond to arrays containing input/output file names (as read from the datafile)
         # Note: implemented as generator so that a list generation and comprehension is not required
-        read_datafile_str = "".join(
-            f"{self.arr(i)}=()\n" for i in range(ndata)
-        )
+        read_datafile_str = "".join(f"{self.arr(i)}=()\n" for i in range(ndata))
 
         # writes out the while loop needed to read in files names into their corresponding arrays
         # -r option prevents backslashes from being treated as escape characters
         read_datafile_str += (
-            f"while IFS={SubmissionScript.SEPARATOR} read -r "
-            f"{' '.join(self.var(i) for i in range(ndata))}\n"
+            f"while IFS={SubmissionScript.SEPARATOR} read -r {' '.join(self.var(i) for i in range(ndata))}\n"
         )
         read_datafile_str += "do\n"
+        
+        # lines which will add the things read in from the datafile to the previously made arrays
         for i in range(ndata):
             read_datafile_str += f"    {self.arr(i)}+=(${self.var(i)})\n"
+            
         read_datafile_str += f"done < ${SubmissionScript.DATAFILE}\n"
 
         # checks if array entries are not empty, so that we do not get errors
@@ -255,14 +225,11 @@ class SubmissionScript:
         :param data: A list of lists. Each inner list contains strings which are the names of the inputs and output files.
         """
         self.write_datafile(datafile, data)
-        datafile_str = self.setup_script_arrays(datafile, data)
+        datafile_str = self.generate_str_for_reading_datafile(datafile, data)
         datafile_variables = [self.array_index(i) for i in range(len(data[0]))]
-        set_uid()
+        # TODO: check if this is needed
+        # set_uid()
         return datafile_variables, datafile_str
-
-    @classproperty
-    def BASH_NOW(self) -> str:
-        return "$(date)"
 
     def write(self):
         """Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
@@ -271,13 +238,10 @@ class SubmissionScript:
         mkdir(self.path.parent)
 
         if self.grouped_commands:
+            
+            njobs = len(self.grouped_commands)
 
             with open(self.path, "w") as f:
-
-                njobs = max(
-                    len(command_group)
-                    for command_group in self.grouped_commands
-                )
 
                 f.write("#!/bin/bash -l\n")
                 # write any options to be given to the batch system, such as working directory, where to write outputs/errors, etc.
@@ -293,66 +257,50 @@ class SubmissionScript:
                 # if writing an array jobs, then the batch system needs to know that
                 # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
                 if njobs > 1:
-                    f.write(
-                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
-                    )
+                    f.write(f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n")
+                    # this is instead of njobs > self.max_running_tasks and self.max_running_tasks > 0
                     if njobs > self.max_running_tasks > 0:
-                        f.write(
-                            f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(self.max_running_tasks)}\n"
-                        )
-                else:
-                    f.write(f"{BATCH_SYSTEM.TaskID}=1\n")
+                        f.write(f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(self.max_running_tasks)}\n")
 
                 # if job or array job is going to use more than 1 cores, then we need extra things to write.
                 if self.ncores > 1:
                     f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
-                    # f.write(f"export OMP_PROC_BIND=true\n")
-                    # f.write(f"export OMP_PLACES=cores\n")
 
-                f.write(f"echo \"Loading Modules | {self.BASH_NOW}\"\n")
+                f.write(f"echo \"Loading Modules | {self.bash_date}\"\n")
 
                 # load any modules required for the job
                 for module in self.modules:
                     f.write(f"module load {module}\n")
 
-                f.write(f"echo \"Starting Job | {self.BASH_NOW}\"\n")
+                f.write(f"echo \"Starting Job | {self.bash_date}\"\n")
 
-                requires_datafile = False  # used to check if there was any command group that requires a datafile
-                for command_group in self.grouped_commands:
-                    command_variables = []
-                    # Gaussian, Ferebus, AIMALL jobs need access to datafiles
-                    # the datafile's name is the unique id that was assigned to the submission script
-                    if command_group.data:
-                        requires_datafile = True  # if we got to this part of the code, then we definitely need to check array entries read from datafile
+                # used to check if there was any command group that requires a datafile
+                requires_datafile = self.grouped_commands.data  
+                
+                # Gaussian, Ferebus, AIMALL jobs need access to datafiles
+                # the datafile's name is the unique id that was assigned to the submission script
+                
+                # if we got to this part of the code, then we definitely need to check array entries read from datafile
+                if requires_datafile:
+                        
+                    datafile = FILE_STRUCTURE["datafiles"] / Path(str(self.uid))
+                    
+                    # get the data that is needed for each command in a command group
+                    # for example, if the command is a Gaussian command, then we need an input file (.gjf) and an output file (.gau)
+                    # command_group_data is a list of lists. Each inner list has input/output files
+                    command_group_data = [command.data for command in self.grouped_commands]
+                    # datafile_vars is a list of strings corresponding to the arrays that need to be used by the program we are running (eg. Gaussian)
+                    # datafile_str is the rest of the stuff that sets up the arrays used for the array job in the submission script
+                    datafile_vars, datafile_str = self.setup_datafile(datafile, command_group_data)
+                    f.write(f"{datafile_str}\n")  # write the array job parts to the submission script
+                f.write(f"{self.grouped_commands.repr(datafile_vars)}\n")  # see class GaussianCommand for example
 
-                        datafile = FILE_STRUCTURE["datafiles"] / Path(
-                            str(self.uid)
-                        )
-                        # get the data that is needed for each command in a command group
-                        # for example, if the command is a Gaussian command, then we need an input file (.gjf) and an output file (.gau)
-                        # command_group_data is a list of lists. Each inner list has input/output files
-                        command_group_data = [
-                            command.data for command in command_group
-                        ]
-                        # datafile_vars is a list of strings corresponding to the arrays that need to be used by the program we are running (eg. Gaussian)
-                        # datafile_str is the rest of the stuff that sets up the arrays used for the array job in the submission script
-                        datafile_vars, datafile_str = self.setup_datafile(
-                            datafile, command_group_data
-                        )
-                        command_variables += datafile_vars
-                        f.write(
-                            f"{datafile_str}\n"
-                        )  # write the array job parts to the submission script
-                    f.write(
-                        f"{command_group.repr(command_variables)}\n"
-                    )  # see class GaussianCommand for example
-
-                # close the if statement that was started when checking if arrays have non-null entries (see self.setup_script_arrays)
+                # close the if statement that was started when checking if arrays have non-null entries (see self.generate_str_for_reading_datafile)
                 # only write this if there was a command that required a datafile. Otherwise this will not be written
                 if requires_datafile:
                     f.write("fi\n")
 
-                f.write(f"echo \"Finished Job | {self.BASH_NOW}\"\n")
+                f.write(f"echo \"Finished Job | {self.bash_date}\"\n")
 
         else:
             raise ValueError(
@@ -361,10 +309,7 @@ class SubmissionScript:
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
 
-        if (
-            BATCH_SYSTEM.current_node() is not NodeType.ComputeNode
-            and MACHINE.submit_type is SubmitType.SubmitOnCompute
-        ):
+        if (BATCH_SYSTEM.current_node() is not NodeType.ComputeNode):
             return BATCH_SYSTEM.submit_script(self.path, hold)
 
     def __enter__(self) -> "SubmissionScript":
