@@ -8,18 +8,6 @@ from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 from ichor.hpc.make_sets import MAKE_SET_METHODS_DICT
 from ichor.hpc import FILE_STRUCTURE
 
-# TODO: Do not use these functions as they do not work as the sets can have identical points in them which is really bad.
-# Needs redesigning (or just computing all the point initially, then the dataset does not have to be split)
-def make_training_set(points_input: Path, training_set_methods: Dict[str, Union[int, None]]):
-    make_sets(points_input, training_set_methods=training_set_methods)
-
-def make_sample_pool(points_input: Path, sample_pool_methods: Dict[str, Union[int, None]]):
-    make_sets(points_input, sample_pool_methods=sample_pool_methods)
-
-def make_validation_set(points_input: Path, validation_set_methods: Dict[str, Union[int, None]]):
-    make_sets(points_input, validation_set_methods=validation_set_methods)
-
-
 # makes all the sets at once, mutating the points_input, ensuring that each set has unique points.
 # as a Path is passed in and not an object containing points, this mutation should not break code
 # as objects containing points are made and used only inside the function.
@@ -52,6 +40,10 @@ def make_sets(
         raise TypeError(
             f"Cannot convert path '{points_input}' into type 'ListOfAtoms'"
         )
+    
+    # use this later for when writing file names to correspond to the timestep in the trajectory
+    for idx, p in enumerate(points):
+        p._original_index = idx
 
     if not training_set_methods:
         training_set_methods = {"random": 2000}
@@ -59,6 +51,10 @@ def make_sets(
         sample_pool_methods = {"random": 10000}
     if not validation_set_methods:
         validation_set_methods = {"random": 500}
+
+    total_number_of_points_in_sets = sum(training_set_methods.values(), sample_pool_methods.values(), validation_set_methods.values())
+    if total_number_of_points_in_sets > len(points):
+        raise ValueError("The total number of points in the sets is greater than the number of supplied points in the trajectory/directory.")
 
     s = generate_geometries_set(points, training_set_methods)
     write_set_to_dir(FILE_STRUCTURE["training_set"], s, system_name)
@@ -85,13 +81,15 @@ def make_set(
     for make_set_class_name, make_set_class in MAKE_SET_METHODS_DICT.items():
         # if the method matches the name of a class, then get the indices of points using that class
         if make_set_class_name == method_name:
+            
             indices_list = make_set_class.get_points_indices(all_points, npoints)
             
             # get the indices from the ListOfAtoms instance and add not new set of points
             # mutate all_points to prevent duplicates.
             for idx in indices_list:
                 # add instance of Atoms or PointDirectory to new set
-                new_set.append((all_points[idx], idx))
+                new_set.append(all_points[idx])
+    
                 del all_points[idx]
             
     if len(new_set) == 0:
@@ -99,12 +97,11 @@ def make_set(
 
     return new_set
 
-
 def write_set_to_dir(path: Path, points: List[Tuple[str, int]], system_name: str) -> None:
     
     mkdir(path)
-    for point, point_index_in_trajectory in points:
-        point_name = f"{system_name}{point_index_in_trajectory}"
+    for point in points:
+        point_name = f"{system_name}{point._original_index}"
         mkdir(path / point_name)
         if isinstance(point, PointDirectory):
             xyz = XYZ(path / point_name / f"{point_name}{XYZ.filetype}", atoms=point.atoms)
@@ -113,9 +110,6 @@ def write_set_to_dir(path: Path, points: List[Tuple[str, int]], system_name: str
         # TODO: why is centering needed? This does not do anything for the calculations
         # xyz.atoms.centre()
         xyz.write()
-
-
-
 
 
 
