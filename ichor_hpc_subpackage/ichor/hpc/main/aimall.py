@@ -2,8 +2,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.core.common.io import remove
-from ichor.core.files import AIM, INT, PointsDirectory, FileContents
+from ichor.core.files import PointsDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script import SCRIPT_NAMES, AIMAllCommand, SubmissionScript
@@ -21,6 +20,8 @@ def submit_points_directory_to_aimall(
         points = PointsDirectory(points_directory)
  
     method = method.upper()
+    if method not in AIMALL_FUNCTIONALS:
+        raise ValueError("The functional provided is not supported by AIMAll.")
     
     list_of_wfn_paths = add_method_and_get_wfn_paths(points, method)
     
