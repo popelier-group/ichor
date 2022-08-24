@@ -22,14 +22,12 @@ def submit_points_directory_to_gaussian(
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
     :param directory: A Path object which is the path of the directory (commonly traning set path, sample pool path, etc.).
-    :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True.
-        If this is False, then any existing `.gjf` files in the directory will not be overwritten
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files, even if .wfn files already exist. Defaults to False.
     :param rerun: Whether to attempt to rerun failed points. Default False
     :param scrub: Whether to scrub (move) failed points to another directory for scrubbed points. Default False
     :param kwargs: Key word arguments to pass to GJF class. These are things like number of cores, basis set,
-        level of theory, spin multiplicity, charge, etc. These will get used if overwrite_existing_gjf is True or if the gjf path does
-        not exist yet.
+        level of theory, spin multiplicity, charge, etc. These will get used in the new written gjf files (overwriting 
+        settings from previously existing gjf files)
     """
     if not isinstance(directory, PointsDirectory):
         points_directory = PointsDirectory(
@@ -45,8 +43,6 @@ def write_gjfs(
     which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf` file in the PointDirectory (if it does not exist already).
 
     :param points: A PointsDirectory instance which wraps around a whole directory containing points (such as TRAINING_SET).
-    :param overwrite_existing: Whether to overwrite existing gjf files in a directory. Default is True (see `submit_points_directory_to_gaussian`)
-        If this is False, then any existing `.gjf` files in the directory will not be overwritten (thus they would not be using the GLOBALS Gaussian settings.)
     :return: A list of Path objects which point to `.gjf` files in each PointDirectory that is contained in the PointsDirectory.
     """
 
