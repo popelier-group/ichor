@@ -28,7 +28,7 @@ def submit_points_directory_to_gaussian(
 
     gjf_files = write_gjfs(points_directory, overwrite_existing, **kwargs)
     return submit_gjfs(gjf_files, script_name = script_name, force_calculate_wfn=force_calculate_wfn,
-                       rerun=rerun, scrub_points=scrub, ncores=ncores, hold=hold)
+                       rerun=rerun, scrub=scrub, ncores=ncores, hold=hold)
 
 
 def write_gjfs(
