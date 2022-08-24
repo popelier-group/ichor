@@ -16,7 +16,7 @@ from ichor.hpc.log import logger
 from typing import Union
 
 def submit_points_directory_to_gaussian(
-    directory: Union[Path, PointsDirectory], overwrite_existing_gjf: bool = True, force_calculate_wfn: bool = False,
+    directory: Union[Path, PointsDirectory], force_calculate_wfn: bool = False,
     rerun: bool = False, scrub: bool = False, ncores=2,**kwargs) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
@@ -35,12 +35,12 @@ def submit_points_directory_to_gaussian(
         points_directory = PointsDirectory(
             directory
         )  # a directory which contains points (a bunch of molecular geometries)
-    gjf_files = write_gjfs(points_directory, overwrite_existing_gjf, **kwargs)
+    gjf_files = write_gjfs(points_directory, **kwargs)
     return submit_gjfs(gjf_files, force_calculate_wfn=force_calculate_wfn, rerun_points=rerun, scrub_points=scrub, ncores=ncores)
 
 
 def write_gjfs(
-    points_directory: PointsDirectory, overwrite_existing_gjf: bool, **kwargs) -> List[Path]:
+    points_directory: PointsDirectory, **kwargs) -> List[Path]:
     """Writes out .gjf files in every PointDirectory which is contained in a PointsDirectory. Each PointDirectory should always have a `.xyz` file in it,
     which contains only one molecular geometry. This `.xyz` file can be used to write out the `.gjf` file in the PointDirectory (if it does not exist already).
 
@@ -54,14 +54,9 @@ def write_gjfs(
     
     for point_directory in points_directory:
         
-        # use key word arguments to make gjf if gjf file does not exist or overwrite_existing flag is set
-        if not point_directory.gjf.exists() or overwrite_existing_gjf:
-            point_directory.gjf = GJF(
-                Path(point_directory.path / (point_directory.path.name + GJF.filetype)), **kwargs)
-        # if gjf path exists or overwrite_existing_gjf is False, then do not modify existing GJF file.
-        else:
-            point_directory.gjf = GJF(Path(point_directory.path / (point_directory.path.name + GJF.filetype)))
+        point_directory.gjf = GJF(Path(point_directory.path / (point_directory.path.name + GJF.filetype)), **kwargs)
         point_directory.gjf.atoms = point_directory.xyz.atoms
+        point_directory.gjf.write()
 
         gjfs.append(point_directory.gjf.path)
 
