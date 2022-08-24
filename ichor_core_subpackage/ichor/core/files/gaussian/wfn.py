@@ -7,7 +7,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import split_by
 from ichor.core.common.constants import AIMALL_FUNCTIONALS
-from ichor.core.files.file import FileContents, ReadFile, WriteFile
+from ichor.core.files.file import FileContents, ReadFile, WriteFile, FileState
 from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.common.units import AtomicDistance
 from ichor.core.common.itertools import chunker
@@ -190,6 +190,13 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
     @property
     def properties(self) -> Dict[str, float]:
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
+
+    def _check_values_before_writing(self):
+        """ This check is just here so that the file is read before attempting to write the file.
+        It is an arbitrary check. This is to prevent a situation where the original file has not been read yet,
+        but a new file with the same path is being written (so therefore the new file is empty and all the data has been
+        lost and has not been read in into an instance yet)."""
+        self.title = self.title
 
     def _write_file(self, path: Path):
         """ Write method needs to be implemented because the correct functional needs to be added to the .wfn file,
