@@ -280,7 +280,6 @@ class AIMAllCommand(CommandLine):
         # if a list of atom names is given, then need to make in format which AIMAll reads
         # -atoms=all_... (e.g., -atoms=all_1,3,6) will calculate a full molecular graph but will only calculate atomic properties of the listed atoms.
         # Specifying -atoms=... (e.g., -atoms=1,3,6) (recommended for reruns of problem atoms following an all atom run) will only determine the critical point connectivity and atomic properties of the listed atoms, i.e., the full molecular graph will not be (re)calculated.  
-        print(self.atoms)
         atoms = (self.atoms if self.atoms == "all" else "all_" + ", ".join(map(str, [get_digits(a) for a in self.atoms])))
         
         return [
