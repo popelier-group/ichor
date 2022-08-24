@@ -74,7 +74,7 @@ def submit_wfns(
     :param hold: An optional JobID to hold for. The AIMALL job will not run until that other job is finished.
     
     """
-    with SubmissionScript(script_name) as submission_script:
+    with SubmissionScript(script_name, ncores=ncores) as submission_script:
         
         for wfn in wfns:
             submission_script.add_command(AIMAllCommand(wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs))
