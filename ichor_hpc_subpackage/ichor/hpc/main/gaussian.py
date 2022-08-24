@@ -8,7 +8,7 @@ from ichor.hpc.log import logger
 from ichor.hpc.submission_script import SCRIPT_NAMES, GaussianCommand, SubmissionScript, print_completed
 
 def submit_points_directory_to_gaussian(
-    directory: Union[Path, PointsDirectory], overwrite_existing = False, force_calculate_wfn: bool = False,
+    points_directory: Union[Path, PointsDirectory], overwrite_existing = False, force_calculate_wfn: bool = False,
     ncores = 2, rerun: bool = False, scrub: bool = False,
     hold: JobID = None, script_name: str = None, **kwargs) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
@@ -22,10 +22,10 @@ def submit_points_directory_to_gaussian(
         level of theory, spin multiplicity, charge, etc. These will get used in the new written gjf files (overwriting 
         settings from previously existing gjf files)
     """
-    if not isinstance(directory, PointsDirectory):
-        points_directory = PointsDirectory(
-            directory
-        )  # a directory which contains points (a bunch of molecular geometries)
+    # a directory which contains points (a bunch of molecular geometries)
+    if not isinstance(points_directory, PointsDirectory):
+        points_directory = PointsDirectory(points_directory)
+
     gjf_files = write_gjfs(points_directory, overwrite_existing, **kwargs)
     return submit_gjfs(gjf_files, script_name = script_name, force_calculate_wfn=force_calculate_wfn,
                        rerun_points=rerun, scrub_points=scrub, ncores=ncores, hold=hold)
