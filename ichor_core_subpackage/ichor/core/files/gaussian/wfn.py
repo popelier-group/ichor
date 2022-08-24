@@ -195,7 +195,13 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
         """ This check is just here so that the file is read before attempting to write the file.
         This is to prevent a situation where the original file has not been read yet,
         but a new file with the same path is being written (so therefore the new file is empty and all the data has been
-        lost and has not been read in into an instance yet)."""
+        lost and has not been read in into an instance yet).
+        
+        ..note::
+            Even though the file could already be read in and some attributes might be modified by the user,
+            reading the file a second time prior to writing will not change any user attributes because of the 
+            way the read file is written (i.e. any user-set attributes are kept even after the file is read again).
+        """
         if self.state == FileState.Unread:
             self.read()
 
