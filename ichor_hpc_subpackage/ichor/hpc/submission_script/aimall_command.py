@@ -19,9 +19,9 @@ from ichor.hpc import MACHINE
 
 class UseTwoe(Enum):
     
-    No = "0"
-    Vee_aa = "1"
-    Always = "2"
+    No = 0
+    Vee_aa = 1
+    Always = 2
 
 class BasinIntegrationMethod(Enum):
     Auto = "auto"
@@ -154,42 +154,6 @@ AIMAll_COMMANDS = {
     Machine.local: "aimall",
 }
 
-
-DEFAULT_ARGUMENTS = {
-        'usetwoe': 0,
-        'encomp': 3,
-        'boaq': "auto",
-        'iasmesh': "fine",
-        'bim': "auto",
-        'capture': "auto",
-        'ehren': 0,
-        'feynman': False,
-        'iasprops': True,
-        'magprops': "none",
-        'source': False,
-        'iaswrite': False,
-        'atidsprops': 0.001,
-        'warn': True,
-        'scp': "some",
-        'delmog': True,
-        'skipint': False,
-        'f2w': "wfx",
-        'f2wonly': False,
-        'mir': "auto",
-        'cpconn': "moderate",
-        'intveeaa': "new",
-        'atlaprhocps': False,
-        'wsp': True,
-        'shm_lmax': 5,
-        'maxmem': 2400,
-        "verifyw": "yes",
-        "saw":  False,
-        "autonnacps":  True,
-        "rerun": False,
-        "scrub":  False,
-    }
-
-
 class AIMAllCommand(CommandLine):
     """
     A class which is used to add AIMALL-related commands to a submission script. It is used to write the submission script line where
@@ -208,38 +172,39 @@ class AIMAllCommand(CommandLine):
         wfn_file_path: Path,
         ncores: int,
         naat: int,
-        usetwoe: 0,
-        atoms: Optional[Union[List[str], Atoms, str]] = "all",
-        encomp: int = DEFAULT_ARGUMENTS["encomp"],
-        boaq: str = DEFAULT_ARGUMENTS["boaq"],
-        iasmesh: str = DEFAULT_ARGUMENTS["iasmesh"],
-        bim: str = DEFAULT_ARGUMENTS["bim"],
-        capture: str = DEFAULT_ARGUMENTS["capture"],
-        ehren: int = DEFAULT_ARGUMENTS["ehren"],
-        feynman: bool = DEFAULT_ARGUMENTS["feynman"],
-        iasprops: bool = DEFAULT_ARGUMENTS["iasprops"],
-        magprops: str = DEFAULT_ARGUMENTS["magprops"],
-        source: bool = DEFAULT_ARGUMENTS["source"],
-        iaswrite: bool = DEFAULT_ARGUMENTS["iaswrite"],
-        atidsprops: float = DEFAULT_ARGUMENTS["atidsprops"],
-        warn: bool = DEFAULT_ARGUMENTS["warn"],
-        scp: str = DEFAULT_ARGUMENTS["scp"],
-        delmog: bool = DEFAULT_ARGUMENTS["delmog"],
-        skipint: bool = DEFAULT_ARGUMENTS["skipint"],
-        f2w: str = DEFAULT_ARGUMENTS["f2w"],
-        f2wonly: bool = DEFAULT_ARGUMENTS["f2wonly"],
-        mir: str = DEFAULT_ARGUMENTS["mir"],
-        cpconn: str = DEFAULT_ARGUMENTS["cpconn"],
-        intveeaa: str = DEFAULT_ARGUMENTS["intveeaa"],
-        atlaprhocps: bool = DEFAULT_ARGUMENTS["atlaprhocps"],
-        wsp: bool = DEFAULT_ARGUMENTS["wsp"],
-        shm_lmax: int = DEFAULT_ARGUMENTS["shm_lmax"],
-        maxmem: int = DEFAULT_ARGUMENTS["maxmem"],
-        verifyw: str = DEFAULT_ARGUMENTS["verifyw"],
-        saw: bool = DEFAULT_ARGUMENTS["saw"],
-        autonnacps: bool = DEFAULT_ARGUMENTS["autonnacps"],
-        rerun: bool = DEFAULT_ARGUMENTS["rerun"],
-        scrub: bool = DEFAULT_ARGUMENTS["scrub"],
+        
+        atoms: Optional[Union[List[str], Atoms]] = "all",
+        usetwoe: int = 0,
+        encomp: int = 3,
+        boaq: str = "auto",
+        iasmesh: str = "fine",
+        bim: str = "auto",
+        capture: str = "auto",
+        ehren: int = 0,
+        feynman: bool = False,
+        iasprops: bool = True,
+        magprops: str = "none",
+        source: bool = False,
+        iaswrite: bool = False,
+        atidsprops: float = 0.001,
+        warn: bool = True,
+        scp: str = "some",
+        delmog: bool = True,
+        skipint: bool = False,
+        f2w: str = "wfx",
+        f2wonly: bool = False,
+        mir: str = "auto",
+        cpconn: str = "moderate",
+        intveeaa: str = "new",
+        atlaprhocps: bool = False,
+        wsp: bool = True,
+        shm_lmax: int = 5,
+        maxmem: int = 2400,
+        verifyw: str = "yes",
+        saw: bool = False,
+        autonnacps: bool = True,
+        rerun: bool = False,
+        scrub: bool = False,
     ):
         
         self.wfn_file = WFN(wfn_file_path)
@@ -315,7 +280,8 @@ class AIMAllCommand(CommandLine):
         # if a list of atom names is given, then need to make in format which AIMAll reads
         # -atoms=all_... (e.g., -atoms=all_1,3,6) will calculate a full molecular graph but will only calculate atomic properties of the listed atoms.
         # Specifying -atoms=... (e.g., -atoms=1,3,6) (recommended for reruns of problem atoms following an all atom run) will only determine the critical point connectivity and atomic properties of the listed atoms, i.e., the full molecular graph will not be (re)calculated.  
-        atoms = (self.atoms if self.atoms == "all" else "all_" + ",".join(map(str, [get_digits(a) for a in self.atoms])))
+        print(self.atoms)
+        atoms = (self.atoms if self.atoms == "all" else "all_" + ", ".join(map(str, [get_digits(a) for a in self.atoms])))
         
         return [
             f"-nogui",
