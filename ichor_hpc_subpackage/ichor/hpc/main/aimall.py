@@ -13,21 +13,34 @@ from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
 def submit_points_directory_to_aimall(
     points_directory: Union[PointsDirectory, Path], method = "B3LYP", ncores: int= 2, naat: int = 1,
-    aimall_atoms: Optional[List[str]] = None, force: bool = False, hold: JobID= None) -> Optional[JobID]:
-    """Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file"""
+    aimall_atoms: Optional[List[str]] = None, hold: JobID= None, **kwargs) -> Optional[JobID]:
+    """Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file
+
+    :param points_directory: A path to a `PointsDirectory`-structured directory or a PointsDirectory instance
+    :param method: Functional to be written to the .wfn file because AIMAll needs to know it to function correctly.
+    :param ncores: Number of cores to run AIMAll with, defaults to 2
+    :param naat: Number of atoms at a time, defaults to 1
+    :param aimall_atoms: A list of atom names (e.g. [C1, H2, etc.]) which to integrate over, defaults to None
+        If left as None, AIMAll will do calculations for all atoms.
+    :type aimall_atoms: Optional[List[str]], optional
+    :param hold: Hold for a specific JobID, defaults to None
+    :raises ValueError: if the provided method is not in the supported functionals, then raise error.
+    :return: The job id of the submitted job
+    :rtype: Optional[JobID]
+    """
  
     if not isinstance(points_directory, PointsDirectory):
-        points = PointsDirectory(points_directory)
+        points_directory = PointsDirectory(points_directory)
  
     method = method.upper()
     if method not in AIMALL_FUNCTIONALS:
         raise ValueError("The functional provided is not supported by AIMAll.")
     
-    list_of_wfn_paths = add_method_and_get_wfn_paths(points, method)
+    list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
     
     logger.info("Submitting wavefunctions to AIMAll.")
     return submit_wfns(list_of_wfn_paths, aimall_atoms=aimall_atoms,
-                        force=force, ncores=ncores, naat=naat, hold=hold)
+                       ncores=ncores, naat=naat, hold=hold, **kwargs)
 
 def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[Path]:
     """ AIMALL needs to know the method from the wfn file. The method needs to be added in the wfn file, otherwise AIMALL gets the method wrong and
@@ -50,8 +63,8 @@ def submit_wfns(
     script_name: str = SCRIPT_NAMES["aimall"],
     ncores = 2,
     naat = 1,
-    force: bool = False,
     hold: Optional[JobID] = None,
+    **kwargs
 ) -> Optional[JobID]:
     """ Write out submission script and submit wavefunctions to AIMALL on a cluster.
     
@@ -64,9 +77,8 @@ def submit_wfns(
     with SubmissionScript(script_name) as submission_script:
         
         for wfn in wfns:
-            if force:
-                submission_script.add_command(AIMAllCommand(wfn, atoms=aimall_atoms, ncores=ncores, naat=naat))
-                logger.info(f"Adding {wfn} to {submission_script.path}")
+            submission_script.add_command(AIMAllCommand(wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs))
+            logger.info(f"Adding {wfn} to {submission_script.path}")
 
     # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
     if len(submission_script.grouped_commands) > 0:
