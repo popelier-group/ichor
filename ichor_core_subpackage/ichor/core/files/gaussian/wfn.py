@@ -202,6 +202,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
             reading the file a second time prior to writing will not change any user attributes because of the 
             way the read file is written (i.e. any user-set attributes are kept even after the file is read again).
         """
+        # TODO: potentially make this the default for WriteFile._check_values_before_writing
         if self.state == FileState.Unread:
             self.read()
 
