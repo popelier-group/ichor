@@ -164,6 +164,7 @@ class SubmissionScript:
             WATER0002.gjf,WATER0002.gau
             ...
         """
+        # TODO:remove datalock in the future.
         if not DataLock.locked:
             mkdir(datafile.parent)
             with open(datafile, "w") as f:
@@ -213,7 +214,9 @@ class SubmissionScript:
         read_datafile_str += " && ".join(
             [self.test_array_not_null(i) for i in range(ndata)]
         )
-        read_datafile_str += "\nthen\n"  # only if array entries are not empty then execute the programs
+        # only if array entries are not empty then execute the programs
+        # the \n after then is added in the `write` method
+        read_datafile_str += "\nthen"
 
         return f"{datafile_str}\n{read_datafile_str}"
 
@@ -226,11 +229,11 @@ class SubmissionScript:
         :param data: A list of lists. Each inner list contains strings which are the names of the inputs and output files.
         """
         self.write_datafile(datafile, data)
-        datafile_str = self.generate_str_for_reading_datafile(datafile, data)
+        read_datafile_str = self.generate_str_for_reading_datafile(datafile, data)
         datafile_variables = [self.array_index(i) for i in range(len(data[0]))]
         # TODO: check if this is needed
         # set_uid()
-        return datafile_variables, datafile_str
+        return datafile_variables, read_datafile_str
 
     def write(self):
         """Writes the submission script that is passed to the queuing system. The options for the job (such as directory, number of jobs, core count, etc.)
@@ -254,7 +257,7 @@ class SubmissionScript:
                     f.write(
                         f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(self.include_nodes, self.exclude_nodes)}\n"
                     )
-                    
+
                 # if writing an array jobs, then the batch system needs to know that
                 # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
                 if njobs > 1:
@@ -263,43 +266,47 @@ class SubmissionScript:
                     if njobs > self.max_running_tasks > 0:
                         f.write(f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(self.max_running_tasks)}\n")
 
-                # if job or array job is going to use more than 1 cores, then we need extra things to write.
-                if self.ncores > 1:
-                    f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
-
-                f.write(f"echo \"Loading Modules | {self.bash_date}\"\n")
-
                 # load any modules required for the job
+                f.write(f"echo \"Loading Modules | {self.bash_date}\"\n")
                 for module in self.modules:
                     f.write(f"module load {module}\n")
 
-                f.write(f"echo \"Starting Job | {self.bash_date}\"\n")
+                # if job or array job is going to use more than 1 core
+                # then need to specify in options, as well as set OMP_NUM_THREADS, so program uses that amount of cores
+                if self.ncores > 1:
+                    f.write(f"export OMP_NUM_THREADS={self.ncores}\n")
 
+                f.write(f"echo \"Starting Job | {self.bash_date}\"\n")
                 # used to check if there was any command group that requires a datafile
-                requires_datafile = self.grouped_commands.data  
-                
                 # Gaussian, Ferebus, AIMALL jobs need access to datafiles
                 # the datafile's name is the unique id that was assigned to the submission script
+                requires_datafile = self.grouped_commands.data  
                 
                 # if we got to this part of the code, then we definitely need to check array entries read from datafile
                 if requires_datafile:
                         
-                    datafile = FILE_STRUCTURE["datafiles"] / Path(str(self.uid))
+                    datafile_path = FILE_STRUCTURE["datafiles"] / Path(str(self.uid))
                     
                     # get the data that is needed for each command in a command group
                     # for example, if the command is a Gaussian command, then we need an input file (.gjf) and an output file (.gau)
                     # command_group_data is a list of lists. Each inner list has input/output files
                     command_group_data = [command.data for command in self.grouped_commands]
-                    # datafile_vars is a list of strings corresponding to the arrays that need to be used by the program we are running (eg. Gaussian)
+                    # array_indices is a list of strings that will index the arrays created by datafile_str
+                    # then the correct files are used in each task of the array job
+                    # for example, it can be ["${arr1[$SGE_TASK_ID-1]}", "${arr2[$SGE_TASK_ID-1]}"]
                     # datafile_str is the rest of the stuff that sets up the arrays used for the array job in the submission script
-                    datafile_vars, datafile_str = self.setup_datafile(datafile, command_group_data)
-                    f.write(f"{datafile_str}\n")  # write the array job parts to the submission script
-                f.write(f"{self.grouped_commands.repr(datafile_vars)}\n")  # see class GaussianCommand for example
-
-                # close the if statement that was started when checking if arrays have non-null entries (see self.generate_str_for_reading_datafile)
-                # only write this if there was a command that required a datafile. Otherwise this will not be written
-                if requires_datafile:
+                    array_indices, datafile_str = self.setup_datafile(datafile_path, command_group_data)
+                    # write parts which read in the datafile
+                    f.write(f"{datafile_str}\n")
+                    # write parts which run the command (for example lines that run Gaussian Program)
+                    f.write(f"{self.grouped_commands.repr(array_indices)}\n")
+                    # close the if statement that was started when checking if arrays have non-null entries (see self.generate_str_for_reading_datafile)
+                    # only write this if there was a command that required a datafile. Otherwise this will not be written
                     f.write("fi\n")
+                    
+                # if no datafile is required, then can just write the command to run
+                else:
+                    f.write(f"{self.grouped_commands.repr()}\n")
 
                 f.write(f"echo \"Finished Job | {self.bash_date}\"\n")
 
