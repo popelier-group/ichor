@@ -85,7 +85,7 @@ class MagProps(Enum):
 
 class ATIDSProps(Enum):
     No = "no"
-    Some = "0.001"
+    Some = 0.001
     All = "all"
 
 
