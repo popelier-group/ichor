@@ -89,7 +89,7 @@ def submit_gjfs(
 
     # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
     if len(submission_script.grouped_commands) > 0:
-        logger.info(f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian")
+        logger.info(f"Submitting {len(submission_script.grouped_commands)} GJF(s) to Gaussian")
         return submission_script.submit(hold=hold)
     else:
         raise ValueError("There are no jobs to submit in the submission script.")
