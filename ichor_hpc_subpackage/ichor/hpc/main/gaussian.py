@@ -1,23 +1,16 @@
 import sys
 from pathlib import Path
-from typing import List, Optional
-
+from typing import List, Optional, Union
 from ichor.core.common.io import last_line
 from ichor.core.files import GJF, PointsDirectory, PointDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    GaussianCommand,
-    SubmissionScript,
-    print_completed,
-)
-from ichor.hpc.log import logger
-from typing import Union
+from ichor.hpc.submission_script import SCRIPT_NAMES, GaussianCommand, SubmissionScript, print_completed
 
 def submit_points_directory_to_gaussian(
     directory: Union[Path, PointsDirectory], overwrite_existing = False, force_calculate_wfn: bool = False,
-    rerun: bool = False, scrub: bool = False, ncores=2,**kwargs) -> Optional[JobID]:
+    ncores = 2, rerun: bool = False, scrub: bool = False,
+    hold: JobID = None, script_name: str = None, **kwargs) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
@@ -34,7 +27,8 @@ def submit_points_directory_to_gaussian(
             directory
         )  # a directory which contains points (a bunch of molecular geometries)
     gjf_files = write_gjfs(points_directory, overwrite_existing, **kwargs)
-    return submit_gjfs(gjf_files, force_calculate_wfn=force_calculate_wfn, rerun_points=rerun, scrub_points=scrub, ncores=ncores)
+    return submit_gjfs(gjf_files, script_name = script_name, force_calculate_wfn=force_calculate_wfn,
+                       rerun_points=rerun, scrub_points=scrub, ncores=ncores, hold=hold)
 
 
 def write_gjfs(
@@ -63,12 +57,12 @@ def write_gjfs(
 def submit_gjfs(
     gjfs: List[Path],
     force_calculate_wfn: bool = False,
-    script_name: Optional[Path] = SCRIPT_NAMES["gaussian"],
+    script_name: Optional[Union[str, Path]] = SCRIPT_NAMES["gaussian"],
     hold: Optional[JobID] = None,
     rerun = False,
     scrub = False,
     ncores = 2,
-) -> Optional[JobID]:
+) -> JobID:
     """Function that writes out a submission script which contains an array of Gaussian jobs to be ran on compute nodes. If calling this function from
     a log-in node, it will write out the submission script, a datafile (file which contains the names of all the .gjf file that need to be ran through Gaussian),
     and it will submit the submission script to compute nodes as well to run Gaussian on compute nodes. However, if using this function from a compute node,
@@ -91,11 +85,16 @@ def submit_gjfs(
                 submission_script.add_command(
                     GaussianCommand(gjf, rerun=rerun, scrub=scrub)
                 )  # make a list of GaussianCommand instances.
-                logger.debug(f"Adding {gjf} to {submission_script.path}")
-    # write the final submission script file that containing the job that needs to be ran (could be an array job that has many tasks)
-    logger.info(
-        f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian"
-    )
+                logger.info(f"Adding {gjf} to {submission_script.path}")
+
+    # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
+    if len(submission_script.grouped_commands) > 0:
+        logger.info(f"Submitting {len(submission_script.commands)} GJF(s) to Gaussian")
+        return submission_script.submit(hold=hold)
+    else:
+        raise ValueError("There are no jobs to submit in the submission script.")
+    
+    
     # submit the final submission script to the queuing system, and return the job id. hold for other jobs if needed.
     return submission_script.submit(hold=hold)
 
