@@ -10,7 +10,7 @@ from ichor.hpc.submission_script import SCRIPT_NAMES, GaussianCommand, Submissio
 def submit_points_directory_to_gaussian(
     points_directory: Union[Path, PointsDirectory], overwrite_existing = False, force_calculate_wfn: bool = False,
     ncores = 2, rerun: bool = False, scrub: bool = False,
-    hold: JobID = None, script_name: str = None, **kwargs) -> Optional[JobID]:
+    hold: JobID = None, script_name: str = SCRIPT_NAMES["gaussian"], **kwargs) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
     calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.
 
