@@ -196,7 +196,8 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
         It is an arbitrary check. This is to prevent a situation where the original file has not been read yet,
         but a new file with the same path is being written (so therefore the new file is empty and all the data has been
         lost and has not been read in into an instance yet)."""
-        self.title = self.title
+        if self.state == FileState.Unread:
+            self.read()
 
     def _write_file(self, path: Path):
         """ Write method needs to be implemented because the correct functional needs to be added to the .wfn file,
