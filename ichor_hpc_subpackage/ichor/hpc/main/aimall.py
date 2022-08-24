@@ -22,7 +22,6 @@ def submit_points_directory_to_aimall(
     :param naat: Number of atoms at a time, defaults to 1
     :param aimall_atoms: A list of atom names (e.g. [C1, H2, etc.]) which to integrate over, defaults to None
         If left as None, AIMAll will do calculations for all atoms.
-    :type aimall_atoms: Optional[List[str]], optional
     :param hold: Hold for a specific JobID, defaults to None
     :raises ValueError: if the provided method is not in the supported functionals, then raise error.
     :return: The job id of the submitted job
