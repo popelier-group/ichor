@@ -193,7 +193,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
 
     def _check_values_before_writing(self):
         """ This check is just here so that the file is read before attempting to write the file.
-        It is an arbitrary check. This is to prevent a situation where the original file has not been read yet,
+        This is to prevent a situation where the original file has not been read yet,
         but a new file with the same path is being written (so therefore the new file is empty and all the data has been
         lost and has not been read in into an instance yet)."""
         if self.state == FileState.Unread:
