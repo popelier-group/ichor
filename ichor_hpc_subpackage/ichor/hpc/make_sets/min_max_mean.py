@@ -10,11 +10,8 @@ class MinMaxMean(MakeSetMethod):
     def name(cls) -> str:
         return "min_max_mean"
 
-    @classmethod
-    def get_npoints(cls, npoints: int, points: ListOfAtoms) -> int:
-        return 3 * points[0].features().shape[-1]
-
-    def get_points(self, points: ListOfAtoms) -> List[int]:
+    @staticmethod
+    def get_points_indices(points: ListOfAtoms, *args, **kwargs) -> List[int]:
         from ichor.hpc import GLOBALS
 
         atom = (
