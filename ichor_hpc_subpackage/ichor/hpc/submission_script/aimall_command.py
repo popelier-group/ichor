@@ -211,7 +211,7 @@ class AIMAllCommand(CommandLine):
         
         self.usetwoe = UseTwoe(usetwoe)
 
-        self.atoms = atoms
+        self.atoms = atoms or "all"
         if isinstance(atoms, Atoms):
             self.atoms = list(self.atoms.names)
 
