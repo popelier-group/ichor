@@ -13,7 +13,8 @@ from ichor.hpc.submission_script.command_line import (
     SubmissionError,
 )
 from ichor.hpc.log import logger
-
+from ichor.hpc.machine import Machine
+from ichor.hpc import MACHINE
 
 class BasinIntegrationMethod(Enum):
     Auto = "auto"
@@ -139,9 +140,15 @@ class VerifyW(Enum):
     Yes = "yes"
     Only = "only"
 
+AIMAll_COMMANDS = {
+    Machine.csf3: "~/AIMAll/aimqb.ish",
+    Machine.csf4: "~/AIMAll/aimqb.ish",
+    Machine.ffluxlab: "aimall",
+    Machine.local: "aimall",
+}
+
 
 class AIMAllCommand(CommandLine):
-
     """
     A class which is used to add AIMALL-related commands to a submission script. It is used to write the submission script line where
     AIMALL modules are loaded. It is also used to write out the submission script line where AIMALL is ran on a specified array of files (usually
@@ -150,138 +157,172 @@ class AIMAllCommand(CommandLine):
     after being reran).
 
     :param wfn_file: Path to a .wfn file. This is not needed when running auto-run for a whole directory.
-    :param aimall_output: Optional path to the AIMALL job output. Default is None as it is set to the `gjf_file_name`.aim if not specified.
+    :param atoms: A list of strings of atom names (e.g. C1)
+        which aimall to integrate or an Atoms instance (from which the names will be obtained)
     """
 
     def __init__(
         self,
-        wfn_file: Path,
-        atoms: Optional[Union[str, List[str]]] = None,
-        aimall_output: Optional[Path] = None,
+        wfn_file_path: Path,
+        ncores: int,
+        naat: int,
+        atoms: Optional[Union[List[str], Atoms]] = None,
+        encomp: int = 3,
+        boaq: str = "auto",
+        iasmesh: str = "fine",
+        bim: str = "auto",
+        capture: str = "auto",
+        ehren: int = 0,
+        feynman: bool = False,
+        iasprops: bool = True,
+        magprops: str = "none",
+        source: bool = False,
+        iaswrite: bool = False,
+        atidsprops: float = 0.001,
+        warn: bool = True,
+        scp: str = "some",
+        delmog: bool = True,
+        skipint: bool = False,
+        f2w: str = "wfx",
+        f2wonly: bool = False,
+        mir: str = "auto",
+        cpconn: str = "moderate",
+        intveeaa: str = "new",
+        atlaprhocps: bool = False,
+        wsp: bool = True,
+        shm_lmax: int = 5,
+        maxmem: int = 2400,
+        verifyw: str = "yes",
+        saw: bool = False,
+        autonnacps: bool = True,
+        rerun: bool = False,
+        scrub: bool = False,
     ):
-        self.wfn_file = WFN(wfn_file)
-        self.aimall_output = aimall_output or wfn_file.with_suffix(".aim")
+        
+        self.wfn_file = WFN(wfn_file_path)
         self.atoms = atoms or "all"
-        if (
-            not isinstance(self.atoms, str)
-            and self.wfn_file.exists()
-            and len(self.atoms) == len(self.wfn_file.atoms)
-        ):
-            self.atoms = "all"  # Might as well use atoms=all if all atoms are being calculated
-        if isinstance(self.atoms, Atoms):
+        if isinstance(atoms, Atoms):
             self.atoms = list(self.atoms.names)
+
+        self.ncores = ncores
+        self.naat = naat
+        self.aimall_output = wfn_file_path.with_suffix(".aim")
+        self.encomp = Encomp(encomp)
+        self.boaq = Boaq(boaq)
+        self.iasmesh = IASMesh(iasmesh)
+        self.bim = BasinIntegrationMethod(bim)
+        self.capture = Capture(capture)
+        self.ehren = Ehren(ehren)
+        self.feynman = feynman
+        self.iasprops = iasprops
+        self.magprops = MagProps(magprops)
+        self.source = source
+        self.iaswrite = iaswrite
+        self.atidsprops = ATIDSProps(atidsprops)
+        self.warn = warn
+        self.scp = SCP(scp)
+        self.delmog = delmog
+        self.skipint = skipint
+        self.f2w = F2W(f2w)
+        self.f2wonly = f2wonly
+        self.mir = MIR(mir)
+        self.cpconn = CPConn(cpconn)
+        self.intveeaa = IntVeeAA(intveeaa)
+        self.atlaprhocps = atlaprhocps
+        self.wsp = wsp
+        self.shm_lmax=SHMMax(shm_lmax)
+        self.maxmem = maxmem
+        self.verifyw = VerifyW(verifyw)
+        self.saw = saw
+        self.autonnacps = autonnacps
+        
+        self.scrub = scrub
+        self.rerun = rerun
 
     @property
     def data(self) -> List[str]:
-        return [
-            str(self.wfn_file.path.absolute()),
-            str(self.aimall_output.absolute()),
-        ]
+        """ Returns the data needed for the AIMAll job to run successfully"""
+        return [str(self.wfn_file.path.absolute()),str(self.aimall_output.absolute())]
 
     @classproperty
     def modules(self) -> Modules:
+        """ Returns a list of modules to be loaded for AIMAll. Note that only ffluxlab has AIMAll as a module.
+        For other machines, the AIMAll folder (containing scripts/executables) needs to be found in the home directory."""
         return AIMAllModules
 
     @classproperty
     def command(self) -> str:
-        from ichor.hpc import MACHINE, Machine
+        """ Returns the command which runs aimall on the current machine. Note that only ffluxlab has AIMAll as a module.
+        For other machines, the AIMAll folder (containing scripts/executables) needs to be found in the home directory."""
 
-        aimall_commands = {
-            Machine.csf3: "~/AIMAll/aimqb.ish",
-            Machine.csf4: "~/AIMAll/aimqb.ish",
-            Machine.ffluxlab: "aimall",
-            Machine.local: "aimall",
-        }
-
-        if MACHINE not in aimall_commands.keys():
+        if MACHINE not in AIMAll_COMMANDS.keys():
             raise SubmissionError(
                 f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
             )
 
-        return aimall_commands[MACHINE]
-
-    # @classproperty
-    # def options(self) -> List[str]:
-    #     """Options taken from GAIA to run AIMAll likely not necessary as we specifiy /bin/bash at the top of the
-    #     submission script
-    #
-    #     Note: '-j y' removed from these options from the GAIA version as this outputted both stdout and stderr to
-    #           stdout whereas we want them to be put in the files we specify with the -o and -e flags separately
-    #     """
-    #     return ["-S /bin/bash"]
+        return AIMAll_COMMANDS[MACHINE]
 
     @property
     def arguments(self) -> List[str]:
-        from ichor.hpc import GLOBALS
 
-        logger.debug(f"atoms: {self.atoms}")        
-
-        atoms = (
-            self.atoms
-            if isinstance(self.atoms, str)
-            else "all_"
-            + ",".join(map(str, [get_digits(a) for a in self.atoms]))
-        )
+        # if all, then no need to change anything
+        # if a list of atom names is given, then need to make in format which AIMAll reads
+        # -atoms=all_... (e.g., -atoms=all_1,3,6) will calculate a full molecular graph but will only calculate atomic properties of the listed atoms.
+        # Specifying -atoms=... (e.g., -atoms=1,3,6) (recommended for reruns of problem atoms following an all atom run) will only determine the critical point connectivity and atomic properties of the listed atoms, i.e., the full molecular graph will not be (re)calculated.  
+        atoms = (self.atoms if self.atoms == "all" else "all_" + ",".join(map(str, [get_digits(a) for a in self.atoms])))
 
         return [
             "-nogui",
             "-usetwoe=0",
             f"-atoms={atoms}",
-            f"-encomp={Encomp(GLOBALS.AIMALL_ENCOMP).value}",
-            f"-boaq={Boaq(GLOBALS.AIMALL_BOAQ).value}",
-            f"-iasmesh={IASMesh(GLOBALS.AIMALL_IASMESH).value}",
+            f"-encomp={self.encomp.value}",
+            f"-boaq={self.boaq.value}",
+            f"-iasmesh={self.iasmesh.value}",
             f"-nproc={self.ncores}",
-            f"-naat={self.ncores if self.atoms == 'all' else min(len(self.atoms), self.ncores)}",
-            f"-bim={BasinIntegrationMethod(GLOBALS.AIMALL_BIM).value}",
-            f"-capture={Capture(GLOBALS.AIMALL_CAPTURE).value}",
-            f"-ehren={Ehren(GLOBALS.AIMALL_EHREN).value}",
-            f"-feynman={str(GLOBALS.AIMALL_FEYNMAN).lower()}",
-            f"-iasprops={str(GLOBALS.AIMALL_IASPROPS).lower()}",
-            f"-magprops={MagProps(GLOBALS.AIMALL_MAGPROPS).value}",
-            f"-source={str(GLOBALS.AIMALL_SOURCE).lower()}",
-            f"-iaswrite={str(GLOBALS.AIMALL_IASWRITE).lower()}",
-            f"-atidsprops={ATIDSProps(GLOBALS.AIMALL_ATIDSPROPS).value}",
-            f"-warn={str(GLOBALS.AIMALL_WARN).lower()}",
-            f"-scp={SCP(GLOBALS.AIMALL_SCP.lower()).value}",
-            f"-delmog={str(GLOBALS.AIMALL_DELMOG).lower()}",
-            f"-skipint={str(GLOBALS.AIMALL_SKIPINT).lower()}",
-            f"-f2w={F2W(GLOBALS.AIMALL_F2W).value}",
-            f"-f2wonly={str(GLOBALS.AIMALL_F2WONLY).lower()}",
-            f"-mir={MIR.Auto.value if GLOBALS.AIMALL_MIR < 0 else GLOBALS.AIMALL_MIR}",
-            f"-cpconn={CPConn(GLOBALS.AIMALL_CPCONN).value}",
-            f"-intveeaa={IntVeeAA(GLOBALS.AIMALL_INTVEEAA).value}",
-            f"-atlaprhocps={str(GLOBALS.AIMALL_ATLAPRHOCPS).lower()}",
-            f"-wsp={str(GLOBALS.AIMALL_WSP).lower()}",
-            f"-shm_lmax={SHMMax(GLOBALS.AIMALL_SHM).value}",
-            f"-maxmem={GLOBALS.AIMALL_MAXMEM}",
-            f"-verifyw={VerifyW(GLOBALS.AIMALL_VERIFYW).value}",
-            f"-saw={str(GLOBALS.AIMALL_SAW).lower()}",
-            f"-autonnacps={str(GLOBALS.AIMALL_AUTONNACPS).lower()}",
+            f"-naat={self.naat}",
+            f"-bim={self.bim.value}",
+            f"-capture={self.capture.value}",
+            f"-ehren={self.ehren.value}",
+            f"-feynman={str(self.feynman).lower()}",
+            f"-iasprops={str(self.iasprops).lower()}",
+            f"-magprops={self.magprops.value}",
+            f"-source={str(self.source).lower()}",
+            f"-iaswrite={str(self.iaswrite).lower()}",
+            f"-atidsprops={self.atidsprops.value}",
+            f"-warn={str(self.warn).lower()}",
+            f"-scp={self.scp.value}",
+            f"-delmog={str(self.delmog).lower()}",
+            f"-skipint={str(self.skipint).lower()}",
+            f"-f2w={self.f2w.value}",
+            f"-f2wonly={str(self.f2wonly).lower()}",
+            f"-mir={self.mir.value}",
+            f"-cpconn={self.cpconn.value}",
+            f"-intveeaa={self.intveeaa.value}",
+            f"-atlaprhocps={str(self.atlaprhocps).lower()}",
+            f"-wsp={str(self.wsp).lower()}",
+            f"-shm_lmax={self.shm_lmax.value}",
+            f"-maxmem={self.maxmem}",
+            f"-verifyw={self.verifyw.value}",
+            f"-saw={str(self.saw).lower()}",
+            f"-autonnacps={str(self.autonnacps).lower()}",
         ]
-
-    @classproperty
-    def ncores(self) -> int:
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.AIMALL_NCORES
 
     def repr(self, variables: List[str]) -> str:
         """Returns a string which is written out to the submission script file in order to run AIMALL correctly (with the appropriate settings)."""
 
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
-
-        from ichor.hpc import GLOBALS
-
-        if GLOBALS.RERUN_POINTS:
+        
+        # TODO: possibly remove these because they are not really needed
+        if self.rerun:
 
             cm = CheckManager(
                 check_function="rerun_aimall",
                 args_for_check_function=[variables[0]],
-                ntimes=GLOBALS.GAUSSIAN_N_TRIES,
+                ntimes=5,
             )
             cmd = cm.rerun_if_job_failed(cmd)
 
-        if GLOBALS.SCRUB_POINTS:
+        if self.scrub:
             cm = CheckManager(
                 check_function="scrub_aimall",
                 args_for_check_function=[variables[0]],
