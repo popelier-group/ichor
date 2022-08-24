@@ -78,21 +78,20 @@ def generate_geometries_set(points: "ListOfAtoms", methods: Dict[str, Union[int,
     return total_set
 
 def make_set(
-    all_points: "ListOfAtoms", method_name: str, npoints: int) -> List[str]:
+    all_points: "ListOfAtoms", method_name: str, npoints: int) -> List[Tuple[str, int]]:
 
     new_set = []
     # iterate over the possible classes
     for make_set_class_name, make_set_class in MAKE_SET_METHODS_DICT.items():
         # if the method matches the name of a class, then get the indices of points using that class
         if make_set_class_name == method_name:
-            
             indices_list = make_set_class.get_points_indices(all_points, npoints)
             
             # get the indices from the ListOfAtoms instance and add not new set of points
             # mutate all_points to prevent duplicates.
             for idx in indices_list:
                 # add instance of Atoms or PointDirectory to new set
-                new_set.append(all_points[idx])
+                new_set.append((all_points[idx], idx))
                 del all_points[idx]
             
     if len(new_set) == 0:
@@ -101,11 +100,11 @@ def make_set(
     return new_set
 
 
-def write_set_to_dir(path: Path, points: list, system_name: str) -> None:
+def write_set_to_dir(path: Path, points: List[Tuple[str, int]], system_name: str) -> None:
     
     mkdir(path)
-    for i, point in enumerate(points):
-        point_name = f"{system_name}{str(i+1).zfill(max(4, count_digits(len(points))))}"
+    for point, point_index_in_trajectory in points:
+        point_name = f"{system_name}{point_index_in_trajectory}"
         mkdir(path / point_name)
         if isinstance(point, PointDirectory):
             xyz = XYZ(path / point_name / f"{point_name}{XYZ.filetype}", atoms=point.atoms)
