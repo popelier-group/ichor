@@ -9,6 +9,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.files.file import FileState, ReadFile, WriteFile
 from ichor.core.atoms.alf import ALF
+from ichor.core.files import XYZ
 
 from ichor.core.calculators import alf_features_to_coordinates
 
@@ -145,14 +146,13 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
             a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
         """
-        from ichor.core.files import XYZ
 
         mkdir(root, empty=True)
         for i, geometry in enumerate(self):
 
             if (i % every) == 0:
 
-                path = Path(system_name + str(i + 1) + ".xyz")
+                path = Path(system_name + str(i) + ".xyz")
                 path = root / path
                 xyz_file = XYZ(path, geometry)
                 xyz_file.write()

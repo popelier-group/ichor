@@ -10,6 +10,7 @@ import numpy as np
 from ichor.core.calculators.alf import default_alf_calculator
 from ichor.core.atoms import ALF
 from ichor.core.files.file_data import PointsDirectoryProperties
+from ichor.core.files.xyz import Trajectory
 
 
 class PointsDirectory(ListOfAtoms, Directory):
@@ -198,7 +199,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             error["dispersion"] *= ha_to_kj_mol
 
         # order the properties: iqa, q00, q10,....
-        error = OrderedDict(sorted(error.items()))
+        error = dict(sorted(error.items()))
 
         fname = fname.with_suffix(".xyz")
 
@@ -221,7 +222,18 @@ class PointsDirectory(ListOfAtoms, Directory):
                     f.write(
                         f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
                     )
-                    
+
+    @classmethod
+    def from_trajectory(cls, trajectory_path: Union[str, Path], points_dir_name: str) -> "PointsDirectory":
+        """Generate a PointsDirectory-type structure directory from a trajectory (.xyz) file
+
+        :param trajectory_path: A str or Path to a .xyz file containing geometries
+        :param points_dir_name: How the new folder will be named
+        """
+        traj = Trajectory(trajectory_path)
+        traj.to_dir(points_dir_name, points_dir_name)
+        return PointsDirectory(points_dir_name)
+
     def __getitem__(
         self, item: Union[int, str]
     ) -> Union[Atoms, ListOfAtoms]:
