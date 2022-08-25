@@ -153,7 +153,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
             if (i % every) == 0:
                 if center:
-                    atoms_instance = atoms_instance.centre()
+                    atoms_instance.centre()
                 point_name = f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
                 path = Path(point_name)
                 path = root / path
