@@ -1,10 +1,9 @@
 from pathlib import Path
-from typing import List, Optional, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union
 from ichor.core.atoms import ListOfAtoms
 from ichor.core.common.int import count_digits
 from ichor.core.common.io import mkdir
 from ichor.core.files import XYZ, PointsDirectory, Trajectory, PointDirectory
-from ichor.hpc.make_sets.make_set_method import MakeSetMethod
 from ichor.hpc.make_sets import MAKE_SET_METHODS_DICT
 from ichor.hpc import FILE_STRUCTURE
 
@@ -24,11 +23,11 @@ def make_sets(
 
     :param points_input: A path to a file/directory containing Points
     :param training_set_methods: A dictionary of key:method name, value: number of points to add to be
-        used to generate a training set
+        used to generate a training set. If None, default is {"random": 500}
     :param sample_pool_methods: A dictionary of key:method name, value: number of points to add to be
-        used to generate a sample pool
+        used to generate a sample pool. If None, default is {"random": 10000}
     :param validation_set_methods: A dictionary of key:method name, value: number of points to add to be
-        used to generate a validation set
+        used to generate a validation set. If None, default is {"random": 500}
     :raises TypeError: If a file that cannot be read or does not contain points is passed in.
     """
     
@@ -46,12 +45,13 @@ def make_sets(
         p._original_index = idx
 
     if not training_set_methods:
-        training_set_methods = {"random": 2000}
+        training_set_methods = {"random": 500}
     if not sample_pool_methods:
         sample_pool_methods = {"random": 10000}
     if not validation_set_methods:
         validation_set_methods = {"random": 500}
 
+    # check that there are enough points provided
     total_number_of_points_in_sets = sum(training_set_methods.values(), sample_pool_methods.values(), validation_set_methods.values())
     if total_number_of_points_in_sets > len(points):
         raise ValueError("The total number of points in the sets is greater than the number of supplied points in the trajectory/directory.")
