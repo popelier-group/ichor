@@ -9,6 +9,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.files.file import FileState, ReadFile, WriteFile
 from ichor.core.atoms.alf import ALF
+from ichor.core.common.int import count_digits
 
 from ichor.core.calculators import alf_features_to_coordinates
 
@@ -152,7 +153,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
             if (i % every) == 0:
 
-                path = Path(system_name + str(i) + ".xyz")
+                point_name = f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
+                path = Path(point_name)
                 path = root / path
                 xyz_file = XYZ(path, geometry)
                 xyz_file.write()

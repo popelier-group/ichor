@@ -235,7 +235,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         
         if not points_dir_name:
             points_dir_name = traj.path.stem
-        
+
         traj.to_dir(points_dir_name, points_dir_name)
         return PointsDirectory(points_dir_name)
 
