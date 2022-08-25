@@ -40,10 +40,11 @@ def make_sets(
             f"Cannot convert path '{points_input}' into type 'ListOfAtoms'"
         )
     
+    total_npoints = len(points)
+    total_points_digits = count_digits(total_npoints)
     # use this later for when writing file names to correspond to the timestep in the trajectory
     for idx, p in enumerate(points):
-        p._original_index = idx
-
+        p._original_index_str = str(idx).zfill(max(4, total_points_digits))
     if not training_set_methods:
         training_set_methods = {"random": 500}
     if not sample_pool_methods:
@@ -53,7 +54,7 @@ def make_sets(
 
     # check that there are enough points provided
     total_number_of_points_in_sets = sum(training_set_methods.values(), sample_pool_methods.values(), validation_set_methods.values())
-    if total_number_of_points_in_sets > len(points):
+    if total_number_of_points_in_sets > total_npoints:
         raise ValueError("The total number of points in the sets is greater than the number of supplied points in the trajectory/directory.")
 
     s = generate_geometries_set(points, training_set_methods)
@@ -101,8 +102,10 @@ def write_set_to_dir(path: Path, points: List[Tuple[str, int]], system_name: str
     
     mkdir(path)
     for point in points:
-        point_name = f"{system_name}{point._original_index}"
+        
+        point_name = f"{system_name}{point._original_index_str}"
         mkdir(path / point_name)
+
         if isinstance(point, PointDirectory):
             xyz = XYZ(path / point_name / f"{point_name}{XYZ.filetype}", atoms=point.atoms)
         else:
