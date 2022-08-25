@@ -224,13 +224,18 @@ class PointsDirectory(ListOfAtoms, Directory):
                     )
 
     @classmethod
-    def from_trajectory(cls, trajectory_path: Union[str, Path], points_dir_name: str) -> "PointsDirectory":
+    def from_trajectory(cls, trajectory_path: Union[str, Path], points_dir_name: str = None) -> "PointsDirectory":
         """Generate a PointsDirectory-type structure directory from a trajectory (.xyz) file
 
         :param trajectory_path: A str or Path to a .xyz file containing geometries
         :param points_dir_name: How the new folder will be named
         """
+        
         traj = Trajectory(trajectory_path)
+        
+        if not points_dir_name:
+            points_dir_name = traj.path.stem
+        
         traj.to_dir(points_dir_name, points_dir_name)
         return PointsDirectory(points_dir_name)
 
