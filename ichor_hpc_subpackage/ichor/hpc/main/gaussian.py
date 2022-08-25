@@ -45,7 +45,10 @@ def write_gjfs(
     for point_directory in points_directory:
         
         if overwrite_existing:
-            point_directory.gjf.path.unlink()
+            # the gjf file object might not exist, so check for that first
+            if point_directory.gjf:
+                # if the object exists, then delete it
+                point_directory.gjf.path.unlink()
         point_directory.gjf = GJF(Path(point_directory.path / (point_directory.path.name + GJF.filetype)), **kwargs)
         point_directory.gjf.atoms = point_directory.xyz.atoms
         point_directory.gjf.write()
