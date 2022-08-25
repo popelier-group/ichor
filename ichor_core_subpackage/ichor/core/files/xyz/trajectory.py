@@ -240,17 +240,14 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
     def _write_file(self, path: Path, every: int = 1):
         with open(path, "w") as f:
-            n = 0
-            for i, frame in enumerate(self):
-                n += 1
-                if n == every:
-                    f.write(f"{len(frame)}\n")
+            for i, atoms_instance in enumerate(self):
+                if i % every == 0:
+                    f.write(f"{len(atoms_instance)}\n")
                     f.write(f"i = {i}\n")
-                    for atom in frame:
+                    for atom in atoms_instance:
                         f.write(
                             f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
                         )
-                    n = 0
 
     def __getitem__(self, item) -> Atoms:
         """Used to index a Trajectory instance by a str (eg. trajectory['C1']) or by integer (eg. trajectory[2]),
