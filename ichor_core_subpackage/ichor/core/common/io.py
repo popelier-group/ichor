@@ -40,7 +40,7 @@ def mkdir(path: Path, empty: bool = False, fail_ok: bool = False) -> None:
     """Makes a directory.
 
     :param path: Where to make the directory
-    :param empty: Whether to ignore FileExistsError exceptions. Set to False to ignore exceptions.
+    :param empty: Whether to overwrite an existing directory.
     :param fail_ok: When set to False (default), raise OSError if cannot make directory
     """
     if path.is_dir() and empty:
