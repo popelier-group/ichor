@@ -241,7 +241,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     def _write_file(self, path: Path, every: int = 1):
         with open(path, "w") as f:
             for i, atoms_instance in enumerate(self):
-                if i % every == 0:
+                if (i % every) == 0:
                     f.write(f"{len(atoms_instance)}\n")
                     f.write(f"i = {i}\n")
                     for atom in atoms_instance:
