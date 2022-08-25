@@ -107,8 +107,9 @@ def write_set_to_dir(path: Path, points: List[Tuple[str, int]], system_name: str
             xyz = XYZ(path / point_name / f"{point_name}{XYZ.filetype}", atoms=point.atoms)
         else:
             xyz = XYZ(path / point_name / f"{point_name}{XYZ.filetype}", atoms=point)
-        # TODO: why is centering needed? This does not do anything for the calculations
-        # xyz.atoms.centre()
+        # centering is needed because Gaussian wfn file writes out ****** instead of x,y,z coordinate
+        # if x,y,z coordinate is greater than 100 (because they did not account for that....)
+        xyz.atoms.centre()
         xyz.write()
 
 
