@@ -47,7 +47,7 @@ class PeriodicBoundaryCondition(Enum):
     ConstantPressure = 2  # constant pressure
 
 
-class AmberMDIn(WriteFile, ReadFile, File):
+class AmberMDIn(WriteFile, ReadFile):
     def __init__(
         self,
         path: Path,
@@ -63,7 +63,7 @@ class AmberMDIn(WriteFile, ReadFile, File):
         thermostat: AmberThermostat = AmberThermostat.Langevin,
         ln_gamma: float = 0.5,
     ):
-        File.__init__(self, path)
+        super(ReadFile, self).__init__(path)
 
         self.nsteps: int = FileContents
 
@@ -176,6 +176,30 @@ def write_mdin(
     thermostat: AmberThermostat = AmberThermostat.Langevin,
     ln_gamma: float = 0.5,
 ):
+    """_summary_
+
+    :param mdin_file: File where to write data
+    :param nsteps: Number of timesteps to run simulation for
+    :param dt: Timestep time in picoseconds, default is 0.001
+    :param temperature: Temperature to perform simulation at, default is 300.0
+    :param force_evaluation: _description_, defaults to ForceEvaluation.Complete
+    :type force_evaluation: ForceEvaluation, optional
+    :param bond_constraint: _description_, defaults to BondLengthConstraint.NoConstraint
+    :type bond_constraint: BondLengthConstraint, optional
+    :param write_coordinates_every: _description_, defaults to 1
+    :type write_coordinates_every: int, optional
+    :param write_velocities_every: _description_, defaults to -1
+    :type write_velocities_every: int, optional
+    :param write_forces_every: _description_, defaults to -1
+    :type write_forces_every: int, optional
+    :param periodic_boundary_condition: _description_, defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
+    :type periodic_boundary_condition: PeriodicBoundaryCondition, optional
+    :param thermostat: _description_, defaults to AmberThermostat.Langevin
+    :type thermostat: AmberThermostat, optional
+    :param ln_gamma: _description_, defaults to 0.5
+    :type ln_gamma: float, optional
+    """
+    
     AmberMDIn(
         mdin_file,
         nsteps,

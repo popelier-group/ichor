@@ -24,8 +24,10 @@ def get_atoms_from_path(path: Path) -> "Atoms":
         else:
             pd = PointDirectory(path)
 
-        if pd.gjf.exists():
-            return pd.gjf.atoms
+        if pd.gjf:
+            if pd.gjf.exists():
+                return pd.gjf.atoms
+
     elif path.is_file():
         if path.suffix == GJF.filetype:
             return GJF(path).atoms
