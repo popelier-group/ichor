@@ -224,11 +224,14 @@ class PointsDirectory(ListOfAtoms, Directory):
                     )
 
     @classmethod
-    def from_trajectory(cls, trajectory_path: Union[str, Path], points_dir_name: str = None) -> "PointsDirectory":
+    def from_trajectory(cls, trajectory_path: Union[str, Path], points_dir_name: str = None, center = True) -> "PointsDirectory":
         """Generate a PointsDirectory-type structure directory from a trajectory (.xyz) file
 
         :param trajectory_path: A str or Path to a .xyz file containing geometries
         :param points_dir_name: How the new folder will be named
+        :param center: Whether to center the geometries on the centroid of the system. This is useful to prevent
+            the molecule from translating in 3D space (and prevents issues with WFN files, where a very large x,y,z
+            value (over 100) for the coordinates leads to ******** being written in the .wfn file...)
         """
         
         traj = Trajectory(trajectory_path)
@@ -236,7 +239,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         if not points_dir_name:
             points_dir_name = traj.path.stem
 
-        traj.to_dir(points_dir_name, points_dir_name)
+        traj.to_dir(points_dir_name, points_dir_name, center=center)
         return PointsDirectory(points_dir_name)
 
     def __getitem__(

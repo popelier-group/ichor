@@ -137,7 +137,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return [ref.rmsd(point) for point in self]
 
-    def to_dir(self, system_name: str, root: Path, every: int = 1):
+    def to_dir(self, system_name: str, root: Path, every: int = 1, center = False):
         """Writes out every nth timestep to a separate .xyz file to a given directory
 
         :param system_name: The name of the
@@ -149,14 +149,15 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         from ichor.core.files import XYZ
 
         mkdir(root, empty=True)
-        for i, geometry in enumerate(self):
+        for i, atoms_instance in enumerate(self):
 
             if (i % every) == 0:
-
+                if center:
+                    atoms_instance = atoms_instance.centre()
                 point_name = f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
                 path = Path(point_name)
                 path = root / path
-                xyz_file = XYZ(path, geometry)
+                xyz_file = XYZ(path, atoms_instance)
                 xyz_file.write()
 
     def coordinates_to_xyz(
@@ -240,10 +241,21 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return trajectory
 
-    def _write_file(self, path: Path, every: int = 1):
+    def _write_file(self, path: Path, every: int = 1, center: bool = False):
+        """Write  a trajectroy file
+
+        :param path: Path to trajectory file
+        :param every: Write every nth point. Default is 1, so every point is written.
+        :param center: Whether to center the geometries prior to writing. This centers the geometry on the
+            centroid of the molecule. This is helpful, so that x,y,z coordinates are in the same range
+            (i.e. the molecule does not float around in space too much.)
+        """
+        
         with open(path, "w") as f:
             for i, atoms_instance in enumerate(self):
                 if (i % every) == 0:
+                    if center:
+                        atoms_instance.centre()
                     f.write(f"{len(atoms_instance)}\n")
                     f.write(f"i = {i}\n")
                     for atom in atoms_instance:
