@@ -48,10 +48,11 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
     wfns = []
     for point in points:
         # write out the wfn file with the method modified because AIMAll needs to know the functional used
-        if point.wfn.exists():
-            point.wfn.method = method
-            point.wfn.write()
-            wfns.append(point.wfn.path)
+        if point.wfn:
+            if point.wfn.exists():
+                point.wfn.method = method
+                point.wfn.write()
+                wfns.append(point.wfn.path)
         else:
             warn(f"Wavefunction file {point.wfn.path} does not exist.")
     return wfns
