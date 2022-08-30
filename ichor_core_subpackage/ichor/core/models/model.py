@@ -3,14 +3,12 @@ from typing import Dict, List, Optional
 
 import numpy as np
 from ichor.core.atoms import ALF
-from ichor.core.common.functools import cached_property, classproperty
+from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
 from ichor.core.files.file import (
-    File,
     FileContents,
-    FileState,
     ReadFile,
     WriteFile,
 )
@@ -47,7 +45,7 @@ def _get_default_output_unit(property: str) -> str:
         return "unknown"
 
 
-class Model(ReadFile, WriteFile, File):
+class Model(ReadFile, WriteFile):
     """A model file that is returned back from our machine learning program FEREBUS.
 
     .. note::
@@ -77,7 +75,7 @@ class Model(ReadFile, WriteFile, File):
         program_version: Version = FileContents,
         notes: Dict[str, str] = FileContents,
     ):
-        File.__init__(self, path)
+        super(ReadFile, self).__init__(path)
 
         self.program = program
         self.system_name = system_name
