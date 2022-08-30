@@ -39,6 +39,10 @@ class PeriodicKernel(Kernel):
     @property
     def params(self):
         return self._thetas, self._period_length
+    
+    @property
+    def lengthscales(self):
+        return 1.0 / (self._thetas)
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """
@@ -56,12 +60,15 @@ class PeriodicKernel(Kernel):
         """
 
         # implementation from gpytorch https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
-        true_lengthscales = np.sqrt(1.0 / (2 * self._thetas))
+        true_lengthscales = self.lengthscales
         true_lengthscales = true_lengthscales.reshape(-1, 1, 1)
 
         # get only dimensions which need periodic kernel
         x1_ = x1[:, self.active_dims]
         x2_ = x2[:, self.active_dims]
+        
+        print("per x1 shape", x1_.shape)
+        print("per x2 shape", x2_.shape)
 
         # divide by period length and multiply by pi beforehand
         x1_ = np.pi * (x1_ / self._period_length)
@@ -74,8 +81,8 @@ class PeriodicKernel(Kernel):
         diff = x1_ - x2_
 
         np.sin(diff, out=diff)
-        diff /= true_lengthscales
         np.power(diff, 2, out=diff)
+        diff /= true_lengthscales
         res = np.sum(
             diff, axis=-3
         )  # get ntrain, ntrain from n_train x n_train x n_feats
@@ -102,4 +109,7 @@ class PeriodicKernel(Kernel):
         f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):
-        return f"'{self.__class__.__name__}', thetas: {self._thetas}, period_length: {self._period_length}"
+        
+        lengthscales = 1.0 / (self._thetas)
+        
+        return f"'{self.__class__.__name__}', lengthscale: {lengthscales}, period_length: {self._period_length}"
