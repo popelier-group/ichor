@@ -28,6 +28,10 @@ class RBF(Kernel):
     @property
     def params(self):
         return self._thetas
+    
+    @property
+    def lengthscales(self):
+        return np.sqrt(1.0 / (2 * self._thetas))
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """
@@ -60,4 +64,7 @@ class RBF(Kernel):
         f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: thetas: {self._thetas}"
+        
+        lengthscales = np.sqrt(1.0 / (2 * self._thetas))
+        
+        return f"{self.__class__.__name__}: lengthscales: {lengthscales}"
