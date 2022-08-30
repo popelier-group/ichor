@@ -86,7 +86,7 @@ def calculate_dihedrals(atoms: "Atoms") -> np.ndarray:
 
 def get_connected_atoms(atoms: "Atoms") -> "ConnectedAtoms":
     
-    from ichor.core.atoms import ConnectedAtoms
+    from ichor.core.files.dl_poly.dl_poly_field import ConnectedAtoms
 
     connected_atoms = ConnectedAtoms(atoms)
     return connected_atoms
