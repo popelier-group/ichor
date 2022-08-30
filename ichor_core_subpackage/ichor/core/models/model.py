@@ -44,7 +44,6 @@ def _get_default_output_unit(property: str) -> str:
     else:
         return "unknown"
 
-
 class Model(ReadFile, WriteFile):
     """A model file that is returned back from our machine learning program FEREBUS.
 
@@ -416,6 +415,14 @@ class Model(ReadFile, WriteFile):
                 path
                 / f"{self.system_name}_{self.prop}_{self.atom_name}{Model.filetype}"
             )
+        
+        # these are so that the writing of models does not crash. They do not affect predictions
+        if not self.jitter:
+            self.jitter = 1e-6
+        if not self.likelihood:
+            self.likelihood = 1.0
+        if not self.notes:
+            self.notes = {}
 
         with open(path, "w") as f:
             f.write("# [metadata]\n")
