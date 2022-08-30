@@ -137,11 +137,11 @@ class DlPolyField(WriteFile):
     # def _read_file(self):
     #     ...
 
-    def _write_file(self):
-        
+    def _write_file(self, path: Path):
+
         bonds, angles, dihedrals = get_internal_feature_indices(self.atoms)
 
-        with open(self.path, "w") as f:
+        with open(path, "w") as f:
             f.write("DL_FIELD v3.00\n")
             f.write("Units kJ/mol\n")
             f.write("Molecular types 1\n")
