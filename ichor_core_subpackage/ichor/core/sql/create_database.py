@@ -9,11 +9,11 @@ def create_database(database_path: Union[str, Path]):
 
     :param database_path: A string or Path to a (non-existing) database on disk.
     """
-        
+
     database_path = str(Path(database_path))
 
     # create new database and start session
-    engine = create_engine(f"sqlite+pysqlite://{database_path}", echo=True, future=True)
+    engine = create_engine(f"sqlite+pysqlite:///{database_path}", echo=True, future=True)
     # Session = sessionmaker(bind=engine)
     # session = Session()
     Base = declarative_base()
