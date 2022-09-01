@@ -48,9 +48,11 @@ class RBF(Kernel):
                 The RBF covariance matrix of shape (n, m)
         """
 
-        true_lengthscales = np.sqrt(1.0 / (2 * self._thetas))
+        true_lengthscales = self.lengthscales
+
         tmp_x1 = x1[:, self.active_dims] / true_lengthscales
         tmp_x2 = x2[:, self.active_dims] / true_lengthscales
+        
         dist = Distance.squared_euclidean_distance(tmp_x1, tmp_x2)
         return np.exp(-0.5 * dist)
 
@@ -65,6 +67,6 @@ class RBF(Kernel):
 
     def __repr__(self):
         
-        lengthscales = np.sqrt(1.0 / (2 * self._thetas))
+        lengthscales = self.lengthscales
         
         return f"{self.__class__.__name__}: lengthscales: {lengthscales}"
