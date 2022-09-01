@@ -17,12 +17,14 @@ def make_nvalidation_sets_with_npoints(points_input: Path, system_name: str, nse
     :param npoints: How many points should be in each set
     """
     
+    total_set_digits = count_digits(nsets)
+    
     for i in range(nsets):
 
         make_sets(points_input, system_name, training_set_methods={"random":0},
                   sample_pool_methods={"random":0},
                   validation_set_methods={"random": npoints},
-                  validation_set_path=Path(f"{system_name}/VALIDATION_SET{i}")
+                  validation_set_path=Path(f"{system_name}/VALIDATION_SET{str(i).zfill(max(4, total_set_digits))}")
                   )
 
 # makes all the sets at once, mutating the points_input, ensuring that each set has unique points.
