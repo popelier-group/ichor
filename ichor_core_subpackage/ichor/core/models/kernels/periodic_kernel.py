@@ -66,9 +66,6 @@ class PeriodicKernel(Kernel):
         # get only dimensions which need periodic kernel
         x1_ = x1[:, self.active_dims]
         x2_ = x2[:, self.active_dims]
-        
-        print("per x1 shape", x1_.shape)
-        print("per x2 shape", x2_.shape)
 
         # divide by period length and multiply by pi beforehand
         x1_ = np.pi * (x1_ / self._period_length)
