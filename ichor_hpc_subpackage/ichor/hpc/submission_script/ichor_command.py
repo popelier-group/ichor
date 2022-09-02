@@ -21,10 +21,8 @@ class ICHORCommand(PythonCommand):
         self,
         script: Optional[Path] = None,
         args: Optional[List[str]] = None,
-        auto_run: bool = False,
         func: Optional[Union[str, F]] = None,
         func_args: Optional[List[str]] = None,
-        needs_uid: Optional[bool] = True,
     ):
         PythonCommand.__init__(
             self,
@@ -32,26 +30,9 @@ class ICHORCommand(PythonCommand):
             args if args is not None else [],
         )
 
-        from ichor.hpc import GLOBALS
-        from ichor.hpc.arguments import Arguments
-
-        self.needs_uid = needs_uid
-
-        self.args += [f"-c {Arguments.config_file}"]
-
-        if self.needs_uid:
-            self.args += [f"-u {GLOBALS.UID}"]
-
-        if auto_run:
-            self.args += ["-ar"]
-
         if func is not None:
-            func_args = func_args if func_args is not None else []
+            func_args = func_args if func_args else []
             self.add_function_to_job(func, *func_args)
-
-    @classproperty
-    def group(self) -> bool:
-        return False
 
     def add_function_to_job(self, function_to_run: Union[str, F], *args):
         """extends self.args with the function and function arguments that need to be executed to check output"""

@@ -25,7 +25,7 @@ class PythonCommand(CommandLine):
     @classproperty
     def command(self) -> str:
         """Returns the command(program) which is ran in the job."""
-        return "python"
+        return "python3"
 
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Returns a string which is then written into the submission script in order to run a python job."""

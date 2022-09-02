@@ -10,7 +10,6 @@ from uuid import UUID
 from ichor.core.common.bool import check_bool
 from ichor.hpc.uid import get_uid
 
-
 class ExternalFunction:
     """
     Class to contain information for adding an ichor function to be able to be ran externally
@@ -90,8 +89,8 @@ external_functions = [
 ]
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key
-external_functions = {ef.name: ef for ef in external_functions}
-
+EXTERNAL_FUNCTIONS = {ef.name: ef for ef in external_functions}
+ALLOWED_FUNCTIONS = ", ".join(map(str, external_functions.keys()))
 
 class UnknownExternalFunction(Exception):
     pass
@@ -100,27 +99,17 @@ class UnknownExternalFunction(Exception):
 class Arguments:
     """Used to parse command line arguments that are given to ICHOR. These arguments are given using `-` or `--` and read with argparse."""
 
-    config_file: Path = Path("config.properties")
-    uid: UUID = get_uid()
-    auto_run: bool = False
-
     call_external_function = None
     call_external_function_args = []
 
     @staticmethod
     def read():
+
         parser = ArgumentParser(
-            description="ICHOR: A training suite for producing atomistic GPR models"
+            description="ichor: File management program for various computational chemistry software as well as \
+                machine learning in DL_FFLUX."
         )
 
-        parser.add_argument(
-            "-c",
-            "--config",
-            dest="config_file",
-            type=str,
-            help="Name of Config File for ICHOR",
-        )
-        allowed_functions = ", ".join(map(str, external_functions.keys()))
         parser.add_argument(
             "-f",
             "--func",
@@ -128,29 +117,11 @@ class Arguments:
             type=str,
             metavar=("func", "arg"),
             nargs="+",
-            help=f"Call ichor function with args, allowed functions: [{allowed_functions}]",
-        )
-        parser.add_argument(
-            "-u",
-            "--uid",
-            dest="uid",
-            type=str,
-            help="Unique Identifier For ichor Jobs To Write To",
-        )
-
-        parser.add_argument(
-            "-ar",
-            "--autorun",
-            dest="autorun",
-            default=False,
-            action="store_true",
-            help="Flag used to specify ichor is running in auto-run mode",
+            help=f"Call ichor function with args, allowed functions: [{ALLOWED_FUNCTIONS}]",
         )
 
         args = parser.parse_args()
-        if args.config_file:
-            Arguments.config_file = Path(args.config_file)
-
+        
         if args.func:
             ifunc = 0
             display_help = False
