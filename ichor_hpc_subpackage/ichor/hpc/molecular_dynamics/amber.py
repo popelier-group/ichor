@@ -37,5 +37,6 @@ def submit_amber(
     )
 
     with SubmissionScript(SCRIPT_NAMES["amber"], ncores=ncores) as submission_script:
-        submission_script.add_command(AmberCommand(mol2.path, mdin, temperature, system_name , ncores))
+        submission_script.add_command(AmberCommand(mol2_file=mol2.path, mdin_file=mdin, system_name=system_name,
+                                                   temperature=temperature, ncores=ncores))
     return submission_script.submit()

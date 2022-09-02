@@ -74,7 +74,7 @@ class AmberCommand(CommandLine):
         cmd = ""
         cmd += f"pushd {mol2_file.parent}\n"
         # run antechanmber to modify mol2 file for use in amber
-        cmd += f"antechamber -i {mol2_file} -o {mol2_file} -fi mol2 -fo mol2 -c bcc -pf yes -nc -2 -at gaff2 -j 5 -rn {self.system_name()}\n"
+        cmd += f"antechamber -i {mol2_file} -o {mol2_file} -fi mol2 -fo mol2 -c bcc -pf yes -nc -2 -at gaff2 -j 5 -rn {self.system_name}\n"
         # run parmchk to generate frcmod file
         cmd += f"parmchk2 -i {mol2_file} -f mol2 -o {frcmod_file} -s 2\n"
         # run tleap to generate prmtop and inpcrd
