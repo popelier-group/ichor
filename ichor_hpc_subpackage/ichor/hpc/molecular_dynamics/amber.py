@@ -29,7 +29,7 @@ def submit_amber(
     mkdir(FILE_STRUCTURE["amber"])
     mol2 = Mol2(FILE_STRUCTURE["amber"] / (system_name + Mol2.filetype))
     mol2.atoms = atoms
-    mol2.write()
+    mol2.write(system_name=system_name)
 
     mdin = FILE_STRUCTURE["amber"] / "md.in"
     write_mdin(mdin, nsteps=nsteps, dt=dt, temperature=temperature,
