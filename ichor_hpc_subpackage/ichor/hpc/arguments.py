@@ -90,7 +90,7 @@ external_functions = [
 
 # Convert list of external functions to a dictionary of external functions with the name of each function as the key
 EXTERNAL_FUNCTIONS = {ef.name: ef for ef in external_functions}
-ALLOWED_FUNCTIONS = ", ".join(map(str, external_functions.keys()))
+ALLOWED_FUNCTIONS = ", ".join(map(str, EXTERNAL_FUNCTIONS.keys()))
 
 class UnknownExternalFunction(Exception):
     pass
