@@ -9,6 +9,7 @@ from ichor.core.common.os import current_user
 from ichor.core.files.file import File, WriteFile, ReadFile
 from ichor.core.files.file_data import HasAtoms
 from ichor.core.common.units import AtomicDistance
+from ichor.core.common import constants
 
 
 class MoleculeType(Enum):
@@ -126,14 +127,11 @@ def gasteigger_charge(atom: Atom) -> float:
     # todo: implement gasteigger charges
     return 0.0
 
-
 def charge(atom: Atom) -> float:
     return gasteigger_charge(atom)
 
-
 def get_valence(atom):
     return len(get_atom_bonds(atom))
-
 
 def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
     if {atom1.type, atom2.type} == {"C", "N"}:
@@ -180,10 +178,6 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
                 return BondType.Aromatic
 
         return BondType.Double
-
-
-visited = []
-
 
 def _get_ring(
     atom: Atom,
@@ -422,6 +416,15 @@ class Mol2Atom(Atom):
         if self._atom_type is None:
             self._atom_type = get_atom_type(self, self.parent)
         return self._atom_type
+        
+    @property
+    def valence(self):
+        return constants.type2valence[self.type]
+
+    @property
+    def unpaired_electrons(self):
+        return constants.type2orbital[self.type].value - self.valence
+        
 
 
 non_metal_atoms = [
