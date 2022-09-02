@@ -40,7 +40,7 @@ class AmberCommand(CommandLine):
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
         return AmberModules
 
-    @classproperty
+    @property
     def command(self) -> str:
         return (
             "sander"
