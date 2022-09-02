@@ -29,7 +29,7 @@ class ConfigProvider(dict):
        an extra condition to the if statement in loadConfig()
     """
 
-    def __init__(self, source: Path = Arguments.config_file):
+    def __init__(self, source: Path = Path("config.properties")):
         self.src: Path = Path(source)
         self.load_config()
 

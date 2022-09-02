@@ -642,11 +642,7 @@ class Globals:
 
         if config_file is None:
             if self._config_file is None:
-                # if no config file is provided and the instance of globals wasn't defined from a config, default to
-                # `Arguments.config_file`
-                from ichor.hpc.arguments import Arguments
-
-                config_file = Arguments.config_file
+                config_file = "config.properties"
             else:
                 config_file = self._config_file
         config_file = Path(config_file)
