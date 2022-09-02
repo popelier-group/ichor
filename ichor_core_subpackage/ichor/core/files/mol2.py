@@ -168,7 +168,7 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
                 return BondType.Aromatic
 
             single_bond_distance = atom1.radius + atom2.radius
-            from ichor.core.analysis.geometry import calculate_bond
+            from ichor.core.calculators.geometry_calculator import calculate_bond
 
             bond_distance = calculate_bond(atom1.parent, atom1.i, atom2.i)
             bond_percentage = bond_distance / single_bond_distance
@@ -252,7 +252,7 @@ def bond_index_to_atom(
 
 
 def get_atom_bonds(atom: Atom) -> List[Tuple[int, int]]:
-    from ichor.core.analysis.geometry import bonds
+    from ichor.core.calculators.geometry_calculator import bonds
 
     """Return list of bond indices (1-index)"""
     return [bond for bond in bonds(atom.parent) if atom.index in bond]
