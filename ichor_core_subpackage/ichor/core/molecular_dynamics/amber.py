@@ -4,13 +4,8 @@ from typing import Optional
 
 import numpy as np
 from ichor.core.common.functools import classproperty
-from ichor.core.files import (
-    File,
-    FileContents,
-    OptionalFile,
-    ReadFile,
-    WriteFile,
-)
+from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
+from ichor.core.files.optional_file import OptionalFile
 
 
 class AmberThermostat(Enum):

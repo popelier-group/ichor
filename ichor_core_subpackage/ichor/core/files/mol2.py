@@ -489,7 +489,7 @@ class Mol2(HasAtoms, WriteFile, File):
                 )
 
     def _write_file(self, path: Path, system_name: str):
-        from ichor.core.analysis.geometry import bonds
+        from ichor.core.calculators.geometry_calculator import bonds
 
         self.format()
         b = bonds(self.atoms)

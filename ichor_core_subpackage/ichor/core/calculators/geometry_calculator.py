@@ -2,7 +2,6 @@ from typing import List, Tuple
 
 import numpy as np
 from ichor.core.common.linalg import mag
-from ichor.core.calculators import default_connectivity_calculator
 
 def calculate_bond(atoms: "Atoms", i: int, j: int):
     """
