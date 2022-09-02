@@ -81,7 +81,7 @@ class AmberCommand(CommandLine):
 
         cmd += f"tleap -f {tleap_script}\n"
         # run amber
-        cmd += f"{AmberCommand.command} -O -i {self.mdin_file.absolute()} -o md.out -p {prmtop_file} -c {inpcrd_file} -inf md.info\n"
+        cmd += f"{self.command} -O -i {self.mdin_file.absolute()} -o md.out -p {prmtop_file} -c {inpcrd_file} -inf md.info\n"
 
         cmd += "popd\n"
         return cmd
