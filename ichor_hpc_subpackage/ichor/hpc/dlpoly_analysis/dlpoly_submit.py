@@ -40,8 +40,8 @@ def setup_dlpoly_directory(dl_poly_job_directory_path: Path, system_name:str,
     # change into the new directory and write out the CONTROL, CONFIG, FIELD files
     with pushd(dl_poly_job_directory_path):
         write_control(system_name, temperature=temperature)
-        write_config(dl_poly_job_directory_path, atoms)
-        write_field(dl_poly_job_directory_path, atoms)
+        write_config(atoms=atoms, system_name=system_name)
+        write_field(atoms=atoms, system_name=system_name)
     # copy over model files to model_krig inside the job directory
     copy_models(dl_poly_job_directory_path, models_directory)
 
@@ -52,49 +52,84 @@ def submit_dlpoly_job(
     dl_poly_executable_path: Path,
     ncores: int = 1, 
     temperature: int = 1,
+    cell_size: float = 50.0,
     dl_poly_job_directory: Path = Path("DL_FFLUX_RUN"),
     hold: Optional[JobID] = None,
 ) -> JobID:
     
     atoms_instance = get_atoms_from_path(file_containing_atoms)
-    setup_dlpoly_directory(dl_poly_job_directory, system_name, atoms_instance, models_directory, temperature=temperature)
+    setup_dlpoly_directory(dl_poly_job_directory, system_name, atoms_instance, models_directory, temperature=temperature,
+                           cell_size=cell_size)
     
     with SubmissionScript(SCRIPT_NAMES["dlpoly"], ncores=ncores) as submission_script:
         submission_script.add_command(DlpolyCommand(dl_poly_executable_path, dl_poly_job_directory))
     return submission_script.submit(hold=hold)
 
-# def submit_final_geometry_to_gaussian(
-#     dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
-#     hold: Optional[JobID] = None,
-# ) -> JobID:
-#     gjfs = write_final_geometry_to_gjf(dlpoly_directory)
-#     return submit_gjf_files(gjfs, hold=hold)
+def submit_final_geometry_from_history_to_gaussian(
+    dlpoly_directory: Path,
+    hold: Optional[JobID] = None,
+    **kwargs
+) -> JobID:
+    """
+    Runs the last geometry that was found in the DL POLY HISTORY file to Gaussian.
+
+    :param dlpoly_directory: The directory containing the DL POLY run with HISTORY file.
+    :param hold: A JobID to hold this job for, defaults to None
+    :param kwargs: Key word arguments to pass to GJF class. These can be things like basis set or level of theory.
+    :return: Returns the JobID of the submitted job.
+    """
+    gjfs = write_final_geometry_to_gjf(dlpoly_directory, **kwargs)
+    return submit_gjf_files(gjfs, hold=hold)
 
 
+# # TODO: fix these after fixing the ichor command to activate the conda environment with ichor installed.
 
-# TODO: fix these after fixing the ichor command to activate the conda environment with ichor installed.
+# def submit_setup_dlpoly_directory(dl_poly_job_directory_path: Path, system_name:str,
+#                            file_containing_atoms: Path, models_directory: Path, temperature: int = 1
+#                            ) -> JobID:
+#     """Submitted to compute node. Sets up a DL POLY directory where the DL POLY job will be ran.
 
-
-# def run_dlpoly_geometry_optimisation(
-#     dlpoly_input: Path, model_location: Path, hold=Optional[JobID]
-# ) -> JobID:
-#     return run_dlpoly(dlpoly_input, model_location, temperature=1, hold=hold)
-
-# def submit_setup_dlpoly_directories(
-#     dlpoly_input: Path,
-#     model_location: Path,
-#     hold: Optional[JobID] = None,
-# ) -> JobID:
+#     :param dl_poly_directory_path: Path to DL POLY directory
+#     :param atoms: Instance of Atoms which contains the initial geometry for DL POLY
+#     :param models_directory: A Path object to directory containing .model files that DL POLY uses to make predictions
+#     :param temperature: The temperature at which to run the simulation, defaults to 1
+#     """
+    
+#     atoms_instance = get_atoms_from_path(file_containing_atoms)
+    
 #     with SubmissionScript(
 #         SCRIPT_NAMES["ichor"]["dlpoly"]["setup"]
 #     ) as submission_script:
 #         submission_script.add_command(
 #             ICHORCommand(
-#                 func="run_dlpoly_geometry_optimisations",
-#                 func_args=[str(dlpoly_input), str(model_location)],
+#                 func="setup_dlpoly_directory",
+#                 func_args=[str(dl_poly_job_directory_path), str(system_name), ],
 #             )
 #         )
 #     return submission_script.submit(hold=hold)
+
+
+
+# def submit_dlpoly_optimisation_analysis_auto_run(
+#     file_containing_atoms: Path,
+#     models_directory: Path,
+#     dlpoly_job_directory: Path = FILE_STRUCTURE["dlpoly"],
+#     hold: Optional[JobID] = None,
+# ) -> JobID:
+    
+#     ninputs = len(get_models_from_path(model_location))
+    
+#     job_id = submit_setup_dlpoly_directories(
+#         dlpoly_input, model_location, hold=hold
+#     )
+#     job_id = submit_dlpoly_jobs(dummy_paths, hold=job_id)
+#     job_id = submit_write_dlpoly_gjfs(dlpoly_directory, hold=job_id)
+#     job_id = submit_dlpoly_gjfs(dummy_paths, hold=job_id)
+#     job_id = submit_dlpoly_energies(dlpoly_directory, hold=job_id)
+#     return job_id
+
+
+
 
 
 # def submit_write_dlpoly_gjfs(
@@ -110,25 +145,6 @@ def submit_dlpoly_job(
 #             )
 #         )
 #     return submission_script.submit(hold=hold)
-
-# def submit_dlpoly_optimisation_analysis_auto_run(
-#     dlpoly_input: Path,
-#     model_location: Path,
-#     dlpoly_directory: Path = FILE_STRUCTURE["dlpoly"],
-#     hold: Optional[JobID] = None,
-# ) -> JobID:
-#     ninputs = len(get_models_from_path(model_location))
-#     dummy_paths = [Path("tmp.file") for _ in range(ninputs)]
-    
-#     with DataLock():
-#         job_id = submit_setup_dlpoly_directories(
-#             dlpoly_input, model_location, hold=hold
-#         )
-#         job_id = submit_dlpoly_jobs(dummy_paths, hold=job_id)
-#         job_id = submit_write_dlpoly_gjfs(dlpoly_directory, hold=job_id)
-#         job_id = submit_dlpoly_gjfs(dummy_paths, hold=job_id)
-#         job_id = submit_dlpoly_energies(dlpoly_directory, hold=job_id)
-#     return job_id
 
 # def submit_get_dlpoly_energies(
 #     dlpoly_directory: Path, hold: Optional[JobID] = None
