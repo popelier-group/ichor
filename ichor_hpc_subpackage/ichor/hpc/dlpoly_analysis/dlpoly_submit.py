@@ -1,107 +1,72 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.core.analysis.geometry import get_internal_feature_indices
-from ichor.core.analysis.get_atoms import get_atoms_from_path
-from ichor.core.analysis.get_models import get_models_from_path
+from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
+from ichor.core.useful_functions import get_atoms_from_path, get_models_from_path
 from ichor.core.atoms import Atoms
 from ichor.core.common.io import convert_to_path, ln, mkdir
 from ichor.core.common.constants import dlpoly_weights
 from ichor.core.models import Models
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import (SCRIPT_NAMES, DataLock, DlpolyCommand,
-                                         ICHORCommand, SubmissionScript)
+from ichor.hpc.submission_script import SCRIPT_NAMES, DataLock, DlpolyCommand, ICHORCommand, SubmissionScript
 from ichor.hpc.submission_script.common import submit_gjf_files
-
+from ichor.core.files.dl_poly import DlPolyControl, DlPolyConfig, DlPolyField
 
 def write_control(
-    path: Path,
     system_name: str,
+    ensemble: str = "nvt",
+    thermostat: str = "hoover",
     hoover_number: float = 0.04,
-    temperature: float = 0.0,
+    temperature: int = 1,
     timestep: float = 0.001,
     n_steps: int = 500,
+    file_name: str = "CONTROL",
 ):
-    with open(path / "CONTROL", "w+") as f:
-        f.write(f"Title: {system_name}\n")
-        f.write("\n")
-        f.write(f"ensemble nvt hoover {hoover_number}\n")
-        f.write("\n")
-        if int(temperature) == 0:
-            f.write("temperature 0\n")
-            f.write("\n")
-            f.write("#perform zero temperature run (really set to 10K)\n")
-            f.write("zero\n")
-        else:
-            f.write(f"temperature {temperature}\n")
-        f.write("\n")
-        f.write("\n")
-        f.write(f"timestep {timestep}\n")
-        f.write(f"steps {n_steps}\n")
-        f.write("scale 100\n")
-        f.write("\n")
-        f.write("cutoff  8.0\n")
-        f.write("rvdw    8.0\n")
-        f.write("vdw direct\n")
-        f.write("vdw shift\n")
-        f.write("fflux cluster L1\n")
-        f.write("\n")
-        f.write("dump  1000\n")
-        f.write("traj 0 1 0\n")
-        f.write("print every 1\n")
-        f.write("stats every 1\n")
-        f.write("fflux print 0 1\n")
-        f.write("job time 10000000\n")
-        f.write("close time 20000\n")
-        f.write("finish\n")
+    """ Writes CONTROL file that DL_FFLUX needs to function. It is a modified version of the DL_POLY CONTROL file.
+    The defaults of the function are used to perform a geometry optimization, so the settings are different
+    that the default settings.
+
+    :param system_name: The name of the system
+    :parm ensemble: The ensemble to use for the simulation, defaults to nvt
+    :param thermostat: The thermostat to use for the simulation, defaults to hoover (Nose-Hoover thermostat)
+    :param hoover_number: The relaxation constant of Nose-Hoover thermostat in ps, defaults to 0.04
+    :param temperature: The temperature to run the simulation at, defaults to 0.0 (note that simulation is actually ran at 10K)
+        because `zero` keyword is also added.
+    :param timestep: The timestep time, defaults to 0.001 ps
+    :param n_steps: The number of timesteps for the simulation, defaults to 500
+    """
+    
+    control_file = DlPolyControl(path=file_name, system_name=system_name, ensemble=ensemble,
+                                 thermostat=thermostat, thermostat_settings=[hoover_number], temperature=temperature,
+                                 timestep=timestep, n_steps=n_steps)
+    control_file.write()
 
 
-def write_config(path: Path, atoms: Atoms, cell_size: float, system_name: str):
+def write_config(atoms: Atoms, cell_size: float, system_name: str, file_name: str = "CONFIG"):
+    """Writes CONFIG file that DL_FFLUX needs to run.
+
+    :param atoms: An Atoms instance that is the starting geometry of the DL_FFLUX MD simulation
+    :param cell_size: The box size. Default is 50x50x50 Angstroms. Can be a cube only.
+    :param system_name: The system name
+    :parm file_name: The name of the config file. It has to be `CONFIG` to be read in correctly by DL_FFLUX.
+    """
+    
+    # center atoms if the coordinates are very large, so that molecule is in box size.
     atoms.centre()
+    dl_poly_config = DlPolyConfig(path=file_name, system_name=system_name, atoms=atoms, cell_size=cell_size)
+    dl_poly_config.write()
 
-    with open(path / "CONFIG", "w+") as f:
-        f.write("Frame :         1\n")
-        f.write("\t0\t1\n")  # PBC Solution to temporary problem
-        f.write(f"{cell_size} 0.0 0.0\n")
-        f.write(f"0.0 {cell_size} 0.0\n")
-        f.write(f"0.0 0.0 {cell_size}\n")
-        for atom in atoms:
-            f.write(
-                f"{atom.type}  {atom.index}  {system_name}_{atom.type}{atom.index}\n"
-            )
-            f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
+def write_field(atoms: Atoms, system_name: str, file_name = "FIELD"):
+    """Writes out DL FFLUX FIELD file.
 
+    :param atoms: An Atoms instance which contains a geometry of the chemical system of interest.
+    :param system_name: The name of the system
+    :param file_name: The FIELD file name, defaults to "FIELD"
+    """
 
-def write_field(path: Path, atoms: Atoms, system_name: str):
-    bonds, angles, dihedrals = get_internal_feature_indices(atoms)
-
-    with open(path / "FIELD", "w") as f:
-        f.write("DL_FIELD v3.00\n")
-        f.write("Units kJ/mol\n")
-        f.write("Molecular types 1\n")
-        f.write(f"{system_name}\n")
-        f.write("nummols 1\n")
-        f.write(f"atoms {len(atoms)}\n")
-        for atom in atoms:
-            f.write(
-                #  Atom Type      Atomic Mass                    Charge Repeats Frozen(0=NotFrozen)
-                f"{atom.type}\t\t{dlpoly_weights[atom.type]:.7f}     0.0   1   0\n"
-            )
-        f.write(f"BONDS {len(bonds)}\n")
-        for i, j in bonds:
-            f.write(f"harm {i} {j} 0.0 0.0\n")
-        if len(angles) > 0:
-            f.write(f"ANGLES {len(angles)}\n")
-            for i, j, k in angles:
-                f.write(f"harm {i} {j} {k} 0.0 0.0\n")
-        if len(dihedrals) > 0:
-            f.write(f"DIHEDRALS {len(dihedrals)}\n")
-            for i, j, k, l in dihedrals:
-                f.write(f"harm {i} {j} {k} {l} 0.0 0.0\n")
-        f.write("finish\n")
-        f.write("close\n")
-
+    field_file = DlPolyField(path=file_name, atoms=atoms, system_name=system_name)
+    field_file.write()
 
 def link_models(path: Path, models: Models):
     model_dir = path / "model_krig"

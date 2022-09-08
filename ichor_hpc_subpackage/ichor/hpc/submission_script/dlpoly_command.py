@@ -14,8 +14,11 @@ class DlpolyCommand(CommandLine):
     :param dlpoly_directory: Path to where the working directory for dlpoly.
     """
 
-    def __init__(self, dlpoly_directory: Path):
+    def __init__(self, dlpoly_program_path: Path, dlpoly_directory: Path , ncores: int = 1):
+        
+        self.dlpoly_program_path = dlpoly_program_path
         self.dlpoly_directory = dlpoly_directory
+        self.ncores = ncores
 
     @property
     def data(self) -> List[str]:
@@ -26,24 +29,15 @@ class DlpolyCommand(CommandLine):
         """Return a string corresponding to modules that need to be loaded for dlpoly jobs to run on compute nodes."""
         return DlpolyModules
 
-    @classproperty
+    @property
     def command(self) -> str:
         """Return the command word that is used to run dlpoly. Since it is an executable, it can be ran by calling the path of dlpoly followed by any
         configuration settings."""
-        dlpoly_path = get_dlpoly_path()
-        return str(dlpoly_path.absolute())
-
-    @classproperty
-    def ncores(self) -> int:
-        """Return the number of cores to be used for ferebus jobs."""
-
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.DLPOLY_NCORES
+        return str(self.dlpoly_program_path.absolute())
 
     def repr(self, variables: List[str]) -> str:
         """Return a string that is used to construct ferebus job files."""
         cmd = f"pushd {variables[0]}\n"
-        cmd += f"  {DlpolyCommand.command}\n"
+        cmd += f"  {self.command}\n"
         cmd += "popd\n"
         return cmd

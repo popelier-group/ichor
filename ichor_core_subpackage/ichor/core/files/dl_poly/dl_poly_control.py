@@ -3,6 +3,8 @@ from pathlib import Path
 
 class DlPolyControl(WriteFile):
     """Write out a DLPoly CONTROL file. The name of the file needs to be CONTROL,  so DL POLY knows to use it.
+    The default Control file is made to be used for geometry optimizations at very low temperatures. Settings must be
+    changed to write out a file for water box simulations for example.
     """
     
     # https://www.ehu.eus/sgi/ARCHIVOS/dlpoly_man.pdf , section 5.1.1
@@ -12,9 +14,9 @@ class DlPolyControl(WriteFile):
                  ensemble: str = "nvt",
                  thermostat: str = "hoover",
                  thermostat_settings: list = [0.04],
-                 temperature = 0.0,
+                 temperature: int = 1,
                  timestep = 0.001,
-                 steps = 5000,
+                 steps = 500,
                  scale = 100,
                  cutoff = 8.0,
                  rvwd = 8.0,
@@ -26,9 +28,9 @@ class DlPolyControl(WriteFile):
                  stats_every = 1,
                  job_time = 10000000,
                  close_time = 20000
-                 
                  ):
-        super().__init__()
+        
+        super().__init__(path)
         
         self.system_name = system_name
         self.ensemble = ensemble
@@ -63,15 +65,8 @@ class DlPolyControl(WriteFile):
             str_thermostat_settings = " ".join([i for i in self.thermostat_settings])
             f.write(f"ensemble {self.ensemble} {self.thermostat} {str_thermostat_settings}\n")
             f.write("\n")
-            if int(self.temperature) == 0:
-                f.write("temperature 0\n")
-                f.write("\n")
-                f.write("#perform zero temperature run (really set to 10K)\n")
-                f.write("zero\n")
-                f.write("\n")
-            else:
-                f.write(f"temperature {self.temperature}\n")
-                f.write("\n")
+            f.write(f"temperature {self.temperature}\n")
+            f.write("\n")
             f.write("\n")
             # timestep in ps
             f.write(f"timestep {self.timestep}\n")

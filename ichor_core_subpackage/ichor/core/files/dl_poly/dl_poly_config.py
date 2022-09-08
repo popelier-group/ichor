@@ -10,6 +10,7 @@ class DlPolyConfig(WriteFile):
                  system_name,
                  atoms,
                  cell_size = 50):
+
         super().__init__(path)
         
         self.system_name = system_name
