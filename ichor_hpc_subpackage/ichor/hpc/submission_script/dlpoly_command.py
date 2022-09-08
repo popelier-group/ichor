@@ -1,10 +1,7 @@
 from pathlib import Path
 from typing import List
-
 from ichor.core.common.functools import classproperty
-from ichor.hpc.log import logger
 from ichor.hpc.modules import DlpolyModules, Modules
-from ichor.hpc.programs import get_dlpoly_path
 from ichor.hpc.submission_script.command_line import CommandLine
 
 
@@ -26,18 +23,18 @@ class DlpolyCommand(CommandLine):
 
     @classproperty
     def modules(self) -> Modules:
-        """Return a string corresponding to modules that need to be loaded for dlpoly jobs to run on compute nodes."""
-        return DlpolyModules
+        """No modules need to be loaded for DL POLY. DL POLY needs to be compiled before it can be used with ICHOR."""
+        return ""
 
     @property
     def command(self) -> str:
-        """Return the command word that is used to run dlpoly. Since it is an executable, it can be ran by calling the path of dlpoly followed by any
-        configuration settings."""
+        """Return the command word that is used to run DL POLY. In this case, the path to the DL POLY
+        executable is returned."""
         return str(self.dlpoly_program_path.absolute())
 
     def repr(self, variables: List[str]) -> str:
-        """Return a string that is used to construct ferebus job files."""
+        """Return a string that is used to construct DL POLY job files."""
         cmd = f"pushd {variables[0]}\n"
-        cmd += f"  {self.command}\n"
+        cmd += f"{self.command} &> Energies\n"
         cmd += "popd\n"
         return cmd
