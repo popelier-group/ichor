@@ -1,12 +1,6 @@
-import os
-import sys
 from pathlib import Path
 from typing import List, Optional, Union
-
-import ichor
-from ichor.core.common.functools import classproperty
 from ichor.core.common.types.itypes import F
-from ichor.hpc.programs import get_ichor_parent_directory
 from ichor.hpc.submission_script.python_command import PythonCommand
 
 
@@ -24,11 +18,7 @@ class ICHORCommand(PythonCommand):
         func: Optional[Union[str, F]] = None,
         func_args: Optional[List[str]] = None,
     ):
-        PythonCommand.__init__(
-            self,
-            script or get_ichor_parent_directory(),
-            args if args is not None else [],
-        )
+        super().__init__(script, args)
 
         if func is not None:
             func_args = func_args if func_args else []
@@ -36,6 +26,7 @@ class ICHORCommand(PythonCommand):
 
     def add_function_to_job(self, function_to_run: Union[str, F], *args):
         """extends self.args with the function and function arguments that need to be executed to check output"""
+        
         if not isinstance(function_to_run, str):
             function_to_run = function_to_run.__name__
         arg_str = " ".join(f'"{arg}"' for arg in args)

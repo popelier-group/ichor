@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import List, Optional
-
+import sys
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules, PythonModules
 from ichor.hpc.submission_script.command_line import CommandLine
@@ -19,13 +19,13 @@ class PythonCommand(CommandLine):
 
     @classproperty
     def modules(self) -> Modules:
-        """Returns a `Modules` instance which contains modules that need to be loaded on the machine for Python to function."""
-        return PythonModules
+        """Returns the python executable that the current ichor program is running from."""
+        return ""
 
     @classproperty
     def command(self) -> str:
         """Returns the command(program) which is ran in the job."""
-        return "python3"
+        return str(Path(sys.base_prefix) / "bin" / "python")
 
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Returns a string which is then written into the submission script in order to run a python job."""
