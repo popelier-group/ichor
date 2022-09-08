@@ -30,7 +30,7 @@ def write_control(
     control_file.write()
 
 
-def write_config(atoms: Atoms, cell_size: float, system_name: str, file_name: str = "CONFIG"):
+def write_config(atoms: "Atoms", system_name: str, cell_size: float = 50.0, file_name: str = "CONFIG"):
     """Writes CONFIG file that DL_FFLUX needs to run.
 
     :param atoms: An Atoms instance that is the starting geometry of the DL_FFLUX MD simulation
@@ -41,12 +41,10 @@ def write_config(atoms: Atoms, cell_size: float, system_name: str, file_name: st
     # have import in function to prevent cyclic imports
     from ichor.core.files.dl_poly import DlPolyConfig
     
-    # center atoms if the coordinates are very large, so that molecule is in box size.
-    atoms.centre()
     dl_poly_config = DlPolyConfig(path=file_name, system_name=system_name, atoms=atoms, cell_size=cell_size)
     dl_poly_config.write()
 
-def write_field(atoms: Atoms, system_name: str, file_name = "FIELD"):
+def write_field(atoms: "Atoms", system_name: str, file_name = "FIELD"):
     """Writes out DL FFLUX FIELD file.
 
     :param atoms: An Atoms instance which contains a geometry of the chemical system of interest.

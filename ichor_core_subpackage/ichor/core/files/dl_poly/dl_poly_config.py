@@ -7,17 +7,15 @@ class DlPolyConfig(WriteFile):
     """
     
     def __init__(self, path: Union[Path, str],
-                 system_name,
-                 atoms,
-                 cell_size = 50):
+                 system_name: str,
+                 atoms: "Atoms",
+                 cell_size: float = 50.0):
 
-        super().__init__(path)
-        
+        super().__init__(path)      
         self.system_name = system_name
-        self.atoms = atoms
+        # center atoms if the coordinates are very large, so that molecule is in box size.  
+        self.atoms = atoms.centre()
         self.cell_size = cell_size
-        # TODO: why is centering needed?
-        # atoms.centre()
 
     # TODO: implement reading for dlpoly config file
     # def _read_file(self):
