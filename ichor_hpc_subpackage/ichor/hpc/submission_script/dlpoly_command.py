@@ -11,11 +11,10 @@ class DlpolyCommand(CommandLine):
     :param dlpoly_directory: Path to where the working directory for dlpoly.
     """
 
-    def __init__(self, dlpoly_program_path: Path, dlpoly_directory: Path , ncores: int = 1):
+    def __init__(self, dlpoly_program_path: Path, dlpoly_directory: Path):
         
         self.dlpoly_program_path = dlpoly_program_path
         self.dlpoly_directory = dlpoly_directory
-        self.ncores = ncores
 
     @property
     def data(self) -> List[str]:
