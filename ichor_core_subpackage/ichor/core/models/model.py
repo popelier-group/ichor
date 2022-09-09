@@ -126,7 +126,7 @@ class Model(ReadFile, WriteFile):
                     continue
 
                 if (
-                    "jitter" in line or "nugget" in line
+                    "jitter" in line or "nugget" in line or "noise" in line
                 ):  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
                     self.jitter = self.jitter or float(line.split()[-1])
                     continue
@@ -392,6 +392,7 @@ class Model(ReadFile, WriteFile):
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """Returns an array containing the test point predictions."""
+        
         return (
             self.mean.value(x_test)
             + np.dot(self.r(x_test).T, self.weights)[:, -1]
