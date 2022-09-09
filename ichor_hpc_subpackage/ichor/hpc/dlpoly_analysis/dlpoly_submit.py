@@ -109,7 +109,6 @@ def submit_final_geometry_from_history_to_gaussian(
 #     return submission_script.submit(hold=hold)
 
 
-
 # def submit_dlpoly_optimisation_analysis_auto_run(
 #     file_containing_atoms: Path,
 #     models_directory: Path,
