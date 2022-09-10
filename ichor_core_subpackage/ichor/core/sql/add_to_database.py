@@ -9,6 +9,11 @@ from typing import List
 from sqlalchemy import select
 
 def add_atom_names_to_database(database_path: Path, atom_names: List[str]):
+    """Adds a list of atom names to the atom_names table of the database.
+
+    :param database_path: Path to database
+    :param atom_names: A list of atom names, e.g. ["C1", "H2", "H3", ....]
+    """
     
     database_path = str(Path(database_path).absolute())
 
@@ -25,6 +30,12 @@ def add_atom_names_to_database(database_path: Path, atom_names: List[str]):
 # TODO: make this more robust as some data might be absent. Check that .wfn exists before adding wfn data
 # TODO: check that gaussian out forces exist. Check that int file exists.
 def add_point_to_database(database_path: Path, point: "PointDirectory"):
+    """Adds information from an instance of a PointDirectory to the database.
+
+    :param database_path: Path to database
+    :param point: A PointDirectory instance, containing Gaussian/AIMAll outputs that can be
+        written to the database.
+    """
 
     database_path = str(Path(database_path).absolute())
 
@@ -65,10 +76,13 @@ def add_point_to_database(database_path: Path, point: "PointDirectory"):
         atom_force_y = atom_global_forces.y
         atom_force_z = atom_global_forces.z
         
+        # add information from int file for the current atom
         atom_int_file = point.ints[atom_name]
         atom_iqa_energy = atom_int_file.iqa
         atom_integration_error = atom_int_file.integration_error
         
+        # note that these are not rotated because the alf has not been chosen yet
+        # the user can choose an alf and rotate the global spherical multipoles as needed
         global_multipole_moments = atom_int_file.global_spherical_multipoles
         atom_q00 = global_multipole_moments["q00"]
         atom_q10 = global_multipole_moments["q10"]
@@ -94,8 +108,8 @@ def add_point_to_database(database_path: Path, point: "PointDirectory"):
         atom_q43s = global_multipole_moments["q43s"]
         atom_q44c = global_multipole_moments["q44c"]
         atom_q44s = global_multipole_moments["q44s"]
-    
-    
+        
+        # add the Dataset object to list so it can be bulk written later
         db_dataset_list.append(Dataset(point_id=db_point.id,
                                 atom_id=atom_id,
                                 x=x_coord,
@@ -132,7 +146,7 @@ def add_point_to_database(database_path: Path, point: "PointDirectory"):
                                 q44s=atom_q44s)
         )
     
-    # add all the dataset object to database
+    # add all the dataset object to database using bulk operations
     session.bulk_save_objects(db_dataset_list)
-    # commit to write to database
+    # commit to database
     session.commit()
