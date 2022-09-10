@@ -60,7 +60,7 @@ def add_point_to_database(database_path: Path, point: "PointDirectory", echo=Fal
     # if file does not exist, still add to database, but do not contain wfn information
     else:
         # ORM for points table
-        db_point = Points(date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S:%f"),
+        db_point = Points(date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
                         # wfn energy might not exist if Gaussian has not been ran yet (or wfn file does not exist.)
                         # add a None for wfn energy if wfn energy is not present
                     name=point.name, wfn_energy=None)
