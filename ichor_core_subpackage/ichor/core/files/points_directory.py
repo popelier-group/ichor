@@ -273,7 +273,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )
     
-    def write_to_sqlite3_database(self, db_path: Union[str, Path] = None, echo=False, print_missing_data=False) -> Path:
+    def write_to_sqlite3_database(self, db_path: Union[str, Path] = None, echo=False, print_missing_data=True) -> Path:
         """Write out important information from a PointsDirectory instance to an SQLite3 database.
 
         :param db_path: database to write to
