@@ -273,17 +273,26 @@ class PointsDirectory(ListOfAtoms, Directory):
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )
     
-    def write_to_sqlite3_database(self, db_path: Union[str, Path] = None):
+    def write_to_sqlite3_database(self, db_path: Union[str, Path] = None, echo=False, print_missing_data=False) -> Path:
         """Write out important information from a PointsDirectory instance to an SQLite3 database.
 
         :param db_path: database to write to
-        :type db_path: Union[str, Path]
+        :param echo: Whether to print out SQL queries from SQL Alchemy
+
+        :param db_path: _description_, defaults to None
+        :type db_path: Union[str, Path], optional
+        :param echo: Whether to print out SQL queries from SQL Alchemy, defaults to False
+        :param print_missing_data: Whether to print out any missing data from each PointDirectory contained
+            in self, defaults to False
+        :return: The path to the written SQL database
         """
         
         if not db_path:
             db_path = Path(f"{self.path.name}_sqlite.db")
                 
-        create_database(db_path)
-        add_atom_names_to_database(db_path, self.atom_names)
+        create_database(db_path, echo)
+        add_atom_names_to_database(db_path, self.atom_names, echo, print_missing_data)
         for point in self:
             add_point_to_database(db_path, point)
+            
+        return db_path
