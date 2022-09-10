@@ -272,7 +272,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         raise TypeError(
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )
-        
+    
     def write_to_sqlite3_database(self, db_path: Union[str, Path] = None):
         """Write out important information from a PointsDirectory instance to an SQLite3 database.
 

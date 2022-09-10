@@ -22,7 +22,8 @@ def add_atom_names_to_database(database_path: Path, atom_names: List[str]):
     session.bulk_save_objects(db_atom_names_list)
     session.commit()
 
-
+# TODO: make this more robust as some data might be absent. Check that .wfn exists before adding wfn data
+# TODO: check that gaussian out forces exist. Check that int file exists.
 def add_point_to_database(database_path: Path, point: "PointDirectory"):
 
     database_path = str(Path(database_path).absolute())
