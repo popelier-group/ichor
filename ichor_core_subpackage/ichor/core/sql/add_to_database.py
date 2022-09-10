@@ -55,7 +55,7 @@ def add_point_to_database(database_path: Path, point: "PointDirectory", echo=Fal
     # if wfn file exists
     if point.wfn:
         # ORM for points table
-        db_point = Points(date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S:%f"),
+        db_point = Points(date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
                     name=point.name, wfn_energy=point.wfn.total_energy)
     # if file does not exist, still add to database, but do not contain wfn information
     else:
