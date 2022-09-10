@@ -11,6 +11,7 @@ from ichor.core.calculators.alf import default_alf_calculator
 from ichor.core.atoms import ALF
 from ichor.core.files.file_data import PointsDirectoryProperties
 from ichor.core.files.xyz import Trajectory
+from ichor.core.sql import create_database, add_point_to_database, add_atom_names_to_database
 
 
 class PointsDirectory(ListOfAtoms, Directory):
@@ -271,3 +272,18 @@ class PointsDirectory(ListOfAtoms, Directory):
         raise TypeError(
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )
+        
+    def write_to_sqlite3_database(self, db_path: Union[str, Path] = None):
+        """Write out important information from a PointsDirectory instance to an SQLite3 database.
+
+        :param db_path: database to write to
+        :type db_path: Union[str, Path]
+        """
+        
+        if not db_path:
+            db_path = Path(f"{self.path.name}_sqlite.db")
+                
+        create_database(db_path)
+        add_atom_names_to_database(db_path, self.atom_names)
+        for point in self:
+            add_point_to_database(db_path, point)
