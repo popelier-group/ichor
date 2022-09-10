@@ -289,10 +289,10 @@ class PointsDirectory(ListOfAtoms, Directory):
         
         if not db_path:
             db_path = Path(f"{self.path.name}_sqlite.db")
-                
+
         create_database(db_path, echo)
-        add_atom_names_to_database(db_path, self.atom_names, echo, print_missing_data)
+        add_atom_names_to_database(db_path, self.atom_names, echo=echo)
         for point in self:
-            add_point_to_database(db_path, point)
+            add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
             
         return db_path
