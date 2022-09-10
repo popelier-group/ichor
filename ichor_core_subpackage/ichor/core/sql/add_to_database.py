@@ -82,7 +82,7 @@ def add_point_to_database(database_path: Path, point: "PointDirectory", echo=Fal
     if not point.ints:
 
         if print_missing_data:
-            print(f"Point {point.path} does not contain any .int files in the atomicfiles directory.")
+            print(f"Point {point.path} does not contain an atomicfiles directory (containing AIMAll .int).")
     
     # add database point to session. Need to do this before adding the dataset stuff
     # because the id needs to be assigned to the point (because dataset contains foreign key point_id)
@@ -206,11 +206,13 @@ def add_point_to_database(database_path: Path, point: "PointDirectory", echo=Fal
                                     )
                                 )
             
+    # if there are missing atoms, then print these out
     if len(missing_int_files) > 0:
         
         if print_missing_data:
             print(f"Point {point.path} has missing .int files for atoms: {missing_int_files}.")
 
+    # bulk save the information for all atoms in the point
     session.bulk_save_objects(db_dataset_list)
     # commit to database
     session.commit()
