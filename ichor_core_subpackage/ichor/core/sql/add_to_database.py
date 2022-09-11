@@ -65,7 +65,7 @@ def add_point_to_database(database_path: Path, point: "PointDirectory", echo=Fal
                         # add a None for wfn energy if wfn energy is not present
                     name=point.name, wfn_energy=None)
         if print_missing_data:
-            print(f"Point {point.path} does not have a Gaussian wavefunction (.wfn) file.")
+            print(f"Point {point.path} does not contain a Gaussian wavefunction (.wfn) file.")
 
     ###############################
     # gaussian output file check 
@@ -73,7 +73,7 @@ def add_point_to_database(database_path: Path, point: "PointDirectory", echo=Fal
     
     if not point.gaussian_out:
         if print_missing_data:
-            print(f"Point {point.path} does not have force calculations in Gaussian out file.")
+            print(f"Point {point.path} does not contain a Gaussian output (.gau) file.")
 
     ###############################
     # _atomicfiles directory check 
@@ -129,6 +129,7 @@ def add_point_to_database(database_path: Path, point: "PointDirectory", echo=Fal
             # in case that the force keyword was not used but gaussian out exists
             else:
                 atom_force_x, atom_force_y, atom_force_z = None, None, None
+                print(f"Point {point.path} does not have forces in Gaussian output (.gau) file.")
         # in case that gaussian out does not exist in point directory
         else:
             atom_force_x, atom_force_y, atom_force_z = None, None, None
