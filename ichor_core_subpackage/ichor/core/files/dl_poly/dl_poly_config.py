@@ -21,7 +21,7 @@ class DlPolyConfig(WriteFile):
     # def _read_file(self):
     #     ...
 
-    def _write_file(self):
+    def _write_file(self, path: Path):
 
         with open(self.path , "w") as f:
             
