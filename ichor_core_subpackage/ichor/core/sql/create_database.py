@@ -18,8 +18,8 @@ class AtomNames(Base):
     # these should not be nullable as a PointsDirectory should at least contain geometries
     # even if no jobs are ran yet
     name = Column(String, unique=True, nullable=False)
-    
-    children = relationship("Dataset", backref="atom_names")
+
+    children = relationship("Dataset", back_populates="atom_names_parent")
 
 class Points(Base):
     
@@ -31,7 +31,7 @@ class Points(Base):
     # make nullable because Gaussian might not be ran yet
     wfn_energy = Column(Float, nullable=True)
     
-    children = relationship("Dataset", backref="points")
+    children = relationship("Dataset", back_populates="points_parent")
     
 class Dataset(Base):
     
@@ -40,6 +40,9 @@ class Dataset(Base):
     id = Column(Integer, primary_key=True)
     point_id = Column(Integer, ForeignKey("points.id"))
     atom_id = Column(Integer, ForeignKey("atom_names.id"))
+    
+    points_parent = relationship("Points", back_populates="children")
+    atom_names_parent = relationship("AtomNames", back_populates="children")
     
     # coordinates should exist even if jobs are not ran yet in a PointsDirectory
     x = Column(Float, nullable=False)
