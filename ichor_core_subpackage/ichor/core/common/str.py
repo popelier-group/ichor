@@ -22,6 +22,9 @@ def get_digits(str_in: str) -> int:
     """Gets the digits in a string and retruns the integer number corresponding to the joined digits."""
     return int("".join(c for c in str_in if c.isdigit()))
 
+def get_characters(str_in: str) -> str:
+    """Removes the digits from a string and returns resulting string"""
+    return "".join(c for c in str_in if not c.isdigit())
 
 def split_every(s: str, n: int) -> List[str]:
     """
