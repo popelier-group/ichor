@@ -14,7 +14,7 @@ class DlPolyConfig(WriteFile):
         super().__init__(path)      
         self.system_name = system_name
         # center atoms if the coordinates are very large, so that molecule is in box size.  
-        self.atoms = atoms.centre()
+        atoms.centre()
         self.cell_size = cell_size
 
     # TODO: implement reading for dlpoly config file
