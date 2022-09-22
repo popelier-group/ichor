@@ -10,7 +10,6 @@ from ichor.core.common.io import mkdir
 from ichor.core.common.os import run_cmd
 from ichor.core.common.types import VarReprMixin
 from ichor.hpc.batch_system.node import NodeType
-from ichor.hpc.uid import get_uid
 from ichor.hpc.log import logger
 
 
