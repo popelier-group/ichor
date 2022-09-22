@@ -14,7 +14,7 @@ from ichor.core.files import (
 )
 
 
-class CP2KInput(ReadFile, WriteFile, File, HasAtoms):
+class CP2KInput(ReadFile, WriteFile, HasAtoms):
     def __init__(
         self,
         path: Path,
@@ -29,7 +29,7 @@ class CP2KInput(ReadFile, WriteFile, File, HasAtoms):
         n_molecules: int = 1,
         box_size: float = 25.0,
     ):
-        File.__init__(self, path)
+        super(ReadFile, self).__init__(path)
         
         self.atoms = atoms
         self.temperature = temperature
