@@ -304,7 +304,7 @@ def write_cp2k_input(
     temperature: int,
     nsteps: int,
     datafile_location: Path,
-    project_name: str = "CP2K",
+    system_name: str,
     method: str = "BLYP",
     basis_set: str = "6-31G*",
     molecular_charge: int = 0,
@@ -313,6 +313,9 @@ def write_cp2k_input(
     n_molecules: int = 1,
     box_size: float = 25.0,
 ):
+
+    project_name = system_name + str(temperature) + "K"
+
     CP2KInput(
         cp2k_input_file,
         atoms,
