@@ -48,7 +48,7 @@ class JobID:
             {
                 "script": self.script,
                 "id": self.id,
-                "instance": self.instance,
+                # "instance": self.instance,
             }
         ]
 
@@ -57,7 +57,7 @@ class JobID:
             json.dump(job_ids, f)
 
     def __repr__(self) -> str:
-        return f"JobID(script: {self.script}, id: {self.id}, instance: {self.instance})"
+        return f"JobID(script: {self.script}, id: {self.id}."
 
 
 class Job(VarReprMixin):
