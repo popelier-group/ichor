@@ -61,7 +61,7 @@ class CP2KCommand(CommandLine):
         cmd = ""
         cmd += f'cp2kdir=$(dirname "{input}")\n'
         cmd += f"pushd $cp2kdir\n"
-        cmd += f"{CP2KCommand.command} -i {input} -o {input.with_suffix('.out')}\n"
+        cmd += f"{self.command} -i {input} -o {input.with_suffix('.out')}\n"
         cmd += "popd\n"
 
         return cmd
