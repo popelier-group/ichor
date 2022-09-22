@@ -17,9 +17,13 @@ class CP2KCommand(CommandLine):
         self,
         cp2k_input: Path,
         temperature: float,
+        ncores: int,
+        system_name: str,
     ):
         self.input = cp2k_input
         self.temperature = temperature
+        self.ncores = ncores
+        self.system_name = system_name
 
     @classproperty
     def group(self) -> bool:
@@ -37,17 +41,11 @@ class CP2KCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
+
         if self.ncores == 1:
             return "cp2k.sopt"
         else:
             return f"cp2k.ssmp"
-
-    @classproperty
-    def ncores(self) -> int:
-        """Returns the number of cores that CP2K should use for the job."""
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.CP2K_NCORES
 
     def repr(self, variables: List[str]) -> str:
         """
@@ -63,15 +61,5 @@ class CP2KCommand(CommandLine):
         cmd += f"pushd $cp2kdir\n"
         cmd += f"{CP2KCommand.command} -i {input} -o {input.with_suffix('.out')}\n"
         cmd += "popd\n"
-
-        xyz = f"{GLOBALS.SYSTEM_NAME}-cp2k-{int(self.temperature)}.xyz"
-        ichor_command = ICHORCommand(
-            func="cp2k_to_xyz", func_args=[input, xyz]
-        )
-        cmd += f"{ichor_command.repr(variables)}\n"
-        ichor_command = ICHORCommand(
-            func="set_points_location", func_args=[xyz]
-        )
-        cmd += f"{ichor_command.repr(variables)}\n"
 
         return cmd
