@@ -35,6 +35,8 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
         self.project_name = project_name
         self.method: str = method
         self.basis_set: str = basis_set
+        self.molecular_charge = molecular_charge
+        self.spin_multiplicity = spin_multiplicity
         self.solver: str = solver
         self.n_molecules: int = n_molecules
         self.box_size: float = box_size
