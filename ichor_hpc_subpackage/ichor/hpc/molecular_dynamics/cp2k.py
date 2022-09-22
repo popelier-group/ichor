@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from typing import Union
 from ichor.core.common.io import mkdir
 from ichor.core.files import GJF, XYZ
 from ichor.core.molecular_dynamics.cp2k import write_cp2k_input
@@ -19,11 +19,11 @@ datafile_location = {
 }
 
 
-def submit_cp2k(input_file: Path, system_name: str, temperature: int, nsteps: int,
+def submit_cp2k(input_file: Union[str, Path], system_name: str, temperature: int, nsteps: int,
                     method: str = "BLYP", basis_set: str = "6-31G*", 
                     molecular_charge: int = 0, spin_multiplicity: int = 1,
                     ncores=2) -> JobID:
-    """_summary_
+    """Submits a CP2K job to a compute node.
 
     :param input_file: A XYZ (.xyz) or GJF (.gjf) file that contains the starting geometry.
     :param system_name:  The name of the chemical system
@@ -38,6 +38,8 @@ def submit_cp2k(input_file: Path, system_name: str, temperature: int, nsteps: in
     :return: An object containing information for the submitted job
     :rtype: JobID
     """
+
+    input_file = Path(input_file)
 
     if input_file.suffix == XYZ.filetype:
         atoms = XYZ(input_file).atoms
