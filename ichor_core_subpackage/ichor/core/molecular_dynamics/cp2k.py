@@ -20,6 +20,8 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
         project_name: str = FileContents,
         method: str = "BLYP",
         basis_set: str = "6-31G*",
+        molecular_charge: int = 0, # neutral
+        spin_multiplicity: int = 1, # no unpaired electrons
         solver: str = "periodic",
         n_molecules: int = 1,
         box_size: float = 25.0,
@@ -106,8 +108,8 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
             )
             f.write("\n")
             f.write("    ! Charge and multiplicity\n")
-            f.write(f"    CHARGE {self.atoms.nuclear_charge}\n")
-            f.write("    MULTIPLICITY 1\n")
+            f.write(f"    CHARGE {self.molecular_charge}\n")
+            f.write(f"    MULTIPLICITY {self.spin_multiplicity}\n")
             f.write("\n")
             f.write("    &MGRID\n")
             f.write(
@@ -297,12 +299,14 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
 def write_cp2k_input(
     cp2k_input_file: Path,
     atoms: Atoms,
-    temperature: float,
+    temperature: int,
     nsteps: int,
     datafile_location: Path,
     project_name: str = "CP2K",
     method: str = "BLYP",
     basis_set: str = "6-31G*",
+    molecular_charge: int = 0,
+    spin_multiplicity: int = 1,
     solver: str = "periodic",
     n_molecules: int = 1,
     box_size: float = 25.0,
@@ -316,6 +320,8 @@ def write_cp2k_input(
         project_name,
         method,
         basis_set,
+        molecular_charge,
+        spin_multiplicity,
         solver,
         n_molecules,
         box_size,

@@ -19,8 +19,10 @@ datafile_location = {
 }
 
 
-def submit_cp2k(input_file: Path, system_name: str, temperature: float, nsteps: int,
-                    method: str = "BLYP", basis_set: str = "6-31G*", ncores=2) -> JobID:
+def submit_cp2k(input_file: Path, system_name: str, temperature: int, nsteps: int,
+                    method: str = "BLYP", basis_set: str = "6-31G*", 
+                    molecular_charge: int = 0, spin_multiplicity: int = 1,
+                    ncores=2) -> JobID:
     """_summary_
 
     :param input_file: A XYZ (.xyz) or GJF (.gjf) file that contains the starting geometry.
@@ -29,6 +31,9 @@ def submit_cp2k(input_file: Path, system_name: str, temperature: float, nsteps: 
     :param nsteps: The number of timeteps to run the simulation for
     :param method: The method which to use for the simulation, defaults to "BLYP"
     :param basis_set: The basis set which to use for the simulation, defaults to "6-31G*"
+    :param molecular_charge: The charge of the system, defaults to 0
+    :param spin_multiplicity: The spin multiplicity of the system, defaults to 1
+    :param ncores: The number of cores to use for the simulation, defaults to 2
     :raises ValueError: If incorrect filetype (not xyz or gjf) is passed in
     :return: An object containing information for the submitted job
     :rtype: JobID
@@ -53,6 +58,8 @@ def submit_cp2k(input_file: Path, system_name: str, temperature: float, nsteps: 
         system_name,
         method,
         basis_set,
+        molecular_charge,
+        spin_multiplicity
     )
 
     with SubmissionScript(SCRIPT_NAMES["cp2k"], ncores=ncores) as submission_script:
