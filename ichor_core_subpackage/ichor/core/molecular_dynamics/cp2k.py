@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.core.analysis.get_input import get_files_of_type
+from ichor.core.useful_functions.get_input import get_files_of_type
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files import (
