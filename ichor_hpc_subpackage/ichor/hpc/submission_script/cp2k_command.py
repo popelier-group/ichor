@@ -29,18 +29,20 @@ class CP2KCommand(CommandLine):
     def group(self) -> bool:
         return False
 
-    @property
-    def data(self) -> List[str]:
-        """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau)"""
-        return [str(self.input.absolute())]
-
     @classproperty
     def modules(self) -> Modules:
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
         return CP2KModules
 
-    @classproperty
+    @property
+    def data(self) -> List[str]:
+        """Return a list of the absolute paths of the Gaussian input file (.gjf) and the output file (.gau)"""
+        return [str(self.input.absolute())]
+
+    @property
     def command(self) -> str:
+        """Returns the command to be used to run CP2K. The command depends on the 
+        number of cores."""
 
         if self.ncores == 1:
             return "cp2k.sopt"
