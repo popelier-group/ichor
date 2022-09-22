@@ -4,13 +4,9 @@ from typing import Optional
 from ichor.core.useful_functions.get_input import get_files_of_type
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
-from ichor.core.files import (
-    FileContents,
-    HasAtoms,
-    ReadFile,
-    Trajectory,
-    WriteFile,
-)
+from ichor.core.files import Trajectory
+from ichor.core.files.file import FileContents, ReadFile, WriteFile
+from ichor.core.files.file_data import HasAtoms
 
 
 class CP2KInput(ReadFile, WriteFile, HasAtoms):
