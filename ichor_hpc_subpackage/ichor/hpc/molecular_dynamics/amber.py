@@ -10,21 +10,22 @@ from ichor.hpc import  FILE_STRUCTURE
 
 def submit_amber(
     input_file_path: Union[str, Path], temperature: float, nsteps: int = 1_000_000, write_coord_every: int = 10,
-    system_name: str = None, ncores: int = 1, dt = 0.001, ln_gamma=0.7
+    system_name: str = None, ncores: int = 2, dt = 0.001, ln_gamma=0.7
 ) -> JobID:
 
     input_file_path = Path(input_file_path)
     atoms = get_atoms_from_path(input_file_path)
     # convert to Angstroms if not in Angstroms already, as Amber works with angstroms
     atoms = atoms.to_angstroms()
-    
+
     if not system_name:
         system_name = input_file_path.stem
 
+    # TODO: CSF3 1 job queue is slow, so run on 2 cores
     # number of residues is fixed at 1 as we aren't hydrating
-    nres = 1
-    # ncores must be less than or equal to the number of residues
-    ncores = min(ncores, nres)
+    # nres = 1
+    # # ncores must be less than or equal to the number of residues
+    # ncores = min(ncores, nres)
 
     mkdir(FILE_STRUCTURE["amber"])
     mol2 = Mol2(FILE_STRUCTURE["amber"] / (system_name + Mol2.filetype))

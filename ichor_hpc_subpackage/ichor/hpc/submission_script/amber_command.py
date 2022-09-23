@@ -42,11 +42,16 @@ class AmberCommand(CommandLine):
 
     @property
     def command(self) -> str:
-        return (
-            "sander"
-            if self.ncores == 1
-            else f"mpirun -n {self.ncores} sander.MPI"
-        )
+        # TODO: mpi not needed for single molecule simulations
+        # TODO: csf3 queue time for 1 core jobs is slow, so run on 2 cores
+
+        # return (
+        #     "sander"
+        #     if self.ncores == 1
+        #     else f"mpirun -n {self.ncores} sander.MPI"
+        # )
+
+        return "sander"
 
     def repr(self, *args) -> str:
         """
