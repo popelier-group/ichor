@@ -181,7 +181,7 @@ def write_mdin(
     thermostat: AmberThermostat = AmberThermostat.Langevin,
     ln_gamma: float = 0.5,
 ):
-    """_summary_
+    """ Writes an AMBER md.in file with the given settings
 
     :param mdin_file: File where to write data
     :param nsteps: Number of timesteps to run simulation for
