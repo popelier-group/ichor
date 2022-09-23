@@ -22,8 +22,8 @@ class DropCompute:
     ):
         self._unix_group: str = unix_group
         self.max_jobs = max_jobs
-        self.ntries = ntries or GLOBALS.DROP_COMPUTE_NTRIES
-        self.location = location or GLOBALS.DROP_COMPUTE_LOCATION
+        self.ntries = ntries or 1000
+        self.location = location or ""
 
         if self.location is None:
             raise ValueError(
