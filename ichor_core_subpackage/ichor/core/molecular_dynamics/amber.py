@@ -103,11 +103,11 @@ class AmberMDIn(WriteFile, ReadFile):
                     self.dt = float(line.split("=")[-1])
                 elif "ntf" in line:
                     self.force_evaluation = ForceEvaluation(
-                        line.split("=")[-1]
+                        int(line.split("=")[-1])
                     )
                 elif "ntc" in line:
                     self.bond_constraint = BondLengthConstraint(
-                        line.split("=")[-1]
+                        int(line.split("=")[-1])
                     )
                 elif "temp0" in line:
                     self.temperature = int(line.split("=")[-1])
@@ -119,10 +119,10 @@ class AmberMDIn(WriteFile, ReadFile):
                     self.write_forces_every = int(line.split("=")[-1])
                 elif "ntb" in line:
                     self.periodic_boundary_condition = (
-                        PeriodicBoundaryCondition(line.split("=")[-1])
+                        PeriodicBoundaryCondition(int(line.split("=")[-1]))
                     )
                 elif "ntt" in line:
-                    self.thermostat = AmberThermostat(line.split("=")[-1])
+                    self.thermostat = AmberThermostat(int(line.split("=")[-1]))
                 elif "gamma_ln" in line:
                     self.ln_gamma = float(line.split("=")[-1])
 
