@@ -68,7 +68,7 @@ class AmberMDIn(WriteFile, ReadFile):
         self.write_coordinates_every = write_coordinates_every
         self.write_velocities_every = write_velocities_every
         self.write_forces_every = write_forces_every
-        self.periodic_boundary_condition: periodic_boundary_condition
+        self.periodic_boundary_condition = periodic_boundary_condition
         self.thermostat = thermostat
         self.ln_gamma = ln_gamma
 
