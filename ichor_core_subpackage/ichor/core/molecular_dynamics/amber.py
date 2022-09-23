@@ -46,42 +46,52 @@ class AmberMDIn(WriteFile, ReadFile):
     def __init__(
         self,
         path: Path,
-        nsteps: Optional[int] = None,
-        dt: float = 0.001,
-        temperature: float = 300.0,
-        force_evaluation: ForceEvaluation = ForceEvaluation.Complete,
-        bond_constraint: BondLengthConstraint = BondLengthConstraint.NoConstraint,
-        write_coordinates_every: int = 1,
-        write_velocities_every: int = 0, # if set to -1, then cannot write an ASCII file
-        write_forces_every: int = 0, # if set to -1, then cannot write an ASCII file
-        periodic_boundary_condition: PeriodicBoundaryCondition = PeriodicBoundaryCondition.NoPeriodicBoundary,
-        thermostat: AmberThermostat = AmberThermostat.Langevin,
-        ln_gamma: float = 0.5,
+        nsteps: Optional[int] = FileContents,
+        dt: float = FileContents,
+        temperature: int = FileContents,
+        force_evaluation: ForceEvaluation = FileContents,
+        bond_constraint: BondLengthConstraint = FileContents,
+        write_coordinates_every: int = FileContents,
+        write_velocities_every: int = FileContents, # if set to -1, then cannot write an ASCII file
+        write_forces_every: int = FileContents, # if set to -1, then cannot write an ASCII file
+        periodic_boundary_condition: PeriodicBoundaryCondition = FileContents,
+        thermostat: AmberThermostat = FileContents,
+        ln_gamma: float = FileContents,
     ):
         super(ReadFile, self).__init__(path)
 
-        self.nsteps: int = FileContents
-
-        self.nsteps: int = nsteps or FileContents
-        self.dt: float = dt
-        self.temperature: float = temperature
-        self.force_evaluation: ForceEvaluation = force_evaluation
-        self.bond_constraint: BondLengthConstraint = bond_constraint
-        self.write_coordinates_every: int = write_coordinates_every
-        self.write_velocities_every: int = write_velocities_every
-        self.write_forces_every: int = write_forces_every
-        self.periodic_boundary_condition: PeriodicBoundaryCondition = (
-            periodic_boundary_condition
-        )
-        self.thermostat: AmberThermostat = thermostat
-        self.ln_gamma: float = ln_gamma
+        self.nsteps = nsteps
+        self.dt = dt
+        self.temperature = temperature
+        self.force_evaluation = force_evaluation
+        self.bond_constraint = bond_constraint
+        self.write_coordinates_every = write_coordinates_every
+        self.write_velocities_every = write_velocities_every
+        self.write_forces_every = write_forces_every
+        self.periodic_boundary_condition: periodic_boundary_condition
+        self.thermostat = thermostat
+        self.ln_gamma = ln_gamma
 
     @classproperty
     def filetype(self) -> str:
         return ".in"
 
-    def _initialise_contents(self):
-        self.nsteps = self.nsteps or 0
+    def __set_write_defaults_if_needed(self):
+        """
+        See class `WriteFile` this is called prior to writing file to set defautls
+        """
+
+        self.nsteps = self.nsteps or 100
+        self.dt = self.dt or 0.001
+        self.temperature = self.temperature or 300
+        self.force_evaluation = self.force_evaluation or ForceEvaluation.Complete
+        self.bond_constraint = self.bond_constraint or BondLengthConstraint.NoConstraint
+        self.write_coordinates_every = self.write_coordinates_every or 1
+        self.write_velocities_every = self.write_velocities_every or 0
+        self.write_forces_every = self.write_forces_every or 0
+        self.periodic_boundary_condition = self.periodic_boundary_condition or PeriodicBoundaryCondition.NoPeriodicBoundary
+        self.thermostat = self.thermostat or AmberThermostat.Langevin
+        self.ln_gamma = self.ln_gamma or 0.5
 
     def _read_file(self, *args, **kwargs):
         with open(self.path, "r") as f:
@@ -100,7 +110,7 @@ class AmberMDIn(WriteFile, ReadFile):
                         line.split("=")[-1]
                     )
                 elif "temp0" in line:
-                    self.temperature = float(line.split("=")[-1])
+                    self.temperature = int(line.split("=")[-1])
                 elif "ntwx" in line:
                     self.write_coordinates_every = int(line.split("=")[-1])
                 elif "ntwv" in line:
