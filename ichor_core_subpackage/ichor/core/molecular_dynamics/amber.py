@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from ichor.core.common.functools import classproperty
@@ -212,14 +212,15 @@ def write_mdin(
 
 
 def mdcrd_to_xyz(
-    mdcrd: Path,
-    prmtop: Path,
-    xyz: Optional[Path] = None,
+    mdcrd: Union[str, Path], # contains geometry
+    prmtop: Union[str, Path], # contains atom names
+    mdin: Union[str, Path], # contains temperature information
+    system_name: str,
     every: int = 1,
-    system_name: Optional[str] = None,
-    temperature: Optional[float] = None,
 ):
     atom_names = []
+
+    # read in atom names
     with open(prmtop, "r") as f:
         for line in f:
             if "ATOM_NAME" in line:
@@ -229,29 +230,20 @@ def mdcrd_to_xyz(
                     atom_names += [a[0] for a in line.split()]
                     line = next(f)
 
-    if xyz is None:
-        system_name = f"{system_name}-" if system_name is not None else ""
+    mdin_inst = AmberMDIn(mdin)
 
-        if temperature is None:
-            mdin = OptionalFile
-            for f in mdcrd.parent.iterdir():
-                if f.suffix == AmberMDIn.filetype:
-                    mdin = AmberMDIn(f)
-                    break
+    temperature = ""
+    if mdin_inst.exists():
+        temperature = mdin.temperature
 
-            if mdin.exists():
-                temperature = mdin.temperature
-
-        temperature = f"-{int(temperature)}" if temperature is not None else ""
-
-        xyz = Path(f"{system_name}amber{temperature}.xyz")
+    output_f_name = Path(f"{system_name}-amber{temperature}K.xyz")
 
     natoms = len(atom_names)
     with open(mdcrd, "r") as f:
         _ = next(f)
         traj = np.array([])
         i = 0
-        with open(xyz, "w") as o:
+        with open(output_f_name, "w") as o:
             for line in f:
                 traj = np.hstack((traj, np.array(line.split(), dtype=float)))
                 if len(traj) == natoms * 3:
