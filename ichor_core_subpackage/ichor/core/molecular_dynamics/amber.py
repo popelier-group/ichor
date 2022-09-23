@@ -46,7 +46,7 @@ class AmberMDIn(WriteFile, ReadFile):
     def __init__(
         self,
         path: Path,
-        nsteps: Optional[int] = FileContents,
+        nsteps: int = FileContents,
         dt: float = FileContents,
         temperature: int = FileContents,
         force_evaluation: ForceEvaluation = FileContents,
