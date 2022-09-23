@@ -19,7 +19,6 @@ def read_jid(jid_file: Optional[Path] = None) -> List[JobID]:
                 JobID(
                     script=jid["script"],
                     id=jid["id"],
-                    instance=jid["instance"],
                 )
                 for jid in jids
             ]
