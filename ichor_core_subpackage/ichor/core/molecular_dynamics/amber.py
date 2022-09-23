@@ -96,7 +96,7 @@ class AmberMDIn(WriteFile, ReadFile):
     def _read_file(self, *args, **kwargs):
         with open(self.path, "r") as f:
             for line in f:
-                line = line.replace(",", "")
+                line = line.replace(",", "").strip()
                 if "nstlim" in line:
                     self.nsteps = int(line.split("=")[-1])
                 elif "dt" in line:
