@@ -234,7 +234,7 @@ def mdcrd_to_xyz(
 
     temperature = ""
     if mdin_inst.exists():
-        temperature = mdin.temperature
+        temperature = mdin_inst.temperature
 
     output_f_name = Path(f"{system_name}-amber{temperature}K.xyz")
 
