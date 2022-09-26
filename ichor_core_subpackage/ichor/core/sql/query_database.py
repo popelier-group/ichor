@@ -6,6 +6,7 @@ import sqlalchemy
 from ichor.core.sql import Dataset, Points, AtomNames
 from sqlalchemy import create_engine
 import pandas as pd
+import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.str import get_characters
 from ichor.core.calculators import calculate_alf_features, calculate_alf_atom_sequence
@@ -164,8 +165,8 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
     :param full_df: DataFrame object extracted from SQLite database. This object contains information for
         all points (and all atoms in every point)
     :param point_ids: A list of integers represending the `id` column of the points table of the SQLite database.
-    :param atom_name: The atom for which features are going to be calculated and multipole moments rotated
-        for every point in the dataset
+    :param atom_name: The atom for which features, local multipole moments,
+        as well as local forces are going to be calculated for every point in the dataset
     :param alf: A dictionary of key(atom_name):value(ALF instance) to be used when calculating features
         and calculating C matrices
     :param max_integration_error: Maximum integration error that a point needs to have for the atom
@@ -187,7 +188,7 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
         # for the atom and do not add this point to training set for this atom.
         # if other atoms have good integration errors, the same point can be used in their training sets.
         row_with_atom_info = one_point_df.loc[one_point_df['name_1'] == atom_name]
-        
+
         # if the absolute of the integration error is less than threshold, then calculate features
         if abs(row_with_atom_info["integration_error"].item()) < max_integration_error:
 
@@ -202,6 +203,17 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
             C = atoms[atom_name].C(alf)
             one_atom_features = atoms[atom_name].features(calculate_alf_features, alf)
             n_features = len(one_atom_features)
+
+            # default values to be written if forces do not exist
+            local_forces_array = None, None, None
+            # if forces are also in database then calculate local forces
+            if row_with_atom_info["force_x"] is not None:
+
+                global_forces_array = np.array([row_with_atom_info["force_x"].item(),
+                                row_with_atom_info["force_y"].item(),
+                                row_with_atom_info["force_z"].item()])
+                
+                local_forces_array = np.matmul(C, global_forces_array)
             
             # make dictionary of rotated multipoles
             local_spherical_multipoles = {spherical_monopole_labels[0]: row_with_atom_info["q00"].item()}
@@ -258,12 +270,16 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
             total_dict[str(point_id)] = {f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)}
             # add iqa to dictionary
             total_dict[str(point_id)].update({"iqa_energy": row_with_atom_info["iqa_energy"].item()})
+            # add local forces after rotation or None if they were not calculated.
+            total_dict[str(point_id)].update({"force_x": local_forces_array[0]})
+            total_dict[str(point_id)].update({"force_y": local_forces_array[1]})
+            total_dict[str(point_id)].update({"force_z": local_forces_array[2]})
             # add rotated multipole moments to dictionary
             total_dict[str(point_id)].update(local_spherical_multipoles)
 
     # write the total dict containing information for all points to a DataFrame and save
     total_df = pd.DataFrame.from_dict(total_dict, orient="index")
-    total_df.to_csv(f"{atom_name}_features_and_rotated_multipole_moments.csv", index=write_index_col)
+    total_df.to_csv(f"{atom_name}_processed_data.csv", index=write_index_col)
 
 def get_db_information(db_path: Union[str, Path], echo=False) -> Tuple[List[str], List[str], pd.DataFrame]:
     """Gets relevant information from database needed to post process data and generate datasets
