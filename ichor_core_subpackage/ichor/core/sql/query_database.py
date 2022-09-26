@@ -278,7 +278,7 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
             total_dict[str(point_id)].update(local_spherical_multipoles)
 
     alf_for_current_atom = alf[atom_name]
-    alf_str = "alf" + "_".join(list(map(str, alf_for_current_atom)))
+    alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
 
     # write the total dict containing information for all points to a DataFrame and save
     total_df = pd.DataFrame.from_dict(total_dict, orient="index")
