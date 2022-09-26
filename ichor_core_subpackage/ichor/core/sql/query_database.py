@@ -277,9 +277,12 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
             # add rotated multipole moments to dictionary
             total_dict[str(point_id)].update(local_spherical_multipoles)
 
+    alf_for_current_atom = alf[atom_name]
+    alf_str = "alf" + "_".join(list(map(str, alf_for_current_atom)))
+
     # write the total dict containing information for all points to a DataFrame and save
     total_df = pd.DataFrame.from_dict(total_dict, orient="index")
-    total_df.to_csv(f"{atom_name}_processed_data.csv", index=write_index_col)
+    total_df.to_csv(f"{atom_name}_processed_data_{alf_str}.csv", index=write_index_col)
 
 def get_db_information(db_path: Union[str, Path], echo=False) -> Tuple[List[str], List[str], pd.DataFrame]:
     """Gets relevant information from database needed to post process data and generate datasets
