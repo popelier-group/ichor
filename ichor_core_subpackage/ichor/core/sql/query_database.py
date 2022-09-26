@@ -152,7 +152,7 @@ def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> Dic
         atom_type = get_characters(row_data.name_1)
         atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
         
-    return atoms.alf(calculate_alf_atom_sequence)
+    return atoms.alf_dict(calculate_alf_atom_sequence)
 
 
 def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[int],
