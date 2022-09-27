@@ -8,15 +8,12 @@ import math
 from ichor.core.atoms import ALF
 from ichor.core.models.fflux_derivative_helper_functions import *
 
-
 def sign_j(fdiff):
 
     if fdiff <= 0.0:
-        sign_j = 1
+        return 1.0
     else:
-        sign_j = -1
-
-    return sign_j
+        return -1.0
 
 def fflux_predict_value(model_inst, test_x_features):
 
@@ -82,10 +79,6 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, model_inst, system_alf):
     jatm_features = atoms_instance[jatm_idx].features(calculate_alf_features, system_alf)
 
     Q_pred, dQ_df = fflux_predict_value(model_inst, jatm_features)
-
-    print("In fflux derivs")
-    print(Q_pred)
-    print(dQ_df)
 
     # feature 1
     df_da = dR_da(atoms_instance, iatm_idx, jatm_idx, 0, system_alf[iatm_idx], jatm_idx)
