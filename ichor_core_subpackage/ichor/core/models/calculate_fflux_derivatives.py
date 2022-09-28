@@ -8,13 +8,6 @@ import math
 from ichor.core.atoms import ALF
 from ichor.core.models.fflux_derivative_helper_functions import *
 
-def sign_j(fdiff):
-
-    if fdiff <= 0.0:
-        return 1.0
-    else:
-        return -1.0
-
 def fflux_predict_value(model_inst, test_x_features):
 
     x_train_array = model_inst.x
@@ -69,7 +62,7 @@ def fflux_predict_value(model_inst, test_x_features):
 
     return Q_est, dQ_df
 
-def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, model_inst, system_alf):
+def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
 
     dQ_dx = 0.0
     dQ_dy = 0.0
@@ -81,31 +74,30 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, model_inst, system_alf):
     Q_pred, dQ_df = fflux_predict_value(model_inst, jatm_features)
 
     # feature 1
-    df_da = dR_da(atoms_instance, iatm_idx, jatm_idx, 0, system_alf[iatm_idx], jatm_idx)
+    df_da = dR_da(jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf)
     dQ_dx = dQ_dx + dQ_df[0] * df_da[0]
     dQ_dy = dQ_dy + dQ_df[0] * df_da[1]
     dQ_dz = dQ_dz + dQ_df[0] * df_da[2]
     # feature 2
-    df_da = dR_da(atoms_instance, iatm_idx, jatm_idx, 1, system_alf[iatm_idx], jatm_idx)
+    df_da = dR_da(jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf)
     dQ_dx = dQ_dx + dQ_df[1] * df_da[0]
     dQ_dy = dQ_dy + dQ_df[1] * df_da[1]
     dQ_dz = dQ_dz + dQ_df[1] * df_da[2]
     # feature 3
-    df_da = dChi_da(atoms_instance, iatm_idx, system_alf[iatm_idx], jatm_idx)
+    df_da = dChi_da(jatm_idx, iatm_idx, atoms_instance, system_alf)
     dQ_dx = dQ_dx + dQ_df[2] * df_da[0]
     dQ_dy = dQ_dy + dQ_df[2] * df_da[1]
     dQ_dz = dQ_dz + dQ_df[2] * df_da[2]
 
-    # non-local alf atoms
+    # non-alf atoms
     local_non_alf_atoms = [i for i in range(len(atoms_instance)) if i not in system_alf[jatm_idx]]
 
     feat_idx = 3
     for k in range(len(atoms_instance)-3):
-
         diff = atoms_instance[local_non_alf_atoms[k]].coordinates - atoms_instance[jatm_idx].coordinates
 
-        df_da = dR_da(atoms_instance, jatm_idx, local_non_alf_atoms[k], feat_idx, system_alf[jatm_idx], iatm_idx)
-
+        # R
+        df_da = dR_da(jatm_idx, local_non_alf_atoms[k], feat_idx, iatm_idx, atoms_instance, system_alf)
         dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
         dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
         dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
@@ -118,7 +110,7 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, model_inst, system_alf):
         zeta3 = zetas[2]
 
         # Theta
-        df_da = dTheta_da(atoms_instance, jatm_idx, local_non_alf_atoms[k], system_alf[jatm_idx], feat_idx, zeta3, iatm_idx)
+        df_da = dTheta_da(jatm_idx, local_non_alf_atoms[k], feat_idx, zeta3, iatm_idx, atoms_instance, system_alf)
         dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
         dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
         dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
@@ -126,11 +118,11 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, model_inst, system_alf):
         feat_idx += 1
 
         # Phi
-        df_da = dPhi_da(atoms_instance, jatm_idx, local_non_alf_atoms[k], system_alf[jatm_idx], zeta1, zeta2, feat_idx, iatm_idx)
+        df_da = dPhi_da(jatm_idx, local_non_alf_atoms[k], zeta1, zeta2, feat_idx, iatm_idx, atoms_instance, system_alf)
         dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
         dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
         dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
 
         feat_idx += 1
 
-    return dQ_dx, dQ_dy, dQ_dz
+    return np.array([dQ_dx, dQ_dy, dQ_dz])
