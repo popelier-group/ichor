@@ -230,9 +230,9 @@ def dTheta_da(iatm_idx, jatm_idx, theta_feat_idx, zeta3, omega, atoms_instance, 
     invSinTheta = -1.0 / np.sin(Theta)
     dInvR = -1.0 * inv_RAn**2 * dR_da(iatm_idx, jatm_idx, theta_feat_idx-1, omega, atoms_instance, system_alf)
     dz3 = dZj_da(iatm_idx, jatm_idx, omega, 3, atoms_instance, system_alf)
-    res[0] = invSinTheta * (zeta3 * dInvR[0] + inv_RAn * dz3[0])
-    res[1] = invSinTheta * (zeta3 * dInvR[1] + inv_RAn * dz3[1])
-    res[2] = invSinTheta * (zeta3 * dInvR[2] + inv_RAn * dz3[2])
+    res[0] = invSinTheta * ( (zeta3 * dInvR[0]) + (inv_RAn * dz3[0]) )
+    res[1] = invSinTheta * ( (zeta3 * dInvR[1]) + (inv_RAn * dz3[1]) )
+    res[2] = invSinTheta * ( (zeta3 * dInvR[2]) + (inv_RAn * dz3[2]) )
     return res
 
 def dPhi_da(iatm_idx, jatm_idx, zeta1, zeta2, phi_feat_idx, omega, atoms_instance, system_alf):
