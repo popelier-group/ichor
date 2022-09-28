@@ -1,17 +1,9 @@
-from json import detect_encoding
-from os import system
-from ichor.core.files import XYZ
-from ichor.core.models.model import Model
-from ichor.core.calculators import calculate_alf_atom_sequence, default_feature_calculator
 import numpy as np
-import math
-from ichor.core.atoms import ALF
 from ichor.core.models.fflux_derivative_helper_functions import *
 
 def fflux_predict_value(model_inst, test_x_features):
 
     x_train_array = model_inst.x
-    y_train_array = model_inst.y.flatten()
     weights = model_inst.weights.flatten()
 
     kernels = model_inst.kernel
@@ -39,8 +31,8 @@ def fflux_predict_value(model_inst, test_x_features):
             if ((h+1) % 3) == 0 and h != 2:
 
                 # 2.0 because gpytorch does not multiply periodic kernel lengthscale by 2, i.e. it is 1/lambda
-                expo = expo + 2.0 * thetas[h] * math.sin((fdiff/2.0))**2
-                dQ_df_temp[h] = weights[j]*(-2.0)*thetas[h]*sign_j(fdiff) * math.sin(abs(fdiff)/2.0) * math.cos(abs(fdiff)/2.0)
+                expo = expo + 2.0 * thetas[h] * np.sin((fdiff/2.0))**2
+                dQ_df_temp[h] = weights[j]*(-2.0)*thetas[h]*sign_j(fdiff) * np.sin(abs(fdiff)/2.0) * np.cos(abs(fdiff)/2.0)
 
             # if not phi dimension, use rbf kernel
             else:
@@ -49,7 +41,7 @@ def fflux_predict_value(model_inst, test_x_features):
 
                 dQ_df_temp[h] = weights[j] *sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
 
-        expo = math.exp(-expo)
+        expo = np.exp(-expo)
 
         Q_est = Q_est + weights[j] * expo
 
@@ -78,11 +70,13 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
     dQ_dx = dQ_dx + dQ_df[0] * df_da[0]
     dQ_dy = dQ_dy + dQ_df[0] * df_da[1]
     dQ_dz = dQ_dz + dQ_df[0] * df_da[2]
+
     # feature 2
     df_da = dR_da(jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf)
     dQ_dx = dQ_dx + dQ_df[1] * df_da[0]
     dQ_dy = dQ_dy + dQ_df[1] * df_da[1]
     dQ_dz = dQ_dz + dQ_df[1] * df_da[2]
+
     # feature 3
     df_da = dChi_da(jatm_idx, iatm_idx, atoms_instance, system_alf)
     dQ_dx = dQ_dx + dQ_df[2] * df_da[0]
