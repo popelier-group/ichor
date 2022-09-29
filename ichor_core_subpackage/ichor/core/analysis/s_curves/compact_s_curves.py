@@ -502,11 +502,9 @@ def calculate_compact_s_curves_from_files(
     simplified_write_to_excel(total_dict, output_location, **kwargs)
 
 # TODO: remove code duplication
-def calculate_compact_s_curves_from_dicts(
-    features_dict: Dict[str, np.ndarray],
+def calculate_compact_s_curves_from_true_predicted(
+    predicted_values_dict: Dict[str, Dict[str, np.ndarray]],
     true_values_dict: Dict[str, Dict[str, np.ndarray]],
-    models: Models,
-    nfeatures: int,
     output_location: Union[str, Path] = "s_curves_from_df.xlsx",
     **kwargs
 ):
@@ -515,38 +513,26 @@ def calculate_compact_s_curves_from_dicts(
     nested_dict = lambda: defaultdict(nested_dict)
     total_dict = nested_dict()
 
-    for model in models:
-        atom_name = model.atom_name
-        property_name = model.prop
-        print(property_name)
-        # iqa is written in model files but df contains iqa_energy instead
-        if property_name == "iqa":
-            property_name = "iqa_energy"
+    atom_names = list(predicted_values_dict.keys())
+    property_names = list(predicted_values_dict[atom_names[0]].keys())
 
-        # get features array for atom
-        features_array_for_atom = features_dict.get(atom_name)
+    for atom_name in atom_names:
 
-        # check to see if the passed data contains the infromation that the model needs
-        if (features_array_for_atom is not None) and (true_values_dict.get(atom_name) is not None):
-            
+        for property_name in property_names:
+
             # get true values for property
-            atomic_true_values = true_values_dict[atom_name].get(property_name)
+            atomic_true_values = true_values_dict[atom_name][property_name]
+            predicted = predicted_values_dict[atom_name][property_name]
 
             if atomic_true_values is not None:
 
-                model_predictions = model.predict(features_array_for_atom)
-                errors = atomic_true_values - model_predictions
+                errors = atomic_true_values - predicted
 
                 if property_name == "iqa_energy":
                     errors *= 2625.5
 
                 total_dict[property_name][atom_name]["true"] = atomic_true_values
-                total_dict[property_name][atom_name]["predicted"] = model_predictions
+                total_dict[property_name][atom_name]["predicted"] = predicted
                 total_dict[property_name][atom_name]["error"] = errors
-            
-            else:
-                print(f"Could not get value for atom/property: {atom_name}/{property_name} from model file {model.path}.")
-        else:
-            print(f"Could not get features/true values for atom/prop: {atom_name}/{atomic_true_values} from model file {model.path}.")
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
