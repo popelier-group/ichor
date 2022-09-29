@@ -30,7 +30,9 @@ def predict_fflux_forces_for_all_atoms(atoms: "Atoms", models: "Models", system_
     # make sure the ordering of the models is the same as the sequence of atoms 
     models_list = []
     for atom_name in atom_names:
-        models_list.append(models[atom_name])
+        for model in models:
+            if model.atom_name == atom_name and model.prop == "iqa":
+                models_list.append(model)
 
     for atm_idx in range(natoms):
 
@@ -39,11 +41,11 @@ def predict_fflux_forces_for_all_atoms(atoms: "Atoms", models: "Models", system_
 
         # first three atoms that are central, x-axis, xy-plane
         for j in range(3):
-            force = fflux_derivs(atm_idx, system_alf[atm_idx][j], atoms, system_alf, models[system_alf[atm_idx][j]])
+            force = fflux_derivs(atm_idx, system_alf[atm_idx][j], atoms, system_alf, models_list[system_alf[atm_idx][j]])
             local_forces = local_forces - force
         # rest of atoms in molecule
         for non_local_atm in non_local_atoms:
-            force = fflux_derivs(atm_idx, non_local_atm, atoms, system_alf, models[non_local_atm])
+            force = fflux_derivs(atm_idx, non_local_atm, atoms, system_alf, models_list[non_local_atm])
             local_forces = local_forces - force
 
         atomic_forces_list.append(local_forces)
