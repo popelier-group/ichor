@@ -2,7 +2,6 @@ import ast
 import re
 from pathlib import Path
 from typing import Iterable, List, Optional, Union, Callable, Dict
-
 import numpy as np
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
 from ichor.core.common.functools import classproperty
@@ -10,7 +9,6 @@ from ichor.core.common.io import mkdir
 from ichor.core.files.file import FileState, ReadFile, WriteFile
 from ichor.core.atoms.alf import ALF
 from ichor.core.common.int import count_digits
-
 from ichor.core.calculators import alf_features_to_coordinates
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
@@ -171,7 +169,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         """
         return self.write(path=fname, every=step)
 
-
     @classmethod
     def features_file_to_trajectory(
         cls,
@@ -240,6 +237,19 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             trajectory.add(atoms)
 
         return trajectory
+
+    def change_atom_ordering(self, new_atom_ordering: List[int]):
+
+        new_traj = Trajectory(self.path)
+        new_traj.state = FileState.Read
+
+        for old_atoms_instance in self:
+            new_atoms_instance = Atoms()
+            for new_atom_idx in new_atom_ordering:
+                new_atoms_instance.append(old_atoms_instance[new_atom_idx])
+            new_traj.append(new_atoms_instance)
+
+        return new_traj
 
     def _write_file(self, path: Path, every: int = 1, center: bool = False):
         """Write  a trajectroy file
