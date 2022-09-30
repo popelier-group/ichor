@@ -16,7 +16,6 @@ from ichor.core.common.constants import multipole_names
 def percentile(n: int) -> np.ndarray:
     return np.linspace(100 / n, 100, n)
 
-
 def make_chart_settings(local_kwargs: dict):
     """Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
     constructs dictionaries with parameter values to be passed to xlsx writer to configure graph settings.
@@ -61,7 +60,6 @@ def make_chart_settings(local_kwargs: dict):
     }
 
     return x_axis_settings, y_axis_settings
-
 
 def calculate_compact_s_curves(
     model_location: Path,
@@ -429,18 +427,18 @@ def simplified_write_to_excel(
 def calculate_compact_s_curves_from_files(
     csv_files_list: Dict[str, np.ndarray],
     models: Models,
-    nfeatures: int,
     output_location: Union[str, Path] = "s_curves_from_df.xlsx",
     **kwargs,
 ):
     """Calculates S-curves used to check model prediction performance. 
 
-    :param test_arrays: A dictionary of key: atom_name, value: n_timesteps x n_features np.ndarray for the atom
-    :param true_values: A dictionary of dictionarties. The outer dict has key: atom_name, value inner dict. The inner
-        dict has keys : property_name, value:1D np.ndarray of values of shape n_timesteps,
+    :param csv_files_list: A list of .csv files that contain features columns and property columns.
     :param models: A `Models` instance which contains model files
+    :param output_location: The name of the .xlsx file where to save the s-curves.
+    :param kwargs: Key word argument to give to xlsxwriter for customizing plots.
      """
 
+    nfeatures = models[0].x.shape[-1]
     # dicts to read in csv data
     features_dict: Dict[str, np.ndarray] = {}
     true_values_dict: Dict[str, Dict[str, np.ndarray]] = {}
@@ -506,6 +504,14 @@ def calculate_compact_s_curves_from_true_predicted(
     output_location: Union[str, Path] = "s_curves_from_df.xlsx",
     **kwargs
 ):
+    """Make s-curves from dictionary of predicted values and dictionary of true values
+
+    :param predicted_values_dict:  A dict of key: atom_name val inner_dict.
+        inner_dict of key: property_name, values: 1D np.ndarray containing predicted data for all points 
+    :param true_values_dict: A dict of key: atom_name val inner_dict.
+        inner_dict of key: property_name, values: 1D np.ndarray containing true data for all points 
+    :param output_location: The name of the output .xlsx file, defaults to "s_curves_from_df.xlsx"
+    """
 
    # get a nested dict of dict of dict of .... https://stackoverflow.com/a/8702435
     nested_dict = lambda: defaultdict(nested_dict)
