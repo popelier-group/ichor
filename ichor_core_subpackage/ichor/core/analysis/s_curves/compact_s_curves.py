@@ -385,7 +385,6 @@ def simplified_write_to_excel(
 
                 rmse_val = np.sqrt(df["Error"].abs().pow(2).sum()/ndata)
                 mae_val = df["Error"].abs().sum()/ndata
-                print(atom_name, sheet_name, rmse_val, mae_val)
 
                 writer.sheets[sheet_name].write(0, start_col, atom_name)
                 writer.sheets[sheet_name].write(0, start_col+1, "RMSE")
@@ -468,7 +467,6 @@ def calculate_compact_s_curves_from_files(
     for model in models:
         atom_name = model.atom_name
         property_name = model.prop
-        print(property_name)
         # iqa is written in model files but df contains iqa_energy instead
         if property_name == "iqa":
             property_name = "iqa_energy"
@@ -524,15 +522,13 @@ def calculate_compact_s_curves_from_true_predicted(
             atomic_true_values = true_values_dict[atom_name][property_name]
             predicted = predicted_values_dict[atom_name][property_name]
 
-            if atomic_true_values is not None:
+            errors = atomic_true_values - predicted
 
-                errors = atomic_true_values - predicted
+            if property_name == "iqa_energy":
+                errors *= 2625.5
 
-                if property_name == "iqa_energy":
-                    errors *= 2625.5
-
-                total_dict[property_name][atom_name]["true"] = atomic_true_values
-                total_dict[property_name][atom_name]["predicted"] = predicted
-                total_dict[property_name][atom_name]["error"] = errors
+            total_dict[property_name][atom_name]["true"] = atomic_true_values
+            total_dict[property_name][atom_name]["predicted"] = predicted
+            total_dict[property_name][atom_name]["error"] = errors
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
