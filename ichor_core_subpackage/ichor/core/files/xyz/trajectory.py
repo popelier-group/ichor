@@ -283,12 +283,20 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         # if PointsDirectory is indexed by a slice e.g. [:50], [20:40], etc.
         elif isinstance(item, slice):
-            
-            return Trajectory(self.path, list.__getitem__(self, item))
+
+            new_traj = Trajectory(self.path, list.__getitem__(self, item))
+            # need to set the filestate to read otherwise the file will be read again
+            new_traj.state = FileState.Read
+
+            return new_traj
         
         # if PointsDirectory is indexed by a list, e.g. [0, 5, 10]
         elif isinstance(item, (list, np.ndarray)):
             
+            new_traj = Trajectory(self.path, [list.__getitem__(self, i) for i in item])
+            # need to set the filestate to read otherwise the file will be read again
+            new_traj.state = FileState.Read
+
             return Trajectory(self.path, [list.__getitem__(self, i) for i in item])
 
         # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
