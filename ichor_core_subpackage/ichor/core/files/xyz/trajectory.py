@@ -224,6 +224,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         xyz_array = bohr2ang * xyz_array
 
         trajectory = Trajectory(trajectory_path)
+        trajectory.state = FileState.Read
 
         for geometry in xyz_array:
             # initialize empty Atoms instance
