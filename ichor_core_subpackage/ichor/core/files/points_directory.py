@@ -1,6 +1,7 @@
 from pathlib import Path
-from typing import Union, List, Optional, Callable
+from typing import Union, List, Optional, Callable, Dict
 from ichor.core.atoms import ListOfAtoms, Atoms
+from ichor.core.calculators.features.alf_features_calculator import calculate_alf_features
 from ichor.core.common.io import mkdir
 from ichor.core.files.directory import Directory
 from ichor.core.files.point_directory import PointDirectory
@@ -12,7 +13,8 @@ from ichor.core.atoms import ALF
 from ichor.core.files.file_data import PointsDirectoryProperties
 from ichor.core.files.xyz import Trajectory
 from ichor.core.sql import create_database, add_point_to_database, add_atom_names_to_database
-
+import pandas as pd
+from ichor.core.common import constants
 
 class PointsDirectory(ListOfAtoms, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).
@@ -84,6 +86,14 @@ class PointsDirectory(ListOfAtoms, Directory):
         :param **kwargs: key word arguments to pass to alf calculator
         """
         return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0].atoms]
+
+    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[str, ALF]:
+        """Returns a dictionary of key: atom_name, value: ALF instance (containing central atom index, x-axis idx, xy-plane idx)
+        e.g. {"O1":ALF(0,1,2),"H2":ALF(1,0,2), "H3":ALF(2,0,1)]
+        :param *args: positional arguments to pass to alf calculator
+        :param **kwargs: key word arguments to pass to alf calculator
+        """
+        return self[0].alf_dict(alf_calculator, *args)
 
     def properties(self, system_alf: Optional[List[ALF]] = None, specific_property: str = None) -> PointsDirectoryProperties:
         """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
@@ -177,7 +187,6 @@ class PointsDirectory(ListOfAtoms, Directory):
         :param fname: The file name to which to write the timesteps/coordinates
         :param step: Write coordinates for every n^th step. Default is 1, so writes coordinates for every step
         """
-        from collections import OrderedDict
 
         from ichor.core.analysis.predictions import get_true_predicted
         from ichor.core.common.constants import ha_to_kj_mol
@@ -291,7 +300,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             db_path = Path(f"{self.path.name}_sqlite.db")
         else:
             db_path = Path(db_path).with_suffix(".db")
-        
+
         if db_path.exists():
             for point in self:
                 add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
@@ -302,3 +311,56 @@ class PointsDirectory(ListOfAtoms, Directory):
                 add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
             
         return db_path
+
+    def features_with_properties_to_csv(
+        self,
+        system_alf: Dict[str, ALF],
+        str_to_append_to_fname: str = "_features_with_properties.csv",
+        atom_names: Optional[List[str]] = None,
+        property_types: Optional[List[str]] = None,
+        **kwargs
+    ):
+        """
+        Calculates ALF features and properties (with multipole moments rotated).
+
+        :param str_to_append_to_fname: a string that is appended to the default file name (which is `name_of_atom.csv`), defaults to None
+        :param atom_names: A list of atom names for which to write out csv files with properties. If None, then writes out files for all
+            atoms in the system, defaults to None
+        :param property_types: A list of property names (iqa, multipole names) for which to write columns. If None, then writes out
+            columns for all properties, defaults to None
+        :param *args: positional arguments to pass to calculator function
+        :param **kwargs: key word arguments to be passed to the feature calculator function
+        :raises TypeError: This method only works for PointsDirectory instances because it needs access to AIMALL information. Does not
+            work for Trajectory instances.
+        """
+
+        if not atom_names:
+            atom_names = self.atom_names
+        elif isinstance(atom_names, str):
+            atom_names = [atom_names]
+
+        # TODO: add dispersion later if we are going to make models for it separately
+        if not property_types:
+            property_types = ["iqa"] + constants.multipole_names
+
+        for atom_name in atom_names:
+
+            training_data = []
+            features = self[atom_name].features(calculate_alf_features, system_alf, **kwargs)
+
+            for i, point in enumerate(self):
+                point_properties_dict = point.properties(system_alf)
+                properties = [point_properties_dict.get(atom_name).get(ty) for ty in property_types]
+                training_data.append([*features[i], *properties])
+
+            input_headers = [f"f{i+1}" for i in range(features.shape[-1])]
+            output_headers = [f"{output}" for output in property_types]
+
+            fname = atom_name + str_to_append_to_fname
+
+            df = pd.DataFrame(
+                training_data,
+                columns=input_headers + output_headers,
+                dtype=np.float64,
+            )
+            df.to_csv(fname, index=False)
