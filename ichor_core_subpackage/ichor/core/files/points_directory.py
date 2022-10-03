@@ -341,7 +341,7 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         # TODO: add dispersion later if we are going to make models for it separately
         if not property_types:
-            property_types = ["iqa"] + constants.multipole_names
+            property_types = ["iqa", "force_x", "force_y", "force_z"] + constants.multipole_names
 
         for atom_name in atom_names:
 
