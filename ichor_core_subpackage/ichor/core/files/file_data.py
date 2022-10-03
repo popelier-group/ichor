@@ -61,7 +61,7 @@ class HasAtoms(ABC):
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
         return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.atoms.alf(alf_calculator, *args, **kwargs)]
 
-    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
+    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[str, ALF]:
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
         return {atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs) for atom_instance in self.atoms}
 
