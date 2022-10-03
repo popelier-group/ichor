@@ -46,6 +46,8 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
     def property_names(self) -> List[str]:
         return ["forces"]
 
+    # TODO: rotation of Gaussian forces not needed in FFLUX, can directly learn Gaussian forces
+    # TODO: FFLUX predicts directly in the global frame so IQA forces should be the same as Gaussian forces
     def properties(self, C_matrix_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, AtomForce]]:
         """Returns the machine learning labels which are in this file. The atomic forces need to be rotated by a C matrix
         (each atom has its own C matrix) prior to machine learning. This method is primarily here to be used by
