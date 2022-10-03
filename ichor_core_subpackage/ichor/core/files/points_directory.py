@@ -291,10 +291,14 @@ class PointsDirectory(ListOfAtoms, Directory):
             db_path = Path(f"{self.path.name}_sqlite.db")
         else:
             db_path = Path(db_path).with_suffix(".db")
-
-        create_database(db_path, echo)
-        add_atom_names_to_database(db_path, self.atom_names, echo=echo)
-        for point in self:
-            add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
+        
+        if db_path.exists():
+            for point in self:
+                add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
+        else:
+            create_database(db_path, echo)
+            add_atom_names_to_database(db_path, self.atom_names, echo=echo)
+            for point in self:
+                add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
             
         return db_path
