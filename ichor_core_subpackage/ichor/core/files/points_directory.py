@@ -302,9 +302,11 @@ class PointsDirectory(ListOfAtoms, Directory):
             db_path = Path(db_path).with_suffix(".db")
 
         if db_path.exists():
+            print("Database already exists. Adding new points to database...")
             for point in self:
                 add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
         else:
+            print("Making new database and adding points...")
             create_database(db_path, echo)
             add_atom_names_to_database(db_path, self.atom_names, echo=echo)
             for point in self:
