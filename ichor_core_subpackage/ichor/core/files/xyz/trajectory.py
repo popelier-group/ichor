@@ -10,6 +10,8 @@ from ichor.core.files.file import FileState, ReadFile, WriteFile
 from ichor.core.atoms.alf import ALF
 from ichor.core.common.int import count_digits
 from ichor.core.calculators import alf_features_to_coordinates
+import pandas as pd
+from ichor.core.common.constants import bohr2ang
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
@@ -195,11 +197,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         :param sheet_name: The excel sheet to be used to convert to xyz. Default is 0. This is only needed for excel files, not csv files.
         """
 
-        from pathlib import Path
-
-        import pandas as pd
-        from ichor.core.common.constants import bohr2ang
-
         if isinstance(f, str):
             f = Path(f)
         if f.suffix == ".xlsx":
@@ -221,6 +218,42 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         # xyz coordinates are currently in bohr, so convert them to angstroms
         xyz_array = alf_features_to_coordinates(features_array)
+        xyz_array = bohr2ang * xyz_array
+
+        trajectory = Trajectory(trajectory_path)
+        trajectory.state = FileState.Read
+
+        for geometry in xyz_array:
+            # initialize empty Atoms instance
+            atoms = Atoms()
+            for ty, atom_coord in zip(atom_types, geometry):
+                # add Atom instances for every atom in the geometry to the Atoms instance
+                atoms.add(
+                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
+                )
+            # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
+            trajectory.add(atoms)
+
+        return trajectory
+
+    @classmethod
+    def np_array_to_trajectory(
+        self,
+        arr: np.ndarray,
+        trajectory_path: Union[str, Path],
+        atom_types: List[str],
+        ):
+        """Creates a Trajectory instance from a np.ndarray object
+        
+        :param arr: np.ndarray containing features.This should be a 2D array of
+            shape n_timesteps x n_features
+        :param trajectory_path: The path associated with the trajectory instance which is made
+        :param atom_types: A list of atom types (elements) that correspond to the features
+            in the given array. It is important that they are the same order as in the np.ndarray.
+        :return: Trajectory instance containing xyz geometries converted from features
+        """
+
+        xyz_array = alf_features_to_coordinates(arr)
         xyz_array = bohr2ang * xyz_array
 
         trajectory = Trajectory(trajectory_path)
