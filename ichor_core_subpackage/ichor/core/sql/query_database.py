@@ -213,8 +213,13 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
                                 row_with_atom_info["force_y"].item(),
                                 row_with_atom_info["force_z"].item()])
                 
-                # do not need to rotate forces as fflux already predicts forces in the global frame
-                # local_forces_array = np.matmul(C, global_forces_array)
+                # FFLUX predicts forces in the global frame
+                # but two identical molecules can have different global forces depending on
+                # position in 3D space
+                # so therefore predict in local frame
+                # then to transform back into global frame,
+                # use C.T (as C is rotation matrix so inverse is the transpose)
+                local_forces_array = np.matmul(C, global_forces_array)
             
             # make dictionary of rotated multipoles
             local_spherical_multipoles = {spherical_monopole_labels[0]: row_with_atom_info["q00"].item()}
@@ -272,9 +277,9 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
             # add iqa to dictionary
             total_dict[str(point_id)].update({"iqa_energy": row_with_atom_info["iqa_energy"].item()})
             # add local forces after rotation or None if they were not calculated.
-            total_dict[str(point_id)].update({"force_x": global_forces_array[0]})
-            total_dict[str(point_id)].update({"force_y": global_forces_array[1]})
-            total_dict[str(point_id)].update({"force_z": global_forces_array[2]})
+            total_dict[str(point_id)].update({"force_x": local_forces_array[0]})
+            total_dict[str(point_id)].update({"force_y": local_forces_array[1]})
+            total_dict[str(point_id)].update({"force_z": local_forces_array[2]})
             # add rotated multipole moments to dictionary
             total_dict[str(point_id)].update(local_spherical_multipoles)
 
