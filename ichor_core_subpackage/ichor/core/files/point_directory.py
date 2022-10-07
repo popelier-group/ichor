@@ -118,11 +118,20 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         c_matrix_dict = self.C_matrix_dict(system_alf)
 
         # grab properties from WFN
-        wfn_properties = self.wfn.properties
+        if self.wfn:
+            wfn_properties = self.wfn.properties
+        else:
+            wfn_properties = {}
         # grab properties from INTs directory
-        ints_properties = self.ints.properties(c_matrix_dict)
-        gaussian_output_properties = self.gaussian_out.properties(c_matrix_dict)
-        
+        if self.ints:
+            ints_properties = self.ints.properties(c_matrix_dict)
+        else:
+            ints_properties = {}
+        if self.gaussian_out:
+            gaussian_output_properties = self.gaussian_out.properties(c_matrix_dict)
+        else:
+            gaussian_output_properties = {}
+
         return PointDirectoryProperties(merge(wfn_properties, ints_properties, gaussian_output_properties))
 
     # todo: make this more robust, check for any of the files inside
