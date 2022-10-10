@@ -13,7 +13,8 @@ from ichor.core.common.types.itypes import F
 
 
 def convert_to_path(func: F) -> F:
-    """Used as a decorator which converts any function inputs which have type annotation `Path` to a `Path` object."""
+    """Used as a decorator which converts any function inputs which have type
+     annotation `Path` to a `Path` object."""
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
@@ -36,7 +37,7 @@ def convert_to_path(func: F) -> F:
 
 
 @convert_to_path
-def mkdir(path: Path, empty: bool = False, fail_ok: bool = False) -> None:
+def mkdir(path: Path, empty: bool = False, fail_ok: bool = False):
     """Makes a directory.
 
     :param path: Where to make the directory
@@ -64,16 +65,15 @@ def move(src: Path, dst: Path, exist_ok=False) -> None:
 
 
 @convert_to_path
-def cp(src: Path, dst: Path, *args, **kwargs) -> None:
+def cp(src: Path, dst: Path, *args, **kwargs):
     """See copyfile function below"""
     if src.is_file():
         copyfile(src, dst, *args, **kwargs)
     elif src.is_dir():
         copytree(src, dst, *args, **kwargs)
 
-
 @convert_to_path
-def copyfile(src: Path, dst: Path) -> None:
+def copyfile(src: Path, dst: Path):
     """Copy contents and metadata (such as date created, etc.) from src to dst.
 
     :param src: The source directory where the file/directory are currently
@@ -281,12 +281,13 @@ def cat(outfile: Path, infiles: List[Path]) -> None:
             with open(infile, "rb") as inf:
                 shutil.copyfileobj(inf, outf)
 
-
 @convert_to_path
 def ln(f: Path, link: Path, force: bool = True):
     """
-    Creates symlink between f and link
-    :param f: file to link to
+    Creates symlink between f and link. If the `link` links to a directory,
+    but a file is passed as `f`, then the symbolic link to `f`.
+    is created inside the `link` directory.
+    :param f: file or directory to which to create a symbolic link for
     :param link: link to create
     :param force: if the path exists then unlink first
     """
@@ -296,6 +297,10 @@ def ln(f: Path, link: Path, force: bool = True):
         link.unlink()
     link.symlink_to(f)
 
+def symlink(f: Path, link: Path, force=True):
+    """Same as ln function.
+    """
+    ln(f, link, force=force)
 
 @convert_to_path
 def last_modified(f: Path) -> str:
