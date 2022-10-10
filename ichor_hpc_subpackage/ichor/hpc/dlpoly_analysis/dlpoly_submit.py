@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from ichor.core.useful_functions import get_atoms_from_path, get_models_from_path
 from ichor.core.atoms import Atoms
-from ichor.core.common.io import mkdir, copyfile, pushd
+from ichor.core.common.io import mkdir, copyfile, pushd, ln
 from ichor.core.models import Model
 from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID
@@ -11,6 +11,22 @@ from ichor.hpc.submission_script import SCRIPT_NAMES, DataLock, DlpolyCommand, I
 from ichor.hpc.submission_script.common import submit_gjf_files
 from ichor.core.useful_functions.dl_poly.dl_poly_write_optimization_files import write_config, write_control, write_field
 from ichor.core.useful_functions.dl_poly.write_final_geometry_to_gjf import write_final_geometry_to_gjf
+
+def symlink_models(dl_poly_directory_path: Path, models_directory: Path):
+    """Creates symbolic link to models in `models_directory` inside
+    a directory called `model_krig` in `dl_poly_directory_path`.
+
+    :param dl_poly_directory_path: _description_
+    :type dl_poly_directory_path: Path
+    :param models_directory: _description_
+    :type models_directory: Path
+    """
+
+    model_dir = dl_poly_directory_path / "model_krig"
+    mkdir(model_dir)
+    for model in models_directory.iterdir():
+        if model.suffix == Model.filetype:
+            ln(model.absolute(), model_dir)
 
 def copy_models(dl_poly_directory_path: Path, models_directory: Path):
     """Copies all model files to the `model_krig` directory, which is in the directory where DL POLY will be ran.
