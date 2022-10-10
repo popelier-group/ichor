@@ -7,7 +7,7 @@ from ichor.core.files import XYZ, PointsDirectory, Trajectory, PointDirectory
 from ichor.hpc.make_sets import MAKE_SET_METHODS_DICT
 from ichor.hpc import FILE_STRUCTURE
 
-def make_nvalidation_sets_with_npoints(points_input: Path, system_name: str, nsets: int, npoints: int, ):
+def make_nvalidation_sets_with_npoints(points_input: Union[str, Path], system_name: str, nsets: int, npoints: int, ):
     """Used to make multiple validation sets at once. One validation set has unique points in it. However,
     identical points might be present in multiple of the validation sets.
 
@@ -16,6 +16,8 @@ def make_nvalidation_sets_with_npoints(points_input: Path, system_name: str, nse
     :param nsets: The number of sets to generate
     :param npoints: How many points should be in each set
     """
+
+    points_input = Path(points_input)
     
     total_set_digits = count_digits(nsets)
     
