@@ -11,12 +11,12 @@ from ichor.hpc.submission_script import (
     SCRIPT_NAMES,
     FerebusCommand,
 )
-from ichor.core.common.str import get_digits
 from ichor.hpc.programs.qct import (
     QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM,
     QuantumChemicalTopologyProgram,
 )
 from ichor.core.common import constants
+from ichor.core.atoms import ALF
 
 
 default_model_type = "iqa"
@@ -38,7 +38,7 @@ def MODEL_TYPES() -> List[str]:
     return model_types
 
 
-def make_models(
+def make_gpr_models(
     directory: Path,
     atoms: Optional[List[str]] = None,
     ntrain: Optional[int] = None,
@@ -82,7 +82,6 @@ def _move_model(f: Path):
 
     mkdir(FILE_STRUCTURE["models"])
     mkdir(FILE_STRUCTURE["model_log"])
-
     cp(f, FILE_STRUCTURE["models"])
     model_log = FILE_STRUCTURE["model_log"] / (
         GLOBALS.SYSTEM_NAME + str(Model(f).ntrain).zfill(4)
@@ -131,7 +130,6 @@ def create_ferebus_directories_and_submit(
 
     return make_ferebus_script(ferebus_directories, hold=hold)
 
-
 def make_ferebus_script(
     ferebus_directories: List[Path], hold: Optional[JobID] = None
 ) -> Optional[JobID]:
@@ -145,7 +143,6 @@ def make_ferebus_script(
         ferebus_script.add_command(FerebusCommand(ferebus_directory))
     ferebus_script.write()
     return ferebus_script.submit(hold=hold)
-
 
 def write_training_set(
     atom: str,
@@ -190,69 +187,88 @@ def write_training_set(
     return ferebus_directory
 
 
-def write_ftoml(ferebus_directory: Path, atom: str, model_types: List[str]):
+def write_ftoml(ferebus_directory: Path,
+                atomic_alf: ALF,
+                model_types: List[str],
+                natoms: int,
+                system_name: str,
+                atom_name: str,
+                mean_type: str,
+                optimiser_type: str,
+                kernel: str = "periodic",
+                standardise: bool = False,
+                theta_min: float = 0.0,
+                theta_max: float = 3.0,
+                swarm_size: int = 50,
+                max_iterations: int = 1000,
+                inertia_weight: float = 0.72900,
+                cognitive_learning_rate: float = 1.49400,
+                social_learning_rate: float = 1.49400,
+                tolerance: float = 1.0e-8,
+                stall_iterations: int = 20,
+                method: str = "B3LYP",
+                basis_set: str = "6-31+g(d,p)",
+                add_dispersion: bool = False,
+                ):
     """Write the toml file which holds settings for FEREBUS.
 
     :param ferebus_directory: A Path object pointing to the directory where the FEREBUS job is going to be ran
     :param atom: A string corresponding to the atom's name (such as C1, H3, etc.)
     :param model_types: List of model types (str) being trained
     """
-    from ichor.hpc import GLOBALS
+
+    nfeats = 3*natoms - 6 if natoms > 2 else 1
 
     ftoml_file = ferebus_directory / "ferebus.toml"
-    alf = list(np.array(GLOBALS.ALF[get_digits(atom) - 1]) + 1)
+    alf = list(np.array(atomic_alf) + 1)
 
-    # todo: probably best to remake this in a smarter way
-    nfeats = 3 * len(GLOBALS.ATOMS) - 6
-    rbf_dims = list(range(1, nfeats + 1))
-    per_dims = [i for i in rbf_dims if i > 3 and i % 3 == 0]
-    rbf_dims = list(set(rbf_dims) - set(per_dims))
+    per_dims = [i for i in range(1, nfeats + 1) if i > 3 and i % 3 == 0]
+    rbf_dims = [i for i in range(1, nfeats + 1) if i not in per_dims]
 
     with open(ftoml_file, "w") as ftoml:
         ftoml.write("[system]\n")
-        ftoml.write(f'name = "{GLOBALS.SYSTEM_NAME}"\n')
-        ftoml.write(f"natoms = {len(GLOBALS.ATOMS)}\n")
+        ftoml.write(f'name = "{system_name}"\n')
+        ftoml.write(f"natoms = {natoms}\n")
         ftoml.write(f"atoms = [\n")
         ftoml.write(
-            f'  {{name="{atom}", alf=[{alf[0]}, {alf[1]}, {alf[2]}]}}\n'
+            f'  {{name="{atom_name}", alf=[{alf[0]}, {alf[1]}, {alf[2]}]}}\n'
         )
         ftoml.write("]\n")
         ftoml.write("\n")
         ftoml.write("[model]\n")
-        ftoml.write(f'mean = "{GLOBALS.FEREBUS_MEAN}"\n')
-        ftoml.write(f'optimiser = "{GLOBALS.FEREBUS_OPTIMISATION}"\n')
-        if GLOBALS.KERNEL.lower() in ["rbf", "rbf-cyclic"] or nfeats < 6:
+        ftoml.write(f'mean = "{mean_type}"\n')
+        ftoml.write(f'optimiser = "{optimiser_type}"\n')
+        if kernel.lower() in ["rbf", "rbf-cyclic"] or nfeats < 6:
             ftoml.write(f'kernel = "k1"\n')
-        elif GLOBALS.KERNEL.lower() == "periodic":
+        elif kernel.lower() == "periodic":
             ftoml.write(f'kernel = "k1*k2"\n')
-        if GLOBALS.STANDARDISE:
+        if standardise:
             ftoml.write(f"standardise = true\n")
         # ftoml.write(f'likelihood = "{GLOBALS.FEREBUS_LIKELIHOOD}"\n')
         ftoml.write("\n")
         ftoml.write("[optimiser]\n")
-        ftoml.write(f"search_min = {GLOBALS.FEREBUS_THETA_MIN}\n")
-        ftoml.write(f"search_max = {GLOBALS.FEREBUS_THETA_MAX}\n")
+        ftoml.write(f"search_min = {theta_min}\n")
+        ftoml.write(f"search_max = {theta_max}\n")
         ftoml.write("\n")
         ftoml.write("[optimiser.pso]\n")
-        ftoml.write(f"swarm_size = {GLOBALS.FEREBUS_SWARM_SIZE}\n")
-        ftoml.write(f"iterations = {GLOBALS.FEREBUS_MAX_ITERATION}\n")
-        ftoml.write(f"inertia_weight = {GLOBALS.FEREBUS_INERTIA_WEIGHT}\n")
+        ftoml.write(f"swarm_size = {swarm_size}\n")
+        ftoml.write(f"iterations = {max_iterations}\n")
+        ftoml.write(f"inertia_weight = {inertia_weight}\n")
         ftoml.write(
-            f"cognitive_learning_rate = {GLOBALS.FEREBUS_COGNITIVE_LEARNING_RATE}\n"
+            f"cognitive_learning_rate = {cognitive_learning_rate}\n"
         )
         ftoml.write(
-            f"social_learning_rate = {GLOBALS.FEREBUS_SOCIAL_LEARNING_RATE}\n"
+            f"social_learning_rate = {social_learning_rate}\n"
         )
         ftoml.write(f'stopping_criteria="relative_change"\n')
         ftoml.write("\n")
         ftoml.write(f"[optimiser.pso.relative_change]\n")
-        ftoml.write(f"tolerance={GLOBALS.FEREBUS_TOLERANCE}\n")
-        ftoml.write(f"stall_iterations={GLOBALS.FEREBUS_STALL_ITERATIONS}\n")
+        ftoml.write(f"tolerance={tolerance}\n")
+        ftoml.write(f"stall_iterations={stall_iterations}\n")
         ftoml.write("\n")
-        kernel = "rbf-cyclic" if GLOBALS.KERNEL == "rbf-cyclic" else "rbf"
         ftoml.write("[kernels.k1]\n")
-        ftoml.write(f'type = "{kernel}"\n')
-        if nfeats > 6 and GLOBALS.KERNEL == "periodic":
+        ftoml.write(f'type = "rbf"\n')
+        if nfeats > 6 and kernel == "periodic":
             ftoml.write(f"active_dimensions = {rbf_dims}\n")
             ftoml.write("\n")
             ftoml.write("[kernels.k2]\n")
@@ -260,12 +276,10 @@ def write_ftoml(ferebus_directory: Path, atom: str, model_types: List[str]):
             ftoml.write(f"active_dimensions = {per_dims}\n")
         ftoml.write("\n")
         ftoml.write("[notes]\n")
-        ftoml.write(f'method = "{GLOBALS.METHOD}"\n')
-        ftoml.write(f'basis-set = "{GLOBALS.BASIS_SET}"\n')
+        ftoml.write(f'method = "{method}"\n')
+        ftoml.write(f'basis-set = "{basis_set}"\n')
         if (
             "iqa" in model_types
-            and QUANTUM_CHEMICAL_TOPOLOGY_PROGRAM()
-            is QuantumChemicalTopologyProgram.Morfi
         ):
-            iqa = "iqa+dispersion" if GLOBALS.ADD_DISPERSION_TO_IQA else "iqa"
-            ftoml.write(f'iqa = "{iqa}"\n')
+            tmp_iqa = "iqa+dispersion" if add_dispersion else "iqa"
+            ftoml.write(f'iqa = "{tmp_iqa}"\n')
