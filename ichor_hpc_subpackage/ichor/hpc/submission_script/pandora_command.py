@@ -3,9 +3,7 @@ from typing import List, Optional
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files import PandoraDirectory
-from ichor.hpc import GLOBALS
 from ichor.hpc.modules import Modules, MorfiModules, PandoraModules
-from ichor.hpc.programs.pandora import PANDORA_LOCATION
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
 from ichor.hpc.submission_script.python_command import PythonCommand
 
@@ -15,15 +13,18 @@ class PandoraCommand(PythonCommand):
     run_pyscf: bool = True
 
     def __init__(
-        self, config_file: Path, pyscf: bool = True, morfi: bool = True
+        self, config_file: Path, pandora_location: Path,
+        ncores: int = 2, pyscf: bool = True, morfi: bool = True
     ):
         self.config_file = config_file
         self.run_pyscf = pyscf
         self.run_morfi = morfi
+        self.ncores = ncores
+        self.pandora_location = pandora_location
 
         self._args = []
 
-        PythonCommand.__init__(self, Path(PANDORA_LOCATION()).absolute())
+        PythonCommand.__init__(self, Path(self.pandora_location).absolute())
 
     @classproperty
     def modules(self) -> Modules:
@@ -57,14 +58,12 @@ class PandoraCommand(PythonCommand):
 
 class PandoraPySCFCommand(PandoraCommand):
     def __init__(
-        self, config_file: Path, point_directory: Optional[Path] = None
+        self, config_file: Path, pandora_location: Path, ncores=2,
+        point_directory: Optional[Path] = None
     ):
-        PandoraCommand.__init__(self, config_file, pyscf=True, morfi=False)
+        PandoraCommand.__init__(self, config_file, ncores=ncores, pyscf=True, morfi=False)
         self.point_directory = point_directory
-
-    @property
-    def ncores(self):
-        return GLOBALS.PYSCF_NCORES
+        self.pandora_location = pandora_location
 
     @property
     def data(self) -> List[str]:

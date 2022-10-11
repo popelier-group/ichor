@@ -78,7 +78,7 @@ def move_models(model_dir: Optional[Path] = None):
 
 
 def _move_model(f: Path):
-    from ichor.hpc import FILE_STRUCTURE, GLOBALS
+    from ichor.hpc import FILE_STRUCTURE
 
     mkdir(FILE_STRUCTURE["models"])
     mkdir(FILE_STRUCTURE["model_log"])

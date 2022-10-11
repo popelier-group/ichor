@@ -16,7 +16,7 @@ from ichor.hpc.auto_run.per import (PerAtomDaemon, PerAtomPerPropertyDaemon,
                                     stop_all_child_processes)
 from ichor.hpc.auto_run.per.child_processes import (
     concat_dir_to_ts, print_child_processes_status)
-from ichor.hpc.main.collate_log import collate_model_log
+from maybe_not_needed.collate_log import collate_model_log
 
 
 def auto_run_per_menu():

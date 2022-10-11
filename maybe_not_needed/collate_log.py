@@ -27,7 +27,7 @@ def get_collate_model_log(
 ) -> Dict[str, Dict[str, Tuple[Path, int]]]:
     from ichor.core.common.types import DictList
     from ichor.core.models import Models
-    from ichor.hpc import FILE_STRUCTURE, GLOBALS
+    from ichor.hpc import FILE_STRUCTURE
 
     if directory is None:
         directory = GLOBALS.CWD

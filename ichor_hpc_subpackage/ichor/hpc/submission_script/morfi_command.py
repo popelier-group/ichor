@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc import GLOBALS
 from ichor.hpc.modules import Modules
 from ichor.hpc.submission_script.aimall_command import AIMAllCommand
 from ichor.hpc.submission_script.command_line import CommandLine
@@ -21,6 +20,7 @@ class MorfiCommand(CommandLine):
         aimall_wfn: Optional[Path] = None,
         point_directory: Optional[Path] = None,
         atoms: Optional[List[str]] = None,
+        ncores=2
     ):
         self.pandora_command = PandoraMorfiCommand(morfi_input)
         self.aimall_command = (
@@ -29,14 +29,11 @@ class MorfiCommand(CommandLine):
             else None
         )
         self.point_directory = point_directory
+        self.ncores = ncores
 
     @classproperty
     def modules(self) -> Modules:
         return PandoraMorfiCommand.modules + AIMAllCommand.modules
-
-    @property
-    def ncores(self):
-        return GLOBALS.MORFI_NCORES
 
     @property
     def data(self) -> List[str]:

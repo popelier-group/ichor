@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.core.common.os import current_user_groups
-from ichor.hpc import GLOBALS, FILE_STRUCTURE
+from ichor.hpc import FILE_STRUCTURE
 from ichor.core.common.io import mkdir
 
 

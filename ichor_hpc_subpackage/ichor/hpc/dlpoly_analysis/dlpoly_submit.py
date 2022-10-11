@@ -1,13 +1,12 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.core.useful_functions import get_atoms_from_path, get_models_from_path
+from ichor.core.useful_functions import get_atoms_from_path
 from ichor.core.atoms import Atoms
 from ichor.core.common.io import mkdir, copyfile, pushd, ln
 from ichor.core.models import Model
-from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import SCRIPT_NAMES, DataLock, DlpolyCommand, ICHORCommand, SubmissionScript
+from ichor.hpc.submission_script import SCRIPT_NAMES, DlpolyCommand, SubmissionScript
 from ichor.hpc.submission_script.common import submit_gjf_files
 from ichor.core.useful_functions.dl_poly.dl_poly_write_optimization_files import write_config, write_control, write_field
 from ichor.core.useful_functions.dl_poly.write_final_geometry_to_gjf import write_final_geometry_to_gjf

@@ -4,7 +4,6 @@ from typing import List
 from ichor.core.common.functools import classproperty
 from ichor.hpc.log import logger
 from ichor.hpc.modules import FerebusModules, Modules
-from ichor.hpc.programs import get_ferebus_path
 from ichor.hpc.submission_script.command_line import CommandLine
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
 
@@ -12,13 +11,14 @@ from ichor.hpc.submission_script.ichor_command import ICHORCommand
 class FerebusCommand(CommandLine):
     """Class used to construct a FEREBUS job. Jobs are submitted using the `SubmissionScript` class.
 
-    :param ferebus_directory: Path to where the FEREBUS program is located.
+    :param ferebus_directory: Path to ferebus executable
     :param mode_models: Whether or not to move the GP models made by FEREBUS to the MODEL directory.
     """
 
-    def __init__(self, ferebus_directory: Path, move_models: bool = True):
+    def __init__(self, ferebus_directory: Path, ncores: int = 2, move_models: bool = True):
         self.ferebus_directory = ferebus_directory
         self.move_models = move_models
+        self.ncores = ncores
 
     @property
     def data(self) -> List[str]:
@@ -33,16 +33,7 @@ class FerebusCommand(CommandLine):
     def command(self) -> str:
         """Return the command word that is used to run FEREBUS. Since it is an executable, it can be ran by calling the path of FEREBUS followed by any
         configuration settings."""
-        ferebus_path = get_ferebus_path()
-        return str(ferebus_path.absolute())
-
-    @classproperty
-    def ncores(self) -> int:
-        """Return the number of cores to be used for ferebus jobs."""
-
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.FEREBUS_NCORES
+        return str(self.ferebus_directory.absolute() / "FEREBUS")
 
     def repr(self, variables: List[str]) -> str:
         """Return a string that is used to construct ferebus job files."""

@@ -7,8 +7,6 @@ Module responsible for locating programs that ichor uses such as:
 
 from pathlib import Path
 from typing import Optional
-
-import ichor
 from ichor.core.common.io import cp, mkdir, move
 from ichor.core.common.os import (
     OTHER_EXECUTE,
@@ -18,7 +16,7 @@ from ichor.core.common.os import (
     permissions,
     set_permission,
 )
-from ichor.hpc import GLOBALS, MACHINE
+from ichor.hpc import MACHINE
 
 _local_bin_directory = Path.home() / ".ichor" / "bin"
 

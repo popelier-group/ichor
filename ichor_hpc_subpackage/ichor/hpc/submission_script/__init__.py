@@ -36,7 +36,7 @@ def prepend_script_directory(paths):
 
 class ScriptNames(dict):
     """A helper class which retruns the full path of a particular script that is used to submit job files
-    for programs like Guassian and AIMALL. All the script files are stored into a directory GLOBALS.FILE_STRUCTURE["scripts"].
+    for programs like Guassian and AIMALL. All the script files are stored into a directory FILE_STRUCTURE["scripts"].
     These scripts are submitted to compute nodes on CSF3/FFLUXLAB which initiates a job."""
 
     parent: Path = MutableValue(FILE_STRUCTURE["scripts"])

@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules, TycheModules
-from ichor.hpc.programs import get_tyche_path
 from ichor.hpc.submission_script.command_line import CommandLine
 from ichor.hpc.submission_script.gaussian_command import GaussianCommand
 
@@ -15,11 +14,15 @@ class TycheCommand(CommandLine):
 
     def __init__(
         self,
+        tyche_path: Path,
         freq_param: Path,
         g09_input: Path,
+        ncores: int = 2
     ):
+        self.tyche_path = tyche_path
         self.freq_param = freq_param
         self.g09_input = g09_input
+        self.ncores = ncores
 
     @classproperty
     def group(self) -> bool:
@@ -40,15 +43,7 @@ class TycheCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
-        tyche_loc = get_tyche_path()
-        return f"{tyche_loc.absolute()}"
-
-    @classproperty
-    def ncores(self) -> int:
-        """Returns the number of cores that Amber should use for the job."""
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.TYCHE_NCORES
+        return f"{self.tyche_path.absolute()}"
 
     def repr(self, variables: List[str]) -> str:
         """
