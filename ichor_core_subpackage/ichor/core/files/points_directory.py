@@ -12,7 +12,7 @@ from ichor.core.calculators.alf import default_alf_calculator
 from ichor.core.atoms import ALF
 from ichor.core.files.file_data import PointsDirectoryProperties
 from ichor.core.files.xyz import Trajectory
-from ichor.core.sql import create_database, add_point_to_database, add_atom_names_to_database
+from ichor.core.sql import create_database, add_point_to_database, add_atom_names_to_database, create_database_session
 import pandas as pd
 from ichor.core.common import constants
 
@@ -31,6 +31,10 @@ class PointsDirectory(ListOfAtoms, Directory):
     will wrap around a SYSTEM_NAME00... folder (which only contains information about 1 point).
 
     :param path: Path to a directory which contains points. This path is typically the path to the training set, sample pool, etc.
+    :param needs_parsing: By default, every PointsDirectory is parsed when the instance is created to
+        create PointDirectory instances of each inner directory (but the contents of the files are not read).
+        If however, a slice of a already created PointsDirectory is made, the conents of the directories
+        do not need to be parsed again, so needs_parsing would be false
     """
 
     def __init__(self, path: Union[Path, str], needs_parsing = True, *args, **kwargs):
@@ -295,22 +299,25 @@ class PointsDirectory(ListOfAtoms, Directory):
             in self, defaults to False
         :return: The path to the written SQL database
         """
-        
+
         if not db_path:
             db_path = Path(f"{self.path.name}_sqlite.db")
         else:
             db_path = Path(db_path).with_suffix(".db")
 
+        # if db exists, then add new points to existing database.
         if db_path.exists():
             print("Database already exists. Adding new points to database...")
+            session = create_database_session(db_path)
             for point in self:
-                add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
+                add_point_to_database(session, point, echo=echo, print_missing_data=print_missing_data)
         else:
             print("Making new database and adding points...")
             create_database(db_path, echo)
-            add_atom_names_to_database(db_path, self.atom_names, echo=echo)
+            session = create_database_session(db_path)
+            add_atom_names_to_database(session, self.atom_names, echo=echo)
             for point in self:
-                add_point_to_database(db_path, point, echo=echo, print_missing_data=print_missing_data)
+                add_point_to_database(session, point, echo=echo, print_missing_data=print_missing_data)
             
         return db_path
 

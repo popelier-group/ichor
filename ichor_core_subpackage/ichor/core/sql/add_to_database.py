@@ -1,4 +1,5 @@
 from ichor.core.sql import AtomNames, Points, Dataset
+import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path
@@ -7,46 +8,44 @@ from typing import List
 from sqlalchemy import select
 from ichor.core.common.constants import multipole_names
 import warnings
+from sqlalchemy.orm import Session
 
-def add_atom_names_to_database(database_path: Path, atom_names: List[str], echo=False):
+def create_database_session(database_path: Path, echo=False):
+    """Creates a sqlalchemy Engine object as well as a Session object
+    which are used to interact with the SQLite database.
+
+    :param database_path: pathlib.Path object to database
+    :param echo: Whether for SQLAlchemy to echo SQL commands used, defaults to False
+    """
+
+    database_path = str(Path(database_path).absolute())
+    # create new database and start session
+    engine = create_engine(f"sqlite+pysqlite:///{database_path}", echo=echo, future=True)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    return session
+
+def add_atom_names_to_database(session: Session, atom_names: List[str], echo=False):
     """Adds a list of atom names to the atom_names table of the database.
 
     :param database_path: Path to database
     :param atom_names: A list of atom names, e.g. ["C1", "H2", "H3", ....]
     """
-    
-    database_path = str(Path(database_path).absolute())
 
-    # create new database and start session
-    engine = create_engine(f"sqlite+pysqlite:///{database_path}", echo=echo, future=True)
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    
     db_atom_names_list = [AtomNames(name=atom_name) for atom_name in atom_names]
     session.bulk_save_objects(db_atom_names_list)
     session.commit()
 
 # TODO: make this more robust as some data might be absent. Check that .wfn exists before adding wfn data
 # TODO: check that gaussian out forces exist. Check that int file exists.
-def add_point_to_database(database_path: Path, point: "PointDirectory", echo=False, print_missing_data=True):
+def add_point_to_database(session: Session, point: "PointDirectory", echo=False, print_missing_data=True):
     """Adds information from an instance of a PointDirectory to the database.
 
     :param database_path: Path to database
     :param point: A PointDirectory instance, containing Gaussian/AIMAll outputs that can be
         written to the database.
     """
-    
-    wfn_file_exists = False
-    ints_directory_exists = False
-    gaussian_out_file_exists = False
-
-    database_path = str(Path(database_path).absolute())
-
-    # create new database and start session
-    engine = create_engine(f"sqlite+pysqlite:///{database_path}", echo=echo, future=True)
-    Session = sessionmaker(bind=engine)
-    session = Session()
     
     ###############################
     # wfn information 
