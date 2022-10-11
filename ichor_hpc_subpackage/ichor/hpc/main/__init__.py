@@ -1,1 +1,2 @@
-"""Command Line Interface (CLI) for ICHOR that shows up once 'python ichor_command.py' is ran. Each menu option calls a function which performs the given task."""
+from ichor.hpc.main.aimall import submit_points_directory_to_aimall
+from ichor.hpc.main.gaussian import submit_points_directory_to_gaussian, submit_gjfs
