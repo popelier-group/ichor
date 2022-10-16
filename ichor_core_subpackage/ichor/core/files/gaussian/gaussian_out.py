@@ -6,15 +6,8 @@ from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.common.units import AtomicDistance
-from collections import namedtuple
+from ichor.core.common.types.forces import AtomForce, MolecularDipole, MolecularHexadecapole, MolecularOctapole, MolecularQuadrupole, TracelessMolecularQuadrupole
 import numpy as np
-
-AtomForce = namedtuple("AtomForce", "x y z")
-MolecularDipole = namedtuple("MolecularDipole", "x y z total")
-MolecularQuadrupole = namedtuple("MolecularQuadrupole", "xx yy zz xy xz yz")
-TracelessMolecularQuadrupole = namedtuple("TracelessMolecularQuadrupole", "xx yy zz xy xz yz")
-MolecularOctapole = namedtuple("MolecularOctapole", "xxx yyy zzz xyy xxy xxz xzz yzz yyz xyz")
-MolecularHexadecapole = namedtuple("MolecularHexadecapole", "xxxx yyyy zzzz xxxy xxxz yyyx yyyz zzzx zzzy xxyy xxzz yyzz xxyz yyxz zzxy")
 
 class GaussianOut(HasAtoms, HasProperties, ReadFile):
     """Wraps around a .gau/.log file that is the output of Gaussian. This file contains coordinates (in Angstroms),
