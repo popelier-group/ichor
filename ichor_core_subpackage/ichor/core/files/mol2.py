@@ -2,15 +2,15 @@ import datetime
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Tuple, Union, Any
-
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import current_user
-from ichor.core.files.file import File, WriteFile, ReadFile
+from ichor.core.files.file import File, WriteFile
 from ichor.core.files.file_data import HasAtoms
 from ichor.core.common.units import AtomicDistance
 from ichor.core.common import constants
 
+# TODO: potentially use pytraj or another software for managing AMBER files
 
 class MoleculeType(Enum):
     Small = "SMALL"
@@ -130,33 +130,34 @@ def gasteigger_charge(atom: Atom) -> float:
 def charge(atom: Atom) -> float:
     return gasteigger_charge(atom)
 
-def get_valence(atom):
+def get_nbonds(atom):
     return len(get_atom_bonds(atom))
 
 def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
+
     if {atom1.type, atom2.type} == {"C", "N"}:
         # check for amide bond
         catom = atom1 if atom1.type == "C" else atom2
         natom = atom1 if atom1.type == "N" else atom2
 
         if (
-            get_valence(catom) == 3
-            and get_valence(natom) == 3
+            get_nbonds(catom) == 3
+            and get_nbonds(natom) == 3
             and "O" in [atom.type for atom in get_bonded_atoms(catom)]
         ):
             return BondType.Amide
 
-    atom1_valence = get_valence(atom1)
-    atom2_valence = get_valence(atom2)
-    if (
-        atom1.unpaired_electrons == atom1_valence
-        or atom2_valence == atom2.unpaired_electrons
-    ):
+    atom1_nbonds = get_nbonds(atom1)
+    atom2_nbonds = get_nbonds(atom2)
+
+    # if the number of unpaired electrons is equal to the number of bonds, then it
+    # can only be a single bond (eg. Carbon has 4 "unpaired electrons" and if 4 bonds, then 4 single bonds)
+    if atom1.unpaired_electrons == atom1_nbonds or atom2_nbonds == atom2.unpaired_electrons:
         return BondType.Single
-    if (
-        atom1.valence - 1 == atom1_valence
-        or atom2_valence - 1 == atom2.valence
-    ):
+
+    # if the number of bonds is one less than the "unpaired electrons", then there has to be a double bond
+    # or a aromatic bond
+    elif atom1.unpaired_electrons - 1 == atom1_nbonds or atom2.unpaired_electrons - 1 == atom2_nbonds:
         aromatic_types = ["C", "N"]
         if atom1.type in aromatic_types and atom2.type in aromatic_types:
             # check aromatic
@@ -178,6 +179,10 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
                 return BondType.Aromatic
 
         return BondType.Double
+
+    # if nothing is found yet, assume it is a triple bond
+    else:
+        return BondType.Triple
 
 def _get_ring(
     atom: Atom,
@@ -457,12 +462,12 @@ non_metal_atoms = [
 # todo?: Would it be useful to be able to read Mol2?
 class Mol2(HasAtoms, WriteFile, File):
     
-    def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
+    def __init__(self, path: Union[Path, str], system_name: str, atoms: Atoms):
         
         super(WriteFile, self).__init__(path)
 
+        self.system_name = system_name
         self.atoms = atoms
-        self.system_name = None
         self.nbonds = None
         self.nsubstructures = None
         self.nfeatures = None
@@ -492,19 +497,19 @@ class Mol2(HasAtoms, WriteFile, File):
                     units=atom.units,
                 )
 
-    def _write_file(self, path: Path, system_name: str):
+    def _write_file(self, path: Path):
         from ichor.core.calculators.geometry_calculator import bonds
 
         self.format()
         b = bonds(self.atoms)
 
         with open(path, "w") as f:
-            f.write(f"# Name: {system_name}\n")
+            f.write(f"# Name: {self.system_name}\n")
             f.write(f"# Created by: {current_user()}\n")
             f.write(f"# Created on: {datetime.datetime.now()}\n")
             f.write("\n")
             f.write("@<TRIPOS>MOLECULE\n")
-            f.write(f"{system_name}\n")
+            f.write(f"{self.system_name}\n")
             f.write(f" {len(self.atoms)} {len(b)} 0 0 0\n")
             f.write(f"{self.mol_type.value}\n")
             f.write(f"{self.charge_type.value}\n")
@@ -513,10 +518,11 @@ class Mol2(HasAtoms, WriteFile, File):
             f.write("@<TRIPOS>ATOM\n")
             for atom in self.atoms:
                 f.write(
-                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {system_name} {gasteigger_charge(atom):6.4f}\n"
+                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {self.system_name} {gasteigger_charge(atom):6.4f}\n"
                 )
             f.write("@<TRIPOS>BOND\n")
             for i, (bi, bj) in enumerate(b):
+                bond_type = get_bond_type(self.atoms[bi-1], self.atoms[bj-1]).value
                 f.write(
-                    f"{i+1:7d} {bi:4d} {bj:4d} {get_bond_type(self.atoms[bi-1], self.atoms[bj-1]).value:>4}\n"
+                    f"{i+1:7d} {bi:4d} {bj:4d} {bond_type:>4}\n"
                 )
