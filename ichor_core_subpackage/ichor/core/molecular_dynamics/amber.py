@@ -1,12 +1,10 @@
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 from ichor.core.common.functools import classproperty
-from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
-from ichor.core.files.optional_file import OptionalFile
-
+from ichor.core.files.file import FileContents, ReadFile, WriteFile
 
 class AmberThermostat(Enum):
     ConstantEnergy = 0
@@ -43,6 +41,24 @@ class PeriodicBoundaryCondition(Enum):
 
 
 class AmberMDIn(WriteFile, ReadFile):
+    """Class that handles amber input files `mdin`.d
+
+    :param mdin_file: File where to write data
+    :param nsteps: Number of timesteps to run simulation for
+    :param dt: Timestep time in picoseconds, default is 0.001
+    :param temperature: Temperature to perform simulation at, default is 300
+    :param force_evaluation: _description_, defaults to ForceEvaluation.Complete
+    :param bond_constraint: _description_, defaults to BondLengthConstraint.NoConstraint
+    :param write_coordinates_every: Write coordinates every nth timestep, defaults to 1
+    :param write_velocities_every: Write velocities out to mdcrd even nth step
+        Note that these should not be written out as output format `ioutfm` is set to 0 (meaning output is not in binary format), optional
+    :param write_forces_every: Write atomic forces out to mdcrd every nth step
+        Note that output file is not NETCDF (binary format), defaults to -1
+    :param periodic_boundary_condition: Whether to use periodic boundary conditions or not, defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
+    :param thermostat: The thermostat to use for the simulation, defaults to AmberThermostat.Langevin
+    :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
+    """
+
     def __init__(
         self,
         path: Path,
@@ -152,7 +168,7 @@ class AmberMDIn(WriteFile, ReadFile):
             f.write(
                 f"  ntwf={self.write_forces_every},\n"
             )  # force info printed to mdout every ntwf steps
-            f.write("  ioutfm=0,\n")  # output formatting
+            f.write("  ioutfm=0,\n")  # output formatting, setting to 0 means that a human readable file is written (not a NETCDF format which is binary)
             f.write("  cut=999.0,\n")  # nonbonded cutoff
             f.write(
                 f"  ntb={self.periodic_boundary_condition.value},\n"
@@ -171,7 +187,7 @@ def write_mdin(
     mdin_file: Path,
     nsteps: int,
     dt: float = 0.001,
-    temperature: float = 300.0,
+    temperature: int = 300,
     force_evaluation: ForceEvaluation = ForceEvaluation.Complete,
     bond_constraint: BondLengthConstraint = BondLengthConstraint.NoConstraint,
     write_coordinates_every: int = 1,
@@ -186,23 +202,17 @@ def write_mdin(
     :param mdin_file: File where to write data
     :param nsteps: Number of timesteps to run simulation for
     :param dt: Timestep time in picoseconds, default is 0.001
-    :param temperature: Temperature to perform simulation at, default is 300.0
+    :param temperature: Temperature to perform simulation at, default is 300
     :param force_evaluation: _description_, defaults to ForceEvaluation.Complete
-    :type force_evaluation: ForceEvaluation, optional
     :param bond_constraint: _description_, defaults to BondLengthConstraint.NoConstraint
-    :type bond_constraint: BondLengthConstraint, optional
-    :param write_coordinates_every: _description_, defaults to 1
-    :type write_coordinates_every: int, optional
-    :param write_velocities_every: _description_, defaults to -1
-    :type write_velocities_every: int, optional
-    :param write_forces_every: _description_, defaults to -1
-    :type write_forces_every: int, optional
-    :param periodic_boundary_condition: _description_, defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
-    :type periodic_boundary_condition: PeriodicBoundaryCondition, optional
-    :param thermostat: _description_, defaults to AmberThermostat.Langevin
-    :type thermostat: AmberThermostat, optional
-    :param ln_gamma: _description_, defaults to 0.5
-    :type ln_gamma: float, optional
+    :param write_coordinates_every: Write coordinates every nth timestep, defaults to 1
+    :param write_velocities_every: Write velocities out to mdcrd even nth step
+        Note that these should not be written out as output format `ioutfm` is set to 0 (meaning output is not in binary format), optional
+    :param write_forces_every: Write atomic forces out to mdcrd every nth step
+        Note that output file is not NETCDF (binary format), defaults to -1
+    :param periodic_boundary_condition: Whether to use periodic boundary conditions or not, defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
+    :param thermostat: The thermostat to use for the simulation, defaults to AmberThermostat.Langevin
+    :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
     """
     
     AmberMDIn(
