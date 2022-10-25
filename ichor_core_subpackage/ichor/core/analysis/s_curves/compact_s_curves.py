@@ -425,7 +425,7 @@ def simplified_write_to_excel(
             writer.sheets[sheet_name].insert_chart("A10", atomic_s_curve)
 
 def calculate_compact_s_curves_from_files(
-    csv_files_list: Dict[str, np.ndarray],
+    csv_files_list: List[Union[Path, str]],
     models: Models,
     output_location: Union[str, Path] = "s_curves_from_df.xlsx",
     **kwargs,
