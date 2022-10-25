@@ -471,16 +471,12 @@ def calculate_compact_s_curves_from_files(
     for model in models:
         atom_name = model.atom_name
         property_name = model.prop
-        # iqa is written in model files but df contains iqa_energy instead
-        if property_name == "iqa":
-            property_name = "iqa_energy"
-
         # get features array for atom
         features_array_for_atom = features_dict.get(atom_name)
 
         # check to see if the passed data contains the infromation that the model needs
         if (features_array_for_atom is not None) and (true_values_dict.get(atom_name) is not None):
-            
+
             # get true values for property
             atomic_true_values = true_values_dict[atom_name].get(property_name)
 
@@ -489,7 +485,7 @@ def calculate_compact_s_curves_from_files(
                 model_predictions = model.predict(features_array_for_atom)
                 errors = atomic_true_values - model_predictions
 
-                if property_name == "iqa_energy":
+                if property_name == "iqa_energy" or "iqa":
                     errors *= 2625.5
 
                 total_dict[property_name][atom_name]["true"] = atomic_true_values
