@@ -29,6 +29,9 @@ class ABINT(HasProperties, ReadFile):
     @property
     def properties(self) -> Dict[str, float]:
         return self.iqa_diatomic_contributions
+    
+    def property_names(self):
+        return None
 
     @property
     def e_inter(self):
@@ -54,7 +57,7 @@ class ABINT(HasProperties, ReadFile):
             while "=" in line:
                 record = line.split()
                 key = record[0].split("(")[0]
-                value = float(record[1])
+                value = float(record[2])
                 if key in diatomic_contributions.keys():
                     diatomic_contributions[key] = (
                         diatomic_contributions[key] + value
