@@ -425,9 +425,10 @@ def simplified_write_to_excel(
             writer.sheets[sheet_name].insert_chart("A10", atomic_s_curve)
 
 def calculate_compact_s_curves_from_files(
-    csv_files_list: Dict[str, np.ndarray],
+    csv_files_list: List[Union[Path, str]],
     models: Models,
     output_location: Union[str, Path] = "s_curves_from_df.xlsx",
+    property_names: List[str] = None,
     **kwargs,
 ):
     """Calculates S-curves used to check model prediction performance. 
@@ -435,6 +436,8 @@ def calculate_compact_s_curves_from_files(
     :param csv_files_list: A list of .csv files that contain features columns and property columns.
     :param models: A `Models` instance which contains model files
     :param output_location: The name of the .xlsx file where to save the s-curves.
+    :param property_names: A list of strings to use for property column names. If left as None,
+        a default set of property names is used
     :param kwargs: Key word argument to give to xlsxwriter for customizing plots.
      """
 
@@ -443,7 +446,10 @@ def calculate_compact_s_curves_from_files(
     features_dict: Dict[str, np.ndarray] = {}
     true_values_dict: Dict[str, Dict[str, np.ndarray]] = {}
     # property names
-    all_props = ["iqa_energy", "force_x", "force_y", "force_z"] + multipole_names
+    if not property_names:
+        all_props = ["iqa_energy", "force_x", "force_y", "force_z"] + multipole_names
+    else:
+        all_props = property_names
     # use this to get features columns from df
     features_list = [f"f{i}" for i in range(1,nfeatures+1)]
 
