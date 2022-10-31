@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Union, List, Dict, Tuple
+import sqlite3
 from sqlalchemy import select
 from sqlalchemy import func
 import sqlalchemy
@@ -339,4 +340,66 @@ def write_processed_data_for_atoms(db_path: Union[str, Path], alf: Dict[str, ALF
         write_processed_one_atom_data_to_csv(full_df, point_ids, atom_name=atom_name, alf=alf,
                                              max_integration_error=max_integration_error,
                                              write_index_col=write_index_col)
+
+# TODO: finish implementation
+def write_geometries_into_trajectory(db_path: Union[str, Path],
+                                   echo=False, xyz_name="trajectory_from_database.xyz"):
+    """
+    Implementation not finished
+    Writes a trajectory file from geometries contained in database. This is useful to do for
+    visualization purposes. Note that the geometries in the database might not be centered on
+    some atom.
+
+    :param db_path: Path to sqlite3 database.
+    :param echo: Whether to echo SQL queries, defaults to False
+    """
+
+    point_ids, atom_names, full_df = get_db_information(db_path, echo=echo)
+
+    for point_id in point_ids:
         
+        # find geometry which matches the id
+        one_point_df = full_df.loc[full_df["id"] == point_id]
+
+        atoms = Atoms()
+        for idx, row in one_point_df.iterrows():
+            pass
+
+
+# TODO: improve code
+def get_dataframe_from_database(database_path: Path, atom_id: int, integration_error: float = 1e-4, all_atoms = False, natoms: int = None):
+    """ Makes a pandas DataFrame object from database for a particular atom and returns the
+    dataframe. Note that this function does not process data (i.e. does not rotate multipole moments).
+    The integration error given is used to determine the maximum integration error for AIMAll.
+    
+    :param database_path: pathlib Path object to database containing `dataset` table
+    :param atom_id: The id of the atom. This is 1-indexed and the ids can be found in the
+        atom_names table in the sqlite database.
+    :integration_error: The maximum integration error which we consider to be good
+    :param all_atoms: If all atoms in ONE geometry need to have below this integration error
+        or the individual atoms we are focusing on just need to have below that integration error.
+    :param natoms: The number of atoms in the system. This needs to be included only if all_atoms is set to True.
+    :raises ValuesError: If natoms is not specified but all_atoms is set to True.
+    """
+
+    conn = sqlite3.connect(str(database_path))
+
+    # when all atons in the system need to have below this integration error
+    if all_atoms:
+        if natoms is None:
+            raise ValueError("natoms needs to be the number of the atoms in the system.")
+        df = pd.read_sql("""SELECT * FROM (
+        SELECT *,
+            COUNT(point_id) OVER (PARTITION BY point_id) as tot
+            FROM dataset
+            WHERE ABS(integration_error) < ?
+        )
+        WHERE tot = ? AND atom_id = ?""", conn, params=[integration_error, natoms, atom_id])
+
+    else:
+        df = pd.read_sql("""SELECT *
+            FROM dataset
+            WHERE ABS(integration_error) < ?
+            AND atom_id = ?""", conn, params=[integration_error, atom_id])
+
+    return df
