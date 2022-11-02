@@ -501,8 +501,6 @@ def calculate_compact_s_curves_from_files(
         else:
             print(f"Could not get features/true values for atom/prop: {atom_name}/{atomic_true_values} from model file {model.path}.")
 
-    print(total_dict)
-
     simplified_write_to_excel(total_dict, output_location, **kwargs)
 
 # TODO: remove code duplication
