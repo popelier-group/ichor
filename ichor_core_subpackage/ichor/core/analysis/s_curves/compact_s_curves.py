@@ -450,6 +450,7 @@ def calculate_compact_s_curves_from_files(
         all_props = ["iqa_energy", "force_x", "force_y", "force_z"] + multipole_names
     else:
         all_props = property_names
+
     # use this to get features columns from df
     features_list = [f"f{i}" for i in range(1,nfeatures+1)]
 
@@ -477,6 +478,9 @@ def calculate_compact_s_curves_from_files(
         # check to see if the passed data contains the infromation that the model needs
         if (features_array_for_atom is not None) and (true_values_dict.get(atom_name) is not None):
 
+            # in case models have "iqa" written as property, but csv file has "iqa_energy"
+            if property_name == "iqa" and "iqa_energy" in true_values_dict[atom_name].keys():
+                property_name = "iqa_energy"
             # get true values for property
             atomic_true_values = true_values_dict[atom_name].get(property_name)
 
@@ -496,6 +500,8 @@ def calculate_compact_s_curves_from_files(
                 print(f"Could not get value for atom/property: {atom_name}/{property_name} from model file {model.path}.")
         else:
             print(f"Could not get features/true values for atom/prop: {atom_name}/{atomic_true_values} from model file {model.path}.")
+
+    print(total_dict)
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
 
@@ -532,7 +538,7 @@ def calculate_compact_s_curves_from_true_predicted(
 
             errors = atomic_true_values - predicted
 
-            if property_name == "iqa_energy":
+            if property_name == "iqa_energy" or "iqa":
                 errors *= 2625.5
 
             total_dict[property_name][atom_name]["true"] = atomic_true_values
