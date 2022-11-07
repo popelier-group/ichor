@@ -112,6 +112,7 @@ class INT(HasProperties, ReadFile):
         """ Get properties which we are interested in machine learning from the INT file. Rotate multipoles using a given C matrix."""
         return {
             **{"iqa": self.iqa},
+            **{"integration_error": self.integration_error},
             **self.local_spherical_multipoles(C),
         }
 
