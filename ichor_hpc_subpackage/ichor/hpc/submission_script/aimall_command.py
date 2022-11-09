@@ -205,6 +205,7 @@ class AIMAllCommand(CommandLine):
         autonnacps: bool = True,
         rerun: bool = False,
         scrub: bool = False,
+        iasviz: bool = False,
     ):
         
         self.wfn_file = WFN(wfn_file_path)
@@ -246,9 +247,9 @@ class AIMAllCommand(CommandLine):
         self.verifyw = VerifyW(verifyw)
         self.saw = saw
         self.autonnacps = autonnacps
-        
         self.scrub = scrub
         self.rerun = rerun
+        self.iasviz = iasviz
 
     @property
     def data(self) -> List[str]:
@@ -316,6 +317,7 @@ class AIMAllCommand(CommandLine):
             f"-verifyw={self.verifyw.value}",
             f"-saw={str(self.saw).lower()}",
             f"-autonnacps={str(self.autonnacps).lower()}",
+            f"-iasviz={str(self.iasviz)}"
         ]
 
     def repr(self, variables: List[str]) -> str:
