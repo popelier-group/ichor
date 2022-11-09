@@ -205,7 +205,6 @@ class AIMAllCommand(CommandLine):
         autonnacps: bool = True,
         rerun: bool = False,
         scrub: bool = False,
-        iaswrite: bool = False,
     ):
         
         self.wfn_file = WFN(wfn_file_path)
@@ -249,7 +248,6 @@ class AIMAllCommand(CommandLine):
         self.autonnacps = autonnacps
         self.scrub = scrub
         self.rerun = rerun
-        self.iaswrite = iaswrite
 
     @property
     def data(self) -> List[str]:
