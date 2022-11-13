@@ -10,10 +10,22 @@ def fflux_predict_value(model_inst, test_x_features):
     rbf_thetas = kernels.k1._thetas
     periodic_thetas = kernels.k2._thetas
 
-    thetas = np.concatenate((rbf_thetas, periodic_thetas))
-
     n_train = x_train_array.shape[0]
     n_features = x_train_array.shape[1]
+
+    # make sure thetas are ordered correctly (cannot concat rbf thetas to periodic thetas because it leads to wrong indexing)
+    #  first five thetas are for rbf dimensions (because non cyclic), then 6th (5th index) is a phi dimension, then two rbf, then periodic and so on
+    thetas = []
+    rbf_idx = 0
+    periodic_idx = 0
+    for i in range(n_features):
+        if ((i+1) % 3) == 0 and i != 2:
+            thetas.append(periodic_thetas[periodic_idx])
+            periodic_idx += 1
+        else:
+            thetas.append(rbf_thetas[rbf_idx])
+            rbf_idx += 1
+    thetas = np.array(thetas)
 
     Q_est = 0.0
     dQ_df = np.zeros(n_features)
@@ -42,6 +54,7 @@ def fflux_predict_value(model_inst, test_x_features):
                 dQ_df_temp[h] = weights[j] *sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
 
         expo = np.exp(-expo)
+        print(expo)
 
         Q_est = Q_est + weights[j] * expo
 
