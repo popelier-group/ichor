@@ -54,7 +54,6 @@ def fflux_predict_value(model_inst, test_x_features):
                 dQ_df_temp[h] = weights[j] *sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
 
         expo = np.exp(-expo)
-        print(expo)
 
         Q_est = Q_est + weights[j] * expo
 
