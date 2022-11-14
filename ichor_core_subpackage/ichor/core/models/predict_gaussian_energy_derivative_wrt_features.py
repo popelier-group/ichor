@@ -3,7 +3,7 @@ from ichor.core.models.reciprocal_fflux_derivatives import reciprocal_fflux_deri
 from ichor.core.atoms import ALF
 from typing import List, Dict
 
-def predict_gaussian_derivatives_wrt_features_for_all_atoms(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx, forces_array) -> np.ndarray:
+def predict_gaussian_derivatives_wrt_features_for_all_atoms(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> np.ndarray:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
 
     .. note::
