@@ -82,6 +82,8 @@ def gaussian_energy_derivatives_wrt_features(atoms: "Atoms", system_alf: List["A
         by atoms described in r-theta-phi. The system alf that is given determines the conversion
     """
 
+    # copy array so that original array is not altered unintentionally.
+    copied_forces_array = forces_array.copy()
     natoms = len(atoms)
 
     # matrix containing derivatives of global cartesian coordinates of all atoms
@@ -106,8 +108,8 @@ def gaussian_energy_derivatives_wrt_features(atoms: "Atoms", system_alf: List["A
     atom_indices_new_order = alf_atom_indices + non_local_atom_indices
 
     # swap rows of forces array
-    forces_array[[atom_indices_new_order, original_row_indices]] = forces_array[[original_row_indices, atom_indices_new_order]]
+    copied_forces_array[[atom_indices_new_order, original_row_indices]] = copied_forces_array[[original_row_indices, atom_indices_new_order]]
 
-    dE_df = np.matmul(da_df_matrix, forces_array.flatten())
+    dE_df = np.matmul(da_df_matrix, copied_forces_array.flatten())
 
     return dE_df
