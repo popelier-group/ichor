@@ -3,8 +3,24 @@ from ichor.core.models.reciprocal_fflux_derivatives import reciprocal_fflux_deri
 from ichor.core.atoms import ALF
 from typing import List, Dict
 
-def predict_gaussian_derivatives_wrt_features_for_all_atoms(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> np.ndarray:
-    """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
+def gaussian_derivatives_wrt_features_for_all_atoms(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> np.ndarray:
+    """Returns a np array of shape n_features x (n_atomsx3), containing the derivative of
+    atomic x,y,z coordinates with respect to the features (of a given central atom).
+
+    Note that the atoms are ordered as A_0, A_x, A_xy, A_4, A_5, ..., A_N. Therefore, the
+    Gaussian forces vector must also be made in this order, so that the derivatives match up,
+    so that we can get convert Gaussian forces (dE/da where a is a global Cartesian coord)
+    to forces (dE/df) where f are features (of a given central atom).
+
+    For example, the the first column will contain the derivative of x-coordinate of the A_0 atom (the
+    central ALF atom) with respect to the first feature. The second column will be
+    the y-coordinate of A_0 with respect to the first feature.
+    The last column will be the derivative of the z-coordinate of the A_N atom with respect to
+    the last feature.
+
+    Features are ordered as distance to x-axis atom, distance to xy-plane atom,
+    angle between x-axis atom and xy-plane atom, distance to Nth atom, theta to Nth atom,
+    phi to Nth atom.
 
     .. note::
         The atoms instance is converted to Bohr internally because the forces are per Bohr in FFLUX.
@@ -14,10 +30,10 @@ def predict_gaussian_derivatives_wrt_features_for_all_atoms(atoms: "Atoms", syst
     :param atoms: An Atoms instance containing the geometry for which to predict forces.
         Note that the ordering of the atoms matters, i.e. the index of the atoms in the Atoms instance
         must match the index of the model files.
-    :param models: A models instance which wraps around a directory containing model files.
     :param system_alf: The system alf as a list of `ALF` instances (the `ALF` instances are just a named tuple
         containing origin_idx, x-axis_idx, xy_plane_idx. It is 0-indexed.)
-    :return: A np.ndarray of shape n_atoms x 3 containing the x,y,z force for every atom
+    :param central atom index: The index of the atom to be used as the central atom. Therefore,
+    the features are going to be for this central atom. 
     """
 
     # make sure the coords are in Bohr because forces are calculated per Bohr
