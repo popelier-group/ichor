@@ -20,6 +20,9 @@ def reciprocal_fflux_derivs_da_df(jatm_idx: int, iatm_idx: int, atoms_instance: 
     :rtype: np.ndarray
     """
 
+    # use a machine precision an order of magnitude higher to prevent tiny values of da_df from
+    # becoming very large when doing 1/df_da. Round down da_df to 0.0 when needed.
+
     # column of da/df_n. So derivative of one coordinate (of one atom) with respect to all features
     n_features_times_3_tmp_matrix = np.zeros(((3 * len(atoms_instance) - 6), 3))
 
