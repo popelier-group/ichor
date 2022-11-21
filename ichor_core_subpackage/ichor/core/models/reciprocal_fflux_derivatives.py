@@ -20,6 +20,27 @@ def reciprocal_fflux_derivs_da_df(jatm_idx: int, iatm_idx: int, atoms_instance: 
     :rtype: np.ndarray
     """
 
+    natoms = len(atoms_instance)
+
+    # add this in case of two atom systems such as HCl
+    if natoms == 2:
+        # column of da/df_n. So derivative of one coordinate (of one atom) with respect to all features
+        # for two atom systems, there is only 1 feature, the distance between atoms
+        n_features_times_3_tmp_matrix = np.zeros((1, 3))
+        # derivative of feature 1 of atom jatm da^jatm_dx with respect to change of coordinates of iatm_idx
+        # so there is only going to be change if iatm_idx is the A_x atom
+        # or if the iatm_idx is the jatm_idx (the central atom)
+        # otherwise return 0,0,0
+        df_da = dR_da(jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf)
+        # then find the reciprocal, so it will be derivative of Cartesian coord of iatm_idx with respect to first feature (given jatm_idx as central atom)
+        # also give back zeroes if difference is very small / when dividing by zero
+        da_df = np.divide(1.0, df_da, out=np.zeros_like(df_da), where= np.abs(df_da) > np.finfo(float).eps * 10)
+        n_features_times_3_tmp_matrix[0, 0] = da_df[0]
+        n_features_times_3_tmp_matrix[0, 1] = da_df[1]
+        n_features_times_3_tmp_matrix[0, 2] = da_df[2]
+
+        return n_features_times_3_tmp_matrix
+
     # use a machine precision an order of magnitude higher to prevent tiny values of da_df from
     # becoming very large when doing 1/df_da. Round down da_df to 0.0 when needed.
 

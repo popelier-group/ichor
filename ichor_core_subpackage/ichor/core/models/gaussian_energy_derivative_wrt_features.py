@@ -47,14 +47,21 @@ def cartesian_derivatives_wrt_features_for_all_atoms(atoms: "Atoms", system_alf:
     # loop over all atoms in the system and calculate n_features x 3 submatrix
     # matrix contains derivatives of Global cartesian coordinates for one atom wrt all features.
 
+    if natoms > 2:
     # first three atoms that are central, x-axis, xy-plane
-    for j in range(3):
-        force = reciprocal_fflux_derivs_da_df(central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf)
-        force_columns.append(force)
-    # rest of atoms in molecule
-    for non_local_atm in non_local_atoms:
-        force = reciprocal_fflux_derivs_da_df(central_atom_idx, non_local_atm, atoms, system_alf)
-        force_columns.append(force)
+        for j in range(3):
+            force = reciprocal_fflux_derivs_da_df(central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf)
+            force_columns.append(force)
+        # rest of atoms in molecule
+        for non_local_atm in non_local_atoms:
+            force = reciprocal_fflux_derivs_da_df(central_atom_idx, non_local_atm, atoms, system_alf)
+            force_columns.append(force)
+
+
+    elif natoms == 2:
+        for j in range(2):
+            force = reciprocal_fflux_derivs_da_df(central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf)
+            force_columns.append(force)
 
     # shape n_features x 3N where N is the number of atoms. Thus multiplied by the vector of 3N (the Gaussian forces)
     # should give an n_features x1 vector which is the dE_df where E is the total energy
@@ -102,6 +109,9 @@ def gaussian_energy_derivatives_wrt_features(atoms: "Atoms", system_alf: List["A
 
     # contains indices of central atom, x-axis atom, xy-plane atom
     alf_atom_indices = list(system_alf[central_atom_idx])
+    if None in alf_atom_indices:
+        alf_atom_indices.remove(None)
+
     # contains all other atom indices not in the alf
     non_local_atom_indices = [t for t in range(natoms) if t not in system_alf[central_atom_idx]]
     # the correct order which the forces array should be in
