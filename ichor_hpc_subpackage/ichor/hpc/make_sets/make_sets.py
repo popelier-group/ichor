@@ -56,7 +56,7 @@ def make_sets(
     :raises TypeError: If a file that cannot be read or does not contain points is passed in.
     """
     
-    if points_input.suffix == ".xyz":
+    if points_input.endswith(".xyz"):
         points = Trajectory(points_input)
     elif points_input.is_dir():
         points = PointsDirectory(points_input)
