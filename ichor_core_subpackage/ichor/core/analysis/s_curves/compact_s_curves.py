@@ -499,7 +499,7 @@ def calculate_compact_s_curves_from_files(
             else:
                 print(f"Could not get value for atom/property: {atom_name}/{property_name} from model file {model.path}.")
         else:
-            print(f"Could not get features/true values for atom/prop: {atom_name}/{atomic_true_values} from model file {model.path}.")
+            print(f"Could not get features or true values for atom {atom_name}, property {property_name} from model file {model.path}.")
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
 
