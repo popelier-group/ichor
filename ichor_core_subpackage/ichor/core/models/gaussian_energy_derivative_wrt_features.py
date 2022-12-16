@@ -67,6 +67,11 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, ato
     .. note::
         The ordering of the forces should match up with the ordering of the b_matrix.
 
+    .. note::
+        The general inverse of G is NOT used here. Gaussian seems to use the regular inverse (so this is why np.linalg.inv is used,
+        but can use Chloesky or something like this instead because G is a symmetric square (BuB^T, where u is the identity matrix here))
+        Using the general inverse gives different results than Gaussian.
+
     See Using Redundant Internal Coordinates to Optimize Equilibrium Geometries and Transition States
     https://doi.org/10.1002/(SICI)1096-987X(19960115)17:1<49::AID-JCC5>3.0.CO;2-0
     https://doi.org/10.1063/1.462844
@@ -97,11 +102,13 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, ato
     copied_forces_array[[atom_indices_new_order, original_row_indices]] = copied_forces_array[[original_row_indices, atom_indices_new_order]]
     copied_forces_array = copied_forces_array.flatten()
 
-    inverse_eigenvalues = w**-1
-    inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
+    # inverse_eigenvalues = w**-1
+    # inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
+    # generalized_g_inverse = np.matmul(v, np.matmul(inverse_g, v.T))
+    # gradient_dE_dq = np.matmul(inverse_g, np.matmul(generalized_g_inverse, copied_forces_array))
 
-    generalized_g_inverse = np.matmul(v, np.matmul(inverse_eigenvalues_diagonal_matrix, v.T))
+    inverse_g = np.linalg.inv(g_matrix)
 
-    gradient_dE_dq = np.matmul(generalized_g_inverse, np.matmul(b_matrix, copied_forces_array))
+    gradient_dE_dq = np.matmul(inverse_g, np.matmul(b_matrix, copied_forces_array))
 
     return gradient_dE_dq
