@@ -155,9 +155,6 @@ def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
 
         return n_features_times_3_tmp_matrix
 
-    # use a machine precision an order of magnitude higher to prevent tiny values of da_df from
-    # becoming very large when doing 1/df_da. Round down da_df to 0.0 when needed.
-
     # column of da/df_n. So derivative of one coordinate (of one atom) with respect to all features
     n_features_times_3_tmp_matrix = np.zeros(((3 * len(atoms_instance) - 6), 3))
     C = atoms_instance[jatm_idx].C(system_alf)
