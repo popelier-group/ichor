@@ -132,3 +132,97 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
         feat_idx += 1
 
     return np.array([dQ_dx, dQ_dy, dQ_dz])
+
+
+def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
+    """Calculates the """
+
+    natoms = len(atoms_instance)
+
+    # add this in case of two atom systems such as HCl
+    if natoms == 2:
+        # column of da/df_n. So derivative of one coordinate (of one atom) with respect to all features
+        # for two atom systems, there is only 1 feature, the distance between atoms
+        n_features_times_3_tmp_matrix = np.zeros((1, 3))
+        # derivative of feature 1 of atom jatm da^jatm_dx with respect to change of coordinates of iatm_idx
+        # so there is only going to be change if iatm_idx is the A_x atom
+        # or if the iatm_idx is the jatm_idx (the central atom)
+        # otherwise return 0,0,0
+        df_da = dR_da(jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf)
+        n_features_times_3_tmp_matrix[0, 0] = df_da[0]
+        n_features_times_3_tmp_matrix[0, 1] = df_da[1]
+        n_features_times_3_tmp_matrix[0, 2] = df_da[2]
+
+        return n_features_times_3_tmp_matrix
+
+    # use a machine precision an order of magnitude higher to prevent tiny values of da_df from
+    # becoming very large when doing 1/df_da. Round down da_df to 0.0 when needed.
+
+    # column of da/df_n. So derivative of one coordinate (of one atom) with respect to all features
+    n_features_times_3_tmp_matrix = np.zeros(((3 * len(atoms_instance) - 6), 3))
+    C = atoms_instance[jatm_idx].C(system_alf)
+
+    # derivative of feature 1 of atom jatm da^jatm_dx with respect to change of coordinates of iatm_idx
+    # so there is only going to be change if iatm_idx is the A_x atom
+    # or if the iatm_idx is the jatm_idx (the central atom)
+    # otherwise return 0,0,0
+    df_da = dR_da(jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf)
+    n_features_times_3_tmp_matrix[0, 0] = df_da[0]
+    n_features_times_3_tmp_matrix[0, 1] = df_da[1]
+    n_features_times_3_tmp_matrix[0, 2] = df_da[2]
+
+    # derivative of feature 2 of atom jatm da^jatm_dx with respect to change of coordinates of iatm_idx
+    # so there is only going to be change if iatm_idx is the A_xy atom
+    # or if the iatm_idx is the jatm_idx (the central atom) 
+    # otherwise return 0,0,0
+    df_da = dR_da(jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf)
+    n_features_times_3_tmp_matrix[1, 0] = df_da[0]
+    n_features_times_3_tmp_matrix[1, 1] = df_da[1]
+    n_features_times_3_tmp_matrix[1, 2] = df_da[2]
+
+    # derivative of feature 3 of atom jatm da^jatm_dx with respect to change of coordinates of iatm_idx
+    # three atoms are involved in feature 3 as it is the valence angle.
+    df_da = dChi_da(jatm_idx, iatm_idx, atoms_instance, system_alf)
+    n_features_times_3_tmp_matrix[2, 0] = df_da[0]
+    n_features_times_3_tmp_matrix[2, 1] = df_da[1]
+    n_features_times_3_tmp_matrix[2, 2] = df_da[2]
+
+    # non-alf atoms
+    local_non_alf_atoms = [i for i in range(len(atoms_instance)) if i not in system_alf[jatm_idx]]
+
+    # derivative of non-alf atom w.r.t. feature k of jatm_idx (the atom on which the ALF is centered)
+    feat_idx = 3
+    for k in range(len(atoms_instance)-3):
+        diff = atoms_instance[local_non_alf_atoms[k]].coordinates - atoms_instance[jatm_idx].coordinates
+
+        # R
+        df_da = dR_da(jatm_idx, local_non_alf_atoms[k], feat_idx, iatm_idx, atoms_instance, system_alf)
+
+        n_features_times_3_tmp_matrix[feat_idx, 0] = df_da[0]
+        n_features_times_3_tmp_matrix[feat_idx, 1] = df_da[1]
+        n_features_times_3_tmp_matrix[feat_idx, 2] = df_da[2]
+
+        feat_idx += 1
+
+        zetas = np.dot(C, diff)
+        zeta1 = zetas[0]
+        zeta2 = zetas[1]
+        zeta3 = zetas[2]
+
+        # Theta
+        df_da = dTheta_da(jatm_idx, local_non_alf_atoms[k], feat_idx, zeta3, iatm_idx, atoms_instance, system_alf)
+        n_features_times_3_tmp_matrix[feat_idx, 0] = df_da[0]
+        n_features_times_3_tmp_matrix[feat_idx, 1] = df_da[1]
+        n_features_times_3_tmp_matrix[feat_idx, 2] = df_da[2]
+
+        feat_idx += 1
+
+        # Phi
+        df_da = dPhi_da(jatm_idx, local_non_alf_atoms[k], zeta1, zeta2, feat_idx, iatm_idx, atoms_instance, system_alf)
+        n_features_times_3_tmp_matrix[feat_idx, 0] = df_da[0]
+        n_features_times_3_tmp_matrix[feat_idx, 1] = df_da[1]
+        n_features_times_3_tmp_matrix[feat_idx, 2] = df_da[2]
+
+        feat_idx += 1
+
+    return n_features_times_3_tmp_matrix
