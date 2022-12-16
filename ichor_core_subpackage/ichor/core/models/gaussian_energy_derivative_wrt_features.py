@@ -3,6 +3,9 @@ from ichor.core.models.calculate_fflux_derivatives import fflux_derivs_da_df_mat
 from ichor.core.atoms import ALF
 from typing import List, Dict
 
+# TODO: Add method that converts back to Cartesian coordinates. Note that the rows will be A_0, A_x, A_xy, non_alf atoms. So need to revert back to original rows
+# so that it can be compared to Gaussian.
+
 def form_b_matrix(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> np.ndarray:
     """Returns a np array of shape n_features x (n_atomsx3), containing the derivative of
     features with respect to atomic x,y,z coordinates
