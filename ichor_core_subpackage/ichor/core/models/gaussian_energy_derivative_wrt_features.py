@@ -121,7 +121,7 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, sys
     atom_indices_new_order = alf_atom_indices + non_local_atom_indices
 
     # swap rows of forces array
-    copied_forces_array[[atom_indices_new_order, original_row_indices]] = copied_forces_array[[original_row_indices, atom_indices_new_order]]
+    copied_forces_array[[atom_indices_new_order, original_row_indices], :] = copied_forces_array[[original_row_indices, atom_indices_new_order], :]
     copied_forces_array = copied_forces_array.flatten()
 
     inverse_g = form_g_matrix(b_matrix)
