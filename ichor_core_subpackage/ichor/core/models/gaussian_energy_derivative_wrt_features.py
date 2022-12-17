@@ -151,6 +151,6 @@ def convert_to_cartesian_forces(b_matrix: np.ndarray, dE_df_array: np.ndarray, s
     dE_dCart = np.matmul(b_matrix.T, dE_df_array).reshape(-1, 3)
 
     # swap rows of Cartesian array to match the original Atoms ordering
-    dE_dCart[[original_row_indices, atom_indices_new_order]] = dE_dCart[[atom_indices_new_order, original_row_indices]]
+    dE_dCart[[original_row_indices, atom_indices_new_order], :] = dE_dCart[[atom_indices_new_order, original_row_indices], :]
 
     return dE_dCart
