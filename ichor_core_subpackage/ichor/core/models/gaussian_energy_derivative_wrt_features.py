@@ -27,10 +27,12 @@ def form_b_matrix(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> 
         Also the `system_alf` argument is 0-indexed (as calculated by ichor methods),
         while the ALF in the .model files is 1-indexed.
 
+    :param atoms: The Atoms instance for which to calculate the Wilson B matrix.
+        The B matrix is calculated from the coordinates of the atoms.
     :param system_alf: The system alf as a list of `ALF` instances (the `ALF` instances are just a named tuple
         containing origin_idx, x-axis_idx, xy_plane_idx. It is 0-indexed.)
     :param central atom index: The index of the atom to be used as the central atom. Therefore,
-    the features are going to be for this central atom. 
+        the derivatives df_i / dx_j are going to be for the features of this atom.
     """
 
     # make sure the coords are in Bohr because forces are calculated per Bohr
@@ -65,7 +67,7 @@ def form_b_matrix(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> 
     return da_df
 
 def form_g_matrix(b_matrix: np.ndarray):
-    """ Forms and inverts the g_matrix as in Gaussian.
+    """ Forms and inverts the G matrix as in Gaussian.
 
     .. note::
         The general inverse of G is NOT used here. Gaussian seems to use the regular inverse (so this is why np.linalg.inv is used,
@@ -88,12 +90,17 @@ def form_g_matrix(b_matrix: np.ndarray):
 
 def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, system_alf, central_atom_idx):
     """
-    Compute -dE/df (since the global Cartesian forces are negative of the derivative of the potential)
+    Compute -dE/df (since the global Cartesian forces are negative of the derivative of the potential).
+    If making models with these values, need to take the NEGATIVE of -dE/df, as the
+    derivative of the potential energy is dE/df. dE/df are the values that need to be used when adding derivatives to GP model.
 
     :param global_cartesian_forces: A 2D numpy array of shape (N_atoms, 3) containing the global Cartesian forces.
         The rows of this array are swapped internally to match the rows of the b-matrix.
-    :param b_matrix: B matrix to be used to calculate G matrix, as well as dE/df. Shnould be of shape
+    :param b_matrix: Wilson B matrix to be used to calculate, as well as dE/df. Should be of shape
         (3N-6) x 3N where N is the number of atoms.
+    :param system_alf: A list of ALF instances containing the ALF of every atom.
+    :param central_atom_idx: The index of the atom (0-indexed) which was the central ALF atom for which
+        features (and feature derivatives) were calculated.
 
     .. note::
         The ordering of the forces should match up with the ordering of the b_matrix.
@@ -130,7 +137,16 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, sys
 
     return gradient_dE_df
 
-def convert_to_cartesian_forces(b_matrix: np.ndarray, dE_df_array: np.ndarray, system_alf, central_atom_idx):
+def convert_to_cartesian_forces(dE_df_array: np.ndarray, b_matrix: np.ndarray, system_alf: List[ALF], central_atom_idx: int):
+    """ Converts from local 'feature' forces to global Cartesian forces, as given by Gaussian.
+
+    :param dE_df_array: 1D array of shape n_features x 1 containing 'feature' forces.  
+    :param b_matrix: Wilson B matrix to be used to calculate, as well as dE/df. Should be of shape
+        (3N-6) x 3N where N is the number of atoms.
+    :param system_alf: A list of ALF instances containing the ALF of every atom.
+    :param central_atom_idx: The index of the atom (0-indexed) which was the central ALF atom for which
+        features (and feature derivatives) were calculated.
+    """
 
     natoms = len(system_alf)
 
