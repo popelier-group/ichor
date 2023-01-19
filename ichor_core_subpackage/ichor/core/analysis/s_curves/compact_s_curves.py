@@ -455,7 +455,17 @@ def calculate_compact_s_curves_from_files(
     features_list = [f"f{i}" for i in range(1,nfeatures+1)]
 
     for csv_file in csv_files_list:
+
         test_set_df = pd.read_csv(csv_file)
+
+        # make sure that the property iqa / iqa_energy has the correct name
+        # if "iqa" found, then replace in all_props
+        df_cols = test_set_df.columns
+        if "iqa" in df_cols:
+            for pr_idx, pr in enumerate(all_props):
+                if pr == "iqa_energy":
+                    all_props[pr_idx] = "iqa"
+
         atom_name = csv_file.name.split("_")[0]
 
         true_values_dict[atom_name] = {}
@@ -489,7 +499,7 @@ def calculate_compact_s_curves_from_files(
                 model_predictions = model.predict(features_array_for_atom)
                 errors = atomic_true_values - model_predictions
 
-                if property_name == "iqa_energy" or "iqa":
+                if property_name == "iqa_energy" or property_name == "iqa":
                     errors *= 2625.5
 
                 total_dict[property_name][atom_name]["true"] = atomic_true_values
