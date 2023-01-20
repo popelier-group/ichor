@@ -23,39 +23,35 @@ class DlPolyConfig(WriteFile):
     :param cell_size: The size of the box, float
     :param comment line: The very first line in the CONFIG file.
         Must be below 72 characters
-    :param vmd_compatible: Whether or not the CONFIG file can be read in
-        VMD as a DLPOLY_CONFIG type file. Because FFLUX needs to know
-        which model to use for which atom in the syste, the CONFIG file
-        is slightly different than the normal config file. Setting this to true
-        will write out a VMD compatible DLPOLY CONFIG which can be visualized in VMD.
     """
     
     def __init__(self, path: Union[Path, str],
                  system_name: str,
                  trajectory: "Trajectory",
                  cell_size: float = 50.0,
-                 comment_line = "Frame :         1\n",
-                 vmd_compatible = False):
+                 comment_line = "Frame :         1\n"
+                 ):
 
         super().__init__(path)
         self.system_name = system_name 
         self.trajectory = trajectory
         self.cell_size = float(cell_size)
         self.comment_line = comment_line
-        self.vmd_compatible = vmd_compatible
 
     # TODO: implement reading for dlpoly config file
     # def _read_file(self):
     #     ...
 
-    def _write_file(self, path: Path):
+    def _write_file(self, path: Path, vmd_compatible=False):
+
+        print(vmd_compatible)
 
         with open(self.path , "w") as f:
 
             f.write(self.comment_line)
             # see dlpoly manual 4 for settings, VMD needs to have the third optional number
             # which is the total number of particles in the system (the number of timesteps * the number of atoms in one timestep)
-            if self.vmd_compatible:
+            if vmd_compatible:
                 f.write(f"0  1  {len(self.trajectory) * len(self.trajectory[0])}\n")
             else:
                 f.write(f"0  1\n")  # PBC Solution to temporary problem
@@ -63,8 +59,8 @@ class DlPolyConfig(WriteFile):
             f.write(f"0.0 {self.cell_size} 0.0\n")
             f.write(f"0.0 0.0 {self.cell_size}\n")
             total_atoms_counter = 1
-            
-            if self.vmd_compatible:
+
+            if vmd_compatible:
                 for timestep in self.trajectory:
                     for atom in timestep:
                         f.write(
