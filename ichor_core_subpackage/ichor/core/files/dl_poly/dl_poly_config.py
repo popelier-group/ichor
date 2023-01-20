@@ -44,8 +44,6 @@ class DlPolyConfig(WriteFile):
 
     def _write_file(self, path: Path, vmd_compatible=False):
 
-        print(vmd_compatible)
-
         with open(self.path , "w") as f:
 
             f.write(self.comment_line)
