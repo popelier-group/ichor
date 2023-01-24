@@ -207,7 +207,7 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
             # default values to be written if forces do not exist
             global_forces_array = None, None, None
             # if forces are also in database then calculate local forces
-            if row_with_atom_info["force_x"] is not None:
+            if row_with_atom_info["force_x"].item() is not None:
 
                 global_forces_array = np.array([row_with_atom_info["force_x"].item(),
                                 row_with_atom_info["force_y"].item(),
