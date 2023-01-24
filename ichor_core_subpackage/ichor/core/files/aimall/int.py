@@ -23,7 +23,7 @@ from ichor.core.multipoles import (
     rotate_octupole,
     rotate_quadrupole,
 )
-
+from ichor.core.common.types.version import Version
 
 class CriticalPointType(Enum):
     Bond = "BCP"
@@ -152,16 +152,27 @@ class INT(HasProperties, ReadFile):
 
         with open(self.path, "r") as f:
             line = next(f)
-            while "Current Directory" not in line:
-                line = next(f)
+            aimall_version = Version(line.split()[2].strip(","))
 
-            # TODO: document what this is doing and why
-            self.current_directory = Path(line.split()[-1])
-            next(f)  # blank line
+            if aimall_version.major == 19:
+                while "Current Directory" not in line:
+                    line = next(f)
 
-            inp_file_path = self.current_directory / Path(next(f).split()[-1])
-            wfn_file_path = self.current_directory / Path(next(f).split()[-1])
-            out_file_path = self.current_directory / Path(next(f).split()[-1])
+                # TODO: document what this is doing and why
+                self.current_directory = Path(line.split()[-1])
+                next(f)  # blank line
+
+                inp_file_path = self.current_directory / Path(next(f).split()[-1])
+                wfn_file_path = self.current_directory / Path(next(f).split()[-1])
+                out_file_path = self.current_directory / Path(next(f).split()[-1])
+
+            elif aimall_version.major == 16:
+                while "Inp File:" not in line:
+                    line = next(f)
+
+                inp_file_path = Path(line.split()[-1])
+                wfn_file_path = Path(next(f).split()[-1])
+                out_file_path = Path(next(f).split()[-1])
 
             self.inp_file_path = self._path_relative_to_aimall(
                 out_file_path, inp_file_path
