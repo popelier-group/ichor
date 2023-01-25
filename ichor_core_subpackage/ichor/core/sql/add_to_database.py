@@ -45,6 +45,10 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
     :param database_path: Path to database
     :param point: A PointDirectory instance, containing Gaussian/AIMAll outputs that can be
         written to the database.
+
+    .. note:: Even if atomic data (.int file) is missing for a particular atom in the system,
+        the information for the point will still be added to the database. This is because
+        the rest the point can still be used in the training set for the other atoms.
     """
     
     ###############################
