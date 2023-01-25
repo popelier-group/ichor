@@ -189,99 +189,105 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
         # if other atoms have good integration errors, the same point can be used in their training sets.
         row_with_atom_info = one_point_df.loc[one_point_df['name_1'] == atom_name]
 
-        # if the absolute of the integration error is less than threshold, then calculate features
-        if abs(row_with_atom_info["integration_error"].item()) < max_integration_error:
+        # If the atomic information (.int file) was missing, then this
+        # will be an empty dataframe. The database might not contain the
+        # information on a particular atom of a specific point because 
+        # the int file for that atom might not exist for some reason.
+        if not row_with_atom_info.empty:
 
-            # create atoms instance which will be used to calculate features
-            atoms = Atoms()
-            for row_id, row_data in one_point_df.iterrows():
-                # atoms accepts atom type (but database contains the atom index as well)
-                atom_type = get_characters(row_data.name_1)
-                atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
+            # if the absolute of the integration error is less than threshold, then calculate features
+            if abs(row_with_atom_info["integration_error"].item()) < max_integration_error:
 
-            # calculate features for the atom of interest
-            C = atoms[atom_name].C(alf)
-            one_atom_features = atoms[atom_name].features(calculate_alf_features, alf)
-            n_features = len(one_atom_features)
+                # create atoms instance which will be used to calculate features
+                atoms = Atoms()
+                for row_id, row_data in one_point_df.iterrows():
+                    # atoms accepts atom type (but database contains the atom index as well)
+                    atom_type = get_characters(row_data.name_1)
+                    atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
 
-            # default values to be written if forces do not exist
-            local_forces_array = None, None, None
-            # if forces are also in database then calculate local forces
-            if row_with_atom_info["force_x"].item() is not None:
+                # calculate features for the atom of interest
+                C = atoms[atom_name].C(alf)
+                one_atom_features = atoms[atom_name].features(calculate_alf_features, alf)
+                n_features = len(one_atom_features)
 
-                global_forces_array = np.array([row_with_atom_info["force_x"].item(),
-                                row_with_atom_info["force_y"].item(),
-                                row_with_atom_info["force_z"].item()])
+                # default values to be written if forces do not exist
+                local_forces_array = None, None, None
+                # if forces are also in database then calculate local forces
+                if row_with_atom_info["force_x"].item() is not None:
+
+                    global_forces_array = np.array([row_with_atom_info["force_x"].item(),
+                                    row_with_atom_info["force_y"].item(),
+                                    row_with_atom_info["force_z"].item()])
+                    
+                    # FFLUX predicts forces in the global frame
+                    # but two identical molecules can have different global forces depending on
+                    # position in 3D space
+                    # so therefore predict in local frame
+                    # then to transform back into global frame,
+                    # use C.T (as C is rotation matrix so inverse is the transpose)
+                    local_forces_array = np.matmul(C, global_forces_array)
                 
-                # FFLUX predicts forces in the global frame
-                # but two identical molecules can have different global forces depending on
-                # position in 3D space
-                # so therefore predict in local frame
-                # then to transform back into global frame,
-                # use C.T (as C is rotation matrix so inverse is the transpose)
-                local_forces_array = np.matmul(C, global_forces_array)
-            
-            # make dictionary of rotated multipoles
-            local_spherical_multipoles = {spherical_monopole_labels[0]: row_with_atom_info["q00"].item()}
+                # make dictionary of rotated multipoles
+                local_spherical_multipoles = {spherical_monopole_labels[0]: row_with_atom_info["q00"].item()}
 
-            local_dipole_moments = rotate_dipole(
-                *(
-                    row_with_atom_info[dipole_label].item()
-                    for dipole_label in spherical_dipole_labels
-                ),
-                C,
-            )
-            for dipole_name, dipole_value in zip(
-                spherical_dipole_labels, local_dipole_moments
-            ):
-                local_spherical_multipoles[dipole_name] = dipole_value
+                local_dipole_moments = rotate_dipole(
+                    *(
+                        row_with_atom_info[dipole_label].item()
+                        for dipole_label in spherical_dipole_labels
+                    ),
+                    C,
+                )
+                for dipole_name, dipole_value in zip(
+                    spherical_dipole_labels, local_dipole_moments
+                ):
+                    local_spherical_multipoles[dipole_name] = dipole_value
 
-            local_quadrupole_moments = rotate_quadrupole(
-                *(
-                    row_with_atom_info[quadrupole_label].item()
-                    for quadrupole_label in spherical_quadrupole_labels
-                ),
-                C,
-            )
-            for quadrupole_name, quadrupole_value in zip(
-                spherical_quadrupole_labels, local_quadrupole_moments
-            ):
-                local_spherical_multipoles[quadrupole_name] = quadrupole_value
+                local_quadrupole_moments = rotate_quadrupole(
+                    *(
+                        row_with_atom_info[quadrupole_label].item()
+                        for quadrupole_label in spherical_quadrupole_labels
+                    ),
+                    C,
+                )
+                for quadrupole_name, quadrupole_value in zip(
+                    spherical_quadrupole_labels, local_quadrupole_moments
+                ):
+                    local_spherical_multipoles[quadrupole_name] = quadrupole_value
 
-            local_octupole_moments = rotate_octupole(
-                *(
-                    row_with_atom_info[octupole_label].item()
-                    for octupole_label in spherical_octupole_labels
-                ),
-                C,
-            )
-            for octupole_name, octupole_value in zip(
-                spherical_octupole_labels, local_octupole_moments
-            ):
-                local_spherical_multipoles[octupole_name] = octupole_value
+                local_octupole_moments = rotate_octupole(
+                    *(
+                        row_with_atom_info[octupole_label].item()
+                        for octupole_label in spherical_octupole_labels
+                    ),
+                    C,
+                )
+                for octupole_name, octupole_value in zip(
+                    spherical_octupole_labels, local_octupole_moments
+                ):
+                    local_spherical_multipoles[octupole_name] = octupole_value
 
-            local_hexadecapole_moments = rotate_hexadecapole(
-                *(
-                    row_with_atom_info[hexadecapole_label].item()
-                    for hexadecapole_label in spherical_hexadecapole_labels
-                ),
-                C,
-            )
-            for hexadecapole_name, hexadecapole_value in zip(
-                spherical_hexadecapole_labels, local_hexadecapole_moments
-            ):
-                local_spherical_multipoles[hexadecapole_name] = hexadecapole_value
-            
-            # add features to dictionary               
-            total_dict[str(point_id)] = {f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)}
-            # add iqa to dictionary
-            total_dict[str(point_id)].update({"iqa_energy": row_with_atom_info["iqa_energy"].item()})
-            # add local forces after rotation or None if they were not calculated.
-            total_dict[str(point_id)].update({"force_x": local_forces_array[0]})
-            total_dict[str(point_id)].update({"force_y": local_forces_array[1]})
-            total_dict[str(point_id)].update({"force_z": local_forces_array[2]})
-            # add rotated multipole moments to dictionary
-            total_dict[str(point_id)].update(local_spherical_multipoles)
+                local_hexadecapole_moments = rotate_hexadecapole(
+                    *(
+                        row_with_atom_info[hexadecapole_label].item()
+                        for hexadecapole_label in spherical_hexadecapole_labels
+                    ),
+                    C,
+                )
+                for hexadecapole_name, hexadecapole_value in zip(
+                    spherical_hexadecapole_labels, local_hexadecapole_moments
+                ):
+                    local_spherical_multipoles[hexadecapole_name] = hexadecapole_value
+                
+                # add features to dictionary               
+                total_dict[str(point_id)] = {f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)}
+                # add iqa to dictionary
+                total_dict[str(point_id)].update({"iqa_energy": row_with_atom_info["iqa_energy"].item()})
+                # add local forces after rotation or None if they were not calculated.
+                total_dict[str(point_id)].update({"force_x": local_forces_array[0]})
+                total_dict[str(point_id)].update({"force_y": local_forces_array[1]})
+                total_dict[str(point_id)].update({"force_z": local_forces_array[2]})
+                # add rotated multipole moments to dictionary
+                total_dict[str(point_id)].update(local_spherical_multipoles)
 
     alf_for_current_atom = alf[atom_name]
     alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
