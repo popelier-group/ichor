@@ -61,228 +61,6 @@ def make_chart_settings(local_kwargs: dict):
 
     return x_axis_settings, y_axis_settings
 
-def calculate_compact_s_curves(
-    model_location: Path,
-    validation_set_location: Path,
-    output_location: Path,
-    atoms: Optional[List[str]] = None,
-    types: Optional[List[str]] = None,
-    **kwargs,
-):
-    """Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
-
-    :param model_location: A directory containing model files `.model`
-    :param validation_set_location: A directory containing validation or test set points. These points should NOT be in the training set.
-    :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves. S-curves are made for all atoms in the system by default.
-    :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves. S-curves are made for all properties in the model files.
-    :param **kwargs: Any key word arguments that can be passed into the write_to_excel function to change how the S-curves excel file looks. See write_to_excel() method
-    """
-
-    if model_location is None or validation_set_location is None:
-        raise ValueError(
-            "Enter valid locations for models and validation sets."
-        )
-
-    model = Models(model_location)
-    validation_set = PointsDirectory(validation_set_location)
-    true, predicted = get_true_predicted(model, validation_set, atoms, types)
-
-    write_to_excel(true, predicted, output_location, **kwargs)
-
-def write_to_excel(
-    true: pd.DataFrame,
-    predicted: pd.DataFrame,
-    output_name: Path = "s-curves.xlsx",
-    x_axis_name: str = "Absolute Prediction Error",
-    x_log_scale: bool = True,
-    x_major_gridlines_visible: bool = True,
-    x_minor_gridlines_visible: bool = True,
-    x_axis_major_gridline_width: int = 0.75,
-    x_axis_major_gridline_color: str = "#F2F2F2",
-    y_axis_name: str = "%",
-    y_min: int = 0,
-    y_max: int = 100,
-    y_major_gridlines_visible: bool = True,
-    y_minor_gridlines_visible: bool = False,
-    y_axis_major_gridline_width: int = 0.75,
-    y_axis_major_gridline_color: str = "#BFBFBF",
-    show_legend: bool = False,
-    excel_style: int = 10,
-):
-    """
-    Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
-    also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
-
-    :param true: a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set
-    :param predicted: a ModelsResult containing predicted values, given the validation/test set features
-    :param output_name: The name of the excel file to be written out.
-    :param x_axis_name: The title to be used for x-axis in the S-curves plot.
-    :param x_log_scale: Whether to make x dimension log scaled. Default True.
-    :param x_major_gridlines_visible: Whether to show major gridlines along x. Default True.
-    :param x_minor_gridlines_visible: Whether to show minor gridlines along x. Default True.
-    :param x_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
-    :param x_axis_major_gridline_color: Color to use for gridlines. Default is "#F2F2F2".
-    :param y_axis_name: The title to be used for the y-axis in the S-curves plot.
-    :param y_min: The minimum percentage value to show.
-    :param y_max: The maximum percentage value to show.
-    :param y_major_gridlines_visible: Whether to show major gridlines along y. Default True.
-    :param y_minor_gridlines_visible: Whether to show minor gridlines along y. Default False.
-    :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
-    :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
-    :param show_legend: Whether to show legend on the plot. Default False.
-    :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
-    """
-
-    # use the key word arguments to construct the settings used for x and y axes
-    x_axis_settings, y_axis_settings = make_chart_settings(locals())
-
-    # transpose to get keys to be the properties (iqa, q00, etc.) instead of them being the values
-    true = true.T
-    predicted = predicted.T
-    # error is still a ModelResult
-    error = true - predicted  # .abs()
-    # sort to get properties to be ordered nicely
-    true = {k: v for k, v in sorted(true.items())}
-
-    with pd.ExcelWriter(output_name) as writer:
-        workbook = writer.book
-
-        # iterate over all properties, such as iqa, q00, etc.
-        for sheet_name in true.keys():
-
-            start_row = 2
-            start_col = 12
-
-            # iqa predictions are in Hartrees, convert to kJ mol-1
-            if sheet_name == "iqa":
-                error[sheet_name] *= ha_to_kj_mol
-
-            # make graphs to plot later once data is added
-            atomic_s_curve = workbook.add_chart(
-                {"type": "scatter", "subtype": "straight"}
-            )
-            total_s_curve = workbook.add_chart(
-                {"type": "scatter", "subtype": "straight"}
-            )
-
-            ############################
-            # TOTAL S-CURVE
-            ############################
-
-            # calculate a total df that sums up all the errors for all atoms in one point and then sorts by error (ascending)
-            # see ModelResult reduce method
-            df = pd.DataFrame(error[sheet_name].reduce())
-            df.rename(columns={0: "Total"}, inplace=True)
-            df["Total"] = df["Total"].abs()
-            df.sort_values("Total", inplace=True)
-            ndata = len(df["Total"])
-            df["%"] = percentile(ndata)
-            # the end row is one more because the df starts one row down
-            end_row = ndata + 1
-            df.to_excel(
-                writer, sheet_name=sheet_name, startrow=1, startcol=start_col
-            )
-            writer.sheets[sheet_name].write(0, start_col, "Total")
-
-            total_s_curve.add_series(
-                {
-                    "categories": [
-                        sheet_name,
-                        start_row,
-                        start_col + 1,
-                        end_row,
-                        start_col + 1,
-                    ],
-                    "values": [
-                        sheet_name,
-                        start_row,
-                        start_col + 2,
-                        end_row,
-                        start_col + 2,
-                    ],
-                    "line": {"width": 1.5},
-                }
-            )
-
-            # Configure total prediction error S-curve
-            total_s_curve.set_x_axis(x_axis_settings)
-            total_s_curve.set_y_axis(y_axis_settings)
-            total_s_curve.set_legend({"position": "none"})
-            total_s_curve.set_style(excel_style)
-            total_s_curve.set_title({"name": "Total S-Curve"})
-            total_s_curve.set_size({"width": 650, "height": 520})
-
-            writer.sheets[sheet_name].insert_chart("A1", total_s_curve)
-
-            start_col += 4
-
-            # get the atom names from the inner dictionary (see get_true_predicted function above)
-            atom_names = natsorted(true[sheet_name].keys(), key=ignore_alpha)
-            ####################################
-            # INDIVIDUAL ATOM OVERLAPPED S-CURVE
-            ####################################
-
-            # write out individual atom data to sheet
-            for atom_name in atom_names:
-
-                # make data to write to an workbook using pandas
-                data = {
-                    "True": true[sheet_name][atom_name],
-                    "Predicted": predicted[sheet_name][atom_name],
-                    "Error": error[sheet_name][atom_name],
-                }
-                df = pd.DataFrame(data)
-                df["Error"] = df["Error"].abs()
-                # sort whole df by error column (ascending)
-                df.sort_values("Error", inplace=True)
-                # add percentage column after sorting by error
-                ndata = len(df["Error"])
-                df["%"] = percentile(ndata)
-                end_row = ndata + 1
-                # add the atom name above the df
-                # write the df for individual atoms
-                df.to_excel(
-                    writer,
-                    sheet_name=sheet_name,
-                    startrow=1,
-                    startcol=start_col,
-                )
-                writer.sheets[sheet_name].write(0, start_col, atom_name)
-
-                atomic_s_curve.add_series(
-                    {
-                        "name": atom_name,
-                        "categories": [
-                            sheet_name,
-                            start_row,
-                            start_col + 3,
-                            end_row,
-                            start_col + 3,
-                        ],
-                        "values": [
-                            sheet_name,
-                            start_row,
-                            start_col + 4,
-                            end_row,
-                            start_col + 4,
-                        ],
-                        "line": {"width": 1.5},
-                    }
-                )
-
-                start_col += 6
-
-            # Configure graph with overlapping S-curves for all atoms
-            atomic_s_curve.set_x_axis(x_axis_settings)
-            atomic_s_curve.set_y_axis(y_axis_settings)
-            if show_legend:
-                atomic_s_curve.set_legend({"position": "right"})
-            atomic_s_curve.set_style(excel_style)
-            atomic_s_curve.set_title({"name": "Individual Atom S-Curve"})
-            atomic_s_curve.set_size({"width": 650, "height": 520})
-
-            writer.sheets[sheet_name].insert_chart("A27", atomic_s_curve)
-
 def simplified_write_to_excel(
     total_dict: Dict[str, Dict[str, Dict[str, np.ndarray]]],
     output_name: Path = "s-curves.xlsx",
@@ -554,3 +332,230 @@ def calculate_compact_s_curves_from_true_predicted(
             total_dict[property_name][atom_name]["error"] = errors
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
+
+
+######################
+# LEGACY FUNCTIONS, SHOULD NOT REALLY BE USED, MIGHT DELETE IN FUTURE
+##########################
+
+def calculate_compact_s_curves(
+    model_location: Path,
+    validation_set_location: Path,
+    output_location: Path,
+    atoms: Optional[List[str]] = None,
+    types: Optional[List[str]] = None,
+    **kwargs,
+):
+    """Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
+
+    :param model_location: A directory containing model files `.model`
+    :param validation_set_location: A directory containing validation or test set points. These points should NOT be in the training set.
+    :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves. S-curves are made for all atoms in the system by default.
+    :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves. S-curves are made for all properties in the model files.
+    :param **kwargs: Any key word arguments that can be passed into the write_to_excel function to change how the S-curves excel file looks. See write_to_excel() method
+    """
+
+    if model_location is None or validation_set_location is None:
+        raise ValueError(
+            "Enter valid locations for models and validation sets."
+        )
+
+    model = Models(model_location)
+    validation_set = PointsDirectory(validation_set_location)
+    true, predicted = get_true_predicted(model, validation_set, atoms, types)
+
+    write_to_excel(true, predicted, output_location, **kwargs)
+
+def write_to_excel(
+    true: pd.DataFrame,
+    predicted: pd.DataFrame,
+    output_name: Path = "s-curves.xlsx",
+    x_axis_name: str = "Absolute Prediction Error",
+    x_log_scale: bool = True,
+    x_major_gridlines_visible: bool = True,
+    x_minor_gridlines_visible: bool = True,
+    x_axis_major_gridline_width: int = 0.75,
+    x_axis_major_gridline_color: str = "#F2F2F2",
+    y_axis_name: str = "%",
+    y_min: int = 0,
+    y_max: int = 100,
+    y_major_gridlines_visible: bool = True,
+    y_minor_gridlines_visible: bool = False,
+    y_axis_major_gridline_width: int = 0.75,
+    y_axis_major_gridline_color: str = "#BFBFBF",
+    show_legend: bool = False,
+    excel_style: int = 10,
+):
+    """
+    Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
+    also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
+
+    :param true: a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set
+    :param predicted: a ModelsResult containing predicted values, given the validation/test set features
+    :param output_name: The name of the excel file to be written out.
+    :param x_axis_name: The title to be used for x-axis in the S-curves plot.
+    :param x_log_scale: Whether to make x dimension log scaled. Default True.
+    :param x_major_gridlines_visible: Whether to show major gridlines along x. Default True.
+    :param x_minor_gridlines_visible: Whether to show minor gridlines along x. Default True.
+    :param x_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
+    :param x_axis_major_gridline_color: Color to use for gridlines. Default is "#F2F2F2".
+    :param y_axis_name: The title to be used for the y-axis in the S-curves plot.
+    :param y_min: The minimum percentage value to show.
+    :param y_max: The maximum percentage value to show.
+    :param y_major_gridlines_visible: Whether to show major gridlines along y. Default True.
+    :param y_minor_gridlines_visible: Whether to show minor gridlines along y. Default False.
+    :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
+    :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
+    :param show_legend: Whether to show legend on the plot. Default False.
+    :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
+    """
+
+    # use the key word arguments to construct the settings used for x and y axes
+    x_axis_settings, y_axis_settings = make_chart_settings(locals())
+
+    # transpose to get keys to be the properties (iqa, q00, etc.) instead of them being the values
+    true = true.T
+    predicted = predicted.T
+    # error is still a ModelResult
+    error = true - predicted  # .abs()
+    # sort to get properties to be ordered nicely
+    true = {k: v for k, v in sorted(true.items())}
+
+    with pd.ExcelWriter(output_name) as writer:
+        workbook = writer.book
+
+        # iterate over all properties, such as iqa, q00, etc.
+        for sheet_name in true.keys():
+
+            start_row = 2
+            start_col = 12
+
+            # iqa predictions are in Hartrees, convert to kJ mol-1
+            if sheet_name == "iqa":
+                error[sheet_name] *= ha_to_kj_mol
+
+            # make graphs to plot later once data is added
+            atomic_s_curve = workbook.add_chart(
+                {"type": "scatter", "subtype": "straight"}
+            )
+            total_s_curve = workbook.add_chart(
+                {"type": "scatter", "subtype": "straight"}
+            )
+
+            ############################
+            # TOTAL S-CURVE
+            ############################
+
+            # calculate a total df that sums up all the errors for all atoms in one point and then sorts by error (ascending)
+            # see ModelResult reduce method
+            df = pd.DataFrame(error[sheet_name].reduce())
+            df.rename(columns={0: "Total"}, inplace=True)
+            df["Total"] = df["Total"].abs()
+            df.sort_values("Total", inplace=True)
+            ndata = len(df["Total"])
+            df["%"] = percentile(ndata)
+            # the end row is one more because the df starts one row down
+            end_row = ndata + 1
+            df.to_excel(
+                writer, sheet_name=sheet_name, startrow=1, startcol=start_col
+            )
+            writer.sheets[sheet_name].write(0, start_col, "Total")
+
+            total_s_curve.add_series(
+                {
+                    "categories": [
+                        sheet_name,
+                        start_row,
+                        start_col + 1,
+                        end_row,
+                        start_col + 1,
+                    ],
+                    "values": [
+                        sheet_name,
+                        start_row,
+                        start_col + 2,
+                        end_row,
+                        start_col + 2,
+                    ],
+                    "line": {"width": 1.5},
+                }
+            )
+
+            # Configure total prediction error S-curve
+            total_s_curve.set_x_axis(x_axis_settings)
+            total_s_curve.set_y_axis(y_axis_settings)
+            total_s_curve.set_legend({"position": "none"})
+            total_s_curve.set_style(excel_style)
+            total_s_curve.set_title({"name": "Total S-Curve"})
+            total_s_curve.set_size({"width": 650, "height": 520})
+
+            writer.sheets[sheet_name].insert_chart("A1", total_s_curve)
+
+            start_col += 4
+
+            # get the atom names from the inner dictionary (see get_true_predicted function above)
+            atom_names = natsorted(true[sheet_name].keys(), key=ignore_alpha)
+            ####################################
+            # INDIVIDUAL ATOM OVERLAPPED S-CURVE
+            ####################################
+
+            # write out individual atom data to sheet
+            for atom_name in atom_names:
+
+                # make data to write to an workbook using pandas
+                data = {
+                    "True": true[sheet_name][atom_name],
+                    "Predicted": predicted[sheet_name][atom_name],
+                    "Error": error[sheet_name][atom_name],
+                }
+                df = pd.DataFrame(data)
+                df["Error"] = df["Error"].abs()
+                # sort whole df by error column (ascending)
+                df.sort_values("Error", inplace=True)
+                # add percentage column after sorting by error
+                ndata = len(df["Error"])
+                df["%"] = percentile(ndata)
+                end_row = ndata + 1
+                # add the atom name above the df
+                # write the df for individual atoms
+                df.to_excel(
+                    writer,
+                    sheet_name=sheet_name,
+                    startrow=1,
+                    startcol=start_col,
+                )
+                writer.sheets[sheet_name].write(0, start_col, atom_name)
+
+                atomic_s_curve.add_series(
+                    {
+                        "name": atom_name,
+                        "categories": [
+                            sheet_name,
+                            start_row,
+                            start_col + 3,
+                            end_row,
+                            start_col + 3,
+                        ],
+                        "values": [
+                            sheet_name,
+                            start_row,
+                            start_col + 4,
+                            end_row,
+                            start_col + 4,
+                        ],
+                        "line": {"width": 1.5},
+                    }
+                )
+
+                start_col += 6
+
+            # Configure graph with overlapping S-curves for all atoms
+            atomic_s_curve.set_x_axis(x_axis_settings)
+            atomic_s_curve.set_y_axis(y_axis_settings)
+            if show_legend:
+                atomic_s_curve.set_legend({"position": "right"})
+            atomic_s_curve.set_style(excel_style)
+            atomic_s_curve.set_title({"name": "Individual Atom S-Curve"})
+            atomic_s_curve.set_size({"width": 650, "height": 520})
+
+            writer.sheets[sheet_name].insert_chart("A27", atomic_s_curve)
