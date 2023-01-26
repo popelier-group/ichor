@@ -171,7 +171,7 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
                                         force_x=atom_force_x,
                                         force_y=atom_force_y,
                                         force_z=atom_force_z,
-                                        iqa_energy=atom_iqa_energy,
+                                        iqa=atom_iqa_energy,
                                         integration_error=atom_integration_error,
                                         **global_multipole_moments
                                         )

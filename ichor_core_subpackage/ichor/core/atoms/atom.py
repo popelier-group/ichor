@@ -414,7 +414,7 @@ class AtomWithProperties(Atom):
     index: Optional[int] = None,
     parent: Optional["Atoms"] = None,
     units: AtomicDistance = AtomicDistance.Angstroms,
-    iqa_energy = None,
+    iqa = None,
     integration_error = None,
     q00 = None,
     q10 = None,
@@ -458,7 +458,7 @@ class AtomWithProperties(Atom):
     ):
 
         super().__init__(ty, x, y, z, index, parent, units)
-        self.iqa_energy = iqa_energy,
+        self.iqa = iqa,
         self.integration_error = integration_error,
         self.q00 = q00,
         self.q10 = q10,

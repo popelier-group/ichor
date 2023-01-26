@@ -447,7 +447,7 @@ def calculate_compact_s_curves_from_files(
     true_values_dict: Dict[str, Dict[str, np.ndarray]] = {}
     # property names
     if not property_names:
-        all_props = ["iqa_energy", "force_x", "force_y", "force_z"] + multipole_names
+        all_props = ["iqa", "force_x", "force_y", "force_z"] + multipole_names
     else:
         all_props = property_names
 

@@ -57,7 +57,7 @@ class Dataset(Base):
     
     # AIMAll might not have been ran yet or lower encomp settings used
     # so make nullable
-    iqa_energy = Column(Float, nullable=True)
+    iqa = Column(Float, nullable=True)
     integration_error = Column(Float, nullable=True)
     q00 = Column(Float, nullable=True)
     q10 = Column(Float, nullable=True)

@@ -281,7 +281,7 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
                 # add features to dictionary               
                 total_dict[str(point_id)] = {f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)}
                 # add iqa to dictionary
-                total_dict[str(point_id)].update({"iqa_energy": row_with_atom_info["iqa_energy"].item()})
+                total_dict[str(point_id)].update({"iqa": row_with_atom_info["iqa"].item()})
                 # add local forces after rotation or None if they were not calculated.
                 total_dict[str(point_id)].update({"force_x": local_forces_array[0]})
                 total_dict[str(point_id)].update({"force_y": local_forces_array[1]})
