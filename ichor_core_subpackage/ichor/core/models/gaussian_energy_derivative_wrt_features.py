@@ -78,15 +78,14 @@ def form_g_matrix(b_matrix: np.ndarray):
     g_matrix = np.matmul(b_matrix, b_matrix.T)
     # w is eigenvalues, v is eigenvectors matrix
     w, v = np.linalg.eig(g_matrix)
-
-    inverse_g = np.linalg.inv(g_matrix)
+    # inverse_g = np.linalg.inv(g_matrix)
 
     # Gaussian does not seem to do a generalized inverse
-    # inverse_eigenvalues = w**-1
-    # inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
-    # generalized_g_inverse = np.matmul(v, np.matmul(inverse_g, v.T))
+    inverse_eigenvalues = w**-1
+    inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
+    generalized_g_inverse = np.matmul(v, np.matmul(inverse_eigenvalues_diagonal_matrix, v.T))
 
-    return inverse_g
+    return generalized_g_inverse
 
 def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, system_alf, central_atom_idx):
     """
