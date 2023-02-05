@@ -67,25 +67,33 @@ def form_b_matrix(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> 
     return da_df
 
 def form_g_matrix(b_matrix: np.ndarray):
-    """ Forms and inverts the G matrix as in Gaussian.
+    """ Forms the G matrix as in Gaussian.
 
     .. note::
         The general inverse of G is NOT used here. Gaussian seems to use the regular inverse (so this is why np.linalg.inv is used,
-        but can use Chloesky or something like this instead because G is a symmetric square (BuB^T, where u is the identity matrix here))
-        Using the general inverse gives different results than Gaussian.    
+        but can use Chloesky or something like this instead because G is a symmetric square (BuB^T, where u is the identity matrix here))   
     """
 
     g_matrix = np.matmul(b_matrix, b_matrix.T)
-    # w is eigenvalues, v is eigenvectors matrix
-    w, v = np.linalg.eig(g_matrix)
-    # inverse_g = np.linalg.inv(g_matrix)
+    return g_matrix
+
+def form_g_inverse(g_matrix: np.ndarray):
+    """ Inverts the G matrix, gives generalized inverse"""
+
+    # # w is eigenvalues, v is eigenvectors matrix
+    # w, v = np.linalg.eig(g_matrix)
+    inverse_g = np.linalg.inv(g_matrix)
+
+    # using the generalized inverse seems to mess up results
+    # there is some sort of roundoff error happening as decomposition of G = V L V^T where L has eigenvalues on diagonal
+    # but doing V L V^T does not give the exact numbers that BB^T=G gives
 
     # Gaussian does not seem to do a generalized inverse
-    inverse_eigenvalues = w**-1
-    inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
-    generalized_g_inverse = np.matmul(v, np.matmul(inverse_eigenvalues_diagonal_matrix, v.T))
+    # inverse_eigenvalues = w**-1
+    # inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
+    # generalized_g_inverse = np.matmul(v, np.matmul(inverse_eigenvalues_diagonal_matrix, v.T))
 
-    return generalized_g_inverse
+    return inverse_g
 
 def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, system_alf, central_atom_idx):
     """
@@ -130,7 +138,8 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, sys
     copied_forces_array[[atom_indices_new_order, original_row_indices], :] = copied_forces_array[[original_row_indices, atom_indices_new_order], :]
     copied_forces_array = copied_forces_array.flatten()
 
-    inverse_g = form_g_matrix(b_matrix)
+    g_matrix = form_g_matrix(b_matrix)
+    inverse_g = form_g_inverse(g_matrix)
 
     gradient_dE_df = np.matmul(inverse_g, np.matmul(b_matrix, copied_forces_array))
 
