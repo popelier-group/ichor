@@ -378,7 +378,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         self,
         alf_list: List[ALF],
         central_atom_idx: int,
-        str_to_append_to_fname: str = "_features_with_properties.csv",
+        str_to_append_to_fname: str = "_features_with_dE_df.csv",
         **kwargs
     ):
         """_summary_
@@ -406,7 +406,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             training_data.append([*features, wfn_energy, *dE_df])
 
             input_headers = [f"f{i+1}" for i in range(nfeatures)]
-            output_headers = ["wfn_energy"] + [f"dEdf{i}" for i in range(nfeatures)]
+            output_headers = ["wfn_energy"] + [f"dEdf{i+1}" for i in range(nfeatures)]
 
             fname = atoms[central_atom_idx].name + str_to_append_to_fname
 
