@@ -410,9 +410,9 @@ class PointsDirectory(ListOfAtoms, Directory):
 
             fname = atoms[central_atom_idx].name + str_to_append_to_fname
 
-            df = pd.DataFrame(
-                training_data,
-                columns=input_headers + output_headers,
-                dtype=np.float64,
-            )
-            df.to_csv(fname, index=False)
+        df = pd.DataFrame(
+            training_data,
+            columns=input_headers + output_headers,
+            dtype=np.float64,
+        )
+        df.to_csv(fname, index=False)
