@@ -324,7 +324,7 @@ def calculate_compact_s_curves_from_true_predicted(
 
             errors = atomic_true_values - predicted
 
-            if property_name == "iqa_energy" or property_name == "iqa":
+            if property_name in ("iqa_energy", "iqa", "wfn_energy"):
                 errors *= 2625.5
 
             total_dict[property_name][atom_name]["true"] = atomic_true_values
