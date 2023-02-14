@@ -139,9 +139,14 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, sys
     copied_forces_array = copied_forces_array.flatten()
 
     g_matrix = form_g_matrix(b_matrix)
-    inverse_g = form_g_inverse(g_matrix)
+    # inverse_g = form_g_inverse(g_matrix)
 
-    gradient_dE_df = np.matmul(inverse_g, np.matmul(b_matrix, copied_forces_array))
+    cholesky_g = np.linalg.cholesky(g_matrix)
+    b = np.matmul(b_matrix, copied_forces_array)
+    z = np.linalg.solve(cholesky_g, b)
+    gradient_dE_df = np.linalg.solve(cholesky_g.T, z)
+
+    # gradient_dE_df = np.matmul(inverse_g, np.matmul(b_matrix, copied_forces_array))
 
     return gradient_dE_df
 
