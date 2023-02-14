@@ -381,7 +381,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         str_to_append_to_fname: str = "_features_with_dE_df.csv",
         **kwargs
     ):
-        """_summary_
+        """Writes out a csv file containing wfn energy and FORCEs calculated for every feature.
+        Note that the forces (dE/df_i) are the negative of the PES gradient, so for machine learning, the negative of these forces needs
+        to be taken to add gradient information into GP models.
 
         :param system_alf: A list of ALF instances containing alf info
         :param central_atom_idx: The central atom which to center the alf on
@@ -406,7 +408,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             training_data.append([*features, wfn_energy, *dE_df])
 
             input_headers = [f"f{i+1}" for i in range(nfeatures)]
-            output_headers = ["wfn_energy"] + [f"dEdf{i+1}" for i in range(nfeatures)]
+            output_headers = ["wfn_energy"] + [f"-dEdf{i+1}" for i in range(nfeatures)]
 
             fname = atoms[central_atom_idx].name + str_to_append_to_fname
 
