@@ -66,6 +66,53 @@ def fflux_predict_value(model_inst, test_x_features):
 
     return Q_est, dQ_df
 
+
+def fflux_predict_value_rbf_only(model_inst, test_x_features):
+
+    x_train_array = model_inst.x
+    weights = model_inst.weights.flatten()
+
+    kernels = model_inst.kernel
+    rbf_thetas = kernels._thetas
+
+    n_train = x_train_array.shape[0]
+    n_features = x_train_array.shape[1]
+
+    # make sure thetas are ordered correctly (cannot concat rbf thetas to periodic thetas because it leads to wrong indexing)
+    #  first five thetas are for rbf dimensions (because non cyclic), then 6th (5th index) is a phi dimension, then two rbf, then periodic and so on
+    thetas = np.array(rbf_thetas)
+
+    Q_est = 0.0
+    dQ_df = np.zeros(n_features)
+    dQ_df_temp = np.zeros(n_features)
+
+    for j in range(n_train):
+
+        expo = 0.0
+
+        for h in range(n_features):
+
+            fdiff = x_train_array[j, h] - test_x_features[h]
+            # use rbf for all dimensions
+            expo = expo + thetas[h] * fdiff * fdiff
+
+            dQ_df_temp[h] = weights[j] *sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
+
+        expo = np.exp(-expo)
+
+        Q_est = Q_est + weights[j] * expo
+
+        dQ_df_temp = expo * dQ_df_temp
+
+        dQ_df = dQ_df + dQ_df_temp
+
+    Q_est = Q_est + model_inst.mean.value(np.zeros((1,1)))
+    Q_est = Q_est.item()
+
+    return Q_est, dQ_df
+
+
+
 def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
 
     dQ_dx = 0.0
