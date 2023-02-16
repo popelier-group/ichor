@@ -402,7 +402,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             features = atoms[central_atom_idx].features(calculate_alf_features, alf_list)
             nfeatures = len(features)
             wfn_energy = point_dir.wfn.total_energy
-            b_matrix = form_b_matrix(atoms, alf_list, 0)
+            b_matrix = form_b_matrix(atoms, alf_list, central_atom_idx)
             cart_forces = np.array(list(point_dir.gaussian_out.global_forces.values()))
             dE_df = convert_to_feature_forces(cart_forces, b_matrix, alf_list, central_atom_idx)
             training_data.append([*features, wfn_energy, *dE_df])
