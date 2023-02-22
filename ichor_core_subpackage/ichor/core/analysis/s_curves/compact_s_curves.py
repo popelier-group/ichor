@@ -79,6 +79,7 @@ def simplified_write_to_excel(
     y_axis_major_gridline_color: str = "#BFBFBF",
     show_legend: bool = False,
     excel_style: int = 10,
+    sort_keys: bool = True
 ):
     """
     Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
@@ -103,12 +104,14 @@ def simplified_write_to_excel(
     :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
     :param show_legend: Whether to show legend on the plot. Default False.
     :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
+    :param sort_columns: Whether to sort the keys of the dictionary (uses Python sort). Default True.
     """
 
     # use the key word arguments to construct the settings used for x and y axes
     x_axis_settings, y_axis_settings = make_chart_settings(locals())
 
-    total_dict = {k: v for k, v in sorted(total_dict.items())}
+    if sort_keys:
+        total_dict = {k: v for k, v in sorted(total_dict.items())}
 
     with pd.ExcelWriter(output_name) as writer:
         
@@ -331,7 +334,7 @@ def calculate_compact_s_curves_from_true_predicted(
             total_dict[property_name][atom_name]["predicted"] = predicted
             total_dict[property_name][atom_name]["error"] = errors
 
-    simplified_write_to_excel(total_dict, output_location, **kwargs)
+    simplified_write_to_excel(total_dict, output_location, sort_keys=False, **kwargs)
 
 
 ######################
