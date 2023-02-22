@@ -42,9 +42,10 @@ def fflux_predict_value(model_inst, test_x_features):
             # if phi dimension, then use periodic kernel
             if ((h+1) % 3) == 0 and h != 2:
 
-                # 2.0 because gpytorch does not multiply periodic kernel lengthscale by 2, i.e. it is 1/lambda
-                expo = expo + 2.0 * thetas[h] * np.sin((fdiff/2.0))**2
-                dQ_df_temp[h] = weights[j]*(-2.0)*thetas[h]*sign_j(fdiff) * np.sin(abs(fdiff)/2.0) * np.cos(abs(fdiff)/2.0)
+                # 4.0 because we use 1/(2*l^2), for every kernel. For the periodic kernel, there is no 2 in the definition
+                # gpytorch only divided by lambda (which is equal to l^2)
+                expo = expo + 4.0 * thetas[h] * np.sin((fdiff/2.0))**2
+                dQ_df_temp[h] = weights[j]*(-4.0)*thetas[h]*sign_j(fdiff) * np.sin(abs(fdiff)/2.0) * np.cos(abs(fdiff)/2.0)
 
             # if not phi dimension, use rbf kernel
             else:
