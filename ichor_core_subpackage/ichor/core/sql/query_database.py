@@ -15,6 +15,61 @@ from ichor.core.common.constants import multipole_names, spherical_monopole_labe
         spherical_hexadecapole_labels
 from ichor.core.multipoles import rotate_dipole, rotate_quadrupole, rotate_octupole, rotate_hexadecapole
 from ichor.core.atoms import ALF
+from ichor.core.models.gaussian_energy_derivative_wrt_features import form_b_matrix, convert_to_feature_forces
+
+def rotate_multipole_moments(row_with_atom_info, C):
+
+        local_spherical_multipoles = {spherical_monopole_labels[0]: row_with_atom_info["q00"].item()}
+
+        local_dipole_moments = rotate_dipole(
+            *(
+                row_with_atom_info[dipole_label].item()
+                for dipole_label in spherical_dipole_labels
+            ),
+            C,
+        )
+        for dipole_name, dipole_value in zip(
+            spherical_dipole_labels, local_dipole_moments
+        ):
+            local_spherical_multipoles[dipole_name] = dipole_value
+
+        local_quadrupole_moments = rotate_quadrupole(
+            *(
+                row_with_atom_info[quadrupole_label].item()
+                for quadrupole_label in spherical_quadrupole_labels
+            ),
+            C,
+        )
+        for quadrupole_name, quadrupole_value in zip(
+            spherical_quadrupole_labels, local_quadrupole_moments
+        ):
+            local_spherical_multipoles[quadrupole_name] = quadrupole_value
+
+        local_octupole_moments = rotate_octupole(
+            *(
+                row_with_atom_info[octupole_label].item()
+                for octupole_label in spherical_octupole_labels
+            ),
+            C,
+        )
+        for octupole_name, octupole_value in zip(
+            spherical_octupole_labels, local_octupole_moments
+        ):
+            local_spherical_multipoles[octupole_name] = octupole_value
+
+        local_hexadecapole_moments = rotate_hexadecapole(
+            *(
+                row_with_atom_info[hexadecapole_label].item()
+                for hexadecapole_label in spherical_hexadecapole_labels
+            ),
+            C,
+        )
+        for hexadecapole_name, hexadecapole_value in zip(
+            spherical_hexadecapole_labels, local_hexadecapole_moments
+        ):
+            local_spherical_multipoles[hexadecapole_name] = hexadecapole_value
+
+        return local_spherical_multipoles
 
 def create_db_connection(db_path: Union[str, Path], echo=False) -> sqlalchemy.engine.Connection:
     """Creates a connection to a SQLite3 database and returns a connection object to be used
@@ -155,8 +210,8 @@ def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> Dic
     return atoms.alf_dict(calculate_alf_atom_sequence)
 
 
-def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[int],
-                                         atom_name: str, alf: Dict[str, ALF],
+def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[int], properties: tuple,
+                                         atom_name: str, alf: List[ALF],
                                          max_integration_error = 0.001,
                                          write_index_col=False):
     """Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
@@ -167,7 +222,7 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
     :param point_ids: A list of integers represending the `id` column of the points table of the SQLite database.
     :param atom_name: The atom for which features, local multipole moments,
         as well as local forces are going to be calculated for every point in the dataset
-    :param alf: A dictionary of key(atom_name):value(ALF instance) to be used when calculating features
+    :param alf: A list of ALF instance to be used when calculating features
         and calculating C matrices
     :param max_integration_error: Maximum integration error that a point needs to have for the atom
         of interest. Having a higher (absolute) integration error for the atom of interest means that
@@ -183,11 +238,16 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
         
         # find geometry which matches the id
         one_point_df = full_df.loc[full_df["id"] == point_id]
-        
+
         # check that integration error is below threshold, otherwise do not calculate features
         # for the atom and do not add this point to training set for this atom.
         # if other atoms have good integration errors, the same point can be used in their training sets.
         row_with_atom_info = one_point_df.loc[one_point_df['name_1'] == atom_name]
+
+        if not one_point_df["force_x"].isnull().values.any():
+            global_forces_array = one_point_df[["force_x", "force_y", "force_z"]].to_numpy()
+        else:
+            global_forces_array = None
 
         # If the atomic information (.int file) was missing, then this
         # will be an empty dataframe. The database might not contain the
@@ -205,91 +265,32 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
                     atom_type = get_characters(row_data.name_1)
                     atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
 
-                # calculate features for the atom of interest
                 C = atoms[atom_name].C(alf)
+                central_atom_index = atoms[atom_name].i # 0-indexed
+                # calculate features for the atom of interest
                 one_atom_features = atoms[atom_name].features(calculate_alf_features, alf)
                 n_features = len(one_atom_features)
 
-                # default values to be written if forces do not exist
-                local_forces_array = None, None, None
-                # if forces are also in database then calculate local forces
-                if row_with_atom_info["force_x"].item() is not None:
+                if global_forces_array:
+                    b_matrix = form_b_matrix(atoms, alf, central_atom_index)
+                    negative_dE_df = convert_to_feature_forces(global_forces_array, b_matrix, alf, central_atom_index)
+                else:
+                    negative_dE_df = [None] * n_features
 
-                    global_forces_array = np.array([row_with_atom_info["force_x"].item(),
-                                    row_with_atom_info["force_y"].item(),
-                                    row_with_atom_info["force_z"].item()])
-                    
-                    # FFLUX predicts forces in the global frame
-                    # but two identical molecules can have different global forces depending on
-                    # position in 3D space
-                    # so therefore predict in local frame
-                    # then to transform back into global frame,
-                    # use C.T (as C is rotation matrix so inverse is the transpose)
-                    local_forces_array = np.matmul(C, global_forces_array)
-                
                 # make dictionary of rotated multipoles
-                local_spherical_multipoles = {spherical_monopole_labels[0]: row_with_atom_info["q00"].item()}
+                local_spherical_multipoles = rotate_multipole_moments(row_with_atom_info, C)
 
-                local_dipole_moments = rotate_dipole(
-                    *(
-                        row_with_atom_info[dipole_label].item()
-                        for dipole_label in spherical_dipole_labels
-                    ),
-                    C,
-                )
-                for dipole_name, dipole_value in zip(
-                    spherical_dipole_labels, local_dipole_moments
-                ):
-                    local_spherical_multipoles[dipole_name] = dipole_value
-
-                local_quadrupole_moments = rotate_quadrupole(
-                    *(
-                        row_with_atom_info[quadrupole_label].item()
-                        for quadrupole_label in spherical_quadrupole_labels
-                    ),
-                    C,
-                )
-                for quadrupole_name, quadrupole_value in zip(
-                    spherical_quadrupole_labels, local_quadrupole_moments
-                ):
-                    local_spherical_multipoles[quadrupole_name] = quadrupole_value
-
-                local_octupole_moments = rotate_octupole(
-                    *(
-                        row_with_atom_info[octupole_label].item()
-                        for octupole_label in spherical_octupole_labels
-                    ),
-                    C,
-                )
-                for octupole_name, octupole_value in zip(
-                    spherical_octupole_labels, local_octupole_moments
-                ):
-                    local_spherical_multipoles[octupole_name] = octupole_value
-
-                local_hexadecapole_moments = rotate_hexadecapole(
-                    *(
-                        row_with_atom_info[hexadecapole_label].item()
-                        for hexadecapole_label in spherical_hexadecapole_labels
-                    ),
-                    C,
-                )
-                for hexadecapole_name, hexadecapole_value in zip(
-                    spherical_hexadecapole_labels, local_hexadecapole_moments
-                ):
-                    local_spherical_multipoles[hexadecapole_name] = hexadecapole_value
-                
                 # add features to dictionary               
                 total_dict[str(point_id)] = {f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)}
+                # add wfn energy to dictionary
+                total_dict[str(point_id)].update({"wfn_energy": row_with_atom_info["wfn_energy"].item()})
+                # add -dE/df (forces wrt features) to dict
+                total_dict[str(point_id)].update({f"-dE/df{i}": neg_dE_df for i, neg_dE_df in zip(range(1, n_features+1), negative_dE_df)})
                 # add iqa to dictionary
                 total_dict[str(point_id)].update({"iqa": row_with_atom_info["iqa"].item()})
-                # add local forces after rotation or None if they were not calculated.
-                total_dict[str(point_id)].update({"force_x": local_forces_array[0]})
-                total_dict[str(point_id)].update({"force_y": local_forces_array[1]})
-                total_dict[str(point_id)].update({"force_z": local_forces_array[2]})
-                # add rotated multipole moments to dictionary
                 total_dict[str(point_id)].update(local_spherical_multipoles)
 
-    alf_for_current_atom = alf[atom_name]
+    alf_for_current_atom = alf[central_atom_index]
     alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
 
     # write the total dict containing information for all points to a DataFrame and save
@@ -318,18 +319,20 @@ def get_db_information(db_path: Union[str, Path], echo=False) -> Tuple[List[str]
     return point_ids, atom_names, full_df
 
 
-def write_processed_data_for_atoms(db_path: Union[str, Path], alf: Dict[str, ALF],
+def write_processed_data_for_atoms(db_path: Union[str, Path], alf: List[ALF],
                                    max_integration_error: float = 0.001,
                                    write_index_col=False,
-                                   echo=False):
-    """Writes a csv containing the features, iqa energy, and rotated multipoles for every atom in the SQL database.
+                                   echo=False,
+                                   properties=("features", "wfn_energy", "-dE/df", "iqa", "rotated_multipole_moments")):
+    """Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
+        iqa energy, and rotated multipoles for every atom in the SQL database.
         Note that only points for which the absolute integration error for the atom of interest
         is below the threshold are added to the
         corresponding atomic datasets. 
 
     :param db_path: Path to SQLite3 database containing `Points`, `AtomNames`, and `Dataset` tables.
-    :param alf: A dictionary of key(atom_name):value(ALF instance) to be used when calculating features
-        and calculating C matrices
+    :param alf: A list of ALF instances to be used when calculating features
+        and calculating C matrices.
     :param max_integration_error: Maximum integration error that a point needs to have for the atom
         of interest. Having a higher (absolute) integration error for the atom of interest means that
         this point will not be added in the dataset for the atom of interest. However, the same
@@ -342,7 +345,6 @@ def write_processed_data_for_atoms(db_path: Union[str, Path], alf: Dict[str, ALF
     
     for atom_name in atom_names:
 
-        write_processed_one_atom_data_to_csv(full_df, point_ids, atom_name=atom_name, alf=alf,
+        write_processed_one_atom_data_to_csv(full_df, point_ids, properties, atom_name=atom_name, alf=alf,
                                              max_integration_error=max_integration_error,
                                              write_index_col=write_index_col)
-        
