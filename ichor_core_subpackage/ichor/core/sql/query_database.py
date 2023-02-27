@@ -271,7 +271,7 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
                 one_atom_features = atoms[atom_name].features(calculate_alf_features, alf)
                 n_features = len(one_atom_features)
 
-                if global_forces_array:
+                if global_forces_array is not None:
                     b_matrix = form_b_matrix(atoms, alf, central_atom_index)
                     negative_dE_df = convert_to_feature_forces(global_forces_array, b_matrix, alf, central_atom_index)
                 else:
