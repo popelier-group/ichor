@@ -188,12 +188,12 @@ def get_full_dataframe_for_all_atoms(db_path: Union[str, Path],  echo=False) -> 
     return full_df
 
 
-def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> Dict[str, ALF]:
+def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> List[ALF]:
     """Returns the atomic local frame for every atom from the first point.
 
     :param db_path: Path to SQLite3 database containing `Points`, `AtomNames`, and `Dataset` tables.
     :param echo: Whether to echo executed SQL queries, defaults to False
-    :return: A dictionary of key(atom_name), val(ALF instance, a named tuple)
+    :return: A list of ALF instances for every atom in the system.
     """
     
     first_point_id = get_list_of_point_ids_from_db(db_path=db_path, echo=echo)[0]
@@ -207,7 +207,7 @@ def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> Dic
         atom_type = get_characters(row_data.name_1)
         atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
         
-    return atoms.alf_dict(calculate_alf_atom_sequence)
+    return atoms.alf_list(calculate_alf_atom_sequence)
 
 
 def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[int], properties: tuple,
