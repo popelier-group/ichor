@@ -228,9 +228,11 @@ def calculate_compact_s_curves_from_files(
     true_values_dict: Dict[str, Dict[str, np.ndarray]] = {}
     # property names
     if not property_names:
-        all_props = ["iqa", "force_x", "force_y", "force_z"] + multipole_names
+        # sum_iqa compared to wfn_energy
+        all_props = ["iqa", "wfn_energy"] + multipole_names
     else:
-        all_props = property_names
+        # add wfn energy to always have access to it in case doing sum of iqa
+        all_props = property_names + ["wfn_energy"]
 
     # use this to get features columns from df
     features_list = [f"f{i}" for i in range(1,nfeatures+1)]
@@ -271,7 +273,7 @@ def calculate_compact_s_curves_from_files(
 
             # in case models have "iqa" written as property, but csv file has "iqa_energy"
             if property_name == "iqa" and "iqa_energy" in true_values_dict[atom_name].keys():
-                property_name = "iqa_energy"
+                property_name = "iqa"
             # get true values for property
             atomic_true_values = true_values_dict[atom_name].get(property_name)
 
@@ -291,6 +293,17 @@ def calculate_compact_s_curves_from_files(
                 print(f"Could not get value for atom/property: {atom_name}/{property_name} from model file {model.path}.")
         else:
             print(f"Could not get features or true values for atom {atom_name}, property {property_name} from model file {model.path}.")
+
+    # if we have iqa energy we can compare to wfn energy
+    if "iqa" in total_dict.keys() or "iqa_energy" in total_dict.keys():
+        # get arrays of predictions for iqa energies, sum and compare to wfn energy
+        tmp = [inner_dict["predicted"] for atom_name, inner_dict in total_dict["iqa"].items()]
+        total_sums = np.sum(tmp, axis=0)
+        total_dict["sum_iqa"]["sum_iqa"]["predicted"] =  total_sums
+        # assumes the test set is made from the same geometries for all atoms!!!, so then the wfn energy is the same between all datasets
+        total_dict["sum_iqa"]["sum_iqa"]["true"] = true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy")
+        errors = true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy") - total_sums
+        total_dict["sum_iqa"]["sum_iqa"]["error"] =  errors * 2625.5
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
 
