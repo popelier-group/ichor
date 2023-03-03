@@ -351,3 +351,22 @@ def write_processed_data_for_atoms(db_path: Union[str, Path], alf: List[ALF],
         write_processed_one_atom_data_to_csv(full_df, point_ids, properties, atom_name=atom_name, alf=alf,
                                              max_integration_error=max_integration_error,
                                              write_index_col=write_index_col)
+
+def atoms_from_point_id(full_df, point_id: int) -> "Atoms":
+    """Returns an Atoms instance containing geometry for a point id.
+    
+    :param full_df: see get_df_information function
+    :param point_id: The id of the point for which to get the geometry
+    """
+
+    # find geometry which matches the id
+    one_point_df = full_df.loc[full_df["id"] == point_id]
+
+    # create atoms instance which will be used to calculate features
+    atoms = Atoms()
+    for row_id, row_data in one_point_df.iterrows():
+        # atoms accepts atom type (but database contains the atom index as well)
+        atom_type = get_characters(row_data.name_1)
+        atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
+
+    return atoms
