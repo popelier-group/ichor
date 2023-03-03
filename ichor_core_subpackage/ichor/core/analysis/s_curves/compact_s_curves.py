@@ -292,7 +292,7 @@ def calculate_compact_s_curves_from_files(
             else:
                 print(f"Could not get value for atom/property: {atom_name}/{property_name} from model file {model.path}.")
         else:
-            print(f"Could not get features or true values for atom {atom_name}, property {property_name} from model file {model.path}.")
+            print(f"Could not get features or true values for atom {atom_name}. Current property: {property_name}, current model file: {model.path}.")
 
     # if we have iqa energy we can compare to wfn energy
     if "iqa" in total_dict.keys() or "iqa_energy" in total_dict.keys():
