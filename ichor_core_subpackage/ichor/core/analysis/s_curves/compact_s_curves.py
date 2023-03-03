@@ -210,7 +210,6 @@ def calculate_compact_s_curves_from_files(
     models: Models,
     output_location: Union[str, Path] = "s_curves_from_df.xlsx",
     property_names: List[str] = None,
-    absolute_sum_iqa_errors = False,
     **kwargs,
 ):
     """Calculates S-curves used to check model prediction performance. 
@@ -220,7 +219,6 @@ def calculate_compact_s_curves_from_files(
     :param output_location: The name of the .xlsx file where to save the s-curves.
     :param property_names: A list of strings to use for property column names. If left as None,
         a default set of property names is used
-    :param absolute_sum_iqa_errors: Whether to absolute iqa energies before summing them up.
     :param kwargs: Key word argument to give to xlsxwriter for customizing plots.
      """
 
@@ -301,10 +299,7 @@ def calculate_compact_s_curves_from_files(
         # get arrays of predictions for iqa energies, sum and compare to wfn energy
         # shape is n_atoms x n_points
         tmp = [inner_dict["predicted"] for atom_name, inner_dict in total_dict["iqa"].items()]
-        if absolute_sum_iqa_errors:
-            total_sums = - np.sum(np.abs(np.array(tmp)), axis=0)
-        else:
-            total_sums = np.sum(tmp, axis=0)
+        total_sums = np.sum(tmp, axis=0)
         total_dict["sum_iqa"]["sum_iqa"]["predicted"] =  total_sums
         # assumes the test set is made from the same geometries for all atoms!!!, so then the wfn energy is the same between all datasets
         total_dict["sum_iqa"]["sum_iqa"]["true"] = true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy")
