@@ -282,7 +282,7 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
 
                 # add the point_id and name of point to dictionary
                 point_id_str = str(point_id)
-                total_dict[point_id_str] = {"point_id": point_id, "point_name": row_with_atom_info["name"]}
+                total_dict[point_id_str] = {"point_id": point_id, "point_name": row_with_atom_info["name"].item()}
                 # add features to dictionary               
                 total_dict[point_id_str].update({f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)})
                 # add wfn energy to dictionary
