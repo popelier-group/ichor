@@ -304,7 +304,17 @@ def calculate_compact_s_curves_from_files(
         # assumes the test set is made from the same geometries for all atoms!!!, so then the wfn energy is the same between all datasets
         total_dict["sum_iqa"]["sum_iqa"]["true"] = true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy")
         errors = true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy") - total_sums
-        total_dict["sum_iqa"]["sum_iqa"]["error"] =  errors * 2625.5
+        total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["error"] =  errors * 2625.5
+
+        errors_sum = []
+        # sum up the absolute errors of each atom
+        for atom_name in total_dict["iqa"].keys():
+            errors_sum.append(total_dict["iqa"][atom_name]["error"])
+        errors_sum = np.sum(np.abs(np.array(errors_sum)), axis=0)
+
+        total_dict["sum_iqa_error"]["sum_iqa_error"]["error"] =  errors_sum
+        total_dict["sum_iqa_error"]["sum_iqa_error"]["predicted"] = errors_sum
+        total_dict["sum_iqa_error"]["sum_iqa_error"]["true"] = np.zeros_like(errors_sum)
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
 
