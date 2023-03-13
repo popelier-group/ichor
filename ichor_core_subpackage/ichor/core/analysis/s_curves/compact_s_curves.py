@@ -231,8 +231,7 @@ def calculate_compact_s_curves_from_files(
         # sum_iqa compared to wfn_energy
         all_props = ["iqa", "wfn_energy"] + multipole_names
     else:
-        # add wfn energy to always have access to it in case doing sum of iqa
-        all_props = property_names + ["wfn_energy"]
+        all_props = property_names
 
     # use this to get features columns from df
     features_list = [f"f{i}" for i in range(1,nfeatures+1)]
@@ -244,6 +243,11 @@ def calculate_compact_s_curves_from_files(
         # make sure that the property iqa / iqa_energy has the correct name
         # if "iqa" found, then replace in all_props
         df_cols = test_set_df.columns
+
+        # add wfn energy to always have access to it in case doing sum of iqa
+        if "wfn_energy" in df_cols:
+            all_props.append("wfn_energy")
+
         if "iqa" in df_cols:
             for pr_idx, pr in enumerate(all_props):
                 if pr == "iqa_energy":
@@ -295,7 +299,7 @@ def calculate_compact_s_curves_from_files(
             print(f"Could not get features or true values for atom {atom_name}. Current property: {property_name}, current model file: {model.path}.")
 
     # if we have iqa energy we can compare to wfn energy
-    if "iqa" in total_dict.keys() or "iqa_energy" in total_dict.keys():
+    if ("iqa" in total_dict.keys() or "iqa_energy" in total_dict.keys()) and "wfn_energy" in total_dict.keys():
         # get arrays of predictions for iqa energies, sum and compare to wfn energy
         # shape is n_atoms x n_points
         tmp = [inner_dict["predicted"] for atom_name, inner_dict in total_dict["iqa"].items()]
