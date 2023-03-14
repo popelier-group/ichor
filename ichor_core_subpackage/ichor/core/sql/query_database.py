@@ -250,10 +250,8 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
             global_forces_array = None
 
         # If the atomic information (.int file) was missing, then this
-        # will be an empty dataframe. The database might not contain the
-        # information on a particular atom of a specific point because 
-        # the int file for that atom might not exist for some reason.
-        if not row_with_atom_info.empty:
+        # iqa energy will be None, so it will not get executed
+        if row_with_atom_info["iqa"].item():
 
             # if the absolute of the integration error is less than threshold, then calculate features
             if abs(row_with_atom_info["integration_error"].item()) < max_integration_error:
@@ -292,6 +290,20 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
                 # add iqa to dictionary
                 total_dict[point_id_str].update({"iqa": row_with_atom_info["iqa"].item()})
                 total_dict[point_id_str].update(local_spherical_multipoles)
+
+        else:
+            if not global_forces_array:
+                negative_dE_df = [None] * n_features
+
+                # add the point_id and name of point to dictionary
+                point_id_str = str(point_id)
+                total_dict[point_id_str] = {"point_id": point_id, "point_name": row_with_atom_info["name"].item()}
+                # add features to dictionary               
+                total_dict[point_id_str].update({f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)})
+                # add wfn energy to dictionary
+                total_dict[point_id_str].update({"wfn_energy": row_with_atom_info["wfn_energy"].item()})
+                # add -dE/df (forces wrt features) to dict
+                total_dict[point_id_str].update({f"-dE/df{i}": neg_dE_df for i, neg_dE_df in zip(range(1, n_features+1), negative_dE_df)})
 
     alf_for_current_atom = alf[central_atom_index]
     alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
