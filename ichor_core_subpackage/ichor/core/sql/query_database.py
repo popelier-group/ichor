@@ -292,9 +292,6 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
                 total_dict[point_id_str].update(local_spherical_multipoles)
 
         else:
-            if not global_forces_array:
-                negative_dE_df = [None] * n_features
-
                 # add the point_id and name of point to dictionary
                 point_id_str = str(point_id)
                 total_dict[point_id_str] = {"point_id": point_id, "point_name": row_with_atom_info["name"].item()}
