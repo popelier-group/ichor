@@ -44,6 +44,8 @@ If using conda, create a new environment. Please make sure that you are using th
 Using an older conda version will make it a bit harder to install ichor as the python/setuptools/pip version supplied are older.
 Make sure that you have at least python 3.7 in the current environment and that setuptools and pip are all up to date.
 
+Make sure you are connected to a proxy, on csf3 do `module load tools/env/proxy2`. Otherwise you will not be able to access github or install the required packages for ichor.
+
 First, download the ICHOR source code. It is recommended to download the code as a git repository, so that you can pull changes from the github code when changes are made. If you download the code as a zip, you will not be able to pull from github and will have to download the code every time a change is made!
 
 To make a conda environment do
@@ -51,6 +53,17 @@ To make a conda environment do
 ```
 conda create -n ichor
 ```
+
+To activate the conda environment do `conda activate name_of_env`.
+
+Use can also use a `venv` environment. To make a venv, do
+
+```
+python3 -m venv ~/.venv/ichor
+```
+
+This activate this environment, do `source ~/.venv/env_name/bin/activate`. Use this is you have problems with the anaconda for some reason or problems installing packages in anaconda.
+
 
 This will make a new environment called `ichor`, which can be activated by doing `conda activate ichor`. You should see `(ichor)` show up on the left side of the terminal, which indicates you are in the `ichor` environment.
 
