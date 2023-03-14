@@ -299,7 +299,7 @@ def calculate_compact_s_curves_from_files(
             print(f"Could not get features or true values for atom {atom_name}. Current property: {property_name}, current model file: {model.path}.")
 
     # if we have iqa energy we can compare to wfn energy
-    if ("iqa" in total_dict.keys() or "iqa_energy" in total_dict.keys()) and "wfn_energy" in total_dict.keys():
+    if "iqa" in total_dict.keys() and "wfn_energy" in true_values_dict[list(true_values_dict.keys())[0]]:
         # get arrays of predictions for iqa energies, sum and compare to wfn energy
         # shape is n_atoms x n_points
         tmp = [inner_dict["predicted"] for atom_name, inner_dict in total_dict["iqa"].items()]
