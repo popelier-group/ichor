@@ -292,15 +292,34 @@ def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[
                 total_dict[point_id_str].update(local_spherical_multipoles)
 
         else:
-                # add the point_id and name of point to dictionary
-                point_id_str = str(point_id)
-                total_dict[point_id_str] = {"point_id": point_id, "point_name": row_with_atom_info["name"].item()}
-                # add features to dictionary               
-                total_dict[point_id_str].update({f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)})
-                # add wfn energy to dictionary
-                total_dict[point_id_str].update({"wfn_energy": row_with_atom_info["wfn_energy"].item()})
-                # add -dE/df (forces wrt features) to dict
-                total_dict[point_id_str].update({f"-dE/df{i}": neg_dE_df for i, neg_dE_df in zip(range(1, n_features+1), negative_dE_df)})
+
+            # create atoms instance which will be used to calculate features
+            atoms = Atoms()
+            for row_id, row_data in one_point_df.iterrows():
+                # atoms accepts atom type (but database contains the atom index as well)
+                atom_type = get_characters(row_data.name_1)
+                atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
+
+            C = atoms[atom_name].C(alf)
+            central_atom_index = atoms[atom_name].i # 0-indexed
+            # calculate features for the atom of interest
+            one_atom_features = atoms[atom_name].features(calculate_alf_features, alf)
+            n_features = len(one_atom_features)
+
+            if global_forces_array is not None:
+                b_matrix = form_b_matrix(atoms, alf, central_atom_index)
+                negative_dE_df = convert_to_feature_forces(global_forces_array, b_matrix, alf, central_atom_index)
+            else:
+                negative_dE_df = [None] * n_features
+            # add the point_id and name of point to dictionary
+            point_id_str = str(point_id)
+            total_dict[point_id_str] = {"point_id": point_id, "point_name": row_with_atom_info["name"].item()}
+            # add features to dictionary               
+            total_dict[point_id_str].update({f"f{i}": one_atom_feature for i, one_atom_feature in zip(range(1, n_features+1), one_atom_features)})
+            # add wfn energy to dictionary
+            total_dict[point_id_str].update({"wfn_energy": row_with_atom_info["wfn_energy"].item()})
+            # add -dE/df (forces wrt features) to dict
+            total_dict[point_id_str].update({f"-dE/df{i}": neg_dE_df for i, neg_dE_df in zip(range(1, n_features+1), negative_dE_df)})
 
     alf_for_current_atom = alf[central_atom_index]
     alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
