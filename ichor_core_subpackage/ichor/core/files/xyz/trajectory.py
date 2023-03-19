@@ -160,6 +160,38 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 xyz_file = XYZ(path, atoms_instance)
                 xyz_file.write()
 
+    def to_dirs(self, system_name: str, root: Path, split_size: int, every: int = 1, center = False):
+        """Writes out every nth timestep to a separate .xyz file. This method differs
+        from `to_dir` because it has a structure room / inner_dir / xyz file.
+
+        :param system_name: The name of the system
+        :param root: A Path to a directory where where sub-directories
+            are going to be made. An empty directory is made for the given Path and
+            overwrites an existing directory for the given Path.
+        :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
+            a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
+        """
+        from ichor.core.files import XYZ
+
+        mkdir(root, empty=True)
+        i = 0
+        chunks = [self[x:x+split_size] for x in range(0, len(self), split_size)]
+        inner_dir_names = [f"{system_name}{chunk_idx}" for chunk_idx in range(len(chunks))]
+        for dir_name in inner_dir_names:
+            mkdir(root / dir_name, empty=True)
+
+        for dir_name, chunk in zip(inner_dir_names, chunks):
+            for atoms_instance in chunk:
+                if (i % every) == 0:
+                    if center:
+                        atoms_instance.centre()
+                    point_name = f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
+                    path = Path(point_name)
+                    path = root / dir_name / path
+                    xyz_file = XYZ(path, atoms_instance)
+                    xyz_file.write()
+                    i += 1
+
     def split_traj(self, root_dir: Path, split_size: int):
         """Splits trajectory into sub-trajectories and writes then to a folder.
         Eg. a 10,000 original trajectory can be split into 10 sub-trajectories
