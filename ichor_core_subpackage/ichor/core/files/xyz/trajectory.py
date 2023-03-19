@@ -160,6 +160,26 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 xyz_file = XYZ(path, atoms_instance)
                 xyz_file.write()
 
+    def split_traj(self, root_dir: Path, split_size: int):
+        """Splits trajectory into sub-trajectories and writes then to a folder.
+        Eg. a 10,000 original trajectory can be split into 10 sub-trajectories
+        containing 1,000 geometries each (given a split size of 1,000).
+
+        :param root_dir: The folder to write sub-trajectories to.
+            Must be a Path object and this directory will be created internally.
+        :param split_size: The split size by which to split original trajectory.
+        """
+
+        mkdir(root_dir, empty=True)
+        chunks = [self[x:x+split_size] for x in range(0, len(self), split_size)]
+        original_traj_stem = self.path.stem
+
+        for idx, chunk in enumerate(chunks):
+            new_traj_name = f"{original_traj_stem}_split{idx}.xyz"
+            new_traj = Trajectory(root_dir / new_traj_name)
+            new_traj.extend(chunk)
+            new_traj.write()
+
     def coordinates_to_xyz(
         self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
     ):
