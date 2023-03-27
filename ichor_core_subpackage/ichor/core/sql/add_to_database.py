@@ -37,8 +37,6 @@ def add_atom_names_to_database(session: Session, atom_names: List[str], echo=Fal
     session.bulk_save_objects(db_atom_names_list)
     session.commit()
 
-# TODO: make this more robust as some data might be absent. Check that .wfn exists before adding wfn data
-# TODO: check that gaussian out forces exist. Check that int file exists.
 def add_point_to_database(session: Session, point: "PointDirectory", echo=False, print_missing_data=True):
     """Adds information from an instance of a PointDirectory to the database.
 
@@ -148,6 +146,29 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
             
             # if .int file / INT instance exists, then data can be read in
             if atom_int_file:
+
+                # try to read int file as it might be corrupted if there is a .sh file from AIMAll
+                try:
+                    atom_int_file.read()
+                except:
+                    # if corrupted, just add Gaussian data and move to next atom
+                    # always print out that the file could not be read as this is an error
+                    print(f"The int file {atom_int_file.path} could not be read.")
+                    # add the Dataset object to list so it can be bulk written later
+                    db_dataset_list.append(Dataset(point_id=db_point.id,
+                                            atom_id=atom_id,
+                                            x=x_coord,
+                                            y=y_coord,
+                                            z=z_coord,
+                                            force_x=atom_force_x,
+                                            force_y=atom_force_y,
+                                            force_z=atom_force_z,
+                                            # the .int file arguments will be None by default
+                                            # as they can be nullable because of the dataset SQL table definition
+                                            )
+                                        )
+                    missing_int_files.append(atom_name)
+                    continue
 
                 # do not display warning from .int file if iqa energy is not there
                 # iqa energy will not be in an existing .int file in -encomp setting is below 3
