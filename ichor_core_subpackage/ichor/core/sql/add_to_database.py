@@ -167,6 +167,7 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
                                             # as they can be nullable because of the dataset SQL table definition
                                             )
                                         )
+                    missing_int_files.append(atom_name)
                     continue
 
                 # do not display warning from .int file if iqa energy is not there
