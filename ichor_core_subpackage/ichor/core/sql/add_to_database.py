@@ -50,6 +50,14 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
         the information for the point will still be added to the database. This is because
         the rest the point can still be used in the training set for the other atoms.
     """
+
+    # check for .sh file in directory as AIMALL should delete it if it ran successfully
+    # if .sh file is found then do not append this point to the database as it can cause problems
+    # when reading the database
+
+    for _f in point.path.iterdir():
+        if _f.suffix == ".sh":
+            print(f"A shell file (.sh) was found in {point.path.absolute()}, so AIMAll probably crashed. Not added to db.")
     
     ###############################
     # wfn information 
