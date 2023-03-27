@@ -58,6 +58,7 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
     for _f in point.path.iterdir():
         if _f.suffix == ".sh":
             print(f"A shell file (.sh) was found in {point.path.absolute()}, so AIMAll probably crashed. Not added to db.")
+            return
     
     ###############################
     # wfn information 
