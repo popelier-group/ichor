@@ -10,6 +10,12 @@ Base = declarative_base()
 # Declare structure of database
 #####
 
+# TO ENABLE CASCADE DELTE FOR SQLITE3, it is a bit more work
+# https://stackoverflow.com/a/62327279
+# https://stackoverflow.com/a/12801654
+# TLDR: doing  x = session.query(T).all(); [session.delete(y) for y in x] is not the same as session.query(T).delete()
+# Need to also enable PRAGMA foreign_keys=ON for sqlite3, otherwise does not work
+
 class AtomNames(Base):
     
     __tablename__ = "atom_names"
@@ -31,8 +37,7 @@ class Points(Base):
     # make nullable because Gaussian might not be ran yet
     wfn_energy = Column(Float, nullable=True)
     
-    # if point info gets deleted, delete the corresponding rows in the dataset table
-    children = relationship("Dataset", back_populates="points_parent", cascade="all, delete, delete-orphan", passive_deletes=True)
+    children = relationship("Dataset", back_populates="points_parent", passive_deletes=True)
     
 class Dataset(Base):
     
