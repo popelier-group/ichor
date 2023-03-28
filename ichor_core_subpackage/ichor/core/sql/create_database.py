@@ -32,14 +32,14 @@ class Points(Base):
     wfn_energy = Column(Float, nullable=True)
     
     # if point info gets deleted, delete the corresponding rows in the dataset table
-    children = relationship("Dataset", back_populates="points_parent", cascade="all, delete, delete-orphan")
+    children = relationship("Dataset", back_populates="points_parent", cascade="all, delete, delete-orphan", passive_deletes=True)
     
 class Dataset(Base):
     
     __tablename__ = "dataset"
     
     id = Column(Integer, primary_key=True)
-    point_id = Column(Integer, ForeignKey("points.id"))
+    point_id = Column(Integer, ForeignKey("points.id", ondelete='CASCADE'))
     atom_id = Column(Integer, ForeignKey("atom_names.id"))
     
     points_parent = relationship("Points", back_populates="children")
