@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Tuple
 from sqlalchemy import select
 from sqlalchemy import func
 import sqlalchemy
 from ichor.core.sql import Dataset, Points, AtomNames
 from sqlalchemy import create_engine
 import pandas as pd
-import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.str import get_characters
 from ichor.core.calculators import calculate_alf_features, calculate_alf_atom_sequence
@@ -16,6 +15,11 @@ from ichor.core.common.constants import multipole_names, spherical_monopole_labe
 from ichor.core.multipoles import rotate_dipole, rotate_quadrupole, rotate_octupole, rotate_hexadecapole
 from ichor.core.atoms import ALF
 from ichor.core.models.gaussian_energy_derivative_wrt_features import form_b_matrix, convert_to_feature_forces
+from sqlalchemy.orm import Session
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from sqlite3 import Connection as SQLite3Connection
+
 
 def rotate_multipole_moments(row_with_atom_info, C):
 
@@ -70,6 +74,20 @@ def rotate_multipole_moments(row_with_atom_info, C):
             local_spherical_multipoles[hexadecapole_name] = hexadecapole_value
 
         return local_spherical_multipoles
+
+def create_db_engine(db_path: Union[str, Path], echo=False) -> sqlalchemy.engine.Engine:
+    """Creates an engine to a SQLite3 database and returns the Engine object.
+
+    :param db_path: Path to SQLite3 database
+    :param echo: Whether to echo SQL queries, defaults to False
+    :return: An egnine object for the SQL database
+    :rtype: sqlalchemy.engine.Engine
+    """
+    database_path = str(Path(db_path).absolute())
+    # create database engine and start session
+    engine = create_engine(f"sqlite+pysqlite:///{database_path}", echo=echo, future=True)
+    
+    return engine
 
 def create_db_connection(db_path: Union[str, Path], echo=False) -> sqlalchemy.engine.Connection:
     """Creates a connection to a SQLite3 database and returns a connection object to be used
@@ -398,3 +416,16 @@ def atoms_from_point_id(full_df, point_id: int) -> "Atoms":
         atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
 
     return atoms
+
+def delete_points_by_id(engine, point_ids: List[int]):
+
+    @event.listens_for(Engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, connection_record):
+        if isinstance(dbapi_connection, SQLite3Connection):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON;")
+            cursor.close()
+
+    session = Session(engine, future=True)
+    session.query(Points).filter(Points.id.in_(point_ids)).delete()
+    session.commit()
