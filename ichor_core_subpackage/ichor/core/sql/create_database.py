@@ -31,7 +31,8 @@ class Points(Base):
     # make nullable because Gaussian might not be ran yet
     wfn_energy = Column(Float, nullable=True)
     
-    children = relationship("Dataset", back_populates="points_parent")
+    # if point info gets deleted, delete the corresponding rows in the dataset table
+    children = relationship("Dataset", back_populates="points_parent", cascade="all, delete, delete-orphan")
     
 class Dataset(Base):
     
