@@ -426,6 +426,8 @@ def atoms_from_point_id(full_df, point_id: int) -> "Atoms":
 
 def delete_points_by_id(engine, point_ids: List[int]):
 
+    # need to enable this for SQLite3 database in order to delete correctly, see
+    # https://stackoverflow.com/a/62327279
     @event.listens_for(Engine, "connect")
     def _set_sqlite_pragma(dbapi_connection, connection_record):
         if isinstance(dbapi_connection, SQLite3Connection):
