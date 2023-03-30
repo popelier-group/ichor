@@ -228,7 +228,7 @@ def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> Lis
     return atoms.alf_list(calculate_alf_atom_sequence)
 
 
-def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[int], properties: tuple,
+def write_processed_one_atom_data_to_csv(full_df: pd.DataFrame, point_ids: List[int],
                                          atom_name: str, alf: List[ALF],
                                          max_integration_error = 0.001,
                                          write_index_col=False):
@@ -372,7 +372,8 @@ def write_processed_data_for_atoms(db_path: Union[str, Path], alf: List[ALF],
                                    max_integration_error: float = 0.001,
                                    write_index_col=False,
                                    echo=False,
-                                   properties=("features", "wfn_energy", "-dE/df", "iqa", "rotated_multipole_moments")):
+                                   atom_names: List = None,
+                                   ):
     """Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
         iqa energy, and rotated multipoles for every atom in the SQL database.
         Note that only points for which the absolute integration error for the atom of interest
@@ -388,13 +389,19 @@ def write_processed_data_for_atoms(db_path: Union[str, Path], alf: List[ALF],
         point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001
     :param write_index_col: Whether to write the index col in the final .csv file, defaults to False
     :param echo: Whether to echo executed SQL statements, defaults to False
+    :param atom_names: A list of atom names for which to write db. If left to None, csv files
+        will be written for all atoms.
+    :param properties: Which properties to write out to csv files.
     """
     
-    point_ids, atom_names, full_df = get_db_information(db_path, echo=echo)
+    point_ids, all_atom_names, full_df = get_db_information(db_path, echo=echo)
     
+    if not atom_names:
+        atom_names = all_atom_names
+
     for atom_name in atom_names:
 
-        write_processed_one_atom_data_to_csv(full_df, point_ids, properties, atom_name=atom_name, alf=alf,
+        write_processed_one_atom_data_to_csv(full_df, point_ids, atom_name=atom_name, alf=alf,
                                              max_integration_error=max_integration_error,
                                              write_index_col=write_index_col)
 
