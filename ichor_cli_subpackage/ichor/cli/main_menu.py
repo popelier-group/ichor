@@ -22,6 +22,7 @@ main_menu_submenus = [SubmenuItem(POINTS_DIRECTORY_MENU_DESCRIPTION.title, point
 for submenu in main_menu_submenus:
     main_menu.append_item(submenu)
 
+# this function will be used by setuptools entry points
 def run_main_menu():
     """ Runs main ichor menu."""
     main_menu.show()
