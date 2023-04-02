@@ -1,0 +1,1 @@
+from ichor.cli.sub_menus.points_directory_menu.points_directory_menu import points_directory_menu
