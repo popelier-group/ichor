@@ -1,1 +1,0 @@
-from ichor.cli.sub_menus.molecular_dynamics_menu.molecular_dynamics_menu import molecular_dynamics_menu

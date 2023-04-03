@@ -1,14 +1,14 @@
 # Import the necessary packages
 from consolemenu import ConsoleMenu, SelectionMenu, MultiSelectMenu, MenuFormatBuilder, PromptUtils, Screen, items, clear_terminal
 from consolemenu.items import CommandItem, ExitItem, ExternalItem, FunctionItem, MenuItem, SelectionItem, SubmenuItem
-from ichor.cli.sub_menus.points_directory_menu import points_directory_menu
-from ichor.cli.sub_menus.analysis_menu import analysis_menu
-from ichor.cli.sub_menus.molecular_dynamics_menu.molecular_dynamics_menu import molecular_dynamics_menu
-from ichor.cli.sub_menus.tools_menu.tools_menu import tools_menu
+from ichor.cli.main_menu_submenus.points_directory_menu import points_directory_menu
+from ichor.cli.main_menu_submenus.analysis_menu import analysis_menu
+from ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_menu import molecular_dynamics_menu
+from ichor.cli.main_menu_submenus.tools_menu.tools_menu import tools_menu
 from ichor.cli.menu_descriptions import MenuDescription
 
 # import menu decriptions
-from ichor.cli.sub_menus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANALYSIS_MENU_DESCRIPTION, \
+from ichor.cli.main_menu_submenus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANALYSIS_MENU_DESCRIPTION, \
         MOLECULAR_DYNAMICS_MENU_DESCRIPTION, TOOLS_MENU_DESCRIPTION
 
 MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", "Welcome to ichor's main menu!", show_exit_option=True)
