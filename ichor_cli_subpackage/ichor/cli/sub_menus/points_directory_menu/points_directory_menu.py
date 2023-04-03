@@ -4,7 +4,7 @@ from ichor.core.files import PointsDirectory
 from pathlib import Path
 from ichor.cli.useful_functions.user_input import user_input_path
 from ichor.cli.menu_descriptions import MenuDescription, MenuPrologue, update_menu_prologue
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu", "Use this to do interact with ichor's PointsDirectory class.")
 
