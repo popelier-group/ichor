@@ -1,0 +1,4 @@
+from ichor.cli.sub_menus.analysis_menu.analysis_menu import ANALYSIS_MENU_DESCRIPTION
+from ichor.cli.sub_menus.molecular_dynamics_menu.molecular_dynamics_menu import MOLECULAR_DYNAMICS_MENU_DESCRIPTION
+from ichor.cli.sub_menus.points_directory_menu.points_directory_menu import POINTS_DIRECTORY_MENU_DESCRIPTION
+from ichor.cli.sub_menus.tools_menu.tools_menu import TOOLS_MENU_DESCRIPTION
