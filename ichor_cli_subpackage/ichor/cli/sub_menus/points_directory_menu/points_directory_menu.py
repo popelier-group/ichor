@@ -6,13 +6,12 @@ from ichor.cli.useful_functions.user_input import user_input_path
 from ichor.cli.menu_descriptions import MenuDescription, MenuPrologue, update_menu_prologue
 from dataclasses import dataclass, asdict
 
+POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu", "Use this to do interact with ichor's PointsDirectory class.")
+
 # dataclass used to store values for PointsDirectoryMenu
 @dataclass
 class PointsDirectoryMenuPrologue(MenuPrologue):
     selected_points_directory: str = ""
-
-# initialize dataclass
-points_directory_menu_prologue = PointsDirectoryMenuPrologue()
 
 # class with static methods for each menu item that calls a function.
 class PointsDirectoryFunctions:
@@ -20,23 +19,27 @@ class PointsDirectoryFunctions:
     @staticmethod
     def select_points_directory():
         """ Asks user to update pointsdirectory and then updates PointsDirectoryMenuPrologue instance."""
-        val = user_input_path("Enter PointsDirectory Path: ")
-        points_directory_menu_prologue.selected_points_directory = val
+        pd_path = user_input_path("Enter PointsDirectory Path: ")
+        points_directory_menu_prologue.selected_points_directory = Path(pd_path).absolute()
 
-POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu", "Use this to do interact with ichor's PointsDirectory class.")
+    @staticmethod
+    def convert_trajectory_to_points_directory():
+        """ Converts given trajectory (.xyz) to a PointsDirectory-like structure."""
+        trajectory_path = user_input_path("Enter Trajectory Path: ")
+        pd = PointsDirectory.from_trajectory(trajectory_path)
+        points_directory_menu_prologue.selected_points_directory = pd.path.absolute()
 
+# initialize dataclass for storing information for menu
+points_directory_menu_prologue = PointsDirectoryMenuPrologue()
+# initialize menu
 points_directory_menu = ConsoleMenu(POINTS_DIRECTORY_MENU_DESCRIPTION.title, lambda: update_menu_prologue(points_directory_menu_prologue))
 
-# selection_menu = SelectionMenu([d for d in Path().iterdir() if d.is_dir()])
-# selection_items = SubmenuItem("Select Directory", selection_menu, points_directory_menu)
-# points_directory_menu.append_item(selection_items)
+# make menu items
+point_directory_path = FunctionItem("Select path of PointsDirectory", PointsDirectoryFunctions.select_points_directory)
+trajectory_from_points_directory = FunctionItem("Make PointsDirectory from .xyz trajectory", PointsDirectoryFunctions.convert_trajectory_to_points_directory)
 
-accept_user_input_path = FunctionItem("Write path for PointsDirectory", PointsDirectoryFunctions.select_points_directory)
-
-points_directory_menu.append_item(accept_user_input_path)
-# new_points_location = accept_user_input_path.get_return()
-# points_directory_menu.prologue_text = new_points_location
-# points_directory_menu.draw()
-# make_points_dir_from_trajectory = FunctionItem("Make trajectory from PointsDirectory", PointsDirectory.from_trajectory, )
+# add items to menu
+points_directory_menu.append_item(point_directory_path)
+points_directory_menu.append_item(trajectory_from_points_directory)
 
 
