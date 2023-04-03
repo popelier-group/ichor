@@ -15,5 +15,5 @@ class MenuPrologue:
 
         return "\n".join([f"{k} : {v}" for k, v in asdict(self).items()])
 
-def update_menu_prologue(prologue):
-    return str(prologue)
+def update_menu_prologue_or_epilogue(prologue_or_epilogue):
+    return str(prologue_or_epilogue)
