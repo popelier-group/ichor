@@ -11,10 +11,10 @@ from ichor.cli.menu_descriptions import MenuDescription
 from ichor.cli.main_menu_submenus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANALYSIS_MENU_DESCRIPTION, \
         MOLECULAR_DYNAMICS_MENU_DESCRIPTION, TOOLS_MENU_DESCRIPTION
 
-MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", "Welcome to ichor's main menu!", show_exit_option=True)
+MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", prologue_description_text="Welcome to ichor's main menu!", show_exit_option=True)
 
 # create main menu
-main_menu = ConsoleMenu(MAIN_MENU_DESCRIPTION.title, prologue_text=MAIN_MENU_DESCRIPTION.prologue_text)
+main_menu = ConsoleMenu(MAIN_MENU_DESCRIPTION.title, prologue_text=MAIN_MENU_DESCRIPTION.prologue_description_text)
 
 # make submenus
 main_menu_submenus = [SubmenuItem(POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu),
