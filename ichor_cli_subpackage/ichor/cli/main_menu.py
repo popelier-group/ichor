@@ -11,10 +11,22 @@ from ichor.cli.menu_descriptions import MenuDescription
 from ichor.cli.main_menu_submenus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANALYSIS_MENU_DESCRIPTION, \
         MOLECULAR_DYNAMICS_MENU_DESCRIPTION, TOOLS_MENU_DESCRIPTION
 
-MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", prologue_description_text="Welcome to ichor's main menu!", show_exit_option=True)
+# points_directory_menu = ConsoleMenu(POINTS_DIRECTORY_MENU_DESCRIPTION.title,
+#                                     subtitle=POINTS_DIRECTORY_MENU_DESCRIPTION.subtitle,
+#                                     prologue_text = lambda: POINTS_DIRECTORY_MENU_DESCRIPTION.prologue_description_text + points_directory_menu_options(),
+#                                     epilogue_text=POINTS_DIRECTORY_MENU_DESCRIPTION.epilogue_description_text,
+#                                     show_exit_option=POINTS_DIRECTORY_MENU_DESCRIPTION.show_exit_option)
+
+
+MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", subtitle="Welcome to ichor's main menu!", show_exit_option=True)
 
 # create main menu
-main_menu = ConsoleMenu(MAIN_MENU_DESCRIPTION.title, prologue_text=MAIN_MENU_DESCRIPTION.prologue_description_text)
+main_menu = ConsoleMenu(MAIN_MENU_DESCRIPTION.title,
+                        subtitle=MAIN_MENU_DESCRIPTION.subtitle,
+                        prologue_text=MAIN_MENU_DESCRIPTION,
+                        epilogue_text=MAIN_MENU_DESCRIPTION.epilogue_description_text,
+                        show_exit_option=MAIN_MENU_DESCRIPTION.show_exit_option
+                        )
 
 # make submenus
 main_menu_submenus = [SubmenuItem(POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu),

@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Union
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu", 
-                                                        prologue_description_text="Use this to do interact with ichor's PointsDirectory class.\n")
+                                                        subtitle="Use this to do interact with ichor's PointsDirectory class.\n")
 
 # dataclass used to store values for PointsDirectoryMenu
 @dataclass
@@ -53,6 +53,7 @@ points_directory_menu_functions = PointsDirectoryFunctions()
 
 # initialize menu
 points_directory_menu = ConsoleMenu(POINTS_DIRECTORY_MENU_DESCRIPTION.title,
+                                    subtitle=POINTS_DIRECTORY_MENU_DESCRIPTION.subtitle,
                                     prologue_text = lambda: POINTS_DIRECTORY_MENU_DESCRIPTION.prologue_description_text + points_directory_menu_options(),
                                     epilogue_text=POINTS_DIRECTORY_MENU_DESCRIPTION.epilogue_description_text,
                                     show_exit_option=POINTS_DIRECTORY_MENU_DESCRIPTION.show_exit_option)
