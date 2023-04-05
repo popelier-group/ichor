@@ -5,7 +5,7 @@ from ichor.cli.main_menu_submenus.points_directory_menu import points_directory_
 from ichor.cli.main_menu_submenus.analysis_menu import analysis_menu
 from ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_menu import molecular_dynamics_menu
 from ichor.cli.main_menu_submenus.tools_menu.tools_menu import tools_menu
-from ichor.cli.menu_descriptions import MenuDescription
+from ichor.cli.menu_description import MenuDescription
 
 # import menu decriptions
 from ichor.cli.main_menu_submenus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANALYSIS_MENU_DESCRIPTION, \

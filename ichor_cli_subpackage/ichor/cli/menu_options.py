@@ -1,15 +1,6 @@
 from dataclasses import dataclass, asdict
 
 @dataclass
-class MenuDescription:
-    """ Dataclass for menu descriptions. Each menu has its own description, which remains CONSTANT."""
-    title: str
-    subtitle: str = ""
-    prologue_description_text: str = ""
-    epilogue_description_text: str = ""
-    show_exit_option: bool = False
-
-@dataclass
 class MenuOptions:
     """ Base class for Menu options. Each menu can implements its own options. Formats
         and prints out the options, as well as displays warnings to prologue when there are warnings

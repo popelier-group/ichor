@@ -4,7 +4,8 @@ from consolemenu.format import MenuBorderStyleType
 from ichor.core.files import PointsDirectory, Trajectory
 from pathlib import Path
 from ichor.cli.useful_functions.user_input import user_input_path
-from ichor.cli.menu_descriptions import MenuDescription, MenuOptions
+from ichor.cli.menu_description import MenuDescription
+from ichor.cli.menu_options import MenuOptions
 from dataclasses import dataclass
 from typing import Union
 
