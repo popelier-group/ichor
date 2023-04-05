@@ -23,7 +23,7 @@ MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", subtitle="Welcome to ichor'
 # create main menu
 main_menu = ConsoleMenu(MAIN_MENU_DESCRIPTION.title,
                         subtitle=MAIN_MENU_DESCRIPTION.subtitle,
-                        prologue_text=MAIN_MENU_DESCRIPTION,
+                        prologue_text=MAIN_MENU_DESCRIPTION.prologue_description_text,
                         epilogue_text=MAIN_MENU_DESCRIPTION.epilogue_description_text,
                         show_exit_option=MAIN_MENU_DESCRIPTION.show_exit_option
                         )
