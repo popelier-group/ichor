@@ -15,6 +15,7 @@ class MenuOptions:
         and prints out the options, as well as displays warnings to prologue when there are warnings
         for the given options. These options can be changed by the user."""
 
+    # TODO: use the formatter class
     @staticmethod
     def formatter_menu_options(s: str):
         """ Formats the names of the dataclass variables, so they are printed nicely in the terminal."""
