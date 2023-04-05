@@ -49,5 +49,5 @@ class MenuOptions:
         # if not an empty list
         if warnings:
             warnings = "\n".join(warnings)
-            return attributes_str + "Warnings:\n" + warnings
+            return attributes_str + "\n\nWarnings:\n" + warnings
         return attributes_str
