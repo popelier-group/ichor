@@ -3,4 +3,4 @@ from consolemenu.items import CommandItem, ExitItem, ExternalItem, FunctionItem,
 from ichor.cli.menu_descriptions import MenuDescription
 
 ANALYSIS_MENU_DESCRIPTION = MenuDescription("Analysis Menu", "Use this to do analysis of data with ichor.")
-analysis_menu = ConsoleMenu(ANALYSIS_MENU_DESCRIPTION.title, ANALYSIS_MENU_DESCRIPTION.prologue_text)
+analysis_menu = ConsoleMenu(ANALYSIS_MENU_DESCRIPTION.title, ANALYSIS_MENU_DESCRIPTION.prologue_description_text)
