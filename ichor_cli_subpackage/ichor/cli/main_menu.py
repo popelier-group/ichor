@@ -22,15 +22,15 @@ main_menu = ConsoleMenu(MAIN_MENU_DESCRIPTION.title,
                         )
 
 # make submenus
-main_menu_submenus = [SubmenuItem(POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu),
-                      SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
-                      SubmenuItem(MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu),
-                      SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu)
+main_menu_items = [SubmenuItem(POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu),
+                    SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
+                    SubmenuItem(MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu),
+                    SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu)
                     ]
 
 # add submenus to main menu
-for submenu in main_menu_submenus:
-    main_menu.append_item(submenu)
+for itm in main_menu_items:
+    main_menu.append_item(itm)
 
 # this function will be used by setuptools entry points
 def run_main_menu():

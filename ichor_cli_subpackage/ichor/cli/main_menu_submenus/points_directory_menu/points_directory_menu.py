@@ -19,7 +19,7 @@ class PointsDirectoryMenuOptions(MenuOptions):
     selected_points_directory_path: Path = Path("").absolute()
 
     def check_selected_points_directory_path(self) -> Union[str, None]:
-        """ Checks whether the given PointsDirectory exists or if it is a directory """
+        """ Checks whether the given PointsDirectory exists or if it is a directory."""
         pd_path = Path(self.selected_points_directory_path)
         if (not pd_path.exists()) or (not pd_path.is_dir()):
             return f"Current {pd_path} does not exist or is not a directory."
