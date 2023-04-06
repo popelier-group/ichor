@@ -63,7 +63,8 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         an error is thrown when attempting to write the gjf file (because no gjf file or `Atoms` instance was given)
 
     :param extra_calculation_details: A list of strings to be added to the bottom of the gjf file
-        (after atoms section containing atom names and coordinates). This is done in order to handle different basis sets
+        (after atoms section containing atom names and coordinates).
+        This is done in order to handle different basis sets
         for individual atoms, modredundant settings, and other settings that Gaussian handles.
 
     .. note::
@@ -243,7 +244,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         if self.spin_multiplicity < 1:
             raise ValueError(f"Spin multiplicity cannot be {self.spin_multiplicity}.")
         if len(self.atoms) == 0:
-            raise ValueError(f"There are no atoms to write to gjf file.")
+            raise ValueError("There are no atoms to write to gjf file.")
 
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"

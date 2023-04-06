@@ -30,7 +30,8 @@ class Enum(Enum):
 
 
 class EnumStrList(Enum):
-    """Extension of Enum where each enumeration is a list of strings to be searched through when initialising an enumeration"""
+    """Extension of Enum where each enumeration is a
+    list of strings to be searched through when initialising an enumeration"""
 
     @classmethod
     def _missing_(cls, value):

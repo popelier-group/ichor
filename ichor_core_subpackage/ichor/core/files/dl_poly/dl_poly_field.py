@@ -3,10 +3,7 @@ from typing import List, Union
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.calculators import (
-    default_connectivity_calculator,
-    default_feature_calculator,
-)
+from ichor.core.calculators import default_connectivity_calculator
 from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
 from ichor.core.common.constants import dlpoly_weights
 from ichor.core.files.file import WriteFile

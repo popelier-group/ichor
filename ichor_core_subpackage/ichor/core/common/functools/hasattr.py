@@ -1,6 +1,6 @@
-import builtins
-import inspect
-import types
+# import builtins
+# import inspect
+# import types
 
 """
     When using hasattr in ichor, it may be preferrable to use
@@ -11,7 +11,7 @@ import types
 
     This hasattr overrides the builtin hasattr so that if hasattr is called from a hasattr statement,
     it can be seen using inspect.current_frame(). This is because the builtin hasattr is written in C
-    and therefore cannot be seen by inspect and we therefore cannot avoid this possible infinite recurssive
+    and therefore cannot be seen by inspect and we therefore cannot avoid this possible infinite recursive
     loop.
 
     This is of great importance when wanting to use hasattr in a __getattr__ method as hasattr calls

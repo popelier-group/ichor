@@ -1,5 +1,3 @@
-from functools import wraps
-
 from ichor.core.common.types.itypes import F
 
 
@@ -27,8 +25,10 @@ class ClassPropertyDescriptor:
 
 
 def classproperty(func: F) -> ClassPropertyDescriptor:
-    """A decorator which makes it possible to make class properties, where the class can call a class method without the parenthesis at the end.
-    This is useful to have as class variables are static and cannot be changed. Class properties allow us to change these values on the fly."""
+    """A decorator which makes it possible to make class properties,
+    where the class can call a class method without the parenthesis at the end.
+    This is useful to have as class variables are static and cannot be changed.
+    Class properties allow us to change these values on the fly."""
     if not isinstance(func, (classmethod, staticmethod)):
         func = classmethod(func)
     return ClassPropertyDescriptor(func)

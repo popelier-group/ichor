@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.common.constants import ha_to_kj_mol, multipole_names
-from ichor.core.common.excel import num2col
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
@@ -17,10 +16,13 @@ def percentile(n: int) -> np.ndarray:
 
 
 def make_chart_settings(local_kwargs: dict):
-    """Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
-    constructs dictionaries with parameter values to be passed to xlsx writer to configure graph settings.
+    """Takes in a dictionary of key word arguments that were
+    passed into the `write_to_excel` function. Then, this function
+    constructs dictionaries with parameter values to be passed
+    to xlsx writer to configure graph settings.
 
-    :param local_kwargs: A dictionary containing key word arguments that are parsed to construct the xlsx-writer graph settings
+    :param local_kwargs: A dictionary containing key word arguments
+        that are parsed to construct the xlsx-writer graph settings
     """
 
     from collections import defaultdict
@@ -83,12 +85,15 @@ def simplified_write_to_excel(
     sort_keys: bool = True,
 ):
     """
-    Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
-    also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
+    Writes out relevant information which is used to make s-curves to an excel file.
+    It will make a separate sheet for every atom (and property). It
+    also makes a `Total` sheet for every property,
+    which gives an idea how the predictions do overall for the whole system.
 
     :param total_dict: a dictionary containing key: property, val: inner_dict.
         inner_dict contains key: atom_name, val: inner_inner_dict.
-        inner_inner_dict contains: key: (true, predicted or error), val: a 1D numpy array containing the corresponding values
+        inner_inner_dict contains key: (true, predicted or error),
+            val: a 1D numpy array containing the corresponding values
     :param output_name: The name of the excel file to be written out.
     :param x_axis_name: The title to be used for x-axis in the S-curves plot.
     :param x_log_scale: Whether to make x dimension log scaled. Default True.
@@ -104,7 +109,8 @@ def simplified_write_to_excel(
     :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
     :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
     :param show_legend: Whether to show legend on the plot. Default False.
-    :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
+    :param excel_style: The style which excel uses for the plots.
+        Default is 10, which is the default style used by excel.
     :param sort_columns: Whether to sort the keys of the dictionary (uses Python sort). Default True.
     """
 
@@ -306,7 +312,8 @@ def calculate_compact_s_curves_from_files(
                 )
         else:
             print(
-                f"Could not get features or true values for atom {atom_name}. Current property: {property_name}, current model file: {model.path}."
+                f"Could not get features or true values for atom {atom_name}. \
+                    Current property: {property_name}, current model file: {model.path}."
             )
 
     # if we have iqa energy we can compare to wfn energy
@@ -322,7 +329,8 @@ def calculate_compact_s_curves_from_files(
         ]
         total_sums = np.sum(tmp, axis=0)
         total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["predicted"] = total_sums
-        # assumes the test set is made from the same geometries for all atoms!!!, so then the wfn energy is the same between all datasets
+        # assumes the test set is made from the same geometries for all atoms!!!
+        # , so then the wfn energy is the same between all datasets
         total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["true"] = true_values_dict[
             list(true_values_dict.keys())[0]
         ].get("wfn_energy")
@@ -404,10 +412,14 @@ def calculate_compact_s_curves(
     """Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
 
     :param model_location: A directory containing model files `.model`
-    :param validation_set_location: A directory containing validation or test set points. These points should NOT be in the training set.
-    :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves. S-curves are made for all atoms in the system by default.
-    :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves. S-curves are made for all properties in the model files.
-    :param **kwargs: Any key word arguments that can be passed into the write_to_excel function to change how the S-curves excel file looks. See write_to_excel() method
+    :param validation_set_location: A directory containing validation or test set points.
+        These points should NOT be in the training set.
+    :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
+        S-curves are made for all atoms in the system by default.
+    :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves.
+        S-curves are made for all properties in the model files.
+    :param **kwargs: Any key word arguments that can be passed into the write_to_excel
+        function to change how the S-curves excel file looks. See write_to_excel() method
     """
 
     if model_location is None or validation_set_location is None:
@@ -441,8 +453,10 @@ def write_to_excel(
     excel_style: int = 10,
 ):
     """
-    Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
-    also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
+    Writes out relevant information which is used to make s-curves to an excel file.
+    It will make a separate sheet for every atom (and property). It
+    also makes a `Total` sheet for every property, which gives
+    an idea how the predictions do overall for the whole system.
 
     :param true: a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set
     :param predicted: a ModelsResult containing predicted values, given the validation/test set features
@@ -461,7 +475,8 @@ def write_to_excel(
     :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
     :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
     :param show_legend: Whether to show legend on the plot. Default False.
-    :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
+    :param excel_style: The style which excel uses for the plots.
+        Default is 10, which is the default style used by excel.
     """
 
     # use the key word arguments to construct the settings used for x and y axes
@@ -500,7 +515,8 @@ def write_to_excel(
             # TOTAL S-CURVE
             ############################
 
-            # calculate a total df that sums up all the errors for all atoms in one point and then sorts by error (ascending)
+            # calculate a total df that sums up all the errors for
+            # all atoms in one point and then sorts by error (ascending)
             # see ModelResult reduce method
             df = pd.DataFrame(error[sheet_name].reduce())
             df.rename(columns={0: "Total"}, inplace=True)

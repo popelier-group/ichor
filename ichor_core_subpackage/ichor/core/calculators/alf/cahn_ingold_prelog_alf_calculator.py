@@ -1,14 +1,16 @@
 from ichor.core.calculators.connectivity import default_connectivity_calculator
 
+
 # TODO: use connectivity here instead of connectivity calculator.
 def calculate_alf_cahn_ingold_prelog(
-    atom: "Atom",
+    atom: "Atom",  # noqa F821
     connectivity_calculator=default_connectivity_calculator,
-) -> "ALF":
+) -> "ALF":  # noqa F821
 
     from ichor.core.atoms.alf import ALF
 
-    """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
+    """Returns the Atomic Local Frame (ALF) of the specified atom,
+    note that it is 0-indexed. The ALF consists of 3 Atom instances,
     the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
     matrix and features.
 
@@ -26,7 +28,7 @@ def calculate_alf_cahn_ingold_prelog(
     import itertools as it
     from typing import List
 
-    def _priority_by_mass(atoms: List["Atom"]) -> float:
+    def _priority_by_mass(atoms: List["Atom"]) -> float:  # noqa F821
         """Returns the sum of masses of a list of Atom instances
 
         Args:
@@ -38,7 +40,7 @@ def calculate_alf_cahn_ingold_prelog(
         """
         return sum(a.mass for a in atoms)
 
-    def _get_priority(atom: "Atom", level: int):
+    def _get_priority(atom: "Atom", level: int):  # noqa F821
         """Returns the priority of atoms on a given level."""
         atoms = [atom]
         for _ in range(level):
@@ -54,7 +56,7 @@ def calculate_alf_cahn_ingold_prelog(
 
         return _priority_by_mass(atoms)
 
-    def _max_priority(atoms: List["Atom"]):
+    def _max_priority(atoms: List["Atom"]):  # noqa F821
         """Returns the Atom instance that has the highest priority in the given list.
 
             Args:
@@ -75,12 +77,13 @@ def calculate_alf_cahn_ingold_prelog(
                 prev_priorities = priorities
         return atoms[priorities.index(max(priorities))]
 
-    def _calculate_alf(atom) -> List["Atom"]:
+    def _calculate_alf(atom) -> List["Atom"]:  # noqa F821
         """Returns a list consisting of the x-axis and xy-plane Atom instances, which
         correspond to the atoms of first and second highest priorty as determined by the
         Cahn-Ingold-Prelog rules."""
         alf = [atom]
-        # we need to get 2 atoms - one for x-axis and one for xy-plane. If the molecule is 2d (like HCl), then we only need 1 atom.
+        # we need to get 2 atoms - one for x-axis and one for xy-plane.
+        # If the molecule is 2d (like HCl), then we only need 1 atom.
         n_atoms_in_alf = 2 if len(atom.parent) > 2 else 1
         if len(atom.parent) == 1:
             raise ValueError(
@@ -106,5 +109,6 @@ def calculate_alf_cahn_ingold_prelog(
             alf.append(max_priority_atom)
         return alf
 
-    # return a list of the index (starts at 0 because we use this alf to index lists) of central atom, the x_axis and xy_plane atoms
+    # return a list of the index (starts at 0 because we use this alf to index lists)
+    # of central atom, the x_axis and xy_plane atoms
     return ALF(*[a.i for a in _calculate_alf(atom)])

@@ -19,7 +19,8 @@ from ichor.core.files.file_data import HasAtoms, HasProperties
 
 
 class GaussianOut(HasAtoms, HasProperties, ReadFile):
-    """Wraps around a .gau/.log file that is the output of Gaussian. This file contains coordinates (in Angstroms),
+    """Wraps around a .gau/.log file that is the output of Gaussian.
+    This file contains coordinates (in Angstroms),
     forces, as well as molecular multipole moments.
 
     :param path: Path object or string to the .gau or .log file that are Gaussian output files
@@ -53,8 +54,10 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
     def properties(
         self, C_matrix_dict: Dict[str, np.ndarray]
     ) -> Dict[str, Dict[str, AtomForce]]:
-        """Returns the machine learning labels which are in this file. The atomic forces need to be rotated by a C matrix
-        (each atom has its own C matrix) prior to machine learning. This method is primarily here to be used by
+        """Returns the machine learning labels which are in this file.
+        The atomic forces need to be rotated by a C matrix
+        (each atom has its own C matrix) prior to machine learning.
+        This method is primarily here to be used by
         `PointDirectory`/`PointsDirectory` classes.
 
         :param C_matrix_dict: A dictionary of C matrices for each atom in the system.
@@ -69,8 +72,9 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
     def local_forces(
         self, C_matrix_dict: Dict[str, np.ndarray]
     ) -> Dict[str, AtomForce]:
-        """Rotates the force vector by the C matrix (which defines a new coordinate frame). The C matrix is dependent on
-        the atomic local frame calculated for each atom. Each atom has its own C rotation matrix, so each atomic force is
+        """Rotates the force vector by the C matrix (which defines a new coordinate frame).
+         The C matrix is dependent on the atomic local frame calculated for each atom.
+         Each atom has its own C rotation matrix, so each atomic force is
         rotated by the atom's specific C matrix.
 
         :param C_matrix_dict: A dictionary of C matrices for each atom in the system.
@@ -92,7 +96,8 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
         return local_forces
 
     def _read_file(self):
-        """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
+        """Parse through a .wfn file to look for the relevant information.
+        This is automatically called if an attribute is being accessed, but the
         FileState of the file is FileState.Unread"""
 
         atoms = Atoms()
@@ -159,7 +164,8 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
                     ]
                     self.molecular_quadrupole = MolecularQuadrupole(*values)
 
-                    # this is the line that says Traceless Quadrupole moment, the problem is that it contains the same text
+                    # this is the line that says Traceless Quadrupole moment,
+                    # the problem is that it contains the same text
                     # as the other quadrupole line
                     line = next(f)
 

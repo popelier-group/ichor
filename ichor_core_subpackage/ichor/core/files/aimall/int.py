@@ -106,13 +106,14 @@ class INT(HasProperties, ReadFile):
         return ["iqa, integration_error"] + multipole_names
 
     @property
-    def wfn(self) -> "WFN":
+    def wfn(self) -> "WFN":  # noqa F821
         from ichor.core.files import WFN
 
         return WFN(self.wfn_file_path)
 
     def properties(self, C: np.ndarray) -> Dict[str, float]:
-        """Get properties which we are interested in machine learning from the INT file. Rotate multipoles using a given C matrix."""
+        """Get properties which we are interested in machine
+        learning from the INT file. Rotate multipoles using a given C matrix."""
         return {
             **{"iqa": self.iqa},
             **{"integration_error": self.integration_error},
@@ -270,13 +271,16 @@ class INT(HasProperties, ReadFile):
 
     @property
     def integration_error(self) -> float:
-        """The integration error can tell you if a point has been decomposed into topological atoms correctly. A large integration error signals
-        that the point might not be suitable for training as the AIMALL IQA/multipole moments might be inaccurate."""
+        """The integration error can tell you if a point has been
+        decomposed into topological atoms correctly. A large integration error signals
+        that the point might not be suitable for training as the
+        AIMALL IQA/multipole moments might be inaccurate."""
         return self.basin_integration_results["L"]
 
     @property
     def iqa(self) -> float:
-        """Returns the IQA energy of the topological atom that was calculated for this topological atom (since 1 .int file is written for each topological atom)."""
+        """Returns the IQA energy of the topological atom that was calculated for
+        this topological atom (since 1 .int file is written for each topological atom)."""
         # YulianM: removed the ADD_DISPERSION. This class should only be used to parse .int files and
         # processing the data should be done somewhere else.
         # TODO: Check the -encomp setting somehow from the .int file?

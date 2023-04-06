@@ -2,21 +2,21 @@ from typing import IO, Optional
 
 import numpy as np
 from ichor.core.common.functools import cached_property
-from ichor.core.common.np import batched_array
-from ichor.core.models.kernels.distance import Distance
 from ichor.core.models.kernels.kernel import Kernel
 
 
 class RBFCyclic(Kernel):
 
-    # TODO: figure out a good way to say if training data is standardized, normalized, etc. because this kernel is affected by data preprocessing
+    # TODO: figure out a good way to say if training data is standardized,
+    # normalized, etc. because this kernel is affected by data preprocessing
 
     """Implemtation of Radial Basis Function (RBF) kernel with cyclic feature correction for phi angle feature
 
     .. note::
         Cyclic correction is applied only for our phi angles (phi is the azimuthal angle measured in the xy plane).
 
-        If we have unstandardized(original) features, we have to apply this correction only when the distance between two phi angles is greater than pi
+        If we have unstandardized(original) features, we have to apply this correction only
+        when the distance between two phi angles is greater than pi
 
         .. math::
 
@@ -26,17 +26,19 @@ class RBFCyclic(Kernel):
             & 2\pi - (\phi_1 - \phi_2), && \text{if}\ (\phi_1 - \phi_2) \geq \pi
             \end{aligned} \right.
 
-        If we have standardized features (where we have subtracted the feature mean and divided by the feature standard deviation),
-        we have to apply a correction only when the distance is greater than pi/sigma where sigma is the standard deviation of
+        If we have standardized features (where we have subtracted the
+        feature mean and divided by the feature standard deviation), we have to apply a correction
+        only when the distance is greater than pi/sigma where sigma is the standard deviation of
         the particular feature in the training data.
 
         .. math::
 
-            \hat \phi_1 - \hat \phi_2 = \left \{
-            \begin{aligned}
-            &\hat \phi_1 - \hat \phi_2, && \text{if}\ \hat \phi_1 - \hat \phi_2 \leq \frac{\pi}{\sigma} \\
-            & \frac{2\pi}{\sigma} - (\hat \phi_1 - \hat \phi_2), && \text{if}\ (\hat \phi_1 - \hat \phi_2) \geq \frac{\pi}{\sigma}
-            \end{aligned} \right.
+        \hat \phi_1 - \hat \phi_2 = \left \{
+        \begin{aligned}
+        &\hat \phi_1 - \hat \phi_2, && \text{if}\ \hat \phi_1 - \hat \phi_2 \leq \frac{\pi}{\sigma} \\
+        & \frac{2\pi}{\sigma} - (\hat \phi_1 - \hat \phi_2),
+        && \text{if}\ (\hat \phi_1 - \hat \phi_2) \geq \frac{\pi}{\sigma}
+        \end{aligned} \right.
     """
 
     def __init__(
@@ -51,7 +53,8 @@ class RBFCyclic(Kernel):
             :param: `lengthscale` np.ndarray of shape ndimensions (1D array):
                 array of lengthscales. We are using a separate lengthscale for each feature(dimension).
             :param: optional, `train_x_std` np.ndarray of shape ndimensions (1D array):
-                if training/test data is standardized, then `train_x_std` has to be provided. This array contains the standard
+                if training/test data is standardized, then `train_x_std` has to be provided.
+                This array contains the standard
                 deviations for each feature, calculated from the training set points.
         """
         super().__init__(name, active_dims)

@@ -127,7 +127,8 @@ class AIM(ReadFile, dict):
                     self.output_file = Path(line.split()[-1])
 
                 if is_all_atom_calculation and "aimint.exe" in line:
-                    # find the path to where the atom information will be stored (this is without suffix), also remove extra " in line
+                    # find the path to where the atom information will
+                    # be stored (this is without suffix), also remove extra " in line
                     aimatom_path = Path(line.split()[-2].strip('"'))
                     # convert the stem to upper, eg. o1 -> O1
                     inpfile = aimatom_path.with_suffix(".inp")

@@ -7,7 +7,8 @@ import numpy as np
 class Kernel(ABC):
     """Base class for all kernels that implements dunder methods for addition or multiplication of separate kernels"""
 
-    # TODO: figure out a good way to say if training data is standardized, normalized, etc. because kernels can be affected (for example cyclic RBF is affected)
+    # TODO: figure out a good way to say if training data is standardized,
+    # normalized, etc. because kernels can be affected (for example cyclic RBF is affected)
 
     def __init__(self, name: str, active_dims: Optional[np.ndarray] = None):
         self.name = name
@@ -21,7 +22,8 @@ class Kernel(ABC):
 
     @property
     def true_lengthscales(self):
-        """These are the true lengthscale values. Typically the kernel equations are written with these values (l) instead of theta (see the
+        """These are the true lengthscale values. Typically the kernel
+        equations are written with these values (l) instead of theta (see the
         kernel cookbook or Rasmussen and Williams for examples."""
         return np.sqrt(1.0 / (2 * self._thetas))
 

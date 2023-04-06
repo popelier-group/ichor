@@ -85,7 +85,8 @@ class INTs(HasProperties, dict, Directory):
         a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
         (as read in from the int file) will be used (if it exists).
 
-        :param C_dict: A dictionary of rotation matrices, each of the atoms. This ensures that the correct C matrix is used for each atom.
+        :param C_dict: A dictionary of rotation matrices, each of the atoms.
+            This ensures that the correct C matrix is used for each atom.
         :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
             with the int file does not exist. Then we cannot calculate multipoles.
         """

@@ -31,7 +31,7 @@ class DlPolyConfig(WriteFile):
         self,
         path: Union[Path, str],
         system_name: str,
-        trajectory: "Trajectory",
+        trajectory: "Trajectory",  # noqa F821
         cell_size: float = 50.0,
         comment_line="Frame :         1\n",
     ):
@@ -52,11 +52,12 @@ class DlPolyConfig(WriteFile):
 
             f.write(self.comment_line)
             # see dlpoly manual 4 for settings, VMD needs to have the third optional number
-            # which is the total number of particles in the system (the number of timesteps * the number of atoms in one timestep)
+            # which is the total number of particles in the system
+            # (the number of timesteps * the number of atoms in one timestep)
             if vmd_compatible:
                 f.write(f"0  1  {len(self.trajectory) * len(self.trajectory[0])}\n")
             else:
-                f.write(f"0  1\n")  # PBC Solution to temporary problem
+                f.write("0  1\n")  # PBC Solution to temporary problem
             f.write(f"{self.cell_size} 0.0 0.0\n")
             f.write(f"0.0 {self.cell_size} 0.0\n")
             f.write(f"0.0 0.0 {self.cell_size}\n")

@@ -1,8 +1,6 @@
-import sys
 from typing import IO, Optional
 
 import numpy as np
-from ichor.core.models.kernels.distance import Distance
 from ichor.core.models.kernels.kernel import Kernel
 
 
@@ -26,10 +24,14 @@ class PeriodicKernel(Kernel):
 
         .. note::
             Lengthscales is typically n_features long because we want a separate lengthscale for each dimension.
-            The periodic kernel is going to be used for phi features because these are the features we know can be cyclic.
-            The period of the phi angle is always :math:`2\pi`, however this period can change if there is normalization
-            or standardization applied to features. The new period then becomes the distance between where :math:`\pi` and :math:`-\pi`
-            land after the features are scaled. Because the period can vary for individual phi angles for standardization, it is
+            The periodic kernel is going to be used for phi features
+            because these are the features we know can be cyclic.
+            The period of the phi angle is always :math:`2\pi`,
+            however this period can change if there is normalization
+            or standardization applied to features. The new period then becomes
+            the distance between where :math:`\pi` and :math:`-\pi`
+            land after the features are scaled. Because the period can vary
+            for individual phi angles for standardization, it is
             still passed in as an array that is n_features long.
         """
         super().__init__(name, active_dims)
@@ -61,7 +63,8 @@ class PeriodicKernel(Kernel):
                 The periodic covariance matrix of shape (n, m)
         """
 
-        # implementation from gpytorch https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
+        # implementation from gpytorch
+        # https://github.com/cornellius-gp/gpytorch/blob/master/gpytorch/kernels/periodic_kernel.py
         true_lengthscales = self.lengthscales
         true_lengthscales = true_lengthscales.reshape(-1, 1, 1)
 

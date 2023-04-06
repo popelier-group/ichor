@@ -17,10 +17,12 @@ from ichor.core.files.file import FileState, ReadFile, WriteFile
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
-    atoms. A user can also initialize an empty trajectory and append `Atoms` instances to it without reading in a .xyz file. This allows
+    atoms. A user can also initialize an empty trajectory and append `Atoms`
+    instances to it without reading in a .xyz file. This allows
     the user to build custom trajectories containing any sort of geometries.
 
-    :param path: The path to a .xyz file that contains timesteps. Set to None by default as the user can initialize an empty trajectory and built it up
+    :param path: The path to a .xyz file that contains timesteps.
+    Set to None by default as the user can initialize an empty trajectory and built it up
         themselves
     """
 
@@ -37,7 +39,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 # match the line containing the number of atoms in timestep
                 if re.match(r"^\s*\d+$", line):
                     natoms = int(line)
-                    # this is the comment line of xyz files. It can be empty or contain some useful information that can be stored.
+                    # this is the comment line of xyz files.
+                    # It can be empty or contain some useful information that can be stored.
                     line = next(f)
                     # if the comment line properties errors, we can store these
                     if re.match(r"^\s*?i\s*?=\s*?\d+\s*properties_error", line):
@@ -144,9 +147,11 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         """Writes out every nth timestep to a separate .xyz file to a given directory
 
         :param system_name: The name of the
-        :param root: A Path to a directory where to write the .xyz files. An empty directory is made for the given Path and
+        :param root: A Path to a directory where to write the .xyz files.
+            An empty directory is made for the given Path and
             overwrites an existing directory for the given Path.
-        :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
+        :param every: An integer value that indicates the nth step at which an
+            xyz file should be written. Default is 1. If
             a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
         """
         from ichor.core.files import XYZ
@@ -180,8 +185,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         :param root: A Path to a directory where where sub-directories
             are going to be made. An empty directory is made for the given Path and
             overwrites an existing directory for the given Path.
-        :param every: An integer value that indicates the nth step at which an xyz file should be written. Default is 1. If
-            a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
+        :param every: An integer value that indicates the nth step at
+            which an xyz file should be written. Default is 1.
+            If a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
         """
         from ichor.core.files import XYZ
 
@@ -251,18 +257,28 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     ) -> "Trajectory":
 
         """Takes in a csv or excel file containing features and convert it to a `Trajectory` object.
-        It assumes that the features start from the first column (column after the index column, if one exists). Feature files that
-        are written out by ichor are in Bohr instead of Angstroms for now. After converting to cartesian coordinates, we have to convert
-        Bohr to Angstroms because .xyz files are written out in Angstroms (and programs like Avogadro, VMD, etc. expect distances in angstroms).
-        Failing to do that will result in xyz files that are in Bohr, so if features are calculated from them again, the features will be wrong.
+        It assumes that the features start from the first column
+        (column after the index column, if one exists). Feature files that are written out by ichor
+        are in Bohr instead of Angstroms for now.
 
-        :param f: Path to the file (either .csv or .xlsx) containing the features. We only need the features for one atom to reconstruct the geometries,
-            thus we only need 1 csv file or 1 sheet of an excel file. By default, the 0th sheet of the excel file is read in.
-        :param atom_types: A list of strings corresponding to the atom elements (C, O, H, etc.). This has to be ordered the same way
-            as atoms corresponding to the features.
-        :param header: Whether the first line of the csv file contains the names of the columns. Default is set to 0 to use the 0th row.
-        :param index_col: Whether a column should be used as the index column. Default is set to 0 to use 0th column.
-        :param sheet_name: The excel sheet to be used to convert to xyz. Default is 0. This is only needed for excel files, not csv files.
+        After converting to cartesian coordinates, we have to convert
+        Bohr to Angstroms because .xyz files are written out in Angstroms
+        (and programs like Avogadro, VMD, etc. expect distances in angstroms).
+        Failing to do that will result in xyz files that are in Bohr, so if features
+        are calculated from them again, the features will be wrong.
+
+        :param f: Path to the file (either .csv or .xlsx) containing the features.
+            We only need the features for one atom to reconstruct the geometries,
+            thus we only need 1 csv file or 1 sheet of an excel file.
+            By default, the 0th sheet of the excel file is read in.
+        :param atom_types: A list of strings corresponding to the atom elements (C, O, H, etc.).
+            This has to be ordered the same way as atoms corresponding to the features.
+        :param header: Whether the first line of the csv file contains the names of the columns.
+            Default is set to 0 to use the 0th row.
+        :param index_col: Whether a column should be used as the index column.
+            Default is set to 0 to use 0th column.
+        :param sheet_name: The excel sheet to be used to convert to xyz. Default is 0.
+            This is only needed for excel files, not csv files.
         """
 
         if isinstance(f, str):
@@ -403,7 +419,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
             return Trajectory(self.path, [list.__getitem__(self, i) for i in item])
 
-        # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
+        # if indexing by something else that has not been programmed yet
+        # should only be reached if not indexed by int, str, or slice
         raise TypeError(
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )
@@ -421,7 +438,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         return super().__len__()
 
     def __repr__(self) -> str:
-        """Make a repr otherwise doing print(trajectory_instance) will print out an empty list if the trajectory attributes have not been accessed yet,
+        """Make a repr otherwise doing print(trajectory_instance) will print
+        out an empty list if the trajectory attributes have not been accessed yet,
         due to how how the files are being parsed using PathObject/File classes."""
         return (
             f"class {self.__class__}\n"

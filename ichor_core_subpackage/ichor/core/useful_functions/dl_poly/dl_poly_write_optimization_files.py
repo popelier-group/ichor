@@ -8,7 +8,8 @@ def write_control(
     n_steps: int = 500,
     file_name: str = "CONTROL",
 ):
-    """Writes CONTROL file that DL_FFLUX needs to function. It is a modified version of the DL_POLY CONTROL file.
+    """Writes CONTROL file that DL_FFLUX needs to function.
+    It is a modified version of the DL_POLY CONTROL file.
     The defaults of the function are used to perform a geometry optimization, so the settings are different
     that the default settings.
 
@@ -16,7 +17,8 @@ def write_control(
     :parm ensemble: The ensemble to use for the simulation, defaults to nvt
     :param thermostat: The thermostat to use for the simulation, defaults to hoover (Nose-Hoover thermostat)
     :param hoover_number: The relaxation constant of Nose-Hoover thermostat in ps, defaults to 0.04
-    :param temperature: The temperature to run the simulation at, defaults to 0.0 (note that simulation is actually ran at 10K)
+    :param temperature: The temperature to run the simulation at,
+        defaults to 0.0 (note that simulation is actually ran at 10K)
         because `zero` keyword is also added.
     :param timestep: The timestep time, defaults to 0.001 ps
     :param n_steps: The number of timesteps for the simulation, defaults to 500
@@ -38,7 +40,10 @@ def write_control(
 
 
 def write_config(
-    atoms: "Atoms", system_name: str, cell_size: float = 50.0, file_name: str = "CONFIG"
+    atoms: "Atoms",  # noqa E821
+    system_name: str,
+    cell_size: float = 50.0,
+    file_name: str = "CONFIG",
 ):
     """Writes CONFIG file that DL_FFLUX needs to run.
 
@@ -56,7 +61,7 @@ def write_config(
     dl_poly_config.write()
 
 
-def write_field(atoms: "Atoms", system_name: str, file_name="FIELD"):
+def write_field(atoms: "Atoms", system_name: str, file_name="FIELD"):  # noqa E821
     """Writes out DL FFLUX FIELD file.
 
     :param atoms: An Atoms instance which contains a geometry of the chemical system of interest.

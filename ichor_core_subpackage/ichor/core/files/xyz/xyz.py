@@ -8,13 +8,15 @@ from ichor.core.files.file_data import HasAtoms
 
 
 class XYZ(HasAtoms, ReadFile, WriteFile, File):
-    """A class which wraps around a .xyz file that is contained in each PointDirectory. This .xyz file should always be there and it is
+    """A class which wraps around a .xyz file that is contained in each PointDirectory.
+    This .xyz file should always be there and it is
     used to write out .gjf files. Each instance of `XYZ` only has one geometry. If there is a need to
     read a `.xyz` file that contains multiple geometries (i.e. a trajectory file), the use the `Trajectory`
     class.
 
     :param path: The path to an .xyz file
-    :param atoms: Optional list of Atoms which can be used to construct a .xyz file. If a list of atoms is passed, then a new xyz file
+    :param atoms: Optional list of Atoms which can be used to construct a .xyz file.
+        If a list of atoms is passed, then a new xyz file
         with the given Atoms will be written to the given Path.
     """
 
@@ -46,7 +48,8 @@ class XYZ(HasAtoms, ReadFile, WriteFile, File):
         self.atoms = self.atoms or read_atoms
 
     def _write_file(self, path: Path):
-        """Write a .xyz to a given path. If no path is given, it will write it to the path given when the XYZ instance was constructed.
+        """Write a .xyz to a given path. If no path is given,
+        it will write it to the path given when the XYZ instance was constructed.
 
         :param path: An optional path to which to write the .xyz file
         """

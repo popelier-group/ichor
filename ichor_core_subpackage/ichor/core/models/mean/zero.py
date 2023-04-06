@@ -5,7 +5,8 @@ from ichor.core.models.mean.mean import Mean
 
 
 class ZeroMean(Mean):
-    """Implements a zero mean for the Gaussian Process. When covariance between training points and a test point is low, this means the GP will return the
+    """Implements a zero mean for the Gaussian Process.
+    When covariance between training points and a test point is low, this means the GP will return the
     mean of the GP (in this case it is set to 0)."""
 
     def value(self, x: np.ndarray) -> np.ndarray:

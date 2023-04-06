@@ -11,8 +11,8 @@ default_distance_unit: AtomicDistance = AtomicDistance.Bohr
 
 
 def calculate_alf_features(
-    atom: "Atom",
-    alf: Union["ALF", List["ALF"], List[List[int]], Dict[str, "ALF"]],
+    atom: "Atom",  # noqa F821
+    alf: Union["ALF", List["ALF"], List[List[int]], Dict[str, "ALF"]],  # noqa F821
     distance_unit: AtomicDistance = default_distance_unit,
 ) -> np.ndarray:
     """Calculates the features for the given central atom.
@@ -20,22 +20,26 @@ def calculate_alf_features(
     Args:
         :param atom: an instance of the `Atom` class:
             This atom is the central atom for which we want to calculate the C rotation matrix.
-        :param alf: A callable or instance of `ALF` that is used to calculate the atomic local frame for the atom. This atomic local frame then defines the
-            features which are going to be calculated. If no ALF is passed by user, then the default way of calculating ALF is used.
-        :param distance_unit: The distance units to use for the calculated distances which are part of the features. The default distance is Bohr.
+        :param alf: A callable or instance of `ALF` that is used to
+            calculate the atomic local frame for the atom. This atomic local frame then defines the
+            features which are going to be calculated. If no ALF is passed by user,
+            then the default way of calculating ALF is used.
+        :param distance_unit: The distance units to use for the calculated distances
+            which are part of the features. The default distance is Bohr.
 
     Returns:
         :type: `np.ndarray`
-            A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of. If there are only two atoms,
+            A 1D numpy array of shape 3N-6, where N is the number of atoms
+            in the system which `atom` is a part of. If there are only two atoms,
             then there is only 1 feature (the distance between the atoms).
     """
 
     alf = get_atom_alf(atom, alf)
 
+    # if only 2 atoms are in parent, there are only 2 atoms
+    # in the system so there is only 1 feature - distance.
     if len(atom.parent) == 2:
-        feature_array = np.empty(
-            1
-        )  # if only 2 atoms are in parent, there are only 2 atoms in the system so there is only 1 feature - distance.
+        feature_array = np.empty(1)
     elif len(atom.parent) > 2:
         feature_array = np.empty(
             3 * len(atom.parent) - 6
@@ -83,7 +87,8 @@ def calculate_alf_features(
 
     c_matrix = calculate_c_matrix(atom, alf)
 
-    # the rest of the atoms are described as 3 features each: distance(r), polar angle(theta), and azimuthal angle(phi) - physics convention
+    # the rest of the atoms are described as 3 features each:
+    # distance(r), polar angle(theta), and azimuthal angle(phi) - physics convention
     # theta is between 0 and pi (not cyclic), phi is between -pi and pi (cyclic)
 
     if len(atom._parent) > 3:

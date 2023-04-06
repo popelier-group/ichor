@@ -4,7 +4,7 @@ from ichor.core.calculators.connectivity.distance_connectivity_calculator import
 )
 
 
-def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:
+def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:  # noqa F821
     """
     Calculates the connectivity matrix (showing which atoms are bonded as 1 and those that are not bonded as 0.
     It uses the Van Der Waals radius an Atom (see `Atom` class) to determine if atoms should be bonded or not.
@@ -18,8 +18,8 @@ def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:
 
     .. note::
 
-        This is a class method because the connectivity only needs to be calculated once per trajectory. The connectivity remains the same for all
-        timesteps in a trajectory.
+        This is a class method because the connectivity only needs to be calculated once per trajectory.
+        The connectivity remains the same for all timesteps in a trajectory.
     """
 
     connectivity = connectivity_calculator_distance(atoms)

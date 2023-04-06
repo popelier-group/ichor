@@ -2,8 +2,6 @@
 
 from typing import Any, Callable, TypeVar, Union
 
-import numpy as np
-
 F = TypeVar("F", bound=Callable[..., Any])  # Function
 T = TypeVar("T", bound=Any)  # anything
 

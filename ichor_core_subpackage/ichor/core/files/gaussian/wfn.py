@@ -1,8 +1,5 @@
-from optparse import Option
 from pathlib import Path
-from typing import Dict, List, Optional, Union
-
-import numpy as np
+from typing import Dict, List, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.constants import AIMALL_FUNCTIONALS
@@ -51,8 +48,9 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
     :ivar energy: The molecular energy read in from the bottom of the .wfn file
     :ivar virial: The virial read in from the bottom of the .wfn file
     .. note::
-        Since the wfn file is written out by Gaussian, we do not really have to modify it when writing out except
-        we need to add the method used, so that AIMALL can use the correct method. Otherwise AIMALL assumes Hartree-Fock
+        Since the wfn file is written out by Gaussian, we do not really
+        have to modify it when writing out except we need to add the method used,
+        so that AIMALL can use the correct method. Otherwise AIMALL assumes Hartree-Fock
         was used, which might be wrong.
     """
 
@@ -79,7 +77,8 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
         self.virial_ratio = FileContents
 
     def _read_file(self):
-        """Parse through a .wfn file to look for the relevant information. This is automatically called if an attribute is being accessed, but the
+        """Parse through a .wfn file to look for the relevant information.
+        This is automatically called if an attribute is being accessed, but the
         FileState of the file is FileState.Unread"""
         atoms = Atoms()
         with open(self.path, "r") as f:
@@ -103,7 +102,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
                 x = float(record[3])
                 y = float(record[4])
                 z = float(record[5])
-                nuclear_charge = float(record[-1])
+                _ = float(record[-1])  # nuclear charge, not used
                 atoms.add(
                     Atom(
                         atom_type,
@@ -191,7 +190,8 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
     def _check_values_before_writing(self):
         """This check is just here so that the file is read before attempting to write the file.
         This is to prevent a situation where the original file has not been read yet,
-        but a new file with the same path is being written (so therefore the new file is empty and all the data has been
+        but a new file with the same path is being written
+        (so therefore the new file is empty and all the data has been
         lost and has not been read in into an instance yet).
 
         ..note::
@@ -205,18 +205,19 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
 
     def _write_file(self, path: Path):
         """Write method needs to be implemented because the correct functional needs to be added to the .wfn file,
-        so that AIMAll can then use it when it does calculations. Otherwise, the wrong results are obtained with AIMAll.
+        so that AIMAll can then use it when it does calculations.
+        Otherwise, the wrong results are obtained with AIMAll.
         """
         with open(path, "w") as f:
             f.write(f"{self.title}\n")
-            header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"
+            header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
             # add method here, so that AIMAll works correctly
             if self.method.upper() in AIMALL_FUNCTIONALS:
                 header_line += f"   {self.method}"
             f.write(f"{header_line}\n")
             for i, atom in enumerate(self.atoms):
                 f.write(
-                    f"{atom.type:3s} {i+1:4d}    (CENTRE {i+1:2d}) {atom.x:12.8f}{atom.y:12.8f}{atom.z:12.8f}  CHARGE = {atom.nuclear_charge:3.1f}\n"
+                    f"{atom.type:3s} {i+1:4d}    (CENTRE {i+1:2d}) {atom.x:12.8f}{atom.y:12.8f}{atom.z:12.8f}  CHARGE = {atom.nuclear_charge:3.1f}\n"  # noqa E501
                 )
 
             for centre_assignments in chunker(self.centre_assignments, 20):
@@ -237,7 +238,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
 
             for molecular_orbital in self.molecular_orbitals:
                 f.write(
-                    f"MO {molecular_orbital.index:4d}     MO {molecular_orbital.eigen_value:10.8f} OCC NO = {molecular_orbital.occupation_number:12.7f}  ORB. ENERGY ={molecular_orbital.energy:12.6f}\n"
+                    f"MO {molecular_orbital.index:4d}     MO {molecular_orbital.eigen_value:10.8f} OCC NO = {molecular_orbital.occupation_number:12.7f}  ORB. ENERGY ={molecular_orbital.energy:12.6f}\n"  # noqa E501
                 )
                 for primitives in chunker(molecular_orbital.primitives, 5):
                     primitives = "".join(

@@ -15,10 +15,13 @@ def percentile(n: int) -> np.ndarray:
 
 
 def make_chart_settings(local_kwargs: dict):
-    """Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
-    constructs dictionaries with parameter values to be passed to xlsx writer to configure graph settings.
+    """Takes in a dictionary of key word arguments that were passed
+    into the `write_to_excel` function. Then, this function
+    constructs dictionaries with parameter values to be passed
+    to xlsx writer to configure graph settings.
 
-    :param local_kwargs: A dictionary containing key word arguments that are parsed to construct the xlsx-writer graph settings
+    :param local_kwargs: A dictionary containing key word arguments
+        that are parsed to construct the xlsx-writer graph settings
     """
 
     from collections import defaultdict
@@ -71,10 +74,14 @@ def calculate_s_curves(
     """Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
 
     :param model_location: A directory containing model files `.model`
-    :param validation_set_location: A directory containing validation or test set points. These points should NOT be in the training set.
-    :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves. S-curves are made for all atoms in the system by default.
-    :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves. S-curves are made for all properties in the model files.
-    :param **kwargs: Any key word arguments that can be passed into the write_to_excel function to change how the S-curves excel file looks. See write_to_excel() method
+    :param validation_set_location: A directory containing validation or test set points.
+        These points should NOT be in the training set.
+    :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
+        S-curves are made for all atoms in the system by default.
+    :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves.
+        S-curves are made for all properties in the model files.
+    :param **kwargs: Any key word arguments that can be passed into the write_to_excel function
+        to change how the S-curves excel file looks. See write_to_excel() method
     """
 
     if model_location is None or validation_set_location is None:
@@ -108,8 +115,10 @@ def write_to_excel(
     excel_style: int = 10,
 ):
     """
-    Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
-    also makes a `Total` sheet for every property, which gives an idea how the predictions do overall for the whole system.
+    Writes out relevant information which is used to make s-curves to an excel file.
+    It will make a separate sheet for every atom (and property). It
+    also makes a `Total` sheet for every property, which gives
+    an idea how the predictions do overall for the whole system.
 
     :param true: a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set
     :param predicted: a ModelsResult containing predicted values, given the validation/test set features
@@ -128,7 +137,8 @@ def write_to_excel(
     :param y_axis_major_gridline_width: The width to use for the major gridlines. Default is 0.75.
     :param y_axis_major_gridline_color: Color to use for gridlines. Default is "#BFBFBF".
     :param show_legend: Whether to show legend on the plot. Default False.
-    :param excel_style: The style which excel uses for the plots. Default is 10, which is the default style used by excel.
+    :param excel_style: The style which excel uses for the plots.
+        Default is 10, which is the default style used by excel.
     """
 
     # use the key word arguments to construct the settings used for x and y axes
@@ -151,7 +161,8 @@ def write_to_excel(
                 error[type_] *= ha_to_kj_mol
             atom_sheets = {}
 
-            # our true values dictionary only contains info about atoms that we care about (see get_true_predicted function above)
+            # our true values dictionary only contains info about atoms
+            # that we care about (see get_true_predicted function above)
             atom_names = true[type_].keys()
             # iterate over all atoms that have this property calculated
             for atom in atom_names:

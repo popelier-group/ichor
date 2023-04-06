@@ -368,7 +368,7 @@ class MOUT(
                     _ = next(f)  # # quad inside beta     # quad outside beta
                     _ = next(
                         f
-                    )  #  rad   theta    phi      rad   theta   phi      rho     maxsect
+                    )  # rad   theta    phi      rad   theta   phi      rho     maxsect
                     line = next(f)
                     while "Atom" in line:
                         record = line.split()
