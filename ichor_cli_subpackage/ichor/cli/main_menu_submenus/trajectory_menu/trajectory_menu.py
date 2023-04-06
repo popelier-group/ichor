@@ -3,7 +3,7 @@ from consolemenu.items import SubmenuItem
 from consolemenu.items import FunctionItem
 from ichor.core.files import Trajectory
 from pathlib import Path
-from ichor.cli.useful_functions.user_input import user_input_path
+from ichor.cli.useful_functions.user_input import user_input_path, user_input_int, user_input_bool
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from dataclasses import dataclass
@@ -38,6 +38,52 @@ class TrajectoryFunctions:
         ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH = Path(traj_path).absolute()
         trajectory_menu_options.selected_trajectory_path = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH
 
+    @staticmethod
+    def split_trajectory_into_points_directory():
+        """functions that splits a trajectory into a PointsDirectory."""
+        default_to_center = False
+        default_every = 1
+
+        to_center = user_input_bool(f"Subtract Centroid of Geometries (default {default_to_center}): ")
+        if to_center is None:
+            to_center = default_to_center
+
+        every = user_input_int(f"Write out every ith geometry (give i) (default {default_every}): ")
+        if every is None:
+            every = default_every
+
+        traj = Trajectory(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
+        system_name = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.stem
+        root = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.with_name(system_name.upper())
+
+        traj.to_dir(system_name, root, every, to_center)
+
+    @staticmethod
+    def split_trajectory_into_many_points_directories():
+        """ function that splits a given trajectory into many PointsDirectory-like directories."""
+        default_split_size = 5000
+        default_to_center = False
+        default_every = 1
+
+        nsplit = user_input_int(f"Enter split size integer (default {default_split_size}): ")
+        if nsplit is None:
+            nsplit = default_split_size
+
+        to_center = user_input_bool(f"Subtract Centroid of Geometries (default {default_to_center}): ")
+        if to_center is None:
+            to_center = default_to_center
+
+        every = user_input_int(f"Write out every ith geometry (give i) (default {default_every}): ")
+        if every is None:
+            every = default_every
+
+        traj = Trajectory(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
+
+        system_name = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.stem
+        root = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.with_name(system_name + "_PARENT")
+
+        traj.to_dirs(system_name, root, nsplit, every, to_center)
+
 # initialize menu
 trajectory_menu = ConsoleMenu(this_menu_options=trajectory_menu_options,
                                     title=TRAJECTORY_MENU_DESCRIPTION.title,
@@ -48,7 +94,9 @@ trajectory_menu = ConsoleMenu(this_menu_options=trajectory_menu_options,
 
 # make menu items
 # can use lamda functions to change text of options as well :)
-trajectory_menu_items = [FunctionItem("Select path of Trajectory", TrajectoryFunctions.select_trajectory),
-                            ]
+trajectory_menu_items = [FunctionItem("Select path of trajectory", TrajectoryFunctions.select_trajectory),
+                         FunctionItem("Split trajectory into single PointsDirectory-like dir", TrajectoryFunctions.split_trajectory_into_points_directory),
+                        FunctionItem("Split trajectory into many PointsDirectories-like dirs with root dir", TrajectoryFunctions.split_trajectory_into_many_points_directories)
+]
 
 add_items_to_menu(trajectory_menu, trajectory_menu_items)
