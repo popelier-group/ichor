@@ -14,6 +14,7 @@ from typing import Union
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.points_directory_to_database_menu import points_directory_to_database_menu, \
     POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION
 from ichor.cli.console_menu import add_items_to_menu
+import ichor.cli.global_menu_variables
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu", 
                                                         subtitle="Use this to interact with ichor's PointsDirectory class.\n")
@@ -22,7 +23,7 @@ POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu",
 @dataclass
 class PointsDirectoryMenuOptions(MenuOptions):
     # defaults to the current working directory
-    selected_points_directory_path: Path = Path("").absolute()
+    selected_points_directory_path: Path = ichor.cli.global_menu_variables.CURRENT_POINTS_DIRECTORY
 
     def check_selected_points_directory_path(self) -> Union[str, None]:
         """ Checks whether the given PointsDirectory exists or if it is a directory."""
@@ -41,7 +42,8 @@ class PointsDirectoryFunctions:
     def select_points_directory():
         """ Asks user to update points directory and then updates PointsDirectoryMenuPrologue instance."""
         pd_path = user_input_path("Enter PointsDirectory Path: ")
-        points_directory_menu_options.selected_points_directory_path = Path(pd_path).absolute()
+        ichor.cli.global_menu_variables.CURRENT_POINTS_DIRECTORY = Path(pd_path).absolute()
+        points_directory_menu_options.selected_points_directory_path = ichor.cli.global_menu_variables.CURRENT_POINTS_DIRECTORY
 
     # TODO: move these to sub menus
     # @staticmethod
@@ -66,6 +68,7 @@ points_directory_menu = ConsoleMenu(this_menu_options=points_directory_menu_opti
                                     show_exit_option=POINTS_DIRECTORY_MENU_DESCRIPTION.show_exit_option)
 
 # make menu items
+# can use lamda functions to change text of options as well :)
 point_directory_menu_items = [FunctionItem("Select path of PointsDirectory", PointsDirectoryFunctions.select_points_directory),
                               SubmenuItem(text=POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION.title, submenu=points_directory_to_database_menu,
                                 menu=points_directory_menu)
