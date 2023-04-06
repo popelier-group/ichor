@@ -5,4 +5,8 @@
 
 from pathlib import Path
 
+# PointsDirectoryMenu options
 SELECTED_POINTS_DIRECTORY_PATH: Path = Path("").absolute()
+
+#TrajectoryMenu options
+SELECTED_TRAJECTORY_PATH: Path = Path("").absolute()

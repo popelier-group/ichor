@@ -2,6 +2,7 @@ from ichor.cli.main_menu_submenus.points_directory_menu import points_directory_
 from ichor.cli.main_menu_submenus.analysis_menu import analysis_menu
 from ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_menu import molecular_dynamics_menu
 from ichor.cli.main_menu_submenus.tools_menu.tools_menu import tools_menu
+from ichor.cli.main_menu_submenus.trajectory_menu.trajectory_menu import trajectory_menu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.console_menu import ConsoleMenu
 from consolemenu.items import SubmenuItem
@@ -11,7 +12,7 @@ from ichor.cli.console_menu import add_items_to_menu
 
 # import menu decriptions
 from ichor.cli.main_menu_submenus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANALYSIS_MENU_DESCRIPTION, \
-        MOLECULAR_DYNAMICS_MENU_DESCRIPTION, TOOLS_MENU_DESCRIPTION
+        MOLECULAR_DYNAMICS_MENU_DESCRIPTION, TOOLS_MENU_DESCRIPTION, TRAJECTORY_MENU_DESCRIPTION
 
 MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", subtitle="Welcome to ichor's main menu!")
 
@@ -36,6 +37,7 @@ main_menu = ConsoleMenu(this_menu_options=main_menu_options,
 
 # make submenus
 main_menu_items = [SubmenuItem(POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu),
+                   SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
                     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
                     SubmenuItem(MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title, molecular_dynamics_menu, main_menu),
                     SubmenuItem(TOOLS_MENU_DESCRIPTION.title, tools_menu, main_menu)

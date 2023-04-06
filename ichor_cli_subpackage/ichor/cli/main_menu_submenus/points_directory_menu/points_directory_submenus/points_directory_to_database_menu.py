@@ -5,7 +5,7 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu
 import ichor.cli.global_menu_variables
 
-POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION = MenuDescription("PointsDirectoryToDatabaseMenu", 
+POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION = MenuDescription("Make database from PointsDirectory", 
                                                         subtitle="Use this to convert PointsDirectory folder to a database.\n")
 
 
