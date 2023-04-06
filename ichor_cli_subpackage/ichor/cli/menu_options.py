@@ -40,7 +40,7 @@ class MenuOptions:
     def __str__(self):
         """ Format all the defined attributes (which are current menu settings) into a nice string to be displayed in the prologue."""
         # k is name of attribute (str), value is value of attribute defined in the dataclass.
-        return "\n".join([f"-- {MenuOptions.formatter_menu_options(k)}: {v}" for k, v in asdict(self).items()])
+        return "".join([f"-- {MenuOptions.formatter_menu_options(k)}: {v}\n" for k, v in asdict(self).items()])
 
     def __call__(self):
         """When instance of prologue is called, makes the prologue nicely formatted."""

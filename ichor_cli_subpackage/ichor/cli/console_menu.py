@@ -89,7 +89,6 @@ class ConsoleMenu(OriginalConsoleMenu):
             # the __call__ method of a MenuOption just makes it into a string which can be printed to the prologue
             prologue_txt += p_options()
         # add a new line so that the current menu options are on a new line
-        prologue_txt += "\n"
         # finally add any new options from the current menu, again __call__ method of MenuOption is used
         if self.this_menu_options:
             prologue_txt += self.this_menu_options()

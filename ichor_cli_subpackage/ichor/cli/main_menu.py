@@ -16,6 +16,8 @@ from ichor.cli.main_menu_submenus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANAL
 MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", subtitle="Welcome to ichor's main menu!")
 
 # no main menu options for now
+# note: need to have typing on classes, otherwise they will not show up in the prologue
+# dataclasses need to have typing
 @dataclass
 class MainMenuOptions(MenuOptions):
     pass
