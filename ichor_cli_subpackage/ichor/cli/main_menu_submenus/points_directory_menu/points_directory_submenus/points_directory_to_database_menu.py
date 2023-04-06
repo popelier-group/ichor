@@ -18,7 +18,7 @@ class PointsDirectoryToDatabaseFunctions:
     @staticmethod
     def convert_points_directory_to_sqlite3_db():
         """ Converts selected PointsDirectory to Sqlite3 database."""
-        pd_path = ichor.cli.global_menu_variables.CURRENT_POINTS_DIRECTORY
+        pd_path = ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         PointsDirectory(pd_path).write_to_sqlite3_database()
 
 # initialize menu

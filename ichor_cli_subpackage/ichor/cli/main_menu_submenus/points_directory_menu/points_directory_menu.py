@@ -23,7 +23,7 @@ POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu",
 @dataclass
 class PointsDirectoryMenuOptions(MenuOptions):
     # defaults to the current working directory
-    selected_points_directory_path: Path = ichor.cli.global_menu_variables.CURRENT_POINTS_DIRECTORY
+    selected_points_directory_path: Path = ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
 
     def check_selected_points_directory_path(self) -> Union[str, None]:
         """ Checks whether the given PointsDirectory exists or if it is a directory."""
@@ -42,8 +42,8 @@ class PointsDirectoryFunctions:
     def select_points_directory():
         """ Asks user to update points directory and then updates PointsDirectoryMenuPrologue instance."""
         pd_path = user_input_path("Enter PointsDirectory Path: ")
-        ichor.cli.global_menu_variables.CURRENT_POINTS_DIRECTORY = Path(pd_path).absolute()
-        points_directory_menu_options.selected_points_directory_path = ichor.cli.global_menu_variables.CURRENT_POINTS_DIRECTORY
+        ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH = Path(pd_path).absolute()
+        points_directory_menu_options.selected_points_directory_path = ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
 
     # TODO: move these to sub menus
     # @staticmethod
