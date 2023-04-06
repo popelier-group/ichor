@@ -1,16 +1,13 @@
-# Import the necessary packages
-# from consolemenu import ConsoleMenu, SelectionMenu, MultiSelectMenu, MenuFormatBuilder, PromptUtils, Screen, items, clear_terminal
-# from consolemenu.items import CommandItem, ExitItem, ExternalItem, FunctionItem, MenuItem, SelectionItem, SubmenuItem
 from ichor.cli.main_menu_submenus.points_directory_menu import points_directory_menu
 from ichor.cli.main_menu_submenus.analysis_menu import analysis_menu
 from ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_menu import molecular_dynamics_menu
 from ichor.cli.main_menu_submenus.tools_menu.tools_menu import tools_menu
 from ichor.cli.menu_description import MenuDescription
-from ichor.cli.submenu_item import ConsoleMenu
+from ichor.cli.console_menu import ConsoleMenu
 from consolemenu.items import SubmenuItem
 from dataclasses import dataclass
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import add_items_to_menu
+from ichor.cli.console_menu import add_items_to_menu
 
 # import menu decriptions
 from ichor.cli.main_menu_submenus import POINTS_DIRECTORY_MENU_DESCRIPTION, ANALYSIS_MENU_DESCRIPTION, \
@@ -23,6 +20,7 @@ MAIN_MENU_DESCRIPTION = MenuDescription("Main Menu", subtitle="Welcome to ichor'
 class MainMenuOptions(MenuOptions):
     pass
 
+# make instance of options
 main_menu_options = MainMenuOptions()
 
 # create main menu

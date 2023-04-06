@@ -1,7 +1,7 @@
 # from consolemenu import ConsoleMenu, SelectionMenu, MultiSelectMenu, MenuFormatBuilder, PromptUtils, Screen, items, clear_terminal
 # from consolemenu.items import CommandItem, ExitItem, ExternalItem, FunctionItem, MenuItem, SelectionItem, SubmenuItem
 # from consolemenu.format import MenuBorderStyleType
-from ichor.cli.submenu_item import ConsoleMenu
+from ichor.cli.console_menu import ConsoleMenu
 from consolemenu.items import SubmenuItem
 from consolemenu.items import FunctionItem
 from ichor.core.files import PointsDirectory, Trajectory
@@ -13,10 +13,10 @@ from dataclasses import dataclass
 from typing import Union
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.points_directory_to_database_menu import points_directory_to_database_menu, \
     POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION
-from ichor.cli.useful_functions import add_items_to_menu
+from ichor.cli.console_menu import add_items_to_menu
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription("PointsDirectory Menu", 
-                                                        subtitle="Use this to do interact with ichor's PointsDirectory class.\n")
+                                                        subtitle="Use this to interact with ichor's PointsDirectory class.\n")
 
 # dataclass used to store values for PointsDirectoryMenu
 @dataclass

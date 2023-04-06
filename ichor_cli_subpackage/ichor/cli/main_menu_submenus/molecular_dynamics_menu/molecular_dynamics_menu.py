@@ -2,7 +2,7 @@ from consolemenu import ConsoleMenu, SelectionMenu, MultiSelectMenu, MenuFormatB
 from consolemenu.items import CommandItem, ExitItem, ExternalItem, FunctionItem, MenuItem, SelectionItem, SubmenuItem
 from ichor.cli.menu_description import MenuDescription
 
-MOLECULAR_DYNAMICS_MENU_DESCRIPTION = MenuDescription("Molecular Dynamics Menu", subtitle="Use this to do submit MD simulations with ichor.")
+MOLECULAR_DYNAMICS_MENU_DESCRIPTION = MenuDescription("Molecular Dynamics Menu", subtitle="Use this to submit MD simulations with ichor.")
 
 molecular_dynamics_menu = ConsoleMenu(title=MOLECULAR_DYNAMICS_MENU_DESCRIPTION.title,
                             subtitle=MOLECULAR_DYNAMICS_MENU_DESCRIPTION.subtitle,

@@ -2,7 +2,9 @@ from dataclasses import dataclass
 
 @dataclass
 class MenuDescription:
-    """ Dataclass for menu descriptions. Each menu has its own description, which remains CONSTANT."""
+    """ Dataclass for menu descriptions. Each menu has its own description, which remains CONSTANT.
+    Each menu has its own title/subtitle/etc, so make instance of this for each menu and fill in details.
+    """
     title: str
     subtitle: str = ""
     prologue_description_text: str = ""
