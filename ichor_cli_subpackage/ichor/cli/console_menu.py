@@ -4,6 +4,17 @@ from ichor.cli.menu_options import MenuOptions
 from typing import Iterable
 from consolemenu.items import MenuItem
 
+# TODO: maybe imporve screen size
+# from consolemenu.screen import Screen as OriginalScreen
+# import shutil
+
+# class Screen(OriginalScreen):
+#     """ Screen size of menu, make bigger than the default."""
+
+#     def __init__(self):
+#         # self.__height, self.__width = shutil.get_terminal_size()
+#         self.__height = 100
+#         self.__width = 100
 
 class ConsoleMenu(OriginalConsoleMenu):
     """ Subclasses from `consolemenu.ConsoleMenu`, which is the base menu class. This subclass
@@ -25,9 +36,18 @@ class ConsoleMenu(OriginalConsoleMenu):
     :param **kwargs: Key word arguments to be passed to the original `ConsoleMenu` class.
     """
 
-    def __init__(self, this_menu_options: MenuOptions=None, **kwargs):
+    def __init__(self, this_menu_options: MenuOptions=None, title=None, subtitle=None, screen=None, formatter=None,
+                 prologue_text=None, epilogue_text=None, clear_screen=True,
+                 show_exit_option=True, exit_option_text='Exit', exit_menu_char=None):
 
-        super().__init__(**kwargs)
+        # make screen bigger by default
+        # if screen is None:
+        #     screen = Screen()
+        # self.screen = screen
+
+        super().__init__(title=title, subtitle=subtitle, screen=screen, formatter=formatter,
+                 prologue_text=prologue_text, epilogue_text=epilogue_text, clear_screen=clear_screen,
+                 show_exit_option=show_exit_option, exit_option_text=exit_option_text, exit_menu_char=exit_menu_char)
 
         self.this_menu_options = this_menu_options
 
