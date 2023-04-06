@@ -3,7 +3,7 @@ from typing import Union
 
 from sqlalchemy import Column, create_engine, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 

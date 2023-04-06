@@ -510,7 +510,7 @@ class Mol2(HasAtoms, WriteFile, File):
             f.write("@<TRIPOS>ATOM\n")
             for atom in self.atoms:
                 f.write(
-                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {self.system_name} {gasteigger_charge(atom):6.4f}\n"
+                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {self.system_name} {gasteigger_charge(atom):6.4f}\n"  # noqa E501
                 )
             f.write("@<TRIPOS>BOND\n")
             for i, (bi, bj) in enumerate(b):

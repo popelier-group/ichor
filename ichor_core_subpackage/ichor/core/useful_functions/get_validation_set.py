@@ -38,7 +38,7 @@ def choose_validation_set_menu_refresh(menu: Menu):
         kwargs={"vs": FILE_STRUCTURE["sample_pool"]},
     )
     menu.add_option(
-        "3", f"Custom Validation Set Directory", choose_custom_validation_set
+        "3", "Custom Validation Set Directory", choose_custom_validation_set
     )
     menu.add_space()
     menu.add_message(f"Current Validation Set: {_current_validation_set}")

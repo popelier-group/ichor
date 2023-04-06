@@ -6,9 +6,13 @@ import numpy as np
 def rotate_dipole(
     q10: float, q11c: float, q11s: float, C: np.ndarray
 ) -> Tuple[float, float, float]:
-    """Rotates dipole moment from global cartesian to local cartesian. Attributes like self.q11c, self.q11s, etc. are not
-    explicitly defined here, but they can be accessed because of the GeometryData __getattr__ implementation, which allows
-    accessing dictionary keys as if they were attributes."""
+    """Rotates dipole moment from global cartesian to local cartesian.
+
+    :param q10: q10 component
+    :param q11c: q11c component
+    :param q11s: q11s component
+    :param C: C matrix to use to rotate dipoles
+    """
 
     # Global cartesian dipole moment d is a simple rearrangement of the spherical form
     d = dipole_spherical_to_cartesian(q10, q11c, q11s)

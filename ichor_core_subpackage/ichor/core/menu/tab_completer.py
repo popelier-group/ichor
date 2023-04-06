@@ -1,4 +1,5 @@
-"""Implements Tab completion for ICHOR's menus. Tab completion is handy when providing files or browsing between ICHOR menus."""
+"""Implements Tab completion for ICHOR's menus.
+Tab completion is handy when providing files or browsing between ICHOR menus."""
 
 import os
 from abc import ABC, abstractmethod
@@ -27,7 +28,8 @@ class TabCompleter(ABC):
         define what kinds of things are shown with Tab completion.
 
         :param text: Text that has been typed into the prompt
-        :param state: An integer value that is used by the readline package to return possible word completions. See readline.set_completer in docs.
+        :param state: An integer value that is used by the readline package to return possible word completions.
+            See readline.set_completer in docs.
         """
         pass
 

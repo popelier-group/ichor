@@ -14,8 +14,10 @@ def fflux_predict_value(model_inst, test_x_features):
     n_train = x_train_array.shape[0]
     n_features = x_train_array.shape[1]
 
-    # make sure thetas are ordered correctly (cannot concat rbf thetas to periodic thetas because it leads to wrong indexing)
-    #  first five thetas are for rbf dimensions (because non cyclic), then 6th (5th index) is a phi dimension, then two rbf, then periodic and so on
+    # make sure thetas are ordered correctly (cannot concat rbf thetas
+    # to periodic thetas because it leads to wrong indexing)
+    # first five thetas are for rbf dimensions (because non cyclic),
+    # then 6th (5th index) is a phi dimension, then two rbf, then periodic and so on
     thetas = []
     rbf_idx = 0
     periodic_idx = 0
@@ -43,7 +45,8 @@ def fflux_predict_value(model_inst, test_x_features):
             # if phi dimension, then use periodic kernel
             if ((h + 1) % 3) == 0 and h != 2:
 
-                # 4.0 because we use 1/(2*l^2), for every kernel. For the periodic kernel, there is no 2 in the definition
+                # 4.0 because we use 1/(2*l^2), for every kernel.
+                # For the periodic kernel, there is no 2 in the definition
                 # gpytorch only divided by lambda (which is equal to l^2)
                 expo = expo + 4.0 * thetas[h] * np.sin((fdiff / 2.0)) ** 2
                 dQ_df_temp[h] = (
@@ -89,8 +92,10 @@ def fflux_predict_value_rbf_only(model_inst, test_x_features):
     n_train = x_train_array.shape[0]
     n_features = x_train_array.shape[1]
 
-    # make sure thetas are ordered correctly (cannot concat rbf thetas to periodic thetas because it leads to wrong indexing)
-    #  first five thetas are for rbf dimensions (because non cyclic), then 6th (5th index) is a phi dimension, then two rbf, then periodic and so on
+    # make sure thetas are ordered correctly
+    # (cannot concat rbf thetas to periodic thetas because it leads to wrong indexing)
+    # first five thetas are for rbf dimensions (because non cyclic),
+    # then 6th (5th index) is a phi dimension, then two rbf, then periodic and so on
     thetas = np.array(rbf_thetas)
 
     Q_est = 0.0

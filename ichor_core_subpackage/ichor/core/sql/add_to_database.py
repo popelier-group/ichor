@@ -3,8 +3,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-import sqlalchemy
-from ichor.core.common.constants import multipole_names
 from ichor.core.sql import AtomNames, Dataset, Points
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
@@ -44,7 +42,10 @@ def add_atom_names_to_database(session: Session, atom_names: List[str], echo=Fal
 # TODO: make this more robust as some data might be absent. Check that .wfn exists before adding wfn data
 # TODO: check that gaussian out forces exist. Check that int file exists.
 def add_point_to_database(
-    session: Session, point: "PointDirectory", echo=False, print_missing_data=True
+    session: Session,
+    point: "PointDirectory",  # noqa F821
+    echo=False,
+    print_missing_data=True,
 ):
     """Adds information from an instance of a PointDirectory to the database.
 
@@ -120,10 +121,12 @@ def add_point_to_database(
 
     # use this list later to bulk add all Dataset instances to database
     # there are multiple Dataset instances because each single point (one row in points table)
-    # relates to multiple rows in the dataset table (because one point contains many atoms and each atom has information for it)
+    # relates to multiple rows in the dataset table
+    # (because one point contains many atoms and each atom has information for it)
     db_dataset_list = []
 
-    # list that will add missing int files (if _atomicfiles directory exists) but .int file for an atom does not.
+    # list that will add missing int files
+    # (if _atomicfiles directory exists) but .int file for an atom does not.
     missing_int_files = []
 
     # add information to dataset table for each atom

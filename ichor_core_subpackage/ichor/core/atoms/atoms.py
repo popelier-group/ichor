@@ -203,7 +203,8 @@ class Atoms(list):
     def features(
         self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
     ) -> np.ndarray:
-        """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
+        """Returns the features for this Atoms instance,
+        corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
         The array shape is n_atoms x n_features (3*n_atoms - 6)
@@ -225,7 +226,8 @@ class Atoms(list):
     def features_dict(
         self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
     ) -> dict:
-        """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
+        """Returns the features in a dictionary for this Atoms instance,
+        corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
         :param args: positional arguments to pass to feature calculator
@@ -330,7 +332,8 @@ class Atoms(list):
         return self
 
     def __bool__(self):
-        """Atoms instance evaluates as true if it contains Atom instances in it. If empty, the Atoms instance evaluates to False."""
+        """Atoms instance evaluates as true if it contains
+        Atom instances in it. If empty, the Atoms instance evaluates to False."""
         return bool(len(self))
 
     def _rmsd(self, other: "Atoms") -> float:

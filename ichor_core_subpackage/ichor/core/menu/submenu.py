@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Sequence
 
 from ichor.core.common.os import input_with_prefill
 from ichor.core.common.types.itypes import Scalar, T

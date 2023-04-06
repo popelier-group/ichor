@@ -1,5 +1,3 @@
-import inspect
-import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List, Type, Union
@@ -20,7 +18,9 @@ class Directory(PathObject, ABC):
     def __init__(self, path: Union[Path, str]):
 
         super().__init__(path)
-        self._parse()  # parse directory to find contents and setup the directory structure. THIS DOES NOT READ IN DIRECTORY CONTENTS
+        # parse directory to find contents and setup the directory structure.
+        # THIS DOES NOT READ IN DIRECTORY CONTENTS
+        self._parse()
 
     @abstractmethod
     def _parse(self) -> None:
@@ -54,7 +54,8 @@ class Directory(PathObject, ABC):
 
 
 class AnnotatedDirectory(Directory, ABC):
-    """Abstract method for adding a parser for a Directory that has annotated files (such as GJF, INT, WFN). For example, look at the `PointDirectory` class."""
+    """Abstract method for adding a parser for a Directory that
+    has annotated files (such as GJF, INT, WFN). For example, look at the `PointDirectory` class."""
 
     @cached_property
     def pathtypes(self) -> Dict[str, Type[PathObject]]:
@@ -62,8 +63,10 @@ class AnnotatedDirectory(Directory, ABC):
 
     @cached_property
     def filetypes(self) -> Dict[str, Type[File]]:
-        """Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
-        be set to. These classes are all subclassing from the `File` class. For example {'gjf': GJF,  'wfn': WFN}."""
+        """Returns a dictionary of key:value pairs where the keys are the attributes
+        and the values are the type of class these attributes are going to
+        be set to. These classes are all subclassing from the `File` class.
+        For example {'gjf': GJF,  'wfn': WFN}."""
         filetypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
@@ -79,8 +82,10 @@ class AnnotatedDirectory(Directory, ABC):
 
     @cached_property
     def dirtypes(self) -> Dict[str, Type[Directory]]:
-        """Returns a dictionary of key:value pairs where the keys are the attributes and the values are the type of class these attributes are going to
-        be set to. These classes are all subclassing from the `Directory` class. For example {'ints': INTs}."""
+        """Returns a dictionary of key:value pairs where the keys are
+        the attributes and the values are the type of class these attributes are going to
+        be set to. These classes are all subclassing from the `Directory` class.
+        For example {'ints': INTs}."""
         dirtypes = {}
         if hasattr(self, "__annotations__"):
             for var, type_ in self.__annotations__.items():
@@ -95,7 +100,8 @@ class AnnotatedDirectory(Directory, ABC):
         return dirtypes
 
     def files(self) -> List[File]:
-        """Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `File` class."""
+        """Return all objects which are contained in the `AnnotatedDirectory`
+        instance and that subclass from `File` class."""
         return [
             getattr(self, var)
             for var in vars(self)
@@ -103,7 +109,8 @@ class AnnotatedDirectory(Directory, ABC):
         ]
 
     def directories(self) -> List[Directory]:
-        """Return all objects which are contained in the `AnnotatedDirectory` instance and that subclass from `Directory` class."""
+        """Return all objects which are contained in the `AnnotatedDirectory`
+        instance and that subclass from `Directory` class."""
         return [
             getattr(self, var)
             for var in vars(self)
@@ -117,9 +124,10 @@ class AnnotatedDirectory(Directory, ABC):
 
     def _parse(self):
         """
-        Iterates over an `AnnotatedDirectory`'s contents (which are files or other sub-directories). If the content is a file,
-        then check the filetype of the file (compared to the filetype which the classes subclassing from File have). After
-        the check succeeds, check if that filetype needs a parent (meaning that the filetype needs access to the parent directory
+        Iterates over an `AnnotatedDirectory`'s contents (which are files or other sub-directories).
+        If the content is a file, then check the filetype of the file (compared to the filetype
+        which the classes subclassing from File have). After the check succeeds, check if that filetype
+        needs a parent (meaning that the filetype needs access to the parent directory
         because it needs information from parent directory). For example, an .int file needs access to the parent
         directory because it needs the whole geometry ot calculate the ALF. The same is done for directories.
         """

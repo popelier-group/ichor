@@ -121,11 +121,11 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
             f.write("\n")
             f.write("    &QS\n")
             f.write(
-                "      ! use the GPW method (i.e. pseudopotential based calculations with the Gaussian and Plane Waves scheme).\n"
+                "      ! use the GPW method (i.e. pseudopotential based calculations with the Gaussian and Plane Waves scheme).\n"  # noqa E501
             )
             f.write("      METHOD GPW\n")
             f.write(
-                "      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n"
+                "      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n"  # noqa E501
             )
             f.write("      ! sets reasonable values for all other thresholds.\n")
             f.write("      EPS_DEFAULT 1.0E-10\n")

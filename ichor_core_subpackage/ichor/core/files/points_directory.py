@@ -33,11 +33,14 @@ class PointsDirectory(ListOfAtoms, Directory):
         -- SYSTEM_NAME002
         -- SYSTEM_NAME003
         ........
-    Each of the subdirectories contains Gaussian files (such as .gjf), as well as an `atomic_files` directory, which then contains the AIMALL files.
-    A `PointsDirectory` will wrap around the whole TRAINING_SET directory (which contains multiple points), while a `PointDirectory`
-    will wrap around a SYSTEM_NAME00... folder (which only contains information about 1 point).
+    Each of the subdirectories contains Gaussian files (such as .gjf),
+    as well as an `atomic_files` directory, which then contains the AIMALL files.
+    A `PointsDirectory` will wrap around the whole TRAINING_SET directory
+    (which contains multiple points), while a `PointDirectory` will wrap around a SYSTEM_NAME00...
+    folder (which only contains information about 1 point).
 
-    :param path: Path to a directory which contains points. This path is typically the path to the training set, sample pool, etc.
+    :param path: Path to a directory which contains points.
+        This path is typically the path to the training set, sample pool, etc.
     :param needs_parsing: By default, every PointsDirectory is parsed when the instance is created to
         create PointDirectory instances of each inner directory (but the contents of the files are not read).
         If however, a slice of a already created PointsDirectory is made, the conents of the directories
@@ -55,11 +58,14 @@ class PointsDirectory(ListOfAtoms, Directory):
     def _parse(self) -> None:
         """
         Called from Directory.__init__(self, path)
-        Parse a directory (such as TRAINING_SET, TEST_SET,etc.) and make PointDirectory objects of each of the subirectories.
-        If however there are only .gjf files present in the directory at the moment, then make a new directory for each .gjf file
-        and move the .gjf file in there. So for example, if there is a file called WATER001.gjf, this method will make a
-        folder called WATER001 and will move WATER001.gjf in it.
-        Initially when the training set, test set, and sample pool directories are made, there are only .gjf files present in the
+        Parse a directory (such as TRAINING_SET, TEST_SET,etc.)
+        and make PointDirectory objects of each of the subirectories.
+        If however there are only .gjf files present in the directory at the moment,
+        then make a new directory for each .gjf file and move the .gjf file in there. So for example,
+        if there is a file called WATER001.gjf, this method will make a folder called WATER001
+        and will move WATER001.gjf in it.
+        Initially when the training set, test set, and sample pool directories are made,
+        there are only .gjf files present in the
         directory. This method makes them in separate directories.
         """
 
@@ -78,7 +84,8 @@ class PointsDirectory(ListOfAtoms, Directory):
                 self.append(
                     PointDirectory(new_dir)
                 )  # wrap the new directory as a PointDirectory instance and add to self
-        # sort by the names of the directories (by the numbers in their name) since the system name is always the same
+        # sort by the names of the directories (by the numbers in their name)
+        # since the system name is always the same
         self = self.sort(key=lambda x: x.path.name)
 
     def connectivity(
@@ -106,7 +113,8 @@ class PointsDirectory(ListOfAtoms, Directory):
     def alf_dict(
         self, alf_calculator: Callable[..., ALF], *args, **kwargs
     ) -> Dict[str, ALF]:
-        """Returns a dictionary of key: atom_name, value: ALF instance (containing central atom index, x-axis idx, xy-plane idx)
+        """Returns a dictionary of key: atom_name, value: ALF instance
+            (containing central atom index, x-axis idx, xy-plane idx)
         e.g. {"O1":ALF(0,1,2),"H2":ALF(1,0,2), "H3":ALF(2,0,1)]
         :param *args: positional arguments to pass to alf calculator
         :param **kwargs: key word arguments to pass to alf calculator
@@ -116,14 +124,17 @@ class PointsDirectory(ListOfAtoms, Directory):
     def properties(
         self, system_alf: Optional[List[ALF]] = None, specific_property: str = None
     ) -> PointsDirectoryProperties:
-        """Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
+        """Get properties contained in the PointDirectory.
+        IF no system alf is passed in, an automatic process to get C matrices is started.
 
-        :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
+        :param system_alf: Optional list of `ALF` instances that can be passed in
+            to use a specific alf instead of automatically trying to compute it.
         :param key: return only a specific key from the returned PointsDirectoryProperties dictionary
         """
 
         if not system_alf:
-            # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
+            # TODO: The default alf calculator (the cahn ingold prelog one)
+            # should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
             system_alf = self.alf(default_alf_calculator)
 
         points_dir_properties = {}
@@ -201,8 +212,8 @@ class PointsDirectory(ListOfAtoms, Directory):
         step: Optional[int] = 1,
     ):
         """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
-        for that timestep. The comment lines in the xyz have absolute predictions errors. These can then be plotted in
-        ALFVisualizer as cmap to see where poor predictions happen.
+        for that timestep. The comment lines in the xyz have absolute predictions errors.
+        These can then be plotted in ALFVisualizer as cmap to see where poor predictions happen.
 
         :param models_path: The model path to one atom.
         :param property_: The property for which to predict for and get errors (iqa or any multipole moment)
@@ -300,7 +311,8 @@ class PointsDirectory(ListOfAtoms, Directory):
                 self.path, False, [list.__getitem__(self, i) for i in item]
             )
 
-        # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
+        # if indexing by something else that has not been programmed yet, should only
+        # be reached if not indexed by int, str, or slice
         raise TypeError(
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )
@@ -357,15 +369,16 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         Calculates ALF features and properties (with multipole moments rotated).
 
-        :param str_to_append_to_fname: a string that is appended to the default file name (which is `name_of_atom.csv`), defaults to None
-        :param atom_names: A list of atom names for which to write out csv files with properties. If None, then writes out files for all
-            atoms in the system, defaults to None
-        :param property_types: A list of property names (iqa, multipole names) for which to write columns. If None, then writes out
-            columns for all properties, defaults to None
+        :param str_to_append_to_fname: a string that is appended to the default file name
+            (which is `name_of_atom.csv`), defaults to None
+        :param atom_names: A list of atom names for which to write out csv files with properties.
+            If None, then writes out files for all atoms in the system, defaults to None
+        :param property_types: A list of property names (iqa, multipole names) for which to write columns.
+            If None, then writes out columns for all properties, defaults to None
         :param *args: positional arguments to pass to calculator function
         :param **kwargs: key word arguments to be passed to the feature calculator function
-        :raises TypeError: This method only works for PointsDirectory instances because it needs access to AIMALL information. Does not
-            work for Trajectory instances.
+        :raises TypeError: This method only works for PointsDirectory instances because it
+            needs access to AIMALL information. Does not work for Trajectory instances.
         """
 
         if not atom_names:
@@ -412,8 +425,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         **kwargs,
     ):
         """Writes out a csv file containing wfn energy and FORCEs calculated for every feature.
-        Note that the forces (dE/df_i) are the negative of the PES gradient, so for machine learning, the negative of these forces needs
-        to be taken to add gradient information into GP models.
+        Note that the forces (dE/df_i) are the negative of the PES gradient,
+        so for machine learning, the negative of these forces needs to be taken to
+        add gradient information into GP models.
 
         :param system_alf: A list of ALF instances containing alf info
         :param central_atom_idx: The central atom which to center the alf on

@@ -50,10 +50,12 @@ class AmberMDIn(WriteFile, ReadFile):
     :param bond_constraint: _description_, defaults to BondLengthConstraint.NoConstraint
     :param write_coordinates_every: Write coordinates every nth timestep, defaults to 1
     :param write_velocities_every: Write velocities out to mdcrd even nth step
-        Note that these should not be written out as output format `ioutfm` is set to 0 (meaning output is not in binary format), optional
+        Note that these should not be written out as output format `ioutfm` is set to 0
+        (meaning output is not in binary format), optional
     :param write_forces_every: Write atomic forces out to mdcrd every nth step
         Note that output file is not NETCDF (binary format), defaults to -1
-    :param periodic_boundary_condition: Whether to use periodic boundary conditions or not, defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
+    :param periodic_boundary_condition: Whether to use periodic boundary conditions or not,
+        defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
     :param thermostat: The thermostat to use for the simulation, defaults to AmberThermostat.Langevin
     :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
     """
@@ -155,18 +157,15 @@ class AmberMDIn(WriteFile, ReadFile):
             f.write(f"  ntc={self.bond_constraint.value},\n")  # bond contraint
             f.write(f"  temp0={self.temperature},\n")  # temperature
             f.write("  ntpr=1,\n")  # energy info printed to mdout every ntpr steps
-            f.write(
-                f"  ntwx={self.write_coordinates_every},\n"
-            )  # coordinate info printed to mdout every ntwx steps
-            f.write(
-                f"  ntwv={self.write_velocities_every},\n"
-            )  # velocity info printed to mdout every ntwv steps
-            f.write(
-                f"  ntwf={self.write_forces_every},\n"
-            )  # force info printed to mdout every ntwf steps
-            f.write(
-                "  ioutfm=0,\n"
-            )  # output formatting, setting to 0 means that a human readable file is written (not a NETCDF format which is binary)
+            # coordinate info printed to mdout every ntwx steps
+            f.write(f"  ntwx={self.write_coordinates_every},\n")
+            # velocity info printed to mdout every ntwv steps
+            f.write(f"  ntwv={self.write_velocities_every},\n")
+            # force info printed to mdout every ntwf steps
+            f.write(f"  ntwf={self.write_forces_every},\n")
+            # output formatting, setting to 0 means that a human readable
+            # file is written (not a NETCDF format which is binary)
+            f.write("  ioutfm=0,\n")
             f.write("  cut=999.0,\n")  # nonbonded cutoff
             f.write(
                 f"  ntb={self.periodic_boundary_condition.value},\n"
@@ -205,10 +204,12 @@ def write_mdin(
     :param bond_constraint: _description_, defaults to BondLengthConstraint.NoConstraint
     :param write_coordinates_every: Write coordinates every nth timestep, defaults to 1
     :param write_velocities_every: Write velocities out to mdcrd even nth step
-        Note that these should not be written out as output format `ioutfm` is set to 0 (meaning output is not in binary format), optional
+        Note that these should not be written out as output format `ioutfm`
+        is set to 0 (meaning output is not in binary format), optional
     :param write_forces_every: Write atomic forces out to mdcrd every nth step
         Note that output file is not NETCDF (binary format), defaults to -1
-    :param periodic_boundary_condition: Whether to use periodic boundary conditions or not, defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
+    :param periodic_boundary_condition: Whether to use periodic boundary conditions or not,
+        defaults to PeriodicBoundaryCondition.NoPeriodicBoundary
     :param thermostat: The thermostat to use for the simulation, defaults to AmberThermostat.Langevin
     :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
     """

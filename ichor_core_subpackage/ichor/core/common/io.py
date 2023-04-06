@@ -1,7 +1,6 @@
 import os
 import shutil
 import stat
-import sys
 import time
 from contextlib import contextmanager
 from functools import wraps
@@ -85,11 +84,13 @@ def copyfile(src: Path, dst: Path):
 
 @convert_to_path
 def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
-    """Copy a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.)
+    """Copy a whole tree (a folder and all of its inside
+    contents such as subdirectories, sub-subdirectories, files, etc.)
 
     :param src: The source directory where the tree is currently
     :param dst: The destination directory where the tree is to be copied to
-    :param symlinks: Whether or not to keep symlinks or copy the files corresponding to the symlinks (default is False, so copies the files directly)
+    :param symlinks: Whether or not to keep symlinks or
+        copy the files corresponding to the symlinks (default is False, so copies the files directly)
     :param ignore: A callable which indicates which files should not be copied over.
     """
     for item in src.iterdir():
@@ -103,7 +104,8 @@ def copytree(src: Path, dst: Path, symlinks=False, ignore=None):
 
 @convert_to_path
 def recursive_move(src: Path, dst: Path) -> None:
-    """Move a whole tree (a folder and all of its inside contents such as subdirectories, sub-subdirectories, files, etc.) or a file to a new location.
+    """Move a whole tree (a folder and all of its inside
+    contents such as subdirectories, sub-subdirectories, files, etc.) or a file to a new location.
 
     :param src: The current location of directory of file
     :param dst: The location where the directory or file should be moved to
@@ -155,8 +157,10 @@ def remove_with_suffix(
 @convert_to_path
 def pushd(new_dir: Path):
     """
-    Works like the UNIX `pushd` commmand whereby it changes the current directory and stores the previous directory on the stack
-    By exiting the context manager, the equivalent of `popd` is called and the location is reverted to the previous e.g.
+    Works like the UNIX `pushd` commmand whereby it changes the current directory
+    and stores the previous directory on the stack
+    By exiting the context manager, the equivalent of `popd` is called
+    and the location is reverted to the previous e.g.
 
     ```python
     # currently in /home

@@ -6,7 +6,7 @@ from ichor.core.models.calculate_fflux_derivatives import fflux_derivs
 
 
 def predict_fflux_forces_for_all_atoms(
-    atoms: "Atoms", models: "Models", system_alf: List["ALF"]
+    atoms: "Atoms", models: "Models", system_alf: List["ALF"]  # noqa F821
 ) -> np.ndarray:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
 
@@ -67,7 +67,7 @@ def predict_fflux_forces_for_all_atoms(
 
 
 def predict_fflux_forces_for_all_atoms_dict(
-    atoms: "Atoms", models: "Models", system_alf: List["ALF"]
+    atoms: "Atoms", models: "Models", system_alf: List["ALF"]  # noqa F821
 ) -> Dict[str, np.ndarray]:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
 

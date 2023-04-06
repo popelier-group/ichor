@@ -7,7 +7,6 @@ import sqlalchemy
 from ichor.core.atoms import ALF, Atom, Atoms
 from ichor.core.calculators import calculate_alf_atom_sequence, calculate_alf_features
 from ichor.core.common.constants import (
-    multipole_names,
     spherical_dipole_labels,
     spherical_hexadecapole_labels,
     spherical_monopole_labels,

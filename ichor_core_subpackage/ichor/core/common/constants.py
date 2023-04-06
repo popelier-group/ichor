@@ -1,4 +1,5 @@
-"""Contains all avalable settings for Gaussian, AIMALL, FEREBUS, as well as constant values that are used throughout ICHOR to make conversions, etc."""
+"""Contains all avalable settings for Gaussian, AIMALL, FEREBUS,
+as well as constant values that are used throughout ICHOR to make conversions, etc."""
 
 from enum import Enum
 from typing import Dict, List

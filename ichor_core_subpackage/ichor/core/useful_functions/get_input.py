@@ -53,7 +53,7 @@ def _get_input_menu_refresh(menu):
         menu.add_option(f"{i+1}", f"{f}", _set_input, kwargs={"input_file": f})
     menu.add_space()
     menu.add_option(
-        f"c", f"Custom Input", get_file, kwargs={"filetype": _input_filetypes}
+        "c", "Custom Input", get_file, kwargs={"filetype": _input_filetypes}
     )
     menu.add_space()
     menu.add_message(f"Current Input File {_input_file}")

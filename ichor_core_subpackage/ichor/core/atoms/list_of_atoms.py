@@ -71,7 +71,8 @@ class ListOfAtoms(list, ABC):
         all features for a single atom are easier to group.
         :rtype: `np.ndarray`
         :return:
-            If the features for the whole trajectory are returned, the array has shape `n_atoms` x `n_timesteps` x `n_features`
+            If the features for the whole trajectory are returned,
+            the array has shape `n_atoms` x `n_timesteps` x `n_features`
             If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
             If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
@@ -88,7 +89,8 @@ class ListOfAtoms(list, ABC):
         return features
 
     def get_headings(self):
-        """Helper function which makes the column headings for csv or excel files in which features are going to be saved."""
+        """Helper function which makes the column headings
+        for csv or excel files in which features are going to be saved."""
 
         natoms = self.natoms
         nfeatures = 3 * natoms - 6 if natoms > 1 else 1
@@ -116,12 +118,15 @@ class ListOfAtoms(list, ABC):
         atom_names: Optional[List[str]] = None,
         **kwargs,
     ):
-        """Writes csv files containing features for every atom in the system. Optionally a list can be passed in to get csv files for only a subset of atoms
+        """Writes csv files containing features for every atom in the system.
+        Optionally a list can be passed in to get csv files for only a subset of atoms
 
         :param feature_calculator: Calculator function to be used to calculate features
-        :param fname: A string to be appended to the default csv file names. A .csv file is written out for every atom with default name `atom_name`_features.csv
+        :param fname: A string to be appended to the default csv file names.
+            A .csv file is written out for every atom with default name `atom_name`_features.csv
             If an fname is given, the name becomes `fname`_`atom_name`_features.csv
-        :param atom_names: A list of atom names for which to write csv files. If None, then write out the features for every atom in the system.
+        :param atom_names: A list of atom names for which to write csv files.
+            If None, then write out the features for every atom in the system.
         :param *args: positional arguments to pass to calculator function
         :param **kwargs: key word arguments to be passed to the feature calculator function
         """
@@ -151,7 +156,8 @@ class ListOfAtoms(list, ABC):
         atom_names: List[str] = None,
         **kwargs,
     ):
-        """Writes out one excel file which contains a sheet with features for every atom in the system. Optionally a list of atom names can be
+        """Writes out one excel file which contains a sheet with
+        features for every atom in the system. Optionally a list of atom names can be
         passed in to only make sheets for certain atoms
 
         :param atom_names: A list of atom names for which to calculate features and write in excel spreadsheet
@@ -190,10 +196,12 @@ class ListOfAtoms(list, ABC):
         system_alf: Dict[str, ALF],
         fname: Optional[Union[str, Path]] = None,
     ):
-        """Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
-        xyz file with all geometries centered on that atom. This is essentially what the ALFVisualizier application (ALFi) does.
-        The features for the central atom are calculated, after which they are converted back into xyz coordinates (thus all geometries)
-        are now centered on the given central atom).
+        """Centers all geometries (from a Trajectory of PointsDirectory instance)
+        onto a central atom and then writes out a new xyz file with all geometries centered on that atom.
+        This is essentially what the ALFVisualizier application (ALFi) does.
+        The features for the central atom are calculated, after which they
+        are converted back into xyz coordinates.
+        Thus all geometries are now centered on the given central atom).
 
         :param feature_calculator: Function which calculates features
         :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`

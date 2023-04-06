@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, Type
+from typing import Any, Optional, Type
 
 
 def try_convert(inp: Any, ty: Type, default: Optional[Type]) -> Type:

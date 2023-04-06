@@ -1,4 +1,3 @@
-from traceback import format_exception_only
 from typing import Callable, Dict, Optional
 
 import numpy as np
@@ -38,7 +37,7 @@ class Atom(VarReprMixin, Coordinates3D):
         y: float,
         z: float,
         index: Optional[int] = None,
-        parent: Optional["Atoms"] = None,
+        parent: Optional["Atoms"] = None,  # noqa F821
         units: AtomicDistance = AtomicDistance.Angstroms,
     ):
         # to be read in from coordinate line
@@ -55,7 +54,7 @@ class Atom(VarReprMixin, Coordinates3D):
         self.units: AtomicDistance = units
 
     @classmethod
-    def from_atom(cls, atom: "Atom") -> "Atom":
+    def from_atom(cls, atom: "Atom") -> "Atom":  # noqa F821
         return Atom(
             atom.type,
             atom.x,
@@ -66,7 +65,7 @@ class Atom(VarReprMixin, Coordinates3D):
             atom.units,
         )
 
-    def to_angstroms(self) -> "Atom":
+    def to_angstroms(self) -> "Atom":  # noqa F821
         """Convert the coordiantes to Angstroms"""
         new_atom = Atom.from_atom(self)
         if new_atom.units == AtomicDistance.Bohr:
@@ -74,7 +73,7 @@ class Atom(VarReprMixin, Coordinates3D):
             new_atom.units = AtomicDistance.Angstroms
         return new_atom
 
-    def to_bohr(self) -> "Atom":
+    def to_bohr(self) -> "Atom":  # noqa F821
         """Convert the coordiantes to Bohr"""
         new_atom = Atom.from_atom(self)
         if new_atom.units == AtomicDistance.Angstroms:
@@ -85,7 +84,8 @@ class Atom(VarReprMixin, Coordinates3D):
     @property
     def index(self) -> int:
         """Returns the integer assigned to the atom, calculated from the trajectory file. Indices start at 1.
-        This number is given to every atom in the trajectory, so atoms of the same type(element) can be distinguished."""
+        This number is given to every atom in the trajectory, so atoms of the same type(element)
+        can be distinguished."""
         if self._index is None:
             raise ValueError(
                 f"'index' is not defined for '{self.__class__.__name__}({self.type} {self.x} {self.y} {self.z})'"
@@ -98,7 +98,7 @@ class Atom(VarReprMixin, Coordinates3D):
         self._index = idx
 
     @property
-    def parent(self) -> "Atoms":
+    def parent(self) -> "Atoms":  # noqa F821
         """Returns the parent instance (an instance of `Atoms` class) that holds self (an instance of `Atom`).
 
         :raises ValueError: if parent is not defined
@@ -113,7 +113,7 @@ class Atom(VarReprMixin, Coordinates3D):
         return self._parent
 
     @parent.setter
-    def parent(self, parent: "Atoms"):
+    def parent(self, parent: "Atoms"):  # noqa F821
         """Setter method for ._parent attribute.
 
         :param parent: The parent instance (of type `Atoms`) which holds self (an `Atom` instance)
@@ -227,7 +227,7 @@ class Atom(VarReprMixin, Coordinates3D):
         """
         return f"{self.type:<3s}{self.coordinates_string}"
 
-    def vec_to(self, other: "Atom") -> np.ndarray:
+    def vec_to(self, other: "Atom") -> np.ndarray:  # noqa F821
         """
         Calculates the vector from self to other
         :param other: atom to calculate the vector to
@@ -235,7 +235,7 @@ class Atom(VarReprMixin, Coordinates3D):
         """
         return other.coordinates - self.coordinates
 
-    def dist(self, other: "Atom") -> float:
+    def dist(self, other: "Atom") -> float:  # noqa F821
         """
         Calculated the distance between self and other
         :param other: atom to calculate the distance to
@@ -244,7 +244,7 @@ class Atom(VarReprMixin, Coordinates3D):
         d = self.coordinates - other.coordinates
         return np.sqrt(d.dot(d))
 
-    def angle(self, atom1: "Atom", atom2: "Atom") -> float:
+    def angle(self, atom1: "Atom", atom2: "Atom") -> float:  # noqa F821
         """
         Angle subtending atom1-self-atom2
         :param atom1: atom bonded to self
@@ -261,8 +261,10 @@ class Atom(VarReprMixin, Coordinates3D):
         """
         Returns the 1D np.array corresponding to the connectivity of ONE Atom with respect to all other Atom
         instances that are held in an Atoms instance.
-        For an `Atom` instance, this is only one row of the full connectivity matrix of the Atoms instance that is self.parent.
-        However, to compute the connectivity in the first place, we need access to the `Atoms` instance (self.parent).
+        For an `Atom` instance, this is only one row of the full connectivity matrix
+        of the Atoms instance that is self.parent.
+        However, to compute the connectivity in the first place,
+        we need access to the `Atoms` instance (self.parent).
 
         :param connectivity_calculator: function which calculates connectivity for given atom.
         """
@@ -307,13 +309,16 @@ class Atom(VarReprMixin, Coordinates3D):
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> ALF:
         """Returns an instance of ALF. This ALF is ONLY for this Atom.
 
-        e.g. If we have an Atoms instance for the water monomer, the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
+        e.g. If we have an Atoms instance for the water monomer,
+        the ALF for the whole water monomer can be written as [[0,1,2], [1,0,2], [2,0,1]],
         while the ALF for the first atom only is [0,1,2]
 
-        [0,1,2] contains the indices for the central atom, x-axis atom, and xy-plane atom. These indices start at 0 to index Python objects correctly.
+        [0,1,2] contains the indices for the central atom, x-axis atom,
+        and xy-plane atom. These indices start at 0 to index Python objects correctly.
 
         :param alf_calculator: function which calculates Atomic Local Frame for given atom.
-        :return: An `ALF` instance which contains the origin atom index (self.i) as well as the x-axis and optionally xy-plane index.
+        :return: An `ALF` instance which contains the origin atom index
+            (self.i) as well as the x-axis and optionally xy-plane index.
             For two-atom systems, there is only an x-axis index.
         """
         return alf_calculator(self, *args, **kwargs)
@@ -373,7 +378,7 @@ class Atom(VarReprMixin, Coordinates3D):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.name:<3s}{self.coordinates_string})"
 
-    def __eq__(self, other: "Atom") -> bool:
+    def __eq__(self, other: "Atom") -> bool:  # noqa F821
         """Equality check for two `Atom` instances
 
         :param other: other instance of `Atom`
@@ -397,7 +402,7 @@ class Atom(VarReprMixin, Coordinates3D):
     def __hash__(self):
         return hash(str(self.index) + str(self.coordinates_string))
 
-    def __sub__(self, other: "Atom"):
+    def __sub__(self, other: "Atom"):  # noqa F821
         """Implements subtraction for two `Atom` instances
 
         :param other: `Atom` instance
@@ -417,7 +422,7 @@ class AtomWithProperties(Atom):
         y: float,
         z: float,
         index: Optional[int] = None,
-        parent: Optional["Atoms"] = None,
+        parent: Optional["Atoms"] = None,  # noqa F821
         units: AtomicDistance = AtomicDistance.Angstroms,
         iqa=None,
         integration_error=None,
@@ -587,8 +592,9 @@ class AtomWithProperties(Atom):
     def local_forces(
         self, C_matrix_dict: Dict[str, np.ndarray]
     ) -> Dict[str, AtomForce]:
-        """Rotates the force vector by the C matrix (which defines a new coordinate frame). The C matrix is dependent on
-        the atomic local frame calculated for each atom. Each atom has its own C rotation matrix, so each atomic force is
+        """Rotates the force vector by the C matrix (which defines a new coordinate frame).
+        The C matrix is dependent on the atomic local frame calculated for each atom.
+        Each atom has its own C rotation matrix, so each atomic force is
         rotated by the atom's specific C matrix.
 
         :param C_matrix_dict: A dictionary of C matrices for each atom in the system.

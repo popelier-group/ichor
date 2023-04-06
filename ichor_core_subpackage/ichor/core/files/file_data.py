@@ -6,16 +6,13 @@ import numpy as np
 from ichor.core.atoms import Atom
 from ichor.core.atoms.alf import ALF
 
-from ichor.core.common.dict import (
-    find_in_inner_dicts,
-    unwrap_single_entry,
-    unwrap_single_item,
-)
+from ichor.core.common.dict import find_in_inner_dicts, unwrap_single_entry
 
 
 class HasAtoms(ABC):
     """
-    Abstract base class for classes which either have a property or attribute of `atoms` that gives back an `Atoms` instance.
+    Abstract base class for classes which either have a property or
+    attribute of `atoms` that gives back an `Atoms` instance.
     """
 
     @property
@@ -90,7 +87,8 @@ class HasAtoms(ABC):
     def features_dict(
         self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
     ) -> dict:
-        """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
+        """Returns the features in a dictionary for this Atoms instance,
+        corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
         e.g. {"C1": np.array, "H2": np.array}
@@ -110,10 +108,11 @@ class HasAtoms(ABC):
         fname: Optional[Union[str, Path]] = None,
         **kwargs,
     ):
-        """Centers all geometries (from a Trajectory of PointsDirectory instance) onto a central atom and then writes out a new
-        xyz file with all geometries centered on that atom. This is essentially what the ALFVisualizier application (ALFi) does.
-        The features for the central atom are calculated, after which they are converted back into xyz coordinates (thus all geometries)
-        are now centered on the given central atom).
+        """Centers all geometries (from a Trajectory of PointsDirectory instance)
+        onto a central atom and then writes out a new xyz file with all geometries centered on that atom.
+        This is essentially what the ALFVisualizier application (ALFi) does.
+        The features for the central atom are calculated, after which they are
+        converted back into xyz coordinates (thus all geometries) are now centered on the given central atom).
 
         :param feature_calculator: Function which calculates features
         :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`

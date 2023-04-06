@@ -163,7 +163,8 @@ def pack_cartesian_hexadecapole(
 
 
 def unpack_cartesian_hexadecapole(h):
-    # h_xxxx, h_xxxy, h_xxxz, h_xxyy, h_xxyz, h_xxzz, h_xyyy, h_xyyz, h_xyzz, h_xzzz, h_yyyy, h_yyyz, h_yyzz, h_yzzz, h_zzzz
+    # h_xxxx, h_xxxy, h_xxxz, h_xxyy, h_xxyz, h_xxzz, h_xyyy,
+    # h_xyyz, h_xyzz, h_xzzz, h_yyyy, h_yyyz, h_yyzz, h_yzzz, h_zzzz
     return (
         h[0, 0, 0, 0],
         h[0, 0, 0, 1],

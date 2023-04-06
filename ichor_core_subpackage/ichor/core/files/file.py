@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager, suppress
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from ichor.core.common.functools import buildermethod, classproperty
 from ichor.core.common.io import move, remove
@@ -125,7 +125,8 @@ class ReadFile(File, ABC):
                     *args, **kwargs
                 )  # self._read_file is different based on which type of file is being read (GJF, AIMALL, etc.)
                 # else:
-                #     raise FileNotFoundError(f"File with path path {self.path} of type {self.__class__.__name__} does not exist on disk.") # todo: talk to yulian about this
+                #     raise FileNotFoundError(f"File with path path {self.path}
+                # of type {self.__class__.__name__} does not exist on disk.") # todo: talk to yulian about this
                 self.state = FileState.Read
             else:
                 self.state = FileState.Unread
@@ -140,12 +141,16 @@ class ReadFile(File, ABC):
         )
 
     def __getattribute__(self, item):
-        """This is what gets called when accessing an attribute of an instance. Here, we check if the attribute exists or not.
-        If the attribute does not exist, then read the file and update its filestate. Then try to return the value of the attribute, if
-        the attribute still does not exist after reading the file, then return an AttributeError.
+        """This is what gets called when accessing an attribute of an instance.
+        Here, we check if the attribute exists or not.
 
-        One must be careful to make sure all attributes that want to be accessed lazily must be an attribute of the class and
-        not to override __getattribute__ in subclasses of PathObject.
+        If the attribute does not exist, then read the file and update its filestate.
+        Then try to return the value of the attribute, if the attribute still does not exist
+        after reading the file, then return an AttributeError.
+
+        One must be careful to make sure all attributes that want to be accessed
+        lazily must be an attribute of the class and not to override __getattribute__
+        in subclasses of PathObject.
 
         :param item: The attribute that needs to be accessed.
         """
@@ -162,8 +167,9 @@ class ReadFile(File, ABC):
             raise AttributeError(f"{self} does not have attribute {item}.") from e
 
     def __getitem__(self, item):
-        """Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
-        read the file and try to access the item again. If the item still does not exist, then throw a KeyError."""
+        """Tries to return the item indexed with [] brackets.
+        If the item does not exist and the filestate is Unread, then read the file
+        and try to access the item again. If the item still does not exist, then throw a KeyError."""
         try:
             return super().__getitem__(item)
         except (KeyError, AttributeError):

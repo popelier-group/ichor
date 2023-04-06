@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from ichor.core.atoms import ALF, Atoms, ListOfAtoms
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
-from ichor.core.common.str import get_digits
 from ichor.core.common.types.itypes import F
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasAtoms
@@ -19,7 +18,8 @@ class DimensionError(ValueError):
 
 
 def x_to_features(func: F) -> F:
-    """Used as a decorator to convert an incoming set of test points `x` to features because we need to know the test point features in
+    """Used as a decorator to convert an incoming set of
+    test points `x` to features because we need to know the test point features in
     order to make predictions."""
 
     @wraps(func)
@@ -31,9 +31,12 @@ def x_to_features(func: F) -> F:
 
 
 class Models(Directory, list):
-    """A class which wraps around a directory containing models made by FEREBUS or any other program used to make GP models. There are different
-    models for iqa energy and each individual multipole moment. Aditionally, every atom in the system has its own set of models for iqa and
-    multipole moments. These models can have different training input/output data if the models have been made with per-atom.
+    """A class which wraps around a directory containing models made by FEREBUS
+    or any other program used to make GP models. There are different
+    models for iqa energy and each individual multipole moment. Aditionally,
+    every atom in the system has its own set of models for iqa and
+    multipole moments. These models can have different training input/output data
+    if the models have been made with per-atom.
     """
 
     def __init__(self, path):
@@ -78,15 +81,17 @@ class Models(Directory, list):
         """Returns the zero index alf from each model file as a numpy array e.g. [[0, 1, 2], [1, 0, 2], [2, 0, 1]]
 
         .. note::
-            Sorting by the first integer in elements of the list will give a list like this [[0,...], [1,....], [2,....]].
-            Before that the list could look like [[2,...], [0,....], [1,....]] (because the models could be unordered)
-            which would mess up the alf for atoms.
+            Sorting by the first integer in elements of the list will give a
+            list like this [[0,...], [1,....], [2,....]].
+            Before that the list could look like [[2,...], [0,....], [1,....]]
+            (because the models could be unordered) which would mess up the alf for atoms.
         """
         return np.array(sorted([model.ialf for model in self], key=lambda x: x[0]))
 
     @property
     def ialf_dict(self) -> Dict[str, np.ndarray]:
-        """Returns the zero index alf from each model file as a dictionary e.g. {'O1': [0, 1, 2], 'H2': [1, 0, 2], 'H3': [2, 0, 1]}"""
+        """Returns the zero index alf from each model file as a dictionary
+        e.g. {'O1': [0, 1, 2], 'H2': [1, 0, 2], 'H3': [2, 0, 1]}"""
         return {model.atom: model.ialf for model in self}
 
     @property
@@ -124,7 +129,8 @@ class Models(Directory, list):
     ) -> Dict[str, np.ndarray]:
         """Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
 
-        :param test_x: An object that contains features (or coordinates that can be converted into features), such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
+        :param test_x: An object that contains features (or coordinates that can be converted into features),
+        such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
         :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
         """
 

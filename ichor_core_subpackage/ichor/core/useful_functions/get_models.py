@@ -62,34 +62,34 @@ def enter_custom_directory():
     set_current_model(get_dir())
 
 
-def choose_model_menu_refresh(menu: Menu):
-    latest_model_from_log = try_get_latest_models_from_log()
-    menu.clear_options()
-    menu.add_option(
-        "1",
-        f"Latest FEREBUS Model: {FILE_STRUCTURE['models']}",
-        set_current_model,
-        kwargs={"model": FILE_STRUCTURE["models"]},
-    )
-    menu.add_option(
-        "2",
-        f"Latest Model From Log: {latest_model_from_log}",
-        set_current_model,
-        kwargs={"model": latest_model_from_log},
-    )
-    menu.add_option("3", f"Choose Model From Log", select_from_log)
-    menu.add_option("4", "Custom Model Directory", enter_custom_directory)
-    menu.add_space()
-    menu.add_message(f"Current Model: {_current_model}")
-    menu.add_final_options()
+# def choose_model_menu_refresh(menu: Menu):
+#     latest_model_from_log = try_get_latest_models_from_log()
+#     menu.clear_options()
+#     menu.add_option(
+#         "1",
+#         f"Latest FEREBUS Model: {FILE_STRUCTURE['models']}",
+#         set_current_model,
+#         kwargs={"model": FILE_STRUCTURE["models"]},
+#     )
+#     menu.add_option(
+#         "2",
+#         f"Latest Model From Log: {latest_model_from_log}",
+#         set_current_model,
+#         kwargs={"model": latest_model_from_log},
+#     )
+#     menu.add_option("3", f"Choose Model From Log", select_from_log)
+#     menu.add_option("4", "Custom Model Directory", enter_custom_directory)
+#     menu.add_space()
+#     menu.add_message(f"Current Model: {_current_model}")
+#     menu.add_final_options()
 
 
-def choose_model_menu(current_model: Path) -> Path:
-    global _current_model
-    _current_model = current_model
-    with Menu("Choose Model Menu", refresh=choose_model_menu_refresh, auto_close=True):
-        pass
-    return _current_model
+# def choose_model_menu(current_model: Path) -> Path:
+#     global _current_model
+#     _current_model = current_model
+#     with Menu("Choose Model Menu", refresh=choose_model_menu_refresh, auto_close=True):
+#         pass
+#     return _current_model
 
 
 def get_models_from_path(path: Path) -> List[Models]:

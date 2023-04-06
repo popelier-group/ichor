@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Type, Union
+from typing import List, Optional, Type, Union
 
 from ichor.core.atoms import Atoms, AtomsNotFoundError
 from ichor.core.atoms.alf import ALF
@@ -112,13 +112,16 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     def properties(
         self, system_alf: Optional[List[ALF]] = None
     ) -> PointDirectoryProperties:
-        """Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
+        """Get properties contained in the PointDirectory. IF
+        no system alf is passed in, an automatic process to get C matrices is started.
 
-        :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
+        :param system_alf: Optional list of `ALF` instances that can be
+            passed in to use a specific alf instead of automatically trying to compute it.
         """
 
         if not system_alf:
-            # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
+            # TODO: The default alf calculator (the cahn ingold prelog one) should accept
+            # connectivity, not connectivity calculator, so connectivity also needs to be passed in.
             system_alf = self.alf(default_alf_calculator)
 
         c_matrix_dict = self.C_matrix_dict(system_alf)

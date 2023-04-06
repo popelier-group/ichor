@@ -1,15 +1,16 @@
-from typing import Dict, List
+from typing import List
 
 import numpy as np
 from ichor.core.atoms import ALF
 from ichor.core.models.calculate_fflux_derivatives import fflux_derivs_da_df_matrix
 
-# TODO: Add method that converts back to Cartesian coordinates. Note that the rows will be A_0, A_x, A_xy, non_alf atoms. So need to revert back to original rows
+# TODO: Add method that converts back to Cartesian coordinates.
+# Note that the rows will be A_0, A_x, A_xy, non_alf atoms. So need to revert back to original rows
 # so that it can be compared to Gaussian.
 
 
 def form_b_matrix(
-    atoms: "Atoms", system_alf: List["ALF"], central_atom_idx
+    atoms: "Atoms", system_alf: List["ALF"], central_atom_idx  # noqa F821
 ) -> np.ndarray:
     """Returns a np array of shape n_features x (n_atomsx3), containing the derivative of
     features with respect to x,y,z coordiantes. B_{ij} = df_i / dx_j (the partial derivative of
@@ -83,8 +84,10 @@ def form_g_matrix(b_matrix: np.ndarray):
     """Forms the G matrix as in Gaussian.
 
     .. note::
-        The general inverse of G is NOT used here. Gaussian seems to use the regular inverse (so this is why np.linalg.inv is used,
-        but can use Chloesky or something like this instead because G is a symmetric square (BuB^T, where u is the identity matrix here))
+        The general inverse of G is NOT used here. Gaussian seems to use
+        the regular inverse (so this is why np.linalg.inv is used,
+        but can use Chloesky or something like this instead because
+        G is a symmetric square (BuB^T, where u is the identity matrix here))
     """
 
     g_matrix = np.matmul(b_matrix, b_matrix.T)
@@ -99,7 +102,8 @@ def form_g_inverse(g_matrix: np.ndarray):
     inverse_g = np.linalg.inv(g_matrix)
 
     # using the generalized inverse seems to mess up results
-    # there is some sort of roundoff error happening as decomposition of G = V L V^T where L has eigenvalues on diagonal
+    # there is some sort of roundoff error
+    # happening as decomposition of G = V L V^T where L has eigenvalues on diagonal
     # but doing V L V^T does not give the exact numbers that BB^T=G gives
 
     # Gaussian does not seem to do a generalized inverse
@@ -116,7 +120,9 @@ def convert_to_feature_forces(
     """
     Compute -dE/df (since the global Cartesian forces are negative of the derivative of the potential).
     If making models with these values, need to take the NEGATIVE of -dE/df, as the
-    derivative of the potential energy is dE/df. dE/df are the values that need to be used when adding derivatives to GP model.
+    derivative of the potential energy is dE/df.
+
+    dE/df are the values that need to be used when adding derivatives to GP model.
 
     :param global_cartesian_forces: A 2D numpy array of shape (N_atoms, 3) containing the global Cartesian forces.
         The rows of this array are swapped internally to match the rows of the b-matrix.

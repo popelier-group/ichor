@@ -45,7 +45,8 @@ class Model(ReadFile, WriteFile):
     """A model file that is returned back from our machine learning program FEREBUS.
 
     .. note::
-        Another program can be used for the machine learning as long as it outputs files of the same format as the FEREBUS outputs.
+        Another program can be used for the machine learning as
+        long as it outputs files of the same format as the FEREBUS outputs.
     """
 
     def __init__(
@@ -94,7 +95,8 @@ class Model(ReadFile, WriteFile):
         self.notes = notes
 
     def _read_file(self, up_to: Optional[str] = None):
-        """Read in a FEREBUS output file which contains the optimized hyperparameters, mean function, and other information that is needed to make predictions."""
+        """Read in a FEREBUS output file which contains the optimized
+        hyperparameters, mean function, and other information that is needed to make predictions."""
         kernel_composition = ""
         kernel_dict = {}
         notes = {}
@@ -122,9 +124,9 @@ class Model(ReadFile, WriteFile):
                     )
                     continue
 
-                if (
-                    "jitter" in line or "nugget" in line or "noise" in line
-                ):  # noise to add to the diagonal to help with numerical stability. Typically on the scale 1e-6 to 1e-10
+                if "jitter" in line or "nugget" in line or "noise" in line:
+                    # noise to add to the diagonal to help with numerical stability.
+                    # Typically on the scale 1e-6 to 1e-10
                     self.jitter = self.jitter or float(line.split()[-1])
                     continue
 
@@ -193,9 +195,9 @@ class Model(ReadFile, WriteFile):
                     self.mean = self.mean or mean
                     continue
 
-                if (
-                    "composition" in line
-                ):  # which kernels were used to make the GP model. Different kernels can be specified for different input dimensions
+                if "composition" in line:
+                    # which kernels were used to make the GP model.
+                    # Different kernels can be specified for different input dimensions
                     kernel_composition = line.split()[-1]
                     continue
 
@@ -279,7 +281,7 @@ class Model(ReadFile, WriteFile):
                         i += 1
                         try:
                             line = next(f)
-                        except:
+                        except StopIteration:
                             break
 
                     self.weights = self.weights or weights
@@ -330,7 +332,8 @@ class Model(ReadFile, WriteFile):
 
     @property
     def R(self) -> np.ndarray:
-        """Returns the covariance matrix and adds a jitter to the diagonal for numerical stability. This jitter is a very
+        """Returns the covariance matrix and adds a jitter
+        to the diagonal for numerical stability. This jitter is a very
         small number on the order of 1e-6 to 1e-10."""
         return self.kernel.R(self.x) + (self.jitter * np.identity(self.ntrain))
 
