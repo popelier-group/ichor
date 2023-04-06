@@ -1,5 +1,5 @@
 def calculate_alf_atom_sequence(atom: "Atom") -> "ALF":
-    
+
     from ichor.core.atoms.alf import ALF
 
     """Calculates the ALF for every atom based on the sequence of how the atoms were read in

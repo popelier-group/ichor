@@ -3,11 +3,11 @@ from ichor.core.calculators.connectivity import default_connectivity_calculator
 # TODO: use connectivity here instead of connectivity calculator.
 def calculate_alf_cahn_ingold_prelog(
     atom: "Atom",
-    connectivity_calculator = default_connectivity_calculator,
+    connectivity_calculator=default_connectivity_calculator,
 ) -> "ALF":
 
     from ichor.core.atoms.alf import ALF
-    
+
     """Returns the Atomic Local Frame (ALF) of the specified atom, note that it is 0-indexed. The ALF consists of 3 Atom instances,
     the central atom, the x-axis atom, and the xy-plane atom. These are later used to calculate the C rotation
     matrix and features.
@@ -69,10 +69,7 @@ def calculate_alf_cahn_ingold_prelog(
         while True:
             next_lvl = next(level)  # starts at 0
             priorities = [_get_priority(atom, next_lvl) for atom in atoms]
-            if (
-                priorities.count(max(priorities)) == 1
-                or prev_priorities == priorities
-            ):
+            if priorities.count(max(priorities)) == 1 or prev_priorities == priorities:
                 break
             else:
                 prev_priorities = priorities
@@ -86,16 +83,21 @@ def calculate_alf_cahn_ingold_prelog(
         # we need to get 2 atoms - one for x-axis and one for xy-plane. If the molecule is 2d (like HCl), then we only need 1 atom.
         n_atoms_in_alf = 2 if len(atom.parent) > 2 else 1
         if len(atom.parent) == 1:
-            raise ValueError("ALF cannot be calculated because there is only 1 atom. Two or more atoms are necessary.")
+            raise ValueError(
+                "ALF cannot be calculated because there is only 1 atom. Two or more atoms are necessary."
+            )
 
         for _ in range(n_atoms_in_alf):
             # make a list of atoms to which the central atom is bonded to that are not in alf
-            queue = [a for a in atom.bonded_atoms(connectivity_calculator) if a not in alf]
+            queue = [
+                a for a in atom.bonded_atoms(connectivity_calculator) if a not in alf
+            ]
             # if queue is empty, then we add the bonded atoms of the atoms that the atom of interest is connected to
             if not queue:
                 queue = list(
                     it.chain.from_iterable(
-                        a.bonded_atoms(connectivity_calculator) for a in atom.bonded_atoms(connectivity_calculator)
+                        a.bonded_atoms(connectivity_calculator)
+                        for a in atom.bonded_atoms(connectivity_calculator)
                     )
                 )
                 # again remove atoms if they are already in alf

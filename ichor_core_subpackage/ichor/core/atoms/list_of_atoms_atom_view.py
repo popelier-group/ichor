@@ -47,7 +47,8 @@ class AtomView(ListOfAtoms):
 
     @property
     def type(self):
-        """Returns the types of atoms in the atom view. Since only one atom type is present, it returns a list with one element"""
+        """Returns the types of atoms in the atom view.
+        Since only one atom type is present, it returns a list with one element"""
         return [self[0].type]
 
     def connectivity(self, connectivity_calculator: Callable):
@@ -70,7 +71,8 @@ class AtomView(ListOfAtoms):
         """Return the ndarray of features for only one atom, given an alf for that atom.
         This is assumed to a 2D array of features for only one atom.
 
-        :param alf: A list of integers or a numpy array corresponding to the alf of one atom - The atom which the atom view is for.
+        :param alf: A list of integers or a numpy array corresponding to the alf of one atom
+        The atom which the atom view is for.
         :rtype: `np.ndarray`
         :return: The array has shape `n_timesteps` x `n_features`.
         """

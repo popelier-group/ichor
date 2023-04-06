@@ -38,11 +38,7 @@ def hexadecapole_spherical_to_cartesian(
     q44c: float,
     q44s: float,
 ) -> np.ndarray:
-    h_xxxx = (
-        0.375 * q40
-        - 0.25 * constants.rt5 * q42c
-        + 0.125 * constants.rt35 * q44c
-    )
+    h_xxxx = 0.375 * q40 - 0.25 * constants.rt5 * q42c + 0.125 * constants.rt35 * q44c
     h_xxxy = 0.125 * (constants.rt35 * q44s - constants.rt5 * q42s)
     h_xxxz = 0.0625 * (constants.rt70 * q43c - 3.0 * constants.rt10 * q41c)
     h_xxyy = 0.125 * q40 - 0.125 * constants.rt35 * q44c
@@ -52,11 +48,7 @@ def hexadecapole_spherical_to_cartesian(
     h_xyyz = -0.0625 * (constants.rt10 * q41c + constants.rt70 * q43c)
     h_xyzz = 0.25 * constants.rt5 * q42s
     h_xzzz = constants.rt5_8 * q41c
-    h_yyyy = (
-        0.375 * q40
-        + 0.25 * constants.rt5 * q42c
-        + 0.125 * constants.rt35 * q44c
-    )
+    h_yyyy = 0.375 * q40 + 0.25 * constants.rt5 * q42c + 0.125 * constants.rt35 * q44c
     h_yyyz = -0.0625 * (3.0 * constants.rt10 * q41s + constants.rt70 * q43s)
     h_yyzz = -0.5 * (0.5 * constants.rt5 * q42c + q40)
     h_yzzz = constants.rt5_8 * q41s
@@ -91,9 +83,7 @@ def hexadecapole_cartesian_to_spherical(
     q42s = 4 * constants.rt_1_5 * h[0, 1, 2, 2]
     q43c = 2 * constants.rt_2_35 * (h[0, 0, 0, 2] - 3 * h[0, 1, 1, 2])
     q43s = 2 * constants.rt_2_35 * (3 * h[0, 0, 1, 2] - h[1, 1, 1, 2])
-    q44c = constants.rt_1_35 * (
-        h[0, 0, 0, 0] - 6 * h[0, 0, 1, 1] + h[1, 1, 1, 1]
-    )
+    q44c = constants.rt_1_35 * (h[0, 0, 0, 0] - 6 * h[0, 0, 1, 1] + h[1, 1, 1, 1])
     q44s = 4 * constants.rt_1_35 * (h[0, 0, 0, 1] - h[0, 1, 1, 1])
     return q40, q41c, q41s, q42c, q42s, q43c, q43s, q44c, q44s
 

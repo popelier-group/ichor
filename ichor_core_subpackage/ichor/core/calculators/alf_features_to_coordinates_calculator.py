@@ -1,5 +1,8 @@
 import numpy as np
-from ichor.core.calculators.spherical_to_cartesian_calculator import spherical_to_cartesian
+from ichor.core.calculators.spherical_to_cartesian_calculator import (
+    spherical_to_cartesian,
+)
+
 
 def alf_features_to_coordinates(features: np.ndarray) -> np.ndarray:
     """Converts a given n_points x n_features matrix of features to cartesian coordinates of shape

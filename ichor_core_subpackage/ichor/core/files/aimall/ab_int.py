@@ -1,9 +1,9 @@
-
-from ichor.core.files.file import FileContents, ReadFile
-from ichor.core.files.file_data import HasProperties
 from pathlib import Path
 from typing import Dict, Union
+
 from ichor.core.common.functools import classproperty
+from ichor.core.files.file import FileContents, ReadFile
+from ichor.core.files.file_data import HasProperties
 
 
 class ABINT(HasProperties, ReadFile):
@@ -29,7 +29,7 @@ class ABINT(HasProperties, ReadFile):
     @property
     def properties(self) -> Dict[str, float]:
         return self.iqa_diatomic_contributions
-    
+
     def property_names(self):
         return None
 

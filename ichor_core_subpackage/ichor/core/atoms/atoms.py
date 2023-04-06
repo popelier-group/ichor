@@ -1,11 +1,11 @@
 import itertools as it
 from itertools import compress
-from typing import List, Optional, Sequence, Union, Dict
+from typing import Callable, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 from ichor.core.atoms.alf import ALF
 from ichor.core.atoms.atom import Atom
-from typing import Callable
+
 
 class Atoms(list):
     """
@@ -33,14 +33,14 @@ class Atoms(list):
         self.append(atom)
 
     def append(self, atom: Atom):
-        """ Appends an `Atom` instance to self."""
+        """Appends an `Atom` instance to self."""
         atom.parent = self
         if atom._index is None:
             atom.index = next(self._counter)
         super().append(atom)
 
     def copy(self) -> "Atoms":
-        """ Creates a new atoms instance (different object) from the current `Atoms` instance."""
+        """Creates a new atoms instance (different object) from the current `Atoms` instance."""
         new = Atoms()
         for a in self:
             new.add(Atom.from_atom(a))
@@ -60,7 +60,7 @@ class Atoms(list):
 
     @property
     def nuclear_charge_sum(self) -> int:
-        """ Returns the sum of nuclear charges of `Atoms` instance"""
+        """Returns the sum of nuclear charges of `Atoms` instance"""
         return sum(atom.nuclear_charge for atom in self)
 
     @property
@@ -94,7 +94,7 @@ class Atoms(list):
 
     @property
     def centroid(self) -> np.ndarray:
-        """ Returns the centroid of the system (the mean of the x,y,z coordinates of the atoms)."""
+        """Returns the centroid of the system (the mean of the x,y,z coordinates of the atoms)."""
         coordinates = self.coordinates.T
 
         x = np.mean(coordinates[0])
@@ -110,7 +110,7 @@ class Atoms(list):
 
     @property
     def atom_names(self) -> List[str]:
-        """ Returns the atom names as a list (['O1', 'H2'...])."""
+        """Returns the atom names as a list (['O1', 'H2'...])."""
         return [atom.name for atom in self]
 
     @property
@@ -120,17 +120,14 @@ class Atoms(list):
 
     @property
     def hash(self):
-        """ Returns a hash for the system which is just the atom names joined by a comma. """
+        """Returns a hash for the system which is just the atom names joined by a comma."""
         return ",".join(self.atom_names)
 
     def centre(
         self,
-        centre_atom: Optional[
-            Union[int, str, List[Union[Atom, str, int]]]
-        ] = None,
+        centre_atom: Optional[Union[int, str, List[Union[Atom, str, int]]]] = None,
     ):
-        """ Centers the geometry on some atom. But this is still in GLOBAL Cartesian coordinates.
-        """
+        """Centers the geometry on some atom. But this is still in GLOBAL Cartesian coordinates."""
         if isinstance(centre_atom, (int, str)):
             centre_atom = self[centre_atom]
         elif isinstance(centre_atom, list):
@@ -143,7 +140,9 @@ class Atoms(list):
 
         self._centred = True
 
-    def connectivity(self, connectivity_calculator: Callable[..., np.ndarray]) -> np.ndarray:
+    def connectivity(
+        self, connectivity_calculator: Callable[..., np.ndarray]
+    ) -> np.ndarray:
         """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
         :param connectivity_calculator: connectivity calculator function that calculates connectivity
@@ -151,49 +150,64 @@ class Atoms(list):
         :return: `np.ndarray` of shape n_atoms x n_atoms
         :rtype: np.ndarray
         """
-        
-        
+
         return connectivity_calculator(self)
 
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
-        
-        :param args: positional arguments to pass to alf calculator
-        :param kwargs: key word arguments to pass to alf calculator
-        """
-        return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self]
 
-    def alf_list(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
-        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed).
-        
         :param args: positional arguments to pass to alf calculator
         :param kwargs: key word arguments to pass to alf calculator
         """
-        return [ALF(alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx) for alf in self.alf(alf_calculator, *args, **kwargs)]
+        return [
+            alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self
+        ]
 
-    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[str, ALF]:
-        """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed).
-        
+    def alf_list(
+        self, alf_calculator: Callable[..., ALF], *args, **kwargs
+    ) -> List[List[int]]:
+        """Returns a list of lists with the atomic local frame indices for every atom (0-indexed).
+
         :param args: positional arguments to pass to alf calculator
         :param kwargs: key word arguments to pass to alf calculator
         """
-        return {atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs) for atom_instance in self}
+        return [
+            ALF(alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx)
+            for alf in self.alf(alf_calculator, *args, **kwargs)
+        ]
+
+    def alf_dict(
+        self, alf_calculator: Callable[..., ALF], *args, **kwargs
+    ) -> Dict[str, ALF]:
+        """Returns a list of lists with the atomic local frame indices for every atom (0-indexed).
+
+        :param args: positional arguments to pass to alf calculator
+        :param kwargs: key word arguments to pass to alf calculator
+        """
+        return {
+            atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs)
+            for atom_instance in self
+        }
 
     def C_matrix_dict(self, system_alf: List[ALF]) -> Dict[str, np.ndarray]:
-        """ Returns a dictionary of key (atom name), value (C matrix np array) for every atom"""
-        return {atom_instance.name: atom_instance.C(system_alf) for atom_instance in self}
-    
+        """Returns a dictionary of key (atom name), value (C matrix np array) for every atom"""
+        return {
+            atom_instance.name: atom_instance.C(system_alf) for atom_instance in self
+        }
+
     def C_matrix_list(self, system_alf: List[ALF]) -> List[np.ndarray]:
-        """ Returns a list C matrix np array for every atom"""
+        """Returns a list C matrix np array for every atom"""
         return [atom_instance.C(system_alf) for atom_instance in self]
 
-    def features(self, feature_calculator:  Callable[..., np.ndarray], *args, **kwargs) -> np.ndarray:
+    def features(
+        self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
+    ) -> np.ndarray:
         """Returns the features for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
         The array shape is n_atoms x n_features (3*n_atoms - 6)
-        
+
         :param args: positional arguments to pass to feature calculator
         :param kwargs: key word arguments to pass to feature calculator
 
@@ -201,19 +215,31 @@ class Atoms(list):
             :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
                 Return the feature matrix of this Atoms instance
         """
-        return np.array([atom_instance.features(feature_calculator, *args, **kwargs) for atom_instance in self])
+        return np.array(
+            [
+                atom_instance.features(feature_calculator, *args, **kwargs)
+                for atom_instance in self
+            ]
+        )
 
-    def features_dict(self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs) -> dict:
+    def features_dict(
+        self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
+    ) -> dict:
         """Returns the features in a dictionary for this Atoms instance, corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
-        
+
         :param args: positional arguments to pass to feature calculator
         :param kwargs: key word arguments to pass to feature calculator
 
         e.g. {"C1": np.array, "H2": np.array}
         """
 
-        return {atom_instance.name: atom_instance.features(feature_calculator, *args, **kwargs) for atom_instance in self}
+        return {
+            atom_instance.name: atom_instance.features(
+                feature_calculator, *args, **kwargs
+            )
+            for atom_instance in self
+        }
 
     def kabsch(self, other: "Atoms") -> np.ndarray:
         H = self.coordinates.T.dot(other.coordinates)
@@ -250,15 +276,15 @@ class Atoms(list):
         self.translate(centroid)
 
     def translate(self, v: np.ndarray):
-        """ Translates a system in 3D space.
-        
+        """Translates a system in 3D space.
+
         :param v: numpy array of shape (3,) which is added to the coordinates of each atom.
         """
         for atom in self:
             atom.coordinates += v
 
     def __getitem__(self, item) -> Union[Atom, "Atoms"]:
-        """ Used to index the Atoms isinstance with various types of `item`.
+        """Used to index the Atoms isinstance with various types of `item`.
 
         e.g. we can index a variable atoms (which is an instance of Atoms) as atoms[0], or as atoms["C1"].
         In the first case, atoms[0] will return the 0th element (an Atom instance) held in this Atoms isinstance
@@ -284,7 +310,9 @@ class Atoms(list):
         del atoms["C1"] will delete the Atom instance with the name attribute of 'C1'."""
 
         if not isinstance(i, (int, str)):
-            raise TypeError(f"Index {i} has to be of type int. Currently index is type {type(i)}")
+            raise TypeError(
+                f"Index {i} has to be of type int. Currently index is type {type(i)}"
+            )
         else:
             del self[i]
 
@@ -302,9 +330,8 @@ class Atoms(list):
         return self
 
     def __bool__(self):
-        """ Atoms instance evaluates as true if it contains Atom instances in it. If empty, the Atoms instance evaluates to False."""
+        """Atoms instance evaluates as true if it contains Atom instances in it. If empty, the Atoms instance evaluates to False."""
         return bool(len(self))
-
 
     def _rmsd(self, other: "Atoms") -> float:
         dist = np.sum(

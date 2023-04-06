@@ -3,9 +3,7 @@ import numpy as np
 
 class Distance:
     @staticmethod
-    def squared_euclidean_distance(
-        x1: np.ndarray, x2: np.ndarray
-    ) -> np.ndarray:
+    def squared_euclidean_distance(x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """Calculates squared distance matrix between data points, uses array broadcasting and distance trick
 
         .. note::

@@ -6,9 +6,10 @@ import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.io import convert_to_path
 from ichor.core.common.str import split_by
-from ichor.core.files.xyz import Trajectory
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents
+from ichor.core.files.xyz import Trajectory
+
 
 class DlpolyTrajectoryKey(Enum):
     Coordinate = 0
@@ -36,7 +37,6 @@ class DlpolyPeriodicBoundary(Enum):
 
 
 class DlpolyTimestepAtom(Atom):
-    
     def __init__(
         self,
         ty: str,
@@ -46,12 +46,10 @@ class DlpolyTimestepAtom(Atom):
         index: Optional[int] = None,
         parent: Optional["Atoms"] = None,
         units: AtomicDistance = AtomicDistance.Angstroms,
-        velocity = None,
-        force = None
+        velocity=None,
+        force=None,
     ):
-        super(DlpolyTimestepAtom, self).__init__(
-            ty, x, y, z, index, parent, units
-        )
+        super(DlpolyTimestepAtom, self).__init__(ty, x, y, z, index, parent, units)
 
         self._veloctity = velocity
         self._force = force
@@ -82,9 +80,8 @@ class DlpolyTimestepAtom(Atom):
 
 
 class DlpolyTimestep(Atoms):
-    
     def __init__(self):
-        
+
         super().__init__()
 
         self.unit_cell = np.eye(3)
@@ -94,6 +91,7 @@ class DlpolyTimestep(Atoms):
         self.number_of_atoms = None
         self.timestep_length = None
         self.timestep = None
+
 
 class DlpolyHistory(Trajectory):
     """
@@ -105,9 +103,9 @@ class DlpolyHistory(Trajectory):
     """
 
     def __init__(self, path: Optional[Path]):
-        
+
         super().__init__(path)
-        
+
         self.title = FileContents
         self.trajectory_key = FileContents
         self.periodic_boundary = FileContents
@@ -115,16 +113,16 @@ class DlpolyHistory(Trajectory):
         self.ntimesteps = FileContents
 
     def _read_file(self):
-        
+
         with open(self.path, "r") as f:
-            
+
             self.title = next(f)
             record = next(f).split()
             self.trajectory_key = DlpolyTrajectoryKey(int(record[0]))
             self.periodic_boundary = DlpolyTrajectoryKey(int(record[1]))
             self.number_of_atoms = int(record[2])
             self.ntimesteps = int(record[3])
-            
+
             for line in f:
                 if "timestep" in line:
                     timestep = DlpolyTimestep()
@@ -133,12 +131,8 @@ class DlpolyHistory(Trajectory):
                     record = line.split()
                     timestep.ntimestep = int(record[1])
                     timestep.number_of_atoms = int(record[2])
-                    timestep.trajectory_key = DlpolyTrajectoryKey(
-                        int(record[3])
-                    )
-                    timestep.periodic_boundary = DlpolyPeriodicBoundary(
-                        int(record[4])
-                    )
+                    timestep.trajectory_key = DlpolyTrajectoryKey(int(record[3]))
+                    timestep.periodic_boundary = DlpolyPeriodicBoundary(int(record[4]))
                     timestep.timestep_length = float(record[5])
                     timestep.timestep = float(record[6])
 
@@ -151,19 +145,24 @@ class DlpolyHistory(Trajectory):
                     timestep.unit_cell[2, :] = np.array(
                         [float(ci) for ci in next(f).split()]
                     )  # c vector of unit cell
-                    
+
                     for _ in range(timestep.number_of_atoms):
 
                         # record = atom_type atom_index atomic_mass charge
                         record = split_by(next(f), [8, 10, 12, 12])
-                        
+
                         timestep_atom_type = str(record[0])
 
                         timestep_atom_coordinates = np.array(
                             [float(ci) for ci in next(f).split()]
                         )
-                        
-                        timestep_atom = DlpolyTimestepAtom(timestep_atom_type, timestep_atom_coordinates[0], timestep_atom_coordinates[1], timestep_atom_coordinates[2])
+
+                        timestep_atom = DlpolyTimestepAtom(
+                            timestep_atom_type,
+                            timestep_atom_coordinates[0],
+                            timestep_atom_coordinates[1],
+                            timestep_atom_coordinates[2],
+                        )
 
                         if timestep.trajectory_key in [
                             DlpolyTrajectoryKey.CoordinateVelocity,

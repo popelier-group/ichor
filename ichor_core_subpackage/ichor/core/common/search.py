@@ -1,7 +1,19 @@
 from collections import deque
 from heapq import heappop, heappush
-from typing import (Any, Callable, Deque, Dict, Generic, Iterable, List,
-                    Optional, Sequence, Set, Tuple, TypeVar)
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+)
 
 from typing_extensions import Protocol
 
@@ -184,7 +196,5 @@ def astar(
             new_cost: float = current_node.cost + 1
             if child not in explored or explored[child] > new_cost:
                 explored[child] = new_cost
-                frontier.push(
-                    Node(child, current_node, new_cost, heuristic(child))
-                )
+                frontier.push(Node(child, current_node, new_cost, heuristic(child)))
     return None, len(explored)

@@ -28,7 +28,7 @@ class RBF(Kernel):
     @property
     def params(self):
         return self._thetas
-    
+
     @property
     def lengthscales(self):
         return np.sqrt(1.0 / (2 * self._thetas))
@@ -52,7 +52,7 @@ class RBF(Kernel):
 
         tmp_x1 = x1[:, self.active_dims] / true_lengthscales
         tmp_x2 = x2[:, self.active_dims] / true_lengthscales
-        
+
         dist = Distance.squared_euclidean_distance(tmp_x1, tmp_x2)
         return np.exp(-0.5 * dist)
 
@@ -60,13 +60,11 @@ class RBF(Kernel):
         f.write(f"[kernel.{self.name}]\n")
         f.write("type constant\n")
         f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(
-            f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
-        )
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n")
         f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):
-        
+
         lengthscales = self.lengthscales
-        
+
         return f"{self.__class__.__name__}: lengthscales: {lengthscales}"

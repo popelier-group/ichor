@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Optional
 
-from ichor.core.useful_functions.get_input import get_files_of_type
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.files import Trajectory
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
+
+from ichor.core.useful_functions.get_input import get_files_of_type
 
 
 class CP2KInput(ReadFile, WriteFile, HasAtoms):
@@ -20,14 +21,14 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
         project_name: str = FileContents,
         method: str = "BLYP",
         basis_set: str = "6-31G*",
-        molecular_charge: int = 0, # neutral
-        spin_multiplicity: int = 1, # no unpaired electrons
+        molecular_charge: int = 0,  # neutral
+        spin_multiplicity: int = 1,  # no unpaired electrons
         solver: str = "periodic",
         n_molecules: int = 1,
         box_size: float = 25.0,
     ):
         super(ReadFile, self).__init__(path)
-        
+
         self.atoms = atoms
         self.temperature = temperature
         self.nsteps = nsteps
@@ -85,26 +86,20 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
                 "  ! the project name is made part of most output files... useful to keep order\n"
             )
             f.write(f"  PROJECT {self.project_name}\n")
-            f.write(
-                "  ! various runtypes (energy, geo_opt, etc.) available.\n"
-            )
+            f.write("  ! various runtypes (energy, geo_opt, etc.) available.\n")
             f.write("  RUN_TYPE MD\n")
             f.write("\n")
             f.write("  IOLEVEL LOW\n")
             f.write("&END GLOBAL\n")
             f.write("\n")
             f.write("&FORCE_EVAL\n")
-            f.write(
-                "  ! the electronic structure part of CP2K is named Quickstep\n"
-            )
+            f.write("  ! the electronic structure part of CP2K is named Quickstep\n")
             f.write("  METHOD Quickstep\n")
             f.write("  &DFT\n")
             f.write(
                 "    ! basis sets and pseudopotential files can be found in cp2k/data\n"
             )
-            f.write(
-                f"    BASIS_SET_FILE_NAME {self.datafile_location / 'BASIS_SET'}\n"
-            )
+            f.write(f"    BASIS_SET_FILE_NAME {self.datafile_location / 'BASIS_SET'}\n")
             f.write(
                 f"    POTENTIAL_FILE_NAME {self.datafile_location / 'GTH_POTENTIALS'}\n"
             )
@@ -120,9 +115,7 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
             f.write(
                 "      ! certain calculations (e.g. geometry optimization, vibrational frequencies,\n"
             )
-            f.write(
-                "      ! NPT and cell optimizations, need higher cutoffs)\n"
-            )
+            f.write("      ! NPT and cell optimizations, need higher cutoffs)\n")
             f.write("      CUTOFF [Ry] 400\n")  # TODO: Turn this into variable
             f.write("    &END MGRID\n")
             f.write("\n")
@@ -134,9 +127,7 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
             f.write(
                 "      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n"
             )
-            f.write(
-                "      ! sets reasonable values for all other thresholds.\n"
-            )
+            f.write("      ! sets reasonable values for all other thresholds.\n")
             f.write("      EPS_DEFAULT 1.0E-10\n")
             f.write(
                 "      ! used for MD, the method used to generate the initial guess.\n"
@@ -196,9 +187,7 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
             f.write(
                 "      ! adding Grimme's D3 correction (by default without C9 terms)\n"
             )
-            f.write(
-                f"      &VDW_POTENTIAL {'OFF' if self.n_molecules == 1 else ''}\n"
-            )
+            f.write(f"      &VDW_POTENTIAL {'OFF' if self.n_molecules == 1 else ''}\n")
             f.write("        POTENTIAL_TYPE PAIR_POTENTIAL\n")
             f.write("        &PAIR_POTENTIAL\n")
             f.write(
@@ -341,16 +330,12 @@ def cp2k_to_xyz(
     if xyz is None:
         xyzs = get_files_of_type(Trajectory.filetype, cp2k_input.parent)
         if len(xyzs) == 0:
-            raise FileNotFoundError(
-                f"No trajectory files found in {cp2k_input.parent}"
-            )
+            raise FileNotFoundError(f"No trajectory files found in {cp2k_input.parent}")
         xyz = xyz[0]
     traj = Trajectory(xyz)
     if xyz is None:
         cp2k_input = CP2KInput(cp2k_input)
-        temperature = (
-            cp2k_input.temperature if temperature is None else temperature
-        )
+        temperature = cp2k_input.temperature if temperature is None else temperature
         path = f"{cp2k_input.project_name}-cp2k-{temperature}{Trajectory.filetype}"
         xyz = Path(path)
     traj.write(xyz)

@@ -4,8 +4,8 @@ from typing import Optional, Union
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import ReadFile, FileContents
-from ichor.core.files.file import FileState
+from ichor.core.files.file import FileContents, FileState, ReadFile
+
 
 class AimAtom:
     """Helper class which stores information for each atom which was in the
@@ -89,9 +89,7 @@ class AIM(ReadFile, dict):
         with open(self.path, "r") as f:
 
             lines = f.readlines()
-            is_all_atom_calculation = any(
-                "aimint.exe" in line for line in lines
-            )
+            is_all_atom_calculation = any("aimint.exe" in line for line in lines)
             for line in lines:
 
                 # need this to use multiple cores for systems above certain number of atoms (see AIMAll manual)
@@ -165,10 +163,10 @@ class AIM(ReadFile, dict):
     def __getitem__(self, item: Union[str, int]) -> AimAtom:
         """If an integer is passed, it returns the atom whose index corresponds to the integer (indexing starts at 1).
         If a string is passed, it returns the the AimAtom which corresponds to the given key."""
-        
+
         if self.state is not FileState.Read:
             self.read()
-        
+
         if isinstance(item, int):
             for atom_name, aimatom in self.items():
                 if item == get_digits(atom_name):

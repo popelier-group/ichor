@@ -1,14 +1,16 @@
-from ichor.core.files.file import WriteFile
-from typing import Union, List
 from pathlib import Path
-from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
-from ichor.core.common.constants import dlpoly_weights
+from typing import List, Union
+
+import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.calculators import (
     default_connectivity_calculator,
     default_feature_calculator,
 )
-import numpy as np
+from ichor.core.calculators.geometry_calculator import get_internal_feature_indices
+from ichor.core.common.constants import dlpoly_weights
+from ichor.core.files.file import WriteFile
+
 
 class ConnectedAtom(Atom):
     def __init__(self, atom: Atom, parent: "ConnectedAtoms"):
@@ -34,6 +36,7 @@ class ConnectedAtom(Atom):
     def set_dihedral(self, other: Atom):
         self.dihedral_list += [other]
 
+
 class ConnectedAtoms(Atoms):
     def __init__(self, atoms):
         super().__init__()
@@ -51,7 +54,7 @@ class ConnectedAtoms(Atoms):
         bond_list = []
         angle_list = []
         dihedral_list = []
-        
+
         # iterate over upper triangular matrix to avoid double counting
         for i in range(bonds.shape[0]):
             for j in range(i + 1, bonds.shape[1]):
@@ -101,8 +104,7 @@ class ConnectedAtoms(Atoms):
 
     def angle_names(self) -> List[str]:
         return [
-            f"{self[i].name}-{self[j].name}-{self[k].name}"
-            for i, j, k in self._angles
+            f"{self[i].name}-{self[j].name}-{self[k].name}" for i, j, k in self._angles
         ]
 
     def dihedral_names(self) -> List[str]:
@@ -118,17 +120,17 @@ class ConnectedAtoms(Atoms):
             self.dihedral_names(),
         )
 
+
 class DlPolyField(WriteFile):
-    
-    def __init__(self, path: Union[Path, str],
-                 atoms,
-                 system_name: str,
-                 nummols = 1,
-                 
-                 
-                 ):
+    def __init__(
+        self,
+        path: Union[Path, str],
+        atoms,
+        system_name: str,
+        nummols=1,
+    ):
         super().__init__(path)
-        
+
         self.atoms = atoms
         self.system_name = system_name
         self.nummols = nummols

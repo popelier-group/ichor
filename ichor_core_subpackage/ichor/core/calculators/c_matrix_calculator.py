@@ -1,6 +1,7 @@
 import numpy as np
 from ichor.core.calculators.alf import get_atom_alf
 
+
 def calculate_c_matrix(
     atom: "Atom",
     alf: "ALF",
@@ -19,7 +20,7 @@ def calculate_c_matrix(
         :type: `np.ndarray`
             A 3x3 numpy array which is the C rotation matrix.
     """
-    
+
     alf = get_atom_alf(atom, alf)
 
     c_matrix = np.empty((3, 3))
@@ -28,17 +29,15 @@ def calculate_c_matrix(
     xy_plane_atom_instance = atom.parent[alf.xy_plane_idx]
 
     # first row
-    row1 = (
+    row1 = (x_axis_atom_instance.coordinates - atom.coordinates) / np.linalg.norm(
         x_axis_atom_instance.coordinates - atom.coordinates
-    ) / np.linalg.norm(x_axis_atom_instance.coordinates - atom.coordinates)
+    )
 
     # second row
     x_axis_diff = x_axis_atom_instance.coordinates - atom.coordinates
     xy_plane_diff = xy_plane_atom_instance.coordinates - atom.coordinates
 
-    sigma_fflux = -np.dot(x_axis_diff, xy_plane_diff) / np.dot(
-        x_axis_diff, x_axis_diff
-    )
+    sigma_fflux = -np.dot(x_axis_diff, xy_plane_diff) / np.dot(x_axis_diff, x_axis_diff)
 
     y_vec = sigma_fflux * x_axis_diff + xy_plane_diff
 

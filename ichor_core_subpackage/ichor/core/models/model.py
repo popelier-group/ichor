@@ -7,16 +7,12 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
-from ichor.core.files.file import (
-    FileContents,
-    ReadFile,
-    WriteFile,
-)
+from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.models.kernels import (
-    RBF,
     ConstantKernel,
     Kernel,
     PeriodicKernel,
+    RBF,
     RBFCyclic,
 )
 from ichor.core.models.kernels.interpreter import KernelInterpreter
@@ -43,6 +39,7 @@ def _get_default_output_unit(property: str) -> str:
         return "e"
     else:
         return "unknown"
+
 
 class Model(ReadFile, WriteFile):
     """A model file that is returned back from our machine learning program FEREBUS.
@@ -132,9 +129,7 @@ class Model(ReadFile, WriteFile):
                     continue
 
                 if "likelihood" in line:
-                    self.likelihood = self.likelihood or float(
-                        line.split()[-1]
-                    )
+                    self.likelihood = self.likelihood or float(line.split()[-1])
                     continue
 
                 if "#" in line and "=" in line:
@@ -151,12 +146,8 @@ class Model(ReadFile, WriteFile):
                     self.system_name = self.system_name or line.split()[1]
                     continue
 
-                if line.startswith(
-                    "atom"
-                ):  # atom for which a GP model was made eg. O1
-                    self.atom_name = (
-                        self.atom_name or line.split()[1].capitalize()
-                    )
+                if line.startswith("atom"):  # atom for which a GP model was made eg. O1
+                    self.atom_name = self.atom_name or line.split()[1].capitalize()
                     continue
 
                 if (
@@ -166,9 +157,7 @@ class Model(ReadFile, WriteFile):
                     continue
 
                 if "ALF" in line:
-                    self.alf = self.alf or ALF(
-                        *[int(a) - 1 for a in line.split()[1:]]
-                    )
+                    self.alf = self.alf or ALF(*[int(a) - 1 for a in line.split()[1:]])
                     continue
 
                 if "number_of_atoms" in line:
@@ -193,12 +182,8 @@ class Model(ReadFile, WriteFile):
                     elif mean_type == "zero":
                         mean = ZeroMean()
                     elif mean_type in ["linear", "quadratic"]:
-                        beta = np.array(
-                            [float(b) for b in next(f).split()[1:]]
-                        )
-                        xmin = np.array(
-                            [float(x) for x in next(f).split()[1:]]
-                        )
+                        beta = np.array([float(b) for b in next(f).split()[1:]])
+                        xmin = np.array([float(x) for x in next(f).split()[1:]])
                         ymin = float(next(f).split()[-1])
                         if mean_type == "linear":
                             mean = LinearMean(beta, xmin, ymin)
@@ -222,16 +207,12 @@ class Model(ReadFile, WriteFile):
                     ndims = int(next(f).split()[-1])  # number of dimensions
                     line = next(f)
                     if "TODO" not in line:
-                        active_dims = np.array(
-                            [int(ad) - 1 for ad in line.split()[1:]]
-                        )
+                        active_dims = np.array([int(ad) - 1 for ad in line.split()[1:]])
                     else:
                         active_dims = np.arange(ndims)
 
                     if kernel_type == "rbf":
-                        thetas = np.array(
-                            [float(hp) for hp in next(f).split()[1:]]
-                        )
+                        thetas = np.array([float(hp) for hp in next(f).split()[1:]])
                         kernel_dict[kernel_name] = RBF(
                             kernel_name, thetas, active_dims=active_dims
                         )
@@ -239,9 +220,7 @@ class Model(ReadFile, WriteFile):
                         "rbf-cyclic",
                         "rbf-cylic",
                     ]:  # Due to typo in FEREBUS 7.0
-                        thetas = np.array(
-                            [float(hp) for hp in next(f).split()[1:]]
-                        )
+                        thetas = np.array([float(hp) for hp in next(f).split()[1:]])
                         kernel_dict[kernel_name] = RBFCyclic(
                             kernel_name, thetas, active_dims=active_dims
                         )
@@ -251,9 +230,7 @@ class Model(ReadFile, WriteFile):
                             kernel_name, value, active_dims=active_dims
                         )
                     elif kernel_type == "periodic":
-                        thetas = np.array(
-                            [float(hp) for hp in next(f).split()[1:]]
-                        )
+                        thetas = np.array([float(hp) for hp in next(f).split()[1:]])
                         kernel_dict[kernel_name] = PeriodicKernel(
                             kernel_name,
                             thetas,
@@ -275,9 +252,7 @@ class Model(ReadFile, WriteFile):
                     x = np.empty((self.ntrain, self.nfeats))
                     i = 0
                     while line.strip() != "":
-                        x[i, :] = np.array(
-                            [float(num) for num in line.split()]
-                        )
+                        x[i, :] = np.array([float(num) for num in line.split()])
                         i += 1
                         line = next(f)
                     self.x = self.x or x
@@ -392,10 +367,9 @@ class Model(ReadFile, WriteFile):
 
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """Returns an array containing the test point predictions."""
-        
+
         return (
-            self.mean.value(x_test)
-            + np.dot(self.r(x_test).T, self.weights)[:, -1]
+            self.mean.value(x_test) + np.dot(self.r(x_test).T, self.weights)[:, -1]
         ).flatten()
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
@@ -416,7 +390,7 @@ class Model(ReadFile, WriteFile):
                 path
                 / f"{self.system_name}_{self.prop}_{self.atom_name}{Model.filetype}"
             )
-        
+
         # these are so that the writing of models does not crash. They do not affect predictions
         if not self.jitter:
             self.jitter = 1e-6
@@ -438,9 +412,7 @@ class Model(ReadFile, WriteFile):
             f.write(f"name {self.system_name}\n")
             f.write(f"atom {self.atom_name}\n")
             f.write(f"property {self.prop}\n")
-            f.write(
-                f"ALF {self.alf[0] + 1} {self.alf[1] + 1} {self.alf[2] + 1}\n"
-            )
+            f.write(f"ALF {self.alf[0] + 1} {self.alf[1] + 1} {self.alf[2] + 1}\n")
             f.write("\n")
             f.write("[dimensions]\n")
             f.write(f"number_of_atoms {self.natoms}\n")

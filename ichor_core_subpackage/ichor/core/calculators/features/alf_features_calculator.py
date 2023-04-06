@@ -1,12 +1,14 @@
+from typing import Dict, List, Union
+
 import numpy as np
 from ichor.core.calculators.alf import get_atom_alf
 from ichor.core.calculators.c_matrix_calculator import calculate_c_matrix
 from ichor.core.common.constants import ang2bohr
 from ichor.core.common.units import AtomicDistance
-from typing import Union, List, Dict
 
 
 default_distance_unit: AtomicDistance = AtomicDistance.Bohr
+
 
 def calculate_alf_features(
     atom: "Atom",
@@ -27,7 +29,7 @@ def calculate_alf_features(
             A 1D numpy array of shape 3N-6, where N is the number of atoms in the system which `atom` is a part of. If there are only two atoms,
             then there is only 1 feature (the distance between the atoms).
     """
-    
+
     alf = get_atom_alf(atom, alf)
 
     if len(atom.parent) == 2:
@@ -48,10 +50,8 @@ def calculate_alf_features(
     # the atom outside of the function scope should remain the same as before
     atom = atom.to_angstroms()
     atom.parent = atom.parent.to_angstroms()
-    
-    unit_conversion = (
-        1.0 if distance_unit is AtomicDistance.Angstroms else ang2bohr
-    )
+
+    unit_conversion = 1.0 if distance_unit is AtomicDistance.Angstroms else ang2bohr
 
     x_axis_atom_instance = atom.parent[alf.x_axis_idx]
     x_axis_vect = unit_conversion * (

@@ -1,14 +1,14 @@
-from ichor.core.sql import AtomNames, Points, Dataset
-import sqlalchemy
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from pathlib import Path
-from datetime import datetime
-from typing import List
-from sqlalchemy import select
-from ichor.core.common.constants import multipole_names
 import warnings
-from sqlalchemy.orm import Session
+from datetime import datetime
+from pathlib import Path
+from typing import List
+
+import sqlalchemy
+from ichor.core.common.constants import multipole_names
+from ichor.core.sql import AtomNames, Dataset, Points
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session, sessionmaker
+
 
 def create_database_session(database_path: Path, echo=False):
     """Creates a sqlalchemy Engine object as well as a Session object
@@ -20,11 +20,14 @@ def create_database_session(database_path: Path, echo=False):
 
     database_path = str(Path(database_path).absolute())
     # create new database and start session
-    engine = create_engine(f"sqlite+pysqlite:///{database_path}", echo=echo, future=True)
+    engine = create_engine(
+        f"sqlite+pysqlite:///{database_path}", echo=echo, future=True
+    )
     Session = sessionmaker(bind=engine)
     session = Session()
 
     return session
+
 
 def add_atom_names_to_database(session: Session, atom_names: List[str], echo=False):
     """Adds a list of atom names to the atom_names table of the database.
@@ -37,9 +40,12 @@ def add_atom_names_to_database(session: Session, atom_names: List[str], echo=Fal
     session.bulk_save_objects(db_atom_names_list)
     session.commit()
 
+
 # TODO: make this more robust as some data might be absent. Check that .wfn exists before adding wfn data
 # TODO: check that gaussian out forces exist. Check that int file exists.
-def add_point_to_database(session: Session, point: "PointDirectory", echo=False, print_missing_data=True):
+def add_point_to_database(
+    session: Session, point: "PointDirectory", echo=False, print_missing_data=True
+):
     """Adds information from an instance of a PointDirectory to the database.
 
     :param database_path: Path to database
@@ -57,45 +63,57 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
 
     for _f in point.path.iterdir():
         if _f.suffix == ".sh":
-            print(f"A shell file (.sh) was found in {point.path.absolute()}, so AIMAll probably crashed. Not added to db.")
+            print(
+                f"A shell file (.sh) was found in {point.path.absolute()}, so AIMAll probably crashed. Not added to db."
+            )
             return
-    
+
     ###############################
-    # wfn information 
+    # wfn information
     ###############################
-    
+
     # if wfn file exists
     if point.wfn:
         # ORM for points table
-        db_point = Points(date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
-                    name=point.name, wfn_energy=point.wfn.total_energy)
+        db_point = Points(
+            date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
+            name=point.name,
+            wfn_energy=point.wfn.total_energy,
+        )
     # if file does not exist, still add to database, but do not contain wfn information
     else:
         # ORM for points table
-        db_point = Points(date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
-                        # wfn energy might not exist if Gaussian has not been ran yet (or wfn file does not exist.)
-                        # add a None for wfn energy if wfn energy is not present
-                    name=point.name, wfn_energy=None)
+        db_point = Points(
+            date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
+            # wfn energy might not exist if Gaussian has not been ran yet (or wfn file does not exist.)
+            # add a None for wfn energy if wfn energy is not present
+            name=point.name,
+            wfn_energy=None,
+        )
         if print_missing_data:
-            print(f"Point {point.path} does not contain a Gaussian wavefunction (.wfn) file.")
+            print(
+                f"Point {point.path} does not contain a Gaussian wavefunction (.wfn) file."
+            )
 
     ###############################
-    # gaussian output file check 
+    # gaussian output file check
     ###############################
-    
+
     if not point.gaussian_out:
         if print_missing_data:
             print(f"Point {point.path} does not contain a Gaussian output (.gau) file.")
 
     ###############################
-    # _atomicfiles directory check 
+    # _atomicfiles directory check
     ###############################
-        
+
     if not point.ints:
 
         if print_missing_data:
-            print(f"Point {point.path} does not contain an atomicfiles directory (containing AIMAll .int).")
-    
+            print(
+                f"Point {point.path} does not contain an atomicfiles directory (containing AIMAll .int)."
+            )
+
     # add database point to session. Need to do this before adding the dataset stuff
     # because the id needs to be assigned to the point (because dataset contains foreign key point_id)
     session.add(db_point)
@@ -110,20 +128,20 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
 
     # add information to dataset table for each atom
     for atom_name in point.atom_names:
-        
+
         # make select statement to get atom name
         atom_select_statement = select(AtomNames).where(AtomNames.name == atom_name)
         # get the id of the atom from the atom_names table.
         # use scalars instead of execute and return the first row (there should be one row as atom names are unique)
         atom_id = session.scalars(atom_select_statement).first().id
-        
+
         # get x, y, z coordinates of atom which can then be used to calculated features
         # based on the coordinates of the other atoms in the molecule
         atom_coordinates = point[atom_name].coordinates
         x_coord = atom_coordinates[0]
         y_coord = atom_coordinates[1]
         z_coord = atom_coordinates[2]
-        
+
         ###############################
         # .gau / gaussian output information
         ###############################
@@ -141,20 +159,22 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
             # in case that the force keyword was not used but gaussian out exists
             else:
                 atom_force_x, atom_force_y, atom_force_z = None, None, None
-                print(f"Point {point.path} does not have forces in Gaussian output (.gau) file.")
+                print(
+                    f"Point {point.path} does not have forces in Gaussian output (.gau) file."
+                )
         # in case that gaussian out does not exist in point directory
         else:
             atom_force_x, atom_force_y, atom_force_z = None, None, None
-            
+
         ###############################
-        # .int file information 
+        # .int file information
         ###############################
         if point.ints:
             # add information from int file for the current atom
             # get the INT instance representing the .int file for the atom
             # use get here to get a default value of None if .int file is missing for some atom
             atom_int_file = point.ints.get(atom_name, None)
-            
+
             # if .int file / INT instance exists, then data can be read in
             if atom_int_file:
 
@@ -172,58 +192,66 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
                 global_multipole_moments = atom_int_file.global_spherical_multipoles
 
                 # add the Dataset object to list so it can be bulk written later
-                db_dataset_list.append(Dataset(point_id=db_point.id,
-                                        atom_id=atom_id,
-                                        x=x_coord,
-                                        y=y_coord,
-                                        z=z_coord,
-                                        force_x=atom_force_x,
-                                        force_y=atom_force_y,
-                                        force_z=atom_force_z,
-                                        iqa=atom_iqa_energy,
-                                        integration_error=atom_integration_error,
-                                        **global_multipole_moments
-                                        )
+                db_dataset_list.append(
+                    Dataset(
+                        point_id=db_point.id,
+                        atom_id=atom_id,
+                        x=x_coord,
+                        y=y_coord,
+                        z=z_coord,
+                        force_x=atom_force_x,
+                        force_y=atom_force_y,
+                        force_z=atom_force_z,
+                        iqa=atom_iqa_energy,
+                        integration_error=atom_integration_error,
+                        **global_multipole_moments,
+                    )
                 )
-            
+
             # if .int file for an atom does not exist then (but _atomicfiles directory exists)
             # then just append the coordinates and any other read in information
             else:
                 # add the Dataset object to list so it can be bulk written later
-                db_dataset_list.append(Dataset(point_id=db_point.id,
-                                        atom_id=atom_id,
-                                        x=x_coord,
-                                        y=y_coord,
-                                        z=z_coord,
-                                        force_x=atom_force_x,
-                                        force_y=atom_force_y,
-                                        force_z=atom_force_z,
-                                        # the .int file arguments will be None by default
-                                        # as they can be nullable because of the dataset SQL table definition
-                                        )
-                                    )
+                db_dataset_list.append(
+                    Dataset(
+                        point_id=db_point.id,
+                        atom_id=atom_id,
+                        x=x_coord,
+                        y=y_coord,
+                        z=z_coord,
+                        force_x=atom_force_x,
+                        force_y=atom_force_y,
+                        force_z=atom_force_z,
+                        # the .int file arguments will be None by default
+                        # as they can be nullable because of the dataset SQL table definition
+                    )
+                )
                 missing_int_files.append(atom_name)
 
         else:
             # add the Dataset object to list so it can be bulk written later
-            db_dataset_list.append(Dataset(point_id=db_point.id,
-                                    atom_id=atom_id,
-                                    x=x_coord,
-                                    y=y_coord,
-                                    z=z_coord,
-                                    force_x=atom_force_x,
-                                    force_y=atom_force_y,
-                                    force_z=atom_force_z,
-                                    # the .int file arguments will be None by default
-                                    # as they can be nullable because of the dataset SQL table definition
-                                    )
-                                )
-            
+            db_dataset_list.append(
+                Dataset(
+                    point_id=db_point.id,
+                    atom_id=atom_id,
+                    x=x_coord,
+                    y=y_coord,
+                    z=z_coord,
+                    force_x=atom_force_x,
+                    force_y=atom_force_y,
+                    force_z=atom_force_z,
+                    # the .int file arguments will be None by default
+                    # as they can be nullable because of the dataset SQL table definition
+                )
+            )
+
     # if there are missing atoms, then print these out
     if len(missing_int_files) > 0:
-        
+
         if print_missing_data:
-            print(f"Point {point.path} has missing .int files for atoms: {missing_int_files}.")
+            print(
+                f"Point {point.path} has missing .int files for atoms: {missing_int_files}."
+            )
 
     # bulk save the information for all atoms in the point
     session.bulk_save_objects(db_dataset_list)

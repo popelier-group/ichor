@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
-from ichor.core.files.file import File, ReadFile, WriteFile, FileContents
+from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
 
@@ -55,4 +55,6 @@ class XYZ(HasAtoms, ReadFile, WriteFile, File):
             f.write(f"{len(self.atoms)}\n")
             f.write("\n")
             for atom in self.atoms:
-                f.write(f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n")
+                f.write(
+                    f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
+                )

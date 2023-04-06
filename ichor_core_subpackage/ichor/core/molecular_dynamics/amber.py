@@ -6,6 +6,7 @@ import numpy as np
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 
+
 class AmberThermostat(Enum):
     ConstantEnergy = 0
     ConstantTemperature = 1
@@ -29,9 +30,7 @@ class ForceEvaluation(Enum):
     OmitAngle = 5  # all bond and angle interactions are omitted
     OmitHDihedral = 6  # dihedrals involving H-atoms and all bonds and all angle interactions are omitted
     OmitDihedral = 7  # all bond, angle and dihedral interactions are omitted
-    OmitAll = (
-        8  # all bond, angle, dihedral and non-bonded interactions are omitted
-    )
+    OmitAll = 8  # all bond, angle, dihedral and non-bonded interactions are omitted
 
 
 class PeriodicBoundaryCondition(Enum):
@@ -68,8 +67,8 @@ class AmberMDIn(WriteFile, ReadFile):
         force_evaluation: ForceEvaluation = FileContents,
         bond_constraint: BondLengthConstraint = FileContents,
         write_coordinates_every: int = FileContents,
-        write_velocities_every: int = FileContents, # if set to -1, then cannot write an ASCII file
-        write_forces_every: int = FileContents, # if set to -1, then cannot write an ASCII file
+        write_velocities_every: int = FileContents,  # if set to -1, then cannot write an ASCII file
+        write_forces_every: int = FileContents,  # if set to -1, then cannot write an ASCII file
         periodic_boundary_condition: PeriodicBoundaryCondition = FileContents,
         thermostat: AmberThermostat = FileContents,
         ln_gamma: float = FileContents,
@@ -105,7 +104,10 @@ class AmberMDIn(WriteFile, ReadFile):
         self.write_coordinates_every = self.write_coordinates_every or 1
         self.write_velocities_every = self.write_velocities_every or 0
         self.write_forces_every = self.write_forces_every or 0
-        self.periodic_boundary_condition = self.periodic_boundary_condition or PeriodicBoundaryCondition.NoPeriodicBoundary
+        self.periodic_boundary_condition = (
+            self.periodic_boundary_condition
+            or PeriodicBoundaryCondition.NoPeriodicBoundary
+        )
         self.thermostat = self.thermostat or AmberThermostat.Langevin
         self.ln_gamma = self.ln_gamma or 0.5
 
@@ -118,9 +120,7 @@ class AmberMDIn(WriteFile, ReadFile):
                 elif "dt" in line:
                     self.dt = float(line.split("=")[-1])
                 elif "ntf" in line:
-                    self.force_evaluation = ForceEvaluation(
-                        int(line.split("=")[-1])
-                    )
+                    self.force_evaluation = ForceEvaluation(int(line.split("=")[-1]))
                 elif "ntc" in line:
                     self.bond_constraint = BondLengthConstraint(
                         int(line.split("=")[-1])
@@ -134,8 +134,8 @@ class AmberMDIn(WriteFile, ReadFile):
                 elif "ntwf" in line:
                     self.write_forces_every = int(line.split("=")[-1])
                 elif "ntb" in line:
-                    self.periodic_boundary_condition = (
-                        PeriodicBoundaryCondition(int(line.split("=")[-1]))
+                    self.periodic_boundary_condition = PeriodicBoundaryCondition(
+                        int(line.split("=")[-1])
                     )
                 elif "ntt" in line:
                     self.thermostat = AmberThermostat(int(line.split("=")[-1]))
@@ -151,14 +151,10 @@ class AmberMDIn(WriteFile, ReadFile):
             f.write("  irest=0,\n")  # not restarting simulation
             f.write(f"  nstlim={self.nsteps},\n")  # number of time steps
             f.write(f"  dt={self.dt},\n")  # time step in picoseconds
-            f.write(
-                f"  ntf={self.force_evaluation.value},\n"
-            )  # force constraint
+            f.write(f"  ntf={self.force_evaluation.value},\n")  # force constraint
             f.write(f"  ntc={self.bond_constraint.value},\n")  # bond contraint
             f.write(f"  temp0={self.temperature},\n")  # temperature
-            f.write(
-                "  ntpr=1,\n"
-            )  # energy info printed to mdout every ntpr steps
+            f.write("  ntpr=1,\n")  # energy info printed to mdout every ntpr steps
             f.write(
                 f"  ntwx={self.write_coordinates_every},\n"
             )  # coordinate info printed to mdout every ntwx steps
@@ -168,7 +164,9 @@ class AmberMDIn(WriteFile, ReadFile):
             f.write(
                 f"  ntwf={self.write_forces_every},\n"
             )  # force info printed to mdout every ntwf steps
-            f.write("  ioutfm=0,\n")  # output formatting, setting to 0 means that a human readable file is written (not a NETCDF format which is binary)
+            f.write(
+                "  ioutfm=0,\n"
+            )  # output formatting, setting to 0 means that a human readable file is written (not a NETCDF format which is binary)
             f.write("  cut=999.0,\n")  # nonbonded cutoff
             f.write(
                 f"  ntb={self.periodic_boundary_condition.value},\n"
@@ -197,7 +195,7 @@ def write_mdin(
     thermostat: AmberThermostat = AmberThermostat.Langevin,
     ln_gamma: float = 0.5,
 ):
-    """ Writes an AMBER md.in file with the given settings
+    """Writes an AMBER md.in file with the given settings
 
     :param mdin_file: File where to write data
     :param nsteps: Number of timesteps to run simulation for
@@ -214,7 +212,7 @@ def write_mdin(
     :param thermostat: The thermostat to use for the simulation, defaults to AmberThermostat.Langevin
     :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
     """
-    
+
     AmberMDIn(
         mdin_file,
         nsteps,
@@ -232,9 +230,9 @@ def write_mdin(
 
 
 def mdcrd_to_xyz(
-    mdcrd: Union[str, Path], # contains geometry
-    prmtop: Union[str, Path], # contains atom names
-    mdin: Union[str, Path], # contains temperature information
+    mdcrd: Union[str, Path],  # contains geometry
+    prmtop: Union[str, Path],  # contains atom names
+    mdin: Union[str, Path],  # contains temperature information
     system_name: str,
     every: int = 1,
 ):

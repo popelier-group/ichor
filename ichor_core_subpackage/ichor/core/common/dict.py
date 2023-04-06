@@ -1,7 +1,7 @@
-from typing import TypeVar, Union, MutableMapping, Set, Callable
-from functools import reduce
 from collections import abc
 from contextlib import suppress
+from functools import reduce
+from typing import Callable, MutableMapping, Set, TypeVar, Union
 
 
 KT = TypeVar("KT")
@@ -56,6 +56,7 @@ def find(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
         raise KeyError(f"'{key}' not found.")
     return result
 
+
 def find_in_inner_dicts(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
     """Recursively searches dictionary 'd' for the given 'key'
     e.g.
@@ -78,9 +79,7 @@ def _unwrap(
 ) -> MutableMapping[KT, VT]:
     if predicate(d):
         return {
-            k: _unwrap(v, predicate)
-            if isinstance(v, abc.MutableMapping)
-            else v
+            k: _unwrap(v, predicate) if isinstance(v, abc.MutableMapping) else v
             for k, v in d.items()
         }
 
@@ -88,9 +87,7 @@ def _unwrap(
     return _unwrap(v, predicate) if isinstance(v, abc.MutableMapping) else v
 
 
-def unwrap_single_entry(
-    d: MutableMapping[KT, VT]
-) -> Union[MutableMapping[KT, VT], VT]:
+def unwrap_single_entry(d: MutableMapping[KT, VT]) -> Union[MutableMapping[KT, VT], VT]:
     """Unwraps the dictionary if there is only a single item in the dicitonary
     e.g.
         >>> unwrap_single_entry({"energy": -76.54})
@@ -132,16 +129,10 @@ def unwrap_item(
             if isinstance(val, MutableMapping):
                 result = {**result, **unwrap_item(val, item)}
             else:
-                raise ValueError(
-                    f"Cannot unwrap item '{item}' from mapping '{d}'"
-                )
-        result[key] = (
-            unwrap_item(val, item) if isinstance(val, MutableMapping) else val
-        )
+                raise ValueError(f"Cannot unwrap item '{item}' from mapping '{d}'")
+        result[key] = unwrap_item(val, item) if isinstance(val, MutableMapping) else val
     return result
 
 
-def remove_items(
-    d: MutableMapping[KT, VT], items: Set[KT]
-) -> MutableMapping[KT, VT]:
+def remove_items(d: MutableMapping[KT, VT], items: Set[KT]) -> MutableMapping[KT, VT]:
     return {key: val for key, val in d.items() if key not in items}

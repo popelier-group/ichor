@@ -12,7 +12,7 @@ class RBFCyclic(Kernel):
     # TODO: figure out a good way to say if training data is standardized, normalized, etc. because this kernel is affected by data preprocessing
 
     """Implemtation of Radial Basis Function (RBF) kernel with cyclic feature correction for phi angle feature
-    
+
     .. note::
         Cyclic correction is applied only for our phi angles (phi is the azimuthal angle measured in the xy plane).
 
@@ -25,7 +25,7 @@ class RBFCyclic(Kernel):
             &\phi_1 - \phi_2, && \text{if}\ \phi_1 - \phi_2 \leq \pi \\
             & 2\pi - (\phi_1 - \phi_2), && \text{if}\ (\phi_1 - \phi_2) \geq \pi
             \end{aligned} \right.
-        
+
         If we have standardized features (where we have subtracted the feature mean and divided by the feature standard deviation),
         we have to apply a correction only when the distance is greater than pi/sigma where sigma is the standard deviation of
         the particular feature in the training data.
@@ -36,7 +36,7 @@ class RBFCyclic(Kernel):
             \begin{aligned}
             &\hat \phi_1 - \hat \phi_2, && \text{if}\ \hat \phi_1 - \hat \phi_2 \leq \frac{\pi}{\sigma} \\
             & \frac{2\pi}{\sigma} - (\hat \phi_1 - \hat \phi_2), && \text{if}\ (\hat \phi_1 - \hat \phi_2) \geq \frac{\pi}{\sigma}
-            \end{aligned} \right.    
+            \end{aligned} \right.
     """
 
     def __init__(
@@ -78,13 +78,8 @@ class RBFCyclic(Kernel):
             :type: `np.ndarray`
                 The cyclic RBF covariance matrix matrix of shape (n, m)
         """
-        diff = (
-            x2[np.newaxis, :, self.active_dims]
-            - x1[:, np.newaxis, self.active_dims]
-        )
-        diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (
-            2 * np.pi
-        ) - np.pi
+        diff = x2[np.newaxis, :, self.active_dims] - x1[:, np.newaxis, self.active_dims]
+        diff[:, :, self.mask] = (diff[:, :, self.mask] + np.pi) % (2 * np.pi) - np.pi
         diff *= diff
         diff *= self._thetas
         return np.exp(-np.sum(diff, axis=2))
@@ -93,9 +88,7 @@ class RBFCyclic(Kernel):
         f.write(f"[kernel.{self.name}]\n")
         f.write("type rbf-cyclic\n")
         f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(
-            f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
-        )
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n")
         f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):

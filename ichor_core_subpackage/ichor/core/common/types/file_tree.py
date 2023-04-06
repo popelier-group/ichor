@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import auto, Enum
 from pathlib import Path
 from typing import Optional
 
@@ -94,6 +94,4 @@ class FileTree(dict):
 
     def __str__(self) -> str:
 
-        return "\n".join(
-            ["\n".join((f"{key}", str(val))) for key, val in self.items()]
-        )
+        return "\n".join(["\n".join((f"{key}", str(val))) for key, val in self.items()])

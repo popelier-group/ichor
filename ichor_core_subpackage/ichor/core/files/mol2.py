@@ -1,16 +1,18 @@
 import datetime
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, Any
+from typing import Any, List, Optional, Tuple, Union
+
 from ichor.core.atoms import Atom, Atoms
+from ichor.core.common import constants
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import current_user
+from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import File, WriteFile
 from ichor.core.files.file_data import HasAtoms
-from ichor.core.common.units import AtomicDistance
-from ichor.core.common import constants
 
 # TODO: potentially use pytraj or another software for managing AMBER files
+
 
 class MoleculeType(Enum):
     Small = "SMALL"
@@ -127,11 +129,14 @@ def gasteigger_charge(atom: Atom) -> float:
     # todo: implement gasteigger charges
     return 0.0
 
+
 def charge(atom: Atom) -> float:
     return gasteigger_charge(atom)
 
+
 def get_nbonds(atom):
     return len(get_atom_bonds(atom))
+
 
 def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
 
@@ -152,12 +157,18 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
 
     # if the number of unpaired electrons is equal to the number of bonds, then it
     # can only be a single bond (eg. Carbon has 4 "unpaired electrons" and if 4 bonds, then 4 single bonds)
-    if atom1.unpaired_electrons == atom1_nbonds or atom2_nbonds == atom2.unpaired_electrons:
+    if (
+        atom1.unpaired_electrons == atom1_nbonds
+        or atom2_nbonds == atom2.unpaired_electrons
+    ):
         return BondType.Single
 
     # if the number of bonds is one less than the "unpaired electrons", then there has to be a double bond
     # or a aromatic bond
-    elif atom1.unpaired_electrons - 1 == atom1_nbonds or atom2.unpaired_electrons - 1 == atom2_nbonds:
+    elif (
+        atom1.unpaired_electrons - 1 == atom1_nbonds
+        or atom2.unpaired_electrons - 1 == atom2_nbonds
+    ):
         aromatic_types = ["C", "N"]
         if atom1.type in aromatic_types and atom2.type in aromatic_types:
             # check aromatic
@@ -171,9 +182,7 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
 
             bond_distance = calculate_bond(atom1.parent, atom1.i, atom2.i)
             bond_percentage = bond_distance / single_bond_distance
-            if abs(
-                bond_percentage - portion_of_single_bond[BondType.Aromatic]
-            ) <= abs(
+            if abs(bond_percentage - portion_of_single_bond[BondType.Aromatic]) <= abs(
                 bond_percentage - portion_of_single_bond[BondType.Double]
             ):
                 return BondType.Aromatic
@@ -184,6 +193,7 @@ def get_bond_type(atom1: Atom, atom2: Atom) -> BondType:
     else:
         return BondType.Triple
 
+
 def _get_ring(
     atom: Atom,
     current_ring: List[Atom],
@@ -193,9 +203,7 @@ def _get_ring(
     if len(bonded_atoms) > 1:
         for bonded_atom in bonded_atoms:
             if bonded_atom not in current_ring:
-                ring, found = _get_ring(
-                    bonded_atom, current_ring + [bonded_atom], atom
-                )
+                ring, found = _get_ring(bonded_atom, current_ring + [bonded_atom], atom)
                 if found:
                     return ring, found
             if bonded_atom == current_ring[0] and bonded_atom != called_from:
@@ -229,8 +237,7 @@ def n_bonds_of_type(atom, parent, bond_type):
 
 def get_bond_types(atom, parent) -> List[BondType]:
     return [
-        get_bond_type(parent[i - 1], parent[j - 1])
-        for i, j in get_atom_bonds(atom)
+        get_bond_type(parent[i - 1], parent[j - 1]) for i, j in get_atom_bonds(atom)
     ]
 
 
@@ -244,9 +251,7 @@ def other_atom(atom: Atom, atom1: Atom, atom2: Atom) -> Atom:
         raise ValueError(f"{atom} not in bond Bond({atom1}, {atom2})")
 
 
-def bond_index_to_atom(
-    bond: Tuple[int, int], parent: List[Atom]
-) -> Tuple[Atom, Atom]:
+def bond_index_to_atom(bond: Tuple[int, int], parent: List[Atom]) -> Tuple[Atom, Atom]:
     return parent[bond[0] - 1], parent[bond[1] - 1]
 
 
@@ -284,26 +289,18 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
 
     atom_bonds = get_atom_bonds(atom)
     if atom.type == "C":
-        if (
-            4
-            <= len(atom_bonds)
-            == n_bonds_of_type(atom, parent, BondType.Single)
-        ):
+        if 4 <= len(atom_bonds) == n_bonds_of_type(atom, parent, BondType.Single):
             return AtomType.C3
         elif (
             len(atom_bonds) == 3
-            and all(
-                acyclic_bond(parent[i - 1], parent[j - 1])
-                for i, j in atom_bonds
-            )
+            and all(acyclic_bond(parent[i - 1], parent[j - 1]) for i, j in atom_bonds)
             and all(atom.type == "N" for atom in get_bonded_atoms(atom))
             and all(
                 len(other_atom_bonds(atom, parent[i - 1], parent[j - 1])) == 2
                 for i, j in atom_bonds
             )
             and sum(
-                other_atom(parent[k - 1], parent[k - 1], parent[l - 1]).type
-                == "O"
+                other_atom(parent[k - 1], parent[k - 1], parent[l - 1]).type == "O"
                 for k, l in [
                     other_atom_bonds(atom, parent[i - 1], parent[j - 1])
                     for i, j in atom_bonds
@@ -315,8 +312,7 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
         elif (
             len(atom_bonds) >= 2
             and sum(
-                get_bond_type(parent[i - 1], parent[j - 1])
-                == BondType.Aromatic
+                get_bond_type(parent[i - 1], parent[j - 1]) == BondType.Aromatic
                 for i, j in atom_bonds
             )
             >= 2
@@ -344,8 +340,7 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
                 bonded_atom.type in ["C", "P"]
                 and len(bonded_atom_bonds) == 3
                 and sum(
-                    other_atom(bonded_atom, parent[i - 1], parent[j - 1]).type
-                    == "O"
+                    other_atom(bonded_atom, parent[i - 1], parent[j - 1]).type == "O"
                     for i, j in bonded_atom_bonds
                 )
                 >= 2
@@ -386,8 +381,7 @@ def get_atom_type(atom: Atom, parent: Atoms) -> AtomType:
                     for batom in get_bonded_atoms(nonmetatom):
                         if (
                             batom.type in ["O", "S"]
-                            and get_bond_type(nonmetatom, batom)
-                            is BondType.Double
+                            and get_bond_type(nonmetatom, batom) is BondType.Double
                         ):
                             return AtomType.NAm
             for a in nonmet(atom):
@@ -421,7 +415,7 @@ class Mol2Atom(Atom):
         if self._atom_type is None:
             self._atom_type = get_atom_type(self, self.parent)
         return self._atom_type
-        
+
     @property
     def valence(self):
         return constants.type2valence[self.type]
@@ -429,7 +423,6 @@ class Mol2Atom(Atom):
     @property
     def unpaired_electrons(self):
         return constants.type2orbital[self.type].value - self.valence
-        
 
 
 non_metal_atoms = [
@@ -461,9 +454,8 @@ non_metal_atoms = [
 
 # todo?: Would it be useful to be able to read Mol2?
 class Mol2(HasAtoms, WriteFile, File):
-    
     def __init__(self, path: Union[Path, str], system_name: str, atoms: Atoms):
-        
+
         super(WriteFile, self).__init__(path)
 
         self.system_name = system_name
@@ -522,7 +514,5 @@ class Mol2(HasAtoms, WriteFile, File):
                 )
             f.write("@<TRIPOS>BOND\n")
             for i, (bi, bj) in enumerate(b):
-                bond_type = get_bond_type(self.atoms[bi-1], self.atoms[bj-1]).value
-                f.write(
-                    f"{i+1:7d} {bi:4d} {bj:4d} {bond_type:>4}\n"
-                )
+                bond_type = get_bond_type(self.atoms[bi - 1], self.atoms[bj - 1]).value
+                f.write(f"{i+1:7d} {bi:4d} {bj:4d} {bond_type:>4}\n")

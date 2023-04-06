@@ -2,15 +2,15 @@ import re
 from abc import ABC
 from collections import namedtuple
 from pathlib import Path
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.types import VarReprMixin
-from ichor.core.files.file import File, ReadFile, FileContents
-from ichor.core.files.file_data import HasAtoms, HasProperties
 from ichor.core.common.units import AtomicDistance
+from ichor.core.files.file import File, FileContents, ReadFile
+from ichor.core.files.file_data import HasAtoms, HasProperties
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])
 
@@ -118,41 +118,21 @@ def read_bcp(
     )
 
     _ = next(f)  # blank line
-    ellips += [
-        float(ellip) for ellip in next(f).split("=")[-1].split()
-    ]  # ellip
+    ellips += [float(ellip) for ellip in next(f).split("=")[-1].split()]  # ellip
     K_rs += [float(kr) for kr in next(f).split("=")[-1].split()]  # K(r)
     G_rs += [float(gr) for gr in next(f).split("=")[-1].split()]  # G(r)
     _ = next(f)  # blank line
-    eig1xs += [
-        float(eig1x) for eig1x in next(f).split("=")[-1].split()
-    ]  # eig1(x)
-    eig1ys += [
-        float(eig1y) for eig1y in next(f).split("=")[-1].split()
-    ]  # eig1(y)
-    eig1zs += [
-        float(eig1z) for eig1z in next(f).split("=")[-1].split()
-    ]  # eig1(z)
+    eig1xs += [float(eig1x) for eig1x in next(f).split("=")[-1].split()]  # eig1(x)
+    eig1ys += [float(eig1y) for eig1y in next(f).split("=")[-1].split()]  # eig1(y)
+    eig1zs += [float(eig1z) for eig1z in next(f).split("=")[-1].split()]  # eig1(z)
     _ = next(f)  # blank line
-    eig2xs += [
-        float(eig2x) for eig2x in next(f).split("=")[-1].split()
-    ]  # eig2(x)
-    eig2ys += [
-        float(eig2y) for eig2y in next(f).split("=")[-1].split()
-    ]  # eig2(y)
-    eig2zs += [
-        float(eig2z) for eig2z in next(f).split("=")[-1].split()
-    ]  # eig2(z)
+    eig2xs += [float(eig2x) for eig2x in next(f).split("=")[-1].split()]  # eig2(x)
+    eig2ys += [float(eig2y) for eig2y in next(f).split("=")[-1].split()]  # eig2(y)
+    eig2zs += [float(eig2z) for eig2z in next(f).split("=")[-1].split()]  # eig2(z)
     _ = next(f)  # blank line
-    eig3xs += [
-        float(eig3x) for eig3x in next(f).split("=")[-1].split()
-    ]  # eig3(x)
-    eig3ys += [
-        float(eig3y) for eig3y in next(f).split("=")[-1].split()
-    ]  # eig3(y)
-    eig3zs += [
-        float(eig3z) for eig3z in next(f).split("=")[-1].split()
-    ]  # eig3(z)
+    eig3xs += [float(eig3x) for eig3x in next(f).split("=")[-1].split()]  # eig3(x)
+    eig3ys += [float(eig3y) for eig3y in next(f).split("=")[-1].split()]  # eig3(y)
+    eig3zs += [float(eig3z) for eig3z in next(f).split("=")[-1].split()]  # eig3(z)
     _ = next(f)  # blank line
     dAs += [float(dA) for dA in next(f).split("=")[-1].split()]  # d(*-A)
     dBs += [float(dB) for dB in next(f).split("=")[-1].split()]  # d(*-B)
@@ -199,10 +179,7 @@ def read_ncp(
     while line.startswith("d(*-N)"):
         record = line.split("=")[-1].split()
         dn = [float(record[i]) for i in range(0, len(record) - 2, 3)]
-        an = [
-            f"{record[i]}{int(record[i + 1])}"
-            for i in range(1, len(record) - 1, 3)
-        ]
+        an = [f"{record[i]}{int(record[i + 1])}" for i in range(1, len(record) - 1, 3)]
 
         if not cpdn:
             for _ in range(len(dn)):
@@ -601,9 +578,7 @@ class MOUT(
                                                 index=0,
                                             )
                                         )
-                                self.ring_critical_points[
-                                    i
-                                ].atoms = atoms.copy()
+                                self.ring_critical_points[i].atoms = atoms.copy()
                                 self.ring_critical_points[i].pos = np.array(
                                     [xs[i], ys[i], zs[i]]
                                 )

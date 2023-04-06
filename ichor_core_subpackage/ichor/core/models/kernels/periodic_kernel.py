@@ -39,11 +39,11 @@ class PeriodicKernel(Kernel):
     @property
     def params(self):
         return self._thetas, self._period_length
-    
+
     @property
     def lengthscales(self):
-        """ Note that the lengthscales are already squared for the periodic kernel. But still,
-        thetas are defined to be 1/(2l). (where l here is the already squared true lengthscale) """
+        """Note that the lengthscales are already squared for the periodic kernel. But still,
+        thetas are defined to be 1/(2l). (where l here is the already squared true lengthscale)"""
         return 1.0 / (2.0 * self._thetas)
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
@@ -102,13 +102,11 @@ class PeriodicKernel(Kernel):
         f.write(f"[kernel.{self.name}]\n")
         f.write("type periodic\n")
         f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(
-            f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
-        )
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n")
         f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
 
     def __repr__(self):
-        
+
         lengthscales = 1.0 / (self._thetas)
-        
+
         return f"'{self.__class__.__name__}', lengthscale: {lengthscales}, period_length: {self._period_length}"

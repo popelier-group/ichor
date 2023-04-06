@@ -1,4 +1,4 @@
-from typing import Dict, Callable
+from typing import Callable, Dict
 
 from ichor.core.calculators.connectivity.distance_connectivity_calculator import (
     connectivity_calculator_distance,

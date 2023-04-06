@@ -1,6 +1,7 @@
 import numpy as np
 from ichor.core.models.fflux_derivative_helper_functions import *
 
+
 def fflux_predict_value(model_inst, test_x_features):
 
     x_train_array = model_inst.x
@@ -19,7 +20,7 @@ def fflux_predict_value(model_inst, test_x_features):
     rbf_idx = 0
     periodic_idx = 0
     for i in range(n_features):
-        if ((i+1) % 3) == 0 and i != 2:
+        if ((i + 1) % 3) == 0 and i != 2:
             thetas.append(periodic_thetas[periodic_idx])
             periodic_idx += 1
         else:
@@ -40,19 +41,28 @@ def fflux_predict_value(model_inst, test_x_features):
             fdiff = x_train_array[j, h] - test_x_features[h]
 
             # if phi dimension, then use periodic kernel
-            if ((h+1) % 3) == 0 and h != 2:
+            if ((h + 1) % 3) == 0 and h != 2:
 
                 # 4.0 because we use 1/(2*l^2), for every kernel. For the periodic kernel, there is no 2 in the definition
                 # gpytorch only divided by lambda (which is equal to l^2)
-                expo = expo + 4.0 * thetas[h] * np.sin((fdiff/2.0))**2
-                dQ_df_temp[h] = weights[j]*(-4.0)*thetas[h]*sign_j(fdiff) * np.sin(abs(fdiff)/2.0) * np.cos(abs(fdiff)/2.0)
+                expo = expo + 4.0 * thetas[h] * np.sin((fdiff / 2.0)) ** 2
+                dQ_df_temp[h] = (
+                    weights[j]
+                    * (-4.0)
+                    * thetas[h]
+                    * sign_j(fdiff)
+                    * np.sin(abs(fdiff) / 2.0)
+                    * np.cos(abs(fdiff) / 2.0)
+                )
 
             # if not phi dimension, use rbf kernel
             else:
 
                 expo = expo + thetas[h] * fdiff * fdiff
 
-                dQ_df_temp[h] = weights[j] *sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
+                dQ_df_temp[h] = (
+                    weights[j] * sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
+                )
 
         expo = np.exp(-expo)
 
@@ -62,7 +72,7 @@ def fflux_predict_value(model_inst, test_x_features):
 
         dQ_df = dQ_df + dQ_df_temp
 
-    Q_est = Q_est + model_inst.mean.value(np.zeros((1,1)))
+    Q_est = Q_est + model_inst.mean.value(np.zeros((1, 1)))
     Q_est = Q_est.item()
 
     return Q_est, dQ_df
@@ -97,7 +107,7 @@ def fflux_predict_value_rbf_only(model_inst, test_x_features):
             # use rbf for all dimensions
             expo = expo + thetas[h] * fdiff * fdiff
 
-            dQ_df_temp[h] = weights[j] *sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
+            dQ_df_temp[h] = weights[j] * sign_j(fdiff) * -2.0 * thetas[h] * abs(fdiff)
 
         expo = np.exp(-expo)
 
@@ -107,11 +117,10 @@ def fflux_predict_value_rbf_only(model_inst, test_x_features):
 
         dQ_df = dQ_df + dQ_df_temp
 
-    Q_est = Q_est + model_inst.mean.value(np.zeros((1,1)))
+    Q_est = Q_est + model_inst.mean.value(np.zeros((1, 1)))
     Q_est = Q_est.item()
 
     return Q_est, dQ_df
-
 
 
 def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
@@ -121,18 +130,24 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
     dQ_dz = 0.0
 
     C = atoms_instance[jatm_idx].C(system_alf)
-    jatm_features = atoms_instance[jatm_idx].features(calculate_alf_features, system_alf)
+    jatm_features = atoms_instance[jatm_idx].features(
+        calculate_alf_features, system_alf
+    )
 
     Q_pred, dQ_df = fflux_predict_value(model_inst, jatm_features)
 
     # feature 1
-    df_da = dR_da(jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf)
+    df_da = dR_da(
+        jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf
+    )
     dQ_dx = dQ_dx + dQ_df[0] * df_da[0]
     dQ_dy = dQ_dy + dQ_df[0] * df_da[1]
     dQ_dz = dQ_dz + dQ_df[0] * df_da[2]
 
     # feature 2
-    df_da = dR_da(jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf)
+    df_da = dR_da(
+        jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf
+    )
     dQ_dx = dQ_dx + dQ_df[1] * df_da[0]
     dQ_dy = dQ_dy + dQ_df[1] * df_da[1]
     dQ_dz = dQ_dz + dQ_df[1] * df_da[2]
@@ -144,14 +159,26 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
     dQ_dz = dQ_dz + dQ_df[2] * df_da[2]
 
     # non-alf atoms
-    local_non_alf_atoms = [i for i in range(len(atoms_instance)) if i not in system_alf[jatm_idx]]
+    local_non_alf_atoms = [
+        i for i in range(len(atoms_instance)) if i not in system_alf[jatm_idx]
+    ]
 
     feat_idx = 3
-    for k in range(len(atoms_instance)-3):
-        diff = atoms_instance[local_non_alf_atoms[k]].coordinates - atoms_instance[jatm_idx].coordinates
+    for k in range(len(atoms_instance) - 3):
+        diff = (
+            atoms_instance[local_non_alf_atoms[k]].coordinates
+            - atoms_instance[jatm_idx].coordinates
+        )
 
         # R
-        df_da = dR_da(jatm_idx, local_non_alf_atoms[k], feat_idx, iatm_idx, atoms_instance, system_alf)
+        df_da = dR_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            feat_idx,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
         dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
         dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
         dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
@@ -164,7 +191,15 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
         zeta3 = zetas[2]
 
         # Theta
-        df_da = dTheta_da(jatm_idx, local_non_alf_atoms[k], feat_idx, zeta3, iatm_idx, atoms_instance, system_alf)
+        df_da = dTheta_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            feat_idx,
+            zeta3,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
         dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
         dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
         dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
@@ -172,7 +207,16 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
         feat_idx += 1
 
         # Phi
-        df_da = dPhi_da(jatm_idx, local_non_alf_atoms[k], zeta1, zeta2, feat_idx, iatm_idx, atoms_instance, system_alf)
+        df_da = dPhi_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            zeta1,
+            zeta2,
+            feat_idx,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
         dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
         dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
         dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
@@ -183,7 +227,7 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
 
 
 def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
-    """Calculates the """
+    """Calculates the"""
 
     natoms = len(atoms_instance)
 
@@ -196,7 +240,9 @@ def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
         # so there is only going to be change if iatm_idx is the A_x atom
         # or if the iatm_idx is the jatm_idx (the central atom)
         # otherwise return 0,0,0
-        df_da = dR_da(jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf)
+        df_da = dR_da(
+            jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf
+        )
         n_features_times_3_tmp_matrix[0, 0] = df_da[0]
         n_features_times_3_tmp_matrix[0, 1] = df_da[1]
         n_features_times_3_tmp_matrix[0, 2] = df_da[2]
@@ -211,16 +257,20 @@ def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
     # so there is only going to be change if iatm_idx is the A_x atom
     # or if the iatm_idx is the jatm_idx (the central atom)
     # otherwise return 0,0,0
-    df_da = dR_da(jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf)
+    df_da = dR_da(
+        jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf
+    )
     n_features_times_3_tmp_matrix[0, 0] = df_da[0]
     n_features_times_3_tmp_matrix[0, 1] = df_da[1]
     n_features_times_3_tmp_matrix[0, 2] = df_da[2]
 
     # derivative of feature 2 of atom jatm da^jatm_dx with respect to change of coordinates of iatm_idx
     # so there is only going to be change if iatm_idx is the A_xy atom
-    # or if the iatm_idx is the jatm_idx (the central atom) 
+    # or if the iatm_idx is the jatm_idx (the central atom)
     # otherwise return 0,0,0
-    df_da = dR_da(jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf)
+    df_da = dR_da(
+        jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf
+    )
     n_features_times_3_tmp_matrix[1, 0] = df_da[0]
     n_features_times_3_tmp_matrix[1, 1] = df_da[1]
     n_features_times_3_tmp_matrix[1, 2] = df_da[2]
@@ -233,15 +283,27 @@ def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
     n_features_times_3_tmp_matrix[2, 2] = df_da[2]
 
     # non-alf atoms
-    local_non_alf_atoms = [i for i in range(len(atoms_instance)) if i not in system_alf[jatm_idx]]
+    local_non_alf_atoms = [
+        i for i in range(len(atoms_instance)) if i not in system_alf[jatm_idx]
+    ]
 
     # derivative of non-alf atom w.r.t. feature k of jatm_idx (the atom on which the ALF is centered)
     feat_idx = 3
-    for k in range(len(atoms_instance)-3):
-        diff = atoms_instance[local_non_alf_atoms[k]].coordinates - atoms_instance[jatm_idx].coordinates
+    for k in range(len(atoms_instance) - 3):
+        diff = (
+            atoms_instance[local_non_alf_atoms[k]].coordinates
+            - atoms_instance[jatm_idx].coordinates
+        )
 
         # R
-        df_da = dR_da(jatm_idx, local_non_alf_atoms[k], feat_idx, iatm_idx, atoms_instance, system_alf)
+        df_da = dR_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            feat_idx,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
 
         n_features_times_3_tmp_matrix[feat_idx, 0] = df_da[0]
         n_features_times_3_tmp_matrix[feat_idx, 1] = df_da[1]
@@ -255,7 +317,15 @@ def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
         zeta3 = zetas[2]
 
         # Theta
-        df_da = dTheta_da(jatm_idx, local_non_alf_atoms[k], feat_idx, zeta3, iatm_idx, atoms_instance, system_alf)
+        df_da = dTheta_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            feat_idx,
+            zeta3,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
         n_features_times_3_tmp_matrix[feat_idx, 0] = df_da[0]
         n_features_times_3_tmp_matrix[feat_idx, 1] = df_da[1]
         n_features_times_3_tmp_matrix[feat_idx, 2] = df_da[2]
@@ -263,7 +333,16 @@ def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
         feat_idx += 1
 
         # Phi
-        df_da = dPhi_da(jatm_idx, local_non_alf_atoms[k], zeta1, zeta2, feat_idx, iatm_idx, atoms_instance, system_alf)
+        df_da = dPhi_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            zeta1,
+            zeta2,
+            feat_idx,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
         n_features_times_3_tmp_matrix[feat_idx, 0] = df_da[0]
         n_features_times_3_tmp_matrix[feat_idx, 1] = df_da[1]
         n_features_times_3_tmp_matrix[feat_idx, 2] = df_da[2]

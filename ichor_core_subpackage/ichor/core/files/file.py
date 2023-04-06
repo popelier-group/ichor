@@ -6,8 +6,8 @@ from typing import List, Optional, Union
 
 from ichor.core.common.functools import buildermethod, classproperty
 from ichor.core.common.io import move, remove
-from ichor.core.files.path_object import PathObject
 from ichor.core.common.types import NoStr
+from ichor.core.files.path_object import PathObject
 
 
 class FileReadError(Exception):
@@ -159,9 +159,7 @@ class ReadFile(File, ABC):
         try:
             return object.__getattribute__(self, item)
         except AttributeError as e:
-            raise AttributeError(
-                f"{self} does not have attribute {item}."
-            ) from e
+            raise AttributeError(f"{self} does not have attribute {item}.") from e
 
     def __getitem__(self, item):
         """Tries to return the item indexed with [] brackets. If the item does not exist and the filestate is Unread, then
@@ -205,7 +203,9 @@ class WriteFile(File, ABC):
         and .int), we only need to read and do not have to write out ourselves."""
         path = Path(path or self.path)
         if not path:
-            raise ValueError(f"Path where contents will be written is not allowed, value of path: {path}.")
+            raise ValueError(
+                f"Path where contents will be written is not allowed, value of path: {path}."
+            )
         try:
             self._set_write_defaults_if_needed()
             self._check_values_before_writing()

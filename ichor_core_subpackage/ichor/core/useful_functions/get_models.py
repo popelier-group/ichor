@@ -1,10 +1,11 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.core.useful_functions.get_path import get_dir
 from ichor.core.common.io import get_files_of_type
 from ichor.core.menu.menu import Menu
 from ichor.core.models import Model, Models
+
+from ichor.core.useful_functions.get_path import get_dir
 
 
 class ModelsNotFound(Exception):
@@ -29,10 +30,7 @@ def get_latest_models_from_log(model_log_path: Path) -> Path:
 
 
 def get_latest_models(models_path: Path) -> Path:
-    if (
-        models_path.exists()
-        and number_of_models_in_dir(models_path) > 0
-    ):
+    if models_path.exists() and number_of_models_in_dir(models_path) > 0:
         return models_path
     else:
         return get_latest_models_from_log()
@@ -48,9 +46,7 @@ def set_current_model(model: Path):
 
 def select_from_log(model_log_path: Path):
     i = 1
-    with Menu(
-        "Select Model From Log", space=True, back=True, exit=True
-    ) as menu:
+    with Menu("Select Model From Log", space=True, back=True, exit=True) as menu:
         for model_dir in model_log_path:
             if number_of_models_in_dir(model_dir) > 0:
                 menu.add_option(
@@ -91,9 +87,7 @@ def choose_model_menu_refresh(menu: Menu):
 def choose_model_menu(current_model: Path) -> Path:
     global _current_model
     _current_model = current_model
-    with Menu(
-        "Choose Model Menu", refresh=choose_model_menu_refresh, auto_close=True
-    ):
+    with Menu("Choose Model Menu", refresh=choose_model_menu_refresh, auto_close=True):
         pass
     return _current_model
 

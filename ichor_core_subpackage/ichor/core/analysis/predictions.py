@@ -31,9 +31,7 @@ def get_predicted(
     for atom in atoms:
         predicted[atom] = {}
         for type_ in types:
-            predicted[atom][type_] = (
-                models[atom][type_].predict(points).array()
-            )
+            predicted[atom][type_] = models[atom][type_].predict(points).array()
 
     return pd.DataFrame(predicted)
 

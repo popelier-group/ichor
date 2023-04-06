@@ -48,7 +48,7 @@ from unicodedata import normalize
 
 from .compat.fastnumbers import fast_float, fast_int
 from .compat.locale import get_decimal_point, get_strxfrm, get_thousands_sep
-from .ns_enum import NS_DUMB, ns
+from .ns_enum import ns, NS_DUMB
 from .unicode_numbers import digits_no_decimals, numeric_no_decimals
 
 
@@ -132,9 +132,7 @@ def regex_chooser(alg):
         ns.INT | ns.SIGNED: NumericalRegularExpressions.int_sign(),
         ns.FLOAT | ns.SIGNED: NumericalRegularExpressions.float_sign_exp(),
         ns.FLOAT | ns.NOEXP: NumericalRegularExpressions.float_nosign_noexp(),
-        ns.FLOAT
-        | ns.SIGNED
-        | ns.NOEXP: NumericalRegularExpressions.float_sign_noexp(),
+        ns.FLOAT | ns.SIGNED | ns.NOEXP: NumericalRegularExpressions.float_sign_noexp(),
     }[alg]
 
 
@@ -223,8 +221,7 @@ def natsort_key(val, key, string_func, bytes_func, num_func):
         # Do not apply the key recursively.
         try:
             return tuple(
-                natsort_key(x, None, string_func, bytes_func, num_func)
-                for x in val
+                natsort_key(x, None, string_func, bytes_func, num_func) for x in val
             )
 
         # If that failed, it must be a number.
@@ -594,9 +591,7 @@ def final_data_transform_factory(alg, sep, pre_sep):
         swap = alg & NS_DUMB and alg & ns.LOWERCASEFIRST
         transform = methodcaller("swapcase") if swap else _no_op
 
-        def func(
-            split_val, val, _transform=transform, _sep=sep, _pre_sep=pre_sep
-        ):
+        def func(split_val, val, _transform=transform, _sep=sep, _pre_sep=pre_sep):
             """
             Return a tuple with the first character of the first element
             of the return value as the first element, and the return value
@@ -735,9 +730,7 @@ def path_splitter(s, _d_match=re.compile(r"\.\d").match):
     # the beginning of the suffix or there are no more extensions.
     suffixes = PurePath(base).suffixes
     try:
-        digit_index = next(
-            i for i, x in enumerate(reversed(suffixes)) if _d_match(x)
-        )
+        digit_index = next(i for i, x in enumerate(reversed(suffixes)) if _d_match(x))
     except StopIteration:
         pass
     else:

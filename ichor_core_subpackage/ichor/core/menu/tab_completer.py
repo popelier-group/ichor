@@ -38,9 +38,7 @@ class TabCompleter(ABC):
         """
         if readline:
             readline.set_completer_delims(pattern)  # set a tab as delimiter
-            readline.parse_and_bind(
-                "tab: complete"
-            )  # set tab to trigger readline
+            readline.parse_and_bind("tab: complete")  # set tab to trigger readline
             readline.set_completer(
                 self.completer
             )  # depending on menu, a different functionality is needed for readline
@@ -85,11 +83,9 @@ class ListCompleter(TabCompleter):
             if not line:
                 return [c + " " for c in self.list_completions][state]
             else:
-                return [
-                    c + " "
-                    for c in self.list_completions
-                    if c.startswith(line)
-                ][state]
+                return [c + " " for c in self.list_completions if c.startswith(line)][
+                    state
+                ]
 
 
 class PathCompleter(TabCompleter):

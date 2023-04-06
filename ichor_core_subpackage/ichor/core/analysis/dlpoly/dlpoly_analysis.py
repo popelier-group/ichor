@@ -3,9 +3,9 @@ from typing import Dict
 
 import numpy as np
 import pandas as pd
+from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.common.io import get_files_of_type
 from ichor.core.common.np import dict_of_list_to_dict_of_array
-from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.files import WFN
 from ichor.core.models import Models
 
@@ -38,7 +38,7 @@ def read_wfn_energy(wfn_file: Path) -> float:
 def get_dlpoly_energies(
     optimum_energy: float,
     dlpoly_directory: Path,
-    output: Path =  Path("dlpoly-energies.xlsx"),
+    output: Path = Path("dlpoly-energies.xlsx"),
 ):
 
     data = {
@@ -69,8 +69,6 @@ def get_dlpoly_energies(
         df["fflux_diff / kJ/mol"] = df["fflux_diff / Ha"] * ha_to_kj_mol
         if "gaussian" in df.columns:
             df["gaussian_diff / Ha"] = np.abs(df["gaussian"] - optimum_energy)
-            df["gaussian_diff / kJ/mol"] = (
-                df["gaussian_diff / Ha"] * ha_to_kj_mol
-            )
+            df["gaussian_diff / kJ/mol"] = df["gaussian_diff / Ha"] * ha_to_kj_mol
 
     df.to_excel(output, index=False)

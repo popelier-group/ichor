@@ -1,20 +1,27 @@
 from pathlib import Path
-from typing import Union, List, Optional, Callable, Dict
-from ichor.core.atoms import ListOfAtoms, Atoms
-from ichor.core.calculators.features.alf_features_calculator import calculate_alf_features
-from ichor.core.common.io import mkdir
-from ichor.core.files.directory import Directory
-from ichor.core.files.point_directory import PointDirectory
-from ichor.core.files import GJF
-from ichor.core.files.xyz import XYZ
+from typing import Callable, Dict, List, Optional, Union
+
 import numpy as np
-from ichor.core.calculators.alf import default_alf_calculator
-from ichor.core.atoms import ALF
-from ichor.core.files.file_data import PointsDirectoryProperties
-from ichor.core.files.xyz import Trajectory
-from ichor.core.sql import create_database, add_point_to_database, add_atom_names_to_database, create_database_session
 import pandas as pd
+from ichor.core.atoms import ALF, Atoms, ListOfAtoms
+from ichor.core.calculators.alf import default_alf_calculator
+from ichor.core.calculators.features.alf_features_calculator import (
+    calculate_alf_features,
+)
 from ichor.core.common import constants
+from ichor.core.common.io import mkdir
+from ichor.core.files import GJF
+from ichor.core.files.directory import Directory
+from ichor.core.files.file_data import PointsDirectoryProperties
+from ichor.core.files.point_directory import PointDirectory
+from ichor.core.files.xyz import Trajectory, XYZ
+from ichor.core.sql import (
+    add_atom_names_to_database,
+    add_point_to_database,
+    create_database,
+    create_database_session,
+)
+
 
 class PointsDirectory(ListOfAtoms, Directory):
     """A helper class that wraps around a directory which contains points (molecules with various geometries).
@@ -37,9 +44,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         do not need to be parsed again, so needs_parsing would be false
     """
 
-    def __init__(self, path: Union[Path, str], needs_parsing = True, *args, **kwargs):
+    def __init__(self, path: Union[Path, str], needs_parsing=True, *args, **kwargs):
         # Initialise `list` parent class of `ListOfAtoms`
-        ListOfAtoms.__init__(self,  *args, **kwargs)
+        ListOfAtoms.__init__(self, *args, **kwargs)
         if needs_parsing:
             # this will call Directory __init__ method (which then calls self.parse)
             # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
@@ -74,7 +81,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         # sort by the names of the directories (by the numbers in their name) since the system name is always the same
         self = self.sort(key=lambda x: x.path.name)
 
-    def connectivity(self, connectivity_calculator: Callable[..., np.ndarray]) -> np.ndarray:
+    def connectivity(
+        self, connectivity_calculator: Callable[..., np.ndarray]
+    ) -> np.ndarray:
         """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
         Returns:
@@ -82,16 +91,21 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
 
         return connectivity_calculator(self[0].atoms)
-    
+
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
         :param *args: positional arguments to pass to alf calculator
         :param **kwargs: key word arguments to pass to alf calculator
         """
-        return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0].atoms]
+        return [
+            alf_calculator(atom_instance, *args, **kwargs)
+            for atom_instance in self[0].atoms
+        ]
 
-    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[str, ALF]:
+    def alf_dict(
+        self, alf_calculator: Callable[..., ALF], *args, **kwargs
+    ) -> Dict[str, ALF]:
         """Returns a dictionary of key: atom_name, value: ALF instance (containing central atom index, x-axis idx, xy-plane idx)
         e.g. {"O1":ALF(0,1,2),"H2":ALF(1,0,2), "H3":ALF(2,0,1)]
         :param *args: positional arguments to pass to alf calculator
@@ -99,27 +113,29 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return self[0].alf_dict(alf_calculator, *args)
 
-    def properties(self, system_alf: Optional[List[ALF]] = None, specific_property: str = None) -> PointsDirectoryProperties:
-        """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
-        
+    def properties(
+        self, system_alf: Optional[List[ALF]] = None, specific_property: str = None
+    ) -> PointsDirectoryProperties:
+        """Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
+
         :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
         :param key: return only a specific key from the returned PointsDirectoryProperties dictionary
         """
-        
+
         if not system_alf:
             # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
             system_alf = self.alf(default_alf_calculator)
-        
+
         points_dir_properties = {}
-        
+
         for point in self:
             points_dir_properties[point.name] = point.properties(system_alf)
-        
+
         points_dir_properties = PointsDirectoryProperties(points_dir_properties)
-        
+
         if specific_property:
             return points_dir_properties[specific_property]
-            
+
         return points_dir_properties
 
     @property
@@ -127,7 +143,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
         return self[0].atoms.types
-    
+
     @property
     def types_extended(self) -> List[str]:
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
@@ -142,7 +158,7 @@ class PointsDirectory(ListOfAtoms, Directory):
 
     @property
     def natoms(self) -> int:
-        """ Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
+        """Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
         return len(self[0].atoms)
 
     @property
@@ -155,7 +171,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         return np.array([timestep.atoms.coordinates for timestep in self])
 
     def coordinates_to_xyz(
-        self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
+        self,
+        fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"),
+        step: Optional[int] = 1,
     ):
         """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
         for that timestep.
@@ -224,8 +242,7 @@ class PointsDirectory(ListOfAtoms, Directory):
                 # {atom_name : {prop1: val, prop2: val}, atom_name2: {prop1: val, prop2: val}, ....} for one timestep
                 dict_to_write = {
                     outer_k: {
-                        inner_k: inner_v[i]
-                        for inner_k, inner_v in outer_v.items()
+                        inner_k: inner_v[i] for inner_k, inner_v in outer_v.items()
                     }
                     for outer_k, outer_v in error.items()
                 }
@@ -238,7 +255,9 @@ class PointsDirectory(ListOfAtoms, Directory):
                     )
 
     @classmethod
-    def from_trajectory(cls, trajectory_path: Union[str, Path], points_dir_name: str = None, center = True) -> "PointsDirectory":
+    def from_trajectory(
+        cls, trajectory_path: Union[str, Path], points_dir_name: str = None, center=True
+    ) -> "PointsDirectory":
         """Generate a PointsDirectory-type structure directory from a trajectory (.xyz) file
 
         :param trajectory_path: A str or Path to a .xyz file containing geometries
@@ -247,18 +266,16 @@ class PointsDirectory(ListOfAtoms, Directory):
             the molecule from translating in 3D space (and prevents issues with WFN files, where a very large x,y,z
             value (over 100) for the coordinates leads to ******** being written in the .wfn file...)
         """
-        
+
         traj = Trajectory(trajectory_path)
-        
+
         if not points_dir_name:
             points_dir_name = traj.path.stem
 
         traj.to_dir(points_dir_name, points_dir_name, center=center)
         return PointsDirectory(points_dir_name)
 
-    def __getitem__(
-        self, item: Union[int, str]
-    ) -> Union[Atoms, ListOfAtoms]:
+    def __getitem__(self, item: Union[int, str]) -> Union[Atoms, ListOfAtoms]:
         """Used when indexing a Trajectory instance by an integer, string, or slice."""
 
         # if ListOfAtoms instance is indexed by an integer or np.int64, then index as a list
@@ -268,25 +285,29 @@ class PointsDirectory(ListOfAtoms, Directory):
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
             from ichor.core.atoms.list_of_atoms_atom_view import AtomView
-            
+
             return AtomView(self, item)
 
         # if PointsDirectory is indexed by a slice e.g. [:50], [20:40], etc.
         elif isinstance(item, slice):
-            
+
             return PointsDirectory(self.path, False, list.__getitem__(self, item))
-        
+
         # if PointsDirectory is indexed by a list, e.g. [0, 5, 10]
         elif isinstance(item, (list, np.ndarray)):
-            
-            return PointsDirectory(self.path, False, [list.__getitem__(self, i) for i in item])
+
+            return PointsDirectory(
+                self.path, False, [list.__getitem__(self, i) for i in item]
+            )
 
         # if indexing by something else that has not been programmed yet, should only be reached if not indexed by int, str, or slice
         raise TypeError(
             f"Cannot index type '{self.__class__.__name__}' with type '{type(item)}"
         )
-    
-    def write_to_sqlite3_database(self, db_path: Union[str, Path] = None, echo=False, print_missing_data=False) -> Path:
+
+    def write_to_sqlite3_database(
+        self, db_path: Union[str, Path] = None, echo=False, print_missing_data=False
+    ) -> Path:
         """Write out important information from a PointsDirectory instance to an SQLite3 database.
 
         :param db_path: database to write to
@@ -310,15 +331,19 @@ class PointsDirectory(ListOfAtoms, Directory):
             print("Database already exists. Adding new points to database...")
             session = create_database_session(db_path)
             for point in self:
-                add_point_to_database(session, point, echo=echo, print_missing_data=print_missing_data)
+                add_point_to_database(
+                    session, point, echo=echo, print_missing_data=print_missing_data
+                )
         else:
             print("Making new database and adding points...")
             create_database(db_path, echo)
             session = create_database_session(db_path)
             add_atom_names_to_database(session, self.atom_names, echo=echo)
             for point in self:
-                add_point_to_database(session, point, echo=echo, print_missing_data=print_missing_data)
-            
+                add_point_to_database(
+                    session, point, echo=echo, print_missing_data=print_missing_data
+                )
+
         return db_path
 
     def features_with_properties_to_csv(
@@ -327,7 +352,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         str_to_append_to_fname: str = "_features_with_properties.csv",
         atom_names: Optional[List[str]] = None,
         property_types: Optional[List[str]] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Calculates ALF features and properties (with multipole moments rotated).
@@ -355,11 +380,16 @@ class PointsDirectory(ListOfAtoms, Directory):
         for atom_name in atom_names:
 
             training_data = []
-            features = self[atom_name].features(calculate_alf_features, system_alf, **kwargs)
+            features = self[atom_name].features(
+                calculate_alf_features, system_alf, **kwargs
+            )
 
             for i, point in enumerate(self):
                 point_properties_dict = point.properties(system_alf)
-                properties = [point_properties_dict.get(atom_name).get(ty) for ty in property_types]
+                properties = [
+                    point_properties_dict.get(atom_name).get(ty)
+                    for ty in property_types
+                ]
                 training_data.append([*features[i], *properties])
 
             input_headers = [f"f{i+1}" for i in range(features.shape[-1])]
@@ -379,7 +409,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         alf_list: List[ALF],
         central_atom_idx: int,
         str_to_append_to_fname: str = "_features_with_dE_df.csv",
-        **kwargs
+        **kwargs,
     ):
         """Writes out a csv file containing wfn energy and FORCEs calculated for every feature.
         Note that the forces (dE/df_i) are the negative of the PES gradient, so for machine learning, the negative of these forces needs
@@ -393,18 +423,25 @@ class PointsDirectory(ListOfAtoms, Directory):
         :type str_to_append_to_fname: str, optional
         """
 
-        from ichor.core.models.gaussian_energy_derivative_wrt_features import form_b_matrix, convert_to_feature_forces
+        from ichor.core.models.gaussian_energy_derivative_wrt_features import (
+            convert_to_feature_forces,
+            form_b_matrix,
+        )
 
         training_data = []
         for point_dir in self:
 
             atoms = point_dir.xyz.atoms
-            features = atoms[central_atom_idx].features(calculate_alf_features, alf_list)
+            features = atoms[central_atom_idx].features(
+                calculate_alf_features, alf_list
+            )
             nfeatures = len(features)
             wfn_energy = point_dir.wfn.total_energy
             b_matrix = form_b_matrix(atoms, alf_list, central_atom_idx)
             cart_forces = np.array(list(point_dir.gaussian_out.global_forces.values()))
-            dE_df = convert_to_feature_forces(cart_forces, b_matrix, alf_list, central_atom_idx)
+            dE_df = convert_to_feature_forces(
+                cart_forces, b_matrix, alf_list, central_atom_idx
+            )
             training_data.append([*features, wfn_energy, *dE_df])
 
             input_headers = [f"f{i+1}" for i in range(nfeatures)]

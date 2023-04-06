@@ -1,14 +1,14 @@
 from pathlib import Path
-from typing import List, Optional, Union, NamedTuple
+from typing import List, NamedTuple, Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
-from ichor.core.files.file import FileContents, File, ReadFile, WriteFile
-from ichor.core.files.file_data import HasAtoms
 from ichor.core.common.constants import GAUSSIAN_METHODS
+from ichor.core.common.functools import classproperty
 
 # from enum import Enum
 from ichor.core.common.types.enum import Enum
+from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
+from ichor.core.files.file_data import HasAtoms
 
 
 class PrintLevel(Enum):
@@ -62,7 +62,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         This is either read in (if an existing gjf path is given) or
         an error is thrown when attempting to write the gjf file (because no gjf file or `Atoms` instance was given)
 
-    :param extra_calculation_details: A list of strings to be added to the bottom of the gjf file 
+    :param extra_calculation_details: A list of strings to be added to the bottom of the gjf file
         (after atoms section containing atom names and coordinates). This is done in order to handle different basis sets
         for individual atoms, modredundant settings, and other settings that Gaussian handles.
 
@@ -99,7 +99,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.charge: int = charge or FileContents
         self.spin_multiplicity: int = spin_multiplicity or FileContents
         self.atoms = atoms or FileContents
-        
+
         self._output_chk: bool = output_chk
 
     @classproperty
@@ -200,7 +200,6 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
                     line = next(f)
                 except StopIteration:
                     break
-            
 
         self.link0 = self.link0 or link0
         route_card = self.parse_route_card(route)
@@ -214,7 +213,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.atoms = self.atoms or atoms
 
     def _set_write_defaults_if_needed(self):
-        """ Set default values for attributes if bool(self.attribute) evaluates to False.
+        """Set default values for attributes if bool(self.attribute) evaluates to False.
         So if an attribute is still FileContents, an empty string, an empty list, etc.,
         then default values will be used."""
 
@@ -233,8 +232,8 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.spin_multiplicity = self.spin_multiplicity or 1
 
     def _check_values_before_writing(self):
-        """ Basic checks done prior to writing file.
-        
+        """Basic checks done prior to writing file.
+
         .. note:: Not everything written to file can be checked for, so
         there is still the need for a user to check out what is being written.
         """

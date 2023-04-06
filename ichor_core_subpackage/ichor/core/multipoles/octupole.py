@@ -17,9 +17,7 @@ def rotate_octupole(
     """Rotates octupole moments from the global to local frame"""
 
     # transform global spherical tensor to global cartesian tensor
-    o = octupole_spherical_to_cartesian(
-        q30, q31c, q31s, q32c, q32s, q33c, q33s
-    )
+    o = octupole_spherical_to_cartesian(q30, q31c, q31s, q32c, q32s, q33c, q33s)
     # rotate global cartesian to local cartesian frame
     rotated_o = octupole_rotate_cartesian(o, C)
 

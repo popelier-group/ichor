@@ -1,12 +1,16 @@
+from typing import Dict, List
+
 import numpy as np
-from ichor.core.models.calculate_fflux_derivatives import fflux_derivs_da_df_matrix
 from ichor.core.atoms import ALF
-from typing import List, Dict
+from ichor.core.models.calculate_fflux_derivatives import fflux_derivs_da_df_matrix
 
 # TODO: Add method that converts back to Cartesian coordinates. Note that the rows will be A_0, A_x, A_xy, non_alf atoms. So need to revert back to original rows
 # so that it can be compared to Gaussian.
 
-def form_b_matrix(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> np.ndarray:
+
+def form_b_matrix(
+    atoms: "Atoms", system_alf: List["ALF"], central_atom_idx
+) -> np.ndarray:
     """Returns a np array of shape n_features x (n_atomsx3), containing the derivative of
     features with respect to x,y,z coordiantes. B_{ij} = df_i / dx_j (the partial derivative of
     feature i wrt partial derivative of global Cartesian x_j).
@@ -46,19 +50,27 @@ def form_b_matrix(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> 
 
     if natoms == 2:
         for j in range(2):
-            da_df = fflux_derivs_da_df_matrix(central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf)
+            da_df = fflux_derivs_da_df_matrix(
+                central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf
+            )
             all_derivs.append(da_df)
 
     elif natoms > 2:
-    # first three atoms that are central, x-axis, xy-plane
+        # first three atoms that are central, x-axis, xy-plane
         for j in range(3):
-            da_df = fflux_derivs_da_df_matrix(central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf)
+            da_df = fflux_derivs_da_df_matrix(
+                central_atom_idx, system_alf[central_atom_idx][j], atoms, system_alf
+            )
             all_derivs.append(da_df)
 
-        non_local_atoms = [t for t in range(natoms) if t not in system_alf[central_atom_idx]]
+        non_local_atoms = [
+            t for t in range(natoms) if t not in system_alf[central_atom_idx]
+        ]
 
         for non_local_atm in non_local_atoms:
-            da_df = fflux_derivs_da_df_matrix(central_atom_idx, non_local_atm, atoms, system_alf)
+            da_df = fflux_derivs_da_df_matrix(
+                central_atom_idx, non_local_atm, atoms, system_alf
+            )
             all_derivs.append(da_df)
 
     da_df = np.hstack(all_derivs)
@@ -66,19 +78,21 @@ def form_b_matrix(atoms: "Atoms", system_alf: List["ALF"], central_atom_idx) -> 
     # return B matrix
     return da_df
 
+
 def form_g_matrix(b_matrix: np.ndarray):
-    """ Forms the G matrix as in Gaussian.
+    """Forms the G matrix as in Gaussian.
 
     .. note::
         The general inverse of G is NOT used here. Gaussian seems to use the regular inverse (so this is why np.linalg.inv is used,
-        but can use Chloesky or something like this instead because G is a symmetric square (BuB^T, where u is the identity matrix here))   
+        but can use Chloesky or something like this instead because G is a symmetric square (BuB^T, where u is the identity matrix here))
     """
 
     g_matrix = np.matmul(b_matrix, b_matrix.T)
     return g_matrix
 
+
 def form_g_inverse(g_matrix: np.ndarray):
-    """ Inverts the G matrix, gives generalized inverse"""
+    """Inverts the G matrix, gives generalized inverse"""
 
     # # w is eigenvalues, v is eigenvectors matrix
     # w, v = np.linalg.eig(g_matrix)
@@ -95,7 +109,10 @@ def form_g_inverse(g_matrix: np.ndarray):
 
     return inverse_g
 
-def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, system_alf, central_atom_idx):
+
+def convert_to_feature_forces(
+    global_cartesian_forces: np.ndarray, b_matrix, system_alf, central_atom_idx
+):
     """
     Compute -dE/df (since the global Cartesian forces are negative of the derivative of the potential).
     If making models with these values, need to take the NEGATIVE of -dE/df, as the
@@ -130,12 +147,16 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, sys
         alf_atom_indices.remove(None)
 
     # contains all other atom indices not in the alf
-    non_local_atom_indices = [t for t in range(natoms) if t not in system_alf[central_atom_idx]]
+    non_local_atom_indices = [
+        t for t in range(natoms) if t not in system_alf[central_atom_idx]
+    ]
     # the correct order which the forces array should be in
     atom_indices_new_order = alf_atom_indices + non_local_atom_indices
 
     # swap rows of forces array
-    copied_forces_array[[atom_indices_new_order, original_row_indices], :] = copied_forces_array[[original_row_indices, atom_indices_new_order], :]
+    copied_forces_array[
+        [atom_indices_new_order, original_row_indices], :
+    ] = copied_forces_array[[original_row_indices, atom_indices_new_order], :]
     copied_forces_array = copied_forces_array.flatten()
 
     g_matrix = form_g_matrix(b_matrix)
@@ -150,10 +171,16 @@ def convert_to_feature_forces(global_cartesian_forces: np.ndarray, b_matrix, sys
 
     return gradient_dE_df
 
-def convert_to_cartesian_forces(dE_df_array: np.ndarray, b_matrix: np.ndarray, system_alf: List[ALF], central_atom_idx: int):
-    """ Converts from local 'feature' forces to global Cartesian forces, as given by Gaussian.
 
-    :param dE_df_array: 1D array of shape n_features x 1 containing 'feature' forces.  
+def convert_to_cartesian_forces(
+    dE_df_array: np.ndarray,
+    b_matrix: np.ndarray,
+    system_alf: List[ALF],
+    central_atom_idx: int,
+):
+    """Converts from local 'feature' forces to global Cartesian forces, as given by Gaussian.
+
+    :param dE_df_array: 1D array of shape n_features x 1 containing 'feature' forces.
     :param b_matrix: Wilson B matrix to be used to calculate, as well as dE/df. Should be of shape
         (3N-6) x 3N where N is the number of atoms.
     :param system_alf: A list of ALF instances containing the ALF of every atom.
@@ -172,7 +199,9 @@ def convert_to_cartesian_forces(dE_df_array: np.ndarray, b_matrix: np.ndarray, s
         alf_atom_indices.remove(None)
 
     # contains all other atom indices not in the alf
-    non_local_atom_indices = [t for t in range(natoms) if t not in system_alf[central_atom_idx]]
+    non_local_atom_indices = [
+        t for t in range(natoms) if t not in system_alf[central_atom_idx]
+    ]
     # the correct order which the forces array should be in
     atom_indices_new_order = alf_atom_indices + non_local_atom_indices
 
@@ -180,6 +209,8 @@ def convert_to_cartesian_forces(dE_df_array: np.ndarray, b_matrix: np.ndarray, s
     dE_dCart = np.matmul(b_matrix.T, dE_df_array).reshape(-1, 3)
 
     # swap rows of Cartesian array to match the original Atoms ordering
-    dE_dCart[[original_row_indices, atom_indices_new_order], :] = dE_dCart[[atom_indices_new_order, original_row_indices], :]
+    dE_dCart[[original_row_indices, atom_indices_new_order], :] = dE_dCart[
+        [atom_indices_new_order, original_row_indices], :
+    ]
 
     return dE_dCart

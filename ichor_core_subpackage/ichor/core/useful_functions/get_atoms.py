@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 def get_atoms_from_path(path: Path) -> "Atoms":
     """
     Returns first instance of `Atoms` found from `path`
@@ -7,17 +8,17 @@ def get_atoms_from_path(path: Path) -> "Atoms":
     :return: the instance of `Atoms` found from path
     :raises: AtomsNotFoundError if no atoms are found
     """
-    from ichor.core.common.io import get_files_of_type
     from ichor.core.atoms import AtomsNotFoundError
+    from ichor.core.common.io import get_files_of_type
     from ichor.core.files import (
         GJF,
-        WFN,
-        XYZ,
         PointDirectory,
         PointsDirectory,
         Trajectory,
+        WFN,
+        XYZ,
     )
-    
+
     if path.is_dir():
         if len(get_files_of_type(GJF.filetype, path)) == 0:
             pd = PointsDirectory(path)[0]
@@ -39,10 +40,12 @@ def get_atoms_from_path(path: Path) -> "Atoms":
     raise AtomsNotFoundError(f"Could not find 'Atoms' instance from {path}")
 
 
-def get_trajectory_from_path(path: Path, trajectory_name: str = "new_trajectory.xyz") -> "Trajectory":
-    
+def get_trajectory_from_path(
+    path: Path, trajectory_name: str = "new_trajectory.xyz"
+) -> "Trajectory":
+
     from ichor.core.files import PointsDirectory, Trajectory
-    
+
     trajectory = Trajectory(trajectory_name)
     if path.is_dir() and PointsDirectory.check_path(path):
         for point in PointsDirectory(path):

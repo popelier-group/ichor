@@ -5,8 +5,7 @@ from typing import Optional
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
-from ichor.core.files.file import FileContents
-from ichor.core.files.file import ReadFile, WriteFile
+from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
 
@@ -30,7 +29,7 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile):
         basis_set: str = FileContents,
     ):
         super(ReadFile, self).__init__(path)
-        
+
         self.atoms = atoms
         self.ccsdmod: PandoraCCSDmod = ccsdmod
         self.morfi_grid_radial: float = morfi_grid_radial

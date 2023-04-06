@@ -14,7 +14,7 @@ from ichor.core.common.types.itypes import F
 
 def convert_to_path(func: F) -> F:
     """Used as a decorator which converts any function inputs which have type
-     annotation `Path` to a `Path` object."""
+    annotation `Path` to a `Path` object."""
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
@@ -71,6 +71,7 @@ def cp(src: Path, dst: Path, *args, **kwargs):
         copyfile(src, dst, *args, **kwargs)
     elif src.is_dir():
         copytree(src, dst, *args, **kwargs)
+
 
 @convert_to_path
 def copyfile(src: Path, dst: Path):
@@ -241,9 +242,9 @@ def tail(path: Path, lines: int = 20) -> str:
             block_end_byte -= BLOCK_SIZE
             block_number -= 1
         all_read_text = b"".join(reversed(blocks))
-        return b"\n".join(
-            all_read_text.splitlines()[-total_lines_wanted:]
-        ).decode("utf-8")
+        return b"\n".join(all_read_text.splitlines()[-total_lines_wanted:]).decode(
+            "utf-8"
+        )
 
 
 @convert_to_path
@@ -281,6 +282,7 @@ def cat(outfile: Path, infiles: List[Path]) -> None:
             with open(infile, "rb") as inf:
                 shutil.copyfileobj(inf, outf)
 
+
 @convert_to_path
 def ln(f: Path, link: Path, force: bool = True):
     """
@@ -297,10 +299,11 @@ def ln(f: Path, link: Path, force: bool = True):
         link.unlink()
     link.symlink_to(f)
 
+
 def symlink(f: Path, link: Path, force=True):
-    """Same as ln function.
-    """
+    """Same as ln function."""
     ln(f, link, force=force)
+
 
 @convert_to_path
 def last_modified(f: Path) -> str:

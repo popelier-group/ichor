@@ -1,17 +1,18 @@
 from optparse import Option
 from pathlib import Path
-from typing import Union, Optional, List, Dict
+from typing import Dict, List, Optional, Union
+
 import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
-from ichor.core.common.str import split_by
 from ichor.core.common.constants import AIMALL_FUNCTIONALS
-from ichor.core.files.file import FileContents, ReadFile, WriteFile, FileState
-from ichor.core.files.file_data import HasAtoms, HasProperties
-from ichor.core.common.units import AtomicDistance
-from ichor.core.common.itertools import chunker
 from ichor.core.common.float import from_scientific_double
+from ichor.core.common.functools import classproperty
+from ichor.core.common.itertools import chunker
+from ichor.core.common.str import split_by
+from ichor.core.common.units import AtomicDistance
+from ichor.core.files.file import FileContents, FileState, ReadFile, WriteFile
+from ichor.core.files.file_data import HasAtoms, HasProperties
 
 
 class MolecularOrbital:
@@ -43,7 +44,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
         AIMAll does not automatically determine the method itself, so it can lead
         to wrong IQA/multipole moments results. To make sure AIMAll results are correct,
         the method is a required argument.
-    
+
     :ivar mol_orbitals: The number of molecular orbitals to be read in from the .wfn file.
     :ivar primitives: The number of primitives to be read in from the .wfn file.
     :ivar nuclei: The number of nuclei in the system to be read in from the .wfn file.
@@ -141,12 +142,8 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
 
                 primitives = []
                 line = next(f)
-                while not (
-                    line.startswith(r"MO") or line.startswith(r"END DATA")
-                ):
-                    primitives.extend(
-                        list(map(from_scientific_double, line.split()))
-                    )
+                while not (line.startswith(r"MO") or line.startswith(r"END DATA")):
+                    primitives.extend(list(map(from_scientific_double, line.split())))
                     line = next(f)
                 molecular_orbitals.append(
                     MolecularOrbital(
@@ -192,14 +189,14 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
         return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
 
     def _check_values_before_writing(self):
-        """ This check is just here so that the file is read before attempting to write the file.
+        """This check is just here so that the file is read before attempting to write the file.
         This is to prevent a situation where the original file has not been read yet,
         but a new file with the same path is being written (so therefore the new file is empty and all the data has been
         lost and has not been read in into an instance yet).
-        
+
         ..note::
             Even though the file could already be read in and some attributes might be modified by the user,
-            reading the file a second time prior to writing will not change any user attributes because of the 
+            reading the file a second time prior to writing will not change any user attributes because of the
             way the read file is written (i.e. any user-set attributes are kept even after the file is read again).
         """
         # TODO: potentially make this the default for WriteFile._check_values_before_writing
@@ -207,7 +204,7 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
             self.read()
 
     def _write_file(self, path: Path):
-        """ Write method needs to be implemented because the correct functional needs to be added to the .wfn file,
+        """Write method needs to be implemented because the correct functional needs to be added to the .wfn file,
         so that AIMAll can then use it when it does calculations. Otherwise, the wrong results are obtained with AIMAll.
         """
         with open(path, "w") as f:
@@ -233,9 +230,9 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
                 )
 
             for exponents in chunker(self.primitive_exponents, 5):
-                exponents = "".join(
-                    map(lambda x: f"{x:14.7E}", exponents)
-                ).replace("E", "D")
+                exponents = "".join(map(lambda x: f"{x:14.7E}", exponents)).replace(
+                    "E", "D"
+                )
                 f.write(f"EXPONENTS {exponents}\n")
 
             for molecular_orbital in self.molecular_orbitals:

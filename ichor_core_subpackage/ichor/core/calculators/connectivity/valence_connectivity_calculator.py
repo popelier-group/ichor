@@ -1,5 +1,7 @@
 import numpy as np
-from ichor.core.calculators.connectivity.distance_connectivity_calculator import connectivity_calculator_distance
+from ichor.core.calculators.connectivity.distance_connectivity_calculator import (
+    connectivity_calculator_distance,
+)
 
 
 def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:
@@ -24,9 +26,7 @@ def connectivity_calculator_valence(atoms: "Atoms") -> np.ndarray:
 
     for atom in atoms:
         while sum(connectivity[atom.i]) > atom.valence:
-            connected_atoms = [
-                i for i, c in enumerate(connectivity[atom.i]) if c == 1
-            ]
+            connected_atoms = [i for i, c in enumerate(connectivity[atom.i]) if c == 1]
             incorrect_atom_idx = connected_atoms[
                 np.argmax([atom.dist(atoms[i]) for i in connected_atoms])
             ]

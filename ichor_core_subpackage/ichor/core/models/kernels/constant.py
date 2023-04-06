@@ -8,9 +8,7 @@ class ConstantKernel(Kernel):
     """Implements constant kernel, which scales by a constant factor when used in a kernel product or
     modifies the mean of the Gaussian process when used in a kernel sum"""
 
-    def __init__(
-        self, name: str, value: float, active_dims: Optional[np.ndarray]
-    ):
+    def __init__(self, name: str, value: float, active_dims: Optional[np.ndarray]):
         super().__init__(self, name, active_dims)
         self.value = value
 
@@ -31,7 +29,5 @@ class ConstantKernel(Kernel):
         f.write(f"[kernel.{self.name}]\n")
         f.write("type constant\n")
         f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(
-            f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
-        )
+        f.write(f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n")
         f.write(f"value {self.value}\n")

@@ -8,7 +8,7 @@ def write_control(
     n_steps: int = 500,
     file_name: str = "CONTROL",
 ):
-    """ Writes CONTROL file that DL_FFLUX needs to function. It is a modified version of the DL_POLY CONTROL file.
+    """Writes CONTROL file that DL_FFLUX needs to function. It is a modified version of the DL_POLY CONTROL file.
     The defaults of the function are used to perform a geometry optimization, so the settings are different
     that the default settings.
 
@@ -23,14 +23,23 @@ def write_control(
     """
     # have import in function to prevent cyclic imports
     from ichor.core.files.dl_poly import DlPolyControl
-    
-    control_file = DlPolyControl(path=file_name, system_name=system_name, ensemble=ensemble,
-                                 thermostat=thermostat, thermostat_settings=[hoover_number], temperature=temperature,
-                                 timestep=timestep, n_steps=n_steps)
+
+    control_file = DlPolyControl(
+        path=file_name,
+        system_name=system_name,
+        ensemble=ensemble,
+        thermostat=thermostat,
+        thermostat_settings=[hoover_number],
+        temperature=temperature,
+        timestep=timestep,
+        n_steps=n_steps,
+    )
     control_file.write()
 
 
-def write_config(atoms: "Atoms", system_name: str, cell_size: float = 50.0, file_name: str = "CONFIG"):
+def write_config(
+    atoms: "Atoms", system_name: str, cell_size: float = 50.0, file_name: str = "CONFIG"
+):
     """Writes CONFIG file that DL_FFLUX needs to run.
 
     :param atoms: An Atoms instance that is the starting geometry of the DL_FFLUX MD simulation
@@ -40,11 +49,14 @@ def write_config(atoms: "Atoms", system_name: str, cell_size: float = 50.0, file
     """
     # have import in function to prevent cyclic imports
     from ichor.core.files.dl_poly import DlPolyConfig
-    
-    dl_poly_config = DlPolyConfig(path=file_name, system_name=system_name, atoms=atoms, cell_size=cell_size)
+
+    dl_poly_config = DlPolyConfig(
+        path=file_name, system_name=system_name, atoms=atoms, cell_size=cell_size
+    )
     dl_poly_config.write()
 
-def write_field(atoms: "Atoms", system_name: str, file_name = "FIELD"):
+
+def write_field(atoms: "Atoms", system_name: str, file_name="FIELD"):
     """Writes out DL FFLUX FIELD file.
 
     :param atoms: An Atoms instance which contains a geometry of the chemical system of interest.

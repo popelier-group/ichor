@@ -1,20 +1,20 @@
+from collections import defaultdict
 from pathlib import Path
-from typing import List, Optional, Dict, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-from ichor.core.common.excel import num2col
 from ichor.core.analysis.predictions import get_true_predicted
+from ichor.core.common.constants import ha_to_kj_mol, multipole_names
+from ichor.core.common.excel import num2col
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
-from ichor.core.common.constants import ha_to_kj_mol
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
-from collections import defaultdict
-from ichor.core.common.constants import multipole_names
 
 
 def percentile(n: int) -> np.ndarray:
     return np.linspace(100 / n, 100, n)
+
 
 def make_chart_settings(local_kwargs: dict):
     """Takes in a dictionary of key word arguments that were passed into the `write_to_excel` function. Then, this function
@@ -61,6 +61,7 @@ def make_chart_settings(local_kwargs: dict):
 
     return x_axis_settings, y_axis_settings
 
+
 def simplified_write_to_excel(
     total_dict: Dict[str, Dict[str, Dict[str, np.ndarray]]],
     output_name: Path = "s-curves.xlsx",
@@ -79,7 +80,7 @@ def simplified_write_to_excel(
     y_axis_major_gridline_color: str = "#BFBFBF",
     show_legend: bool = False,
     excel_style: int = 10,
-    sort_keys: bool = True
+    sort_keys: bool = True,
 ):
     """
     Writes out relevant information which is used to make s-curves to an excel file. It will make a separate sheet for every atom (and property). It
@@ -114,7 +115,7 @@ def simplified_write_to_excel(
         total_dict = {k: v for k, v in sorted(total_dict.items())}
 
     with pd.ExcelWriter(output_name) as writer:
-        
+
         workbook = writer.book
 
         # iterate over all properties, such as iqa, q00, etc.
@@ -162,14 +163,14 @@ def simplified_write_to_excel(
                     startcol=start_col,
                 )
 
-                rmse_val = np.sqrt(df["Error"].abs().pow(2).sum()/ndata)
-                mae_val = df["Error"].abs().sum()/ndata
+                rmse_val = np.sqrt(df["Error"].abs().pow(2).sum() / ndata)
+                mae_val = df["Error"].abs().sum() / ndata
 
                 writer.sheets[sheet_name].write(0, start_col, atom_name)
-                writer.sheets[sheet_name].write(0, start_col+1, "RMSE")
-                writer.sheets[sheet_name].write(0, start_col+2, rmse_val)
-                writer.sheets[sheet_name].write(0, start_col+3, "MAE")
-                writer.sheets[sheet_name].write(0, start_col+4, mae_val)
+                writer.sheets[sheet_name].write(0, start_col + 1, "RMSE")
+                writer.sheets[sheet_name].write(0, start_col + 2, rmse_val)
+                writer.sheets[sheet_name].write(0, start_col + 3, "MAE")
+                writer.sheets[sheet_name].write(0, start_col + 4, mae_val)
 
                 atomic_s_curve.add_series(
                     {
@@ -205,6 +206,7 @@ def simplified_write_to_excel(
 
             writer.sheets[sheet_name].insert_chart("A10", atomic_s_curve)
 
+
 def calculate_compact_s_curves_from_files(
     csv_files_list: List[Union[Path, str]],
     models: Models,
@@ -212,7 +214,7 @@ def calculate_compact_s_curves_from_files(
     property_names: List[str] = None,
     **kwargs,
 ):
-    """Calculates S-curves used to check model prediction performance. 
+    """Calculates S-curves used to check model prediction performance.
 
     :param csv_files_list: A list of .csv files that contain features columns and property columns.
     :param models: A `Models` instance which contains model files
@@ -220,7 +222,7 @@ def calculate_compact_s_curves_from_files(
     :param property_names: A list of strings to use for property column names. If left as None,
         a default set of property names is used
     :param kwargs: Key word argument to give to xlsxwriter for customizing plots.
-     """
+    """
 
     nfeatures = models[0].x.shape[-1]
     # dicts to read in csv data
@@ -234,7 +236,7 @@ def calculate_compact_s_curves_from_files(
         all_props = property_names
 
     # use this to get features columns from df
-    features_list = [f"f{i}" for i in range(1,nfeatures+1)]
+    features_list = [f"f{i}" for i in range(1, nfeatures + 1)]
 
     for csv_file in csv_files_list:
 
@@ -273,10 +275,15 @@ def calculate_compact_s_curves_from_files(
         features_array_for_atom = features_dict.get(atom_name)
 
         # check to see if the passed data contains the infromation that the model needs
-        if (features_array_for_atom is not None) and (true_values_dict.get(atom_name) is not None):
+        if (features_array_for_atom is not None) and (
+            true_values_dict.get(atom_name) is not None
+        ):
 
             # in case models have "iqa" written as property, but csv file has "iqa_energy"
-            if property_name == "iqa" and "iqa_energy" in true_values_dict[atom_name].keys():
+            if (
+                property_name == "iqa"
+                and "iqa_energy" in true_values_dict[atom_name].keys()
+            ):
                 property_name = "iqa"
             # get true values for property
             atomic_true_values = true_values_dict[atom_name].get(property_name)
@@ -292,23 +299,38 @@ def calculate_compact_s_curves_from_files(
                 total_dict[property_name][atom_name]["true"] = atomic_true_values
                 total_dict[property_name][atom_name]["predicted"] = model_predictions
                 total_dict[property_name][atom_name]["error"] = errors
-            
+
             else:
-                print(f"Could not get value for atom/property: {atom_name}/{property_name} from model file {model.path}.")
+                print(
+                    f"Could not get value for atom/property: {atom_name}/{property_name} from model file {model.path}."
+                )
         else:
-            print(f"Could not get features or true values for atom {atom_name}. Current property: {property_name}, current model file: {model.path}.")
+            print(
+                f"Could not get features or true values for atom {atom_name}. Current property: {property_name}, current model file: {model.path}."
+            )
 
     # if we have iqa energy we can compare to wfn energy
-    if "iqa" in total_dict.keys() and "wfn_energy" in true_values_dict[list(true_values_dict.keys())[0]]:
+    if (
+        "iqa" in total_dict.keys()
+        and "wfn_energy" in true_values_dict[list(true_values_dict.keys())[0]]
+    ):
         # get arrays of predictions for iqa energies, sum and compare to wfn energy
         # shape is n_atoms x n_points
-        tmp = [inner_dict["predicted"] for atom_name, inner_dict in total_dict["iqa"].items()]
+        tmp = [
+            inner_dict["predicted"]
+            for atom_name, inner_dict in total_dict["iqa"].items()
+        ]
         total_sums = np.sum(tmp, axis=0)
-        total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["predicted"] =  total_sums
+        total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["predicted"] = total_sums
         # assumes the test set is made from the same geometries for all atoms!!!, so then the wfn energy is the same between all datasets
-        total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["true"] = true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy")
-        errors = true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy") - total_sums
-        total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["error"] =  errors * 2625.5
+        total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["true"] = true_values_dict[
+            list(true_values_dict.keys())[0]
+        ].get("wfn_energy")
+        errors = (
+            true_values_dict[list(true_values_dict.keys())[0]].get("wfn_energy")
+            - total_sums
+        )
+        total_dict["sum_iqa_vs_wfn"]["sum_iqa"]["error"] = errors * 2625.5
 
         # errors_sum = []
         # # sum up the absolute errors of each atom
@@ -322,23 +344,24 @@ def calculate_compact_s_curves_from_files(
 
     simplified_write_to_excel(total_dict, output_location, **kwargs)
 
+
 # TODO: remove code duplication
 def calculate_compact_s_curves_from_true_predicted(
     predicted_values_dict: Dict[str, Dict[str, np.ndarray]],
     true_values_dict: Dict[str, Dict[str, np.ndarray]],
     output_location: Union[str, Path] = "s_curves_from_df.xlsx",
-    **kwargs
+    **kwargs,
 ):
     """Make s-curves from dictionary of predicted values and dictionary of true values
 
     :param predicted_values_dict:  A dict of key: atom_name val inner_dict.
-        inner_dict of key: property_name, values: 1D np.ndarray containing predicted data for all points 
+        inner_dict of key: property_name, values: 1D np.ndarray containing predicted data for all points
     :param true_values_dict: A dict of key: atom_name val inner_dict.
-        inner_dict of key: property_name, values: 1D np.ndarray containing true data for all points 
+        inner_dict of key: property_name, values: 1D np.ndarray containing true data for all points
     :param output_location: The name of the output .xlsx file, defaults to "s_curves_from_df.xlsx"
     """
 
-   # get a nested dict of dict of dict of .... https://stackoverflow.com/a/8702435
+    # get a nested dict of dict of dict of .... https://stackoverflow.com/a/8702435
     nested_dict = lambda: defaultdict(nested_dict)
     total_dict = nested_dict()
 
@@ -369,6 +392,7 @@ def calculate_compact_s_curves_from_true_predicted(
 # LEGACY FUNCTIONS, SHOULD NOT REALLY BE USED, MIGHT DELETE IN FUTURE
 ##########################
 
+
 def calculate_compact_s_curves(
     model_location: Path,
     validation_set_location: Path,
@@ -387,15 +411,14 @@ def calculate_compact_s_curves(
     """
 
     if model_location is None or validation_set_location is None:
-        raise ValueError(
-            "Enter valid locations for models and validation sets."
-        )
+        raise ValueError("Enter valid locations for models and validation sets.")
 
     model = Models(model_location)
     validation_set = PointsDirectory(validation_set_location)
     true, predicted = get_true_predicted(model, validation_set, atoms, types)
 
     write_to_excel(true, predicted, output_location, **kwargs)
+
 
 def write_to_excel(
     true: pd.DataFrame,
@@ -487,9 +510,7 @@ def write_to_excel(
             df["%"] = percentile(ndata)
             # the end row is one more because the df starts one row down
             end_row = ndata + 1
-            df.to_excel(
-                writer, sheet_name=sheet_name, startrow=1, startcol=start_col
-            )
+            df.to_excel(writer, sheet_name=sheet_name, startrow=1, startcol=start_col)
             writer.sheets[sheet_name].write(0, start_col, "Total")
 
             total_s_curve.add_series(

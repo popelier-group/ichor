@@ -1,9 +1,11 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional, Union, Callable, Dict
+from typing import Callable, Dict, List, Optional, Union
+
 import numpy as np
-from ichor.core.atoms.atoms import Atoms, ALF
+from ichor.core.atoms.atoms import ALF, Atoms
 from ichor.core.calculators import calculate_alf_features
+
 
 class ListOfAtoms(list, ABC):
     """Used to focus only on how one atom moves in a trajectory, so the user can do something
@@ -15,12 +17,12 @@ class ListOfAtoms(list, ABC):
 
     @abstractmethod
     def connectivity(self) -> np.ndarray:
-        """ Returns the connectivity matrix of the first timestep."""
+        """Returns the connectivity matrix of the first timestep."""
         ...
 
     @abstractmethod
     def alf(self) -> "ALF":
-        """ Returns the atomic local frame for the first timestep."""
+        """Returns the atomic local frame for the first timestep."""
         ...
 
     @property
@@ -43,11 +45,11 @@ class ListOfAtoms(list, ABC):
         """Return the atom names from the first timestep. Assumes that all timesteps have the same
         number of atoms/atom names."""
         ...
-        
+
     @property
     @abstractmethod
     def natoms(self):
-        """ Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
+        """Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
         ...
 
     @property
@@ -61,11 +63,8 @@ class ListOfAtoms(list, ABC):
         ...
 
     def features(
-        self,
-        feature_calculator: Callable[..., np.ndarray],
-        *args,
-        **kwargs
-    )-> np.ndarray:
+        self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
+    ) -> np.ndarray:
         """Return the ndarray of features. This is assumed to be either 2D or 3D array.
         If the dimensionality of the feature array is 3, the array is transposed to transform a
         (ntimestep, natom, nfeature) array into a (natom, ntimestep, nfeature) array so that
@@ -77,29 +76,36 @@ class ListOfAtoms(list, ABC):
             If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
         """
-        
-        features = np.array([timestep.features(feature_calculator, *args, **kwargs) for timestep in self])
+
+        features = np.array(
+            [
+                timestep.features(feature_calculator, *args, **kwargs)
+                for timestep in self
+            ]
+        )
         if features.ndim == 3:
             features = np.transpose(features, (1, 0, 2))
         return features
 
     def get_headings(self):
         """Helper function which makes the column headings for csv or excel files in which features are going to be saved."""
-        
+
         natoms = self.natoms
-        nfeatures = 3*natoms - 6 if natoms > 1 else 1
-        
+        nfeatures = 3 * natoms - 6 if natoms > 1 else 1
+
         if nfeatures == 1:
             return ["bond1"]
-        
+
         headings = ["bond1", "bond2", "angle"]
 
         remaining_features = nfeatures - 3
-        remaining_features = int(remaining_features / 3)  # each feature has r, theta, phi component
+        remaining_features = int(
+            remaining_features / 3
+        )  # each feature has r, theta, phi component
 
         for feat in range(remaining_features):
             headings += [f"r{feat+3}", f"theta{feat+3}", f"phi{feat+3}"]
-            
+
         return headings
 
     def features_to_csv(
@@ -108,7 +114,7 @@ class ListOfAtoms(list, ABC):
         *args,
         fname: Optional[Union[str, Path]] = None,
         atom_names: Optional[List[str]] = None,
-        **kwargs
+        **kwargs,
     ):
         """Writes csv files containing features for every atom in the system. Optionally a list can be passed in to get csv files for only a subset of atoms
 
@@ -128,7 +134,9 @@ class ListOfAtoms(list, ABC):
             atom_names = [atom_names]
 
         for atom_name in atom_names:
-            atom_features = self[atom_name].features(feature_calculator, *args, **kwargs)
+            atom_features = self[atom_name].features(
+                feature_calculator, *args, **kwargs
+            )
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             if fname is None:
                 df.to_csv(f"{atom_name}_features.csv", index=None)
@@ -141,7 +149,7 @@ class ListOfAtoms(list, ABC):
         *args,
         fname: Union[str, Path] = Path("features_to_excel.xlsx"),
         atom_names: List[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """Writes out one excel file which contains a sheet with features for every atom in the system. Optionally a list of atom names can be
         passed in to only make sheets for certain atoms
@@ -165,7 +173,9 @@ class ListOfAtoms(list, ABC):
         dataframes = {}
 
         for atom_name in atom_names:
-            atom_features = self[atom_name].features(feature_calculator, *args, **kwargs)
+            atom_features = self[atom_name].features(
+                feature_calculator, *args, **kwargs
+            )
             df = pd.DataFrame(atom_features, columns=self.get_headings())
             dataframes[atom_name] = df
 
@@ -193,9 +203,9 @@ class ListOfAtoms(list, ABC):
         """
 
         from ichor.core.atoms import Atom
-        from ichor.core.files import Trajectory
         from ichor.core.calculators import alf_features_to_coordinates
         from ichor.core.common.units import AtomicDistance
+        from ichor.core.files import Trajectory
 
         if central_atom_name not in self.atom_names:
             raise ValueError(
@@ -230,9 +240,7 @@ class ListOfAtoms(list, ABC):
         # reverse the ordering, so that the rows are the same as before
         # can now use the atom names sequence as they were read in
         # in initial Trajectory/PointsDirectory instance.
-        xyz_array[:, previous_atom_ordering, :] = xyz_array[
-            :, reverse_alf_ordering, :
-        ]
+        xyz_array[:, previous_atom_ordering, :] = xyz_array[:, reverse_alf_ordering, :]
         trajectory = Trajectory(fname)
 
         for geometry in xyz_array:

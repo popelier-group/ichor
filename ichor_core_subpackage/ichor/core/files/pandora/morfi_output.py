@@ -5,8 +5,9 @@ from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora.mout import MOUT
 
+
 class MorfiDirectory(AnnotatedDirectory):
-    
+
     mout: OptionalPath[MOUT] = OptionalFile
 
     @classproperty

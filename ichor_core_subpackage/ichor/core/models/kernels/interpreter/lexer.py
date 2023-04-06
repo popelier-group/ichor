@@ -31,9 +31,7 @@ class Lexer(object):
         if self.current_char == ".":
             result += self.current_char
             self.advance()
-            while (
-                self.current_char is not None and self.current_char.isdigit()
-            ):
+            while self.current_char is not None and self.current_char.isdigit():
                 result += self.current_char
                 self.advance()
 
@@ -43,9 +41,7 @@ class Lexer(object):
             if self.current_char in ["+", "-"]:
                 result += self.current_char
                 self.advance()
-            while (
-                self.current_char is not None and self.current_char.isdigit()
-            ):
+            while self.current_char is not None and self.current_char.isdigit():
                 result += self.current_char
                 self.advance()
 

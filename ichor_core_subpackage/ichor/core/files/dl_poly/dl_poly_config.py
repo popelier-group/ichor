@@ -1,10 +1,12 @@
-from ichor.core.files.file import WriteFile
-from typing import Union
 from pathlib import Path
+from typing import Union
+
+from ichor.core.files.file import WriteFile
+
 
 class DlPolyConfig(WriteFile):
     """Write out a DLPoly CONFIG file. The name of the file needs to be CONFIG,  so DL POLY knows to use it.
-    
+
     :param system_name: the name of the chemical system
     :param trajectory: a Trajectory instance containing. Each timestep in the trajectory
         is an Atoms instance.
@@ -19,21 +21,23 @@ class DlPolyConfig(WriteFile):
             labels in the CONFIG file will make sure that two molecules
             which should be represented by one GP model have the correct atom labeling
             in the CONFIG file.
-    
+
     :param cell_size: The size of the box, float
     :param comment line: The very first line in the CONFIG file.
         Must be below 72 characters
     """
-    
-    def __init__(self, path: Union[Path, str],
-                 system_name: str,
-                 trajectory: "Trajectory",
-                 cell_size: float = 50.0,
-                 comment_line = "Frame :         1\n"
-                 ):
+
+    def __init__(
+        self,
+        path: Union[Path, str],
+        system_name: str,
+        trajectory: "Trajectory",
+        cell_size: float = 50.0,
+        comment_line="Frame :         1\n",
+    ):
 
         super().__init__(path)
-        self.system_name = system_name 
+        self.system_name = system_name
         self.trajectory = trajectory
         self.cell_size = float(cell_size)
         self.comment_line = comment_line
@@ -44,7 +48,7 @@ class DlPolyConfig(WriteFile):
 
     def _write_file(self, path: Path, vmd_compatible=False):
 
-        with open(self.path , "w") as f:
+        with open(self.path, "w") as f:
 
             f.write(self.comment_line)
             # see dlpoly manual 4 for settings, VMD needs to have the third optional number

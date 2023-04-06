@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import argparse
 import copy
 import ctypes
 import io
@@ -12,7 +11,6 @@ import shlex
 import signal
 import string
 import subprocess
-import sys
 from locale import getlocale
 from types import FrameType
 from typing import (

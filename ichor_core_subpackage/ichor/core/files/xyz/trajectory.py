@@ -1,17 +1,19 @@
 import ast
 import re
 from pathlib import Path
-from typing import Iterable, List, Optional, Union, Callable, Dict
+from typing import Callable, Dict, Iterable, List, Optional, Union
+
 import numpy as np
+import pandas as pd
 from ichor.core.atoms import Atom, Atoms, ListOfAtoms
+from ichor.core.atoms.alf import ALF
+from ichor.core.calculators import alf_features_to_coordinates
+from ichor.core.common.constants import bohr2ang
 from ichor.core.common.functools import classproperty
+from ichor.core.common.int import count_digits
 from ichor.core.common.io import mkdir
 from ichor.core.files.file import FileState, ReadFile, WriteFile
-from ichor.core.atoms.alf import ALF
-from ichor.core.common.int import count_digits
-from ichor.core.calculators import alf_features_to_coordinates
-import pandas as pd
-from ichor.core.common.constants import bohr2ang
+
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
@@ -27,7 +29,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         super(ReadFile, self).__init__(path)
 
     def _read_file(self):
-        
+
         with open(self.path, "r") as f:
             # make empty Atoms instance in which to store one timestep
             atoms = Atoms()
@@ -38,13 +40,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                     # this is the comment line of xyz files. It can be empty or contain some useful information that can be stored.
                     line = next(f)
                     # if the comment line properties errors, we can store these
-                    if re.match(
-                        r"^\s*?i\s*?=\s*?\d+\s*properties_error", line
-                    ):
+                    if re.match(r"^\s*?i\s*?=\s*?\d+\s*properties_error", line):
                         properties_error = line.split("=")[-1].strip()
-                        atoms.properties_error = ast.literal_eval(
-                            properties_error
-                        )
+                        atoms.properties_error = ast.literal_eval(properties_error)
                     # the next line after the comment line is where coordinates begin
                     for _ in range(natoms):
                         line = next(f)
@@ -54,9 +52,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                         ):
                             # add *_ to work for extended xyz which contain extra information after x,y,z coordinates
                             atom_type, x, y, z, *_ = line.split()
-                            atoms.add(
-                                Atom(atom_type, float(x), float(y), float(z))
-                            )
+                            atoms.add(Atom(atom_type, float(x), float(y), float(z)))
 
                     # add the Atoms instance to the Trajectory instance
                     self.add(atoms)
@@ -72,24 +68,24 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
         return self[0].types
-    
+
     @property
     def types_extended(self):
         """Returns the atom elements for atoms, assumes each timesteps has the same atoms.
         Removes duplicates."""
         return self[0].types_extended
-    
+
     @property
     def atom_names(self):
         """Return the atom names from the first timestep. Assumes that all timesteps have the same
         number of atoms/atom names."""
         return self[0].atom_names
-    
+
     @property
     def natoms(self):
-        """ Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
+        """Returns the number of atoms in the first timestep. Each timestep should have the same number of atoms."""
         return len(self[0])
-    
+
     @property
     def coordinates(self) -> np.ndarray:
         """
@@ -100,34 +96,41 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return np.array([timestep.coordinates for timestep in self])
 
-    def connectivity(self, connectivity_calculator: Callable[..., np.ndarray]) -> np.ndarray:
+    def connectivity(
+        self, connectivity_calculator: Callable[..., np.ndarray]
+    ) -> np.ndarray:
         """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
         Returns:
             :type: `np.ndarray` of shape n_atoms x n_atoms
         """
         return connectivity_calculator(self[0])
-    
+
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
         """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
         e.g. [[0,1,2],[1,0,2], [2,0,1]]
         :param *args: positional arguments to pass to alf calculator
         :param **kwargs: key word arguments to pass to alf calculator
         """
-        return [alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0]]
+        return [
+            alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0]
+        ]
 
-    def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[str, ALF]:
-            """ Returns a dictionary with the atomic local frame indices for every atom (0-indexed)."""
-            return {atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs) for atom_instance in self[0]}
+    def alf_dict(
+        self, alf_calculator: Callable[..., ALF], *args, **kwargs
+    ) -> Dict[str, ALF]:
+        """Returns a dictionary with the atomic local frame indices for every atom (0-indexed)."""
+        return {
+            atom_instance.name: atom_instance.alf(alf_calculator, *args, **kwargs)
+            for atom_instance in self[0]
+        }
 
     def add(self, atoms):
         """Add a list of Atoms (corresponding to one timestep) to the end of the trajectory list"""
         if isinstance(atoms, Atoms):
             self.append(atoms)
         else:
-            raise ValueError(
-                f"Cannot add an instance of {type(atoms)} to self."
-            )
+            raise ValueError(f"Cannot add an instance of {type(atoms)} to self.")
 
     def rmsd(self, ref=None):
         if ref is None:
@@ -137,7 +140,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return [ref.rmsd(point) for point in self]
 
-    def to_dir(self, system_name: str, root: Path, every: int = 1, center = False):
+    def to_dir(self, system_name: str, root: Path, every: int = 1, center=False):
         """Writes out every nth timestep to a separate .xyz file to a given directory
 
         :param system_name: The name of the
@@ -154,13 +157,22 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             if (i % every) == 0:
                 if center:
                     atoms_instance.centre()
-                point_name = f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
+                point_name = (
+                    f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
+                )
                 path = Path(point_name)
                 path = root / path
                 xyz_file = XYZ(path, atoms_instance)
                 xyz_file.write()
 
-    def to_dirs(self, system_name: str, root: Path, split_size: int, every: int = 1, center = False):
+    def to_dirs(
+        self,
+        system_name: str,
+        root: Path,
+        split_size: int,
+        every: int = 1,
+        center=False,
+    ):
         """Writes out every nth timestep to a separate .xyz file. This method differs
         from `to_dir` because it has a structure room / inner_dir / xyz file.
 
@@ -175,8 +187,10 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         mkdir(root, empty=True)
         i = 0
-        chunks = [self[x:x+split_size] for x in range(0, len(self), split_size)]
-        inner_dir_names = [f"{system_name}{chunk_idx}" for chunk_idx in range(len(chunks))]
+        chunks = [self[x : x + split_size] for x in range(0, len(self), split_size)]
+        inner_dir_names = [
+            f"{system_name}{chunk_idx}" for chunk_idx in range(len(chunks))
+        ]
         for dir_name in inner_dir_names:
             mkdir(root / dir_name, empty=True)
 
@@ -203,7 +217,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         """
 
         mkdir(root_dir, empty=True)
-        chunks = [self[x:x+split_size] for x in range(0, len(self), split_size)]
+        chunks = [self[x : x + split_size] for x in range(0, len(self), split_size)]
         original_traj_stem = self.path.stem
 
         for idx, chunk in enumerate(chunks):
@@ -213,7 +227,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             new_traj.write()
 
     def coordinates_to_xyz(
-        self, fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"), step: Optional[int] = 1
+        self,
+        fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"),
+        step: Optional[int] = 1,
     ):
         """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
         for that timestep.
@@ -256,13 +272,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 f, sheet_name=sheet_name, header=header, index_col=index_col
             ).values
         elif f.suffix == ".csv":
-            features_array = pd.read_csv(
-                f, header=header, index_col=index_col
-            ).values
+            features_array = pd.read_csv(f, header=header, index_col=index_col).values
         else:
-            raise NotImplementedError(
-                "File needs to have .xlsx or .csv extension"
-            )
+            raise NotImplementedError("File needs to have .xlsx or .csv extension")
 
         n_features = 3 * len(atom_types) - 6
 
@@ -280,9 +292,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             atoms = Atoms()
             for ty, atom_coord in zip(atom_types, geometry):
                 # add Atom instances for every atom in the geometry to the Atoms instance
-                atoms.add(
-                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
-                )
+                atoms.add(Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2]))
             # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
             trajectory.add(atoms)
 
@@ -294,9 +304,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         arr: np.ndarray,
         trajectory_path: Union[str, Path],
         atom_types: List[str],
-        ):
+    ):
         """Creates a Trajectory instance from a np.ndarray object
-        
+
         :param arr: np.ndarray containing features.This should be a 2D array of
             shape n_timesteps x n_features
         :param trajectory_path: The path associated with the trajectory instance which is made
@@ -316,9 +326,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             atoms = Atoms()
             for ty, atom_coord in zip(atom_types, geometry):
                 # add Atom instances for every atom in the geometry to the Atoms instance
-                atoms.add(
-                    Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2])
-                )
+                atoms.add(Atom(ty, atom_coord[0], atom_coord[1], atom_coord[2]))
             # Add the filled Atoms instance to the Trajectory instance and repeat for next geometry
             trajectory.add(atoms)
 
@@ -346,7 +354,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             centroid of the molecule. This is helpful, so that x,y,z coordinates are in the same range
             (i.e. the molecule does not float around in space too much.)
         """
-        
+
         with open(path, "w") as f:
             for i, atoms_instance in enumerate(self):
                 if (i % every) == 0:
@@ -374,7 +382,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         # if ListOfAtoms is indexed by a string, such as an atom name (eg. C1, H2, O3, H4, etc.)
         elif isinstance(item, str):
             from ichor.core.atoms.list_of_atoms_atom_view import AtomView
-            
+
             return AtomView(self, item)
 
         # if PointsDirectory is indexed by a slice e.g. [:50], [20:40], etc.
@@ -385,10 +393,10 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             new_traj.state = FileState.Read
 
             return new_traj
-        
+
         # if PointsDirectory is indexed by a list, e.g. [0, 5, 10]
         elif isinstance(item, (list, np.ndarray)):
-            
+
             new_traj = Trajectory(self.path, [list.__getitem__(self, i) for i in item])
             # need to set the filestate to read otherwise the file will be read again
             new_traj.state = FileState.Read

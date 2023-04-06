@@ -3,9 +3,9 @@ from typing import List, Optional
 
 import numpy as np
 import pandas as pd
-from ichor.core.common.excel import num2col
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.common.constants import ha_to_kj_mol
+from ichor.core.common.excel import num2col
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
 
@@ -78,9 +78,7 @@ def calculate_s_curves(
     """
 
     if model_location is None or validation_set_location is None:
-        raise ValueError(
-            "Enter valid locations for models and validation sets."
-        )
+        raise ValueError("Enter valid locations for models and validation sets.")
 
     model = Models(model_location)
     validation_set = PointsDirectory(validation_set_location)
@@ -174,9 +172,7 @@ def write_to_excel(
                 df.to_excel(writer, sheet_name=sheet_name)
 
                 # add the s-curve to the written sheet
-                s_curve = workbook.add_chart(
-                    {"type": "scatter", "subtype": "straight"}
-                )
+                s_curve = workbook.add_chart({"type": "scatter", "subtype": "straight"})
 
                 # we always have the error in the 3rd column. The rows start at 1 and end in len(df)
                 s_curve.add_series(

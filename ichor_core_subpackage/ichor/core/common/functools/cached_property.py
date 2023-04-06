@@ -199,9 +199,7 @@ class threaded_cached_property_with_ttl(cached_property_with_ttl):
 
     def __get__(self, obj, cls):
         with self.lock:
-            return super(threaded_cached_property_with_ttl, self).__get__(
-                obj, cls
-            )
+            return super(threaded_cached_property_with_ttl, self).__get__(obj, cls)
 
 
 # Alias to make threaded_cached_property_with_ttl easier to use

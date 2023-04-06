@@ -1,9 +1,13 @@
-import numpy as np
-from ichor.core.models.calculate_fflux_derivatives import fflux_derivs
-from ichor.core.atoms import ALF
-from typing import List, Dict
+from typing import Dict, List
 
-def predict_fflux_forces_for_all_atoms(atoms: "Atoms", models: "Models", system_alf: List["ALF"]) -> np.ndarray:
+import numpy as np
+from ichor.core.atoms import ALF
+from ichor.core.models.calculate_fflux_derivatives import fflux_derivs
+
+
+def predict_fflux_forces_for_all_atoms(
+    atoms: "Atoms", models: "Models", system_alf: List["ALF"]
+) -> np.ndarray:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
 
     .. note::
@@ -27,7 +31,7 @@ def predict_fflux_forces_for_all_atoms(atoms: "Atoms", models: "Models", system_
     atom_names = atoms.atom_names
     natoms = len(atoms)
 
-    # make sure the ordering of the models is the same as the sequence of atoms 
+    # make sure the ordering of the models is the same as the sequence of atoms
     models_list = []
     for atom_name in atom_names:
         for model in models:
@@ -42,18 +46,29 @@ def predict_fflux_forces_for_all_atoms(atoms: "Atoms", models: "Models", system_
 
         # first three atoms that are central, x-axis, xy-plane
         for j in range(3):
-            force = fflux_derivs(atm_idx, system_alf[atm_idx][j], atoms, system_alf, models_list[system_alf[atm_idx][j]])
+            force = fflux_derivs(
+                atm_idx,
+                system_alf[atm_idx][j],
+                atoms,
+                system_alf,
+                models_list[system_alf[atm_idx][j]],
+            )
             local_forces = local_forces - force
         # rest of atoms in molecule
         for non_local_atm in non_local_atoms:
-            force = fflux_derivs(atm_idx, non_local_atm, atoms, system_alf, models_list[non_local_atm])
+            force = fflux_derivs(
+                atm_idx, non_local_atm, atoms, system_alf, models_list[non_local_atm]
+            )
             local_forces = local_forces - force
 
         atomic_forces_list.append(local_forces)
 
     return np.array(atomic_forces_list)
 
-def predict_fflux_forces_for_all_atoms_dict(atoms: "Atoms", models: "Models", system_alf: List["ALF"]) -> Dict[str, np.ndarray]:
+
+def predict_fflux_forces_for_all_atoms_dict(
+    atoms: "Atoms", models: "Models", system_alf: List["ALF"]
+) -> Dict[str, np.ndarray]:
     """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
 
     .. note::

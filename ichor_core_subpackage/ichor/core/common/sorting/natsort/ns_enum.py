@@ -121,8 +121,8 @@ class _NSEnum(collections.namedtuple("_NSEnum", enum_fields.keys())):
         `True`.
     COMPATIBILITYNORMALIZE, CN
         Use the "NFKD" unicode normalization form on input rather than the
-        default "NFD". This will transform characters such as '⑦' into
-        '7'. Please see https://stackoverflow.com/a/7934397/1399279,
+        default "NFD". This will transform non-ascii characters.
+        Please see https://stackoverflow.com/a/7934397/1399279,
         https://stackoverflow.com/a/7931547/1399279,
         and https://unicode.org/reports/tr15/ for full details into unicode
         normalization.

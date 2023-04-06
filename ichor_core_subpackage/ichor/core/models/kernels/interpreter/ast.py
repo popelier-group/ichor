@@ -22,15 +22,11 @@ class BinOp(ASTNode):
 
     def visit(self, global_state: Dict[str, Kernel]) -> Kernel:
         if self.op.type == TokenType.Plus:
-            return self.left.visit(global_state) + self.right.visit(
-                global_state
-            )
+            return self.left.visit(global_state) + self.right.visit(global_state)
         elif self.op.type == TokenType.Minus:
             raise NotImplementedError("Error: Not implemented minus kernel")
         elif self.op.type == TokenType.Mul:
-            return self.left.visit(global_state) * self.right.visit(
-                global_state
-            )
+            return self.left.visit(global_state) * self.right.visit(global_state)
         elif self.op.type == TokenType.Div:
             raise NotImplementedError("Error: Not implemented divide kernel")
 

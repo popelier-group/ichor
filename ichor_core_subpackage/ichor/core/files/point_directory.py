@@ -1,20 +1,20 @@
 from pathlib import Path
-from typing import Union, Dict, Optional, Type, List
+from typing import Dict, List, Optional, Type, Union
 
-from ichor.core.atoms import AtomsNotFoundError, Atoms
-from ichor.core.files.directory import AnnotatedDirectory
-from ichor.core.files.file import ReadFile
-
-from ichor.core.files.file_data import HasAtoms, HasProperties
-from ichor.core.files import GJF, WFN, INTs, XYZ, GaussianOut, AIM
-from ichor.core.files.optional_file import OptionalFile, OptionalPath
-from ichor.core.files.pandora import PandoraDirectory, PandoraInput
+from ichor.core.atoms import Atoms, AtomsNotFoundError
+from ichor.core.atoms.alf import ALF
+from ichor.core.calculators import default_alf_calculator
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
-from ichor.core.atoms.alf import ALF
-from ichor.core.calculators import default_alf_calculator
-from ichor.core.files.file_data import PointDirectoryProperties
+from ichor.core.files import AIM, GaussianOut, GJF, INTs, WFN, XYZ
+from ichor.core.files.directory import AnnotatedDirectory
+from ichor.core.files.file import ReadFile
+
+from ichor.core.files.file_data import HasAtoms, HasProperties, PointDirectoryProperties
+from ichor.core.files.optional_file import OptionalFile, OptionalPath
+from ichor.core.files.pandora import PandoraDirectory, PandoraInput
+
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
     """
@@ -52,8 +52,10 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
                 if isinstance(f, HasAtoms):
                     if isinstance(f, WFN):
                         atoms = f.atoms.to_angstroms()
-                        self.xyz = XYZ(Path(self.path) / (self.path.name + XYZ.filetype),
-                        atoms=atoms)
+                        self.xyz = XYZ(
+                            Path(self.path) / (self.path.name + XYZ.filetype),
+                            atoms=atoms,
+                        )
                     else:
                         self.xyz = XYZ(
                             Path(self.path) / (self.path.name + XYZ.filetype),
@@ -94,7 +96,9 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         for f in self.files():
             if isinstance(f, file_with_atoms):
                 return f.atoms
-        raise AtomsNotFoundError(f" {file_with_atoms.__class__.__name__} file does not contain atoms.")
+        raise AtomsNotFoundError(
+            f" {file_with_atoms.__class__.__name__} file does not contain atoms."
+        )
 
     @atoms.setter
     def atoms(self, value: Atoms):
@@ -105,16 +109,18 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         else:
             raise ValueError(f"Cannot set `atoms` to the given value: {value}.")
 
-    def properties(self, system_alf: Optional[List[ALF]] = None) -> PointDirectoryProperties:
-        """ Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
-        
+    def properties(
+        self, system_alf: Optional[List[ALF]] = None
+    ) -> PointDirectoryProperties:
+        """Get properties contained in the PointDirectory. IF no system alf is passed in, an automatic process to get C matrices is started.
+
         :param system_alf: Optional list of `ALF` instances that can be passed in to use a specific alf instead of automatically trying to compute it.
         """
-        
+
         if not system_alf:
             # TODO: The default alf calculator (the cahn ingold prelog one) should accept connectivity, not connectivity calculator, so connectivity also needs to be passed in.
             system_alf = self.alf(default_alf_calculator)
-        
+
         c_matrix_dict = self.C_matrix_dict(system_alf)
 
         # grab properties from WFN
@@ -132,7 +138,9 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         else:
             gaussian_output_properties = {}
 
-        return PointDirectoryProperties(merge(wfn_properties, ints_properties, gaussian_output_properties))
+        return PointDirectoryProperties(
+            merge(wfn_properties, ints_properties, gaussian_output_properties)
+        )
 
     # todo: make this more robust, check for any of the files inside
     @classmethod

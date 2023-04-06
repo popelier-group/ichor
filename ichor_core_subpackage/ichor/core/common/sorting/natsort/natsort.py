@@ -12,7 +12,7 @@ from operator import itemgetter
 
 from . import utils
 from .compat import locale
-from .ns_enum import NS_DUMB, ns
+from .ns_enum import ns, NS_DUMB
 
 
 def decoder(encoding):
@@ -650,9 +650,7 @@ else:
     except ImportError:
         # No ICU installed
         def os_sort_keygen(key=None):
-            return natsort_keygen(
-                key=key, alg=ns.LOCALE | ns.PATH | ns.IGNORECASE
-            )
+            return natsort_keygen(key=key, alg=ns.LOCALE | ns.PATH | ns.IGNORECASE)
 
     else:
         # ICU installed
@@ -663,9 +661,7 @@ else:
                 icu.UCollAttribute.NUMERIC_COLLATION,
                 icu.UCollAttributeValue.ON,
             )
-            return lambda x: tuple(
-                map(collator.getSortKey, _split_apply(x, key))
-            )
+            return lambda x: tuple(map(collator.getSortKey, _split_apply(x, key)))
 
 
 os_sort_keygen.__doc__ = """

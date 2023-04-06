@@ -5,13 +5,12 @@ from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
-from ichor.core.atoms import Atoms, ListOfAtoms
-from ichor.core.atoms import ALF
+from ichor.core.atoms import ALF, Atoms, ListOfAtoms
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.common.str import get_digits
+from ichor.core.common.types.itypes import F
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasAtoms
-from ichor.core.common.types.itypes import F
 from ichor.core.models.model import Model
 
 
@@ -62,9 +61,7 @@ class Models(Directory, list):
     @property
     def atom_names(self) -> List[str]:
         """Returns a list of atom names (such as O1, H2, H3, etc.) for which models were made"""
-        return list(
-            set(natsorted([model.atom for model in self], key=ignore_alpha))
-        )
+        return list(set(natsorted([model.atom for model in self], key=ignore_alpha)))
 
     @property
     def types(self) -> List[str]:
@@ -85,9 +82,7 @@ class Models(Directory, list):
             Before that the list could look like [[2,...], [0,....], [1,....]] (because the models could be unordered)
             which would mess up the alf for atoms.
         """
-        return np.array(
-            sorted([model.ialf for model in self], key=lambda x: x[0])
-        )
+        return np.array(sorted([model.ialf for model in self], key=lambda x: x[0]))
 
     @property
     def ialf_dict(self) -> Dict[str, np.ndarray]:
@@ -110,9 +105,7 @@ class Models(Directory, list):
         """Returns dictionary of DataFrame({"atom": {"property": [values]}})"""
         return pd.DataFrame(
             {
-                atom: {
-                    model.type: model.predict(features) for model in self[atom]
-                }
+                atom: {model.type: model.predict(features) for model in self[atom]}
                 for atom, features in x_test.items()
             }
         )
@@ -121,10 +114,7 @@ class Models(Directory, list):
     def variance(self, x_test) -> pd.DataFrame:
         return pd.DataFrame(
             {
-                atom: {
-                    model.type: model.variance(features)
-                    for model in self[atom]
-                }
+                atom: {model.type: model.variance(features) for model in self[atom]}
                 for atom, features in x_test.items()
             }
         )
@@ -153,8 +143,7 @@ class Models(Directory, list):
     def _features_from_atoms(self, atoms: Atoms) -> Dict[str, np.ndarray]:
         """Returns a dictionary containing atom name as key and atom features for values."""
         return {
-            atom.name: atom.alf_features(alf=self.ialf_dict[atom])
-            for atom in atoms
+            atom.name: atom.alf_features(alf=self.ialf_dict[atom]) for atom in atoms
         }
 
     def _features_from_list_of_atoms(
@@ -166,9 +155,7 @@ class Models(Directory, list):
             if atom in x_test.atom_names
         }
 
-    def _features_from_geometry_file(
-        self, x_test: HasAtoms
-    ) -> Dict[str, np.ndarray]:
+    def _features_from_geometry_file(self, x_test: HasAtoms) -> Dict[str, np.ndarray]:
         return {
             atom: x_test.atoms[atom].alf_features(alf=self.alf)
             for atom in self.atom_names
@@ -177,9 +164,7 @@ class Models(Directory, list):
 
     def _features_from_array(self, x_test: np.ndarray):
         if x_test.ndim == 2:
-            return {
-                atom: x_test for atom in self.atom_names
-            }
+            return {atom: x_test for atom in self.atom_names}
         elif x_test.ndim == 3:
             return {atom: x_test[i] for i, atom in enumerate(self.atom_names)}
         else:
@@ -194,9 +179,7 @@ class Models(Directory, list):
             return list.__getitem__(self, args)
 
     def __iter__(self):
-        return (
-            Directory.__iter__(self) if len(self) == 0 else list.__iter__(self)
-        )
+        return Directory.__iter__(self) if len(self) == 0 else list.__iter__(self)
 
 
 class ModelsView(Models):

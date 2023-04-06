@@ -3,8 +3,8 @@ from pathlib import Path
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files.directory import AnnotatedDirectory
-from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.gaussian import WFN
+from ichor.core.files.optional_file import OptionalFile, OptionalPath
 
 
 class MorfiWFN(WFN):

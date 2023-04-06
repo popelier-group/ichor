@@ -3,6 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from ichor.core.common.linalg import mag
 
+
 def calculate_bond(atoms: "Atoms", i: int, j: int):
     """
     Calculates the bond distance between atoms i and j for atoms
@@ -16,9 +17,7 @@ def calculate_bond(atoms: "Atoms", i: int, j: int):
 
 def calculate_bonds(atoms: "Atoms") -> np.ndarray:
     connected_atoms = get_connected_atoms(atoms)
-    return np.array(
-        [calculate_bond(atoms, i, j) for i, j in connected_atoms._bonds]
-    )
+    return np.array([calculate_bond(atoms, i, j) for i, j in connected_atoms._bonds])
 
 
 def calculate_angle(atoms: "Atoms", i: int, j: int, k: int):
@@ -36,10 +35,7 @@ def calculate_angle(atoms: "Atoms", i: int, j: int, k: int):
 def calculate_angles(atoms: "Atoms") -> np.ndarray:
     connected_atoms = get_connected_atoms(atoms)
     return np.array(
-        [
-            calculate_angle(atoms, i, j, k)
-            for i, j, k in connected_atoms._angles
-        ]
+        [calculate_angle(atoms, i, j, k) for i, j, k in connected_atoms._angles]
     )
 
 
@@ -84,7 +80,7 @@ def calculate_dihedrals(atoms: "Atoms") -> np.ndarray:
 
 
 def get_connected_atoms(atoms: "Atoms") -> "ConnectedAtoms":
-    
+
     from ichor.core.files.dl_poly.dl_poly_field import ConnectedAtoms
 
     connected_atoms = ConnectedAtoms(atoms)

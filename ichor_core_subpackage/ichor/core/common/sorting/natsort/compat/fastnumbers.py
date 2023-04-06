@@ -10,8 +10,7 @@ from distutils.version import StrictVersion
 # benefits. If not, we use the simulated functions that come with natsort.
 try:
     # noinspection PyPackageRequirements
-    from fastnumbers import __version__ as fn_ver
-    from fastnumbers import fast_float, fast_int
+    from fastnumbers import __version__ as fn_ver, fast_float, fast_int
 
     # Require >= version 2.0.0.
     if StrictVersion(fn_ver) < StrictVersion("2.0.0"):

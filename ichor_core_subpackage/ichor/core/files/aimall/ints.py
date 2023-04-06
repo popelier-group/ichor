@@ -1,12 +1,14 @@
 from pathlib import Path
 from typing import Dict, List, Union
+
 import numpy as np
+from ichor.core.common.functools import classproperty
 from ichor.core.common.sorting.natsort import ignore_alpha
+from ichor.core.files.aimall.ab_int import ABINT
+from ichor.core.files.aimall.int import INT
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasProperties
-from ichor.core.files.aimall.int import INT
-from ichor.core.files.aimall.ab_int import ABINT
-from ichor.core.common.functools import classproperty
+
 
 class INTs(HasProperties, dict, Directory):
     """Wraps around a directory which contains all .int files for the system.
@@ -41,7 +43,7 @@ class INTs(HasProperties, dict, Directory):
                 a = a_atom.capitalize()
                 b = b_atom.capitalize()
                 self.interaction_ints[(a, b)] = ABINT(f)
-            
+
         self.sort()
 
     @classmethod
@@ -52,9 +54,7 @@ class INTs(HasProperties, dict, Directory):
     def sort(self):
         """Sorts keys of self by atom index e.g.
         {'H2': , 'H3': , 'O1': } -> {'O1': , 'H2': , 'H3': }"""
-        dict.__init__(
-            self, sorted(self.items(), key=lambda x: ignore_alpha(x[0]))
-        )
+        dict.__init__(self, sorted(self.items(), key=lambda x: ignore_alpha(x[0])))
 
     @classproperty
     def property_names(self) -> List[str]:
@@ -77,8 +77,10 @@ class INTs(HasProperties, dict, Directory):
             for atom_name, int_file_instance in self.items()
         }
 
-    def local_spherical_multipoles(self, C_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, float]]:
-        
+    def local_spherical_multipoles(
+        self, C_dict: Dict[str, np.ndarray]
+    ) -> Dict[str, Dict[str, float]]:
+
         """Rotates global spherical multipoles into local spherical multipoles. Optionally
         a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
         (as read in from the int file) will be used (if it exists).
@@ -89,7 +91,8 @@ class INTs(HasProperties, dict, Directory):
         """
 
         return {
-            atom_name: int_file_instance.local_spherical_multipoles(C_dict[int_file_instance.atom_name]
+            atom_name: int_file_instance.local_spherical_multipoles(
+                C_dict[int_file_instance.atom_name]
             )
             for atom_name, int_file_instance in self.items()
         }
@@ -101,7 +104,7 @@ class INTs(HasProperties, dict, Directory):
 
     def __str__(self):
         return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(self.keys())}"
-    
+
     def __getattr__(self, item):
         return {
             atom_name: getattr(int_file_instance, item)

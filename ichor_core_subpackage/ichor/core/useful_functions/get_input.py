@@ -1,10 +1,11 @@
 from pathlib import Path
 from typing import List, Optional
 
-from ichor.core.useful_functions.get_path import get_file
 from ichor.core.common.io import get_files_of_type
 from ichor.core.common.sorting.natsort import natsorted
 from ichor.core.menu.menu import Menu
+
+from ichor.core.useful_functions.get_path import get_file
 
 _input_file: Optional[Path] = None
 _input_filetypes: Optional[List[str]] = None
@@ -59,9 +60,7 @@ def _get_input_menu_refresh(menu):
     menu.add_final_options()
 
 
-def get_input_menu(
-    current_input: Path, filetypes: Optional[List[str]] = None
-) -> Path:
+def get_input_menu(current_input: Path, filetypes: Optional[List[str]] = None) -> Path:
     global _input_file
     global _input_filetypes
     _input_file = current_input

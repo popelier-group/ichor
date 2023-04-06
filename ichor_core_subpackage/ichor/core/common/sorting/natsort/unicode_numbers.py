@@ -22,15 +22,11 @@ for a in numeric_hex:
     numeric_chars.append(character)
 
 # The digit characters are a subset of the numerals.
-digit_chars = [
-    a for a in numeric_chars if unicodedata.digit(a, None) is not None
-]
+digit_chars = [a for a in numeric_chars if unicodedata.digit(a, None) is not None]
 
 # The decimal characters are a subset of the numberals
 # (probably of the digits, but let's be safe).
-decimal_chars = [
-    a for a in numeric_chars if unicodedata.decimal(a, None) is not None
-]
+decimal_chars = [a for a in numeric_chars if unicodedata.decimal(a, None) is not None]
 
 # Create a single string with the above data.
 decimals = "".join(decimal_chars)
