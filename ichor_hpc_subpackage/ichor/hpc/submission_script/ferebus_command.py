@@ -4,7 +4,6 @@ from typing import List
 from ichor.core.common.functools import classproperty
 from ichor.hpc.log import logger
 from ichor.hpc.modules import FerebusModules, Modules
-from ichor.hpc.programs import get_ferebus_path
 from ichor.hpc.submission_script.command_line import CommandLine
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
 
@@ -33,16 +32,12 @@ class FerebusCommand(CommandLine):
     def command(self) -> str:
         """Return the command word that is used to run FEREBUS. Since it is an executable, it can be ran by calling the path of FEREBUS followed by any
         configuration settings."""
-        ferebus_path = get_ferebus_path()
-        return str(ferebus_path.absolute())
+        pass
 
     @classproperty
     def ncores(self) -> int:
         """Return the number of cores to be used for ferebus jobs."""
-
-        from ichor.hpc import GLOBALS
-
-        return GLOBALS.FEREBUS_NCORES
+        pass
 
     def repr(self, variables: List[str]) -> str:
         """Return a string that is used to construct ferebus job files."""

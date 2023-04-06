@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc import GLOBALS
 from ichor.hpc.modules import Modules
 from ichor.hpc.submission_script.aimall_command import AIMAllCommand
 from ichor.hpc.submission_script.command_line import CommandLine
@@ -36,7 +35,7 @@ class MorfiCommand(CommandLine):
 
     @property
     def ncores(self):
-        return GLOBALS.MORFI_NCORES
+        pass
 
     @property
     def data(self) -> List[str]:

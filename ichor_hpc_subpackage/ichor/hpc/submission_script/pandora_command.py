@@ -3,9 +3,7 @@ from typing import List, Optional
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files import PandoraDirectory
-from ichor.hpc import GLOBALS
 from ichor.hpc.modules import Modules, MorfiModules, PandoraModules
-from ichor.hpc.programs.pandora import PANDORA_LOCATION
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
 from ichor.hpc.submission_script.python_command import PythonCommand
 
@@ -64,7 +62,7 @@ class PandoraPySCFCommand(PandoraCommand):
 
     @property
     def ncores(self):
-        return GLOBALS.PYSCF_NCORES
+        pass
 
     @property
     def data(self) -> List[str]:

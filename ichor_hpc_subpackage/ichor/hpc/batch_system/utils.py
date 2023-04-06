@@ -27,7 +27,7 @@ def read_jid(jid_file: Optional[Path] = None) -> List[JobID]:
 
 
 def delete_jobs():
-    """Delete all jobs that were queued up to run. This function reads the GLOBALS.FILE_STRUCTURE["jid"] file, which contains the names of all submitted jobs."""
+    """Delete all jobs that were queued up to run. This function reads the FILE_STRUCTURE["jid"] file, which contains the names of all submitted jobs."""
     from ichor.hpc import FILE_STRUCTURE, BATCH_SYSTEM
     jid_file = FILE_STRUCTURE["jid"]
     jids = read_jid()

@@ -8,15 +8,3 @@ from uuid import UUID, uuid4
 def get_uid() -> UUID:
     """Get a random universally unique identifier (UUID) for a job."""
     return uuid4()
-
-# TODO: maybe can be deleted in future
-# def set_uid(uid=None):
-#     """Set the GLOBALS Unique ID to one given by get_uid()"""
-#     from ichor.hpc import BATCH_SYSTEM, GLOBALS
-#     from ichor.hpc.batch_system import NodeType
-
-#     """ if GLOBALS.SUBMITTED is true then we are running on the compute node, when running on a compute node, it is important
-#     not to change the UID if it has already been set as this is what is used to write and read to datafiles"""
-#     if BATCH_SYSTEM.current_node() is NodeType.ComputeNode and GLOBALS.UID:
-#         return
-#     GLOBALS.UID = uid or get_uid()
