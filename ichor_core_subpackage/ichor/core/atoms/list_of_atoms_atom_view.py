@@ -1,7 +1,10 @@
-from ichor.core.atoms import ListOfAtoms
 from typing import Callable, List, Union
+
 import numpy as np
+from ichor.core.atoms import ListOfAtoms
 from ichor.core.atoms.alf import ALF
+
+
 class AtomView(ListOfAtoms):
     """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
     a user to get information (such as coordinates or features) for one atom.
@@ -28,7 +31,7 @@ class AtomView(ListOfAtoms):
     def atom_name(self):
         """Returns the name of the atom, e.g. 'C1', 'H2', etc."""
         return self._atom
-    
+
     # this has to return the name of the atom in a list, so that other methods work correctly
     @property
     def atom_names(self):
@@ -48,17 +51,17 @@ class AtomView(ListOfAtoms):
         return [self[0].type]
 
     def connectivity(self, connectivity_calculator: Callable):
-        """ Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
+        """Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
         # get the connectivity for the first Atom instance
         return connectivity_calculator(self[0].parent)[self[0].i]
 
     def alf(self, alf_calculator: Callable, *args, **kwargs):
-        """ Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
+        """Returns the alf calculated from the first Atom object inside the ListOfAtomsAtomView object"""
         return alf_calculator(self[0], *args, **kwargs)
 
     def C(self, alf: Union[ALF, List[int]]):
-        """ Returns the C matrix for every Atom instance in the ListOfAtomsAtomView.
-        
+        """Returns the C matrix for every Atom instance in the ListOfAtomsAtomView.
+
         Thus, the shape is n_timesteps x 3 x 3
         """
         return np.array([atm.C(alf) for atm in self])
@@ -69,7 +72,9 @@ class AtomView(ListOfAtoms):
 
         :param alf: A list of integers or a numpy array corresponding to the alf of one atom - The atom which the atom view is for.
         :rtype: `np.ndarray`
-        :return: Тhe array has shape `n_timesteps` x `n_features`.
+        :return: The array has shape `n_timesteps` x `n_features`.
         """
 
-        return np.array([atom.features(feature_calculator, *args, **kwargs) for atom in self])
+        return np.array(
+            [atom.features(feature_calculator, *args, **kwargs) for atom in self]
+        )
