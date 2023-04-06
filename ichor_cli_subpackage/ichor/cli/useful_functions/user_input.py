@@ -1,18 +1,21 @@
-from ichor.cli.completers.tab_completer import PathCompleter
 from typing import Union
+
+from ichor.cli.completers.tab_completer import PathCompleter
+
 
 def user_input_path(s="Enter Path: ") -> str:
     """Returns user input path.
-    
+
     :param s: A string that is shown in the prompt (printed to standard output).
     """
 
-    with PathCompleter(): 
+    with PathCompleter():
         path = input(s)
-    
+
     return path
 
-def user_input_int(s="Enter integer: ") -> Union[int,None]:
+
+def user_input_int(s="Enter integer: ") -> Union[int, None]:
     """Returns an integer that user has given
 
     :param s: A string that is shown in the prompt (printed to standard output).
@@ -25,12 +28,13 @@ def user_input_int(s="Enter integer: ") -> Union[int,None]:
         try:
             user_input = int(user_input)
             return user_input
-        except:
+        except ValueError:
             pass
+
 
 def user_input_bool(s="Enter True/False: ") -> Union[bool, None]:
     """Returns True or False depending on user input
-    
+
     :param s: A string that is shown in the prompt (printed to standard output).
     """
 

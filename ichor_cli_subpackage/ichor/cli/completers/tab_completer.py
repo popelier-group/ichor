@@ -1,10 +1,10 @@
-"""Implements Tab completion for ICHOR's menus. Tab completion is handy when providing files or browsing between ICHOR menus."""
+"""Implements Tab completion for ICHOR's menus. Tab completion
+is handy when providing files or browsing between ICHOR menus."""
 
 import os
 from abc import ABC, abstractmethod
 from glob import glob
 from pathlib import Path
-from typing import List
 
 # if readline is not accessible, then we cannot do tab completion
 # but we need to handle for this since we do not want ICHOR to crash
@@ -27,7 +27,8 @@ class TabCompleter(ABC):
         define what kinds of things are shown with Tab completion.
 
         :param text: Text that has been typed into the prompt
-        :param state: An integer value that is used by the readline package to return possible word completions. See readline.set_completer in docs.
+        :param state: An integer value that is used by the readline package to
+            return possible word completions. See readline.set_completer in docs.
         """
         pass
 
@@ -38,9 +39,7 @@ class TabCompleter(ABC):
         """
         if readline:
             readline.set_completer_delims(pattern)  # set a tab as delimiter
-            readline.parse_and_bind(
-                "tab: complete"
-            )  # set tab to trigger readline
+            readline.parse_and_bind("tab: complete")  # set tab to trigger readline
             readline.set_completer(
                 self.completer
             )  # depending on menu, a different functionality is needed for readline
