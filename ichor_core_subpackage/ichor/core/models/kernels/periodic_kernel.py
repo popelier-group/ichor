@@ -42,7 +42,9 @@ class PeriodicKernel(Kernel):
     
     @property
     def lengthscales(self):
-        return 1.0 / (self._thetas)
+        """ Note that the lengthscales are already squared for the periodic kernel. But still,
+        thetas are defined to be 1/(2l). (where l here is the already squared true lengthscale) """
+        return 1.0 / (2.0 * self._thetas)
 
     def k(self, x1: np.ndarray, x2: np.ndarray) -> np.ndarray:
         """

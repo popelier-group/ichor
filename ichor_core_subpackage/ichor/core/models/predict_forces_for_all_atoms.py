@@ -36,6 +36,7 @@ def predict_fflux_forces_for_all_atoms(atoms: "Atoms", models: "Models", system_
 
     for atm_idx in range(natoms):
 
+        # forces exerted on atom atoms[atom_idx]
         local_forces = np.zeros(3)
         non_local_atoms = [t for t in range(natoms) if t not in system_alf[atm_idx]]
 

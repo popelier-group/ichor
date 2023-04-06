@@ -207,7 +207,7 @@ GAUSSIAN_METHODS: List[str] = [
     "LC-",
 ]
 
-AIMALL_FUNCTIONALS: List[str] = ["MO62X", "B3LYP", "PBE"]
+AIMALL_FUNCTIONALS: List[str] = ["M062X", "B3LYP", "PBE"]
 
 FEREBUS_TYPES: List[str] = ["executable", "python"]
 

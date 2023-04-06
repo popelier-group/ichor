@@ -59,7 +59,7 @@ class HasAtoms(ABC):
 
     def alf_list(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[List[int]]:
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
-        return [[alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx] for alf in self.atoms.alf(alf_calculator, *args, **kwargs)]
+        return [ALF(alf.origin_idx, alf.x_axis_idx, alf.xy_plane_idx) for alf in self.atoms.alf(alf_calculator, *args, **kwargs)]
 
     def alf_dict(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> Dict[str, ALF]:
         """ Returns a list of lists with the atomic local frame indices for every atom (0-indexed)."""
@@ -104,7 +104,7 @@ class HasAtoms(ABC):
 
         from ichor.core.atoms import Atoms
         from ichor.core.files import XYZ
-        from ichor.core.useful_functions import alf_features_to_coordinates
+        from ichor.core.calculators import alf_features_to_coordinates
         from ichor.core.calculators import calculate_alf_features
         from ichor.core.common.units import AtomicDistance
 

@@ -178,8 +178,7 @@ class Models(Directory, list):
     def _features_from_array(self, x_test: np.ndarray):
         if x_test.ndim == 2:
             return {
-                atom: x_test[get_digits(atom) - 1][np.newaxis, :]
-                for atom in self.atom_names
+                atom: x_test for atom in self.atom_names
             }
         elif x_test.ndim == 3:
             return {atom: x_test[i] for i, atom in enumerate(self.atom_names)}

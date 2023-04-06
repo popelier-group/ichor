@@ -225,7 +225,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.print_level = self.print_level or PrintLevel.Verbose
         self.method = self.method or "b3lyp"
         self.basis_set = self.basis_set or "6-31+g(d,p)"
-        self.keywords = self.keywords or ["nosymm", "output=wfn"]
+        self.keywords = self.keywords or ["nosymm", "output=wfn", "force"]
 
         self.title = self.title or str(self.path.stem)
 

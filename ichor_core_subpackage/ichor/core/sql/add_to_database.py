@@ -45,7 +45,20 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
     :param database_path: Path to database
     :param point: A PointDirectory instance, containing Gaussian/AIMAll outputs that can be
         written to the database.
+
+    .. note:: Even if atomic data (.int file) is missing for a particular atom in the system,
+        the information for the point will still be added to the database. This is because
+        the rest the point can still be used in the training set for the other atoms.
     """
+
+    # check for .sh file in directory as AIMALL should delete it if it ran successfully
+    # if .sh file is found then do not append this point to the database as it can cause problems
+    # when reading the database
+
+    for _f in point.path.iterdir():
+        if _f.suffix == ".sh":
+            print(f"A shell file (.sh) was found in {point.path.absolute()}, so AIMAll probably crashed. Not added to db.")
+            return
     
     ###############################
     # wfn information 
@@ -167,7 +180,7 @@ def add_point_to_database(session: Session, point: "PointDirectory", echo=False,
                                         force_x=atom_force_x,
                                         force_y=atom_force_y,
                                         force_z=atom_force_z,
-                                        iqa_energy=atom_iqa_energy,
+                                        iqa=atom_iqa_energy,
                                         integration_error=atom_integration_error,
                                         **global_multipole_moments
                                         )

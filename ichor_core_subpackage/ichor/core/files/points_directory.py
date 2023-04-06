@@ -373,3 +373,48 @@ class PointsDirectory(ListOfAtoms, Directory):
                 dtype=np.float64,
             )
             df.to_csv(fname, index=False)
+
+    def features_with_wfn_energy_and_dE_df_to_csv(
+        self,
+        alf_list: List[ALF],
+        central_atom_idx: int,
+        str_to_append_to_fname: str = "_features_with_dE_df.csv",
+        **kwargs
+    ):
+        """Writes out a csv file containing wfn energy and FORCEs calculated for every feature.
+        Note that the forces (dE/df_i) are the negative of the PES gradient, so for machine learning, the negative of these forces needs
+        to be taken to add gradient information into GP models.
+
+        :param system_alf: A list of ALF instances containing alf info
+        :param central_atom_idx: The central atom which to center the alf on
+            and for which dE/df will be calculated
+        :type central_atom_idx: int
+        :param str_to_append_to_fname: _description_, defaults to "_features_with_properties.csv"
+        :type str_to_append_to_fname: str, optional
+        """
+
+        from ichor.core.models.gaussian_energy_derivative_wrt_features import form_b_matrix, convert_to_feature_forces
+
+        training_data = []
+        for point_dir in self:
+
+            atoms = point_dir.xyz.atoms
+            features = atoms[central_atom_idx].features(calculate_alf_features, alf_list)
+            nfeatures = len(features)
+            wfn_energy = point_dir.wfn.total_energy
+            b_matrix = form_b_matrix(atoms, alf_list, central_atom_idx)
+            cart_forces = np.array(list(point_dir.gaussian_out.global_forces.values()))
+            dE_df = convert_to_feature_forces(cart_forces, b_matrix, alf_list, central_atom_idx)
+            training_data.append([*features, wfn_energy, *dE_df])
+
+            input_headers = [f"f{i+1}" for i in range(nfeatures)]
+            output_headers = ["wfn_energy"] + [f"-dEdf{i+1}" for i in range(nfeatures)]
+
+            fname = atoms[central_atom_idx].name + str_to_append_to_fname
+
+        df = pd.DataFrame(
+            training_data,
+            columns=input_headers + output_headers,
+            dtype=np.float64,
+        )
+        df.to_csv(fname, index=False)

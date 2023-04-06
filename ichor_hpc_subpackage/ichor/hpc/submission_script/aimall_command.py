@@ -246,7 +246,6 @@ class AIMAllCommand(CommandLine):
         self.verifyw = VerifyW(verifyw)
         self.saw = saw
         self.autonnacps = autonnacps
-        
         self.scrub = scrub
         self.rerun = rerun
 
@@ -316,6 +315,7 @@ class AIMAllCommand(CommandLine):
             f"-verifyw={self.verifyw.value}",
             f"-saw={str(self.saw).lower()}",
             f"-autonnacps={str(self.autonnacps).lower()}",
+            f"-iaswrite={str(self.iaswrite)}"
         ]
 
     def repr(self, variables: List[str]) -> str:

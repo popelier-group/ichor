@@ -3,9 +3,15 @@ from ichor.core.calculators.spherical_to_cartesian_calculator import spherical_t
 
 def alf_features_to_coordinates(features: np.ndarray) -> np.ndarray:
     """Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
-    n_points x n_atoms x 3
+    n_points x n_atoms x 3. Note cartesian coordinates are in Bohr as features
+    are usually calculated in Bohr!
 
     :param features: a numpy array of shape n_points x n_features
+
+    .. note::
+        The distances in the features are in Bohr, so the resulting Cartesian
+        coordinates will also be in Bohr. You will need to multiply by
+        bohr2ang (in ichor.core.constants) to convert to Cartesian coordinates in Angstroms.
     """
 
     if features.ndim == 1:
