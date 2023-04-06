@@ -93,10 +93,10 @@ trajectory_menu = ConsoleMenu(this_menu_options=trajectory_menu_options,
                                     show_exit_option=TRAJECTORY_MENU_DESCRIPTION.show_exit_option)
 
 # make menu items
-# can use lamda functions to change text of options as well :)
+# can use lambda functions to change text of options as well :)
 trajectory_menu_items = [FunctionItem("Select path of trajectory", TrajectoryFunctions.select_trajectory),
                          FunctionItem("Split trajectory into single PointsDirectory-like dir", TrajectoryFunctions.split_trajectory_into_points_directory),
-                        FunctionItem("Split trajectory into many PointsDirectories-like dirs with root dir", TrajectoryFunctions.split_trajectory_into_many_points_directories)
+                        FunctionItem("Split trajectory into many PointsDirectories-like dirs", TrajectoryFunctions.split_trajectory_into_many_points_directories)
 ]
 
 add_items_to_menu(trajectory_menu, trajectory_menu_items)
