@@ -1,8 +1,8 @@
+from typing import Iterable, List
+
 from consolemenu import ConsoleMenu as OriginalConsoleMenu
-from typing import List
-from ichor.cli.menu_options import MenuOptions
-from typing import Iterable
 from consolemenu.items import MenuItem
+from ichor.cli.menu_options import MenuOptions
 
 # TODO: maybe imporve screen size
 # from consolemenu.screen import Screen as OriginalScreen
@@ -16,8 +16,9 @@ from consolemenu.items import MenuItem
 #         self.__height = 100
 #         self.__width = 100
 
+
 class ConsoleMenu(OriginalConsoleMenu):
-    """ Subclasses from `consolemenu.ConsoleMenu`, which is the base menu class. This subclass
+    """Subclasses from `consolemenu.ConsoleMenu`, which is the base menu class. This subclass
     adds the `this_menu_options` addribute, which contains options for the menus,
     see the `MenuOptions` class. These options can be changed.
 
@@ -36,18 +37,38 @@ class ConsoleMenu(OriginalConsoleMenu):
     :param **kwargs: Key word arguments to be passed to the original `ConsoleMenu` class.
     """
 
-    def __init__(self, this_menu_options: MenuOptions=None, title=None, subtitle=None, screen=None, formatter=None,
-                 prologue_text=None, epilogue_text=None, clear_screen=True,
-                 show_exit_option=True, exit_option_text='Exit', exit_menu_char=None):
+    def __init__(
+        self,
+        this_menu_options: MenuOptions = None,
+        title=None,
+        subtitle=None,
+        screen=None,
+        formatter=None,
+        prologue_text=None,
+        epilogue_text=None,
+        clear_screen=True,
+        show_exit_option=True,
+        exit_option_text="Exit",
+        exit_menu_char=None,
+    ):
 
         # make screen bigger by default
         # if screen is None:
         #     screen = Screen()
         # self.screen = screen
 
-        super().__init__(title=title, subtitle=subtitle, screen=screen, formatter=formatter,
-                 prologue_text=prologue_text, epilogue_text=epilogue_text, clear_screen=clear_screen,
-                 show_exit_option=show_exit_option, exit_option_text=exit_option_text, exit_menu_char=exit_menu_char)
+        super().__init__(
+            title=title,
+            subtitle=subtitle,
+            screen=screen,
+            formatter=formatter,
+            prologue_text=prologue_text,
+            epilogue_text=epilogue_text,
+            clear_screen=clear_screen,
+            show_exit_option=show_exit_option,
+            exit_option_text=exit_option_text,
+            exit_menu_char=exit_menu_char,
+        )
 
         self.this_menu_options = this_menu_options
 
@@ -73,7 +94,7 @@ class ConsoleMenu(OriginalConsoleMenu):
         return self._parent_menu_options
 
     def get_prologue_text(self) -> str:
-        """ Gets the prologue text, containing information for saved variables that are needed for jobs.
+        """Gets the prologue text, containing information for saved variables that are needed for jobs.
         First, if the `ConsoleMenu` instance has a default `self.prologue_text`, this gets printed out (this
         should not really be needed, can put this info in the subtitle anyway).
         After that, the information of options from parent classes is printed out (the oldest parent options
@@ -83,7 +104,9 @@ class ConsoleMenu(OriginalConsoleMenu):
 
         # if there is some constant prologue text to be displayed for some menu for some reason
         # there really shouldn't be a need for this but keep for now
-        prologue_txt = self.prologue_text() if callable(self.prologue_text) else self.prologue_text
+        prologue_txt = (
+            self.prologue_text() if callable(self.prologue_text) else self.prologue_text
+        )
         # add the strings that each parent gives
         for p_options in self.parent_menu_options:
             # the __call__ method of a MenuOption just makes it into a string which can be printed to the prologue
@@ -95,8 +118,9 @@ class ConsoleMenu(OriginalConsoleMenu):
 
         return prologue_txt
 
+
 def add_items_to_menu(menu: ConsoleMenu, items: Iterable[MenuItem]):
-    """ Adds a list of `MenuItem` instances to a `ConsoleMenu` instance."""
+    """Adds a list of `MenuItem` instances to a `ConsoleMenu` instance."""
 
     for i in items:
         menu.append_item(i)

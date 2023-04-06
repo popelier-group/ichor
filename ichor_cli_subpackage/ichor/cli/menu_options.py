@@ -1,25 +1,27 @@
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+
 
 @dataclass
 class MenuOptions:
-    """ Base class for Menu options. Each menu can implements its own options. Formats
-        and prints out the options, as well as displays warnings to prologue when there are warnings
-        for the given options. These options can be changed by the user."""
+    """Base class for Menu options. Each menu can implements its own options. Formats
+    and prints out the options, as well as displays warnings to prologue when there are warnings
+    for the given options. These options can be changed by the user."""
 
     # TODO: use the formatter class
     @staticmethod
     def formatter_menu_options(s: str):
-        """ Formats the names of the dataclass variables, so they are printed nicely in the terminal."""
-        return s.replace('_', ' ').capitalize()
+        """Formats the names of the dataclass variables, so they are printed nicely in the terminal."""
+        return s.replace("_", " ").capitalize()
 
     @staticmethod
     def formatter_check_function(s):
-        """ Formats the string output of the check function, so that the user knows something is wrong."""
+        """Formats the string output of the check function, so that the user knows something is wrong."""
         return "! " + s
 
     def run_check_functions(self):
-        """ Runs all methods that start with `check`. These are methods that make sure the current selected values
-            make sense. If they do not, warnings are displayed."""
+        """Runs all methods that start with `check`.
+        These are methods that make sure the current selected values make sense.
+        If they do not, warnings are displayed (when warnings are implemented)."""
         all_warnings = []
 
         # loop over all attribute names
@@ -31,16 +33,23 @@ class MenuOptions:
                 # if the name of the function/method starts with check, then we run the function/method
                 if attr.__name__.startswith("check"):
                     res = attr()
-                    # if there is some result, i.e. function returns something other than None (a non empty string for example)
+                    # if there is some result, i.e. function returns
+                    # something other than None (a non empty string for example)
                     if res:
                         all_warnings.append(MenuOptions.formatter_check_function(res))
 
         return all_warnings
 
     def __str__(self):
-        """ Format all the defined attributes (which are current menu settings) into a nice string to be displayed in the prologue."""
+        """Format all the defined attributes (which are current menu settings)
+        into a nice string to be displayed in the prologue."""
         # k is name of attribute (str), value is value of attribute defined in the dataclass.
-        return "".join([f"-- {MenuOptions.formatter_menu_options(k)}: {v}\n" for k, v in asdict(self).items()])
+        return "".join(
+            [
+                f"-- {MenuOptions.formatter_menu_options(k)}: {v}\n"
+                for k, v in asdict(self).items()
+            ]
+        )
 
     def __call__(self):
         """When instance of prologue is called, makes the prologue nicely formatted."""
