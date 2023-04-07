@@ -1,17 +1,11 @@
-import sys
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ichor.core.common.io import last_line
-from ichor.core.files import GJF, PointDirectory, PointsDirectory
+from ichor.core.files import GJF, PointsDirectory
+from ichor.hpc import SCRIPT_NAMES
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import (
-    GaussianCommand,
-    print_completed,
-    SCRIPT_NAMES,
-    SubmissionScript,
-)
+from ichor.hpc.submission_script import GaussianCommand, SubmissionScript
 
 
 def submit_points_directory_to_gaussian(
@@ -140,52 +134,48 @@ def submit_gjfs(
     else:
         raise ValueError("There are no jobs to submit in the submission script.")
 
-    # submit the final submission script to the queuing system, and return the job id. hold for other jobs if needed.
-    return submission_script.submit(hold=hold)
-
 
 # Below are functions used by autorun to check if stuff exists and reruns if necessary.
 
+# def rerun_gaussian(gaussian_file: str):
+#     """Used by `CheckManager`. Checks if Gaussian jobs ran correctly and a full .wfn
+#     file is returned. If there is no .wfn file or it does not
+#     have the correct contents, then rerun Gaussian.
 
-def rerun_gaussian(gaussian_file: str):
-    """Used by `CheckManager`. Checks if Gaussian jobs ran correctly and a full .wfn
-    file is returned. If there is no .wfn file or it does not
-    have the correct contents, then rerun Gaussian.
-
-    :param gaussian_file: A string that is a Path to a .gjf file
-    """
-    if not gaussian_file:
-        print_completed()
-        sys.exit()
-    if Path(gaussian_file).with_suffix(".wfn").exists() and "TOTAL ENERGY" in last_line(
-        Path(gaussian_file).with_suffix(".wfn")
-    ):
-        print_completed()
-    else:
-        logger.error(f"Gaussian Job {gaussian_file} failed to run")
+#     :param gaussian_file: A string that is a Path to a .gjf file
+#     """
+#     if not gaussian_file:
+#         print_completed()
+#         sys.exit()
+#     if Path(gaussian_file).with_suffix(".wfn").exists() and "TOTAL ENERGY" in last_line(
+#         Path(gaussian_file).with_suffix(".wfn")
+#     ):
+#         print_completed()
+#     else:
+#         logger.error(f"Gaussian Job {gaussian_file} failed to run")
 
 
-def scrub_gaussian(gaussian_file: str):
-    """Used by `CheckManager`. Checks if Gaussian job ran correctly.
-    If it did not, it will move the Point to the `FILE_STRUCTURE["gaussian_scrubbed_points"]` directory
-    and record that it has moved the point in the log file. If a .wfn file exists
-    and it contains the correct information in its last line, then
-    this checking function will not do anything.
+# def scrub_gaussian(gaussian_file: str):
+#     """Used by `CheckManager`. Checks if Gaussian job ran correctly.
+#     If it did not, it will move the Point to the `FILE_STRUCTURE["gaussian_scrubbed_points"]` directory
+#     and record that it has moved the point in the log file. If a .wfn file exists
+#     and it contains the correct information in its last line, then
+#     this checking function will not do anything.
 
-    :param gaussian_file: A string that is a Path to a .gjf file
-    """
+#     :param gaussian_file: A string that is a Path to a .gjf file
+#     """
 
-    gaussian_file = Path(gaussian_file)
-    point = PointDirectory(gaussian_file.parent)
+#     gaussian_file = Path(gaussian_file)
+#     point = PointDirectory(gaussian_file.parent)
 
-    reason: Optional[str] = None
-    if not gaussian_file.exists():
-        reason = f"{gaussian_file} does not exist"
-    elif not point.wfn.exists():
-        reason = f"No WFN file found in directory {point.path}"
-    elif "TOTAL ENERGY" not in last_line(point.wfn.path):
-        reason = f"Incomplete WFN ('{point.wfn.path}') file found"
+#     reason: Optional[str] = None
+#     if not gaussian_file.exists():
+#         reason = f"{gaussian_file} does not exist"
+#     elif not point.wfn.exists():
+#         reason = f"No WFN file found in directory {point.path}"
+#     elif "TOTAL ENERGY" not in last_line(point.wfn.path):
+#         reason = f"Incomplete WFN ('{point.wfn.path}') file found"
 
-    if reason is not None:
-        logger.error(f"'{point.path}' will be ignored | Reason: {reason}")
-        point.ignore(reason)
+#     if reason is not None:
+#         logger.error(f"'{point.path}' will be ignored | Reason: {reason}")
+#         point.ignore(reason)
