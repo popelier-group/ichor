@@ -1,7 +1,7 @@
 from typing import Optional
 
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
-from ichor.hpc.submission_script.submision_script import SubmissionScript
+from ichor.hpc.submission_script.submission_script import SubmissionScript
 
 
 class TimingManager:
@@ -22,18 +22,18 @@ class TimingManager:
     @property
     def job_id(self) -> str:
         from ichor.hpc import BATCH_SYSTEM
+
         return f"${BATCH_SYSTEM.JobID}"
-    
+
     @property
     def task_id(self) -> str:
         from ichor.hpc import BATCH_SYSTEM
+
         return f"${BATCH_SYSTEM.TaskID}"
 
     @property
     def identifier(self):
-        return (
-            f"{self.submission_script.path.name}:{self.job_id}:{self.task_id}"
-        )
+        return f"{self.submission_script.path.name}:{self.job_id}:{self.task_id}"
 
     def __enter__(self):
         python_job = ICHORCommand()
@@ -44,9 +44,7 @@ class TimingManager:
                 self.message,
             )
         else:
-            python_job.add_function_to_job(
-                "log_time", f"START:{self.identifier}"
-            )
+            python_job.add_function_to_job("log_time", f"START:{self.identifier}")
         self.submission_script.add_command(python_job)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):

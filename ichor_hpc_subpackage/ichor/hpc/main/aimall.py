@@ -1,20 +1,26 @@
-import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
+from warnings import warn
+
+from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
 from ichor.core.files import PointsDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import SCRIPT_NAMES, AIMAllCommand, SubmissionScript
-from typing import Union
-from warnings import warn
-from ichor.core.common.constants import AIMALL_FUNCTIONALS
+from ichor.hpc.submission_script import AIMAllCommand, SCRIPT_NAMES, SubmissionScript
 
 
 def submit_points_directory_to_aimall(
-    points_directory: Union[PointsDirectory, Path], method = "B3LYP", ncores: int= 2, naat: int = 1,
-    aimall_atoms: Optional[List[str]] = None, hold: JobID= None, **kwargs) -> Optional[JobID]:
-    """Submits .wfn files which will be partitioned into .int files by AIMALL. Each topological atom i the system has its own .int file
+    points_directory: Union[PointsDirectory, Path],
+    method="B3LYP",
+    ncores: int = 2,
+    naat: int = 1,
+    aimall_atoms: List[str] = None,
+    hold: JobID = None,
+    **kwargs,
+) -> Optional[JobID]:
+    """Submits .wfn files which will be partitioned into .int files by
+    AIMALL. Each topological atom i the system has its own .int file
 
     :param points_directory: A path to a `PointsDirectory`-structured directory or a PointsDirectory instance
     :param method: Functional to be written to the .wfn file because AIMAll needs to know it to function correctly.
@@ -27,24 +33,32 @@ def submit_points_directory_to_aimall(
     :return: The job id of the submitted job
     :rtype: Optional[JobID]
     """
- 
+
     if not isinstance(points_directory, PointsDirectory):
         points_directory = PointsDirectory(points_directory)
- 
+
     method = method.upper()
     if method not in AIMALL_FUNCTIONALS:
         raise ValueError("The functional provided is not supported by AIMAll.")
-    
+
     list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
-    
+
     logger.info("Submitting wavefunctions to AIMAll.")
-    return submit_wfns(list_of_wfn_paths, aimall_atoms=aimall_atoms,
-                       ncores=ncores, naat=naat, hold=hold, **kwargs)
+    return submit_wfns(
+        list_of_wfn_paths,
+        aimall_atoms=aimall_atoms,
+        ncores=ncores,
+        naat=naat,
+        hold=hold,
+        **kwargs,
+    )
+
 
 def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[Path]:
-    """ AIMALL needs to know the method from the wfn file. The method needs to be added in the wfn file, otherwise AIMALL gets the method wrong and
+    """AIMALL needs to know the method from the wfn file. The method needs to be
+    added in the wfn file, otherwise AIMALL gets the method wrong and
     gives the wrong results."""
-    
+
     wfns = []
     for point in points:
         # write out the wfn file with the method modified because AIMAll needs to know the functional used
@@ -57,39 +71,50 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
             warn(f"Wavefunction file {point.wfn.path} does not exist.")
     return wfns
 
+
 def submit_wfns(
     wfns: List[Path],
     aimall_atoms: Optional[List[str]] = None,
     script_name: str = SCRIPT_NAMES["aimall"],
-    ncores = 2,
-    naat = 1,
+    ncores=2,
+    naat=1,
     hold: Optional[JobID] = None,
-    **kwargs
+    **kwargs,
 ) -> Optional[JobID]:
-    """ Write out submission script and submit wavefunctions to AIMALL on a cluster.
-    
+    """Write out submission script and submit wavefunctions to AIMALL on a cluster.
+
     :param wfns: a list of wavefunction paths which to write to the submission script
-    :param atoms: a list of stings corresponding to atom names. These will be the atoms for which AIMALL computes properties.
+    :param atoms: a list of stings corresponding to atom names.
+        These will be the atoms for which AIMALL computes properties.
     :param force: Whether or not to compute AIMALL for this wfn. If force is True, AIMALL will be ran again
     :param hold: An optional JobID to hold for. The AIMALL job will not run until that other job is finished.
-    
+
     """
     with SubmissionScript(script_name, ncores=ncores) as submission_script:
-        
+
         for wfn in wfns:
-            submission_script.add_command(AIMAllCommand(wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs))
+            submission_script.add_command(
+                AIMAllCommand(
+                    wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
+                )
+            )
             logger.info(f"Adding {wfn} to {submission_script.path}")
 
-    # todo this will get executed when running from a compute node, but this does not submit any wfns to aimall, it is just used to make the datafile.
+    # todo this will get executed when running from a compute node,
+    # but this does not submit any wfns to aimall, it is just used to make the datafile.
     if len(submission_script.grouped_commands) > 0:
-        logger.info(f"Submitting {len(submission_script.grouped_commands)} WFN(s) to AIMAll")
+        logger.info(
+            f"Submitting {len(submission_script.grouped_commands)} WFN(s) to AIMAll"
+        )
         return submission_script.submit(hold=hold)
     else:
         raise ValueError("There are no jobs to submit in the submission script.")
 
+
 # TODO: check if the functions below are necessary
 # def aimall_completed(wfn: Path) -> bool:
-#     """ This function is used when checking if AIMALL ran successfully. The .aim file as well as if the .int files contain the required information."""
+#     """ This function is used when checking if AIMALL ran successfully.
+# The .aim file as well as if the .int files contain the required information."""
 #     aim_file = wfn.with_suffix(AIM.filetype)
 #     if not aim_file.exists():
 #         return False
@@ -113,7 +138,7 @@ def submit_wfns(
 
 # def cleanup_failed_aimall(wfn: Path):
 #     """ Removes atomicfiles directories in a given directory where the wfn is.
-    
+
 #     :param wfn: A path to a wfn file. The _atomicfiles directory is in the same directory as the .wfn
 #     """
 #     atomicfiles = wfn.with_suffix("_atomicfiles")
@@ -125,9 +150,9 @@ def submit_wfns(
 
 
 # def rerun_aimall(wfn_file: str):
-    
+
 #     from ichor.hpc.submission_script import print_completed
-    
+
 #     if not wfn_file:
 #         print_completed()
 #         sys.exit()
@@ -143,13 +168,15 @@ def submit_wfns(
 
 
 # def scrub_aimall(wfn_file: str):
-#     """Used by `CheckManager`. Checks if AIMALL job ran correctly. If it did not, it will move the Point to the `FILE_STRUCTURE["aimall_scrubbed_points"]`
-#     directory and record that it has moved the point in the log file. If a .sh file exists and the integration error for the point is lower than the
+#     """Used by `CheckManager`. Checks if AIMALL job ran correctly. If
+# it did not, it will move the Point to the `FILE_STRUCTURE["aimall_scrubbed_points"]`
+#     directory and record that it has moved the point in the log file. If a .sh
+# file exists and the integration error for the point is lower than the
 #     threshold (1e-4), then this checking function will not do anything.
 
 #     :param wfn_file: A string that is a Path to a .wfn file
 #     """
-    
+
 #     INTEGRATION_ERROR_THRESHOLD = 1e-4
 
 #     from pathlib import Path
@@ -185,7 +212,8 @@ def submit_wfns(
 #         if not point.ints:
 #             reason = f"{INT.filetype} files for '{point.path}' do not exist."
 #         elif set(aim.keys()) != set(point.ints.keys()):
-#             reason = f"Atoms in aim file {aim_file} ({set(aim.keys())}) do not correspond to atoms for which int files were made ({set(point.ints.keys())})."
+#             reason = f"Atoms in aim file {aim_file} ({set(aim.keys())})
+# do not correspond to atoms for which int files were made ({set(point.ints.keys())})."
 
 #     if reason is None:
 #         integration_errors = {
@@ -199,7 +227,8 @@ def submit_wfns(
 #                     f"{point.ints.path} | {atom} | Integration Error: {error}"
 #                     for atom, error in integration_errors.items()
 #                 )
-#                 + f"\n'{len(integration_errors)}' atom(s) have a greater than integration error threshold ('{INTEGRATION_ERROR_THRESHOLD}')"
+#                 + f"\n'{len(integration_errors)}' atom(s) have a greater
+# than integration error threshold ('{INTEGRATION_ERROR_THRESHOLD}')"
 #             )
 
 #     if reason is not None:

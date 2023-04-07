@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import AmberModules, Modules
+from ichor.hpc.modules import AmberModules
+from ichor.hpc.modules.modules import Modules
 from ichor.hpc.submission_script.command_line import CommandLine
-from ichor.hpc.submission_script.ichor_command import ICHORCommand
 
 
 class AmberCommand(CommandLine):
@@ -56,8 +56,9 @@ class AmberCommand(CommandLine):
     def repr(self, *args) -> str:
         """
         Returns a strings which is then written out to the final submission script file.
-        If the outputs of the job need to be checked (by default self.rerun is set to True, so job outputs are checked),
-        then the corresponsing strings are appended to the initial commands string.
+        If the outputs of the job need to be checked (by default self.rerun is set to True,
+        so job outputs are checked), then the corresponsing strings are appended to the initial
+        commands string.
 
         The length of `variables` is defined by the length of `self.data`
         """
@@ -79,14 +80,14 @@ class AmberCommand(CommandLine):
         cmd = ""
         cmd += f"pushd {mol2_file.parent}\n"
         # run antechanmber to modify mol2 file for use in amber
-        cmd += f"antechamber -i {mol2_file} -o {mol2_file} -fi mol2 -fo mol2 -c bcc -pf yes -nc -2 -at gaff2 -j 5 -rn {self.system_name}\n"
+        cmd += f"antechamber -i {mol2_file} -o {mol2_file} -fi mol2 -fo mol2 -c bcc -pf yes -nc -2 -at gaff2 -j 5 -rn {self.system_name}\n"  # noqa E501
         # run parmchk to generate frcmod file
         cmd += f"parmchk2 -i {mol2_file} -f mol2 -o {frcmod_file} -s 2\n"
         # run tleap to generate prmtop and inpcrd
 
         cmd += f"tleap -f {tleap_script}\n"
         # run amber
-        cmd += f"{self.command} -O -i {self.mdin_file.absolute()} -o md.out -p {prmtop_file} -c {inpcrd_file} -inf md.info\n"
+        cmd += f"{self.command} -O -i {self.mdin_file.absolute()} -o md.out -p {prmtop_file} -c {inpcrd_file} -inf md.info\n"  # noqa E501
 
         cmd += "popd\n"
         return cmd

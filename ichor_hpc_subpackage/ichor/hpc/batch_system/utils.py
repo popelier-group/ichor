@@ -1,12 +1,14 @@
 import json
-from typing import List, Optional
 from pathlib import Path
+from typing import List, Optional
+
 from ichor.hpc.batch_system.batch_system import Job, JobID
 
 
 def read_jid(jid_file: Optional[Path] = None) -> List[JobID]:
     if jid_file is None:
         from ichor.hpc import FILE_STRUCTURE
+
         jid_file = FILE_STRUCTURE["jid"]
 
     if jid_file.exists():
@@ -27,8 +29,10 @@ def read_jid(jid_file: Optional[Path] = None) -> List[JobID]:
 
 
 def delete_jobs():
-    """Delete all jobs that were queued up to run. This function reads the FILE_STRUCTURE["jid"] file, which contains the names of all submitted jobs."""
-    from ichor.hpc import FILE_STRUCTURE, BATCH_SYSTEM
+    """Delete all jobs that were queued up to run. This function reads the FILE_STRUCTURE["jid"]
+    file, which contains the names of all submitted jobs."""
+    from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE
+
     jid_file = FILE_STRUCTURE["jid"]
     jids = read_jid()
     for jid in jids:
@@ -40,7 +44,8 @@ def delete_jobs():
 
 
 def get_current_jobs() -> List[Job]:
-    from ichor.hpc import FILE_STRUCTURE, BATCH_SYSTEM
+    from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE
+
     all_jobs = BATCH_SYSTEM.get_queued_jobs()
     ichor_jobs = read_jid(FILE_STRUCTURE["jid"])
     ichor_job_ids = [job.id for job in ichor_jobs]

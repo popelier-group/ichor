@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import List
+
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import DlpolyModules, Modules
+from ichor.hpc.modules import Modules
 from ichor.hpc.submission_script.command_line import CommandLine
 
 
@@ -12,7 +13,7 @@ class DlpolyCommand(CommandLine):
     """
 
     def __init__(self, dlpoly_program_path: Path, dlpoly_directory: Path):
-        
+
         self.dlpoly_program_path = dlpoly_program_path
         self.dlpoly_directory = dlpoly_directory
 

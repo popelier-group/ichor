@@ -1,16 +1,13 @@
 from pathlib import Path
 from typing import Union
+
 from ichor.core.common.io import mkdir
 from ichor.core.files import GJF, XYZ
 from ichor.core.molecular_dynamics.cp2k import write_cp2k_input
+from ichor.hpc import FILE_STRUCTURE, MACHINE
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.machine import Machine
-from ichor.hpc.submission_script import (
-    SCRIPT_NAMES,
-    CP2KCommand,
-    SubmissionScript,
-)
-from ichor.hpc import FILE_STRUCTURE, MACHINE
+from ichor.hpc.submission_script import CP2KCommand, SCRIPT_NAMES, SubmissionScript
 
 datafile_location = {
     Machine.ffluxlab: Path("/home/modules/apps/cp2k/6.1.0/data"),
@@ -19,10 +16,17 @@ datafile_location = {
 }
 
 
-def submit_cp2k(input_file: Union[str, Path], system_name: str, temperature: int, nsteps: int,
-                    method: str = "BLYP", basis_set: str = "6-31G*", 
-                    molecular_charge: int = 0, spin_multiplicity: int = 1,
-                    ncores=2) -> JobID:
+def submit_cp2k(
+    input_file: Union[str, Path],
+    system_name: str,
+    temperature: int,
+    nsteps: int,
+    method: str = "BLYP",
+    basis_set: str = "6-31G*",
+    molecular_charge: int = 0,
+    spin_multiplicity: int = 1,
+    ncores=2,
+) -> JobID:
     """Submits a CP2K job to a compute node.
 
     :param input_file: A XYZ (.xyz) or GJF (.gjf) file that contains the starting geometry.
@@ -61,9 +65,11 @@ def submit_cp2k(input_file: Union[str, Path], system_name: str, temperature: int
         method,
         basis_set,
         molecular_charge,
-        spin_multiplicity
+        spin_multiplicity,
     )
 
     with SubmissionScript(SCRIPT_NAMES["cp2k"], ncores=ncores) as submission_script:
-        submission_script.add_command(CP2KCommand(cp2k_input, temperature, ncores, system_name))
+        submission_script.add_command(
+            CP2KCommand(cp2k_input, temperature, ncores, system_name)
+        )
     return submission_script.submit()

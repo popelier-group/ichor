@@ -1,8 +1,9 @@
+import sys
 from pathlib import Path
 from typing import List, Optional
-import sys
+
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import Modules, PythonModules
+from ichor.hpc.modules import Modules
 from ichor.hpc.submission_script.command_line import CommandLine
 
 

@@ -40,6 +40,7 @@ class CommandGroup(CommandLine, list):
         return len(set([type(c) for c in self]))
 
     def repr(self, variables: Optional[List[str]] = None) -> str:
-        """Return a string which represents the line in the job script which runs the program (Gaussian, AIMALL, etc.) with
-        its given inputs (typically these inputs are in the form of a job array so they look like ${arr1[$SGE_TASK_ID-1]}"""
+        """Return a string which represents the line in the job script which
+        runs the program (Gaussian, AIMALL, etc.) with its given inputs (typically these inputs are
+        in the form of a job array so they look like ${arr1[$SGE_TASK_ID-1]}"""
         return self[0].repr(variables)

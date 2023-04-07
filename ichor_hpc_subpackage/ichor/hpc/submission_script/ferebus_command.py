@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc.log import logger
 from ichor.hpc.modules import FerebusModules, Modules
 from ichor.hpc.submission_script.command_line import CommandLine
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
@@ -25,12 +24,14 @@ class FerebusCommand(CommandLine):
 
     @classproperty
     def modules(self) -> Modules:
-        """Return a string corresponding to modules that need to be loaded for FEREBUS jobs to run on compute nodes."""
+        """Return a string corresponding to modules that
+        need to be loaded for FEREBUS jobs to run on compute nodes."""
         return FerebusModules
 
     @classproperty
     def command(self) -> str:
-        """Return the command word that is used to run FEREBUS. Since it is an executable, it can be ran by calling the path of FEREBUS followed by any
+        """Return the command word that is used to run FEREBUS.
+        Since it is an executable, it can be ran by calling the path of FEREBUS followed by any
         configuration settings."""
         pass
 

@@ -6,22 +6,19 @@ from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
+from ichor.hpc import MACHINE
+from ichor.hpc.machine import Machine
 from ichor.hpc.modules import AIMAllModules, Modules
 from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_script.command_line import (
-    CommandLine,
-    SubmissionError,
-)
-from ichor.hpc.log import logger
-from ichor.hpc.machine import Machine
-from ichor.hpc import MACHINE
+from ichor.hpc.submission_script.command_line import CommandLine, SubmissionError
 
 
 class UseTwoe(Enum):
-    
+
     No = 0
     Vee_aa = 1
     Always = 2
+
 
 class BasinIntegrationMethod(Enum):
     Auto = "auto"
@@ -147,6 +144,7 @@ class VerifyW(Enum):
     Yes = "yes"
     Only = "only"
 
+
 AIMAll_COMMANDS = {
     Machine.csf3: "~/AIMAll/aimqb.ish",
     Machine.csf4: "~/AIMAll/aimqb.ish",
@@ -154,12 +152,17 @@ AIMAll_COMMANDS = {
     Machine.local: "aimall",
 }
 
+
 class AIMAllCommand(CommandLine):
     """
-    A class which is used to add AIMALL-related commands to a submission script. It is used to write the submission script line where
-    AIMALL modules are loaded. It is also used to write out the submission script line where AIMALL is ran on a specified array of files (usually
-    AIMALL is ran as an array job because we want to run hundreds of AIMALL tasks in parallel). Finally, depending on the `check` and `scrub` arguments,
-    additional lines are written to the submission script file which rerun failed tasks as well as remove any points that did not terminate normally (even
+    A class which is used to add AIMALL-related commands to a submission script.
+    It is used to write the submission script line where
+    AIMALL modules are loaded. It is also used to write out the submission script line where
+    AIMALL is ran on a specified array of files (usually
+    AIMALL is ran as an array job because we want to run hundreds of AIMALL tasks in parallel).
+    Finally, depending on the `check` and `scrub` arguments,
+    additional lines are written to the submission script file which rerun failed tasks as well as
+    remove any points that did not terminate normally (even
     after being reran).
 
     :param wfn_file: Path to a .wfn file. This is not needed when running auto-run for a whole directory.
@@ -172,7 +175,6 @@ class AIMAllCommand(CommandLine):
         wfn_file_path: Path,
         ncores: int,
         naat: int,
-        
         atoms: Optional[Union[List[str], Atoms]] = "all",
         usetwoe: int = 0,
         encomp: int = 3,
@@ -206,9 +208,9 @@ class AIMAllCommand(CommandLine):
         rerun: bool = False,
         scrub: bool = False,
     ):
-        
+
         self.wfn_file = WFN(wfn_file_path)
-        
+
         self.usetwoe = UseTwoe(usetwoe)
 
         self.atoms = atoms or "all"
@@ -241,7 +243,7 @@ class AIMAllCommand(CommandLine):
         self.intveeaa = IntVeeAA(intveeaa)
         self.atlaprhocps = atlaprhocps
         self.wsp = wsp
-        self.shm_lmax=SHMMax(shm_lmax)
+        self.shm_lmax = SHMMax(shm_lmax)
         self.maxmem = maxmem
         self.verifyw = VerifyW(verifyw)
         self.saw = saw
@@ -251,19 +253,23 @@ class AIMAllCommand(CommandLine):
 
     @property
     def data(self) -> List[str]:
-        """ Returns the data needed for the AIMAll job to run successfully"""
-        return [str(self.wfn_file.path.absolute()),str(self.aimall_output.absolute())]
+        """Returns the data needed for the AIMAll job to run successfully"""
+        return [str(self.wfn_file.path.absolute()), str(self.aimall_output.absolute())]
 
     @classproperty
     def modules(self) -> Modules:
-        """ Returns a list of modules to be loaded for AIMAll. Note that only ffluxlab has AIMAll as a module.
-        For other machines, the AIMAll folder (containing scripts/executables) needs to be found in the home directory."""
+        """Returns a list of modules to be loaded for AIMAll.
+        Note that only ffluxlab has AIMAll as a module.
+        For other machines, the AIMAll folder (containing scripts/executables)
+        needs to be found in the home directory."""
         return AIMAllModules
 
     @classproperty
     def command(self) -> str:
-        """ Returns the command which runs aimall on the current machine. Note that only ffluxlab has AIMAll as a module.
-        For other machines, the AIMAll folder (containing scripts/executables) needs to be found in the home directory."""
+        """Returns the command which runs aimall on the current machine.
+        Note that only ffluxlab has AIMAll as a module.
+        For other machines, the AIMAll folder (containing scripts/executables)
+        needs to be found in the home directory."""
 
         if MACHINE not in AIMAll_COMMANDS.keys():
             raise SubmissionError(
@@ -277,12 +283,22 @@ class AIMAllCommand(CommandLine):
 
         # if all, then no need to change anything
         # if a list of atom names is given, then need to make in format which AIMAll reads
-        # -atoms=all_... (e.g., -atoms=all_1,3,6) will calculate a full molecular graph but will only calculate atomic properties of the listed atoms.
-        # Specifying -atoms=... (e.g., -atoms=1,3,6) (recommended for reruns of problem atoms following an all atom run) will only determine the critical point connectivity and atomic properties of the listed atoms, i.e., the full molecular graph will not be (re)calculated.  
-        atoms = (self.atoms if self.atoms == "all" else "all_" + ", ".join(map(str, [get_digits(a) for a in self.atoms])))
+
+        # -atoms=all_... (e.g., -atoms=all_1,3,6) will calculate a full molecular graph
+        # but will only calculate atomic properties of the listed atoms.
+
+        # Specifying -atoms=... (e.g., -atoms=1,3,6)
+        # (recommended for reruns of problem atoms following an all atom run)
+        # will only determine the critical point connectivity and atomic properties of the listed atoms,
+        # i.e., the full molecular graph will not be (re)calculated.
+        atoms = (
+            self.atoms
+            if self.atoms == "all"
+            else "all_" + ", ".join(map(str, [get_digits(a) for a in self.atoms]))
+        )
 
         return [
-            f"-nogui",
+            "-nogui",
             f"-usetwoe={self.usetwoe.value}",
             f"-nproc={self.ncores}",
             f"-naat={self.naat}",
@@ -315,14 +331,15 @@ class AIMAllCommand(CommandLine):
             f"-verifyw={self.verifyw.value}",
             f"-saw={str(self.saw).lower()}",
             f"-autonnacps={str(self.autonnacps).lower()}",
-            f"-iaswrite={str(self.iaswrite)}"
+            f"-iaswrite={str(self.iaswrite)}",
         ]
 
     def repr(self, variables: List[str]) -> str:
-        """Returns a string which is written out to the submission script file in order to run AIMALL correctly (with the appropriate settings)."""
+        """Returns a string which is written out to the submission script file in
+        order to run AIMALL correctly (with the appropriate settings)."""
 
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
-        
+
         # TODO: possibly remove these because they are not really needed
         if self.rerun:
 

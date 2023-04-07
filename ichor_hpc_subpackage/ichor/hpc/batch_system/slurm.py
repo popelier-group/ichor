@@ -1,21 +1,15 @@
 import os
-import re
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
 
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import current_user, run_cmd
-from ichor.core.common.str import split_by
 from ichor.core.common.types import EnumStrList
-from ichor.hpc.batch_system.batch_system import (
-    BatchSystem,
-    CannotParseJobID,
-    Job,
-    JobID,
-)
+from ichor.hpc.batch_system.batch_system import BatchSystem
+from ichor.hpc.batch_system.jobs import CannotParseJobID, Job, JobID
+
 from ichor.hpc.batch_system.node import NodeType
-from ichor.hpc.log import logger
 
 
 # todo: Make this enum available to all batch systems and each value must be specified
@@ -31,8 +25,9 @@ class JobStatus(EnumStrList):
 
 
 class SLURM(BatchSystem):
-    """A class that implements methods ICHOR uses to submit jobs to the Sun Grid Engine (SGE) batch system. These methods/properties
-    are used to construct job scripts for any program we want to run on SGE."""
+    """A class that implements methods ICHOR uses to submit jobs to the Sun Grid Engine (SGE)
+    batch system. These methods/properties are used to construct job scripts
+    for any program we want to run on SGE."""
 
     @staticmethod
     def is_present() -> bool:
@@ -67,16 +62,15 @@ class SLURM(BatchSystem):
         try:
             return stdout.split()[-1]
         except IndexError:
-            raise CannotParseJobID(
-                f"Cannot parse job id from output: '{stdout}'"
-            )
+            raise CannotParseJobID(f"Cannot parse job id from output: '{stdout}'")
 
     @classmethod
     def get_queued_jobs(cls) -> List[Job]:
         stdout, _ = run_cmd(cls.status() + ["--array-unique", "-r"])
 
         jobs = []
-        #     JOBID PRIORITY  PARTITION NAME            USER     ACCOUNT ST SUBMIT_TIME    START_TIME     TIME        NODES  CPUS NODELIST(REASON)
+        #     JOBID PRIORITY  PARTITION NAME            USER     ACCOUNT ST SUBMIT_TIME    START_TIME  ...
+        #    TIME        NODES  CPUS NODELIST(REASON)
         for line in stdout.split("\n")[2:]:
             tokens = line.split()
             job_id = tokens[0] if len(tokens) >= 1 else None
@@ -84,14 +78,14 @@ class SLURM(BatchSystem):
             partition = tokens[2] if len(tokens) >= 3 else None
             name = tokens[3] if len(tokens) >= 4 else None
             user = tokens[4] if len(tokens) >= 5 else None
-            account = tokens[5] if len(tokens) >= 6 else None
+            _ = tokens[5] if len(tokens) >= 6 else None  # account
             state = tokens[6] if len(tokens) >= 7 else None
-            submit_time = tokens[7] if len(tokens) >= 8 else None
+            _ = tokens[7] if len(tokens) >= 8 else None  # submit_time
             start_time = tokens[8] if len(tokens) >= 9 else None
-            time_taken = tokens[9] if len(tokens) >= 10 else None
-            nodes = tokens[10] if len(tokens) >= 11 else None
+            _ = tokens[9] if len(tokens) >= 10 else None  # time_taken
+            _ = tokens[10] if len(tokens) >= 11 else None  # nodes
             cpus = tokens[11] if len(tokens) >= 12 else None
-            nodelist = tokens[12] if len(tokens) >= 13 else None
+            _ = tokens[12] if len(tokens) >= 13 else None  # nodelist
 
             task_id = None
             if "_" in job_id:
@@ -124,9 +118,7 @@ class SLURM(BatchSystem):
         return jobs
 
     @classmethod
-    def node_options(
-        cls, include_nodes: List[str], exclude_nodes: List[str]
-    ) -> str:
+    def node_options(cls, include_nodes: List[str], exclude_nodes: List[str]) -> str:
         node_options = []
 
         if include_nodes:
@@ -138,7 +130,8 @@ class SLURM(BatchSystem):
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
-        """Return a list containing `hold_jid` keyword and job id which is used to hold a particular job id for it to be ran at a later time.
+        """Return a list containing `hold_jid` keyword and job id which is used to hold
+        a particular job id for it to be ran at a later time.
         https://hpc.nih.gov/docs/job_dependencies.html"""
         jid = (
             job_id.id
@@ -163,14 +156,13 @@ class SLURM(BatchSystem):
         return f"-D {path}"
 
     @classmethod
-    def _get_output_fmt_str(
-        cls, suffix: str = "o", task_array: bool = False
-    ) -> str:
+    def _get_output_fmt_str(cls, suffix: str = "o", task_array: bool = False) -> str:
         return f"%x.{suffix}%A.%a" if task_array else f"%x.{suffix}%j"
 
     @classmethod
     def output_directory(cls, path: Path, task_array: bool = False) -> str:
-        """Return the line in the job script defining the output directory where the output of the job should be written to.
+        """Return the line in the job script defining the output directory
+        where the output of the job should be written to.
         These files end in `.o{job_id}`."""
         fmt_str = cls._get_output_fmt_str("o", task_array)
         path = path / fmt_str
@@ -178,7 +170,8 @@ class SLURM(BatchSystem):
 
     @classmethod
     def error_directory(cls, path: Path, task_array: bool = False) -> str:
-        """Return the line in the job script defining the error directory where any errors from the job should be written to.
+        """Return the line in the job script defining the error directory
+        where any errors from the job should be written to.
         These files end in `.e{job_id}`."""
         fmt_str = cls._get_output_fmt_str("e", task_array)
         path = path / fmt_str
@@ -189,14 +182,16 @@ class SLURM(BatchSystem):
         """Returns the line in the job script defining the number of corest to be used for the job."""
         from ichor.hpc import MACHINE, PARALLEL_ENVIRONMENT
 
-        return f"-p {PARALLEL_ENVIRONMENT[MACHINE][ncores]}\n#{cls.OptionCmd} -n {ncores}"
+        return (
+            f"-p {PARALLEL_ENVIRONMENT[MACHINE][ncores]}\n#{cls.OptionCmd} -n {ncores}"
+        )
 
     @classmethod
-    def array_job(
-        cls, njobs: int, max_running_tasks: Optional[int] = None
-    ) -> str:
-        """Returns the line in the job script that specifies this job is an array job. These jobs are run at the same time in parallel
-        as they do not depend on one another. An example will be running 50 Gaussian or AIMALL jobs at the same time without having to submit
+    def array_job(cls, njobs: int, max_running_tasks: Optional[int] = None) -> str:
+        """Returns the line in the job script that specifies this job is an array job.
+        These jobs are run at the same time in parallel
+        as they do not depend on one another. An example will be running 50 Gaussian
+        or AIMALL jobs at the same time without having to submit
         50 separate jobs. Instead 1 array job can be submitted."""
         array_str = f"-a 1-{njobs}"
         if max_running_tasks is not None:
@@ -205,9 +200,7 @@ class SLURM(BatchSystem):
 
     @classmethod
     def max_running_tasks(cls, max_running_tasks: int) -> str:
-        raise NotImplementedError(
-            f"No such command for '{cls.__class__.__name__}'"
-        )
+        raise NotImplementedError(f"No such command for '{cls.__class__.__name__}'")
 
     @classproperty
     def JobID(self) -> str:

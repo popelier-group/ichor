@@ -32,36 +32,24 @@
 """
 
 # initialize all things that we need for the hpc package here
+from ichor.hpc.global_variables import (
+    BATCH_SYSTEM,
+    FILE_STRUCTURE,
+    logger,
+    MACHINE,
+    PARALLEL_ENVIRONMENT,
+    SCRIPT_NAMES,
+    timing_logger,
+)
 
-import platform
-import sys
+__version__ = "3.1.0"
 
-from ichor.core.common.types import Version
-from ichor.hpc.batch_system import SLURM, LocalBatchSystem, ParallelEnvironments, SunGridEngine
-from ichor.hpc.file_structure import FileStructure
-from ichor.hpc.log import setup_logger
-from ichor.hpc.machine import Machine, init_machine
-
-__version__ = Version("3.1.0")
-
-FILE_STRUCTURE = FileStructure()
-
-BATCH_SYSTEM = LocalBatchSystem
-if SunGridEngine.is_present():
-    BATCH_SYSTEM = SunGridEngine
-if SLURM.is_present():
-    BATCH_SYSTEM = SLURM
-
-# will be Machine.Local if machine is not in list of names
-machine_name: str = platform.node()
-MACHINE = init_machine(machine_name)
-
-PARALLEL_ENVIRONMENT = ParallelEnvironments()
-PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
-PARALLEL_ENVIRONMENT[Machine.csf4]["serial"] = 1, 1
-PARALLEL_ENVIRONMENT[Machine.csf4]["multicore"] = 2, 32
-PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
-PARALLEL_ENVIRONMENT[Machine.local]["smp"] = 1, 100
-
-logger = setup_logger("ICHOR", "ichor.log")
-timing_logger = setup_logger("TIMING", "ichor.timing")
+__all__ = [
+    "FILE_STRUCTURE",
+    "BATCH_SYSTEM",
+    "MACHINE",
+    "PARALLEL_ENVIRONMENT",
+    "logger",
+    "timing_logger",
+    "SCRIPT_NAMES",
+]

@@ -2,30 +2,36 @@ from ichor.core.common.types import FileTree, FileType
 
 
 class FileStructure(FileTree):
-    """A class which manages all the files/directories that ICHOR needs in order to function. It makes it easier to find
-    the full paths of files and directories (which could be subdirectories). This class is used to make a tree
+    """A class which manages all the files/directories that ICHOR needs
+    in order to function. It makes it easier to find
+    the full paths of files and directories (which could be subdirectories).
+    This class is used to make a tree
     of all the directories/files. Then the full path of a directory can be obtained by doing:
 
     `self.FILE_STRUCTURE["training_set"]` to get the TRAINING_SET directory path.
 
-    Because a `Path` object is returned by the above code (see the `FileNode` class), it makes it possible to write code like
+    Because a `Path` object is returned by the above code (see the `FileNode` class),
+    it makes it possible to write code like
 
     `if self.FILE_STRUCTURE["training_set"].exists():`
 
-    where the `exists()` method can be called because `self.FILE_STRUCTURE["training_set"]` is a `Path` object (see pathlib library).
+    where the `exists()` method can be called because `self.FILE_STRUCTURE["training_set"]`
+    is a `Path` object (see pathlib library).
     """
 
     def __init__(self):
         super(FileStructure, self).__init__()
 
-        # name of the directory, how the directory can be internally referenced to by FILE_STRUCTURE["internal_reference"]
+        # name of the directory, how the directory can
+        # be internally referenced to by FILE_STRUCTURE["internal_reference"]
         # if parent is set, then make it a subdirectory of parent directory
         self.add(
             "TRAINING_SET",
             "training_set",
             type_=FileType.Directory,
-            description="""Directory for points used in GP training. The number of 
-            points in this directory grows as more points are being added from the sample pool to here (with  adaptive/random sampling).""",
+            description="""Directory for points used in GP training. The number of
+            points in this directory grows as more points are being added from the sample
+            pool to here (with  adaptive/random sampling).""",
         )
         self.add(
             "SAMPLE_POOL",
@@ -64,7 +70,8 @@ class FileStructure(FileTree):
             "model_log",
             type_=FileType.Directory,
             description="""Directory that holds all models that are made in an
-            adaptive sampling run. As the number of training points grows, newer models are made with the updated training data and new
+            adaptive sampling run. As the number of training points grows, newer
+            models are made with the updated training data and new
                 model files are written out to this directory.""",
         )
         self.add(
@@ -72,8 +79,10 @@ class FileStructure(FileTree):
             "model_log_collated",
             parent="model_log",
             type_=FileType.Directory,
-            description="""Directory containing either bottom-up or top-down collated models (or both) to group the 
-            model files from model_log into models that can easily be used for system level analysis""",
+            description="""Directory containing either bottom-up or
+            top-down collated models (or both) to group the
+            model files from model_log into models that can easily be
+            used for system level analysis""",
         )
         self.add(
             "BOTTOM_UP",
@@ -94,7 +103,8 @@ class FileStructure(FileTree):
             "scrubbed_points",
             type_=FileType.Directory,
             description="""Directory for points which have errorred out for
-            some reason during the Gaussian or AIMALL calculations. If no .wfn file is produced, AIMALL fails to run, or the integration error of AIMALL is high\
+            some reason during the Gaussian or AIMALL calculations. If no .wfn file is produced,
+            AIMALL fails to run, or the integration error of AIMALL is high\
                 then we do not want to use the point in training, so it is moved to this directory.""",
         )
         self.add(
@@ -125,7 +135,8 @@ class FileStructure(FileTree):
             "alf_reference_file",
             parent="data",
             type_=FileType.File,
-            description="""A reference file which contains the atomic local frame information for every atom in the system.
+            description="""A reference file which contains the atomic local
+            frame information for every atom in the system.
 
             Example file.
             O1,H2,H3 [[0,1,2], [1,0,2], [2,0,1]]
@@ -153,7 +164,8 @@ class FileStructure(FileTree):
             parent="scripts",
             type_=FileType.Directory,
             description="""This directory contains the standard output (stdout) that the job
-            produces. Things like print statements which are written to standard output are going to be written here (if ran from a compute node).
+            produces. Things like print statements which are written to standard
+            output are going to be written here (if ran from a compute node).
                 These files have the '.o' extension.""",
         )
         self.add(
@@ -189,8 +201,10 @@ class FileStructure(FileTree):
             "tyche",
             type_=FileType.Directory,
             description="""Contains files relating to TYCHE, which is a program that
-            distorts a molecule by its normal modes to produce a sample pool. Currently CP2K is used to produce sample pool becaues it 
-                is a full MD simulation package, so a much wider varierty of geometries are generated using it.""",
+            distorts a molecule by its normal modes to produce a sample pool.
+            Currently CP2K is used to produce sample pool becaues it
+                is a full MD simulation package, so a much wider
+                varierty of geometries are generated using it.""",
         )
         self.add(
             "GAUSSIAN",
@@ -208,9 +222,7 @@ class FileStructure(FileTree):
             type_=FileType.Directory,
             description="""Directory with files relating to DLPOLY simulations.""",
         )
-        self.add(
-            "GJF", "dlpoly_gjf", parent="dlpoly", type_=FileType.Directory
-        )
+        self.add("GJF", "dlpoly_gjf", parent="dlpoly", type_=FileType.Directory)
         self.add("AMBER", "amber", type_=FileType.Directory)
 
         self.add(
@@ -251,8 +263,10 @@ class FileStructure(FileTree):
             parent="jobs",
             type_=FileType.Directory,
             description="""A directory containing datafiles, which
-            have information for paths to inputs and outputs of a calculation submitted to the computer cluster. These datafiles are used to give
-                the paths to input/output files to jobs without hard-coding the inputs/outputs in the job script itself.""",
+            have information for paths to inputs and outputs of a calculation submitted
+            to the computer cluster. These datafiles are used to give
+                the paths to input/output files to jobs without hard-coding
+                the inputs/outputs in the job script itself.""",
         )
 
         # todo: not sure what this is for
@@ -278,9 +292,7 @@ class FileStructure(FileTree):
             description="""File that indicates whether the active learning should stop iterating.""",
         )
 
-        self.add(
-            "alpha", "alpha", parent="active_learning", type_=FileType.File
-        )
+        self.add("alpha", "alpha", parent="active_learning", type_=FileType.File)
         self.add(
             "cv_errors",
             "cv_errors",

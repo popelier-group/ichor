@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules, TycheModules
-from ichor.hpc.programs import get_tyche_path
 from ichor.hpc.submission_script.command_line import CommandLine
 from ichor.hpc.submission_script.gaussian_command import GaussianCommand
 
@@ -40,8 +39,7 @@ class TycheCommand(CommandLine):
 
     @classproperty
     def command(self) -> str:
-        tyche_loc = get_tyche_path()
-        return f"{tyche_loc.absolute()}"
+        pass
 
     @classproperty
     def ncores(self) -> int:
@@ -69,7 +67,7 @@ class TycheCommand(CommandLine):
         cmd += f"pushd {freq_param.parent}\n"
         cmd += "if [ -f tyche.log ]; then\n"
         cmd += f"  {TycheCommand.command} clean"
-        cmd += f"fi\n"
+        cmd += "fi\n"
         cmd += f"{TycheCommand.command}\n"
         cmd += "popd\n"
 

@@ -8,8 +8,10 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.os import run_cmd
 from ichor.core.common.str import split_by
 from ichor.core.common.types import EnumStrList
-from ichor.hpc.batch_system.batch_system import (BatchSystem, CannotParseJobID,
-                                                 Job, JobID)
+from ichor.hpc.batch_system.batch_system import BatchSystem
+
+from ichor.hpc.batch_system.jobs import CannotParseJobID, Job, JobID
+
 from ichor.hpc.batch_system.node import NodeType
 
 
@@ -36,7 +38,8 @@ class JobStatus(EnumStrList):
 
 
 class SunGridEngine(BatchSystem):
-    """A class that implements methods ICHOR uses to submit jobs to the Sun Grid Engine (SGE) batch system. These methods/properties
+    """A class that implements methods ICHOR uses to submit jobs
+    to the Sun Grid Engine (SGE) batch system. These methods/properties
     are used to construct job scripts for any program we want to run on SGE."""
 
     @staticmethod
@@ -72,17 +75,16 @@ class SunGridEngine(BatchSystem):
         try:
             return re.findall(r"\d+", stdout)[0]
         except IndexError:
-            raise CannotParseJobID(
-                f"Cannot parse job id from output: '{stdout}'"
-            )
+            raise CannotParseJobID(f"Cannot parse job id from output: '{stdout}'")
 
     @classmethod
     def get_queued_jobs(cls) -> List[Job]:
         stdout, _ = run_cmd(["qstat"])
 
         jobs = []
-        # job-ID  prior   name       user         state submit/start at     queue                          slots ja-task-ID
-        # -----------------------------------------------------------------------------------------------------------------
+        # job-ID  prior   name       user         state submit/start at   ...
+        # ...  queue                          slots ja-task-ID
+        # --------------------------------------------------------------------
         for line in stdout.split("\n")[2:]:
             tokens = split_by(
                 line,
@@ -155,9 +157,7 @@ class SunGridEngine(BatchSystem):
         return jobs
 
     @classmethod
-    def node_options(
-        cls, include_nodes: List[str], exclude_nodes: List[str]
-    ) -> str:
+    def node_options(cls, include_nodes: List[str], exclude_nodes: List[str]) -> str:
         node_options = []
 
         include_nodes = "|".join(include_nodes)
@@ -168,15 +168,12 @@ class SunGridEngine(BatchSystem):
         if exclude_nodes:
             node_options += [f"!({exclude_nodes})"]
 
-        return (
-            "-l h=" + "&".join(node_options) + "\n"
-            if len(node_options) > 0
-            else ""
-        )
+        return "-l h=" + "&".join(node_options) + "\n" if len(node_options) > 0 else ""
 
     @classmethod
     def hold_job(cls, job_id: Union[JobID, List[JobID]]) -> List[str]:
-        """Return a list containing `hold_jid` keyword and job id which is used to hold a particular job id for it to be ran at a later time."""
+        """Return a list containing `hold_jid` keyword and job id which
+        is used to hold a particular job id for it to be ran at a later time."""
         jid = (
             job_id.id
             if isinstance(job_id, JobID)
@@ -201,13 +198,15 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def output_directory(cls, path: Path, task_array: bool = False) -> str:
-        """Return the line in the job script defining the output directory where the output of the job should be written to.
+        """Return the line in the job script defining the
+        output directory where the output of the job should be written to.
         These files end in `.o{job_id}`."""
         return f"-o {path}"
 
     @classmethod
     def error_directory(cls, path: Path, task_array: bool = False) -> str:
-        """Return the line in the job script defining the error directory where any errors from the job should be written to.
+        """Return the line in the job script defining the error directory
+        where any errors from the job should be written to.
         These files end in `.e{job_id}`."""
         return f"-e {path}"
 
@@ -224,8 +223,10 @@ class SunGridEngine(BatchSystem):
 
     @classmethod
     def array_job(cls, njobs: int) -> str:
-        """Returns the line in the job script that specifies this job is an array job. These jobs are run at the same time in parallel
-        as they do not depend on one another. An example will be running 50 Gaussian or AIMALL jobs at the same time without having to submit
+        """Returns the line in the job script that specifies this job is an array job.
+        These jobs are run at the same time in parallel
+        as they do not depend on one another. An example will be running 50
+        Gaussian or AIMALL jobs at the same time without having to submit
         50 separate jobs. Instead 1 array job can be submitted."""
         return f"-t 1-{njobs}"
 

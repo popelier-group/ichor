@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files import PandoraDirectory
@@ -13,7 +13,11 @@ class PandoraCommand(PythonCommand):
     run_pyscf: bool = True
 
     def __init__(
-        self, config_file: Path, pyscf: bool = True, morfi: bool = True
+        self,
+        config_file: Path,
+        pandora_location: Union[str, Path],
+        pyscf: bool = True,
+        morfi: bool = True,
     ):
         self.config_file = config_file
         self.run_pyscf = pyscf
@@ -21,7 +25,7 @@ class PandoraCommand(PythonCommand):
 
         self._args = []
 
-        PythonCommand.__init__(self, Path(PANDORA_LOCATION()).absolute())
+        PythonCommand.__init__(self, Path(pandora_location).absolute())
 
     @classproperty
     def modules(self) -> Modules:
@@ -54,9 +58,7 @@ class PandoraCommand(PythonCommand):
 
 
 class PandoraPySCFCommand(PandoraCommand):
-    def __init__(
-        self, config_file: Path, point_directory: Optional[Path] = None
-    ):
+    def __init__(self, config_file: Path, point_directory: Optional[Path] = None):
         PandoraCommand.__init__(self, config_file, pyscf=True, morfi=False)
         self.point_directory = point_directory
 

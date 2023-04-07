@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import CP2KModules, Modules
+from ichor.hpc.modules import CP2KModules
+from ichor.hpc.modules.modules import Modules
 from ichor.hpc.submission_script.command_line import CommandLine
-from ichor.hpc.submission_script.ichor_command import ICHORCommand
 
 
 class CP2KCommand(CommandLine):
@@ -40,13 +40,13 @@ class CP2KCommand(CommandLine):
 
     @property
     def command(self) -> str:
-        """Returns the command to be used to run CP2K. The command depends on the 
+        """Returns the command to be used to run CP2K. The command depends on the
         number of cores."""
 
         if self.ncores == 1:
             return "cp2k.sopt"
         else:
-            return f"cp2k.ssmp"
+            return "cp2k.ssmp"
 
     def repr(self, variables: List[str]) -> str:
         """
@@ -59,7 +59,7 @@ class CP2KCommand(CommandLine):
         input = self.input.absolute()
         cmd = ""
         cmd += f'cp2kdir=$(dirname "{input}")\n'
-        cmd += f"pushd $cp2kdir\n"
+        cmd += "pushd $cp2kdir\n"
         cmd += f"{self.command} -i {input} -o {input.with_suffix('.out')}\n"
         cmd += "popd\n"
 

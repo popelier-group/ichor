@@ -1,11 +1,11 @@
 import os
-from typing import Optional
 from enum import auto
 from pathlib import Path
+from typing import Optional
 
 from ichor.core.common.functools import cached_property
-from ichor.core.common.types import Enum
 from ichor.core.common.io import mkdir, move
+from ichor.core.common.types import Enum
 from ichor.hpc.uid import get_uid
 
 
@@ -26,7 +26,8 @@ class SubmitType(Enum):
 
 
 class Machine(Enum):
-    """Enum which is used to define any machines that ICHOR is running on. This needs to be done because commands and settings change between different machines."""
+    """Enum which is used to define any machines that ICHOR is running on.
+    This needs to be done because commands and settings change between different machines."""
 
     # Machine Name = Machine Address, Can Submit on Compute, DropCompute available
     csf3 = "csf3.itservices.manchester.ac.uk", False, True
@@ -50,9 +51,7 @@ class Machine(Enum):
         if self.submit_on_compute:
             submit_type = SubmitType.SubmitOnCompute
         elif self.drop_compute_available:
-            from ichor.hpc.drop_compute import (
-                get_drop_compute,
-            )
+            from ichor.hpc.drop_compute import get_drop_compute
 
             if get_drop_compute(self).is_available_to_user:
                 submit_type = SubmitType.DropCompute
@@ -81,9 +80,9 @@ def get_machine_from_name(platform_name: str):
 
 def get_machine_from_file(machine_file: Optional[Path] = None) -> Machine:
     from ichor.hpc import FILE_STRUCTURE
+
     if machine_file is None:
         machine_file = FILE_STRUCTURE["machine"]
-
 
     if machine_file.exists():
         with open(machine_file, "r") as f:
@@ -102,6 +101,7 @@ def init_machine(machine_name: str, machine_file: Optional[Path] = None) -> Mach
 
     if machine_file is None:
         from ichor.hpc import FILE_STRUCTURE
+
         machine_file = FILE_STRUCTURE["machine"]
 
     if machine is Machine.local and machine_file.exists():
@@ -114,11 +114,9 @@ def init_machine(machine_name: str, machine_file: Optional[Path] = None) -> Mach
         and get_machine_from_file() != machine
     ):
         mkdir(machine_file.parent)
-        machine_filepart = Path(
-            str(machine_file) + f".{get_uid()}.filepart"
-        )
+        machine_filepart = Path(str(machine_file) + f".{get_uid()}.filepart")
         with open(machine_filepart, "w") as f:
             f.write(f"{machine.name}")
         move(machine_filepart, machine_file)
-    
+
     return machine

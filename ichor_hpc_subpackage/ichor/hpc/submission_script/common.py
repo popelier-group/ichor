@@ -2,8 +2,12 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import (SCRIPT_NAMES, AIMAllCommand,
-                                         GaussianCommand, SubmissionScript)
+from ichor.hpc.submission_script import (
+    AIMAllCommand,
+    GaussianCommand,
+    SCRIPT_NAMES,
+    SubmissionScript,
+)
 
 
 def submit_gjf_files(

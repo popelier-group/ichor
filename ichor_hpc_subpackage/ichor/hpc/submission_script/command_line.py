@@ -31,7 +31,7 @@ class CommandLine(ABC):
     @abstractmethod
     def data(self) -> List[str]:
         pass
-    
+
     @property
     def ndata(self) -> int:
         return len(self.data)
