@@ -94,17 +94,13 @@ if os.name == "nt":  # pragma: no cover
                 file_.seek(0)
 
             try:
-                msvcrt.locking(
-                    file_.fileno(), constants.LockFlags.UNBLOCK, lock_length
-                )
+                msvcrt.locking(file_.fileno(), constants.LockFlags.UNBLOCK, lock_length)
             except IOError as exc:
                 exception = exc
                 if exc.strerror == "Permission denied":
                     hfile = win32file._get_osfhandle(file_.fileno())
                     try:
-                        win32file.UnlockFileEx(
-                            hfile, 0, -0x10000, __overlapped
-                        )
+                        win32file.UnlockFileEx(hfile, 0, -0x10000, __overlapped)
                     except pywintypes.error as exc:
                         exception = exc
                         if exc.winerror == winerror.ERROR_NOT_LOCKED:

@@ -118,9 +118,7 @@ class LockBase(abc.ABC):  # pragma: no cover
     ):
         self.timeout = coalesce(timeout, DEFAULT_TIMEOUT)
         self.check_interval = coalesce(check_interval, DEFAULT_CHECK_INTERVAL)
-        self.fail_when_locked = coalesce(
-            fail_when_locked, DEFAULT_FAIL_WHEN_LOCKED
-        )
+        self.fail_when_locked = coalesce(fail_when_locked, DEFAULT_FAIL_WHEN_LOCKED)
 
     @abc.abstractmethod
     def acquire(
@@ -329,18 +327,14 @@ class RLock(Lock):
         if self._acquire_count >= 1:
             fh = self.fh
         else:
-            fh = super(RLock, self).acquire(
-                timeout, check_interval, fail_when_locked
-            )
+            fh = super(RLock, self).acquire(timeout, check_interval, fail_when_locked)
         self._acquire_count += 1
         assert fh
         return fh
 
     def release(self):
         if self._acquire_count == 0:
-            raise exceptions.LockException(
-                "Cannot release more times than acquired"
-            )
+            raise exceptions.LockException("Cannot release more times than acquired")
 
         if self._acquire_count == 1:
             super(RLock, self).release()

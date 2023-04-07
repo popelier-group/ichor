@@ -1,7 +1,9 @@
-""" Vendored from https://pypi.org/project/concurrent-log-handler/ to be able to run ICHOR without actually installing the concurrent log handler package
+#!/usr/bin/env python
+
+""" Vendored from https://pypi.org/project/concurrent-log-handler/ to be able
+to run ICHOR without actually installing the concurrent log handler package
 separately. This is needed as multiple ICHOR instances could write to the same file at the same time."""
 
-#!/usr/bin/env python
 # -*- coding: utf-8; mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vim: fileencoding=utf-8 tabstop=4 expandtab shiftwidth=4
 #
@@ -16,6 +18,58 @@ separately. This is needed as multiple ICHOR instances could write to the same f
 #   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #   License for the specific language governing permissions and limitations
 #   under the License.
+
+import io
+
+# Publish this class to the "logging.handlers" module so that it can be use
+# from a logging config file via logging.config.fileConfig().
+import logging.handlers
+import os
+import sys
+import time
+import traceback
+import warnings
+from contextlib import contextmanager
+from logging.handlers import BaseRotatingHandler
+
+from ichor.hpc.log.portalocker import lock, LOCK_EX, unlock
+
+try:
+    import grp
+    import pwd
+except ImportError:
+    pwd = grp = None
+
+# Random numbers for rotation temp file names, using secrets module if available (Python 3.6).
+# Otherwise use `random.SystemRandom` if available, then fall back on `random.Random`.
+try:
+    # noinspection PyPackageRequirements,PyCompatibility
+    from secrets import randbits
+except ImportError:
+    import random
+
+    if hasattr(random, "SystemRandom"):  # May not be present in all Python editions
+        # Should be safe to reuse `SystemRandom` - not software state dependant
+        randbits = random.SystemRandom().getrandbits
+    else:
+
+        def randbits(nb):
+            return random.Random().getrandbits(nb)
+
+
+try:
+    import gzip
+except ImportError:
+    gzip = None
+
+__all__ = [
+    "ConcurrentRotatingFileHandler",
+]
+
+# PY2 = False
+# if sys.version_info[0] == 2:
+#     PY2 = True
+
 
 """concurrent_log_handler: A smart replacement for the standard RotatingFileHandler
 
@@ -58,58 +112,6 @@ See the README file for an example usage of this module.
 This module supports Python 2.6 and later.
 
 """
-
-import io
-import os
-import sys
-import time
-import traceback
-import warnings
-from contextlib import contextmanager
-from logging import LogRecord
-from logging.handlers import BaseRotatingHandler
-
-from ichor.hpc.log.concurrent_log_handler.__version__ import (__author__,
-                                                              __version__)
-from ichor.hpc.log.portalocker import LOCK_EX, lock, unlock
-
-try:
-    import grp
-    import pwd
-except ImportError:
-    pwd = grp = None
-
-# Random numbers for rotation temp file names, using secrets module if available (Python 3.6).
-# Otherwise use `random.SystemRandom` if available, then fall back on `random.Random`.
-try:
-    # noinspection PyPackageRequirements,PyCompatibility
-    from secrets import randbits
-except ImportError:
-    import random
-
-    if hasattr(
-        random, "SystemRandom"
-    ):  # May not be present in all Python editions
-        # Should be safe to reuse `SystemRandom` - not software state dependant
-        randbits = random.SystemRandom().getrandbits
-    else:
-
-        def randbits(nb):
-            return random.Random().getrandbits(nb)
-
-
-try:
-    import gzip
-except ImportError:
-    gzip = None
-
-__all__ = [
-    "ConcurrentRotatingFileHandler",
-]
-
-PY2 = False
-if sys.version_info[0] == 2:
-    PY2 = True
 
 
 class ConcurrentRotatingFileHandler(BaseRotatingHandler):
@@ -361,9 +363,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                     if self.shouldRollover(record):
                         self.doRollover()
                 except Exception as e:
-                    self._console_log(
-                        "Unable to do rollover: %s" % (e,), stack=True
-                    )
+                    self._console_log("Unable to do rollover: %s" % (e,), stack=True)
                     # Continue on anyway
 
                 self.do_write(msg)
@@ -385,54 +385,51 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         self.stream = self.do_open()
         stream = self.stream
 
-        if PY2:
-            self.do_write_py2(msg)
-        else:
-            msg = msg + self.terminator
+        # if PY2:
+        #     self.do_write_py2(msg)
+        msg = msg + self.terminator
+        try:
+            stream.write(msg)
+        except UnicodeError:
+            # Try to emit in a form acceptable to the output encoding
+            # The unicode_error_policy determines whether this is lossy.
             try:
+                encoding = getattr(stream, "encoding", self.encoding or "us-ascii")
+                msg_bin = msg.encode(encoding, self.unicode_error_policy)
+                msg = msg_bin.decode(encoding, self.unicode_error_policy)
                 stream.write(msg)
             except UnicodeError:
-                # Try to emit in a form acceptable to the output encoding
-                # The unicode_error_policy determines whether this is lossy.
-                try:
-                    encoding = getattr(
-                        stream, "encoding", self.encoding or "us-ascii"
-                    )
-                    msg_bin = msg.encode(encoding, self.unicode_error_policy)
-                    msg = msg_bin.decode(encoding, self.unicode_error_policy)
-                    stream.write(msg)
-                except UnicodeError:
-                    # self._console_log(str(e))
-                    raise
+                # self._console_log(str(e))
+                raise
 
         stream.flush()
         self._close()
         return
 
     # noinspection PyCompatibility,PyUnresolvedReferences
-    def do_write_py2(self, msg):
-        stream = self.stream
-        term = self.terminator
-        policy = self.unicode_error_policy
+    # def do_write_py2(self, msg):
+    #     stream = self.stream
+    #     term = self.terminator
+    #     policy = self.unicode_error_policy
 
-        encoding = getattr(stream, "encoding", None)
+    #     encoding = getattr(stream, "encoding", None)
 
-        # as far as I can tell, this should always be set from io.open, but just in case...
-        if not encoding:
-            if not self.encoding:
-                self._console_log(
-                    "Warning, unable to determine encoding of logging stream; assuming utf-8"
-                )
-            encoding = self.encoding or "utf-8"
+    #     # as far as I can tell, this should always be set from io.open, but just in case...
+    #     if not encoding:
+    #         if not self.encoding:
+    #             self._console_log(
+    #                 "Warning, unable to determine encoding of logging stream; assuming utf-8"
+    #             )
+    #         encoding = self.encoding or "utf-8"
 
-        if not isinstance(msg, unicode):
-            msg = unicode(msg, encoding, policy)
+    #     if not isinstance(msg, unicode):
+    #         msg = unicode(msg, encoding, policy)
 
-        # Add in the terminator.
-        if not isinstance(term, unicode):
-            term = unicode(term, encoding, policy)
-        msg = msg + term
-        stream.write(msg)
+    #     # Add in the terminator.
+    #     if not isinstance(term, unicode):
+    #         term = unicode(term, encoding, policy)
+    #     msg = msg + term
+    #     stream.write(msg)
 
     def _do_lock(self):
         if self.is_locked:
@@ -512,9 +509,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             gzip_ext = ".gz"
 
         def do_rename(source_fn, dest_fn):
-            self._console_log(
-                "Rename %s -> %s" % (source_fn, dest_fn + gzip_ext)
-            )
+            self._console_log("Rename %s -> %s" % (source_fn, dest_fn + gzip_ext))
             if os.path.exists(dest_fn):
                 os.remove(dest_fn)
             if os.path.exists(dest_fn + gzip_ext):
@@ -563,9 +558,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if self.maxBytes > 0:  # are we rolling over?
             self.stream = self.do_open()
             try:
-                self.stream.seek(
-                    0, 2
-                )  # due to non-posix-compliant Windows feature
+                self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
                 if self.stream.tell() >= self.maxBytes:
                     return True
             finally:
@@ -597,9 +590,5 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if self.chmod and os.chmod:
             os.chmod(filename, self.chmod)
 
-
-# Publish this class to the "logging.handlers" module so that it can be use
-# from a logging config file via logging.config.fileConfig().
-import logging.handlers
 
 logging.handlers.ConcurrentRotatingFileHandler = ConcurrentRotatingFileHandler

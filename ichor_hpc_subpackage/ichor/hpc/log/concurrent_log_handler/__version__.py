@@ -1,5 +1,7 @@
 __title__ = "concurrent-log-handler"
-__description__ = "RotatingFileHandler replacement with concurrency, gzip and Windows support"
+__description__ = (
+    "RotatingFileHandler replacement with concurrency, gzip and Windows support"
+)
 __url__ = "https://github.com/Preston-Landers/concurrent-log-handler"
 __version__ = "0.9.20"
 __author__ = "Preston Landers"

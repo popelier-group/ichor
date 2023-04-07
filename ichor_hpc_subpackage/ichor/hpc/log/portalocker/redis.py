@@ -134,12 +134,8 @@ class RedisLock(utils.LockBase):
     ):
 
         timeout = utils.coalesce(timeout, self.timeout, 0.0)
-        check_interval = utils.coalesce(
-            check_interval, self.check_interval, 0.0
-        )
-        fail_when_locked = utils.coalesce(
-            fail_when_locked, self.fail_when_locked
-        )
+        check_interval = utils.coalesce(check_interval, self.check_interval, 0.0)
+        fail_when_locked = utils.coalesce(fail_when_locked, self.fail_when_locked)
 
         assert not self.pubsub, "This lock is already active"
         connection = self.get_connection()
@@ -202,9 +198,7 @@ class RedisLock(utils.LockBase):
         )
 
         check_interval = min(self.thread_sleep_time, timeout / 10)
-        for _ in self._timeout_generator(
-            timeout, check_interval
-        ):  # pragma: no branch
+        for _ in self._timeout_generator(timeout, check_interval):  # pragma: no branch
             message = pubsub.get_message(timeout=check_interval)
             if message:  # pragma: no branch
                 pubsub.close()
