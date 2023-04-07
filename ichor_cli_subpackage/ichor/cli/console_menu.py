@@ -90,8 +90,8 @@ class ConsoleMenu(OriginalConsoleMenu):
             prnt = prnt.parent
 
         # reverse ordering so that oldest parent options are at the top
-        self._parent_menu_options = _parent_menu_options[::-1]
-        return self._parent_menu_options
+        _parent_menu_options = _parent_menu_options[::-1]
+        return _parent_menu_options
 
     def get_prologue_text(self) -> str:
         """Gets the prologue text, containing information for saved variables that are needed for jobs.
@@ -111,7 +111,6 @@ class ConsoleMenu(OriginalConsoleMenu):
         for p_options in self.parent_menu_options:
             # the __call__ method of a MenuOption just makes it into a string which can be printed to the prologue
             prologue_txt += p_options()
-        # add a new line so that the current menu options are on a new line
         # finally add any new options from the current menu, again __call__ method of MenuOption is used
         if self.this_menu_options:
             prologue_txt += self.this_menu_options()
