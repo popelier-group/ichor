@@ -49,7 +49,7 @@ class ConsoleMenu(OriginalConsoleMenu):
         clear_screen=True,
         show_exit_option=True,
         exit_option_text="Exit",
-        exit_menu_char=None,
+        exit_menu_char="q",
     ):
 
         # make screen bigger by default
