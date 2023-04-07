@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 from ichor.core.common.io import mkdir
 from ichor.core.common.types import VarReprMixin
+from ichor.hpc import FILE_STRUCTURE
 
 
 class CannotParseJobID(Exception):
@@ -27,8 +28,6 @@ class JobID:
         self.id = id
 
     def write(self):
-        from ichor.hpc import FILE_STRUCTURE
-
         mkdir(
             FILE_STRUCTURE["jid"].parent
         )  # make parent directories if they don't exist
