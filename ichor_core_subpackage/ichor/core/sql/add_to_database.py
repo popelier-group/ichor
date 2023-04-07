@@ -3,7 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from ichor.core.sql import AtomNames, Dataset, Points
+from ichor.core.sql.create_database import AtomNames, Dataset, Points
+
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 

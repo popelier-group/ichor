@@ -7,13 +7,15 @@ from ichor.core.calculators import default_alf_calculator
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
-from ichor.core.files import AIM, GaussianOut, GJF, INTs, WFN, XYZ
+from ichor.core.files.aimall import AIM, INTs
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file import ReadFile
 
 from ichor.core.files.file_data import HasAtoms, HasProperties, PointDirectoryProperties
+from ichor.core.files.gaussian import GaussianOut, GJF, WFN
 from ichor.core.files.optional_file import OptionalFile, OptionalPath
 from ichor.core.files.pandora import PandoraDirectory, PandoraInput
+from ichor.core.files.xyz import XYZ
 
 
 class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):

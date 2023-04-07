@@ -1,3 +1,3 @@
-# from ichor.core.analysis.rmse.rmse_menu import rmse_menu
-#
-# __all__ = ["rmse_menu"]
+from ichor.core.analysis.rmse.rmse import calculate_rmse
+
+__all__ = ["calculate_rmse"]
