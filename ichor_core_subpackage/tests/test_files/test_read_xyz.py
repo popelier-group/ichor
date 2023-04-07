@@ -1,10 +1,11 @@
 """Tests if the atoms contains in the .xyz file are the same as reference Atoms."""
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.files import XYZ
-from tests.test_atoms import _test_atoms_coords
-from tests.path import get_cwd
 from ichor.core.common.units import AtomicDistance
+from ichor.core.files import XYZ
+
+from tests.path import get_cwd
+from tests.test_atoms import _test_atoms_coords
 
 example_dir = get_cwd(__file__) / "example_xyzs"
 

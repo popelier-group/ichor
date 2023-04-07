@@ -1,11 +1,14 @@
-from ichor.core.atoms import Atoms, Atom
+from ichor.core.atoms import Atom, Atoms
 from ichor.core.files import XYZ
 
+
 def _test_write_xyz(xyz_file, xyz_file_contents):
-    
-    """ Asserts that the contents of a written out file are the same as a reference string that should contain the same contents."""
+
+    """Asserts that the contents of a written out file are the same as
+    a reference string that should contain the same contents."""
 
     assert xyz_file.path.read_text() == xyz_file_contents
+
 
 def test_xyz(tmp_path):
 
@@ -57,6 +60,6 @@ def test_xyz(tmp_path):
     xyz_file = XYZ(xyz_file_path, atoms=atoms)
     xyz_file.write()
 
-    xyz_file_contents = "6\n\nO   0.00000000   0.00000000   0.00000000\nH  -0.53506582  -0.96513546   0.34177239\nH   0.99125209   0.11847125  -0.04195287\nO  -0.00000000   0.00000000  -3.30362879\nH   0.00000000   0.33294583  -4.26739270\nH  -0.00000000  -0.93417429  -3.63732169\n"
+    xyz_file_contents = "6\n\nO   0.00000000   0.00000000   0.00000000\nH  -0.53506582  -0.96513546   0.34177239\nH   0.99125209   0.11847125  -0.04195287\nO  -0.00000000   0.00000000  -3.30362879\nH   0.00000000   0.33294583  -4.26739270\nH  -0.00000000  -0.93417429  -3.63732169\n"  # noqa E501
 
     _test_write_xyz(xyz_file, xyz_file_contents)

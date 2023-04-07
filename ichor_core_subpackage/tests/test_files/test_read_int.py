@@ -1,14 +1,13 @@
 from pathlib import Path
-from typing import List, Optional, Dict
-from ichor.core.files import INT, XYZ
-from tests.path import get_cwd
-from ichor.core.files.aimall.int import (
-    CriticalPoint,
-    CriticalPointType,
-)
+from typing import Dict, List, Optional
+
 import pytest
-from tests.test_files import _assert_val_optional
 from ichor.core.common.types.itypes import T
+from ichor.core.files import INT, XYZ
+from ichor.core.files.aimall.int import CriticalPoint, CriticalPointType
+
+from tests.path import get_cwd
+from tests.test_files import _assert_val_optional
 
 example_dir = get_cwd(__file__) / "example_ints"
 
@@ -16,12 +15,10 @@ example_dir = get_cwd(__file__) / "example_ints"
 def _assert_critical_point_instances(
     list_of_critical_points: T, expected_list_of_critical_points: Optional[T]
 ):
-    
-    """ Asserts that a list of CriticalPoint instances is equal to a reference list of Critical Point Instances."""
 
-    assert len(list_of_critical_points) == len(
-        expected_list_of_critical_points
-    )
+    """Asserts that a list of CriticalPoint instances is equal to a reference list of Critical Point Instances."""
+
+    assert len(list_of_critical_points) == len(expected_list_of_critical_points)
 
     if expected_list_of_critical_points is not None:
         for cp, other_cp in zip(
@@ -51,14 +48,14 @@ def _test_int(
     net_charge: float = None,
     global_spherical_multipoles: Dict[str, float] = None,
     local_spherical_multipoles: Dict[str, float] = None,
-    C_matrix = None,
+    C_matrix=None,
     iqa_energy_components: Dict[str, float] = None,
     iqa: float = None,
     e_intra: float = None,
     q: float = None,
     q00: float = None,
     dipole_mag: float = None,
-    total_time: int = None
+    total_time: int = None,
 ):
     """Tests original .int file from AIMALL is being read in correctly. No json
     file is generated anymore for .int files, so this is not tested."""
@@ -73,13 +70,9 @@ def _test_int(
     _assert_val_optional(
         int_file_instance.basin_integration_results, basin_integration_results
     )
-    _assert_val_optional(
-        int_file_instance.integration_error, integration_error
-    )
+    _assert_val_optional(int_file_instance.integration_error, integration_error)
 
-    _assert_critical_point_instances(
-        int_file_instance.critical_points, critical_points
-    )
+    _assert_critical_point_instances(int_file_instance.critical_points, critical_points)
     _assert_critical_point_instances(
         int_file_instance.bond_critical_points, bond_critical_points
     )
@@ -96,9 +89,7 @@ def _test_int(
         global_spherical_multipoles,
     )
 
-    _assert_val_optional(
-        int_file_instance.iqa_energy_components, iqa_energy_components
-    )
+    _assert_val_optional(int_file_instance.iqa_energy_components, iqa_energy_components)
     _assert_val_optional(int_file_instance.iqa, iqa)
     _assert_val_optional(int_file_instance.e_intra, e_intra)
     _assert_val_optional(int_file_instance.q, q)
@@ -115,6 +106,7 @@ def _test_int(
         _assert_val_optional(int_file_instance.properties(C_matrix), properties)
 
     _assert_val_optional(int_file_instance.total_time, total_time)
+
 
 def test_int_without_reference_geometry():
 
@@ -267,13 +259,11 @@ def test_int_without_reference_geometry():
 
 
 def test_int_with_reference_geometry():
-    
+
     from ichor.core.calculators.alf import calculate_alf_cahn_ingold_prelog
 
-    xyz_file_inst = XYZ(
-        example_dir / "example_parent_water_monomer_geometry.xyz"
-    )
-    
+    xyz_file_inst = XYZ(example_dir / "example_parent_water_monomer_geometry.xyz")
+
     # calculate system alf and also calculate C matrix for atom of interest (O1)
     system_alf = xyz_file_inst.alf(calculate_alf_cahn_ingold_prelog)
     o1_C_matrix = xyz_file_inst.C_matrix_dict(system_alf)["O1"]
@@ -299,7 +289,8 @@ def test_int_with_reference_geometry():
 
     _test_int(
         # since only o1 int, only need rotation matrix for O1 atom, but we can pass in dictionary for whole molecule
-        # as the code is written to be able to rotate single atoms using a list of ALFs (as long as the alf for the specific atom is in the list)
+        # as the code is written to be able to rotate single atoms using a list of ALFs
+        # (as long as the alf for the specific atom is in the list)
         int_file_path=example_dir / "o1.int",
         atom_name="O1",
         atom_num=1,

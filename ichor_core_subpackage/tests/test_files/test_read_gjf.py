@@ -2,14 +2,15 @@ from pathlib import Path
 from typing import List, Optional
 
 from ichor.core.atoms import Atom, Atoms
+from ichor.core.common.units import AtomicDistance
 from ichor.core.files import GJF
-from ichor.core.common.types.itypes import T
+
+from tests.path import get_cwd
 from tests.test_atoms import _test_atoms_coords
 from tests.test_files import _assert_val_optional
-from tests.path import get_cwd
-from ichor.core.common.units import AtomicDistance
 
 example_dir = get_cwd(__file__) / "example_gjfs"
+
 
 def _test_read_gjf(
     gjf_file: Path,
@@ -22,9 +23,9 @@ def _test_read_gjf(
     spin_multiplicity: Optional[int] = None,
     atoms: Optional[Atoms] = None,
 ):
-    
+
     "Test function for .gjf Gaussian input file."
-    
+
     gjf = GJF(gjf_file)
 
     _assert_val_optional(gjf.link0, link0)
@@ -203,6 +204,7 @@ def test_paracetamol_standard():
         spin_multiplicity=1,
         atoms=expected_atoms,
     )
+
 
 def test_water_opt_freq():
 
