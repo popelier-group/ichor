@@ -75,7 +75,7 @@ class ConsoleMenu(OriginalConsoleMenu):
     @property
     def parent_menu_options(self) -> List[MenuOptions]:
         """Returns a list of `MenuOption` instances which contain information about options
-        from parent classes. The list is reverse sorted, meaning that the earliest class is displayed\
+        from parent classes. The list is reverse sorted, meaning that the earliest class is displayed
         first."""
 
         # list with "MenuOptions" of all parent classes
