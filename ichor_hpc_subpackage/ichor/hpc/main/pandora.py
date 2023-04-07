@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.io import cp
 from ichor.core.files import (
     MorfiDirectory,
@@ -13,12 +15,8 @@ from ichor.core.files import (
 )
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import (
-    MorfiCommand,
-    PandoraPySCFCommand,
-    SCRIPT_NAMES,
-    SubmissionScript,
-)
+from ichor.hpc.submission_commands import MorfiCommand, PandoraPySCFCommand
+from ichor.hpc.submission_script import SubmissionScript
 
 
 def submit_points_directory_to_pyscf(
@@ -46,7 +44,9 @@ def submit_pandora_input_to_pyscf(
     if point_directories is None:
         point_directories = [None for _ in range(len(pandora_inputs))]
     # make a SubmissionScript instance which is going to house all the jobs that are going to be ran
-    with SubmissionScript(SCRIPT_NAMES["pandora"]["pyscf"]) as submission_script:
+    with SubmissionScript(
+        ichor.hpc.global_variables.SCRIPT_NAMES["pandora"]["pyscf"]
+    ) as submission_script:
         for pandora_input, point_directory in zip(pandora_inputs, point_directories):
             if (
                 force
@@ -140,7 +140,9 @@ def submit_morfi(
         aimall_wfns = [None for _ in range(len(morfi_inputs))]
     if point_directories is None:
         point_directories = [None for _ in range(len(morfi_inputs))]
-    with SubmissionScript(SCRIPT_NAMES["pandora"]["morfi"]) as submission_script:
+    with SubmissionScript(
+        ichor.hpc.global_variables.SCRIPT_NAMES["pandora"]["morfi"]
+    ) as submission_script:
         for morfi_input, aimall_wfn, point_directory in zip(
             morfi_inputs, aimall_wfns, point_directories
         ):

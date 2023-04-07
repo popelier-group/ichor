@@ -1,13 +1,15 @@
 from pathlib import Path
 from typing import Union
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.io import mkdir
 from ichor.core.files import Mol2
 from ichor.core.molecular_dynamics.amber import write_mdin
 from ichor.core.useful_functions.get_atoms import get_atoms_from_path
-from ichor.hpc import FILE_STRUCTURE
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.submission_script import AmberCommand, SCRIPT_NAMES, SubmissionScript
+from ichor.hpc.submission_commands import AmberCommand
+from ichor.hpc.submission_script import SubmissionScript
 
 
 def submit_amber(
@@ -53,13 +55,16 @@ def submit_amber(
     # # ncores must be less than or equal to the number of residues
     # ncores = min(ncores, nres)
 
-    mkdir(FILE_STRUCTURE["amber"])
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["amber"])
     mol2 = Mol2(
-        FILE_STRUCTURE["amber"] / (system_name + Mol2.filetype), system_name, atoms
+        ichor.hpc.global_variables.FILE_STRUCTURE["amber"]
+        / (system_name + Mol2.filetype),
+        system_name,
+        atoms,
     )
     mol2.write()
 
-    mdin = FILE_STRUCTURE["amber"] / "md.in"
+    mdin = ichor.hpc.global_variables.FILE_STRUCTURE["amber"] / "md.in"
     write_mdin(
         mdin,
         nsteps=nsteps,
@@ -69,7 +74,9 @@ def submit_amber(
         ln_gamma=ln_gamma,
     )
 
-    with SubmissionScript(SCRIPT_NAMES["amber"], ncores=ncores) as submission_script:
+    with SubmissionScript(
+        ichor.hpc.global_variables.SCRIPT_NAMES["amber"], ncores=ncores
+    ) as submission_script:
         submission_script.add_command(
             AmberCommand(
                 mol2_file=mol2.path,

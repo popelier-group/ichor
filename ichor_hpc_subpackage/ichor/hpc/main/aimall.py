@@ -2,12 +2,15 @@ from pathlib import Path
 from typing import List, Optional, Union
 from warnings import warn
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
 from ichor.core.files import PointsDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import AIMAllCommand, SCRIPT_NAMES, SubmissionScript
+from ichor.hpc.submission_commands import AIMAllCommand
+from ichor.hpc.submission_script import SubmissionScript
 
 
 def submit_points_directory_to_aimall(
@@ -75,7 +78,7 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
 def submit_wfns(
     wfns: List[Path],
     aimall_atoms: Optional[List[str]] = None,
-    script_name: str = SCRIPT_NAMES["aimall"],
+    script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
     ncores=2,
     naat=1,
     hold: Optional[JobID] = None,
@@ -169,7 +172,7 @@ def submit_wfns(
 
 # def scrub_aimall(wfn_file: str):
 #     """Used by `CheckManager`. Checks if AIMALL job ran correctly. If
-# it did not, it will move the Point to the `FILE_STRUCTURE["aimall_scrubbed_points"]`
+# it did not, it will move the Point to the `ichor.hpc.global_variables.FILE_STRUCTURE["aimall_scrubbed_points"]`
 #     directory and record that it has moved the point in the log file. If a .sh
 # file exists and the integration error for the point is lower than the
 #     threshold (1e-4), then this checking function will not do anything.

@@ -1,8 +1,9 @@
 from pathlib import Path
 from typing import List, Optional, Union
 
+import ichor.hpc.global_variables
+
 from ichor.core.files import GJF, PointsDirectory
-from ichor.hpc import SCRIPT_NAMES
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script import GaussianCommand, SubmissionScript
@@ -16,7 +17,7 @@ def submit_points_directory_to_gaussian(
     rerun: bool = False,
     scrub: bool = False,
     hold: JobID = None,
-    script_name: str = SCRIPT_NAMES["gaussian"],
+    script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"],
     **kwargs,
 ) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
@@ -87,7 +88,9 @@ def write_gjfs(
 def submit_gjfs(
     gjfs: List[Path],
     force_calculate_wfn: bool = False,
-    script_name: Optional[Union[str, Path]] = SCRIPT_NAMES["gaussian"],
+    script_name: Optional[Union[str, Path]] = ichor.hpc.global_variables.SCRIPT_NAMES[
+        "gaussian"
+    ],
     hold: Optional[JobID] = None,
     rerun=False,
     scrub=False,
@@ -106,7 +109,7 @@ def submit_gjfs(
     :param gjfs: A list of Path objects pointing to .gjf files
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files,
         even if .wfn files already exist. Defaults to False.
-    :script_name: Path to write submission script out to defaults to SCRIPT_NAMES["gaussian"]
+    :script_name: Path to write submission script out to defaults to ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"]
     :param hold: An optional JobID for which this job to hold.
         This is used in auto-run to hold this job for the previous job to finish, defaults to None
     :return: The JobID of this job given by the submission system.
@@ -157,7 +160,8 @@ def submit_gjfs(
 
 # def scrub_gaussian(gaussian_file: str):
 #     """Used by `CheckManager`. Checks if Gaussian job ran correctly.
-#     If it did not, it will move the Point to the `FILE_STRUCTURE["gaussian_scrubbed_points"]` directory
+#     If it did not, it will move the Point to the
+#   `ichor.hpc.global_variables.FILE_STRUCTURE["gaussian_scrubbed_points"]` directory
 #     and record that it has moved the point in the log file. If a .wfn file exists
 #     and it contains the correct information in its last line, then
 #     this checking function will not do anything.

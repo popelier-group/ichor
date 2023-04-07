@@ -9,7 +9,7 @@ class SubmissionError(Exception):
     pass
 
 
-class CommandLine(ABC):
+class SubmissionCommand(ABC):
     """Abstract Base Class for job types (such as Gaussian, AIMALL, and FEREBUS jobs.)"""
 
     @classproperty

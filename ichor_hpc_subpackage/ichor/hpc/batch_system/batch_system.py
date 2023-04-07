@@ -27,7 +27,9 @@ class BatchSystem(ABC):
 
     @classmethod
     def submit_script(
-        cls, job_script: Path, hold: Optional[Union[JobID, List[JobID]]] = None
+        cls,
+        job_script: Path,
+        hold: Optional[Union[JobID, List[JobID]]] = None,
     ) -> JobID:
         """Submit a job script to the batch system in order to queue/run jobs."""
         cmd = cls.submit_script_command
@@ -45,7 +47,6 @@ class BatchSystem(ABC):
             job_script, cls.parse_job_id(stdout)
         )  # stdout is parsed because this is where the job id is printed once a job is submitted
         logger.debug(f"- job_id: {job_id}")
-        job_id.write()
         return job_id
 
     @classmethod

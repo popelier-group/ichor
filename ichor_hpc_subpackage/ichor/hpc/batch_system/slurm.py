@@ -180,11 +180,9 @@ class SLURM(BatchSystem):
     @classmethod
     def parallel_environment(cls, ncores: int) -> Optional[str]:
         """Returns the line in the job script defining the number of corest to be used for the job."""
-        from ichor.hpc import MACHINE, PARALLEL_ENVIRONMENT
+        import ichor.hpc.global_variables
 
-        return (
-            f"-p {PARALLEL_ENVIRONMENT[MACHINE][ncores]}\n#{cls.OptionCmd} -n {ncores}"
-        )
+        return f"-p {ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ichor.hpc.global_variables.MACHINE][ncores]}\n#{cls.OptionCmd} -n {ncores}"  # noqa E501
 
     @classmethod
     def array_job(cls, njobs: int, max_running_tasks: Optional[int] = None) -> str:

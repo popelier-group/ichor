@@ -4,10 +4,10 @@ from typing import List, Optional
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules
-from ichor.hpc.submission_script.command_line import CommandLine
+from ichor.hpc.submission_command import SubmissionCommand
 
 
-class PythonCommand(CommandLine):
+class PythonCommand(SubmissionCommand):
     """A class which is used for any jobs that are going to run Python code
 
     :param python_script: A path object to the python script that is being ran

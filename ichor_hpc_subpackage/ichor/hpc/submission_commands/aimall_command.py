@@ -2,15 +2,15 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Union
 
+import ichor.hpc.global_variables
+
 from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
-from ichor.hpc import MACHINE
 from ichor.hpc.machine import Machine
 from ichor.hpc.modules import AIMAllModules, Modules
-from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_script.command_line import CommandLine, SubmissionError
+from ichor.hpc.submission_command import SubmissionCommand, SubmissionError
 
 
 class UseTwoe(Enum):
@@ -153,7 +153,7 @@ AIMAll_COMMANDS = {
 }
 
 
-class AIMAllCommand(CommandLine):
+class AIMAllCommand(SubmissionCommand):
     """
     A class which is used to add AIMALL-related commands to a submission script.
     It is used to write the submission script line where
@@ -271,12 +271,12 @@ class AIMAllCommand(CommandLine):
         For other machines, the AIMAll folder (containing scripts/executables)
         needs to be found in the home directory."""
 
-        if MACHINE not in AIMAll_COMMANDS.keys():
+        if ichor.hpc.global_variables.MACHINE not in AIMAll_COMMANDS.keys():
             raise SubmissionError(
-                f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
+                f"Command not defined for '{self.__name__}' on '{ichor.hpc.global_variables.MACHINE.name}'"
             )
 
-        return AIMAll_COMMANDS[MACHINE]
+        return AIMAll_COMMANDS[ichor.hpc.global_variables.MACHINE]
 
     @property
     def arguments(self) -> List[str]:
@@ -340,21 +340,21 @@ class AIMAllCommand(CommandLine):
 
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
 
-        # TODO: possibly remove these because they are not really needed
-        if self.rerun:
+        # # TODO: possibly remove these because they are not really needed
+        # if self.rerun:
 
-            cm = CheckManager(
-                check_function="rerun_aimall",
-                args_for_check_function=[variables[0]],
-                ntimes=5,
-            )
-            cmd = cm.rerun_if_job_failed(cmd)
+        #     cm = CheckManager(
+        #         check_function="rerun_aimall",
+        #         args_for_check_function=[variables[0]],
+        #         ntimes=5,
+        #     )
+        #     cmd = cm.rerun_if_job_failed(cmd)
 
-        if self.scrub:
-            cm = CheckManager(
-                check_function="scrub_aimall",
-                args_for_check_function=[variables[0]],
-            )
-            cmd = cm.scrub_point_directory(cmd)
+        # if self.scrub:
+        #     cm = CheckManager(
+        #         check_function="scrub_aimall",
+        #         args_for_check_function=[variables[0]],
+        #     )
+        #     cmd = cm.scrub_point_directory(cmd)
 
         return cmd

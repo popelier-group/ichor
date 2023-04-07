@@ -3,11 +3,11 @@ from typing import List
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules, TycheModules
-from ichor.hpc.submission_script.command_line import CommandLine
-from ichor.hpc.submission_script.gaussian_command import GaussianCommand
+from ichor.hpc.submission_command import SubmissionCommand
+from ichor.hpc.submission_commands import GaussianCommand
 
 
-class TycheCommand(CommandLine):
+class TycheCommand(SubmissionCommand):
     """
     todo: write docs
     """

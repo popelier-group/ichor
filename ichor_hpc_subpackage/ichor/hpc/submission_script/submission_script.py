@@ -1,12 +1,12 @@
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
-from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE, MACHINE
 from ichor.hpc.batch_system import JobID, NodeType
 from ichor.hpc.submission_script.command_group import CommandGroup
-from ichor.hpc.submission_script.data_lock import DataLock
 from ichor.hpc.uid import get_uid
 
 
@@ -92,25 +92,27 @@ class SubmissionScript:
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
         the system on which the job is ran, as well as on the number of cores that the job needs."""
 
-        mkdir(FILE_STRUCTURE["outputs"])
-        mkdir(FILE_STRUCTURE["errors"])
+        mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["outputs"])
+        mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["errors"])
 
         task_array = len(self.grouped_commands) > 1
 
         # change current working directory to directory from which ICHOR is launched.
         # make the paths to outputs and errors absolute
         script_options = [
-            BATCH_SYSTEM.change_working_directory(self.cwd),
-            BATCH_SYSTEM.output_directory(
-                FILE_STRUCTURE["outputs"].absolute(), task_array
+            ichor.hpc.global_variables.BATCH_SYSTEM.change_working_directory(self.cwd),
+            ichor.hpc.global_variables.BATCH_SYSTEM.output_directory(
+                ichor.hpc.global_variables.FILE_STRUCTURE["outputs"].absolute(),
+                task_array,
             ),
-            BATCH_SYSTEM.error_directory(
-                FILE_STRUCTURE["errors"].absolute(), task_array
+            ichor.hpc.global_variables.BATCH_SYSTEM.error_directory(
+                ichor.hpc.global_variables.FILE_STRUCTURE["errors"].absolute(),
+                task_array,
             ),
         ]
 
         # if the number of cores is more than 1, have to add additional options
-        pe = BATCH_SYSTEM.parallel_environment(self.ncores)
+        pe = ichor.hpc.global_variables.BATCH_SYSTEM.parallel_environment(self.ncores)
         if pe is not None:
             script_options.append(pe)
 
@@ -128,7 +130,7 @@ class SubmissionScript:
         modules = []
         for command in self.grouped_commands:
             # modules depend on which machine (CSF/FFLUXLAB) we are currently on
-            modules += command.modules[MACHINE]
+            modules += command.modules[ichor.hpc.global_variables.MACHINE]
         return list(set(modules))
 
     @property
@@ -151,7 +153,7 @@ class SubmissionScript:
             The rest is what is returned by this method.
         """
         # Note: double {{ }} is python notation for writing a curly brace in an f-string
-        return f"${{{cls.arr(n)}[${BATCH_SYSTEM.TaskID}-1]}}"
+        return f"${{{cls.arr(n)}[${ichor.hpc.global_variables.BATCH_SYSTEM.TaskID}-1]}}"
 
     def var(cls, n):
         return f"var{n + 1}"
@@ -168,7 +170,8 @@ class SubmissionScript:
         return f"[ -n {cls.array_index(n)} ]"
 
     def write_datafile(self, datafile: Path, data: List[List[str]]) -> None:
-        """Write the datafile to disk. All datafiles are stored in FILE_STRUCTURE["datafiles"]. Each line of the
+        """Write the datafile to disk. All datafiles are stored in
+        ichor.hpc.global_variables.FILE_STRUCTURE["datafiles"]. Each line of the
         datafile contains text that corresponds to the inputs and output file names.
         These are separated by self.separator, which is a comma.
 
@@ -178,13 +181,11 @@ class SubmissionScript:
             WATER0002.gjf,WATER0002.gau
             ...
         """
-        # TODO:remove datalock in the future.
-        if not DataLock.locked:
-            mkdir(datafile.parent)
-            with open(datafile, "w") as f:
-                for cmd_data in data:
-                    # Note: cmd_data should already be strings but we will perform a map just to be safe
-                    f.write(f"{SubmissionScript.SEPARATOR.join(map(str, cmd_data))}\n")
+        mkdir(datafile.parent)
+        with open(datafile, "w") as f:
+            for cmd_data in data:
+                # Note: cmd_data should already be strings but we will perform a map just to be safe
+                f.write(f"{SubmissionScript.SEPARATOR.join(map(str, cmd_data))}\n")
 
     def generate_str_for_reading_datafile(
         self, datafile: Path, data: List[List[str]]
@@ -268,24 +269,26 @@ class SubmissionScript:
                 # write any options to be given to the batch system,
                 # such as working directory, where to write outputs/errors, etc.
                 for option in self.options:
-                    f.write(f"#{BATCH_SYSTEM.OptionCmd} {option}\n")
+                    f.write(
+                        f"#{ichor.hpc.global_variables.BATCH_SYSTEM.OptionCmd} {option}\n"
+                    )
 
                 # compute nodes to include or exclude for job
                 if self.include_nodes or self.exclude_nodes:
                     f.write(
-                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.node_options(self.include_nodes, self.exclude_nodes)}\n"  # noqa E501
+                        f"#{ichor.hpc.global_variables.BATCH_SYSTEM.OptionCmd} {ichor.hpc.global_variables.BATCH_SYSTEM.node_options(self.include_nodes, self.exclude_nodes)}\n"  # noqa E501
                     )
 
                 # if writing an array jobs, then the batch system needs to know that
                 # on SGE, this is given by the #$ -t 1-{njobs}. SGE starts counting from 1 instead of 0.
                 if njobs > 1:
                     f.write(
-                        f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.array_job(njobs)}\n"
+                        f"#{ichor.hpc.global_variables.BATCH_SYSTEM.OptionCmd} {ichor.hpc.global_variables.BATCH_SYSTEM.array_job(njobs)}\n"  # noqa E501
                     )
                     # this is instead of njobs > self.max_running_tasks and self.max_running_tasks > 0
                     if njobs > self.max_running_tasks > 0:
                         f.write(
-                            f"#{BATCH_SYSTEM.OptionCmd} {BATCH_SYSTEM.max_running_tasks(self.max_running_tasks)}\n"
+                            f"#{ichor.hpc.global_variables.BATCH_SYSTEM.OptionCmd} {ichor.hpc.global_variables.BATCH_SYSTEM.max_running_tasks(self.max_running_tasks)}\n"  # noqa E501
                         )
 
                 # load any modules required for the job
@@ -307,7 +310,9 @@ class SubmissionScript:
                 # if we got to this part of the code, then we definitely need to check array entries read from datafile
                 if requires_datafile:
 
-                    datafile_path = FILE_STRUCTURE["datafiles"] / Path(str(self.uid))
+                    datafile_path = ichor.hpc.global_variables.FILE_STRUCTURE[
+                        "datafiles"
+                    ] / Path(str(self.uid))
 
                     # get the data that is needed for each command in a command group
                     # for example, if the command is a Gaussian command, then we
@@ -348,8 +353,13 @@ class SubmissionScript:
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
 
-        if BATCH_SYSTEM.current_node() is not NodeType.ComputeNode:
-            return BATCH_SYSTEM.submit_script(self.path, hold)
+        if (
+            ichor.hpc.global_variables.BATCH_SYSTEM.current_node()
+            is not NodeType.ComputeNode
+        ):
+            return ichor.hpc.global_variables.BATCH_SYSTEM.submit_script(
+                self.path, hold
+            )
 
     def __enter__(self) -> "SubmissionScript":
         """

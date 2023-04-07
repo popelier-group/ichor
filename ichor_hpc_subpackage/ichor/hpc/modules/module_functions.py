@@ -4,9 +4,10 @@ import subprocess
 from pathlib import Path
 from typing import List, Union
 
+import ichor.hpc.global_variables
+
 import ichor.hpc.modules.modules_home
 from ichor.core.common.functools import run_once
-from ichor.hpc import MACHINE
 from ichor.hpc.machine import Machine
 from ichor.hpc.modules.modules import Modules
 
@@ -14,7 +15,7 @@ from ichor.hpc.modules.modules import Modules
 @run_once
 def initialise_modules():
 
-    if MACHINE is Machine.csf3:
+    if ichor.hpc.global_variables.MACHINE is Machine.csf3:
         ichor.hpc.modules.modules_home.MODULES_HOME = Path(
             "/opt/clusterware/opt/modules"
         )
@@ -34,7 +35,7 @@ def initialise_modules():
 
 def module(*args):
 
-    if MACHINE is Machine.local:
+    if ichor.hpc.global_variables.MACHINE is Machine.local:
         return
     if isinstance(args[0], list):
         args = args[0]
@@ -54,8 +55,8 @@ def load_module(module_to_load: Union[str, List[str], Modules]):
     elif isinstance(module_to_load, list):
         module("load", *module_to_load)
     elif isinstance(module_to_load, Modules):
-        from ichor.hpc import MACHINE
+        import ichor.hpc.global_variables
 
-        load_module(module_to_load[MACHINE])
+        load_module(module_to_load[ichor.hpc.global_variables.MACHINE])
     else:
         raise TypeError(f"Unknown module type: {type(module_to_load)}")

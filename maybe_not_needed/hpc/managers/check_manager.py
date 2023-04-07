@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 
-from ichor.hpc import BATCH_SYSTEM
+from ichor.hpc.global_variables import BATCH_SYSTEM
 
 from ichor.hpc.log import logger
 from ichor.hpc.submission_script.ichor_command import ICHORCommand
@@ -38,7 +38,9 @@ class CheckManager:
     ):
         self.check_function = check_function
         self.check_args = (
-            args_for_check_function if args_for_check_function is not None else []
+            args_for_check_function
+            if args_for_check_function is not None
+            else []
         )
         self.ntimes = ntimes
 
@@ -72,7 +74,9 @@ class CheckManager:
 
             new_runcmd += f"{CheckManager.NTRIES}=0\n"
             new_runcmd += f"export {CheckManager.TASK_COMPLETED}=false\n"
-            new_runcmd += f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
+            new_runcmd += (
+                f'while [ "${CheckManager.TASK_COMPLETED}" == false ]\n'
+            )
             new_runcmd += "do\n"
             new_runcmd += "\n"
 
@@ -89,7 +93,9 @@ class CheckManager:
 
             python_job = ICHORCommand(needs_uid=False)
             if self.check_args:
-                python_job.add_function_to_job(self.check_function, *self.check_args)
+                python_job.add_function_to_job(
+                    self.check_function, *self.check_args
+                )
             else:
                 python_job.add_function_to_job(self.check_function)
 
@@ -117,7 +123,9 @@ class CheckManager:
         new_runcmd += "\n"
         python_job = ICHORCommand(needs_uid=False)
         if self.check_args:
-            python_job.add_function_to_job(self.check_function, *self.check_args)
+            python_job.add_function_to_job(
+                self.check_function, *self.check_args
+            )
         else:
             python_job.add_function_to_job(self.check_function)
         new_runcmd += python_job.repr()
@@ -152,7 +160,9 @@ def print_completed():
     if task_last < ntasks and task_id + task_last <= ntasks:
         logger.info(f"Running Task {task_id} as {task_id + task_last}")
         task_id += task_last
-        logger.info(f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}")
+        logger.info(
+            f"ntasks: {ntasks} | task_id: {task_id} | task_last: {task_last}"
+        )
         # prints out to standard output, which then gets evaluated with eval
         # this is needed to set the SGE_TASK_ID(starts as 1 instead of 0)
         # to the SGE_TASK_ID of the task that needs to be ran again.

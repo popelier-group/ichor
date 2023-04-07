@@ -4,10 +4,10 @@ from typing import List
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import AmberModules
 from ichor.hpc.modules.modules import Modules
-from ichor.hpc.submission_script.command_line import CommandLine
+from ichor.hpc.submission_command import SubmissionCommand
 
 
-class AmberCommand(CommandLine):
+class AmberCommand(SubmissionCommand):
     """
     todo: write docs
     """

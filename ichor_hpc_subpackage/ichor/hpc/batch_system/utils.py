@@ -7,9 +7,9 @@ from ichor.hpc.batch_system.batch_system import Job, JobID
 
 def read_jid(jid_file: Optional[Path] = None) -> List[JobID]:
     if jid_file is None:
-        from ichor.hpc import FILE_STRUCTURE
+        import ichor.hpc.global_variables
 
-        jid_file = FILE_STRUCTURE["jid"]
+        jid_file = ichor.hpc.global_variables.FILE_STRUCTURE["jid"]
 
     if jid_file.exists():
         with open(jid_file, "r") as f:
@@ -29,14 +29,14 @@ def read_jid(jid_file: Optional[Path] = None) -> List[JobID]:
 
 
 def delete_jobs():
-    """Delete all jobs that were queued up to run. This function reads the FILE_STRUCTURE["jid"]
+    """Delete all jobs that were queued up to run. This function reads the ichor.hpc.global_variables.FILE_STRUCTURE["jid"]
     file, which contains the names of all submitted jobs."""
-    from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE
+    import ichor.hpc.global_variables
 
-    jid_file = FILE_STRUCTURE["jid"]
+    jid_file = ichor.hpc.global_variables.FILE_STRUCTURE["jid"]
     jids = read_jid()
     for jid in jids:
-        BATCH_SYSTEM.delete(jid)
+        ichor.hpc.global_variables.BATCH_SYSTEM.delete(jid)
         print(f"Deleted {jid}")
 
     with open(jid_file, "w") as f:
@@ -44,10 +44,10 @@ def delete_jobs():
 
 
 def get_current_jobs() -> List[Job]:
-    from ichor.hpc import BATCH_SYSTEM, FILE_STRUCTURE
+    import ichor.hpc.global_variables
 
-    all_jobs = BATCH_SYSTEM.get_queued_jobs()
-    ichor_jobs = read_jid(FILE_STRUCTURE["jid"])
+    all_jobs = ichor.hpc.global_variables.BATCH_SYSTEM.get_queued_jobs()
+    ichor_jobs = read_jid(ichor.hpc.global_variables.FILE_STRUCTURE["jid"])
     ichor_job_ids = [job.id for job in ichor_jobs]
 
     return [job for job in all_jobs if job.id in ichor_job_ids]

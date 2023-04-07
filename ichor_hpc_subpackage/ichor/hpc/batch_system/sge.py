@@ -213,10 +213,10 @@ class SunGridEngine(BatchSystem):
     @classmethod
     def parallel_environment(cls, ncores: int) -> Optional[str]:
         """Returns the line in the job script defining the number of cores to be used for the job."""
-        from ichor.hpc import MACHINE, PARALLEL_ENVIRONMENT
+        import ichor.hpc.global_variables
 
         return (
-            f"-pe {PARALLEL_ENVIRONMENT[MACHINE][ncores]} {ncores}"
+            f"-pe {ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ichor.hpc.global_variables.MACHINE][ncores]} {ncores}"  # noqa E501
             if ncores > 1
             else None
         )

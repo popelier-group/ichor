@@ -3,11 +3,11 @@ from typing import List
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import FerebusModules, Modules
-from ichor.hpc.submission_script.command_line import CommandLine
-from ichor.hpc.submission_script.ichor_command import ICHORCommand
+from ichor.hpc.submission_command import SubmissionCommand
+from ichor.hpc.submission_commands import ICHORCommand
 
 
-class FerebusCommand(CommandLine):
+class FerebusCommand(SubmissionCommand):
     """Class used to construct a FEREBUS job. Jobs are submitted using the `SubmissionScript` class.
 
     :param ferebus_directory: Path to where the FEREBUS program is located.

@@ -2,10 +2,9 @@ from typing import List
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.batch_system.node import NodeType
-from ichor.hpc.batch_system.sge import SunGridEngine
 
 
-class LocalBatchSystem(SunGridEngine):
+class LocalBatchSystem:
     """LocalBatchSystem is to only be used for debugging purposes
     (Unless one wants to implement a batch system to run on a local machine... would be a nice addition)"""
 

@@ -3,17 +3,19 @@ from typing import List, Optional
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules
-from ichor.hpc.submission_script.aimall_command import AIMAllCommand
-from ichor.hpc.submission_script.command_line import CommandLine
-from ichor.hpc.submission_script.ichor_command import ICHORCommand
-from ichor.hpc.submission_script.pandora_command import PandoraMorfiCommand
+from ichor.hpc.submission_command import SubmissionCommand
+from ichor.hpc.submission_commands import (
+    AIMAllCommand,
+    ICHORCommand,
+    PandoraMorfiCommand,
+)
 
 
 class NoInputs(Exception):
     pass
 
 
-class MorfiCommand(CommandLine):
+class MorfiCommand(SubmissionCommand):
     def __init__(
         self,
         morfi_input: Path,

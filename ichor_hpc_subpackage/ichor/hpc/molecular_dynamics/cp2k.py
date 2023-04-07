@@ -1,13 +1,15 @@
 from pathlib import Path
 from typing import Union
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.io import mkdir
 from ichor.core.files import GJF, XYZ
 from ichor.core.molecular_dynamics.cp2k import write_cp2k_input
-from ichor.hpc import FILE_STRUCTURE, MACHINE
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.machine import Machine
-from ichor.hpc.submission_script import CP2KCommand, SCRIPT_NAMES, SubmissionScript
+from ichor.hpc.submission_commands import CP2KCommand
+from ichor.hpc.submission_script import SubmissionScript
 
 datafile_location = {
     Machine.ffluxlab: Path("/home/modules/apps/cp2k/6.1.0/data"),
@@ -52,15 +54,17 @@ def submit_cp2k(
     else:
         raise ValueError(f"Unknown filetype: {input_file}")
 
-    mkdir(FILE_STRUCTURE["cp2k"])
-    cp2k_input = FILE_STRUCTURE["cp2k"] / f"{system_name}.inp"
+    mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["cp2k"])
+    cp2k_input = (
+        ichor.hpc.global_variables.FILE_STRUCTURE["cp2k"] / f"{system_name}.inp"
+    )
 
     write_cp2k_input(
         cp2k_input,
         atoms,
         temperature,
         nsteps,
-        datafile_location[MACHINE],
+        datafile_location[ichor.hpc.global_variables.MACHINE],
         system_name,
         method,
         basis_set,
@@ -68,7 +72,9 @@ def submit_cp2k(
         spin_multiplicity,
     )
 
-    with SubmissionScript(SCRIPT_NAMES["cp2k"], ncores=ncores) as submission_script:
+    with SubmissionScript(
+        ichor.hpc.global_variables.SCRIPT_NAMES["cp2k"], ncores=ncores
+    ) as submission_script:
         submission_script.add_command(
             CP2KCommand(cp2k_input, temperature, ncores, system_name)
         )

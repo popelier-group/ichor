@@ -1,10 +1,10 @@
 from typing import List, Optional, Tuple
 
 from ichor.hpc.modules import Modules
-from ichor.hpc.submission_script.command_line import CommandLine
+from ichor.hpc.submission_command import SubmissionCommand
 
 
-class CommandGroup(CommandLine, list):
+class CommandGroup(SubmissionCommand, list):
     """Wraps around jobs that are of the same type, i.e. Gaussian jobs, AIMALL jobs, FEREBUS jobs, ICHOR jobs.
     Since each job uses the same settings, we can just use the 0th index."""
 

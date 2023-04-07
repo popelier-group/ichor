@@ -1,22 +1,17 @@
 from pathlib import Path
 from typing import List, Optional
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.functools import classproperty
 from ichor.core.files import GaussianOut
-from ichor.hpc import MACHINE, Machine
 from ichor.hpc.modules import GaussianModules, Modules
-from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_script.command_line import CommandLine, SubmissionError
 
-GAUSSIAN_COMMANDS = {
-    Machine.csf3: "$g09root/g09/g09",
-    Machine.csf4: "$g16root/g16/g16",
-    Machine.ffluxlab: "g09",
-    Machine.local: "g09",
-}
+# from ichor.hpc.submission_script.check_manager import CheckManager
+from ichor.hpc.submission_command import SubmissionCommand, SubmissionError
 
 
-class GaussianCommand(CommandLine):
+class GaussianCommand(SubmissionCommand):
 
     """
     A class which is used to add Gaussian-related commands to a submission script.
@@ -49,12 +44,17 @@ class GaussianCommand(CommandLine):
     def command(self) -> str:
         """Returns the command used to run Gaussian on different machines."""
 
-        if MACHINE not in GAUSSIAN_COMMANDS.keys():
+        if (
+            ichor.hpc.global_variables.MACHINE
+            not in ichor.hpc.global_variables.GAUSSIAN_COMMANDS.keys()
+        ):
             raise SubmissionError(
-                f"Command not defined for '{self.__name__}' on '{MACHINE.name}'"
+                f"Command not defined for '{self.__name__}' on '{ichor.hpc.global_variables.MACHINE.name}'"
             )
 
-        return GAUSSIAN_COMMANDS[MACHINE]
+        return ichor.hpc.global_variables.GAUSSIAN_COMMANDS[
+            ichor.hpc.global_variables.MACHINE
+        ]
 
     @classproperty
     def modules(self) -> Modules:
@@ -84,20 +84,20 @@ class GaussianCommand(CommandLine):
         # variables[0] ${arr1[$SGE_TASK_ID-1]}, variables[1] ${arr2[$SGE_TASK_ID-1]}
         cmd = f"export GAUSS_SCRDIR=$(dirname {variables[0]})\n{GaussianCommand.command} {variables[0]} {variables[1]}"
 
-        if self.rerun:
+        # if self.rerun:
 
-            cm = CheckManager(
-                check_function="rerun_gaussian",
-                args_for_check_function=[variables[0]],
-                ntimes=5,
-            )
-            cmd = cm.rerun_if_job_failed(cmd)
+        #     cm = CheckManager(
+        #         check_function="rerun_gaussian",
+        #         args_for_check_function=[variables[0]],
+        #         ntimes=5,
+        #     )
+        #     cmd = cm.rerun_if_job_failed(cmd)
 
-        if self.scrub:
-            cm = CheckManager(
-                check_function="scrub_gaussian",
-                args_for_check_function=[variables[0]],
-            )
-            cmd = cm.scrub_point_directory(cmd)
+        # if self.scrub:
+        #     cm = CheckManager(
+        #         check_function="scrub_gaussian",
+        #         args_for_check_function=[variables[0]],
+        #     )
+        #     cmd = cm.scrub_point_directory(cmd)
 
         return cmd

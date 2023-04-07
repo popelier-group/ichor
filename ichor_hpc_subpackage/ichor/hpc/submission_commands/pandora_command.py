@@ -4,8 +4,7 @@ from typing import List, Optional, Union
 from ichor.core.common.functools import classproperty
 from ichor.core.files import PandoraDirectory
 from ichor.hpc.modules import Modules, MorfiModules, PandoraModules
-from ichor.hpc.submission_script.ichor_command import ICHORCommand
-from ichor.hpc.submission_script.python_command import PythonCommand
+from ichor.hpc.submission_commands import ICHORCommand, PythonCommand
 
 
 class PandoraCommand(PythonCommand):

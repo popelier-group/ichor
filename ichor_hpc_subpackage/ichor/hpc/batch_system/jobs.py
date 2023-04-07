@@ -6,7 +6,6 @@ from typing import Optional, Union
 
 from ichor.core.common.io import mkdir
 from ichor.core.common.types import VarReprMixin
-from ichor.hpc import FILE_STRUCTURE
 
 
 class CannotParseJobID(Exception):
@@ -27,15 +26,13 @@ class JobID:
         self.script = str(script)
         self.id = id
 
-    def write(self):
-        mkdir(
-            FILE_STRUCTURE["jid"].parent
-        )  # make parent directories if they don't exist
+    def write(self, path: Union[str, Path]):
+        mkdir(path.parent)  # make parent directories if they don't exist
 
         job_ids = []
         # if the jid file exists (which contains queued jobs), then read it and append to job_ids list
-        if FILE_STRUCTURE["jid"].exists():
-            with open(FILE_STRUCTURE["jid"], "r") as f:
+        if path.exists():
+            with open(path, "r") as f:
                 with contextlib.suppress(json.JSONDecodeError):
                     job_ids += json.load(f)
         job_ids += [
@@ -48,7 +45,7 @@ class JobID:
 
         # overwrite the jobs file, writing out any new jobs that were
         # submitted plus the old jobs that were already in the file.
-        with open(FILE_STRUCTURE["jid"], "w") as f:
+        with open(path, "w") as f:
             json.dump(job_ids, f)
 
     def __repr__(self) -> str:

@@ -31,25 +31,4 @@
     we will be more than happy to help.
 """
 
-# initialize all things that we need for the hpc package here
-from ichor.hpc.global_variables import (
-    BATCH_SYSTEM,
-    FILE_STRUCTURE,
-    logger,
-    MACHINE,
-    PARALLEL_ENVIRONMENT,
-    SCRIPT_NAMES,
-    timing_logger,
-)
-
 __version__ = "3.1.0"
-
-__all__ = [
-    "FILE_STRUCTURE",
-    "BATCH_SYSTEM",
-    "MACHINE",
-    "PARALLEL_ENVIRONMENT",
-    "logger",
-    "timing_logger",
-    "SCRIPT_NAMES",
-]

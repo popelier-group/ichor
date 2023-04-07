@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from ichor.core.common.types.itypes import F
-from ichor.hpc.submission_script.python_command import PythonCommand
+from ichor.hpc.submission_commands import PythonCommand
 
 
 class ICHORCommand(PythonCommand):

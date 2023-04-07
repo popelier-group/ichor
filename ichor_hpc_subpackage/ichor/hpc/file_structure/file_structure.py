@@ -8,14 +8,14 @@ class FileStructure(FileTree):
     This class is used to make a tree
     of all the directories/files. Then the full path of a directory can be obtained by doing:
 
-    `self.FILE_STRUCTURE["training_set"]` to get the TRAINING_SET directory path.
+    `self.ichor.hpc.global_variables.FILE_STRUCTURE["training_set"]` to get the TRAINING_SET directory path.
 
     Because a `Path` object is returned by the above code (see the `FileNode` class),
     it makes it possible to write code like
 
-    `if self.FILE_STRUCTURE["training_set"].exists():`
+    `if self.ichor.hpc.global_variables.FILE_STRUCTURE["training_set"].exists():`
 
-    where the `exists()` method can be called because `self.FILE_STRUCTURE["training_set"]`
+    where the `exists()` method can be called because `self.ichor.hpc.global_variables.FILE_STRUCTURE["training_set"]`
     is a `Path` object (see pathlib library).
     """
 
@@ -23,7 +23,7 @@ class FileStructure(FileTree):
         super(FileStructure, self).__init__()
 
         # name of the directory, how the directory can
-        # be internally referenced to by FILE_STRUCTURE["internal_reference"]
+        # be internally referenced to by ichor.hpc.global_variables.FILE_STRUCTURE["internal_reference"]
         # if parent is set, then make it a subdirectory of parent directory
         self.add(
             "TRAINING_SET",

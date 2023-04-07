@@ -3,7 +3,7 @@ from pathlib import Path
 from ichor.core.menu.menu import Menu
 
 from ichor.core.useful_functions.get_path import get_dir
-from ichor.hpc import FILE_STRUCTURE
+from ichor.hpc.global_variables import FILE_STRUCTURE
 
 _current_validation_set = None
 

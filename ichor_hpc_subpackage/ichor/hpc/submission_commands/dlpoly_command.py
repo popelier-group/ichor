@@ -3,10 +3,10 @@ from typing import List
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules
-from ichor.hpc.submission_script.command_line import CommandLine
+from ichor.hpc.submission_command import SubmissionCommand
 
 
-class DlpolyCommand(CommandLine):
+class DlpolyCommand(SubmissionCommand):
     """Class used to construct a Dlpoly job. Jobs are submitted using the `SubmissionScript` class.
 
     :param dlpoly_directory: Path to where the working directory for dlpoly.
