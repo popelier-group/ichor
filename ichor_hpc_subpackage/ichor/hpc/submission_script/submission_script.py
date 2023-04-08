@@ -17,6 +17,62 @@ class SubmissionScript:
         These job scripts will have different contents depending on the number of cores selected,
         the number of tasks to do (if running an array job), etc.,
         so they need to be written out dynamically depending on what is going to be ran.
+
+    Example Gaussian submission script for SGE (array job):
+
+    #!/bin/bash -l
+    #$ -o /net/scratch2/mbdxwym4/ammonia_with_derivatives/.DATA/SCRIPTS/OUTPUTS
+    #$ -pe smp.pe 2
+    #$ -wd /net/scratch2/mbdxwym4/ammonia_with_derivatives
+    #$ -e /net/scratch2/mbdxwym4/ammonia_with_derivatives/.DATA/SCRIPTS/ERRORS
+    #$ -t 1-10000
+    echo "Loading Modules | $(date)"
+    module load apps/binapps/gaussian/g09d01_em64t
+    export OMP_NUM_THREADS=2
+    echo "Starting Job | $(date)"
+    ICHOR_DATFILE=/net/scratch2/mbdxwym4/ammonia_with_derivatives/.DATA/JOBS/DATAFILES/dd644974-c430-449a-a8e1-d3540980bcb4
+    arr1=()
+    arr2=()
+    while IFS=, read -r var1 var2
+    do
+        arr1+=($var1)
+        arr2+=($var2)
+    done < $ICHOR_DATFILE
+    if [ -n ${arr1[$SGE_TASK_ID-1]} ] && [ -n ${arr2[$SGE_TASK_ID-1]} ]
+    then
+    export GAUSS_SCRDIR=$(dirname ${arr1[$SGE_TASK_ID-1]})
+    $g09root/g09/g09 ${arr1[$SGE_TASK_ID-1]} ${arr2[$SGE_TASK_ID-1]}
+    fi
+    echo "Finished Job | $(date)"
+
+    Example Gaussian submission script for SLURM (array job):
+
+    #!/bin/bash -l
+    #SBATCH -p multicore
+    #SBATCH -n 2
+    #SBATCH -e /gpfs01/scratch/mbdxwym4/glycine_paper_geometries_gaussian_with_forces/.DATA/SCRIPTS/ERRORS/%x.e%A.%a
+    #SBATCH -o /gpfs01/scratch/mbdxwym4/glycine_paper_geometries_gaussian_with_forces/.DATA/SCRIPTS/OUTPUTS/%x.o%A.%a
+    #SBATCH -D /gpfs01/scratch/mbdxwym4/glycine_paper_geometries_gaussian_with_forces
+    #SBATCH -a 1-3965
+    echo "Loading Modules | $(date)"
+    module load gaussian/g16c01_em64t_detectcpu
+    export OMP_NUM_THREADS=2
+    echo "Starting Job | $(date)"
+    ICHOR_DATFILE=/gpfs01/scratch/mbdxwym4/glycine_paper_geometries_gaussian_with_forces/.DATA/JOBS/DATAFILES/78a3e81e-617e-475d-809b-01501f67bfc9
+    arr1=()
+    arr2=()
+    while IFS=, read -r var1 var2
+    do
+        arr1+=($var1)
+        arr2+=($var2)
+    done < $ICHOR_DATFILE
+    if [ -n ${arr1[$SLURM_ARRAY_TASK_ID-1]} ] && [ -n ${arr2[$SLURM_ARRAY_TASK_ID-1]} ]
+    then
+    export GAUSS_SCRDIR=$(dirname ${arr1[$SLURM_ARRAY_TASK_ID-1]})
+    $g16root/g16/g16 ${arr1[$SLURM_ARRAY_TASK_ID-1]} ${arr2[$SLURM_ARRAY_TASK_ID-1]}
+    fi
+    echo "Finished Job | $(date)"
+
     """
 
     # separator which is used to separate names of files in the datafiles
