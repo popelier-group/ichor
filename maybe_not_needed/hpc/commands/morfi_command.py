@@ -25,7 +25,9 @@ class MorfiCommand(SubmissionCommand):
     ):
         self.pandora_command = PandoraMorfiCommand(morfi_input)
         self.aimall_command = (
-            AIMAllCommand(aimall_wfn, atoms=atoms) if aimall_wfn is not None else None
+            AIMAllCommand(aimall_wfn, atoms=atoms)
+            if aimall_wfn is not None
+            else None
         )
         self.point_directory = point_directory
 
@@ -50,7 +52,9 @@ class MorfiCommand(SubmissionCommand):
         return ""
 
     def repr(self, variables: List[str]) -> str:
-        repr = self.pandora_command.repr(variables[: self.pandora_command.ndata])
+        repr = self.pandora_command.repr(
+            variables[: self.pandora_command.ndata]
+        )
         if self.aimall_command is not None:
             repr += "\n"
             repr += self.aimall_command.repr(

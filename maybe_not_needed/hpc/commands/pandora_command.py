@@ -59,7 +59,9 @@ class PandoraCommand(PythonCommand):
 
 
 class PandoraPySCFCommand(PandoraCommand):
-    def __init__(self, config_file: Path, point_directory: Optional[Path] = None):
+    def __init__(
+        self, config_file: Path, point_directory: Optional[Path] = None
+    ):
         PandoraCommand.__init__(self, config_file, pyscf=True, morfi=False)
         self.point_directory = point_directory
 
