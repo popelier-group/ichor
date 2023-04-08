@@ -11,7 +11,7 @@ class PythonCommand(SubmissionCommand):
     """A class which is used for any jobs that are going to run Python code
 
     :param python_script: A path object to the python script that is being ran
-    :param args: Arguments which need to be passed to the python script via the command line (parsed with argparse)
+    :param args: A list of arguments (strings) which need to be passed to the python script via the command line
     """
 
     def __init__(self, python_script: Path, args: Optional[List[str]] = None):
