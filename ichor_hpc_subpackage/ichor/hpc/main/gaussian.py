@@ -6,7 +6,8 @@ import ichor.hpc.global_variables
 from ichor.core.files import GJF, PointsDirectory
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.log import logger
-from ichor.hpc.submission_script import GaussianCommand, SubmissionScript
+from ichor.hpc.submission_commands import GaussianCommand
+from ichor.hpc.submission_script import SubmissionScript
 
 
 def submit_points_directory_to_gaussian(

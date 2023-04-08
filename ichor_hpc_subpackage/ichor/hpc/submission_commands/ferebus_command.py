@@ -4,7 +4,8 @@ from typing import List
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import FerebusModules, Modules
 from ichor.hpc.submission_command import SubmissionCommand
-from ichor.hpc.submission_commands import ICHORCommand
+
+# from ichor.hpc.submission_commands import ICHORCommand
 
 
 class FerebusCommand(SubmissionCommand):
@@ -45,8 +46,8 @@ class FerebusCommand(SubmissionCommand):
         cmd = f"pushd {variables[0]}\n"
         cmd += f"  {FerebusCommand.command}\n"
         cmd += "popd\n"
-        if self.move_models:
-            move_models = ICHORCommand()
-            move_models.add_function_to_job("move_models", variables[0])
-            cmd += f"{move_models.repr()}\n"
+        # if self.move_models:
+        #     move_models = ICHORCommand()
+        #     move_models.add_function_to_job("move_models", variables[0])
+        #     cmd += f"{move_models.repr()}\n"
         return cmd
