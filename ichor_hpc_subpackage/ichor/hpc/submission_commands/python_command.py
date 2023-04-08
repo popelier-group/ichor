@@ -28,6 +28,10 @@ class PythonCommand(SubmissionCommand):
         """Returns the python executable that the current ichor program is running from."""
         return ""
 
+    @property
+    def data(self) -> None:
+        pass
+
     @classproperty
     def command(self) -> str:
         """For a Python command, this loads in the virtual environment"""
