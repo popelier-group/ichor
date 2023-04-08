@@ -79,7 +79,9 @@ class MenuOption(MenuItem):
                         "__origin__",
                     ):
                         print(
-                            list(self.func.__annotations__.values())[i].__origin__
+                            list(self.func.__annotations__.values())[
+                                i
+                            ].__origin__
                             is not MenuVar
                         )
                     else:
@@ -121,7 +123,9 @@ class MenuOption(MenuItem):
 
             kwargs[key] = arg.var if unwrap else arg
 
-        option_return = OptionReturn(self.func(*args, **kwargs), self.auto_close)
+        option_return = OptionReturn(
+            self.func(*args, **kwargs), self.auto_close
+        )
         if self.wait:
             input("[Return]")
         return option_return
