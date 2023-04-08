@@ -160,10 +160,6 @@ class AIMAllCommand(SubmissionCommand):
     AIMALL modules are loaded. It is also used to write out the submission script line where
     AIMALL is ran on a specified array of files (usually
     AIMALL is ran as an array job because we want to run hundreds of AIMALL tasks in parallel).
-    Finally, depending on the `check` and `scrub` arguments,
-    additional lines are written to the submission script file which rerun failed tasks as well as
-    remove any points that did not terminate normally (even
-    after being reran).
 
     :param wfn_file: Path to a .wfn file. This is not needed when running auto-run for a whole directory.
     :param atoms: A list of strings of atom names (e.g. C1)
@@ -205,8 +201,6 @@ class AIMAllCommand(SubmissionCommand):
         verifyw: str = "yes",
         saw: bool = False,
         autonnacps: bool = True,
-        rerun: bool = False,
-        scrub: bool = False,
     ):
 
         self.wfn_file = WFN(wfn_file_path)
@@ -248,8 +242,6 @@ class AIMAllCommand(SubmissionCommand):
         self.verifyw = VerifyW(verifyw)
         self.saw = saw
         self.autonnacps = autonnacps
-        self.scrub = scrub
-        self.rerun = rerun
 
     @property
     def data(self) -> List[str]:
@@ -288,7 +280,7 @@ class AIMAllCommand(SubmissionCommand):
         # but will only calculate atomic properties of the listed atoms.
 
         # Specifying -atoms=... (e.g., -atoms=1,3,6)
-        # (recommended for reruns of problem atoms following an all atom run)
+        # (recommended for specifying problem atoms with large integration error following an all atom run)
         # will only determine the critical point connectivity and atomic properties of the listed atoms,
         # i.e., the full molecular graph will not be (re)calculated.
         atoms = (
@@ -339,22 +331,5 @@ class AIMAllCommand(SubmissionCommand):
         order to run AIMALL correctly (with the appropriate settings)."""
 
         cmd = f"{AIMAllCommand.command} {' '.join(self.arguments)} {variables[0]} &> {variables[1]}"
-
-        # # TODO: possibly remove these because they are not really needed
-        # if self.rerun:
-
-        #     cm = CheckManager(
-        #         check_function="rerun_aimall",
-        #         args_for_check_function=[variables[0]],
-        #         ntimes=5,
-        #     )
-        #     cmd = cm.rerun_if_job_failed(cmd)
-
-        # if self.scrub:
-        #     cm = CheckManager(
-        #         check_function="scrub_aimall",
-        #         args_for_check_function=[variables[0]],
-        #     )
-        #     cmd = cm.scrub_point_directory(cmd)
 
         return cmd

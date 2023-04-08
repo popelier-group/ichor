@@ -216,6 +216,8 @@ class SubmissionScript:
     def var(cls, n):
         return f"var{n + 1}"
 
+    # TODO: possibly not needed anymore as scrubbing is removed, but keep
+    # because it is a good check to make sure that input and outut are specified,
     def test_array_not_null(cls, n):
         """Returns a string which is used in bash to test if an array entry is not null or empty.
         We need to test this because there could be cases where there are 2000 SGE tasks for example,

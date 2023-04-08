@@ -15,8 +15,6 @@ def submit_points_directory_to_gaussian(
     overwrite_existing=False,
     force_calculate_wfn: bool = False,
     ncores=2,
-    rerun: bool = False,
-    scrub: bool = False,
     hold: JobID = None,
     script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"],
     **kwargs,
@@ -28,8 +26,6 @@ def submit_points_directory_to_gaussian(
         (commonly traning set path, sample pool path, etc.).
     :param force_calculate_wfn: Run Gaussian calculations on given .gjf files,
         even if .wfn files already exist. Defaults to False.
-    :param rerun: Whether to attempt to rerun failed points. Default False
-    :param scrub: Whether to scrub (move) failed points to another directory for scrubbed points. Default False
     :param kwargs: Key word arguments to pass to GJF class. These are things like number of cores, basis set,
         level of theory, spin multiplicity, charge, etc.
         These will get used in the new written gjf files (overwriting
@@ -44,8 +40,6 @@ def submit_points_directory_to_gaussian(
         gjf_files,
         script_name=script_name,
         force_calculate_wfn=force_calculate_wfn,
-        rerun=rerun,
-        scrub=scrub,
         ncores=ncores,
         hold=hold,
     )
@@ -93,8 +87,6 @@ def submit_gjfs(
         "gaussian"
     ],
     hold: Optional[JobID] = None,
-    rerun=False,
-    scrub=False,
     ncores=2,
 ) -> JobID:
     """Function that writes out a submission script which contains an array of
@@ -120,11 +112,10 @@ def submit_gjfs(
     # the submission_script object can be accessed even after the context manager
     with SubmissionScript(script_name, ncores=ncores) as submission_script:
         for gjf in gjfs:
-            # append to submission script if we want to rerun the calculation
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
                 submission_script.add_command(
-                    GaussianCommand(gjf, rerun=rerun, scrub=scrub)
+                    GaussianCommand(gjf)
                 )  # make a list of GaussianCommand instances.
                 logger.info(f"Adding {gjf} to {submission_script.path}")
 

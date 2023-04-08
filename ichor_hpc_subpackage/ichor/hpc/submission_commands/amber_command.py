@@ -56,9 +56,6 @@ class AmberCommand(SubmissionCommand):
     def repr(self, *args) -> str:
         """
         Returns a strings which is then written out to the final submission script file.
-        If the outputs of the job need to be checked (by default self.rerun is set to True,
-        so job outputs are checked), then the corresponsing strings are appended to the initial
-        commands string.
 
         The length of `variables` is defined by the length of `self.data`
         """
