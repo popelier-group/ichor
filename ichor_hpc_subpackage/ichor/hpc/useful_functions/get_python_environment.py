@@ -42,10 +42,6 @@ class PythonEnvironmentPath:
         return self.venv_env_path
 
 
-class PythonEnvironmentNotFound(Exception):
-    pass
-
-
 def get_current_python_environment_path() -> PythonEnvironmentPath:
     """Gets the current active python environment (venv/virtualenv or conda)
 
@@ -58,7 +54,4 @@ def get_current_python_environment_path() -> PythonEnvironmentPath:
 
     python_env = PythonEnvironmentPath(venv_env_path, conda_env_path)
 
-    if python_env.uses_venv or python_env.uses_conda:
-        return python_env
-
-    raise PythonEnvironmentNotFound("There is no current python environment.")
+    return python_env

@@ -1,10 +1,15 @@
-import sys
 from pathlib import Path
 from typing import List, Optional
+
+import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import Modules
 from ichor.hpc.submission_command import SubmissionCommand
+
+
+class PythonEnvironmentNotFound(Exception):
+    pass
 
 
 class PythonCommand(SubmissionCommand):
@@ -25,9 +30,23 @@ class PythonCommand(SubmissionCommand):
 
     @classproperty
     def command(self) -> str:
-        """Returns the command(program) which is ran in the job."""
-        return str(Path(sys.base_prefix) / "bin" / "python")
+        """For a Python command, this loads in the virtual environment"""
+        # load in environment
+        python_env = ichor.hpc.global_variables.CURRENT_PYTHON_ENVIRONMENT_PATH
+        if python_env.uses_venv:
+            env_path = python_env.venv_path.absolute()
+            activate_script = env_path / "bin" / "activate"
+            return f"source {str(activate_script)}\n"
+        elif python_env.uses_conda:
+            env_path = python_env.conda_path.absolute()
+            return f"conda activate {str(env_path)}\n"
+
+        raise PythonEnvironmentNotFound(
+            "Python environment was not found. Cannot submit Python command."
+        )
 
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Returns a string which is then written into the submission script in order to run a python job."""
-        return f"{PythonCommand.command} {self.script} {' '.join(self.args)}"
+        activate_env = PythonCommand.command
+        python_script_to_run = f"python3 {self.script} {' '.join(self.args)}"
+        return activate_env + python_script_to_run
