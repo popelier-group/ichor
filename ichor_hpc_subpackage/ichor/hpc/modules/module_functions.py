@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import List, Union
 
 import ichor.hpc.global_variables
-
-import ichor.hpc.modules.modules_home
 from ichor.core.common.functools import run_once
 from ichor.hpc.machine import Machine
 from ichor.hpc.modules.modules import Modules
@@ -16,12 +14,10 @@ from ichor.hpc.modules.modules import Modules
 def initialise_modules():
 
     if ichor.hpc.global_variables.MACHINE is Machine.csf3:
-        ichor.hpc.modules.modules_home.MODULES_HOME = Path(
-            "/opt/clusterware/opt/modules"
-        )
+        ichor.hpc.global_variables.MODULES_HOME = Path("/opt/clusterware/opt/modules")
 
     if "MODULEPATH" not in os.environ:
-        f = open(ichor.hpc.modules.modules_home.MODULES_HOME / "init/.modulespath", "r")
+        f = open(ichor.hpc.global_variables.MODULES_HOME / "init/.modulespath", "r")
         path = []
         for line in f.readlines():
             line = re.sub("#.*$", "", line)
@@ -42,8 +38,7 @@ def module(*args):
     else:
         args = list(args)
     output, _ = subprocess.Popen(  # output, error
-        [f"{ichor.hpc.modules.modules_home.MODULES_HOME}/bin/modulecmd", "python"]
-        + args,
+        [f"{ichor.hpc.global_variables.MODULES_HOME}/bin/modulecmd", "python"] + args,
         stdout=subprocess.PIPE,
     ).communicate()
     exec(output)

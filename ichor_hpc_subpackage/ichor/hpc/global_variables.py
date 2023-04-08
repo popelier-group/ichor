@@ -1,4 +1,5 @@
 import platform
+from pathlib import Path
 
 from ichor.hpc.batch_system import init_batch_system
 from ichor.hpc.batch_system.parallel_environment import ParallelEnvironments
@@ -7,6 +8,7 @@ from ichor.hpc.log import setup_logger
 from ichor.hpc.machine import Machine
 from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
+
 
 # default file structure to be used for file handling
 FILE_STRUCTURE = FileStructure()
@@ -92,3 +94,5 @@ GAUSSIAN_COMMANDS = {
 
 # set up current python environment
 CURRENT_PYTHON_ENVIRONMENT_PATH = get_current_python_environment_path()
+
+MODULES_HOME = Path("/usr/share/Modules")
