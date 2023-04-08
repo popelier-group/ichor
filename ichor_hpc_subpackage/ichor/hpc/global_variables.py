@@ -3,10 +3,10 @@ import platform
 from ichor.hpc.batch_system import init_batch_system
 from ichor.hpc.batch_system.parallel_environment import ParallelEnvironments
 from ichor.hpc.file_structure import FileStructure
-from ichor.hpc.get_machine import init_machine
 from ichor.hpc.log import setup_logger
 from ichor.hpc.machine import Machine
 from ichor.hpc.submission_script.script_names import ScriptNames
+from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
 
 FILE_STRUCTURE = FileStructure()
 BATCH_SYSTEM = init_batch_system()
@@ -84,3 +84,5 @@ GAUSSIAN_COMMANDS = {
     Machine.ffluxlab: "g09",
     Machine.local: "g09",
 }
+
+CURRENT_PYTHON_ENVIRONMENT_PATH = get_current_python_environment_path()
