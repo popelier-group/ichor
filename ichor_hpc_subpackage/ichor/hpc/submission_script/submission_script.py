@@ -11,6 +11,7 @@ from ichor.hpc.uid import get_uid
 
 
 class SubmissionScript:
+
     """A class that can be used to construct submission scripts for various programs such as Gaussian and AIMALL.
     :param path: A path to a submission script (such as GAUSSIAN.sh and AIMALL.sh).
         These .sh files are submitted as jobs to CSF3/FFLUXLAB.
@@ -73,6 +74,15 @@ class SubmissionScript:
     fi
     echo "Finished Job | $(date)"
 
+    :param submission_script_name: The name of the submission script
+    :param ncores: Number of cores to run the job with
+    :param cwd: The current working directory. If not set, defaults to Path.cwd()
+    :param include_nodes: A list of node names to run the job on, defaults to None
+    :param exclude_nodes: A list of node names to exclude running the job on, defaults to None
+    :param max_running_tasks: Maximum number of tasks (of array job) that can run at once, defaults to -1
+    :param outputs_dir_path: Path to the outputs directory. If not set, it will use the default global_variables one
+    :param errors_dir_path: Path to the errors directory. If not set, it will use the default global_variables one
+    :param datafile_path: Path to datafile containing information needed for job to run, defaults to None
     """
 
     # separator which is used to separate names of files in the datafiles
