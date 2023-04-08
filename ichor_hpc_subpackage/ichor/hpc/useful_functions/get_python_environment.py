@@ -38,6 +38,7 @@ class PythonEnvironmentPath:
     @property
     def venv_path(self) -> Union[str, None]:
         """Returns venv environment path or None if not using a conda environment"""
+        return self.venv_env_path
 
 
 class PythonEnvironmentNotFound(Exception):
