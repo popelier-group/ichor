@@ -186,7 +186,9 @@ class SubmissionScript:
         modules = []
         for command in self.grouped_commands:
             # modules depend on which machine (CSF/FFLUXLAB) we are currently on
-            modules += command.modules[ichor.hpc.global_variables.MACHINE]
+            # also some commands might not need to load in modules
+            if command.modules:
+                modules += command.modules[ichor.hpc.global_variables.MACHINE]
         return list(set(modules))
 
     @property
