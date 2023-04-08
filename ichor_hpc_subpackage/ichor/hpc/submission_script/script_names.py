@@ -24,7 +24,7 @@ class ScriptNames(dict):
         modify: str = "",
         **kwargs
     ):
-        super().__init__(**kwargs)
+        super().__init__(script_names, **kwargs)
         # parent directory
         self.script_names = script_names
         self.parent = parent
