@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 from ichor.core.common.io import mkdir, move
 from ichor.hpc.machine import Machine, MachineNotFound
@@ -24,7 +23,7 @@ def get_machine_from_name(platform_name: str):
     return m
 
 
-def get_machine_from_file(machine_file: Optional[Path] = None) -> Machine:
+def get_machine_from_file(machine_file: Path) -> Machine:
     if machine_file.exists():
         with open(machine_file, "r") as f:
             _machine = f.read().strip()
@@ -46,7 +45,7 @@ def init_machine(machine_name: str, machine_file: Path) -> Machine:
     if machine is not Machine.local and (
         not machine_file.exists()
         or machine_file.exists()
-        and get_machine_from_file() != machine
+        and get_machine_from_file(machine_file) != machine
     ):
         mkdir(machine_file.parent)
         machine_filepart = Path(str(machine_file) + f".{get_uid()}.filepart")
