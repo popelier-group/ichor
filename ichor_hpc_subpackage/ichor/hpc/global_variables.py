@@ -8,13 +8,17 @@ from ichor.hpc.machine import Machine
 from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
 
+# default file structure to be used for file handling
 FILE_STRUCTURE = FileStructure()
+# batch system on current machine
 BATCH_SYSTEM = init_batch_system()
 
 # will be Machine.Local if machine is not in list of names
 machine_name: str = platform.node()
+# initialize machine
 MACHINE = init_machine(machine_name, FILE_STRUCTURE["machine"])
 
+# make parallel environment variables to run jobs on multiple cores
 PARALLEL_ENVIRONMENT = ParallelEnvironments()
 PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
 PARALLEL_ENVIRONMENT[Machine.csf4]["serial"] = 1, 1
@@ -22,10 +26,11 @@ PARALLEL_ENVIRONMENT[Machine.csf4]["multicore"] = 2, 32
 PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
 PARALLEL_ENVIRONMENT[Machine.local]["smp"] = 1, 100
 
+# set up loggers
 logger = setup_logger("ICHOR", "ichor.log")
 timing_logger = setup_logger("TIMING", "ichor.timing")
 
-
+# set up script names that are implemented
 SCRIPT_NAMES = ScriptNames(
     {
         "gaussian": "GAUSSIAN.sh",
@@ -77,7 +82,7 @@ SCRIPT_NAMES = ScriptNames(
     parent=FILE_STRUCTURE["scripts"],
 )
 
-
+# set up Gaussian commands
 GAUSSIAN_COMMANDS = {
     Machine.csf3: "$g09root/g09/g09",
     Machine.csf4: "$g16root/g16/g16",
@@ -85,4 +90,5 @@ GAUSSIAN_COMMANDS = {
     Machine.local: "g09",
 }
 
+# set up current python environment
 CURRENT_PYTHON_ENVIRONMENT_PATH = get_current_python_environment_path()
