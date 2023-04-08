@@ -89,6 +89,9 @@ class SubmissionScript:
         include_nodes: List[str] = None,
         exclude_nodes: List[str] = None,
         max_running_tasks: int = -1,
+        outputs_dir_path: Path = None,
+        errors_dir_path: Path = None,
+        datafile_path: Path = None,
     ):
 
         self.path = Path(submission_script_name)
@@ -100,6 +103,19 @@ class SubmissionScript:
         self.max_running_tasks = max_running_tasks
         self._options = []
         self._commands = []  # a list of commands to be submitted to batch system
+
+        self.outputs_dir_path = (
+            outputs_dir_path or ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+        )
+        self.errors_dir_path = (
+            errors_dir_path or ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+        )
+        self.datafile_path = datafile_path or ichor.hpc.global_variables.FILE_STRUCTURE[
+            "datafiles"
+        ] / Path(str(self.uid))
+
+        mkdir(self.outputs_dir_path)
+        mkdir(self.errors_dir_path)
 
     @classproperty
     def filetype(self) -> str:
@@ -148,9 +164,6 @@ class SubmissionScript:
         needed when specifying more than 1 cores is also written to the options list. This keyword depends on
         the system on which the job is ran, as well as on the number of cores that the job needs."""
 
-        mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["outputs"])
-        mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["errors"])
-
         task_array = len(self.grouped_commands) > 1
 
         # change current working directory to directory from which ICHOR is launched.
@@ -158,11 +171,11 @@ class SubmissionScript:
         script_options = [
             ichor.hpc.global_variables.BATCH_SYSTEM.change_working_directory(self.cwd),
             ichor.hpc.global_variables.BATCH_SYSTEM.output_directory(
-                ichor.hpc.global_variables.FILE_STRUCTURE["outputs"].absolute(),
+                self.outputs_dir_path.absolute(),
                 task_array,
             ),
             ichor.hpc.global_variables.BATCH_SYSTEM.error_directory(
-                ichor.hpc.global_variables.FILE_STRUCTURE["errors"].absolute(),
+                self.errors_dir_path.absolute(),
                 task_array,
             ),
         ]
@@ -231,7 +244,7 @@ class SubmissionScript:
 
     def write_datafile(self, datafile: Path, data: List[List[str]]) -> None:
         """Write the datafile to disk. All datafiles are stored in
-        ichor.hpc.global_variables.FILE_STRUCTURE["datafiles"]. Each line of the
+        self.datafile_path . Each line of the
         datafile contains text that corresponds to the inputs and output file names.
         These are separated by self.separator, which is a comma.
 
@@ -370,10 +383,6 @@ class SubmissionScript:
                 # if we got to this part of the code, then we definitely need to check array entries read from datafile
                 if requires_datafile:
 
-                    datafile_path = ichor.hpc.global_variables.FILE_STRUCTURE[
-                        "datafiles"
-                    ] / Path(str(self.uid))
-
                     # get the data that is needed for each command in a command group
                     # for example, if the command is a Gaussian command, then we
                     # need an input file (.gjf) and an output file (.gau)
@@ -387,7 +396,7 @@ class SubmissionScript:
                     # datafile_str is the rest of the stuff that sets up the arrays used
                     # for the array job in the submission script
                     array_indices, datafile_str = self.setup_datafile(
-                        datafile_path, command_group_data
+                        self.datafile_path, command_group_data
                     )
                     # write parts which read in the datafile
                     f.write(f"{datafile_str}\n")
