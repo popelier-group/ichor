@@ -4,7 +4,9 @@ from typing import List, Optional, Union
 from ichor.core.common.functools import classproperty
 from ichor.core.files import PandoraDirectory
 from ichor.hpc.modules import Modules, MorfiModules, PandoraModules
-from ichor.hpc.submission_commands import ICHORCommand, PythonCommand
+from ichor.hpc.submission_commands import PythonCommand
+
+# from ichor.hpc.submission_commands import ICHORCommand
 
 
 class PandoraCommand(PythonCommand):
@@ -75,12 +77,12 @@ class PandoraPySCFCommand(PandoraCommand):
 
     def repr(self, variables: List[str]) -> str:
         repr = super().repr(variables)
-        if self.point_directory is not None:
-            ichor_command = ICHORCommand(
-                func="copy_aimall_wfn_to_point_directory",
-                func_args=[variables[1], variables[2]],
-            )
-            repr += f"\n{ichor_command.repr(variables)}"
+        # if self.point_directory is not None:
+        #     ichor_command = ICHORCommand(
+        #         func="copy_aimall_wfn_to_point_directory",
+        #         func_args=[variables[1], variables[2]],
+        #     )
+        #     repr += f"\n{ichor_command.repr(variables)}"
         return repr
 
 

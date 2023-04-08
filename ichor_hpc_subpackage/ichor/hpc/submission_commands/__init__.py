@@ -4,7 +4,6 @@ from ichor.hpc.submission_commands.cp2k_command import CP2KCommand
 from ichor.hpc.submission_commands.dlpoly_command import DlpolyCommand
 from ichor.hpc.submission_commands.ferebus_command import FerebusCommand
 from ichor.hpc.submission_commands.gaussian_command import GaussianCommand
-from ichor.hpc.submission_commands.ichor_command import ICHORCommand
 from ichor.hpc.submission_commands.morfi_command import MorfiCommand
 from ichor.hpc.submission_commands.pandora_command import (
     PandoraCommand,
@@ -21,7 +20,6 @@ __all__ = [
     "DlpolyCommand",
     "FerebusCommand",
     "GaussianCommand",
-    "ICHORCommand",
     "MorfiCommand",
     "PythonCommand",
     "TycheCommand",
