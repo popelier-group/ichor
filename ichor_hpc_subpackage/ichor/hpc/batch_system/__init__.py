@@ -13,7 +13,7 @@ def init_batch_system():
 
     if SunGridEngine.is_present():
         batch_system = SunGridEngine
-    if SLURM.is_present():
+    elif SLURM.is_present():
         batch_system = SLURM
     else:
         batch_system = LocalBatchSystem
