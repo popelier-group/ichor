@@ -62,8 +62,33 @@ class FileNode:
 
 class FileTree(dict):
     """A dictionary that contains key:value pairs `_id`:FileNode(name,parent).
-    This is the base class that the `FileStructure` class inherits from.
-    See `FileStructure` for more details.
+
+    This class which is used to create a file structure (a tree of directory and files) where some
+    commonly used directories can be accessed easily. It makes it easier to find
+    the full paths of files and directories (which could be subdirectories).
+    Then the full path of a directory can be obtained by doing:
+
+    `file_structure_instance["file_or_dir"]`.
+
+    For example you can add a `SCRIPTS` directory to a FileTree like so
+
+    FILE_STRUCTURE.add(
+        'SCRIPTS',
+        "scripts",
+        type_=FileType.Directory,
+        description="directory with scripts"
+
+    To get the `SCRIPTS` directory you can do:
+
+    `self.ichor.hpc.global_variables.FileStructure["scripts"]` to get the SCRIPTS directory path.
+
+    Because a `Path` object is returned by the above code (see the `FileNode` class),
+    it makes it possible to write code like
+
+    `if self.ichor.hpc.global_variables.FILE_STRUCTURE["scripts"].exists():`
+
+    where the `exists()` method can be called because `self.ichor.hpc.global_variables.FILE_STRUCTURE["scripts"]`
+    is a `pathlib.Path` object
     """
 
     # type_ is an optional string that can be typed in to indicate a file or directory.

@@ -1,9 +1,10 @@
 import platform
 from pathlib import Path
 
+from ichor.core.common.types import FileTree, FileType
+
 from ichor.hpc.batch_system import init_batch_system
 from ichor.hpc.batch_system.parallel_environment import ParallelEnvironments
-from ichor.hpc.file_structure import FileStructure
 from ichor.hpc.log import setup_logger
 from ichor.hpc.machine import Machine
 from ichor.hpc.submission_script.script_names import ScriptNames
@@ -11,7 +12,95 @@ from ichor.hpc.useful_functions import get_current_python_environment_path, init
 
 
 # default file structure to be used for file handling
-FILE_STRUCTURE = FileStructure()
+FILE_STRUCTURE = FileTree()
+
+FILE_STRUCTURE.add(
+    ".DATA",
+    "data",
+    type_=FileType.Directory,
+    description="""Directory that contains important information for jobs submitted to
+    compute nodes. Submission scripts as well as job outputs among other things are stored here.""",
+)
+
+FILE_STRUCTURE.add(
+    "SCRIPTS",
+    "scripts",
+    parent="data",
+    type_=FileType.Directory,
+    description="""Stores submission scripts which are used to submit
+    jobs to compute nodes. Submission scripts are shell (.sh) files such as GAUSSIAN.sh and AIMALL.sh.""",
+)
+
+FILE_STRUCTURE.add(
+    "OUTPUTS",
+    "outputs",
+    parent="scripts",
+    type_=FileType.Directory,
+    description="""This directory contains the standard output (stdout) that the job
+    produces. Things like print statements which are written to standard
+    output are going to be written here (if ran from a compute node).
+        These files have the '.o' extension.""",
+)
+FILE_STRUCTURE.add(
+    "ERRORS",
+    "errors",
+    parent="scripts",
+    type_=FileType.Directory,
+    description="""Contains standard error (stderr) which a job script/program has
+    produced. These files have the '.e' extension""",
+)
+FILE_STRUCTURE.add(
+    "JOBS",
+    "jobs",
+    parent="data",
+    type_=FileType.Directory,
+    description="""Directory containing information about jobs submitted to the
+    queueing system.""",
+)
+FILE_STRUCTURE.add(
+    "jid",
+    "jid",
+    parent="jobs",
+    type_=FileType.File,
+    description="""A file containing job IDs of jobs submitted to the queueing system.""",
+)
+FILE_STRUCTURE.add(
+    "DATAFILES",
+    "datafiles",
+    parent="jobs",
+    type_=FileType.Directory,
+    description="""A directory containing datafiles, which
+    have information for paths to inputs and outputs of a calculation submitted
+    to the computer cluster. These datafiles are used to give
+        the paths to input/output files to jobs without hard-coding
+        the inputs/outputs in the job script itself.""",
+)
+FILE_STRUCTURE.add(
+    "CP2K",
+    "cp2k",
+    type_=FileType.Directory,
+    description="""Contains files relating to the molecular dynamics package CP2K.""",
+)
+# todo: a better description for these two is needed
+FILE_STRUCTURE.add(
+    "DLPOLY",
+    "dlpoly",
+    type_=FileType.Directory,
+    description="""Directory with files relating to DLPOLY simulations.""",
+)
+FILE_STRUCTURE.add("GJF", "dlpoly_gjf", parent="dlpoly", type_=FileType.Directory)
+FILE_STRUCTURE.add("AMBER", "amber", type_=FileType.Directory)
+
+FILE_STRUCTURE.add(
+    "machine",
+    "machine",
+    parent="data",
+    type_=FileType.File,
+    description="""A file containg the name of the comuter cluster
+    we are working on (csf3, ffluxlab, etc.)""",
+)
+
+
 # batch system on current machine
 BATCH_SYSTEM = init_batch_system()
 
