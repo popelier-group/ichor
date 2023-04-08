@@ -11,7 +11,7 @@ class PythonEnvironmentPath:
     """
 
     def __init__(
-        self, venv_env_path: Union[Path, None], conda_env_path: Union[Path, None]
+        self, venv_env_path: Union[str, None], conda_env_path: Union[str, None]
     ):
 
         self.venv_env_path = venv_env_path
@@ -32,14 +32,16 @@ class PythonEnvironmentPath:
         return False
 
     @property
-    def conda_path(self) -> Union[Path, None]:
-        """Returns conda environment path or None if not using a conda environment"""
-        return self.conda_env_path
-
-    @property
     def venv_path(self) -> Union[Path, None]:
         """Returns venv environment path or None if not using a conda environment"""
-        return self.venv_env_path
+        if self.uses_venv:
+            return Path(self.venv_env_path)
+
+    @property
+    def conda_path(self) -> Union[Path, None]:
+        """Returns conda environment path or None if not using a conda environment"""
+        if self.uses_conda:
+            return Path(self.conda_env_path)
 
 
 def get_current_python_environment_path() -> PythonEnvironmentPath:
@@ -49,8 +51,8 @@ def get_current_python_environment_path() -> PythonEnvironmentPath:
     :return: PythonEnvironmentPath instance containing Python env info
     """
 
-    venv_env_path = Path(os.getenv("VIRTUAL_ENV"))
-    conda_env_path = Path(os.getenv("CONDA_PREFIX"))
+    venv_env_path = os.getenv("VIRTUAL_ENV")
+    conda_env_path = os.getenv("CONDA_PREFIX")
 
     python_env = PythonEnvironmentPath(venv_env_path, conda_env_path)
 
