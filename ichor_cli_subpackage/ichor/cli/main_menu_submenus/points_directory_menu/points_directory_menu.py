@@ -166,7 +166,11 @@ point_directory_menu_items = [
         PointsDirectoryFunctions.select_points_directory,
     ),
     FunctionItem(
-        "Make PointsDirectory into SQLite3 database.",
+        "Submit PointsDirectory to Gaussian",
+        PointsDirectoryFunctions.points_directory_to_gaussian_on_compute,
+    ),
+    FunctionItem(
+        "Make PointsDirectory into SQLite3 database",
         PointsDirectoryFunctions.points_directory_to_database,
     ),
 ]
