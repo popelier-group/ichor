@@ -85,19 +85,19 @@ class PointsDirectoryFunctions:
             basis_set = default_basis_set
 
         ncores = user_input_int(
-            f"Number of cores for Gaussian calculations: {default_number_of_cores}: "
+            f"Number of cores for Gaussian calculations, default {default_number_of_cores}: "
         )
         if ncores == "":
             ncores = default_number_of_cores
 
         overwrite_existing = user_input_bool(
-            f"Overwrite existing GJFs, default {bool_to_str(default_overwrite_existing)}: "
+            f"Overwrite existing GJFs (yes/no), default {bool_to_str(default_overwrite_existing)}: "
         )
         if overwrite_existing == "":
             overwrite_existing = default_overwrite_existing
 
         force_calculate_wfn = user_input_bool(
-            f"Recalculate if wfn already exists, default {bool_to_str(default_force_calculate_wfn)}: "
+            f"Recalculate if wfn already exists (yes/no), default {bool_to_str(default_force_calculate_wfn)}: "
         )
         if force_calculate_wfn == "":
             force_calculate_wfn = default_force_calculate_wfn
@@ -118,6 +118,7 @@ class PointsDirectoryFunctions:
         """Converts the current given PointsDirectory to a SQLite3 database."""
 
         default_submit_on_compute = True
+
         submit_on_compute = user_input_bool(
             f"Submit to compute node (yes/no), default {bool_to_str(default_submit_on_compute)}: "
         )
