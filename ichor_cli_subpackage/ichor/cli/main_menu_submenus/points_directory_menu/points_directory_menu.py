@@ -70,9 +70,13 @@ class PointsDirectoryFunctions:
             pd.write_to_sqlite3_database()
 
         else:
-            txt = f"pd = {PointsDirectory(ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH)}\n"
-            txt += "pd.write_to_sqlite3_database()"
-            py_cmd = FreeFlowPythonCommand(txt)
+            text_list = []
+            text_list.append("from ichor.core.files import PointsDirectory")
+            text_list.append(
+                f"pd = PointsDirectory({ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH})"
+            )
+            text_list.append("pd.write_to_sqlite3_database()")
+            py_cmd = FreeFlowPythonCommand("\n".join(text_list))
             with SubmissionScript("pd_to_sqlite3.sh", ncores=4) as submission_script:
                 submission_script.add_command(py_cmd)
             # submission_script.submit()
