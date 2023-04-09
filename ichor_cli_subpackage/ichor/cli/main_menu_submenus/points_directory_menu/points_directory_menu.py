@@ -43,7 +43,7 @@ class PointsDirectoryMenuOptions(MenuOptions):
         """Checks whether the given PointsDirectory exists or if it is a directory."""
         pd_path = Path(self.selected_points_directory_path)
         if (not pd_path.exists()) or (not pd_path.is_dir()):
-            return f"Current {pd_path} does not exist or is not a directory."
+            return f"Current path: {pd_path} does not exist or is not a directory."
 
 
 # initialize dataclass for storing information for menu
