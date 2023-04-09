@@ -46,3 +46,13 @@ def user_input_bool(s="Enter True/False: ") -> Union[bool, None]:
             return False
         elif user_input == "":
             return
+
+
+def user_input_free_flow(s="Enter str: ") -> str:
+    """Asks user for inputs and returns whatever user has typed
+
+    :param s: A string that is shown in the prompt (printed to standard output).
+    """
+
+    user_input = input(s)
+    return user_input

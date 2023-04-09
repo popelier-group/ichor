@@ -8,9 +8,16 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.script_names import SCRIPT_NAMES
-from ichor.cli.useful_functions import compile_strings_to_python_code
-from ichor.cli.useful_functions.user_input import user_input_bool, user_input_path
+from ichor.cli.useful_functions import (
+    bool_to_str,
+    compile_strings_to_python_code,
+    user_input_bool,
+    user_input_free_flow,
+    user_input_int,
+    user_input_path,
+)
 from ichor.core.files import PointsDirectory
+from ichor.hpc.main import submit_points_directory_to_gaussian
 from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -56,18 +63,69 @@ class PointsDirectoryFunctions:
         )
 
     @staticmethod
+    def points_directory_to_gaussian_on_compute():
+        """Submits PointsDirectory to Gaussian on compute."""
+
+        default_method = "b3lyp"
+        default_basis_set = "6-31+g(d,p)"
+        default_number_of_cores = 2
+        default_overwrite_existing = False
+        default_force_calculate_wfn = False
+
+        method = user_input_free_flow(
+            f"Method for Gaussian calculations, default {default_method}: "
+        )
+        if method == "":
+            method = default_method
+
+        basis_set = user_input_free_flow(
+            f"Basis set for Gaussian calculations, default {default_basis_set}: "
+        )
+        if basis_set == "":
+            basis_set = default_basis_set
+
+        ncores = user_input_int(
+            f"Number of cores for Gaussian calculations: {default_number_of_cores}: "
+        )
+        if ncores == "":
+            ncores = default_number_of_cores
+
+        overwrite_existing = user_input_bool(
+            f"Overwrite existing GJFs, default {bool_to_str(default_overwrite_existing)}: "
+        )
+        if overwrite_existing == "":
+            overwrite_existing = default_overwrite_existing
+
+        force_calculate_wfn = user_input_bool(
+            f"Recalculate if wfn already exists, default {bool_to_str(default_force_calculate_wfn)}: "
+        )
+        if force_calculate_wfn == "":
+            force_calculate_wfn = default_force_calculate_wfn
+
+        pd = PointsDirectory(
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        )
+
+        submit_points_directory_to_gaussian(
+            pd,
+            overwrite_existing=overwrite_existing,
+            force_calculate_wfn=force_calculate_wfn,
+            ncores=ncores,
+        )
+
+    @staticmethod
     def points_directory_to_database():
         """Converts the current given PointsDirectory to a SQLite3 database."""
 
         default_submit_on_compute = True
         submit_on_compute = user_input_bool(
-            "Submit to compute node (yes/no), default yes: "
+            f"Submit to compute node (yes/no), default {bool_to_str(default_submit_on_compute)}: "
         )
         if submit_on_compute is None:
             submit_on_compute = default_submit_on_compute
 
         if not submit_on_compute:
-            pd = pd = PointsDirectory(
+            pd = PointsDirectory(
                 ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
             )
             pd.write_to_sqlite3_database()
