@@ -44,8 +44,7 @@ class TabCompleter(ABC):
                 self.completer
             )  # depending on menu, a different functionality is needed for readline
 
-    @staticmethod
-    def remove_completer() -> None:
+    def remove_completer(self) -> None:
         """Remove the completer to prevent word completion in a menu."""
         if readline:
             readline.set_completer(None)
