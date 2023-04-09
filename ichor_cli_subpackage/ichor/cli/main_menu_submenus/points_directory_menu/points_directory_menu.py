@@ -123,6 +123,7 @@ class PointsDirectoryFunctions:
         default_method = "b3lyp"
         default_number_of_cores = 2
         default_naat = 1
+        default_encomp = 3
 
         method = user_input_free_flow(
             f"Method to be used for AIMAll calculations {default_method}: "
@@ -142,11 +143,17 @@ class PointsDirectoryFunctions:
         if naat is None:
             naat = default_naat
 
+        encomp = user_input_int(f"AIMAll -encomp setting, default {default_encomp}: ")
+        if encomp is None:
+            encomp = default_encomp
+
         pd = PointsDirectory(
             ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         )
 
-        submit_points_directory_to_aimall(pd, method=method, ncores=ncores, naat=naat)
+        submit_points_directory_to_aimall(
+            pd, method=method, ncores=ncores, naat=naat, encomp=encomp
+        )
 
     @staticmethod
     def points_directory_to_database():
