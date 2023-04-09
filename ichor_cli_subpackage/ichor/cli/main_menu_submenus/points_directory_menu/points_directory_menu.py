@@ -59,7 +59,12 @@ class PointsDirectoryFunctions:
     def points_directory_to_database():
         """Converts the current given PointsDirectory to a SQLite3 database."""
 
-        submit_on_compute = user_input_bool("Submit to compute (yes/no), default yes: ")
+        default_submit_on_compute = True
+        submit_on_compute = user_input_bool(
+            "Submit to compute node (yes/no), default yes: "
+        )
+        if submit_on_compute is None:
+            submit_on_compute = default_submit_on_compute
 
         if not submit_on_compute:
             pd = pd = PointsDirectory(
