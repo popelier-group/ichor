@@ -15,5 +15,5 @@ class FreeFlowPythonCommand(PythonCommand):
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Returns a string which is then written into the submission script in order to run a python job."""
         activate_env = PythonCommand.command + "\n"
-        python_script_to_run = f"python3 -c '''{self.text}'''"
+        python_script_to_run = f'python3 -c "{self.text}"'
         return activate_env + python_script_to_run

@@ -77,7 +77,7 @@ class PointsDirectoryFunctions:
                 f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
             )
             text_list.append("pd.write_to_sqlite3_database()")
-            py_cmd = FreeFlowPythonCommand("\n".join(text_list))
+            py_cmd = FreeFlowPythonCommand(";".join(text_list))
             with SubmissionScript(
                 SCRIPT_NAMES["pd_to_sqlite3"], ncores=4
             ) as submission_script:
