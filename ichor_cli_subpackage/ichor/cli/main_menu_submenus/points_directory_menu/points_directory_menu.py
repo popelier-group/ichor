@@ -77,7 +77,7 @@ class PointsDirectoryFunctions:
             text_list.append(
                 f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
             )
-            text_list.append("pd.write_to_sqlite3_database()")
+            text_list.append("pd.write_to_sqlite3_database(print_missing_data=True)")
 
             final_cmd = compile_strings_to_python_code(text_list)
             py_cmd = FreeFlowPythonCommand(final_cmd)
