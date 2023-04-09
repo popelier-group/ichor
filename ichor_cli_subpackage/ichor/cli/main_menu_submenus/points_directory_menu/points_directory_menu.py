@@ -17,7 +17,10 @@ from ichor.cli.useful_functions import (
     user_input_path,
 )
 from ichor.core.files import PointsDirectory
-from ichor.hpc.main import submit_points_directory_to_gaussian
+from ichor.hpc.main import (
+    submit_points_directory_to_aimall,
+    submit_points_directory_to_gaussian,
+)
 from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -114,6 +117,38 @@ class PointsDirectoryFunctions:
         )
 
     @staticmethod
+    def points_directory_to_aimall_on_compute():
+        """Submits PointsDirectory to AIMAll on compute."""
+
+        default_method = "b3lyp"
+        default_number_of_cores = 2
+        default_naat = 1
+
+        method = user_input_free_flow(
+            f"Method to be used for AIMAll calculations {default_method}: "
+        )
+        if method is None:
+            method = default_method
+
+        ncores = user_input_int(
+            f"Number of cores for AIMAll calculations, default {default_number_of_cores}: "
+        )
+        if ncores is None:
+            ncores = default_number_of_cores
+
+        naat = user_input_int(
+            f"Number of atoms at a time in AIMAll, default {default_naat}: "
+        )
+        if naat is None:
+            naat = default_naat
+
+        pd = PointsDirectory(
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        )
+
+        submit_points_directory_to_aimall(pd, method=method, ncores=ncores, naat=naat)
+
+    @staticmethod
     def points_directory_to_database():
         """Converts the current given PointsDirectory to a SQLite3 database."""
 
@@ -168,6 +203,10 @@ point_directory_menu_items = [
     FunctionItem(
         "Submit PointsDirectory to Gaussian",
         PointsDirectoryFunctions.points_directory_to_gaussian_on_compute,
+    ),
+    FunctionItem(
+        "Submit PointsDirectory to AIMAll",
+        PointsDirectoryFunctions.points_directory_to_aimall_on_compute,
     ),
     FunctionItem(
         "Make PointsDirectory into SQLite3 database",
