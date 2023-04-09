@@ -11,6 +11,7 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
+from ichor.cli.script_names import SCRIPT_NAMES
 from ichor.cli.useful_functions.user_input import user_input_bool, user_input_path
 from ichor.core.files import PointsDirectory
 from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
@@ -73,11 +74,13 @@ class PointsDirectoryFunctions:
             text_list = []
             text_list.append("from ichor.core.files import PointsDirectory")
             text_list.append(
-                f"pd = PointsDirectory({ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH})"
+                f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
             )
             text_list.append("pd.write_to_sqlite3_database()")
             py_cmd = FreeFlowPythonCommand("\n".join(text_list))
-            with SubmissionScript("pd_to_sqlite3.sh", ncores=4) as submission_script:
+            with SubmissionScript(
+                SCRIPT_NAMES["pd_to_sqlite3"], ncores=4
+            ) as submission_script:
                 submission_script.add_command(py_cmd)
             # submission_script.submit()
 
