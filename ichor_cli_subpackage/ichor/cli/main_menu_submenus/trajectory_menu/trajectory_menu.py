@@ -58,13 +58,13 @@ class TrajectoryFunctions:
         default_every = 1
 
         to_center = user_input_bool(
-            f"Subtract Centroid of Geometries (default {default_to_center}): "
+            f"Subtract centroid of geometries, default {default_to_center}: "
         )
         if to_center is None:
             to_center = default_to_center
 
         every = user_input_int(
-            f"Write out every ith geometry (give i) (default {default_every}): "
+            f"Write out every ith geometry, default {default_every}: "
         )
         if every is None:
             every = default_every
