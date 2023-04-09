@@ -4,7 +4,8 @@ from ichor.hpc.submission_commands.python_command import PythonCommand
 
 
 class FreeFlowPythonCommand(PythonCommand):
-    """A class which is used for any jobs that are going to run Python code
+    """A class which is used for jobs that will execute python code
+    with python -c `python_code_here`
 
     :param text: Arbitrary text to get compiled with python and get executed on a compute node.
     """
