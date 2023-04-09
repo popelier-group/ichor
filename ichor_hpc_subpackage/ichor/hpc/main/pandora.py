@@ -14,7 +14,6 @@ from ichor.core.files import (
     WFN,
 )
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.log import logger
 from ichor.hpc.submission_commands import MorfiCommand, PandoraPySCFCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -59,13 +58,13 @@ def submit_pandora_input_to_pyscf(
                 submission_script.add_command(
                     PandoraPySCFCommand(pandora_input, point_directory)
                 )
-                logger.debug(
+                ichor.hpc.global_variables.logger.debug(
                     f"Adding {pandora_input} to {submission_script.path}"
                 )  # make a list of GaussianCommand instances.
     # write the final submission script file that containing the job that
     # needs to be ran (could be an array job that has many tasks)
     if len(submission_script.commands) > 0:
-        logger.info(
+        ichor.hpc.global_variables.logger.info(
             f"Submitting {len(submission_script.commands)} Pandora Input(s) to PySCF"
         )
         # submit the final submission script to the queuing system, so that job is ran on compute nodes.
@@ -101,11 +100,11 @@ def copy_aimall_wfn_to_point_directory(
             cp(pandora_directory.pyscf.aimall_wfn.path, aimall_wfn)
             return aimall_wfn
         else:
-            logger.error(
+            ichor.hpc.global_variables.logger.error(
                 f"Expected AIMAll WFN '{pandora_directory.pyscf.aimall_wfn.path}' does not exist"
             )
     else:
-        logger.error(
+        ichor.hpc.global_variables.logger.error(
             f"Expected Pandora PySCF Directory '{pandora_directory.pyscf.path}' does not exist"
         )
 

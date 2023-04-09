@@ -5,7 +5,6 @@ import ichor.hpc.global_variables
 
 from ichor.core.files import GJF, PointsDirectory
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.log import logger
 from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -117,12 +116,14 @@ def submit_gjfs(
                 submission_script.add_command(
                     GaussianCommand(gjf)
                 )  # make a list of GaussianCommand instances.
-                logger.info(f"Adding {gjf} to {submission_script.path}")
+                ichor.hpc.global_variables.logger.info(
+                    f"Adding {gjf} to {submission_script.path}"
+                )
 
     # todo this will get executed when running from a compute node, but this does not
     # submit any wfns to aimall, it is just used to make the datafile.
     if len(submission_script.grouped_commands) > 0:
-        logger.info(
+        ichor.hpc.global_variables.logger.info(
             f"Submitting {len(submission_script.grouped_commands)} GJF(s) to Gaussian"
         )
         return submission_script.submit(hold=hold)
@@ -147,7 +148,7 @@ def submit_gjfs(
 #     ):
 #         print_completed()
 #     else:
-#         logger.error(f"Gaussian Job {gaussian_file} failed to run")
+#         ichor.hpc.global_variables.logger.error(f"Gaussian Job {gaussian_file} failed to run")
 
 
 # def scrub_gaussian(gaussian_file: str):
@@ -173,5 +174,5 @@ def submit_gjfs(
 #         reason = f"Incomplete WFN ('{point.wfn.path}') file found"
 
 #     if reason is not None:
-#         logger.error(f"'{point.path}' will be ignored | Reason: {reason}")
+#         ichor.hpc.global_variables.logger.error(f"'{point.path}' will be ignored | Reason: {reason}")
 #         point.ignore(reason)

@@ -2,12 +2,13 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional, Union
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.functools import classproperty
 from ichor.core.common.os import run_cmd
 
 from ichor.hpc.batch_system.jobs import Job, JobID
 from ichor.hpc.batch_system.node import NodeType
-from ichor.hpc.log import logger
 
 
 class BatchSystem(ABC):
@@ -37,16 +38,20 @@ class BatchSystem(ABC):
             cmd += cls.hold_job(hold)
         cmd += [job_script]
 
-        logger.debug(f"Submitting Script Using Command: {' '.join(map(str, cmd))}")
+        ichor.hpc.global_variables.logger.debug(
+            f"Submitting Script Using Command: {' '.join(map(str, cmd))}"
+        )
 
         stdout, stderr = run_cmd(
             cmd
         )  # this is the part which actually submits the job to  the queuing system
-        logger.debug(f"- stdout: '{stdout}' | stderr: '{stderr}'")
+        ichor.hpc.global_variables.logger.debug(
+            f"- stdout: '{stdout}' | stderr: '{stderr}'"
+        )
         job_id = JobID(
             job_script, cls.parse_job_id(stdout)
         )  # stdout is parsed because this is where the job id is printed once a job is submitted
-        logger.debug(f"- job_id: {job_id}")
+        ichor.hpc.global_variables.logger.debug(f"- job_id: {job_id}")
         return job_id
 
     @classmethod

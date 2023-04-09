@@ -26,12 +26,3 @@ def setup_logger(
     logger.addHandler(handler)
 
     return logger
-
-
-logger = setup_logger("ichor_logger", "ichor.log")
-timing_log = setup_logger("timing_logger", "ichor.timing")
-
-
-def log_time(*args):
-    global timing_log
-    timing_log.info(" | ".join(map(str, args)))

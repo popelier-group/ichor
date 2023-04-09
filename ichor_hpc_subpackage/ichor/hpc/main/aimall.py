@@ -8,7 +8,6 @@ from ichor.core.common.constants import AIMALL_FUNCTIONALS
 
 from ichor.core.files import PointsDirectory
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.log import logger
 from ichor.hpc.submission_commands import AIMAllCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -46,7 +45,7 @@ def submit_points_directory_to_aimall(
 
     list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
 
-    logger.info("Submitting wavefunctions to AIMAll.")
+    ichor.hpc.global_variables.logger.info("Submitting wavefunctions to AIMAll.")
     return submit_wfns(
         list_of_wfn_paths,
         aimall_atoms=aimall_atoms,
@@ -101,12 +100,14 @@ def submit_wfns(
                     wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
                 )
             )
-            logger.info(f"Adding {wfn} to {submission_script.path}")
+            ichor.hpc.global_variables.logger.info(
+                f"Adding {wfn} to {submission_script.path}"
+            )
 
     # todo this will get executed when running from a compute node,
     # but this does not submit any wfns to aimall, it is just used to make the datafile.
     if len(submission_script.grouped_commands) > 0:
-        logger.info(
+        ichor.hpc.global_variables.logger.info(
             f"Submitting {len(submission_script.grouped_commands)} WFN(s) to AIMAll"
         )
         return submission_script.submit(hold=hold)

@@ -109,7 +109,6 @@ PARALLEL_ENVIRONMENT[Machine.local]["smp"] = 1, 100
 
 # set up loggers
 logger = setup_logger("ICHOR", "ichor.log")
-timing_logger = setup_logger("TIMING", "ichor.timing")
 
 # set up script names that are implemented
 SCRIPT_NAMES = ScriptNames(
