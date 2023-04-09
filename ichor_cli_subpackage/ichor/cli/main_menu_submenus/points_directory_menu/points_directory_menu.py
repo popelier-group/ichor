@@ -75,31 +75,31 @@ class PointsDirectoryFunctions:
         method = user_input_free_flow(
             f"Method for Gaussian calculations, default {default_method}: "
         )
-        if method == "":
+        if method is None:
             method = default_method
 
         basis_set = user_input_free_flow(
             f"Basis set for Gaussian calculations, default {default_basis_set}: "
         )
-        if basis_set == "":
+        if basis_set is None:
             basis_set = default_basis_set
 
         ncores = user_input_int(
             f"Number of cores for Gaussian calculations, default {default_number_of_cores}: "
         )
-        if ncores == "":
+        if ncores is None:
             ncores = default_number_of_cores
 
         overwrite_existing = user_input_bool(
             f"Overwrite existing GJFs (yes/no), default {bool_to_str(default_overwrite_existing)}: "
         )
-        if overwrite_existing == "":
+        if overwrite_existing is None:
             overwrite_existing = default_overwrite_existing
 
         force_calculate_wfn = user_input_bool(
             f"Recalculate if wfn already exists (yes/no), default {bool_to_str(default_force_calculate_wfn)}: "
         )
-        if force_calculate_wfn == "":
+        if force_calculate_wfn is None:
             force_calculate_wfn = default_force_calculate_wfn
 
         pd = PointsDirectory(

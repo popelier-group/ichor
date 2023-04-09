@@ -55,4 +55,6 @@ def user_input_free_flow(s="Enter str: ") -> str:
     """
 
     user_input = input(s)
+    if user_input == "":
+        return
     return user_input
