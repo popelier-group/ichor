@@ -91,23 +91,13 @@ FILE_STRUCTURE.add(
 FILE_STRUCTURE.add("GJF", "dlpoly_gjf", parent="dlpoly", type_=FileType.Directory)
 FILE_STRUCTURE.add("AMBER", "amber", type_=FileType.Directory)
 
-FILE_STRUCTURE.add(
-    "machine",
-    "machine",
-    parent="data",
-    type_=FileType.File,
-    description="""A file containg the name of the comuter cluster
-    we are working on (csf3, ffluxlab, etc.)""",
-)
-
-
 # batch system on current machine
 BATCH_SYSTEM = init_batch_system()
 
 # will be Machine.Local if machine is not in list of names
 machine_name: str = platform.node()
 # initialize machine
-MACHINE = init_machine(machine_name, FILE_STRUCTURE["machine"])
+MACHINE = init_machine(machine_name)
 
 # make parallel environment variables to run jobs on multiple cores
 PARALLEL_ENVIRONMENT = ParallelEnvironments()
