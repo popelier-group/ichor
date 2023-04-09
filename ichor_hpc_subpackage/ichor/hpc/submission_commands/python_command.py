@@ -40,10 +40,10 @@ class PythonCommand(SubmissionCommand):
         if python_env.uses_venv:
             env_path = python_env.venv_path.absolute()
             activate_script = env_path / "bin" / "activate"
-            return f"source {str(activate_script)}\n"
+            return f"source {str(activate_script)}"
         elif python_env.uses_conda:
             env_path = python_env.conda_path.absolute()
-            return f"conda activate {str(env_path)}\n"
+            return f"conda activate {str(env_path)}"
 
         raise PythonEnvironmentNotFound(
             "Python environment was not found. Cannot submit Python command."
@@ -51,6 +51,6 @@ class PythonCommand(SubmissionCommand):
 
     def repr(self, variables: Optional[List[str]] = None) -> str:
         """Returns a string which is then written into the submission script in order to run a python job."""
-        activate_env = PythonCommand.command
+        activate_env = PythonCommand.command + "\n"
         python_script_to_run = f"python3 {self.script} {' '.join(self.args)}"
         return activate_env + python_script_to_run
