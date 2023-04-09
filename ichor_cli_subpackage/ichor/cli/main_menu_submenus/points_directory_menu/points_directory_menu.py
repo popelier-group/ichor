@@ -3,12 +3,8 @@ from pathlib import Path
 from typing import Union
 
 import ichor.cli.global_menu_variables
-from consolemenu.items import FunctionItem, SubmenuItem
+from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
-from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.points_directory_to_database_menu import (  # noqa E501
-    points_directory_to_database_menu,
-    POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION,
-)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.script_names import SCRIPT_NAMES
@@ -108,11 +104,6 @@ point_directory_menu_items = [
     FunctionItem(
         "Make PointsDirectory into SQLite3 database.",
         PointsDirectoryFunctions.points_directory_to_database,
-    ),
-    SubmenuItem(
-        text=POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION.title,
-        submenu=points_directory_to_database_menu,
-        menu=points_directory_menu,
     ),
 ]
 
