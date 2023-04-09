@@ -48,6 +48,7 @@ class TabCompleter(ABC):
         """Remove the completer to prevent word completion in a menu."""
         if readline:
             readline.set_completer(None)
+            readline.parse_and_bind("tab: insert-tab")
 
     def __enter__(self):
         """
@@ -114,3 +115,31 @@ class PathCompleter(TabCompleter):
             if Path(f).is_dir():
                 files[i] += os.sep
         return files[state]
+
+
+class DoNothingCompleter(TabCompleter):
+    """This completer does not do anything, but fixes
+    issues where PathCompleter modifies how the tab button works.
+
+    """
+
+    def completer(self, text, state):
+        return super().completer(text, state)
+
+    def setup_completer(self, pattern="\t") -> None:
+        """
+        If readline package is present, then we can use tab completion.
+        :param pattern: Which set of characters to use as delimiter. Default is `\t` which is a Tab
+        """
+        if readline:
+            readline.set_completer_delims(pattern)  # set a tab as delimiter
+            readline.parse_and_bind("tab: insert-tab")  # set tab to trigger readline
+            readline.set_completer(
+                self.completer
+            )  # depending on menu, a different functionality is needed for readline
+
+    def remove_completer(self) -> None:
+        """Remove the completer to prevent word completion in a menu."""
+        if readline:
+            readline.set_completer(None)
+            readline.parse_and_bind("tab: insert-tab")

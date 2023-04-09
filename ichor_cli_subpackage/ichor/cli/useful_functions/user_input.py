@@ -1,6 +1,6 @@
 from typing import Union
 
-from ichor.cli.completers.tab_completer import PathCompleter
+from ichor.cli.completers import PathCompleter
 
 
 def user_input_path(s="Enter Path: ") -> str:

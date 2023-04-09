@@ -2,19 +2,40 @@ from typing import Iterable, List
 
 from consolemenu import ConsoleMenu as OriginalConsoleMenu
 from consolemenu.items import MenuItem
+from consolemenu.screen import Screen as OriginalScreen
+from ichor.cli.completers.tab_completer import DoNothingCompleter
 from ichor.cli.menu_options import MenuOptions
 
 # TODO: maybe imporve screen size
-# from consolemenu.screen import Screen as OriginalScreen
+# TODO: also maybe find a better way to fix the slight bug with user input
 # import shutil
 
-# class Screen(OriginalScreen):
-#     """ Screen size of menu, make bigger than the default."""
 
-#     def __init__(self):
-#         # self.__height, self.__width = shutil.get_terminal_size()
-#         self.__height = 100
-#         self.__width = 100
+class Screen(OriginalScreen):
+    """Screen size of menu, overwrites some methods from library class."""
+
+    def __init__(self):
+        # self.__height, self.__width = shutil.get_terminal_size()
+        self.__height = 100
+        self.__width = 100
+
+    def input(self, prompt=""):
+        """
+        Prompt the end user for input.
+        Without overwriting this, pressing Tab makes a tab.
+        However, PathCompleter changes this, so after using a function with PathCompleter,
+        the Tab button no longer makes a tab. With this fix, pressing Tab
+        in any selection menu does not do anything (i.e. does not insert a tab like it did before).
+        Menus requiring PathCompleter still work as intended and paths are auto-completed.
+
+        Args:
+            prompt (:obj:`str`, optional): The message to display as the prompt.
+
+        Returns:
+            The input provided by the user.
+        """
+        with DoNothingCompleter():
+            return input(prompt)
 
 
 class ConsoleMenu(OriginalConsoleMenu):
@@ -42,7 +63,7 @@ class ConsoleMenu(OriginalConsoleMenu):
         this_menu_options: MenuOptions = None,
         title=None,
         subtitle=None,
-        screen=None,
+        # screen=None,
         formatter=None,
         prologue_text=None,
         epilogue_text=None,
@@ -60,7 +81,7 @@ class ConsoleMenu(OriginalConsoleMenu):
         super().__init__(
             title=title,
             subtitle=subtitle,
-            screen=screen,
+            screen=Screen(),  # always overwrite the screen with our Screen class
             formatter=formatter,
             prologue_text=prologue_text,
             epilogue_text=epilogue_text,
