@@ -40,9 +40,9 @@ def user_input_bool(s="Enter True/False: ") -> Union[bool, None]:
 
     while True:
         user_input = input(s)
-        if user_input.lower() in ["t", "true", "1"]:
+        if user_input.lower() in ["t", "true", "1", "yes", "y"]:
             return True
-        elif user_input.lower() in ["f", "false", "0"]:
+        elif user_input.lower() in ["f", "false", "0", "no", "n"]:
             return False
         elif user_input == "":
             return

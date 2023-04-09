@@ -20,7 +20,7 @@ class PythonCommand(SubmissionCommand):
     """
 
     def __init__(self, python_script: Path, args: Optional[List[str]] = None):
-        self.script = python_script
+        self.script = Path(python_script)
         self.args = args if args is not None else []
 
     @classproperty

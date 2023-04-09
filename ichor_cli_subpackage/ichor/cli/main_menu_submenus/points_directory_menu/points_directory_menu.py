@@ -11,7 +11,10 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions.user_input import user_input_path
+from ichor.cli.useful_functions.user_input import user_input_bool, user_input_path
+from ichor.core.files import PointsDirectory
+from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
+from ichor.hpc.submission_script import SubmissionScript
 
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
@@ -54,6 +57,26 @@ class PointsDirectoryFunctions:
             ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         )
 
+    @staticmethod
+    def points_directory_to_database():
+        """Converts the current given PointsDirectory to a SQLite3 database."""
+
+        submit_on_compute = user_input_bool("Submit to compute (yes/no), default yes: ")
+
+        if not submit_on_compute:
+            pd = pd = PointsDirectory(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+            )
+            pd.write_to_sqlite3_database()
+
+        else:
+            txt = f"pd = {PointsDirectory(ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH)}\n"
+            txt += "pd.write_to_sqlite3_database()"
+            py_cmd = FreeFlowPythonCommand(txt)
+            with SubmissionScript("pd_to_sqlite3.sh", ncores=4) as submission_script:
+                submission_script.add_command(py_cmd)
+            # submission_script.submit()
+
 
 # initialize menu
 points_directory_menu = ConsoleMenu(
@@ -66,11 +89,15 @@ points_directory_menu = ConsoleMenu(
 )
 
 # make menu items
-# can use lamda functions to change text of options as well :)
+# can use lambda functions to change text of options as well :)
 point_directory_menu_items = [
     FunctionItem(
         "Select path of PointsDirectory",
         PointsDirectoryFunctions.select_points_directory,
+    ),
+    FunctionItem(
+        "Make PointsDirectory into SQLite3 database.",
+        PointsDirectoryFunctions.points_directory_to_database,
     ),
     SubmenuItem(
         text=POINTS_DIRECTORY_TO_DATABASE_MENU_DESCRIPTION.title,
