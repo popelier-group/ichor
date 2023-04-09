@@ -126,7 +126,7 @@ class PointsDirectoryFunctions:
         default_encomp = 3
 
         method = user_input_free_flow(
-            f"Method to be used for AIMAll calculations {default_method}: "
+            f"Method to be used for AIMAll calculations, default {default_method}: "
         )
         if method is None:
             method = default_method
