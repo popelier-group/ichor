@@ -8,6 +8,23 @@ from ichor.core.files.file_data import HasAtoms
 
 
 class CP2KInput(ReadFile, WriteFile, HasAtoms):
+    """CP2K inpuit file reading/writing class.
+
+    :param path: path of CP2K .inp file
+    :param atoms: Atoms instance which is the starting geometry, defaults to None
+    :param temperature: Temperature of CP2K simulation, defaults to FileContents
+    :param nsteps: Timesteps of simulation, defaults to FileContents
+    :param datafile_location: The location of a file containing CP2K data.
+        This has nothing to do with the `datafile` that ICHOR uses to submit jobs
+        , defaults to FileContents
+    :param project_name: The name of the system/project, defaults to FileContents
+    :param method: The method to use for the DFT simulation, defaults to "BLYP"
+    :param basis_set: Basis set to use for simulation, defaults to "6-31G*"
+    :param molecular_charge: Charge of system, defaults to 0
+    :param n_molecules: Number of molecules, defaults to 1
+    :param box_size: Box size of simulation, defaults to 25.0
+    """
+
     def __init__(
         self,
         path: Path,
@@ -24,6 +41,7 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
         n_molecules: int = 1,
         box_size: float = 25.0,
     ):
+
         super(ReadFile, self).__init__(path)
 
         self.atoms = atoms
