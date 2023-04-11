@@ -10,3 +10,6 @@ SELECTED_POINTS_DIRECTORY_PATH: Path = Path("").absolute()
 
 # TrajectoryMenu options
 SELECTED_TRAJECTORY_PATH: Path = Path("").absolute()
+
+# MolecularDynamicsMenu options
+SELECTED_XYZ_PATH: Path = Path("").absolute()
