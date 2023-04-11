@@ -197,6 +197,8 @@ class PointsDirectoryFunctions:
 
         else:
             text_list = []
+            # make the python command that will be written in the submit script
+            # it will get executed as `python -c python_code_to_execute...`
             text_list.append("from ichor.core.files import PointsDirectory")
             text_list.append(
                 f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
@@ -206,7 +208,7 @@ class PointsDirectoryFunctions:
             final_cmd = compile_strings_to_python_code(text_list)
             py_cmd = FreeFlowPythonCommand(final_cmd)
             with SubmissionScript(
-                SCRIPT_NAMES["pd_to_sqlite3"], ncores=4
+                SCRIPT_NAMES["pd_to_sqlite3"], ncores=8
             ) as submission_script:
                 submission_script.add_command(py_cmd)
             submission_script.submit()
