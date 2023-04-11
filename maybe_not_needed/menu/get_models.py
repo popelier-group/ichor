@@ -46,7 +46,9 @@ def set_current_model(model: Path):
 
 def select_from_log(model_log_path: Path):
     i = 1
-    with Menu("Select Model From Log", space=True, back=True, exit=True) as menu:
+    with Menu(
+        "Select Model From Log", space=True, back=True, exit=True
+    ) as menu:
         for model_dir in model_log_path:
             if number_of_models_in_dir(model_dir) > 0:
                 menu.add_option(
