@@ -25,7 +25,9 @@ def get_first_file(
     return None
 
 
-def get_default_files(filetypes: List[str], vs_path: Path, sp_path: Path) -> List[Path]:
+def get_default_files(
+    filetypes: List[str], vs_path: Path, sp_path: Path
+) -> List[Path]:
     vs_file = get_first_file(vs_path, filetypes)
     sp_file = get_first_file(sp_path, filetypes)
     files = []
@@ -60,7 +62,9 @@ def _get_input_menu_refresh(menu):
     menu.add_final_options()
 
 
-def get_input_menu(current_input: Path, filetypes: Optional[List[str]] = None) -> Path:
+def get_input_menu(
+    current_input: Path, filetypes: Optional[List[str]] = None
+) -> Path:
     global _input_file
     global _input_filetypes
     _input_file = current_input
