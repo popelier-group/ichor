@@ -25,6 +25,79 @@ from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPytho
 from ichor.hpc.submission_script import SubmissionScript
 
 
+def ask_user_for_gaussian_settings():
+
+    default_method = "b3lyp"
+    default_basis_set = "6-31+g(d,p)"
+    default_number_of_cores = 2
+    default_overwrite_existing = False
+    default_force_calculate_wfn = False
+
+    method = user_input_free_flow(
+        f"Method for Gaussian calculations, default {default_method}: "
+    )
+    if method is None:
+        method = default_method
+
+    basis_set = user_input_free_flow(
+        f"Basis set for Gaussian calculations, default {default_basis_set}: "
+    )
+    if basis_set is None:
+        basis_set = default_basis_set
+
+    ncores = user_input_int(
+        f"Number of cores for Gaussian calculations, default {default_number_of_cores}: "
+    )
+    if ncores is None:
+        ncores = default_number_of_cores
+
+    overwrite_existing = user_input_bool(
+        f"Overwrite existing GJFs (yes/no), default {bool_to_str(default_overwrite_existing)}: "
+    )
+    if overwrite_existing is None:
+        overwrite_existing = default_overwrite_existing
+
+    force_calculate_wfn = user_input_bool(
+        f"Recalculate if wfn already exists (yes/no), default {bool_to_str(default_force_calculate_wfn)}: "
+    )
+    if force_calculate_wfn is None:
+        force_calculate_wfn = default_force_calculate_wfn
+
+    return method, basis_set, ncores, overwrite_existing, force_calculate_wfn
+
+
+def ask_user_for_aimall_settings():
+
+    default_method = "b3lyp"
+    default_number_of_cores = 2
+    default_naat = 1
+    default_encomp = 3
+
+    method = user_input_free_flow(
+        f"Method to be used for AIMAll calculations, default {default_method}: "
+    )
+    if method is None:
+        method = default_method
+
+    ncores = user_input_int(
+        f"Number of cores for AIMAll calculations, default {default_number_of_cores}: "
+    )
+    if ncores is None:
+        ncores = default_number_of_cores
+
+    naat = user_input_int(
+        f"Number of atoms at a time in AIMAll, default {default_naat}: "
+    )
+    if naat is None:
+        naat = default_naat
+
+    encomp = user_input_int(f"AIMAll -encomp setting, default {default_encomp}: ")
+    if encomp is None:
+        encomp = default_encomp
+
+    return method, ncores, naat, encomp
+
+
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
     subtitle="Use this to interact with ichor's PointsDirectory class.\n",
@@ -67,92 +140,41 @@ class PointsDirectoryFunctions:
 
     @staticmethod
     def points_directory_to_gaussian_on_compute():
-        """Submits PointsDirectory to Gaussian on compute."""
+        """Submits a single PointsDirectory to Gaussian on compute."""
 
-        default_method = "b3lyp"
-        default_basis_set = "6-31+g(d,p)"
-        default_number_of_cores = 2
-        default_overwrite_existing = False
-        default_force_calculate_wfn = False
-
-        method = user_input_free_flow(
-            f"Method for Gaussian calculations, default {default_method}: "
-        )
-        if method is None:
-            method = default_method
-
-        basis_set = user_input_free_flow(
-            f"Basis set for Gaussian calculations, default {default_basis_set}: "
-        )
-        if basis_set is None:
-            basis_set = default_basis_set
-
-        ncores = user_input_int(
-            f"Number of cores for Gaussian calculations, default {default_number_of_cores}: "
-        )
-        if ncores is None:
-            ncores = default_number_of_cores
-
-        overwrite_existing = user_input_bool(
-            f"Overwrite existing GJFs (yes/no), default {bool_to_str(default_overwrite_existing)}: "
-        )
-        if overwrite_existing is None:
-            overwrite_existing = default_overwrite_existing
-
-        force_calculate_wfn = user_input_bool(
-            f"Recalculate if wfn already exists (yes/no), default {bool_to_str(default_force_calculate_wfn)}: "
-        )
-        if force_calculate_wfn is None:
-            force_calculate_wfn = default_force_calculate_wfn
+        (
+            method,
+            basis_set,
+            ncores,
+            overwrite_existing,
+            force_calculate_wfn,
+        ) = ask_user_for_gaussian_settings()
 
         pd = PointsDirectory(
             ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         )
 
         submit_points_directory_to_gaussian(
-            pd,
+            points_directory=pd,
             overwrite_existing=overwrite_existing,
             force_calculate_wfn=force_calculate_wfn,
             ncores=ncores,
+            method=method,
+            basis_set=basis_set,
         )
 
     @staticmethod
     def points_directory_to_aimall_on_compute():
-        """Submits PointsDirectory to AIMAll on compute."""
+        """Submits a single PointsDirectory to AIMAll on compute."""
 
-        default_method = "b3lyp"
-        default_number_of_cores = 2
-        default_naat = 1
-        default_encomp = 3
-
-        method = user_input_free_flow(
-            f"Method to be used for AIMAll calculations, default {default_method}: "
-        )
-        if method is None:
-            method = default_method
-
-        ncores = user_input_int(
-            f"Number of cores for AIMAll calculations, default {default_number_of_cores}: "
-        )
-        if ncores is None:
-            ncores = default_number_of_cores
-
-        naat = user_input_int(
-            f"Number of atoms at a time in AIMAll, default {default_naat}: "
-        )
-        if naat is None:
-            naat = default_naat
-
-        encomp = user_input_int(f"AIMAll -encomp setting, default {default_encomp}: ")
-        if encomp is None:
-            encomp = default_encomp
+        method, ncores, naat, encomp = ask_user_for_aimall_settings()
 
         pd = PointsDirectory(
             ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         )
 
         submit_points_directory_to_aimall(
-            pd, method=method, ncores=ncores, naat=naat, encomp=encomp
+            points_directory=pd, method=method, ncores=ncores, naat=naat, encomp=encomp
         )
 
     @staticmethod
