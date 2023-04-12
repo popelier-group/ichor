@@ -37,7 +37,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             atoms = Atoms()
             for line in f:
                 # match the line containing the number of atoms in timestep
-                if re.match(r"^\s*\d+$", line):
+                if re.match(r"^\s*\d+", line):
                     natoms = int(line)
                     # this is the comment line of xyz files.
                     # It can be empty or contain some useful information that can be stored.
