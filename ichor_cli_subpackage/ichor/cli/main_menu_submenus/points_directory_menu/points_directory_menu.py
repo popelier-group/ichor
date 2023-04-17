@@ -16,6 +16,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
 )
+from ichor.core.calculators import default_alf_calculator
 from ichor.core.files import PointsDirectory
 from ichor.hpc.main import (
     submit_points_directory_to_aimall,
@@ -213,6 +214,53 @@ class PointsDirectoryFunctions:
                 submission_script.add_command(py_cmd)
             submission_script.submit()
 
+    @staticmethod
+    def get_features_csv_from_points_directory():
+
+        default_submit_on_compute = True
+        submit_on_compute = user_input_bool(
+            f"Submit to compute node (yes/no), default {bool_to_str(default_submit_on_compute)}: "
+        )
+        if submit_on_compute is None:
+            submit_on_compute = default_submit_on_compute
+
+        # TODO: provide some way to get alf maybe?
+        if not submit_on_compute:
+            pd = PointsDirectory(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+            )
+            alf = pd[0].alf_dict(default_alf_calculator)
+            pd.features_with_properties_to_csv(alf)
+
+        if not submit_on_compute:
+            pd = PointsDirectory(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+            )
+            alf = pd[0].alf_dict(default_alf_calculator)
+            pd.features_with_properties_to_csv(alf)
+
+        else:
+            text_list = []
+            # make the python command that will be written in the submit script
+            # it will get executed as `python -c python_code_to_execute...`
+            text_list.append("from ichor.core.files import PointsDirectory")
+            text_list.append(
+                "from ichor.core.calculators import default_alf_calculator"
+            )
+            text_list.append(
+                f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
+            )
+            text_list.append("alf = pd[0].alf_dict(default_alf_calculator)")
+            text_list.append("pd.features_with_properties_to_csv(alf)")
+
+            final_cmd = compile_strings_to_python_code(text_list)
+            py_cmd = FreeFlowPythonCommand(final_cmd)
+            with SubmissionScript(
+                SCRIPT_NAMES["pd_to_csvs"], ncores=8
+            ) as submission_script:
+                submission_script.add_command(py_cmd)
+            submission_script.submit()
+
 
 # initialize menu
 points_directory_menu = ConsoleMenu(
@@ -242,6 +290,10 @@ point_directory_menu_items = [
     FunctionItem(
         "Make PointsDirectory into SQLite3 database",
         PointsDirectoryFunctions.points_directory_to_database,
+    ),
+    FunctionItem(
+        "Make PointsDirectory into CSVs",
+        PointsDirectoryFunctions.get_features_csv_from_points_directory,
     ),
 ]
 
