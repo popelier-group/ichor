@@ -216,6 +216,8 @@ class PointsDirectoryFunctions:
 
     @staticmethod
     def get_features_csv_from_points_directory():
+        """Converts a PointsDirectory into csv files containing features and properties.
+        By default, submits on compute."""
 
         default_submit_on_compute = True
         submit_on_compute = user_input_bool(
