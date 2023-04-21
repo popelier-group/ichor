@@ -24,7 +24,7 @@ from ichor.core.multipoles import (
     rotate_octupole,
     rotate_quadrupole,
 )
-from ichor.core.sql import AtomNames, Dataset, Points
+from ichor.core.sql.add_to_database import AtomNames, Dataset, Points
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
