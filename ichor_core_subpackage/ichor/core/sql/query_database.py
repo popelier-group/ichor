@@ -544,3 +544,40 @@ def delete_points_by_id(engine, point_ids: List[int]):
     session = Session(engine, future=True)
     session.query(Points).filter(Points.id.in_(point_ids)).delete()
     session.commit()
+
+
+def trajectory_from_database(
+    point_ids, full_df, trajectory_name: str = "trajectory_from_database.xyz"
+):
+    """Writes our trajectory from geometries in database."""
+
+    from ichor.core.files import Trajectory
+
+    trajectory_inst = Trajectory(trajectory_name)
+
+    for point_id in point_ids:
+        atoms = atoms_from_point_id(full_df, point_id)
+        trajectory_inst.append(atoms)
+
+    return trajectory_inst
+
+
+def csv_file_with_specific_properties(
+    point_ids, full_df, all_atom_names, properties: List[str]
+):
+    """Writes out csv file for each atom containing the given properties"""
+
+    for atom_name in all_atom_names:
+        with open(f"{atom_name}_properties.csv", "w") as f:
+            f.write(",".join(properties) + "\n")
+            for point_id in point_ids:
+                # find geometry which matches the id
+                one_point_df = full_df.loc[full_df["id"] == point_id]
+                # check that integration error is below threshold, otherwise do not calculate features
+                # for the atom and do not add this point to training set for this atom.
+                # if other atoms have good integration errors, the same point can be used in their training sets.
+                row_with_atom_info = one_point_df.loc[
+                    one_point_df["name_1"] == atom_name
+                ]
+                results = [str(row_with_atom_info[p]) for p in properties]
+                f.write(",".join(results) + "\n")
