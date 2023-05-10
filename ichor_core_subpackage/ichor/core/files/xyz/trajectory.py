@@ -12,6 +12,7 @@ from ichor.core.common.constants import bohr2ang
 from ichor.core.common.functools import classproperty
 from ichor.core.common.int import count_digits
 from ichor.core.common.io import mkdir
+from ichor.core.common.itertools import chunker
 from ichor.core.files.file import FileState, ReadFile, WriteFile
 
 
@@ -360,6 +361,19 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             new_traj.append(new_atoms_instance)
 
         return new_traj
+
+    def split_packmol_trajectory(
+        self, atoms_per_molecule: int, trajectory_name="packmol_traj_split.xyz"
+    ):
+
+        new_traj = Trajectory(trajectory_name)
+
+        for batch in chunker(self[0], atoms_per_molecule):
+
+            atoms = Atoms(batch)
+            new_traj.append(atoms)
+
+        new_traj.write()
 
     def _write_file(self, path: Path, every: int = 1, center: bool = False):
         """Write  a trajectroy file
