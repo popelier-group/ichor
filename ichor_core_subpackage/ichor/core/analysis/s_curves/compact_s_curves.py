@@ -456,18 +456,21 @@ def plot_with_matplotlib(
     # property name, inner dict
     for key, inner_dict in total_dict.items():
 
-        # atom name, inner_inner_dict
-        for k, v in inner_dict.items():
+        atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
 
-            # true,pred,err keys , array of values
-            # should only plot errors for s-curves
-            for true_pred_err, array in v.items():
+        for an in atom_names:
+
+            # true pred err keys , arrays values
+            for true_pred_err, array in inner_dict[an].items():
+
+                # true,pred,err keys , array of values
+                # should only plot errors for s-curves
 
                 array_sorted = np.sort(np.absolute(array))
                 perc = percentile(array_sorted.shape[0])
 
-            ax.plot(array_sorted, perc, label=k)
-            ax.set_xscale("log")
+                ax.plot(array_sorted, perc, label=an)
+                ax.set_xscale("log")
 
     plt.legend(facecolor="white", framealpha=1, frameon=True)
 
