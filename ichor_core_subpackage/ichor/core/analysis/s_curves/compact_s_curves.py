@@ -396,6 +396,100 @@ def calculate_compact_s_curves_from_true_predicted(
     simplified_write_to_excel(total_dict, output_location, sort_keys=False, **kwargs)
 
 
+def mpl_plot_s_curves_from_true_predicted(
+    predicted_values_dict: Dict[str, Dict[str, np.ndarray]],
+    true_values_dict: Dict[str, Dict[str, np.ndarray]],
+) -> dict:
+    """Make s-curves from dictionary of predicted values and dictionary of true values
+
+    :param predicted_values_dict:  A dict of key: atom_name val inner_dict.
+        inner_dict of key: property_name, values: 1D np.ndarray containing predicted data for all points
+    :param true_values_dict: A dict of key: atom_name val inner_dict.
+        inner_dict of key: property_name, values: 1D np.ndarray containing true data for all points
+    :param output_location: The name of the output .xlsx file, defaults to "s_curves_from_df.xlsx"
+    """
+
+    # get a nested dict of dict of dict of .... https://stackoverflow.com/a/8702435
+    nested_dict = lambda: defaultdict(nested_dict)
+    total_dict = nested_dict()
+
+    atom_names = list(predicted_values_dict.keys())
+    property_names = list(predicted_values_dict[atom_names[0]].keys())
+
+    for atom_name in atom_names:
+
+        for property_name in property_names:
+
+            # get true values for property
+            atomic_true_values = true_values_dict[atom_name][property_name]
+            predicted = predicted_values_dict[atom_name][property_name]
+
+            errors = atomic_true_values - predicted
+
+            if property_name in ("iqa_energy", "iqa", "wfn_energy"):
+                errors *= 2625.5
+
+            total_dict[property_name][atom_name]["error"] = errors
+
+    return total_dict
+
+
+def plot_with_matplotlib(
+    total_dict: dict,
+    x_axis_name: str = None,
+    y_axis_name: str = None,
+    title: str = None,
+):
+
+    try:
+        import matplotlib.pyplot as plt
+        import scienceplots  # noqa
+    except ImportError:
+        print("Could not import relevant packages.")
+
+        return
+
+    plt.style.use("science")
+
+    fig, ax = plt.subplots()
+
+    # property name, inner dict
+    for key, inner_dict in total_dict.items():
+
+        # atom name, inner_inner_dict
+        for k, v in inner_dict.items():
+
+            # true,pred,err keys , array of values
+            # should only plot errors for s-curves
+            for true_pred_err, array in v.items():
+
+                array_sorted = np.sort(np.absolute(array))
+                perc = percentile(array_sorted.shape[0])
+
+            ax.plot(array_sorted, perc, label=k)
+            ax.set_xscale("log")
+
+    plt.legend(facecolor="white", framealpha=1, frameon=True)
+
+    # Show the major grid and style it slightly.
+    ax.grid(which="major", color="#DDDDDD", linewidth=0.8)
+    # Show the minor grid as well. Style it in very light gray as a thin,
+    # dotted line.
+    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=0.8)
+    # Make the minor ticks and gridlines show.
+    ax.minorticks_on()
+    ax.grid(True)
+
+    if x_axis_name:
+        ax.set_xlabel(x_axis_name, fontsize=14)
+    if y_axis_name:
+        ax.set_ylabel(y_axis_name, fontsize=14)
+    if title:
+        ax.set_title(title, fontsize=16)
+
+    plt.show()
+
+
 ######################
 # LEGACY FUNCTIONS, SHOULD NOT REALLY BE USED, MIGHT DELETE IN FUTURE
 ##########################
