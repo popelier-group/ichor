@@ -456,6 +456,7 @@ def plot_with_matplotlib(
     # property name, inner dict
     for key, inner_dict in total_dict.items():
 
+        # sort atom names so they appear correctly in label
         atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
 
         for an in atom_names:
