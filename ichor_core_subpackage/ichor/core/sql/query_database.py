@@ -382,6 +382,17 @@ def write_processed_one_atom_data_to_csv(
                 total_dict[point_id_str].update(
                     {"iqa": row_with_atom_info["iqa"].item()}
                 )
+
+                # add integration_error to dictionary
+                total_dict[point_id_str].update(
+                    {
+                        "integration_error": row_with_atom_info[
+                            "integration_error"
+                        ].item()
+                    }
+                )
+
+                # add all the rotated multipole moments
                 total_dict[point_id_str].update(local_spherical_multipoles)
 
         else:
