@@ -476,6 +476,63 @@ def get_db_information(
     return point_ids, atom_names, full_df
 
 
+def write_processed_data_for_atoms_parallel(
+    db_path: Union[str, Path],
+    alf: List[ALF],
+    ncores: int,
+    max_integration_error: float = 0.001,
+    write_index_col=False,
+    echo=False,
+    atom_names: List = None,
+):
+    """
+    Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
+    on multiple cores, so that multiple atom calculations can be done in parallel.
+
+    Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
+    iqa energy, and rotated multipoles for every atom in the SQL database.
+    Note that only points for which the absolute integration error for the atom of interest
+    is below the threshold are added to the
+    corresponding atomic datasets.
+
+    :param db_path: Path to SQLite3 database containing `Points`, `AtomNames`, and `Dataset` tables.
+    :param alf: A list of ALF instances to be used when calculating features
+        and calculating C matrices.
+    :param ncores: The number of cores to use for the parallel calculations. Each core will calculate
+        the data for an individual atom.
+    :param max_integration_error: Maximum integration error that a point needs to have for the atom
+        of interest. Having a higher (absolute) integration error for the atom of interest means that
+        this point will not be added in the dataset for the atom of interest. However, the same
+        point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001
+    :param write_index_col: Whether to write the index col in the final .csv file, defaults to False
+    :param echo: Whether to echo executed SQL statements, defaults to False
+    :param atom_names: A list of atom names for which to write db. If left to None, csv files
+        will be written for all atoms.
+    :param properties: Which properties to write out to csv files.
+    """
+    import concurrent.futures
+
+    point_ids, all_atom_names, full_df = get_db_information(db_path, echo=echo)
+
+    if not atom_names:
+        atom_names = all_atom_names
+
+    def func_to_run_in_parallel(atom_name):
+
+        write_processed_one_atom_data_to_csv(
+            full_df,
+            point_ids,
+            atom_name=atom_name,
+            alf=alf,
+            max_integration_error=max_integration_error,
+            write_index_col=write_index_col,
+        )
+
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+
+        executor.map(func_to_run_in_parallel, atom_names)
+
+
 def write_processed_data_for_atoms(
     db_path: Union[str, Path],
     alf: List[ALF],
