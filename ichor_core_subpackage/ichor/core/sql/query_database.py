@@ -528,7 +528,7 @@ def write_processed_data_for_atoms_parallel(
             write_index_col=write_index_col,
         )
 
-    with concurrent.futures.ProcessPoolExecutor() as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=ncores) as executor:
 
         executor.map(func_to_run_in_parallel, atom_names)
 
