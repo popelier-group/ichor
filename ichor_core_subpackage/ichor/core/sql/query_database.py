@@ -511,6 +511,14 @@ def write_processed_data_for_atoms_parallel(
     :param properties: Which properties to write out to csv files.
     """
     import concurrent.futures
+    import multiprocessing
+
+    CPU_COUNT = multiprocessing.cpu_count()
+
+    if CPU_COUNT < ncores:
+        raise ValueError(
+            f"The number of available cores {CPU_COUNT} is less than the selected number of cores {ncores}."
+        )
 
     point_ids, all_atom_names, full_df = get_db_information(db_path, echo=echo)
 
