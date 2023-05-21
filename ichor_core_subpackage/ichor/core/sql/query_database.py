@@ -274,7 +274,7 @@ def write_processed_one_atom_data_to_csv(
     alf: List[ALF],
     max_integration_error=0.001,
     write_index_col=False,
-    calc_forces=False,
+    calc_forces: bool = False,
 ):
     """Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
     for all points (as long as integration error for the atom of interest is below a threshold integration error).
@@ -489,7 +489,7 @@ def write_processed_data_for_atoms_parallel(
     write_index_col=False,
     echo=False,
     atom_names: List = None,
-    calc_forces=False,
+    calc_forces: bool = False,
 ):
     """
     Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
@@ -555,6 +555,7 @@ def write_processed_data_for_atoms(
     write_index_col=False,
     echo=False,
     atom_names: List = None,
+    calc_forces: bool = False,
 ):
     """Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
         iqa energy, and rotated multipoles for every atom in the SQL database.
@@ -590,6 +591,7 @@ def write_processed_data_for_atoms(
             alf=alf,
             max_integration_error=max_integration_error,
             write_index_col=write_index_col,
+            calc_forces=calc_forces,
         )
 
 
