@@ -274,6 +274,7 @@ def write_processed_one_atom_data_to_csv(
     alf: List[ALF],
     max_integration_error=0.001,
     write_index_col=False,
+    calc_forces=False,
 ):
     """Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
     for all points (as long as integration error for the atom of interest is below a threshold integration error).
@@ -289,6 +290,7 @@ def write_processed_one_atom_data_to_csv(
         of interest. Having a higher (absolute) integration error for the atom of interest means that
         this point will not be added in the dataset for the atom of interest. However, the same
         point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001
+    :param calc_forces: Whether to calculate -dE/df forces (which takes a long time currently), default False.
     """
 
     # final dictionary that is going to be converted to pd.DataFrame and written to csv
@@ -305,10 +307,13 @@ def write_processed_one_atom_data_to_csv(
         # if other atoms have good integration errors, the same point can be used in their training sets.
         row_with_atom_info = one_point_df.loc[one_point_df["name_1"] == atom_name]
 
-        if not one_point_df["force_x"].isnull().values.any():
-            global_forces_array = one_point_df[
-                ["force_x", "force_y", "force_z"]
-            ].to_numpy()
+        if calc_forces:
+            if not one_point_df["force_x"].isnull().values.any():
+                global_forces_array = one_point_df[
+                    ["force_x", "force_y", "force_z"]
+                ].to_numpy()
+            else:
+                global_forces_array = None
         else:
             global_forces_array = None
 
@@ -484,6 +489,7 @@ def write_processed_data_for_atoms_parallel(
     write_index_col=False,
     echo=False,
     atom_names: List = None,
+    calc_forces=False,
 ):
     """
     Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
@@ -508,7 +514,7 @@ def write_processed_data_for_atoms_parallel(
     :param echo: Whether to echo executed SQL statements, defaults to False
     :param atom_names: A list of atom names for which to write db. If left to None, csv files
         will be written for all atoms.
-    :param properties: Which properties to write out to csv files.
+    :param calc_forces: Whether to calculate -dE/df, default False.
     """
     import concurrent.futures
     import multiprocessing
@@ -534,6 +540,7 @@ def write_processed_data_for_atoms_parallel(
             alf=alf,
             max_integration_error=max_integration_error,
             write_index_col=write_index_col,
+            calc_forces=calc_forces,
         )
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=ncores) as executor:
