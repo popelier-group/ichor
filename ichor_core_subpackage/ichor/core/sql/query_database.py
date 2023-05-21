@@ -274,6 +274,7 @@ def write_processed_one_atom_data_to_csv(
     alf: List[ALF],
     max_integration_error=0.001,
     write_index_col=False,
+    calc_multipoles: bool = True,
     calc_forces: bool = False,
 ):
     """Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
@@ -351,9 +352,10 @@ def write_processed_one_atom_data_to_csv(
                     negative_dE_df = [None] * n_features
 
                 # make dictionary of rotated multipoles
-                local_spherical_multipoles = rotate_multipole_moments(
-                    row_with_atom_info, C
-                )
+                if calc_multipoles:
+                    local_spherical_multipoles = rotate_multipole_moments(
+                        row_with_atom_info, C
+                    )
 
                 # add the point_id and name of point to dictionary
                 point_id_str = str(point_id)
@@ -397,8 +399,9 @@ def write_processed_one_atom_data_to_csv(
                     }
                 )
 
-                # add all the rotated multipole moments
-                total_dict[point_id_str].update(local_spherical_multipoles)
+                if calc_multipoles:
+                    # add all the rotated multipole moments
+                    total_dict[point_id_str].update(local_spherical_multipoles)
 
         else:
 
@@ -489,6 +492,7 @@ def write_processed_data_for_atoms_parallel(
     write_index_col=False,
     echo=False,
     atom_names: List = None,
+    calc_multipoles: bool = True,
     calc_forces: bool = False,
 ):
     """
@@ -540,6 +544,7 @@ def write_processed_data_for_atoms_parallel(
             alf=alf,
             max_integration_error=max_integration_error,
             write_index_col=write_index_col,
+            calc_multipoles=calc_multipoles,
             calc_forces=calc_forces,
         )
 
@@ -555,6 +560,7 @@ def write_processed_data_for_atoms(
     write_index_col=False,
     echo=False,
     atom_names: List = None,
+    calc_multipoles: bool = True,
     calc_forces: bool = False,
 ):
     """Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
@@ -591,6 +597,7 @@ def write_processed_data_for_atoms(
             alf=alf,
             max_integration_error=max_integration_error,
             write_index_col=write_index_col,
+            calc_multipoles=calc_multipoles,
             calc_forces=calc_forces,
         )
 
