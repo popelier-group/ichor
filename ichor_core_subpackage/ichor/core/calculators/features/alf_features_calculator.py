@@ -108,7 +108,11 @@ def calculate_alf_features(
             i_feat += 1
 
             zeta = np.dot(c_matrix, r_vect)
-            feature_array[i_feat] = np.arccos(zeta[2] / r_vect_norm)
+            # TODO: is few geometries zeta[2] / r_vect_norm can be evaluated as +-1.0000000001 or someting close
+            # which is outside of the range of arccos
+            # clipping zeta[2] / r_vect_norm between -1.0 and 1.0 solves the problem
+            z2_rvect_clipped = np.clip(zeta[2] / r_vect_norm, -1.0, 1.0)
+            feature_array[i_feat] = np.arccos(z2_rvect_clipped)
 
             i_feat += 1
 
