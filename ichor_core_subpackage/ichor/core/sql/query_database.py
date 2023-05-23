@@ -5,7 +5,11 @@ from typing import List, Tuple, Union
 import pandas as pd
 import sqlalchemy
 from ichor.core.atoms import ALF, Atom, Atoms
-from ichor.core.calculators import calculate_alf_atom_sequence, calculate_alf_features
+from ichor.core.calculators import (
+    calculate_alf_atom_sequence,
+    calculate_alf_features,
+    get_atom_alf,
+)
 from ichor.core.common.constants import (
     spherical_dipole_labels,
     spherical_hexadecapole_labels,
@@ -335,6 +339,18 @@ def write_processed_one_atom_data_to_csv(
                     atom_type = get_characters(row_data.name_1)
                     atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
 
+                natoms = len(atoms)
+                in_alf_atom_indices = get_atom_alf(atoms[atom_name], alf)
+                not_in_alf_indices = [
+                    i for i in range(natoms) if i not in in_alf_atom_indices
+                ]
+                indices_ordering_in_features = (
+                    list(in_alf_atom_indices) + not_in_alf_indices
+                )
+                atom_ordering_in_features = [
+                    atoms[i].name for i in indices_ordering_in_features
+                ]
+
                 C = atoms[atom_name].C(alf)
                 central_atom_index = atoms[atom_name].i  # 0-indexed
                 # calculate features for the atom of interest
@@ -366,9 +382,11 @@ def write_processed_one_atom_data_to_csv(
                 # add features to dictionary
                 total_dict[point_id_str].update(
                     {
-                        f"f{i}": one_atom_feature
-                        for i, one_atom_feature in zip(
-                            range(1, n_features + 1), one_atom_features
+                        f"f{i}_{a}": one_atom_feature
+                        for a, i, one_atom_feature in zip(
+                            atom_ordering_in_features,
+                            range(1, n_features + 1),
+                            one_atom_features,
                         )
                     }
                 )
