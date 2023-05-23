@@ -396,7 +396,7 @@ def calculate_compact_s_curves_from_true_predicted(
     simplified_write_to_excel(total_dict, output_location, sort_keys=False, **kwargs)
 
 
-def mpl_plot_s_curves_from_true_predicted(
+def mpl_get_true_vals_dict(
     predicted_values_dict: Dict[str, Dict[str, np.ndarray]],
     true_values_dict: Dict[str, Dict[str, np.ndarray]],
 ) -> dict:
@@ -436,8 +436,8 @@ def mpl_plot_s_curves_from_true_predicted(
 
 def plot_with_matplotlib(
     total_dict: dict,
-    x_axis_name: str = None,
-    y_axis_name: str = None,
+    x_axis_name: str = "Prediction Error / kJ mol$^-1$",
+    y_axis_name: str = "%",
     title: str = None,
 ):
 
@@ -494,7 +494,8 @@ def plot_with_matplotlib(
     ax.tick_params(axis="both", which="major", labelsize=18)
     ax.tick_params(axis="both", which="minor", labelsize=18)
 
-    plt.show()
+    fig.savefig("s_curves.png", dpi=300)
+    # plt.show()
 
 
 ######################
