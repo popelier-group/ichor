@@ -353,7 +353,7 @@ def write_processed_one_atom_data_to_csv(
                     x_axis_name,
                     xy_plane_atom_name,
                     val_angle_name,
-                ] + [atoms[i].name * 3 for i in not_in_alf_indices]
+                ] + [atoms[i].name for i in not_in_alf_indices for _ in range(3)]
 
                 C = atoms[atom_name].C(alf)
                 central_atom_index = atoms[atom_name].i  # 0-indexed
