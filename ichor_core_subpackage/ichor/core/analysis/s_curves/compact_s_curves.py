@@ -451,7 +451,7 @@ def plot_with_matplotlib(
 
     plt.style.use("science")
 
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(7, 7))
 
     # property name, inner dict
     for key, inner_dict in total_dict.items():
