@@ -437,7 +437,7 @@ def mpl_get_true_vals_dict(
 def plot_with_matplotlib(
     total_dict: dict,
     x_axis_name: str = "Prediction Error / kJ mol$^-1$",
-    y_axis_name: str = "%",
+    y_axis_name: str = "\%",
     title: str = None,
 ):
 
@@ -451,7 +451,7 @@ def plot_with_matplotlib(
 
     plt.style.use("science")
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 10))
 
     # property name, inner dict
     for key, inner_dict in total_dict.items():
@@ -495,7 +495,11 @@ def plot_with_matplotlib(
     ax.tick_params(axis="both", which="minor", labelsize=18)
 
     fig.savefig("s_curves.png", dpi=300)
-    # plt.show()
+    print("plotting")
+    try:
+        plt.show()
+    except:  # noqa
+        pass  # noqa
 
 
 ######################
