@@ -345,8 +345,8 @@ def write_processed_one_atom_data_to_csv(
                     i for i in range(natoms) if i not in in_alf_atom_indices
                 ]
 
-                x_axis_name = atoms[in_alf_atom_indices[1]]
-                xy_plane_atom_name = atoms[in_alf_atom_indices[2]]
+                x_axis_name = atoms[in_alf_atom_indices[1]].name
+                xy_plane_atom_name = atoms[in_alf_atom_indices[2]].name
                 val_angle_name = x_axis_name + "-" + xy_plane_atom_name
 
                 atom_ordering_in_features = [
