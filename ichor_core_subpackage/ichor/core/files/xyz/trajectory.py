@@ -349,9 +349,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return trajectory
 
-    def change_atom_ordering(self, new_atom_ordering: List[int]):
+    def change_atom_ordering(self, new_traj_name: str, new_atom_ordering: List[int]):
 
-        new_traj = Trajectory(self.path)
+        new_traj = Trajectory(new_traj_name)
         new_traj.state = FileState.Read
 
         for old_atoms_instance in self:
