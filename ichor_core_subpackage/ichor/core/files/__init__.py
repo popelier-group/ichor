@@ -5,8 +5,11 @@ from ichor.core.files.aimall import ABINT, AIM, INT, INTs
 from ichor.core.files.dl_poly import (
     DlPolyConfig,
     DlPolyControl,
+    DlPolyFFLUX,
     DlPolyField,
     DlpolyHistory,
+    DlPolyIQAEnergies,
+    DlPolyIQAForces,
 )
 
 # gaussian files
@@ -43,6 +46,9 @@ __all__ = [
     "DlPolyField",
     "DlPolyConfig",
     "DlPolyControl",
+    "DlPolyFFLUX",
+    "DlPolyIQAEnergies",
+    "DlPolyIQAForces",
     "PandoraInput",
     "PointDirectory",
     "PointsDirectory",
