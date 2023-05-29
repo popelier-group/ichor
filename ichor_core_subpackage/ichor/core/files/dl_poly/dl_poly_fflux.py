@@ -24,6 +24,10 @@ class DlPolyFFLUX(ReadFile):
         super().__init__(path)
         self.df = FileContents
 
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return path.stem == "FFLUX"
+
     def _read_file(self):
 
         self.df = pd.read_csv(

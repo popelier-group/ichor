@@ -112,6 +112,10 @@ class DlpolyHistory(Trajectory):
         self.number_of_atoms = FileContents
         self.ntimesteps = FileContents
 
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        return path.stem == "HISTORY"
+
     def _read_file(self):
 
         with open(self.path, "r") as f:
