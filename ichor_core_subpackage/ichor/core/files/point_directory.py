@@ -70,10 +70,6 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         return INTs.property_names + WFN.property_names
 
     @property
-    def name(self):
-        return self.path.name
-
-    @property
     def atoms(self) -> Atoms:
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
         # always try to get atoms from wfn file first because the wfn file contains the final geometry.

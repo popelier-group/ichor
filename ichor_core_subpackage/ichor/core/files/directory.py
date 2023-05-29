@@ -52,6 +52,10 @@ class Directory(PathObject, ABC):
         path objects to all directory contents."""
         return self.iterdir()
 
+    @property
+    def name(self):
+        return self.path.name
+
 
 class AnnotatedDirectory(Directory, ABC):
     """Abstract method for adding a parser for a Directory that
