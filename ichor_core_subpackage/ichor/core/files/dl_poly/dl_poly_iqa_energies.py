@@ -46,4 +46,4 @@ class DlPolyIQAEnergies(ReadFile):
                     counter = 0
 
             # save as matrix of natoms x ntimesteps
-            self.energies = np.array(energies).T
+            self.energies = np.array(energies)
