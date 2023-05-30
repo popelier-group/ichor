@@ -58,3 +58,19 @@ class DlPolyIQAForces(ReadFile):
 
             # save as array of shape ntimesteps x natoms x 3
             self.forces = np.array(forces)
+
+    def check_forces_less_than_value(self, value=1e-3) -> np.ndarray:
+        """Checks what timesteps have all forces less than value.
+        The GP models will revert back to prior mean when far away from training data,
+        so that the forces on atoms will be 0.
+
+        We can check for that because if the forces are consistently less than the `value`
+        then either the simulation has crashed or a minimum is reached
+
+        :param value: Value for which all forces need to be less than
+        :return: np.ndarray containing timestep indices for which condition is true
+            If len(array) is 0, then the condition is not met for any timestep. Could be
+            useful to check if a geometry is optimized or simulation crashed.
+        """
+
+        return np.where(np.all(abs(self.forces) < value, axis=(1, 2)))[0]
