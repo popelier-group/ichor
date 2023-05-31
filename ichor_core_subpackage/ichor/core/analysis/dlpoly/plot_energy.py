@@ -28,7 +28,7 @@ def format_energy_plots(ax, title: str = ""):
 def plot_total_energy(
     data: Union[DlPolyFFLUX, FFLUXDirectory],
     until_converged: bool = True,
-    subtract_mean=False,
+    reference: float = None,
     title: str = "",
 ):
     """Plots the predicted total energy of the system (in kJ mol-1) from the fflux
@@ -38,8 +38,8 @@ def plot_total_energy(
     where the difference to the next timestep is less that 1e-4 kJ mol-1.
 
     :param data: A FFLUX file or directory containing a FFLUX file to read data from.
-    :param until_converged: Plot timesteps until energy is converted to 1e-4 kJ mol-1, defaults to True
-    :param subtract_mean: Whether to subtract mean from the data or not
+    :param until_converged: Plot timesteps until energy is converted to 1e-4 kJ mol-1, defaults to True.
+    :param reference: A reference value to subtract (could be the Gaussian optimized minimum)
     :param title: Title for plot
     """
 
@@ -52,14 +52,13 @@ def plot_total_energy(
     fig, ax = plt.subplots(figsize=(9, 9))
 
     idx = fflux_file.first_index_where_delta_less_than()
-
     total_eng = fflux_file.total_energy_kj_mol
-    if subtract_mean:
-        total_eng = total_eng - total_eng.mean()
+
+    if reference:
+        total_eng = total_eng - reference
 
     if until_converged:
-        final_energy = total_eng[idx]
-        ax.plot(range(idx), total_eng[:idx] - final_energy)
+        ax.plot(range(idx), total_eng[:idx])
     else:
         ax.plot(range(fflux_file.ntimesteps), total_eng)
 
@@ -74,6 +73,7 @@ def plot_total_energy(
 def plot_total_energy_from_array(
     data: np.ndarray,
     title: str = "",
+    reference: float = None,
 ):
     """Plots the given predicted data (in kJ mol-1) against timesteps
 
@@ -82,6 +82,7 @@ def plot_total_energy_from_array(
 
     :param data: A np array containing predicted total energy data
     :param title: Title for plot
+    :param referece: reference Gaussain energy
     """
 
     fig, ax = plt.subplots(figsize=(9, 9))
@@ -89,6 +90,9 @@ def plot_total_energy_from_array(
     total_eng = data
 
     ax.plot(range(len(total_eng)), total_eng)
+
+    if reference:
+        ax.plot(range(len(total_eng)), [reference] * len(total_eng))
 
     ax.set_xlabel("Timestep", fontsize=24)
     ax.set_ylabel("Energy / kJ mol$^{-1}$", fontsize=24)
