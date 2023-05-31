@@ -78,13 +78,23 @@ class DlPolyFFLUX(ReadFile):
         differences = []
 
         for i in range(1, self.ntimesteps):
-            differences.append(
-                2625.5 * (self.total_energy[i] - self.total_energy[i - 1])
-            )
+            differences.append(self.total_energy[i] - self.total_energy[i - 1])
 
         differences = np.array(differences)
 
         return differences
+
+    @property
+    def delta_between_timesteps_kj_mol(self) -> List[float]:
+        """Calculates the delta energy (in kJ mol-1) between
+        each pairs of timesteps. Useful for checking convergence of energy
+        when doing optimizations.
+
+        :return: List containing the first index (timestep) where the threshold is met
+            as well as the list of differences for all timesteps
+        """
+
+        return 2625.5 * self.delta_between_timesteps
 
     def first_index_where_delta_less_than(self, delta=1e-4) -> int:
         """Returns first index where the energy between timesteps is
@@ -93,30 +103,12 @@ class DlPolyFFLUX(ReadFile):
         :param delta: The threshold when geometry is converged, defaults to 1e-4 kJ mol-1
         """
 
-        diffs = np.abs(self.delta_between_timesteps)
+        diffs = np.abs(self.delta_between_timesteps_kj_mol)
 
         (indices,) = np.where(diffs < delta)
         idx = indices[0]
 
         return idx
-
-    # TODO: move to analysis
-    def plot_total_energy(self, until_converged_energy=True):
-
-        from matplotlib import pyplot as plt
-
-        idx = self.first_index_where_delta_less_than()
-
-        if until_converged_energy:
-            final_energy = self.total_energy_kj_mol[idx]
-            plt.plot(range(idx), self.total_energy_kj_mol[:idx] - final_energy)
-        else:
-            plt.plot(range(self.ntimesteps), self.total_energy_kj_mol)
-
-        plt.xlabel("Timestep")
-        plt.ylabel("Energy / kJ mol$^{-1}$")
-
-        plt.show()
 
     # TODO: move to analysis
     def plot_abs_differences(self, until_converged_energy=True):
@@ -126,10 +118,12 @@ class DlPolyFFLUX(ReadFile):
         idx = self.first_index_where_delta_less_than()
 
         if until_converged_energy:
-            final_energy = self.delta_between_timesteps[idx]
-            plt.plot(range(idx), self.delta_between_timesteps[:idx] - final_energy)
+            final_energy = self.delta_between_timesteps_kj_mol[idx]
+            plt.plot(
+                range(idx), self.delta_between_timesteps_kj_mol[:idx] - final_energy
+            )
         else:
-            plt.plot(range(self.ntimesteps), self.delta_between_timesteps)
+            plt.plot(range(self.ntimesteps), self.delta_between_timesteps_kj_mol)
 
         plt.xlabel("Timestep")
         plt.ylabel("Energy / kJ mol$^{-1}$")
