@@ -62,12 +62,23 @@ def get_random_geometries_from_fflux_simulation(
 
 
 def plot_true_vs_predicted_from_arrays(
-    predicted_energies_array_kj_mol,
+    predicted_energies_array_kj_mol: np.ndarray,
     true_energies_array_hartree: Union[np.ndarray, PointsDirectory],
     title: str = "",
-    subtract_mean=False,
-    absolute_diff=True,
+    subtract_mean: bool = False,
+    absolute_diff: bool = True,
 ):
+    """Plots true vs predicted energies, as well as calculates R^2 value
+
+    :param predicted_energies_array_kj_mol: np array containing FFLUX predicted energies
+    :param true_energies_array_hartree: a np.array cotaning true energies (in hartrees)
+        or a PointsDirectory (containing ordered wfns from which to get the array) again
+        in Hartrees
+    :param title: The title of the plot, defaults to ""
+    :param subtract_mean: Whether to subtract mean of data, defaults to False
+    :param absolute_diff: Whether to use the absolute of the differences
+        of true and predicted or not, defaults to True
+    """
 
     from sklearn.metrics import r2_score
 
