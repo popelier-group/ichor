@@ -50,13 +50,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                     # the next line after the comment line is where coordinates begin
                     for _ in range(natoms):
                         line = next(f)
-                        if re.match(
-                            r"^\s*?\w+(\s+[+-]?\d+.\d+([Ee]?[+-]?\d+)?){3}",
-                            line,
-                        ):
-                            # add *_ to work for extended xyz which contain extra information after x,y,z coordinates
-                            atom_type, x, y, z, *_ = line.split()
-                            atoms.add(Atom(atom_type, float(x), float(y), float(z)))
+                        # add *_ to work for extended xyz which contain extra information after x,y,z coordinates
+                        atom_type, x, y, z, *_ = line.split()
+                        atoms.add(Atom(atom_type, float(x), float(y), float(z)))
 
                     # add the Atoms instance to the Trajectory instance
                     self.add(atoms)
