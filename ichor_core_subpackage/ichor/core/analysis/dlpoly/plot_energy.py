@@ -71,6 +71,33 @@ def plot_total_energy(
     plt.show()
 
 
+def plot_total_energy_from_array(
+    data: np.ndarray,
+    title: str = "",
+):
+    """Plots the given predicted data (in kJ mol-1) against timesteps
+
+    If until_coverged is True, it will only plot the timesteps until the timestep
+    where the difference to the next timestep is less that 1e-4 kJ mol-1.
+
+    :param data: A np array containing predicted total energy data
+    :param title: Title for plot
+    """
+
+    fig, ax = plt.subplots(figsize=(9, 9))
+
+    total_eng = data
+
+    ax.plot(range(len(total_eng)), total_eng)
+
+    ax.set_xlabel("Timestep", fontsize=24)
+    ax.set_ylabel("Energy / kJ mol$^{-1}$", fontsize=24)
+
+    format_energy_plots(ax, title)
+
+    plt.show()
+
+
 def plot_differences(
     data: Union[DlPolyFFLUX, FFLUXDirectory],
     until_converged: bool = True,
