@@ -17,6 +17,11 @@ def format_energy_plots(ax, title: str = ""):
 
     # Show the major grid and style it slightly.
     ax.grid(which="major", color="#DDDDDD", linewidth=1.2)
+    # Show the minor grid as well. Style it in very light gray as a thin,
+    # dotted line.
+    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=1.0)
+    # Make the minor ticks and gridlines show.
+    ax.minorticks_on()
     ax.grid(True)
 
     if title:
@@ -39,7 +44,8 @@ def plot_total_energy(
 
     :param data: A FFLUX file or directory containing a FFLUX file to read data from.
     :param until_converged: Plot timesteps until energy is converted to 1e-4 kJ mol-1, defaults to True.
-    :param reference: A reference value to subtract (could be the Gaussian optimized minimum)
+    :param reference: A reference value to subtract (could be the Gaussian optimized minimum).
+        This value has to be in kJ mol-1
     :param title: Title for plot
     """
 
@@ -56,6 +62,9 @@ def plot_total_energy(
 
     if reference:
         total_eng = total_eng - reference
+        with open("difference_between_reference_and_fflux.txt", "w") as writef:
+            diff_ref_and_fflux = total_eng[idx]
+            writef.write(f"Difference kJ mol-1: {diff_ref_and_fflux}")
 
     if until_converged:
         ax.plot(range(idx), total_eng[:idx])

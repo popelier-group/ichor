@@ -82,11 +82,13 @@ def plot_true_vs_predicted_from_arrays(
 
     diff = predicted_energies_array_kj_mol - true_energies_array_kj_mol
 
-    print("Maximum absolute difference", np.max(np.abs(diff)))
-    print("Minimum absolute difference", np.min(np.abs(diff)))
-
     r_score = r2_score(true_energies_array_kj_mol, predicted_energies_array_kj_mol)
-    print("R^2 score", r_score)
+
+    with open("min_max_r2.txt", "w") as writef:
+
+        writef.write(f"Maximum absolute difference: {np.max(np.abs(diff))}\n")
+        writef.write(f"Minimum absolute difference: {np.min(np.abs(diff))}\n")
+        writef.write(f"R^2 score: {r_score}")
 
     if subtract_mean:
         mean = true_energies_array_kj_mol.mean()
