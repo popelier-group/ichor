@@ -56,9 +56,11 @@ def get_random_geometries_from_fflux_simulation(
         if isinstance(fflux_file, (Path, str)):
             fflux_file = DlPolyFFLUX(fflux_file)
 
-            total_energies = fflux_file.total_energy_kj_mol[random_indices]
+        total_energies = fflux_file.total_energy_kj_mol[random_indices]
 
-            np.save(f"{k}_total_predicted_energies_from_simulation.npy", total_energies)
+        np.save(
+            f"{k}_total_predicted_energies_from_simulation_kj_mol.npy", total_energies
+        )
 
 
 def plot_true_vs_predicted_from_arrays(
@@ -134,7 +136,7 @@ def plot_true_vs_predicted_from_arrays(
         facecolor="white", framealpha=1, frameon=True, fontsize=14, loc="lower right"
     )
     # set title as the R^2 value
-    leg.set_title(f"R$^2$ = {r_score:.3}", prop={"size": 20})
+    leg.set_title(f"R$^2$ = {r_score:.3f}", prop={"size": 20})
 
     if title:
         ax.set_title(title, fontsize=28)
