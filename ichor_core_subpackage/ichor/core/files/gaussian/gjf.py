@@ -270,3 +270,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
                 )
             if "output=wfn" in self.keywords:
                 f.write(f"\n{self.path.with_suffix('.wfn')}")
+            # add newline character because Gaussian otherwise crashes
+            # if requesting using other keywords but not output=wfn
+            else:
+                f.write("\n")
