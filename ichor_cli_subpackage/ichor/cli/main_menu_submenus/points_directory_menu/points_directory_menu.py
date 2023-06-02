@@ -98,6 +98,21 @@ def ask_user_for_aimall_settings():
     return method, ncores, naat, encomp
 
 
+def single_or_many_points_directories():
+    """Checks whether the current selected PointsDirectory path is a directory containing
+    many PointsDirectories, or is just one PointsDirectory.
+
+    This is just done by checking if parent is in the name of the directory.
+    """
+
+    if (
+        "parent"
+        in ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem.lower()
+    ):
+        return True
+    return False
+
+
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
     subtitle="Use this to interact with ichor's PointsDirectory class.\n",
@@ -150,18 +165,44 @@ class PointsDirectoryFunctions:
             force_calculate_wfn,
         ) = ask_user_for_gaussian_settings()
 
-        pd = PointsDirectory(
-            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        is_parent_directory_to_many_points_directories = (
+            single_or_many_points_directories()
         )
 
-        submit_points_directory_to_gaussian(
-            points_directory=pd,
-            overwrite_existing=overwrite_existing,
-            force_calculate_wfn=force_calculate_wfn,
-            ncores=ncores,
-            method=method,
-            basis_set=basis_set,
-        )
+        # if containing many PointsDirectory
+        if is_parent_directory_to_many_points_directories:
+
+            for (
+                d
+            ) in (
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
+            ):
+
+                pd = PointsDirectory(d)
+
+                submit_points_directory_to_gaussian(
+                    points_directory=pd,
+                    overwrite_existing=overwrite_existing,
+                    force_calculate_wfn=force_calculate_wfn,
+                    ncores=ncores,
+                    method=method,
+                    basis_set=basis_set,
+                )
+
+        # if containing one PointsDirectory
+        else:
+            pd = PointsDirectory(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+            )
+
+            submit_points_directory_to_gaussian(
+                points_directory=pd,
+                overwrite_existing=overwrite_existing,
+                force_calculate_wfn=force_calculate_wfn,
+                ncores=ncores,
+                method=method,
+                basis_set=basis_set,
+            )
 
     @staticmethod
     def points_directory_to_aimall_on_compute():
@@ -169,13 +210,40 @@ class PointsDirectoryFunctions:
 
         method, ncores, naat, encomp = ask_user_for_aimall_settings()
 
-        pd = PointsDirectory(
-            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+        is_parent_directory_to_many_points_directories = (
+            single_or_many_points_directories()
         )
 
-        submit_points_directory_to_aimall(
-            points_directory=pd, method=method, ncores=ncores, naat=naat, encomp=encomp
-        )
+        # if containing many PointsDirectory
+        if is_parent_directory_to_many_points_directories:
+
+            for (
+                d
+            ) in (
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
+            ):
+
+                pd = PointsDirectory(d)
+                submit_points_directory_to_aimall(
+                    points_directory=pd,
+                    method=method,
+                    ncores=ncores,
+                    naat=naat,
+                    encomp=encomp,
+                )
+
+        else:
+            pd = PointsDirectory(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+            )
+
+            submit_points_directory_to_aimall(
+                points_directory=pd,
+                method=method,
+                ncores=ncores,
+                naat=naat,
+                encomp=encomp,
+            )
 
     @staticmethod
     def points_directory_to_database():
@@ -189,29 +257,84 @@ class PointsDirectoryFunctions:
         if submit_on_compute is None:
             submit_on_compute = default_submit_on_compute
 
+        is_parent_directory_to_many_points_directories = (
+            single_or_many_points_directories()
+        )
+
+        # if running on login node, discouraged because takes a long time
         if not submit_on_compute:
-            pd = PointsDirectory(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
-            pd.write_to_sqlite3_database()
+
+            # if running on a directory containing many PointsDirectories
+            if is_parent_directory_to_many_points_directories:
+
+                for (
+                    d
+                ) in (
+                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
+                ):
+
+                    pd = PointsDirectory(d)
+                    # write all data to a single database by passing in the same name for every PointsDirectory
+                    pd.write_to_sqlite3_database(
+                        f"{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem}_sqlite.db"
+                    )
+
+            else:
+                pd = PointsDirectory(
+                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+                )
+                pd.write_to_sqlite3_database()
 
         else:
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import PointsDirectory")
-            text_list.append(
-                f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
-            )
-            text_list.append("pd.write_to_sqlite3_database(print_missing_data=True)")
 
-            final_cmd = compile_strings_to_python_code(text_list)
-            py_cmd = FreeFlowPythonCommand(final_cmd)
-            with SubmissionScript(
-                SCRIPT_NAMES["pd_to_sqlite3"], ncores=8
-            ) as submission_script:
-                submission_script.add_command(py_cmd)
-            submission_script.submit()
+            # if turning many PointsDirectories into db on compute node
+            if is_parent_directory_to_many_points_directories:
+
+                db_name = (
+                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem
+                    + "_sqlite.db"
+                )
+
+                text_list = []
+                # make the python command that will be written in the submit script
+                # it will get executed as `python -c python_code_to_execute...`
+                text_list.append("from ichor.core.files import PointsDirectory")
+                str_part1 = "for d in ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir():"
+                str_part2 = " PointsDirectory(d).write_to_sqlite3_database("
+                str_part3 = f"'{db_name}', print_missing_data=True)"
+
+                total_str = str_part1 + str_part2 + str_part3
+
+                text_list.append(total_str)
+                final_cmd = compile_strings_to_python_code(text_list)
+                py_cmd = FreeFlowPythonCommand(final_cmd)
+                with SubmissionScript(
+                    SCRIPT_NAMES["pd_to_sqlite3"], ncores=8
+                ) as submission_script:
+                    submission_script.add_command(py_cmd)
+                submission_script.submit()
+
+            # if only one PointsDirectory to sql on compute
+            else:
+
+                text_list = []
+                # make the python command that will be written in the submit script
+                # it will get executed as `python -c python_code_to_execute...`
+                text_list.append("from ichor.core.files import PointsDirectory")
+                text_list.append(
+                    f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
+                )
+                text_list.append(
+                    "pd.write_to_sqlite3_database(print_missing_data=True)"
+                )
+
+                final_cmd = compile_strings_to_python_code(text_list)
+                py_cmd = FreeFlowPythonCommand(final_cmd)
+                with SubmissionScript(
+                    SCRIPT_NAMES["pd_to_sqlite3"], ncores=8
+                ) as submission_script:
+                    submission_script.add_command(py_cmd)
+                submission_script.submit()
 
 
 # initialize menu
