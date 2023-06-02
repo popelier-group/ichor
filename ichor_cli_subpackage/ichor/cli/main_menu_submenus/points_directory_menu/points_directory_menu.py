@@ -351,19 +351,19 @@ points_directory_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 point_directory_menu_items = [
     FunctionItem(
-        "Select path of PointsDirectory",
+        "Select path of PointsDirectory or Parent to many PointsDirectory",
         PointsDirectoryFunctions.select_points_directory,
     ),
     FunctionItem(
-        "Submit PointsDirectory to Gaussian",
+        "Submit to Gaussian",
         PointsDirectoryFunctions.points_directory_to_gaussian_on_compute,
     ),
     FunctionItem(
-        "Submit PointsDirectory to AIMAll",
+        "Submit to AIMAll",
         PointsDirectoryFunctions.points_directory_to_aimall_on_compute,
     ),
     FunctionItem(
-        "Make PointsDirectory into SQLite3 database",
+        "Make into SQLite3 database",
         PointsDirectoryFunctions.points_directory_to_database,
     ),
 ]
