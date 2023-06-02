@@ -351,7 +351,7 @@ points_directory_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 point_directory_menu_items = [
     FunctionItem(
-        "Select path of PointsDirectory or Parent to many PointsDirectory",
+        "Select path of PointsDirectory or parent dir containing many PointsDirectory",
         PointsDirectoryFunctions.select_points_directory,
     ),
     FunctionItem(
