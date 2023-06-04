@@ -260,6 +260,9 @@ molecular_dynamics_menu_items = [
         "Submit .xyz file to CP2K",
         MolecularDynamicsMenuFunctions.submit_cp2k_to_compute,
     ),
+    FunctionItem(
+        "Convert mdcrd to xyz.", MolecularDynamicsMenuFunctions.xyz_from_mdcrd
+    ),
 ]
 
 add_items_to_menu(molecular_dynamics_menu, molecular_dynamics_menu_items)
