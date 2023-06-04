@@ -399,7 +399,7 @@ class PointsDirectoryFunctions:
                 "from ichor.core.sql.query_database import get_alf_from_first_db_geometry"
             )
             text_list.append("from pathlib import Path")
-            text_list.append(f"db_path = Path('{db_path.absolute()}'")
+            text_list.append(f"db_path = Path('{db_path.absolute()}')")
             text_list.append("alf = get_alf_from_first_db_geometry(db_path)")
             str_part1 = "write_processed_data_for_atoms(db_path, alf,"
             str_part2 = f" calc_multipoles={rotate_multipoles}, calc_forces={calculate_feature_forces})"
