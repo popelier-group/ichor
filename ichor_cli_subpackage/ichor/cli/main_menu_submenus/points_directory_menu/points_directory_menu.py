@@ -443,6 +443,10 @@ point_directory_menu_items = [
         "Make into SQLite3 database",
         PointsDirectoryFunctions.points_directory_to_database,
     ),
+    FunctionItem(
+        "Make processed csvs from SQLite3 database",
+        PointsDirectoryFunctions.make_csvs_from_database,
+    ),
 ]
 
 add_items_to_menu(points_directory_menu, point_directory_menu_items)
