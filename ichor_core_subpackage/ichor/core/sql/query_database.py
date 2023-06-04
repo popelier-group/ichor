@@ -506,6 +506,19 @@ def get_db_information(
     return point_ids, atom_names, full_df
 
 
+# needed for parallel job, because it does not work with closed over functions (or lambdas)
+_func = None
+
+
+def worker_init(func):
+    global _func
+    _func = func
+
+
+def worker(x):
+    return _func(x)
+
+
 def write_processed_data_for_atoms_parallel(
     db_path: Union[str, Path],
     alf: List[ALF],
@@ -557,7 +570,9 @@ def write_processed_data_for_atoms_parallel(
     if not atom_names:
         atom_names = all_atom_names
 
-    def func_to_run_in_parallel(atom_name):
+    # needed for parallel lambda
+
+    def func_for_parallel(atom_name):
 
         write_processed_one_atom_data_to_csv(
             full_df,
@@ -570,9 +585,11 @@ def write_processed_data_for_atoms_parallel(
             calc_forces=calc_forces,
         )
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=ncores) as executor:
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=ncores, initializer=worker_init, initargs=func_for_parallel
+    ) as executor:
 
-        executor.map(func_to_run_in_parallel, atom_names)
+        executor.map(worker, atom_names)
 
 
 def write_processed_data_for_atoms(
