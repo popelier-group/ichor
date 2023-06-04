@@ -285,6 +285,7 @@ class PointsDirectoryFunctions:
                 )
                 pd.write_to_sqlite3_database()
 
+        # if running on compute node
         else:
 
             # if turning many PointsDirectories into db on compute node
@@ -299,9 +300,11 @@ class PointsDirectoryFunctions:
                 # make the python command that will be written in the submit script
                 # it will get executed as `python -c python_code_to_execute...`
                 text_list.append("from ichor.core.files import PointsDirectory")
-                str_part1 = "for d in ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir():"
-                str_part2 = " PointsDirectory(d).write_to_sqlite3_database("
-                str_part3 = f"'{db_name}', print_missing_data=True)"
+                text_list.append("from pathlib import Path")
+                # make the parent directory path in a Path object
+                str_part1 = f"parent_dir = Path('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
+                str_part2 = f"[PointsDirectory(d).write_to_sqlite3_database('{db_name}', print_missing_data=True)"
+                str_part3 = " for d in parent_dir.iterdir()]"
 
                 total_str = str_part1 + str_part2 + str_part3
 
