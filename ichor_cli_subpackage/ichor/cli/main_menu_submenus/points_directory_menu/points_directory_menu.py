@@ -17,6 +17,10 @@ from ichor.cli.useful_functions import (
     user_input_path,
 )
 from ichor.core.files import PointsDirectory
+from ichor.core.sql.query_database import (
+    get_alf_from_first_db_geometry,
+    write_processed_data_for_atoms,
+)
 from ichor.hpc.main import (
     submit_points_directory_to_aimall,
     submit_points_directory_to_gaussian,
@@ -247,7 +251,8 @@ class PointsDirectoryFunctions:
 
     @staticmethod
     def points_directory_to_database():
-        """Converts the current given PointsDirectory to a SQLite3 database."""
+        """Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
+        and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies"""
 
         default_submit_on_compute = True
 
@@ -344,6 +349,69 @@ class PointsDirectoryFunctions:
                 ) as submission_script:
                     submission_script.add_command(py_cmd)
                 submission_script.submit()
+
+    @staticmethod
+    def make_csvs_from_database():
+        """Makes csv files contaning features, iqa energies, and rotated multipole moments given a database"""
+
+        default_submit_on_compute = True
+        default_rotate_multipoles = True
+        default_calculate_feature_forces = False
+
+        db_path = user_input_path("Enter path to SQLite3 database: ")
+        db_path = Path(db_path)
+
+        rotate_multipoles = user_input_bool(
+            f"Calculate rotated multipoles (yes/no), default {bool_to_str(default_rotate_multipoles)}: "
+        )
+        if rotate_multipoles is None:
+            rotate_multipoles = default_rotate_multipoles
+
+        calculate_feature_forces = user_input_bool(
+            f"Calculate feature forces (yes/no), default {bool_to_str(default_calculate_feature_forces)}: "
+        )
+        if calculate_feature_forces is None:
+            calculate_feature_forces = default_calculate_feature_forces
+
+        submit_on_compute = user_input_bool(
+            f"Submit to compute node (yes/no), default {bool_to_str(default_submit_on_compute)}: "
+        )
+        if submit_on_compute is None:
+            submit_on_compute = default_submit_on_compute
+
+        if not submit_on_compute:
+            alf = get_alf_from_first_db_geometry(db_path)
+            write_processed_data_for_atoms(
+                db_path,
+                alf,
+                calc_multipoles=rotate_multipoles,
+                calc_forces=calculate_feature_forces,
+            )
+
+        else:
+            text_list = []
+            # make the python command that will be written in the submit script
+            # it will get executed as `python -c python_code_to_execute...`
+            text_list.append(
+                "from ichor.core.sql.query_database import write_processed_data_for_atoms"
+            )
+            text_list.append(
+                "from ichor.core.sql.query_database import get_alf_from_first_db_geometry"
+            )
+            text_list.append("from pathlib import Path")
+            text_list.append(f"db_path = Path('{db_path.absolute()}'")
+            text_list.append("alf = get_alf_from_first_db_geometry(db_path)")
+            str_part1 = "write_processed_data_for_atoms(db_path, alf,"
+            str_part2 = f" calc_multipoles={rotate_multipoles}, calc_forces={calculate_feature_forces})"
+            text_list.append(str_part1 + str_part2)
+
+            final_cmd = compile_strings_to_python_code(text_list)
+            py_cmd = FreeFlowPythonCommand(final_cmd)
+            with SubmissionScript(
+                SCRIPT_NAMES["calculate_features"], ncores=8
+            ) as submission_script:
+                submission_script.add_command(py_cmd)
+            submission_script.submit()
 
 
 # initialize menu
