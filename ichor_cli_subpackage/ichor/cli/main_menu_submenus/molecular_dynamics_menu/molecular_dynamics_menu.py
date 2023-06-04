@@ -12,6 +12,7 @@ from ichor.cli.useful_functions import (
     user_input_int,
     user_input_path,
 )
+from ichor.core.molecular_dynamics.amber import mdcrd_to_xyz
 from ichor.hpc.molecular_dynamics import submit_amber, submit_cp2k
 
 
@@ -117,6 +118,22 @@ def ask_user_for_amber_settings():
     return temperature, nsteps, write_coord_every, dt, ln_gamma
 
 
+def ask_user_for_mdcrd_paths():
+
+    default_every = 1
+
+    amber_directory_path = user_input_path("Give path to AMBER directory: ")
+    system_name = user_input_free_flow("Give name of system: ")
+    system_name = system_name.upper()
+    every = user_input_int(
+        f"Write out every nth timestep (give n), default {default_every}: "
+    )
+    if every is None:
+        every = default_every
+
+    return Path(amber_directory_path), system_name, every
+
+
 MOLECULAR_DYNAMICS_MENU_DESCRIPTION = MenuDescription(
     "Molecular Dynamics Menu", subtitle="Use this to submit MD simulations with ichor."
 )
@@ -202,6 +219,20 @@ class MolecularDynamicsMenuFunctions:
             dt=dt,
             ln_gamma=ln_gamma,
         )
+
+    @staticmethod
+    def xyz_from_mdcrd():
+        amber_path, system_name, every = ask_user_for_mdcrd_paths()
+
+        for f in amber_path.iterdir():
+            if f.stem == "mdcrd":
+                mdcrd_file = f
+            elif f.suffix == ".prmtop":
+                prmtop_file = f
+            elif f.name == "md.in":
+                mdin_file = f
+
+        mdcrd_to_xyz(mdcrd_file, prmtop_file, mdin_file, system_name, every)
 
 
 # initialize menu
