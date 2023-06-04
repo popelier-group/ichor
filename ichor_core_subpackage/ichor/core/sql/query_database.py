@@ -507,6 +507,7 @@ def get_db_information(
 
 
 # needed for parallel job, because it does not work with closed over functions (or lambdas)
+# need to execute a globally defined a function to be mapped by ProcessPool
 _func = None
 
 
@@ -585,6 +586,7 @@ def write_processed_data_for_atoms_parallel(
             calc_forces=calc_forces,
         )
 
+    # need to execute a globally defined a function, so this initializer and initialargs do that
     with concurrent.futures.ProcessPoolExecutor(
         max_workers=ncores, initializer=worker_init, initargs=(func_for_parallel,)
     ) as executor:
