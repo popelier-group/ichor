@@ -305,6 +305,10 @@ class PointsDirectoryFunctions:
                 text_list.append(
                     f"parent_dir = Path('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
                 )
+
+                # make a list comprehension that writes each PointsDirectory in the parent dir
+                # into the same SQLite database
+                # needs to be a list comprehension because for loops do not work with -c flag
                 str_part1 = f"[PointsDirectory(d).write_to_sqlite3_database('{db_name}', print_missing_data=True)"
                 str_part2 = " for d in parent_dir.iterdir()]"
 
