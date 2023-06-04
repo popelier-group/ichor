@@ -586,7 +586,7 @@ def write_processed_data_for_atoms_parallel(
         )
 
     with concurrent.futures.ProcessPoolExecutor(
-        max_workers=ncores, initializer=worker_init, initargs=func_for_parallel
+        max_workers=ncores, initializer=worker_init, initargs=(func_for_parallel,)
     ) as executor:
 
         executor.map(worker, atom_names)
