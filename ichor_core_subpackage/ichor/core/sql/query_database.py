@@ -398,15 +398,19 @@ def write_processed_one_atom_data_to_csv(
                 total_dict[point_id_str].update(
                     {"wfn_energy": row_with_atom_info["wfn_energy"].item()}
                 )
-                # add -dE/df (forces wrt features) to dict
-                total_dict[point_id_str].update(
-                    {
-                        f"-dE/df{i}": neg_dE_df
-                        for i, neg_dE_df in zip(
-                            range(1, n_features + 1), negative_dE_df
-                        )
-                    }
-                )
+
+                # add feature forces to dictionary (these are negative of gradient)
+                if calc_forces:
+                    # add -dE/df (forces wrt features) to dict
+                    total_dict[point_id_str].update(
+                        {
+                            f"-dE/df{i}": neg_dE_df
+                            for i, neg_dE_df in zip(
+                                range(1, n_features + 1), negative_dE_df
+                            )
+                        }
+                    )
+
                 # add iqa to dictionary
                 total_dict[point_id_str].update(
                     {"iqa": row_with_atom_info["iqa"].item()}
@@ -425,6 +429,7 @@ def write_processed_one_atom_data_to_csv(
                     # add all the rotated multipole moments
                     total_dict[point_id_str].update(local_spherical_multipoles)
 
+        # if no iqa information found
         else:
 
             # create atoms instance which will be used to calculate features
