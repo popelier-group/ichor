@@ -19,7 +19,7 @@ from ichor.cli.useful_functions import (
 from ichor.core.files import PointsDirectory
 from ichor.core.sql.query_database import (
     get_alf_from_first_db_geometry,
-    write_processed_data_for_atoms,
+    write_processed_data_for_atoms_parallel,
 )
 from ichor.hpc.main import (
     submit_points_directory_to_aimall,
@@ -357,6 +357,7 @@ class PointsDirectoryFunctions:
         default_submit_on_compute = True
         default_rotate_multipoles = True
         default_calculate_feature_forces = False
+        default_ncores = 4
 
         db_path = user_input_path("Enter path to SQLite3 database: ")
         db_path = Path(db_path)
@@ -379,21 +380,29 @@ class PointsDirectoryFunctions:
         if submit_on_compute is None:
             submit_on_compute = default_submit_on_compute
 
+        ncores = user_input_int(
+            f"Number of cores to use (one core per atom csv), default {default_ncores}: "
+        )
+        if ncores is None:
+            ncores = default_ncores
+
         if not submit_on_compute:
             alf = get_alf_from_first_db_geometry(db_path)
-            write_processed_data_for_atoms(
+            write_processed_data_for_atoms_parallel(
                 db_path,
                 alf,
+                ncores,
                 calc_multipoles=rotate_multipoles,
                 calc_forces=calculate_feature_forces,
             )
 
+        # if running on compute
         else:
             text_list = []
             # make the python command that will be written in the submit script
             # it will get executed as `python -c python_code_to_execute...`
             text_list.append(
-                "from ichor.core.sql.query_database import write_processed_data_for_atoms"
+                "from ichor.core.sql.query_database import write_processed_data_for_atoms_parallel"
             )
             text_list.append(
                 "from ichor.core.sql.query_database import get_alf_from_first_db_geometry"
@@ -401,14 +410,16 @@ class PointsDirectoryFunctions:
             text_list.append("from pathlib import Path")
             text_list.append(f"db_path = Path('{db_path.absolute()}')")
             text_list.append("alf = get_alf_from_first_db_geometry(db_path)")
-            str_part1 = "write_processed_data_for_atoms(db_path, alf,"
+            str_part1 = (
+                f"write_processed_data_for_atoms_parallel(db_path, alf, {ncores},"
+            )
             str_part2 = f" calc_multipoles={rotate_multipoles}, calc_forces={calculate_feature_forces})"
             text_list.append(str_part1 + str_part2)
 
             final_cmd = compile_strings_to_python_code(text_list)
             py_cmd = FreeFlowPythonCommand(final_cmd)
             with SubmissionScript(
-                SCRIPT_NAMES["calculate_features"], ncores=8
+                SCRIPT_NAMES["calculate_features"], ncores=ncores
             ) as submission_script:
                 submission_script.add_command(py_cmd)
             submission_script.submit()
