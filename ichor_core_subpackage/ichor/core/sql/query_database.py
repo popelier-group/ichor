@@ -471,13 +471,17 @@ def write_processed_one_atom_data_to_csv(
             total_dict[point_id_str].update(
                 {"wfn_energy": row_with_atom_info["wfn_energy"].item()}
             )
-            # add -dE/df (forces wrt features) to dict
-            total_dict[point_id_str].update(
-                {
-                    f"-dE/df{i}": neg_dE_df
-                    for i, neg_dE_df in zip(range(1, n_features + 1), negative_dE_df)
-                }
-            )
+
+            if calc_forces:
+                # add -dE/df (forces wrt features) to dict
+                total_dict[point_id_str].update(
+                    {
+                        f"-dE/df{i}": neg_dE_df
+                        for i, neg_dE_df in zip(
+                            range(1, n_features + 1), negative_dE_df
+                        )
+                    }
+                )
 
     alf_for_current_atom = alf[central_atom_index]
     alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
