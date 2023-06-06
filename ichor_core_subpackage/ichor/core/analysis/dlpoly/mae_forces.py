@@ -1,4 +1,5 @@
 import warnings
+from typing import List
 
 import numpy as np
 from ichor.core.common.constants import bohr2ang
@@ -12,7 +13,9 @@ except ImportError:
     warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
 
 
-def mae_forces(predicted_forces_array: np.ndarray, true_forces_array: np.ndarray):
+def mae_forces(
+    predicted_forces_array: np.ndarray, true_forces_array: np.ndarray, atom_names: List
+):
     """Plots a matshow in matplotlib of the MAE of the predicted forces array vs
     the true forces array
 
@@ -34,8 +37,8 @@ def mae_forces(predicted_forces_array: np.ndarray, true_forces_array: np.ndarray
 
     ax.set_xticks(range(3))
     ax.set_xticklabels(["x", "y", "z"], fontsize=18)
-    ax.set_yticks(range(4))
-    ax.set_yticklabels(["N1", "H2", "H3", "H4"], fontsize=18)
+    ax.set_yticks(range(len(atom_names)))
+    ax.set_yticklabels(atom_names, fontsize=18)
 
     for (i, j), z in np.ndenumerate(mae_diff_kcal_mol_ang):
         ax.text(
