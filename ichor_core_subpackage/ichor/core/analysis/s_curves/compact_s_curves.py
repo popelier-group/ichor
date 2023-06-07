@@ -453,6 +453,20 @@ def plot_with_matplotlib(
 
     fig, ax = plt.subplots(figsize=(9, 9))
 
+    ax.set_prop_cycle(
+        color=[
+            "0C5DA5",
+            "00B945",
+            "FF9500",
+            "FF2C00",
+            "845B97",
+            "474747",
+            "9e9e9e",
+            "30D5C8",
+            "FA8072",
+        ]
+    )
+
     # property name, inner dict
     for key, inner_dict in total_dict.items():
 
