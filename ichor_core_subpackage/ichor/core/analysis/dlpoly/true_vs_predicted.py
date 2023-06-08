@@ -56,15 +56,15 @@ def get_random_geometries_from_fflux_simulation(
         if isinstance(fflux_file, (Path, str)):
             fflux_file = DlPolyFFLUX(fflux_file)
 
-        total_energies = fflux_file.total_energy_kj_mol[random_indices]
+        total_energies = fflux_file.total_energy[random_indices]
 
         np.save(
-            f"{k}_total_predicted_energies_from_simulation_kj_mol.npy", total_energies
+            f"{k}_total_predicted_energies_from_simulation_hartree.npy", total_energies
         )
 
 
 def plot_true_vs_predicted_from_arrays(
-    predicted_energies_array_kj_mol: np.ndarray,
+    predicted_energies_array_hartree: np.ndarray,
     true_energies_array_hartree: Union[np.ndarray, PointsDirectory],
     title: str = "",
     subtract_mean: bool = False,
@@ -72,7 +72,8 @@ def plot_true_vs_predicted_from_arrays(
 ):
     """Plots true vs predicted energies, as well as calculates R^2 value
 
-    :param predicted_energies_array_kj_mol: np array containing FFLUX predicted energies
+    :param predicted_energies_array_hartree: np array containing FFLUX predicted energies
+        In hartrees
     :param true_energies_array_hartree: a np.array cotaning true energies (in hartrees)
         or a PointsDirectory (containing ordered wfns from which to get the array) again
         in Hartrees
@@ -89,13 +90,13 @@ def plot_true_vs_predicted_from_arrays(
         pd = true_energies_array_hartree
         for p in pd:
             true_energies.append(p.wfn.total_energy)
-        true_energies_array_kj_mol = np.array(true_energies) * 2625.5
+        true_energies_array_hartree = np.array(true_energies)
     else:
-        true_energies_array_kj_mol = true_energies_array_hartree * 2625.5
+        true_energies_array_hartree = true_energies_array_hartree
 
-    diff = predicted_energies_array_kj_mol - true_energies_array_kj_mol
+    diff = (predicted_energies_array_hartree - true_energies_array_hartree) * 2625.5
 
-    r_score = r2_score(true_energies_array_kj_mol, predicted_energies_array_kj_mol)
+    r_score = r2_score(true_energies_array_hartree, predicted_energies_array_hartree)
 
     with open("min_max_r2.txt", "w") as writef:
 
@@ -104,9 +105,9 @@ def plot_true_vs_predicted_from_arrays(
         writef.write(f"R^2 score: {r_score}")
 
     if subtract_mean:
-        mean = true_energies_array_kj_mol.mean()
-        true_energies_array_kj_mol = true_energies_array_kj_mol - mean
-        predicted_energies_array_kj_mol = predicted_energies_array_kj_mol - mean
+        mean = true_energies_array_hartree.mean()
+        true_energies_array_hartree = true_energies_array_hartree - mean
+        predicted_energies_array_hartree = predicted_energies_array_hartree - mean
 
     if absolute_diff:
         diff = np.abs(diff)
@@ -114,14 +115,14 @@ def plot_true_vs_predicted_from_arrays(
     fig, ax = plt.subplots(figsize=(9, 9))
     # c is the array of differences, cmap is for the cmap to use
     scatter_object = ax.scatter(
-        true_energies_array_kj_mol,
-        predicted_energies_array_kj_mol,
+        true_energies_array_hartree,
+        predicted_energies_array_hartree,
         c=diff,
         cmap="viridis",
     )
 
-    p1 = max(max(predicted_energies_array_kj_mol), max(true_energies_array_kj_mol))
-    p2 = min(min(predicted_energies_array_kj_mol), min(true_energies_array_kj_mol))
+    p1 = max(max(predicted_energies_array_hartree), max(true_energies_array_hartree))
+    p2 = min(min(predicted_energies_array_hartree), min(true_energies_array_hartree))
     plt.plot([p1, p2], [p1, p2], "k--", linewidth=2.0, alpha=0.5)
 
     # Show the major grid and style it slightly.
@@ -141,8 +142,8 @@ def plot_true_vs_predicted_from_arrays(
     if title:
         ax.set_title(title, fontsize=28)
 
-    ax.set_xlabel("True Energy / kJ mol$^{-1}$", fontsize=24)
-    ax.set_ylabel("Predicted Energy / kJ mol$^{-1}$", fontsize=24)
+    ax.set_xlabel("True Energy / Ha", fontsize=24)
+    ax.set_ylabel("Predicted Energy / Ha", fontsize=24)
 
     # colorbar for difference in energies
     cbar = fig.colorbar(scatter_object)
@@ -151,4 +152,5 @@ def plot_true_vs_predicted_from_arrays(
     else:
         cbar.set_label("Difference / kJ mol$^{-1}$", fontsize=24)
 
+    ax.ticklabel_format(axis="both", style="plain", useOffset=False)
     plt.show()
