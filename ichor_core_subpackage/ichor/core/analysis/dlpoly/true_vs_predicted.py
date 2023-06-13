@@ -153,4 +153,5 @@ def plot_true_vs_predicted_from_arrays(
         cbar.set_label("Difference / kJ mol$^{-1}$", fontsize=24)
 
     ax.ticklabel_format(axis="both", style="plain", useOffset=False)
+    ax.tick_params(axis="both", which="major", labelsize=18)
     plt.show()
