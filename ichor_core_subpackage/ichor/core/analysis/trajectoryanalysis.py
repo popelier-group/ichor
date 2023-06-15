@@ -51,6 +51,23 @@ class TrajectoryAnalysis(ReadFile):
             self._compute_distances_matrix()
         return self._distances_matrix
 
+    @property
+    def distance_hist(self) -> List[float]:
+        """distance_hist attribute which returns the bins to plot
+        a histogram 
+
+        :return: list of floats
+        """        
+        return self.distributions
+
+    @property
+    def bins(self) -> List[float]:
+        """bins attribute which returns 
+
+        :return: _description_
+        """        
+        return self.r
+
     def _compute_distances_matrix(self):
         """_compute_distances_matrix computes the matrix of distances of 
         all timesteps of a trajectory using cdists
@@ -76,23 +93,6 @@ class TrajectoryAnalysis(ReadFile):
         true_vals = len(index[index == True])
         return true_vals
 
-    @property
-    def distance_hist(self) -> List[float]:
-        """distance_hist attribute which returns the bins to plot
-        a histogram 
-
-        :return: list of floats
-        """        
-        return self.distributions
-
-    @property
-    def bins(self) -> List[float]:
-        """bins attribute which returns 
-
-        :return: _description_
-        """        
-        return self.r
-
     def hr(self, nbins : Optional[int] = 1000, max_dist : Optional[float] = 10.0):
         """hr is a function which computes the distributions of distances of all pair-wise distances 
         across a whole trajectory.
@@ -107,8 +107,7 @@ class TrajectoryAnalysis(ReadFile):
             self.distributions.append(
                 distribution
                 / (
-                    len(self.trajectory)
-                    / (self.trajectory.natoms * (self.trajectory.natoms - 1)*len(self.trajectory))
+                    len(self.trajectory)* (self.trajectory.natoms * (self.trajectory.natoms - 1))
                 )
             )
 
