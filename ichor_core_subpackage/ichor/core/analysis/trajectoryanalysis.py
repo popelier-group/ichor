@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import Union, List, Tuple, Iterator, Iterable, Optional
 import itertools
 import matplotlib.pyplot as plt
+from scipy.spatial.distance import cdist
 from ichor.core.files import Trajectory, DlpolyHistory, XYZ, GJF
 from ichor.core.files.file import ReadFile
 from ichor.core.calculators import default_connectivity_calculator
-from scipy.spatial.distance import cdist
 
 
 def pairwise(iterable: Iterable) -> Iterator[Tuple[int, int]]:
@@ -20,6 +20,10 @@ class TrajectoryAnalysis(ReadFile):
     """TrajectoryAnalysis is a class used for general analysis of
     molecular dynamics trajectories.
     Functionality for now comprehends only distribution of distances for a single molecule
+    Example usage:
+    traj = TrajectoryAnalysis(Path('path/to/trajectory'))
+    traj.hr()
+    traj.plot_hr(Path('path/to/figure.png'))
     """
 
     def __init__(self, trajectory_path: Union[Path, str]):
@@ -130,6 +134,11 @@ class Stability(TrajectoryAnalysis):
     which simply checks whether a simulation of a molecule is stable given a threshold
     value. Each connected bond distance is subtracted to a reference bond distance
     (e.g. of the corresponding optimised molecule) and then checked against the threshold.
+    Example usage:
+    traj = Stability(Path('path/to/reference'),Path('path/to/trajectory'). threshold=0.5)
+    traj.stable_trajectory()
+    traj.hr()
+    traj.plot_hr(Path('path/to/figure.png'))
     """
 
     def __init__(
