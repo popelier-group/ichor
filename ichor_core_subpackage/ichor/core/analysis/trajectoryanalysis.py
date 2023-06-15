@@ -1,13 +1,12 @@
+import numpy as np
+from pathlib import Path
+from typing import Union, List, Tuple, Iterator, Iterable, Optional
+import itertools
+import matplotlib.pyplot as plt
 from ichor.core.files import Trajectory, DlpolyHistory, XYZ, GJF
 from ichor.core.files.file import ReadFile
 from ichor.core.calculators import default_connectivity_calculator
 from scipy.spatial.distance import cdist
-import matplotlib.pyplot as plt
-import numpy as np
-from pathlib import Path
-from typing import Union, List, Tuple, Iterator, Iterable
-import itertools
-
 
 def pairwise(iterable: Iterable) -> Iterator[Tuple[int,int]] :    
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -19,6 +18,7 @@ def pairwise(iterable: Iterable) -> Iterator[Tuple[int,int]] :
 class TrajectoryAnalysis(ReadFile):
     """TrajectoryAnalysis is a class used for general analysis of 
     molecular dynamics trajectories. 
+    Functionality for now comprehends only distribution of distances for a single molecule
     """    
     def __init__(self, trajectory_path: Union[Path, str]):
         """__init__ 
@@ -79,7 +79,7 @@ class TrajectoryAnalysis(ReadFile):
     @property
     def distance_hist(self) -> List[float]:
         """distance_hist attribute which returns the bins to plot
-        an histogram 
+        a histogram 
 
         :return: list of floats
         """        
@@ -87,40 +87,60 @@ class TrajectoryAnalysis(ReadFile):
 
     @property
     def bins(self) -> List[float]:
-        """bins _summary_
+        """bins attribute which returns 
 
         :return: _description_
         """        
         return self.r
 
-    def hr(self, nbins=1000, max_dist=10.0):
+    def hr(self, nbins : Optional[int] = 1000, max_dist : Optional[float] = 10.0):
+        """hr is a function which computes the distributions of distances of all pair-wise distances 
+        across a whole trajectory.
+        This function needs to be called if the bins and distance_hist attributes need to be computed
+
+        :param nbins: number of bins to consider for the distance range considered, defaults to 1000
+        :param max_dist: maximum distance to consider for the distribution, defaults to 10.0
+        """        
         self.r = np.linspace(0.0, max_dist, nbins)
-        # round_distances_matrix = np.round(self.distances_matrix,decimals=decimals)
         for pair in pairwise(self.r):
             distribution = self.delta_dirac(pair[0], pair[1])
             self.distributions.append(
                 distribution
                 / (
                     len(self.trajectory)
-                    / (self.trajectory.natoms * (self.trajectory.natoms - 1))
+                    / (self.trajectory.natoms * (self.trajectory.natoms - 1)*len(self.trajectory))
                 )
             )
 
     def plot_hr(self, save_path: Union[Path, str]):
+        """plot_hr is an helper function which plots a quick graph 
+        for visualising the hr distribution.
+
+        :param save_path: path and name of the file ending in .png  
+        """        
         fig, ax = plt.subplots(figsize=(12, 6))
-        # ax.hist(self.r-1, bins=len(self.r)-1, weights=self.distributions)
-        # ax.stairs(self.distributions, self.r)
         ax.plot(self.r[:-1], self.distributions)
         fig.savefig(save_path, dpi=300)
 
 
-class Stability(TrajectoryAnalysis):
+class Stability(TrajectoryAnalysis):     
+    """Stability is a child class of TrajectoryAnalysis 
+    which simply checks whether a simulation of a molecule is stable given a threshold
+    value. Each connected bond distance is subtracted to a reference bond distance 
+    (e.g. of the corresponding optimised molecule) and then checked against the threshold.
+    """
     def __init__(
         self,
         reference_path: Union[Path, str],
         trajectory_path: Union[Path, str],
         threshold: float,
     ):
+        """__init__ 
+
+        :param reference_path: path to the reference structure of a molecule. Can be .gjf or .xyz file.
+        :param trajectory_path: path to the trajectory file. Can be a DLPOLY4 trajectory or a .xyz trajectory file.
+        :param threshold: threshold value for stability across the trajectory.
+        """        
         TrajectoryAnalysis.__init__(self, trajectory_path)
         self.reference = (
             XYZ(reference_path)
@@ -137,12 +157,20 @@ class Stability(TrajectoryAnalysis):
             self.reference._read_file()
 
     @property
-    def bond_lengths_matrix(self):
+    def bond_lengths_matrix(self) -> np.ndarray:
+        """bond_lengths_matrix returns a distances matrix only for bonds.
+
+        :return: numpy array of (timesteps,natoms,natoms) dimensions
+        """        
         if self._bond_lengths_matrix is None:
             self._compute_bond_lengths_matrix()
         return self._bond_lengths_matrix
 
     def _compute_bond_lengths_matrix(self):
+        """_compute_bond_lengths_matrix is a function which computes
+        a distance matrix of all distances along a trajectory and masks it with 
+        the connectivity of the reference geometry.
+        """        
         self._bond_lengths_matrix = np.zeros_like(self.distances_matrix)
         # mask = connectivity[np.newaxis, ...].repeat(self.distances_matrix.shape[0], axis=0)
         distances_matrix_masked = np.where(
@@ -150,7 +178,12 @@ class Stability(TrajectoryAnalysis):
         )
         self._bond_lengths_matrix = distances_matrix_masked
 
-    def bond_lengths_differences_matrix(self):
+    def bond_lengths_differences_matrix(self) -> np.ndarray :
+        """bond_lengths_differences_matrix computes a matrix of the differences of distances
+        between a reference geometry and all the timesteps of a trajectory.
+
+        :return: numpy array of dimensions (timesteps,natoms,natoms)
+        """        
         reference_distance_matrix = cdist(
             self.reference.coordinates, self.reference.coordinates
         )
@@ -161,35 +194,27 @@ class Stability(TrajectoryAnalysis):
             self.bond_lengths_matrix
             - reference_distance_matrix_masked[np.newaxis, :, :]
         )
-        # print(np.abs(diff))
-        # Now creating a mask matrix where all the differences of distances that are above a threshold return 1 while the rest is 0
+        # Now creating a mask matrix where all the differences of distances 
+        # that are above a threshold return 1 while the rest is 0
         mask = np.where(np.abs(diff) > self.threshold, 1, 0)
         return mask
 
     def stable_trajectory(self):
+        """stable_trajectory is the main function of the Stability class
+        The function computes the bond_lengths_differences_matrix and then checks
+        at which timesteps the trajectory is not stable and overwrites the original 
+        trajectory attribute with the stable trajectory only so that the distribution of distances
+        hr can then be computed on the stable part of the trajectory.
+        """        
         mask = self.bond_lengths_differences_matrix()
         # indices where the trajectory is unstable above the threshold value
         indices = np.nonzero(mask)
-        if indices is not None:
+        if not indices:
             print(
                 f"Timestep {indices[0][0]} has bonds over the threshold thus deemed UNSTABLE!"
             )
+            self.trajectory = self.trajectory[:indices[0][0]]
         else:
-            print(f"Trajectory is fully stable for {self.trajectory.shape[0]} steps")
-        self.trajectory = self.trajectory[: indices[0][0]]
+            print(f"Trajectory is fully stable for {len(self.trajectory)} steps")
+        
 
-
-t = TrajectoryAnalysis(Path("toluene.xyz"))
-stab = Stability(Path("toluene_single.xyz"),Path("HISTORY_toluene_8ktrain"), threshold=0.5)
-#stab = TrajectoryAnalysis(Path("HISTORY_toluene_8ktrain"))
-# stab.hr()
-# stab.plot_hr("./hist_8k_paracetamol_unstable.png")
-stab.stable_trajectory()
-stab.hr()
-t.hr()
-#fig, ax = plt.subplots(figsize=(12, 6))
-#ax.plot(t.bins[:-1], t.distance_hist, label="MD17")
-#ax.plot(stab.bins[:-1], stab.distance_hist, label="FFLUX_8ktrain")
-#plt.legend()
-#fig.savefig("./TOLUENE_comparison_hist_8k_vs_MD17_stable.png", dpi=300)
-quit()
