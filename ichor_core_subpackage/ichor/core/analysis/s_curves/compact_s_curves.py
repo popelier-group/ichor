@@ -444,12 +444,12 @@ def plot_with_matplotlib(
     try:
         import matplotlib.pyplot as plt
         import scienceplots  # noqa
+
+        plt.style.use("science")
     except ImportError:
         print("Could not import relevant packages.")
 
         return
-
-    plt.style.use("science")
 
     fig, ax = plt.subplots(figsize=(9, 9))
 
