@@ -508,7 +508,7 @@ def plot_with_matplotlib(
     ax.tick_params(axis="both", which="major", labelsize=18)
     ax.tick_params(axis="both", which="minor", labelsize=18)
 
-    fig.savefig("s_curves.png", dpi=300)
+    fig.savefig("s_curves.svg")
     print("plotting")
     try:
         plt.show()
