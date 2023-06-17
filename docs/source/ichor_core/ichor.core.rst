@@ -1,0 +1,28 @@
+ichor.core package
+==================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ichor.core.analysis
+   ichor.core.atoms
+   ichor.core.calculators
+   ichor.core.common
+   ichor.core.daemon
+   ichor.core.files
+   ichor.core.models
+   ichor.core.molecular_dynamics
+   ichor.core.multipoles
+   ichor.core.sql
+   ichor.core.useful_functions
+
+Module contents
+---------------
+
+.. automodule:: ichor.core
+   :members:
+   :undoc-members:
+   :show-inheritance:
