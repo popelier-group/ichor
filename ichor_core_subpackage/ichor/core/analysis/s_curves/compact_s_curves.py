@@ -435,15 +435,20 @@ def mpl_get_true_vals_dict(
 
 
 def plot_with_matplotlib(
-    total_dict: dict,
-    x_axis_name: str = "Prediction Error / kJ mol$^-1$",
+    total_dict: Union[List[dict], dict],
+    x_axis_name: str = "Prediction Error / kJ mol$^{-1}$",
     y_axis_name: str = "\%",
     title: str = None,
+    saved_name: str = "s_curves.svg",
 ):
 
     try:
+        # import matplotlib
         import matplotlib.pyplot as plt
         import scienceplots  # noqa
+        from matplotlib import ticker as mticker
+
+        # from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
         plt.style.use("science")
     except ImportError:
@@ -451,69 +456,91 @@ def plot_with_matplotlib(
 
         return
 
-    fig, ax = plt.subplots(figsize=(9, 9))
+    if isinstance(total_dict, dict):
+        total_dict = [total_dict]
 
-    ax.set_prop_cycle(
-        color=[
-            "0C5DA5",
-            "00B945",
-            "FF9500",
-            "FF2C00",
-            "845B97",
-            "474747",
-            "9e9e9e",
-            "30D5C8",
-            "FA8072",
-        ]
-    )
+    nplots = len(total_dict)
+    fig, ax = plt.subplots(1, nplots, figsize=(15 * nplots, 15), sharey=True)
 
-    # property name, inner dict
-    for key, inner_dict in total_dict.items():
+    if not isinstance(ax, np.ndarray):
+        ax = [ax]
 
-        # sort atom names so they appear correctly in label
-        atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
+    for ax_idx, d in enumerate(total_dict):
 
-        for an in atom_names:
+        ax[ax_idx].set_prop_cycle(
+            color=[
+                "0C5DA5",
+                "00B945",
+                "FF9500",
+                "FF2C00",
+                "845B97",
+                "474747",
+                "9e9e9e",
+                "30D5C8",
+                "FA8072",
+            ]
+        )
 
-            # true pred err keys , arrays values
-            for true_pred_err, array in inner_dict[an].items():
+        # property name, inner dict
+        for key, inner_dict in d.items():
 
-                # true,pred,err keys , array of values
-                # should only plot errors for s-curves
+            # sort atom names so they appear correctly in label
+            atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
 
-                array_sorted = np.sort(np.absolute(array))
-                perc = percentile(array_sorted.shape[0])
+            for an in atom_names:
 
-                ax.plot(array_sorted, perc, label=an, linewidth=2)
-                ax.set_xscale("log")
+                # true pred err keys , arrays values
+                for true_pred_err, array in inner_dict[an].items():
 
-    plt.legend(facecolor="white", framealpha=1, frameon=True, fontsize=24)
+                    # true,pred,err keys , array of values
+                    # should only plot errors for s-curves
 
-    # Show the major grid and style it slightly.
-    ax.grid(which="major", color="#DDDDDD", linewidth=1.2)
-    # Show the minor grid as well. Style it in very light gray as a thin,
-    # dotted line.
-    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=1.0)
-    # Make the minor ticks and gridlines show.
-    ax.minorticks_on()
-    ax.grid(True)
+                    array_sorted = np.sort(np.absolute(array))
+                    perc = percentile(array_sorted.shape[0])
 
-    if x_axis_name:
-        ax.set_xlabel(x_axis_name, fontsize=24)
-    if y_axis_name:
-        ax.set_ylabel(y_axis_name, fontsize=24)
-    if title:
-        ax.set_title(title, fontsize=28)
+                    ax[ax_idx].semilogx(array_sorted, perc, label=an, linewidth=4)
 
-    ax.tick_params(axis="both", which="major", labelsize=18)
-    ax.tick_params(axis="both", which="minor", labelsize=18)
+        ax[ax_idx].legend(facecolor="white", framealpha=1, frameon=True, fontsize=48)
 
-    fig.savefig("s_curves.svg")
-    print("plotting")
-    try:
-        plt.show()
-    except:  # noqa
-        pass  # noqa
+        # Show the major grid and style it slightly.
+        ax[ax_idx].grid(which="major", color="#DDDDDD", linewidth=4.0)
+        # Show the minor grid as well. Style it in very light gray as a thin,
+        # dotted line.
+        ax[ax_idx].grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=3.0)
+        # Make the minor ticks and gridlines show.
+        ax[ax_idx].minorticks_on()
+        ax[ax_idx].grid(True)
+
+        if x_axis_name:
+            ax[ax_idx].set_xlabel(x_axis_name, fontsize=54, labelpad=20)
+            # ax.set_xlabel(x_axis_name, fontsize=28, fontweight="bold")
+        # only set the y axis for the first plot
+        if y_axis_name:
+            ax[0].set_ylabel(y_axis_name, fontsize=54, labelpad=20)
+            # ax.set_ylabel(y_axis_name, fontsize=28, fontweight="bold")
+        if title:
+            ax[ax_idx].set_title(title, fontsize=48)
+
+        # useful mplt stuff
+        # https://stackoverflow.com/questions/2969867/how-do-i-add-space-between-the-ticklabels-and-the-axes-in-matplotlib
+        # https://stackoverflow.com/questions/67253174/how-to-set-space-between-the-axis-and-the-label
+        # https://stackoverflow.com/questions/44078409/matplotlib-semi-log-plot-minor-tick-marks-are-gone-when-range-is-large
+        # https://stackoverflow.com/a/73094650
+
+        ax[ax_idx].xaxis.set_major_locator(mticker.LogLocator(numticks=999))
+        ax[ax_idx].xaxis.set_minor_locator(
+            mticker.LogLocator(numticks=999, subs="auto")
+        )
+
+        ax[ax_idx].tick_params(
+            axis="both", which="major", labelsize=48, length=3, width=2, pad=15
+        )
+        ax[ax_idx].tick_params(
+            axis="both", which="minor", labelsize=48, length=3, width=2, pad=15
+        )
+
+        # fig.savefig("s_curves.png", pad_inches = 0.2)
+        fig.savefig(saved_name, pad_inches=0.2)
 
 
 ######################
