@@ -81,6 +81,7 @@ def plot_true_vs_predicted_from_arrays(
         of true and predicted or not, defaults to True
     """
 
+    from matplotlib.ticker import FormatStrFormatter
     from sklearn.metrics import r2_score
 
     if isinstance(true_energies_array_hartree[0], PointsDirectory):
@@ -139,12 +140,16 @@ def plot_true_vs_predicted_from_arrays(
         )
         ax.plot([p1, p2], [p1, p2], "k--", linewidth=3.0, alpha=0.5)
 
+        print(p1, p2)
+
         steps = np.linspace(p2, p1, 5)
-        steps = np.around(steps, 3)
         ax.set_xticks(steps)
         ax.set_xticklabels(steps)
         ax.set_yticks(steps)
         ax.set_yticklabels(steps)
+
+        ax.xaxis.set_major_formatter(FormatStrFormatter("%.3f"))
+        ax.yaxis.set_major_formatter(FormatStrFormatter("%.3f"))
 
         ax.tick_params(axis="both", which="major", labelsize=48, pad=15)
         ax.tick_params(axis="both", which="minor", labelsize=48, pad=15)
@@ -172,6 +177,11 @@ def plot_true_vs_predicted_from_arrays(
         ax.set_xlabel("True Energy / Ha", fontsize=54, labelpad=20)
         ax.set_ylabel("Predicted Energy / Ha", fontsize=54, labelpad=20)
 
+        min_diff = min(diff[i])
+        max_diff = max(diff[i])
+
+        diff_linspace = np.linspace(min_diff, max_diff, 5)
+
         # colorbar for difference in energies
         cbar = fig.colorbar(scatter_object)
         if absolute_diff:
@@ -180,6 +190,11 @@ def plot_true_vs_predicted_from_arrays(
             )
         else:
             cbar.set_label("Difference / kJ mol$^{-1}$", fontsize=54, labelpad=20)
+
+        cbar.ax.set_yticks(diff_linspace)
+        cbar.ax.set_yticklabels(diff_linspace)
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
+
         cbar.ax.tick_params(labelsize=48, pad=15)
 
         # ax.ticklabel_format(axis="both", style="plain", useOffset=False)
