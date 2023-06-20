@@ -535,9 +535,9 @@ def plot_with_matplotlib(
         ax[ax_idx].tick_params(
             axis="both", which="major", labelsize=48, length=3, width=2, pad=15
         )
-        ax[ax_idx].tick_params(
-            axis="both", which="minor", labelsize=48, length=3, width=2, pad=15
-        )
+        # ax[ax_idx].tick_params(
+        #     axis="both", which="minor", labelsize=48, length=3, width=2, pad=15
+        # )
 
         # fig.savefig("s_curves.png", pad_inches = 0.2)
         fig.savefig(saved_name, pad_inches=0.2)

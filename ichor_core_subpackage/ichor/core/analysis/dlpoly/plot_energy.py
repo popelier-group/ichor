@@ -1,5 +1,5 @@
 import warnings
-from typing import Union
+from typing import List, Union
 
 import numpy as np
 from ichor.core.files.dl_poly import DlPolyFFLUX, FFLUXDirectory
@@ -13,28 +13,31 @@ except ImportError:
     warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
 
 
-def format_energy_plots(ax, title: str = ""):
+def format_energy_plots(ax, xlabel="Timestep", fontsize=54, labelpad=20):
 
     # Show the major grid and style it slightly.
-    ax.grid(which="major", color="#DDDDDD", linewidth=1.2)
+    ax.grid(which="major", color="#DDDDDD", linewidth=4.0)
     # Show the minor grid as well. Style it in very light gray as a thin,
     # dotted line.
-    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=1.0)
+    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=4)
     # Make the minor ticks and gridlines show.
     ax.minorticks_on()
     ax.grid(True)
 
-    if title:
-        ax.set_title(title, fontsize=28)
+    ax.set_xlabel(xlabel, fontsize=fontsize, labelpad=labelpad)
 
-    ax.tick_params(axis="both", which="major", labelsize=18)
+    # ax.tick_params(axis="both", which="major", labelsize=48, length=3, width=2, pad=15)
+    # ax.tick_params(axis="both", which="minor", labelsize=48, length=3, width=2, pad=15)
+
+    ax.tick_params(axis="both", which="major", labelsize=48, pad=15)
+    ax.tick_params(axis="both", which="minor", labelsize=48, pad=15)
 
 
 def plot_total_energy(
-    data: Union[DlPolyFFLUX, FFLUXDirectory],
+    data: Union[DlPolyFFLUX, FFLUXDirectory, List[DlPolyFFLUX], List[FFLUXDirectory]],
     until_converged: bool = True,
     reference: float = None,
-    title: str = "",
+    filename: str = "total_energy.svg",
 ):
     """Plots the predicted total energy of the system (in kJ mol-1) from the fflux
     simulation for every timestep.
@@ -45,38 +48,67 @@ def plot_total_energy(
     :param data: A FFLUX file or directory containing a FFLUX file to read data from.
     :param until_converged: Plot timesteps until energy is converted to 1e-4 kJ mol-1, defaults to True.
     :param reference: A reference value to subtract (could be the Gaussian optimized minimum).
-        This value has to be in kJ mol-1
-    :param title: Title for plot
+        This value has to be in kJ mol-1. If a list is passed in as data, then this reference must also be a
+        list of the same length as data.
     """
 
     # get data from somewhere
-    if isinstance(data, DlPolyFFLUX):
-        fflux_file = data
-    elif isinstance(data, FFLUXDirectory):
-        fflux_file = data.fflux_file
+    if not isinstance(data, list):
+        fflux_files = [data]
 
-    fig, ax = plt.subplots(figsize=(9, 9))
+    if isinstance(data[0], DlPolyFFLUX):
+        fflux_files = data
+    elif isinstance(data[0], FFLUXDirectory):
+        fflux_files = [d.fflux_file for d in data]
 
-    idx = fflux_file.first_index_where_delta_less_than()
-    total_eng = fflux_file.total_energy_kj_mol
+    idx_where_energy_diff_less_than = [
+        f.first_index_where_delta_less_than() for f in fflux_files
+    ]
+    total_eng_kj_mol = [f.total_energy_kj_mol for f in fflux_files]
 
     if reference:
-        total_eng = total_eng - reference
+        total_eng_kj_mol = [tot - ref for tot, ref in zip(total_eng_kj_mol, reference)]
         with open("difference_between_reference_and_fflux.txt", "w") as writef:
-            diff_ref_and_fflux = total_eng[idx]
-            writef.write(f"Difference kJ mol-1: {diff_ref_and_fflux}")
+            for i, t in enumerate(total_eng_kj_mol):
+                diff_ref_and_fflux = t[idx_where_energy_diff_less_than[i]]
+                writef.write(
+                    f"Difference kJ mol-1 for fflux file {fflux_files[i]}: {diff_ref_and_fflux}"
+                )
+
+    nplots = len(fflux_files)
+    fig, axes = plt.subplots(1, nplots, figsize=(15 * nplots, 10), sharey=True)
+
+    if not isinstance(axes, np.ndarray):
+        axes = [axes]
 
     if until_converged:
-        ax.plot(range(idx), total_eng[:idx])
+
+        total_eng_kj_mol = [
+            t[:i] for i, t in zip(idx_where_energy_diff_less_than, total_eng_kj_mol)
+        ]
+
+        for i, ax in enumerate(axes):
+            current_idx = idx_where_energy_diff_less_than[i]
+            current_total_eng = total_eng_kj_mol[i]
+
+            ax.plot(range(current_idx), current_total_eng, linewidth=2)
+
     else:
-        ax.plot(range(fflux_file.ntimesteps), total_eng)
 
-    ax.set_xlabel("Timestep", fontsize=24)
-    ax.set_ylabel("Energy / kJ mol$^{-1}$", fontsize=24)
+        for i, ax in enumerate(axes):
+            current_total_eng = total_eng_kj_mol[i]
+            current_fflux_file = fflux_files[i]
 
-    format_energy_plots(ax, title)
+            ax.plot(
+                range(current_fflux_file.ntimesteps), current_total_eng, linewidth=2
+            )
 
-    plt.show()
+    for ax in axes:
+        format_energy_plots(ax, xlabel="Timestep", fontsize=54, labelpad=20)
+    # only set the y label for first plot
+    axes[0].set_ylabel(ylabel="Energy / kJ mol$^{-1}$", fontsize=54, labelpad=20)
+
+    plt.savefig(filename, pad_inches=0.2)
 
 
 def plot_total_energy_from_array(

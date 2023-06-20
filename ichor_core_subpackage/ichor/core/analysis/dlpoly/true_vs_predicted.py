@@ -1,7 +1,7 @@
 import random
 import warnings
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
 import numpy as np
 from ichor.core.files import PointsDirectory, Trajectory
@@ -65,10 +65,9 @@ def get_random_geometries_from_fflux_simulation(
 
 def plot_true_vs_predicted_from_arrays(
     predicted_energies_array_hartree: np.ndarray,
-    true_energies_array_hartree: Union[np.ndarray, PointsDirectory],
-    title: str = "",
-    subtract_mean: bool = False,
+    true_energies_array_hartree: Union[np.ndarray, List[PointsDirectory]],
     absolute_diff: bool = True,
+    filename="output.svg",
 ):
     """Plots true vs predicted energies, as well as calculates R^2 value
 
@@ -78,80 +77,116 @@ def plot_true_vs_predicted_from_arrays(
         or a PointsDirectory (containing ordered wfns from which to get the array) again
         in Hartrees
     :param title: The title of the plot, defaults to ""
-    :param subtract_mean: Whether to subtract mean of data, defaults to False
     :param absolute_diff: Whether to use the absolute of the differences
         of true and predicted or not, defaults to True
     """
 
     from sklearn.metrics import r2_score
 
-    if isinstance(true_energies_array_hartree, PointsDirectory):
-        true_energies = []
-        pd = true_energies_array_hartree
-        for p in pd:
-            true_energies.append(p.wfn.total_energy)
-        true_energies_array_hartree = np.array(true_energies)
+    if isinstance(true_energies_array_hartree[0], PointsDirectory):
+        all_true_energies = []
+        for pd in true_energies_array_hartree:
+            one_system_energies = []
+            for p in pd:
+                one_system_energies.append(p.wfn.total_energy)
+            all_true_energies.append(one_system_energies)
+        true_energies_array_hartree = np.array(all_true_energies)
     else:
         true_energies_array_hartree = true_energies_array_hartree
 
+    nsystems = predicted_energies_array_hartree.shape[0]
+
     diff = (predicted_energies_array_hartree - true_energies_array_hartree) * 2625.5
 
-    r_score = r2_score(true_energies_array_hartree, predicted_energies_array_hartree)
+    r2_scores = [
+        r2_score(true_energies_array_hartree[i], predicted_energies_array_hartree[i])
+        for i in range(nsystems)
+    ]
 
     with open("min_max_r2.txt", "w") as writef:
 
-        writef.write(f"Maximum absolute difference: {np.max(np.abs(diff))}\n")
-        writef.write(f"Minimum absolute difference: {np.min(np.abs(diff))}\n")
-        writef.write(f"R^2 score: {r_score}")
+        for i, d in enumerate(diff):
 
-    if subtract_mean:
-        mean = true_energies_array_hartree.mean()
-        true_energies_array_hartree = true_energies_array_hartree - mean
-        predicted_energies_array_hartree = predicted_energies_array_hartree - mean
+            writef.write(f"Maximum absolute difference {i}: {np.max(np.abs(d))}\n")
+            writef.write(f"Minimum absolute difference {i}: {np.min(np.abs(d))}\n")
+            writef.write(f"R^2 score {i}: {r2_scores[i]}\n")
 
     if absolute_diff:
         diff = np.abs(diff)
 
-    fig, ax = plt.subplots(figsize=(9, 9))
+    fig, axes = plt.subplots(1, nsystems, figsize=(30 * nsystems, 15))
     # c is the array of differences, cmap is for the cmap to use
-    scatter_object = ax.scatter(
-        true_energies_array_hartree,
-        predicted_energies_array_hartree,
-        c=diff,
-        cmap="viridis",
-    )
+    if not isinstance(axes, np.ndarray):
+        axes = [axes]
 
-    p1 = max(max(predicted_energies_array_hartree), max(true_energies_array_hartree))
-    p2 = min(min(predicted_energies_array_hartree), min(true_energies_array_hartree))
-    plt.plot([p1, p2], [p1, p2], "k--", linewidth=2.0, alpha=0.5)
+    for i, ax in enumerate(axes):
 
-    # Show the major grid and style it slightly.
-    ax.grid(which="major", color="#DDDDDD", linewidth=1.2)
-    ax.grid(True)
+        scatter_object = ax.scatter(
+            true_energies_array_hartree[i],
+            predicted_energies_array_hartree[i],
+            c=diff[i],
+            cmap="viridis",
+            s=200,
+        )
 
-    # note that there will be a warning that no axes need legends, that is fine
-    # make legend have a frame
-    # the fonsize in the legend is for text apart from the title
-    # set it to some reasonable value so that the frame is large enough to fit title
-    leg = plt.legend(
-        facecolor="white", framealpha=1, frameon=True, fontsize=14, loc="lower right"
-    )
-    # set title as the R^2 value
-    leg.set_title(f"R$^2$ = {r_score:.3f}", prop={"size": 20})
+        p1 = max(
+            max(predicted_energies_array_hartree[i]),
+            max(true_energies_array_hartree[i]),
+        )
+        p2 = min(
+            min(predicted_energies_array_hartree[i]),
+            min(true_energies_array_hartree[i]),
+        )
+        ax.plot([p1, p2], [p1, p2], "k--", linewidth=3.0, alpha=0.5)
 
-    if title:
-        ax.set_title(title, fontsize=28)
+        steps = np.linspace(p2, p1, 5)
+        steps = np.around(steps, 3)
+        ax.set_xticks(steps)
+        ax.set_xticklabels(steps)
+        ax.set_yticks(steps)
+        ax.set_yticklabels(steps)
 
-    ax.set_xlabel("True Energy / Ha", fontsize=24)
-    ax.set_ylabel("Predicted Energy / Ha", fontsize=24)
+        ax.tick_params(axis="both", which="major", labelsize=48, pad=15)
+        ax.tick_params(axis="both", which="minor", labelsize=48, pad=15)
 
-    # colorbar for difference in energies
-    cbar = fig.colorbar(scatter_object)
-    if absolute_diff:
-        cbar.set_label("Absolute Difference / kJ mol$^{-1}$", fontsize=24)
-    else:
-        cbar.set_label("Difference / kJ mol$^{-1}$", fontsize=24)
+        # Show the major grid and style it slightly.
+        ax.grid(which="major", color="#DDDDDD", linewidth=4.0)
+        ax.grid(True)
 
-    ax.ticklabel_format(axis="both", style="plain", useOffset=False)
-    ax.tick_params(axis="both", which="major", labelsize=18)
-    plt.show()
+        # note that there will be a warning that no axes need legends, that is fine
+        # make legend have a frame
+        # the fonsize in the legend is for text apart from the title
+        # set it to some reasonable value so that the frame is large enough to fit title
+        leg = ax.legend(
+            facecolor="white",
+            framealpha=1,
+            frameon=True,
+            fontsize=0.1,
+            loc="lower right",
+            borderpad=15.0,
+        )
+        # set title as the R^2 value
+        leg.set_title(f"R$^2$ = {r2_scores[i]:.3f}", prop={"size": 54})
+        leg.get_frame().set_linewidth(3.0)
+
+        ax.set_xlabel("True Energy / Ha", fontsize=54, labelpad=20)
+        ax.set_ylabel("Predicted Energy / Ha", fontsize=54, labelpad=20)
+
+        # colorbar for difference in energies
+        cbar = fig.colorbar(scatter_object)
+        if absolute_diff:
+            cbar.set_label(
+                "Absolute Difference / kJ mol$^{-1}$", fontsize=54, labelpad=20
+            )
+        else:
+            cbar.set_label("Difference / kJ mol$^{-1}$", fontsize=54, labelpad=20)
+        cbar.ax.tick_params(labelsize=48, pad=15)
+
+        # ax.ticklabel_format(axis="both", style="plain", useOffset=False)
+
+        # ax.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+        # ax.xaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+
+    fig.savefig(filename, pad_inches=0.2)
+
+    return fig, axes
