@@ -221,9 +221,9 @@ class Stability(TrajectoryAnalysis):
         mask = self.bond_lengths_differences_matrix()
         # indices where the trajectory is unstable above the threshold value
         indices = np.nonzero(mask)
-        if not indices:
+        if indices[0].any():
             print(
-                f"Timestep {indices[0][0]} has bonds over the threshold thus deemed UNSTABLE!"
+                f"Timestep {indices[0][0]} has bonds over the threshold! Trajectory is unstable after this."
             )
             self.trajectory = self.trajectory[: indices[0][0]]
         else:
