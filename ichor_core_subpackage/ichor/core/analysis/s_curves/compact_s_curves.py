@@ -1,5 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
+from string import ascii_uppercase
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -9,6 +10,8 @@ from ichor.core.common.constants import ha_to_kj_mol, multipole_names
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
+
+ascii_uppercase = list(ascii_uppercase)
 
 
 def percentile(n: int) -> np.ndarray:
@@ -437,12 +440,14 @@ def mpl_get_true_vals_dict(
 def plot_with_matplotlib(
     total_dict: Union[List[dict], dict],
     x_axis_name: str = "Prediction Error / kJ mol$^{-1}$",
-    y_axis_name: str = "\%",
+    y_axis_name: str = "%",
     title: str = None,
     saved_name: str = "s_curves.svg",
 ):
 
     try:
+        import matplotlib
+
         # import matplotlib
         import matplotlib.pyplot as plt
         import scienceplots  # noqa
@@ -451,16 +456,41 @@ def plot_with_matplotlib(
         # from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
         plt.style.use("science")
+
+        matplotlib.rcParams.update(
+            {
+                "text.usetex": False,
+                "font.family": "sans-serif",
+                "font.serif": "DejaVu Serif",
+                "axes.formatter.use_mathtext": False,
+                "mathtext.fontset": "dejavusans",
+            }
+        )
+
     except ImportError:
         print("Could not import relevant packages.")
 
         return
 
+    FIGURE_LABEL_SIZE = 30
+    X_Y_LABELS_FONTSIZE = 30
+    TICKLABELS_FONTSIZE = 22
+    LABELPAD = 10
+    AXES_PADDING = 10.0
+    LINEWIDTH = 3.0
+    MINOR_LINEWIDTH = 2.0
+    MAJOR_TICK_LENGTH = 6.0
+    MINOR_TICK_LENGTH = 3.0
+    PAD_INCHES = 0.05
+
+    nplots = len(total_dict)
+    WIDTH = 10 * nplots
+    HEIGHT = WIDTH / 3
+
     if isinstance(total_dict, dict):
         total_dict = [total_dict]
 
-    nplots = len(total_dict)
-    fig, ax = plt.subplots(1, nplots, figsize=(15 * nplots, 15), sharey=True)
+    fig, ax = plt.subplots(1, nplots, figsize=(WIDTH, HEIGHT), sharey=True)
 
     if not isinstance(ax, np.ndarray):
         ax = [ax]
@@ -498,28 +528,42 @@ def plot_with_matplotlib(
                     array_sorted = np.sort(np.absolute(array))
                     perc = percentile(array_sorted.shape[0])
 
-                    ax[ax_idx].semilogx(array_sorted, perc, label=an, linewidth=4)
+                    ax[ax_idx].semilogx(
+                        array_sorted, perc, label=an, linewidth=LINEWIDTH
+                    )
 
-        ax[ax_idx].legend(facecolor="white", framealpha=1, frameon=True, fontsize=48)
+        ax[ax_idx].legend(
+            facecolor="white", framealpha=1, frameon=True, fontsize=X_Y_LABELS_FONTSIZE
+        )
 
         # Show the major grid and style it slightly.
-        ax[ax_idx].grid(which="major", color="#DDDDDD", linewidth=4.0)
+        ax[ax_idx].grid(which="major", color="#DDDDDD", linewidth=LINEWIDTH)
         # Show the minor grid as well. Style it in very light gray as a thin,
         # dotted line.
-        ax[ax_idx].grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=3.0)
+        ax[ax_idx].grid(
+            which="minor", color="#EEEEEE", linestyle=":", linewidth=MINOR_LINEWIDTH
+        )
         # Make the minor ticks and gridlines show.
         ax[ax_idx].minorticks_on()
         ax[ax_idx].grid(True)
 
         if x_axis_name:
-            ax[ax_idx].set_xlabel(x_axis_name, fontsize=54, labelpad=20)
+            ax[ax_idx].set_xlabel(
+                x_axis_name,
+                fontsize=X_Y_LABELS_FONTSIZE,
+                labelpad=LABELPAD,
+                fontweight="bold",
+            )
             # ax.set_xlabel(x_axis_name, fontsize=28, fontweight="bold")
         # only set the y axis for the first plot
         if y_axis_name:
-            ax[0].set_ylabel(y_axis_name, fontsize=54, labelpad=20)
+            ax[0].set_ylabel(
+                y_axis_name,
+                fontsize=X_Y_LABELS_FONTSIZE,
+                labelpad=LABELPAD,
+                fontweight="bold",
+            )
             # ax.set_ylabel(y_axis_name, fontsize=28, fontweight="bold")
-        if title:
-            ax[ax_idx].set_title(title, fontsize=48)
 
         # useful mplt stuff
         # https://stackoverflow.com/questions/2969867/how-do-i-add-space-between-the-ticklabels-and-the-axes-in-matplotlib
@@ -533,14 +577,40 @@ def plot_with_matplotlib(
         )
 
         ax[ax_idx].tick_params(
-            axis="both", which="major", labelsize=48, length=3, width=2, pad=15
+            axis="both",
+            which="major",
+            labelsize=TICKLABELS_FONTSIZE,
+            length=MAJOR_TICK_LENGTH,
+            width=LINEWIDTH,
+            top=False,
+            right=False,
+            pad=AXES_PADDING,
         )
-        # ax[ax_idx].tick_params(
-        #     axis="both", which="minor", labelsize=48, length=3, width=2, pad=15
-        # )
+        ax[ax_idx].tick_params(
+            axis="both",
+            which="minor",
+            length=MINOR_TICK_LENGTH,
+            width=MINOR_LINEWIDTH,
+            top=False,
+            right=False,
+            pad=AXES_PADDING,
+        )
+
+        tick_labels = ax[ax_idx].get_xticklabels() + ax[ax_idx].get_yticklabels()
+        for t in tick_labels:
+            t.set_fontweight("bold")
+
+        ax[ax_idx].text(
+            0.85,
+            0.15,
+            f"{ascii_uppercase[ax_idx]}",
+            fontsize=FIGURE_LABEL_SIZE,
+            transform=ax[ax_idx].transAxes,
+            fontweight="bold",
+        )
 
         # fig.savefig("s_curves.png", pad_inches = 0.2)
-        fig.savefig(saved_name, pad_inches=0.2)
+        fig.savefig(saved_name, pad_inches=PAD_INCHES, dpi=300)
 
 
 ######################

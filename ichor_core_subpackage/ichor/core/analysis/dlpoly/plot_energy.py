@@ -1,44 +1,114 @@
+import math
 import warnings
+
+from string import ascii_uppercase
 from typing import List, Union
+
+import matplotlib
 
 import numpy as np
 from ichor.core.files.dl_poly import DlPolyFFLUX, FFLUXDirectory
 from matplotlib import pyplot as plt
 
+ascii_uppercase = list(ascii_uppercase)
+
 try:
     import scienceplots  # noqa
 
     plt.style.use("science")
+
+    matplotlib.rcParams.update(
+        {
+            "text.usetex": False,
+            "font.family": "sans-serif",
+            "font.serif": "DejaVu Serif",
+            "axes.formatter.use_mathtext": False,
+            "mathtext.fontset": "dejavusans",
+        }
+    )
+
 except ImportError:
     warnings.warn("Could not import scienceplots. Will not use scienceplots styles.")
 
 
-def format_energy_plots(ax, xlabel="Timestep", fontsize=54, labelpad=20):
+def round_base_10(x):
+    if x < 0:
+        return 0
+    elif x == 0:
+        return 10
+    return math.ceil(math.log10(x))
+
+
+def format_energy_plots(
+    ax,
+    xlabel="Timestep",
+    major_grid_linewidth=4.0,
+    minor_grid_linewidth=4.0,
+    xlabel_fontsize=20,
+    label_pad=1.0,
+    tick_params_labelsize=48,
+    tick_params_pad=15,
+    major_tick_params_length=6.0,
+    major_tick_params_width=4,
+    minor_tick_params_length=3.0,
+    minor_tick_params_width=4.0,
+):
 
     # Show the major grid and style it slightly.
-    ax.grid(which="major", color="#DDDDDD", linewidth=4.0)
+    ax.grid(which="major", color="#DDDDDD", linewidth=major_grid_linewidth)
     # Show the minor grid as well. Style it in very light gray as a thin,
     # dotted line.
-    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=4)
+    # ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=minor_grid_linewidth)
     # Make the minor ticks and gridlines show.
-    ax.minorticks_on()
-    ax.grid(True)
+    # ax.minorticks_on()
+    # ax.grid(True)
 
-    ax.set_xlabel(xlabel, fontsize=fontsize, labelpad=labelpad)
+    ax.set_xlabel(
+        xlabel, fontsize=xlabel_fontsize, labelpad=label_pad, fontweight="bold"
+    )
 
-    # ax.tick_params(axis="both", which="major", labelsize=48, length=3, width=2, pad=15)
-    # ax.tick_params(axis="both", which="minor", labelsize=48, length=3, width=2, pad=15)
+    ax.tick_params(
+        axis="both",
+        which="major",
+        labelsize=tick_params_labelsize,
+        pad=tick_params_pad,
+        length=major_tick_params_length,
+        width=major_tick_params_width,
+        top=False,
+        right=False,
+    )
+    ax.tick_params(
+        axis="both",
+        which="minor",
+        labelsize=tick_params_labelsize,
+        pad=tick_params_pad,
+        length=minor_tick_params_length,
+        width=minor_tick_params_width,
+        top=False,
+        right=False,
+    )
 
-    ax.tick_params(axis="both", which="major", labelsize=48, pad=15)
-    ax.tick_params(axis="both", which="minor", labelsize=48, pad=15)
+    tick_labels = ax.get_xticklabels() + ax.get_yticklabels()
+    for t in tick_labels:
+        t.set_fontweight("bold")
 
 
 def plot_total_energy(
     data: Union[DlPolyFFLUX, FFLUXDirectory, List[DlPolyFFLUX], List[FFLUXDirectory]],
     until_converged: bool = True,
-    reference: float = None,
+    reference: List[float] = None,
+    FIGURE_LABEL_SIZE=30,
+    X_Y_LABELS_FONTSIZE=30,
+    TICKLABELS_FONTSIZE=22,
+    LABELPAD=10,
+    AXES_PADDING=10.0,
+    LINEWIDTH=2.0,
+    MAJOR_TICK_LENGTH=6.0,
+    MINOR_TICK_LENGTH=3.0,
+    PAD_INCHES=0.05,
     filename: str = "total_energy.svg",
 ):
+
     """Plots the predicted total energy of the system (in kJ mol-1) from the fflux
     simulation for every timestep.
 
@@ -50,16 +120,32 @@ def plot_total_energy(
     :param reference: A reference value to subtract (could be the Gaussian optimized minimum).
         This value has to be in kJ mol-1. If a list is passed in as data, then this reference must also be a
         list of the same length as data.
+    :param FIGURE_LABEL_SIZE: The size of the figure labels (A, B, C, etc.), defaults to 30
+    :param X_Y_LABELS_FONTSIZE: The size of the x and y axis labels, defaults to 30
+    :param TICKLABELS_FONTSIZE: The size of the tick labels on the axes, defaults to 22
+    :param LABELPAD: The padding of the x and y labels from the plot, defaults to 10
+    :param AXES_PADDING: The padding of the number on the axes from the plots, defaults to 10.0
+    :param LINEWIDTH: The width of the lines, defaults to 2.0
+    :param MAJOR_TICK_LENGTH: The length of the major ticks, defaults to 6.0
+    :param MINOR_TICK_LENGTH: The length of the minor ticks, defaults to 3.0
+    :param PAD_INCHES: Padding on the sides of the plot (as tight layout is used), defaults to 0.05
+    :param filename: The filename to save as. Note that the extension determines how the fine is saved (png, svg),
+         defaults to "total_energy.svg"
     """
 
     # get data from somewhere
     if not isinstance(data, list):
         fflux_files = [data]
-
     if isinstance(data[0], DlPolyFFLUX):
         fflux_files = data
     elif isinstance(data[0], FFLUXDirectory):
         fflux_files = [d.fflux_file for d in data]
+
+    nplots = len(fflux_files)
+    WIDTH = 12 * nplots
+    HEIGHT = WIDTH / 4
+
+    fig, axes = plt.subplots(1, nplots, figsize=(WIDTH, HEIGHT), sharey=True)
 
     idx_where_energy_diff_less_than = [
         f.first_index_where_delta_less_than() for f in fflux_files
@@ -75,9 +161,6 @@ def plot_total_energy(
                     f"Difference kJ mol-1 for fflux file {fflux_files[i]}: {diff_ref_and_fflux}"
                 )
 
-    nplots = len(fflux_files)
-    fig, axes = plt.subplots(1, nplots, figsize=(15 * nplots, 10), sharey=True)
-
     if not isinstance(axes, np.ndarray):
         axes = [axes]
 
@@ -91,7 +174,19 @@ def plot_total_energy(
             current_idx = idx_where_energy_diff_less_than[i]
             current_total_eng = total_eng_kj_mol[i]
 
-            ax.plot(range(current_idx), current_total_eng, linewidth=2)
+            ax.text(
+                0.9,
+                0.88,
+                f"{ascii_uppercase[i]}",
+                fontsize=FIGURE_LABEL_SIZE,
+                transform=ax.transAxes,
+                fontweight="bold",
+            )
+
+            ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
+            ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
+
+            ax.plot(range(current_idx), current_total_eng, linewidth=LINEWIDTH)
 
     else:
 
@@ -99,16 +194,49 @@ def plot_total_energy(
             current_total_eng = total_eng_kj_mol[i]
             current_fflux_file = fflux_files[i]
 
+            ax.text(
+                0.1,
+                0.85,
+                rf"$\bf{{{ascii_uppercase[i]}}}$",
+                fontsize=FIGURE_LABEL_SIZE,
+                transform=ax.transAxes,
+            )
+
+            ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
+            ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
+
             ax.plot(
-                range(current_fflux_file.ntimesteps), current_total_eng, linewidth=2
+                range(current_fflux_file.ntimesteps),
+                current_total_eng,
+                linewidth=LINEWIDTH,
             )
 
     for ax in axes:
-        format_energy_plots(ax, xlabel="Timestep", fontsize=54, labelpad=20)
-    # only set the y label for first plot
-    axes[0].set_ylabel(ylabel="Energy / kJ mol$^{-1}$", fontsize=54, labelpad=20)
 
-    plt.savefig(filename, pad_inches=0.2)
+        format_energy_plots(
+            ax,
+            xlabel="Timestep",
+            major_grid_linewidth=LINEWIDTH,
+            minor_grid_linewidth=LINEWIDTH,
+            xlabel_fontsize=X_Y_LABELS_FONTSIZE,
+            label_pad=LABELPAD,
+            tick_params_labelsize=TICKLABELS_FONTSIZE,
+            tick_params_pad=AXES_PADDING,
+            major_tick_params_length=MAJOR_TICK_LENGTH,
+            major_tick_params_width=LINEWIDTH,
+            minor_tick_params_length=MINOR_TICK_LENGTH,
+            minor_tick_params_width=LINEWIDTH,
+        )
+
+    # only set the y label for first plot
+    axes[0].set_ylabel(
+        ylabel="Energy / kJ mol$^{-1}$",
+        fontsize=X_Y_LABELS_FONTSIZE,
+        labelpad=LABELPAD,
+        fontweight="bold",
+    )
+
+    fig.savefig(filename, pad_inches=PAD_INCHES, dpi=300)
 
 
 def plot_total_energy_from_array(
