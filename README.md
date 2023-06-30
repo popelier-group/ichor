@@ -44,7 +44,7 @@ If using conda, create a new environment. Please make sure that you are using th
 Using an older conda version will make it a bit harder to install ichor as the python/setuptools/pip version supplied are older.
 Make sure that you have at least python 3.7 in the current environment and that setuptools and pip are all up to date.
 
-Make sure you are connected to a proxy, on csf3 do `module load tools/env/proxy2`. Otherwise you will not be able to access github or install the required packages for ichor.
+On CSF3, you now need to do `qrsh -l short` as the proxy is no longer available. Then, from the submit node, you can access the internet and install packages as needed.
 
 First, download the ICHOR source code. It is recommended to download the code as a git repository, so that you can pull changes from the github code when changes are made. If you download the code as a zip, you will not be able to pull from github and will have to download the code every time a change is made!
 
@@ -71,13 +71,17 @@ To install each of the sub-packages, do `python3 -m pip install -e ichor_core_su
 
 The `-e` flag installs the package in `editable` mode, meaning that changes in the ichor source code will be directly made in the installed package. As ichor is still work in progress, it makes it easier to make changes and then test the changes.
 
+```
+Note it is usually better to use venv. ON CSF3, activate anaconda first. After that use the python from the anaconda environment to make a venv. After this step is done, you can activate the venv and you no longer need to activate or use conda.
+```
+
 ## Usage
 When you have installed portions of the `ichor` namespace packeg, you can import from the sub-packages like so:
 
 ```
 from ichor.core import ...
 ```
-or 
+or
 ```
 from ichor.hpc import
 ```
