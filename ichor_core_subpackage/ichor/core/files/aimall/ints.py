@@ -19,9 +19,15 @@ class INTs(HasProperties, dict, Directory):
     """
 
     def __init__(self, path: Union[Path, str]):
+
+        # need to have this initialized before reading Directory
+        # otherwise self._parse will be called first
+        # which will error out because it will try to access
+        # self.interaction_ints which does not exist already
+        self.interaction_ints = {}
+
         Directory.__init__(self, path)
         dict.__init__(self)
-        self.interaction_ints = {}
 
     def _parse(self) -> None:
         """Parse an *_atomicfiles directory and look for .int files. This method is
