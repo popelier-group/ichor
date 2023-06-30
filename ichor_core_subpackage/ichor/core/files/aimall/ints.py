@@ -39,7 +39,7 @@ class INTs(HasProperties, dict, Directory):
                 self[f.stem.capitalize()] = INT(f)
 
             elif ABINT.check_path(f):
-                a_atom, b_atom = f.stem.split()
+                a_atom, b_atom = f.stem.split("_")
                 a = a_atom.capitalize()
                 b = b_atom.capitalize()
                 self.interaction_ints[(a, b)] = ABINT(f)
