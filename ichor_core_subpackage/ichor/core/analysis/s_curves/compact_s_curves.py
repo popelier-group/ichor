@@ -613,6 +613,88 @@ def plot_with_matplotlib(
         fig.savefig(saved_name, pad_inches=PAD_INCHES, dpi=300)
 
 
+def plot_with_matplotlib_simple(
+    total_dict: dict,
+    x_axis_name: str = "Prediction Error / kJ mol$^-1$",
+    y_axis_name: str = "\%",
+    title: str = None,
+):
+
+    try:
+        import matplotlib.pyplot as plt
+        import scienceplots  # noqa
+    except ImportError:
+        print("Could not import relevant packages.")
+
+        return
+
+    plt.style.use("science")
+
+    fig, ax = plt.subplots(figsize=(9, 9))
+
+    ax.set_prop_cycle(
+        color=[
+            "0C5DA5",
+            "00B945",
+            "FF9500",
+            "FF2C00",
+            "845B97",
+            "474747",
+            "9e9e9e",
+            "30D5C8",
+            "FA8072",
+        ]
+    )
+
+    # property name, inner dict
+    for key, inner_dict in total_dict.items():
+
+        # sort atom names so they appear correctly in label
+        atom_names = natsorted(inner_dict.keys(), key=ignore_alpha)
+
+        for an in atom_names:
+
+            # true pred err keys , arrays values
+            for true_pred_err, array in inner_dict[an].items():
+
+                # true,pred,err keys , array of values
+                # should only plot errors for s-curves
+
+                array_sorted = np.sort(np.absolute(array))
+                perc = percentile(array_sorted.shape[0])
+
+                ax.plot(array_sorted, perc, label=an, linewidth=2)
+                ax.set_xscale("log")
+
+    plt.legend(facecolor="white", framealpha=1, frameon=True, fontsize=24)
+
+    # Show the major grid and style it slightly.
+    ax.grid(which="major", color="#DDDDDD", linewidth=1.2)
+    # Show the minor grid as well. Style it in very light gray as a thin,
+    # dotted line.
+    ax.grid(which="minor", color="#EEEEEE", linestyle=":", linewidth=1.0)
+    # Make the minor ticks and gridlines show.
+    ax.minorticks_on()
+    ax.grid(True)
+
+    if x_axis_name:
+        ax.set_xlabel(x_axis_name, fontsize=24)
+    if y_axis_name:
+        ax.set_ylabel(y_axis_name, fontsize=24)
+    if title:
+        ax.set_title(title, fontsize=28)
+
+    ax.tick_params(axis="both", which="major", labelsize=18)
+    ax.tick_params(axis="both", which="minor", labelsize=18)
+
+    fig.savefig("s_curves.png", dpi=300)
+    print("plotting")
+    try:
+        plt.show()
+    except:  # noqa
+        pass  # noqa
+
+
 ######################
 # LEGACY FUNCTIONS, SHOULD NOT REALLY BE USED, MIGHT DELETE IN FUTURE
 ##########################
