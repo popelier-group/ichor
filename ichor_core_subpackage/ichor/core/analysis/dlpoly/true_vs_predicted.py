@@ -303,3 +303,143 @@ def plot_true_vs_predicted_from_arrays(
         )
 
     fig.savefig(filename, pad_inches=PAD_INCHES, dpi=300)
+
+
+def plot_true_vs_predicted_from_arrays_one_system(
+    predicted_energies_array_hartree: np.ndarray,
+    true_energies_array_hartree: Union[np.ndarray, List[PointsDirectory]],
+    absolute_diff: bool = True,
+    filename="output.svg",
+):
+    """Plots true vs predicted energies, as well as calculates R^2 value
+
+    :param predicted_energies_array_hartree: np array containing FFLUX predicted energies
+        In hartrees
+    :param true_energies_array_hartree: a np.array cotaning true energies (in hartrees)
+        or a PointsDirectory (containing ordered wfns from which to get the array) again
+        in Hartrees
+    :param absolute_diff: Whether to use the absolute of the differences
+    """
+
+    if isinstance(true_energies_array_hartree, PointsDirectory):
+        all_true_energies = []
+        for p in true_energies_array_hartree:
+            all_true_energies.append(p.wfn.total_energy)
+        true_energies_array_hartree = np.array(all_true_energies)
+
+    diff = (predicted_energies_array_hartree - true_energies_array_hartree) * 2625.5
+
+    r2_scores = r2_score(true_energies_array_hartree, predicted_energies_array_hartree)
+
+    with open("min_max_r2.txt", "w") as writef:
+
+        writef.write(f"Maximum absolute difference: {np.max(np.abs(diff))}\n")
+        writef.write(f"Minimum absolute difference: {np.min(np.abs(diff))}\n")
+        writef.write(f"R^2 score: {r2_scores}\n")
+
+    if absolute_diff:
+        diff = np.abs(diff)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # only set y label on first axes
+    ax.set_ylabel(
+        "Predicted Energy / Ha",
+        fontweight="bold",
+    )
+
+    scatter_object = ax.scatter(
+        true_energies_array_hartree,
+        predicted_energies_array_hartree,
+        c=diff,
+        cmap="viridis",
+    )
+
+    p1 = max(
+        max(predicted_energies_array_hartree),
+        max(true_energies_array_hartree),
+    )
+    p2 = min(
+        min(predicted_energies_array_hartree),
+        min(true_energies_array_hartree),
+    )
+
+    # plot the diagonal line
+    ax.plot(
+        [0, 1],
+        [0, 1],
+        "k--",
+        alpha=0.5,
+        transform=ax.transAxes,
+    )
+
+    steps = np.linspace(p2, p1, 5)
+
+    ax.set_xticks(steps)
+    ax.set_yticks(steps)
+    # convert into str and bold
+    steps_str = [rf"$\bf{{{s:.3f}}}$" for s in steps]
+    ax.set_xticklabels(steps_str)
+    ax.set_yticklabels(steps_str)
+
+    ax.tick_params(
+        axis="both",
+        which="major",
+        top=False,
+        right=False,
+    )
+    ax.tick_params(
+        axis="both",
+        which="minor",
+        top=False,
+        right=False,
+    )
+
+    # Show the major grid and style it slightly.
+    ax.grid(which="major", color="#DDDDDD")
+    ax.grid(True)
+
+    ax.set_xlabel(
+        "True Energy / Ha",
+        fontweight="bold",
+    )
+
+    # note that there will be a warning that no axes need legends, that is fine
+    # make legend have a frame
+    # the fonsize in the legend is for text apart from the title
+    # set it to some reasonable value so that the frame is large enough to fit title
+    leg = ax.legend(
+        facecolor="white",
+        framealpha=1,
+        frameon=True,
+        fontsize=0.01,
+        edgecolor="black",
+        loc="lower right",
+        bbox_to_anchor=(0.85, 0.23),
+    )
+    # set title as the R^2 value
+    leg.set_title(rf"$\bf{{R^{2} = {r2_scores:.3f}}}$")
+    leg.get_frame().set_linewidth(1.0)
+
+    # max_diff = max(diff)
+
+    # diff_linspace = np.linspace(0.0, max_diff, 5)
+
+    # colorbar for difference in energies
+    cbar = fig.colorbar(scatter_object)
+    # if absolute_diff:
+    #     cbar.set_label(
+    #         "Absolute Difference / kJ mol$^{-1}$", fontsize=54, labelpad=20
+    #     )
+    # else:
+    #     cbar.set_label("Difference / kJ mol$^{-1}$", fontsize=54, labelpad=20)
+
+    # cbar.ax.set_yticks(diff_linspace)
+    # diff_linspace_str = [rf"$\bf{{{s:.2f}}}$" for s in diff_linspace]
+    # cbar.ax.set_yticklabels(diff_linspace_str)
+
+    cbar.ax.tick_params(
+        axis="both",
+    )
+
+    fig.savefig(filename, pad_inches=0.2, dpi=300)
