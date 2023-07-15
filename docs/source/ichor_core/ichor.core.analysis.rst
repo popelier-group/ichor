@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    ichor.core.analysis.dlpoly
-   ichor.core.analysis.rmse
    ichor.core.analysis.s_curves
 
 Submodules
