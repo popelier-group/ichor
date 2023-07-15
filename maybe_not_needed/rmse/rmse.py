@@ -9,7 +9,9 @@ from ichor.core.models import Models
 from ichor.core.useful_functions import number_of_models_in_dir
 
 
-def calculate_rmse(models_location: Path, validation_set_location: Path, **kwargs):
+def calculate_rmse(
+    models_location: Path, validation_set_location: Path, **kwargs
+):
     """
     Calculates rmse errors for a given directory containing model
     files and a given validation set directory. Also, writes the data to
@@ -215,17 +217,23 @@ def write_to_excel(
 
                     # make true and predicted columns
                     rmse_data[f"{atom}_{type_} True (Ha)"] = true[type_][atom]
-                    rmse_data[f"{atom}_{type_} Predicted (Ha)"] = predicted[type_][atom]
+                    rmse_data[f"{atom}_{type_} Predicted (Ha)"] = predicted[
+                        type_
+                    ][atom]
 
                     # calculate absolute error column, make into kJ mol-1 if working with iqa energies
-                    abs_error = np.abs(true[type_][atom] - predicted[type_][atom])
+                    abs_error = np.abs(
+                        true[type_][atom] - predicted[type_][atom]
+                    )
                     if type_ == "iqa":
                         abs_error = ha_to_kj_mol * np.abs(
                             true[type_][atom] - predicted[type_][atom]
                         )
 
                     # add Absolute Error Column to df
-                    rmse_data[f"{atom}_{type_} absError (kJ mol-1)"] = abs_error
+                    rmse_data[
+                        f"{atom}_{type_} absError (kJ mol-1)"
+                    ] = abs_error
                     type_errors += [abs_error]
 
                     # calculate MAE/RMSE and append to errors row to be written below the last row of the df
@@ -241,11 +249,15 @@ def write_to_excel(
                 # make the list into a 2D numpy array and sum over the rows,
                 # which are the errors for each atom (for one property)
                 total_abs_error = np.sum(np.array(type_errors), axis=0)
-                rmse_data[f"{type_} Total absError (kJ mol-1)"] = total_abs_error
+                rmse_data[
+                    f"{type_} Total absError (kJ mol-1)"
+                ] = total_abs_error
 
                 # calculate total MAE/RMSE and append to errors list that
                 # is written on the row below the written dataframe
-                total_mean_absolute_error = calculate_error(total_abs_error, error_type)
+                total_mean_absolute_error = calculate_error(
+                    total_abs_error, error_type
+                )
                 errors_to_write.append(total_mean_absolute_error)
                 # also write this error to the dictionary which is used to make the final sheet containing mae/rmse
                 all_errors_dict[f"total_{type_} (kJ mol-1)"][
@@ -268,7 +280,9 @@ def write_to_excel(
             # subtract two columns as we need to write out the Total absError MAE,
             # but that should be written right next to the previous RMSE
             col_idx -= 2
-            writer.sheets[sheet_name].write(n_rows + 1, col_idx, errors_to_write[-1])
+            writer.sheets[sheet_name].write(
+                n_rows + 1, col_idx, errors_to_write[-1]
+            )
 
         # make the sheet that only contains RMSE information, pandas df can accept a dictionary of dictionaries
         df = pd.DataFrame(all_errors_dict)
@@ -276,7 +290,9 @@ def write_to_excel(
         writer.sheets[error_type].write(0, 0, "n_train")
 
         # RMSE plot for IQA energies
-        rmse_plot1 = workbook.add_chart({"type": "scatter", "subtype": "straight"})
+        rmse_plot1 = workbook.add_chart(
+            {"type": "scatter", "subtype": "straight"}
+        )
         # add data to plot
         for col in df.columns:
             if "iqa" in col.lower():
@@ -301,10 +317,14 @@ def write_to_excel(
             rmse_plot1.set_legend({"position": "none"})
         rmse_plot1.set_style(excel_style)  # default style of excel plots
 
-        writer.sheets[error_type].insert_chart(f"{num2col(df.shape[1]+3)}2", rmse_plot1)
+        writer.sheets[error_type].insert_chart(
+            f"{num2col(df.shape[1]+3)}2", rmse_plot1
+        )
 
         # RMSE plot for multipoles
-        rmse_plot2 = workbook.add_chart({"type": "scatter", "subtype": "straight"})
+        rmse_plot2 = workbook.add_chart(
+            {"type": "scatter", "subtype": "straight"}
+        )
         # add data to plot
         for col in df.columns:
             if not ("iqa" in col.lower()):
