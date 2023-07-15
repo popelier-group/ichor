@@ -11,7 +11,6 @@ Welcome to ichor's documentation!
    :caption: Contents:
 
 
-
 Indices and tables
 ==================
 
