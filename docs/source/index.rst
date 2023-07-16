@@ -10,6 +10,10 @@ Welcome to ichor's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   ichor_core/ichor.core
+   ichor_hpc/ichor.hpc
+   ichor_cli/ichor.cli
+
 
 Indices and tables
 ==================

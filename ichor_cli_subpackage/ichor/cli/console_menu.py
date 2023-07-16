@@ -19,7 +19,7 @@ class Screen(OriginalScreen):
         self.__height = 100
         self.__width = 100
 
-    def input(self, prompt=""):
+    def input(self, prompt: str = ""):
         """
         Prompt the end user for input.
         Without overwriting this, pressing Tab makes a tab.
@@ -28,11 +28,8 @@ class Screen(OriginalScreen):
         in any selection menu does not do anything (i.e. does not insert a tab like it did before).
         Menus requiring PathCompleter still work as intended and paths are auto-completed.
 
-        Args:
-            prompt (:obj:`str`, optional): The message to display as the prompt.
-
-        Returns:
-            The input provided by the user.
+        :param prompt: The message to display as the prompt.
+        :returns: The input provided by the user.
         """
         with DoNothingCompleter():
             return input(prompt)
@@ -40,7 +37,7 @@ class Screen(OriginalScreen):
 
 class ConsoleMenu(OriginalConsoleMenu):
     """Subclasses from `consolemenu.ConsoleMenu`, which is the base menu class. This subclass
-    adds the `this_menu_options` addribute, which contains options for the menus,
+    adds the `this_menu_options` attribute, which contains options for the menus,
     see the `MenuOptions` class. These options can be changed.
 
     Also, the `get_prologue_text` method is overwritten here to be able print out extra info
@@ -55,7 +52,7 @@ class ConsoleMenu(OriginalConsoleMenu):
 
     :param this_menu_options: A `MenuOptions` instance (a dataclass) containing options which can be
         changed by the user.
-    :param **kwargs: Key word arguments to be passed to the original `ConsoleMenu` class.
+    :param kwargs: Key word arguments to be passed to the original `ConsoleMenu` class.
     """
 
     def __init__(

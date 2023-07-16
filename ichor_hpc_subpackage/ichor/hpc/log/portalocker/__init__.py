@@ -10,10 +10,10 @@ from ichor.hpc.log.portalocker import (
     utils,
 )
 
-try:  # pragma: no cover
-    from .redis import RedisLock
-except ImportError:  # pragma: no cover
-    RedisLock = None  # type: ignore
+# try:  # pragma: no cover
+#     from .redis import RedisLock
+# except ImportError:  # pragma: no cover
+#     RedisLock = None  # type: ignore
 
 
 #: The package name on Pypi

@@ -57,8 +57,8 @@ def get_random_geometries_from_fflux_simulation(
     1. New trajectory containing random geometries to be submitted to Gaussian.
     2. A txt file containing the indices of the random geometries taken from the HISTORY
     3. If a FFLUX file is given, it writes out a .npy file containing the predicted
-        total energy associated with the random geometries. If not give, the user can use
-        the .txt file and obtain the energies from the FFLUX file themselves.
+    total energy associated with the random geometries. If not give, the user can use
+    the .txt file and obtain the energies from the FFLUX file themselves.
 
     :param history: A HISTORY file or path to HISTORY file containing FFLUX geometries
     :param k: How many geometries to get from the HISTORY, defaults to 1000

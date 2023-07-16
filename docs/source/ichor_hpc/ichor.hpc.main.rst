@@ -20,14 +20,6 @@ ichor.hpc.main.gaussian module
    :undoc-members:
    :show-inheritance:
 
-ichor.hpc.main.pandora module
------------------------------
-
-.. automodule:: ichor.hpc.main.pandora
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

@@ -1,7 +1,7 @@
-ichor
-=====
+ichor.hpc
+=========
 
 .. toctree::
    :maxdepth: 4
 
-   ichor
+   ichor.hpc

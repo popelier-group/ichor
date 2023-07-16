@@ -31,7 +31,9 @@ def submit_points_directory_to_pyscf(
     )  # a directory which contains points (a bunch of molecular geometries)
     pandora_inputs = write_pandora_input(points)
     point_directories = [point.path for point in points]
-    return submit_pandora_input_to_pyscf(pandora_inputs, point_directories, force=force)
+    return submit_pandora_input_to_pyscf(
+        pandora_inputs, point_directories, force=force
+    )
 
 
 def submit_pandora_input_to_pyscf(
@@ -46,7 +48,9 @@ def submit_pandora_input_to_pyscf(
     with SubmissionScript(
         ichor.hpc.global_variables.SCRIPT_NAMES["pandora"]["pyscf"]
     ) as submission_script:
-        for pandora_input, point_directory in zip(pandora_inputs, point_directories):
+        for pandora_input, point_directory in zip(
+            pandora_inputs, point_directories
+        ):
             if (
                 force
                 or not (
@@ -95,7 +99,8 @@ def copy_aimall_wfn_to_point_directory(
             if not point_directory.exists():
                 point_directory.mkdir()
             aimall_wfn = (
-                point_directory.path / f"{point_directory.path.name}{WFN.filetype}"
+                point_directory.path
+                / f"{point_directory.path.name}{WFN.filetype}"
             )
             cp(pandora_directory.pyscf.aimall_wfn.path, aimall_wfn)
             return aimall_wfn
@@ -154,7 +159,9 @@ def submit_morfi(
                 ).exists()
             ):
                 submission_script.add_command(
-                    MorfiCommand(morfi_input, aimall_wfn, point_directory, atoms=atoms)
+                    MorfiCommand(
+                        morfi_input, aimall_wfn, point_directory, atoms=atoms
+                    )
                 )
 
     if len(submission_script.commands) > 0:
@@ -176,7 +183,9 @@ def check_pyscf_wfns(
                 and point.pandora.pyscf.aimall_wfn.exists()
             ):
                 point.wfn = WFN(
-                    copy_aimall_wfn_to_point_directory(point.pandora.path, point.path)
+                    copy_aimall_wfn_to_point_directory(
+                        point.pandora.path, point.path
+                    )
                 )
             aimall_wfns.append(point.wfn.path)
             point_directories.append(point.path)

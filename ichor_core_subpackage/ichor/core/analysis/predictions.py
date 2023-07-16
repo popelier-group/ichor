@@ -15,6 +15,7 @@ def get_predicted(
 ) -> pd.DataFrame:
     """
     Returns the predicted values for a given ListOfAtoms given Models
+
     :param models: the models to use for predicting the values of points
     :param points: a ListOfAtoms containing geometries to predict
     :param atoms: optional list of atoms to predict the values of points for, defaults to all atoms in models
@@ -41,6 +42,7 @@ def get_true(
 ) -> pd.DataFrame:
     """
     Returns the true values for a given PointsDirectory as a ModelsResult
+
     :param validation_set: the PointsDirectory containing the true values
     :param atoms: List of atoms to get the true values for
     :param types: List of property types, such as iqa, q00, etc. to get the true values for
@@ -64,6 +66,7 @@ def get_true_predicted(
     """
     Returns the true and predicted values of the given model and
         validation set for each of the specified atoms and types
+
     :param models: models to use for the predictions
     :param validation_set: validation set containing geometry data and true values
     :param atoms: optional list of atoms to predict, defaults to all atoms found in model_location

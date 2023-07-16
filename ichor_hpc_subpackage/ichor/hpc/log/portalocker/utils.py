@@ -162,23 +162,23 @@ class LockBase(abc.ABC):  # pragma: no cover
 class Lock(LockBase):
     """Lock manager with build-in timeout
 
-    Args:
-        filename: filename
-        mode: the open mode, 'a' or 'ab' should be used for writing
+    :param filename: filename
+    :param mode: the open mode, 'a' or 'ab' should be used for writing
         truncate: use truncate to emulate 'w' mode, None is disabled, 0 is
-            truncate to 0 bytes
-        timeout: timeout when trying to acquire a lock
-        check_interval: check interval while waiting
-        fail_when_locked: after the initial lock failed, return an error
+        truncate to 0 bytes
+    :param timeout: timeout when trying to acquire a lock
+    :param check_interval: check interval while waiting
+    :param fail_when_locked: after the initial lock failed, return an error
             or lock the file. This does not wait for the timeout.
-        **file_open_kwargs: The kwargs for the `open(...)` call
+    :param file_open_kwargs: The kwargs for the `open(...)` call
 
-    fail_when_locked is useful when multiple threads/processes can race
-    when creating a file. If set to true than the system will wait till
-    the lock was acquired and then return an AlreadyLocked exception.
+    .. note::
+        fail_when_locked is useful when multiple threads/processes can race
+        when creating a file. If set to true than the system will wait till
+        the lock was acquired and then return an AlreadyLocked exception.
 
-    Note that the file is opened first and locked later. So using 'w' as
-    mode will result in truncate _BEFORE_ the lock is checked.
+        Note that the file is opened first and locked later. So using 'w' as
+        mode will result in truncate _BEFORE_ the lock is checked.
     """
 
     def __init__(
