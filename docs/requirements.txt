@@ -20,9 +20,9 @@ docutils==0.18.1
 executing==1.2.0
 fastjsonschema==2.17.1
 fonttools==4.41.1
--e git+https://github.com/popelier-group/ICHOR.git@39bff4e50ac0f9fa5d08bbd19259d739164c8137#egg=ichor_cli&subdirectory=ichor_cli_subpackage
--e git+https://github.com/popelier-group/ICHOR.git@39bff4e50ac0f9fa5d08bbd19259d739164c8137#egg=ichor_core&subdirectory=ichor_core_subpackage
--e git+https://github.com/popelier-group/ICHOR.git@39bff4e50ac0f9fa5d08bbd19259d739164c8137#egg=ichor_hpc&subdirectory=ichor_hpc_subpackage
+-e git+https://github.com/popelier-group/ICHOR.git@9cf4f1fe6cfae9458df27763a2fe25d0b3877aa9#egg=ichor_cli&subdirectory=ichor_cli_subpackage
+-e git+https://github.com/popelier-group/ICHOR.git@9cf4f1fe6cfae9458df27763a2fe25d0b3877aa9#egg=ichor_core&subdirectory=ichor_core_subpackage
+-e git+https://github.com/popelier-group/ICHOR.git@9cf4f1fe6cfae9458df27763a2fe25d0b3877aa9#egg=ichor_hpc&subdirectory=ichor_hpc_subpackage
 idna==3.4
 imagesize==1.4.1
 ipykernel==6.24.0
