@@ -32,7 +32,7 @@ There are multiple formats for trajectory files, the ones we use are either `.xy
 ## The `Trajectory` class
 The trajectory class allows us to work with `.xyz` files containing timesteps with different molecular geometries. Each atom in a molecular geometry has its own set of features (there are 3N-6 features, where N is the number of atoms in the system.)
 
-To read in a trajectory file, do 
+To read in a trajectory file, do
 ```python
 from ichor.ichor_lib.files.trajectory import Trajectory
 
@@ -264,6 +264,3 @@ from ichor.ichor_lib.files.dlpoly_history import DlpolyHistory
 
 traj = DlpolyHistory("DLPOLY_history_file_location")
 ```
-
-
-

@@ -20,9 +20,9 @@ docutils==0.18.1
 executing==1.2.0
 fastjsonschema==2.17.1
 fonttools==4.41.1
--e git+https://github.com/popelier-group/ICHOR.git@9cf4f1fe6cfae9458df27763a2fe25d0b3877aa9#egg=ichor_cli&subdirectory=ichor_cli_subpackage
--e git+https://github.com/popelier-group/ICHOR.git@9cf4f1fe6cfae9458df27763a2fe25d0b3877aa9#egg=ichor_core&subdirectory=ichor_core_subpackage
--e git+https://github.com/popelier-group/ICHOR.git@9cf4f1fe6cfae9458df27763a2fe25d0b3877aa9#egg=ichor_hpc&subdirectory=ichor_hpc_subpackage
+-e git+https://github.com/popelier-group/ICHOR.git@0270b59faff550405467e4771162ab0a9b0430e2#egg=ichor_cli&subdirectory=ichor_cli_subpackage
+-e git+https://github.com/popelier-group/ICHOR.git@0270b59faff550405467e4771162ab0a9b0430e2#egg=ichor_core&subdirectory=ichor_core_subpackage
+-e git+https://github.com/popelier-group/ICHOR.git@0270b59faff550405467e4771162ab0a9b0430e2#egg=ichor_hpc&subdirectory=ichor_hpc_subpackage
 idna==3.4
 imagesize==1.4.1
 ipykernel==6.24.0
@@ -35,10 +35,14 @@ jupyter_client==8.3.0
 jupyter_core==5.3.1
 jupyterlab-pygments==0.2.2
 kiwisolver==1.4.4
+markdown-it-py==3.0.0
 MarkupSafe==2.1.3
 matplotlib==3.7.2
 matplotlib-inline==0.1.6
+mdit-py-plugins==0.4.0
+mdurl==0.1.2
 mistune==3.0.1
+myst-parser==2.0.0
 nbclient==0.8.0
 nbconvert==7.7.2
 nbformat==5.9.1
@@ -61,6 +65,7 @@ Pygments==2.15.1
 pyparsing==3.0.9
 python-dateutil==2.8.2
 pytz==2023.3
+PyYAML==6.0.1
 pyzmq==25.1.0
 referencing==0.30.0
 requests==2.31.0

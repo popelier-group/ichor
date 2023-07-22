@@ -66,10 +66,6 @@ new_df.to_csv("water_dimer_phi_change_only.csv")
 
 What we have done is taken a features file that contained a lot of water dimer geometries. We have taken the first geometry only and added an array which only modifies the phi features (which are the 5,8,11th columns as indeces start at 0). We have written this to a new features file that contains the modified features. The result is shown below. As you can see, one of the water molecules is stationary and the other is only rotating in the phi dimension.
 
-This is an image of what the custom trajectory looks like (only a subset of the geometries is shown.)
-
-![Water Dimer Custom Trajectory](images/vmd_phi_only.bmp)
-
 Now we have a custom trajectory and we can run it through gaussian and Aimall like so
 
 ```python
