@@ -26,11 +26,13 @@ class RouteCard(NamedTuple):
 
 class GJF(ReadFile, WriteFile, File, HasAtoms):
     """
-    https://gaussian.com/input/
 
-    Wraps around a .gjf file that is used as input to Gaussian. Below is the usual gjf file structure:
+    Wraps around a .gjf file that is used as input to Gaussian.
+    See https://gaussian.com/input/ for details.
+    Below is the usual gjf file structure:
 
-        ----------------------------------------------------------
+    .. code-block:: text
+
         %nproc
         %mem
         # <job_type> <method>/<basis-set> <keywords>
@@ -44,12 +46,15 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         extra_details_str (containing basis sets for individual atoms, what to freeze, etc.)
 
         <wfn-name>
-        -----------------------------------------------------------
+        blank line
+        blank line
+        blank line
+        ...
 
     :param path: A string or Path to the .gjf file. If a path is not give,
         then there is no file to be read, so the user has to write the file contents. If
         no contents/options are written by user, they are written as the default values in the
-        `write` method.
+        ``write`` method.
     :param title: A string to be written between the link0 options and the keywords.
         It can contain any information.
     :param job_type: The job type, an energy, optimization, or frequency
@@ -68,9 +73,11 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         for individual atoms, modredundant settings, and other settings that Gaussian handles.
 
     .. note::
+
         It is up to the user to handle write the `extra_calculation_details` settings. ICHOR
         does NOT do checks to see if these additional settings are going to be read in correctly
         in Gaussian.
+
     """
 
     def __init__(
@@ -114,6 +121,16 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         )
 
     def set_nproc(self, nproc: int):
+        """
+        Sets the number of processor cores for Gaussian
+
+        :param nproc: An integer which is the number of cores.
+
+        .. note::
+
+            No checks are done for CPU core count.
+
+        """
         nproc = f"nproc={nproc}"
         n = self._find_in_link("nproc")
         if n is None:
@@ -122,6 +139,16 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
             self.link0[n] = nproc
 
     def set_mem(self, mem: str):
+        """
+        Sets memory for Gaussian job
+
+        :param mem: string to set as memory
+
+        .. note::
+
+            This is not checked internally.
+
+        """
         mem = f"mem={mem}"
         n = self._find_in_link("mem")
         if n is None:
@@ -130,10 +157,29 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
             self.link0[n] = mem
 
     def add_keyword(self, keyword: str):
+        """Add a keyword to the Gaussian input keywords
+
+        :param keywords: A string to add as a keyword
+
+        .. note::
+
+            The keyword is not checked internally.
+
+        """
+
         if keyword not in self.keywords:
             self.keywords.append(keyword)
 
     def add_keywords(self, keywords: List[str]):
+        """Add a list of keywords to the Gaussian input keywords
+
+        :param keywords: A list of keywords
+
+        .. note::
+
+            The keywords are not checked internally.
+
+        """
         for keyword in keywords:
             self.add_keyword(keyword)
 

@@ -72,9 +72,10 @@ class GaussianOut(HasAtoms, HasProperties, ReadFile):
     def local_forces(
         self, C_matrix_dict: Dict[str, np.ndarray]
     ) -> Dict[str, AtomForce]:
-        """Rotates the force vector by the C matrix (which defines a new coordinate frame).
-         The C matrix is dependent on the atomic local frame calculated for each atom.
-         Each atom has its own C rotation matrix, so each atomic force is
+        """
+        Rotates the force vector by the C matrix (which defines a new coordinate frame).
+        The C matrix is dependent on the atomic local frame calculated for each atom.
+        Each atom has its own C rotation matrix, so each atomic force is
         rotated by the atom's specific C matrix.
 
         :param C_matrix_dict: A dictionary of C matrices for each atom in the system.

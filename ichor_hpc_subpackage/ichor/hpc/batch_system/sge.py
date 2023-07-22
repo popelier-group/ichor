@@ -67,10 +67,14 @@ class SunGridEngine(BatchSystem):
     def parse_job_id(cls, stdout) -> str:
         """
         Example script submission using SGE:
+
+        .. code-block:: text
+
             $ qsub test.sh
             > Your job 518753 ("test.sh") has been submitted
                        ^^^^^^
-        Our job id is given by the number, this is parsed by finding the number in the return string
+
+        The job id is given by the number, this is parsed by finding the number in the return string
         """
         try:
             return re.findall(r"\d+", stdout)[0]

@@ -18,8 +18,8 @@ class JobID:
     :param script: A path to a script file such as GAUSSIAN.sh
         that will be submitted to compute node.
     :param id: The job id given to the job when the job was submitted to a compute node.
-    :instance: the unique identified (UUID) that is used for the job's
-    datafile (containing the names of all the files needed for the job).
+    :param instance: the unique identified (UUID) that is used for the job's
+        datafile (containing the names of all the files needed for the job).
     """
 
     def __init__(self, script: Union[str, Path], id: str):

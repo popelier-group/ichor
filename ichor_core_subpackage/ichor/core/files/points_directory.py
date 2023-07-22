@@ -24,15 +24,20 @@ from ichor.core.sql import (
 
 
 class PointsDirectory(ListOfAtoms, Directory):
-    """A helper class that wraps around a directory which contains points (molecules with various geometries).
+    """
+    A helper class that wraps around a directory which contains points (molecules with various geometries).
     Calling Directory.__init__(self, path) will call the `parse` method of PointsDirectory instead of Directory
     (because Python looks for the method in this class first before looking at parent class methods.) A typical ICHOR
     directory that contains points will points will have a structure like this:
-    -TRAINING_SET
-        -- SYSTEM_NAME001
-        -- SYSTEM_NAME002
-        -- SYSTEM_NAME003
-        ........
+
+    .. code-block:: text
+
+        -TRAINING_SET
+            -- SYSTEM_NAME000
+            -- SYSTEM_NAME001
+            -- SYSTEM_NAME002
+            ........
+
     Each of the subdirectories contains Gaussian files (such as .gjf),
     as well as an `atomic_files` directory, which then contains the AIMALL files.
     A `PointsDirectory` will wrap around the whole TRAINING_SET directory
@@ -100,10 +105,12 @@ class PointsDirectory(ListOfAtoms, Directory):
         return connectivity_calculator(self[0].atoms)
 
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
-        """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
-        e.g. [[0,1,2],[1,0,2], [2,0,1]]
-        :param *args: positional arguments to pass to alf calculator
-        :param **kwargs: key word arguments to pass to alf calculator
+        """
+        Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
+        e.g. ``[[0,1,2],[1,0,2], [2,0,1]]``.
+
+        :param \*args: positional arguments to pass to alf calculator
+        :param \**kwargs: key word arguments to pass to alf calculator
         """
         return [
             alf_calculator(atom_instance, *args, **kwargs)
@@ -113,11 +120,14 @@ class PointsDirectory(ListOfAtoms, Directory):
     def alf_dict(
         self, alf_calculator: Callable[..., ALF], *args, **kwargs
     ) -> Dict[str, ALF]:
-        """Returns a dictionary of key: atom_name, value: ALF instance
+        """
+        Returns a dictionary of key: atom_name, value: ALF instance
             (containing central atom index, x-axis idx, xy-plane idx)
-        e.g. {"O1":ALF(0,1,2),"H2":ALF(1,0,2), "H3":ALF(2,0,1)]
-        :param *args: positional arguments to pass to alf calculator
-        :param **kwargs: key word arguments to pass to alf calculator
+
+        e.g. ``{"O1":ALF(0,1,2),"H2":ALF(1,0,2), "H3":ALF(2,0,1)]``.
+
+        :param \*args: positional arguments to pass to alf calculator
+        :param \**kwargs: key word arguments to pass to alf calculator
         """
         return self[0].alf_dict(alf_calculator, *args)
 
@@ -370,13 +380,13 @@ class PointsDirectory(ListOfAtoms, Directory):
         Calculates ALF features and properties (with multipole moments rotated).
 
         :param str_to_append_to_fname: a string that is appended to the default file name
-            (which is `name_of_atom.csv`), defaults to None
+            (which is ``name_of_atom.csv``), defaults to None
         :param atom_names: A list of atom names for which to write out csv files with properties.
             If None, then writes out files for all atoms in the system, defaults to None
         :param property_types: A list of property names (iqa, multipole names) for which to write columns.
             If None, then writes out columns for all properties, defaults to None
-        :param *args: positional arguments to pass to calculator function
-        :param **kwargs: key word arguments to be passed to the feature calculator function
+        :param \*args: positional arguments to pass to calculator function
+        :param \**kwargs: key word arguments to be passed to the feature calculator function
         :raises TypeError: This method only works for PointsDirectory instances because it
             needs access to AIMALL information. Does not work for Trajectory instances.
         """

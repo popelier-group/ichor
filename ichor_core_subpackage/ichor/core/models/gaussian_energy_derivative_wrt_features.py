@@ -12,20 +12,31 @@ from ichor.core.models.calculate_fflux_derivatives import fflux_derivs_da_df_mat
 def form_b_matrix(
     atoms: "Atoms", system_alf: List["ALF"], central_atom_idx  # noqa F821
 ) -> np.ndarray:
-    """Returns a np array of shape n_features x (n_atomsx3), containing the derivative of
-    features with respect to x,y,z coordiantes. B_{ij} = df_i / dx_j (the partial derivative of
-    feature i wrt partial derivative of global Cartesian x_j).
+    r"""
+    Returns a np array of shape ``n_features`` x ``n_atomsx3``, containing the derivative of
+    features with respect to x,y,z coordiantes.
+
+    .. math::
+
+        B_{ij} = \frac{df_i}{dx_j}
+
+    where the partial derivative of feature i :math:`f_i` wrt.
+    partial derivative of global Cartesian :math:`x_j`.
 
     See Using Redundant Internal Coordinates to Optimize Equilibrium Geometries and Transition States
-    https://doi.org/10.1002/(SICI)1096-987X(19960115)17:1<49::AID-JCC5>3.0.CO;2-0
-    https://doi.org/10.1063/1.462844
+    and  Geometry optimization in redundant internal coordinates
 
-    .. note::
-        The first three columns of the B-matrix are for atom A_0 (df_i / dA0_x, df_i / dA0_y, df_i / dA0_z)
-        The next three columns of the B-matrix are for atom A_x (df_i / dAx_x, df_i / dAx_y, df_i / dx_z)
-        The next three columns of the B-matrix are for atom Axy (df_i / dAxy_x, df_i / dAxy_y, df_i / dAxy_z)
-        The subsequents sets of three columns of the B-matrix are for atom An, atoms described
-            by r, theta, phi (df_i / dAn_x, df_i / dAn_y, df_i / dAn_z)
+    Link 1: _link1
+    Link 2: _link2
+
+    .. _link1: https://doi.org/10.1002/(SICI)1096-987X(19960115)17:1<49::AID-JCC5>3.0.CO;2-0
+    .. _link2: https://doi.org/10.1063/1.462844
+
+    The first three columns of the B-matrix are for atom A_0 (df_i / dA0_x, df_i / dA0_y, df_i / dA0_z)
+    The next three columns of the B-matrix are for atom A_x (df_i / dAx_x, df_i / dAx_y, df_i / dx_z)
+    The next three columns of the B-matrix are for atom Axy (df_i / dAxy_x, df_i / dAxy_y, df_i / dAxy_z)
+    The subsequents sets of three columns of the B-matrix are for atom An, atoms described
+    by r, theta, phi (df_i / dAn_x, df_i / dAn_y, df_i / dAn_z)
 
     .. note::
         The atoms instance is converted to Bohr internally because the forces are per Bohr in FFLUX.

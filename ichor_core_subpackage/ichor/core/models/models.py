@@ -127,10 +127,11 @@ class Models(Directory, list):
     def get_features_dict(
         self, test_x: Union[Atoms, ListOfAtoms, np.ndarray, HasAtoms, dict]
     ) -> Dict[str, np.ndarray]:
-        """Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
+        """
+        Returns a dictionary containing the atom names as keys and an np.ndarray of features as values.
 
         :param test_x: An object that contains features (or coordinates that can be converted into features),
-        such as `Atoms`, `ListOfAtoms`, `np.ndarray`, `dict`
+            such as ``Atoms``, ``ListOfAtoms``, ``np.ndarray``, ``dict``
         :return: A dictionary containing the atom names as keys and an np.ndarray of features as values
         """
 

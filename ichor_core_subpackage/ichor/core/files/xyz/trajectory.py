@@ -17,13 +17,14 @@ from ichor.core.files.file import FileState, ReadFile, WriteFile
 
 
 class Trajectory(ReadFile, WriteFile, ListOfAtoms):
-    """Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
-    atoms. A user can also initialize an empty trajectory and append `Atoms`
+    """
+    Handles .xyz files that have multiple timesteps, with each timestep giving the x y z coordinates of the
+    atoms. A user can also initialize an empty trajectory and append ``Atoms``
     instances to it without reading in a .xyz file. This allows
     the user to build custom trajectories containing any sort of geometries.
 
     :param path: The path to a .xyz file that contains timesteps.
-    Set to None by default as the user can initialize an empty trajectory and built it up
+        Set to None by default as the user can initialize an empty trajectory and built it up
         themselves
     """
 
@@ -99,18 +100,20 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     def connectivity(
         self, connectivity_calculator: Callable[..., np.ndarray]
     ) -> np.ndarray:
-        """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
+        """
+        Return the connectivity matrix ``n_atoms x n_atoms`` for the given Atoms instance.
 
-        Returns:
-            :type: `np.ndarray` of shape n_atoms x n_atoms
+        :rtype: `np.ndarray` of shape n_atoms x n_atoms
         """
         return connectivity_calculator(self[0])
 
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
-        """Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
-        e.g. [[0,1,2],[1,0,2], [2,0,1]]
-        :param *args: positional arguments to pass to alf calculator
-        :param **kwargs: key word arguments to pass to alf calculator
+        """
+        Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms.
+        e.g. ``[[0,1,2],[1,0,2], [2,0,1]]``
+
+        :param \*args: positional arguments to pass to alf calculator
+        :param \**kwargs: key word arguments to pass to alf calculator
         """
         return [
             alf_calculator(atom_instance, *args, **kwargs) for atom_instance in self[0]

@@ -10,7 +10,8 @@ class RBFCyclic(Kernel):
     # TODO: figure out a good way to say if training data is standardized,
     # normalized, etc. because this kernel is affected by data preprocessing
 
-    """Implemtation of Radial Basis Function (RBF) kernel with cyclic feature correction for phi angle feature
+    r"""
+    Implemtation of Radial Basis Function (RBF) kernel with cyclic feature correction for phi angle feature
 
     .. note::
         Cyclic correction is applied only for our phi angles (phi is the azimuthal angle measured in the xy plane).
@@ -18,27 +19,28 @@ class RBFCyclic(Kernel):
         If we have unstandardized(original) features, we have to apply this correction only
         when the distance between two phi angles is greater than pi
 
-        .. math::
+    .. math::
 
-            \phi_1 - \phi_2 = \left \{
-            \begin{aligned}
-            &\phi_1 - \phi_2, && \text{if}\ \phi_1 - \phi_2 \leq \pi \\
-            & 2\pi - (\phi_1 - \phi_2), && \text{if}\ (\phi_1 - \phi_2) \geq \pi
-            \end{aligned} \right.
+        \phi_1 - \phi_2 = \left \{
+        \begin{aligned}
+        &\phi_1 - \phi_2, && \text{if}\ \phi_1 - \phi_2 \leq \pi \\
+        & 2\pi - (\phi_1 - \phi_2), && \text{if}\ (\phi_1 - \phi_2) \geq \pi
+        \end{aligned} \right \}
 
-        If we have standardized features (where we have subtracted the
-        feature mean and divided by the feature standard deviation), we have to apply a correction
-        only when the distance is greater than pi/sigma where sigma is the standard deviation of
-        the particular feature in the training data.
+    If we have standardized features (where we have subtracted the
+    feature mean and divided by the feature standard deviation), we have to apply a correction
+    only when the distance is greater than pi/sigma where sigma is the standard deviation of
+    the particular feature in the training data.
 
-        .. math::
+    .. math::
 
         \hat \phi_1 - \hat \phi_2 = \left \{
         \begin{aligned}
         &\hat \phi_1 - \hat \phi_2, && \text{if}\ \hat \phi_1 - \hat \phi_2 \leq \frac{\pi}{\sigma} \\
         & \frac{2\pi}{\sigma} - (\hat \phi_1 - \hat \phi_2),
         && \text{if}\ (\hat \phi_1 - \hat \phi_2) \geq \frac{\pi}{\sigma}
-        \end{aligned} \right.
+        \end{aligned} \right \}
+
     """
 
     def __init__(

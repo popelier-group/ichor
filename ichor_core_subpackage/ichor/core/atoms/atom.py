@@ -592,15 +592,16 @@ class AtomWithProperties(Atom):
     def local_forces(
         self, C_matrix_dict: Dict[str, np.ndarray]
     ) -> Dict[str, AtomForce]:
-        """Rotates the force vector by the C matrix (which defines a new coordinate frame).
+        """
+        Rotates the force vector by the C matrix (which defines a new coordinate frame).
         The C matrix is dependent on the atomic local frame calculated for each atom.
         Each atom has its own C rotation matrix, so each atomic force is
         rotated by the atom's specific C matrix.
 
         :param C_matrix_dict: A dictionary of C matrices for each atom in the system.
-        :type C_matrix_dict: Dict[str, np.ndarray]
         :return: A dictionary of dictionaries. The inner dictionary
-            has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).
+            has ``key: atom_name and value: AtomForce``
+            where ``AtomForce`` is a namedtuple with rotated forces for that atom.
         :rtype: Dict[str, float]
         """
 

@@ -302,7 +302,7 @@ def humansorted(seq, key=None, reverse=False, alg=ns.DEFAULT):
 
     Notes
     -----
-    Please read :ref:`locale_issues` before using `humansorted`.
+    Please read ``locale_issues`` before using `humansorted`.
 
     Examples
     --------
@@ -475,7 +475,7 @@ def index_humansorted(seq, key=None, reverse=False, alg=ns.DEFAULT):
 
     Notes
     -----
-    Please read :ref:`locale_issues` before using `humansorted`.
+    Please read ``locale_issues`` before using `humansorted`.
 
     Examples
     --------

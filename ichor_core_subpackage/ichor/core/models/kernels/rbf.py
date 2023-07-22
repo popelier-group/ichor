@@ -6,14 +6,16 @@ from ichor.core.models.kernels.kernel import Kernel
 
 
 class RBF(Kernel):
-    """Implementation of Radial Basis Function (RBF) kernel
+    r"""
+    Implementation of Radial Basis Function (RBF) kernel
     When each dimension has a separate lengthscale, this is also called the RBF-ARD kernel. Note that
     we use thetas instead of true lengthscales.
 
     .. math::
+
         \theta = \frac{1}{2l^2}
 
-    where `l` is the lengthscale value.
+    where ``l`` is the lengthscale value.
     """
 
     def __init__(

@@ -25,11 +25,25 @@ help:
 	@$(SPHINXAPIDOC) --implicit-namespaces --force -o source/ichor_cli/ ../ichor_cli_subpackage/ichor/
 	@$(SPHINXAPIDOC) --implicit-namespaces --force -o source/ichor_hpc/ ../ichor_hpc_subpackage/ichor/
 
-	rm source/ichor_core/ichor.rst
-	rm source/ichor_core/modules.rst
-	rm source/ichor_hpc/ichor.rst
-	rm source/ichor_hpc/modules.rst
-	rm source/ichor_cli/ichor.rst
-	rm source/ichor_cli/modules.rst
+	rm -f source/ichor_core/ichor.rst
+	rm -f source/ichor_core/modules.rst
+	rm -f source/ichor_hpc/ichor.rst
+	rm -f source/ichor_hpc/modules.rst
+	rm -f source/ichor_cli/ichor.rst
+	rm -f source/ichor_cli/modules.rst
 
 	@$(SPHINXBUILD) -a -E "$(SOURCEDIR)" "$(BUILDDIR)"
+
+%: quick
+	@$(SPHINXAPIDOC) --implicit-namespaces -o source/ichor_core/ ../ichor_core_subpackage/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -o source/ichor_cli/ ../ichor_cli_subpackage/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces -o source/ichor_hpc/ ../ichor_hpc_subpackage/ichor/
+
+	rm -f source/ichor_core/ichor.rst
+	rm -f source/ichor_core/modules.rst
+	rm -f source/ichor_hpc/ichor.rst
+	rm -f source/ichor_hpc/modules.rst
+	rm -f source/ichor_cli/ichor.rst
+	rm -f source/ichor_cli/modules.rst
+
+	@$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)"

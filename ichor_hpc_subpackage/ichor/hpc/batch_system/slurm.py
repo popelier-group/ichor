@@ -54,9 +54,13 @@ class SLURM(BatchSystem):
     def parse_job_id(cls, stdout) -> str:
         """
         Example script submission using SLURM:
+
+        .. code-block:: text
+
             $ sbatch test.sh
             > Submitted batch job 345234
                                   ^^^^^^
+
         Our job id is the final number in the stdout
         """
         try:

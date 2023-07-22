@@ -117,8 +117,8 @@ class HasAtoms(ABC):
         :param feature_calculator: Function which calculates features
         :param central_atom_name: the name of the central atom to center all geometries on. Eg. `O1`
         :param fname: Optional file name in which to save the rotated geometries.
-        :param *args: Positional arguments to pass to calculator function
-        :param **kwargs: Key word arguments to pass to calculator function
+        :param \*args: Positional arguments to pass to calculator function
+        :param \**kwargs: Key word arguments to pass to calculator function
         """
 
         from ichor.core.atoms import Atoms

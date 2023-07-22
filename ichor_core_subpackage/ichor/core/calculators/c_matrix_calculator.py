@@ -11,14 +11,11 @@ def calculate_c_matrix(
     See https://pubs.acs.org/doi/pdf/10.1021/ct500565g , Section 3.3 for the derivations. This matrix has 3 unit
     vectors.
 
-    Args:
-        :param: `atom` an instance of the `Atom` class:
-            This atom is the central atom for which we want to calculate the C rotation matrix.
-        :param alf: An Atomic Local Frame instance for the particular atom.
+    :param: ``atom`` an instance of the ``Atom`` class:
+        This atom is the central atom for which we want to calculate the C rotation matrix.
+    :param alf: An Atomic Local Frame instance for the particular atom.
 
-    Returns:
-        :type: `np.ndarray`
-            A 3x3 numpy array which is the C rotation matrix.
+    :return: A 3x3 numpy array which is the C rotation matrix.
     """
 
     alf = get_atom_alf(atom, alf)

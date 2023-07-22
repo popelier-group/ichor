@@ -47,11 +47,13 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
     :ivar nuclei: The number of nuclei in the system to be read in from the .wfn file.
     :ivar energy: The molecular energy read in from the bottom of the .wfn file
     :ivar virial: The virial read in from the bottom of the .wfn file
+
     .. note::
         Since the wfn file is written out by Gaussian, we do not really
         have to modify it when writing out except we need to add the method used,
-        so that AIMALL can use the correct method. Otherwise AIMALL assumes Hartree-Fock
+        so that AIMALL can use the correct method. Otherwise AIMAll assumes Hartree-Fock
         was used, which might be wrong.
+
     """
 
     def __init__(
