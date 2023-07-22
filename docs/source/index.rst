@@ -17,17 +17,18 @@ contains code allows a user to submit jobs on compute clusters (SGE and SLURM).
 The :code:`ichor.cli` packages is a menu system that allows a user to do the most
 common tasks without having to write individual scripts.
 
+Below are examples of how to use ``ichor``.
+
 .. toctree::
    :maxdepth: 1
-   :caption: ichor.core
 
    ichor_core_examples_toc
-   ichor_core/ichor.core
 
 .. toctree::
    :maxdepth: 1
-   :caption: Subpackages:
+   :caption: full documentation of source code
 
+   ichor_core/ichor.core
    ichor_hpc/ichor.hpc
    ichor_cli/ichor.cli
 

@@ -1,5 +1,5 @@
-ichor.core examples
-===================
+Examples for ichor.core
+=======================
 
 .. toctree::
    :maxdepth: 1
