@@ -13,7 +13,10 @@ class DictionaryMergeConflict(Exception):
 
 
 def merge_mutable(a, b, path=None):
-    """merges b into a, modifies a"""
+    """
+    merges b into a, modifies a
+
+    """
     if path is None:
         path = []
     for key in b:
@@ -32,17 +35,28 @@ def merge_mutable(a, b, path=None):
 def merge(*dicts):
     """Merges dictionaries (dicts) immutably
     e.g.
+
+    .. code-block:: text
+
         >>> {"total_energy": -76.4}, {"O1": {"iqa": -75.2}}, {"O1": {"dispersion": -1.0}}
         {"total_energy": -76.4, "O1": {"iqa": -75.2, "dispersion": -1.0}}
+
+    :param \*dicts: Dictionaries to merge
     """
     return reduce(merge_mutable, map(dict, dicts), {})
 
 
 def find(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
-    """Recursively searches dictionary 'd' for the given 'key'
+    """
+    Recursively searches dictionary ``d`` for the given ``key``
     e.g.
+    .. code-block:: text
+
         >>> find("iqa", {"energy": -76.54, "O1": {"iqa": -75.40, "q00": -0.22}, "H2": {"iqa": -0.52, "q00": 0.15}})
         {"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}
+
+    :param key: The key to search for
+    :param d: The dictionary to search in
     """
     result = {}
     if key in d.keys():
@@ -58,10 +72,16 @@ def find(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
 
 
 def find_in_inner_dicts(key: KT, d: MutableMapping[KT, VT]) -> MutableMapping[KT, VT]:
-    """Recursively searches dictionary 'd' for the given 'key'
+    """Recursively searches dictionary ``d`` for the given ``key``
     e.g.
+
+    .. code-block:: text
+
         >>> find("iqa", {"energy": -76.54, "O1": {"iqa": -75.40, "q00": -0.22}, "H2": {"iqa": -0.52, "q00": 0.15}})
         {"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}
+
+    :param key: The key to search for
+    :param d: The dictionary to search in
     """
     result = {}
     for k, v in d.items():
@@ -88,14 +108,19 @@ def _unwrap(
 
 
 def unwrap_single_entry(d: MutableMapping[KT, VT]) -> Union[MutableMapping[KT, VT], VT]:
-    """Unwraps the dictionary if there is only a single item in the dicitonary
-    e.g.
+    """
+    Unwraps the dictionary if there is only a single item in the dictionary.
+
+    .. code-block:: text
+
         >>> unwrap_single_entry({"energy": -76.54})
         -76.54
         >>> unwrap_single_entry({"O1": {"iqa": -75.40})
         75.40
         >>> unwrap_single_entry({"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}})
         {"O1": -75.40, "H2": -0.52}
+
+    :param d: dictionary to unwrap
     """
     return _unwrap(d, lambda x: len(x) > 1)
 
@@ -104,11 +129,15 @@ def unwrap_single_item(
     d: MutableMapping[KT, VT], item: KT
 ) -> Union[MutableMapping[KT, VT], VT]:
     """Unwraps the dictionary if the given 'item' is the only item in the dictionary
-    e.g.
+
+    .. code-block:: text
+
         >>> unwrap_single_item({"energy": -76.54}, "energy")
         -76.54
         >>> unwrap_single_item({"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}, "iqa")
         {"O1": -75.40, "H2": -0.52}
+
+    :param d: Dictionary to unwrap single item
     """
     return _unwrap(d, lambda x: len(x) > 1 or item not in x.keys())
 
@@ -116,12 +145,19 @@ def unwrap_single_item(
 def unwrap_item(
     d: MutableMapping[KT, VT], item: KT
 ) -> Union[MutableMapping[KT, VT], VT]:
-    """Unwraps the dictionary if the given 'item' is the only item in the dictionary
+    """
+    Unwraps the dictionary if the given 'item' is the only item in the dictionary
     e.g.
+
+    .. code-block:: text
+
         >>> unwrap_single_item({"energy": -76.54}, "energy")
         -76.54
         >>> unwrap_single_item({"O1": {"iqa": -75.40}, "H2": {"iqa": -0.52}}, "iqa")
         {"O1": -75.40, "H2": -0.52}
+
+    :param d: dictionary to unwrap
+    :param item: key to look for
     """
     result = {}
     for key, val in d.items():

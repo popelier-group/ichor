@@ -6,11 +6,12 @@ from ichor.core.atoms.alf import ALF
 
 
 class AtomView(ListOfAtoms):
-    """Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
+    """
+    Class used to index a ListOfAtoms instance by an atom name (eg. C1, H2, etc.). This allows
     a user to get information (such as coordinates or features) for one atom.
 
     :param parent: An instance of a class that subclasses from ListOfAtoms
-    :param atom: A string representing the name of an atom, e.g. 'C1', 'H2', etc.
+    :param atom: A string representing the name of an atom, e.g. C1, H2, etc.
     """
 
     def __init__(self, parent, atom):
@@ -67,14 +68,14 @@ class AtomView(ListOfAtoms):
         """
         return np.array([atm.C(alf) for atm in self])
 
-    def features(self, feature_calculator: Callable, *args, **kwargs):
-        """Return the ndarray of features for only one atom, given an alf for that atom.
+    def features(self, feature_calculator: Callable, *args, **kwargs) -> np.ndarray:
+        """
+        Return the ndarray of features for only one atom, given an alf for that atom.
         This is assumed to a 2D array of features for only one atom.
 
         :param alf: A list of integers or a numpy array corresponding to the alf of one atom
-        The atom which the atom view is for.
-        :rtype: `np.ndarray`
-        :return: The array has shape `n_timesteps` x `n_features`.
+            The atom which the atom view is for.
+        :return: The array has shape \`n_timesteps\` x \`n_features\`.
         """
 
         return np.array(

@@ -20,7 +20,7 @@ def percentile(n: int) -> np.ndarray:
 
 def make_chart_settings(local_kwargs: dict):
     """Takes in a dictionary of key word arguments that were
-    passed into the `write_to_excel` function. Then, this function
+    passed into the ``write_to_excel`` function. Then, this function
     constructs dictionaries with parameter values to be passed
     to xlsx writer to configure graph settings.
 
@@ -90,13 +90,13 @@ def simplified_write_to_excel(
     """
     Writes out relevant information which is used to make s-curves to an excel file.
     It will make a separate sheet for every atom (and property). It
-    also makes a `Total` sheet for every property,
+    also makes a ``Total`` sheet for every property,
     which gives an idea how the predictions do overall for the whole system.
 
     :param total_dict: a dictionary containing key: property, val: inner_dict.
         inner_dict contains key: atom_name, val: inner_inner_dict.
         inner_inner_dict contains key: (true, predicted or error),
-            val: a 1D numpy array containing the corresponding values
+        val: a 1D numpy array containing the corresponding values
     :param output_name: The name of the excel file to be written out.
     :param x_axis_name: The title to be used for x-axis in the S-curves plot.
     :param x_log_scale: Whether to make x dimension log scaled. Default True.
@@ -226,7 +226,7 @@ def calculate_compact_s_curves_from_files(
     """Calculates S-curves used to check model prediction performance.
 
     :param csv_files_list: A list of .csv files that contain features columns and property columns.
-    :param models: A `Models` instance which contains model files
+    :param models: A ``Models`` instance which contains model files
     :param output_location: The name of the .xlsx file where to save the s-curves.
     :param property_names: A list of strings to use for property column names. If left as None,
         a default set of property names is used
@@ -710,14 +710,14 @@ def calculate_compact_s_curves(
 ):
     """Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
 
-    :param model_location: A directory containing model files `.model`
+    :param model_location: A directory containing model files ``.model``
     :param validation_set_location: A directory containing validation or test set points.
         These points should NOT be in the training set.
     :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
         S-curves are made for all atoms in the system by default.
     :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves.
         S-curves are made for all properties in the model files.
-    :param **kwargs: Any key word arguments that can be passed into the write_to_excel
+    :param kwargs: Any key word arguments that can be passed into the write_to_excel
         function to change how the S-curves excel file looks. See write_to_excel() method
     """
 
@@ -754,7 +754,7 @@ def write_to_excel(
     """
     Writes out relevant information which is used to make s-curves to an excel file.
     It will make a separate sheet for every atom (and property). It
-    also makes a `Total` sheet for every property, which gives
+    also makes a ``Total`` sheet for every property, which gives
     an idea how the predictions do overall for the whole system.
 
     :param true: a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set

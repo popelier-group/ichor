@@ -71,16 +71,18 @@ def calculate_s_curves(
     types: Optional[List[str]] = None,
     **kwargs,
 ):
-    """Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.
+    """
+    Calculates S-curves used to check model prediction performance.
+    Writes the S-curves to an excel file.
 
-    :param model_location: A directory containing model files `.model`
+    :param model_location: A directory containing model files ``.model``
     :param validation_set_location: A directory containing validation or test set points.
         These points should NOT be in the training set.
     :param atoms: A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
         S-curves are made for all atoms in the system by default.
     :param types: A list of property types, such as iqa, q00, etc. for which to make S-curves.
         S-curves are made for all properties in the model files.
-    :param **kwargs: Any key word arguments that can be passed into the write_to_excel function
+    :param kwargs: Any key word arguments that can be passed into the write_to_excel function
         to change how the S-curves excel file looks. See write_to_excel() method
     """
 

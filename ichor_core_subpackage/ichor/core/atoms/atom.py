@@ -359,7 +359,7 @@ class Atom(VarReprMixin, Coordinates3D):
         :param feature_calculator: A function used to calculate features from the `Atom` instance
         :param args: positional arguments to pass to feature calculator function.
         :param kwargs: key word arguments to pass to the feature calculator function. Check the feature calculator
-        to see what required key word arguments the calculator needs to function.
+            to see what required key word arguments the calculator needs to function.
         :return: The features associated with self.
 
         .. note::

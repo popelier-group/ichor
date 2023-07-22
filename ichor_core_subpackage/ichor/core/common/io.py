@@ -159,20 +159,20 @@ def pushd(new_dir: Path):
     """
     Works like the UNIX `pushd` commmand whereby it changes the current directory
     and stores the previous directory on the stack
-    By exiting the context manager, the equivalent of `popd` is called
+    By exiting the context manager, the equivalent of ``popd`` is called
     and the location is reverted to the previous e.g.
 
-    ```python
-    # currently in /home
-    with pushd('usr/bin'):
-        # now in /home/usr/bin
-        ...
-        with pushd('/foo/bar'):
-            # now in /foo/bar
+    .. code-block:: python
+
+        # currently in /home
+        with pushd('usr/bin'):
+            # now in /home/usr/bin
             ...
-        # now in /home/usr/bin
-    # now back in /home
-    ```
+            with pushd('/foo/bar'):
+                # now in /foo/bar
+                ...
+            # now in /home/usr/bin
+        # now back in /home
 
     Is good to use to temporarily change the current working directory as it is easy to return to the original location
     """

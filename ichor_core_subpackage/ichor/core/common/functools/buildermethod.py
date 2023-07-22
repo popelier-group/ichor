@@ -4,7 +4,8 @@ from ichor.core.common.types.itypes import F, T
 
 
 def buildermethod(func: F) -> F:
-    """Executes a function on an instance of a class and returns the modified instance.
+    """
+    Executes a function on an instance of a class and returns the modified instance.
     This allows for scenarios where we can initialize a class and call a method
     (which does not return anything but it does modify the instance) in the same line.
 
