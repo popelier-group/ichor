@@ -38,3 +38,4 @@ dist
 *egg-info*
 test.*
 .pytest_cache
+output.txt

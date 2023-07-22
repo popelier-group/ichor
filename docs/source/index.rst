@@ -21,13 +21,13 @@ common tasks without having to write individual scripts.
    :maxdepth: 1
    :caption: ichor.core
 
-   Examples
+   ichor_core_examples_toc
+   ichor_core/ichor.core
 
 .. toctree::
    :maxdepth: 1
    :caption: Subpackages:
 
-   ichor_core/ichor.core
    ichor_hpc/ichor.hpc
    ichor_cli/ichor.cli
 
