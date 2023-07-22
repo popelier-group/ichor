@@ -11,5 +11,8 @@ sphinx-apidoc --implicit-namespaces --force -o source/ichor_cli/ ../ichor_cli_su
 
 sphinx-apidoc --implicit-namespaces --force -o source/ichor_hpc/ ../ichor_hpc_subpackage/ichor/
 
-sphinx-build -a - E source/ build/
+sphinx-build -a -E source/ build/
 ```
+
+If you have `make` installed, you can run `make docs` which will run the
+above commands automatically.

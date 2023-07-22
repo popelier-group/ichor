@@ -7,6 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+SPHINXAPIDOC  ?= sphinx-apidoc
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -16,5 +17,19 @@ help:
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+# %: Makefile
+# 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+%: docs
+	@$(SPHINXAPIDOC) --implicit-namespaces --force -o source/ichor_core/ ../ichor_core_subpackage/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces --force -o source/ichor_cli/ ../ichor_cli_subpackage/ichor/
+	@$(SPHINXAPIDOC) --implicit-namespaces --force -o source/ichor_hpc/ ../ichor_hpc_subpackage/ichor/
+
+	rm source/ichor_core/ichor.rst
+	rm source/ichor_core/modules.rst
+	rm source/ichor_hpc/ichor.rst
+	rm source/ichor_hpc/modules.rst
+	rm source/ichor_cli/ichor.rst
+	rm source/ichor_cli/modules.rst
+
+	@$(SPHINXBUILD) -a -E "$(SOURCEDIR)" "$(BUILDDIR)"
