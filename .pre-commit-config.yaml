@@ -28,7 +28,7 @@ repos:
     rev: 2.1.6
     hooks:
     -   id: require-ascii
-        exclude: ^(examples/.*\.ipynb)|(.github/ISSUE_TEMPLATE/*)
+        exclude: ^(examples/.*\.ipynb)|(.github/ISSUE_TEMPLATE/*)|(docs/source/_static/*)
     -   id: script-must-have-extension
     -   id: forbid-binary
         exclude: ^(examples/*)
@@ -37,3 +37,4 @@ repos:
     hooks:
     -   id: forbid-crlf
     -   id: forbid-tabs
+        exclude: ^(docs/source/_static/*)

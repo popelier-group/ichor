@@ -1,4 +1,4 @@
-## Converting to `Trajectory` from features
+# Converting to `Trajectory` from features
 
 ichor can convert from a features `.csv` or `.xlsx` files to a trajectory instance. This trajectory instance can then be used to access coordinates of atoms or white to a `.xyz file`. converting to/from features can be useful if the user wants to modify the features in some way and then make
 a `.xyz` file which can be used to submit `.gjf`/`.wfn` files to Gaussian or AIMALL.
