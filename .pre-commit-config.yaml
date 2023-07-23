@@ -37,4 +37,4 @@ repos:
     hooks:
     -   id: forbid-crlf
     -   id: forbid-tabs
-        exclude: ^(docs/source/_static/*)
+        exclude: ^(docs/source/_static/*)|(docs/Makefile)

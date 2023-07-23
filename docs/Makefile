@@ -1,5 +1,4 @@
 # Minimal makefile for Sphinx documentation
-#
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.
@@ -32,7 +31,7 @@ help:
 	rm -f source/ichor_cli/ichor.rst
 	rm -f source/ichor_cli/modules.rst
 
-	@$(SPHINXBUILD) -a -E "$(SOURCEDIR)" "$(BUILDDIR)"
+	@$(SPHINXBUILD) -a -E "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 %: quick
 	@$(SPHINXAPIDOC) --implicit-namespaces -d 1 -o source/ichor_core/ ../ichor_core_subpackage/ichor/
@@ -46,4 +45,4 @@ help:
 	rm -f source/ichor_cli/ichor.rst
 	rm -f source/ichor_cli/modules.rst
 
-	@$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)"
+	@$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

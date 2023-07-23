@@ -34,3 +34,6 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ['_static']
 
 add_module_names = False
+
+# executing notebooks takes a while
+nbsphinx_execute = 'always'
