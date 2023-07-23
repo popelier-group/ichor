@@ -31,18 +31,26 @@ def form_b_matrix(
     Using redundant internal coordinates to optimize equilibrium geometries and transition states:
 
     `link1`_
+
     Geometry optimization in redundant internal coordinates:
 
     `link2`_
 
     The first three columns of the B\-matrix are for atom :math:`A_0`.
+
     :math:`\frac{df_i}{dA^0_x}, \frac{df_i}{dA^0_y}, \frac{df_i}{dA^0_z}`
+
     The next three columns of the B\-matrix are for atom :math:`A_x`.
+
     :math:`\frac{df_i}{dA^x_x}, \frac{df_i}{dA^x_y}, \frac{df_i}{dA^x_z}`
+
     The next three columns of the B\-matrix are for atom :math:`A^{xy}`.
+
     :math:`\frac{df_i}{dA^{xy}_x}, \frac{df_i}{dA^{xy}_y}, \frac{df_i}{dA^{xy}_z}`
+
     The subsequent sets of three columns of the B\-matrix are for atom :math:`A^n`.
     which are atoms described by r, theta, phi.
+
     :math:`\frac{df_i}{dA^n_x}, \frac{df_i}{dA^n_y}, \frac{df_i}{dA^n_z}`
 
     .. note::
