@@ -23,6 +23,7 @@ Below are examples of how to use ``ichor``.
    :maxdepth: 1
 
    ichor_core_examples_toc
+   ichor_hpc_examples_toc
 
 .. toctree::
    :maxdepth: 1

@@ -1,0 +1,729 @@
+ AIMExt (Version 19.10.12, Professional)
+ Portions Copyright (c) 1997-2019 by Todd A. Keith
+ AIMExt is a component of the AIMAll package ( http://aim.tkgristmill.com )
+
+ TP:  64-bit Linux
+
+ Licensed To:  Paul Popelier at University of Manchester, UK
+
+ AIMExt is a heavily modified and extended version of the EXTREME program
+ developed by members of R.F.W. Bader's research group
+
+ Much of the Quantum Theory of Atoms in Molecules (QTAIM) is described in the book:
+   "Atoms in Molecules - A Quantum Theory"
+   R.F.W. Bader, Oxford University Press, Oxford, 1990
+
+ For additional references see:  http://aim.tkgristmill.com/references.html
+
+ Wfn File:  /net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.wfn
+ ExtOut File:  /net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.extout
+ Mgp File:  /net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.mgp
+
+ MgpViz File:  /net/scratch2/mbdxwym4/water_monomer_active_learning/ATOMS/O1/TRAINING_SET/WATER_MONOMER0001/WATER_MONOMER0001.mgpviz
+
+ Wfn Title:   WATER_MONOMER0001
+ Job Title:  Auto
+
+ The nuclear coordinates:
+      O1           -6.3281880000E-02 -8.8230871000E-01 -8.0295400000E-03
+      H2           -9.5295537000E-01  3.8291891000E-01  1.0713773800E+00
+      H3            1.0162372500E+00  4.9938980000E-01 -1.0633478400E+00
+
+ Number of primitives read from wavefunction =    126
+ Number of unique primitives to be used =    121
+
+ Using MO basis.
+
+ Number of processors used for this job =    2
+
+ Total memory allocated for AIMExt =       12.782 Megabytes
+
+Model:  Restricted B3LYP
+
+ Restricted, closed-shell, single-determinant wavefunction.
+   Number of electrons (from MO Occs)                   =          10.0000000000
+   Number of Alpha electrons (from MO Occs)             =           5.0000000000
+   Number of Beta electrons (from MO Occs)              =           5.0000000000
+   Number of electron pairs (N*(N-1)/2)                 =          45.0000000000
+   Number of electron pairs (from Muller 2EDM)          =          45.0000000000
+
+ Analyzing Rho, the electron density
+
+ New critical point found: CP# 1
+
+ Number of Newton-Raphson Iterations:     2
+
+ Coordinates of critical point and distance from molecular origin:
+          X =  -6.3281501859E-02
+          Y =  -8.8230116222E-01
+          Z =  -8.0292935659E-03
+          R =   8.8460406900E-01
+
+ Vectors and distances from nuclei to critical point:
+ Nucleus           X                 Y                 Z                Dist
+ O1         3.7814116094E-07  7.5477764863E-06  2.4643407714E-07  7.5612598407E-06
+ H2         8.8967386814E-01 -1.2652200722E+00 -1.0794066736E+00  1.8861124542E+00
+ H3        -1.0795187519E+00 -1.3816909622E+00  1.0553185464E+00  2.0464916040E+00
+
+ Angles of vectors with respect to YZ/XZ/XY planes:
+ Nucleus        YZ Angle          XZ Angle          XY Angle
+ O1         2.8665770529E+00  8.6577810282E+01  1.8676958241E+00
+ H2         2.8144518684E+01  4.2129487978E+01  3.4910194396E+01
+ H3         3.1836511470E+01  4.2465881467E+01  3.1042387169E+01
+
+ The Hessian:
+  -1.1112732533E+06 -2.2208377072E+00  1.7755917720E+01
+  -2.2208377072E+00 -1.1112815821E+06  2.5413227104E-01
+   1.7755917720E+01  2.5413227104E-01 -1.1112760918E+06
+
+ Eigenvalues of the Hessian:
+  -1.1112927433E+06 -1.1112814100E+06 -1.1112567739E+06
+
+ Eigenvectors of the Hessian:
+   6.7509053331E-01 -5.9244022481E-02  7.3535224052E-01
+   1.5077158268E-01  9.8681162989E-01 -5.8912960877E-02
+  -7.2216390223E-01  1.5064180331E-01  6.7511950454E-01
+
+ The stress tensor:
+  -2.7786416292E+05  6.0062531752E-01 -4.2462099657E+00
+   6.0062531752E-01 -2.7786136512E+05 -6.5710247956E-02
+  -4.2462099657E+00 -6.5710247956E-02 -2.7786349013E+05
+
+ Eigenvalues of the stress tensor:
+  -2.7786810944E+05 -2.7786145167E+05 -2.7785945705E+05
+
+ Eigenvectors of the stress tensor:
+   7.3535210204E-01 -1.1666848105E-01  6.6756703899E-01
+  -5.8910127212E-02  9.7033572679E-01  2.3447425065E-01
+   6.7511990263E-01  2.1174759228E-01 -7.0666546133E-01
+
+ Minus divergence of the stress tensor:
+  -1.1569455207E+04 -2.3037793662E+05 -7.4917291298E+03
+
+ Values:
+ Rho(r)                   2.9776203813E+02
+ |Grad(Rho(r))|           3.3663047337E-11
+ Grad(Rho(r))x           -5.9285909515E-13
+ Grad(Rho(r))y           -3.3656799570E-11
+ Grad(Rho(r))z           -2.6290081223E-13
+ DelSq(Rho(r))           -3.3338309272E+06
+ G(r)                     6.5643177421E+01
+ K(r)                     8.3352337499E+05
+ L(r)                     8.3345773181E+05
+ Vnuc(r)                  1.0580257619E+06
+ V(r)                    -8.3358901817E+05
+ Ven(r)                  -3.1503990725E+08
+ Vrep(r)                  3.1420631823E+08
+ DelSq(V(r))              9.3208462994E+10
+ DelSq(Ven(r))            3.5272790139E+12
+ DelSq(Vrep(r))          -3.4340705509E+12
+ DelSq(G(r))              3.1110640729E+09
+ DelSq(K(r))             -9.6319527067E+10
+
+ New critical point found: CP# 2
+
+ Number of Newton-Raphson Iterations:     5
+
+ Coordinates of critical point and distance from molecular origin:
+          X =  -9.3101007442E-01
+          Y =   3.5245527555E-01
+          Z =   1.0448171792E+00
+          R =   1.4431380453E+00
+
+ Vectors and distances from nuclei to critical point:
+ Nucleus           X                 Y                 Z                Dist
+ O1        -8.6772819442E-01  1.2347639856E+00  1.0528467192E+00  1.8401305751E+00
+ H2         2.1945295581E-02 -3.0463634450E-02 -2.6560200781E-02  4.5989925936E-02
+ H3        -1.9472473244E+00 -1.4693452445E-01  2.1081650192E+00  2.8736251748E+00
+
+ Angles of vectors with respect to YZ/XZ/XY planes:
+ Nucleus        YZ Angle          XZ Angle          XY Angle
+ O1         2.8135473789E+01  4.2145819597E+01  3.4900896125E+01
+ H2         2.8501133450E+01  4.1483014493E+01  3.5276451734E+01
+ H3         4.2658521337E+01  2.9309323161E+00  4.7191209102E+01
+
+ The Hessian:
+  -7.5000685532E+00 -4.4283653359E-01 -3.7566501670E-01
+  -4.4283653359E-01 -7.1952822214E+00  5.3592150412E-01
+  -3.7566501670E-01  5.3592150412E-01 -7.3535799966E+00
+
+ Eigenvalues of the Hessian:
+  -7.8190508076E+00 -7.8095033019E+00 -6.4203766617E+00
+
+ Eigenvectors of the Hessian:
+   4.8446330513E-01  7.3547759074E-01 -4.7367501464E-01
+   7.4202902349E-01 -5.8694997657E-02  6.6779325060E-01
+  -4.6334461720E-01  6.7500193390E-01  5.7418129102E-01
+
+ The stress tensor:
+  -1.8951282168E+00 -1.1243787688E-01 -1.0097899677E-01
+  -1.1243787688E-01 -1.8157635764E+00  1.3669281253E-01
+  -1.0097899677E-01  1.3669281253E-01 -1.8569226260E+00
+
+ Eigenvalues of the stress tensor:
+  -1.9788327798E+00 -1.9727379879E+00 -1.6162436515E+00
+
+ Eigenvectors of the stress tensor:
+   7.3531409979E-01  4.8204425794E-01 -4.7638903014E-01
+  -5.8945054779E-02  7.4574670856E-01  6.6361685270E-01
+   6.7515824454E-01 -4.5988605117E-01  5.7677219487E-01
+
+ Minus divergence of the stress tensor:
+  -1.0092468588E+01  1.4005125029E+01  1.2214400412E+01
+
+ Values:
+ Rho(r)                   3.9563351399E-01
+ |Grad(Rho(r))|           9.1201691284E-11
+ Grad(Rho(r))x            4.3401053584E-11
+ Grad(Rho(r))y           -6.0593974283E-11
+ Grad(Rho(r))z           -5.2559179231E-11
+ DelSq(Rho(r))           -2.2048930771E+01
+ G(r)                     2.7790863139E-02
+ K(r)                     5.5400235560E+00
+ L(r)                     5.5122326928E+00
+ Vnuc(r)                  2.6439402441E+01
+ V(r)                    -5.5678144191E+00
+ Ven(r)                  -1.0460313696E+01
+ Vrep(r)                  4.8924992766E+00
+ DelSq(V(r))              1.3664195651E+03
+ DelSq(Ven(r))            5.8296055414E+02
+ DelSq(Vrep(r))           7.8345901093E+02
+ DelSq(G(r))              1.0420584102E+02
+ DelSq(K(r))             -1.4706254061E+03
+
+ New critical point found: CP# 3
+
+ Number of Newton-Raphson Iterations:     5
+
+ Coordinates of critical point and distance from molecular origin:
+          X =   9.9560685258E-01
+          Y =   4.7385207332E-01
+          Z =  -1.0431038713E+00
+          R =   1.5178387525E+00
+
+ Vectors and distances from nuclei to critical point:
+ Nucleus           X                 Y                 Z                Dist
+ O1         1.0588887326E+00  1.3561607833E+00 -1.0350743313E+00  2.0079333379E+00
+ H2         1.9485622226E+00  9.0933163322E-02 -2.1144812513E+00  2.8768375932E+00
+ H3        -2.0630397420E-02 -2.5537726678E-02  2.0243968673E-02  3.8569509320E-02
+
+ Angles of vectors with respect to YZ/XZ/XY planes:
+ Nucleus        YZ Angle          XZ Angle          XY Angle
+ O1         3.1826750079E+01  4.2485321078E+01  3.1030371900E+01
+ H2         4.2635183082E+01  1.8113481466E+00  4.7307381186E+01
+ H3         3.2336368419E+01  4.1461922016E+01  3.1659475229E+01
+
+ The Hessian:
+  -6.6568054611E+00  3.3601119211E-01 -2.5859666594E-01
+   3.3601119211E-01 -6.5017908750E+00 -3.2941554063E-01
+  -2.5859666594E-01 -3.2941554063E-01 -6.6681808124E+00
+
+ Eigenvalues of the Hessian:
+  -6.9259351594E+00 -6.9211224606E+00 -5.9797195284E+00
+
+ Eigenvectors of the Hessian:
+   4.2186122424E-01  7.3508777669E-01  5.3073446095E-01
+  -7.4050805651E-01 -5.8411182661E-02  6.6950425837E-01
+  -5.2314522432E-01  6.7545103027E-01 -5.1969700786E-01
+
+ The stress tensor:
+  -1.6765607420E+00  8.5106019586E-02 -6.8909936523E-02
+   8.5106019586E-02 -1.6365017591E+00 -8.3093083075E-02
+  -6.8909936523E-02 -8.3093083075E-02 -1.6788282654E+00
+
+ Eigenvalues of the stress tensor:
+  -1.7466400961E+00 -1.7423601263E+00 -1.5028905440E+00
+
+ Eigenvectors of the stress tensor:
+   7.3541531720E-01  4.1800328558E-01  5.3332688333E-01
+  -5.8987251352E-02 -7.4458365230E-01  6.6491780613E-01
+   6.7504430626E-01 -5.2045022622E-01 -5.2292135796E-01
+
+ Minus divergence of the stress tensor:
+   8.5653816879E+00  1.0600831402E+01 -8.4051194470E+00
+
+ Values:
+ Rho(r)                   3.4252287892E-01
+ |Grad(Rho(r))|           2.2052181124E-13
+ Grad(Rho(r))x           -1.1775302955E-13
+ Grad(Rho(r))y           -1.4627188349E-13
+ Grad(Rho(r))z            1.1562278912E-13
+ DelSq(Rho(r))           -1.9826777148E+01
+ G(r)                     1.7598239689E-02
+ K(r)                     4.9742925268E+00
+ L(r)                     4.9566942871E+00
+ Vnuc(r)                  3.0259015946E+01
+ V(r)                    -4.9918907665E+00
+ Ven(r)                  -1.0364405255E+01
+ Vrep(r)                  5.3725144888E+00
+ DelSq(V(r))              1.2582342185E+03
+ DelSq(Ven(r))            5.9993876590E+02
+ DelSq(Vrep(r))           6.5829545257E+02
+ DelSq(G(r))              9.6727272316E+01
+ DelSq(K(r))             -1.3549614908E+03
+
+ New critical point found: CP# 4
+
+ Number of Newton-Raphson Iterations:    10
+
+ Coordinates of critical point and distance from molecular origin:
+          X =  -7.6381542088E-01
+          Y =   1.1484931659E-01
+          Z =   8.4198108911E-01
+          R =   1.1426007689E+00
+
+ Vectors and distances from nuclei to critical point:
+ Nucleus           X                 Y                 Z                Dist
+ O1        -7.0053354088E-01  9.9715802659E-01  8.5001062911E-01  1.4857958950E+00
+ H2         1.8913994912E-01 -2.6806959341E-01 -2.2939629089E-01  4.0032222714E-01
+ H3        -1.7800526709E+00 -3.8454048341E-01  1.9053289291E+00  2.6356663716E+00
+
+ Angles of vectors with respect to YZ/XZ/XY planes:
+ Nucleus        YZ Angle          XZ Angle          XY Angle
+ O1         2.8130868300E+01  4.2154121723E+01  3.4896174614E+01
+ H2         2.8194701732E+01  4.2038865266E+01  3.4961726317E+01
+ H3         4.2482968228E+01  8.3893284625E+00  4.6294611403E+01
+
+ The Hessian:
+  -1.0006135541E+00 -7.4479186212E-01 -6.1335038290E-01
+  -7.4479186212E-01 -4.6558326369E-01  9.0182587087E-01
+  -6.1335038290E-01  9.0182587087E-01 -7.5735045774E-01
+
+ Eigenvalues of the Hessian:
+  -1.5342326987E+00 -1.5040827349E+00  8.1476815812E-01
+
+ Ellipticity:  2.0045415794E-02
+
+ Eigenvectors of the Hessian:
+   4.8885227562E-01  7.3538842371E-01 -4.6928383617E-01
+   7.3596540046E-01 -5.8834456286E-02  6.7445788311E-01
+  -4.6837846017E-01  6.7508693738E-01  5.6998179359E-01
+
+ The stress tensor:
+  -3.0208134673E-01 -1.9052787242E-01 -1.6993359881E-01
+  -1.9052787242E-01 -1.5940713335E-01  2.3224878205E-01
+  -1.6993359881E-01  2.3224878205E-01 -2.3748658779E-01
+
+ Eigenvalues of the stress tensor:
+  -4.4283862456E-01 -4.3005353360E-01  1.7391709029E-01
+
+ Eigenvectors of the stress tensor:
+   7.3533750001E-01  4.8574455380E-01 -4.7257908284E-01
+  -5.8910767065E-02  7.4050266445E-01  6.6946644834E-01
+   6.7513575124E-01 -4.6444378819E-01  5.7313496229E-01
+
+ Minus divergence of the stress tensor:
+  -6.7881184558E-01  9.6724068110E-01  8.2374001869E-01
+
+ Values:
+ Rho(r)                   3.3725990940E-01
+ |Grad(Rho(r))|           7.1882683761E-13
+ Grad(Rho(r))x           -1.0465239786E-13
+ Grad(Rho(r))y           -7.0925210149E-13
+ Grad(Rho(r))z            5.2166604370E-14
+ DelSq(Rho(r))           -2.2235472755E+00
+ G(r)                     7.1544124494E-02
+ K(r)                     6.2743094337E-01
+ L(r)                     5.5588681888E-01
+ Vnuc(r)                  8.2617180204E+00
+ V(r)                    -6.9897506787E-01
+ Ven(r)                  -2.7863462710E+00
+ Vrep(r)                  2.0873712032E+00
+ DelSq(V(r))              1.3324031661E+01
+ DelSq(Ven(r))            1.8370320595E+01
+ DelSq(Vrep(r))          -5.0462889346E+00
+ DelSq(G(r))              4.4087793795E+00
+ DelSq(K(r))             -1.7732811040E+01
+
+ Point is a Bond Critical Point (BCP)
+ ------------------------------------
+   Bond path linked to nuclear attractor H2
+     Attractor coordinates =  -9.3101007442E-01  3.5245527555E-01  1.0448171792E+00
+     Euclidean distance from attractor to nucleus =   4.5989925938E-02
+     Number of steps from BCP to attractor =  354
+     Step size =   1.0000000000E-03
+     Path length from BCP to attractor =   3.5433620434E-01
+     Euclidean distance from BCP to attractor =   3.5433476171E-01
+     Euclidean distance from BCP to nucleus =   4.0032222714E-01
+     Unit vector from attractor in the bond path direction:
+       Cartesian Coords.    Spherical Coords.
+      4.7371508899E-01      1.0000000000E+00
+     -6.6773191505E-01      2.1824468911E+00
+     -5.7421956086E-01      5.3294218196E+00
+
+   Bond path linked to nuclear attractor O1
+     Attractor coordinates =  -6.3281501859E-02 -8.8230116222E-01 -8.0292935659E-03
+     Euclidean distance from attractor to nucleus =   7.5612598407E-06
+     Number of steps from BCP to attractor = 1485
+     Step size =   1.0000000000E-03
+     Path length from BCP to attractor =   1.4859939176E+00
+     Euclidean distance from BCP to attractor =   1.4857908668E+00
+     Euclidean distance from BCP to nucleus =   1.4857958950E+00
+     Unit vector from attractor in the bond path direction:
+       Cartesian Coords.    Spherical Coords.
+     -4.7739999442E-01      6.6205246978E-01
+      6.6205246978E-01      5.7773330577E-01
+      5.7773330577E-01      1.0000000000E+00
+
+   Total bond path length =   1.8403301219E+00
+   Distance between attractors =   1.8401255478E+00
+   Distance between nuclei =   1.8861174799E+00
+   Sum of distances between BCP and attractors =   1.8401256285E+00
+   Sum of distances between BCP and nuclei =   1.8861181221E+00
+   Total bond path length minus distance between attractors =   2.0457418330E-04
+   Total bond path length minus distance between nuclei =  -4.5787358008E-02
+   Total bond path length minus sum of distances between BCP and attractors =   2.0449347035E-04
+   Total bond path length minus sum of distances between BCP and nuclei =  -4.5788000158E-02
+
+ New critical point found: CP# 5
+
+ Number of Newton-Raphson Iterations:    10
+
+ Coordinates of critical point and distance from molecular origin:
+          X =   7.5472805821E-01
+          Y =   1.6630947183E-01
+          Z =  -8.0755694711E-01
+          R =   1.1177752480E+00
+
+ Vectors and distances from nuclei to critical point:
+ Nucleus           X                 Y                 Z                Dist
+ O1         8.1800993821E-01  1.0486181818E+00 -7.9952740711E-01  1.5517681608E+00
+ H2         1.7076834282E+00 -2.1660943817E-01 -1.8789343271E+00  2.5482340052E+00
+ H3        -2.6150919179E-01 -3.3308032817E-01  2.5579089289E-01  4.9473077860E-01
+
+ Angles of vectors with respect to YZ/XZ/XY planes:
+ Nucleus        YZ Angle          XZ Angle          XY Angle
+ O1         3.1812891337E+01  4.2512962460E+01  3.1013256147E+01
+ H2         4.2078170646E+01  4.8762403253E+00  4.7505962552E+01
+ H3         3.1910161123E+01  4.2318843148E+01  3.1133272054E+01
+
+ The Hessian:
+  -5.2898266618E-01  6.3152758951E-01 -4.6637631388E-01
+   6.3152758951E-01 -2.1100671712E-01 -6.1837844077E-01
+  -4.6637631388E-01 -6.1837844077E-01 -5.5367533804E-01
+
+ Eigenvalues of the Hessian:
+  -1.0295240055E+00 -1.0077271846E+00  7.4358646867E-01
+
+ Ellipticity:  2.1629684334E-02
+
+ Eigenvectors of the Hessian:
+   4.2856602997E-01  7.3531090351E-01  5.2502288820E-01
+  -7.3140672076E-01 -5.8811687726E-02  6.7940076112E-01
+  -5.3044826965E-01  6.7517335594E-01 -5.1260664515E-01
+
+ The stress tensor:
+  -1.7298650217E-01  1.6075765889E-01 -1.2779303314E-01
+   1.6075765889E-01 -8.8885716901E-02 -1.5640864792E-01
+  -1.2779303314E-01 -1.5640864792E-01 -1.7763154988E-01
+
+ Eigenvalues of the stress tensor:
+  -3.0318446868E-01 -2.9337195993E-01  1.5705265966E-01
+
+ Eigenvectors of the stress tensor:
+   7.3537179855E-01  4.2447208854E-01  5.2825350349E-01
+  -5.8915342866E-02 -7.3652418364E-01  6.7384056667E-01
+   6.7509799309E-01 -5.2664558572E-01 -5.1661119496E-01
+
+ Minus divergence of the stress tensor:
+   6.5348349647E-01  8.3813192534E-01 -6.3868618016E-01
+
+ Values:
+ Rho(r)                   2.7094028089E-01
+ |Grad(Rho(r))|           1.5281328665E-16
+ Grad(Rho(r))x           -6.9388939039E-18
+ Grad(Rho(r))y           -1.5265566589E-16
+ Grad(Rho(r))z            0.0000000000E+00
+ DelSq(Rho(r))           -1.2936647213E+00
+ G(r)                     5.8043794307E-02
+ K(r)                     3.8145997464E-01
+ L(r)                     3.2341618033E-01
+ Vnuc(r)                  7.5691393018E+00
+ V(r)                    -4.3950376895E-01
+ Ven(r)                  -2.0507847285E+00
+ Vrep(r)                  1.6112809596E+00
+ DelSq(V(r))             -4.7983453667E-02
+ DelSq(Ven(r))            9.7919284857E+00
+ DelSq(Vrep(r))          -9.8399119394E+00
+ DelSq(G(r))              2.6971221372E+00
+ DelSq(K(r))             -2.6491386836E+00
+
+ Point is a Bond Critical Point (BCP)
+ ------------------------------------
+   Bond path linked to nuclear attractor H3
+     Attractor coordinates =   9.9560685259E-01  4.7385207333E-01 -1.0431038713E+00
+     Euclidean distance from attractor to nucleus =   3.8569509305E-02
+     Number of steps from BCP to attractor =  456
+     Step size =   1.0000000000E-03
+     Path length from BCP to attractor =   4.5617053763E-01
+     Euclidean distance from BCP to attractor =   4.5616597729E-01
+     Euclidean distance from BCP to nucleus =   4.9473077860E-01
+     Unit vector from attractor in the bond path direction:
+       Cartesian Coords.    Spherical Coords.
+     -5.3076642371E-01      1.0000000000E+00
+     -6.6944806696E-01      1.0242535427E+00
+      5.1973674982E-01      4.0420280483E+00
+
+   Bond path linked to nuclear attractor O1
+     Attractor coordinates =  -6.3281501859E-02 -8.8230116222E-01 -8.0292935659E-03
+     Euclidean distance from attractor to nucleus =   7.5612598407E-06
+     Number of steps from BCP to attractor = 1552
+     Step size =   1.0000000000E-03
+     Path length from BCP to attractor =   1.5520799173E+00
+     Euclidean distance from BCP to attractor =   1.5517629880E+00
+     Euclidean distance from BCP to nucleus =   1.5517681608E+00
+     Unit vector from attractor in the bond path direction:
+       Cartesian Coords.    Spherical Coords.
+      5.3513954231E-01      6.6167393035E-01
+      6.6167393035E-01     -5.2517928382E-01
+     -5.2517928382E-01      1.0000000000E+00
+
+   Total bond path length =   2.0082504549E+00
+   Distance between attractors =   2.0079281678E+00
+   Distance between nuclei =   2.0464967723E+00
+   Sum of distances between BCP and attractors =   2.0079289653E+00
+   Sum of distances between BCP and nuclei =   2.0464989394E+00
+   Total bond path length minus distance between attractors =   3.2228709289E-04
+   Total bond path length minus distance between nuclei =  -3.8246317373E-02
+   Total bond path length minus sum of distances between BCP and attractors =   3.2148958411E-04
+   Total bond path length minus sum of distances between BCP and nuclei =  -3.8248484545E-02
+
+ Searching for CP connectivities:
+      Moderate searching for CP connectivities will be done
+
+ Determining CP connectivity for atom O1 : 2 BCPs; Moderate searching of 0 RCPs and 0 CCPs
+ Writing AIMInt input file for atom O1
+
+ Determining CP connectivity for atom H2 : 1 BCPs; Moderate searching of 0 RCPs and 0 CCPs
+
+ Determining CP connectivity for atom H3 : 1 BCPs; Moderate searching of 0 RCPs and 0 CCPs
+
+Total number of electron density critical points found =      5
+
+Electron Density Critical Point Analysis of Molecular Structure:
+---------------------------------------------------------------
+  NACP = Nuclear Attractor Critical Point
+  NNACP = Non-Nuclear Attractor Critical Point
+  BCP = Bond Critical Point
+  RCP = Ring Critical Point
+  CCP = Cage Critical Point
+  Rho = Electron Density
+  GradRho = Gradient of Electron Density
+  HessRho_EigVals = Eigenvalues of the Hessian of Rho, Ascending Order
+  HessRho_EigVecs = Eigenvectors of the Hessian of Rho
+  DelSqRho = Laplacian of Rho = Trace of Hessian of Rho
+  Bond Ellipticity = (HessRho_EigVal(1) / HessRho_EigVal(2)) - 1
+  V = Virial Field = Potential Energy Density = Trace of Stress Tensor
+  G = Lagrangian Form of Kinetic Energy Density
+  K = Hamiltonian Form of Kinetic Energy Density
+  L = K - G = Lagrangian Density = (-1/4)DelSqRho
+  Vnuc = Electrostatic Potential from Nuclei
+  Ven = Electron-nuclear attractive contribution to Virial Field V
+  Vrep = V - Ven = Repulsive contribution to Virial Field V
+  DelSqV = Laplacian of V
+  DelSqVen = Laplacian of Ven
+  DelSqVrep = Laplacian of Vrep
+  DelSqG = Laplacian of G
+  DelSqK = Laplacian of K
+  Stress_EigVals = Eigenvalues of Stress Tensor, Ascending Order
+  Stress_EigVecs = Eigenvectors of Stress Tensor
+  -DivStress = Ehrenfest Force Density = Minus Divergence of Stress Tensor
+  ESP = Total Electrostatic Potential
+  ESPe = Electrostatic Potential from Electrons
+  ESPn = Electrostatic Potential from Nuclei
+  BP = Bond Path
+  BPL = Bond Path Length
+  GBL = Geometric Bond Length
+  GBL_I = Distance Between Nuclear Attractors
+  GBL_II = Distance Between Nuclei
+  GBL_III = Sum of Distances Between BCP and Nuclear Attractors
+  GBL_IV = Sum of Distances Between BCP and Nuclei
+
+CP# 1      Coords = -6.32815018588391E-02 -8.82301162223514E-01 -8.02929356592286E-03
+           Type = (3,-3) NACP O1
+           Rho =  2.9776203813E+02     Rho at Nucleus =  2.9776200636E+02
+           GradRho = -5.9285909515E-13 -3.3656799570E-11 -2.6290081223E-13
+           HessRho_EigVals = -1.1112927433E+06 -1.1112814100E+06 -1.1112567739E+06
+           HessRho_EigVec1 =  6.7509053331E-01  1.5077158268E-01 -7.2216390223E-01
+           HessRho_EigVec2 = -5.9244022481E-02  9.8681162989E-01  1.5064180331E-01
+           HessRho_EigVec3 =  7.3535224052E-01 -5.8912960877E-02  6.7511950454E-01
+           DelSqRho = -3.3338309272E+06
+           Bond Ellipticity = NA
+           V = -8.3358901817E+05
+           G =  6.5643177421E+01
+           K =  8.3352337499E+05
+           L =  8.3345773181E+05
+           Vnuc =  1.0580257619E+06
+           Ven = -3.1503990725E+08
+           Vrep =  3.1420631823E+08
+           DelSqV =  9.3208462994E+10
+           DelSqVen =  3.5272790139E+12
+           DelSqVrep = -3.4340705509E+12
+           DelSqG =  3.1110640729E+09
+           DelSqK = -9.6319527067E+10
+           Stress_EigVals = -2.7786810944E+05 -2.7786145167E+05 -2.7785945705E+05
+           Stress_EigVec1 =  7.3535210204E-01 -5.8910127212E-02  6.7511990263E-01
+           Stress_EigVec2 = -1.1666848105E-01  9.7033572679E-01  2.1174759228E-01
+           Stress_EigVec3 =  6.6756703899E-01  2.3447425065E-01 -7.0666546133E-01
+           -DivStress = -1.1569455207E+04 -2.3037793662E+05 -7.4917291298E+03
+           ESP =  -2.2331207690E+01     ESP at Nucleus =  -2.2331208048E+01
+           ESPe = -2.3350039915E+01     ESPe at Nucleus = -2.3350037627E+01
+           ESPn =  1.0188322252E+00     ESPn at Nucleus =  1.0188295784E+00
+
+CP# 2      Coords = -9.31010074418807E-01  3.52455275550034E-01  1.04481717921926E+00
+           Type = (3,-3) NACP H2
+           Rho =  3.9563351399E-01     Rho at Nucleus =  3.8823817184E-01
+           GradRho =  4.3401053584E-11 -6.0593974283E-11 -5.2559179231E-11
+           HessRho_EigVals = -7.8190508076E+00 -7.8095033019E+00 -6.4203766617E+00
+           HessRho_EigVec1 =  4.8446330513E-01  7.4202902349E-01 -4.6334461720E-01
+           HessRho_EigVec2 =  7.3547759074E-01 -5.8694997657E-02  6.7500193390E-01
+           HessRho_EigVec3 = -4.7367501464E-01  6.6779325060E-01  5.7418129102E-01
+           DelSqRho = -2.2048930771E+01
+           Bond Ellipticity = NA
+           V = -5.5678144191E+00
+           G =  2.7790863139E-02
+           K =  5.5400235560E+00
+           L =  5.5122326928E+00
+           Vnuc =  2.6439402441E+01
+           Ven = -1.0460313696E+01
+           Vrep =  4.8924992766E+00
+           DelSqV =  1.3664195651E+03
+           DelSqVen =  5.8296055414E+02
+           DelSqVrep =  7.8345901093E+02
+           DelSqG =  1.0420584102E+02
+           DelSqK = -1.4706254061E+03
+           Stress_EigVals = -1.9788327798E+00 -1.9727379879E+00 -1.6162436515E+00
+           Stress_EigVec1 =  7.3531409979E-01 -5.8945054779E-02  6.7515824454E-01
+           Stress_EigVec2 =  4.8204425794E-01  7.4574670856E-01 -4.5988605117E-01
+           Stress_EigVec3 = -4.7638903014E-01  6.6361685270E-01  5.7677219487E-01
+           -DivStress = -1.0092468588E+01  1.4005125029E+01  1.2214400412E+01
+           ESP =  -9.8322169563E-01     ESP at Nucleus =  -9.8404001894E-01
+           ESPe = -5.6787317591E+00     ESPe at Nucleus = -5.5696016792E+00
+           ESPn =  4.6955100634E+00     ESPn at Nucleus =  4.5855616603E+00
+
+CP# 3      Coords =  9.95606852580188E-01  4.73852073321845E-01 -1.04310387132723E+00
+           Type = (3,-3) NACP H3
+           Rho =  3.4252287892E-01     Rho at Nucleus =  3.3780764709E-01
+           GradRho = -1.1775302955E-13 -1.4627188349E-13  1.1562278912E-13
+           HessRho_EigVals = -6.9259351594E+00 -6.9211224606E+00 -5.9797195284E+00
+           HessRho_EigVec1 =  4.2186122424E-01 -7.4050805651E-01 -5.2314522432E-01
+           HessRho_EigVec2 =  7.3508777669E-01 -5.8411182661E-02  6.7545103027E-01
+           HessRho_EigVec3 =  5.3073446095E-01  6.6950425837E-01 -5.1969700786E-01
+           DelSqRho = -1.9826777148E+01
+           Bond Ellipticity = NA
+           V = -4.9918907665E+00
+           G =  1.7598239689E-02
+           K =  4.9742925268E+00
+           L =  4.9566942871E+00
+           Vnuc =  3.0259015946E+01
+           Ven = -1.0364405255E+01
+           Vrep =  5.3725144888E+00
+           DelSqV =  1.2582342185E+03
+           DelSqVen =  5.9993876590E+02
+           DelSqVrep =  6.5829545257E+02
+           DelSqG =  9.6727272316E+01
+           DelSqK = -1.3549614908E+03
+           Stress_EigVals = -1.7466400961E+00 -1.7423601263E+00 -1.5028905440E+00
+           Stress_EigVec1 =  7.3541531720E-01 -5.8987251352E-02  6.7504430626E-01
+           Stress_EigVec2 =  4.1800328558E-01 -7.4458365230E-01 -5.2045022622E-01
+           Stress_EigVec3 =  5.3332688333E-01  6.6491780613E-01 -5.2292135796E-01
+           -DivStress =  8.5653816879E+00  1.0600831402E+01 -8.4051194470E+00
+           ESP =  -9.6407840923E-01     ESP at Nucleus =  -9.6215796458E-01
+           ESPe = -5.2958783340E+00     ESPe at Nucleus = -5.2153215684E+00
+           ESPn =  4.3317999248E+00     ESPn at Nucleus =  4.2531636038E+00
+
+CP# 4      Coords = -7.63815420877390E-01  1.14849316586857E-01  8.41981089112813E-01
+           Type = (3,-1) BCP H2 O1
+           Rho =  3.3725990940E-01
+           GradRho = -1.0465239786E-13 -7.0925210149E-13  5.2166604370E-14
+           HessRho_EigVals = -1.5342326987E+00 -1.5040827349E+00  8.1476815812E-01
+           HessRho_EigVec1 =  4.8885227562E-01  7.3596540046E-01 -4.6837846017E-01
+           HessRho_EigVec2 =  7.3538842371E-01 -5.8834456286E-02  6.7508693738E-01
+           HessRho_EigVec3 = -4.6928383617E-01  6.7445788311E-01  5.6998179359E-01
+           DelSqRho = -2.2235472755E+00
+           Bond Ellipticity =  2.0045415794E-02
+           V = -6.9897506787E-01
+           G =  7.1544124494E-02
+           K =  6.2743094337E-01
+           L =  5.5588681888E-01
+           Vnuc =  8.2617180204E+00
+           Ven = -2.7863462710E+00
+           Vrep =  2.0873712032E+00
+           DelSqV =  1.3324031661E+01
+           DelSqVen =  1.8370320595E+01
+           DelSqVrep = -5.0462889346E+00
+           DelSqG =  4.4087793795E+00
+           DelSqK = -1.7732811040E+01
+           Stress_EigVals = -4.4283862456E-01 -4.3005353360E-01  1.7391709029E-01
+           Stress_EigVec1 =  7.3533750001E-01 -5.8910767065E-02  6.7513575124E-01
+           Stress_EigVec2 =  4.8574455380E-01  7.4050266445E-01 -4.6444378819E-01
+           Stress_EigVec3 = -4.7257908284E-01  6.6946644834E-01  5.7313496229E-01
+           -DivStress = -6.7881184558E-01  9.6724068110E-01  8.2374001869E-01
+           ESP =   1.6766942884E+00
+           ESPe = -6.5850237320E+00
+           ESPn =  8.2617180204E+00
+           BPL =  1.8403301219E+00 =  3.5433620434E-01 +  1.4859939176E+00
+           GBL_I =  1.8401255478E+00
+           GBL_II =  1.8861174799E+00
+           GBL_III =  1.8401256285E+00 =  3.5433476171E-01 +  1.4857908668E+00
+           GBL_IV =  1.8861181221E+00 =  4.0032222714E-01 +  1.4857958950E+00
+
+CP# 5      Coords =  7.54728058207110E-01  1.66309471829375E-01 -8.07556947106425E-01
+           Type = (3,-1) BCP H3 O1
+           Rho =  2.7094028089E-01
+           GradRho = -6.9388939039E-18 -1.5265566589E-16  0.0000000000E+00
+           HessRho_EigVals = -1.0295240055E+00 -1.0077271846E+00  7.4358646867E-01
+           HessRho_EigVec1 =  4.2856602997E-01 -7.3140672076E-01 -5.3044826965E-01
+           HessRho_EigVec2 =  7.3531090351E-01 -5.8811687726E-02  6.7517335594E-01
+           HessRho_EigVec3 =  5.2502288820E-01  6.7940076112E-01 -5.1260664515E-01
+           DelSqRho = -1.2936647213E+00
+           Bond Ellipticity =  2.1629684334E-02
+           V = -4.3950376895E-01
+           G =  5.8043794307E-02
+           K =  3.8145997464E-01
+           L =  3.2341618033E-01
+           Vnuc =  7.5691393018E+00
+           Ven = -2.0507847285E+00
+           Vrep =  1.6112809596E+00
+           DelSqV = -4.7983453667E-02
+           DelSqVen =  9.7919284857E+00
+           DelSqVrep = -9.8399119394E+00
+           DelSqG =  2.6971221372E+00
+           DelSqK = -2.6491386836E+00
+           Stress_EigVals = -3.0318446868E-01 -2.9337195993E-01  1.5705265966E-01
+           Stress_EigVec1 =  7.3537179855E-01 -5.8915342866E-02  6.7509799309E-01
+           Stress_EigVec2 =  4.2447208854E-01 -7.3652418364E-01 -5.2664558572E-01
+           Stress_EigVec3 =  5.2825350349E-01  6.7384056667E-01 -5.1661119496E-01
+           -DivStress =  6.5348349647E-01  8.3813192534E-01 -6.3868618016E-01
+           ESP =   1.2248790137E+00
+           ESPe = -6.3442602882E+00
+           ESPn =  7.5691393018E+00
+           BPL =  2.0082504549E+00 =  4.5617053763E-01 +  1.5520799173E+00
+           GBL_I =  2.0079281678E+00
+           GBL_II =  2.0464967723E+00
+           GBL_III =  2.0079289653E+00 =  4.5616597729E-01 +  1.5517629880E+00
+           GBL_IV =  2.0464989394E+00 =  4.9473077860E-01 +  1.5517681608E+00
+
+Number of NACPs  =      3
+Number of NNACPs =      0
+Number of BCPs   =      2
+Number of RCPs   =      0
+Number of CCPs   =      0
+NumNACP + NumNNACP - NumBCP + NumRCP - NumCCP =      1
+Poincare-Hopf Relationship is Satisfied
+
+Bond Path Angles and Corresponding Geometric Bond Angles:
+--------------------------------------------------------
+  BPA     = A-B-C Bond Path Angle
+  GBA_I   = A-B-C Geometric Bond Angle in Terms of Nuclear Attractors
+  GBA_II  = A-B-C Geometric Bond Angle in Terms of Nuclei
+  GBA_III = A-B-C Geometric Bond Angle in Terms of A|B and C|B BCPs and Nuclear Attractor B
+  GBA_IV  = A-B-C Geometric Bond Angle in Terms of A|B and C|B BCPs and Nucleus B
+-------------------------------------------------------------------------------------------------
+Atom A    Atom B    Atom C        BPA          GBA_I         GBA_II       GBA_III       GBA_IV
+-------------------------------------------------------------------------------------------------
+H3        O1        H2         96.93979415   95.18770654   95.22293325   95.15173202   95.15131062
+
+ Total memory allocated for AIMExt =       12.782 Megabytes
+
+ Total time for electron density critical point search, analysis and connectivity = 1 sec (NProc = 2)
