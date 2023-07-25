@@ -54,8 +54,8 @@ meaning that changes in the ichor source code will be directly made in the insta
 
 .. note::
 
-    You need to be connected to the internet to be able to download and install the relavant
-dependencies of ichor**.
+    You need to be connected to the internet to be able to download and install the relevant
+    dependencies of ichor.
 
 .. note::
 
