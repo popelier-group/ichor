@@ -22,8 +22,10 @@ Below are examples of how to use ``ichor``.
 .. toctree::
    :maxdepth: 1
 
+   installation
    ichor_core_examples_toc
    ichor_hpc_examples_toc
+   ichor_cli_examples_toc
 
 .. toctree::
    :maxdepth: 1
