@@ -93,10 +93,28 @@ class PointsDirectory(ListOfAtoms, Directory):
         # since the system name is always the same
         self = self.sort(key=lambda x: x.path.name)
 
+    @property
+    def wfn_energy(self) -> np.ndarray:
+        """Returns np array of wfn energies of all points
+
+        :return: np array of total energy (in Hartree) for all points
+        """
+        return np.array([point.wfn.total_energy for point in self])
+
+    @property
+    def total_energy(self):
+        """
+        Returns np array of wfn energies of all points
+
+        :return: np array of total energy (in Hartree) for all points
+        """
+        return self.wfn_energy
+
     def connectivity(
         self, connectivity_calculator: Callable[..., np.ndarray]
     ) -> np.ndarray:
-        """Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
+        """
+        Return the connectivity matrix (n_atoms x n_atoms) for the given Atoms instance.
 
         Returns:
             :type: `np.ndarray` of shape n_atoms x n_atoms

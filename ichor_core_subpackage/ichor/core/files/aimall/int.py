@@ -132,6 +132,10 @@ class INT(HasProperties, ReadFile):
     def cage_critical_points(self) -> List[CriticalPoint]:
         return [cp for cp in self.critical_points if cp.type is CriticalPointType.Cage]
 
+    @property
+    def global_multipole_moments(self):
+        return self.global_spherical_multipoles
+
     def _path_relative_to_aimall(self, int_path: Path, other: Path) -> Path:
         return relpath(self.path.parent, Path.cwd()) / relpath(other, int_path.parent)
 

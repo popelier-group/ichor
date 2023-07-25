@@ -1,0 +1,219 @@
+AIMAll Professional license check succeeded.
+
+AIMAll Professional features will be available.
+
+AIMQB (Version 19.10.12, Professional)
+Copyright (c) 1997-2019 by Todd A. Keith
+AIMQB is a component of the AIMAll package ( http://aim.tkgristmill.com )
+
+Licensed To:  Paul Popelier at University of Manchester, UK
+
+Checking type and normalization of traditional wfn file.  Please wait ...
+
+Wavefunction File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.wfn
+Sum of MO Occupancies                       =  3.20000000E+01
+Analytically integrated number of electrons =  3.19999973E+01
+Maximum deviation from 1 for diagonal of MO overlap matrix =  2.35079346E-07 (MO 12)
+
+The calculation of Vee(A) and Vee(A,A) can be very time-consuming!
+
+For post-HF wavefunctions (e.g., CISD, MP2, CCSD, etc.), Vee(A) and Vee(A,A) are calculated from an approximation of the 2-EDM in terms of the 1-EDM.
+
+For wavefunctions of supported DFT models (currently LSDA, B3LYP, M062X, PBE and PBE0), corresponding model-specific exchange-correlation energy functional contributions are calculated.  However, for wavefunctions of non-supported DFT models, the Hartree-Fock model is assumed.
+
+
+ AIMExt (Version 19.10.12, Professional)
+ Portions Copyright (c) 1997-2019 by Todd A. Keith
+ AIMExt is a component of the AIMAll package ( http://aim.tkgristmill.com )
+
+ Licensed To:  Paul Popelier at University of Manchester, UK
+
+ AIMExt is a heavily modified and extended version of the EXTREME program
+ developed by members of R.F.W. Bader's research group
+
+ Much of the Quantum Theory of Atoms in Molecules (QTAIM) is described in the book:
+   "Atoms in Molecules - A Quantum Theory"
+   R.F.W. Bader, Oxford University Press, Oxford, 1990
+
+ For additional references see:  http://aim.tkgristmill.com/references.html
+
+ Wfn File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.wfn
+ ExtOut File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.extout
+ Mgp File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.mgp
+
+ MgpViz File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.mgpviz
+
+ Wfn Title:  10k_random_sample_set_5000K05000
+
+ Using MO basis.
+
+ Number of processors used for this job =    2
+
+ Analyzing Rho, the electron density
+
+
+Total number of electron density critical points found =     15
+
+Calculating ESP values at 15 critical points:
+      ...............
+
+Number of NACPs  =      8
+Number of NNACPs =      0
+Number of BCPs   =      7
+Number of RCPs   =      0
+Number of CCPs   =      0
+NumNACP + NumNNACP - NumBCP + NumRCP - NumCCP =      1
+Poincare-Hopf Relationship is Satisfied
+
+ Total time for electron density critical point search, analysis and connectivity = 5 sec (NProc = 2)
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/c1.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/c1.int
+
+ Insufficient accuracy:  |L| =  1.13E-03.
+ Recalculating using a larger outer angular integration grid...
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/c1.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/c1.int
+
+ Insufficient accuracy:  |L| =  8.04E-04.
+ Recalculating using a larger outer angular integration grid...
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/c1.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/c1.int
+
+ Insufficient accuracy:  |L| =  5.88E-04.
+ Recalculating using a larger outer angular integration grid...
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/c1.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/c1.int
+
+ Insufficient accuracy:  |L| =  7.58E-04.
+ Recalculating using a larger outer angular integration grid...
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/c1.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/c1.int
+
+Total time for atom C1 = 131 sec (NProc = 2), L = 0.000109
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/o2.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/o2.int
+
+Total time for atom O2 = 108 sec (NProc = 2), L = 0.000027
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/n3.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/n3.int
+
+Total time for atom N3 = 148 sec (NProc = 2), L = 0.000044
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/n4.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/n4.int
+
+Total time for atom N4 = 137 sec (NProc = 2), L = -0.000043
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/h5.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/h5.int
+
+Total time for atom H5 = 31 sec (NProc = 2), L = 0.000015
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/h6.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/h6.int
+
+Total time for atom H6 = 34 sec (NProc = 2), L = 0.000022
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/h7.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/h7.int
+
+Total time for atom H7 = 32 sec (NProc = 2), L = 0.000026
+
+
+ AIMInt (Version 19.10.12, Professional)
+
+ Current Directory:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000
+
+ Inp File:  10k_random_sample_set_5000K05000_atomicfiles/h8.inp
+ Wfn File:  10k_random_sample_set_5000K05000.wfn
+ Out File:  10k_random_sample_set_5000K05000_atomicfiles/h8.int
+
+Total time for atom H8 = 34 sec (NProc = 2), L = 0.000025
+
+
+AIMSum (Version 19.10.12, Professional)
+Copyright (c) 1997-2019 by Todd A. Keith
+AIMSum is a component of the AIMAll package ( http://aim.tkgristmill.com )
+
+Licensed To:  Paul Popelier at University of Manchester, UK
+
+Wfn File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.wfn
+Sum File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.sum
+
+SumViz File:  /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.sumviz
+
+
+AIMQB Job Completed, /gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.wfn

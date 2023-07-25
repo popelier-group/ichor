@@ -1,0 +1,15 @@
+#p b3lyp/6-31+g(d,p) nosymm output=wfn force geom=notest
+
+10k_random_sample_set_5000K05000
+
+0   1
+C  -2.93300000   0.92700000   0.52200000
+O  -3.41000000   0.38500000   1.39400000
+N  -2.28800000   2.07200000   0.74700000
+N  -3.10900000   0.28400000  -0.80000000
+H  -3.78100000  -0.22800000  -0.92900000
+H  -2.69400000   0.43100000  -1.68300000
+H  -2.31600000   2.68800000   1.50900000
+H  -1.56100000   1.99100000  -0.18800000
+
+/gpfs01/scratch/mbdxwym4/urea_631g_sample_set_5000K/10k_random_sample_set_5000K_PARENT/10k_random_sample_set_5000K1/10k_random_sample_set_5000K05000/10k_random_sample_set_5000K05000.wfn
