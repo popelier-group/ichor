@@ -203,9 +203,7 @@ class PointsDirectory(ListOfAtoms, Directory):
     @property
     def coordinates(self) -> np.ndarray:
         """
-        Returns:
-            :type: `np.ndarray`
-            the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
+        :return: the xyz coordinates of all atoms for all timesteps. Shape `n_timesteps` x `n_atoms` x `3`
         """
         return np.array([timestep.atoms.coordinates for timestep in self])
 
@@ -239,7 +237,8 @@ class PointsDirectory(ListOfAtoms, Directory):
         fname: Optional[Union[str, Path]] = Path("xyz_with_properties_error.xyz"),
         step: Optional[int] = 1,
     ):
-        """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
+        """
+        Write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
         for that timestep. The comment lines in the xyz have absolute predictions errors.
         These can then be plotted in ALFVisualizer as cmap to see where poor predictions happen.
 
@@ -297,7 +296,8 @@ class PointsDirectory(ListOfAtoms, Directory):
     def from_trajectory(
         cls, trajectory_path: Union[str, Path], points_dir_name: str = None, center=True
     ) -> "PointsDirectory":
-        """Generate a PointsDirectory-type structure directory from a trajectory (.xyz) file
+        """
+        Generate a PointsDirectory-type structure directory from a trajectory (.xyz) file
 
         :param trajectory_path: A str or Path to a .xyz file containing geometries
         :param points_dir_name: How the new folder will be named
@@ -348,7 +348,8 @@ class PointsDirectory(ListOfAtoms, Directory):
     def write_to_sqlite3_database(
         self, db_path: Union[str, Path] = None, echo=False, print_missing_data=False
     ) -> Path:
-        """Write out important information from a PointsDirectory instance to an SQLite3 database.
+        """
+        Write out important information from a PointsDirectory instance to an SQLite3 database.
 
         :param db_path: database to write to
         :param echo: Whether to print out SQL queries from SQL Alchemy

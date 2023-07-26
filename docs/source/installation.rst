@@ -45,8 +45,9 @@ meaning that changes in the ichor source code will be directly made in the insta
 
 .. warning::
 
-    You will need to have access to the software on the computer cluster.
-    Currently, the paths to programs are hard coded into the ichor code, so
+    You will need to have access to the relevant
+    software on the computer cluster if submitting jobs with `ichor.hpc` or
+    `ichor.cli`. Currently, the paths to programs are hard coded into the ichor code, so
     they will need to exist at the correct paths.
 
     Also, make sure that you have access to the right versions of the software
