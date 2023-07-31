@@ -25,3 +25,5 @@ sphinx-build -a -E source/ build/
 
 If you have `make` installed, you can run `make docs` which will run the
 above commands automatically.
+
+After making the documentation, go into the `build` directory and drag the `index.html` file into a browser window, which will open the home page (this documentation is only available locally for now, it will be available online when the package is open sourced).
