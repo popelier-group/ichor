@@ -10,8 +10,7 @@ pip install requirements.txt
 
 Additionally, you will need to have the ichor packages installed. 
 
-From the `docs` directory these are the sphinx commands to run to generate the .rst files and make the docs
-The default docs don't look too good, so will update them in the future
+From the `docs` directory these are the sphinx commands to run to generate the .rst files automatically using `sphinx-apidoc`. Note that these `.rst` files do not actually contain the documentation but instead contains instructions on what to document. Then, when running `sphinx-build`, the `.rst` files are read and the Python code is executed to get the docstrings and make the documentation. Examples notebooks and other `.rst` pages to be displayed in the final documentation / website must be written manually.
 :
 
 ```
