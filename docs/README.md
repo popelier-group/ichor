@@ -1,5 +1,15 @@
 # To generate docs
 
+# Installing requirements
+
+Install the requirements by doing 
+
+```
+pip install requirements.txt
+```
+
+Additionally, you will need to have the ichor packages installed. 
+
 From the `docs` directory these are the sphinx commands to run to generate the .rst files and make the docs
 The default docs don't look too good, so will update them in the future
 :
