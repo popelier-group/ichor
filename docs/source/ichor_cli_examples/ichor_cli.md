@@ -4,4 +4,4 @@ After installing `ichor.cli`, it can be launched from the command line using `ic
 
 Below is an example of what the menu structure looks like. Selecting options and pressing `Enter` leads to sub-menus with more options. The most common options are shown in the menus, not all of the functionality is available through the menus. However, one can complete all steps starting from making a dataset (using AMBER, CP2K) to running Gaussian and AIMAll, to making datasets for machine learning from the menus.
 
-![alt text](../../../example_files/ichor_cli_main_menu.png "SQLite3 Schema")
+![alt text](../../../example_files/ichor_cli_main_menu.png "Ichor main menu")
