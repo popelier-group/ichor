@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Working with ichor files &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with Gaussian files" href="working_with_gaussian_files.html" />
+    <link rel="prev" title="Example for Gaussian Process Regression (GPR)" href="simple_gp.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="calculating_features.html">Calculating Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="points_directory.html"><code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code> - A class used to encapsulate all calculations for many geometries (of a dataset)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simple_gp.html">Example for Gaussian Process Regression (GPR)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Working with <code class="docutils literal notranslate"><span class="pre">ichor</span></code> files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#General-implementation-of-file-classes">General implementation of file classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_gaussian_files.html">Working with Gaussian files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core/ichor.core.html">ichor.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+      <li class="breadcrumb-item active">Working with <code class="docutils literal notranslate"><span class="pre">ichor</span></code> files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core_examples/working_with_files.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="Working-with-ichor-files">
+<h1>Working with <code class="docutils literal notranslate"><span class="pre">ichor</span></code> files<a class="headerlink" href="#Working-with-ichor-files" title="Permalink to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">ichor.core</span></code> package has classes implemented for file reading (and writing) of several input and output files of computational programs that are used (Gaussian, AIMAll, DLPOLY, etc.)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># all available classes (see ichor.core.files.__init__ file where __all__ is implemented)</span>
+<span class="kn">from</span> <span class="nn">ichor.core</span> <span class="kn">import</span> <span class="n">files</span>
+
+<span class="n">files</span><span class="o">.</span><span class="n">__all__</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;INT&#39;,
+ &#39;INTs&#39;,
+ &#39;AIM&#39;,
+ &#39;GJF&#39;,
+ &#39;WFN&#39;,
+ &#39;GaussianOut&#39;,
+ &#39;Trajectory&#39;,
+ &#39;DlpolyHistory&#39;,
+ &#39;DlPolyField&#39;,
+ &#39;DlPolyConfig&#39;,
+ &#39;DlPolyControl&#39;,
+ &#39;DlPolyFFLUX&#39;,
+ &#39;DlPolyIQAEnergies&#39;,
+ &#39;DlPolyIQAForces&#39;,
+ &#39;FFLUXDirectory&#39;,
+ &#39;PandoraInput&#39;,
+ &#39;PointDirectory&#39;,
+ &#39;PointsDirectory&#39;,
+ &#39;XYZ&#39;,
+ &#39;Mol2&#39;,
+ &#39;PySCFDirectory&#39;,
+ &#39;MorfiDirectory&#39;,
+ &#39;PandoraDirectory&#39;,
+ &#39;ABINT&#39;]
+</pre></div></div>
+</div>
+<section id="General-implementation-of-file-classes">
+<h2>General implementation of file classes<a class="headerlink" href="#General-implementation-of-file-classes" title="Permalink to this heading"></a></h2>
+<p>File classes subclass from <code class="docutils literal notranslate"><span class="pre">ichor.core.files.file.ReadFile</span></code> and/or <code class="docutils literal notranslate"><span class="pre">ichor.core.files.file.WriteFile</span></code>.</p>
+<p>When subclassing from <code class="docutils literal notranslate"><span class="pre">ReadFile</span></code>, a <code class="docutils literal notranslate"><span class="pre">_read_file</span></code> method must be defined, which is how the new file should be read and parsed. Ichor has lazy file reading implemented, meaning that a file will only be read when an attribute of the file instance is accessed, <strong>not</strong> when the file instance is created.</p>
+<p>For example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.files</span> <span class="kn">import</span> <span class="n">GJF</span>
+
+<span class="c1"># make instance of GJF, file has not been read yet</span>
+<span class="n">gjf_instance</span> <span class="o">=</span> <span class="n">GJF</span><span class="p">(</span><span class="s2">&quot;../../../example_files/example_gjf.gjf&quot;</span><span class="p">)</span>
+
+<span class="c1"># then you can access attributes</span>
+<span class="c1"># in the background, the lazy file reading will check the value of the attribute</span>
+<span class="c1"># and read the file if necessary</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">gjf_instance</span><span class="o">.</span><span class="n">atoms</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+N1       1.30610788    -29.77550072     -0.39451506
+H2       0.88322943    -29.08071028     -1.14190493
+H3       1.46749713    -29.22282070      0.46703669
+H4       2.11921902    -30.18852549     -0.75438182
+</pre></div></div>
+</div>
+<p>The way the lazy reading works is by having a special <code class="docutils literal notranslate"><span class="pre">None</span></code> equivalent, defined as <code class="docutils literal notranslate"><span class="pre">FileContents</span></code> (which is an instance of <code class="docutils literal notranslate"><span class="pre">FileContentsType</span></code>. This essentially the same as <code class="docutils literal notranslate"><span class="pre">NoneType</span></code>). This allows us to check if an attribute is <code class="docutils literal notranslate"><span class="pre">FileContents</span></code>. If it is <code class="docutils literal notranslate"><span class="pre">FileContents</span></code>, then we first must read the file and then try to access the attribute value again. The implementation is found in <code class="docutils literal notranslate"><span class="pre">ReadFile.__getattribute__</span></code>, which is called every time that an attribute is accessed.</p>
+<p>Subclassing from <code class="docutils literal notranslate"><span class="pre">WriteFile</span></code> means a <code class="docutils literal notranslate"><span class="pre">_write_file</span></code> method must be implemented in the sub-class, which defines the format of the file that needs to be written out.</p>
+<p><strong>Note that you can directly then call the ``write`` method, which subsequently calls ``_write_file``.</strong></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="simple_gp.html" class="btn btn-neutral float-left" title="Example for Gaussian Process Regression (GPR)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="working_with_gaussian_files.html" class="btn btn-neutral float-right" title="Working with Gaussian files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

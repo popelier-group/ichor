@@ -1,0 +1,103 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Working with Gaussian files"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "N1       1.30610788    -29.77550072     -0.39451506\n",
+      "H2       0.88322943    -29.08071028     -1.14190493\n",
+      "H3       1.46749713    -29.22282070      0.46703669\n",
+      "H4       2.11921902    -30.18852549     -0.75438182\n"
+     ]
+    }
+   ],
+   "source": [
+    "# you can directly import the specific file classes\n",
+    "from ichor.core.files import GJF\n",
+    "\n",
+    "gjf_instance = GJF(\"../../../example_files/example_gjf.gjf\")\n",
+    "\n",
+    "# then you can access attributes\n",
+    "# in the background, the lazy file reading will check the value of the attribute\n",
+    "# and read the file if necessary\n",
+    "atoms = gjf_instance.atoms\n",
+    "\n",
+    "print(atoms)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "6-31+g(d,p)\n",
+      "aug-cc-pvtz\n"
+     ]
+    }
+   ],
+   "source": [
+    "# changing the basis set of the gjf file\n",
+    "\n",
+    "print(gjf_instance.basis_set)\n",
+    "\n",
+    "gjf_instance.basis_set = \"aug-cc-pvtz\"\n",
+    "\n",
+    "print(gjf_instance.basis_set)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# writing out file\n",
+    "# see the _write_file() method in each of the file classes\n",
+    "# this _write_file method() is what actually gets called\n",
+    "# when you call the write() method\n",
+    "# (see the `WriteFile` class from which these file classes subclass)\n",
+    "\n",
+    "# gjf.write()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "ichor_docs",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.9"
+  },
+  "orig_nbformat": 4
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

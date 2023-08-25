@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ichor.core.analysis.dlpoly package &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ichor.core.analysis.s_curves package" href="ichor.core.analysis.s_curves.html" />
+    <link rel="prev" title="ichor.core.analysis package" href="ichor.core.analysis.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.core.html">ichor.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="ichor.core.analysis.html">ichor.core.analysis package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="ichor.core.analysis.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.analysis.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.analysis.html#module-ichor.core.analysis.predictions">ichor.core.analysis.predictions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.analysis.html#module-ichor.core.analysis">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.core.html#module-ichor.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.html">ichor.core package</a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.analysis.html">ichor.core.analysis package</a></li>
+      <li class="breadcrumb-item active">ichor.core.analysis.dlpoly package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core/ichor.core.analysis.dlpoly.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="ichor-core-analysis-dlpoly-package">
+<h1>ichor.core.analysis.dlpoly package<a class="headerlink" href="#ichor-core-analysis-dlpoly-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.analysis.dlpoly.dlpoly_analysis">
+<span id="ichor-core-analysis-dlpoly-dlpoly-analysis-module"></span><h2>ichor.core.analysis.dlpoly.dlpoly_analysis module<a class="headerlink" href="#module-ichor.core.analysis.dlpoly.dlpoly_analysis" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.dlpoly_analysis.get_dlpoly_energies">
+<span class="sig-name descname"><span class="pre">get_dlpoly_energies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimum_energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dlpoly_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('dlpoly-energies.xlsx')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.dlpoly_analysis.get_dlpoly_energies" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.dlpoly_analysis.read_fflux">
+<span class="sig-name descname"><span class="pre">read_fflux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fflux_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.analysis.dlpoly.dlpoly_analysis.read_fflux" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.dlpoly_analysis.read_wfn_energy">
+<span class="sig-name descname"><span class="pre">read_wfn_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wfn_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ichor.core.analysis.dlpoly.dlpoly_analysis.read_wfn_energy" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-ichor.core.analysis.dlpoly.dlpoly_files">
+<span id="ichor-core-analysis-dlpoly-dlpoly-files-module"></span><h2>ichor.core.analysis.dlpoly.dlpoly_files module<a class="headerlink" href="#module-ichor.core.analysis.dlpoly.dlpoly_files" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.analysis.dlpoly.mae_forces">
+<span id="ichor-core-analysis-dlpoly-mae-forces-module"></span><h2>ichor.core.analysis.dlpoly.mae_forces module<a class="headerlink" href="#module-ichor.core.analysis.dlpoly.mae_forces" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.mae_forces.mae_forces">
+<span class="sig-name descname"><span class="pre">mae_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted_forces_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_forces_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output.png'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.mae_forces.mae_forces" title="Permalink to this definition"></a></dt>
+<dd><p>Plots a matshow in matplotlib of the MAE of the predicted forces array vs
+the true forces array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicted_forces_array</strong> – Predicted forces array of shape ntimesteps x natoms x 3.</p></li>
+<li><p><strong>true_forces_array</strong> – True forces array of shape ntimesteps x natoms x 3</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.analysis.dlpoly.plot_energy">
+<span id="ichor-core-analysis-dlpoly-plot-energy-module"></span><h2>ichor.core.analysis.dlpoly.plot_energy module<a class="headerlink" href="#module-ichor.core.analysis.dlpoly.plot_energy" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.plot_energy.format_energy_plots">
+<span class="sig-name descname"><span class="pre">format_energy_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Timestep'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">major_grid_linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minor_grid_linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_params_labelsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">48</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tick_params_pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">major_tick_params_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">major_tick_params_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minor_tick_params_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minor_tick_params_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.plot_energy.format_energy_plots" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.plot_energy.plot_differences">
+<span class="sig-name descname"><span class="pre">plot_differences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX" title="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX"><span class="pre">DlPolyFFLUX</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory" title="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory"><span class="pre">FFLUXDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">until_converged</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absolute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.plot_energy.plot_differences" title="Permalink to this definition"></a></dt>
+<dd><p>Plots the differences between one timestep and the next timestep (in kJ mol-1) from the FFLUX
+file for every pair of timesteps</p>
+<p>If until_coverged is True, it will only plot the difference until the timestep
+where the difference to the next timestep is less that 1e-4 kJ mol-1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – A FFLUX file or directory containing a FFLUX file to read data from.</p></li>
+<li><p><strong>until_converged</strong> – Plot timesteps and ifference until energy is converted to 1e-4 kJ mol-1, defaults to True</p></li>
+<li><p><strong>absolute</strong> – Plot the absolute of the differences between each timestep</p></li>
+<li><p><strong>title</strong> – Title for plot</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.plot_energy.plot_total_energy">
+<span class="sig-name descname"><span class="pre">plot_total_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX" title="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX"><span class="pre">DlPolyFFLUX</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory" title="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory"><span class="pre">FFLUXDirectory</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX" title="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX"><span class="pre">DlPolyFFLUX</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory" title="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory"><span class="pre">FFLUXDirectory</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">until_converged</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FIGURE_LABEL_SIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_Y_LABELS_FONTSIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TICKLABELS_FONTSIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">22</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LABELPAD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AXES_PADDING</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LINEWIDTH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAJOR_TICK_LENGTH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MINOR_TICK_LENGTH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PAD_INCHES</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'total_energy.svg'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.plot_energy.plot_total_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Plots the predicted total energy of the system (in kJ mol-1) from the fflux
+simulation for every timestep.</p>
+<p>If until_coverged is True, it will only plot the timesteps until the timestep
+where the difference to the next timestep is less that 1e-4 kJ mol-1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – A FFLUX file or directory containing a FFLUX file to read data from.</p></li>
+<li><p><strong>until_converged</strong> – Plot timesteps until energy is converted to 1e-4 kJ mol-1, defaults to True.</p></li>
+<li><p><strong>reference</strong> – A reference value to subtract (could be the Gaussian optimized minimum).
+This value has to be in kJ mol-1. If a list is passed in as data, then this reference must also be a
+list of the same length as data.</p></li>
+<li><p><strong>FIGURE_LABEL_SIZE</strong> – The size of the figure labels (A, B, C, etc.), defaults to 30</p></li>
+<li><p><strong>X_Y_LABELS_FONTSIZE</strong> – The size of the x and y axis labels, defaults to 30</p></li>
+<li><p><strong>TICKLABELS_FONTSIZE</strong> – The size of the tick labels on the axes, defaults to 22</p></li>
+<li><p><strong>LABELPAD</strong> – The padding of the x and y labels from the plot, defaults to 10</p></li>
+<li><p><strong>AXES_PADDING</strong> – The padding of the number on the axes from the plots, defaults to 10.0</p></li>
+<li><p><strong>LINEWIDTH</strong> – The width of the lines, defaults to 2.0</p></li>
+<li><p><strong>MAJOR_TICK_LENGTH</strong> – The length of the major ticks, defaults to 6.0</p></li>
+<li><p><strong>MINOR_TICK_LENGTH</strong> – The length of the minor ticks, defaults to 3.0</p></li>
+<li><p><strong>PAD_INCHES</strong> – Padding on the sides of the plot (as tight layout is used), defaults to 0.05</p></li>
+<li><p><strong>filename</strong> – The filename to save as. Note that the extension determines how the fine is saved (png, svg),
+defaults to “total_energy.svg”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.plot_energy.plot_total_energy_from_array">
+<span class="sig-name descname"><span class="pre">plot_total_energy_from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.plot_energy.plot_total_energy_from_array" title="Permalink to this definition"></a></dt>
+<dd><p>Plots the given predicted data (in kJ mol-1) against timesteps</p>
+<p>If until_coverged is True, it will only plot the timesteps until the timestep
+where the difference to the next timestep is less that 1e-4 kJ mol-1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – A np array containing predicted total energy data</p></li>
+<li><p><strong>title</strong> – Title for plot</p></li>
+<li><p><strong>referece</strong> – reference Gaussain energy</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.plot_energy.round_base_10">
+<span class="sig-name descname"><span class="pre">round_base_10</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.plot_energy.round_base_10" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-ichor.core.analysis.dlpoly.true_vs_predicted">
+<span id="ichor-core-analysis-dlpoly-true-vs-predicted-module"></span><h2>ichor.core.analysis.dlpoly.true_vs_predicted module<a class="headerlink" href="#module-ichor.core.analysis.dlpoly.true_vs_predicted" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.true_vs_predicted.get_random_geometries_from_fflux_simulation">
+<span class="sig-name descname"><span class="pre">get_random_geometries_from_fflux_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory" title="ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory"><span class="pre">DlpolyHistory</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fflux_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX" title="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX"><span class="pre">DlPolyFFLUX</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.true_vs_predicted.get_random_geometries_from_fflux_simulation" title="Permalink to this definition"></a></dt>
+<dd><p>Gets random geometries from fflux simulation, so that the true energy from Gaussian
+can be computed from the geometries.
+This function writes out several files.
+1. New trajectory containing random geometries to be submitted to Gaussian.
+2. A txt file containing the indices of the random geometries taken from the HISTORY
+3. If a FFLUX file is given, it writes out a .npy file containing the predicted
+total energy associated with the random geometries. If not give, the user can use
+the .txt file and obtain the energies from the FFLUX file themselves.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>history</strong> – A HISTORY file or path to HISTORY file containing FFLUX geometries</p></li>
+<li><p><strong>k</strong> – How many geometries to get from the HISTORY, defaults to 1000</p></li>
+<li><p><strong>fflux_file</strong> – A FFLUX file where to get the total predicted energies
+associated with the HISTORY file, defaults to None.
+If given, this will write out a .npy file containing predicted
+total energies array. If not given, it will not write out the
+np array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.true_vs_predicted.plot_true_vs_predicted_from_arrays">
+<span class="sig-name descname"><span class="pre">plot_true_vs_predicted_from_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted_energies_array_hartree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_energies_array_hartree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absolute_diff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FIGURE_LABEL_SIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">48</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_Y_LABELS_FONTSIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">48</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TICKLABELS_FONTSIZE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LABELPAD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AXES_PADDING</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LINEWIDTH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MAJOR_TICK_LENGTH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MINOR_TICK_LENGTH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LEGEND_BORDERPAD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LEGEND_FRAME_WIDTH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">COLORBAR_PADDING</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PAD_INCHES</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output.svg'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.true_vs_predicted.plot_true_vs_predicted_from_arrays" title="Permalink to this definition"></a></dt>
+<dd><p>Plots true vs predicted energies, as well as calculates R^2 value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicted_energies_array_hartree</strong> – np array containing FFLUX predicted energies
+In hartrees</p></li>
+<li><p><strong>true_energies_array_hartree</strong> – a np.array cotaning true energies (in hartrees)
+or a PointsDirectory (containing ordered wfns from which to get the array) again
+in Hartrees</p></li>
+<li><p><strong>title</strong> – The title of the plot, defaults to “”</p></li>
+<li><p><strong>absolute_diff</strong> – Whether to use the absolute of the differences
+of true and predicted or not, defaults to True</p></li>
+<li><p><strong>FIGURE_LABEL_SIZE</strong> – The label size of the figures (A, B, C, etc.), defaults to 48</p></li>
+<li><p><strong>X_Y_LABELS_FONTSIZE</strong> – The size of the x and y axis labels, defaults to 48</p></li>
+<li><p><strong>TICKLABELS_FONTSIZE</strong> – The fontsize of the ticklabels, defaults to 30</p></li>
+<li><p><strong>LABELPAD</strong> – The padding of the x y labels from plot, defaults to 15.0</p></li>
+<li><p><strong>AXES_PADDING</strong> – The padding of axes numbers from plot, defaults to 10.0</p></li>
+<li><p><strong>LINEWIDTH</strong> – The width of lines, defaults to 2.0</p></li>
+<li><p><strong>MAJOR_TICK_LENGTH</strong> – The width of major tickmarks, defaults to 6.0</p></li>
+<li><p><strong>MINOR_TICK_LENGTH</strong> – The width of minor tickmarks, defaults to 3.0</p></li>
+<li><p><strong>LEGEND_BORDERPAD</strong> – The border padding of the legend, defaults to 15.0</p></li>
+<li><p><strong>LEGEND_FRAME_WIDTH</strong> – The width of the legend frame, defaults to 2.0</p></li>
+<li><p><strong>COLORBAR_PADDING</strong> – The padding of the colorbar axes, defaults to 5.0</p></li>
+<li><p><strong>PAD_INCHES</strong> – padding on the sides (as tight layout is used), defaults to 0.05</p></li>
+<li><p><strong>filename</strong> – The filename. Note the extension affects the format of the file
+, defaults to “output.svg”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.true_vs_predicted.plot_true_vs_predicted_from_arrays_one_system">
+<span class="sig-name descname"><span class="pre">plot_true_vs_predicted_from_arrays_one_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted_energies_array_hartree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_energies_array_hartree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absolute_diff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output.svg'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.true_vs_predicted.plot_true_vs_predicted_from_arrays_one_system" title="Permalink to this definition"></a></dt>
+<dd><p>Plots true vs predicted energies, as well as calculates R^2 value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicted_energies_array_hartree</strong> – np array containing FFLUX predicted energies
+In hartrees</p></li>
+<li><p><strong>true_energies_array_hartree</strong> – a np.array cotaning true energies (in hartrees)
+or a PointsDirectory (containing ordered wfns from which to get the array) again
+in Hartrees</p></li>
+<li><p><strong>absolute_diff</strong> – Whether to use the absolute of the differences</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.dlpoly.true_vs_predicted.r2_score">
+<span class="sig-name descname"><span class="pre">r2_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.dlpoly.true_vs_predicted.r2_score" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-ichor.core.analysis.dlpoly">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.analysis.dlpoly" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ichor.core.analysis.html" class="btn btn-neutral float-left" title="ichor.core.analysis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.core.analysis.s_curves.html" class="btn btn-neutral float-right" title="ichor.core.analysis.s_curves package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

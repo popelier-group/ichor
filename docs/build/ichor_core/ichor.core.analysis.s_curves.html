@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ichor.core.analysis.s_curves package &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ichor.core.atoms package" href="ichor.core.atoms.html" />
+    <link rel="prev" title="ichor.core.analysis.dlpoly package" href="ichor.core.analysis.dlpoly.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.core.html">ichor.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="ichor.core.analysis.html">ichor.core.analysis package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="ichor.core.analysis.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.analysis.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.analysis.html#module-ichor.core.analysis.predictions">ichor.core.analysis.predictions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.analysis.html#module-ichor.core.analysis">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.core.html#module-ichor.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.html">ichor.core package</a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.analysis.html">ichor.core.analysis package</a></li>
+      <li class="breadcrumb-item active">ichor.core.analysis.s_curves package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core/ichor.core.analysis.s_curves.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="ichor-core-analysis-s-curves-package">
+<h1>ichor.core.analysis.s_curves package<a class="headerlink" href="#ichor-core-analysis-s-curves-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.analysis.s_curves.compact_s_curves">
+<span id="ichor-core-analysis-s-curves-compact-s-curves-module"></span><h2>ichor.core.analysis.s_curves.compact_s_curves module<a class="headerlink" href="#module-ichor.core.analysis.s_curves.compact_s_curves" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.calculate_compact_s_curves">
+<span class="sig-name descname"><span class="pre">calculate_compact_s_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_set_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.calculate_compact_s_curves" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_location</strong> – A directory containing model files <code class="docutils literal notranslate"><span class="pre">.model</span></code></p></li>
+<li><p><strong>validation_set_location</strong> – A directory containing validation or test set points.
+These points should NOT be in the training set.</p></li>
+<li><p><strong>atoms</strong> – A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
+S-curves are made for all atoms in the system by default.</p></li>
+<li><p><strong>types</strong> – A list of property types, such as iqa, q00, etc. for which to make S-curves.
+S-curves are made for all properties in the model files.</p></li>
+<li><p><strong>kwargs</strong> – Any key word arguments that can be passed into the write_to_excel
+function to change how the S-curves excel file looks. See write_to_excel() method</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.calculate_compact_s_curves_from_files">
+<span class="sig-name descname"><span class="pre">calculate_compact_s_curves_from_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_files_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.models.html#ichor.core.models.models.Models" title="ichor.core.models.models.Models"><span class="pre">Models</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'s_curves_from_df.xlsx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.calculate_compact_s_curves_from_files" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates S-curves used to check model prediction performance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>csv_files_list</strong> – A list of .csv files that contain features columns and property columns.</p></li>
+<li><p><strong>models</strong> – A <code class="docutils literal notranslate"><span class="pre">Models</span></code> instance which contains model files</p></li>
+<li><p><strong>output_location</strong> – The name of the .xlsx file where to save the s-curves.</p></li>
+<li><p><strong>property_names</strong> – A list of strings to use for property column names. If left as None,
+a default set of property names is used</p></li>
+<li><p><strong>kwargs</strong> – Key word argument to give to xlsxwriter for customizing plots.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.calculate_compact_s_curves_from_true_predicted">
+<span class="sig-name descname"><span class="pre">calculate_compact_s_curves_from_true_predicted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted_values_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'s_curves_from_df.xlsx'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.calculate_compact_s_curves_from_true_predicted" title="Permalink to this definition"></a></dt>
+<dd><p>Make s-curves from dictionary of predicted values and dictionary of true values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicted_values_dict</strong> – A dict of key: atom_name val inner_dict.
+inner_dict of key: property_name, values: 1D np.ndarray containing predicted data for all points</p></li>
+<li><p><strong>true_values_dict</strong> – A dict of key: atom_name val inner_dict.
+inner_dict of key: property_name, values: 1D np.ndarray containing true data for all points</p></li>
+<li><p><strong>output_location</strong> – The name of the output .xlsx file, defaults to “s_curves_from_df.xlsx”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.make_chart_settings">
+<span class="sig-name descname"><span class="pre">make_chart_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.make_chart_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Takes in a dictionary of key word arguments that were
+passed into the <code class="docutils literal notranslate"><span class="pre">write_to_excel</span></code> function. Then, this function
+constructs dictionaries with parameter values to be passed
+to xlsx writer to configure graph settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_kwargs</strong> – A dictionary containing key word arguments
+that are parsed to construct the xlsx-writer graph settings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.mpl_get_true_vals_dict">
+<span class="sig-name descname"><span class="pre">mpl_get_true_vals_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted_values_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.mpl_get_true_vals_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Make s-curves from dictionary of predicted values and dictionary of true values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicted_values_dict</strong> – A dict of key: atom_name val inner_dict.
+inner_dict of key: property_name, values: 1D np.ndarray containing predicted data for all points</p></li>
+<li><p><strong>true_values_dict</strong> – A dict of key: atom_name val inner_dict.
+inner_dict of key: property_name, values: 1D np.ndarray containing true data for all points</p></li>
+<li><p><strong>output_location</strong> – The name of the output .xlsx file, defaults to “s_curves_from_df.xlsx”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.percentile">
+<span class="sig-name descname"><span class="pre">percentile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.percentile" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.plot_with_matplotlib">
+<span class="sig-name descname"><span class="pre">plot_with_matplotlib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Prediction</span> <span class="pre">Error</span> <span class="pre">/</span> <span class="pre">kJ</span> <span class="pre">mol$^{-1}$'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saved_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'s_curves.svg'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.plot_with_matplotlib" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.plot_with_matplotlib_simple">
+<span class="sig-name descname"><span class="pre">plot_with_matplotlib_simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Prediction</span> <span class="pre">Error</span> <span class="pre">/</span> <span class="pre">kJ</span> <span class="pre">mol$^-1$'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\\%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.plot_with_matplotlib_simple" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.simplified_write_to_excel">
+<span class="sig-name descname"><span class="pre">simplified_write_to_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'s-curves.xlsx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Absolute</span> <span class="pre">Prediction</span> <span class="pre">Error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_log_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_major_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_minor_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_major_gridline_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_major_gridline_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#F2F2F2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_major_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_minor_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_major_gridline_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_major_gridline_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#BFBFBF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excel_style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.simplified_write_to_excel" title="Permalink to this definition"></a></dt>
+<dd><p>Writes out relevant information which is used to make s-curves to an excel file.
+It will make a separate sheet for every atom (and property). It
+also makes a <code class="docutils literal notranslate"><span class="pre">Total</span></code> sheet for every property,
+which gives an idea how the predictions do overall for the whole system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>total_dict</strong> – a dictionary containing key: property, val: inner_dict.
+inner_dict contains key: atom_name, val: inner_inner_dict.
+inner_inner_dict contains key: (true, predicted or error),
+val: a 1D numpy array containing the corresponding values</p></li>
+<li><p><strong>output_name</strong> – The name of the excel file to be written out.</p></li>
+<li><p><strong>x_axis_name</strong> – The title to be used for x-axis in the S-curves plot.</p></li>
+<li><p><strong>x_log_scale</strong> – Whether to make x dimension log scaled. Default True.</p></li>
+<li><p><strong>x_major_gridlines_visible</strong> – Whether to show major gridlines along x. Default True.</p></li>
+<li><p><strong>x_minor_gridlines_visible</strong> – Whether to show minor gridlines along x. Default True.</p></li>
+<li><p><strong>x_axis_major_gridline_width</strong> – The width to use for the major gridlines. Default is 0.75.</p></li>
+<li><p><strong>x_axis_major_gridline_color</strong> – Color to use for gridlines. Default is “#F2F2F2”.</p></li>
+<li><p><strong>y_axis_name</strong> – The title to be used for the y-axis in the S-curves plot.</p></li>
+<li><p><strong>y_min</strong> – The minimum percentage value to show.</p></li>
+<li><p><strong>y_max</strong> – The maximum percentage value to show.</p></li>
+<li><p><strong>y_major_gridlines_visible</strong> – Whether to show major gridlines along y. Default True.</p></li>
+<li><p><strong>y_minor_gridlines_visible</strong> – Whether to show minor gridlines along y. Default False.</p></li>
+<li><p><strong>y_axis_major_gridline_width</strong> – The width to use for the major gridlines. Default is 0.75.</p></li>
+<li><p><strong>y_axis_major_gridline_color</strong> – Color to use for gridlines. Default is “#BFBFBF”.</p></li>
+<li><p><strong>show_legend</strong> – Whether to show legend on the plot. Default False.</p></li>
+<li><p><strong>excel_style</strong> – The style which excel uses for the plots.
+Default is 10, which is the default style used by excel.</p></li>
+<li><p><strong>sort_columns</strong> – Whether to sort the keys of the dictionary (uses Python sort). Default True.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.compact_s_curves.write_to_excel">
+<span class="sig-name descname"><span class="pre">write_to_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'s-curves.xlsx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Absolute</span> <span class="pre">Prediction</span> <span class="pre">Error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_log_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_major_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_minor_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_major_gridline_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_major_gridline_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#F2F2F2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_major_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_minor_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_major_gridline_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_major_gridline_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#BFBFBF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excel_style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.compact_s_curves.write_to_excel" title="Permalink to this definition"></a></dt>
+<dd><p>Writes out relevant information which is used to make s-curves to an excel file.
+It will make a separate sheet for every atom (and property). It
+also makes a <code class="docutils literal notranslate"><span class="pre">Total</span></code> sheet for every property, which gives
+an idea how the predictions do overall for the whole system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>true</strong> – a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set</p></li>
+<li><p><strong>predicted</strong> – a ModelsResult containing predicted values, given the validation/test set features</p></li>
+<li><p><strong>output_name</strong> – The name of the excel file to be written out.</p></li>
+<li><p><strong>x_axis_name</strong> – The title to be used for x-axis in the S-curves plot.</p></li>
+<li><p><strong>x_log_scale</strong> – Whether to make x dimension log scaled. Default True.</p></li>
+<li><p><strong>x_major_gridlines_visible</strong> – Whether to show major gridlines along x. Default True.</p></li>
+<li><p><strong>x_minor_gridlines_visible</strong> – Whether to show minor gridlines along x. Default True.</p></li>
+<li><p><strong>x_axis_major_gridline_width</strong> – The width to use for the major gridlines. Default is 0.75.</p></li>
+<li><p><strong>x_axis_major_gridline_color</strong> – Color to use for gridlines. Default is “#F2F2F2”.</p></li>
+<li><p><strong>y_axis_name</strong> – The title to be used for the y-axis in the S-curves plot.</p></li>
+<li><p><strong>y_min</strong> – The minimum percentage value to show.</p></li>
+<li><p><strong>y_max</strong> – The maximum percentage value to show.</p></li>
+<li><p><strong>y_major_gridlines_visible</strong> – Whether to show major gridlines along y. Default True.</p></li>
+<li><p><strong>y_minor_gridlines_visible</strong> – Whether to show minor gridlines along y. Default False.</p></li>
+<li><p><strong>y_axis_major_gridline_width</strong> – The width to use for the major gridlines. Default is 0.75.</p></li>
+<li><p><strong>y_axis_major_gridline_color</strong> – Color to use for gridlines. Default is “#BFBFBF”.</p></li>
+<li><p><strong>show_legend</strong> – Whether to show legend on the plot. Default False.</p></li>
+<li><p><strong>excel_style</strong> – The style which excel uses for the plots.
+Default is 10, which is the default style used by excel.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.analysis.s_curves.s_curves">
+<span id="ichor-core-analysis-s-curves-s-curves-module"></span><h2>ichor.core.analysis.s_curves.s_curves module<a class="headerlink" href="#module-ichor.core.analysis.s_curves.s_curves" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.s_curves.calculate_s_curves">
+<span class="sig-name descname"><span class="pre">calculate_s_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_set_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.s_curves.calculate_s_curves" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates S-curves used to check model prediction performance.
+Writes the S-curves to an excel file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_location</strong> – A directory containing model files <code class="docutils literal notranslate"><span class="pre">.model</span></code></p></li>
+<li><p><strong>validation_set_location</strong> – A directory containing validation or test set points.
+These points should NOT be in the training set.</p></li>
+<li><p><strong>atoms</strong> – A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
+S-curves are made for all atoms in the system by default.</p></li>
+<li><p><strong>types</strong> – A list of property types, such as iqa, q00, etc. for which to make S-curves.
+S-curves are made for all properties in the model files.</p></li>
+<li><p><strong>kwargs</strong> – Any key word arguments that can be passed into the write_to_excel function
+to change how the S-curves excel file looks. See write_to_excel() method</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.s_curves.make_chart_settings">
+<span class="sig-name descname"><span class="pre">make_chart_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.s_curves.make_chart_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Takes in a dictionary of key word arguments that were passed
+into the <cite>write_to_excel</cite> function. Then, this function
+constructs dictionaries with parameter values to be passed
+to xlsx writer to configure graph settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>local_kwargs</strong> – A dictionary containing key word arguments
+that are parsed to construct the xlsx-writer graph settings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.s_curves.percentile">
+<span class="sig-name descname"><span class="pre">percentile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.analysis.s_curves.s_curves.percentile" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.s_curves.write_to_excel">
+<span class="sig-name descname"><span class="pre">write_to_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'s-curves.xlsx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Absolute</span> <span class="pre">Prediction</span> <span class="pre">Error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_log_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_major_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_minor_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_major_gridline_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_major_gridline_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#F2F2F2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_major_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_minor_gridlines_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_major_gridline_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_major_gridline_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#BFBFBF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excel_style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.s_curves.write_to_excel" title="Permalink to this definition"></a></dt>
+<dd><p>Writes out relevant information which is used to make s-curves to an excel file.
+It will make a separate sheet for every atom (and property). It
+also makes a <cite>Total</cite> sheet for every property, which gives
+an idea how the predictions do overall for the whole system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>true</strong> – a ModelsResult containing true values (as caluclated by AIMALL) for the validation/test set</p></li>
+<li><p><strong>predicted</strong> – a ModelsResult containing predicted values, given the validation/test set features</p></li>
+<li><p><strong>output_name</strong> – The name of the excel file to be written out.</p></li>
+<li><p><strong>x_axis_name</strong> – The title to be used for x-axis in the S-curves plot.</p></li>
+<li><p><strong>x_log_scale</strong> – Whether to make x dimension log scaled. Default True.</p></li>
+<li><p><strong>x_major_gridlines_visible</strong> – Whether to show major gridlines along x. Default True.</p></li>
+<li><p><strong>x_minor_gridlines_visible</strong> – Whether to show minor gridlines along x. Default True.</p></li>
+<li><p><strong>x_axis_major_gridline_width</strong> – The width to use for the major gridlines. Default is 0.75.</p></li>
+<li><p><strong>x_axis_major_gridline_color</strong> – Color to use for gridlines. Default is “#F2F2F2”.</p></li>
+<li><p><strong>y_axis_name</strong> – The title to be used for the y-axis in the S-curves plot.</p></li>
+<li><p><strong>y_min</strong> – The minimum percentage value to show.</p></li>
+<li><p><strong>y_max</strong> – The maximum percentage value to show.</p></li>
+<li><p><strong>y_major_gridlines_visible</strong> – Whether to show major gridlines along y. Default True.</p></li>
+<li><p><strong>y_minor_gridlines_visible</strong> – Whether to show minor gridlines along y. Default False.</p></li>
+<li><p><strong>y_axis_major_gridline_width</strong> – The width to use for the major gridlines. Default is 0.75.</p></li>
+<li><p><strong>y_axis_major_gridline_color</strong> – Color to use for gridlines. Default is “#BFBFBF”.</p></li>
+<li><p><strong>show_legend</strong> – Whether to show legend on the plot. Default False.</p></li>
+<li><p><strong>excel_style</strong> – The style which excel uses for the plots.
+Default is 10, which is the default style used by excel.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.analysis.s_curves">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.analysis.s_curves" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.calculate_compact_s_curves">
+<span class="sig-name descname"><span class="pre">calculate_compact_s_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_set_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.calculate_compact_s_curves" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates S-curves used to check model prediction performance. Writes the S-curves to an excel file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_location</strong> – A directory containing model files <code class="docutils literal notranslate"><span class="pre">.model</span></code></p></li>
+<li><p><strong>validation_set_location</strong> – A directory containing validation or test set points.
+These points should NOT be in the training set.</p></li>
+<li><p><strong>atoms</strong> – A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
+S-curves are made for all atoms in the system by default.</p></li>
+<li><p><strong>types</strong> – A list of property types, such as iqa, q00, etc. for which to make S-curves.
+S-curves are made for all properties in the model files.</p></li>
+<li><p><strong>kwargs</strong> – Any key word arguments that can be passed into the write_to_excel
+function to change how the S-curves excel file looks. See write_to_excel() method</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.analysis.s_curves.calculate_s_curves">
+<span class="sig-name descname"><span class="pre">calculate_s_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_set_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.analysis.s_curves.calculate_s_curves" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates S-curves used to check model prediction performance.
+Writes the S-curves to an excel file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_location</strong> – A directory containing model files <code class="docutils literal notranslate"><span class="pre">.model</span></code></p></li>
+<li><p><strong>validation_set_location</strong> – A directory containing validation or test set points.
+These points should NOT be in the training set.</p></li>
+<li><p><strong>atoms</strong> – A list of atom names, eg. O1, H2, C3, etc. for which to make S-curves.
+S-curves are made for all atoms in the system by default.</p></li>
+<li><p><strong>types</strong> – A list of property types, such as iqa, q00, etc. for which to make S-curves.
+S-curves are made for all properties in the model files.</p></li>
+<li><p><strong>kwargs</strong> – Any key word arguments that can be passed into the write_to_excel function
+to change how the S-curves excel file looks. See write_to_excel() method</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ichor.core.analysis.dlpoly.html" class="btn btn-neutral float-left" title="ichor.core.analysis.dlpoly package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.core.atoms.html" class="btn btn-neutral float-right" title="ichor.core.atoms package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

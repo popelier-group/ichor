@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PointsDirectory - A class used to encapsulate all calculations for many geometries (of a dataset) &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example for Gaussian Process Regression (GPR)" href="simple_gp.html" />
+    <link rel="prev" title="Calculating Features" href="calculating_features.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="calculating_features.html">Calculating Features</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code> - A class used to encapsulate all calculations for many geometries (of a dataset)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#PointDirectory-strucutre"><code class="docutils literal notranslate"><span class="pre">PointDirectory</span></code> strucutre</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Obtaining-Gaussian-results">Obtaining Gaussian results</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Obtaining-total-energy-from-PointsDirectory">Obtaining total energy from <code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Accessing-IQA-energy">Accessing IQA energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Accessing-Mulipole-Moments">Accessing Mulipole Moments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Converting-to-SQLite3-database">Converting to SQLite3 database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#SQLite-Database-Schema-Diagram">SQLite Database Schema Diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Generating-CSV-files-with-Features-from-SQLite3-Database">Generating CSV files with Features from SQLite3 Database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="simple_gp.html">Example for Gaussian Process Regression (GPR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_files.html">Working with <code class="docutils literal notranslate"><span class="pre">ichor</span></code> files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_gaussian_files.html">Working with Gaussian files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core/ichor.core.html">ichor.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code> - A class used to encapsulate all calculations for many geometries (of a dataset)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core_examples/points_directory.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="PointsDirectory---A-class-used-to-encapsulate-all-calculations-for-many-geometries-(of-a-dataset)">
+<h1><code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code> - A class used to encapsulate all calculations for many geometries (of a dataset)<a class="headerlink" href="#PointsDirectory---A-class-used-to-encapsulate-all-calculations-for-many-geometries-(of-a-dataset)" title="Permalink to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">ichor.core.files.PointsDirectory</span></code> class can be used to easily work with thousands of files which are generated when getting Gaussian, AIMAll, etc. calculations for many geometries.</p>
+<p>The general structure of a <code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code>-like directory is like so:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>.
+|--- SYSTEM0001
+|   |--- SYSTEM0001_atomicfiles
+|   |   |--- h2.int
+|   |   |--- h3.int
+|   |   |--- o1.int
+|   |--- SYSTEM0001.gjf
+|   |--- SYSTEM0001.wfn
+|--- SYSTEM0002
+|   |--- SYSTEM0002_atomicfiles
+|   |   |--- h2.int
+|   |   |--- h3.int
+|   |   |--- o1.int
+|   |--- SYSTEM0002.gjf
+|   |--- SYSTEM0002.wfn
+...
+...
+...
+</pre></div>
+</div>
+<p>Essentially, <code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code> is a classed that is used to parse a directory contains many sub-directories. Each sub-directory (e.g. <code class="docutils literal notranslate"><span class="pre">SYSTEM0001</span></code>, <code class="docutils literal notranslate"><span class="pre">SYSTEM0002</span></code>) contains all relevant calculations for <strong>one</strong> geometry. Each of the <em>sub-directories</em> can be individually read in as a <code class="docutils literal notranslate"><span class="pre">ichor.core.files.PointDirectory</span></code> instance (note that there is no <em>s</em> in this case.)</p>
+<p>This class makes it easy to access calculations for many geometries very easily. For example, it can be used if you want to get the <code class="docutils literal notranslate"><span class="pre">.wfn</span></code> energy of all geometries.</p>
+<section id="PointDirectory-strucutre">
+<h2><code class="docutils literal notranslate"><span class="pre">PointDirectory</span></code> strucutre<a class="headerlink" href="#PointDirectory-strucutre" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">PointDirectory</span></code> class encapsulates a directory, containing all relevant calculations for <strong>one</strong> geometry. It subclasses from <code class="docutils literal notranslate"><span class="pre">ichor.core.files.directory.AnnotatedDirectory</span></code>. This gives us the ability to define <em>class</em> variables, which are of specific file types. Then the <code class="docutils literal notranslate"><span class="pre">AnnotatedDirectory._parse</span></code> method is what parses all files in the directory. The extensions of the files determine what the file type, and thus the class which is going to be used to parse the file.</p>
+</section>
+<section id="Obtaining-Gaussian-results">
+<h2>Obtaining Gaussian results<a class="headerlink" href="#Obtaining-Gaussian-results" title="Permalink to this heading"></a></h2>
+<section id="Obtaining-total-energy-from-PointsDirectory">
+<h3>Obtaining total energy from <code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code><a class="headerlink" href="#Obtaining-total-energy-from-PointsDirectory" title="Permalink to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.files</span> <span class="kn">import</span> <span class="n">PointsDirectory</span>
+
+<span class="c1"># PointsDirectory(&quot;path_to_directory_with_wfn_and_int_files&quot;)</span>
+<span class="n">points_dir</span> <span class="o">=</span> <span class="n">PointsDirectory</span><span class="p">(</span><span class="s2">&quot;../../../example_files/urea_example_points_directory&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">point_directory</span> <span class="ow">in</span> <span class="n">points_dir</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">point_directory</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">point_directory</span><span class="o">.</span><span class="n">wfn</span><span class="o">.</span><span class="n">total_energy</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+urea0000 -225.17620443033
+urea0001 -225.081384781131
+</pre></div></div>
+</div>
+</section>
+<section id="Accessing-IQA-energy">
+<h3>Accessing IQA energy<a class="headerlink" href="#Accessing-IQA-energy" title="Permalink to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">point_directory</span> <span class="ow">in</span> <span class="n">points_dir</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">point_directory</span><span class="o">.</span><span class="n">ints</span><span class="o">.</span><span class="n">iqa</span><span class="p">)</span>
+
+<span class="c1"># note that this is for A A&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;C1&#39;: -37.857821914, &#39;O2&#39;: -75.361149077, &#39;N3&#39;: -54.974866964, &#39;N4&#39;: -54.940748886, &#39;H5&#39;: -0.51125155556, &#39;H6&#39;: -0.52313765036, &#39;H7&#39;: -0.498359498, &#39;H8&#39;: -0.50876638824}
+{&#39;C1&#39;: -37.82774214, &#39;O2&#39;: -75.372219569, &#39;N3&#39;: -54.930291248, &#39;N4&#39;: -54.950141186, &#39;H5&#39;: -0.49270810195, &#39;H6&#39;: -0.5019590637, &#39;H7&#39;: -0.51138493187, &#39;H8&#39;: -0.49501200059}
+</pre></div></div>
+</div>
+</section>
+<section id="Accessing-Mulipole-Moments">
+<h3>Accessing Mulipole Moments<a class="headerlink" href="#Accessing-Mulipole-Moments" title="Permalink to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">point_directory</span> <span class="ow">in</span> <span class="n">points_dir</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">point_directory</span><span class="o">.</span><span class="n">ints</span><span class="o">.</span><span class="n">global_spherical_multipoles</span><span class="p">)</span>
+
+<span class="c1"># note these are not rotated</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;C1&#39;: {&#39;q00&#39;: 2.0566949812, &#39;q10&#39;: 0.43547872781, &#39;q11c&#39;: -0.11072742898, &#39;q11s&#39;: -0.058793978143, &#39;q20&#39;: 0.26199432667, &#39;q21c&#39;: -0.19584871924, &#39;q21s&#39;: 0.060993929677, &#39;q22c&#39;: -0.34915275413, &#39;q22s&#39;: 0.7005351433, &#39;q30&#39;: -0.46399151978, &#39;q31c&#39;: -0.076106962971, &#39;q31s&#39;: -0.63067578604, &#39;q32c&#39;: 0.13837424126, &#39;q32s&#39;: -0.19269925576, &#39;q33c&#39;: -0.32411444133, &#39;q33s&#39;: 0.086714013101, &#39;q40&#39;: -0.08844184554, &#39;q41c&#39;: 0.68304098201, &#39;q41s&#39;: 0.28844244849, &#39;q42c&#39;: 0.38965399325, &#39;q42s&#39;: -0.9370677379, &#39;q43c&#39;: 0.01477248443, &#39;q43s&#39;: 0.56492211508, &#39;q44c&#39;: 0.86785954459, &#39;q44s&#39;: 1.2164272089, &#39;q50&#39;: 0.64442652355, &#39;q51c&#39;: -1.0766687502, &#39;q51s&#39;: 1.0621360834, &#39;q52c&#39;: -1.6117534507, &#39;q52s&#39;: 0.71110515289, &#39;q53c&#39;: -2.0172675763, &#39;q53s&#39;: -0.29786028162, &#39;q54c&#39;: 0.087737831647, &#39;q54s&#39;: -0.1413840078, &#39;q55c&#39;: -0.42342204159, &#39;q55s&#39;: 1.7161766165}, &#39;O2&#39;: {&#39;q00&#39;: -1.3289438603, &#39;q10&#39;: 0.386303531, &#39;q11c&#39;: -0.17380989349, &#39;q11s&#39;: -0.23541024678, &#39;q20&#39;: 0.094856993798, &#39;q21c&#39;: -0.12768108116, &#39;q21s&#39;: -0.12888959789, &#39;q22c&#39;: -0.054080632214, &#39;q22s&#39;: 0.14341100948, &#39;q30&#39;: -0.56169834095, &#39;q31c&#39;: 0.025492352376, &#39;q31s&#39;: -0.54447927966, &#39;q32c&#39;: 0.24943439072, &#39;q32s&#39;: -0.37438174775, &#39;q33c&#39;: -0.7181896584, &#39;q33s&#39;: 0.18546803232, &#39;q40&#39;: -0.015574167275, &#39;q41c&#39;: -0.27054481906, &#39;q41s&#39;: -0.12105959135, &#39;q42c&#39;: -0.0040362847357, &#39;q42s&#39;: 0.51479988034, &#39;q43c&#39;: 0.30220869747, &#39;q43s&#39;: -0.087089144118, &#39;q44c&#39;: -0.08970047212, &#39;q44s&#39;: -0.0073722013641, &#39;q50&#39;: 3.2925234061, &#39;q51c&#39;: -1.1543893984, &#39;q51s&#39;: 0.53864717252, &#39;q52c&#39;: 0.37827387442, &#39;q52s&#39;: -1.8988245203, &#39;q53c&#39;: -0.46371379216, &#39;q53s&#39;: 0.35005389259, &#39;q54c&#39;: -0.59516566111, &#39;q54s&#39;: -1.2812347982, &#39;q55c&#39;: -0.20149642951, &#39;q55s&#39;: 1.769480939}, &#39;N3&#39;: {&#39;q00&#39;: -1.2598608886, &#39;q10&#39;: 0.098901567824, &#39;q11c&#39;: 0.054759794001, &#39;q11s&#39;: 0.043907049624, &#39;q20&#39;: 0.33917882537, &#39;q21c&#39;: -0.91956171474, &#39;q21s&#39;: 0.66733273867, &#39;q22c&#39;: -0.18855241535, &#39;q22s&#39;: 0.76629366828, &#39;q30&#39;: -0.28624877198, &#39;q31c&#39;: 0.51462527773, &#39;q31s&#39;: 0.31968073299, &#39;q32c&#39;: -1.5714010073, &#39;q32s&#39;: 0.050939386788, &#39;q33c&#39;: 0.32834914726, &#39;q33s&#39;: -0.08770125847, &#39;q40&#39;: -1.8384725306, &#39;q41c&#39;: -0.63287638434, &#39;q41s&#39;: 0.76004963653, &#39;q42c&#39;: -0.047834318164, &#39;q42s&#39;: 0.88919457432, &#39;q43c&#39;: -1.1023362153, &#39;q43s&#39;: -0.32512854014, &#39;q44c&#39;: 1.3835339014, &#39;q44s&#39;: 0.72772192284, &#39;q50&#39;: -2.502648618, &#39;q51c&#39;: -1.1353321539, &#39;q51s&#39;: 1.1581830363, &#39;q52c&#39;: -3.0147758785, &#39;q52s&#39;: -2.0005424131, &#39;q53c&#39;: -0.51567493182, &#39;q53s&#39;: 0.35902708993, &#39;q54c&#39;: 0.99457439907, &#39;q54s&#39;: 1.2246015484, &#39;q55c&#39;: 1.3600929816, &#39;q55s&#39;: -3.1478716033}, &#39;N4&#39;: {&#39;q00&#39;: -1.1721805322, &#39;q10&#39;: 0.11511888977, &#39;q11c&#39;: -0.054371889055, &#39;q11s&#39;: 0.0056497988968, &#39;q20&#39;: 1.0107168484, &#39;q21c&#39;: -0.43619436684, &#39;q21s&#39;: 0.54382981834, &#39;q22c&#39;: 0.19290198507, &#39;q22s&#39;: 1.3577237487, &#39;q30&#39;: -0.24811590352, &#39;q31c&#39;: 1.2838497337, &#39;q31s&#39;: 0.26648701586, &#39;q32c&#39;: -0.61177240283, &#39;q32s&#39;: -0.76587952972, &#39;q33c&#39;: 0.16862819943, &#39;q33s&#39;: -0.79934976237, &#39;q40&#39;: 0.42146234742, &#39;q41c&#39;: -2.0279646385, &#39;q41s&#39;: -2.8527925224, &#39;q42c&#39;: 0.9446245129, &#39;q42s&#39;: -1.1974195476, &#39;q43c&#39;: 0.14708389261, &#39;q43s&#39;: 0.67850235361, &#39;q44c&#39;: -1.0954516499, &#39;q44s&#39;: 1.3123373922, &#39;q50&#39;: -2.9849794603, &#39;q51c&#39;: 0.89758977658, &#39;q51s&#39;: 0.73517598528, &#39;q52c&#39;: 1.6913423703, &#39;q52s&#39;: 0.098901296055, &#39;q53c&#39;: 1.2938041016, &#39;q53s&#39;: 1.8271204942, &#39;q54c&#39;: 1.0031447709, &#39;q54s&#39;: 1.6454656562, &#39;q55c&#39;: 0.24209735239, &#39;q55s&#39;: 1.3122411815}, &#39;H5&#39;: {&#39;q00&#39;: 0.46214005678, &#39;q10&#39;: 0.032080899883, &#39;q11c&#39;: 0.1569736714, &#39;q11s&#39;: 0.11946778562, &#39;q20&#39;: 0.01244188918, &#39;q21c&#39;: -0.0057911484904, &#39;q21s&#39;: -0.0054828195888, &#39;q22c&#39;: -0.0082868252996, &#39;q22s&#39;: -0.024329065029, &#39;q30&#39;: 0.026830285302, &#39;q31c&#39;: 0.039594947741, &#39;q31s&#39;: 0.031865127622, &#39;q32c&#39;: -0.00074186226834, &#39;q32s&#39;: -0.035373685306, &#39;q33c&#39;: 0.043536514896, &#39;q33s&#39;: -0.096124087257, &#39;q40&#39;: 0.042039304328, &#39;q41c&#39;: -0.08347228299, &#39;q41s&#39;: -0.076583962109, &#39;q42c&#39;: -0.021544575676, &#39;q42s&#39;: -0.08646968271, &#39;q43c&#39;: -0.079639262133, &#39;q43s&#39;: 0.074620615589, &#39;q44c&#39;: -0.2553203192, &#39;q44s&#39;: 0.13959961145, &#39;q50&#39;: -0.208980925, &#39;q51c&#39;: 0.028954837126, &#39;q51s&#39;: 0.012892422289, &#39;q52c&#39;: 0.025253353256, &#39;q52s&#39;: 0.2624042033, &#39;q53c&#39;: -0.026199025772, &#39;q53s&#39;: 0.089796591545, &#39;q54c&#39;: 0.27891350168, &#39;q54s&#39;: 0.020631565338, &#39;q55c&#39;: 0.65275097722, &#39;q55s&#39;: 0.085778210285}, &#39;H6&#39;: {&#39;q00&#39;: 0.39721900164, &#39;q10&#39;: 0.17632419715, &#39;q11c&#39;: -0.080608640099, &#39;q11s&#39;: -0.032784973449, &#39;q20&#39;: 0.020097024202, &#39;q21c&#39;: -0.023778750733, &#39;q21s&#39;: -0.00015923912606, &#39;q22c&#39;: 0.0060371476891, &#39;q22s&#39;: 0.0017105723658, &#39;q30&#39;: -0.11094144903, &#39;q31c&#39;: 0.17840175986, &#39;q31s&#39;: 0.036415396939, &#39;q32c&#39;: -0.064836144397, &#39;q32s&#39;: -0.061458491887, &#39;q33c&#39;: 0.0010309687533, &#39;q33s&#39;: 0.026810911691, &#39;q40&#39;: 0.14405917184, &#39;q41c&#39;: -0.30435438823, &#39;q41s&#39;: -0.024486606291, &#39;q42c&#39;: 0.15042466151, &#39;q42s&#39;: 0.13225976928, &#39;q43c&#39;: -0.0059068307484, &#39;q43s&#39;: -0.10983708168, &#39;q44c&#39;: -0.041417415491, &#39;q44s&#39;: 0.029413348478, &#39;q50&#39;: -0.23225563491, &#39;q51c&#39;: 0.27221367062, &#39;q51s&#39;: -0.068958695854, &#39;q52c&#39;: -0.088023172088, &#39;q52s&#39;: -0.059586687899, &#39;q53c&#39;: 0.018224803216, &#39;q53s&#39;: 0.12193122823, &#39;q54c&#39;: 0.11987725284, &#39;q54s&#39;: -0.068814266304, &#39;q55c&#39;: -0.085044833381, &#39;q55s&#39;: -0.017832612975}, &#39;H7&#39;: {&#39;q00&#39;: 0.50655138763, &#39;q10&#39;: -0.12706189336, &#39;q11c&#39;: 0.0032232241511, &#39;q11s&#39;: -0.10035909855, &#39;q20&#39;: 0.0016170832799, &#39;q21c&#39;: -0.0011187196964, &#39;q21s&#39;: 0.01136647971, &#39;q22c&#39;: -0.006728645847, &#39;q22s&#39;: -0.0058451371008, &#39;q30&#39;: -0.0070695655129, &#39;q31c&#39;: -0.015182084393, &#39;q31s&#39;: 0.12172840138, &#39;q32c&#39;: -0.097312460422, &#39;q32s&#39;: -0.0079609091862, &#39;q33c&#39;: 0.0028085900308, &#39;q33s&#39;: -0.033567580515, &#39;q40&#39;: -0.11266695354, &#39;q41c&#39;: -0.054528933863, &#39;q41s&#39;: 0.13025725462, &#39;q42c&#39;: -0.2110009388, &#39;q42s&#39;: -0.015548241329, &#39;q43c&#39;: -0.014141819768, &#39;q43s&#39;: -0.12977811801, &#39;q44c&#39;: 0.033518052986, &#39;q44s&#39;: -0.012160491892, &#39;q50&#39;: -0.23409315132, &#39;q51c&#39;: -0.13686537268, &#39;q51s&#39;: -0.0219653365, &#39;q52c&#39;: -0.20946282555, &#39;q52s&#39;: -0.056918862895, &#39;q53c&#39;: -0.063356131275, &#39;q53s&#39;: -0.25711192952, &#39;q54c&#39;: 0.10260972433, &#39;q54s&#39;: -0.070505278806, &#39;q55c&#39;: 0.040890311773, &#39;q55s&#39;: 0.0027721376512}, &#39;H8&#39;: {&#39;q00&#39;: 0.33850135184, &#39;q10&#39;: 0.1074302751, &#39;q11c&#39;: -0.11074837242, &#39;q11s&#39;: -0.024537697573, &#39;q20&#39;: 0.061019388555, &#39;q21c&#39;: -0.080667650295, &#39;q21s&#39;: 0.056721420038, &#39;q22c&#39;: 0.013228445034, &#39;q22s&#39;: -0.0073580845522, &#39;q30&#39;: 0.017777703781, &#39;q31c&#39;: 0.18282883612, &#39;q31s&#39;: -0.062996641086, &#39;q32c&#39;: -0.11960800386, &#39;q32s&#39;: -0.02360816312, &#39;q33c&#39;: 0.071042308401, &#39;q33s&#39;: 0.038855078333, &#39;q40&#39;: -0.10064186934, &#39;q41c&#39;: 0.065045125119, &#39;q41s&#39;: 0.035883527056, &#39;q42c&#39;: 0.091572250207, &#39;q42s&#39;: 0.13196588601, &#39;q43c&#39;: -0.10124629675, &#39;q43s&#39;: -0.16476700296, &#39;q44c&#39;: 0.097744666134, &#39;q44s&#39;: 0.087035467535, &#39;q50&#39;: -0.42431038503, &#39;q51c&#39;: -0.40351171141, &#39;q51s&#39;: -0.006886507174, &#39;q52c&#39;: 0.36769022627, &#39;q52s&#39;: -0.38336706262, &#39;q53c&#39;: -0.36561397545, &#39;q53s&#39;: 0.26909328162, &#39;q54c&#39;: 0.090118404559, &#39;q54s&#39;: -0.30269128031, &#39;q55c&#39;: 0.1144674338, &#39;q55s&#39;: 0.057839409629}}
+{&#39;C1&#39;: {&#39;q00&#39;: 1.7951873342, &#39;q10&#39;: 0.27652031472, &#39;q11c&#39;: 0.28552083675, &#39;q11s&#39;: 0.24360429672, &#39;q20&#39;: 0.3839777304, &#39;q21c&#39;: -0.42433097507, &#39;q21s&#39;: -0.23733864639, &#39;q22c&#39;: 0.050568194616, &#39;q22s&#39;: -0.62250994887, &#39;q30&#39;: -0.62156433629, &#39;q31c&#39;: -0.22316006521, &#39;q31s&#39;: 0.34279144145, &#39;q32c&#39;: 0.34008133686, &#39;q32s&#39;: -0.47389549532, &#39;q33c&#39;: -0.38537061861, &#39;q33s&#39;: 0.1393410041, &#39;q40&#39;: 0.52941944519, &#39;q41c&#39;: 1.1064086026, &#39;q41s&#39;: 0.28349876963, &#39;q42c&#39;: 0.102098474, &#39;q42s&#39;: 0.52035006849, &#39;q43c&#39;: -0.28606860021, &#39;q43s&#39;: -0.38119189031, &#39;q44c&#39;: 1.0336919783, &#39;q44s&#39;: 0.34575023821, &#39;q50&#39;: 0.49102994097, &#39;q51c&#39;: -1.7504536118, &#39;q51s&#39;: -0.9660064956, &#39;q52c&#39;: -2.0611444338, &#39;q52s&#39;: 0.26473706483, &#39;q53c&#39;: 1.709567989, &#39;q53s&#39;: -2.0707576924, &#39;q54c&#39;: 1.7113719005, &#39;q54s&#39;: 1.6896079268, &#39;q55c&#39;: -0.12900957025, &#39;q55s&#39;: -1.8992345115}, &#39;O2&#39;: {&#39;q00&#39;: -1.0655877102, &#39;q10&#39;: 0.26812384368, &#39;q11c&#39;: -0.013396019141, &#39;q11s&#39;: 0.11037464713, &#39;q20&#39;: 0.059920005288, &#39;q21c&#39;: -0.30559908175, &#39;q21s&#39;: 0.364526727, &#39;q22c&#39;: 0.091546901881, &#39;q22s&#39;: -0.14902848597, &#39;q30&#39;: -0.5378893327, &#39;q31c&#39;: -0.050513983401, &#39;q31s&#39;: 0.23574614621, &#39;q32c&#39;: 0.35549317104, &#39;q32s&#39;: -0.13426944793, &#39;q33c&#39;: -0.45086650162, &#39;q33s&#39;: -0.31963421859, &#39;q40&#39;: 0.34579864309, &#39;q41c&#39;: -0.19156917225, &#39;q41s&#39;: 0.4507075207, &#39;q42c&#39;: -0.91364304173, &#39;q42s&#39;: 0.54188595627, &#39;q43c&#39;: 0.25171159153, &#39;q43s&#39;: -1.1650854504, &#39;q44c&#39;: -0.16657318331, &#39;q44s&#39;: 0.21309797148, &#39;q50&#39;: 0.32485564471, &#39;q51c&#39;: -3.5175307667, &#39;q51s&#39;: 1.2862660813, &#39;q52c&#39;: 1.1512793155, &#39;q52s&#39;: -0.22378521716, &#39;q53c&#39;: 1.0356310568, &#39;q53s&#39;: -1.0857116747, &#39;q54c&#39;: -1.0684242108, &#39;q54s&#39;: 2.1583353557, &#39;q55c&#39;: 0.80215697014, &#39;q55s&#39;: -1.441442288}, &#39;N3&#39;: {&#39;q00&#39;: -1.2743108248, &#39;q10&#39;: 0.026526611162, &#39;q11c&#39;: 0.1583673751, &#39;q11s&#39;: 0.087072598752, &#39;q20&#39;: 0.59053687586, &#39;q21c&#39;: -0.52992819078, &#39;q21s&#39;: -0.42493764441, &#39;q22c&#39;: 0.93260903172, &#39;q22s&#39;: -0.56138871272, &#39;q30&#39;: 1.0956392462, &#39;q31c&#39;: 0.3125079609, &#39;q31s&#39;: 0.14644459842, &#39;q32c&#39;: -0.52559029361, &#39;q32s&#39;: -0.38218770981, &#39;q33c&#39;: 0.78240328204, &#39;q33s&#39;: -0.15506907229, &#39;q40&#39;: 1.8223832123, &#39;q41c&#39;: 2.1606330938, &#39;q41s&#39;: -0.33844787583, &#39;q42c&#39;: 0.74504129736, &#39;q42s&#39;: -0.28080526625, &#39;q43c&#39;: -0.13857183147, &#39;q43s&#39;: 0.12161085757, &#39;q44c&#39;: 2.1272254632, &#39;q44s&#39;: -0.14275504822, &#39;q50&#39;: -1.414631931, &#39;q51c&#39;: 1.5186017592, &#39;q51s&#39;: -1.420860458, &#39;q52c&#39;: -0.84488906157, &#39;q52s&#39;: 2.0960544331, &#39;q53c&#39;: -0.30720022829, &#39;q53s&#39;: -1.3494534636, &#39;q54c&#39;: -0.40300817778, &#39;q54s&#39;: 2.3444107732, &#39;q55c&#39;: -0.5026925249, &#39;q55s&#39;: -1.0383643698}, &#39;N4&#39;: {&#39;q00&#39;: -1.0891989603, &#39;q10&#39;: 0.11832667434, &#39;q11c&#39;: 0.11896280951, &#39;q11s&#39;: -0.094834581748, &#39;q20&#39;: -0.2428172234, &#39;q21c&#39;: -0.36647901046, &#39;q21s&#39;: 0.11782410701, &#39;q22c&#39;: 0.2622136601, &#39;q22s&#39;: 0.1158029642, &#39;q30&#39;: -0.42880199292, &#39;q31c&#39;: -0.65384916362, &#39;q31s&#39;: 0.025247869697, &#39;q32c&#39;: -0.43632330281, &#39;q32s&#39;: 0.49345492305, &#39;q33c&#39;: -0.088327135115, &#39;q33s&#39;: -0.4030209026, &#39;q40&#39;: -0.7169875659, &#39;q41c&#39;: 0.48584338681, &#39;q41s&#39;: -0.78997330921, &#39;q42c&#39;: -1.0970218336, &#39;q42s&#39;: 0.95079163411, &#39;q43c&#39;: -2.1717527634, &#39;q43s&#39;: 0.35276224924, &#39;q44c&#39;: -0.39342075162, &#39;q44s&#39;: -2.3431270195, &#39;q50&#39;: 0.9986023452, &#39;q51c&#39;: -0.015822518431, &#39;q51s&#39;: -2.8611732431, &#39;q52c&#39;: 1.658851666, &#39;q52s&#39;: -2.7089201448, &#39;q53c&#39;: -0.60134227401, &#39;q53s&#39;: 0.67508244626, &#39;q54c&#39;: -1.0918444315, &#39;q54s&#39;: -1.6823032383, &#39;q55c&#39;: 0.95968234022, &#39;q55s&#39;: -2.1509940719}, &#39;H5&#39;: {&#39;q00&#39;: 0.38484703203, &#39;q10&#39;: -0.079689917359, &#39;q11c&#39;: -0.070214393438, &#39;q11s&#39;: -0.13654853621, &#39;q20&#39;: 0.041710047322, &#39;q21c&#39;: 0.01766333798, &#39;q21s&#39;: 0.0225615107, &#39;q22c&#39;: 0.020914838348, &#39;q22s&#39;: 0.0080121351138, &#39;q30&#39;: -0.025825609548, &#39;q31c&#39;: -0.0054198452796, &#39;q31s&#39;: 0.058647958456, &#39;q32c&#39;: -0.044297993198, &#39;q32s&#39;: 0.10419478377, &#39;q33c&#39;: -0.066428834924, &#39;q33s&#39;: 0.0098444220097, &#39;q40&#39;: -0.025856704037, &#39;q41c&#39;: -0.091993605275, &#39;q41s&#39;: -0.081311188629, &#39;q42c&#39;: -0.044740696354, &#39;q42s&#39;: -0.068310166745, &#39;q43c&#39;: -0.156454053, &#39;q43s&#39;: -0.0002470384998, &#39;q44c&#39;: -0.048816876273, &#39;q44s&#39;: -0.12537969099, &#39;q50&#39;: 0.10016330152, &#39;q51c&#39;: 0.10107509147, &#39;q51s&#39;: -0.0039910658058, &#39;q52c&#39;: 0.11794185165, &#39;q52s&#39;: -0.37716842751, &#39;q53c&#39;: 0.32357220049, &#39;q53s&#39;: -0.12758790649, &#39;q54c&#39;: -0.057858212159, &#39;q54s&#39;: -0.14940267872, &#39;q55c&#39;: 0.1421856919, &#39;q55s&#39;: -0.12352749528}, &#39;H6&#39;: {&#39;q00&#39;: 0.38299508315, &#39;q10&#39;: 0.030267360415, &#39;q11c&#39;: -0.18931759763, &#39;q11s&#39;: 0.071138387373, &#39;q20&#39;: 0.0084357047562, &#39;q21c&#39;: 0.045307081098, &#39;q21s&#39;: -0.030741113123, &#39;q22c&#39;: -0.0016034575068, &#39;q22s&#39;: -0.0019772532505, &#39;q30&#39;: -0.046219449723, &#39;q31c&#39;: -0.063724853118, &#39;q31s&#39;: 0.013809608775, &#39;q32c&#39;: -0.025954440216, &#39;q32s&#39;: -0.053284000603, &#39;q33c&#39;: 0.032926680888, &#39;q33s&#39;: -0.10958479059, &#39;q40&#39;: 0.068494451205, &#39;q41c&#39;: 0.026549796971, &#39;q41s&#39;: 0.045697850753, &#39;q42c&#39;: -0.059154712553, &#39;q42s&#39;: 0.057057929804, &#39;q43c&#39;: -0.14989210845, &#39;q43s&#39;: 0.026378460156, &#39;q44c&#39;: -0.0231104484, &#39;q44s&#39;: -0.16419682404, &#39;q50&#39;: -0.10450493577, &#39;q51c&#39;: 0.035581660887, &#39;q51s&#39;: -0.082911270419, &#39;q52c&#39;: 0.25297634633, &#39;q52s&#39;: -0.044231378898, &#39;q53c&#39;: 0.13716650231, &#39;q53s&#39;: -0.061628073765, &#39;q54c&#39;: -0.14965616135, &#39;q54s&#39;: 0.21124938109, &#39;q55c&#39;: -0.0048917723609, &#39;q55s&#39;: -0.063340959358}, &#39;H7&#39;: {&#39;q00&#39;: 0.45163080956, &#39;q10&#39;: -0.16898689273, &#39;q11c&#39;: -0.018781605474, &#39;q11s&#39;: 0.012224858144, &#39;q20&#39;: 0.030667606878, &#39;q21c&#39;: -0.016761765978, &#39;q21s&#39;: 0.0081831833595, &#39;q22c&#39;: -0.0031008638285, &#39;q22s&#39;: -0.011263660194, &#39;q30&#39;: 0.16882399794, &#39;q31c&#39;: 0.012768482621, &#39;q31s&#39;: -0.014802688435, &#39;q32c&#39;: 0.011478017576, &#39;q32s&#39;: -0.048835530142, &#39;q33c&#39;: 0.0022797221635, &#39;q33s&#39;: 0.015593921198, &#39;q40&#39;: 0.21389349224, &#39;q41c&#39;: 0.11423821867, &#39;q41s&#39;: -0.079161892171, &#39;q42c&#39;: 0.058224664492, &#39;q42s&#39;: -0.12270075558, &#39;q43c&#39;: 0.011761070585, &#39;q43s&#39;: 0.036276144041, &#39;q44c&#39;: 0.005023183128, &#39;q44s&#39;: -0.0036564871571, &#39;q50&#39;: -0.028106290313, &#39;q51c&#39;: 0.33677792384, &#39;q51s&#39;: -0.19881994689, &#39;q52c&#39;: 0.15156961958, &#39;q52s&#39;: -0.18598542561, &#39;q53c&#39;: 0.063615053553, &#39;q53s&#39;: 0.01425384793, &#39;q54c&#39;: 0.08139847425, &#39;q54s&#39;: 0.013666776696, &#39;q55c&#39;: -0.055402550375, &#39;q55s&#39;: -0.0074996539352}, &#39;H8&#39;: {&#39;q00&#39;: 0.41412720197, &#39;q10&#39;: 0.10444468682, &#39;q11c&#39;: -0.19213109508, &#39;q11s&#39;: 0.00088329833685, &#39;q20&#39;: 0.016006764152, &#39;q21c&#39;: 0.019666331795, &#39;q21s&#39;: -0.019484879086, &#39;q22c&#39;: -0.033879267568, &#39;q22s&#39;: 0.0071782468992, &#39;q30&#39;: 0.035521058858, &#39;q31c&#39;: 0.038716514918, &#39;q31s&#39;: 0.053338040117, &#39;q32c&#39;: -0.077702529624, &#39;q32s&#39;: -0.044247186709, &#39;q33c&#39;: 0.061846730843, &#39;q33s&#39;: 0.0072670463623, &#39;q40&#39;: -0.050383804583, &#39;q41c&#39;: 0.074484013971, &#39;q41s&#39;: -0.068634298762, &#39;q42c&#39;: 0.067806482949, &#39;q42s&#39;: 0.1372087269, &#39;q43c&#39;: -0.19771914077, &#39;q43s&#39;: -0.050155355131, &#39;q44c&#39;: 0.18688738356, &#39;q44s&#39;: -0.0096239974854, &#39;q50&#39;: -0.15497049467, &#39;q51c&#39;: -0.031633811195, &#39;q51s&#39;: -0.015413390347, &#39;q52c&#39;: 0.090844452891, &#39;q52s&#39;: -0.21261145123, &#39;q53c&#39;: 0.10489586553, &#39;q53s&#39;: 0.19801369663, &#39;q54c&#39;: -0.42085633739, &#39;q54s&#39;: 0.042727742015, &#39;q55c&#39;: 0.43214218017, &#39;q55s&#39;: -0.095304277372}}
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Converting-to-SQLite3-database">
+<h2>Converting to SQLite3 database<a class="headerlink" href="#Converting-to-SQLite3-database" title="Permalink to this heading"></a></h2>
+<p>Reading thousands of files every time is very time consuming (especially on hard drives), so it is much more efficient to read the data once and store it in a database. <code class="docutils literal notranslate"><span class="pre">ichor</span></code> has SQLite3 support implemented, meaning a <code class="docutils literal notranslate"><span class="pre">PointsDirecotry</span></code> can be readily converted to an SQLite3 database. <strong>NOTE: ONLY RAW DATA FROM CALCULATIONS IS STORED IN THE DATABSE. NO POSTPROCESSING IS DONE. ANY POSTPROCESSING MUST BE DONE AT A LATER STEP (e.g. rotating multipole moments).</strong></p>
+<p>Code snipped to produce database:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.files</span> <span class="kn">import</span> <span class="n">PointsDirectory</span>
+
+<span class="n">pd</span> <span class="o">=</span> <span class="n">PointsDirectory</span><span class="p">(</span><span class="s2">&quot;points_directory_path&quot;</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">write_to_sqlite3_database</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Note 1: It takes a while to read all files, so this should be submitted on compute.</strong></p>
+<p><strong>Note 2: If the dataset is large and split into many ``PointsDirectory``-like directories, then you can do</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.files</span> <span class="kn">import</span> <span class="n">PointsDirectory</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">parent_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;parent_dir&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">parent_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+
+    <span class="n">pd</span> <span class="o">=</span> <span class="n">PointsDirectory</span><span class="p">(</span><span class="s2">&quot;points_directory_path&quot;</span><span class="p">)</span>
+    <span class="n">pd</span><span class="o">.</span><span class="n">write_to_sqlite3_database</span><span class="p">(</span><span class="s2">&quot;large_database.db&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where all the information will be stored into one database.</p>
+</section>
+<section id="SQLite-Database-Schema-Diagram">
+<h2>SQLite Database Schema Diagram<a class="headerlink" href="#SQLite-Database-Schema-Diagram" title="Permalink to this heading"></a></h2>
+<p>The following is that the schema diagram looks like for the table currently. The image was made with DBVisualizer. Note that these <strong>all</strong> fields might not be populated if the database. That depends on the raw data that is present in the <code class="docutils literal notranslate"><span class="pre">PointsDirectory</span></code>. For example, if only Gaussian are ran, then the AIMAll-related data will be missing from the database.</p>
+<p>Below is a diagram of the SQLite3 Database, made with DbVisualizer <img alt="alt text" src="../_images/sql_database_schema.svg" /></p>
+</section>
+<section id="Generating-CSV-files-with-Features-from-SQLite3-Database">
+<h2>Generating CSV files with Features from SQLite3 Database<a class="headerlink" href="#Generating-CSV-files-with-Features-from-SQLite3-Database" title="Permalink to this heading"></a></h2>
+<p>CSV files containing (ALF) features and relevant outputs can be generated from an SQLite3 database like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.sql.query_database</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_alf_from_first_db_geometry</span><span class="p">,</span>
+    <span class="n">write_processed_data_for_atoms_parallel</span><span class="p">,</span>
+    <span class="n">write_processed_data_for_atoms</span>
+<span class="p">)</span>
+
+<span class="n">db_path</span> <span class="o">=</span> <span class="s2">&quot;DATABASE_PATH&quot;</span>
+
+<span class="c1"># note that you can also define an ALF manually as well</span>
+<span class="c1"># or get it from some other molecular geometry</span>
+<span class="c1"># that contains the same atom sequencing as in the database</span>
+<span class="n">alf</span> <span class="o">=</span> <span class="n">get_alf_from_first_db_geometry</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span>
+
+<span class="c1"># note that this will write files out in parallel</span>
+<span class="c1"># use write_processed_data_for_atoms for serial</span>
+
+<span class="n">write_processed_data_for_atoms_parallel</span><span class="p">(</span>
+    <span class="n">db_path</span><span class="p">,</span>
+    <span class="n">alf</span><span class="p">,</span>
+    <span class="n">ncores</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">calc_multipoles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># rotates multipoles using C matrix</span>
+    <span class="n">calc_forces</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1"># rotates forces using C matrix, note that this takes a while</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="calculating_features.html" class="btn btn-neutral float-left" title="Calculating Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="simple_gp.html" class="btn btn-neutral float-right" title="Example for Gaussian Process Regression (GPR)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

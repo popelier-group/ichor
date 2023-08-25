@@ -36,5 +36,6 @@ repos:
     rev: v1.1.13
     hooks:
     -   id: forbid-crlf
+        exclude: (docs/build)
     -   id: forbid-tabs
         exclude: ^(docs/source/_static/*)|(docs/Makefile)|(docs/build)

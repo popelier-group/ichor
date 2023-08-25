@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ichor.core.calculators package &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ichor.core.calculators.alf package" href="ichor.core.calculators.alf.html" />
+    <link rel="prev" title="ichor.core.atoms package" href="ichor.core.atoms.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.core.html">ichor.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.analysis.html">ichor.core.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.core.calculators package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.calculators.alf_features_to_coordinates_calculator">ichor.core.calculators.alf_features_to_coordinates_calculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.calculators.c_matrix_calculator">ichor.core.calculators.c_matrix_calculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.calculators.geometry_calculator">ichor.core.calculators.geometry_calculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.calculators.spherical_to_cartesian_calculator">ichor.core.calculators.spherical_to_cartesian_calculator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.calculators">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.core.html#module-ichor.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.html">ichor.core package</a></li>
+      <li class="breadcrumb-item active">ichor.core.calculators package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core/ichor.core.calculators.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="ichor-core-calculators-package">
+<h1>ichor.core.calculators package<a class="headerlink" href="#ichor-core-calculators-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ichor.core.calculators.alf.html">ichor.core.calculators.alf package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ichor.core.calculators.connectivity.html">ichor.core.calculators.connectivity package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ichor.core.calculators.features.html">ichor.core.calculators.features package</a></li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.calculators.alf_features_to_coordinates_calculator">
+<span id="ichor-core-calculators-alf-features-to-coordinates-calculator-module"></span><h2>ichor.core.calculators.alf_features_to_coordinates_calculator module<a class="headerlink" href="#module-ichor.core.calculators.alf_features_to_coordinates_calculator" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.alf_features_to_coordinates_calculator.alf_features_to_coordinates">
+<span class="sig-name descname"><span class="pre">alf_features_to_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.alf_features_to_coordinates_calculator.alf_features_to_coordinates" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
+n_points x n_atoms x 3. Note cartesian coordinates are in Bohr as features
+are usually calculated in Bohr!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>features</strong> – a numpy array of shape n_points x n_features</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The distances in the features are in Bohr, so the resulting Cartesian
+coordinates will also be in Bohr. You will need to multiply by
+bohr2ang (in ichor.core.constants) to convert to Cartesian coordinates in Angstroms.</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.calculators.c_matrix_calculator">
+<span id="ichor-core-calculators-c-matrix-calculator-module"></span><h2>ichor.core.calculators.c_matrix_calculator module<a class="headerlink" href="#module-ichor.core.calculators.c_matrix_calculator" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.c_matrix_calculator.calculate_c_matrix">
+<span class="sig-name descname"><span class="pre">calculate_c_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.c_matrix_calculator.calculate_c_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
+See <a class="reference external" href="https://pubs.acs.org/doi/pdf/10.1021/ct500565g">https://pubs.acs.org/doi/pdf/10.1021/ct500565g</a> , Section 3.3 for the derivations. This matrix has 3 unit
+vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">atom</span></code> an instance of the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> class:
+This atom is the central atom for which we want to calculate the C rotation matrix.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>alf</strong> – An Atomic Local Frame instance for the particular atom.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A 3x3 numpy array which is the C rotation matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.calculators.geometry_calculator">
+<span id="ichor-core-calculators-geometry-calculator-module"></span><h2>ichor.core.calculators.geometry_calculator module<a class="headerlink" href="#module-ichor.core.calculators.geometry_calculator" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.angle_names">
+<span class="sig-name descname"><span class="pre">angle_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.angle_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the angle names for atoms
+:param atoms: ‘Atoms’ instance to get the angle names
+:return: angle names of atoms as list of str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.angles">
+<span class="sig-name descname"><span class="pre">angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.angles" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.bond_names">
+<span class="sig-name descname"><span class="pre">bond_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.bond_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the bond names for atoms
+:param atoms: ‘Atoms’ instance to get the bond names
+:return: bond names of atoms as list of str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.bonds">
+<span class="sig-name descname"><span class="pre">bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.bonds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.calculate_angle">
+<span class="sig-name descname"><span class="pre">calculate_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.calculate_angle" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the angle between atoms i, j, and k for atoms
+:param atoms: instance of ‘Atoms’ to calculate angle
+:param i: 0-index atoms[i]
+:param j: 0-index atoms[j]
+:param k: 0-index atoms[k]
+:return: angle between atoms i-j-k as float</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.calculate_angles">
+<span class="sig-name descname"><span class="pre">calculate_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.calculate_angles" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.calculate_bond">
+<span class="sig-name descname"><span class="pre">calculate_bond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.calculate_bond" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the bond distance between atoms i and j for atoms
+:param atoms: instance of ‘Atoms’ to calculate bond distance
+:param i: 0-index atoms[i]
+:param j: 0-index atoms[j]
+:return: bond distance between atoms i-j as float</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.calculate_bonds">
+<span class="sig-name descname"><span class="pre">calculate_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.calculate_bonds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.calculate_dihedral">
+<span class="sig-name descname"><span class="pre">calculate_dihedral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.calculate_dihedral" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the dihedral angle between atoms i, j, k and l for atoms
+:param atoms: instance of ‘Atoms’ to calculate dihedral angle
+:param i: 0-index atoms[i]
+:param j: 0-index atoms[j]
+:param k: 0-index atoms[k]
+:param l: 0-index atoms[l]
+:return: dihedral angle between atoms i-j-k-l as float</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.calculate_dihedrals">
+<span class="sig-name descname"><span class="pre">calculate_dihedrals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.calculate_dihedrals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.calculate_internal_features">
+<span class="sig-name descname"><span class="pre">calculate_internal_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.calculate_internal_features" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the bonds, angles and dihedrals for atoms
+:param atoms: instance of <cite>Atoms</cite> to calculate the bonds, angles and dihedrals for
+:return: bonds, angles and dihedrals as a tuple of numpy arrays</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.dihedral_names">
+<span class="sig-name descname"><span class="pre">dihedral_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.dihedral_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the dihedral names for atoms
+:param atoms: ‘Atoms’ instance to get the dihedral names
+:return: dihedral names of atoms as list of str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.dihedrals">
+<span class="sig-name descname"><span class="pre">dihedrals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.dihedrals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.get_connected_atoms">
+<span class="sig-name descname"><span class="pre">get_connected_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.files.dl_poly.html#ichor.core.files.dl_poly.dl_poly_field.ConnectedAtoms" title="ichor.core.files.dl_poly.dl_poly_field.ConnectedAtoms"><span class="pre">ConnectedAtoms</span></a></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.get_connected_atoms" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.get_internal_feature_indices">
+<span class="sig-name descname"><span class="pre">get_internal_feature_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.get_internal_feature_indices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.geometry_calculator.internal_feature_names">
+<span class="sig-name descname"><span class="pre">internal_feature_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.geometry_calculator.internal_feature_names" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the names of the bonds, angles and dihedrals for atoms
+:param atoms: instance of ‘Atoms’ to get the names for bonds, angles and dihedrals
+:return: tuple of lists of the names for the bonds angles and dihedrals for atoms</p>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.calculators.spherical_to_cartesian_calculator">
+<span id="ichor-core-calculators-spherical-to-cartesian-calculator-module"></span><h2>ichor.core.calculators.spherical_to_cartesian_calculator module<a class="headerlink" href="#module-ichor.core.calculators.spherical_to_cartesian_calculator" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.spherical_to_cartesian_calculator.spherical_to_cartesian">
+<span class="sig-name descname"><span class="pre">spherical_to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.spherical_to_cartesian_calculator.spherical_to_cartesian" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Spherical to cartesian transformation, where r in [0, inf),        heta in [0, pi], phi in [-pi, pi).</dt><dd><p>x = r sin       heta cosphi
+y = r sin phi sin      heta
+z = r cos       heta</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.calculators">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.calculators" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.alf_features_to_coordinates">
+<span class="sig-name descname"><span class="pre">alf_features_to_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.alf_features_to_coordinates" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a given n_points x n_features matrix of features to cartesian coordinates of shape
+n_points x n_atoms x 3. Note cartesian coordinates are in Bohr as features
+are usually calculated in Bohr!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>features</strong> – a numpy array of shape n_points x n_features</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The distances in the features are in Bohr, so the resulting Cartesian
+coordinates will also be in Bohr. You will need to multiply by
+bohr2ang (in ichor.core.constants) to convert to Cartesian coordinates in Angstroms.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.angle_names">
+<span class="sig-name descname"><span class="pre">angle_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.angle_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the angle names for atoms
+:param atoms: ‘Atoms’ instance to get the angle names
+:return: angle names of atoms as list of str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.angles">
+<span class="sig-name descname"><span class="pre">angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.angles" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.bond_names">
+<span class="sig-name descname"><span class="pre">bond_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.bond_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the bond names for atoms
+:param atoms: ‘Atoms’ instance to get the bond names
+:return: bond names of atoms as list of str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.bonds">
+<span class="sig-name descname"><span class="pre">bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.bonds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_alf_atom_sequence">
+<span class="sig-name descname"><span class="pre">calculate_alf_atom_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a></span></span><a class="headerlink" href="#ichor.core.calculators.calculate_alf_atom_sequence" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_alf_cahn_ingold_prelog">
+<span class="sig-name descname"><span class="pre">calculate_alf_cahn_ingold_prelog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom:</span> <span class="pre">Atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectivity_calculator=&lt;function</span> <span class="pre">connectivity_calculator_valence&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a></span></span><a class="headerlink" href="#ichor.core.calculators.calculate_alf_cahn_ingold_prelog" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_alf_features">
+<span class="sig-name descname"><span class="pre">calculate_alf_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.common.html#ichor.core.common.units.AtomicDistance" title="ichor.core.common.units.AtomicDistance"><span class="pre">AtomicDistance</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">AtomicDistance.Bohr</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.calculate_alf_features" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the features for the given central atom.</p>
+<dl>
+<dt>:param<span class="classifier">param atom: an instance of the <cite>Atom</cite> class:</span></dt><dd><p>This atom is the central atom for which we want to calculate the C rotation matrix.</p>
+</dd>
+<dt>:param<span class="classifier">param alf: A callable or instance of <cite>ALF</cite> that is used to</span></dt><dd><p>calculate the atomic local frame for the atom. This atomic local frame then defines the
+features which are going to be calculated. If no ALF is passed by user,
+then the default way of calculating ALF is used.</p>
+</dd>
+<dt>:param<span class="classifier">param distance_unit: The distance units to use for the calculated distances</span></dt><dd><p>which are part of the features. The default distance is Bohr.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>type: <cite>np.ndarray</cite></dt><dd><p>A 1D numpy array of shape 3N-6, where N is the number of atoms
+in the system which <cite>atom</cite> is a part of. If there are only two atoms,
+then there is only 1 feature (the distance between the atoms).</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_angle">
+<span class="sig-name descname"><span class="pre">calculate_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.calculators.calculate_angle" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the angle between atoms i, j, and k for atoms
+:param atoms: instance of ‘Atoms’ to calculate angle
+:param i: 0-index atoms[i]
+:param j: 0-index atoms[j]
+:param k: 0-index atoms[k]
+:return: angle between atoms i-j-k as float</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_bond">
+<span class="sig-name descname"><span class="pre">calculate_bond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.calculators.calculate_bond" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the bond distance between atoms i and j for atoms
+:param atoms: instance of ‘Atoms’ to calculate bond distance
+:param i: 0-index atoms[i]
+:param j: 0-index atoms[j]
+:return: bond distance between atoms i-j as float</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_c_matrix">
+<span class="sig-name descname"><span class="pre">calculate_c_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.calculate_c_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the C rotation matrix that relates the global Cartesian coordinates to the ALF Cartesian Coordinates.
+See <a class="reference external" href="https://pubs.acs.org/doi/pdf/10.1021/ct500565g">https://pubs.acs.org/doi/pdf/10.1021/ct500565g</a> , Section 3.3 for the derivations. This matrix has 3 unit
+vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">atom</span></code> an instance of the <code class="docutils literal notranslate"><span class="pre">Atom</span></code> class:
+This atom is the central atom for which we want to calculate the C rotation matrix.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>alf</strong> – An Atomic Local Frame instance for the particular atom.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A 3x3 numpy array which is the C rotation matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_dihedral">
+<span class="sig-name descname"><span class="pre">calculate_dihedral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ichor.core.calculators.calculate_dihedral" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the dihedral angle between atoms i, j, k and l for atoms
+:param atoms: instance of ‘Atoms’ to calculate dihedral angle
+:param i: 0-index atoms[i]
+:param j: 0-index atoms[j]
+:param k: 0-index atoms[k]
+:param l: 0-index atoms[l]
+:return: dihedral angle between atoms i-j-k-l as float</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.calculate_internal_features">
+<span class="sig-name descname"><span class="pre">calculate_internal_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.calculate_internal_features" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the bonds, angles and dihedrals for atoms
+:param atoms: instance of <cite>Atoms</cite> to calculate the bonds, angles and dihedrals for
+:return: bonds, angles and dihedrals as a tuple of numpy arrays</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.default_alf_calculator">
+<span class="sig-name descname"><span class="pre">default_alf_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a></span></span><a class="headerlink" href="#ichor.core.calculators.default_alf_calculator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.default_connectivity_calculator">
+<span class="sig-name descname"><span class="pre">default_connectivity_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.default_connectivity_calculator" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the connectivity matrix (showing which atoms are bonded as 1 and those that are not bonded as 0.
+It uses the Van Der Waals radius an Atom (see <cite>Atom</cite> class) to determine if atoms should be bonded or not.</p>
+<p>:param : atoms: <cite>Atoms</cite> instance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>type: <cite>np.ndarray</cite></dt><dd><p>The connectivity matrix between atoms of shape len(atoms) x len(atoms)</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a class method because the connectivity only needs to be calculated once per trajectory.
+The connectivity remains the same for all timesteps in a trajectory.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.default_feature_calculator">
+<span class="sig-name descname"><span class="pre">default_feature_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.common.html#ichor.core.common.units.AtomicDistance" title="ichor.core.common.units.AtomicDistance"><span class="pre">AtomicDistance</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">AtomicDistance.Bohr</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.calculators.default_feature_calculator" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the features for the given central atom.</p>
+<dl>
+<dt>:param<span class="classifier">param atom: an instance of the <cite>Atom</cite> class:</span></dt><dd><p>This atom is the central atom for which we want to calculate the C rotation matrix.</p>
+</dd>
+<dt>:param<span class="classifier">param alf: A callable or instance of <cite>ALF</cite> that is used to</span></dt><dd><p>calculate the atomic local frame for the atom. This atomic local frame then defines the
+features which are going to be calculated. If no ALF is passed by user,
+then the default way of calculating ALF is used.</p>
+</dd>
+<dt>:param<span class="classifier">param distance_unit: The distance units to use for the calculated distances</span></dt><dd><p>which are part of the features. The default distance is Bohr.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>type: <cite>np.ndarray</cite></dt><dd><p>A 1D numpy array of shape 3N-6, where N is the number of atoms
+in the system which <cite>atom</cite> is a part of. If there are only two atoms,
+then there is only 1 feature (the distance between the atoms).</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.dihedral_names">
+<span class="sig-name descname"><span class="pre">dihedral_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.dihedral_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the dihedral names for atoms
+:param atoms: ‘Atoms’ instance to get the dihedral names
+:return: dihedral names of atoms as list of str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.dihedrals">
+<span class="sig-name descname"><span class="pre">dihedrals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.dihedrals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.get_atom_alf">
+<span class="sig-name descname"><span class="pre">get_atom_alf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atom.Atom" title="ichor.core.atoms.atom.Atom"><span class="pre">Atom</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.calculators.get_atom_alf" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.get_internal_feature_indices">
+<span class="sig-name descname"><span class="pre">get_internal_feature_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.get_internal_feature_indices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.internal_feature_names">
+<span class="sig-name descname"><span class="pre">internal_feature_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.internal_feature_names" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the names of the bonds, angles and dihedrals for atoms
+:param atoms: instance of ‘Atoms’ to get the names for bonds, angles and dihedrals
+:return: tuple of lists of the names for the bonds angles and dihedrals for atoms</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.calculators.spherical_to_cartesian">
+<span class="sig-name descname"><span class="pre">spherical_to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.calculators.spherical_to_cartesian" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Spherical to cartesian transformation, where r in [0, inf),        heta in [0, pi], phi in [-pi, pi).</dt><dd><p>x = r sin       heta cosphi
+y = r sin phi sin      heta
+z = r cos       heta</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ichor.core.atoms.html" class="btn btn-neutral float-left" title="ichor.core.atoms package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.core.calculators.alf.html" class="btn btn-neutral float-right" title="ichor.core.calculators.alf package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

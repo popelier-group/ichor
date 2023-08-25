@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ichor.core.common.sorting.natsort package &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ichor.core.common.sorting.natsort.compat package" href="ichor.core.common.sorting.natsort.compat.html" />
+    <link rel="prev" title="ichor.core.common.sorting package" href="ichor.core.common.sorting.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.core.html">ichor.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.analysis.html">ichor.core.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="ichor.core.common.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.arith">ichor.core.common.arith module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.bool">ichor.core.common.bool module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.constants">ichor.core.common.constants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.conversion">ichor.core.common.conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.dict">ichor.core.common.dict module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.excel">ichor.core.common.excel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.float">ichor.core.common.float module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.formatting">ichor.core.common.formatting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.int">ichor.core.common.int module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.io">ichor.core.common.io module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.itertools">ichor.core.common.itertools module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.linalg">ichor.core.common.linalg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.np">ichor.core.common.np module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.obj">ichor.core.common.obj module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.os">ichor.core.common.os module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.patterns">ichor.core.common.patterns module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.search">ichor.core.common.search module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.str">ichor.core.common.str module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.units">ichor.core.common.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.core.html#module-ichor.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.html">ichor.core package</a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.common.html">ichor.core.common package</a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.common.sorting.html">ichor.core.common.sorting package</a></li>
+      <li class="breadcrumb-item active">ichor.core.common.sorting.natsort package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core/ichor.core.common.sorting.natsort.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="ichor-core-common-sorting-natsort-package">
+<h1>ichor.core.common.sorting.natsort package<a class="headerlink" href="#ichor-core-common-sorting-natsort-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ichor.core.common.sorting.natsort.compat.html">ichor.core.common.sorting.natsort.compat package</a></li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.common.sorting.natsort.natsort">
+<span id="ichor-core-common-sorting-natsort-natsort-module"></span><h2>ichor.core.common.sorting.natsort.natsort module<a class="headerlink" href="#module-ichor.core.common.sorting.natsort.natsort" title="Permalink to this heading"></a></h2>
+<p>Along with ns_enum.py, this module contains all of the
+natsort public API.</p>
+<p>The majority of the “work” is defined in utils.py.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.as_ascii">
+<span class="sig-name descname"><span class="pre">as_ascii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.as_ascii" title="Permalink to this definition"></a></dt>
+<dd><p>Function to decode an input with the ASCII codec, or return as-is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>object</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If the input was of type <cite>bytes</cite>, the return value is a <cite>str</cite> decoded
+with the ASCII codec. Otherwise, the return value is identically the
+input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>output</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.decoder" title="ichor.core.common.sorting.natsort.natsort.decoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decoder</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.as_utf8">
+<span class="sig-name descname"><span class="pre">as_utf8</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.as_utf8" title="Permalink to this definition"></a></dt>
+<dd><p>Function to decode an input with the UTF-8 codec, or return as-is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>object</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If the input was of type <cite>bytes</cite>, the return value is a <cite>str</cite> decoded
+with the UTF-8 codec. Otherwise, the return value is identically the
+input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>output</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.decoder" title="ichor.core.common.sorting.natsort.natsort.decoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decoder</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.decoder">
+<span class="sig-name descname"><span class="pre">decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.decoder" title="Permalink to this definition"></a></dt>
+<dd><p>Return a function that can be used to decode bytes to unicode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encoding</strong> (<em>str</em>) – The codec to use for decoding. This must be a valid unicode codec.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A function that takes a single argument and attempts to decode
+it using the supplied codec. Any <cite>UnicodeErrors</cite> are raised.
+If the argument was not of <cite>bytes</cite> type, it is simply returned
+as-is.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>decode_function</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.as_ascii" title="ichor.core.common.sorting.natsort.natsort.as_ascii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_ascii</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.as_utf8" title="ichor.core.common.sorting.natsort.natsort.as_utf8"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_utf8</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;bytes&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">12345</span><span class="p">)</span> <span class="o">==</span> <span class="mi">12345</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># On Python 3, without decoder this would return [b&#39;a10&#39;, b&#39;a2&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">([</span><span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;a2&#39;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="n">decoder</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;a2&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># On Python 3, without decoder this would raise a TypeError.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">([</span><span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">,</span> <span class="s1">&#39;a2&#39;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="n">decoder</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;a2&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.humansorted">
+<span class="sig-name descname"><span class="pre">humansorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.humansorted" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience function to properly sort non-numeric characters.</p>
+<p>This is a wrapper around <code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.LOCALE)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.LOCALE</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.index_humansorted" title="ichor.core.common.sorting.natsort.natsort.index_humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_humansorted</span></code></a></dt><dd><p>Returns the sorted indexes from <cite>humansorted</cite>.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Please read <code class="docutils literal notranslate"><span class="pre">locale_issues</span></code> before using <cite>humansorted</cite>.</p>
+<p class="rubric">Examples</p>
+<p>Use <cite>humansorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Banana&#39;</span><span class="p">,</span> <span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;banana&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;Apple&#39;, &#39;Banana&#39;, &#39;apple&#39;, &#39;banana&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">humansorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;apple&#39;, &#39;Apple&#39;, &#39;banana&#39;, &#39;Banana&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.index_humansorted">
+<span class="sig-name descname"><span class="pre">index_humansorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.index_humansorted" title="Permalink to this definition"></a></dt>
+<dd><p>This is a wrapper around <code class="docutils literal notranslate"><span class="pre">index_natsorted(seq,</span> <span class="pre">alg=ns.LOCALE)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.LOCALE</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The ordered indexes of the input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.humansorted" title="ichor.core.common.sorting.natsort.natsort.humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">humansorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.order_by_index" title="ichor.core.common.sorting.natsort.natsort.order_by_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_by_index</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>Please read <code class="docutils literal notranslate"><span class="pre">locale_issues</span></code> before using <cite>humansorted</cite>.</p>
+<p class="rubric">Examples</p>
+<p>Use <cite>index_humansorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Banana&#39;</span><span class="p">,</span> <span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;banana&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index_humansorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[2, 0, 3, 1]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.index_natsorted">
+<span class="sig-name descname"><span class="pre">index_natsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.index_natsorted" title="Permalink to this definition"></a></dt>
+<dd><p>Determine the list of the indexes used to sort the input sequence.</p>
+<p>Sorts a sequence naturally, but returns a list of sorted the
+indexes and not the sorted list itself. This list of indexes
+can be used to sort multiple lists by the sorted order of the
+given sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.INT</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The ordered indexes of the input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsort.natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.order_by_index" title="ichor.core.common.sorting.natsort.natsort.order_by_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_by_index</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<p>Use index_natsorted if you want to sort multiple lists by the
+sorted order of one list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;baz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="n">index_natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span>
+<span class="go">[2, 0, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Sort both lists by the sort order of a</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num3&#39;, &#39;num5&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;baz&#39;, &#39;foo&#39;, &#39;bar&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.index_realsorted">
+<span class="sig-name descname"><span class="pre">index_realsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.index_realsorted" title="Permalink to this definition"></a></dt>
+<dd><p>This is a wrapper around <code class="docutils literal notranslate"><span class="pre">index_natsorted(seq,</span> <span class="pre">alg=ns.REAL)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.REAL</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The ordered indexes of the input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.realsorted" title="ichor.core.common.sorting.natsort.natsort.realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">realsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.order_by_index" title="ichor.core.common.sorting.natsort.natsort.order_by_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_by_index</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<p>Use <cite>index_realsorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num5.10&#39;</span><span class="p">,</span> <span class="s1">&#39;num-3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5.3&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index_realsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[1, 3, 0, 2]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.natsort_keygen">
+<span class="sig-name descname"><span class="pre">natsort_keygen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.natsort_keygen" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a key to sort strings and numbers naturally.</p>
+<p>This key is designed for use as the <cite>key</cite> argument to
+functions such as the <cite>sorted</cite> builtin.</p>
+<p>The user may customize the generated function with the
+arguments to <cite>natsort_keygen</cite>, including an optional
+<cite>key</cite> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to manipulate the input value before parsing for
+numbers. It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.INT</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – A function that parses input for natural sorting that is
+suitable for passing as the <cite>key</cite> argument to functions
+such as <cite>sorted</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsort.natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsorted</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_key</span></code></p>
+</div>
+<p class="rubric">Examples</p>
+<p><cite>natsort_keygen</cite> is a convenient way to create a custom key
+to sort lists in-place (for example).:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num5.10&#39;</span><span class="p">,</span> <span class="s1">&#39;num-3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5.3&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">natsort_keygen</span><span class="p">(</span><span class="n">alg</span><span class="o">=</span><span class="n">ns</span><span class="o">.</span><span class="n">REAL</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
+<span class="go">[&#39;num-3&#39;, &#39;num2&#39;, &#39;num5.10&#39;, &#39;num5.3&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.natsorted">
+<span class="sig-name descname"><span class="pre">natsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.natsorted" title="Permalink to this definition"></a></dt>
+<dd><p>Sorts an iterable naturally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the iterable.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.INT</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.natsort_keygen" title="ichor.core.common.sorting.natsort.natsort.natsort_keygen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_keygen</span></code></a></dt><dd><p>Generates the key that makes natural sorting possible.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.realsorted" title="ichor.core.common.sorting.natsort.natsort.realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">realsorted</span></code></a></dt><dd><p>A wrapper for <code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.REAL)</span></code>.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.humansorted" title="ichor.core.common.sorting.natsort.natsort.humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">humansorted</span></code></a></dt><dd><p>A wrapper for <code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.LOCALE)</span></code>.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.index_natsorted" title="ichor.core.common.sorting.natsort.natsort.index_natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_natsorted</span></code></a></dt><dd><p>Returns the sorted indexes from <cite>natsorted</cite>.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.os_sorted" title="ichor.core.common.sorting.natsort.natsort.os_sorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sorted</span></code></a></dt><dd><p>Sort according to your operating system’s rules.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Use <cite>natsorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num3&#39;, &#39;num5&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.numeric_regex_chooser">
+<span class="sig-name descname"><span class="pre">numeric_regex_chooser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.numeric_regex_chooser" title="Permalink to this definition"></a></dt>
+<dd><p>Select an appropriate regex for the type of number of interest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alg</strong> (<em>ns enum</em>) – Used to indicate the regular expression to select.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>regex</strong> – Regular expression string that matches the desired number type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.order_by_index">
+<span class="sig-name descname"><span class="pre">order_by_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.order_by_index" title="Permalink to this definition"></a></dt>
+<dd><p>Order a given sequence by an index sequence.</p>
+<p>The output of <cite>index_natsorted</cite> is a
+sequence of integers (index) that correspond to how its input
+sequence <strong>would</strong> be sorted. The idea is that this index can
+be used to reorder multiple sequences by the sorted order of the
+first sequence. This function is a convenient wrapper to
+apply this ordering to a sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>sequence</em>) – The sequence to order.</p></li>
+<li><p><strong>index</strong> (<em>iterable</em>) – The iterable that indicates how to order <cite>seq</cite>.
+It should be the same length as <cite>seq</cite> and consist
+of integers only.</p></li>
+<li><p><strong>iter</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – If <cite>True</cite>, the ordered sequence is returned as a
+iterator; otherwise it is returned as a
+list. The default is <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sequence ordered by <cite>index</cite>, as a <cite>list</cite> or as an
+iterator (depending on the value of <cite>iter</cite>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>{{list, iterator}}</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.index_natsorted" title="ichor.core.common.sorting.natsort.natsort.index_natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_natsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.index_humansorted" title="ichor.core.common.sorting.natsort.natsort.index_humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_humansorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.index_realsorted" title="ichor.core.common.sorting.natsort.natsort.index_realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_realsorted</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<p><cite>order_by_index</cite> is a convenience function that helps you apply
+the result of <cite>index_natsorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;baz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="n">index_natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span>
+<span class="go">[2, 0, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Sort both lists by the sort order of a</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num3&#39;, &#39;num5&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;baz&#39;, &#39;foo&#39;, &#39;bar&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.os_sort_keygen">
+<span class="sig-name descname"><span class="pre">os_sort_keygen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.os_sort_keygen" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a sorting key to replicate your file browser’s sort order</p>
+<p>See <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.os_sorted" title="ichor.core.common.sorting.natsort.natsort.os_sorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">os_sorted()</span></code></a> for description and caveats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – A function that parses input for OS path sorting that is
+suitable for passing as the <cite>key</cite> argument to functions
+such as <cite>sorted</cite>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>function</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sort_key</span></code>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.os_sorted" title="ichor.core.common.sorting.natsort.natsort.os_sorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sorted</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>On Windows, this will implicitly coerce all inputs to str before
+collating.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.os_sorted">
+<span class="sig-name descname"><span class="pre">os_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.os_sorted" title="Permalink to this definition"></a></dt>
+<dd><p>Sort elements in the same order as your operating system’s file browser</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The resulting function will generate results that will be
+differnt depending on your platform. This is intentional.</p>
+</div>
+<p>On Windows, this will sort with the same order as Windows Explorer.</p>
+<p>On MacOS/Linux, you will get different results depending on whether
+or not you have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed.</p>
+<ul class="simple">
+<li><p>If you have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed, you will get results that are
+the same as (or very close to) the same order as your operating
+system’s file browser.</p></li>
+<li><p>If you do not have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed, then this will give
+the same results as if you used <code class="docutils literal notranslate"><span class="pre">ns.LOCALE</span></code>, <code class="docutils literal notranslate"><span class="pre">ns.PATH</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">ns.IGNORECASE</span></code> with <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsort.natsorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">natsorted()</span></code></a>. If you do not have
+special characters this will give correct results, but once
+special characters are added you should lower your expectations.</p></li>
+</ul>
+<p>It is <em>strongly</em> reccommended to have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed on
+MacOS/Linux if you want correct sort results.</p>
+<p>It does <em>not</em> take into account if a path is a directory or a file
+when sorting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort. Each element must be of type str.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsort.natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.os_sort_keygen" title="ichor.core.common.sorting.natsort.natsort.os_sort_keygen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sort_keygen</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>This will implicitly coerce all inputs to str before collating.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort.realsorted">
+<span class="sig-name descname"><span class="pre">realsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort.realsorted" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience function to properly sort signed floats.</p>
+<p>A signed float in a string could be “a-5.7”. This is a wrapper around
+<code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.REAL)</span></code>.</p>
+<p>The behavior of <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.realsorted" title="ichor.core.common.sorting.natsort.natsort.realsorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">realsorted()</span></code></a> for <cite>natsort</cite> version &gt;= 4.0.0
+was the default behavior of <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsort.natsorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">natsorted()</span></code></a> for <cite>natsort</cite>
+version &lt; 4.0.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.REAL</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort.index_realsorted" title="ichor.core.common.sorting.natsort.natsort.index_realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_realsorted</span></code></a></dt><dd><p>Returns the sorted indexes from <cite>realsorted</cite>.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Use <cite>realsorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num5.10&#39;</span><span class="p">,</span> <span class="s1">&#39;num-3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5.3&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num5.3&#39;, &#39;num5.10&#39;, &#39;num-3&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">realsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;num-3&#39;, &#39;num2&#39;, &#39;num5.10&#39;, &#39;num5.3&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.common.sorting.natsort.ns_enum">
+<span id="ichor-core-common-sorting-natsort-ns-enum-module"></span><h2>ichor.core.common.sorting.natsort.ns_enum module<a class="headerlink" href="#module-ichor.core.common.sorting.natsort.ns_enum" title="Permalink to this heading"></a></h2>
+<p>This module defines the “ns” enum for natsort is used to determine
+what algorithm natsort uses.</p>
+</section>
+<section id="module-ichor.core.common.sorting.natsort.unicode_numbers">
+<span id="ichor-core-common-sorting-natsort-unicode-numbers-module"></span><h2>ichor.core.common.sorting.natsort.unicode_numbers module<a class="headerlink" href="#module-ichor.core.common.sorting.natsort.unicode_numbers" title="Permalink to this heading"></a></h2>
+<p>Pre-determine the collection of unicode decimals, digits, and numerals.</p>
+</section>
+<section id="module-ichor.core.common.sorting.natsort.unicode_numeric_hex">
+<span id="ichor-core-common-sorting-natsort-unicode-numeric-hex-module"></span><h2>ichor.core.common.sorting.natsort.unicode_numeric_hex module<a class="headerlink" href="#module-ichor.core.common.sorting.natsort.unicode_numeric_hex" title="Permalink to this heading"></a></h2>
+<p>Contains all possible non-ASCII unicode numbers.</p>
+</section>
+<section id="module-ichor.core.common.sorting.natsort.utils">
+<span id="ichor-core-common-sorting-natsort-utils-module"></span><h2>ichor.core.common.sorting.natsort.utils module<a class="headerlink" href="#module-ichor.core.common.sorting.natsort.utils" title="Permalink to this heading"></a></h2>
+<p>Utilities and definitions for natsort, mostly all used to define
+the natsort_key function.</p>
+<p>SOME CONVENTIONS USED IN THIS FILE.</p>
+<p>1 - Factory Functions</p>
+<p>Most of the logic of natsort revolves around factory functions
+that create branchless transformation functions. For example, rather
+than making a string transformation function that has an if
+statement to determine whether or not to perform .lowercase() at
+runtime for each element to transform, there is a string transformation
+factory function that will return a function that either calls
+.lowercase() or does nothing. In this way, all the branches and
+decisions are taken care of once, up front. In addition to a slight
+speed improvement, this provides a more extensible infrastructure.</p>
+<p>Each of these factory functions will end with the suffix “_factory”
+to indicate that they themselves return a function.</p>
+<p>2 - Keyword Parameters For Local Scope</p>
+<p>Many of the closures that are created by the factory functions
+have signatures similar to the following</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">factory</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39;yes&#39;</span> <span class="k">if</span> <span class="n">parameter</span> <span class="k">else</span> <span class="s1">&#39;no&#39;</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">closure</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_val</span><span class="o">=</span><span class="n">val</span><span class="p">):</span>
+<span class="gp">... </span>         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_val</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">closure</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>The variable value is passed as the default to a keyword argument.
+This is a micro-optimization
+that ensures “val” is a local variable instead of global variable
+and thus has a slightly improved performance at runtime.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NumericalRegularExpressions</span></span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container of regular expressions that match numbers.</p>
+<p>The numbers also account for unicode non-decimal characters.</p>
+<p>Not intended to be made an instance - use class methods only.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.digits">
+<span class="sig-name descname"><span class="pre">digits</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'²³¹፩፪፫፬፭፮፯፰፱᧚⁰⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉①②③④⑤⑥⑦⑧⑨⑴⑵⑶⑷⑸⑹⑺⑻⑼⒈⒉⒊⒋⒌⒍⒎⒏⒐⓪⓵⓶⓷⓸⓹⓺⓻⓼⓽⓿❶❷❸❹❺❻❼❽❾➀➁➂➃➄➅➆➇➈➊➋➌➍➎➏➐➑➒𐩀𐩁𐩂𐩃𐹠𐹡𐹢𐹣𐹤𐹥𐹦𐹧𐹨𑁒𑁓𑁔𑁕𑁖𑁗𑁘𑁙𑁚🄀🄁🄂🄃🄄🄅🄆🄇🄈🄉🄊'</span></em><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.digits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.exp">
+<span class="sig-name descname"><span class="pre">exp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'(?:[eE][-+]?\\d+)?'</span></em><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.exp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_exp">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">float_nosign_exp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_exp" title="Permalink to this definition"></a></dt>
+<dd><p>Regular expression to match an unsigned float with exponent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_noexp">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">float_nosign_noexp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_nosign_noexp" title="Permalink to this definition"></a></dt>
+<dd><p>Regular expression to match an unsigned float without exponent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_num">
+<span class="sig-name descname"><span class="pre">float_num</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'(?:\\d+\\.?\\d*|\\.\\d+)'</span></em><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_num" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_exp">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">float_sign_exp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_exp" title="Permalink to this definition"></a></dt>
+<dd><p>Regular expression to match a signed float with exponent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_noexp">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">float_sign_noexp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.float_sign_noexp" title="Permalink to this definition"></a></dt>
+<dd><p>Regular expression to match a signed float without exponent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.int_nosign">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">int_nosign</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.int_nosign" title="Permalink to this definition"></a></dt>
+<dd><p>Regular expression to match an unsigned int.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.int_sign">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">int_sign</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.int_sign" title="Permalink to this definition"></a></dt>
+<dd><p>Regular expression to match a signed int.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.numeric">
+<span class="sig-name descname"><span class="pre">numeric</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'²³¹¼½¾৴৵৶৷৸৹୲୳୴୵୶୷௰௱௲౸౹౺౻౼౽౾൘൙൚൛൜൝൞൰൱൲൳൴൵൶൷൸༪༫༬༭༮༯༰༱༲༳፩፪፫፬፭፮፯፰፱፲፳፴፵፶፷፸፹፺፻፼ᛮᛯᛰ៰៱៲៳៴៵៶៷៸៹᧚⁰⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞⅟ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫⅬⅭⅮⅯⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻⅼⅽⅾⅿↀↁↂↅↆↇↈ↉①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛⓪⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴⓵⓶⓷⓸⓹⓺⓻⓼⓽⓾⓿❶❷❸❹❺❻❼❽❾❿➀➁➂➃➄➅➆➇➈➉➊➋➌➍➎➏➐➑➒➓⳽〇〡〢〣〤〥〦〧〨〩〸〹〺㆒㆓㆔㆕㈠㈡㈢㈣㈤㈥㈦㈧㈨㈩㉈㉉㉊㉋㉌㉍㉎㉏㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟㊀㊁㊂㊃㊄㊅㊆㊇㊈㊉㊱㊲㊳㊴㊵㊶㊷㊸㊹㊺㊻㊼㊽㊾㊿㐅㒃㠪㭍一七万三九二五亖亿什仟仨伍佰億兆兩八六十千卄卅卌叁参參叄四壱壹幺廾廿弌弍弎弐拾捌柒漆玖百肆萬貮貳贰阡陆陌陸零ꛦꛧꛨꛩꛪꛫꛬꛭꛮꛯ꠰꠱꠲꠳꠴꠵參拾兩零六陸什𐄇𐄈𐄉𐄊𐄋𐄌𐄍𐄎𐄏𐄐𐄑𐄒𐄓𐄔𐄕𐄖𐄗𐄘𐄙𐄚𐄛𐄜𐄝𐄞𐄟𐄠𐄡𐄢𐄣𐄤𐄥𐄦𐄧𐄨𐄩𐄪𐄫𐄬𐄭𐄮𐄯𐄰𐄱𐄲𐄳𐅀𐅁𐅂𐅃𐅄𐅅𐅆𐅇𐅈𐅉𐅊𐅋𐅌𐅍𐅎𐅏𐅐𐅑𐅒𐅓𐅔𐅕𐅖𐅗𐅘𐅙𐅚𐅛𐅜𐅝𐅞𐅟𐅠𐅡𐅢𐅣𐅤𐅥𐅦𐅧𐅨𐅩𐅪𐅫𐅬𐅭𐅮𐅯𐅰𐅱𐅲𐅳𐅴𐅵𐅶𐅷𐅸𐆊𐆋𐋡𐋢𐋣𐋤𐋥𐋦𐋧𐋨𐋩𐋪𐋫𐋬𐋭𐋮𐋯𐋰𐋱𐋲𐋳𐋴𐋵𐋶𐋷𐋸𐋹𐋺𐋻𐌠𐌡𐌢𐌣𐍁𐍊𐏑𐏒𐏓𐏔𐏕𐡘𐡙𐡚𐡛𐡜𐡝𐡞𐡟𐡹𐡺𐡻𐡼𐡽𐡾𐡿𐢧𐢨𐢩𐢪𐢫𐢬𐢭𐢮𐢯𐣻𐣼𐣽𐣾𐣿𐤖𐤗𐤘𐤙𐤚𐤛𐦼𐦽𐧀𐧁𐧂𐧃𐧄𐧅𐧆𐧇𐧈𐧉𐧊𐧋𐧌𐧍𐧎𐧏𐧒𐧓𐧔𐧕𐧖𐧗𐧘𐧙𐧚𐧛𐧜𐧝𐧞𐧟𐧠𐧡𐧢𐧣𐧤𐧥𐧦𐧧𐧨𐧩𐧪𐧫𐧬𐧭𐧮𐧯𐧰𐧱𐧲𐧳𐧴𐧵𐧶𐧷𐧸𐧹𐧺𐧻𐧼𐧽𐧾𐧿𐩀𐩁𐩂𐩃𐩄𐩅𐩆𐩇𐩈𐩽𐩾𐪝𐪞𐪟𐫫𐫬𐫭𐫮𐫯𐭘𐭙𐭚𐭛𐭜𐭝𐭞𐭟𐭸𐭹𐭺𐭻𐭼𐭽𐭾𐭿𐮩𐮪𐮫𐮬𐮭𐮮𐮯𐳺𐳻𐳼𐳽𐳾𐳿𐹠𐹡𐹢𐹣𐹤𐹥𐹦𐹧𐹨𐹩𐹪𐹫𐹬𐹭𐹮𐹯𐹰𐹱𐹲𐹳𐹴𐹵𐹶𐹷𐹸𐹹𐹺𐹻𐹼𐹽𐹾𐼝𐼞𐼟𐼠𐼡𐼢𐼣𐼤𐼥𐼦𐽑𐽒𐽓𐽔𐿅𐿆𐿇𐿈𐿉𐿊𐿋𑁒𑁓𑁔𑁕𑁖𑁗𑁘𑁙𑁚𑁛𑁜𑁝𑁞𑁟𑁠𑁡𑁢𑁣𑁤𑁥𑇡𑇢𑇣𑇤𑇥𑇦𑇧𑇨𑇩𑇪𑇫𑇬𑇭𑇮𑇯𑇰𑇱𑇲𑇳𑇴𑜺𑜻𑣪𑣫𑣬𑣭𑣮𑣯𑣰𑣱𑣲𑱚𑱛𑱜𑱝𑱞𑱟𑱠𑱡𑱢𑱣𑱤𑱥𑱦𑱧𑱨𑱩𑱪𑱫𑱬𑿀𑿁𑿂𑿃𑿄𑿅𑿆𑿇𑿈𑿉𑿊𑿋𑿌𑿍𑿎𑿏𑿐𑿑𑿒𑿓𑿔𒐀𒐁𒐂𒐃𒐄𒐅𒐆𒐇𒐈𒐉𒐊𒐋𒐌𒐍𒐎𒐏𒐐𒐑𒐒𒐓𒐔𒐕𒐖𒐗𒐘𒐙𒐚𒐛𒐜𒐝𒐞𒐟𒐠𒐡𒐢𒐣𒐤𒐥𒐦𒐧𒐨𒐩𒐪𒐫𒐬𒐭𒐮𒐯𒐰𒐱𒐲𒐳𒐴𒐵𒐶𒐷𒐸𒐹𒐺𒐻𒐼𒐽𒐾𒐿𒑀𒑁𒑂𒑃𒑄𒑅𒑆𒑇𒑈𒑉𒑊𒑋𒑌𒑍𒑎𒑏𒑐𒑑𒑒𒑓𒑔𒑕𒑖𒑗𒑘𒑙𒑚𒑛𒑜𒑝𒑞𒑟𒑠𒑡𒑢𒑣𒑤𒑥𒑦𒑧𒑨𒑩𒑪𒑫𒑬𒑭𒑮𖭛𖭜𖭝𖭞𖭟𖭠𖭡𖺀𖺁𖺂𖺃𖺄𖺅𖺆𖺇𖺈𖺉𖺊𖺋𖺌𖺍𖺎𖺏𖺐𖺑𖺒𖺓𖺔𖺕𖺖𝋠𝋡𝋢𝋣𝋤𝋥𝋦𝋧𝋨𝋩𝋪𝋫𝋬𝋭𝋮𝋯𝋰𝋱𝋲𝋳𝍠𝍡𝍢𝍣𝍤𝍥𝍦𝍧𝍨𝍩𝍪𝍫𝍬𝍭𝍮𝍯𝍰𝍱𝍲𝍳𝍴𝍵𝍶𝍷𝍸𞣇𞣈𞣉𞣊𞣋𞣌𞣍𞣎𞣏𞱱𞱲𞱳𞱴𞱵𞱶𞱷𞱸𞱹𞱺𞱻𞱼𞱽𞱾𞱿𞲀𞲁𞲂𞲃𞲄𞲅𞲆𞲇𞲈𞲉𞲊𞲋𞲌𞲍𞲎𞲏𞲐𞲑𞲒𞲓𞲔𞲕𞲖𞲗𞲘𞲙𞲚𞲛𞲜𞲝𞲞𞲟𞲠𞲡𞲢𞲣𞲤𞲥𞲦𞲧𞲨𞲩𞲪𞲫𞲭𞲮𞲯𞲱𞲲𞲳𞲴𞴁𞴂𞴃𞴄𞴅𞴆𞴇𞴈𞴉𞴊𞴋𞴌𞴍𞴎𞴏𞴐𞴑𞴒𞴓𞴔𞴕𞴖𞴗𞴘𞴙𞴚𞴛𞴜𞴝𞴞𞴟𞴠𞴡𞴢𞴣𞴤𞴥𞴦𞴧𞴨𞴩𞴪𞴫𞴬𞴭𞴯𞴰𞴱𞴲𞴳𞴴𞴵𞴶𞴷𞴸𞴹𞴺𞴻𞴼𞴽🄀🄁🄂🄃🄄🄅🄆🄇🄈🄉🄊🄋🄌𠀁𠁤𠃢𠄡𠤪𠦃𠦌𠦜𠫪𠫽𠬙𢎐𢦘𣬛𦉭廾'</span></em><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.NumericalRegularExpressions.numeric" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.chain_functions">
+<span class="sig-name descname"><span class="pre">chain_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.chain_functions" title="Permalink to this definition"></a></dt>
+<dd><p>Chain a list of single-argument functions together and return.</p>
+<p>The functions are applied in list order, and the output of the
+previous functions is passed to the next function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>functions</strong> (<em>list</em>) – A list of single-argument functions to chain together.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A single argument function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Chain several functions together!</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">funcs</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func</span> <span class="o">=</span> <span class="n">chain_functions</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func</span><span class="p">(</span><span class="s1">&#39;hey&#39;</span><span class="p">)</span>
+<span class="go">17</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.do_decoding">
+<span class="sig-name descname"><span class="pre">do_decoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.do_decoding" title="Permalink to this definition"></a></dt>
+<dd><p>Helper to decode a <em>bytes</em> object, or return the object as-is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>bytes</em><em> | </em><em>object</em>) – </p></li>
+<li><p><strong>encoding</strong> (<em>str</em>) – The encoding to use to decode <em>s</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>str</em> if <em>s</em> was <em>bytes</em> and the decoding was successful.
+<em>s</em> if <em>s</em> was not <em>bytes</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>decoded</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.final_data_transform_factory">
+<span class="sig-name descname"><span class="pre">final_data_transform_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_sep</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.final_data_transform_factory" title="Permalink to this definition"></a></dt>
+<dd><p>Create a function to transform a tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alg</strong> (<em>ns enum</em>) – Indicate how to format the <em>str</em>.</p></li>
+<li><p><strong>sep</strong> (<em>str</em>) – Separator that was passed to <em>parse_string_factory</em>.</p></li>
+<li><p><strong>pre_sep</strong> (<em>str</em>) – String separator to insert at the at the front
+of the return tuple in the case that the first element
+is <em>sep</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A function to be used as the <em>final_transform</em> argument to
+<em>parse_string_factory</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.parse_string_factory" title="ichor.core.common.sorting.natsort.utils.parse_string_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_string_factory</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.groupletters">
+<span class="sig-name descname"><span class="pre">groupletters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">operator.methodcaller('casefold')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.groupletters" title="Permalink to this definition"></a></dt>
+<dd><p>Double all characters, making doubled letters lowercase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">groupletters</span><span class="p">(</span><span class="s2">&quot;Apple&quot;</span><span class="p">)</span>
+<span class="go">&#39;aAppppllee&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.input_string_transform_factory">
+<span class="sig-name descname"><span class="pre">input_string_transform_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.input_string_transform_factory" title="Permalink to this definition"></a></dt>
+<dd><p>Create a function to transform a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alg</strong> (<em>ns enum</em>) – Indicate how to format the <em>str</em>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A function to be used as the <em>input_transform</em> argument to
+<em>parse_string_factory</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.parse_string_factory" title="ichor.core.common.sorting.natsort.utils.parse_string_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_string_factory</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.natsort_key">
+<span class="sig-name descname"><span class="pre">natsort_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bytes_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.natsort_key" title="Permalink to this definition"></a></dt>
+<dd><p>Key to sort strings and numbers naturally.</p>
+<p>It works by splitting the string into components of strings and numbers,
+and then converting the numbers into actual ints or floats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> (<em>str</em><em> | </em><em>unicode</em><em> | </em><em>bytes</em><em> | </em><em>int</em><em> | </em><em>float</em><em> | </em><em>iterable</em>) – </p></li>
+<li><p><strong>key</strong> (<em>callable</em><em> | </em><em>None</em>) – A key to apply to the <em>val</em> before any other operations are performed.</p></li>
+<li><p><strong>string_func</strong> (<em>callable</em>) – If <em>val</em> (or the output of <em>key</em> if given) is of type <em>str</em>, this
+function will be applied to it. The function must return
+a tuple.</p></li>
+<li><p><strong>bytes_func</strong> (<em>callable</em>) – If <em>val</em> (or the output of <em>key</em> if given) is of type <em>bytes</em>, this
+function will be applied to it. The function must return
+a tuple.</p></li>
+<li><p><strong>num_func</strong> (<em>callable</em>) – If <em>val</em> (or the output of <em>key</em> if given) is not of type <em>bytes</em>,
+<em>str</em>, nor is iterable, this function will be applied to it.
+The function must return a tuple.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The string split into its string and numeric components.
+It <em>always</em> starts with a string, and then alternates
+between numbers and strings (unless it was applied
+recursively, in which case it will return tuples of tuples,
+but the lowest-level tuples will then <em>always</em> start with
+a string etc.).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.parse_string_factory" title="ichor.core.common.sorting.natsort.utils.parse_string_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_string_factory</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.parse_bytes_factory" title="ichor.core.common.sorting.natsort.utils.parse_bytes_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_bytes_factory</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_number_factory</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.parse_bytes_factory">
+<span class="sig-name descname"><span class="pre">parse_bytes_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.parse_bytes_factory" title="Permalink to this definition"></a></dt>
+<dd><p>Create a function that will format a <em>bytes</em> object into a tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alg</strong> (<em>ns enum</em>) – Indicate how to format the <em>bytes</em>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A function that accepts <em>bytes</em> input and returns a tuple
+with the formatted <em>bytes</em>. Intended to be used as the
+<em>bytes_func</em> argument to <em>natsort_key</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.natsort_key" title="ichor.core.common.sorting.natsort.utils.natsort_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_key</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.parse_number_or_none_factory">
+<span class="sig-name descname"><span class="pre">parse_number_or_none_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_sep</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.parse_number_or_none_factory" title="Permalink to this definition"></a></dt>
+<dd><p>Create a function that will format a number (or None) into a tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alg</strong> (<em>ns enum</em>) – Indicate how to format the <em>bytes</em>.</p></li>
+<li><p><strong>sep</strong> (<em>str</em>) – The string character to be inserted before the number
+in the returned tuple.</p></li>
+<li><p><strong>pre_sep</strong> (<em>str</em>) – In the event that <em>alg</em> contains <code class="docutils literal notranslate"><span class="pre">UNGROUPLETTERS</span></code>, this
+string will be placed in a single-element tuple at the front
+of the returned nested tuple.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A function that accepts numeric input (e.g. <em>int</em> or <em>float</em>)
+and returns a tuple containing the number with the leading string
+<em>sep</em>. Intended to be used as the <em>num_func</em> argument to
+<em>natsort_key</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.natsort_key" title="ichor.core.common.sorting.natsort.utils.natsort_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_key</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.parse_path_factory">
+<span class="sig-name descname"><span class="pre">parse_path_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str_split</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.parse_path_factory" title="Permalink to this definition"></a></dt>
+<dd><p>Create a function that will properly split and format a path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>str_split</strong> (<em>callable</em>) – The output of the <em>parse_string_factory</em> function.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A function that accepts a string or path-like object
+and splits it into its path components, then passes
+each component to <em>str_split</em> and returns the result
+as a nested tuple. Can be used as the <em>string_func</em>
+argument to <em>natsort_key</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.natsort_key" title="ichor.core.common.sorting.natsort.utils.natsort_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_key</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.parse_string_factory" title="ichor.core.common.sorting.natsort.utils.parse_string_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_string_factory</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.parse_string_factory">
+<span class="sig-name descname"><span class="pre">parse_string_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splitter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_transform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_transform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_transform</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.parse_string_factory" title="Permalink to this definition"></a></dt>
+<dd><p>Create a function that will split and format a <em>str</em> into a tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alg</strong> (<em>ns enum</em>) – Indicate how to format and split the <em>str</em>.</p></li>
+<li><p><strong>sep</strong> (<em>str</em>) – The string character to be inserted between adjacent numeric
+objects in the returned tuple.</p></li>
+<li><p><strong>splitter</strong> (<em>callable</em>) – A function the will accept a string and returns an iterable
+of strings where the numbers are separated from the non-numbers.</p></li>
+<li><p><strong>input_transform</strong> (<em>callable</em>) – A function to apply to the string input <em>before</em> applying
+the <em>splitter</em> function. Must return a string.</p></li>
+<li><p><strong>component_transform</strong> (<em>callable</em>) – A function that is operated elementwise on the output of
+<em>splitter</em>. It must accept a single string and return either
+a string or a number.</p></li>
+<li><p><strong>final_transform</strong> (<em>callable</em>) – A function to operate on the return value as a whole. It
+must accept a tuple and a string argument - the tuple
+should be the result of applying the above functions, and the
+string is the original input value. It must return a tuple.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A function that accepts string input and returns a tuple
+containing the string split into numeric and non-numeric
+components, where the numeric components are converted into
+numeric objects. The first element is <em>always</em> a string,
+and then alternates number then string. Intended to be
+used as the <em>string_func</em> argument to <em>natsort_key</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.natsort_key" title="ichor.core.common.sorting.natsort.utils.natsort_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_key</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.input_string_transform_factory" title="ichor.core.common.sorting.natsort.utils.input_string_transform_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_string_transform_factory</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.string_component_transform_factory" title="ichor.core.common.sorting.natsort.utils.string_component_transform_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">string_component_transform_factory</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.final_data_transform_factory" title="ichor.core.common.sorting.natsort.utils.final_data_transform_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">final_data_transform_factory</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.path_splitter">
+<span class="sig-name descname"><span class="pre">path_splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_d_match=&lt;built-in</span> <span class="pre">method</span> <span class="pre">match</span> <span class="pre">of</span> <span class="pre">re.Pattern</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.path_splitter" title="Permalink to this definition"></a></dt>
+<dd><p>Split a string into its path components.</p>
+<p>Assumes a string is a path or is path-like.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>str</em><em> | </em><em>pathlib.Path</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>split</strong> – The path split by directory components and extensions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">path_splitter</span><span class="p">(</span><span class="s2">&quot;this/thing.ext&quot;</span><span class="p">))</span>
+<span class="go">(&#39;this&#39;, &#39;thing&#39;, &#39;.ext&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.regex_chooser">
+<span class="sig-name descname"><span class="pre">regex_chooser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.regex_chooser" title="Permalink to this definition"></a></dt>
+<dd><p>Select an appropriate regex for the type of number of interest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alg</strong> (<em>ns enum</em>) – Used to indicate the regular expression to select.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>regex</strong> – Regular expression object that matches the desired number type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>compiled regex object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.sep_inserter">
+<span class="sig-name descname"><span class="pre">sep_inserter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.sep_inserter" title="Permalink to this definition"></a></dt>
+<dd><p>Insert ‘’ between numbers in an iterable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iterable</strong> – </p></li>
+<li><p><strong>sep</strong> (<em>str</em>) – The string character to be inserted between adjacent numeric objects.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><em>The values of *iterable</em> in order, with <em>sep</em> inserted where adjacent*</p></li>
+<li><p><em>elements are numeric. If the first element in the input is numeric</em></p></li>
+<li><p><em>then *sep</em> will be the first value yielded.*</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.utils.string_component_transform_factory">
+<span class="sig-name descname"><span class="pre">string_component_transform_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.utils.string_component_transform_factory" title="Permalink to this definition"></a></dt>
+<dd><p>Create a function to either transform a string or convert to a number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alg</strong> (<em>ns enum</em>) – Indicate how to format the <em>str</em>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A function to be used as the <em>component_transform</em> argument to
+<em>parse_string_factory</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.utils.parse_string_factory" title="ichor.core.common.sorting.natsort.utils.parse_string_factory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_string_factory</span></code></a></p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.common.sorting.natsort">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.common.sorting.natsort" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.as_ascii">
+<span class="sig-name descname"><span class="pre">as_ascii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.as_ascii" title="Permalink to this definition"></a></dt>
+<dd><p>Function to decode an input with the ASCII codec, or return as-is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>object</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If the input was of type <cite>bytes</cite>, the return value is a <cite>str</cite> decoded
+with the ASCII codec. Otherwise, the return value is identically the
+input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>output</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.decoder" title="ichor.core.common.sorting.natsort.decoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decoder</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.as_utf8">
+<span class="sig-name descname"><span class="pre">as_utf8</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.as_utf8" title="Permalink to this definition"></a></dt>
+<dd><p>Function to decode an input with the UTF-8 codec, or return as-is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>object</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If the input was of type <cite>bytes</cite>, the return value is a <cite>str</cite> decoded
+with the UTF-8 codec. Otherwise, the return value is identically the
+input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>output</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.decoder" title="ichor.core.common.sorting.natsort.decoder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decoder</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.chain_functions">
+<span class="sig-name descname"><span class="pre">chain_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.chain_functions" title="Permalink to this definition"></a></dt>
+<dd><p>Chain a list of single-argument functions together and return.</p>
+<p>The functions are applied in list order, and the output of the
+previous functions is passed to the next function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>functions</strong> (<em>list</em>) – A list of single-argument functions to chain together.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>func</strong> – A single argument function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Chain several functions together!</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">funcs</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func</span> <span class="o">=</span> <span class="n">chain_functions</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func</span><span class="p">(</span><span class="s1">&#39;hey&#39;</span><span class="p">)</span>
+<span class="go">17</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.decoder">
+<span class="sig-name descname"><span class="pre">decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.decoder" title="Permalink to this definition"></a></dt>
+<dd><p>Return a function that can be used to decode bytes to unicode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encoding</strong> (<em>str</em>) – The codec to use for decoding. This must be a valid unicode codec.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A function that takes a single argument and attempts to decode
+it using the supplied codec. Any <cite>UnicodeErrors</cite> are raised.
+If the argument was not of <cite>bytes</cite> type, it is simply returned
+as-is.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>decode_function</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.as_ascii" title="ichor.core.common.sorting.natsort.as_ascii"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_ascii</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.as_utf8" title="ichor.core.common.sorting.natsort.as_utf8"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_utf8</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;bytes&#39;</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">12345</span><span class="p">)</span> <span class="o">==</span> <span class="mi">12345</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># On Python 3, without decoder this would return [b&#39;a10&#39;, b&#39;a2&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">([</span><span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;a2&#39;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="n">decoder</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;a2&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># On Python 3, without decoder this would raise a TypeError.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">([</span><span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">,</span> <span class="s1">&#39;a2&#39;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="n">decoder</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;a2&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;a10&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.humansorted">
+<span class="sig-name descname"><span class="pre">humansorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.humansorted" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience function to properly sort non-numeric characters.</p>
+<p>This is a wrapper around <code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.LOCALE)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.LOCALE</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.index_humansorted" title="ichor.core.common.sorting.natsort.index_humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_humansorted</span></code></a></dt><dd><p>Returns the sorted indexes from <cite>humansorted</cite>.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Please read <code class="docutils literal notranslate"><span class="pre">locale_issues</span></code> before using <cite>humansorted</cite>.</p>
+<p class="rubric">Examples</p>
+<p>Use <cite>humansorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Banana&#39;</span><span class="p">,</span> <span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;banana&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;Apple&#39;, &#39;Banana&#39;, &#39;apple&#39;, &#39;banana&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">humansorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;apple&#39;, &#39;Apple&#39;, &#39;banana&#39;, &#39;Banana&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.ignore_alpha">
+<span class="sig-name descname"><span class="pre">ignore_alpha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.ignore_alpha" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.index_humansorted">
+<span class="sig-name descname"><span class="pre">index_humansorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.index_humansorted" title="Permalink to this definition"></a></dt>
+<dd><p>This is a wrapper around <code class="docutils literal notranslate"><span class="pre">index_natsorted(seq,</span> <span class="pre">alg=ns.LOCALE)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.LOCALE</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The ordered indexes of the input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.humansorted" title="ichor.core.common.sorting.natsort.humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">humansorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.order_by_index" title="ichor.core.common.sorting.natsort.order_by_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_by_index</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>Please read <code class="docutils literal notranslate"><span class="pre">locale_issues</span></code> before using <cite>humansorted</cite>.</p>
+<p class="rubric">Examples</p>
+<p>Use <cite>index_humansorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Banana&#39;</span><span class="p">,</span> <span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;banana&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index_humansorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[2, 0, 3, 1]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.index_natsorted">
+<span class="sig-name descname"><span class="pre">index_natsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.index_natsorted" title="Permalink to this definition"></a></dt>
+<dd><p>Determine the list of the indexes used to sort the input sequence.</p>
+<p>Sorts a sequence naturally, but returns a list of sorted the
+indexes and not the sorted list itself. This list of indexes
+can be used to sort multiple lists by the sorted order of the
+given sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.INT</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The ordered indexes of the input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.order_by_index" title="ichor.core.common.sorting.natsort.order_by_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_by_index</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<p>Use index_natsorted if you want to sort multiple lists by the
+sorted order of one list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;baz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="n">index_natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span>
+<span class="go">[2, 0, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Sort both lists by the sort order of a</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num3&#39;, &#39;num5&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;baz&#39;, &#39;foo&#39;, &#39;bar&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.index_realsorted">
+<span class="sig-name descname"><span class="pre">index_realsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.index_realsorted" title="Permalink to this definition"></a></dt>
+<dd><p>This is a wrapper around <code class="docutils literal notranslate"><span class="pre">index_natsorted(seq,</span> <span class="pre">alg=ns.REAL)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.REAL</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The ordered indexes of the input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.realsorted" title="ichor.core.common.sorting.natsort.realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">realsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.order_by_index" title="ichor.core.common.sorting.natsort.order_by_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">order_by_index</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<p>Use <cite>index_realsorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num5.10&#39;</span><span class="p">,</span> <span class="s1">&#39;num-3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5.3&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index_realsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[1, 3, 0, 2]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort_key">
+<span class="sig-name descname"><span class="pre">natsort_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort_key" title="Permalink to this definition"></a></dt>
+<dd><p>The default natural sorting key.</p>
+<p>This is the output of <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort_keygen" title="ichor.core.common.sorting.natsort.natsort_keygen"><code class="xref py py-func docutils literal notranslate"><span class="pre">natsort_keygen()</span></code></a> with default values.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort_keygen" title="ichor.core.common.sorting.natsort.natsort_keygen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_keygen</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsort_keygen">
+<span class="sig-name descname"><span class="pre">natsort_keygen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsort_keygen" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a key to sort strings and numbers naturally.</p>
+<p>This key is designed for use as the <cite>key</cite> argument to
+functions such as the <cite>sorted</cite> builtin.</p>
+<p>The user may customize the generated function with the
+arguments to <cite>natsort_keygen</cite>, including an optional
+<cite>key</cite> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to manipulate the input value before parsing for
+numbers. It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.INT</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – A function that parses input for natural sorting that is
+suitable for passing as the <cite>key</cite> argument to functions
+such as <cite>sorted</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort_key" title="ichor.core.common.sorting.natsort.natsort_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_key</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<p><cite>natsort_keygen</cite> is a convenient way to create a custom key
+to sort lists in-place (for example).:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num5.10&#39;</span><span class="p">,</span> <span class="s1">&#39;num-3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5.3&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">natsort_keygen</span><span class="p">(</span><span class="n">alg</span><span class="o">=</span><span class="n">ns</span><span class="o">.</span><span class="n">REAL</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
+<span class="go">[&#39;num-3&#39;, &#39;num2&#39;, &#39;num5.10&#39;, &#39;num5.3&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.natsorted">
+<span class="sig-name descname"><span class="pre">natsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.natsorted" title="Permalink to this definition"></a></dt>
+<dd><p>Sorts an iterable naturally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the iterable.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.INT</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsort_keygen" title="ichor.core.common.sorting.natsort.natsort_keygen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsort_keygen</span></code></a></dt><dd><p>Generates the key that makes natural sorting possible.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.realsorted" title="ichor.core.common.sorting.natsort.realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">realsorted</span></code></a></dt><dd><p>A wrapper for <code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.REAL)</span></code>.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.humansorted" title="ichor.core.common.sorting.natsort.humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">humansorted</span></code></a></dt><dd><p>A wrapper for <code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.LOCALE)</span></code>.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.index_natsorted" title="ichor.core.common.sorting.natsort.index_natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_natsorted</span></code></a></dt><dd><p>Returns the sorted indexes from <cite>natsorted</cite>.</p>
+</dd>
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.os_sorted" title="ichor.core.common.sorting.natsort.os_sorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sorted</span></code></a></dt><dd><p>Sort according to your operating system’s rules.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Use <cite>natsorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num3&#39;, &#39;num5&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.numeric_regex_chooser">
+<span class="sig-name descname"><span class="pre">numeric_regex_chooser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.numeric_regex_chooser" title="Permalink to this definition"></a></dt>
+<dd><p>Select an appropriate regex for the type of number of interest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alg</strong> (<em>ns enum</em>) – Used to indicate the regular expression to select.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>regex</strong> – Regular expression string that matches the desired number type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.order_by_index">
+<span class="sig-name descname"><span class="pre">order_by_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.order_by_index" title="Permalink to this definition"></a></dt>
+<dd><p>Order a given sequence by an index sequence.</p>
+<p>The output of <cite>index_natsorted</cite> is a
+sequence of integers (index) that correspond to how its input
+sequence <strong>would</strong> be sorted. The idea is that this index can
+be used to reorder multiple sequences by the sorted order of the
+first sequence. This function is a convenient wrapper to
+apply this ordering to a sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>sequence</em>) – The sequence to order.</p></li>
+<li><p><strong>index</strong> (<em>iterable</em>) – The iterable that indicates how to order <cite>seq</cite>.
+It should be the same length as <cite>seq</cite> and consist
+of integers only.</p></li>
+<li><p><strong>iter</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – If <cite>True</cite>, the ordered sequence is returned as a
+iterator; otherwise it is returned as a
+list. The default is <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sequence ordered by <cite>index</cite>, as a <cite>list</cite> or as an
+iterator (depending on the value of <cite>iter</cite>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>{{list, iterator}}</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.index_natsorted" title="ichor.core.common.sorting.natsort.index_natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_natsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.index_humansorted" title="ichor.core.common.sorting.natsort.index_humansorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_humansorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.index_realsorted" title="ichor.core.common.sorting.natsort.index_realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_realsorted</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<p><cite>order_by_index</cite> is a convenience function that helps you apply
+the result of <cite>index_natsorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;baz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="n">index_natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span>
+<span class="go">[2, 0, 1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Sort both lists by the sort order of a</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num3&#39;, &#39;num5&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_by_index</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+<span class="go">[&#39;baz&#39;, &#39;foo&#39;, &#39;bar&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.os_sort_key">
+<span class="sig-name descname"><span class="pre">os_sort_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.os_sort_key" title="Permalink to this definition"></a></dt>
+<dd><p>The default key to replicate your file browser’s sort order</p>
+<p>This is the output of <a class="reference internal" href="#ichor.core.common.sorting.natsort.os_sort_keygen" title="ichor.core.common.sorting.natsort.os_sort_keygen"><code class="xref py py-func docutils literal notranslate"><span class="pre">os_sort_keygen()</span></code></a> with default values.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.os_sort_keygen" title="ichor.core.common.sorting.natsort.os_sort_keygen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sort_keygen</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.os_sort_keygen">
+<span class="sig-name descname"><span class="pre">os_sort_keygen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.os_sort_keygen" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a sorting key to replicate your file browser’s sort order</p>
+<p>See <a class="reference internal" href="#ichor.core.common.sorting.natsort.os_sorted" title="ichor.core.common.sorting.natsort.os_sorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">os_sorted()</span></code></a> for description and caveats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – A function that parses input for OS path sorting that is
+suitable for passing as the <cite>key</cite> argument to functions
+such as <cite>sorted</cite>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>function</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.os_sort_key" title="ichor.core.common.sorting.natsort.os_sort_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sort_key</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.os_sorted" title="ichor.core.common.sorting.natsort.os_sorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sorted</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>On Windows, this will implicitly coerce all inputs to str before
+collating.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.os_sorted">
+<span class="sig-name descname"><span class="pre">os_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.os_sorted" title="Permalink to this definition"></a></dt>
+<dd><p>Sort elements in the same order as your operating system’s file browser</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The resulting function will generate results that will be
+differnt depending on your platform. This is intentional.</p>
+</div>
+<p>On Windows, this will sort with the same order as Windows Explorer.</p>
+<p>On MacOS/Linux, you will get different results depending on whether
+or not you have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed.</p>
+<ul class="simple">
+<li><p>If you have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed, you will get results that are
+the same as (or very close to) the same order as your operating
+system’s file browser.</p></li>
+<li><p>If you do not have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed, then this will give
+the same results as if you used <code class="docutils literal notranslate"><span class="pre">ns.LOCALE</span></code>, <code class="docutils literal notranslate"><span class="pre">ns.PATH</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">ns.IGNORECASE</span></code> with <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">natsorted()</span></code></a>. If you do not have
+special characters this will give correct results, but once
+special characters are added you should lower your expectations.</p></li>
+</ul>
+<p>It is <em>strongly</em> reccommended to have <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyicu</span></code> installed on
+MacOS/Linux if you want correct sort results.</p>
+<p>It does <em>not</em> take into account if a path is a directory or a file
+when sorting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort. Each element must be of type str.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#ichor.core.common.sorting.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natsorted</span></code></a>, <a class="reference internal" href="#ichor.core.common.sorting.natsort.os_sort_keygen" title="ichor.core.common.sorting.natsort.os_sort_keygen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os_sort_keygen</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<p>This will implicitly coerce all inputs to str before collating.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.sorting.natsort.realsorted">
+<span class="sig-name descname"><span class="pre">realsorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.sorting.natsort.realsorted" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience function to properly sort signed floats.</p>
+<p>A signed float in a string could be “a-5.7”. This is a wrapper around
+<code class="docutils literal notranslate"><span class="pre">natsorted(seq,</span> <span class="pre">alg=ns.REAL)</span></code>.</p>
+<p>The behavior of <a class="reference internal" href="#ichor.core.common.sorting.natsort.realsorted" title="ichor.core.common.sorting.natsort.realsorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">realsorted()</span></code></a> for <cite>natsort</cite> version &gt;= 4.0.0
+was the default behavior of <a class="reference internal" href="#ichor.core.common.sorting.natsort.natsorted" title="ichor.core.common.sorting.natsort.natsorted"><code class="xref py py-func docutils literal notranslate"><span class="pre">natsorted()</span></code></a> for <cite>natsort</cite>
+version &lt; 4.0.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>iterable</em>) – The input to sort.</p></li>
+<li><p><strong>key</strong> (<em>callable</em><em>, </em><em>optional</em>) – A key used to determine how to sort each element of the sequence.
+It is <strong>not</strong> applied recursively.
+It should accept a single argument and return a single value.</p></li>
+<li><p><strong>reverse</strong> (<em>{{True</em><em>, </em><em>False}}</em><em>, </em><em>optional</em>) – Return the list in reversed sorted order. The default is
+<cite>False</cite>.</p></li>
+<li><p><strong>alg</strong> (<em>ns enum</em><em>, </em><em>optional</em>) – This option is used to control which algorithm <cite>natsort</cite>
+uses when sorting. For details into these options, please see
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ns</span></code> class documentation. The default is <cite>ns.REAL</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The sorted input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#ichor.core.common.sorting.natsort.index_realsorted" title="ichor.core.common.sorting.natsort.index_realsorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_realsorted</span></code></a></dt><dd><p>Returns the sorted indexes from <cite>realsorted</cite>.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Use <cite>realsorted</cite> just like the builtin <cite>sorted</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;num5.10&#39;</span><span class="p">,</span> <span class="s1">&#39;num-3&#39;</span><span class="p">,</span> <span class="s1">&#39;num5.3&#39;</span><span class="p">,</span> <span class="s1">&#39;num2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">natsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;num2&#39;, &#39;num5.3&#39;, &#39;num5.10&#39;, &#39;num-3&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">realsorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">[&#39;num-3&#39;, &#39;num2&#39;, &#39;num5.10&#39;, &#39;num5.3&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ichor.core.common.sorting.html" class="btn btn-neutral float-left" title="ichor.core.common.sorting package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.core.common.sorting.natsort.compat.html" class="btn btn-neutral float-right" title="ichor.core.common.sorting.natsort.compat package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

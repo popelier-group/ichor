@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ichor.hpc.main package &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ichor.hpc.modules package" href="ichor.hpc.modules.html" />
+    <link rel="prev" title="ichor.hpc.log.portalocker package" href="ichor.hpc.log.portalocker.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core/ichor.core.html">ichor.core package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.hpc.html">ichor.hpc package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.hpc.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.batch_system.html">ichor.hpc.batch_system package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.log.html">ichor.hpc.log package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.hpc.main package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.main.aimall">ichor.hpc.main.aimall module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.main.gaussian">ichor.hpc.main.gaussian module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.main">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.modules.html">ichor.hpc.modules package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.molecular_dynamics.html">ichor.hpc.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_commands.html">ichor.hpc.submission_commands package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_script.html">ichor.hpc.submission_script package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.useful_functions.html">ichor.hpc.useful_functions package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.global_variables">ichor.hpc.global_variables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.machine">ichor.hpc.machine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.submission_command">ichor.hpc.submission_command module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.uid">ichor.hpc.uid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ichor.hpc.html">ichor.hpc package</a></li>
+      <li class="breadcrumb-item active">ichor.hpc.main package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_hpc/ichor.hpc.main.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="ichor-hpc-main-package">
+<h1>ichor.hpc.main package<a class="headerlink" href="#ichor-hpc-main-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.hpc.main.aimall">
+<span id="ichor-hpc-main-aimall-module"></span><h2>ichor.hpc.main.aimall module<a class="headerlink" href="#module-ichor.hpc.main.aimall" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.aimall.add_method_and_get_wfn_paths">
+<span class="sig-name descname"><span class="pre">add_method_and_get_wfn_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../ichor_core/ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.hpc.main.aimall.add_method_and_get_wfn_paths" title="Permalink to this definition"></a></dt>
+<dd><p>AIMALL needs to know the method from the wfn file. The method needs to be
+added in the wfn file, otherwise AIMALL gets the method wrong and
+gives the wrong results.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.aimall.submit_points_directory_to_aimall">
+<span class="sig-name descname"><span class="pre">submit_points_directory_to_aimall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../ichor_core/ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'B3LYP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aimall_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.hpc.main.aimall.submit_points_directory_to_aimall" title="Permalink to this definition"></a></dt>
+<dd><p>Submits .wfn files which will be partitioned into .int files by
+AIMALL. Each topological atom i the system has its own .int file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points_directory</strong> – A path to a <cite>PointsDirectory</cite>-structured directory or a PointsDirectory instance</p></li>
+<li><p><strong>method</strong> – Functional to be written to the .wfn file because AIMAll needs to know it to function correctly.</p></li>
+<li><p><strong>ncores</strong> – Number of cores to run AIMAll with, defaults to 2</p></li>
+<li><p><strong>naat</strong> – Number of atoms at a time, defaults to 1</p></li>
+<li><p><strong>aimall_atoms</strong> – A list of atom names (e.g. [C1, H2, etc.]) which to integrate over, defaults to None
+If left as None, AIMAll will do calculations for all atoms.</p></li>
+<li><p><strong>hold</strong> – Hold for a specific JobID, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the provided method is not in the supported functionals, then raise error.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The job id of the submitted job</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[<a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID">JobID</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.aimall.submit_wfns">
+<span class="sig-name descname"><span class="pre">submit_wfns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wfns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aimall_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.DATA/SCRIPTS/AIMALL.sh')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.hpc.main.aimall.submit_wfns" title="Permalink to this definition"></a></dt>
+<dd><p>Write out submission script and submit wavefunctions to AIMALL on a cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wfns</strong> – a list of wavefunction paths which to write to the submission script</p></li>
+<li><p><strong>atoms</strong> – a list of stings corresponding to atom names.
+These will be the atoms for which AIMALL computes properties.</p></li>
+<li><p><strong>force</strong> – Whether or not to compute AIMALL for this wfn. If force is True, AIMALL will be ran again</p></li>
+<li><p><strong>hold</strong> – An optional JobID to hold for. The AIMALL job will not run until that other job is finished.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ichor.hpc.main.gaussian">
+<span id="ichor-hpc-main-gaussian-module"></span><h2>ichor.hpc.main.gaussian module<a class="headerlink" href="#module-ichor.hpc.main.gaussian" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.gaussian.submit_gjfs">
+<span class="sig-name descname"><span class="pre">submit_gjfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gjfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_calculate_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.DATA/SCRIPTS/GAUSSIAN.sh')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a></span></span><a class="headerlink" href="#ichor.hpc.main.gaussian.submit_gjfs" title="Permalink to this definition"></a></dt>
+<dd><p>Function that writes out a submission script which contains an array of
+Gaussian jobs to be ran on compute nodes. If calling this function from
+a log-in node, it will write out the submission script, a datafile (file which contains the names of
+all the .gjf file that need to be ran through Gaussian),
+and it will submit the submission script to compute nodes as well to run Gaussian on compute nodes.
+However, if using this function from a compute node,
+(which will happen when ichor is ran in auto-run mode), this function will only be used to write out
+the datafile and will not submit any new jobs
+from the compute node (as you cannot submit jobs from compute nodes on CSF3.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gjfs</strong> – A list of Path objects pointing to .gjf files</p></li>
+<li><p><strong>force_calculate_wfn</strong> – Run Gaussian calculations on given .gjf files,
+even if .wfn files already exist. Defaults to False.</p></li>
+<li><p><strong>hold</strong> – An optional JobID for which this job to hold.
+This is used in auto-run to hold this job for the previous job to finish, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Script_name<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to write submission script out to defaults to ichor.hpc.global_variables.SCRIPT_NAMES[“gaussian”]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The JobID of this job given by the submission system.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.gaussian.submit_points_directory_to_gaussian">
+<span class="sig-name descname"><span class="pre">submit_points_directory_to_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../ichor_core/ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_existing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_calculate_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.DATA/SCRIPTS/GAUSSIAN.sh')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.hpc.main.gaussian.submit_points_directory_to_gaussian" title="Permalink to this definition"></a></dt>
+<dd><p>Function that writes out .gjf files from .xyz files that are in each directory and
+calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – A Path object which is the path of the directory
+(commonly traning set path, sample pool path, etc.).</p></li>
+<li><p><strong>force_calculate_wfn</strong> – Run Gaussian calculations on given .gjf files,
+even if .wfn files already exist. Defaults to False.</p></li>
+<li><p><strong>kwargs</strong> – Key word arguments to pass to GJF class. These are things like number of cores, basis set,
+level of theory, spin multiplicity, charge, etc.
+These will get used in the new written gjf files (overwriting
+settings from previously existing gjf files)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.gaussian.write_gjfs">
+<span class="sig-name descname"><span class="pre">write_gjfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../ichor_core/ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_existing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.hpc.main.gaussian.write_gjfs" title="Permalink to this definition"></a></dt>
+<dd><p>Writes out .gjf files in every PointDirectory which is contained
+in a PointsDirectory. Each PointDirectory should always have a <cite>.xyz</cite> file in it,
+which contains only one molecular geometry. This <cite>.xyz</cite> file can be used to write out the <cite>.gjf</cite>
+file in the PointDirectory (if it does not exist already).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> – A PointsDirectory instance which wraps around a
+whole directory containing points (such as TRAINING_SET).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of Path objects which point to <cite>.gjf</cite> files in each
+PointDirectory that is contained in the PointsDirectory.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ichor.hpc.main">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.hpc.main" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.submit_gjfs">
+<span class="sig-name descname"><span class="pre">submit_gjfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gjfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_calculate_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.DATA/SCRIPTS/GAUSSIAN.sh')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a></span></span><a class="headerlink" href="#ichor.hpc.main.submit_gjfs" title="Permalink to this definition"></a></dt>
+<dd><p>Function that writes out a submission script which contains an array of
+Gaussian jobs to be ran on compute nodes. If calling this function from
+a log-in node, it will write out the submission script, a datafile (file which contains the names of
+all the .gjf file that need to be ran through Gaussian),
+and it will submit the submission script to compute nodes as well to run Gaussian on compute nodes.
+However, if using this function from a compute node,
+(which will happen when ichor is ran in auto-run mode), this function will only be used to write out
+the datafile and will not submit any new jobs
+from the compute node (as you cannot submit jobs from compute nodes on CSF3.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gjfs</strong> – A list of Path objects pointing to .gjf files</p></li>
+<li><p><strong>force_calculate_wfn</strong> – Run Gaussian calculations on given .gjf files,
+even if .wfn files already exist. Defaults to False.</p></li>
+<li><p><strong>hold</strong> – An optional JobID for which this job to hold.
+This is used in auto-run to hold this job for the previous job to finish, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Script_name<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to write submission script out to defaults to ichor.hpc.global_variables.SCRIPT_NAMES[“gaussian”]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The JobID of this job given by the submission system.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.submit_points_directory_to_aimall">
+<span class="sig-name descname"><span class="pre">submit_points_directory_to_aimall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../ichor_core/ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'B3LYP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aimall_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.hpc.main.submit_points_directory_to_aimall" title="Permalink to this definition"></a></dt>
+<dd><p>Submits .wfn files which will be partitioned into .int files by
+AIMALL. Each topological atom i the system has its own .int file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points_directory</strong> – A path to a <cite>PointsDirectory</cite>-structured directory or a PointsDirectory instance</p></li>
+<li><p><strong>method</strong> – Functional to be written to the .wfn file because AIMAll needs to know it to function correctly.</p></li>
+<li><p><strong>ncores</strong> – Number of cores to run AIMAll with, defaults to 2</p></li>
+<li><p><strong>naat</strong> – Number of atoms at a time, defaults to 1</p></li>
+<li><p><strong>aimall_atoms</strong> – A list of atom names (e.g. [C1, H2, etc.]) which to integrate over, defaults to None
+If left as None, AIMAll will do calculations for all atoms.</p></li>
+<li><p><strong>hold</strong> – Hold for a specific JobID, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the provided method is not in the supported functionals, then raise error.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The job id of the submitted job</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[<a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID">JobID</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.main.submit_points_directory_to_gaussian">
+<span class="sig-name descname"><span class="pre">submit_points_directory_to_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../ichor_core/ichor.core.files.html#ichor.core.files.points_directory.PointsDirectory" title="ichor.core.files.points_directory.PointsDirectory"><span class="pre">PointsDirectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_existing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_calculate_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.DATA/SCRIPTS/GAUSSIAN.sh')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.batch_system.html#ichor.hpc.batch_system.jobs.JobID" title="ichor.hpc.batch_system.jobs.JobID"><span class="pre">JobID</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.hpc.main.submit_points_directory_to_gaussian" title="Permalink to this definition"></a></dt>
+<dd><p>Function that writes out .gjf files from .xyz files that are in each directory and
+calls submit_gjfs which submits all .gjf files in a directory to Gaussian. Gaussian outputs .wfn files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – A Path object which is the path of the directory
+(commonly traning set path, sample pool path, etc.).</p></li>
+<li><p><strong>force_calculate_wfn</strong> – Run Gaussian calculations on given .gjf files,
+even if .wfn files already exist. Defaults to False.</p></li>
+<li><p><strong>kwargs</strong> – Key word arguments to pass to GJF class. These are things like number of cores, basis set,
+level of theory, spin multiplicity, charge, etc.
+These will get used in the new written gjf files (overwriting
+settings from previously existing gjf files)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ichor.hpc.log.portalocker.html" class="btn btn-neutral float-left" title="ichor.hpc.log.portalocker package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.hpc.modules.html" class="btn btn-neutral float-right" title="ichor.hpc.modules package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

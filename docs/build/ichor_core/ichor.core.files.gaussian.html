@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ichor.core.files.gaussian package &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ichor.core.files.pandora package" href="ichor.core.files.pandora.html" />
+    <link rel="prev" title="ichor.core.files.dl_poly package" href="ichor.core.files.dl_poly.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.core.html">ichor.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.analysis.html">ichor.core.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="ichor.core.files.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.directory">ichor.core.files.directory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.file">ichor.core.files.file module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.file_data">ichor.core.files.file_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.mol2">ichor.core.files.mol2 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.optional_file">ichor.core.files.optional_file module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.path_object">ichor.core.files.path_object module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.point_directory">ichor.core.files.point_directory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.points_directory">ichor.core.files.points_directory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.qcp">ichor.core.files.qcp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.core.html#module-ichor.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.html">ichor.core package</a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.files.html">ichor.core.files package</a></li>
+      <li class="breadcrumb-item active">ichor.core.files.gaussian package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core/ichor.core.files.gaussian.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="ichor-core-files-gaussian-package">
+<h1>ichor.core.files.gaussian package<a class="headerlink" href="#ichor-core-files-gaussian-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.files.gaussian.gaussian_out">
+<span id="ichor-core-files-gaussian-gaussian-out-module"></span><h2>ichor.core.files.gaussian.gaussian_out module<a class="headerlink" href="#module-ichor.core.files.gaussian.gaussian_out" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gaussian_out.GaussianOut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gaussian_out.GaussianOut" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<p>Wraps around a .gau/.log file that is the output of Gaussian.
+This file contains coordinates (in Angstroms),
+forces, as well as molecular multipole moments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Path object or string to the .gau or .log file that are Gaussian output files</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gaussian_out.GaussianOut.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.gau'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gaussian_out.GaussianOut.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gaussian_out.GaussianOut.local_forces">
+<span class="sig-name descname"><span class="pre">local_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_matrix_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.forces.AtomForce" title="ichor.core.common.types.forces.AtomForce"><span class="pre">AtomForce</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.gaussian.gaussian_out.GaussianOut.local_forces" title="Permalink to this definition"></a></dt>
+<dd><p>Rotates the force vector by the C matrix (which defines a new coordinate frame).
+The C matrix is dependent on the atomic local frame calculated for each atom.
+Each atom has its own C rotation matrix, so each atomic force is
+rotated by the atom’s specific C matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>C_matrix_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – A dictionary of C matrices for each atom in the system.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of dictionaries. The inner dictionary
+has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gaussian_out.GaussianOut.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gaussian_out.GaussianOut.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gaussian_out.GaussianOut.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_matrix_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.forces.AtomForce" title="ichor.core.common.types.forces.AtomForce"><span class="pre">AtomForce</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.gaussian.gaussian_out.GaussianOut.properties" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the machine learning labels which are in this file.
+The atomic forces need to be rotated by a C matrix
+(each atom has its own C matrix) prior to machine learning.
+This method is primarily here to be used by
+<cite>PointDirectory</cite>/<cite>PointsDirectory</cite> classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>C_matrix_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – A dictionary of C matrices for each atom in the system.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of dictionaries. The inner dictionary
+has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Dict[str, <cite>AtomForce</cite>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gaussian_out.GaussianOut.property_names">
+<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['forces']</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gaussian_out.GaussianOut.property_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.files.gaussian.gjf">
+<span id="ichor-core-files-gaussian-gjf-module"></span><h2>ichor.core.files.gaussian.gjf module<a class="headerlink" href="#module-ichor.core.files.gaussian.gjf" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GJF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ichor.core.files.gaussian.gjf.PrintLevel" title="ichor.core.files.gaussian.gjf.PrintLevel"><span class="pre">PrintLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_multiplicity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_chk</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.File" title="ichor.core.files.file.File"><code class="xref py py-class docutils literal notranslate"><span class="pre">File</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a></p>
+<p>Wraps around a .gjf file that is used as input to Gaussian.
+See <a class="reference external" href="https://gaussian.com/input/">https://gaussian.com/input/</a> for details.
+Below is the usual gjf file structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>%nproc
+%mem
+# &lt;job_type&gt; &lt;method&gt;/&lt;basis-set&gt; &lt;keywords&gt;
+
+Title
+
+0 1
+&lt;atom-name&gt; &lt;todo: add -1 for freeze&gt; &lt;x&gt; &lt;y&gt; &lt;z&gt;
+...
+
+extra_details_str (containing basis sets for individual atoms, what to freeze, etc.)
+
+&lt;wfn-name&gt;
+blank line
+blank line
+blank line
+...
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – A string or Path to the .gjf file. If a path is not give,
+then there is no file to be read, so the user has to write the file contents. If
+no contents/options are written by user, they are written as the default values in the
+<code class="docutils literal notranslate"><span class="pre">write</span></code> method.</p></li>
+<li><p><strong>title</strong> – A string to be written between the link0 options and the keywords.
+It can contain any information.</p></li>
+<li><p><strong>job_type</strong> – The job type, an energy, optimization, or frequency</p></li>
+<li><p><strong>keywords</strong> – A list of keywords to be added to the Gaussian keywords line</p></li>
+<li><p><strong>method</strong> – The method to be used by Gaussian (e.g. B3LYP)</p></li>
+<li><p><strong>basis_set</strong> – The basis set to be used by Gaussian (e.g. 6-31+g(d,p))</p></li>
+<li><p><strong>charge</strong> – The charge to be used by Gaussian for the system</p></li>
+<li><p><strong>multiplicity</strong> – The multiplicity to be used by Gaussian for the system.</p></li>
+<li><p><strong>atoms</strong> – An Atoms instance containing a geometry to be written in the .gjf file.
+This is either read in (if an existing gjf path is given) or
+an error is thrown when attempting to write the gjf file (because no gjf file or <cite>Atoms</cite> instance was given)</p></li>
+<li><p><strong>extra_calculation_details</strong> – A list of strings to be added to the bottom of the gjf file
+(after atoms section containing atom names and coordinates).
+This is done in order to handle different basis sets
+for individual atoms, modredundant settings, and other settings that Gaussian handles.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is up to the user to handle write the <cite>extra_calculation_details</cite> settings. ICHOR
+does NOT do checks to see if these additional settings are going to be read in correctly
+in Gaussian.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.add_keyword">
+<span class="sig-name descname"><span class="pre">add_keyword</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.add_keyword" title="Permalink to this definition"></a></dt>
+<dd><p>Add a keyword to the Gaussian input keywords</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>keywords</strong> – A string to add as a keyword</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The keyword is not checked internally.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.add_keywords">
+<span class="sig-name descname"><span class="pre">add_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.add_keywords" title="Permalink to this definition"></a></dt>
+<dd><p>Add a list of keywords to the Gaussian input keywords</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>keywords</strong> – A list of keywords</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The keywords are not checked internally.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.basis_set">
+<span class="sig-name descname"><span class="pre">basis_set</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.basis_set" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.charge">
+<span class="sig-name descname"><span class="pre">charge</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.charge" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.gjf'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.keywords">
+<span class="sig-name descname"><span class="pre">keywords</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.keywords" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.link0">
+<span class="sig-name descname"><span class="pre">link0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.link0" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.method" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.output_wfn">
+<span class="sig-name descname"><span class="pre">output_wfn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.output_wfn" title="Permalink to this definition"></a></dt>
+<dd><p>Helper method to add ‘output=wfn’ to the GJF keyword list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.parse_route_card">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_route_card</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route_card</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.files.gaussian.gjf.RouteCard" title="ichor.core.files.gaussian.gjf.RouteCard"><span class="pre">RouteCard</span></a></span></span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.parse_route_card" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.set_mem">
+<span class="sig-name descname"><span class="pre">set_mem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.set_mem" title="Permalink to this definition"></a></dt>
+<dd><p>Sets memory for Gaussian job</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mem</strong> – string to set as memory</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is not checked internally.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.set_nproc">
+<span class="sig-name descname"><span class="pre">set_nproc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nproc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.set_nproc" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the number of processor cores for Gaussian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nproc</strong> – An integer which is the number of cores.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No checks are done for CPU core count.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.GJF.spin_multiplicity">
+<span class="sig-name descname"><span class="pre">spin_multiplicity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.GJF.spin_multiplicity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.PrintLevel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PrintLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.PrintLevel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.enum.Enum" title="ichor.core.common.types.enum.Enum"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.PrintLevel.Normal">
+<span class="sig-name descname"><span class="pre">Normal</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'n'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.PrintLevel.Normal" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.PrintLevel.Terse">
+<span class="sig-name descname"><span class="pre">Terse</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'t'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.PrintLevel.Terse" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.PrintLevel.Verbose">
+<span class="sig-name descname"><span class="pre">Verbose</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'p'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.PrintLevel.Verbose" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.RouteCard">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RouteCard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.gjf.RouteCard" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">NamedTuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.RouteCard.basis_set">
+<span class="sig-name descname"><span class="pre">basis_set</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.RouteCard.basis_set" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.RouteCard.keywords">
+<span class="sig-name descname"><span class="pre">keywords</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.RouteCard.keywords" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.RouteCard.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.RouteCard.method" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.gjf.RouteCard.print_level">
+<span class="sig-name descname"><span class="pre">print_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.gaussian.gjf.PrintLevel" title="ichor.core.files.gaussian.gjf.PrintLevel"><span class="pre">PrintLevel</span></a></em><a class="headerlink" href="#ichor.core.files.gaussian.gjf.RouteCard.print_level" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.files.gaussian.wfn">
+<span id="ichor-core-files-gaussian-wfn-module"></span><h2>ichor.core.files.gaussian.wfn module<a class="headerlink" href="#module-ichor.core.files.gaussian.wfn" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfn.MolecularOrbital">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MolecularOrbital</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigen_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">occupation_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitives</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.wfn.MolecularOrbital" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfn.WFN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WFN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.wfn.WFN" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a></p>
+<p>Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
+an output file, so it does not have a write method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path object or string to the .wfn file</p></li>
+<li><p><strong>atoms</strong> – an Atoms instance which is read in from the top of the .wfn file.
+Note that the units of the .wfn file are in Bohr.</p></li>
+<li><p><strong>method</strong> – The method (eg. B3LYP) which was used in the Gaussian calculation
+that created the .wfn file. The method is not initially written to the .wfn
+file by Gaussian, but it is necessary to add it to the .wfn file because
+AIMAll does not automatically determine the method itself, so it can lead
+to wrong IQA/multipole moments results. To make sure AIMAll results are correct,
+the method is a required argument.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mol_orbitals</strong> – The number of molecular orbitals to be read in from the .wfn file.</p></li>
+<li><p><strong>primitives</strong> – The number of primitives to be read in from the .wfn file.</p></li>
+<li><p><strong>nuclei</strong> – The number of nuclei in the system to be read in from the .wfn file.</p></li>
+<li><p><strong>energy</strong> – The molecular energy read in from the bottom of the .wfn file</p></li>
+<li><p><strong>virial</strong> – The virial read in from the bottom of the .wfn file</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since the wfn file is written out by Gaussian, we do not really
+have to modify it when writing out except we need to add the method used,
+so that AIMALL can use the correct method. Otherwise AIMAll assumes Hartree-Fock
+was used, which might be wrong.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfn.WFN.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.wfn'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfn.WFN.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfn.WFN.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfn.WFN.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfn.WFN.properties">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfn.WFN.properties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfn.WFN.property_names">
+<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['energy',</span> <span class="pre">'wfn']</span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfn.WFN.property_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.files.gaussian">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.files.gaussian" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GJF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ichor.core.files.gaussian.gjf.PrintLevel" title="ichor.core.files.gaussian.gjf.PrintLevel"><span class="pre">PrintLevel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_multiplicity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_chk</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.GJF" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.File" title="ichor.core.files.file.File"><code class="xref py py-class docutils literal notranslate"><span class="pre">File</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a></p>
+<p>Wraps around a .gjf file that is used as input to Gaussian.
+See <a class="reference external" href="https://gaussian.com/input/">https://gaussian.com/input/</a> for details.
+Below is the usual gjf file structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>%nproc
+%mem
+# &lt;job_type&gt; &lt;method&gt;/&lt;basis-set&gt; &lt;keywords&gt;
+
+Title
+
+0 1
+&lt;atom-name&gt; &lt;todo: add -1 for freeze&gt; &lt;x&gt; &lt;y&gt; &lt;z&gt;
+...
+
+extra_details_str (containing basis sets for individual atoms, what to freeze, etc.)
+
+&lt;wfn-name&gt;
+blank line
+blank line
+blank line
+...
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – A string or Path to the .gjf file. If a path is not give,
+then there is no file to be read, so the user has to write the file contents. If
+no contents/options are written by user, they are written as the default values in the
+<code class="docutils literal notranslate"><span class="pre">write</span></code> method.</p></li>
+<li><p><strong>title</strong> – A string to be written between the link0 options and the keywords.
+It can contain any information.</p></li>
+<li><p><strong>job_type</strong> – The job type, an energy, optimization, or frequency</p></li>
+<li><p><strong>keywords</strong> – A list of keywords to be added to the Gaussian keywords line</p></li>
+<li><p><strong>method</strong> – The method to be used by Gaussian (e.g. B3LYP)</p></li>
+<li><p><strong>basis_set</strong> – The basis set to be used by Gaussian (e.g. 6-31+g(d,p))</p></li>
+<li><p><strong>charge</strong> – The charge to be used by Gaussian for the system</p></li>
+<li><p><strong>multiplicity</strong> – The multiplicity to be used by Gaussian for the system.</p></li>
+<li><p><strong>atoms</strong> – An Atoms instance containing a geometry to be written in the .gjf file.
+This is either read in (if an existing gjf path is given) or
+an error is thrown when attempting to write the gjf file (because no gjf file or <cite>Atoms</cite> instance was given)</p></li>
+<li><p><strong>extra_calculation_details</strong> – A list of strings to be added to the bottom of the gjf file
+(after atoms section containing atom names and coordinates).
+This is done in order to handle different basis sets
+for individual atoms, modredundant settings, and other settings that Gaussian handles.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is up to the user to handle write the <cite>extra_calculation_details</cite> settings. ICHOR
+does NOT do checks to see if these additional settings are going to be read in correctly
+in Gaussian.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.add_keyword">
+<span class="sig-name descname"><span class="pre">add_keyword</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.GJF.add_keyword" title="Permalink to this definition"></a></dt>
+<dd><p>Add a keyword to the Gaussian input keywords</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>keywords</strong> – A string to add as a keyword</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The keyword is not checked internally.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.add_keywords">
+<span class="sig-name descname"><span class="pre">add_keywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.GJF.add_keywords" title="Permalink to this definition"></a></dt>
+<dd><p>Add a list of keywords to the Gaussian input keywords</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>keywords</strong> – A list of keywords</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The keywords are not checked internally.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.basis_set">
+<span class="sig-name descname"><span class="pre">basis_set</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.basis_set" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.charge">
+<span class="sig-name descname"><span class="pre">charge</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.charge" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.gjf'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.keywords">
+<span class="sig-name descname"><span class="pre">keywords</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.keywords" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.link0">
+<span class="sig-name descname"><span class="pre">link0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.link0" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.method" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.output_wfn">
+<span class="sig-name descname"><span class="pre">output_wfn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.GJF.output_wfn" title="Permalink to this definition"></a></dt>
+<dd><p>Helper method to add ‘output=wfn’ to the GJF keyword list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.parse_route_card">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_route_card</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route_card</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.files.gaussian.gjf.RouteCard" title="ichor.core.files.gaussian.gjf.RouteCard"><span class="pre">RouteCard</span></a></span></span><a class="headerlink" href="#ichor.core.files.gaussian.GJF.parse_route_card" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.set_mem">
+<span class="sig-name descname"><span class="pre">set_mem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.GJF.set_mem" title="Permalink to this definition"></a></dt>
+<dd><p>Sets memory for Gaussian job</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mem</strong> – string to set as memory</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is not checked internally.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.set_nproc">
+<span class="sig-name descname"><span class="pre">set_nproc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nproc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.GJF.set_nproc" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the number of processor cores for Gaussian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nproc</strong> – An integer which is the number of cores.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No checks are done for CPU core count.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GJF.spin_multiplicity">
+<span class="sig-name descname"><span class="pre">spin_multiplicity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GJF.spin_multiplicity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GaussianOut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.GaussianOut" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<p>Wraps around a .gau/.log file that is the output of Gaussian.
+This file contains coordinates (in Angstroms),
+forces, as well as molecular multipole moments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Path object or string to the .gau or .log file that are Gaussian output files</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GaussianOut.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.gau'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GaussianOut.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GaussianOut.local_forces">
+<span class="sig-name descname"><span class="pre">local_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_matrix_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.forces.AtomForce" title="ichor.core.common.types.forces.AtomForce"><span class="pre">AtomForce</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.gaussian.GaussianOut.local_forces" title="Permalink to this definition"></a></dt>
+<dd><p>Rotates the force vector by the C matrix (which defines a new coordinate frame).
+The C matrix is dependent on the atomic local frame calculated for each atom.
+Each atom has its own C rotation matrix, so each atomic force is
+rotated by the atom’s specific C matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>C_matrix_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – A dictionary of C matrices for each atom in the system.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of dictionaries. The inner dictionary
+has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GaussianOut.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GaussianOut.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GaussianOut.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_matrix_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.forces.AtomForce" title="ichor.core.common.types.forces.AtomForce"><span class="pre">AtomForce</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.gaussian.GaussianOut.properties" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the machine learning labels which are in this file.
+The atomic forces need to be rotated by a C matrix
+(each atom has its own C matrix) prior to machine learning.
+This method is primarily here to be used by
+<cite>PointDirectory</cite>/<cite>PointsDirectory</cite> classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>C_matrix_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – A dictionary of C matrices for each atom in the system.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of dictionaries. The inner dictionary
+has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Dict[str, <cite>AtomForce</cite>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.GaussianOut.property_names">
+<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['forces']</span></em><a class="headerlink" href="#ichor.core.files.gaussian.GaussianOut.property_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WFN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.WFN" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a></p>
+<p>Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
+an output file, so it does not have a write method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path object or string to the .wfn file</p></li>
+<li><p><strong>atoms</strong> – an Atoms instance which is read in from the top of the .wfn file.
+Note that the units of the .wfn file are in Bohr.</p></li>
+<li><p><strong>method</strong> – The method (eg. B3LYP) which was used in the Gaussian calculation
+that created the .wfn file. The method is not initially written to the .wfn
+file by Gaussian, but it is necessary to add it to the .wfn file because
+AIMAll does not automatically determine the method itself, so it can lead
+to wrong IQA/multipole moments results. To make sure AIMAll results are correct,
+the method is a required argument.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mol_orbitals</strong> – The number of molecular orbitals to be read in from the .wfn file.</p></li>
+<li><p><strong>primitives</strong> – The number of primitives to be read in from the .wfn file.</p></li>
+<li><p><strong>nuclei</strong> – The number of nuclei in the system to be read in from the .wfn file.</p></li>
+<li><p><strong>energy</strong> – The molecular energy read in from the bottom of the .wfn file</p></li>
+<li><p><strong>virial</strong> – The virial read in from the bottom of the .wfn file</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since the wfn file is written out by Gaussian, we do not really
+have to modify it when writing out except we need to add the method used,
+so that AIMALL can use the correct method. Otherwise AIMAll assumes Hartree-Fock
+was used, which might be wrong.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFN.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.wfn'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFN.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFN.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFN.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFN.properties">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFN.properties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFN.property_names">
+<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['energy',</span> <span class="pre">'wfn']</span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFN.property_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ichor.core.files.dl_poly.html" class="btn btn-neutral float-left" title="ichor.core.files.dl_poly package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.core.files.pandora.html" class="btn btn-neutral float-right" title="ichor.core.files.pandora package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

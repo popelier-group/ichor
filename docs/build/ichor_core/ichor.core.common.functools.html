@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ichor.core.common.functools package &mdash; ichor 3.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ichor.core.common.sorting package" href="ichor.core.common.sorting.html" />
+    <link rel="prev" title="ichor.core.common package" href="ichor.core.common.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+          <a href="../index.html" class="icon icon-home">
+            ichor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="ichor.core.html">ichor.core package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ichor.core.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.analysis.html">ichor.core.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="ichor.core.common.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.arith">ichor.core.common.arith module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.bool">ichor.core.common.bool module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.constants">ichor.core.common.constants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.conversion">ichor.core.common.conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.dict">ichor.core.common.dict module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.excel">ichor.core.common.excel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.float">ichor.core.common.float module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.formatting">ichor.core.common.formatting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.int">ichor.core.common.int module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.io">ichor.core.common.io module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.itertools">ichor.core.common.itertools module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.linalg">ichor.core.common.linalg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.np">ichor.core.common.np module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.obj">ichor.core.common.obj module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.os">ichor.core.common.os module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.patterns">ichor.core.common.patterns module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.search">ichor.core.common.search module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.str">ichor.core.common.str module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common.units">ichor.core.common.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.common.html#module-ichor.core.common">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ichor.core.html#module-ichor.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ichor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.html">ichor.core package</a></li>
+          <li class="breadcrumb-item"><a href="ichor.core.common.html">ichor.core.common package</a></li>
+      <li class="breadcrumb-item active">ichor.core.common.functools package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/ichor_core/ichor.core.common.functools.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="ichor-core-common-functools-package">
+<h1>ichor.core.common.functools package<a class="headerlink" href="#ichor-core-common-functools-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.common.functools.buildermethod">
+<span id="ichor-core-common-functools-buildermethod-module"></span><h2>ichor.core.common.functools.buildermethod module<a class="headerlink" href="#module-ichor.core.common.functools.buildermethod" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.buildermethod.buildermethod">
+<span class="sig-name descname"><span class="pre">buildermethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">F</span></span></span><a class="headerlink" href="#ichor.core.common.functools.buildermethod.buildermethod" title="Permalink to this definition"></a></dt>
+<dd><p>Executes a function on an instance of a class and returns the modified instance.
+This allows for scenarios where we can initialize a class and call a method
+(which does not return anything but it does modify the instance) in the same line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be executed</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>Without builder decorator:</dt><dd><p>t = Test().add() Since the add() method does not return anything, t is <cite>None</cite></p>
+</dd>
+<dt>With &#64;builder decorator:</dt><dd><p>t = Test().add() Since the add() method does not return anything, t is an instance of test</p>
+</dd>
+</dl>
+<p>Without builder method:
+t = Test()
+t.add()</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.common.functools.cached_property">
+<span id="ichor-core-common-functools-cached-property-module"></span><h2>ichor.core.common.functools.cached_property module<a class="headerlink" href="#module-ichor.core.common.functools.cached_property" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.cached_property">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cached_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.cached_property.cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A property that is only computed once per instance and then replaces itself
+with an ordinary attribute. Deleting the attribute resets the property.
+Source: <a class="reference external" href="https://github.com/bottlepy/bottle/commit/fa7733e075da0d790d809aa3d2f53071897e6f76">https://github.com/bottlepy/bottle/commit/fa7733e075da0d790d809aa3d2f53071897e6f76</a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.cached_property_ttl">
+<span class="sig-name descname"><span class="pre">cached_property_ttl</span></span><a class="headerlink" href="#ichor.core.common.functools.cached_property.cached_property_ttl" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.cached_property_with_ttl" title="ichor.core.common.functools.cached_property.cached_property_with_ttl"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property_with_ttl</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.cached_property_with_ntimes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cached_property_with_ntimes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ntimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.cached_property.cached_property_with_ntimes" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A property that is only computed once per instance and then replaces itself
+with an ordinary attribute. Setting the ntimes to a number expresses how many
+times the property can be called before being recalculated</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.cached_property_with_ttl">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cached_property_with_ttl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.cached_property.cached_property_with_ttl" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A property that is only computed once per instance and then replaces itself
+with an ordinary attribute. Setting the ttl to a number expresses how long
+the property will last before being timed out.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.ntimes_cached_property">
+<span class="sig-name descname"><span class="pre">ntimes_cached_property</span></span><a class="headerlink" href="#ichor.core.common.functools.cached_property.ntimes_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.cached_property_with_ntimes" title="ichor.core.common.functools.cached_property.cached_property_with_ntimes"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property_with_ntimes</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.threaded_cached_property">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threaded_cached_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.cached_property.threaded_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A cached_property version for use in environments where multiple threads
+might concurrently try to access the property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.threaded_cached_property_ttl">
+<span class="sig-name descname"><span class="pre">threaded_cached_property_ttl</span></span><a class="headerlink" href="#ichor.core.common.functools.cached_property.threaded_cached_property_ttl" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl" title="ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl"><code class="xref py py-class docutils literal notranslate"><span class="pre">threaded_cached_property_with_ttl</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threaded_cached_property_with_ttl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ichor.core.common.functools.cached_property.cached_property_with_ttl" title="ichor.core.common.functools.cached_property.cached_property_with_ttl"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property_with_ttl</span></code></a></p>
+<p>A cached_property version for use in environments where multiple threads
+might concurrently try to access the property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.timed_cached_property">
+<span class="sig-name descname"><span class="pre">timed_cached_property</span></span><a class="headerlink" href="#ichor.core.common.functools.cached_property.timed_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.cached_property_with_ttl" title="ichor.core.common.functools.cached_property.cached_property_with_ttl"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property_with_ttl</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property.timed_threaded_cached_property">
+<span class="sig-name descname"><span class="pre">timed_threaded_cached_property</span></span><a class="headerlink" href="#ichor.core.common.functools.cached_property.timed_threaded_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl" title="ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl"><code class="xref py py-class docutils literal notranslate"><span class="pre">threaded_cached_property_with_ttl</span></code></a></p>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.common.functools.classproperty">
+<span id="ichor-core-common-functools-classproperty-module"></span><h2>ichor.core.common.functools.classproperty module<a class="headerlink" href="#module-ichor.core.common.functools.classproperty" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.classproperty.ClassPropertyDescriptor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ClassPropertyDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.classproperty.ClassPropertyDescriptor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.common.functools.classproperty.ClassPropertyDescriptor.setter">
+<span class="sig-name descname"><span class="pre">setter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.classproperty.ClassPropertyDescriptor.setter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.classproperty.classproperty">
+<span class="sig-name descname"><span class="pre">classproperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.common.functools.classproperty.ClassPropertyDescriptor" title="ichor.core.common.functools.classproperty.ClassPropertyDescriptor"><span class="pre">ClassPropertyDescriptor</span></a></span></span><a class="headerlink" href="#ichor.core.common.functools.classproperty.classproperty" title="Permalink to this definition"></a></dt>
+<dd><p>A decorator which makes it possible to make class properties,
+where the class can call a class method without the parenthesis at the end.
+This is useful to have as class variables are static and cannot be changed.
+Class properties allow us to change these values on the fly.</p>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.common.functools.hasattr">
+<span id="ichor-core-common-functools-hasattr-module"></span><h2>ichor.core.common.functools.hasattr module<a class="headerlink" href="#module-ichor.core.common.functools.hasattr" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.common.functools.run_function">
+<span id="ichor-core-common-functools-run-function-module"></span><h2>ichor.core.common.functools.run_function module<a class="headerlink" href="#module-ichor.core.common.functools.run_function" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.run_function.get_functions_to_run">
+<span class="sig-name descname"><span class="pre">get_functions_to_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">F</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.common.functools.run_function.get_functions_to_run" title="Permalink to this definition"></a></dt>
+<dd><p>Finds all methods of <cite>obj</cite> with the <cite>order</cite> attribute then returns the sequence of methods
+in the order defined</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.run_function.run_function">
+<span class="sig-name descname"><span class="pre">run_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Scalar</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">F</span></span></span><a class="headerlink" href="#ichor.core.common.functools.run_function.run_function" title="Permalink to this definition"></a></dt>
+<dd><p>Used to decorate a method so that <cite>get_functions_to_run</cite> can find and return the methods in
+the order specified by the order parameter</p>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.common.functools.run_once">
+<span id="ichor-core-common-functools-run-once-module"></span><h2>ichor.core.common.functools.run_once module<a class="headerlink" href="#module-ichor.core.common.functools.run_once" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.run_once.run_once">
+<span class="sig-name descname"><span class="pre">run_once</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">F</span></span></span><a class="headerlink" href="#ichor.core.common.functools.run_once.run_once" title="Permalink to this definition"></a></dt>
+<dd><p>Decorator which only runs the function the first
+time it is called and stores the result. If the function is ran another time, the stored result is
+returned.</p>
+</dd></dl>
+
+</section>
+<section id="module-ichor.core.common.functools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.common.functools" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.buildermethod">
+<span class="sig-name descname"><span class="pre">buildermethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">F</span></span></span><a class="headerlink" href="#ichor.core.common.functools.buildermethod" title="Permalink to this definition"></a></dt>
+<dd><p>Executes a function on an instance of a class and returns the modified instance.
+This allows for scenarios where we can initialize a class and call a method
+(which does not return anything but it does modify the instance) in the same line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be executed</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>Without builder decorator:</dt><dd><p>t = Test().add() Since the add() method does not return anything, t is <cite>None</cite></p>
+</dd>
+<dt>With &#64;builder decorator:</dt><dd><p>t = Test().add() Since the add() method does not return anything, t is an instance of test</p>
+</dd>
+</dl>
+<p>Without builder method:
+t = Test()
+t.add()</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.cached_property">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cached_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A property that is only computed once per instance and then replaces itself
+with an ordinary attribute. Deleting the attribute resets the property.
+Source: <a class="reference external" href="https://github.com/bottlepy/bottle/commit/fa7733e075da0d790d809aa3d2f53071897e6f76">https://github.com/bottlepy/bottle/commit/fa7733e075da0d790d809aa3d2f53071897e6f76</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.classproperty">
+<span class="sig-name descname"><span class="pre">classproperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ichor.core.common.functools.classproperty.ClassPropertyDescriptor" title="ichor.core.common.functools.classproperty.ClassPropertyDescriptor"><span class="pre">ClassPropertyDescriptor</span></a></span></span><a class="headerlink" href="#ichor.core.common.functools.classproperty" title="Permalink to this definition"></a></dt>
+<dd><p>A decorator which makes it possible to make class properties,
+where the class can call a class method without the parenthesis at the end.
+This is useful to have as class variables are static and cannot be changed.
+Class properties allow us to change these values on the fly.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.get_functions_to_run">
+<span class="sig-name descname"><span class="pre">get_functions_to_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">F</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.common.functools.get_functions_to_run" title="Permalink to this definition"></a></dt>
+<dd><p>Finds all methods of <cite>obj</cite> with the <cite>order</cite> attribute then returns the sequence of methods
+in the order defined</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.ntimes_cached_property">
+<span class="sig-name descname"><span class="pre">ntimes_cached_property</span></span><a class="headerlink" href="#ichor.core.common.functools.ntimes_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.cached_property_with_ntimes" title="ichor.core.common.functools.cached_property.cached_property_with_ntimes"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property_with_ntimes</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.run_function">
+<span class="sig-name descname"><span class="pre">run_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Scalar</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">F</span></span></span><a class="headerlink" href="#ichor.core.common.functools.run_function" title="Permalink to this definition"></a></dt>
+<dd><p>Used to decorate a method so that <cite>get_functions_to_run</cite> can find and return the methods in
+the order specified by the order parameter</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.common.functools.run_once">
+<span class="sig-name descname"><span class="pre">run_once</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">F</span></span></span><a class="headerlink" href="#ichor.core.common.functools.run_once" title="Permalink to this definition"></a></dt>
+<dd><p>Decorator which only runs the function the first
+time it is called and stores the result. If the function is ran another time, the stored result is
+returned.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.common.functools.threaded_cached_property">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threaded_cached_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.common.functools.threaded_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A cached_property version for use in environments where multiple threads
+might concurrently try to access the property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.timed_cached_property">
+<span class="sig-name descname"><span class="pre">timed_cached_property</span></span><a class="headerlink" href="#ichor.core.common.functools.timed_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.cached_property_with_ttl" title="ichor.core.common.functools.cached_property.cached_property_with_ttl"><code class="xref py py-class docutils literal notranslate"><span class="pre">cached_property_with_ttl</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.common.functools.timed_threaded_cached_property">
+<span class="sig-name descname"><span class="pre">timed_threaded_cached_property</span></span><a class="headerlink" href="#ichor.core.common.functools.timed_threaded_cached_property" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl" title="ichor.core.common.functools.cached_property.threaded_cached_property_with_ttl"><code class="xref py py-class docutils literal notranslate"><span class="pre">threaded_cached_property_with_ttl</span></code></a></p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ichor.core.common.html" class="btn btn-neutral float-left" title="ichor.core.common package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.core.common.sorting.html" class="btn btn-neutral float-right" title="ichor.core.common.sorting package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Yulian Manchev.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>
