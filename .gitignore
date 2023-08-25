@@ -32,7 +32,6 @@ SOURCES.txt
 top_level.txt
 dependency_links.txt
 requires.txt
-build
 dist
 *venv*
 *egg-info*
