@@ -1,34 +1,100 @@
 Installing ichor
 ----------------
 
-If using conda, create a new environment. Please make sure that you are using the latest version of conda on CSF3/CSF4.
-Using an older conda version will make it a bit harder to install ichor as the python/setuptools/pip version supplied are older.
-Make sure that you have at least python 3.7 in the current environment and that setuptools and pip are all up to date.
+++++++++++++++++++++++++++++++
+Setting up Python environments
+++++++++++++++++++++++++++++++
 
-On CSF3, you now need to do ``qrsh -l short`` as the proxy is no longer available. Then, from the submit node, you can access the internet and install packages as needed.
 
-First, download the ICHOR source code. It is recommended to download the code as a git repository,
-so that you can pull changes from the github code when changes are made.
-If you download the code as a zip, you will not be able to pull from github and will have to download the code every time a change is made!
+.. warning::
 
-To make a conda environment do
+    You will need to make separate environments for CSF3 and CSF4.
+
+    For CSF3 use ``source activate my_env`` to activate a CONDA environment in both the login node and when submitting jobs.
+    Check out the guide here. Not sure why this is required.
+
+    * `Anaconda CSF3 <https://ri.itservices.manchester.ac.uk/csf3/software/applications/anaconda-python/>`_
+
+CSF3/CSF4 have a very old Python 3 installed, so you will need to load in an anaconda module file to gain access to recent python versions.
+Please make sure that you are using the latest version of conda on CSF3/CSF4.
+At the time of writing this guide, the latest version of Python with conda is ``3.9``. Using an older conda version will make it harder to install ichor as the python/setuptools/pip version supplied are older.
+
+To load conda, use
+
+.. code-block:: text
+
+    module load apps/binapps/anaconda3/2022.10
+
+To activate the ``base`` conda environment, which should have Python ``3.9`` with the above module, do
+
+.. code-block:: text
+
+    conda activate
+
+and you should see a ``(base)`` on the left of the terminal, you can check the version by doing ``python3 --version``.
+
+On CSF3, you need to do ``qrsh -l short`` as the network proxy is no longer available.
+This goes into a submit node, you can access the internet and install packages as well as make new conda environments with different python versions.
+
+.. note::
+
+    You will need to load in the module and activate the environment again in the compute node to be able to install packages in the correct environment.
+
+To make a conda environment (with the appropriate conda module loaded on csf3/csf4) do
 
 .. code-block:: text
 
     conda create -n ichor
 
-To activate the conda environment do ``conda activate name_of_env``.
+This will create a new environment with the Python version from the base environment.
 
-Use can also use a ``venv`` environment. To make a venv, do
+To activate the conda environment do ``conda activate name_of_env``. Note that you can specify the Python version in these conda environments as well,
+just make sure to be on the compute node because it has to download things from the internet.
+
+Now you can make a ``venv`` environment which will use the Python version from the activated conda environment. To make a venv, do
 
 .. code-block:: text
 
     python3 -m venv ~/.venv/ichor
 
-This activate this environment, do ``source ~/.venv/env_name/bin/activate``. Use this is you have problems with the anaconda for some reason or problems installing packages in anaconda.
+This creates a virtual environment in the ``~/.venv/ichor`` folder and all environment packages will be installed here.
+To active the venv environment, do ``source ~/.venv/env_name/bin/activate``. Use this is you have problems with the anaconda for some reason or problems installing packages in anaconda.
 
-This will make a new environment called ``ichor``, which can be activated by doing ``conda activate ichor``.
-You should see ``(ichor)`` show up on the left side of the terminal, which indicates you are in the ``ichor`` environment.
+.. note::
+
+    You will not need the conda module anymore if using venv. If you make a venv environment, the python version will be
+    taken from the conda environment (so we are going to be using the same python version available in the conda environment),
+    however, all packages will now be installed in the venv environment instead of the conda environment. This should remove
+    problems associated with anaconda / loading anaconda modules.
+
+You should see ``(ichor)`` show up on the left side of the terminal, which indicates you are in the ``ichor`` environment. This is the
+same for both venv and conda.
+
+Make sure that you have at least python 3.7 in the current venv or conda environment and that setuptools and pip are all up to date.
+
+To make sure you are using the latest versions of the packages, use
+
+.. code-block:: text
+
+    python3 -m pip install --upgrade pip setuptools
+
+++++++++++++++++++++++++++++++
+Downloading ichor
+++++++++++++++++++++++++++++++
+
+First, download the ichor source code to your home directory (again you need to be on the compute node to have internet access). It is recommended to download the code as a git repository,
+so that you can pull changes from the github code when changes are made. You can follow the Github guides on how to clone.
+If you download the code as a zip, you will not be able to pull from github and will have to download the code every time a change is made!
+
+.. warning::
+
+    You will need to use HTTPS to clone a repository to CSF3/CSF4 as SSH is not supported on the servers.
+    Therefore, you will also need to create a Personal Access Token as Github no longer accepts direct password authentication on a server.
+    Below are two guides how to clone a repository and create a personal access token
+
+    * `Github Cloning a Repository <https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository>`_
+    * `Github Personal Access Token <https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens>`_
+
 
 To install each of the sub-packages, do
 
