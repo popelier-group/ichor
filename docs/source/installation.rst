@@ -42,7 +42,7 @@ This goes into a submit (compute) node, you can access the internet and install 
     compute node to be able to install packages in the correct environment.
     Create environments while in the compute node which has internet access. After you have installed all the packages,
     then you can exit out of the compute node and should be able to load in the environment on the login node.
-    You should be able to submit jobs now that use the Python environment.
+    You should be able to submit jobs now on the login node using the Python environment made on the compute node.
 
 To make a conda environment (with the appropriate conda module loaded on csf3/csf4) do
 
