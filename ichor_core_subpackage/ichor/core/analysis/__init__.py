@@ -1,3 +1,3 @@
-from ichor.core.analysis.trajectoryanalysis import TrajectoryAnalysis, Stability
+from ichor.core.analysis.trajectory_analysis import Stability, TrajectoryAnalysis
 
 __all__ = ["TrajectoryAnalysis", "Stability"]

@@ -1,12 +1,15 @@
-import numpy as np
-from pathlib import Path
-from typing import Union, List, Tuple, Iterator, Iterable, Optional
 import itertools
+from pathlib import Path
+from typing import Iterable, Iterator, List, Optional, Tuple, Union
+
 import matplotlib.pyplot as plt
-from scipy.spatial.distance import cdist
-from ichor.core.files import Trajectory, DlpolyHistory, XYZ, GJF
-from ichor.core.files.file import ReadFile
+import numpy as np
 from ichor.core.calculators import default_connectivity_calculator
+from ichor.core.files import DlpolyHistory, GJF, Trajectory, XYZ
+from ichor.core.files.file import ReadFile
+
+# TODO: potentially move Distance to outside of models/kernels
+from ichor.core.models.kernels.distance import Distance
 
 
 def pairwise(iterable: Iterable) -> Iterator[Tuple[int, int]]:
@@ -20,18 +23,20 @@ class TrajectoryAnalysis(ReadFile):
     """TrajectoryAnalysis is a class used for general analysis of
     molecular dynamics trajectories.
     Functionality for now comprehends only distribution of distances for a single molecule
+
+    :param trajectory_path: Path to the trajectory file. Can be an xyz or a DLPOLY4 trajectory.
+    :type trajectory_path: Union[Path, str]
+
     Example usage:
-    traj = TrajectoryAnalysis(Path('path/to/trajectory'))
-    traj.hr()
-    traj.plot_hr(Path('path/to/figure.png'))
+
+    .. code-block:: text
+
+        traj = TrajectoryAnalysis(Path('path/to/trajectory'))
+        traj.hr()
+        traj.plot_hr(Path('path/to/figure.png'))
     """
 
     def __init__(self, trajectory_path: Union[Path, str]):
-        """__init__
-
-        :param trajectory_path: Path to the trajectory file. Can be an xyz or a DLPOLY4 trajectory.
-        :type trajectory_path: Union[Path, str]
-        """
         ReadFile.__init__(self, trajectory_path)
         self.trajectory = (
             Trajectory(trajectory_path)
@@ -48,10 +53,10 @@ class TrajectoryAnalysis(ReadFile):
 
     @property
     def distances_matrix(self) -> np.ndarray:
-        """distances_matrix is a property that returns a distance matrix of
-        all timesteps of a trajectory
+        """
+        Returns a distance matrix of all timesteps of a trajectory
 
-        :return: matrix of shape (timesteps,natoms,natoms)
+        :return: matrix of shape (timesteps, natoms, natoms)
         """
         if self._distances_matrix is None:
             self._compute_distances_matrix()
@@ -59,33 +64,38 @@ class TrajectoryAnalysis(ReadFile):
 
     @property
     def distance_hist(self) -> List[float]:
-        """distance_hist attribute which returns the bins to plot
-        a histogram
+        """
+        The bins to plot on a histogram
 
-        :return: list of floats
+        :return: The bins to plot
         """
         return self.distributions
 
     @property
     def bins(self) -> List[float]:
-        """bins attribute which returns
+        """
+        bins attribute which returns
 
         :return: _description_
         """
         return self.r
 
     def _compute_distances_matrix(self):
-        """_compute_distances_matrix computes the matrix of distances of
-        all timesteps of a trajectory using cdists
+        """
+        Computes the distance matrix between atoms for each timestep and stores
+        into the self._distances_matrix attribute for later usage.
         """
         self._distances_matrix = np.zeros(
             (len(self.trajectory), self.trajectory.natoms, self.trajectory.natoms)
         )
         for i, t in enumerate(self.trajectory):
-            self._distances_matrix[i, :, :] = cdist(t.coordinates, t.coordinates)
+            self._distances_matrix[i, :, :] = Distance.euclidean_distance(
+                t.coordinates, t.coordinates
+            )
 
     def delta_dirac(self, r0: float, r1: float) -> int:
-        """delta_dirac function to compute a modified version of the Dirac delta function.
+        """
+        Computes a modified version of the Dirac delta function.
         In other words this uses the distances_matrix attribute and checks
         all the distances that are between two int values.
         This is mainly used to compute the distribution of distances h(r).
@@ -96,11 +106,12 @@ class TrajectoryAnalysis(ReadFile):
         """
         # Index is a f
         index = (r0 < self.distances_matrix) & (self.distances_matrix < r1)
-        true_vals = len(index[index == True])
+        true_vals = len(index[index is True])
         return true_vals
 
     def hr(self, nbins: Optional[int] = 1000, max_dist: Optional[float] = 10.0):
-        """hr is a function which computes the distributions of distances of all pair-wise distances
+        """
+        Computes the distributions of distances of all pair-wise distances
         across a whole trajectory.
         This function needs to be called if the bins and distance_hist attributes need to be computed
 
@@ -119,8 +130,7 @@ class TrajectoryAnalysis(ReadFile):
             )
 
     def plot_hr(self, save_path: Union[Path, str]):
-        """plot_hr is an helper function which plots a quick graph
-        for visualising the hr distribution.
+        """Helper function which plots a quick graph for visualising the hr distribution.
 
         :param save_path: path and name of the file ending in .png
         """
@@ -130,15 +140,23 @@ class TrajectoryAnalysis(ReadFile):
 
 
 class Stability(TrajectoryAnalysis):
-    """Stability is a child class of TrajectoryAnalysis
-    which simply checks whether a simulation of a molecule is stable given a threshold
-    value. Each connected bond distance is subtracted to a reference bond distance
+    """
+    Class used to check whether a simulation of a molecule is stable given a threshold value.
+    Each connected bond distance is subtracted to a reference bond distance
     (e.g. of the corresponding optimised molecule) and then checked against the threshold.
+
+    :param reference_path: path to the reference structure of a molecule. Can be .gjf or .xyz file.
+    :param trajectory_path: path to the trajectory file. Can be a DLPOLY4 trajectory or a .xyz trajectory file.
+    :param threshold: threshold value for stability across the trajectory.
+
     Example usage:
-    traj = Stability(Path('path/to/reference'),Path('path/to/trajectory'). threshold=0.5)
-    traj.stable_trajectory()
-    traj.hr()
-    traj.plot_hr(Path('path/to/figure.png'))
+
+    .. code-block:: text
+
+        traj = Stability(Path('path/to/reference'),Path('path/to/trajectory'). threshold=0.5)
+        traj.stable_trajectory()
+        traj.hr()
+        traj.plot_hr(Path('path/to/figure.png'))
     """
 
     def __init__(
@@ -147,13 +165,7 @@ class Stability(TrajectoryAnalysis):
         trajectory_path: Union[Path, str],
         threshold: float,
     ):
-        """__init__
-
-        :param reference_path: path to the reference structure of a molecule. Can be .gjf or .xyz file.
-        :param trajectory_path: path to the trajectory file. Can be a DLPOLY4 trajectory or a .xyz trajectory file.
-        :param threshold: threshold value for stability across the trajectory.
-        """
-        TrajectoryAnalysis.__init__(self, trajectory_path)
+        super().__init__(trajectory_path)
         self.reference = (
             XYZ(reference_path)
             if reference_path.suffix == ".xyz"
@@ -165,12 +177,10 @@ class Stability(TrajectoryAnalysis):
             default_connectivity_calculator
         )
 
-        def _read_file(self):
-            self.reference._read_file()
-
     @property
     def bond_lengths_matrix(self) -> np.ndarray:
-        """bond_lengths_matrix returns a distances matrix only for bonds.
+        """
+        Returns a distances matrix only for bonds.
 
         :return: numpy array of (timesteps,natoms,natoms) dimensions
         """
@@ -179,8 +189,8 @@ class Stability(TrajectoryAnalysis):
         return self._bond_lengths_matrix
 
     def _compute_bond_lengths_matrix(self):
-        """_compute_bond_lengths_matrix is a function which computes
-        a distance matrix of all distances along a trajectory and masks it with
+        """
+        Computes a distance matrix of all distances along a trajectory and masks it with
         the connectivity of the reference geometry.
         """
         self._bond_lengths_matrix = np.zeros_like(self.distances_matrix)
@@ -191,12 +201,13 @@ class Stability(TrajectoryAnalysis):
         self._bond_lengths_matrix = distances_matrix_masked
 
     def bond_lengths_differences_matrix(self) -> np.ndarray:
-        """bond_lengths_differences_matrix computes a matrix of the differences of distances
+        """
+        Computes a matrix of the differences of distances
         between a reference geometry and all the timesteps of a trajectory.
 
         :return: numpy array of dimensions (timesteps,natoms,natoms)
         """
-        reference_distance_matrix = cdist(
+        reference_distance_matrix = Distance.euclidean_distance(
             self.reference.coordinates, self.reference.coordinates
         )
         reference_distance_matrix_masked = np.where(
@@ -212,8 +223,8 @@ class Stability(TrajectoryAnalysis):
         return mask
 
     def stable_trajectory(self):
-        """stable_trajectory is the main function of the Stability class
-        The function computes the bond_lengths_differences_matrix and then checks
+        """
+        Computes the bond_lengths_differences_matrix and then checks
         at which timesteps the trajectory is not stable and overwrites the original
         trajectory attribute with the stable trajectory only so that the distribution of distances
         hr can then be computed on the stable part of the trajectory.
