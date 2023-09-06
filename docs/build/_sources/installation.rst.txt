@@ -34,11 +34,15 @@ To activate the ``base`` conda environment, which should have Python ``3.9`` wit
 and you should see a ``(base)`` on the left of the terminal, you can check the version by doing ``python3 --version``.
 
 On CSF3, you need to do ``qrsh -l short`` as the network proxy is no longer available.
-This goes into a submit node, you can access the internet and install packages as well as make new conda environments with different python versions.
+This goes into a submit (compute) node, you can access the internet and install packages as well as make new conda environments with different python versions.
 
-.. note::
+.. warning::
 
-    You will need to load in the module and activate the environment again in the compute node to be able to install packages in the correct environment.
+    You will need to load in the anaconda module and activate the environment again in the
+    compute node to be able to install packages in the correct environment.
+    Create environments while in the compute node which has internet access. After you have installed all the packages,
+    then you can exit out of the compute node and should be able to load in the environment on the login node.
+    You should be able to submit jobs now that use the Python environment.
 
 To make a conda environment (with the appropriate conda module loaded on csf3/csf4) do
 

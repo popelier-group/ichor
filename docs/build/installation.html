@@ -110,10 +110,14 @@ At the time of writing this guide, the latest version of Python with conda is <c
 </div>
 <p>and you should see a <code class="docutils literal notranslate"><span class="pre">(base)</span></code> on the left of the terminal, you can check the version by doing <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">--version</span></code>.</p>
 <p>On CSF3, you need to do <code class="docutils literal notranslate"><span class="pre">qrsh</span> <span class="pre">-l</span> <span class="pre">short</span></code> as the network proxy is no longer available.
-This goes into a submit node, you can access the internet and install packages as well as make new conda environments with different python versions.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>You will need to load in the module and activate the environment again in the compute node to be able to install packages in the correct environment.</p>
+This goes into a submit (compute) node, you can access the internet and install packages as well as make new conda environments with different python versions.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You will need to load in the anaconda module and activate the environment again in the
+compute node to be able to install packages in the correct environment.
+Create environments while in the compute node which has internet access. After you have installed all the packages,
+then you can exit out of the compute node and should be able to load in the environment on the login node.
+You should be able to submit jobs now that use the Python environment.</p>
 </div>
 <p>To make a conda environment (with the appropriate conda module loaded on csf3/csf4) do</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>conda create -n ichor
