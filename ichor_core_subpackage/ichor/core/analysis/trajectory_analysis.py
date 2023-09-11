@@ -31,13 +31,14 @@ class TrajectoryAnalysis(ReadFile):
 
     .. code-block:: text
 
-        traj = TrajectoryAnalysis(Path('path/to/trajectory'))
+        traj = TrajectoryAnalysis('path/to/trajectory')
         traj.hr()
-        traj.plot_hr(Path('path/to/figure.png'))
+        traj.plot_hr('path/to/figure.png')
     """
 
     def __init__(self, trajectory_path: Union[Path, str]):
         ReadFile.__init__(self, trajectory_path)
+        trajectory_path = Path(trajectory_path)
         self.trajectory = (
             Trajectory(trajectory_path)
             if trajectory_path.suffix == ".xyz"
@@ -153,10 +154,10 @@ class Stability(TrajectoryAnalysis):
 
     .. code-block:: text
 
-        traj = Stability(Path('path/to/reference'),Path('path/to/trajectory'). threshold=0.5)
+        traj = Stability('path/to/reference.xyz','path/to/trajectory.xyz', threshold=0.5)
         traj.stable_trajectory()
         traj.hr()
-        traj.plot_hr(Path('path/to/figure.png'))
+        traj.plot_hr('path/to/figure.png')
     """
 
     def __init__(
@@ -166,6 +167,7 @@ class Stability(TrajectoryAnalysis):
         threshold: float,
     ):
         super().__init__(trajectory_path)
+        reference_path = Path(reference_path)
         self.reference = (
             XYZ(reference_path)
             if reference_path.suffix == ".xyz"
