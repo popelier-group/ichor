@@ -5,7 +5,7 @@
 Install the requirements by doing 
 
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 Additionally, you will need to have the ichor packages installed. 

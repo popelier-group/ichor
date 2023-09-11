@@ -21,6 +21,14 @@ ichor.core.analysis.predictions module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.analysis.trajectory\_analysis module
+-----------------------------------------------
+
+.. automodule:: ichor.core.analysis.trajectory_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

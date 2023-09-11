@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-
+  
         <script src="../_static/jquery.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -21,17 +21,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ichor.hpc.main package" href="ichor.hpc.main.html" />
-    <link rel="prev" title="ichor.hpc.log.concurrent_log_handler package" href="ichor.hpc.log.concurrent_log_handler.html" />
+    <link rel="prev" title="ichor.hpc.log.concurrent_log_handler package" href="ichor.hpc.log.concurrent_log_handler.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-
-
+          
+          
           <a href="../index.html" class="icon icon-home">
             ichor
           </a>
@@ -104,7 +104,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <section id="ichor-hpc-log-portalocker-package">
 <h1>ichor.hpc.log.portalocker package<a class="headerlink" href="#ichor-hpc-log-portalocker-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
@@ -266,10 +266,28 @@ mode will result in truncate _BEFORE_ the lock is checked.</p>
 <dd><p>Acquire the locked filehandle</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.utils.Lock.check_interval">
+<span class="sig-name descname"><span class="pre">check_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.utils.Lock.check_interval" title="Permalink to this definition"></a></dt>
+<dd><p>check interval while waiting for <cite>timeout</cite></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.utils.Lock.fail_when_locked">
+<span class="sig-name descname"><span class="pre">fail_when_locked</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.utils.Lock.fail_when_locked" title="Permalink to this definition"></a></dt>
+<dd><p>skip the timeout and immediately fail if the initial lock fails</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.hpc.log.portalocker.utils.Lock.release">
 <span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.log.portalocker.utils.Lock.release" title="Permalink to this definition"></a></dt>
 <dd><p>Releases the currently locked file handle</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.utils.Lock.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.utils.Lock.timeout" title="Permalink to this definition"></a></dt>
+<dd><p>timeout when trying to acquire a lock</p>
 </dd></dl>
 
 </dd></dl>
@@ -319,7 +337,7 @@ portalocker as a dependency that needs to be downloaded separately.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ichor.hpc.log.portalocker.BoundedSemaphore">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BoundedSemaphore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bounded_semaphore'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'{name}.{number:02d}.lock'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/tmp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.log.portalocker.BoundedSemaphore" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BoundedSemaphore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bounded_semaphore'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'{name}.{number:02d}.lock'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/tmp/4505618.1.short-interactive.q'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.log.portalocker.BoundedSemaphore" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LockBase</span></code></p>
 <p>Bounded semaphore to prevent too many parallel processes from running</p>
 <p>It’s also possible to specify a timeout when acquiring the lock to wait
@@ -432,11 +450,54 @@ mode will result in truncate _BEFORE_ the lock is checked.</p>
 <dd><p>Acquire the locked filehandle</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.check_interval">
+<span class="sig-name descname"><span class="pre">check_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.check_interval" title="Permalink to this definition"></a></dt>
+<dd><p>check interval while waiting for <cite>timeout</cite></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.fail_when_locked">
+<span class="sig-name descname"><span class="pre">fail_when_locked</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.fail_when_locked" title="Permalink to this definition"></a></dt>
+<dd><p>skip the timeout and immediately fail if the initial lock fails</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.fh">
+<span class="sig-name descname"><span class="pre">fh</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IO</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.fh" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.filename" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.hpc.log.portalocker.constants.LockFlags" title="ichor.hpc.log.portalocker.constants.LockFlags"><span class="pre">LockFlags</span></a></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.flags" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.mode" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.release">
 <span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.release" title="Permalink to this definition"></a></dt>
 <dd><p>Releases the currently locked file handle</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.timeout" title="Permalink to this definition"></a></dt>
+<dd><p>timeout when trying to acquire a lock</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.Lock.truncate">
+<span class="sig-name descname"><span class="pre">truncate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.Lock.truncate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -490,11 +551,54 @@ calls are made the lock will finally release the underlying file lock.</p>
 <dd><p>Acquire the locked filehandle</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.check_interval">
+<span class="sig-name descname"><span class="pre">check_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.check_interval" title="Permalink to this definition"></a></dt>
+<dd><p>check interval while waiting for <cite>timeout</cite></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.fail_when_locked">
+<span class="sig-name descname"><span class="pre">fail_when_locked</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.fail_when_locked" title="Permalink to this definition"></a></dt>
+<dd><p>skip the timeout and immediately fail if the initial lock fails</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.fh">
+<span class="sig-name descname"><span class="pre">fh</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IO</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.fh" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.filename" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.hpc.log.portalocker.constants.LockFlags" title="ichor.hpc.log.portalocker.constants.LockFlags"><span class="pre">LockFlags</span></a></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.flags" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.mode" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.release">
 <span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.release" title="Permalink to this definition"></a></dt>
 <dd><p>Releases the currently locked file handle</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.timeout" title="Permalink to this definition"></a></dt>
+<dd><p>timeout when trying to acquire a lock</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.log.portalocker.RLock.truncate">
+<span class="sig-name descname"><span class="pre">truncate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#ichor.hpc.log.portalocker.RLock.truncate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -561,7 +665,7 @@ is generally the case but not a guarantee.</p>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -572,7 +676,7 @@ is generally the case but not a guarantee.</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>
