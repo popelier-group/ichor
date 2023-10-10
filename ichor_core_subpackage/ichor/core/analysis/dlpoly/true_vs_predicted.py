@@ -415,7 +415,7 @@ def plot_true_vs_predicted_from_arrays_one_system(
         fontsize=0.01,
         edgecolor="black",
         loc="lower right",
-        bbox_to_anchor=(0.85, 0.23),
+        bbox_to_anchor=(0.40, 0.80),
     )
     # set title as the R^2 value
     leg.set_title(rf"$\bf{{R^{2} = {r2_scores:.3f}}}$")
