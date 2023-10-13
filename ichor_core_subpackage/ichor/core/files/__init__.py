@@ -14,7 +14,7 @@ from ichor.core.files.dl_poly import (
 )
 
 # gaussian files
-from ichor.core.files.gaussian import GaussianOut, GJF, WFN
+from ichor.core.files.gaussian import GaussianOut, GJF, WFN, WFX
 
 # md (amber) simulation files
 from ichor.core.files.mol2 import Mol2
@@ -41,6 +41,7 @@ __all__ = [
     "AIM",
     "GJF",
     "WFN",
+    "WFX",
     "GaussianOut",
     "Trajectory",
     "DlpolyHistory",
