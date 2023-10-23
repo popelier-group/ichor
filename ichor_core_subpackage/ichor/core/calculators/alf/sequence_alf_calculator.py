@@ -2,7 +2,8 @@ def calculate_alf_atom_sequence(atom: "Atom") -> "ALF":  # noqa F821
 
     from ichor.core.atoms.alf import ALF
 
-    """Calculates the ALF for every atom based on the sequence of how the atoms were read in
+    """
+    Calculates the ALF for every atom based on the sequence of how the atoms were read in
     from the geometry file (gjf, xyz, etc.). Because a trajectory should contain the same
     sequence of atoms for every timestep, this means this calculator should calculate
     the same atomic local frame atoms (the same x-axis and same xy-plane atom) for every
@@ -24,40 +25,37 @@ def calculate_alf_atom_sequence(atom: "Atom") -> "ALF":  # noqa F821
             the 1st element is the x-axis Atom instance, and the 2nd element is the xy-plane Atom instance.
     """
 
-    # X-axis atom index calculation (0-indexed)
-    # if we have 3 atoms or more
+    # x-axis and xy-plane atoms calculations (0-indexed)
+
+    # if we have 3 atoms or more, i.e. we have both x-axis and xy-plane atoms
     if len(atom.parent) > 2:
-        # if the last atom in the sequence, return atom i that is two away
+
         if atom.i + 1 == len(atom.parent):
+            # if the last atom in the sequence, then x-axis atom is two away
             x_axis_idx = atom.i - 2
-        # if the first atom in sequence return the next index
+            # and the xy-plane atom is one less
+            xy_plane_idx = atom.i - 1
+
         elif atom.i == 0:
+            # if the first atom in sequence, x axis atom is 1 away
             x_axis_idx = atom.i + 1
-        # otherwise return the atom that is one away (previous atom in sequence)
+            # are the xy-plane atom is 2 indices away
+            xy_plane_idx = atom.i + 2
+
         else:
+            # otherwise return the atom that is one away before the current atom for x-axis
             x_axis_idx = atom.i - 1
+            # and atom that is one away in sequence after current atom for xy-plane
+            xy_plane_idx = atom.i + 1
 
     # if we only have 2 atoms, then we can only have 0 and 1 indices
     elif len(atom.parent) == 2:
-        # if last atom, return 0 as x-axis
+        xy_plane_idx = None
+        # if last atom, then 0 atom is x-axis
         if atom.i == 1:
             x_axis_idx = 0
-        # if first atom, then return 1 as x-axis
+        # otherwise then return 1 as x-axis
         else:
             x_axis_idx = 1
 
-    # XY-plane atom index calculation (0-indexed)
-    xy_plane_idx = None
-    # if we have 3 atoms or more
-    if len(atom.parent) > 2:
-        # if the last atom in the sequence, return the previous i, as this is xy-plane atom
-        if atom.i + 1 == len(atom.parent):
-            xy_plane_idx = atom.i - 1
-        # if the first atom in sequence return the next next atom (2 away)
-        elif atom.i == 0:
-            xy_plane_idx = atom.i + 2
-        # otherwise return the atom that is one away (next atom in sequence)
-        else:
-            xy_plane_idx = atom.i + 1
-
-        return ALF(atom.i, x_axis_idx, xy_plane_idx)
+    return ALF(atom.i, x_axis_idx, xy_plane_idx)
