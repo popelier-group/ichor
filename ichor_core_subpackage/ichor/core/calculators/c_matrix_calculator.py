@@ -22,29 +22,67 @@ def calculate_c_matrix(
 
     c_matrix = np.empty((3, 3))
 
-    x_axis_atom_instance = atom.parent[alf.x_axis_idx]
-    xy_plane_atom_instance = atom.parent[alf.xy_plane_idx]
+    if atom.parent.natoms > 2:
 
-    # first row
-    row1 = (x_axis_atom_instance.coordinates - atom.coordinates) / np.linalg.norm(
-        x_axis_atom_instance.coordinates - atom.coordinates
-    )
+        x_axis_atom_instance = atom.parent[alf.x_axis_idx]
+        xy_plane_atom_instance = atom.parent[alf.xy_plane_idx]
 
-    # second row
-    x_axis_diff = x_axis_atom_instance.coordinates - atom.coordinates
-    xy_plane_diff = xy_plane_atom_instance.coordinates - atom.coordinates
+        x_axis_diff = x_axis_atom_instance.coordinates - atom.coordinates
 
-    sigma_fflux = -np.dot(x_axis_diff, xy_plane_diff) / np.dot(x_axis_diff, x_axis_diff)
+        # first row
+        row1 = (x_axis_diff) / np.linalg.norm(x_axis_diff)
 
-    y_vec = sigma_fflux * x_axis_diff + xy_plane_diff
+        # second row
+        xy_plane_diff = xy_plane_atom_instance.coordinates - atom.coordinates
 
-    row2 = y_vec / np.linalg.norm(y_vec)
+        sigma_fflux = -np.dot(x_axis_diff, xy_plane_diff) / np.dot(
+            x_axis_diff, x_axis_diff
+        )
 
-    # third row
-    row3 = np.cross(row1, row2)
+        y_vec = sigma_fflux * x_axis_diff + xy_plane_diff
 
-    c_matrix[0, :] = row1
-    c_matrix[1, :] = row2
-    c_matrix[2, :] = row3
+        row2 = y_vec / np.linalg.norm(y_vec)
 
-    return c_matrix
+        # third row
+        row3 = np.cross(row1, row2)
+
+        c_matrix[0, :] = row1
+        c_matrix[1, :] = row2
+        c_matrix[2, :] = row3
+
+        return c_matrix
+
+    # if we only have 2 atoms, e.g HCl
+    else:
+
+        x_axis_atom_instance = atom.parent[alf.x_axis_idx]
+        x_axis_diff = x_axis_atom_instance.coordinates - atom.coordinates
+
+        # there is no xy-plane atom, so we make a dummy atom
+        # that is somewhere away from the central atom and x-ais atom
+        xy_plane_diff = (
+            atom.coordinates
+            + x_axis_atom_instance.coordinates
+            + np.array([1.0, 1.0, 1.0])
+        ) - atom.coordinates
+
+        # first row
+        row1 = (x_axis_atom_instance.coordinates - atom.coordinates) / np.linalg.norm(
+            x_axis_atom_instance.coordinates - atom.coordinates
+        )
+
+        # second row
+        sigma_fflux = -np.dot(x_axis_diff, xy_plane_diff) / np.dot(
+            x_axis_diff, x_axis_diff
+        )
+        y_vec = sigma_fflux * x_axis_diff + xy_plane_diff
+        row2 = y_vec / np.linalg.norm(y_vec)
+
+        # third row
+        row3 = np.cross(row1, row2)
+
+        c_matrix[0, :] = row1
+        c_matrix[1, :] = row2
+        c_matrix[2, :] = row3
+
+        return c_matrix
