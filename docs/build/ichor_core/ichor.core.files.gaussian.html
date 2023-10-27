@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../_static/jquery.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -21,17 +21,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ichor.core.files.pandora package" href="ichor.core.files.pandora.html" />
-    <link rel="prev" title="ichor.core.files.dl_poly package" href="ichor.core.files.dl_poly.html" /> 
+    <link rel="prev" title="ichor.core.files.dl_poly package" href="ichor.core.files.dl_poly.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../index.html" class="icon icon-home">
             ichor
           </a>
@@ -112,7 +112,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="ichor-core-files-gaussian-package">
 <h1>ichor.core.files.gaussian package<a class="headerlink" href="#ichor-core-files-gaussian-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
@@ -486,6 +486,74 @@ was used, which might be wrong.</p>
 </dd></dl>
 
 </section>
+<section id="module-ichor.core.files.gaussian.wfx">
+<span id="ichor-core-files-gaussian-wfx-module"></span><h2>ichor.core.files.gaussian.wfx module<a class="headerlink" href="#module-ichor.core.files.gaussian.wfx" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfx.MolecularOrbital">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MolecularOrbital</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigen_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">occupation_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitives</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.wfx.MolecularOrbital" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfx.WFX">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WFX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.wfx.WFX" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<p>Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
+an output file, so it does not have a write method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path object or string to the .wfn file</p></li>
+<li><p><strong>atoms</strong> – an Atoms instance which is read in from the top of the .wfn file.
+Note that the units of the .wfn file are in Bohr.</p></li>
+<li><p><strong>method</strong> – The method (eg. B3LYP) which was used in the Gaussian calculation
+that created the .wfn file. The method is not initially written to the .wfn
+file by Gaussian, but it is necessary to add it to the .wfn file because
+AIMAll does not automatically determine the method itself, so it can lead
+to wrong IQA/multipole moments results. To make sure AIMAll results are correct,
+the method is a required argument.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mol_orbitals</strong> – The number of molecular orbitals to be read in from the .wfn file.</p></li>
+<li><p><strong>primitives</strong> – The number of primitives to be read in from the .wfn file.</p></li>
+<li><p><strong>nuclei</strong> – The number of nuclei in the system to be read in from the .wfn file.</p></li>
+<li><p><strong>energy</strong> – The molecular energy read in from the bottom of the .wfn file</p></li>
+<li><p><strong>virial</strong> – The virial read in from the bottom of the .wfn file</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since the wfn file is written out by Gaussian, we do not really
+have to modify it when writing out except we need to add the method used,
+so that AIMALL can use the correct method. Otherwise AIMAll assumes Hartree-Fock
+was used, which might be wrong.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfx.WFX.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.wfx'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfx.WFX.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfx.WFX.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfx.WFX.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfx.WFX.properties">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfx.WFX.properties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.wfx.WFX.property_names">
+<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['energy',</span> <span class="pre">'wfn']</span></em><a class="headerlink" href="#ichor.core.files.gaussian.wfx.WFX.property_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-ichor.core.files.gaussian">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.files.gaussian" title="Permalink to this heading"></a></h2>
 <dl class="py class">
@@ -789,6 +857,65 @@ was used, which might be wrong.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFX">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WFX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.gaussian.WFX" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<p>Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
+an output file, so it does not have a write method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path object or string to the .wfn file</p></li>
+<li><p><strong>atoms</strong> – an Atoms instance which is read in from the top of the .wfn file.
+Note that the units of the .wfn file are in Bohr.</p></li>
+<li><p><strong>method</strong> – The method (eg. B3LYP) which was used in the Gaussian calculation
+that created the .wfn file. The method is not initially written to the .wfn
+file by Gaussian, but it is necessary to add it to the .wfn file because
+AIMAll does not automatically determine the method itself, so it can lead
+to wrong IQA/multipole moments results. To make sure AIMAll results are correct,
+the method is a required argument.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>mol_orbitals</strong> – The number of molecular orbitals to be read in from the .wfn file.</p></li>
+<li><p><strong>primitives</strong> – The number of primitives to be read in from the .wfn file.</p></li>
+<li><p><strong>nuclei</strong> – The number of nuclei in the system to be read in from the .wfn file.</p></li>
+<li><p><strong>energy</strong> – The molecular energy read in from the bottom of the .wfn file</p></li>
+<li><p><strong>virial</strong> – The virial read in from the bottom of the .wfn file</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since the wfn file is written out by Gaussian, we do not really
+have to modify it when writing out except we need to add the method used,
+so that AIMALL can use the correct method. Otherwise AIMAll assumes Hartree-Fock
+was used, which might be wrong.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFX.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.wfx'</span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFX.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFX.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFX.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFX.properties">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFX.properties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.gaussian.WFX.property_names">
+<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['energy',</span> <span class="pre">'wfn']</span></em><a class="headerlink" href="#ichor.core.files.gaussian.WFX.property_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -809,7 +936,7 @@ was used, which might be wrong.</p>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -820,7 +947,7 @@ was used, which might be wrong.</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

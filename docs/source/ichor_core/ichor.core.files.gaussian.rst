@@ -28,6 +28,14 @@ ichor.core.files.gaussian.wfn module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.files.gaussian.wfx module
+------------------------------------
+
+.. automodule:: ichor.core.files.gaussian.wfx
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
