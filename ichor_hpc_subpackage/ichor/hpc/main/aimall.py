@@ -39,9 +39,13 @@ def submit_points_directory_to_aimall(
     if not isinstance(points_directory, PointsDirectory):
         points_directory = PointsDirectory(points_directory)
 
-    method = method.upper()
-    if method not in AIMALL_FUNCTIONALS:
-        raise ValueError("The functional provided is not supported by AIMAll.")
+    method = method.upper().strip()
+
+    # add this check for Hartree Fock, since for that
+    # you do not add anything to the WFN file
+    if method != "":
+        if method not in AIMALL_FUNCTIONALS:
+            raise ValueError("The functional provided is not supported by AIMAll.")
 
     list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
 
