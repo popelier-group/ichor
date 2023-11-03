@@ -231,6 +231,134 @@ def fflux_derivs(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
     return np.array([dQ_dx, dQ_dy, dQ_dz])
 
 
+def fflux_derivs_rbf_only(iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst):
+
+    dQ_dx = 0.0
+    dQ_dy = 0.0
+    dQ_dz = 0.0
+
+    C = atoms_instance[jatm_idx].C(system_alf)
+    jatm_features = atoms_instance[jatm_idx].features(
+        calculate_alf_features, system_alf
+    )
+
+    Q_pred, dQ_df = fflux_predict_value_rbf_only(model_inst, jatm_features)
+
+    # feature 1
+    df_da = dR_da(
+        jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf
+    )
+    dQ_dx = dQ_dx + dQ_df[0] * df_da[0]
+    dQ_dy = dQ_dy + dQ_df[0] * df_da[1]
+    dQ_dz = dQ_dz + dQ_df[0] * df_da[2]
+
+    # feature 2
+    df_da = dR_da(
+        jatm_idx, system_alf[jatm_idx][2], 1, iatm_idx, atoms_instance, system_alf
+    )
+    dQ_dx = dQ_dx + dQ_df[1] * df_da[0]
+    dQ_dy = dQ_dy + dQ_df[1] * df_da[1]
+    dQ_dz = dQ_dz + dQ_df[1] * df_da[2]
+
+    # feature 3
+    df_da = dChi_da(jatm_idx, iatm_idx, atoms_instance, system_alf)
+    dQ_dx = dQ_dx + dQ_df[2] * df_da[0]
+    dQ_dy = dQ_dy + dQ_df[2] * df_da[1]
+    dQ_dz = dQ_dz + dQ_df[2] * df_da[2]
+
+    # non-alf atoms
+    local_non_alf_atoms = [
+        i for i in range(len(atoms_instance)) if i not in system_alf[jatm_idx]
+    ]
+
+    feat_idx = 3
+    for k in range(len(atoms_instance) - 3):
+        diff = (
+            atoms_instance[local_non_alf_atoms[k]].coordinates
+            - atoms_instance[jatm_idx].coordinates
+        )
+
+        # R
+        df_da = dR_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            feat_idx,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
+        dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
+        dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
+        dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
+
+        feat_idx += 1
+
+        zetas = np.dot(C, diff)
+        zeta1 = zetas[0]
+        zeta2 = zetas[1]
+        zeta3 = zetas[2]
+
+        # Theta
+        df_da = dTheta_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            feat_idx,
+            zeta3,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
+        dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
+        dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
+        dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
+
+        feat_idx += 1
+
+        # Phi
+        df_da = dPhi_da(
+            jatm_idx,
+            local_non_alf_atoms[k],
+            zeta1,
+            zeta2,
+            feat_idx,
+            iatm_idx,
+            atoms_instance,
+            system_alf,
+        )
+        dQ_dx = dQ_dx + dQ_df[feat_idx] * df_da[0]
+        dQ_dy = dQ_dy + dQ_df[feat_idx] * df_da[1]
+        dQ_dz = dQ_dz + dQ_df[feat_idx] * df_da[2]
+
+        feat_idx += 1
+
+    return np.array([dQ_dx, dQ_dy, dQ_dz])
+
+
+def fflux_derivs_rbf_only_one_dimensional(
+    iatm_idx, jatm_idx, atoms_instance, system_alf, model_inst
+):
+
+    dQ_dx = 0.0
+    dQ_dy = 0.0
+    dQ_dz = 0.0
+
+    jatm_features = atoms_instance[jatm_idx].features(
+        calculate_alf_features, system_alf
+    )
+
+    Q_pred, dQ_df = fflux_predict_value_rbf_only(model_inst, jatm_features)
+
+    # feature 1
+    df_da = dR_da(
+        jatm_idx, system_alf[jatm_idx][1], 0, iatm_idx, atoms_instance, system_alf
+    )
+    dQ_dx = dQ_dx + dQ_df[0] * df_da[0]
+    dQ_dy = dQ_dy + dQ_df[0] * df_da[1]
+    dQ_dz = dQ_dz + dQ_df[0] * df_da[2]
+
+    return np.array([dQ_dx, dQ_dy, dQ_dz])
+
+
 def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
     """Calculates the"""
 

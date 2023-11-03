@@ -2,7 +2,10 @@ from typing import Dict, List
 
 import numpy as np
 from ichor.core.atoms import ALF
-from ichor.core.models.calculate_fflux_derivatives import fflux_derivs
+from ichor.core.models.calculate_fflux_derivatives import (
+    fflux_derivs,
+    fflux_derivs_rbf_only_one_dimensional,
+)
 
 
 def predict_fflux_forces_for_all_atoms(
@@ -88,3 +91,58 @@ def predict_fflux_forces_for_all_atoms_dict(
     forces = predict_fflux_forces_for_all_atoms(atoms, models, system_alf)
 
     return dict(zip(atom_names, forces))
+
+
+def predict_fflux_forces_for_all_atoms_one_dimensional(
+    atoms: "Atoms", models: "Models", system_alf: List["ALF"]  # noqa F821
+) -> np.ndarray:
+    """Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
+    Note this is for special case where the system has only one feature, eg. HCl.
+
+    .. note::
+        The atoms instance is converted to Bohr internally because the forces are per Bohr in FFLUX.
+        Also the `system_alf` argument is 0-indexed (as calcualted by ichor methods),
+        while the ALF in the .model files is 1-indexed.
+
+    :param atoms: An Atoms instance containing the geometry for which to predict forces.
+        Note that the ordering of the atoms matters, i.e. the index of the atoms in the Atoms instance
+        must match the index of the model files.
+    :param models: A models instance which wraps around a directory containing model files.
+    :param system_alf: The system alf as a list of `ALF` instances (the `ALF` instances are just a named tuple
+        containing origin_idx, x-axis_idx, xy_plane_idx. It is 0-indexed.)
+    :return: A np.ndarray of shape n_atoms x 3 containing the x,y,z force for every atom
+    """
+
+    atomic_forces_list = []
+
+    # make sure the coords are in Bohr because forces are calculated per Bohr
+    atoms = atoms.to_bohr()
+    atom_names = atoms.atom_names
+    natoms = len(atoms)
+
+    # make sure the ordering of the models is the same as the sequence of atoms
+    models_list = []
+    for atom_name in atom_names:
+        for model in models:
+            if model.atom_name == atom_name and model.prop == "iqa":
+                models_list.append(model)
+
+    for atm_idx in range(natoms):
+
+        # forces exerted on atom atoms[atom_idx]
+        local_forces = np.zeros(3)
+
+        # first three atoms that are central, x-axis, xy-plane
+        for j in range(2):
+            force = fflux_derivs_rbf_only_one_dimensional(
+                atm_idx,
+                system_alf[atm_idx][j],
+                atoms,
+                system_alf,
+                models_list[system_alf[atm_idx][j]],
+            )
+            local_forces = local_forces - force
+
+        atomic_forces_list.append(local_forces)
+
+    return np.array(atomic_forces_list)

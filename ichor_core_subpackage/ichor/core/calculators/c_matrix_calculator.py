@@ -59,7 +59,7 @@ def calculate_c_matrix(
         x_axis_diff = x_axis_atom_instance.coordinates - atom.coordinates
 
         # there is no xy-plane atom, so we make a dummy atom
-        # that is somewhere away from the central atom and x-ais atom
+        # that is somewhere away from the central atom and x-axis atom
         xy_plane_diff = (
             atom.coordinates
             + x_axis_atom_instance.coordinates

@@ -220,6 +220,11 @@ def convert_to_cartesian_forces(
         features (and feature derivatives) were calculated.
     """
 
+    # add a dimension if necessary, so that it is n_features x 1. This is needed when you
+    # only have 1 feature (i.e. the input dE_df_array is a float)
+    if dE_df_array.ndim == 0:
+        dE_df_array = dE_df_array[..., np.newaxis]
+
     natoms = len(system_alf)
 
     # original row indices

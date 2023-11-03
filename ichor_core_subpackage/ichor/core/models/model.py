@@ -159,7 +159,15 @@ class Model(ReadFile, WriteFile):
                     continue
 
                 if "ALF" in line:
-                    self.alf = self.alf or ALF(*[int(a) - 1 for a in line.split()[1:]])
+                    tmp_line_split = line.split()[1:]
+                    if tmp_line_split[-1] == "None":
+                        self.alf = self.alf or ALF(
+                            *[int(a) - 1 for a in line.split()[1:-1]], None
+                        )
+                    else:
+                        self.alf = self.alf or ALF(
+                            *[int(a) - 1 for a in line.split()[1:]]
+                        )
                     continue
 
                 if "number_of_atoms" in line:
