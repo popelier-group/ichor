@@ -26,6 +26,7 @@ def submit_points_directory_to_aimall(
 
     :param points_directory: A path to a `PointsDirectory`-structured directory or a PointsDirectory instance
     :param method: Functional to be written to the .wfn file because AIMAll needs to know it to function correctly.
+        Note that only HF, B3LYP, M062X, PBE are supported.
     :param ncores: Number of cores to run AIMAll with, defaults to 2
     :param naat: Number of atoms at a time, defaults to 1
     :param aimall_atoms: A list of atom names (e.g. [C1, H2, etc.]) which to integrate over, defaults to None
@@ -41,14 +42,9 @@ def submit_points_directory_to_aimall(
 
     method = method.upper().strip()
 
-    # add this check for Hartree Fock, since for that
-    # you do not add anything to the WFN file
+    # aimall functionals also contains HF, which is the default
     if method not in AIMALL_FUNCTIONALS:
         raise ValueError("The functional provided is not supported by AIMAll.")
-
-    # HF is default, so do not add anything in this case
-    if method == "HF":
-        method = ""
 
     list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
 

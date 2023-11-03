@@ -209,12 +209,20 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
         so that AIMAll can then use it when it does calculations.
         Otherwise, the wrong results are obtained with AIMAll.
         """
+
+        # TODO: think of a way to prevent deleting file if there are errors with the attributes
+        # currently, if the file writing fails for some reason, the file will be overwritten and deleted
+
         with open(path, "w") as f:
             f.write(f"{self.title}\n")
             header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
             # add method here, so that AIMAll works correctly
             # note that only selected functionals / methods work
-            header_line += f"   {self.method}"
+
+            # do not modify header line with method if the method is HF
+            if self.method.upper() != "HF":
+                header_line += f"   {self.method}"
+
             f.write(f"{header_line}\n")
             for i, atom in enumerate(self.atoms):
                 f.write(
