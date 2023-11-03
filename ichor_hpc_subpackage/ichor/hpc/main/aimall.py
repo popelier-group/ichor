@@ -77,7 +77,10 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
                 point.wfn.write()
                 wfns.append(point.wfn.path)
         else:
-            warn(f"Wavefunction file {point.wfn.path} does not exist.")
+            warn(f"Wavefunction file of point {point.path} does not exist.")
+            ichor.hpc.global_variables.logger.info(
+                f"Wavefunction not found for {point.path}."
+            )
     return wfns
 
 
