@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.constants import AIMALL_FUNCTIONALS
 from ichor.core.common.float import from_scientific_double
 from ichor.core.common.functools import classproperty
 from ichor.core.common.itertools import chunker
@@ -214,8 +213,8 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
             f.write(f"{self.title}\n")
             header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
             # add method here, so that AIMAll works correctly
-            if self.method.upper() in AIMALL_FUNCTIONALS:
-                header_line += f"   {self.method}"
+            # note that only selected functionals / methods work
+            header_line += f"   {self.method}"
             f.write(f"{header_line}\n")
             for i, atom in enumerate(self.atoms):
                 f.write(
