@@ -32,7 +32,7 @@ class TrajectoryAnalysis(ReadFile):
     .. code-block:: text
 
         traj = TrajectoryAnalysis('path/to/trajectory')
-        traj.hr()
+        traj.hr(nbins=1000,max_dist=10.0)
         traj.plot_hr('path/to/figure.png')
     """
 
@@ -105,9 +105,8 @@ class TrajectoryAnalysis(ReadFile):
         :param r1: higher bound of the interval
         :return: number of values that are within that interval
         """
-        # Index is a f
         index = (r0 < self.distances_matrix) & (self.distances_matrix < r1)
-        true_vals = len(index[index is True])
+        true_vals= len(index[index == True])
         return true_vals
 
     def hr(self, nbins: Optional[int] = 1000, max_dist: Optional[float] = 10.0):
@@ -156,7 +155,7 @@ class Stability(TrajectoryAnalysis):
 
         traj = Stability('path/to/reference.xyz','path/to/trajectory.xyz', threshold=0.5)
         traj.stable_trajectory()
-        traj.hr()
+        traj.hr(nbins=1000, max_dist=10.0)
         traj.plot_hr('path/to/figure.png')
     """
 
