@@ -225,7 +225,7 @@ def convert_to_cartesian_forces(
     if dE_df_array.ndim == 0:
         dE_df_array = dE_df_array[..., np.newaxis]
 
-    natoms = len(system_alf)
+    natoms = int(b_matrix.shape[-1] / 3)
 
     # original row indices
     original_row_indices = [i for i in range(natoms)]
