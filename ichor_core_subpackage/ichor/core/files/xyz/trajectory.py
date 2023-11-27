@@ -203,6 +203,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         geometries_to_write = self[::every]
         len_geoms_to_write = len(geometries_to_write)
 
+        geom_counter = 0
+
         # loop over geometries and write to respective dir
         for i, atoms_instance in enumerate(geometries_to_write):
 
@@ -215,9 +217,11 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             xyz_file = XYZ(path, atoms_instance)
             xyz_file.write()
 
+            geom_counter += 1
             # if we have reached the split size, then make a new inner directory
-            if i % split_size == 0:
-                chunk_idx += 1
+            if geom_counter == split_size:
+                # reset counter
+                geom_counter = 0
                 inner_dir_name = f"{system_name}{chunk_idx}"
                 mkdir(root / inner_dir_name, empty=True)
 
