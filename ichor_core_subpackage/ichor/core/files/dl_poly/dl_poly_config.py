@@ -10,7 +10,7 @@ class DlPolyConfig(WriteFile):
     :param system_name: the name of the chemical system
     :param trajectory: a Trajectory instance containing the geometries that are going to be written to
         the CONFIG file. Each timestep in the trajectory is an Atoms instance.
-
+    :param path: The path to the CONFIG file, defaults to Path('CONFIG')
     :param cell_size: The size of the box, float
     :param comment line: The very first line in the CONFIG file.
         Must be below 72 characters
