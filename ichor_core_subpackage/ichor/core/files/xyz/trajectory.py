@@ -191,26 +191,35 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         """
         from ichor.core.files import XYZ
 
+        # make root directory
         mkdir(root, empty=True)
-        i = 0
-        chunks = [self[x : x + split_size] for x in range(0, len(self), split_size)]
-        inner_dir_names = [
-            f"{system_name}{chunk_idx}" for chunk_idx in range(len(chunks))
-        ]
-        for dir_name in inner_dir_names:
-            mkdir(root / dir_name, empty=True)
 
-        for dir_name, chunk in zip(inner_dir_names, chunks):
-            for atoms_instance in chunk:
-                if (i % every) == 0:
-                    if center:
-                        atoms_instance.centre()
-                    point_name = f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
-                    path = Path(point_name)
-                    path = root / dir_name / path
-                    xyz_file = XYZ(path, atoms_instance)
-                    xyz_file.write()
-                    i += 1
+        # make chunk directory
+        chunk_idx = 0
+        inner_dir_name = f"{system_name}{chunk_idx}"
+        mkdir(root / inner_dir_name, empty=True)
+
+        # get only the every-th element of the trajectory
+        geometries_to_write = self[::every]
+        # loop over geometries and write to respective dir
+        for i, atoms_instance in enumerate(geometries_to_write):
+
+            if center:
+                atoms_instance.centre()
+
+            point_name = (
+                f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
+            )
+            path = Path(point_name)
+            path = root / inner_dir_name / path
+            xyz_file = XYZ(path, atoms_instance)
+            xyz_file.write()
+
+            # if we have reached the split size, then make a new inner directory
+            if i % split_size == 0:
+                chunk_idx += 1
+                inner_dir_name = f"{system_name}{chunk_idx}"
+                mkdir(root / inner_dir_name, empty=True)
 
     def split_traj(self, root_dir: Path, split_size: int):
         """Splits trajectory into sub-trajectories and writes then to a folder.
