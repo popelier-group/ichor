@@ -201,15 +201,15 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         # get only the every-th element of the trajectory
         geometries_to_write = self[::every]
+        len_geoms_to_write = len(geometries_to_write)
+
         # loop over geometries and write to respective dir
         for i, atoms_instance in enumerate(geometries_to_write):
 
             if center:
                 atoms_instance.centre()
 
-            point_name = (
-                f"{system_name}{str(i).zfill(max(4, count_digits(len(self))))}.xyz"
-            )
+            point_name = f"{system_name}{str(i).zfill(max(4, count_digits(len_geoms_to_write)))}.xyz"
             path = Path(point_name)
             path = root / inner_dir_name / path
             xyz_file = XYZ(path, atoms_instance)
