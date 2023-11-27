@@ -8,8 +8,12 @@ class DlPolyConfig(WriteFile):
     """Write out a DLPoly CONFIG file. The name of the file needs to be CONFIG,  so DL POLY knows to use it.
 
     :param system_name: the name of the chemical system
-    :param trajectory: a Trajectory instance containing. Each timestep in the trajectory
-        is an Atoms instance.
+    :param trajectory: a Trajectory instance containing the geometries that are going to be written to
+        the CONFIG file. Each timestep in the trajectory is an Atoms instance.
+
+    :param cell_size: The size of the box, float
+    :param comment line: The very first line in the CONFIG file.
+        Must be below 72 characters
 
         .. note::
             ALL of the timesteps in the Trajectory will be written to one
@@ -21,17 +25,13 @@ class DlPolyConfig(WriteFile):
             labels in the CONFIG file will make sure that two molecules
             which should be represented by one GP model have the correct atom labeling
             in the CONFIG file.
-
-    :param cell_size: The size of the box, float
-    :param comment line: The very first line in the CONFIG file.
-        Must be below 72 characters
     """
 
     def __init__(
         self,
-        path: Union[Path, str],
         system_name: str,
         trajectory: "Trajectory",  # noqa F821
+        path: Union[Path, str] = Path("CONFIG"),
         cell_size: float = 50.0,
         comment_line="Frame :         1\n",
     ):
