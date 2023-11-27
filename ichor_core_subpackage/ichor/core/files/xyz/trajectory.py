@@ -220,8 +220,10 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             geom_counter += 1
             # if we have reached the split size, then make a new inner directory
             if geom_counter == split_size:
-                # reset counter
+
+                # reset counter and update chunk
                 geom_counter = 0
+                chunk_idx += 1
                 inner_dir_name = f"{system_name}{chunk_idx}"
                 mkdir(root / inner_dir_name, empty=True)
 
