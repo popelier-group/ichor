@@ -15,4 +15,5 @@ def submit_free_flow_python_command_on_compute(text_list, script_name, ncores):
     ) as submission_script:
 
         submission_script.add_command(py_cmd)
-        submission_script.submit()
+
+    submission_script.submit()
