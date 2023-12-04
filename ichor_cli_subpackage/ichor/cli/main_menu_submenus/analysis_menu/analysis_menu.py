@@ -102,9 +102,9 @@ class AnalysisFunctions:
             # it will get executed as `python -c python_code_to_execute...`
             text_list.append("from ichor.core.files import Trajectory")
             text_list.append("from ichor.core.atoms import ALF")
-            text_list.append(f"traj = Trajectory('{trajectory_path}')")
+            text_list.append(f"traj = Trajectory('{trajectory_path.absolute()}')")
             text_list.append(
-                f"traj.center_geometries_on_atom_and_write_xyz({central_atom_name}, {alf_dict}, {xyz_output_path})"
+                f"traj.center_geometries_on_atom_and_write_xyz('{central_atom_name}', {alf_dict}, '{xyz_output_path}')"
             )
 
             submit_free_flow_python_command_on_compute(
