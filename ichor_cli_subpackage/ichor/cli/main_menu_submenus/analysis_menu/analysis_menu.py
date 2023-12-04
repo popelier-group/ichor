@@ -60,10 +60,12 @@ class AnalysisFunctions:
 
         trajectory_path = user_input_path("Enter path to xyz: ")
 
+        # get atom names from first geometry
         first_geometry = XYZ(trajectory_path)
         atom_names = first_geometry.atom_names
         print(f"Available atom names: {', '.join(atom_names)}")
 
+        # get alf atoms to center on
         central_atom_name = ask_user_input_for_atom_name(atom_names, "central", 0)
         x_axis_atom_name = ask_user_input_for_atom_name(atom_names, "x-axis", 1)
         xy_plane_atom_name = ask_user_input_for_atom_name(atom_names, "xy-plane", 2)
