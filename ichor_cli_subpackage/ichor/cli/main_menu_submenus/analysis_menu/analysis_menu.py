@@ -28,7 +28,7 @@ analysis_menu = ConsoleMenu(
 
 def is_atom_name_in_atom_names(atom_name, atom_names) -> bool:
 
-    return atom_name in atom_names
+    return atom_name.upper() in atom_names
 
 
 def ask_user_input_for_atom_name(
@@ -38,12 +38,12 @@ def ask_user_input_for_atom_name(
     while True:
         atom_name = user_input_free_flow(
             f"Select {atom_position} atom, default {atom_names[default_index]}: "
-        ).upper()
-        if is_atom_name_in_atom_names(atom_name, atom_names):
-            return atom_name
-        elif atom_name is None:
+        )
+        if atom_name is None:
             atom_name = atom_names[default_index]
             return atom_name
+        elif is_atom_name_in_atom_names(atom_name, atom_names):
+            return atom_name.upper()
 
 
 class AnalysisFunctions:
