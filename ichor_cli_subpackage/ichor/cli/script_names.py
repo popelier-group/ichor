@@ -5,6 +5,7 @@ SCRIPT_NAMES = ScriptNames(
     {
         "pd_to_sqlite3": "pd_to_sqlite3.sh",
         "calculate_features": "calculate_features.sh",
+        "center_trajectory": "center_trajectory.sh",
     },
     parent=FILE_STRUCTURE["scripts"],
 )
