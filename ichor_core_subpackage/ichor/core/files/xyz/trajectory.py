@@ -222,15 +222,14 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             total_geom_counter += 1
             # if we have reached the split size, then make a new inner directory
             # do not make a new directory if last point is reached
-            if geom_counter == split_size and (
-                total_geom_counter != len_geoms_to_write
-            ):
+            if geom_counter == split_size:
 
                 # reset counter and update chunk
                 geom_counter = 0
                 chunk_idx += 1
                 inner_dir_name = f"{system_name}{chunk_idx}"
-                mkdir(root / inner_dir_name, empty=True)
+                if total_geom_counter != len_geoms_to_write:
+                    mkdir(root / inner_dir_name, empty=True)
 
     def split_traj(self, root_dir: Path, split_size: int):
         """Splits trajectory into sub-trajectories and writes then to a folder.
