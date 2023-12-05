@@ -203,6 +203,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         geometries_to_write = self[::every]
         len_geoms_to_write = len(geometries_to_write)
 
+        total_geom_counter = 0
         geom_counter = 0
 
         # loop over geometries and write to respective dir
@@ -218,8 +219,12 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             xyz_file.write()
 
             geom_counter += 1
+            total_geom_counter += 1
             # if we have reached the split size, then make a new inner directory
-            if geom_counter == split_size:
+            # do not make a new directory if last point is reached
+            if geom_counter == split_size and (
+                total_geom_counter != len_geoms_to_write
+            ):
 
                 # reset counter and update chunk
                 geom_counter = 0
