@@ -32,6 +32,23 @@ def user_input_int(s="Enter integer: ") -> Union[int, None]:
             pass
 
 
+def user_input_float(s="Enter float: ") -> Union[int, None]:
+    """Returns a float that user has given
+
+    :param s: A string that is shown in the prompt (printed to standard output).
+    """
+
+    while True:
+        user_input = input(s)
+        if user_input == "":
+            return
+        try:
+            user_input = float(user_input)
+            return user_input
+        except ValueError:
+            pass
+
+
 def user_input_bool(s="Enter True/False: ") -> Union[bool, None]:
     """Returns True or False depending on user input
 

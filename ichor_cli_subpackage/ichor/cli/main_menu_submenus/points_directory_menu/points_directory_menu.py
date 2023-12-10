@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Union
@@ -12,6 +13,7 @@ from ichor.cli.useful_functions import (
     bool_to_str,
     compile_strings_to_python_code,
     user_input_bool,
+    user_input_float,
     user_input_free_flow,
     user_input_int,
     user_input_path,
@@ -357,6 +359,8 @@ class PointsDirectoryFunctions:
         default_submit_on_compute = True
         default_rotate_multipoles = True
         default_calculate_feature_forces = False
+        default_filter_by_integration_error = True
+        default_float_integration_error = 0.001
         default_ncores = 4
 
         db_path = user_input_path("Enter path to SQLite3 database: ")
@@ -373,6 +377,23 @@ class PointsDirectoryFunctions:
         )
         if calculate_feature_forces is None:
             calculate_feature_forces = default_calculate_feature_forces
+
+        filter_by_integration_error = user_input_bool(
+            f"Filter by integration error (yes/no), default {bool_to_str(default_filter_by_integration_error)}: "
+        )
+        if filter_by_integration_error is None:
+            filter_by_integration_error = default_filter_by_integration_error
+
+        # ask for integration error if user has said yes
+        if filter_by_integration_error:
+            float_integration_error = user_input_float(
+                f"Enter integration error threshold, default {default_float_integration_error}: "
+            )
+            if float_integration_error is None:
+                float_integration_error = default_float_integration_error
+        # if user has selected do not filter by integration error, then set threshold to infinity
+        else:
+            float_integration_error = math.inf
 
         submit_on_compute = user_input_bool(
             f"Submit to compute node (yes/no), default {bool_to_str(default_submit_on_compute)}: "
@@ -392,6 +413,7 @@ class PointsDirectoryFunctions:
                 db_path,
                 alf,
                 ncores,
+                max_integration_error=float_integration_error,
                 calc_multipoles=rotate_multipoles,
                 calc_forces=calculate_feature_forces,
             )
