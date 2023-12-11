@@ -359,6 +359,8 @@ class PointsDirectoryFunctions:
         default_submit_on_compute = True
         default_rotate_multipoles = True
         default_calculate_feature_forces = False
+        default_filter_by_sum_iqa_compared_to_wfn = True
+        default_float_difference_iqa_wfn = 4.184
         default_filter_by_integration_error = True
         default_float_integration_error = 0.001
         default_ncores = 4
@@ -378,6 +380,25 @@ class PointsDirectoryFunctions:
         if calculate_feature_forces is None:
             calculate_feature_forces = default_calculate_feature_forces
 
+        # filtering by sum of iqa vs wfn energy
+        filter_by_sum_iqa_vs_wfn = user_input_bool(
+            f"Filter by comparing sum of IQA to WFN (yes/no), \
+                  default {bool_to_str(default_filter_by_sum_iqa_compared_to_wfn)}: "
+        )
+        if filter_by_sum_iqa_vs_wfn is None:
+            filter_by_sum_iqa_vs_wfn = default_filter_by_sum_iqa_compared_to_wfn
+
+        if filter_by_sum_iqa_vs_wfn:
+            float_difference_iqa_wfn = user_input_float(
+                f"Enter maximum energy difference (kJ mol-1) between sum of IQA and WFN, \
+                      default {default_float_difference_iqa_wfn}: "
+            )
+            if float_difference_iqa_wfn is None:
+                float_difference_iqa_wfn = default_float_difference_iqa_wfn
+        else:
+            float_difference_iqa_wfn = math.inf
+
+        # filtering by integration error
         filter_by_integration_error = user_input_bool(
             f"Filter by integration error (yes/no), default {bool_to_str(default_filter_by_integration_error)}: "
         )
@@ -413,6 +434,7 @@ class PointsDirectoryFunctions:
                 db_path,
                 alf,
                 ncores,
+                max_diff_iqa_wfn=float_difference_iqa_wfn,
                 max_integration_error=float_integration_error,
                 calc_multipoles=rotate_multipoles,
                 calc_forces=calculate_feature_forces,
