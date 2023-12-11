@@ -382,16 +382,14 @@ class PointsDirectoryFunctions:
 
         # filtering by sum of iqa vs wfn energy
         filter_by_sum_iqa_vs_wfn = user_input_bool(
-            f"Filter by comparing sum of IQA to WFN (yes/no), \
-                  default {bool_to_str(default_filter_by_sum_iqa_compared_to_wfn)}: "
+            f"Filter by comparing sum of IQA to WFN (yes/no), default {bool_to_str(default_filter_by_sum_iqa_compared_to_wfn)}: "  # noqa: E501
         )
         if filter_by_sum_iqa_vs_wfn is None:
             filter_by_sum_iqa_vs_wfn = default_filter_by_sum_iqa_compared_to_wfn
 
         if filter_by_sum_iqa_vs_wfn:
             float_difference_iqa_wfn = user_input_float(
-                f"Enter maximum energy difference (kJ mol-1) between sum of IQA and WFN, \
-                      default {default_float_difference_iqa_wfn}: "
+                f"Enter maximum energy difference (kJ mol-1) between sum of IQA and WFN, default {default_float_difference_iqa_wfn}: "  # noqa: E501
             )
             if float_difference_iqa_wfn is None:
                 float_difference_iqa_wfn = default_float_difference_iqa_wfn
