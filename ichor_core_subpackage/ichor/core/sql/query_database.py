@@ -271,12 +271,14 @@ def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> Lis
     return atoms.alf_list(calculate_alf_atom_sequence)
 
 
+# TODO: add logic that calculates rotated multipoles only (encomp=0) and does integration error
 def write_processed_one_atom_data_to_csv(
     full_df: pd.DataFrame,
     point_ids: List[int],
     atom_name: str,
     alf: List[ALF],
-    max_integration_error=0.001,
+    max_diff_iqa_wfn: float = 4.184,
+    max_integration_error: float = 0.001,
     write_index_col=False,
     calc_multipoles: bool = True,
     calc_forces: bool = False,
@@ -291,6 +293,8 @@ def write_processed_one_atom_data_to_csv(
         as well as local forces are going to be calculated for every point in the dataset
     :param alf: A list of ALF instance to be used when calculating features
         and calculating C matrices
+    :param max_diff_iqa_wfn: Maximum difference between sum of IQA and wfn energy (in kJ mol-1).
+        If point is above threshold, it will get filtered before doing integration error.
     :param max_integration_error: Maximum integration error that a point needs to have for the atom
         of interest. Having a higher (absolute) integration error for the atom of interest means that
         this point will not be added in the dataset for the atom of interest. However, the same
@@ -306,6 +310,18 @@ def write_processed_one_atom_data_to_csv(
 
         # find geometry which matches the id
         one_point_df = full_df.loc[full_df["id"] == point_id]
+
+        # need to check that iqa is populated for all atoms before summing
+        if one_point_df["iqa"].all():
+            sum_iqa_energies = one_point_df["iqa"].sum()
+            # the wfn energy will be the same for all atoms, since they come from same geometry
+            # so just grab first value
+            abs_diff_wfn_iqa_kj_mol = (
+                abs(one_point_df["wfn_energy"].values[0] - sum_iqa_energies) * 2625.5
+            )
+            # do not add point to the processed csv if difference is too large
+            if abs_diff_wfn_iqa_kj_mol >= max_diff_iqa_wfn:
+                continue
 
         # check that integration error is below threshold, otherwise do not calculate features
         # for the atom and do not add this point to training set for this atom.
@@ -544,6 +560,7 @@ def write_processed_data_for_atoms_parallel(
     db_path: Union[str, Path],
     alf: List[ALF],
     ncores: int,
+    max_diff_iqa_wfn: float = 4.184,
     max_integration_error: float = 0.001,
     write_index_col=False,
     echo=False,
@@ -566,6 +583,8 @@ def write_processed_data_for_atoms_parallel(
         and calculating C matrices.
     :param ncores: The number of cores to use for the parallel calculations. Each core will calculate
         the data for an individual atom.
+    :param max_diff_iqa_wfn: The maximum difference between the sum of iqa and wfn energy (in kJ mol-1). Any point
+        that is above this threshold will be filtered out before doing integration errors.
     :param max_integration_error: Maximum integration error that a point needs to have for the atom
         of interest. Having a higher (absolute) integration error for the atom of interest means that
         this point will not be added in the dataset for the atom of interest. However, the same
@@ -600,6 +619,7 @@ def write_processed_data_for_atoms_parallel(
             point_ids,
             atom_name=atom_name,
             alf=alf,
+            max_diff_iqa_wfn=max_diff_iqa_wfn,
             max_integration_error=max_integration_error,
             write_index_col=write_index_col,
             calc_multipoles=calc_multipoles,
