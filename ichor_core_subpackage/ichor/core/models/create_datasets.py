@@ -72,14 +72,7 @@ def write_csvs_intersection(
         df.to_csv(output_path, index=True, header=True)
 
 
-def write_out_random_train_test_sets(
-    ntrain: int, ntest: int, processed_csvs_dir: Union[str, Path] = "processed_csvs"
-):
-
-    pass
-
-
-def generate_multiple_incremeting_train_sets_and_one_test_set(
+def write_multiple_incremeting_train_sets_and_one_test_set(
     ntrain_initial: int,
     ntrain_increment: int,
     nincrements: int,
@@ -92,7 +85,11 @@ def generate_multiple_incremeting_train_sets_and_one_test_set(
 
         The function assumes that csvs contain ALL the same points in them.
 
-    Function used to generate multiple training sets and one test set. The training sets contain
+    .. note::
+        If there are 0 increments, then it will only make one training set and one test set
+        containing random points (points in the training set are NOT in the test set).
+
+    Function used to generate (multiple)training sets and one test set. The training sets contain
     an increasing number of training points, where bigger training sets contain the smaller training sets
     in them already. The test set contains points that are outside of the training sets.
 
@@ -182,3 +179,23 @@ def generate_multiple_incremeting_train_sets_and_one_test_set(
             atom_name, alf = get_atom_name_and_alf_from_csv(csv_file)
 
             make_dataset(csv_file, atom_name, alf, training_indices, "train")
+
+
+def write_random_train_test_sets(
+    ntrain: int,
+    ntest: int,
+    processed_csvs_dir: Union[str, Path] = "processed_csvs",
+    set_path=Path("sets"),
+):
+    """Writes out a random training and test set
+
+    :param ntrain: Number of training points
+    :param ntest: Number of test points
+    :param processed_csvs_dir: Directory with sample set csv files, defaults to "processed_csvs"
+    :param set_path: Directory where train/test csvs are going to be written, defaults to Path("sets")
+    """
+
+    # just call the same function but do not increment training set size
+    write_multiple_incremeting_train_sets_and_one_test_set(
+        ntrain, 0, 0, ntest, processed_csvs_dir, set_path
+    )
