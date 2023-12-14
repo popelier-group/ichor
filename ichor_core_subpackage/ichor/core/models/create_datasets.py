@@ -1,14 +1,18 @@
 import random
 from pathlib import Path
-from typing import Union
+from typing import List, Tuple, Union
 
 import pandas as pd
-
 
 # these work with csv files written out by ichor
 
 
-def get_atom_name_and_alf_from_csv(csv_path: Path):
+def get_atom_name_and_alf_from_csv(csv_path: Path) -> Tuple[str, List[str]]:
+    """Helper function to get atom name and alf (as list of str)
+
+    :param csv_path: The csv file path
+    :return: A tuple containing the atom name and alf
+    """
 
     # files are in the form H6_processed_data_alf_5_3_4.csv
     atom_name = csv_path.stem.split("_")[0]
