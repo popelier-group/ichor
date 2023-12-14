@@ -83,7 +83,12 @@ def generate_multiple_incremeting_train_sets_and_one_test_set(
     processed_csvs_dir: Union[str, Path] = "processed_csvs",
     set_path=Path("sets"),
 ):
-    """Function used to generate multiple training sets and one test set. The training sets contain
+    """
+    .. warning::
+
+        The function assumes that csvs contain ALL the same points in them.
+
+    Function used to generate multiple training sets and one test set. The training sets contain
     an increasing number of training points, where bigger training sets contain the smaller training sets
     in them already. The test set contains points that are outside of the training sets.
 
