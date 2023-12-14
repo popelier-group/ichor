@@ -303,6 +303,7 @@ def write_processed_one_atom_data_to_csv(
     :param calc_forces: Whether to calculate -dE/df forces (which takes a long time currently), default False.
     """
 
+    # make directory where csvs are going to be stored
     parent_directory.mkdir(exist_ok=True)
 
     # final dictionary that is going to be converted to pd.DataFrame and written to csv
