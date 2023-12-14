@@ -271,7 +271,7 @@ def get_alf_from_first_db_geometry(db_path: Union[str, Path], echo=False) -> Lis
     return atoms.alf_list(calculate_alf_atom_sequence)
 
 
-# TODO: add logic that calculates rotated multipoles only (encomp=0) and does integration error
+# TODO: add logic that calculates rotated multipoles only (encomp=0) and does integration error only for rotated multipoles
 def write_processed_one_atom_data_to_csv(
     full_df: pd.DataFrame,
     point_ids: List[int],
@@ -282,6 +282,7 @@ def write_processed_one_atom_data_to_csv(
     write_index_col=False,
     calc_multipoles: bool = True,
     calc_forces: bool = False,
+    parent_directory: Path = Path("processed_csvs")
 ):
     """Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
     for all points (as long as integration error for the atom of interest is below a threshold integration error).
@@ -301,6 +302,8 @@ def write_processed_one_atom_data_to_csv(
         point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001
     :param calc_forces: Whether to calculate -dE/df forces (which takes a long time currently), default False.
     """
+
+    parent_directory.mkdir(exist_ok=True)
 
     # final dictionary that is going to be converted to pd.DataFrame and written to csv
     total_dict = {}
@@ -515,7 +518,7 @@ def write_processed_one_atom_data_to_csv(
 
     # write the total dict containing information for all points to a DataFrame and save
     total_df = pd.DataFrame.from_dict(total_dict, orient="index")
-    total_df.to_csv(f"{atom_name}_processed_data_{alf_str}.csv", index=write_index_col)
+    total_df.to_csv(parent_directory / f"{atom_name}_processed_data_{alf_str}.csv", index=write_index_col)
 
 
 def get_db_information(
@@ -567,6 +570,7 @@ def write_processed_data_for_atoms_parallel(
     atom_names: List = None,
     calc_multipoles: bool = True,
     calc_forces: bool = False,
+    parent_directory: Path = Path("processed_csvs")
 ):
     """
     Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
