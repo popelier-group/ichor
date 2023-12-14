@@ -279,7 +279,7 @@ def write_processed_one_atom_data_to_csv(
     atom_name: str,
     alf: List[ALF],
     max_diff_iqa_wfn: float = 4.184,  # this is 1 kcal mol-1 because some consider that "below chemical accuracy"
-    max_integration_error: float = 0.001,
+    max_integration_error: float = 0.001,  # 1e-3 is a decent enough value, can use 1e-4 instead as well
     write_index_col=False,
     calc_multipoles: bool = True,
     calc_forces: bool = False,
