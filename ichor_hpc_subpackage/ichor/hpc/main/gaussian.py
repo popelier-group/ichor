@@ -16,6 +16,8 @@ def submit_points_directory_to_gaussian(
     ncores=2,
     hold: JobID = None,
     script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["gaussian"],
+    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
+    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
 ) -> Optional[JobID]:
     """Function that writes out .gjf files from .xyz files that are in each directory and
@@ -41,6 +43,8 @@ def submit_points_directory_to_gaussian(
         force_calculate_wfn=force_calculate_wfn,
         ncores=ncores,
         hold=hold,
+        outputs_dir_path=outputs_dir_path,
+        errors_dir_path=errors_dir_path,
     )
 
 
@@ -87,6 +91,8 @@ def submit_gjfs(
     ],
     hold: Optional[JobID] = None,
     ncores=2,
+    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
+    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
 ) -> JobID:
     """Function that writes out a submission script which contains an array of
     Gaussian jobs to be ran on compute nodes. If calling this function from
@@ -109,7 +115,12 @@ def submit_gjfs(
 
     # make a SubmissionScript instance which is going to contain all the jobs that are going to be ran
     # the submission_script object can be accessed even after the context manager
-    with SubmissionScript(script_name, ncores=ncores) as submission_script:
+    with SubmissionScript(
+        script_name,
+        ncores=ncores,
+        outputs_dir_path=outputs_dir_path,
+        errors_dir_path=errors_dir_path,
+    ) as submission_script:
         for gjf in gjfs:
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():

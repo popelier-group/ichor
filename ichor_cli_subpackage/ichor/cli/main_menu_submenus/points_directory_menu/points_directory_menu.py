@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Union
 
 import ichor.cli.global_menu_variables
+import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
@@ -193,6 +194,14 @@ class PointsDirectoryFunctions:
                     ncores=ncores,
                     method=method,
                     basis_set=basis_set,
+                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
+                        "outputs"
+                    ]
+                    / pd.path.name
+                    / "GAUSSIAN",
+                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+                    / pd.path.name
+                    / "GAUSSIAN",
                 )
 
         # if containing one PointsDirectory
