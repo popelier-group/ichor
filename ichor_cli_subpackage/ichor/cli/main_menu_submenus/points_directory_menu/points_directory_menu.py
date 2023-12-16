@@ -217,6 +217,12 @@ class PointsDirectoryFunctions:
                 ncores=ncores,
                 method=method,
                 basis_set=basis_set,
+                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+                / pd.path.name
+                / "GAUSSIAN",
+                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+                / pd.path.name
+                / "GAUSSIAN",
             )
 
     @staticmethod
@@ -245,6 +251,14 @@ class PointsDirectoryFunctions:
                     ncores=ncores,
                     naat=naat,
                     encomp=encomp,
+                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
+                        "outputs"
+                    ]
+                    / pd.path.name
+                    / "AIMALL",
+                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+                    / pd.path.name
+                    / "AIMALL",
                 )
 
         else:
@@ -258,6 +272,12 @@ class PointsDirectoryFunctions:
                 ncores=ncores,
                 naat=naat,
                 encomp=encomp,
+                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
+                / pd.path.name
+                / "AIMALL",
+                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
+                / pd.path.name
+                / "AIMALL",
             )
 
     @staticmethod

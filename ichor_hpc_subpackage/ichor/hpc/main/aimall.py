@@ -19,6 +19,9 @@ def submit_points_directory_to_aimall(
     naat: int = 1,
     aimall_atoms: List[str] = None,
     hold: JobID = None,
+    script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
+    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
+    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
 ) -> Optional[JobID]:
     """Submits .wfn files which will be partitioned into .int files by
@@ -55,6 +58,9 @@ def submit_points_directory_to_aimall(
         ncores=ncores,
         naat=naat,
         hold=hold,
+        script_name=script_name,
+        outputs_dir_path=outputs_dir_path,
+        errors_dir_path=errors_dir_path,
         **kwargs,
     )
 
@@ -87,6 +93,8 @@ def submit_wfns(
     ncores=2,
     naat=1,
     hold: Optional[JobID] = None,
+    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
+    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
     **kwargs,
 ) -> Optional[JobID]:
     """Write out submission script and submit wavefunctions to AIMALL on a cluster.
@@ -98,7 +106,12 @@ def submit_wfns(
     :param hold: An optional JobID to hold for. The AIMALL job will not run until that other job is finished.
 
     """
-    with SubmissionScript(script_name, ncores=ncores) as submission_script:
+    with SubmissionScript(
+        script_name,
+        ncores=ncores,
+        outputs_dir_path=outputs_dir_path,
+        errors_dir_path=errors_dir_path,
+    ) as submission_script:
 
         for wfn in wfns:
             submission_script.add_command(
