@@ -204,7 +204,7 @@ Each connected bond distance is subtracted to a reference bond distance
 <p>Example usage:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = Stability(&#39;path/to/reference.xyz&#39;,&#39;path/to/trajectory.xyz&#39;, threshold=0.5)
 traj.stable_trajectory()
-traj.hr()
+traj.hr(nbins=1000, max_dist=10.0)
 traj.plot_hr(&#39;path/to/figure.png&#39;)
 </pre></div>
 </div>
@@ -256,7 +256,7 @@ Functionality for now comprehends only distribution of distances for a single mo
 </dl>
 <p>Example usage:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = TrajectoryAnalysis(&#39;path/to/trajectory&#39;)
-traj.hr()
+traj.hr(nbins=1000,max_dist=10.0)
 traj.plot_hr(&#39;path/to/figure.png&#39;)
 </pre></div>
 </div>
@@ -370,7 +370,7 @@ Each connected bond distance is subtracted to a reference bond distance
 <p>Example usage:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = Stability(&#39;path/to/reference.xyz&#39;,&#39;path/to/trajectory.xyz&#39;, threshold=0.5)
 traj.stable_trajectory()
-traj.hr()
+traj.hr(nbins=1000, max_dist=10.0)
 traj.plot_hr(&#39;path/to/figure.png&#39;)
 </pre></div>
 </div>
@@ -422,7 +422,7 @@ Functionality for now comprehends only distribution of distances for a single mo
 </dl>
 <p>Example usage:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>traj = TrajectoryAnalysis(&#39;path/to/trajectory&#39;)
-traj.hr()
+traj.hr(nbins=1000,max_dist=10.0)
 traj.plot_hr(&#39;path/to/figure.png&#39;)
 </pre></div>
 </div>

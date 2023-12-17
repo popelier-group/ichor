@@ -21,6 +21,14 @@ ichor.core.models.calculate\_fflux\_derivatives module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.models.create\_datasets module
+-----------------------------------------
+
+.. automodule:: ichor.core.models.create_datasets
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.core.models.fflux\_derivative\_helper\_functions module
 -------------------------------------------------------------
 

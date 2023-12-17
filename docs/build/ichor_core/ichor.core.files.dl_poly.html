@@ -122,15 +122,19 @@
 <span id="ichor-core-files-dl-poly-dl-poly-config-module"></span><h2>ichor.core.files.dl_poly.dl_poly_config module<a class="headerlink" href="#module-ichor.core.files.dl_poly.dl_poly_config" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_config.DlPolyConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DlPolyConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.Trajectory" title="ichor.core.files.Trajectory"><span class="pre">Trajectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Frame</span> <span class="pre">:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_config.DlPolyConfig" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DlPolyConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.Trajectory" title="ichor.core.files.Trajectory"><span class="pre">Trajectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('CONFIG')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Frame</span> <span class="pre">:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_config.DlPolyConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a></p>
 <p>Write out a DLPoly CONFIG file. The name of the file needs to be CONFIG,  so DL POLY knows to use it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>system_name</strong> – the name of the chemical system</p></li>
-<li><p><strong>trajectory</strong> – <p>a Trajectory instance containing. Each timestep in the trajectory
-is an Atoms instance.</p>
+<li><p><strong>trajectory</strong> – a Trajectory instance containing the geometries that are going to be written to
+the CONFIG file. Each timestep in the trajectory is an Atoms instance.</p></li>
+<li><p><strong>path</strong> – The path to the CONFIG file, defaults to Path(‘CONFIG’)</p></li>
+<li><p><strong>cell_size</strong> – The size of the box, float</p></li>
+<li><p><strong>line</strong> (<em>comment</em>) – <p>The very first line in the CONFIG file.
+Must be below 72 characters</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>ALL of the timesteps in the Trajectory will be written to one
@@ -144,9 +148,6 @@ which should be represented by one GP model have the correct atom labeling
 in the CONFIG file.</p>
 </div>
 </p></li>
-<li><p><strong>cell_size</strong> – The size of the box, float</p></li>
-<li><p><strong>line</strong> (<em>comment</em>) – The very first line in the CONFIG file.
-Must be below 72 characters</p></li>
 </ul>
 </dd>
 </dl>
@@ -629,15 +630,19 @@ and HISTORY file</p>
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.files.dl_poly" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DlPolyConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.Trajectory" title="ichor.core.files.Trajectory"><span class="pre">Trajectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Frame</span> <span class="pre">:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyConfig" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DlPolyConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.Trajectory" title="ichor.core.files.Trajectory"><span class="pre">Trajectory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('CONFIG')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Frame</span> <span class="pre">:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a></p>
 <p>Write out a DLPoly CONFIG file. The name of the file needs to be CONFIG,  so DL POLY knows to use it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>system_name</strong> – the name of the chemical system</p></li>
-<li><p><strong>trajectory</strong> – <p>a Trajectory instance containing. Each timestep in the trajectory
-is an Atoms instance.</p>
+<li><p><strong>trajectory</strong> – a Trajectory instance containing the geometries that are going to be written to
+the CONFIG file. Each timestep in the trajectory is an Atoms instance.</p></li>
+<li><p><strong>path</strong> – The path to the CONFIG file, defaults to Path(‘CONFIG’)</p></li>
+<li><p><strong>cell_size</strong> – The size of the box, float</p></li>
+<li><p><strong>line</strong> (<em>comment</em>) – <p>The very first line in the CONFIG file.
+Must be below 72 characters</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>ALL of the timesteps in the Trajectory will be written to one
@@ -651,9 +656,6 @@ which should be represented by one GP model have the correct atom labeling
 in the CONFIG file.</p>
 </div>
 </p></li>
-<li><p><strong>cell_size</strong> – The size of the box, float</p></li>
-<li><p><strong>line</strong> (<em>comment</em>) – The very first line in the CONFIG file.
-Must be below 72 characters</p></li>
 </ul>
 </dd>
 </dl>

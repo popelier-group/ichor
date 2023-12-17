@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../_static/jquery.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -21,17 +21,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ichor.core.useful_functions package" href="ichor.core.useful_functions.html" />
-    <link rel="prev" title="ichor.core.multipoles package" href="ichor.core.multipoles.html" /> 
+    <link rel="prev" title="ichor.core.multipoles package" href="ichor.core.multipoles.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../index.html" class="icon icon-home">
             ichor
           </a>
@@ -104,7 +104,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="ichor-core-sql-package">
 <h1>ichor.core.sql package<a class="headerlink" href="#ichor-core-sql-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
@@ -716,7 +716,7 @@ will be written for all atoms.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.core.sql.query_database.write_processed_data_for_atoms_parallel">
-<span class="sig-name descname"><span class="pre">write_processed_data_for_atoms_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.sql.query_database.write_processed_data_for_atoms_parallel" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_processed_data_for_atoms_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_diff_iqa_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.184</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('processed_csvs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.sql.query_database.write_processed_data_for_atoms_parallel" title="Permalink to this definition"></a></dt>
 <dd><p>Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
 on multiple cores, so that multiple atom calculations can be done in parallel.</p>
 <p>Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
@@ -732,6 +732,8 @@ corresponding atomic datasets.</p>
 and calculating C matrices.</p></li>
 <li><p><strong>ncores</strong> – The number of cores to use for the parallel calculations. Each core will calculate
 the data for an individual atom.</p></li>
+<li><p><strong>max_diff_iqa_wfn</strong> – The maximum difference between the sum of iqa and wfn energy (in kJ mol-1). Any point
+that is above this threshold will be filtered out before doing integration errors.</p></li>
 <li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
 of interest. Having a higher (absolute) integration error for the atom of interest means that
 this point will not be added in the dataset for the atom of interest. However, the same
@@ -748,7 +750,7 @@ will be written for all atoms.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.core.sql.query_database.write_processed_one_atom_data_to_csv">
-<span class="sig-name descname"><span class="pre">write_processed_one_atom_data_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.sql.query_database.write_processed_one_atom_data_to_csv" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_processed_one_atom_data_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_diff_iqa_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.184</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('processed_csvs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.sql.query_database.write_processed_one_atom_data_to_csv" title="Permalink to this definition"></a></dt>
 <dd><p>Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
 for all points (as long as integration error for the atom of interest is below a threshold integration error).</p>
 <dl class="field-list simple">
@@ -761,6 +763,8 @@ all points (and all atoms in every point)</p></li>
 as well as local forces are going to be calculated for every point in the dataset</p></li>
 <li><p><strong>alf</strong> – A list of ALF instance to be used when calculating features
 and calculating C matrices</p></li>
+<li><p><strong>max_diff_iqa_wfn</strong> – Maximum difference between sum of IQA and wfn energy (in kJ mol-1).
+If point is above threshold, it will get filtered before doing integration error.</p></li>
 <li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
 of interest. Having a higher (absolute) integration error for the atom of interest means that
 this point will not be added in the dataset for the atom of interest. However, the same
@@ -874,7 +878,7 @@ which are used to interact with the SQLite database.</p>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -885,7 +889,7 @@ which are used to interact with the SQLite database.</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

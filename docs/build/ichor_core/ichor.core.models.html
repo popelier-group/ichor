@@ -65,6 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.models.calculate_fflux_derivatives">ichor.core.models.calculate_fflux_derivatives module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.models.create_datasets">ichor.core.models.create_datasets module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.models.fflux_derivative_helper_functions">ichor.core.models.fflux_derivative_helper_functions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.models.gaussian_energy_derivative_wrt_features">ichor.core.models.gaussian_energy_derivative_wrt_features module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.models.model">ichor.core.models.model module</a></li>
@@ -139,6 +140,16 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.models.calculate_fflux_derivatives.fflux_derivs_rbf_only">
+<span class="sig-name descname"><span class="pre">fflux_derivs_rbf_only</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iatm_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jatm_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_alf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_inst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.calculate_fflux_derivatives.fflux_derivs_rbf_only" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.models.calculate_fflux_derivatives.fflux_derivs_rbf_only_one_dimensional">
+<span class="sig-name descname"><span class="pre">fflux_derivs_rbf_only_one_dimensional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iatm_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jatm_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_alf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_inst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.calculate_fflux_derivatives.fflux_derivs_rbf_only_one_dimensional" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="ichor.core.models.calculate_fflux_derivatives.fflux_predict_value">
 <span class="sig-name descname"><span class="pre">fflux_predict_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_x_features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.calculate_fflux_derivatives.fflux_predict_value" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -147,6 +158,90 @@
 <dt class="sig sig-object py" id="ichor.core.models.calculate_fflux_derivatives.fflux_predict_value_rbf_only">
 <span class="sig-name descname"><span class="pre">fflux_predict_value_rbf_only</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_x_features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.calculate_fflux_derivatives.fflux_predict_value_rbf_only" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+</section>
+<section id="module-ichor.core.models.create_datasets">
+<span id="ichor-core-models-create-datasets-module"></span><h2>ichor.core.models.create_datasets module<a class="headerlink" href="#module-ichor.core.models.create_datasets" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.models.create_datasets.get_atom_name_and_alf_from_csv">
+<span class="sig-name descname"><span class="pre">get_atom_name_and_alf_from_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.models.create_datasets.get_atom_name_and_alf_from_csv" title="Permalink to this definition"></a></dt>
+<dd><p>Helper function to get atom name and alf (as list of str)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>csv_path</strong> – The csv file path</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the atom name and alf</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.models.create_datasets.write_csvs_intersection">
+<span class="sig-name descname"><span class="pre">write_csvs_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'processed_csvs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'processed_csvs_intersection'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.create_datasets.write_csvs_intersection" title="Permalink to this definition"></a></dt>
+<dd><p>Not all processed atom csvs might contain the same points. This is because
+one atom might in a point might be filtered because of integration error but another
+one might not. This function is used to write out datasets that enforce that all atoms
+in a point are present in the written out csvs. The function finds the
+intersection of all point names across the csvs and then only writes out the
+rows from each csv that are in the intersection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dir</strong> – The path to the directory containing processed csvs files, defaults to “processed_csvs”</p></li>
+<li><p><strong>output_dir</strong> – The path to the directory containing output csvs, defaults to “processed_csvs_all_atoms”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.models.create_datasets.write_multiple_incremeting_train_sets_and_one_test_set">
+<span class="sig-name descname"><span class="pre">write_multiple_incremeting_train_sets_and_one_test_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ntrain_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntrain_increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nincrements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed_csvs_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'processed_csvs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('sets')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.create_datasets.write_multiple_incremeting_train_sets_and_one_test_set" title="Permalink to this definition"></a></dt>
+<dd><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The function assumes that csvs contain ALL the same points in them.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If there are 0 increments, then it will only make one training set and one test set
+containing random points (points in the training set are NOT in the test set).</p>
+</div>
+<p>Function used to generate (multiple)training sets and one test set. The training sets contain
+an increasing number of training points, where bigger training sets contain the smaller training sets
+in them already. The test set contains points that are outside of the training sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ntrain_initial</strong> – smallest possible training set size</p></li>
+<li><p><strong>ntrain_increment</strong> – how much to increase the training set size by</p></li>
+<li><p><strong>nincrements</strong> – how many times to increase the training set size</p></li>
+<li><p><strong>ntest</strong> – number of test set points</p></li>
+<li><p><strong>processed_csvs_dir</strong> – Location of processed csvs containing sample set, defaults to “processed_csvs”</p></li>
+<li><p><strong>set_path</strong> – The output directory which will contain the train/test sets, defaults to Path(“sets”)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the training+test set size is above the sample set size</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.models.create_datasets.write_random_train_test_sets">
+<span class="sig-name descname"><span class="pre">write_random_train_test_sets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ntrain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed_csvs_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'processed_csvs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('sets')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.models.create_datasets.write_random_train_test_sets" title="Permalink to this definition"></a></dt>
+<dd><p>Writes out a random training and test set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ntrain</strong> – Number of training points</p></li>
+<li><p><strong>ntest</strong> – Number of test points</p></li>
+<li><p><strong>processed_csvs_dir</strong> – Directory with sample set csv files, defaults to “processed_csvs”</p></li>
+<li><p><strong>set_path</strong> – Directory where train/test csvs are going to be written, defaults to Path(“sets”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-ichor.core.models.fflux_derivative_helper_functions">
@@ -669,6 +764,34 @@ containing origin_idx, x-axis_idx, xy_plane_idx. It is 0-indexed.)</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A dictionary of key: atom_name, value: 1D np.ndarray containing the x,y,z forces on the atom.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.models.predict_forces_for_all_atoms.predict_fflux_forces_for_all_atoms_one_dimensional">
+<span class="sig-name descname"><span class="pre">predict_fflux_forces_for_all_atoms_one_dimensional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ichor.core.models.models.Models" title="ichor.core.models.models.Models"><span class="pre">Models</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ichor.core.models.predict_forces_for_all_atoms.predict_fflux_forces_for_all_atoms_one_dimensional" title="Permalink to this definition"></a></dt>
+<dd><p>Predicts the forces that FFLUX predicts (which are written to IQA_FORCES file).
+Note this is for special case where the system has only one feature, eg. HCl.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The atoms instance is converted to Bohr internally because the forces are per Bohr in FFLUX.
+Also the <cite>system_alf</cite> argument is 0-indexed (as calcualted by ichor methods),
+while the ALF in the .model files is 1-indexed.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> – An Atoms instance containing the geometry for which to predict forces.
+Note that the ordering of the atoms matters, i.e. the index of the atoms in the Atoms instance
+must match the index of the model files.</p></li>
+<li><p><strong>models</strong> – A models instance which wraps around a directory containing model files.</p></li>
+<li><p><strong>system_alf</strong> – The system alf as a list of <cite>ALF</cite> instances (the <cite>ALF</cite> instances are just a named tuple
+containing origin_idx, x-axis_idx, xy_plane_idx. It is 0-indexed.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A np.ndarray of shape n_atoms x 3 containing the x,y,z force for every atom</p>
 </dd>
 </dl>
 </dd></dl>
