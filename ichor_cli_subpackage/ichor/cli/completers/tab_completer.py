@@ -111,10 +111,25 @@ class PathCompleter(TabCompleter):
         files = [
             x for x in glob(p + "*")
         ]  # find all files which match what is typed into the prompt
-        for i, f in enumerate(files):
-            if Path(f).is_dir():
-                files[i] += os.sep
-        return files[state]
+
+        # check for many files which can clutter prompt
+        if len(files) > 500:
+            from ichor.cli.useful_functions import user_input_bool
+
+            display_all_files = user_input_bool(
+                f"There are {len(files)} files to show, display all (yes/no): "
+            )
+            if display_all_files:
+                for i, f in enumerate(files):
+                    if Path(f).is_dir():
+                        files[i] += os.sep
+                return files[state]
+        # if there are not many files, then display them all
+        else:
+            for i, f in enumerate(files):
+                if Path(f).is_dir():
+                    files[i] += os.sep
+            return files[state]
 
 
 class DoNothingCompleter(TabCompleter):
