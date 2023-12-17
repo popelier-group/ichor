@@ -26,7 +26,13 @@ analysis_menu = ConsoleMenu(
 )
 
 
-def is_atom_name_in_atom_names(atom_name, atom_names) -> bool:
+def is_atom_name_in_atom_names(atom_name: str, atom_names: list) -> bool:
+    """Checks if the atom name is in the list of atom names
+
+    :param atom_name: atom name to check if in list
+    :param atom_names: list of atom names
+    :return: True if in atom_names, False otherwise
+    """
 
     return atom_name.upper() in atom_names
 
