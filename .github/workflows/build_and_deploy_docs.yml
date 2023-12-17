@@ -24,6 +24,7 @@ jobs:
         pip install sphinx  # Install Sphinx
         pip install sphinx-rtd-theme
         pip install nbsphinx
+        pip install myst-parser
 
     - name: Build Documentation
       run: |
