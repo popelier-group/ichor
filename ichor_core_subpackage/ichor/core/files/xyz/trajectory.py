@@ -258,24 +258,24 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         from ichor.core.files import XYZ
 
         # ensure that root is a path because that will get modified later
-        root = Path(root)
+        root_path = Path(root)
 
         # get only the every-th element of the trajectory
         geometries_to_write = self[::every]
         len_geoms_to_write = len(geometries_to_write)
 
         # parent directory index
-        root_idx = 0
+        root_idx = 1
         # inner directory index
-        chunk_idx = 0
+        chunk_idx = 1
 
         # add index to parent directory, because there will be multiple
-        root = root.with_name(f"{root.name}{root_idx}")
+        root_path = root_path.with_name(f"{root}{root_idx}")
         # make initial root directory
-        mkdir(root, empty=True)
+        mkdir(root_path, empty=True)
         # make initial chunk directory
         inner_dir_name = f"{system_name}{chunk_idx}"
-        mkdir(root / inner_dir_name, empty=True)
+        mkdir(root_path / inner_dir_name, empty=True)
 
         geoms_in_split_counter = 0
         nsplits_counter = 0
@@ -290,7 +290,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
             point_name = f"{system_name}{str(total_geom_counter).zfill(max(4, count_digits(len_geoms_to_write)))}.xyz"
             path = Path(point_name)
-            path = root / inner_dir_name / path
+            path = root_path / inner_dir_name / path
             xyz_file = XYZ(path, atoms_instance)
             xyz_file.write()
 
@@ -303,19 +303,20 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 # reset counter and update chunk
                 geoms_in_split_counter = 0
                 chunk_idx += 1
+
+                # make a new parent directory if the number of splits is reached
+                if nsplits_counter == nsplits_in_root:
+
+                    nsplits_counter = 0
+                    root_idx += 1
+                    root_path = root_path.with_name(f"{root}{root_idx}")
+                    if total_geom_counter != len_geoms_to_write:
+                        mkdir(root_path, empty=True)
+
                 inner_dir_name = f"{system_name}{chunk_idx}"
                 # do not make a new directory on the last iteration
                 if total_geom_counter != len_geoms_to_write:
-                    mkdir(root / inner_dir_name, empty=True)
-
-            # make a new parent directory if the number of splits is reached
-            if nsplits_counter == nsplits_in_root:
-
-                nsplits_counter = 0
-                root_idx += 1
-                root = root.with_name(f"{root.name}{root_idx}")
-                if total_geom_counter != len_geoms_to_write:
-                    mkdir(root, empty=True)
+                    mkdir(root_path / inner_dir_name, empty=True)
 
     def split_traj(self, root_dir: Path, split_size: int):
         """Splits trajectory into sub-trajectories and writes then to a folder.
