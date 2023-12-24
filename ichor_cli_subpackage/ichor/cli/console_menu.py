@@ -91,7 +91,7 @@ class ConsoleMenu(OriginalConsoleMenu):
             exit_menu_char=exit_menu_char,
         )
 
-        # self.this_menu_options = this_menu_options
+        self.this_menu_options = this_menu_options
         # if formatter is None:
         #     formatter = MenuFormatBuilder(max_dimension=Dimension(120, 100))
         # self.formatter = formatter
