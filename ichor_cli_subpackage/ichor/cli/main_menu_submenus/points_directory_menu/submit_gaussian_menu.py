@@ -20,6 +20,14 @@ SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
     subtitle="Use this menu to submit a PointsDirectory to Gaussian.\n",
 )
 
+SUBMIT_GAUSSIAN_MENU_DEFAULTS = {
+    "default_method": "b3lyp",
+    "default_basis_set": "6-31+g(d,p)",
+    "default_ncores": 2,
+    "default_overwrite_existing_gjfs": False,
+    "default_force_calculate_wfn": False,
+}
+
 
 # dataclass used to store values for SubmitGaussianMenu
 @dataclass
@@ -34,7 +42,7 @@ class SubmitGaussianMenuOptions(MenuOptions):
 
 # initialize dataclass for storing information for menu
 submit_gaussian_menu_options = SubmitGaussianMenuOptions(
-    "b3lyp", "6-31+g(d,p)", 2, False, False
+    *SUBMIT_GAUSSIAN_MENU_DEFAULTS.values()
 )
 
 
@@ -44,28 +52,30 @@ class SubmitGaussianFunctions:
     def select_method():
         """Asks user to update the method for Gaussian"""
         submit_gaussian_menu_options.selected_method = user_input_free_flow(
-            "Enter method: "
+            "Enter method: ", submit_gaussian_menu_options.selected_method
         )
 
     @staticmethod
     def select_basis_set():
         """Asks user to update the basis set."""
         submit_gaussian_menu_options.selected_basis_set = user_input_free_flow(
-            "Enter basis set: "
+            "Enter basis set: ", submit_gaussian_menu_options.selected_basis_set
         )
 
     @staticmethod
     def select_number_of_cores():
         """Asks user to update the basis set."""
         submit_gaussian_menu_options.selected_number_of_cores = user_input_int(
-            "Enter number of cores: "
+            "Enter number of cores: ",
+            submit_gaussian_menu_options.selected_number_of_cores,
         )
 
     @staticmethod
     def select_overwrite_existing_gjfs():
         """Asks user whether or not to overwrite existing gjfs"""
         submit_gaussian_menu_options.selected_overwrite_existing_gjfs = user_input_bool(
-            "Overwrite existing gjfs (yes/no): "
+            "Overwrite existing gjfs (yes/no): ",
+            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
         )
 
     @staticmethod
@@ -73,21 +83,20 @@ class SubmitGaussianFunctions:
         """Whether or not to recalculate wfns if they are already present"""
 
         submit_gaussian_menu_options.selected_force_calculate_wfn = user_input_bool(
-            "Overwrite existing gjfs (yes/no): "
+            "Overwrite existing gjfs (yes/no): ",
+            submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
     @staticmethod
     def points_directory_to_gaussian_on_compute():
         """Submits a single PointsDirectory to Gaussian on compute."""
 
-        opts = submit_gaussian_menu_options
-
         (method, basis_set, ncores, overwrite_existing, force_calculate_wfn,) = (
-            opts.selected_method,
-            opts.selected_basis_set,
-            opts.selected_number_of_cores,
-            opts.selected_overwrite_existing_gjfs,
-            opts.selected_force_calculate_wfn,
+            submit_gaussian_menu_options.selected_method,
+            submit_gaussian_menu_options.selected_basis_set,
+            submit_gaussian_menu_options.selected_number_of_cores,
+            submit_gaussian_menu_options.selected_overwrite_existing_gjfs,
+            submit_gaussian_menu_options.selected_force_calculate_wfn,
         )
 
         is_parent_directory_to_many_points_directories = (
