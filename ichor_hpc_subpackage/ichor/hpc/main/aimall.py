@@ -134,8 +134,8 @@ def submit_wfns(
                 nsubmitted_jobs += 1
 
         ichor.hpc.global_variables.logger.info(
-            f"Adding {nsubmitted_jobs}/{wfns} to {submission_script.path}. \
-                                               {wfns-nsubmitted_jobs} already have INTs calculated."
+            f"Adding {nsubmitted_jobs}/{len(wfns)} to {submission_script.path}. \
+                                               {len(wfns)-nsubmitted_jobs} already have INTs calculated."
         )
 
     # todo this will get executed when running from a compute node,
