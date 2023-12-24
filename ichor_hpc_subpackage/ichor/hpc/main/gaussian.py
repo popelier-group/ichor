@@ -71,12 +71,13 @@ def write_gjfs(
             if point_directory.gjf:
                 # if the object exists, then delete it
                 point_directory.gjf.path.unlink()
-        point_directory.gjf = GJF(
-            Path(point_directory.path / (point_directory.path.name + GJF.filetype)),
-            **kwargs,
-        )
-        point_directory.gjf.atoms = point_directory.xyz.atoms
-        point_directory.gjf.write()
+
+            point_directory.gjf = GJF(
+                Path(point_directory.path / (point_directory.path.name + GJF.filetype)),
+                **kwargs,
+            )
+            point_directory.gjf.atoms = point_directory.xyz.atoms
+            point_directory.gjf.write()
 
         gjfs.append(point_directory.gjf.path)
 
@@ -121,18 +122,22 @@ def submit_gjfs(
         outputs_dir_path=outputs_dir_path,
         errors_dir_path=errors_dir_path,
     ) as submission_script:
+
+        number_of_jobs = 0
+
         for gjf in gjfs:
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
-                submission_script.add_command(
-                    GaussianCommand(gjf)
-                )  # make a list of GaussianCommand instances.
-                ichor.hpc.global_variables.logger.info(
-                    f"Adding {gjf} to {submission_script.path}"
-                )
+                # make a list of GaussianCommand instances.
+                submission_script.add_command(GaussianCommand(gjf))
 
-    # todo this will get executed when running from a compute node, but this does not
-    # submit any wfns to aimall, it is just used to make the datafile.
+                number_of_jobs += 1
+
+        ichor.hpc.global_variables.logger.info(
+            f"Added {number_of_jobs} / {len(gjfs)} Gaussian jobs to {submission_script.path}"
+        )
+
+    # submit on compute node if there are files to submit
     if len(submission_script.grouped_commands) > 0:
         ichor.hpc.global_variables.logger.info(
             f"Submitting {len(submission_script.grouped_commands)} GJF(s) to Gaussian"

@@ -433,7 +433,7 @@ class SubmissionScript:
         else:
             raise ValueError(
                 "No tasks were added to submission script and no jobs were submitted\n"
-                + "Check if the output files from the job already exist. Set 'force' argument to True, if available."
+                + "Check if the output files from the job already exist."
             )
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
