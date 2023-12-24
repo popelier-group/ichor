@@ -18,6 +18,7 @@ def submit_points_directory_to_aimall(
     ncores: int = 2,
     naat: int = 1,
     aimall_atoms: List[str] = None,
+    force_calculate_ints=False,
     hold: JobID = None,
     script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
@@ -57,6 +58,7 @@ def submit_points_directory_to_aimall(
         aimall_atoms=aimall_atoms,
         ncores=ncores,
         naat=naat,
+        force_calculate_ints=force_calculate_ints,
         hold=hold,
         script_name=script_name,
         outputs_dir_path=outputs_dir_path,
@@ -92,6 +94,7 @@ def submit_wfns(
     script_name: str = ichor.hpc.global_variables.SCRIPT_NAMES["aimall"],
     ncores=2,
     naat=1,
+    force_calculate_ints=False,
     hold: Optional[JobID] = None,
     outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"],
     errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"],
@@ -113,15 +116,27 @@ def submit_wfns(
         errors_dir_path=errors_dir_path,
     ) as submission_script:
 
+        nsubmitted_jobs = 0
+
         for wfn in wfns:
-            submission_script.add_command(
-                AIMAllCommand(
-                    wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
+
+            if (
+                force_calculate_ints
+                or not wfn.with_suffix("").with_name(f"{wfn.stem}_atomicfiles").exists()
+            ):
+
+                submission_script.add_command(
+                    AIMAllCommand(
+                        wfn, atoms=aimall_atoms, ncores=ncores, naat=naat, **kwargs
+                    )
                 )
-            )
-            ichor.hpc.global_variables.logger.info(
-                f"Adding {wfn} to {submission_script.path}"
-            )
+
+                nsubmitted_jobs += 1
+
+        ichor.hpc.global_variables.logger.info(
+            f"Adding {nsubmitted_jobs}/{wfns} to {submission_script.path}. \
+                                               {wfns-nsubmitted_jobs} already have INTs calculated."
+        )
 
     # todo this will get executed when running from a compute node,
     # but this does not submit any wfns to aimall, it is just used to make the datafile.
@@ -131,4 +146,4 @@ def submit_wfns(
         )
         return submission_script.submit(hold=hold)
     else:
-        raise ValueError("There are no jobs to submit in the submission script.")
+        ichor.hpc.global_variables.logger("There are no jobs to submit.")

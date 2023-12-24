@@ -431,9 +431,9 @@ class SubmissionScript:
                 f.write(f'echo "Finished Job | {self.bash_date}"\n')
 
         else:
-            raise ValueError(
-                "No tasks were added to submission script and no jobs were submitted\n"
-                + "Check if the output files from the job already exist."
+
+            ichor.hpc.global_variables.logger.info(
+                f"Submission script{self.path} was not written out because there were no jobs to add to it."
             )
 
     def submit(self, hold: Optional[JobID] = None) -> Optional[JobID]:
