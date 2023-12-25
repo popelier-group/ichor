@@ -78,6 +78,15 @@ class MenuOptions:
         warnings = self.run_check_functions()
         # if not an empty list
         if warnings:
-            warnings = "\n".join(warnings)
-            return attributes_str + "\n\nWarnings:\n" + warnings
+            if TERMCOLOR_IMPORTED:
+                warnings = "\n".join(warnings)
+                return (
+                    attributes_str
+                    + "\n\n"
+                    + colored("Warnings:", "red")
+                    + "\n"
+                    + warnings
+                )
+            else:
+                return attributes_str + "\n\nWarnings:\n" + warnings
         return attributes_str
