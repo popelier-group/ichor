@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 
 from ichor.cli.completers import PathCompleter
 
@@ -94,3 +94,30 @@ def user_input_free_flow(s="Enter str: ", default=None) -> str:
     if user_input == "":
         return default
     return user_input
+
+
+def user_input_restricted(
+    available_options: List[str], s="Enter str: ", default=None
+) -> str:
+    """Asks user for inputs and returns whatever user has typed
+
+    :param s: A string that is shown in the prompt (printed to standard output).
+
+    .. note::
+        Additional info is displayed because the string is modified to show
+        the available options in the function
+    """
+
+    available_options = [a.lower() for a in available_options]
+    s = "Available options: " + ",".join(map(str, available_options)) + "\n" + s
+
+    # if pressing ctrl + D, will return to previous menu
+    while True:
+        try:
+            user_input = input(s).lower()
+        except EOFError:
+            return default
+        if user_input == "":
+            return default
+        elif user_input in available_options:
+            return user_input.lower()

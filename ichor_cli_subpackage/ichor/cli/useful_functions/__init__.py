@@ -11,6 +11,7 @@ from ichor.cli.useful_functions.user_input import (
     user_input_free_flow,
     user_input_int,
     user_input_path,
+    user_input_restricted,
 )
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "user_input_float",
     "compile_strings_to_python_code",
     "bool_to_str",
+    "user_input_restricted",
     "single_or_many_points_directories",
 ]

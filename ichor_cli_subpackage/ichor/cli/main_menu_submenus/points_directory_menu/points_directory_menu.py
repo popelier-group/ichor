@@ -10,6 +10,8 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus import (
     submit_aimall_menu,
     SUBMIT_AIMALL_MENU_DESCRIPTION,
+    submit_database_menu,
+    SUBMIT_DATABASE_MENU_DESCRIPTION,
     submit_gaussian_menu,
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
 )
@@ -19,13 +21,11 @@ from ichor.cli.script_names import SCRIPT_NAMES
 from ichor.cli.useful_functions import (
     bool_to_str,
     compile_strings_to_python_code,
-    single_or_many_points_directories,
     user_input_bool,
     user_input_float,
     user_input_int,
     user_input_path,
 )
-from ichor.core.files import PointsDirectory
 from ichor.core.sql.query_database import (
     get_alf_from_first_db_geometry,
     write_processed_data_for_atoms_parallel,
@@ -72,107 +72,6 @@ class PointsDirectoryFunctions:
         points_directory_menu_options.selected_points_directory_path = (
             ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         )
-
-    @staticmethod
-    def points_directory_to_database():
-        """Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
-        and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies"""
-
-        default_submit_on_compute = True
-
-        submit_on_compute = user_input_bool(
-            f"Submit to compute node (yes/no), default {bool_to_str(default_submit_on_compute)}: "
-        )
-        if submit_on_compute is None:
-            submit_on_compute = default_submit_on_compute
-
-        is_parent_directory_to_many_points_directories = (
-            single_or_many_points_directories()
-        )
-
-        # if running on login node, discouraged because takes a long time
-        if not submit_on_compute:
-
-            # if running on a directory containing many PointsDirectories
-            if is_parent_directory_to_many_points_directories:
-
-                for (
-                    d
-                ) in (
-                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
-                ):
-
-                    pd = PointsDirectory(d)
-                    # write all data to a single database by passing in the same name for every PointsDirectory
-                    pd.write_to_sqlite3_database(
-                        f"{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem}_sqlite.db"
-                    )
-
-            else:
-                pd = PointsDirectory(
-                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-                )
-                pd.write_to_sqlite3_database()
-
-        # if running on compute node
-        else:
-
-            # if turning many PointsDirectories into db on compute node
-            if is_parent_directory_to_many_points_directories:
-
-                db_name = (
-                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem
-                    + "_sqlite.db"
-                )
-
-                text_list = []
-                # make the python command that will be written in the submit script
-                # it will get executed as `python -c python_code_to_execute...`
-                text_list.append("from ichor.core.files import PointsDirectory")
-                text_list.append("from pathlib import Path")
-                # make the parent directory path in a Path object
-                text_list.append(
-                    f"parent_dir = Path('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
-                )
-
-                # make a list comprehension that writes each PointsDirectory in the parent dir
-                # into the same SQLite database
-                # needs to be a list comprehension because for loops do not work with -c flag
-                str_part1 = f"[PointsDirectory(d).write_to_sqlite3_database('{db_name}', print_missing_data=True)"
-                str_part2 = " for d in parent_dir.iterdir()]"
-
-                total_str = str_part1 + str_part2
-
-                text_list.append(total_str)
-                final_cmd = compile_strings_to_python_code(text_list)
-                py_cmd = FreeFlowPythonCommand(final_cmd)
-                with SubmissionScript(
-                    SCRIPT_NAMES["pd_to_sqlite3"], ncores=8
-                ) as submission_script:
-                    submission_script.add_command(py_cmd)
-                submission_script.submit()
-
-            # if only one PointsDirectory to sql on compute
-            else:
-
-                text_list = []
-                # make the python command that will be written in the submit script
-                # it will get executed as `python -c python_code_to_execute...`
-                text_list.append("from ichor.core.files import PointsDirectory")
-                text_list.append(
-                    f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
-                )
-                text_list.append(
-                    "pd.write_to_sqlite3_database(print_missing_data=True)"
-                )
-
-                final_cmd = compile_strings_to_python_code(text_list)
-                py_cmd = FreeFlowPythonCommand(final_cmd)
-                with SubmissionScript(
-                    SCRIPT_NAMES["pd_to_sqlite3"], ncores=8
-                ) as submission_script:
-                    submission_script.add_command(py_cmd)
-                submission_script.submit()
 
     @staticmethod
     def make_csvs_from_database():
@@ -314,9 +213,10 @@ point_directory_menu_items = [
     SubmenuItem(
         SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, points_directory_menu
     ),
-    FunctionItem(
-        "Make into SQLite3 database",
-        PointsDirectoryFunctions.points_directory_to_database,
+    SubmenuItem(
+        SUBMIT_DATABASE_MENU_DESCRIPTION.title,
+        submit_database_menu,
+        points_directory_menu,
     ),
     FunctionItem(
         "Make processed csvs from SQLite3 database",
