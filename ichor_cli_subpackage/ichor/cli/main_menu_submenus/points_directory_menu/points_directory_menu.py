@@ -7,11 +7,9 @@ import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
-from ichor.cli.main_menu_submenus.points_directory_menu.submit_aimall_menu import (
+from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus import (
     submit_aimall_menu,
     SUBMIT_AIMALL_MENU_DESCRIPTION,
-)
-from ichor.cli.main_menu_submenus.points_directory_menu.submit_gaussian_menu import (
     submit_gaussian_menu,
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
 )
@@ -305,7 +303,7 @@ points_directory_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 point_directory_menu_items = [
     FunctionItem(
-        "Select path of PointsDirectory or parent dir containing many PointsDirectory",
+        "Select PointsDirectory Path or Parent to PointsDirectory",
         PointsDirectoryFunctions.select_points_directory,
     ),
     SubmenuItem(
