@@ -79,6 +79,19 @@ def write_gjfs(
             point_directory.gjf.atoms = point_directory.xyz.atoms
             point_directory.gjf.write()
 
+        # if gjf does not exist
+        elif not point_directory.gjf:
+
+            point_directory.gjf = GJF(
+                Path(point_directory.path / (point_directory.path.name + GJF.filetype)),
+                **kwargs,
+            )
+            point_directory.gjf.atoms = point_directory.xyz.atoms
+            point_directory.gjf.write()
+
+        # if gjf does exist and overwrite is set to false
+        # then it should still get added to the list
+
         gjfs.append(point_directory.gjf.path)
 
     return gjfs
