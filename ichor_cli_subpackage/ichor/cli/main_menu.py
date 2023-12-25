@@ -62,9 +62,7 @@ main_menu_items = [
     SubmenuItem(
         POINTS_DIRECTORY_MENU_DESCRIPTION.title, points_directory_menu, main_menu
     ),
-    SubmenuItem(
-        SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, points_directory_menu
-    ),
+    SubmenuItem(SUBMIT_CSVS_MENU_DESCRIPTION.title, submit_csvs_menu, main_menu),
     SubmenuItem(TRAJECTORY_MENU_DESCRIPTION.title, trajectory_menu, main_menu),
     SubmenuItem(ANALYSIS_MENU_DESCRIPTION.title, analysis_menu, main_menu),
     SubmenuItem(
