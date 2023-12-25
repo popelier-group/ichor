@@ -6,7 +6,7 @@ venv/
 wily*
 rmsd*
 *.log
-*DATA*/
+.DATA/
 makeSets.py
 *.code-workspace
 FEREBUS/
