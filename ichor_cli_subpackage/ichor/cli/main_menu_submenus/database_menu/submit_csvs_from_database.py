@@ -60,8 +60,10 @@ class SubmitCSVSMenuOptions(MenuOptions):
     def check_selected_database_path(self) -> Union[str, None]:
         """Checks whether the given database exists or if it is a file."""
         db_path = Path(self.selected_database_path)
-        if (not db_path.exists()) or (not db_path.is_file()):
-            return f"Current database path: {db_path} does not exist or is not a file."
+        if not db_path.exists():
+            return f"Current database path: {db_path} does not exist."
+        elif not db_path.is_file():
+            return f"Current database path: {db_path} is not a file."
 
 
 # initialize dataclass for storing information for menu

@@ -28,8 +28,10 @@ class TrajectoryMenuOptions(MenuOptions):
     def check_selected_trajectory_path(self) -> Union[str, None]:
         """Checks whether the given Trjectory exists or if it is a file."""
         traj_path = Path(self.selected_trajectory_path)
-        if (not traj_path.exists()) or (not traj_path.is_file()):
-            return f"Current path: {traj_path} does not exist or is not a file."
+        if not traj_path.exists():
+            return f"Current database path: {traj_path} does not exist."
+        elif not traj_path.is_file():
+            return f"Current database path: {traj_path} is not a file."
 
 
 # initialize dataclass for storing information for menu
