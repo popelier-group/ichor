@@ -6,7 +6,6 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.script_names import SCRIPT_NAMES
 from ichor.cli.useful_functions import (
     compile_strings_to_python_code,
     single_or_many_points_directories,
@@ -14,6 +13,7 @@ from ichor.cli.useful_functions import (
     user_input_restricted,
 )
 from ichor.core.files import PointsDirectory
+from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 

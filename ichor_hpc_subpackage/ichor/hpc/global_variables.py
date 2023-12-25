@@ -113,6 +113,9 @@ logger = setup_logger("ICHOR", "ichor.log")
 # set up script names that are implemented
 SCRIPT_NAMES = ScriptNames(
     {
+        "pd_to_database": "pd_to_database.sh",
+        "calculate_features": "calculate_features.sh",
+        "center_trajectory": "center_trajectory.sh",
         "gaussian": "GAUSSIAN.sh",
         "aimall": "AIMALL.sh",
         "ferebus": "FEREBUS.sh",

@@ -17,7 +17,6 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 )
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.script_names import SCRIPT_NAMES
 from ichor.cli.useful_functions import (
     bool_to_str,
     compile_strings_to_python_code,
@@ -30,6 +29,7 @@ from ichor.core.sql.query_database import (
     get_alf_from_first_db_geometry,
     write_processed_data_for_atoms_parallel,
 )
+from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
 from ichor.hpc.submission_script import SubmissionScript
 
