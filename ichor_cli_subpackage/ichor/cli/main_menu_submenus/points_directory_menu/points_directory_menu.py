@@ -7,6 +7,10 @@ import ichor.cli.global_menu_variables
 import ichor.hpc.global_variables
 from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.points_directory_menu.submit_aimall_menu import (
+    submit_aimall_menu,
+    SUBMIT_AIMALL_MENU_DESCRIPTION,
+)
 from ichor.cli.main_menu_submenus.points_directory_menu.submit_gaussian_menu import (
     submit_gaussian_menu,
     SUBMIT_GAUSSIAN_MENU_DESCRIPTION,
@@ -20,7 +24,6 @@ from ichor.cli.useful_functions import (
     single_or_many_points_directories,
     user_input_bool,
     user_input_float,
-    user_input_free_flow,
     user_input_int,
     user_input_path,
 )
@@ -29,42 +32,8 @@ from ichor.core.sql.query_database import (
     get_alf_from_first_db_geometry,
     write_processed_data_for_atoms_parallel,
 )
-from ichor.hpc.main import submit_points_directory_to_aimall
 from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
 from ichor.hpc.submission_script import SubmissionScript
-
-
-def ask_user_for_aimall_settings():
-
-    default_method = "b3lyp"
-    default_number_of_cores = 2
-    default_naat = 1
-    default_encomp = 3
-
-    method = user_input_free_flow(
-        f"Method to be used for AIMAll calculations, default {default_method}: "
-    )
-    if method is None:
-        method = default_method
-
-    ncores = user_input_int(
-        f"Number of cores for AIMAll calculations, default {default_number_of_cores}: "
-    )
-    if ncores is None:
-        ncores = default_number_of_cores
-
-    naat = user_input_int(
-        f"Number of atoms at a time in AIMAll, default {default_naat}: "
-    )
-    if naat is None:
-        naat = default_naat
-
-    encomp = user_input_int(f"AIMAll -encomp setting, default {default_encomp}: ")
-    if encomp is None:
-        encomp = default_encomp
-
-    return method, ncores, naat, encomp
-
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
@@ -105,61 +74,6 @@ class PointsDirectoryFunctions:
         points_directory_menu_options.selected_points_directory_path = (
             ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
         )
-
-    @staticmethod
-    def points_directory_to_aimall_on_compute():
-        """Submits a single PointsDirectory to AIMAll on compute."""
-
-        method, ncores, naat, encomp = ask_user_for_aimall_settings()
-
-        is_parent_directory_to_many_points_directories = (
-            single_or_many_points_directories()
-        )
-
-        # if containing many PointsDirectory
-        if is_parent_directory_to_many_points_directories:
-
-            for (
-                d
-            ) in (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
-            ):
-
-                pd = PointsDirectory(d)
-                submit_points_directory_to_aimall(
-                    points_directory=pd,
-                    method=method,
-                    ncores=ncores,
-                    naat=naat,
-                    encomp=encomp,
-                    outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE[
-                        "outputs"
-                    ]
-                    / pd.path.name
-                    / "AIMALL",
-                    errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                    / pd.path.name
-                    / "AIMALL",
-                )
-
-        else:
-            pd = PointsDirectory(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
-
-            submit_points_directory_to_aimall(
-                points_directory=pd,
-                method=method,
-                ncores=ncores,
-                naat=naat,
-                encomp=encomp,
-                outputs_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["outputs"]
-                / pd.path.name
-                / "AIMALL",
-                errors_dir_path=ichor.hpc.global_variables.FILE_STRUCTURE["errors"]
-                / pd.path.name
-                / "AIMALL",
-            )
 
     @staticmethod
     def points_directory_to_database():
@@ -397,11 +311,10 @@ point_directory_menu_items = [
     SubmenuItem(
         SUBMIT_GAUSSIAN_MENU_DESCRIPTION.title,
         submit_gaussian_menu,
-        points_directory_menu,
     ),
-    FunctionItem(
-        "Submit to AIMAll",
-        PointsDirectoryFunctions.points_directory_to_aimall_on_compute,
+    SubmenuItem(
+        SUBMIT_AIMALL_MENU_DESCRIPTION.title,
+        submit_aimall_menu,
     ),
     FunctionItem(
         "Make into SQLite3 database",
