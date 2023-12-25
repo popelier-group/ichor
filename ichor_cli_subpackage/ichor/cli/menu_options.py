@@ -28,6 +28,8 @@ class MenuOptions:
     @staticmethod
     def formatter_check_function(s):
         """Formats the string output of the check function, so that the user knows something is wrong."""
+        if TERMCOLOR_IMPORTED:
+            return colored(f"! {s}", "red")
         return "! " + s
 
     def run_check_functions(self):
