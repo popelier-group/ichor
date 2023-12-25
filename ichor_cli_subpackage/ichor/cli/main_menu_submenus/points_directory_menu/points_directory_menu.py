@@ -311,10 +311,10 @@ point_directory_menu_items = [
     SubmenuItem(
         SUBMIT_GAUSSIAN_MENU_DESCRIPTION.title,
         submit_gaussian_menu,
+        points_directory_menu,
     ),
     SubmenuItem(
-        SUBMIT_AIMALL_MENU_DESCRIPTION.title,
-        submit_aimall_menu,
+        SUBMIT_AIMALL_MENU_DESCRIPTION.title, submit_aimall_menu, points_directory_menu
     ),
     FunctionItem(
         "Make into SQLite3 database",
