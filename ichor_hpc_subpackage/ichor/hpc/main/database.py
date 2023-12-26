@@ -4,11 +4,6 @@ from typing import List
 from ichor.core.atoms import ALF
 from ichor.core.sql.query_database import get_alf_from_first_db_geometry
 from ichor.hpc.global_variables import SCRIPT_NAMES
-from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
-from ichor.hpc.submission_script import SubmissionScript
-from ichor.hpc.useful_functions.compile_strings_to_python_code import (
-    compile_strings_to_python_code,
-)
 from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
     submit_free_flow_python_command_on_compute,
 )
@@ -59,14 +54,6 @@ def submit_make_csvs_from_database(
     str_part3 = f" max_integration_error={float_integration_error},"
     str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
     text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
-
-    final_cmd = compile_strings_to_python_code(text_list)
-    py_cmd = FreeFlowPythonCommand(final_cmd)
-    with SubmissionScript(
-        SCRIPT_NAMES["calculate_features"], ncores=ncores
-    ) as submission_script:
-        submission_script.add_command(py_cmd)
-    submission_script.submit()
 
     return submit_free_flow_python_command_on_compute(
         text_list=text_list,
