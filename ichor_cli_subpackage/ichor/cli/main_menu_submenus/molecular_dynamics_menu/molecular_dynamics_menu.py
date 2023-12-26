@@ -34,7 +34,7 @@ class MolecularDynamicsMenuOptions(MenuOptions):
             or (not xyz_path.suffix == ".xyz")
         ):
             return (
-                f"Current path: {xyz_path} does not exist or might not be a .xyz file"
+                f"Current path: {xyz_path} does not exist or might not be a .xyz file\n"
             )
 
 
