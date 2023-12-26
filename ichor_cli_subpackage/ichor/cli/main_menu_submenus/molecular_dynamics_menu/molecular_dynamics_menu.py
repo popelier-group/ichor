@@ -3,136 +3,17 @@ from pathlib import Path
 from typing import Union
 
 import ichor.cli.global_menu_variables
-from consolemenu.items import FunctionItem
+from consolemenu.items import FunctionItem, SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
+from ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_submenus import (
+    amber_menu,
+    AMBER_MENU_DESCRIPTION,
+    cp2k_menu,
+    CP2K_MENU_DESCRIPTION,
+)
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import (
-    user_input_free_flow,
-    user_input_int,
-    user_input_path,
-)
-from ichor.core.molecular_dynamics.amber import mdcrd_to_xyz
-from ichor.hpc.molecular_dynamics import submit_amber, submit_cp2k
-
-
-def ask_user_for_cp2k_settings():
-
-    default_method = "BLYP"
-    default_basis_set = "6-31G*"
-    default_temperature = 300
-    default_nsteps = 10_000
-    default_molecular_charge = 0
-    default_spin_multiplicity = 1
-    default_number_of_cores = 8
-
-    method = user_input_free_flow(
-        f"Method for CP2K calculations, default {default_method}: "
-    )
-    if method is None:
-        method = default_method
-
-    basis_set = user_input_free_flow(
-        f"Basis set for CP2K calculations, default {default_basis_set}: "
-    )
-    if basis_set is None:
-        basis_set = default_basis_set
-
-    temperature = user_input_int(
-        f"Temperature for CP2K simulation, default {default_temperature}: "
-    )
-    if temperature is None:
-        temperature = default_temperature
-
-    nsteps = user_input_int(
-        f"Number of steps for CP2K simulation, default {default_nsteps}: "
-    )
-    if nsteps is None:
-        nsteps = default_nsteps
-
-    molecular_charge = user_input_int(
-        f"Molecular charge of system, default {default_molecular_charge}: "
-    )
-    if molecular_charge is None:
-        molecular_charge = default_molecular_charge
-
-    spin_multiplicity = user_input_int(
-        f"Spin multiplicity charge of system, default {default_spin_multiplicity}: "
-    )
-    if spin_multiplicity is None:
-        spin_multiplicity = default_spin_multiplicity
-
-    ncores = user_input_int(
-        f"Number of cores for CP2K simulation, default {default_number_of_cores}: "
-    )
-    if ncores is None:
-        ncores = default_number_of_cores
-
-    return (
-        method,
-        basis_set,
-        temperature,
-        nsteps,
-        molecular_charge,
-        spin_multiplicity,
-        ncores,
-    )
-
-
-def ask_user_for_amber_settings():
-
-    default_temperature = 1000
-    default_nsteps = 1_000_000
-    default_write_coord_every = 10
-    default_dt = 0.001
-    default_ln_gamma = 0.7
-
-    temperature = user_input_int(
-        f"Temperature for AMBER simulation, default {default_temperature}: "
-    )
-    if temperature is None:
-        temperature = default_temperature
-
-    nsteps = user_input_int(
-        f"Number of timesteps for AMBER simulation, default {default_nsteps}: "
-    )
-    if nsteps is None:
-        nsteps = default_nsteps
-
-    write_coord_every = user_input_int(
-        f"Write coordinates every n-th step, default {default_write_coord_every}: "
-    )
-    if write_coord_every is None:
-        write_coord_every = default_write_coord_every
-
-    dt = user_input_int(f"Timestep time in picoseconds, default {default_dt}: ")
-    if dt is None:
-        dt = default_dt
-
-    ln_gamma = user_input_int(
-        f"Collision frequency in picoseconds, default {default_ln_gamma}: "
-    )
-    if ln_gamma is None:
-        ln_gamma = default_ln_gamma
-
-    return temperature, nsteps, write_coord_every, dt, ln_gamma
-
-
-def ask_user_for_mdcrd_paths():
-
-    default_every = 1
-
-    amber_directory_path = user_input_path("Give path to AMBER directory: ")
-    system_name = user_input_free_flow("Give name of system: ")
-    system_name = system_name.upper()
-    every = user_input_int(
-        f"Write out every nth timestep (give n), default {default_every}: "
-    )
-    if every is None:
-        every = default_every
-
-    return Path(amber_directory_path), system_name, every
-
+from ichor.cli.useful_functions import user_input_path
 
 MOLECULAR_DYNAMICS_MENU_DESCRIPTION = MenuDescription(
     "Molecular Dynamics Menu", subtitle="Use this to submit MD simulations with ichor."
@@ -141,6 +22,7 @@ MOLECULAR_DYNAMICS_MENU_DESCRIPTION = MenuDescription(
 
 @dataclass
 class MolecularDynamicsMenuOptions(MenuOptions):
+
     selected_xyz_path: Path = ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
 
     def check_selected_xyz_path(self) -> Union[str, None]:
@@ -172,68 +54,6 @@ class MolecularDynamicsMenuFunctions:
             ichor.cli.global_menu_variables.SELECTED_XYZ_PATH
         )
 
-    @staticmethod
-    def submit_cp2k_to_compute():
-        """Asks for user input and submits CP2K job to compute node."""
-
-        (
-            method,
-            basis_set,
-            temperature,
-            nsteps,
-            molecular_charge,
-            spin_multiplicity,
-            ncores,
-        ) = ask_user_for_cp2k_settings()
-
-        submit_cp2k(
-            input_file=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
-            system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
-            temperature=temperature,
-            nsteps=nsteps,
-            method=method,
-            basis_set=basis_set,
-            molecular_charge=molecular_charge,
-            spin_multiplicity=spin_multiplicity,
-            ncores=ncores,
-        )
-
-    @staticmethod
-    def submit_amber_to_compute():
-        """Asks for user input and submits AMBER job to compute node."""
-
-        (
-            temperature,
-            nsteps,
-            write_coord_every,
-            dt,
-            ln_gamma,
-        ) = ask_user_for_amber_settings()
-
-        submit_amber(
-            input_file_path=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH,
-            temperature=temperature,
-            nsteps=nsteps,
-            write_coord_every=write_coord_every,
-            system_name=ichor.cli.global_menu_variables.SELECTED_XYZ_PATH.stem,
-            dt=dt,
-            ln_gamma=ln_gamma,
-        )
-
-    @staticmethod
-    def xyz_from_mdcrd():
-        amber_path, system_name, every = ask_user_for_mdcrd_paths()
-
-        for f in amber_path.iterdir():
-            if f.stem == "mdcrd":
-                mdcrd_file = f
-            elif f.suffix == ".prmtop":
-                prmtop_file = f
-            elif f.name == "md.in":
-                mdin_file = f
-
-        mdcrd_to_xyz(mdcrd_file, prmtop_file, mdin_file, system_name, every)
-
 
 # initialize menu
 molecular_dynamics_menu = ConsoleMenu(
@@ -249,17 +69,11 @@ molecular_dynamics_menu = ConsoleMenu(
 # can use lambda functions to change text of options as well :)
 molecular_dynamics_menu_items = [
     FunctionItem(
-        "Select path of .xyz file containing MD starting geometry",
+        "Select xyz file containing MD starting geometry",
         MolecularDynamicsMenuFunctions.select_xyz,
     ),
-    FunctionItem(
-        "Submit .xyz file to AMBER",
-        MolecularDynamicsMenuFunctions.submit_amber_to_compute,
-    ),
-    FunctionItem(
-        "Submit .xyz file to CP2K",
-        MolecularDynamicsMenuFunctions.submit_cp2k_to_compute,
-    ),
+    SubmenuItem(AMBER_MENU_DESCRIPTION.title, amber_menu, molecular_dynamics_menu),
+    SubmenuItem(CP2K_MENU_DESCRIPTION.title, cp2k_menu, molecular_dynamics_menu),
     FunctionItem(
         "Convert mdcrd to xyz.", MolecularDynamicsMenuFunctions.xyz_from_mdcrd
     ),
