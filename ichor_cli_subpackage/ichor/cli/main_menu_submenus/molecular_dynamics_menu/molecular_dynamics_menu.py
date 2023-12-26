@@ -74,9 +74,6 @@ molecular_dynamics_menu_items = [
     ),
     SubmenuItem(AMBER_MENU_DESCRIPTION.title, amber_menu, molecular_dynamics_menu),
     SubmenuItem(CP2K_MENU_DESCRIPTION.title, cp2k_menu, molecular_dynamics_menu),
-    FunctionItem(
-        "Convert mdcrd to xyz.", MolecularDynamicsMenuFunctions.xyz_from_mdcrd
-    ),
 ]
 
 add_items_to_menu(molecular_dynamics_menu, molecular_dynamics_menu_items)
