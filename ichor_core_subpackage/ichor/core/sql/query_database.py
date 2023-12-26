@@ -633,6 +633,7 @@ def write_processed_data_for_atoms_parallel(
             write_index_col=write_index_col,
             calc_multipoles=calc_multipoles,
             calc_forces=calc_forces,
+            parent_directory=parent_directory,
         )
 
     # need to execute a globally defined a function, so this initializer and initialargs do that
