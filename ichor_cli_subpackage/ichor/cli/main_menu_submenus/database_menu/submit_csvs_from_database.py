@@ -49,7 +49,7 @@ class SubmitCSVSMenuOptions(MenuOptions):
     selected_rotate_multipole_moments: bool
     selected_calculate_feature_forces: bool
     selected_filter_by_energy: bool
-    selected_difference_IQA_and_WFN: float
+    selected_difference_iqa_and_wfn_kj_per_mol: float
     selected_filter_by_integration_error: bool
     selected_integration_error: float
     selected_number_of_cores: int
@@ -120,7 +120,9 @@ class SubmitCSVSFunctions:
             submit_csvs_menu_options.selected_filter_by_energy,
         )
         if not submit_csvs_menu_options.selected_filter_by_energy:
-            submit_csvs_menu_options.selected_difference_IQA_and_WFN = math.inf
+            submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol = (
+                math.inf
+            )
 
     @staticmethod
     def select_difference_IQA_and_WFN_threshold():
@@ -138,9 +140,11 @@ class SubmitCSVSFunctions:
         """
 
         if submit_csvs_menu_options.selected_filter_by_energy:
-            submit_csvs_menu_options.selected_difference_IQA_and_WFN = user_input_float(
-                "Absolute maximum energy difference threshold: ",
-                submit_csvs_menu_options.selected_difference_IQA_and_WFN,
+            submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol = (
+                user_input_float(
+                    "Absolute maximum energy difference threshold: ",
+                    submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol,
+                )
             )
         else:
             input("Filtering by energy is turned off. Press Enter to go back to menu.")
@@ -209,7 +213,7 @@ class SubmitCSVSFunctions:
             submit_csvs_menu_options.selected_calculate_feature_forces
         )
         float_difference_iqa_wfn = (
-            submit_csvs_menu_options.selected_difference_IQA_and_WFN
+            submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol
         )
         float_integration_error = submit_csvs_menu_options.selected_integration_error
         ncores = submit_csvs_menu_options.selected_number_of_cores
