@@ -28,14 +28,12 @@ class MolecularDynamicsMenuOptions(MenuOptions):
     def check_selected_xyz_path(self) -> Union[str, None]:
         """Checks whether the given Trjectory exists or if it is a file."""
         xyz_path = Path(self.selected_xyz_path)
-        if (
-            (not xyz_path.exists())
-            or (not xyz_path.is_file())
-            or (not xyz_path.suffix == ".xyz")
-        ):
-            return (
-                f"Current path: {xyz_path} does not exist or might not be a .xyz file\n"
-            )
+        if not xyz_path.exists():
+            return f"Current path: {xyz_path} does not exist."
+        elif not xyz_path.is_file():
+            return f"Current path: {xyz_path} is not a file."
+        elif not xyz_path.suffix == ".xyz":
+            return f"Current path: {xyz_path} might not be a .xyz file."
 
 
 # initialize dataclass for storing information for menu

@@ -30,7 +30,7 @@ class MenuOptions:
         """Formats the string output of the check function, so that the user knows something is wrong."""
         if TERMCOLOR_IMPORTED:
             return colored(f"! {s}", "red")
-        return "! " + s
+        return "! " + s + "\n"
 
     def run_check_functions(self):
         """Runs all methods that start with `check`.
@@ -76,10 +76,20 @@ class MenuOptions:
         """When instance of prologue is called, makes the prologue nicely formatted."""
         attributes_str = str(self)
         warnings = self.run_check_functions()
-        # if not an empty list
+
+        # if there are warnings, make into string
         if warnings:
-            if TERMCOLOR_IMPORTED:
-                warnings = "\n".join(warnings)
+
+            warnings = "\n".join(warnings)
+            warnings += "\n"
+
+        else:
+            warnings = ""
+
+        if TERMCOLOR_IMPORTED:
+
+            if warnings:
+
                 return (
                     attributes_str
                     + "\n\n"
@@ -87,6 +97,14 @@ class MenuOptions:
                     + "\n"
                     + warnings
                 )
+
             else:
+
+                return attributes_str + "\n\n"
+
+        else:
+
+            if warnings:
                 return attributes_str + "\n\nWarnings:\n" + warnings
-        return attributes_str
+
+            return attributes_str + "\n\n"
