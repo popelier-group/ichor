@@ -246,8 +246,10 @@ class SubmitCSVSFunctions:
             str_part1 = (
                 f"write_processed_data_for_atoms_parallel(db_path, alf, {ncores},"
             )
-            str_part2 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
-            text_list.append(str_part1 + str_part2)
+            str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
+            str_part3 = f" max_integration_error={float_integration_error},"
+            str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
+            text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
 
             final_cmd = compile_strings_to_python_code(text_list)
             py_cmd = FreeFlowPythonCommand(final_cmd)
