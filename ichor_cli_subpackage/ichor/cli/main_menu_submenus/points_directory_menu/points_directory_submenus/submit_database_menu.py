@@ -7,15 +7,15 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    compile_strings_to_python_code,
     single_or_many_points_directories,
     user_input_bool,
     user_input_restricted,
 )
 from ichor.core.files import PointsDirectory
 from ichor.hpc.global_variables import SCRIPT_NAMES
-from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
-from ichor.hpc.submission_script import SubmissionScript
+from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
+    submit_free_flow_python_command_on_compute,
+)
 
 SUBMIT_DATABASE_MENU_DESCRIPTION = MenuDescription(
     "Database Menu",
@@ -110,13 +110,10 @@ def make_database(database_format, submit_on_compute):
             total_str = str_part1 + str_part2
 
             text_list.append(total_str)
-            final_cmd = compile_strings_to_python_code(text_list)
-            py_cmd = FreeFlowPythonCommand(final_cmd)
-            with SubmissionScript(
-                SCRIPT_NAMES["pd_to_database"], ncores=1
-            ) as submission_script:
-                submission_script.add_command(py_cmd)
-            submission_script.submit()
+
+            submit_free_flow_python_command_on_compute(
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
+            )
 
         # if only one PointsDirectory to sql on compute
         else:
@@ -130,13 +127,9 @@ def make_database(database_format, submit_on_compute):
             )
             text_list.append(f"pd.{str_database_method}(print_missing_data=True)")
 
-            final_cmd = compile_strings_to_python_code(text_list)
-            py_cmd = FreeFlowPythonCommand(final_cmd)
-            with SubmissionScript(
-                SCRIPT_NAMES["pd_to_database"], ncores=1
-            ) as submission_script:
-                submission_script.add_command(py_cmd)
-            submission_script.submit()
+            submit_free_flow_python_command_on_compute(
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
+            )
 
 
 # class with static methods for each menu item that calls a function.

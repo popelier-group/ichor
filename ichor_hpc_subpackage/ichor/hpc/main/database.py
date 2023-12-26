@@ -9,6 +9,9 @@ from ichor.hpc.submission_script import SubmissionScript
 from ichor.hpc.useful_functions.compile_strings_to_python_code import (
     compile_strings_to_python_code,
 )
+from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
+    submit_free_flow_python_command_on_compute,
+)
 
 
 def submit_make_csvs_from_database(
@@ -64,3 +67,9 @@ def submit_make_csvs_from_database(
     ) as submission_script:
         submission_script.add_command(py_cmd)
     submission_script.submit()
+
+    return submit_free_flow_python_command_on_compute(
+        text_list=text_list,
+        script_name=SCRIPT_NAMES["calculate_features"],
+        ncores=ncores,
+    )

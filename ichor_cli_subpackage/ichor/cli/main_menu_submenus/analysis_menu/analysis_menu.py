@@ -10,9 +10,7 @@ from ichor.cli.useful_functions import (
 from ichor.core.atoms import ALF
 from ichor.core.common.str import get_digits
 from ichor.core.files import Trajectory, XYZ
-from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
-    submit_free_flow_python_command_on_compute,
-)
+from ichor.hpc.main.trajectory import submit_center_trajectory_on_atom
 
 ANALYSIS_MENU_DESCRIPTION = MenuDescription(
     "Analysis Menu", subtitle="Use this to do analysis of data with ichor."
@@ -103,18 +101,11 @@ class AnalysisFunctions:
 
         else:
 
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import Trajectory")
-            text_list.append("from ichor.core.atoms import ALF")
-            text_list.append(f"traj = Trajectory('{trajectory_path}')")
-            text_list.append(
-                f"traj.center_geometries_on_atom_and_write_xyz('{central_atom_name}', {alf_dict}, '{xyz_output_path}')"
-            )
-
-            submit_free_flow_python_command_on_compute(
-                text_list, "center_trajectory", 2
+            submit_center_trajectory_on_atom(
+                trajectory_path,
+                central_atom_name,
+                alf_dict,
+                f"{central_atom_name}_centered_trajectory.xyz",
             )
 
 
