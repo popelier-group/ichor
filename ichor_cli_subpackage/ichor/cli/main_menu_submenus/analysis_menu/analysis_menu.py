@@ -7,12 +7,12 @@ from ichor.cli.useful_functions import (
     user_input_free_flow,
     user_input_path,
 )
-from ichor.cli.useful_functions.submit_free_flow_python_on_compute import (
-    submit_free_flow_python_command_on_compute,
-)
 from ichor.core.atoms import ALF
 from ichor.core.common.str import get_digits
 from ichor.core.files import Trajectory, XYZ
+from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
+    submit_free_flow_python_command_on_compute,
+)
 
 ANALYSIS_MENU_DESCRIPTION = MenuDescription(
     "Analysis Menu", subtitle="Use this to do analysis of data with ichor."

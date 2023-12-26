@@ -10,7 +10,6 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    compile_strings_to_python_code,
     user_input_bool,
     user_input_float,
     user_input_int,
@@ -21,9 +20,8 @@ from ichor.core.sql.query_database import (
     get_alf_from_first_db_geometry,
     write_processed_data_for_atoms_parallel,
 )
-from ichor.hpc.global_variables import SCRIPT_NAMES
-from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
-from ichor.hpc.submission_script import SubmissionScript
+
+from ichor.hpc.main import submit_make_csvs_from_database
 
 SUBMIT_CSVS_MENU_DESCRIPTION = MenuDescription(
     "Database Processing Menu",
@@ -231,33 +229,16 @@ class SubmitCSVSFunctions:
 
         # if running on compute
         else:
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append(
-                "from ichor.core.sql.query_database import write_processed_data_for_atoms_parallel"
-            )
-            text_list.append(
-                "from ichor.core.sql.query_database import get_alf_from_first_db_geometry"
-            )
-            text_list.append("from pathlib import Path")
-            text_list.append(f"db_path = Path('{db_path.absolute()}')")
-            text_list.append("alf = get_alf_from_first_db_geometry(db_path)")
-            str_part1 = (
-                f"write_processed_data_for_atoms_parallel(db_path, alf, {ncores},"
-            )
-            str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
-            str_part3 = f" max_integration_error={float_integration_error},"
-            str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
-            text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
 
-            final_cmd = compile_strings_to_python_code(text_list)
-            py_cmd = FreeFlowPythonCommand(final_cmd)
-            with SubmissionScript(
-                SCRIPT_NAMES["calculate_features"], ncores=ncores
-            ) as submission_script:
-                submission_script.add_command(py_cmd)
-            submission_script.submit()
+            submit_make_csvs_from_database(
+                db_path,
+                ncores=ncores,
+                alf=None,
+                float_difference_iqa_wfn=float_difference_iqa_wfn,
+                float_integration_error=float_integration_error,
+                rotate_multipole_moments=rotate_multipole_moments,
+                calculate_feature_forces=calculate_feature_forces,
+            )
 
 
 # make menu items

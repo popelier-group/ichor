@@ -1,9 +1,9 @@
-from ichor.cli.useful_functions.compile_strings_to_python_code import (
-    compile_strings_to_python_code,
-)
 from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.submission_commands.free_flow_python_command import FreeFlowPythonCommand
 from ichor.hpc.submission_script import SubmissionScript
+from ichor.hpc.useful_functions.compile_strings_to_python_code import (
+    compile_strings_to_python_code,
+)
 
 
 def submit_free_flow_python_command_on_compute(text_list, script_name, ncores):
