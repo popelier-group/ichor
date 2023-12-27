@@ -100,11 +100,11 @@ class MenuOptions:
 
             else:
 
-                return attributes_str + "\n\n"
+                return attributes_str
 
         else:
 
             if warnings:
                 return attributes_str + "\n\nWarnings:\n" + warnings
 
-            return attributes_str + "\n\n"
+            return attributes_str
