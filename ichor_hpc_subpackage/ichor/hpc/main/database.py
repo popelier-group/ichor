@@ -17,6 +17,7 @@ def submit_make_database(
     database_format: str = "sqlite",
     is_parent_directory_to_many_points_directories: bool = False,
     submit_on_compute: bool = True,
+    ncores=1,
 ):
     """Method for making a PointsDirectory or parent to PointsDirectory into a database.
 
@@ -25,6 +26,7 @@ def submit_make_database(
     :param database_format: the format, which will get added to the name of the file
         Currently, only the sqlite format is supported
     :param submit_on_compute: Whether or not to submit to compute node, defaults to True
+    :param ncores: number of cores to use on compute node
     """
 
     if database_format not in AVAILABLE_DATABASE_FORMATS.keys():
@@ -81,7 +83,7 @@ def submit_make_database(
             text_list.append(total_str)
 
             return submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
             )
 
         # if only one PointsDirectory to sql on compute
@@ -97,7 +99,7 @@ def submit_make_database(
             )
 
             return submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
             )
 
 
