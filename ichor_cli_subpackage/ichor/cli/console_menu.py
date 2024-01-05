@@ -6,6 +6,9 @@ from consolemenu.screen import Screen as OriginalScreen
 from ichor.cli.completers.tab_completer import DoNothingCompleter
 from ichor.cli.menu_options import MenuOptions
 
+# from consolemenu.menu_formatter import MenuFormatBuilder
+# from consolemenu.menu_component import Dimension
+
 # TODO: maybe imporve screen size
 # TODO: also maybe find a better way to fix the slight bug with user input
 # import shutil
@@ -89,6 +92,9 @@ class ConsoleMenu(OriginalConsoleMenu):
         )
 
         self.this_menu_options = this_menu_options
+        # if formatter is None:
+        #     formatter = MenuFormatBuilder(max_dimension=Dimension(120, 100))
+        # self.formatter = formatter
 
     @property
     def parent_menu_options(self) -> List[MenuOptions]:

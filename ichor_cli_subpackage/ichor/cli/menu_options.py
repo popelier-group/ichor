@@ -1,4 +1,16 @@
+import os
 from dataclasses import asdict, dataclass
+
+try:
+    from termcolor import colored
+
+    TERMCOLOR_IMPORTED = True
+except ImportError:
+    TERMCOLOR_IMPORTED = False
+
+# do this on Windows to get the color working
+if os.name == "nt":
+    os.system("color")
 
 
 @dataclass
@@ -16,7 +28,9 @@ class MenuOptions:
     @staticmethod
     def formatter_check_function(s):
         """Formats the string output of the check function, so that the user knows something is wrong."""
-        return "! " + s
+        if TERMCOLOR_IMPORTED:
+            return colored(f"! {s}", "red")
+        return "! " + s + "\n"
 
     def run_check_functions(self):
         """Runs all methods that start with `check`.
@@ -44,6 +58,13 @@ class MenuOptions:
         """Format all the defined attributes (which are current menu settings)
         into a nice string to be displayed in the prologue."""
         # k is name of attribute (str), value is value of attribute defined in the dataclass.
+        if TERMCOLOR_IMPORTED:
+            return "".join(
+                [
+                    f"-- {MenuOptions.formatter_menu_options(k)}: {colored(str(v), 'green')}\n"
+                    for k, v in asdict(self).items()
+                ]
+            )
         return "".join(
             [
                 f"-- {MenuOptions.formatter_menu_options(k)}: {v}\n"
@@ -55,8 +76,35 @@ class MenuOptions:
         """When instance of prologue is called, makes the prologue nicely formatted."""
         attributes_str = str(self)
         warnings = self.run_check_functions()
-        # if not an empty list
+
+        # if there are warnings, make into string
         if warnings:
+
             warnings = "\n".join(warnings)
-            return attributes_str + "\n\nWarnings:\n" + warnings
-        return attributes_str
+            warnings += "\n"
+
+        else:
+            warnings = ""
+
+        if TERMCOLOR_IMPORTED:
+
+            if warnings:
+
+                return (
+                    attributes_str
+                    + "\n\n"
+                    + colored("Warnings:", "red")
+                    + "\n"
+                    + warnings
+                )
+
+            else:
+
+                return attributes_str
+
+        else:
+
+            if warnings:
+                return attributes_str + "\n\nWarnings:\n" + warnings
+
+            return attributes_str
