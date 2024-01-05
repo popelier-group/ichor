@@ -80,7 +80,7 @@ def submit_make_database(
 
             text_list.append(total_str)
 
-            submit_free_flow_python_command_on_compute(
+            return submit_free_flow_python_command_on_compute(
                 text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
             )
 
@@ -96,7 +96,7 @@ def submit_make_database(
                 f"pd.{str_database_method}('{db_name}', print_missing_data=True)"
             )
 
-            submit_free_flow_python_command_on_compute(
+            return submit_free_flow_python_command_on_compute(
                 text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
             )
 
