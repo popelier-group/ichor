@@ -74,7 +74,7 @@ class SubmitDatabaseFunctions:
         )
 
         database_format, submit_on_compute = (
-            submit_database_menu_options.selected_database,
+            submit_database_menu_options.selected_database_format,
             submit_database_menu_options.selected_submit_on_compute,
         )
 
