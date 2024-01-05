@@ -11,11 +11,7 @@ from ichor.cli.useful_functions import (
     user_input_bool,
     user_input_restricted,
 )
-from ichor.core.files import PointsDirectory
-from ichor.hpc.global_variables import SCRIPT_NAMES
-from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
-    submit_free_flow_python_command_on_compute,
-)
+from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS, submit_make_database
 
 SUBMIT_DATABASE_MENU_DESCRIPTION = MenuDescription(
     "Database Menu",
@@ -27,8 +23,6 @@ SUBMIT_DATABASE_MENU_DEFAULTS = {
     "default_database_format": "sqlite",
     "default_submit_on_compute": True,
 }
-
-AVAILABLE_DATABASE_FORMATS = {"sqlite": "write_to_sqlite3_database"}
 
 
 # dataclass used to store values for SubmitAIMALLMenu
@@ -43,93 +37,6 @@ class SubmitDatabaseMenuOptions(MenuOptions):
 submit_database_menu_options = SubmitDatabaseMenuOptions(
     *SUBMIT_DATABASE_MENU_DEFAULTS.values()
 )
-
-
-def make_database(database_format, submit_on_compute):
-
-    is_parent_directory_to_many_points_directories = single_or_many_points_directories()
-
-    # this is used to be able to call the respective methods from PointsDirectory
-    # so that the same code below is used with the respective methods
-    str_database_method = AVAILABLE_DATABASE_FORMATS[database_format]
-
-    # if running on login node, discouraged because takes a long time
-    if not submit_on_compute:
-
-        # if running on a directory containing many PointsDirectories
-        if is_parent_directory_to_many_points_directories:
-
-            db_name = (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem
-                + f"_{database_format}.db"
-            )
-
-            for (
-                d
-            ) in (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.iterdir()
-            ):
-
-                pd = PointsDirectory(d)
-                # write all data to a single database by passing in the same name for every PointsDirectory
-                getattr(pd, str_database_method)(db_name)
-
-        else:
-            pd = PointsDirectory(
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
-            )
-            getattr(pd, str_database_method)()
-
-    # if running on compute node
-    else:
-
-        # if turning many PointsDirectories into db on compute node
-        if is_parent_directory_to_many_points_directories:
-
-            db_name = (
-                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem
-                + f"_{database_format}.db"
-            )
-
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import PointsDirectory")
-            text_list.append("from pathlib import Path")
-            # make the parent directory path in a Path object
-            text_list.append(
-                f"parent_dir = Path('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
-            )
-
-            # make a list comprehension that writes each PointsDirectory in the parent dir
-            # into the same SQLite database
-            # needs to be a list comprehension because for loops do not work with -c flag
-            str_part1 = f"[PointsDirectory(d).{str_database_method}('{db_name}', print_missing_data=True)"
-            str_part2 = " for d in parent_dir.iterdir()]"
-
-            total_str = str_part1 + str_part2
-
-            text_list.append(total_str)
-
-            submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
-            )
-
-        # if only one PointsDirectory to sql on compute
-        else:
-
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import PointsDirectory")
-            text_list.append(
-                f"pd = PointsDirectory('{ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH}')"
-            )
-            text_list.append(f"pd.{str_database_method}(print_missing_data=True)")
-
-            submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
-            )
 
 
 # class with static methods for each menu item that calls a function.
@@ -162,12 +69,21 @@ class SubmitDatabaseFunctions:
         """Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
         and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies"""
 
+        is_parent_directory_to_many_points_directories = (
+            single_or_many_points_directories()
+        )
+
         database_format, submit_on_compute = (
             submit_database_menu_options.selected_database,
             submit_database_menu_options.selected_submit_on_compute,
         )
 
-        make_database(database_format, submit_on_compute)
+        submit_make_database(
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
+            database_format,
+            is_parent_directory_to_many_points_directories,
+            submit_on_compute,
+        )
 
 
 # make menu items

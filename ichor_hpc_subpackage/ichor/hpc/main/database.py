@@ -2,11 +2,103 @@ from pathlib import Path
 from typing import List
 
 from ichor.core.atoms import ALF
+from ichor.core.files import PointsDirectory
 from ichor.core.sql.query_database import get_alf_from_first_db_geometry
 from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
     submit_free_flow_python_command_on_compute,
 )
+
+AVAILABLE_DATABASE_FORMATS = {"sqlite": "write_to_sqlite3_database"}
+
+
+def submit_make_database(
+    points_dir_path: Path,
+    database_format: str = "sqlite",
+    is_parent_directory_to_many_points_directories: bool = False,
+    submit_on_compute: bool = True,
+):
+    """Method for making a PointsDirectory or parent to PointsDirectory into a database.
+
+    :param points_dir_path: Path to PointsDirectory or parent to PointsDirectory-ies
+    :param is_parent_directory_to_many_points_directories: whether the path is a parent or PointsDirectory
+    :param database_format: the format, which will get added to the name of the file
+        Currently, only the sqlite format is supported
+    :param submit_on_compute: Whether or not to submit to compute node, defaults to True
+    """
+
+    if database_format not in AVAILABLE_DATABASE_FORMATS.keys():
+        print(
+            f"The given database format, {database_format} is not in the available formats:",
+            ",".join(AVAILABLE_DATABASE_FORMATS.keys()),
+        )
+
+    path_stem = points_dir_path.stem
+    db_name = path_stem + f"_{database_format}.db"
+
+    # this is used to be able to call the respective methods from PointsDirectory
+    # so that the same code below is used with the respective methods
+    str_database_method = AVAILABLE_DATABASE_FORMATS[database_format]
+
+    # if running on login node, discouraged because takes a long time
+    if not submit_on_compute:
+
+        # if running on a directory containing many PointsDirectories
+        if is_parent_directory_to_many_points_directories:
+
+            for d in points_dir_path.iterdir():
+
+                pd = PointsDirectory(d)
+                # write all data to a single database by passing in the same name for every PointsDirectory
+                getattr(pd, str_database_method)(db_name)
+
+        else:
+            pd = PointsDirectory(points_dir_path)
+            getattr(pd, str_database_method)(db_name)
+
+    # if running on compute node
+    else:
+
+        # if turning many PointsDirectories into db on compute node
+        if is_parent_directory_to_many_points_directories:
+
+            text_list = []
+            # make the python command that will be written in the submit script
+            # it will get executed as `python -c python_code_to_execute...`
+            text_list.append("from ichor.core.files import PointsDirectory")
+            text_list.append("from pathlib import Path")
+            # make the parent directory path in a Path object
+            text_list.append(f"parent_dir = Path('{points_dir_path.absolute()}')")
+
+            # make a list comprehension that writes each PointsDirectory in the parent dir
+            # into the same SQLite database
+            # needs to be a list comprehension because for loops do not work with -c flag
+            str_part1 = f"[PointsDirectory(d).{str_database_method}('{db_name}', print_missing_data=True)"
+            str_part2 = " for d in parent_dir.iterdir()]"
+
+            total_str = str_part1 + str_part2
+
+            text_list.append(total_str)
+
+            submit_free_flow_python_command_on_compute(
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
+            )
+
+        # if only one PointsDirectory to sql on compute
+        else:
+
+            text_list = []
+            # make the python command that will be written in the submit script
+            # it will get executed as `python -c python_code_to_execute...`
+            text_list.append("from ichor.core.files import PointsDirectory")
+            text_list.append(f"pd = PointsDirectory('{points_dir_path.absolute()}')")
+            text_list.append(
+                f"pd.{str_database_method}('{db_name}', print_missing_data=True)"
+            )
+
+            submit_free_flow_python_command_on_compute(
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=1
+            )
 
 
 def submit_make_csvs_from_database(
