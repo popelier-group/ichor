@@ -112,13 +112,15 @@ class SubmitCSVSFunctions:
     def select_filter_by_energy():
         """
         Asks user whether or not to filter the database by energy. This will filter by the difference
-        of the WFN comapred to sum of IQA energy. Note the difference is in kJ mol-1
+        of the WFN compared to sum of IQA energy. Note the difference is in kJ mol-1
         """
 
         submit_csvs_menu_options.selected_filter_by_energy = user_input_bool(
             "Filter by energy (yes/no): ",
             submit_csvs_menu_options.selected_filter_by_energy,
         )
+
+        # set the energy threshold to infinity if not filtering
         if not submit_csvs_menu_options.selected_filter_by_energy:
             submit_csvs_menu_options.selected_difference_iqa_and_wfn_kj_per_mol = (
                 math.inf
@@ -147,7 +149,10 @@ class SubmitCSVSFunctions:
                 )
             )
         else:
-            input("Filtering by energy is turned off. Press Enter to go back to menu.")
+            print(
+                "Filtering by energy is turned off, turn filtering on to change threshold."
+            )
+            input("Press Enter to go back to menu.")
 
     @staticmethod
     def select_filter_by_integration_error():
@@ -159,6 +164,9 @@ class SubmitCSVSFunctions:
             "Filter by integration errror (yes/no): ",
             submit_csvs_menu_options.selected_filter_by_integration_error,
         )
+
+        # if not filtering by integration error, set integration
+        # error threshold to infinity
         if not submit_csvs_menu_options.selected_filter_by_integration_error:
             submit_csvs_menu_options.selected_integration_error = math.inf
 
@@ -176,9 +184,10 @@ class SubmitCSVSFunctions:
         # if filtering by integration error is off, then
         # do not make it possible to change the integration error threshold.
         else:
-            input(
-                "Filtering by integration error is turned off. Press Enter to go back to menu."
+            print(
+                "Filtering by integration error is turned off, turn filtering on to change threshold."
             )
+            input("Press Enter to go back to menu.")
 
     @staticmethod
     def select_number_of_cores():
@@ -206,6 +215,7 @@ class SubmitCSVSFunctions:
         """Makes csv files containing features, iqa energies, and rotated multipole moments given a database"""
 
         db_path = ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH
+
         rotate_multipole_moments = (
             submit_csvs_menu_options.selected_rotate_multipole_moments
         )
