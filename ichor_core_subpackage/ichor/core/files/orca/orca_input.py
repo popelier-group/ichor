@@ -139,12 +139,14 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         # aim for wfn file
         # nousesym to not use symmetry
         # normalprint for printing out to the outputfile
+        # engrad calculate energy and (analytical) gradient
         self.main_input = self.main_input or [
             "b3lyp/g",
             "6-31+g(d,p)",
             "nousesym",
             "aim",
             "normalprint",
+            "engrad",
         ]
 
         self.charge = self.charge or 0
