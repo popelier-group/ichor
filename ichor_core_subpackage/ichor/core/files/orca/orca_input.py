@@ -49,6 +49,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         https://www.afs.enea.it/software/orca/orca_manual_4_2_1.pdf (note this is for version 4, not 5)
         version 5 manual, needs login:
         available in https://orcaforum.kofo.mpg.de/app.php/dlext/?view=detail&df_id=186
+        https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&t=7470&p=32102&hilit=atomic+force#p32102
     """
 
     def __init__(
