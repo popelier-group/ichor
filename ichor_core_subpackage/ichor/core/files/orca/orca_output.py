@@ -43,7 +43,7 @@ class OrcaOutput(HasAtoms, HasProperties, ReadFile):
 
     @classproperty
     def filetype(self) -> str:
-        return ".orcaout"
+        return ".orcaoutput"
 
     @classproperty
     def property_names(self) -> List[str]:
