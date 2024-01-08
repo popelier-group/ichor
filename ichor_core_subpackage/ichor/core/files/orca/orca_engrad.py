@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
@@ -28,7 +29,7 @@ class OrcaEngrad(ReadFile, HasAtoms):
         https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&t=7470&p=32102&hilit=atomic+force#p32102
     """
 
-    def __init__(self, path: Path | str):
+    def __init__(self, path: Union[Path, str]):
 
         super(ReadFile, self).__init__(path)
         self.global_forces = FileContents
