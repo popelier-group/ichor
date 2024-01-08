@@ -1,22 +1,15 @@
-import itertools
 from pathlib import Path
-from typing import Iterable, Iterator, List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 from ichor.core.calculators import default_connectivity_calculator
+from ichor.core.common.pairwise import pairwise
 from ichor.core.files import DlpolyHistory, GJF, Trajectory, XYZ
 from ichor.core.files.file import ReadFile
 
 # TODO: potentially move Distance to outside of models/kernels
 from ichor.core.models.kernels.distance import Distance
-
-
-def pairwise(iterable: Iterable) -> Iterator[Tuple[int, int]]:
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = itertools.tee(iterable)
-    next(b, None)
-    return zip(a, b)
 
 
 class TrajectoryAnalysis(ReadFile):
@@ -106,7 +99,7 @@ class TrajectoryAnalysis(ReadFile):
         :return: number of values that are within that interval
         """
         index = (r0 < self.distances_matrix) & (self.distances_matrix < r1)
-        true_vals= len(index[index == True])
+        true_vals = len(index[index is True])
         return true_vals
 
     def hr(self, nbins: Optional[int] = 1000, max_dist: Optional[float] = 10.0):

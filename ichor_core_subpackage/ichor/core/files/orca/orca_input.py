@@ -1,9 +1,9 @@
-from itertools import pairwise
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
+from ichor.core.common.pairwise import pairwise
 
 # from enum import Enum
 from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
