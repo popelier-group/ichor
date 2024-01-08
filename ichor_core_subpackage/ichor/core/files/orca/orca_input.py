@@ -12,7 +12,6 @@ from ichor.core.files.file_data import HasAtoms
 
 class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
     """
-
     Wraps around an ORCA input file that is used as input to ORCA.
 
     :param path: A string or Path to the ORCA input file file. If a path is not give,
