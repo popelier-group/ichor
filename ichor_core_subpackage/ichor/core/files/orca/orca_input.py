@@ -13,11 +13,9 @@ from ichor.core.files.file_data import HasAtoms
 class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
     """
 
-    Wraps around a .gjf file that is used as input to Gaussian.
-    See https://gaussian.com/input/ for details.
-    Below is the usual gjf file structure:
+    Wraps around an ORCA input file that is used as input to ORCA.
 
-    :param path: A string or Path to the .gjf file. If a path is not give,
+    :param path: A string or Path to the ORCA input file file. If a path is not give,
         then there is no file to be read, so the user has to write the file contents. If
         no contents/options are written by user, they are written as the default values in the
         ``write`` method.
@@ -75,7 +73,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
 
     @classproperty
     def filetype(self) -> str:
-        return ".inp"
+        return ".orcain"
 
     def _read_file(self):
 
@@ -161,7 +159,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         """
 
         if len(self.atoms) == 0:
-            raise ValueError("There are no atoms to write to gjf file.")
+            raise ValueError("There are no atoms to write to orca input file.")
 
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"

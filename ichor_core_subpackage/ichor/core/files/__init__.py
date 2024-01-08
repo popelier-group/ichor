@@ -19,6 +19,9 @@ from ichor.core.files.gaussian import GaussianOut, GJF, WFN, WFX
 # md (amber) simulation files
 from ichor.core.files.mol2 import Mol2
 
+# orca files
+from ichor.core.files.orca import OrcaEngrad, OrcaInput, OrcaOutput
+
 # pandora files
 from ichor.core.files.pandora import (
     MorfiDirectory,
@@ -43,6 +46,9 @@ __all__ = [
     "WFN",
     "WFX",
     "GaussianOut",
+    "OrcaInput",
+    "OrcaEngrad",
+    "OrcaOutput",
     "Trajectory",
     "DlpolyHistory",
     "DlPolyField",

@@ -117,6 +117,7 @@ SCRIPT_NAMES = ScriptNames(
         "calculate_features": "calculate_features.sh",
         "center_trajectory": "center_trajectory.sh",
         "gaussian": "GAUSSIAN.sh",
+        "orca": "ORCA.sh",
         "aimall": "AIMALL.sh",
         "ferebus": "FEREBUS.sh",
         "ichor": ScriptNames(
@@ -171,6 +172,12 @@ GAUSSIAN_COMMANDS = {
     Machine.csf4: "$g16root/g16/g16",
     Machine.ffluxlab: "g09",
     Machine.local: "g09",
+}
+
+ORCA_COMMANDS = {
+    Machine.csf3: "$ORCA_HOME/orca",
+    Machine.csf4: "orca",
+    Machine.local: "orca",
 }
 
 # set up current python environment

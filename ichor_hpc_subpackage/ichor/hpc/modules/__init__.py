@@ -7,6 +7,7 @@ from ichor.hpc.modules.gaussian import GaussianModules
 from ichor.hpc.modules.internet import InternetModules
 from ichor.hpc.modules.module_functions import initialise_modules, load_module, module
 from ichor.hpc.modules.modules import Modules
+from ichor.hpc.modules.orca import OrcaModules
 from ichor.hpc.modules.pandora import MorfiModules, PandoraModules
 from ichor.hpc.modules.python import PythonModules
 from ichor.hpc.modules.tyche import TycheModules
@@ -23,6 +24,7 @@ __all__ = [
     "PandoraModules",
     "PythonModules",
     "TycheModules",
+    "OrcaModules",
     "load_module",
     "initialise_modules",
     "module",

@@ -7,6 +7,7 @@ from ichor.core.calculators import default_alf_calculator
 from ichor.core.common.dict import merge
 from ichor.core.common.functools import classproperty
 from ichor.core.common.io import remove
+from ichor.core.files import OrcaInput, OrcaOutput
 from ichor.core.files.aimall import AIM, INTs
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file import ReadFile
@@ -32,6 +33,8 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
 
     xyz: OptionalPath[XYZ] = OptionalFile
     gjf: OptionalPath[GJF] = OptionalFile
+    orca_input: OptionalPath[OrcaInput] = OptionalFile
+    orca_output: OptionalPath[OrcaOutput] = OptionalFile
     gaussian_out: OptionalPath[GaussianOut] = OptionalFile
     aim: OptionalPath[AIM] = OptionalFile
     wfn: OptionalPath[WFN] = OptionalFile
@@ -76,7 +79,7 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         # you can run into the issue where you did an optimization (so .xyz/gjf are different from wfn)
         # then predictions - true will be way off because you are predicting on different geometries
 
-        file_priorities = [XYZ, WFN, GJF]
+        file_priorities = [XYZ, WFN, GJF, OrcaInput]
 
         for f in file_priorities:
             for f_inst in self.files():
