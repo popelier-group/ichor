@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ichor.cli.main_menu_submenus.tools_menu package" href="ichor.cli.main_menu_submenus.tools_menu.html" />
-    <link rel="prev" title="ichor.cli.main_menu_submenus.molecular_dynamics_menu package" href="ichor.cli.main_menu_submenus.molecular_dynamics_menu.html" />
+    <link rel="next" title="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus package" href="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.html" />
+    <link rel="prev" title="ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_submenus package" href="ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_submenus.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -70,7 +70,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.main_menu">ichor.cli.main_menu module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.menu_description">ichor.cli.menu_description module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.menu_options">ichor.cli.menu_options module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.script_names">ichor.cli.script_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli">Module contents</a></li>
 </ul>
 </li>
@@ -104,6 +103,14 @@
 
   <section id="ichor-cli-main-menu-submenus-points-directory-menu-package">
 <h1>ichor.cli.main_menu_submenus.points_directory_menu package<a class="headerlink" href="#ichor-cli-main-menu-submenus-points-directory-menu-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.html">ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus package</a></li>
+</ul>
+</div>
+</section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
@@ -115,41 +122,16 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Functions that run when menu items are selected</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.make_csvs_from_database">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_csvs_from_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.make_csvs_from_database" title="Permalink to this definition"></a></dt>
-<dd><p>Makes csv files contaning features, iqa energies, and rotated multipole moments given a database</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.points_directory_to_aimall_on_compute">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">points_directory_to_aimall_on_compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.points_directory_to_aimall_on_compute" title="Permalink to this definition"></a></dt>
-<dd><p>Submits a single PointsDirectory to AIMAll on compute.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.points_directory_to_database">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">points_directory_to_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.points_directory_to_database" title="Permalink to this definition"></a></dt>
-<dd><p>Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
-and works for one <cite>PointsDirectory</cite> or parent directory containing many <cite>PointsDirectory</cite>-ies</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.points_directory_to_gaussian_on_compute">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">points_directory_to_gaussian_on_compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.points_directory_to_gaussian_on_compute" title="Permalink to this definition"></a></dt>
-<dd><p>Submits a single PointsDirectory to Gaussian on compute.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.select_points_directory">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_points_directory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryFunctions.select_points_directory" title="Permalink to this definition"></a></dt>
-<dd><p>Asks user to update points directory and then updates PointsDirectoryMenuPrologue instance.</p>
+<dd><p>Asks user to update points directory and then updates PointsDirectoryMenuOptions instance.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryMenuOptions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PointsDirectoryMenuOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_points_directory_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/Users/user/Documents/GitHub/ICHOR/docs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryMenuOptions" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PointsDirectoryMenuOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_points_directory_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryMenuOptions" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.cli.html#ichor.cli.menu_options.MenuOptions" title="ichor.cli.menu_options.MenuOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">MenuOptions</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryMenuOptions.check_selected_points_directory_path">
@@ -159,27 +141,9 @@ and works for one <cite>PointsDirectory</cite> or parent directory containing ma
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryMenuOptions.selected_points_directory_path">
-<span class="sig-name descname"><span class="pre">selected_points_directory_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">PosixPath('/Users/user/Documents/GitHub/ICHOR/docs')</span></em><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryMenuOptions.selected_points_directory_path" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">selected_points_directory_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.PointsDirectoryMenuOptions.selected_points_directory_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.ask_user_for_aimall_settings">
-<span class="sig-name descname"><span class="pre">ask_user_for_aimall_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.ask_user_for_aimall_settings" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.ask_user_for_gaussian_settings">
-<span class="sig-name descname"><span class="pre">ask_user_for_gaussian_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.ask_user_for_gaussian_settings" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.single_or_many_points_directories">
-<span class="sig-name descname"><span class="pre">single_or_many_points_directories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu_submenus.points_directory_menu.points_directory_menu.single_or_many_points_directories" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether the current selected PointsDirectory path is a directory containing
-many PointsDirectories, or is just one PointsDirectory.</p>
-<p>This is just done by checking if parent is in the name of the directory.</p>
 </dd></dl>
 
 </section>
@@ -192,8 +156,8 @@ many PointsDirectories, or is just one PointsDirectory.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ichor.cli.main_menu_submenus.molecular_dynamics_menu.html" class="btn btn-neutral float-left" title="ichor.cli.main_menu_submenus.molecular_dynamics_menu package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ichor.cli.main_menu_submenus.tools_menu.html" class="btn btn-neutral float-right" title="ichor.cli.main_menu_submenus.tools_menu package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_submenus.html" class="btn btn-neutral float-left" title="ichor.cli.main_menu_submenus.molecular_dynamics_menu.molecular_dynamics_submenus package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus.html" class="btn btn-neutral float-right" title="ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

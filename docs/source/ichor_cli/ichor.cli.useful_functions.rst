@@ -12,18 +12,10 @@ ichor.cli.useful\_functions.bool\_to\_str module
    :undoc-members:
    :show-inheritance:
 
-ichor.cli.useful\_functions.compile\_strings\_to\_python\_code module
----------------------------------------------------------------------
+ichor.cli.useful\_functions.single\_or\_many\_points\_directories module
+------------------------------------------------------------------------
 
-.. automodule:: ichor.cli.useful_functions.compile_strings_to_python_code
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ichor.cli.useful\_functions.submit\_free\_flow\_python\_on\_compute module
---------------------------------------------------------------------------
-
-.. automodule:: ichor.cli.useful_functions.submit_free_flow_python_on_compute
+.. automodule:: ichor.cli.useful_functions.single_or_many_points_directories
    :members:
    :undoc-members:
    :show-inheritance:

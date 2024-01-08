@@ -1,6 +1,14 @@
 ichor.cli.main\_menu\_submenus.points\_directory\_menu package
 ==============================================================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenus
+
 Submodules
 ----------
 

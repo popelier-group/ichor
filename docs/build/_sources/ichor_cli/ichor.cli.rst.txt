@@ -54,14 +54,6 @@ ichor.cli.menu\_options module
    :undoc-members:
    :show-inheritance:
 
-ichor.cli.script\_names module
-------------------------------
-
-.. automodule:: ichor.cli.script_names
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

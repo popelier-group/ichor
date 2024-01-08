@@ -67,6 +67,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.submission_commands.dlpoly_command">ichor.hpc.submission_commands.dlpoly_command module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.submission_commands.free_flow_python_command">ichor.hpc.submission_commands.free_flow_python_command module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.submission_commands.gaussian_command">ichor.hpc.submission_commands.gaussian_command module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.submission_commands.orca_command">ichor.hpc.submission_commands.orca_command module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.submission_commands.python_command">ichor.hpc.submission_commands.python_command module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.submission_commands.tyche_command">ichor.hpc.submission_commands.tyche_command module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.submission_commands">Module contents</a></li>
@@ -885,6 +886,58 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 </dd></dl>
 
 </section>
+<section id="module-ichor.hpc.submission_commands.orca_command">
+<span id="ichor-hpc-submission-commands-orca-command-module"></span><h2>ichor.hpc.submission_commands.orca_command module<a class="headerlink" href="#module-ichor.hpc.submission_commands.orca_command" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrcaCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orca_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orca_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.hpc.html#ichor.hpc.submission_command.SubmissionCommand" title="ichor.hpc.submission_command.SubmissionCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubmissionCommand</span></code></a></p>
+<p>A class which is used to add Gaussian-related commands to a submission script.
+It is used to write the submission script line where Gaussian modules are loaded.
+It is also used to write out the submission script line where Gaussian is ran on a
+specified array of files (usually Gaussian is ran as an array job because we want to
+run hundreds of Gaussian tasks in parallel).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gjf_file</strong> – Path to a gjf file. This is not needed when running auto-run for a whole directory.</p></li>
+<li><p><strong>gjf_output</strong> – Optional path to the Gaussian job output for the gjf_file.
+Default is None as it is set to the <cite>gjf_file_name</cite>.gau if not specified.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand.command">
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'orca'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.command" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.data" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of the absolute paths of the ORCA input file (.orcainput) and the output file (.gau).
+This is the data that is going to be written to the datafile.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand.group">
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.group" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand.modules">
+<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/orca/5.0.3'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['orca/5.0.4-gompi-2021a'],</span> <span class="pre">&lt;Machine.local:</span> <span class="pre">('local',</span> <span class="pre">False,</span> <span class="pre">False)&gt;:</span> <span class="pre">['test/gaussian/module']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.modules" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand.repr">
+<span class="sig-name descname"><span class="pre">repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.repr" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a strings which is then written out to the final submission script file.
+The length of <cite>variables</cite> is defined by the length of <cite>self.data</cite></p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-ichor.hpc.submission_commands.python_command">
 <span id="ichor-hpc-submission-commands-python-command-module"></span><h2>ichor.hpc.submission_commands.python_command module<a class="headerlink" href="#module-ichor.hpc.submission_commands.python_command" title="Permalink to this heading"></a></h2>
 <dl class="py class">
@@ -902,7 +955,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.python_command.PythonCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/Users/user/.venv/ichor_docs/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.python_command.PythonCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/home/julian/.venv/ichor_docs/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.python_command.PythonCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1180,6 +1233,55 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrcaCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orca_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orca_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.hpc.html#ichor.hpc.submission_command.SubmissionCommand" title="ichor.hpc.submission_command.SubmissionCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubmissionCommand</span></code></a></p>
+<p>A class which is used to add Gaussian-related commands to a submission script.
+It is used to write the submission script line where Gaussian modules are loaded.
+It is also used to write out the submission script line where Gaussian is ran on a
+specified array of files (usually Gaussian is ran as an array job because we want to
+run hundreds of Gaussian tasks in parallel).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gjf_file</strong> – Path to a gjf file. This is not needed when running auto-run for a whole directory.</p></li>
+<li><p><strong>gjf_output</strong> – Optional path to the Gaussian job output for the gjf_file.
+Default is None as it is set to the <cite>gjf_file_name</cite>.gau if not specified.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand.command">
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'orca'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.command" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.data" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of the absolute paths of the ORCA input file (.orcainput) and the output file (.gau).
+This is the data that is going to be written to the datafile.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand.group">
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.group" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand.modules">
+<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/orca/5.0.3'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['orca/5.0.4-gompi-2021a'],</span> <span class="pre">&lt;Machine.local:</span> <span class="pre">('local',</span> <span class="pre">False,</span> <span class="pre">False)&gt;:</span> <span class="pre">['test/gaussian/module']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.modules" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand.repr">
+<span class="sig-name descname"><span class="pre">repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.repr" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a strings which is then written out to the final submission script file.
+The length of <cite>variables</cite> is defined by the length of <cite>self.data</cite></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.PythonCommand">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PythonCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">python_script</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.submission_commands.PythonCommand" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.hpc.html#ichor.hpc.submission_command.SubmissionCommand" title="ichor.hpc.submission_command.SubmissionCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubmissionCommand</span></code></a></p>
@@ -1194,7 +1296,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.PythonCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/Users/user/.venv/ichor_docs/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.PythonCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/home/julian/.venv/ichor_docs/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.PythonCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">

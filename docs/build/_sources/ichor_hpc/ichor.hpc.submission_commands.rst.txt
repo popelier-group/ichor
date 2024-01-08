@@ -52,6 +52,14 @@ ichor.hpc.submission\_commands.gaussian\_command module
    :undoc-members:
    :show-inheritance:
 
+ichor.hpc.submission\_commands.orca\_command module
+---------------------------------------------------
+
+.. automodule:: ichor.hpc.submission_commands.orca_command
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.hpc.submission\_commands.python\_command module
 -----------------------------------------------------
 

@@ -134,6 +134,14 @@ ichor.core.common.os module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.common.pairwise module
+---------------------------------
+
+.. automodule:: ichor.core.common.pairwise
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.core.common.patterns module
 ---------------------------------
 

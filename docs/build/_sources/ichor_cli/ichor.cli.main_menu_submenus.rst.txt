@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 1
 
    ichor.cli.main_menu_submenus.analysis_menu
+   ichor.cli.main_menu_submenus.database_menu
    ichor.cli.main_menu_submenus.molecular_dynamics_menu
    ichor.cli.main_menu_submenus.points_directory_menu
    ichor.cli.main_menu_submenus.tools_menu

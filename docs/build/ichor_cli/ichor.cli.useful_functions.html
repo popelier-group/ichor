@@ -59,8 +59,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.cli.useful_functions package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.cli.useful_functions.bool_to_str">ichor.cli.useful_functions.bool_to_str module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.cli.useful_functions.compile_strings_to_python_code">ichor.cli.useful_functions.compile_strings_to_python_code module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.cli.useful_functions.submit_free_flow_python_on_compute">ichor.cli.useful_functions.submit_free_flow_python_on_compute module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.cli.useful_functions.single_or_many_points_directories">ichor.cli.useful_functions.single_or_many_points_directories module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.cli.useful_functions.user_input">ichor.cli.useful_functions.user_input module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.cli.useful_functions">Module contents</a></li>
 </ul>
@@ -73,7 +72,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.main_menu">ichor.cli.main_menu module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.menu_description">ichor.cli.menu_description module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.menu_options">ichor.cli.menu_options module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli.script_names">ichor.cli.script_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.cli.html#module-ichor.cli">Module contents</a></li>
 </ul>
 </li>
@@ -126,40 +124,22 @@
 </dd></dl>
 
 </section>
-<section id="module-ichor.cli.useful_functions.compile_strings_to_python_code">
-<span id="ichor-cli-useful-functions-compile-strings-to-python-code-module"></span><h2>ichor.cli.useful_functions.compile_strings_to_python_code module<a class="headerlink" href="#module-ichor.cli.useful_functions.compile_strings_to_python_code" title="Permalink to this heading"></a></h2>
+<section id="module-ichor.cli.useful_functions.single_or_many_points_directories">
+<span id="ichor-cli-useful-functions-single-or-many-points-directories-module"></span><h2>ichor.cli.useful_functions.single_or_many_points_directories module<a class="headerlink" href="#module-ichor.cli.useful_functions.single_or_many_points_directories" title="Permalink to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.cli.useful_functions.compile_strings_to_python_code.compile_strings_to_python_code">
-<span class="sig-name descname"><span class="pre">compile_strings_to_python_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strings_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.compile_strings_to_python_code.compile_strings_to_python_code" title="Permalink to this definition"></a></dt>
-<dd><p>Takes in a list of strings and concats them with a ; character
-Then these strings can be executed with python -c</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>strings_list</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – _description_</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>_description_</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="ichor.cli.useful_functions.single_or_many_points_directories.single_or_many_points_directories">
+<span class="sig-name descname"><span class="pre">single_or_many_points_directories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.useful_functions.single_or_many_points_directories.single_or_many_points_directories" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether the current selected PointsDirectory path is a directory containing
+many PointsDirectories, or is just one PointsDirectory.</p>
+<p>This is just done by checking if parent is in the name of the directory.</p>
 </dd></dl>
-
-</section>
-<section id="module-ichor.cli.useful_functions.submit_free_flow_python_on_compute">
-<span id="ichor-cli-useful-functions-submit-free-flow-python-on-compute-module"></span><h2>ichor.cli.useful_functions.submit_free_flow_python_on_compute module<a class="headerlink" href="#module-ichor.cli.useful_functions.submit_free_flow_python_on_compute" title="Permalink to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.cli.useful_functions.submit_free_flow_python_on_compute.submit_free_flow_python_command_on_compute">
-<span class="sig-name descname"><span class="pre">submit_free_flow_python_command_on_compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.useful_functions.submit_free_flow_python_on_compute.submit_free_flow_python_command_on_compute" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 </section>
 <section id="module-ichor.cli.useful_functions.user_input">
 <span id="ichor-cli-useful-functions-user-input-module"></span><h2>ichor.cli.useful_functions.user_input module<a class="headerlink" href="#module-ichor.cli.useful_functions.user_input" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input.user_input_bool">
-<span class="sig-name descname"><span class="pre">user_input_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">True/False:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_bool" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">True/False:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_bool" title="Permalink to this definition"></a></dt>
 <dd><p>Returns True or False depending on user input</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -170,7 +150,7 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input.user_input_float">
-<span class="sig-name descname"><span class="pre">user_input_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">float:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_float" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">float:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_float" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a float that user has given</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -181,7 +161,7 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input.user_input_free_flow">
-<span class="sig-name descname"><span class="pre">user_input_free_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">str:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_free_flow" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_free_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">str:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_free_flow" title="Permalink to this definition"></a></dt>
 <dd><p>Asks user for inputs and returns whatever user has typed</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -192,7 +172,7 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input.user_input_int">
-<span class="sig-name descname"><span class="pre">user_input_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">integer:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_int" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">integer:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_int" title="Permalink to this definition"></a></dt>
 <dd><p>Returns an integer that user has given</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -203,13 +183,29 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input.user_input_path">
-<span class="sig-name descname"><span class="pre">user_input_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">Path:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_path" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">Path:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_path" title="Permalink to this definition"></a></dt>
 <dd><p>Returns user input path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>s</strong> – A string that is shown in the prompt (printed to standard output).</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input.user_input_restricted">
+<span class="sig-name descname"><span class="pre">user_input_restricted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">available_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">str:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input.user_input_restricted" title="Permalink to this definition"></a></dt>
+<dd><p>Asks user for inputs and returns whatever user has typed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> – A string that is shown in the prompt (printed to standard output).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Additional info is displayed because the string is modified to show
+the available options in the function</p>
+</div>
 </dd></dl>
 
 </section>
@@ -230,26 +226,16 @@ Then these strings can be executed with python -c</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.cli.useful_functions.compile_strings_to_python_code">
-<span class="sig-name descname"><span class="pre">compile_strings_to_python_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strings_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.compile_strings_to_python_code" title="Permalink to this definition"></a></dt>
-<dd><p>Takes in a list of strings and concats them with a ; character
-Then these strings can be executed with python -c</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>strings_list</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – _description_</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>_description_</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="ichor.cli.useful_functions.single_or_many_points_directories">
+<span class="sig-name descname"><span class="pre">single_or_many_points_directories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.useful_functions.single_or_many_points_directories" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether the current selected PointsDirectory path is a directory containing
+many PointsDirectories, or is just one PointsDirectory.</p>
+<p>This is just done by checking if parent is in the name of the directory.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input_bool">
-<span class="sig-name descname"><span class="pre">user_input_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">True/False:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_bool" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">True/False:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_bool" title="Permalink to this definition"></a></dt>
 <dd><p>Returns True or False depending on user input</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -260,7 +246,7 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input_float">
-<span class="sig-name descname"><span class="pre">user_input_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">float:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_float" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">float:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_float" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a float that user has given</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -271,7 +257,7 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input_free_flow">
-<span class="sig-name descname"><span class="pre">user_input_free_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">str:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_free_flow" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_free_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">str:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_free_flow" title="Permalink to this definition"></a></dt>
 <dd><p>Asks user for inputs and returns whatever user has typed</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -282,7 +268,7 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input_int">
-<span class="sig-name descname"><span class="pre">user_input_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">integer:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_int" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">integer:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_int" title="Permalink to this definition"></a></dt>
 <dd><p>Returns an integer that user has given</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -293,13 +279,29 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input_path">
-<span class="sig-name descname"><span class="pre">user_input_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">Path:</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_path" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_input_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">Path:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_path" title="Permalink to this definition"></a></dt>
 <dd><p>Returns user input path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>s</strong> – A string that is shown in the prompt (printed to standard output).</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.cli.useful_functions.user_input_restricted">
+<span class="sig-name descname"><span class="pre">user_input_restricted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">available_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">str:</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.cli.useful_functions.user_input_restricted" title="Permalink to this definition"></a></dt>
+<dd><p>Asks user for inputs and returns whatever user has typed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> – A string that is shown in the prompt (printed to standard output).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Additional info is displayed because the string is modified to show
+the available options in the function</p>
+</div>
 </dd></dl>
 
 </section>

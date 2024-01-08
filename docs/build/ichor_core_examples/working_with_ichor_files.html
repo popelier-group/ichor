@@ -58,6 +58,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#General-implementation-of-file-classes">General implementation of file classes</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#Example-of-Orca-Input-File-definition">Example of Orca Input File definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
@@ -177,8 +178,223 @@ H4       2.11921902    -30.18852549     -0.75438182
 </div>
 <p>The way the lazy reading works is by having a special <code class="docutils literal notranslate"><span class="pre">None</span></code> equivalent, defined as <code class="docutils literal notranslate"><span class="pre">FileContents</span></code> (which is an instance of <code class="docutils literal notranslate"><span class="pre">FileContentsType</span></code>. This essentially the same as <code class="docutils literal notranslate"><span class="pre">NoneType</span></code>). This allows us to check if an attribute is <code class="docutils literal notranslate"><span class="pre">FileContents</span></code>. If it is <code class="docutils literal notranslate"><span class="pre">FileContents</span></code>, then we first must read the file and then try to access the attribute value again. The implementation is found in <code class="docutils literal notranslate"><span class="pre">ReadFile.__getattribute__</span></code>, which is called every time an attribute is accessed.</p>
 <p>Subclassing from <code class="docutils literal notranslate"><span class="pre">WriteFile</span></code> means a <code class="docutils literal notranslate"><span class="pre">_write_file</span></code> method must be implemented in the sub-class, which defines the format of the file that needs to be written out.</p>
-<p><strong>Note that you can directly then call the ``write`` method, which subsequently calls ``_write_file``.</strong></p>
+<p><strong>Note that you can directly then call the ``write`` method (implemented in the ``WriteFile``), which subsequently calls ``_write_file``.</strong></p>
 </section>
+</section>
+<section id="Example-of-Orca-Input-File-definition">
+<h1>Example of Orca Input File definition<a class="headerlink" href="#Example-of-Orca-Input-File-definition" title="Permalink to this heading"></a></h1>
+<p>Below is an example implementation for ORCA input file. The implementation for the ORCA output file is identical, however there will be additional attributes that need to be defined (which will be the outputs of the calculation). Use the code below (or look at other implementations in ichor) as a reference to define new file formats.</p>
+<p>There are several important things to note for file reading:</p>
+<ol class="arabic simple">
+<li><p>You must subclass from <code class="docutils literal notranslate"><span class="pre">ReadFile</span></code>, <code class="docutils literal notranslate"><span class="pre">WriteFile</span></code>, or both. This will allow you to use ichor’s lazy file reading and other functionality implemented for files.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">HasAtoms</span></code> class means that the <code class="docutils literal notranslate"><span class="pre">atoms</span></code> attribute is present in the class. This <code class="docutils literal notranslate"><span class="pre">atoms</span></code> attribute is an instance of <code class="docutils literal notranslate"><span class="pre">ichor.core.atoms.Atoms</span></code> class, which implements all the functionalities for calculating features, defining ALF, etc. If the atomic coordinates are found in the file somewhere, make sure to subclass from <code class="docutils literal notranslate"><span class="pre">HasAtoms</span></code> as well to utilize this functionality.</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method parameters, make sure any parameters that are going to be read from the file (or are going to be defined by the user) are set as <code class="docutils literal notranslate"><span class="pre">None</span></code>. Then, inside the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method, use definitions like this <code class="docutils literal notranslate"><span class="pre">self.charge:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">charge</span> <span class="pre">or</span> <span class="pre">FileContents</span></code>. What this allows you to do is to either give ORCA job options yourself (so these are going to be used, regardless of the definitions in an already present file ORCA input file) or if definitions are left as <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+then options defined in the already present ORCA file will be read. If the ORCA input file is not present on disk, then sensible default options will be written out to the file.</p></li>
+<li><p>You must set the <code class="docutils literal notranslate"><span class="pre">filetype</span></code> method, which returns the extension of the file. This is used to determine the file type in other parts of the ichor code.</p></li>
+<li><p>Use the <code class="docutils literal notranslate"><span class="pre">_set_write_defaults_if_needed</span></code> method to set the defaults which are going to be used if writing a new file.</p></li>
+<li><p>Implement the <code class="docutils literal notranslate"><span class="pre">_read_file</span></code> and <code class="docutils literal notranslate"><span class="pre">_write_file</span></code> methods which read and write the file respectively. These definitions depend if the file is intended to be read only, written only, or both. Note that the <code class="docutils literal notranslate"><span class="pre">ichor.core.files.file.File</span></code> class implements the <code class="docutils literal notranslate"><span class="pre">read</span></code> and <code class="docutils literal notranslate"><span class="pre">write</span></code> methods, which can be used directly for reading and writing files instead. Note that you will likely not need to use <code class="docutils literal notranslate"><span class="pre">read</span></code> method directly, as accessing any attribute (which contains information from a file) will
+automatically read the file.</p></li>
+</ol>
+<p>Note that you must provide the molecular structure yourself, i.e. you must set the <code class="docutils literal notranslate"><span class="pre">atoms</span></code> attribute to an <code class="docutils literal notranslate"><span class="pre">ichor.core.atoms.Atoms</span></code> instance, which contains the molecular structure. Otherwise, you will not be able to write the file to disk (and will also not be a correct ORCA input file because ORCA needs an input structure).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">ichor.core.atoms</span> <span class="kn">import</span> <span class="n">Atom</span><span class="p">,</span> <span class="n">Atoms</span>
+<span class="kn">from</span> <span class="nn">ichor.core.common.functools</span> <span class="kn">import</span> <span class="n">classproperty</span>
+<span class="kn">from</span> <span class="nn">ichor.core.common.pairwise</span> <span class="kn">import</span> <span class="n">pairwise</span>
+
+<span class="c1"># from enum import Enum</span>
+<span class="kn">from</span> <span class="nn">ichor.core.files.file</span> <span class="kn">import</span> <span class="n">File</span><span class="p">,</span> <span class="n">FileContents</span><span class="p">,</span> <span class="n">ReadFile</span><span class="p">,</span> <span class="n">WriteFile</span>
+<span class="kn">from</span> <span class="nn">ichor.core.files.file_data</span> <span class="kn">import</span> <span class="n">HasAtoms</span>
+
+
+<span class="k">class</span> <span class="nc">OrcaInput</span><span class="p">(</span><span class="n">ReadFile</span><span class="p">,</span> <span class="n">WriteFile</span><span class="p">,</span> <span class="n">File</span><span class="p">,</span> <span class="n">HasAtoms</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Wraps around an ORCA input file that is used as input to ORCA.</span>
+
+<span class="sd">    :param path: A string or Path to the ORCA input file file. If a path is not give,</span>
+<span class="sd">        then there is no file to be read, so the user has to write the file contents. If</span>
+<span class="sd">        no contents/options are written by user, they are written as the default values in the</span>
+<span class="sd">        ``write`` method.</span>
+<span class="sd">    :param main_input: A list of strings which are commands beginning with !</span>
+<span class="sd">        charge: Optional[int] = None,</span>
+<span class="sd">        spin_multiplicity: Optional[int] = None,</span>
+<span class="sd">        atoms: Optional[Atoms] = None,</span>
+<span class="sd">        **input_blocks: Dict[str, Union[str, List[str]]]</span>
+<span class="sd">    :param charge: The charge of the system</span>
+<span class="sd">    :param spin_multiplicity: The spin multiplicity of the system</span>
+<span class="sd">    :param atoms: An Atoms instance that contains the molecular structure</span>
+<span class="sd">    :param input_blocks: A dictionary consisting of keys: The option,</span>
+<span class="sd">        and values: A list containing even number of elements. The option</span>
+<span class="sd">        is going to be written out with a %, followed by the specifications</span>
+<span class="sd">        that the user gives for the option</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        There is no checking of what the inputs are, so it is up to the user to make sure</span>
+<span class="sd">        that the inputs are correct.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        Gaussian uses a different b3lyp version (https://sites.google.com/site/orcainputlibrary/dft-calculations)</span>
+<span class="sd">        so use b3lyp/g (this is the Gaussian implementation) instead of b3lyp</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        https://sites.google.com/site/orcainputlibrary/home</span>
+<span class="sd">        https://www.cup.uni-muenchen.de/oc/zipse/teaching/computational-chemistry-2/topics/a-typical-orca-output-file/</span>
+<span class="sd">        https://www.orcasoftware.de/tutorials_orca/first_steps/input_output.html</span>
+<span class="sd">        https://www.afs.enea.it/software/orca/orca_manual_4_2_1.pdf (note this is for version 4, not 5)</span>
+<span class="sd">        version 5 manual, needs login:</span>
+<span class="sd">        available in https://orcaforum.kofo.mpg.de/app.php/dlext/?view=detail&amp;df_id=186</span>
+<span class="sd">        https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&amp;t=7470&amp;p=32102&amp;hilit=atomic+force#p32102</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">main_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">charge</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">spin_multiplicity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Atoms</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">input_blocks</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]],</span>
+    <span class="p">):</span>
+        <span class="n">File</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># the main input contains lines starting with !</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_input</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">main_input</span> <span class="ow">or</span> <span class="n">FileContents</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">charge</span> <span class="ow">or</span> <span class="n">FileContents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">spin_multiplicity</span> <span class="ow">or</span> <span class="n">FileContents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span> <span class="ow">or</span> <span class="n">FileContents</span>
+
+        <span class="c1"># any other input blocks specified by %</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_blocks</span> <span class="o">=</span> <span class="n">input_blocks</span> <span class="ow">or</span> <span class="n">FileContents</span>
+
+    <span class="nd">@classproperty</span>
+    <span class="k">def</span> <span class="nf">filetype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;.orcainput&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="c1"># assume the first lines start with !</span>
+            <span class="c1"># the next lines are optional commands with %</span>
+            <span class="c1"># and finally the inputs</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+            <span class="n">main_input</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># these are lines that contain things like method and basis set</span>
+            <span class="c1"># since these can be on multiple lines</span>
+            <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">line_splits</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">line_splits</span><span class="p">:</span>
+                    <span class="n">main_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+            <span class="n">input_blocks</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># while we are not at the geometries</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">one_option</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># now read in optional input with %</span>
+                <span class="k">while</span> <span class="s2">&quot;end&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                    <span class="n">one_option</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+                <span class="n">option_name</span><span class="p">,</span> <span class="o">*</span><span class="n">other_options</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">one_option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="n">input_blocks</span><span class="p">[</span><span class="n">option_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">other_options</span>
+                <span class="k">for</span> <span class="n">other_lines</span> <span class="ow">in</span> <span class="n">one_option</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">input_blocks</span><span class="p">[</span><span class="n">option_name</span><span class="p">]</span> <span class="o">+=</span> <span class="n">other_lines</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="n">charge</span><span class="p">,</span> <span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+                <span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atom</span><span class="p">(</span><span class="o">*</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_input</span> <span class="ow">or</span> <span class="n">main_input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_blocks</span> <span class="ow">or</span> <span class="n">input_blocks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="ow">or</span> <span class="n">charge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="ow">or</span> <span class="n">spin_multiplicity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="ow">or</span> <span class="n">atoms</span>
+
+    <span class="k">def</span> <span class="nf">_set_write_defaults_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set default values for attributes if bool(self.attribute) evaluates to False.</span>
+<span class="sd">        So if an attribute is still FileContents, an empty string, an empty list, etc.,</span>
+<span class="sd">        then default values will be used.&quot;&quot;&quot;</span>
+
+        <span class="c1"># aim for wfn file</span>
+        <span class="c1"># nousesym to not use symmetry</span>
+        <span class="c1"># normalprint for printing out to the outputfile</span>
+        <span class="c1"># engrad calculate energy and (analytical) gradient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_input</span> <span class="ow">or</span> <span class="p">[</span>
+            <span class="s2">&quot;b3lyp/g&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;6-31+g(d,p)&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;nousesym&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;aim&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;normalprint&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;engrad&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="c1"># have to have default values for input blocks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_blocks</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="ow">or</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="ow">or</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_check_values_before_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Basic checks done prior to writing file.</span>
+
+<span class="sd">        .. note:: Not everything written to file can be checked for, so</span>
+<span class="sd">        there is still the need for a user to check out what is being written.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;There are no atoms to write to orca input file.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">fmtstr</span> <span class="o">=</span> <span class="s2">&quot;12.8f&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_input</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;!</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_blocks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pairwise</span><span class="p">(</span><span class="n">vals</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;* xyz </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">x</span><span class="si">:{</span><span class="n">fmtstr</span><span class="si">}}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">y</span><span class="si">:{</span><span class="n">fmtstr</span><span class="si">}}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom</span><span class="o">.</span><span class="n">z</span><span class="si">:{</span><span class="n">fmtstr</span><span class="si">}}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
 </section>
 
 

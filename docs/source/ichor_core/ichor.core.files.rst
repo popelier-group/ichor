@@ -10,6 +10,7 @@ Subpackages
    ichor.core.files.aimall
    ichor.core.files.dl_poly
    ichor.core.files.gaussian
+   ichor.core.files.orca
    ichor.core.files.pandora
    ichor.core.files.xyz
 

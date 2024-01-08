@@ -76,6 +76,14 @@ ichor.hpc.modules.modules module
    :undoc-members:
    :show-inheritance:
 
+ichor.hpc.modules.orca module
+-----------------------------
+
+.. automodule:: ichor.hpc.modules.orca
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.hpc.modules.pandora module
 --------------------------------
 

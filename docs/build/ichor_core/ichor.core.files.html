@@ -121,6 +121,7 @@
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.files.aimall.html">ichor.core.files.aimall package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.files.dl_poly.html">ichor.core.files.dl_poly package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.files.gaussian.html">ichor.core.files.gaussian package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ichor.core.files.orca.html">ichor.core.files.orca package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.files.pandora.html">ichor.core.files.pandora package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.core.files.xyz.html">ichor.core.files.xyz package</a></li>
 </ul>
@@ -1149,6 +1150,16 @@ to be able to index it in a certain way</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.core.files.point_directory.PointDirectory.ints">
 <span class="sig-name descname"><span class="pre">ints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.INTs" title="ichor.core.files.aimall.ints.INTs"><span class="pre">INTs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.point_directory.PointDirectory.ints" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.point_directory.PointDirectory.orca_input">
+<span class="sig-name descname"><span class="pre">orca_input</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.orca.html#ichor.core.files.orca.orca_input.OrcaInput" title="ichor.core.files.orca.orca_input.OrcaInput"><span class="pre">OrcaInput</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.point_directory.PointDirectory.orca_input" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.point_directory.PointDirectory.orca_output">
+<span class="sig-name descname"><span class="pre">orca_output</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.orca.html#ichor.core.files.orca.orca_output.OrcaOutput" title="ichor.core.files.orca.orca_output.OrcaOutput"><span class="pre">OrcaOutput</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.point_directory.PointDirectory.orca_output" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2297,6 +2308,129 @@ with the int file does not exist. Then we cannot calculate multipoles.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaEngrad">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrcaEngrad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.OrcaEngrad" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a></p>
+<p>Reads file containing the gradient calculated by ORCA.</p>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://sites.google.com/site/orcainputlibrary/home">https://sites.google.com/site/orcainputlibrary/home</a>
+<a class="reference external" href="https://www.cup.uni-muenchen.de/oc/zipse/teaching/computational-chemistry-2/topics/a-typical-orca-output-file/">https://www.cup.uni-muenchen.de/oc/zipse/teaching/computational-chemistry-2/topics/a-typical-orca-output-file/</a>
+<a class="reference external" href="https://www.orcasoftware.de/tutorials_orca/first_steps/input_output.html">https://www.orcasoftware.de/tutorials_orca/first_steps/input_output.html</a>
+<a class="reference external" href="https://www.afs.enea.it/software/orca/orca_manual_4_2_1.pdf">https://www.afs.enea.it/software/orca/orca_manual_4_2_1.pdf</a> (note this is for version 4, not 5)
+version 5 manual, needs login:
+available in <a class="reference external" href="https://orcaforum.kofo.mpg.de/app.php/dlext/?view=detail&amp;df_id=186">https://orcaforum.kofo.mpg.de/app.php/dlext/?view=detail&amp;df_id=186</a>
+<a class="reference external" href="https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&amp;t=7470&amp;p=32102&amp;hilit=atomic+force#p32102">https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&amp;t=7470&amp;p=32102&amp;hilit=atomic+force#p32102</a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaEngrad.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.engrad'</span></em><a class="headerlink" href="#ichor.core.files.OrcaEngrad.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaEngrad.gradient">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.files.OrcaEngrad.gradient" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaInput">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrcaInput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_multiplicity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">input_blocks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.OrcaInput" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a>, <a class="reference internal" href="#ichor.core.files.file.File" title="ichor.core.files.file.File"><code class="xref py py-class docutils literal notranslate"><span class="pre">File</span></code></a>, <a class="reference internal" href="#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a></p>
+<p>Wraps around an ORCA input file that is used as input to ORCA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – A string or Path to the ORCA input file file. If a path is not give,
+then there is no file to be read, so the user has to write the file contents. If
+no contents/options are written by user, they are written as the default values in the
+<code class="docutils literal notranslate"><span class="pre">write</span></code> method.</p></li>
+<li><p><strong>main_input</strong> – A list of strings which are commands beginning with !
+charge: Optional[int] = None,
+spin_multiplicity: Optional[int] = None,
+atoms: Optional[Atoms] = None,
+<a href="#id1"><span class="problematic" id="id2">**</span></a>input_blocks: Dict[str, Union[str, List[str]]]</p></li>
+<li><p><strong>charge</strong> – The charge of the system</p></li>
+<li><p><strong>spin_multiplicity</strong> – The spin multiplicity of the system</p></li>
+<li><p><strong>atoms</strong> – An Atoms instance that contains the molecular structure</p></li>
+<li><p><strong>input_blocks</strong> – A dictionary consisting of keys: The option,
+and values: A list containing even number of elements. The option
+is going to be written out with a %, followed by the specifications
+that the user gives for the option</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is no checking of what the inputs are, so it is up to the user to make sure
+that the inputs are correct.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Gaussian uses a different b3lyp version (<a class="reference external" href="https://sites.google.com/site/orcainputlibrary/dft-calculations">https://sites.google.com/site/orcainputlibrary/dft-calculations</a>)
+so use b3lyp/g (this is the Gaussian implementation) instead of b3lyp</p>
+</div>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://sites.google.com/site/orcainputlibrary/home">https://sites.google.com/site/orcainputlibrary/home</a>
+<a class="reference external" href="https://www.cup.uni-muenchen.de/oc/zipse/teaching/computational-chemistry-2/topics/a-typical-orca-output-file/">https://www.cup.uni-muenchen.de/oc/zipse/teaching/computational-chemistry-2/topics/a-typical-orca-output-file/</a>
+<a class="reference external" href="https://www.orcasoftware.de/tutorials_orca/first_steps/input_output.html">https://www.orcasoftware.de/tutorials_orca/first_steps/input_output.html</a>
+<a class="reference external" href="https://www.afs.enea.it/software/orca/orca_manual_4_2_1.pdf">https://www.afs.enea.it/software/orca/orca_manual_4_2_1.pdf</a> (note this is for version 4, not 5)
+version 5 manual, needs login:
+available in <a class="reference external" href="https://orcaforum.kofo.mpg.de/app.php/dlext/?view=detail&amp;df_id=186">https://orcaforum.kofo.mpg.de/app.php/dlext/?view=detail&amp;df_id=186</a>
+<a class="reference external" href="https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&amp;t=7470&amp;p=32102&amp;hilit=atomic+force#p32102">https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&amp;t=7470&amp;p=32102&amp;hilit=atomic+force#p32102</a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaInput.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.orcainput'</span></em><a class="headerlink" href="#ichor.core.files.OrcaInput.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaOutput">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrcaOutput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.OrcaOutput" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<p>Wraps around a .gau/.log file that is the output of Gaussian.
+This file contains coordinates (in Angstroms),
+forces, as well as molecular multipole moments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Path object or string to the .gau or .log file that are Gaussian output files</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaOutput.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.orcaoutput'</span></em><a class="headerlink" href="#ichor.core.files.OrcaOutput.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaOutput.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_matrix_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.forces.AtomForce" title="ichor.core.common.types.forces.AtomForce"><span class="pre">AtomForce</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.OrcaOutput.properties" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the machine learning labels which are in this file.
+The atomic forces need to be rotated by a C matrix
+(each atom has its own C matrix) prior to machine learning.
+This method is primarily here to be used by
+<cite>PointDirectory</cite>/<cite>PointsDirectory</cite> classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>C_matrix_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – A dictionary of C matrices for each atom in the system.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of dictionaries. The inner dictionary
+has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Dict[str, <cite>AtomForce</cite>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.OrcaOutput.property_names">
+<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['total_energy']</span></em><a class="headerlink" href="#ichor.core.files.OrcaOutput.property_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="ichor.core.files.PandoraDirectory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PandoraDirectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.PandoraDirectory" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ichor.core.files.file_data.HasAtoms" title="ichor.core.files.file_data.HasAtoms"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasAtoms</span></code></a>, <a class="reference internal" href="#ichor.core.files.directory.AnnotatedDirectory" title="ichor.core.files.directory.AnnotatedDirectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedDirectory</span></code></a></p>
@@ -2425,6 +2559,16 @@ with the int file does not exist. Then we cannot calculate multipoles.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.core.files.PointDirectory.ints">
 <span class="sig-name descname"><span class="pre">ints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.INTs" title="ichor.core.files.aimall.ints.INTs"><span class="pre">INTs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.PointDirectory.ints" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.PointDirectory.orca_input">
+<span class="sig-name descname"><span class="pre">orca_input</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.orca.html#ichor.core.files.orca.orca_input.OrcaInput" title="ichor.core.files.orca.orca_input.OrcaInput"><span class="pre">OrcaInput</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.PointDirectory.orca_input" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.PointDirectory.orca_output">
+<span class="sig-name descname"><span class="pre">orca_output</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.orca.html#ichor.core.files.orca.orca_output.OrcaOutput" title="ichor.core.files.orca.orca_output.OrcaOutput"><span class="pre">OrcaOutput</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.PointDirectory.orca_output" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2988,6 +3132,29 @@ overwrites an existing directory for the given Path.</p></li>
 <li><p><strong>every</strong> – An integer value that indicates the nth step at
 which an xyz file should be written. Default is 1.
 If a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.Trajectory.to_multiple_parent_dirs">
+<span class="sig-name descname"><span class="pre">to_multiple_parent_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsplits_in_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">every</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.Trajectory.to_multiple_parent_dirs" title="Permalink to this definition"></a></dt>
+<dd><p>Splits a trajectory into multiple parent directories, each of which
+can contain multiple PointsDirectory-like directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system_name</strong> – name of system</p></li>
+<li><p><strong>root</strong> – the name of the parent directory. Note that an index
+will be added to this.</p></li>
+<li><p><strong>split_size</strong> – The split that inner PointsDirectory-like directory will contain</p></li>
+<li><p><strong>nsplits_in_root</strong> – The number of splits that are going to be in one root directory</p></li>
+<li><p><strong>every</strong> – An integer value that indicates the nth step at
+which an xyz file should be written, defaults to 1</p></li>
+<li><p><strong>center</strong> – whether or not to subtract centroid of geometry before writing
+out xyz. Useful if geometries are far away from the origin
+which can result in Gaussian failing to write outputs properly, defaults to False</p></li>
 </ul>
 </dd>
 </dl>

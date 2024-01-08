@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../_static/jquery.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -21,17 +21,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ichor.cli package" href="../ichor_cli/ichor.cli.html" />
-    <link rel="prev" title="ichor.hpc.submission_script package" href="ichor.hpc.submission_script.html" /> 
+    <link rel="prev" title="ichor.hpc.submission_script package" href="ichor.hpc.submission_script.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../index.html" class="icon icon-home">
             ichor
           </a>
@@ -65,6 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.useful_functions.get_machine">ichor.hpc.useful_functions.get_machine module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.useful_functions.get_python_environment">ichor.hpc.useful_functions.get_python_environment module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.useful_functions.submit_free_flow_python_on_compute">ichor.hpc.useful_functions.submit_free_flow_python_on_compute module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.hpc.useful_functions">Module contents</a></li>
 </ul>
 </li>
@@ -105,7 +106,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="ichor-hpc-useful-functions-package">
 <h1>ichor.hpc.useful_functions package<a class="headerlink" href="#ichor-hpc-useful-functions-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
@@ -180,6 +181,32 @@
 </dd></dl>
 
 </section>
+<section id="module-ichor.hpc.useful_functions.submit_free_flow_python_on_compute">
+<span id="ichor-hpc-useful-functions-submit-free-flow-python-on-compute-module"></span><h2>ichor.hpc.useful_functions.submit_free_flow_python_on_compute module<a class="headerlink" href="#module-ichor.hpc.useful_functions.submit_free_flow_python_on_compute" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.useful_functions.submit_free_flow_python_on_compute.compile_strings_to_python_code">
+<span class="sig-name descname"><span class="pre">compile_strings_to_python_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strings_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.hpc.useful_functions.submit_free_flow_python_on_compute.compile_strings_to_python_code" title="Permalink to this definition"></a></dt>
+<dd><p>Takes in a list of strings and concats them with a ; character
+Then these strings can be executed with python -c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>strings_list</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – _description_</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.useful_functions.submit_free_flow_python_on_compute.submit_free_flow_python_command_on_compute">
+<span class="sig-name descname"><span class="pre">submit_free_flow_python_command_on_compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.useful_functions.submit_free_flow_python_on_compute.submit_free_flow_python_command_on_compute" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
 <section id="module-ichor.hpc.useful_functions">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.hpc.useful_functions" title="Permalink to this heading"></a></h2>
 <dl class="py function">
@@ -221,7 +248,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -232,7 +259,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

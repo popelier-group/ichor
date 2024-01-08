@@ -342,6 +342,29 @@ If a value eg. 5 is given, then it will only write out a .xyz file for every 5th
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.xyz.trajectory.Trajectory.to_multiple_parent_dirs">
+<span class="sig-name descname"><span class="pre">to_multiple_parent_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsplits_in_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">every</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.xyz.trajectory.Trajectory.to_multiple_parent_dirs" title="Permalink to this definition"></a></dt>
+<dd><p>Splits a trajectory into multiple parent directories, each of which
+can contain multiple PointsDirectory-like directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system_name</strong> – name of system</p></li>
+<li><p><strong>root</strong> – the name of the parent directory. Note that an index
+will be added to this.</p></li>
+<li><p><strong>split_size</strong> – The split that inner PointsDirectory-like directory will contain</p></li>
+<li><p><strong>nsplits_in_root</strong> – The number of splits that are going to be in one root directory</p></li>
+<li><p><strong>every</strong> – An integer value that indicates the nth step at
+which an xyz file should be written, defaults to 1</p></li>
+<li><p><strong>center</strong> – whether or not to subtract centroid of geometry before writing
+out xyz. Useful if geometries are far away from the origin
+which can result in Gaussian failing to write outputs properly, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.xyz.trajectory.Trajectory.types">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">types</span></span><a class="headerlink" href="#ichor.core.files.xyz.trajectory.Trajectory.types" title="Permalink to this definition"></a></dt>
@@ -612,6 +635,29 @@ overwrites an existing directory for the given Path.</p></li>
 <li><p><strong>every</strong> – An integer value that indicates the nth step at
 which an xyz file should be written. Default is 1.
 If a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.xyz.Trajectory.to_multiple_parent_dirs">
+<span class="sig-name descname"><span class="pre">to_multiple_parent_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsplits_in_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">every</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.xyz.Trajectory.to_multiple_parent_dirs" title="Permalink to this definition"></a></dt>
+<dd><p>Splits a trajectory into multiple parent directories, each of which
+can contain multiple PointsDirectory-like directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system_name</strong> – name of system</p></li>
+<li><p><strong>root</strong> – the name of the parent directory. Note that an index
+will be added to this.</p></li>
+<li><p><strong>split_size</strong> – The split that inner PointsDirectory-like directory will contain</p></li>
+<li><p><strong>nsplits_in_root</strong> – The number of splits that are going to be in one root directory</p></li>
+<li><p><strong>every</strong> – An integer value that indicates the nth step at
+which an xyz file should be written, defaults to 1</p></li>
+<li><p><strong>center</strong> – whether or not to subtract centroid of geometry before writing
+out xyz. Useful if geometries are far away from the origin
+which can result in Gaussian failing to write outputs properly, defaults to False</p></li>
 </ul>
 </dd>
 </dl>
