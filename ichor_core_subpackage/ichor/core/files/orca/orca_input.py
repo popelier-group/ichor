@@ -73,7 +73,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
 
     @classproperty
     def filetype(self) -> str:
-        return ".orcain"
+        return ".orcainput"
 
     def _read_file(self):
 
@@ -147,6 +147,9 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
             "normalprint",
             "engrad",
         ]
+
+        # have to have default values for input blocks
+        self.input_blocks = {}
 
         self.charge = self.charge or 0
         self.spin_multiplicity = self.spin_multiplicity or 1

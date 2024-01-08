@@ -31,7 +31,7 @@ class OrcaCommand(SubmissionCommand):
         orca_output: Optional[Path] = None,
     ):
         self.orca_input = orca_input
-        self.orca_output = orca_output or orca_output.with_suffix(OrcaOutput.filetype)
+        self.orca_output = orca_output or orca_input.with_suffix(OrcaOutput.filetype)
 
     @classproperty
     def command(self) -> str:
