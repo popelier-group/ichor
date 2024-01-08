@@ -149,7 +149,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         ]
 
         # have to have default values for input blocks
-        self.input_blocks = {}
+        self.input_blocks = self.input_blocks or {}
 
         self.charge = self.charge or 0
         self.spin_multiplicity = self.spin_multiplicity or 1
