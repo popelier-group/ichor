@@ -11,6 +11,8 @@ def single_or_many_points_directories():
     if (
         "parent"
         in ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem.lower()
+        or "root"
+        in ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem.lower()
     ):
         return True
     return False
