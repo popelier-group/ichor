@@ -15,6 +15,9 @@ The namespace package `ichor` is divided into three parts, `ichor-core`, `ichor-
 
 Look inside the ``docs/build`` directory for documentation. This documentation will be available online once the code is open sourced. This is where you will find installation instructions, guides, and other useful materials.
 
+**The documentation can also be found online [here](https://studious-adventure-rr4kzlv.pages.github.io/)**. You will need to be logged in as a member of Popelier Group Organization to access it, note that this will change when the code is made public.
+
+
 ## Useful Links
 
 * Anaconda3 [link](https://www.anaconda.com/distribution/#download-section)
