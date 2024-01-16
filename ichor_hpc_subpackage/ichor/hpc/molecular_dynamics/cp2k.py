@@ -14,6 +14,7 @@ from ichor.hpc.submission_script import SubmissionScript
 datafile_location = {
     Machine.ffluxlab: Path("/home/modules/apps/cp2k/6.1.0/data"),
     Machine.csf3: Path("/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"),
+    Machine.csf4: Path("/opt/software/RI/apps/CP2K/6.1-iomkl-2020.02/data"),
     Machine.local: Path("$CP2K_HOME/data"),
 }
 
