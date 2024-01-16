@@ -171,6 +171,10 @@ cp2k_menu_items = [
         "Select number of cores",
         CP2KMenuFunctions.select_numer_of_cores,
     ),
+    FunctionItem(
+        "Submit CP2K Job to Compute",
+        CP2KMenuFunctions.submit_cp2k_to_compute,
+    ),
 ]
 
 add_items_to_menu(cp2k_menu, cp2k_menu_items)
