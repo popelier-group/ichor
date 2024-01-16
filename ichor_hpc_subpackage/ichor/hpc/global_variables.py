@@ -180,6 +180,12 @@ ORCA_COMMANDS = {
     Machine.local: "orca",
 }
 
+CP2K_COMMANDS = {
+    Machine.csf3: "cp2k.ssmp",
+    Machine.csf4: "cp2k.popt",
+    Machine.local: "cp2k",
+}
+
 # set up current python environment
 CURRENT_PYTHON_ENVIRONMENT_PATH = get_current_python_environment_path()
 

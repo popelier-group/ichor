@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.functools import classproperty
 from ichor.hpc.modules import CP2KModules
 from ichor.hpc.modules.modules import Modules
@@ -43,10 +45,9 @@ class CP2KCommand(SubmissionCommand):
         """Returns the command to be used to run CP2K. The command depends on the
         number of cores."""
 
-        if self.ncores == 1:
-            return "cp2k.sopt"
-        else:
-            return "cp2k.ssmp"
+        return ichor.hpc.global_variables.CP2K_COMMANDS[
+            ichor.hpc.global_variables.MACHINE
+        ]
 
     def repr(self, variables: List[str]) -> str:
         """
