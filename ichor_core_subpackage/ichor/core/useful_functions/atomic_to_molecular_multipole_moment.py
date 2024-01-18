@@ -1,6 +1,6 @@
 import numpy as np
 from ichor.core.atoms import Atoms
-from ichor.core.common.constants import coulombbohr_to_debye
+from ichor.core.common.constants import coulombbhrsquared_to_debye, coulombbohr_to_debye
 from ichor.core.files import INTs
 from ichor.core.multipoles import (
     atomic_contribution_to_molecular_dipole,
@@ -82,7 +82,7 @@ def recover_molecular_quadrupole(
     from the AIMAll atomic multipole moments.
 
     .. note::
-        Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.
+        Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.
 
     :param atoms: an Atoms instance containing the system geometry
     :param ints_dir: an INTs file instance, which wraps around an AIMAll output directory
@@ -126,7 +126,7 @@ def recover_molecular_quadrupole(
         molecular_quadrupole += atomic_contibution
 
     if convert_to_debye:
-        molecular_quadrupole *= coulombbohr_to_debye
+        molecular_quadrupole *= coulombbhrsquared_to_debye
 
     if convert_to_cartesian:
         molecular_quadrupole = quadrupole_spherical_to_cartesian(*molecular_quadrupole)

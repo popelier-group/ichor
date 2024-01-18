@@ -63,7 +63,8 @@ def quadrupole_rotate_cartesian(q: np.ndarray, C: np.ndarray) -> np.ndarray:
 # Large Clusters: A QCT Analysis
 
 # note that the units for distances are in Bohr
-# Gaussian calculates multipole moments in Debye, while atomic units are using in AIMAll (Coulomb Bohr)
+# Gaussian calculates multipole moments in Debye, while atomic units are using in AIMAll
+# Units for quadrupole are Coulomb Bohr**2
 # TODO: Gaussian defines the x,y,z axes a different way, therefore the values are switched around for dipole moment.
 # TODO: Figure out how axes are swapped and what changes that has on quadrupole, octupole, hexadecapole values
 
