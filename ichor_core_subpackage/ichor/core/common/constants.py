@@ -838,6 +838,9 @@ multipole_names: List[str] = (
     + spherical_hexadecapole_labels
 )
 
+# taken from Anthony Stone Book, The Theory of Intermolecular Forces
+coulombbohr_to_debye = 2.5417464
+
 # ha_to_kj_mol = 2625.5
 ha_to_kj_mol: float = (
     2625.4996394799  # Taken from https://en.wikipedia.org/wiki/Hartree

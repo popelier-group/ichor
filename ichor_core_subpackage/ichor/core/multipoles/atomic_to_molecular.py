@@ -1,0 +1,149 @@
+import numpy as np
+from ichor.core.atoms import Atoms
+from ichor.core.common.constants import coulombbohr_to_debye
+from ichor.core.files import INTs
+
+# equations come from
+# https://doi.org/10.1021/jp067922u
+# The effects of hydrogen-bonding environment on the polarization and electronic properties of water molecules
+# https://doi.org/10.1080/15533170701854189
+# The Asymptotic Behavior of the Dipole and Quadrupole Moment of a Single Water Molecule from Gas Phase to
+# Large Clusters: A QCT Analysis
+
+# note that the units for distances are in Bohr
+# Gaussian calculates multipole moments in Debye, while atomic units are using in AIMAll (Coulomb Bohr)
+# TODO: Gaussian defines the x,y,z axes a different way, therefore the values are switched around for dipole moment.
+# TODO: Figure out how axes are swapped and what changes that has on quadrupole, octupole, hexadecapole values
+
+# You should be able to recover the Gaussain molecular values by
+# doing the necessary conversions of AIMAll values and summing across all atoms
+# Note that the axes that Gaussian uses are different though.
+# Importantly, there is NO NEED to rotate multipole moments in ALF frame if directly comparing AIMAll and Gaussian
+# however, if making predictions with FFLUX, you WILL need to
+# convert the local multipole moments to the global frame before summing up the components
+# across atoms/molecules. Otherwise you will get the wrong answer.
+
+# note that AIMAll multipole moments are in Spherical coordinates but Gaussian ones are in Cartesian
+# for dipole moment, the number of values for spherical/Cartesian is the same (3)
+# for higher multipole moments, there are less spherical ones than Cartesian
+
+
+def q10_prime(q10: float, r_z: float, q00: float):
+    """Calculates math:Q'_{10}, representing the total ATOMIC contribution for the molecular
+    dipole moment.
+
+    .. note::
+        This is the contribution of one atom, which needs to be summed over to get the molecular value.
+        Also, make sure the units for multipole moments / distances are correct.
+
+    :param q_10: AIMAll Q_10 value
+    :param r_z: Distance of atom from the origin in the z-direction. In Bohr.
+    :param q_omega: The charge of the atom (q00). Note that this AIMAll gives q00 without adding the nuclear charge.
+        When obtaining q00 through ichor, the nuclear charge is always added to the q00 value.
+    """
+
+    return q10 + r_z * q00
+
+
+def q11c_prime(q11c: float, r_x: float, q00: float):
+    """Calculates math:Q'_{11c}, representing the total ATOMIC contribution for the molecular
+    dipole moment.
+
+    .. note::
+        This is the contribution of one atom, which needs to be summed over to get the molecular value.
+        Also, make sure the units for multipole moments / distances are correct.
+
+    :param q_10: AIMAll Q_11c value
+    :param r_x: Distance of atom from the origin in the x-direction. In Bohr.
+    :param q_omega: The charge of the atom (q00). Note that this AIMAll gives q00 without adding the nuclear charge.
+        When obtaining q00 through ichor, the nuclear charge is always added to the q00 value.
+    """
+
+    return q11c + r_x * q00
+
+
+def q11s_prime(q11s: float, r_y: float, q00: float):
+    """Calculates math:Q'_{11s}, representing the total ATOMIC contribution for the molecular
+    dipole moment.
+
+    .. note::
+        This is the contribution of one atom, which needs to be summed over to get the molecular value.
+        Also, make sure the units for multipole moments / distances are correct.
+
+    :param q_10: AIMAll Q_11c value
+    :param r_y: Distance of atom from the origin in the y-direction. In Bohr.
+    :param q_omega: The charge of the atom (q00). Note that this AIMAll gives q00 without adding the nuclear charge.
+        When obtaining q00 through ichor, the nuclear charge is always added to the q00 value.
+    """
+
+    return q11s + r_y * q00
+
+
+def atomic_contribution_to_molecular_dipole(
+    q00, q10: float, q11c: float, q11s: float, atomic_coordinates: np.ndarray
+):
+    """Calculates the atomic contribution to the molecular dipole moment.
+
+    .. note::
+        This is contribution of ONE atom.
+
+    :param q10: AIMAll q10 value
+    :param q11c: AIMAll q11c value
+    :param q11s: AIMAll q11s value
+    :param atomic_coordinates: 1D numpy array containing the x,y,z values (in bohr)
+    """
+
+    q10_pr = q10_prime(q10, atomic_coordinates[2], q00)
+    q11c_pr = q11c_prime(q11c, atomic_coordinates[0], q00)
+    q11s_pr = q11s_prime(q11s, atomic_coordinates[1], q00)
+
+    return np.array([q10_pr, q11c_pr, q11s_pr])
+
+
+def recover_molecular_dipole_from_atomic(
+    atoms: Atoms, ints_dir: INTs, atoms_in_angstroms=True, convert_to_debye=True
+):
+    """
+    Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
+    and calculates the molecular dipole moment of the system (in spherical coordinates)
+    from the AIMAll atomic multipole moments.
+
+    .. note::
+        Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.
+
+    :param atoms: an Atoms instance containing the system geometry
+    :param ints_dir: an INTs file instance, which wraps around an AIMAll output directory
+    :param atoms_in_angstroms: Whether the Atom instance coordinates are in Bohr or Angstroms
+        , defaults to True (meaning coordinates are in Angstroms)
+    :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
+        This converts from atomic units to Debye.
+    :returns: A numpy array containing the molecular dipole moment. Note that it is in spherical coordinates.
+    """
+
+    # make sure we are in Bohr
+    if atoms_in_angstroms:
+        atoms = atoms.to_bohr()
+
+    molecular_dipole = np.array(3)
+
+    for atom in atoms:
+
+        # get necessary data for calculations
+        atom_coords = atom.coordinates
+        global_multipoles = ints_dir[atom.name].global_multipole_moments
+
+        # get the values for a particular atom
+        q00 = global_multipoles["q00"]
+        q10 = global_multipoles["q10"]
+        q11c = global_multipoles["q11c"]
+        q11s = global_multipoles["q11s"]
+
+        atomic_contibution = atomic_contribution_to_molecular_dipole(
+            q00, q10, q11c, q11s, atom_coords
+        )
+        molecular_dipole += atomic_contibution
+
+    if convert_to_debye:
+        molecular_dipole *= coulombbohr_to_debye
+
+    return molecular_dipole
