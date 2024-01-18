@@ -139,9 +139,9 @@ def q21c_prime(
 
     return (
         q21c
-        + (np.sqrt(3) * r_z * q11c)
-        + (np.sqrt(3) * r_x * q10)
-        + (np.sqrt(3) * r_x * r_z * q00)
+        + (constants.rt3 * r_z * q11c)
+        + (constants.rt3 * r_x * q10)
+        + (constants.rt3 * r_x * r_z * q00)
     )
 
 
@@ -166,9 +166,9 @@ def q21s_prime(
 
     return (
         q21s
-        + (np.sqrt(3) * r_z * q11s)
-        + (np.sqrt(3) * r_y * q10)
-        + (np.sqrt(3) * r_y * r_z * q00)
+        + (constants.rt3 * r_z * q11s)
+        + (constants.rt3 * r_y * q10)
+        + (constants.rt3 * r_y * r_z * q00)
     )
 
 
@@ -193,9 +193,9 @@ def q22c_prime(
 
     return (
         q22c
-        + (np.sqrt(3) * r_x * q11c)
-        - (np.sqrt(3) * r_y * q11s)
-        + ((np.sqrt(3) / 2.0) * (r_x**2 * r_y**2) * q00)
+        + (constants.rt3 * r_x * q11c)
+        - (constants.rt3 * r_y * q11s)
+        + ((constants.rt3 / 2.0) * (r_x**2 * r_y**2) * q00)
     )
 
 
@@ -220,9 +220,9 @@ def q22s_prime(
 
     return (
         q22s
-        + (np.sqrt(3) * r_y * q11c)
-        + (np.sqrt(3) * r_x * q11s)
-        + (np.sqrt(3) * r_x * r_y * q00)
+        + (constants.rt3 * r_y * q11c)
+        + (constants.rt3 * r_x * q11s)
+        + (constants.rt3 * r_x * r_y * q00)
     )
 
 
