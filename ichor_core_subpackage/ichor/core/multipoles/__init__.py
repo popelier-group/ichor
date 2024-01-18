@@ -1,5 +1,5 @@
-from ichor.core.multipoles.atomic_to_molecular import recover_molecular_dipole
 from ichor.core.multipoles.dipole import (
+    atomic_contribution_to_molecular_dipole,
     dipole_cartesian_to_spherical,
     dipole_rotate_cartesian,
     dipole_spherical_to_cartesian,
@@ -58,5 +58,5 @@ __all__ = [
     "quadrupole_spherical_to_cartesian",
     "rotate_quadrupole",
     "unpack_cartesian_quadrupole",
-    "recover_molecular_dipole",
+    "atomic_contribution_to_molecular_dipole",
 ]
