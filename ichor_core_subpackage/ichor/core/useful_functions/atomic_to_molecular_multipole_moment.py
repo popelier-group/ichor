@@ -29,7 +29,7 @@ def recover_molecular_dipole(
     if atoms_in_angstroms:
         atoms = atoms.to_bohr()
 
-    molecular_dipole = np.array(3)
+    molecular_dipole = np.zeros(3)
 
     for atom in atoms:
 
