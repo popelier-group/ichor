@@ -74,7 +74,7 @@ def recover_molecular_quadrupole(
     ints_dir: INTs,
     atoms_in_angstroms=True,
     convert_to_debye=True,
-    convert_to_cartesian=False,
+    convert_to_cartesian=True,
 ):
     """
     Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
@@ -90,9 +90,9 @@ def recover_molecular_quadrupole(
         , defaults to True (meaning coordinates are in Angstroms)
     :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
         This converts from atomic units to Debye.
-    :param convert_to_cartesian: Whether or not to convert the recovered molecular quadrupole to Cartesian,
-        defaults to False. Note that Gaussian calculates molecular multipole moments in Cartesian coordinates,
-        so set to True in case you are comparing against Gaussian.
+    :param convert_to_cartesian: Whether or not to convert the recovered molecular quadrupole from spherical
+        to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
+        in Cartesian coordinates, so set to True in case you are comparing against Gaussian.
     :returns: A numpy array containing the molecular quadrupole moment.
     """
 
