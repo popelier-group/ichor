@@ -6,7 +6,7 @@ import numpy as np
 def rotate_dipole(
     q10: float, q11c: float, q11s: float, C: np.ndarray
 ) -> Tuple[float, float, float]:
-    """Rotates dipole moment from global cartesian to local cartesian.
+    """Rotates dipole moment from global spherical to local spherical.
 
     :param q10: q10 component
     :param q11c: q11c component
