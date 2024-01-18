@@ -24,6 +24,7 @@ from ichor.core.multipoles.octupole import (
     unpack_cartesian_octupole,
 )
 from ichor.core.multipoles.quadrupole import (
+    atomic_contribution_to_molecular_quadrupole,
     pack_cartesian_quadrupole,
     quadrupole_cartesian_to_spherical,
     quadrupole_rotate_cartesian,
@@ -59,4 +60,5 @@ __all__ = [
     "rotate_quadrupole",
     "unpack_cartesian_quadrupole",
     "atomic_contribution_to_molecular_dipole",
+    "atomic_contribution_to_molecular_quadrupole",
 ]
