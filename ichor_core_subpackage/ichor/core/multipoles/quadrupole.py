@@ -195,7 +195,7 @@ def q22c_prime(
         q22c
         + (constants.rt3 * r_x * q11c)
         - (constants.rt3 * r_y * q11s)
-        + ((constants.rt3 / 2.0) * (r_x**2 * r_y**2) * q00)
+        + ((constants.rt3 / 2.0) * (r_x**2 - r_y**2) * q00)
     )
 
 
