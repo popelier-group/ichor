@@ -19,7 +19,7 @@ defusedxml==0.7.1
 docutils==0.18.1
 executing==1.2.0
 fastjsonschema==2.17.1
-fonttools==4.41.1
+fonttools==4.43.0
 # assumes that ichor packages are already installed
 # -e git+https://github.com/popelier-group/ICHOR.git@0270b59faff550405467e4771162ab0a9b0430e2#egg=ichor_cli&subdirectory=ichor_cli_subpackage
 # -e git+https://github.com/popelier-group/ICHOR.git@0270b59faff550405467e4771162ab0a9b0430e2#egg=ichor_core&subdirectory=ichor_core_subpackage
