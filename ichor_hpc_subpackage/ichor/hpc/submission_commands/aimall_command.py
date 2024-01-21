@@ -323,7 +323,6 @@ class AIMAllCommand(SubmissionCommand):
             f"-verifyw={self.verifyw.value}",
             f"-saw={str(self.saw).lower()}",
             f"-autonnacps={str(self.autonnacps).lower()}",
-            f"-iaswrite={str(self.iaswrite)}",
         ]
 
     def repr(self, variables: List[str]) -> str:
