@@ -410,13 +410,17 @@ class PointsDirectory(ListOfAtoms, Directory):
         else:
             json_db_path = Path(json_db_path).with_suffix(".json")
 
-        with open(json_db_path, "a") as json_db:
+        total_data_list = []
+
+        with open(json_db_path, "w") as json_db:
 
             for point in self:
 
-                data = get_data_for_point(point, print_missing_data=print_missing_data)
+                total_data_list.append(
+                    get_data_for_point(point, print_missing_data=print_missing_data)
+                )
 
-            json.dump(data, json_db, indent=indent, separators=separators)
+            json.dump(total_data_list, json_db, indent=indent, separators=separators)
 
     def features_with_properties_to_csv(
         self,
