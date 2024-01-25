@@ -18,6 +18,7 @@ from ichor.core.common.constants import (
     spherical_quadrupole_labels,
 )
 from ichor.core.common.str import get_characters
+from ichor.core.database.sql.add_to_database import AtomNames, Dataset, Points
 from ichor.core.models.gaussian_energy_derivative_wrt_features import (
     convert_to_feature_forces,
     form_b_matrix,
@@ -28,7 +29,6 @@ from ichor.core.multipoles import (
     rotate_octupole,
     rotate_quadrupole,
 )
-from ichor.core.sql.add_to_database import AtomNames, Dataset, Points
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session

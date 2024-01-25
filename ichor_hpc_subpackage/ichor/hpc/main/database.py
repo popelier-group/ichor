@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import List
 
 from ichor.core.atoms import ALF
+from ichor.core.database.sql.query_database import get_alf_from_first_db_geometry
 from ichor.core.files import PointsDirectory
-from ichor.core.sql.query_database import get_alf_from_first_db_geometry
 from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
     submit_free_flow_python_command_on_compute,
@@ -137,7 +137,7 @@ def submit_make_csvs_from_database(
     # make the python command that will be written in the submit script
     # it will get executed as `python -c python_code_to_execute...`
     text_list.append(
-        "from ichor.core.sql.query_database import write_processed_data_for_atoms_parallel"
+        "from ichor.core.database.sql.query_database import write_processed_data_for_atoms_parallel"
     )
     text_list.append("from pathlib import Path")
     text_list.append("from ichor.core.atoms import ALF")

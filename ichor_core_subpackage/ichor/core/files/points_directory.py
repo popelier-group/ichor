@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Union
 
@@ -10,17 +11,18 @@ from ichor.core.calculators.features.alf_features_calculator import (
 )
 from ichor.core.common import constants
 from ichor.core.common.io import mkdir
-from ichor.core.files import GJF
-from ichor.core.files.directory import Directory
-from ichor.core.files.file_data import PointsDirectoryProperties
-from ichor.core.files.point_directory import PointDirectory
-from ichor.core.files.xyz import Trajectory, XYZ
-from ichor.core.sql import (
+from ichor.core.database.json import get_data_for_point
+from ichor.core.database.sql import (
     add_atom_names_to_database,
     add_point_to_database,
     create_database,
     create_database_session,
 )
+from ichor.core.files import GJF
+from ichor.core.files.directory import Directory
+from ichor.core.files.file_data import PointsDirectoryProperties
+from ichor.core.files.point_directory import PointDirectory
+from ichor.core.files.xyz import Trajectory, XYZ
 
 
 class PointsDirectory(ListOfAtoms, Directory):
@@ -386,6 +388,40 @@ class PointsDirectory(ListOfAtoms, Directory):
                 )
 
         return db_path
+
+    def write_json_database(
+        self,
+        json_db_path: Union[str, Path] = None,
+        print_missing_data=False,
+        indent=None,
+        separators=(",", ":"),
+    ) -> Path:
+        """
+        Write out important information from a PointsDirectory instance to a json file.
+
+        :param json_db_path: database to write to
+        :param print_missing_data: Whether to print out any missing data from each PointDirectory contained
+            in self, defaults to False
+        :return: The path to the written json file
+        """
+
+        if not json_db_path:
+            json_db_path = Path(f"{self.path.name}.json")
+        else:
+            json_db_path = Path(json_db_path).with_suffix(".json")
+
+        # if json file exists, do not make a database
+        if json_db_path.exists():
+            print("JSON Database already exists. Change name of database.")
+            return
+
+        with open(json_db_path, "a") as json_db:
+
+            for point in self:
+
+                data = get_data_for_point(point, print_missing_data=print_missing_data)
+
+            json.dump(data, json_db, indent=indent, separators=separators)
 
     def features_with_properties_to_csv(
         self,

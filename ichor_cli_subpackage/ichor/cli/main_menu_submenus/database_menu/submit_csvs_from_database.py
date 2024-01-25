@@ -16,7 +16,7 @@ from ichor.cli.useful_functions import (
     user_input_path,
 )
 
-from ichor.core.sql.query_database import (
+from ichor.core.database.sql.query_database import (
     get_alf_from_first_db_geometry,
     write_processed_data_for_atoms_parallel,
 )
