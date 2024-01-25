@@ -9,7 +9,11 @@ from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
     submit_free_flow_python_command_on_compute,
 )
 
-AVAILABLE_DATABASE_FORMATS = {"sqlite": "write_to_sqlite3_database"}
+# formats from PointsDirectory
+AVAILABLE_DATABASE_FORMATS = {
+    "sqlite": "write_to_sqlite3_database",
+    "json": "write_json_database",
+}
 
 
 def submit_make_database(

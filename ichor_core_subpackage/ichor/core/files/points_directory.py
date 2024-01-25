@@ -410,11 +410,6 @@ class PointsDirectory(ListOfAtoms, Directory):
         else:
             json_db_path = Path(json_db_path).with_suffix(".json")
 
-        # if json file exists, do not make a database
-        if json_db_path.exists():
-            print("JSON Database already exists. Change name of database.")
-            return
-
         with open(json_db_path, "a") as json_db:
 
             for point in self:
