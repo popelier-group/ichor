@@ -290,7 +290,7 @@ def write_processed_one_atom_data_to_csv(
 
     :param full_df: DataFrame object extracted from SQLite database. This object contains information for
         all points (and all atoms in every point)
-    :param point_ids: A list of integers represending the `id` column of the points table of the SQLite database.
+    :param point_ids: A list of integers representing the `id` column of the points table of the SQLite database.
     :param atom_name: The atom for which features, local multipole moments,
         as well as local forces are going to be calculated for every point in the dataset
     :param alf: A list of ALF instance to be used when calculating features
@@ -515,7 +515,8 @@ def write_processed_one_atom_data_to_csv(
                     }
                 )
 
-    alf_for_current_atom = alf[central_atom_index]
+    # add 1 because model files start with atom index 1
+    alf_for_current_atom = [i + 1 for i in alf[central_atom_index]]
     alf_str = "alf_" + "_".join(list(map(str, alf_for_current_atom)))
 
     # write the total dict containing information for all points to a DataFrame and save
