@@ -5,7 +5,6 @@ from ichor.hpc.modules.dlpoly import DlpolyModules
 from ichor.hpc.modules.ferebus import FerebusModules
 from ichor.hpc.modules.gaussian import GaussianModules
 from ichor.hpc.modules.internet import InternetModules
-from ichor.hpc.modules.module_functions import initialise_modules, load_module, module
 from ichor.hpc.modules.modules import Modules
 from ichor.hpc.modules.orca import OrcaModules
 from ichor.hpc.modules.pandora import MorfiModules, PandoraModules
@@ -25,8 +24,5 @@ __all__ = [
     "PythonModules",
     "TycheModules",
     "OrcaModules",
-    "load_module",
-    "initialise_modules",
-    "module",
     "Modules",
 ]
