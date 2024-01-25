@@ -24,11 +24,11 @@ class Machine(Enum):
     """Enum which is used to define any machines that ICHOR is running on.
     This needs to be done because commands and settings change between different machines."""
 
-    # Machine Name = Machine Address, Can Submit on Compute, DropCompute available
-    csf3 = "csf3.itservices.manchester.ac.uk", False, True
-    csf4 = "csf4.itservices.manchester.ac.uk", False, True
-    ffluxlab = "ffluxlab.mib.manchester.ac.uk", True, False
-    local = "local", False, False
+    # Machine Name = Machine Address, Can Submit on Compute
+    csf3 = "csf3.itservices.manchester.ac.uk", False
+    csf4 = "csf4.itservices.manchester.ac.uk", False
+    ffluxlab = "ffluxlab.mib.manchester.ac.uk", True
+    local = "local", False
 
     def __init__(
         self,
