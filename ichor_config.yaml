@@ -20,6 +20,7 @@ csf3:
     cp2k:
       executable_path: cp2k.ssmp
       modules: ["apps/binapps/cp2k/6.1.0"]
+      data_path: "/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"
 
     dlpoly:
       modules: ["compilers/intel/18.0.3"]
@@ -65,6 +66,7 @@ csf4:
     cp2k:
       executable_path: cp2k.popt
       modules: [cp2k/6.1-iomkl-2020.02]
+      data_path: ["/opt/software/RI/apps/CP2K/6.1-iomkl-2020.02/data"]
 
     dlpoly:
       modules: ["iomkl/2020.02"]
@@ -107,6 +109,7 @@ ffluxlab:
 
     cp2k:
       modules: ["apps/cp2k/6.1.0"]
+      data_path: ["/home/modules/apps/cp2k/6.1.0/data"]
 
     dlpoly:
       modules: ["mpi/intel/18.0.3"]
@@ -145,6 +148,7 @@ _default:
     cp2k:
       executable_path: cp2k.ssmp
       modules: ["apps/binapps/cp2k/6.1.0"]
+      data_path: "/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"
 
     dlpoly:
       modules: ["compilers/intel/18.0.3"]

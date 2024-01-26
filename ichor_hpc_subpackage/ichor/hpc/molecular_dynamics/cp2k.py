@@ -7,16 +7,8 @@ from ichor.core.common.io import mkdir
 from ichor.core.files import GJF, XYZ
 from ichor.core.molecular_dynamics.cp2k import write_cp2k_input
 from ichor.hpc.batch_system import JobID
-from ichor.hpc.machine import Machine
 from ichor.hpc.submission_commands import CP2KCommand
 from ichor.hpc.submission_script import SubmissionScript
-
-datafile_location = {
-    Machine.ffluxlab: Path("/home/modules/apps/cp2k/6.1.0/data"),
-    Machine.csf3: Path("/opt/apps/apps/intel-17.0/cp2k/6.1.0/data"),
-    Machine.csf4: Path("/opt/software/RI/apps/CP2K/6.1-iomkl-2020.02/data"),
-    Machine.local: Path("$CP2K_HOME/data"),
-}
 
 
 def submit_cp2k(
@@ -65,7 +57,9 @@ def submit_cp2k(
         atoms,
         temperature,
         nsteps,
-        datafile_location[ichor.hpc.global_variables.MACHINE],
+        ichor.hpc.global_variables[ichor.hpc.global_variables.MACHINE]["software"][
+            "cp2k"
+        ]["data_path"],
         system_name,
         method,
         basis_set,
