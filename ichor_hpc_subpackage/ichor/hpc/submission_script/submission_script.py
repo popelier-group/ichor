@@ -212,13 +212,13 @@ class SubmissionScript:
     def modules(self) -> List[str]:
         """Returns a list of modules that need to be loaded before a job can be ran."""
 
-        modules = []
+        all_modules = []
         for command in self.grouped_commands:
             # modules depend on which machine (CSF/FFLUXLAB) we are currently on
             # also some commands might not need to load in modules
             if command.modules:
-                modules += command.modules[ichor.hpc.global_variables.MACHINE]
-        return list(set(modules))
+                all_modules += command.modules
+        return list(set(all_modules))
 
     @property
     def bash_date(self) -> str:
