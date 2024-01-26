@@ -9,7 +9,6 @@ from ichor.core.common.types import FileTree, FileType
 from ichor.hpc.batch_system import init_batch_system
 from ichor.hpc.batch_system.parallel_environment import ParallelEnvironment
 from ichor.hpc.log import setup_logger
-from ichor.hpc.machine import Machine
 from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
 
@@ -201,24 +200,24 @@ SCRIPT_NAMES = ScriptNames(
 
 # TODO: remove these once they are implemeted in the config
 # set up Gaussian commands
-GAUSSIAN_COMMANDS = {
-    Machine.csf3: "$g09root/g09/g09",
-    Machine.csf4: "$g16root/g16/g16",
-    Machine.ffluxlab: "g09",
-    Machine.local: "g09",
-}
+# GAUSSIAN_COMMANDS = {
+#     Machine.csf3: "$g09root/g09/g09",
+#     Machine.csf4: "$g16root/g16/g16",
+#     Machine.ffluxlab: "g09",
+#     Machine.local: "g09",
+# }
 
-ORCA_COMMANDS = {
-    Machine.csf3: "$ORCA_HOME/orca",
-    Machine.csf4: "orca",
-    Machine.local: "orca",
-}
+# ORCA_COMMANDS = {
+#     Machine.csf3: "$ORCA_HOME/orca",
+#     Machine.csf4: "orca",
+#     Machine.local: "orca",
+# }
 
-CP2K_COMMANDS = {
-    Machine.csf3: "cp2k.ssmp",
-    Machine.csf4: "cp2k.popt",
-    Machine.local: "cp2k",
-}
+# CP2K_COMMANDS = {
+#     Machine.csf3: "cp2k.ssmp",
+#     Machine.csf4: "cp2k.popt",
+#     Machine.local: "cp2k",
+# }
 
 # set up current python environment
 CURRENT_PYTHON_ENVIRONMENT_PATH = get_current_python_environment_path()
