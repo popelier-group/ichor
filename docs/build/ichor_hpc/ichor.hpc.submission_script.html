@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../_static/jquery.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -21,17 +21,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ichor.hpc.useful_functions package" href="ichor.hpc.useful_functions.html" />
-    <link rel="prev" title="ichor.hpc.submission_commands package" href="ichor.hpc.submission_commands.html" /> 
+    <link rel="prev" title="ichor.hpc.submission_commands package" href="ichor.hpc.submission_commands.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../index.html" class="icon icon-home">
             ichor
           </a>
@@ -57,7 +57,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.batch_system.html">ichor.hpc.batch_system package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.log.html">ichor.hpc.log package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.main.html">ichor.hpc.main package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.modules.html">ichor.hpc.modules package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.molecular_dynamics.html">ichor.hpc.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_commands.html">ichor.hpc.submission_commands package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.hpc.submission_script package</a><ul>
@@ -73,7 +72,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.global_variables">ichor.hpc.global_variables module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.machine">ichor.hpc.machine module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.submission_command">ichor.hpc.submission_command module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.uid">ichor.hpc.uid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc">Module contents</a></li>
@@ -106,7 +104,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="ichor-hpc-submission-script-package">
 <h1>ichor.hpc.submission_script package<a class="headerlink" href="#ichor-hpc-submission-script-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
@@ -141,7 +139,7 @@ This is usually a set of files which are the input files and the output files to
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.hpc.submission_script.command_group.CommandGroup.modules">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.hpc.modules.html#ichor.hpc.modules.modules.Modules" title="ichor.hpc.modules.modules.Modules"><span class="pre">Modules</span></a></em><a class="headerlink" href="#ichor.hpc.submission_script.command_group.CommandGroup.modules" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#ichor.hpc.submission_script.command_group.CommandGroup.modules" title="Permalink to this definition"></a></dt>
 <dd><p>Retruns a string containing any modules that need to be loaded in order for a program to run</p>
 </dd></dl>
 
@@ -174,8 +172,8 @@ in the form of a job array so they look like ${arr1[$SGE_TASK_ID-1]}</p>
 <dt class="sig sig-object py" id="ichor.hpc.submission_script.script_names.ScriptNames">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScriptNames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FileStructure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.submission_script.script_names.ScriptNames" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-<p>A helper class which retruns the full path of a particular script that is used to submit job files
-for programs like Guassian and AIMALL. All the script files are stored into a directory
+<p>A helper class which returns the full path of a particular script that is used to submit job files
+for programs like Gaussian and AIMAll. All the script files are stored into a directory
 ichor.hpc.global_variables.FILE_STRUCTURE[“scripts”].
 These scripts are submitted to compute nodes on CSF3/FFLUXLAB which initiates a job.</p>
 <dl class="py property">
@@ -695,7 +693,7 @@ WATER0002.gjf,WATER0002.gau
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -706,7 +704,7 @@ WATER0002.gjf,WATER0002.gau
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

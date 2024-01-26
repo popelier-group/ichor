@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../_static/jquery.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -21,17 +21,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ichor.core.useful_functions.dl_poly namespace" href="ichor.core.useful_functions.dl_poly.html" />
-    <link rel="prev" title="ichor.core.sql package" href="ichor.core.sql.html" /> 
+    <link rel="prev" title="ichor.core.multipoles package" href="ichor.core.multipoles.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../index.html" class="icon icon-home">
             ichor
           </a>
@@ -62,10 +62,10 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.core.useful_functions package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.atomic_to_molecular_multipole_moment">ichor.core.useful_functions.atomic_to_molecular_multipole_moment module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.check_aimall_completed">ichor.core.useful_functions.check_aimall_completed module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.debugging">ichor.core.useful_functions.debugging module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.useful_functions.get_atoms">ichor.core.useful_functions.get_atoms module</a></li>
@@ -105,7 +105,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="ichor-core-useful-functions-package">
 <h1>ichor.core.useful_functions package<a class="headerlink" href="#ichor-core-useful-functions-package" title="Permalink to this heading"></a></h1>
 <section id="subpackages">
@@ -118,6 +118,69 @@
 </section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-ichor.core.useful_functions.atomic_to_molecular_multipole_moment">
+<span id="ichor-core-useful-functions-atomic-to-molecular-multipole-moment-module"></span><h2>ichor.core.useful_functions.atomic_to_molecular_multipole_moment module<a class="headerlink" href="#module-ichor.core.useful_functions.atomic_to_molecular_multipole_moment" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_dipole">
+<span class="sig-name descname"><span class="pre">recover_molecular_dipole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.INTs" title="ichor.core.files.aimall.ints.INTs"><span class="pre">INTs</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_dipole" title="Permalink to this definition"></a></dt>
+<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
+and calculates the molecular dipole moment of the system (in spherical coordinates)
+from the AIMAll atomic multipole moments.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
+<li><p><strong>ints_dir</strong> – an INTs file instance, which wraps around an AIMAll output directory</p></li>
+<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
+, defaults to True (meaning coordinates are in Angstroms)</p></li>
+<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
+This converts from atomic units to Debye.</p></li>
+<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular dipole from spherical
+to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
+in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array containing the molecular dipole moment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_quadrupole">
+<span class="sig-name descname"><span class="pre">recover_molecular_quadrupole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.INTs" title="ichor.core.files.aimall.ints.INTs"><span class="pre">INTs</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.atomic_to_molecular_multipole_moment.recover_molecular_quadrupole" title="Permalink to this definition"></a></dt>
+<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
+and calculates the molecular quadrupole moment of the system (in spherical coordinates)
+from the AIMAll atomic multipole moments.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
+<li><p><strong>ints_dir</strong> – an INTs file instance, which wraps around an AIMAll output directory</p></li>
+<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
+, defaults to True (meaning coordinates are in Angstroms)</p></li>
+<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
+This converts from atomic units to Debye.</p></li>
+<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular quadrupole from spherical
+to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
+in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array containing the molecular quadrupole moment.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-ichor.core.useful_functions.check_aimall_completed">
 <span id="ichor-core-useful-functions-check-aimall-completed-module"></span><h2>ichor.core.useful_functions.check_aimall_completed module<a class="headerlink" href="#module-ichor.core.useful_functions.check_aimall_completed" title="Permalink to this heading"></a></h2>
@@ -206,6 +269,66 @@ The .aim file as well as if the .int files contain the required information.</p>
 <span class="sig-name descname"><span class="pre">get_trajectory_from_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'new_trajectory.xyz'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.files.html#ichor.core.files.Trajectory" title="ichor.core.files.Trajectory"><span class="pre">Trajectory</span></a></span></span><a class="headerlink" href="#ichor.core.useful_functions.get_trajectory_from_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.useful_functions.recover_molecular_dipole">
+<span class="sig-name descname"><span class="pre">recover_molecular_dipole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.INTs" title="ichor.core.files.aimall.ints.INTs"><span class="pre">INTs</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.recover_molecular_dipole" title="Permalink to this definition"></a></dt>
+<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
+and calculates the molecular dipole moment of the system (in spherical coordinates)
+from the AIMAll atomic multipole moments.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
+<li><p><strong>ints_dir</strong> – an INTs file instance, which wraps around an AIMAll output directory</p></li>
+<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
+, defaults to True (meaning coordinates are in Angstroms)</p></li>
+<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
+This converts from atomic units to Debye.</p></li>
+<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular dipole from spherical
+to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
+in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array containing the molecular dipole moment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.useful_functions.recover_molecular_quadrupole">
+<span class="sig-name descname"><span class="pre">recover_molecular_quadrupole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ints_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ichor.core.files.aimall.html#ichor.core.files.aimall.ints.INTs" title="ichor.core.files.aimall.ints.INTs"><span class="pre">INTs</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_in_angstroms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_debye</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.useful_functions.recover_molecular_quadrupole" title="Permalink to this definition"></a></dt>
+<dd><p>Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
+and calculates the molecular quadrupole moment of the system (in spherical coordinates)
+from the AIMAll atomic multipole moments.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> – an Atoms instance containing the system geometry</p></li>
+<li><p><strong>ints_dir</strong> – an INTs file instance, which wraps around an AIMAll output directory</p></li>
+<li><p><strong>atoms_in_angstroms</strong> – Whether the Atom instance coordinates are in Bohr or Angstroms
+, defaults to True (meaning coordinates are in Angstroms)</p></li>
+<li><p><strong>convert_to_debye</strong> – Whether or not to convert the final result to Debye, default to True.
+This converts from atomic units to Debye.</p></li>
+<li><p><strong>convert_to_cartesian</strong> – Whether or not to convert the recovered molecular quadrupole from spherical
+to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
+in Cartesian coordinates, so set to True in case you are comparing against Gaussian.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array containing the molecular quadrupole moment.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -213,7 +336,7 @@ The .aim file as well as if the .int files contain the required information.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ichor.core.sql.html" class="btn btn-neutral float-left" title="ichor.core.sql package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ichor.core.multipoles.html" class="btn btn-neutral float-left" title="ichor.core.multipoles package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="ichor.core.useful_functions.dl_poly.html" class="btn btn-neutral float-right" title="ichor.core.useful_functions.dl_poly namespace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
@@ -226,7 +349,7 @@ The .aim file as well as if the .int files contain the required information.</p>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -237,7 +360,7 @@ The .aim file as well as if the .int files contain the required information.</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

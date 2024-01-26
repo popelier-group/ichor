@@ -76,7 +76,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
 </ul>
 </li>
@@ -1461,6 +1460,24 @@ Removes duplicates.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.points_directory.PointsDirectory.write_json_database">
+<span class="sig-name descname"><span class="pre">write_json_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_missing_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(',',</span> <span class="pre">':')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#ichor.core.files.points_directory.PointsDirectory.write_json_database" title="Permalink to this definition"></a></dt>
+<dd><p>Write out important information from a PointsDirectory instance to a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_db_path</strong> – database to write to</p></li>
+<li><p><strong>print_missing_data</strong> – Whether to print out any missing data from each PointDirectory contained
+in self, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The path to the written json file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="ichor.core.files.points_directory.PointsDirectory.write_to_sqlite3_database">
 <span class="sig-name descname"><span class="pre">write_to_sqlite3_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_missing_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#ichor.core.files.points_directory.PointsDirectory.write_to_sqlite3_database" title="Permalink to this definition"></a></dt>
 <dd><p>Write out important information from a PointsDirectory instance to an SQLite3 database.</p>
@@ -2348,7 +2365,7 @@ no contents/options are written by user, they are written as the default values 
 charge: Optional[int] = None,
 spin_multiplicity: Optional[int] = None,
 atoms: Optional[Atoms] = None,
-<a href="#id1"><span class="problematic" id="id2">**</span></a>input_blocks: Dict[str, Union[str, List[str]]]</p></li>
+input_blocks: Dict[str, Union[str, List[str]]]</p></li>
 <li><p><strong>charge</strong> – The charge of the system</p></li>
 <li><p><strong>spin_multiplicity</strong> – The spin multiplicity of the system</p></li>
 <li><p><strong>atoms</strong> – An Atoms instance that contains the molecular structure</p></li>
@@ -2867,6 +2884,24 @@ Removes duplicates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np array of total energy (in Hartree) for all points</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.PointsDirectory.write_json_database">
+<span class="sig-name descname"><span class="pre">write_json_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_missing_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(',',</span> <span class="pre">':')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#ichor.core.files.PointsDirectory.write_json_database" title="Permalink to this definition"></a></dt>
+<dd><p>Write out important information from a PointsDirectory instance to a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_db_path</strong> – database to write to</p></li>
+<li><p><strong>print_missing_data</strong> – Whether to print out any missing data from each PointDirectory contained
+in self, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The path to the written json file</p>
 </dd>
 </dl>
 </dd></dl>

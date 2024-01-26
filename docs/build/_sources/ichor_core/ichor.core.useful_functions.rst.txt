@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+ichor.core.useful\_functions.atomic\_to\_molecular\_multipole\_moment module
+----------------------------------------------------------------------------
+
+.. automodule:: ichor.core.useful_functions.atomic_to_molecular_multipole_moment
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.core.useful\_functions.check\_aimall\_completed module
 ------------------------------------------------------------
 

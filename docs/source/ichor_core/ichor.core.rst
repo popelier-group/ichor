@@ -16,7 +16,6 @@ Subpackages
    ichor.core.models
    ichor.core.molecular_dynamics
    ichor.core.multipoles
-   ichor.core.sql
    ichor.core.useful_functions
 
 Module contents

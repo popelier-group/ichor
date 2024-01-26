@@ -247,7 +247,7 @@ urea0001 -225.081384781131
 <section id="Generating-CSV-files-with-Features-from-SQLite3-Database">
 <h2>Generating CSV files with Features from SQLite3 Database<a class="headerlink" href="#Generating-CSV-files-with-Features-from-SQLite3-Database" title="Permalink to this heading"></a></h2>
 <p>CSV files containing (ALF) features and relevant outputs can be generated from an SQLite3 database like so:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.sql.query_database</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.database.sql.query_database</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_alf_from_first_db_geometry</span><span class="p">,</span>
     <span class="n">write_processed_data_for_atoms_parallel</span><span class="p">,</span>
     <span class="n">write_processed_data_for_atoms</span>
