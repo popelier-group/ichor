@@ -24,7 +24,19 @@ def initialize_config(config_path):
     return ichor_config
 
 
-ICHOR_CONFIG_PATH: Path = Path.home() / "ichor.config"
+class MissingIchorConfig(Exception):
+    """Exception for missing ichor config file"""
+
+    pass
+
+
+ICHOR_CONFIG_PATH: Path = Path.home() / "ichor_config.yaml"
+# check that config file exists
+if not ICHOR_CONFIG_PATH.exists():
+    raise MissingIchorConfig(
+        "The ichor_config.yaml file is not found in the home directory. Please add it in order to use ichor.hpc"
+    )
+
 ICHOR_CONFIG: dict = initialize_config(ICHOR_CONFIG_PATH)
 
 # default file structure to be used for file handling
@@ -118,25 +130,14 @@ MACHINE: str = init_machine(machine_hostname, ICHOR_CONFIG)
 # make parallel environment variables to run jobs on multiple cores
 PARALLEL_ENVIRONMENT = defaultdict(ParallelEnvironment)
 
-# TODO: change this so that only parallel environemnts are only defined for MACHINE machine
-if ICHOR_CONFIG:
-    # loop over keys which will contain the names of the machines
-    for k in ICHOR_CONFIG.keys():
+# if you do not specify parallel environments in config, then error out with KeyError
+machine_parallel_envs = ICHOR_CONFIG[MACHINE]["hpc"]["parallel_environments"]
 
-        parallel_environments = ICHOR_CONFIG[k]["hpc"].get("parallel_environments")
-        if parallel_environments:
-            for env_name, val in parallel_environments.items():
-                PARALLEL_ENVIRONMENT[k][env_name] = tuple(val["core_count"])
-
-else:
-    # add _default machine name if not defined in config file
-    PARALLEL_ENVIRONMENT["_default"]["smp"] = 1, 100
-
-# PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
-# PARALLEL_ENVIRONMENT[Machine.csf4]["serial"] = 1, 1
-# PARALLEL_ENVIRONMENT[Machine.csf4]["multicore"] = 2, 32
-# PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
-# PARALLEL_ENVIRONMENT[Machine.local]["smp"] = 1, 100
+# make the possible parallel environments for the machine
+for p_env_name, values in machine_parallel_envs.items():
+    PARALLEL_ENVIRONMENT[MACHINE][p_env_name] = values
+# add _default machine name if not defined in config file
+PARALLEL_ENVIRONMENT["_default"]["smp"] = 1, 100
 
 # set up loggers
 logger = setup_logger("ICHOR", "ichor.log")
@@ -198,28 +199,5 @@ SCRIPT_NAMES = ScriptNames(
 )
 
 
-# TODO: remove these once they are implemeted in the config
-# set up Gaussian commands
-# GAUSSIAN_COMMANDS = {
-#     Machine.csf3: "$g09root/g09/g09",
-#     Machine.csf4: "$g16root/g16/g16",
-#     Machine.ffluxlab: "g09",
-#     Machine.local: "g09",
-# }
-
-# ORCA_COMMANDS = {
-#     Machine.csf3: "$ORCA_HOME/orca",
-#     Machine.csf4: "orca",
-#     Machine.local: "orca",
-# }
-
-# CP2K_COMMANDS = {
-#     Machine.csf3: "cp2k.ssmp",
-#     Machine.csf4: "cp2k.popt",
-#     Machine.local: "cp2k",
-# }
-
 # set up current python environment
 CURRENT_PYTHON_ENVIRONMENT_PATH = get_current_python_environment_path()
-
-MODULES_HOME = Path("/usr/share/Modules")
