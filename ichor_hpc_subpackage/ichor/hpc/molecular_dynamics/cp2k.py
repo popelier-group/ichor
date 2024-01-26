@@ -59,12 +59,14 @@ def submit_cp2k(
         atoms,
         temperature,
         nsteps,
-        get_param_from_config(
-            ichor.hpc.global_variables.ICHOR_CONFIG,
-            ichor.hpc.global_variables.MACHINE,
-            "software",
-            "cp2k",
-            "data_path",
+        Path(
+            get_param_from_config(
+                ichor.hpc.global_variables.ICHOR_CONFIG,
+                ichor.hpc.global_variables.MACHINE,
+                "software",
+                "cp2k",
+                "data_path",
+            )
         ),
         system_name,
         method,
