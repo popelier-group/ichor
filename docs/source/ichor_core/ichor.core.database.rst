@@ -1,7 +1,5 @@
-ichor.core.database namespace
-=============================
-
-.. py:module:: ichor.core.database
+ichor.core.database package
+===========================
 
 Subpackages
 -----------
@@ -11,3 +9,11 @@ Subpackages
 
    ichor.core.database.json
    ichor.core.database.sql
+
+Module contents
+---------------
+
+.. automodule:: ichor.core.database
+   :members:
+   :undoc-members:
+   :show-inheritance:
