@@ -1,5 +1,4 @@
 import platform
-from collections import defaultdict
 from pathlib import Path
 
 import yaml
@@ -13,7 +12,7 @@ from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
 
 
-def get_param_from_config(ichor_config: dict, *keys):
+def get_param_from_config(ichor_config: dict, *keys, default=None):
     """Given a config and keys, this loops over
 
     :param ichor_config: ichor read in config
@@ -30,7 +29,7 @@ def get_param_from_config(ichor_config: dict, *keys):
         # if key is not there, get() will return None by default
         if next_param is None:
 
-            return
+            return default
 
     return next_param
 
@@ -148,18 +147,20 @@ machine_hostname: str = platform.node()
 # will either contain a key from the config file
 # or be set to _default, which would indicate to use default settings
 MACHINE: str = init_machine(machine_hostname, ICHOR_CONFIG)
+if not MACHINE:
+    raise ValueError("The current machine is not defined in the config file.")
 
 # make parallel environment variables to run jobs on multiple cores
-PARALLEL_ENVIRONMENT = defaultdict(ParallelEnvironment)
-
+PARALLEL_ENVIRONMENT = ParallelEnvironment()
 # if you do not specify parallel environments in config, then error out with KeyError
-machine_parallel_envs = ICHOR_CONFIG[MACHINE]["hpc"]["parallel_environments"]
+# make the possible parallel environments for the current machine which ichor is launched on
+try:
+    ICHOR_CONFIG[MACHINE]["hpc"]["parallel_environments"]
+except KeyError:
+    raise KeyError("The parallel environments are not defined for the current machine.")
 
-# make the possible parallel environments for the machine
-for p_env_name, values in machine_parallel_envs.items():
-    PARALLEL_ENVIRONMENT[MACHINE][p_env_name] = values
-# add _default machine name if not defined in config file
-PARALLEL_ENVIRONMENT["_default"]["smp"] = 1, 100
+for p_env_name, values in ICHOR_CONFIG[MACHINE]["hpc"]["parallel_environments"].items():
+    PARALLEL_ENVIRONMENT[p_env_name] = values
 
 # set up loggers
 logger = setup_logger("ICHOR", "ichor.log")

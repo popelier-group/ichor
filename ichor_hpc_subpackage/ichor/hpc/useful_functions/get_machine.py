@@ -13,5 +13,3 @@ def init_machine(platform_name: str, ichor_config: dict) -> str:
         if k in platform_name:
 
             return k
-
-    return "_default"

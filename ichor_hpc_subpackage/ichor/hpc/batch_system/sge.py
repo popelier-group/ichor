@@ -220,7 +220,7 @@ class SunGridEngine(BatchSystem):
         import ichor.hpc.global_variables
 
         return (
-            f"-pe {ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ichor.hpc.global_variables.MACHINE][ncores]} {ncores}"  # noqa E501
+            f"-pe {ichor.hpc.global_variables.PARALLEL_ENVIRONMENT[ncores]} {ncores}"  # noqa E501
             if ncores > 1
             else None
         )
