@@ -2,11 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import Modules
-
-
-class SubmissionError(Exception):
-    pass
 
 
 class SubmissionCommand(ABC):
@@ -19,7 +14,7 @@ class SubmissionCommand(ABC):
 
     @classproperty
     @abstractmethod
-    def modules(self) -> Modules:
+    def modules(self) -> list:
         pass
 
     @classproperty

@@ -4,8 +4,6 @@ from typing import List
 import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import CP2KModules
-from ichor.hpc.modules.modules import Modules
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -31,9 +29,11 @@ class CP2KCommand(SubmissionCommand):
         return False
 
     @classproperty
-    def modules(self) -> Modules:
+    def modules(self) -> list:
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
-        return CP2KModules
+        return ichor.hpc.global_variables.ICHOR_CONFIG[
+            ichor.hpc.global_variables.MACHINE
+        ]["software"]["cp2k"]["modules"]
 
     @property
     def data(self) -> List[str]:
@@ -45,9 +45,9 @@ class CP2KCommand(SubmissionCommand):
         """Returns the command to be used to run CP2K. The command depends on the
         number of cores."""
 
-        return ichor.hpc.global_variables.CP2K_COMMANDS[
-            ichor.hpc.global_variables.MACHINE
-        ]
+        ichor.hpc.global_variables.ICHOR_CONFIG[ichor.hpc.global_variables.MACHINE][
+            "software"
+        ]["cp2k"]["executable_path"]
 
     def repr(self, variables: List[str]) -> str:
         """

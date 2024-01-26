@@ -1,6 +1,5 @@
 from typing import List, Optional, Tuple
 
-from ichor.hpc.modules import Modules
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -20,7 +19,7 @@ class CommandGroup(SubmissionCommand, list):
         return self[0].data
 
     @property
-    def modules(self) -> Modules:
+    def modules(self) -> list:
         """Retruns a string containing any modules that need to be loaded in order for a program to run"""
         return self[0].modules
 

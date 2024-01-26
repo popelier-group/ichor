@@ -5,10 +5,9 @@ import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files import GaussianOut
-from ichor.hpc.modules import GaussianModules, Modules
 
 # from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_command import SubmissionCommand, SubmissionError
+from ichor.hpc.submission_command import SubmissionCommand
 
 
 class GaussianCommand(SubmissionCommand):
@@ -35,25 +34,19 @@ class GaussianCommand(SubmissionCommand):
         self.gjf_output = gjf_output or gjf_file.with_suffix(GaussianOut.filetype)
 
     @classproperty
+    def modules(self) -> list:
+        """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
+        return ichor.hpc.global_variables.ICHOR_CONFIG[
+            ichor.hpc.global_variables.MACHINE
+        ]["software"]["gaussian"]["modules"]
+
+    @classproperty
     def command(self) -> str:
         """Returns the command used to run Gaussian on different machines."""
 
-        if (
+        return ichor.hpc.global_variables.ICHOR_CONFIG[
             ichor.hpc.global_variables.MACHINE
-            not in ichor.hpc.global_variables.GAUSSIAN_COMMANDS.keys()
-        ):
-            raise SubmissionError(
-                f"Command not defined for '{self.__name__}' on '{ichor.hpc.global_variables.MACHINE}'"
-            )
-
-        return ichor.hpc.global_variables.GAUSSIAN_COMMANDS[
-            ichor.hpc.global_variables.MACHINE
-        ]
-
-    @classproperty
-    def modules(self) -> Modules:
-        """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
-        return GaussianModules
+        ]["software"]["gaussian"]["executable_path"]
 
     @classproperty
     def group(self) -> bool:

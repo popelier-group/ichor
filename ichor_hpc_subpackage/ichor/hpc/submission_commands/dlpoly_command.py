@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import Modules
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -21,8 +20,9 @@ class DlpolyCommand(SubmissionCommand):
     def data(self) -> List[str]:
         return [str(self.dlpoly_directory.absolute())]
 
+    # TODO: need to load in modules with compiles for dlpoly for submission scripts
     @classproperty
-    def modules(self) -> Modules:
+    def modules(self) -> list:
         """No modules need to be loaded for DL POLY. DL POLY needs to be compiled before it can be used with ICHOR."""
         return ""
 

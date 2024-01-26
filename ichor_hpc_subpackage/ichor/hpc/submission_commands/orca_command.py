@@ -5,10 +5,9 @@ import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files import OrcaOutput
-from ichor.hpc.modules import Modules, OrcaModules
 
 # from ichor.hpc.submission_script.check_manager import CheckManager
-from ichor.hpc.submission_command import SubmissionCommand, SubmissionError
+from ichor.hpc.submission_command import SubmissionCommand
 
 
 class OrcaCommand(SubmissionCommand):
@@ -34,25 +33,19 @@ class OrcaCommand(SubmissionCommand):
         self.orca_output = orca_output or orca_input.with_suffix(OrcaOutput.filetype)
 
     @classproperty
+    def modules(self) -> list:
+        """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
+        return ichor.hpc.global_variables.ICHOR_CONFIG[
+            ichor.hpc.global_variables.MACHINE
+        ]["software"]["orca"]["modules"]
+
+    @classproperty
     def command(self) -> str:
         """Returns the command used to run ORCA on different machines."""
 
-        if (
+        return ichor.hpc.global_variables.ICHOR_CONFIG[
             ichor.hpc.global_variables.MACHINE
-            not in ichor.hpc.global_variables.ORCA_COMMANDS.keys()
-        ):
-            raise SubmissionError(
-                f"Command not defined for '{self.__name__}' on '{ichor.hpc.global_variables.MACHINE.name}'"
-            )
-
-        return ichor.hpc.global_variables.ORCA_COMMANDS[
-            ichor.hpc.global_variables.MACHINE
-        ]
-
-    @classproperty
-    def modules(self) -> Modules:
-        """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
-        return OrcaModules
+        ]["software"]["orca"]["executable_path"]
 
     @classproperty
     def group(self) -> bool:
