@@ -144,14 +144,6 @@ class VerifyW(Enum):
     Only = "only"
 
 
-# AIMAll_COMMANDS = {
-#     Machine.csf3: "~/AIMAll/aimqb.ish",
-#     Machine.csf4: "~/AIMAll/aimqb.ish",
-#     Machine.ffluxlab: "aimall",
-#     Machine.local: "aimall",
-# }
-
-
 class AIMAllCommand(SubmissionCommand):
     """
     A class which is used to add AIMALL-related commands to a submission script.

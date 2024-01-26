@@ -58,7 +58,13 @@ class AmberCommand(SubmissionCommand):
         #     else f"mpirun -n {self.ncores} sander.MPI"
         # )
 
-        return "sander"
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "amber",
+            "executable_path",
+        )
 
     def repr(self, *args) -> str:
         """

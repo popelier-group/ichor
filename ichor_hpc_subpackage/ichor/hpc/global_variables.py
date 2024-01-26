@@ -153,12 +153,12 @@ PARALLEL_ENVIRONMENT = ParallelEnvironment()
 # if you do not specify parallel environments in config, then error out with KeyError
 # make the possible parallel environments for the current machine which ichor is launched on
 try:
-    ICHOR_CONFIG[MACHINE]["hpc"]["parallel_environments"]
+    for p_env_name, values in ICHOR_CONFIG[MACHINE]["hpc"][
+        "parallel_environments"
+    ].items():
+        PARALLEL_ENVIRONMENT[p_env_name] = values
 except KeyError:
     raise KeyError("The parallel environments are not defined for the current machine.")
-
-for p_env_name, values in ICHOR_CONFIG[MACHINE]["hpc"]["parallel_environments"].items():
-    PARALLEL_ENVIRONMENT[p_env_name] = values
 
 # set up loggers
 LOGGER = setup_logger("ICHOR", "ichor.log")

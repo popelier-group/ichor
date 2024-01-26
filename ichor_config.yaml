@@ -16,6 +16,7 @@ csf3:
 
     amber:
       modules: ["apps/intel-17.0/amber/18-at19-may2019"]
+      executable_path: sander
 
     cp2k:
       executable_path: cp2k.ssmp
@@ -61,6 +62,7 @@ csf4:
 
     amber:
       modules: ["amber/20.12-iomkl-2020.02-ambertools-21.12"]
+      executable_path: sander
 
     cp2k:
       executable_path: cp2k.popt
@@ -141,6 +143,7 @@ _default:
 
     amber:
       modules: ["apps/intel-17.0/amber/18-at19-may2019"]
+      executable_path: "sander"
 
     cp2k:
       executable_path: cp2k.ssmp
