@@ -11,7 +11,7 @@ ICHOR is a Python package used to simplify computational chemistry programs and 
 ---
 The namespace package `ichor` is divided into three parts, `ichor-core`, `ichor-hpc`, and `ichor-cli`. The `ichor-core` sub package contains classes and functions which make it easy to read relevant file and analyze outputs of jobs. The `ichor-hpc` package is used to submit jobs on CSF3, CSF4, and FFLUXLAB. The `ichor-cli` is a command line interface, providing easy access to the most common tools that a user might need to make machine learning models. To get started, only install the `ichor-core` and `ichor-hpc` subpackages (the `hpc` subpackage is only needed when submitting jobs on CSFs and FFLUXLAB, so you do not need to install it when working locally on your machine.)
 
-** You will need to create a `ichor_config.yaml` for configuration settings, see the documentation for examples. **
+**You will need to create a `ichor_config.yaml` for configuration settings, see the documentation for examples.**
 
 ## Documentation
 
