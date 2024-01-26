@@ -12,17 +12,3 @@ class ParallelEnvironment(RangeDict):
             if item == 1:
                 return ""
             raise KeyError(f"'ParallelEnvironment' for {item} cores not found")
-
-
-class ParallelEnvironments(dict):
-    """
-    A wrapper around multiple parallel environments.
-    Essentially a dictionary whose values are ``ParallelEnvironemnt`` instances.
-    This is used to get the specific keyword different machines (CSF3/FFLUXLAB,etc.)
-    use for jobs running on multiple cores.
-    """
-
-    def __getitem__(self, item) -> ParallelEnvironment:
-        if item not in self.keys():
-            self[item] = ParallelEnvironment()
-        return super().__getitem__(item)

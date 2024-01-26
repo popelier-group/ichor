@@ -1,15 +1,32 @@
 import platform
+from collections import defaultdict
 from pathlib import Path
+
+import yaml
 
 from ichor.core.common.types import FileTree, FileType
 
 from ichor.hpc.batch_system import init_batch_system
-from ichor.hpc.batch_system.parallel_environment import ParallelEnvironments
+from ichor.hpc.batch_system.parallel_environment import ParallelEnvironment
 from ichor.hpc.log import setup_logger
 from ichor.hpc.machine import Machine
 from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
 
+
+def initialize_config(config_path):
+    """
+    Reads the ichor config file and sets up where to find modules and executables for programs.
+    """
+
+    with open(config_path, "r") as s:
+        ichor_config = yaml.safe_load(s)
+
+    return ichor_config
+
+
+ICHOR_CONFIG_PATH: Path = Path.home() / "ichor.config"
+ICHOR_CONFIG: dict = initialize_config(ICHOR_CONFIG_PATH)
 
 # default file structure to be used for file handling
 FILE_STRUCTURE = FileTree()
@@ -94,18 +111,33 @@ FILE_STRUCTURE.add("AMBER", "amber", type_=FileType.Directory)
 # batch system on current machine
 BATCH_SYSTEM = init_batch_system()
 
-# will be Machine.Local if machine is not in list of names
-machine_name: str = platform.node()
-# initialize machine
-MACHINE = init_machine(machine_name)
+machine_hostname: str = platform.node()
+# will either contain a key from the config file
+# or be set to _default, which would indicate to use default settings
+MACHINE: str = init_machine(machine_hostname, ICHOR_CONFIG)
 
 # make parallel environment variables to run jobs on multiple cores
-PARALLEL_ENVIRONMENT = ParallelEnvironments()
-PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
-PARALLEL_ENVIRONMENT[Machine.csf4]["serial"] = 1, 1
-PARALLEL_ENVIRONMENT[Machine.csf4]["multicore"] = 2, 32
-PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
-PARALLEL_ENVIRONMENT[Machine.local]["smp"] = 1, 100
+PARALLEL_ENVIRONMENT = defaultdict(ParallelEnvironment)
+
+# TODO: change this so that only parallel environemnts are only defined for MACHINE machine
+if ICHOR_CONFIG:
+    # loop over keys which will contain the names of the machines
+    for k in ICHOR_CONFIG.keys():
+
+        parallel_environments = ICHOR_CONFIG[k]["hpc"].get("parallel_environments")
+        if parallel_environments:
+            for env_name, val in parallel_environments.items():
+                PARALLEL_ENVIRONMENT[k][env_name] = tuple(val["core_count"])
+
+else:
+    # add _default machine name if not defined in config file
+    PARALLEL_ENVIRONMENT["_default"]["smp"] = 1, 100
+
+# PARALLEL_ENVIRONMENT[Machine.csf3]["smp.pe"] = 2, 32
+# PARALLEL_ENVIRONMENT[Machine.csf4]["serial"] = 1, 1
+# PARALLEL_ENVIRONMENT[Machine.csf4]["multicore"] = 2, 32
+# PARALLEL_ENVIRONMENT[Machine.ffluxlab]["smp"] = 2, 44
+# PARALLEL_ENVIRONMENT[Machine.local]["smp"] = 1, 100
 
 # set up loggers
 logger = setup_logger("ICHOR", "ichor.log")
@@ -166,6 +198,8 @@ SCRIPT_NAMES = ScriptNames(
     parent=FILE_STRUCTURE["scripts"],
 )
 
+
+# TODO: remove these once they are implemeted in the config
 # set up Gaussian commands
 GAUSSIAN_COMMANDS = {
     Machine.csf3: "$g09root/g09/g09",

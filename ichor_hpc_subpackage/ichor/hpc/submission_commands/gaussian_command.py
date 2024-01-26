@@ -43,7 +43,7 @@ class GaussianCommand(SubmissionCommand):
             not in ichor.hpc.global_variables.GAUSSIAN_COMMANDS.keys()
         ):
             raise SubmissionError(
-                f"Command not defined for '{self.__name__}' on '{ichor.hpc.global_variables.MACHINE.name}'"
+                f"Command not defined for '{self.__name__}' on '{ichor.hpc.global_variables.MACHINE}'"
             )
 
         return ichor.hpc.global_variables.GAUSSIAN_COMMANDS[
