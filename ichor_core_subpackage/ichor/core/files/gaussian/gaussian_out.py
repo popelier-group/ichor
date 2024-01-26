@@ -5,14 +5,15 @@ import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
-from ichor.core.common.types.forces import (
-    AtomForce,
+from ichor.core.common.types.forces import AtomForce
+from ichor.core.common.types.multipole_moments import (
     MolecularDipole,
     MolecularHexadecapole,
     MolecularOctapole,
     MolecularQuadrupole,
     TracelessMolecularQuadrupole,
 )
+
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasProperties
