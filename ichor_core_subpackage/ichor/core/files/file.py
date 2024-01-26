@@ -233,7 +233,7 @@ class WriteFile(File, ABC):
         # this way, if the file already exists on disk, it will not be overwritten.
         except Exception as e:
             raise FileWriteError(
-                f"Exception occurred while writing file '{path.absolute()}'. File is not written."
+                f"Exception occurred while writing file '{path.absolute()}'. File was not been written/modified."
             ) from e
 
         # if we got to here, we can safely assume that we got a string which can be written to a file
