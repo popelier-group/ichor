@@ -238,5 +238,5 @@ class WriteFile(File, ABC):
 
         # if we got to here, we can safely assume that we got a string which can be written to a file
         # even if the actual string contains wrong things it it
-        with open(path) as f:
+        with open(path, "w") as f:
             f.write(tmp_str)
