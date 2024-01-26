@@ -7,6 +7,8 @@ from ichor.core.common.io import mkdir
 from ichor.core.files import GJF, XYZ
 from ichor.core.molecular_dynamics.cp2k import write_cp2k_input
 from ichor.hpc.batch_system import JobID
+
+from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_commands import CP2KCommand
 from ichor.hpc.submission_script import SubmissionScript
 
@@ -57,9 +59,13 @@ def submit_cp2k(
         atoms,
         temperature,
         nsteps,
-        ichor.hpc.global_variables.ICHOR_CONFIG[ichor.hpc.global_variables.MACHINE][
-            "software"
-        ]["cp2k"]["data_path"],
+        get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "cp2k",
+            "data_path",
+        ),
         system_name,
         method,
         basis_set,
