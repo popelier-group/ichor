@@ -4,7 +4,7 @@ for points)."""
 
 import logging
 
-from ichor.hpc.log.concurrent_log_handler import ConcurrentRotatingFileHandler
+from concurrent_log_handler import ConcurrentRotatingFileHandler
 
 
 def setup_logger(
