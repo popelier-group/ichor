@@ -26,10 +26,6 @@ csf3:
     dlpoly:
       modules: ["compilers/intel/18.0.3"]
 
-    # these could be out of date
-    ferebus:
-      modules: ["compilers/intel/18.0.3"]
-
     orca:
       executable_path: $ORCA_HOME/orca
       modules: ["apps/binapps/orca/5.0.3"]
@@ -73,9 +69,6 @@ csf4:
     dlpoly:
       modules: ["iomkl/2020.02"]
 
-    ferebus:
-      modules: ["iomkl/2020.02"]
-
     orca:
       executable_path: orca
       modules: ["orca/5.0.4-gompi-2021a"]
@@ -116,9 +109,6 @@ ffluxlab:
     dlpoly:
       modules: ["mpi/intel/18.0.3"]
 
-    ferebus:
-      modules: ["compilers/intel/20.0.1"]
-
     pandora:
       modules: ["compilers/intel/18.0.3", "libs/python/pyscf/1.7.4"]
 
@@ -154,10 +144,6 @@ _default:
       data_path: "$CP2K_HOME/data"
 
     dlpoly:
-      modules: ["compilers/intel/18.0.3"]
-
-    # these could be out of date
-    ferebus:
       modules: ["compilers/intel/18.0.3"]
 
     orca:
