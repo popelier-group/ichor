@@ -210,52 +210,42 @@ class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
         Otherwise, the wrong results are obtained with AIMAll.
         """
 
-        # TODO: think of a way to prevent deleting file if there are errors with the attributes
-        # currently, if the file writing fails for some reason, the file will be overwritten and deleted
+        write_str = ""
 
-        with open(path, "w") as f:
-            f.write(f"{self.title}\n")
-            header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
-            # add method here, so that AIMAll works correctly
-            # note that only selected functionals / methods work
+        write_str += f"{self.title}\n"
+        header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
+        # add method here, so that AIMAll works correctly
+        # note that only selected functionals / methods work
 
-            # do not modify header line with method if the method is HF
-            if self.method.upper() != "HF":
-                header_line += f"   {self.method}"
+        # do not modify header line with method if the method is HF
+        if self.method.upper() != "HF":
+            header_line += f"   {self.method}"
 
-            f.write(f"{header_line}\n")
-            for i, atom in enumerate(self.atoms):
-                f.write(
-                    f"{atom.type:3s} {i+1:4d}    (CENTRE {i+1:2d}) {atom.x:12.8f}{atom.y:12.8f}{atom.z:12.8f}  CHARGE = {atom.nuclear_charge:3.1f}\n"  # noqa E501
-                )
+        write_str += f"{header_line}\n"
+        for i, atom in enumerate(self.atoms):
+            write_str += f"{atom.type:3s} {i+1:4d}    (CENTRE {i+1:2d}) {atom.x:12.8f}{atom.y:12.8f}{atom.z:12.8f}  CHARGE = {atom.nuclear_charge:3.1f}\n"  # noqa E501
 
-            for centre_assignments in chunker(self.centre_assignments, 20):
-                f.write(
-                    f"CENTRE ASSIGNMENTS  {''.join(map(lambda x: f'{x:3d}', centre_assignments))}\n"
-                )
+        for centre_assignments in chunker(self.centre_assignments, 20):
+            write_str += f"CENTRE ASSIGNMENTS  {''.join(map(lambda x: f'{x:3d}', centre_assignments))}\n"
 
-            for type_assignments in chunker(self.type_assignments, 20):
-                f.write(
-                    f"TYPE ASSIGNMENTS    {''.join(map(lambda x: f'{x:3d}', type_assignments))}\n"
-                )
+        for type_assignments in chunker(self.type_assignments, 20):
+            write_str += f"TYPE ASSIGNMENTS    {''.join(map(lambda x: f'{x:3d}', type_assignments))}\n"
 
-            for exponents in chunker(self.primitive_exponents, 5):
-                exponents = "".join(map(lambda x: f"{x:14.7E}", exponents)).replace(
+        for exponents in chunker(self.primitive_exponents, 5):
+            exponents = "".join(map(lambda x: f"{x:14.7E}", exponents)).replace(
+                "E", "D"
+            )
+            write_str += f"EXPONENTS {exponents}\n"
+
+        for molecular_orbital in self.molecular_orbitals:
+            write_str += f"MO {molecular_orbital.index:4d}     MO {molecular_orbital.eigen_value:10.8f} OCC NO = {molecular_orbital.occupation_number:12.7f}  ORB. ENERGY ={molecular_orbital.energy:12.6f}\n"  # noqa E501
+            for primitives in chunker(molecular_orbital.primitives, 5):
+                primitives = "".join(map(lambda x: f"{x:16.8E}", primitives)).replace(
                     "E", "D"
                 )
-                f.write(f"EXPONENTS {exponents}\n")
+                write_str += f"{primitives}\n"
 
-            for molecular_orbital in self.molecular_orbitals:
-                f.write(
-                    f"MO {molecular_orbital.index:4d}     MO {molecular_orbital.eigen_value:10.8f} OCC NO = {molecular_orbital.occupation_number:12.7f}  ORB. ENERGY ={molecular_orbital.energy:12.6f}\n"  # noqa E501
-                )
-                for primitives in chunker(molecular_orbital.primitives, 5):
-                    primitives = "".join(
-                        map(lambda x: f"{x:16.8E}", primitives)
-                    ).replace("E", "D")
-                    f.write(f"{primitives}\n")
+        write_str += "END DATA\n"
+        write_str += f" TOTAL ENERGY ={self.total_energy:22.12f} THE VIRIAL(-V/T)= {self.virial_ratio:12.8f}"
 
-            f.write("END DATA\n")
-            f.write(
-                f" TOTAL ENERGY ={self.total_energy:22.12f} THE VIRIAL(-V/T)= {self.virial_ratio:12.8f}"
-            )
+        return write_str

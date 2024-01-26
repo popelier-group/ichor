@@ -53,11 +53,16 @@ class XYZ(HasAtoms, ReadFile, WriteFile, File):
 
         :param path: An optional path to which to write the .xyz file
         """
+
         fmtstr = "12.8f"
-        with open(path, "w") as f:
-            f.write(f"{len(self.atoms)}\n")
-            f.write("\n")
-            for atom in self.atoms:
-                f.write(
-                    f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
-                )
+
+        write_str = ""
+
+        write_str += f"{len(self.atoms)}\n"
+        write_str += "\n"
+        for atom in self.atoms:
+            write_str += (
+                f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
+            )
+
+        return write_str

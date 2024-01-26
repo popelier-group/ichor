@@ -79,6 +79,11 @@ class File(PathObject, ABC):
             dst /= self.path.name
         move(self.path, dst)
 
+    def remove(self):
+        """Removes file from disk."""
+
+        remove(self.path)
+
     @contextmanager
     def block(self):
         """Blocks a file from being read. Contents of the file cannot be read."""
@@ -197,7 +202,12 @@ class WriteFile(File, ABC):
         pass
 
     @abstractmethod
-    def _write_file(self, path: Path, *args, **kwargs):
+    def _write_file(self, path: Path, *args, **kwargs) -> str:
+        """Each sub-class should return a string which is the contents of the file to be written out.
+
+        :param path: path of file
+        :type path: Path
+        """
         raise NotImplementedError(
             f"'_write_file' not implemented for '{self.__class__.__name__}'"
         )
@@ -212,13 +222,21 @@ class WriteFile(File, ABC):
             raise ValueError(
                 f"Path where contents will be written is not allowed, value of path: {path}."
             )
+
         try:
             self._set_write_defaults_if_needed()
             self._check_values_before_writing()
-            self._write_file(path, *args, **kwargs)
+            # try to put the contents into a string, if that is ok, then write to file
+            tmp_str = self._write_file(path, *args, **kwargs)
+
+        # raise warning, but do not remove the file
+        # this way, if the file already exists on disk, it will not be overwritten.
         except Exception as e:
-            if path.exists():
-                remove(path)
             raise FileWriteError(
-                f"Exception occurred while writing file '{path.absolute()}'"
+                f"Exception occurred while writing file '{path.absolute()}'. File is not written."
             ) from e
+
+        # if we got to here, we can safely assume that we got a string which can be written to a file
+        # even if the actual string contains wrong things it it
+        with open(path) as f:
+            f.write(tmp_str)
