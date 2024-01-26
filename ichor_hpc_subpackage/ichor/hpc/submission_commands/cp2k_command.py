@@ -32,9 +32,13 @@ class CP2KCommand(SubmissionCommand):
     @classproperty
     def modules(self) -> list:
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
-        return ichor.hpc.global_variables.ICHOR_CONFIG[
-            ichor.hpc.global_variables.MACHINE
-        ]["software"]["cp2k"]["modules"]
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "cp2k",
+            "modules",
+        )
 
     @property
     def data(self) -> List[str]:
