@@ -165,18 +165,21 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"
 
-        with open(path, "w") as f:
-            for m in self.main_input:
-                f.write(f"!{m}\n")
-            for k, vals in self.input_blocks.items():
-                f.write(f"%{k}\n")
-                for v in pairwise(vals):
-                    f.write(f"    {v[0]} {v[1]}\n")
-                f.write("end")
-            f.write("\n")
-            f.write(f"* xyz {self.charge} {self.spin_multiplicity}\n")
-            for atom in self.atoms:
-                f.write(
-                    f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
-                )
-            f.write("*")
+        write_str = ""
+
+        for m in self.main_input:
+            write_str += f"!{m}\n"
+        for k, vals in self.input_blocks.items():
+            write_str += f"%{k}\n"
+            for v in pairwise(vals):
+                write_str += f"    {v[0]} {v[1]}\n"
+            write_str += "end"
+        write_str += "\n"
+        write_str += f"* xyz {self.charge} {self.spin_multiplicity}\n"
+        for atom in self.atoms:
+            write_str += (
+                f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
+            )
+        write_str += "*"
+
+        return write_str

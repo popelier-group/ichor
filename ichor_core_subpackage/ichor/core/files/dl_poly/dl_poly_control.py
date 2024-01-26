@@ -61,39 +61,42 @@ class DlPolyControl(WriteFile):
 
     def _write_file(self):
 
-        with open(self.path, "w") as f:
-            f.write(f"Title: {self.system_name}\n")
-            f.write("\n")
-            # ensemble nvt hoover f select NVT ensemble, type Nose-Hoover with thermostat
-            # relaxation constant f in ps
-            str_thermostat_settings = " ".join([i for i in self.thermostat_settings])
-            f.write(
-                f"ensemble {self.ensemble} {self.thermostat} {str_thermostat_settings}\n"
-            )
-            f.write("\n")
-            f.write(f"temperature {self.temperature}\n")
-            f.write("\n")
-            f.write("\n")
-            # timestep in ps
-            f.write(f"timestep {self.timestep}\n")
-            # number of timesteps
-            f.write(f"steps {self.steps}\n")
-            # rescale system temperature every n steps during equilibration
-            f.write(f"scale {self.scale}\n")
-            f.write("\n")
-            f.write(f"cutoff  {self.cutoff}\n")
-            f.write(f"rvdw    {self.rvdw}\n")
-            f.write("vdw direct\n")
-            f.write("vdw shift\n")
-            f.write("fflux cluster L1\n")
-            f.write("\n")
-            f.write(f"dump  {self.dump}\n")
-            f.write(
-                f"traj {self.trajectory_i} {self.trajectory_j} {self.trajectory_k}\n"
-            )
-            f.write(f"print every {self.print_every}\n")
-            f.write(f"stats every {self.stats_every}\n")
-            f.write("fflux print 0 1\n")
-            f.write(f"job time {self.job_time}\n")
-            f.write(f"close time {self.close_time}\n")
-            f.write("finish\n")
+        write_str = ""
+
+        write_str += f"Title: {self.system_name}\n"
+        write_str += "\n"
+        # ensemble nvt hoover f select NVT ensemble, type Nose-Hoover with thermostat
+        # relaxation constant f in ps
+        str_thermostat_settings = " ".join([i for i in self.thermostat_settings])
+        write_str += (
+            f"ensemble {self.ensemble} {self.thermostat} {str_thermostat_settings}\n"
+        )
+        write_str += "\n"
+        write_str += f"temperature {self.temperature}\n"
+        write_str += "\n"
+        write_str += "\n"
+        # timestep in ps
+        write_str += f"timestep {self.timestep}\n"
+        # number of timesteps
+        write_str += f"steps {self.steps}\n"
+        # rescale system temperature every n steps during equilibration
+        write_str += f"scale {self.scale}\n"
+        write_str += "\n"
+        write_str += f"cutoff  {self.cutoff}\n"
+        write_str += f"rvdw    {self.rvdw}\n"
+        write_str += "vdw direct\n"
+        write_str += "vdw shift\n"
+        write_str += "fflux cluster L1\n"
+        write_str += "\n"
+        write_str += f"dump  {self.dump}\n"
+        write_str += (
+            f"traj {self.trajectory_i} {self.trajectory_j} {self.trajectory_k}\n"
+        )
+        write_str += f"print every {self.print_every}\n"
+        write_str += f"stats every {self.stats_every}\n"
+        write_str += "fflux print 0 1\n"
+        write_str += f"job time {self.job_time}\n"
+        write_str += f"close time {self.close_time}\n"
+        write_str += "finish\n"
+
+        return write_str

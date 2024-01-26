@@ -300,23 +300,24 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
     def _write_file(self, path: Path, *args, **kwargs):
         fmtstr = "12.8f"
 
-        with open(path, "w") as f:
-            for link0 in self.link0:
-                f.write(f"%{link0}\n")
-            f.write(
-                f"#{self.print_level.value} {self.method}/{self.basis_set} {' '.join(self.keywords)}\n"
+        write_str = ""
+
+        for link0 in self.link0:
+            write_str += f"%{link0}\n"
+        write_str += f"#{self.print_level.value} {self.method}/{self.basis_set} {' '.join(self.keywords)}\n"
+        write_str += "\n"
+        write_str += f"{self.title}\n"
+        write_str += "\n"
+        write_str += f"{self.charge}   {self.spin_multiplicity}\n"
+        for atom in self.atoms:
+            write_str += (
+                f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
             )
-            f.write("\n")
-            f.write(f"{self.title}\n")
-            f.write("\n")
-            f.write(f"{self.charge}   {self.spin_multiplicity}\n")
-            for atom in self.atoms:
-                f.write(
-                    f"{atom.type} {atom.x:{fmtstr}} {atom.y:{fmtstr}} {atom.z:{fmtstr}}\n"
-                )
-            if "output=wfn" in self.keywords:
-                f.write(f"\n{self.path.with_suffix('.wfn')}")
-            # add newline character because Gaussian otherwise crashes
-            # if requesting using other keywords but not output=wfn
-            else:
-                f.write("\n")
+        if "output=wfn" in self.keywords:
+            write_str += f"\n{self.path.with_suffix('.wfn')}"
+        # add newline character because Gaussian otherwise crashes
+        # if requesting using other keywords but not output=wfn
+        else:
+            write_str += "\n"
+
+        return write_str

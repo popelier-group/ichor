@@ -48,37 +48,34 @@ class DlPolyConfig(WriteFile):
 
     def _write_file(self, path: Path, vmd_compatible=False):
 
-        with open(self.path, "w") as f:
+        write_str = ""
 
-            f.write(self.comment_line)
-            # see dlpoly manual 4 for settings, VMD needs to have the third optional number
-            # which is the total number of particles in the system
-            # (the number of timesteps * the number of atoms in one timestep)
-            if vmd_compatible:
-                f.write(f"0  1  {len(self.trajectory) * len(self.trajectory[0])}\n")
-            else:
-                f.write("0  1\n")  # PBC Solution to temporary problem
-            f.write(f"{self.cell_size} 0.0 0.0\n")
-            f.write(f"0.0 {self.cell_size} 0.0\n")
-            f.write(f"0.0 0.0 {self.cell_size}\n")
-            total_atoms_counter = 1
+        write_str += self.comment_line
+        # see dlpoly manual 4 for settings, VMD needs to have the third optional number
+        # which is the total number of particles in the system
+        # (the number of timesteps * the number of atoms in one timestep)
+        if vmd_compatible:
+            write_str += f"0  1  {len(self.trajectory) * len(self.trajectory[0])}\n"
+        else:
+            write_str += "0  1\n"  # PBC Solution to temporary problem
+        write_str += f"{self.cell_size} 0.0 0.0\n"
+        write_str += f"0.0 {self.cell_size} 0.0\n"
+        write_str += f"0.0 0.0 {self.cell_size}\n"
+        total_atoms_counter = 1
 
-            if vmd_compatible:
-                for timestep in self.trajectory:
-                    for atom in timestep:
-                        f.write(
-                            # f"{atom.type}  {total_atoms_counter}  {self.system_name}_{atom.type}{atom.index}\n"
-                            f"{atom.type}  {total_atoms_counter}\n"
-                        )
-                        f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
-                        total_atoms_counter += 1
-            # if CONFIG is going to be used in FFLUX, then add the index of the atoms.
-            # This indicates the model file that is going to be used for that atom.
-            else:
-                for timestep in self.trajectory:
-                    for atom in timestep:
-                        f.write(
-                            f"{atom.type}  {total_atoms_counter}  {self.system_name}_{atom.type}{atom.index}\n"
-                        )
-                        f.write(f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n")
-                        total_atoms_counter += 1
+        if vmd_compatible:
+            for timestep in self.trajectory:
+                for atom in timestep:
+                    write_str += f"{atom.type}  {total_atoms_counter}\n"
+                    write_str += f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n"
+                    total_atoms_counter += 1
+        # if CONFIG is going to be used in FFLUX, then add the index of the atoms.
+        # This indicates the model file that is going to be used for that atom.
+        else:
+            for timestep in self.trajectory:
+                for atom in timestep:
+                    write_str += f"{atom.type}  {total_atoms_counter}  {self.system_name}_{atom.type}{atom.index}\n"
+                    write_str += f"{atom.x}\t\t{atom.y}\t\t{atom.z}\n"
+                    total_atoms_counter += 1
+
+        return write_str

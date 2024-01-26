@@ -188,8 +188,7 @@ class DlpolyHistory(Trajectory):
                     self.add(timestep)
 
     @convert_to_path
-    def write_to_trajectory(self, path: Optional[Path] = None):
+    def write_to_trajectory(self, path: str = "TRAJECTORY.xyz"):
         """Writes a trajectory .xyz file from the DL POLY HISTORY file."""
-        if path is None:
-            path = Path("TRAJECTORY.xyz")
+
         self.write(path)

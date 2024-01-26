@@ -187,3 +187,4 @@ class WFX(HasAtoms, HasProperties, ReadFile):
         Otherwise, the wrong results are obtained with AIMAll.
         """
         # TODO: implement
+        pass

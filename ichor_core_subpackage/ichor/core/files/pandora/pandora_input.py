@@ -57,7 +57,7 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile):
         self.morfi_grid_angular_h = data["morfi"]["grid"]["angular_h"]
         self.morfi_grid_radial_h = data["morfi"]["grid"]["radial_h"]
 
-    def format(self):
+    def _set_write_defaults_if_needed(self):
         self.atoms.centre()
         # todo: ensure no atoms are at the origin (wihtin 1e-6) as this will break morfi
 
@@ -65,7 +65,7 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile):
             self.basis_set = f"unc-{self.basis_set}"
 
     def _write_file(self, path: Path, system_name: str):
-        self.format()
+
         data = {
             "system": {
                 "name": system_name.lower(),
@@ -90,5 +90,5 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile):
             },
         }
 
-        with open(path, "w") as f:
-            json.dump(data, f, indent=4)
+        write_str = json.dumps(data, indent=4)
+        return write_str
