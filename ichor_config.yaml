@@ -1,0 +1,168 @@
+csf3:
+
+  hpc:
+
+    parallel_environments:
+      smp.pe: [2, 32]
+
+  software:
+
+    gaussian:
+      executable_path: "$g09root/g09/g09"
+      modules: ["apps/binapps/gaussian/g09d01_em64t"]
+
+    aimall:
+      executable_path: "~/AIMAll/aimqb.ish"
+
+    amber:
+      modules: ["apps/intel-17.0/amber/18-at19-may2019"]
+
+    cp2k:
+      executable_path: cp2k.ssmp
+      modules: ["apps/binapps/cp2k/6.1.0"]
+
+    dlpoly:
+      modules: ["compilers/intel/18.0.3"]
+
+    # these could be out of date
+    ferebus:
+      modules: ["compilers/intel/18.0.3"]
+
+    orca:
+      executable_path: $ORCA_HOME/orca
+      modules: ["apps/binapps/orca/5.0.3"]
+
+    pandora:
+      modules: ["mpi/intel-18.0/openmpi/4.0.1"]
+
+    # likely not needed
+    python:
+      modules: ["apps/anaconda3/5.2.0/bin"]
+
+    tyche:
+      modules: ["compilers/intel/18.0.3"]
+
+csf4:
+
+  hpc:
+
+    parallel_environments:
+      serial: [1, 1]
+      multicore: [2, 32]
+
+  software:
+
+    aimall:
+      executable_path: "~/AIMAll/aimqb.ish"
+
+    gaussian:
+      executable_path: "$g16root/g16/g16"
+      modules: ["gaussian/g16c01_em64t_detectcpu"]
+
+    amber:
+      modules: ["amber/20.12-iomkl-2020.02-ambertools-21.12"]
+
+    cp2k:
+      executable_path: cp2k.popt
+      modules: [cp2k/6.1-iomkl-2020.02]
+
+    dlpoly:
+      modules: ["iomkl/2020.02"]
+
+    ferebus:
+      modules: ["iomkl/2020.02"]
+
+    orca:
+      executable_path: orca
+      modules: ["orca/5.0.4-gompi-2021a"]
+
+    pandora:
+      modules: ["iomkl/2020.02"]
+
+    python:
+      modules: ["anaconda3/2020.07"]
+
+    tyche:
+      modules: ["iomkl/2020.02"]
+
+ffluxlab:
+
+  hpc:
+
+    parallel_environments:
+      smp: [2, 44]
+
+  software:
+
+    aimall:
+      executable_path: aimall
+      modules: ["apps/aimall/19.02.13"]
+
+    gaussian:
+      executable_path: g09
+      modules: ["apps/gaussian/g09"]
+
+    amber:
+      modules: ["apps/amber/18-at19"]
+
+    cp2k:
+      modules: ["apps/cp2k/6.1.0"]
+
+    dlpoly:
+      modules: ["mpi/intel/18.0.3"]
+
+    ferebus:
+      modules: ["compilers/intel/20.0.1"]
+
+    pandora:
+      modules: ["compilers/intel/18.0.3", "libs/python/pyscf/1.7.4"]
+
+    python:
+      modules: ["apps/anaconda3/3.7.6"]
+
+    tyche:
+      modules: ["compilers/intel/18.0.3"]
+
+_default:
+
+  hpc:
+
+    parallel_environments:
+      smp.pe: [2, 32]
+
+  software:
+
+    gaussian:
+      executable_path: "$g09root/g09/g09"
+      modules: ["apps/binapps/gaussian/g09d01_em64t"]
+
+    aimall:
+      executable_path: "~/AIMAll/aimqb.ish"
+
+    amber:
+      modules: ["apps/intel-17.0/amber/18-at19-may2019"]
+
+    cp2k:
+      executable_path: cp2k.ssmp
+      modules: ["apps/binapps/cp2k/6.1.0"]
+
+    dlpoly:
+      modules: ["compilers/intel/18.0.3"]
+
+    # these could be out of date
+    ferebus:
+      modules: ["compilers/intel/18.0.3"]
+
+    orca:
+      executable_path: $ORCA_HOME/orca
+      modules: ["apps/binapps/orca/5.0.3"]
+
+    pandora:
+      modules: ["mpi/intel-18.0/openmpi/4.0.1"]
+
+    # likely not needed
+    python:
+      modules: ["apps/anaconda3/5.2.0/bin"]
+
+    tyche:
+      modules: ["compilers/intel/18.0.3"]
