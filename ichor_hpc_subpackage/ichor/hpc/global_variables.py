@@ -13,6 +13,28 @@ from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
 
 
+def get_param_from_config(ichor_config: dict, *keys):
+    """Given a config and keys, this loops over
+
+    :param ichor_config: ichor read in config
+    :param keys: positional arguments which to pass to the config
+    """
+
+    # shallow copy should be fine because we are not modifying and inner objects
+    next_param = ichor_config.copy()
+
+    for k in keys:
+
+        next_param = next_param.get(k)
+
+        # if key is not there, get() will return None by default
+        if next_param is None:
+
+            return
+
+    return next_param
+
+
 def initialize_config(config_path):
     """
     Reads the ichor config file and sets up where to find modules and executables for programs.

@@ -8,6 +8,7 @@ from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
+from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -252,9 +253,13 @@ class AIMAllCommand(SubmissionCommand):
         Note that only ffluxlab has AIMAll as a module.
         For other machines, the AIMAll folder (containing scripts/executables)
         needs to be found in the home directory."""
-        return ichor.hpc.global_variables.ICHOR_CONFIG[
-            ichor.hpc.global_variables.MACHINE
-        ]["software"]["aimall"]["modules"]
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "aimall",
+            "modules",
+        )
 
     @classproperty
     def command(self) -> str:
@@ -262,9 +267,13 @@ class AIMAllCommand(SubmissionCommand):
         Note that only ffluxlab has AIMAll as a module.
         For other machines, the AIMAll folder (containing scripts/executables)
         needs to be found in the home directory."""
-        return ichor.hpc.global_variables.ICHOR_CONFIG[
-            ichor.hpc.global_variables.MACHINE
-        ]["software"]["aimall"]["executable_path"]
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "aimall",
+            "executable_path",
+        )
 
     @property
     def arguments(self) -> List[str]:

@@ -4,6 +4,7 @@ from typing import List
 import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
+from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 from ichor.hpc.submission_commands import GaussianCommand
 
@@ -36,15 +37,23 @@ class TycheCommand(SubmissionCommand):
     @classproperty
     def modules(self) -> list:
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
-        return ichor.hpc.global_variables.ICHOR_CONFIG[
-            ichor.hpc.global_variables.MACHINE
-        ]["software"]["tyche"]["modules"]
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "tyche",
+            "modules",
+        )
 
     @classproperty
     def command(self) -> str:
-        return ichor.hpc.global_variables.ICHOR_CONFIG[
-            ichor.hpc.global_variables.MACHINE
-        ]["software"]["tyche"]["executable_path"]
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "tyche",
+            "executable_path",
+        )
 
     @classproperty
     def ncores(self) -> int:

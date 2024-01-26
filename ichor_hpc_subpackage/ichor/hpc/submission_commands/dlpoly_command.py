@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import List
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.functools import classproperty
+from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -24,13 +27,25 @@ class DlpolyCommand(SubmissionCommand):
     @classproperty
     def modules(self) -> list:
         """No modules need to be loaded for DL POLY. DL POLY needs to be compiled before it can be used with ICHOR."""
-        return ""
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "dlpoly",
+            "modules",
+        )
 
     @property
     def command(self) -> str:
         """Return the command word that is used to run DL POLY. In this case, the path to the DL POLY
         executable is returned."""
-        return str(self.dlpoly_program_path.absolute())
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "dlpoly",
+            "executable_path",
+        )
 
     def repr(self, variables: List[str]) -> str:
         """Return a string that is used to construct DL POLY job files."""

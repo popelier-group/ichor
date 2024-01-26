@@ -4,6 +4,7 @@ from typing import List
 import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
+from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -44,10 +45,13 @@ class CP2KCommand(SubmissionCommand):
     def command(self) -> str:
         """Returns the command to be used to run CP2K. The command depends on the
         number of cores."""
-
-        ichor.hpc.global_variables.ICHOR_CONFIG[ichor.hpc.global_variables.MACHINE][
-            "software"
-        ]["cp2k"]["executable_path"]
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "cp2k",
+            "executable_path",
+        )
 
     def repr(self, variables: List[str]) -> str:
         """
