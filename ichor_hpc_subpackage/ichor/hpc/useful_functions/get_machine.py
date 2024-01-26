@@ -8,8 +8,10 @@ def init_machine(platform_name: str, ichor_config: dict) -> str:
         If the key is not found, then returns `"_default"` which would mean that default settings are used
     """
 
-    for k in ichor_config.keys():
+    if ichor_config:
 
-        if k in platform_name:
+        for k in ichor_config.keys():
 
-            return k
+            if k in platform_name:
+
+                return k
