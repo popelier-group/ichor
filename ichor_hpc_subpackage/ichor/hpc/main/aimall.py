@@ -52,7 +52,7 @@ def submit_points_directory_to_aimall(
 
     list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
 
-    ichor.hpc.global_variables.logger.info("Submitting wavefunctions to AIMAll.")
+    ichor.hpc.global_variables.LOGGER.info("Submitting wavefunctions to AIMAll.")
     return submit_wfns(
         list_of_wfn_paths,
         aimall_atoms=aimall_atoms,
@@ -82,7 +82,7 @@ def add_method_and_get_wfn_paths(points: PointsDirectory, method: str) -> List[P
                 wfns.append(point.wfn.path)
         else:
             warn(f"Wavefunction file of point {point.path} does not exist.")
-            ichor.hpc.global_variables.logger.info(
+            ichor.hpc.global_variables.LOGGER.info(
                 f"Wavefunction not found for {point.path}."
             )
     return wfns
@@ -133,7 +133,7 @@ def submit_wfns(
 
                 nsubmitted_jobs += 1
 
-        ichor.hpc.global_variables.logger.info(
+        ichor.hpc.global_variables.LOGGER.info(
             f"Adding {nsubmitted_jobs}/{len(wfns)} to {submission_script.path}. \
                                                {len(wfns)-nsubmitted_jobs} already have INTs calculated."
         )
@@ -141,9 +141,9 @@ def submit_wfns(
     # todo this will get executed when running from a compute node,
     # but this does not submit any wfns to aimall, it is just used to make the datafile.
     if len(submission_script.grouped_commands) > 0:
-        ichor.hpc.global_variables.logger.info(
+        ichor.hpc.global_variables.LOGGER.info(
             f"Submitting {len(submission_script.grouped_commands)} WFN(s) to AIMAll"
         )
         return submission_script.submit(hold=hold)
     else:
-        ichor.hpc.global_variables.logger("There are no jobs to submit.")
+        ichor.hpc.global_variables.LOGGER.info("There are no jobs to submit.")

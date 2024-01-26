@@ -143,10 +143,8 @@ FILE_STRUCTURE.add("AMBER", "amber", type_=FileType.Directory)
 # batch system on current machine
 BATCH_SYSTEM = init_batch_system()
 
-machine_hostname: str = platform.node()
-# will either contain a key from the config file
-# or be set to _default, which would indicate to use default settings
-MACHINE: str = init_machine(machine_hostname, ICHOR_CONFIG)
+# the MACHINE will be a key from the top layer of the config file
+MACHINE: str = init_machine(platform.node(), ICHOR_CONFIG)
 if not MACHINE:
     raise ValueError("The current machine is not defined in the config file.")
 
@@ -163,7 +161,7 @@ for p_env_name, values in ICHOR_CONFIG[MACHINE]["hpc"]["parallel_environments"].
     PARALLEL_ENVIRONMENT[p_env_name] = values
 
 # set up loggers
-logger = setup_logger("ICHOR", "ichor.log")
+LOGGER = setup_logger("ICHOR", "ichor.log")
 
 # set up script names that are implemented
 SCRIPT_NAMES = ScriptNames(

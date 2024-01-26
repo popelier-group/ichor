@@ -432,7 +432,7 @@ class SubmissionScript:
 
         else:
 
-            ichor.hpc.global_variables.logger.info(
+            ichor.hpc.global_variables.LOGGER.info(
                 f"Submission script{self.path} was not written out because there were no jobs to add to it."
             )
 

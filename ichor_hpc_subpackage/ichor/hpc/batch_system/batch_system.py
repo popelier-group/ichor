@@ -38,20 +38,20 @@ class BatchSystem(ABC):
             cmd += cls.hold_job(hold)
         cmd += [job_script]
 
-        ichor.hpc.global_variables.logger.debug(
+        ichor.hpc.global_variables.LOGGER.debug(
             f"Submitting Script Using Command: {' '.join(map(str, cmd))}"
         )
 
         stdout, stderr = run_cmd(
             cmd
         )  # this is the part which actually submits the job to  the queuing system
-        ichor.hpc.global_variables.logger.debug(
+        ichor.hpc.global_variables.LOGGER.debug(
             f"- stdout: '{stdout}' | stderr: '{stderr}'"
         )
         job_id = JobID(
             job_script, cls.parse_job_id(stdout)
         )  # stdout is parsed because this is where the job id is printed once a job is submitted
-        ichor.hpc.global_variables.logger.debug(f"- job_id: {job_id}")
+        ichor.hpc.global_variables.LOGGER.debug(f"- job_id: {job_id}")
         return job_id
 
     @classmethod
