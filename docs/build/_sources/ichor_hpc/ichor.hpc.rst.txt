@@ -10,7 +10,6 @@ Subpackages
    ichor.hpc.batch_system
    ichor.hpc.log
    ichor.hpc.main
-   ichor.hpc.modules
    ichor.hpc.molecular_dynamics
    ichor.hpc.submission_commands
    ichor.hpc.submission_script
@@ -23,14 +22,6 @@ ichor.hpc.global\_variables module
 ----------------------------------
 
 .. automodule:: ichor.hpc.global_variables
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ichor.hpc.machine module
-------------------------
-
-.. automodule:: ichor.hpc.machine
    :members:
    :undoc-members:
    :show-inheritance:

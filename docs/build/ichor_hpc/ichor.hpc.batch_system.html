@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_config_setup.html">Setting up ichor_config.yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
@@ -69,7 +70,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.log.html">ichor.hpc.log package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.main.html">ichor.hpc.main package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.modules.html">ichor.hpc.modules package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.molecular_dynamics.html">ichor.hpc.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_commands.html">ichor.hpc.submission_commands package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_script.html">ichor.hpc.submission_script package</a></li>
@@ -78,7 +78,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.global_variables">ichor.hpc.global_variables module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.machine">ichor.hpc.machine module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.submission_command">ichor.hpc.submission_command module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.uid">ichor.hpc.uid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc">Module contents</a></li>
@@ -397,16 +396,6 @@ or AIMALL jobs at the same time without having to submit
 <dd><p>Bases: <a class="reference internal" href="../ichor_core/ichor.core.common.types.html#ichor.core.common.types.range_dict.RangeDict" title="ichor.core.common.types.range_dict.RangeDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeDict</span></code></a></p>
 <p>A dictionary containing key:value pairs in which the key is a keyword used by the submission system to specify
 the number of cores and the value is a tuple containing a lower and upper bound for the number of cores. Once</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.hpc.batch_system.parallel_environment.ParallelEnvironments">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParallelEnvironments</span></span><a class="headerlink" href="#ichor.hpc.batch_system.parallel_environment.ParallelEnvironments" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-<p>A wrapper around multiple parallel environments.
-Essentially a dictionary whose values are <code class="docutils literal notranslate"><span class="pre">ParallelEnvironemnt</span></code> instances.
-This is used to get the specific keyword different machines (CSF3/FFLUXLAB,etc.)
-use for jobs running on multiple cores.</p>
 </dd></dl>
 
 </section>
@@ -940,16 +929,6 @@ or AIMALL jobs at the same time without having to submit
 <dd><p>Bases: <a class="reference internal" href="../ichor_core/ichor.core.common.types.html#ichor.core.common.types.range_dict.RangeDict" title="ichor.core.common.types.range_dict.RangeDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeDict</span></code></a></p>
 <p>A dictionary containing key:value pairs in which the key is a keyword used by the submission system to specify
 the number of cores and the value is a tuple containing a lower and upper bound for the number of cores. Once</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.hpc.batch_system.ParallelEnvironments">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParallelEnvironments</span></span><a class="headerlink" href="#ichor.hpc.batch_system.ParallelEnvironments" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-<p>A wrapper around multiple parallel environments.
-Essentially a dictionary whose values are <code class="docutils literal notranslate"><span class="pre">ParallelEnvironemnt</span></code> instances.
-This is used to get the specific keyword different machines (CSF3/FFLUXLAB,etc.)
-use for jobs running on multiple cores.</p>
 </dd></dl>
 
 <dl class="py class">

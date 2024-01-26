@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_config_setup.html">Setting up ichor_config.yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
@@ -57,7 +58,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.batch_system.html">ichor.hpc.batch_system package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.log.html">ichor.hpc.log package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.main.html">ichor.hpc.main package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.modules.html">ichor.hpc.modules package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.molecular_dynamics.html">ichor.hpc.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_commands.html">ichor.hpc.submission_commands package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_script.html">ichor.hpc.submission_script package</a></li>
@@ -73,7 +73,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.global_variables">ichor.hpc.global_variables module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.machine">ichor.hpc.machine module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.submission_command">ichor.hpc.submission_command module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.uid">ichor.hpc.uid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc">Module contents</a></li>
@@ -115,14 +114,23 @@
 <section id="module-ichor.hpc.useful_functions.get_machine">
 <span id="ichor-hpc-useful-functions-get-machine-module"></span><h2>ichor.hpc.useful_functions.get_machine module<a class="headerlink" href="#module-ichor.hpc.useful_functions.get_machine" title="Permalink to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.hpc.useful_functions.get_machine.get_machine_from_name">
-<span class="sig-name descname"><span class="pre">get_machine_from_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">platform_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.useful_functions.get_machine.get_machine_from_name" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="ichor.hpc.useful_functions.get_machine.init_machine">
-<span class="sig-name descname"><span class="pre">init_machine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">machine_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.html#ichor.hpc.machine.Machine" title="ichor.hpc.machine.Machine"><span class="pre">Machine</span></a></span></span><a class="headerlink" href="#ichor.hpc.useful_functions.get_machine.init_machine" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">init_machine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">platform_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ichor_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.hpc.useful_functions.get_machine.init_machine" title="Permalink to this definition"></a></dt>
+<dd><p>Loops through the keys of the config file, which contain the
+machine abbreviation/name which is also found in the platform name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>platform_name</strong> – The platform name given by <cite>platform.node()</cite></p></li>
+<li><p><strong>ichor_config</strong> – A dictionary of the ichor config file, containing names of machines as keys</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns key in config file which is contained in the platform name.
+If the key is not found, then returns <cite>“_default”</cite> which would mean that default settings are used</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-ichor.hpc.useful_functions.get_python_environment">
@@ -225,8 +233,22 @@ Then these strings can be executed with python -c</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ichor.hpc.useful_functions.init_machine">
-<span class="sig-name descname"><span class="pre">init_machine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">machine_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.hpc.html#ichor.hpc.machine.Machine" title="ichor.hpc.machine.Machine"><span class="pre">Machine</span></a></span></span><a class="headerlink" href="#ichor.hpc.useful_functions.init_machine" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">init_machine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">platform_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ichor_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#ichor.hpc.useful_functions.init_machine" title="Permalink to this definition"></a></dt>
+<dd><p>Loops through the keys of the config file, which contain the
+machine abbreviation/name which is also found in the platform name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>platform_name</strong> – The platform name given by <cite>platform.node()</cite></p></li>
+<li><p><strong>ichor_config</strong> – A dictionary of the ichor config file, containing names of machines as keys</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns key in config file which is contained in the platform name.
+If the key is not found, then returns <cite>“_default”</cite> which would mean that default settings are used</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 </section>

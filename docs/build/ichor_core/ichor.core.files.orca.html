@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_config_setup.html">Setting up ichor_config.yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
@@ -58,6 +59,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.database.html">ichor.core.database package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.files.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#submodules">Submodules</a></li>
@@ -76,7 +78,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.sql.html">ichor.core.sql package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
 </ul>
 </li>
@@ -169,7 +170,7 @@ no contents/options are written by user, they are written as the default values 
 charge: Optional[int] = None,
 spin_multiplicity: Optional[int] = None,
 atoms: Optional[Atoms] = None,
-<a href="#id1"><span class="problematic" id="id2">**</span></a>input_blocks: Dict[str, Union[str, List[str]]]</p></li>
+input_blocks: Dict[str, Union[str, List[str]]]</p></li>
 <li><p><strong>charge</strong> – The charge of the system</p></li>
 <li><p><strong>spin_multiplicity</strong> – The spin multiplicity of the system</p></li>
 <li><p><strong>atoms</strong> – An Atoms instance that contains the molecular structure</p></li>
@@ -328,7 +329,7 @@ no contents/options are written by user, they are written as the default values 
 charge: Optional[int] = None,
 spin_multiplicity: Optional[int] = None,
 atoms: Optional[Atoms] = None,
-<a href="#id3"><span class="problematic" id="id4">**</span></a>input_blocks: Dict[str, Union[str, List[str]]]</p></li>
+input_blocks: Dict[str, Union[str, List[str]]]</p></li>
 <li><p><strong>charge</strong> – The charge of the system</p></li>
 <li><p><strong>spin_multiplicity</strong> – The spin multiplicity of the system</p></li>
 <li><p><strong>atoms</strong> – An Atoms instance that contains the molecular structure</p></li>

@@ -48,6 +48,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_config_setup.html">Setting up ichor_config.yaml</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="calculating_features.html">Calculating Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="interfacing_ichor_with_other_comp_chem_packages.html">Interfacing ichor files with other Computational Chemistry Python packages</a></li>
@@ -247,7 +248,7 @@ urea0001 -225.081384781131
 <section id="Generating-CSV-files-with-Features-from-SQLite3-Database">
 <h2>Generating CSV files with Features from SQLite3 Database<a class="headerlink" href="#Generating-CSV-files-with-Features-from-SQLite3-Database" title="Permalink to this heading"></a></h2>
 <p>CSV files containing (ALF) features and relevant outputs can be generated from an SQLite3 database like so:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.sql.query_database</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ichor.core.database.sql.query_database</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_alf_from_first_db_geometry</span><span class="p">,</span>
     <span class="n">write_processed_data_for_atoms_parallel</span><span class="p">,</span>
     <span class="n">write_processed_data_for_atoms</span>

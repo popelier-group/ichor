@@ -1,4 +1,8 @@
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Union
+
+import ichor.hpc.global_variables
 
 from consolemenu.items import SubmenuItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
@@ -29,6 +33,23 @@ from ichor.cli.main_menu_submenus.trajectory_menu.trajectory_menu import (
 
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
+
+
+@dataclass
+class MainMenuMenuOptions(MenuOptions):
+    # defaults to the current working directory
+    selected_ichor_config_file: Path
+
+    def check_selected_points_directory_path(self) -> Union[str, None]:
+        """Checks whether the ichor_config.yaml is present in the user home directory."""
+        if not self.selected_ichor_config_file.exists():
+            return "The ichor_config.yaml file is not in the home directory!\nIt is required to use the menu system."
+
+
+# initialize dataclass for storing information for menu
+main_menu_menu_options = MainMenuMenuOptions(
+    ichor.hpc.global_variables.ICHOR_CONFIG_PATH
+)
 
 MAIN_MENU_DESCRIPTION = MenuDescription(
     "Main Menu", subtitle="Welcome to ichor's main menu!"

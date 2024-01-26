@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_config_setup.html">Setting up ichor_config.yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
@@ -57,7 +58,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.batch_system.html">ichor.hpc.batch_system package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.log.html">ichor.hpc.log package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.main.html">ichor.hpc.main package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.modules.html">ichor.hpc.modules package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.molecular_dynamics.html">ichor.hpc.molecular_dynamics package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.hpc.submission_commands package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -79,7 +79,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.global_variables">ichor.hpc.global_variables module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.machine">ichor.hpc.machine module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.submission_command">ichor.hpc.submission_command module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc.uid">ichor.hpc.uid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ichor.hpc.html#module-ichor.hpc">Module contents</a></li>
@@ -145,7 +144,7 @@ which aimall to integrate or an Atoms instance (from which the names will be obt
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.aimall_command.AIMAllCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'aimall'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.aimall_command.AIMAllCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.aimall_command.AIMAllCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -156,7 +155,7 @@ which aimall to integrate or an Atoms instance (from which the names will be obt
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.aimall_command.AIMAllCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{Machine.ffluxlab:</span> <span class="pre">['apps/aimall/19.02.13']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.aimall_command.AIMAllCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.aimall_command.AIMAllCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -721,7 +720,7 @@ order to run AIMALL correctly (with the appropriate settings).</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.amber_command.AmberCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/intel-17.0/amber/18-at19-may2019'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['amber/20.12-iomkl-2020.02-ambertools-21.12'],</span> <span class="pre">&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['apps/amber/18-at19']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.amber_command.AmberCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.amber_command.AmberCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -761,7 +760,7 @@ number of cores.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.cp2k_command.CP2KCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['apps/cp2k/6.1.0'],</span> <span class="pre">&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/cp2k/6.1.0']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.cp2k_command.CP2KCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.cp2k_command.CP2KCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -800,7 +799,7 @@ executable is returned.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.dlpoly_command.DlpolyCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.dlpoly_command.DlpolyCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.dlpoly_command.DlpolyCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -856,7 +855,7 @@ Default is None as it is set to the <cite>gjf_file_name</cite>.gau if not specif
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.gaussian_command.GaussianCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'g09'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.gaussian_command.GaussianCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.gaussian_command.GaussianCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -873,7 +872,7 @@ This is the data that is going to be written to the datafile.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.gaussian_command.GaussianCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/gaussian/g09d01_em64t'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['gaussian/g16c01_em64t_detectcpu'],</span> <span class="pre">&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['apps/gaussian/g09'],</span> <span class="pre">&lt;Machine.local:</span> <span class="pre">('local',</span> <span class="pre">False,</span> <span class="pre">False)&gt;:</span> <span class="pre">['test/gaussian/module']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.gaussian_command.GaussianCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.gaussian_command.GaussianCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -908,7 +907,7 @@ Default is None as it is set to the <cite>gjf_file_name</cite>.gau if not specif
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'orca'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -925,7 +924,7 @@ This is the data that is going to be written to the datafile.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.orca_command.OrcaCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/orca/5.0.3'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['orca/5.0.4-gompi-2021a'],</span> <span class="pre">&lt;Machine.local:</span> <span class="pre">('local',</span> <span class="pre">False,</span> <span class="pre">False)&gt;:</span> <span class="pre">['test/gaussian/module']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.orca_command.OrcaCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -955,7 +954,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.python_command.PythonCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/home/julian/.venv/ichor_paper_examples/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.python_command.PythonCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/home/julian/.venv/ichor_docs/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.python_command.PythonCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -992,7 +991,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 <p>todo: write docs</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.tyche_command.TycheCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.tyche_command.TycheCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.tyche_command.TycheCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1008,7 +1007,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.tyche_command.TycheCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['compilers/intel/18.0.3'],</span> <span class="pre">&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['compilers/intel/18.0.3'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['iomkl/2020.02']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.tyche_command.TycheCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.tyche_command.TycheCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1053,7 +1052,7 @@ which aimall to integrate or an Atoms instance (from which the names will be obt
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.AIMAllCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'aimall'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.AIMAllCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.AIMAllCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1064,7 +1063,7 @@ which aimall to integrate or an Atoms instance (from which the names will be obt
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.AIMAllCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{Machine.ffluxlab:</span> <span class="pre">['apps/aimall/19.02.13']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.AIMAllCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.AIMAllCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1099,7 +1098,7 @@ order to run AIMALL correctly (with the appropriate settings).</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.AmberCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/intel-17.0/amber/18-at19-may2019'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['amber/20.12-iomkl-2020.02-ambertools-21.12'],</span> <span class="pre">&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['apps/amber/18-at19']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.AmberCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.AmberCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1136,7 +1135,7 @@ number of cores.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.CP2KCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['apps/cp2k/6.1.0'],</span> <span class="pre">&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/cp2k/6.1.0']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.CP2KCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.CP2KCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1172,7 +1171,7 @@ executable is returned.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.DlpolyCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.DlpolyCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.DlpolyCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1203,7 +1202,7 @@ Default is None as it is set to the <cite>gjf_file_name</cite>.gau if not specif
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.GaussianCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'g09'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.GaussianCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.GaussianCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1220,7 +1219,7 @@ This is the data that is going to be written to the datafile.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.GaussianCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/gaussian/g09d01_em64t'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['gaussian/g16c01_em64t_detectcpu'],</span> <span class="pre">&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['apps/gaussian/g09'],</span> <span class="pre">&lt;Machine.local:</span> <span class="pre">('local',</span> <span class="pre">False,</span> <span class="pre">False)&gt;:</span> <span class="pre">['test/gaussian/module']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.GaussianCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.GaussianCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1252,7 +1251,7 @@ Default is None as it is set to the <cite>gjf_file_name</cite>.gau if not specif
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'orca'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1269,7 +1268,7 @@ This is the data that is going to be written to the datafile.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.OrcaCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['apps/binapps/orca/5.0.3'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['orca/5.0.4-gompi-2021a'],</span> <span class="pre">&lt;Machine.local:</span> <span class="pre">('local',</span> <span class="pre">False,</span> <span class="pre">False)&gt;:</span> <span class="pre">['test/gaussian/module']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.OrcaCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1296,7 +1295,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.PythonCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/home/julian/.venv/ichor_paper_examples/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.PythonCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'source</span> <span class="pre">/home/julian/.venv/ichor_docs/bin/activate'</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.PythonCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1324,7 +1323,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 <p>todo: write docs</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.TycheCommand.command">
-<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.TycheCommand.command" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.TycheCommand.command" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1340,7 +1339,7 @@ The length of <cite>variables</cite> is defined by the length of <cite>self.data
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ichor.hpc.submission_commands.TycheCommand.modules">
-<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;Machine.ffluxlab:</span> <span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)&gt;:</span> <span class="pre">['compilers/intel/18.0.3'],</span> <span class="pre">&lt;Machine.csf3:</span> <span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['compilers/intel/18.0.3'],</span> <span class="pre">&lt;Machine.csf4:</span> <span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)&gt;:</span> <span class="pre">['iomkl/2020.02']}</span></em><a class="headerlink" href="#ichor.hpc.submission_commands.TycheCommand.modules" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">modules</span></span><a class="headerlink" href="#ichor.hpc.submission_commands.TycheCommand.modules" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

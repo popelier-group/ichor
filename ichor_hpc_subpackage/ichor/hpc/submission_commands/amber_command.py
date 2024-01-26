@@ -1,9 +1,10 @@
 from pathlib import Path
 from typing import List
 
+import ichor.hpc.global_variables
+
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import AmberModules
-from ichor.hpc.modules.modules import Modules
+from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -36,9 +37,15 @@ class AmberCommand(SubmissionCommand):
         return False
 
     @classproperty
-    def modules(self) -> Modules:
+    def modules(self) -> list:
         """Returns the modules that need to be loaded in order for Gaussian to work on a specific machine"""
-        return AmberModules
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "amber",
+            "modules",
+        )
 
     @property
     def command(self) -> str:
@@ -51,7 +58,13 @@ class AmberCommand(SubmissionCommand):
         #     else f"mpirun -n {self.ncores} sander.MPI"
         # )
 
-        return "sander"
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "amber",
+            "executable_path",
+        )
 
     def repr(self, *args) -> str:
         """

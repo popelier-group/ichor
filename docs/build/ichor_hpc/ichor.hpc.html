@@ -10,7 +10,7 @@
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../_static/jquery.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -21,17 +21,17 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ichor.hpc.batch_system package" href="ichor.hpc.batch_system.html" />
-    <link rel="prev" title="ichor.core.useful_functions.dl_poly namespace" href="../ichor_core/ichor.core.useful_functions.dl_poly.html" /> 
+    <link rel="prev" title="ichor.core.useful_functions.dl_poly namespace" href="../ichor_core/ichor.core.useful_functions.dl_poly.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../index.html" class="icon icon-home">
             ichor
           </a>
@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_config_setup.html">Setting up ichor_config.yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
@@ -57,7 +58,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.batch_system.html">ichor.hpc.batch_system package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.log.html">ichor.hpc.log package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.main.html">ichor.hpc.main package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.hpc.modules.html">ichor.hpc.modules package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.molecular_dynamics.html">ichor.hpc.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_commands.html">ichor.hpc.submission_commands package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.hpc.submission_script.html">ichor.hpc.submission_script package</a></li>
@@ -65,23 +65,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ichor.hpc.global_variables">ichor.hpc.global_variables module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ichor.hpc.machine">ichor.hpc.machine module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ichor.hpc.machine.Machine"><code class="docutils literal notranslate"><span class="pre">Machine</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.Machine.csf3"><code class="docutils literal notranslate"><span class="pre">Machine.csf3</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.Machine.csf4"><code class="docutils literal notranslate"><span class="pre">Machine.csf4</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.Machine.ffluxlab"><code class="docutils literal notranslate"><span class="pre">Machine.ffluxlab</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.Machine.local"><code class="docutils literal notranslate"><span class="pre">Machine.local</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.Machine.submit_type"><code class="docutils literal notranslate"><span class="pre">Machine.submit_type</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#ichor.hpc.machine.MachineNotFound"><code class="docutils literal notranslate"><span class="pre">MachineNotFound</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ichor.hpc.machine.SubmitType"><code class="docutils literal notranslate"><span class="pre">SubmitType</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.SubmitType.DropCompute"><code class="docutils literal notranslate"><span class="pre">SubmitType.DropCompute</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.SubmitType.HoldQueueWait"><code class="docutils literal notranslate"><span class="pre">SubmitType.HoldQueueWait</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.machine.SubmitType.SubmitOnCompute"><code class="docutils literal notranslate"><span class="pre">SubmitType.SubmitOnCompute</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ichor.hpc.global_variables">ichor.hpc.global_variables module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ichor.hpc.global_variables.MissingIchorConfig"><code class="docutils literal notranslate"><span class="pre">MissingIchorConfig</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ichor.hpc.global_variables.get_param_from_config"><code class="docutils literal notranslate"><span class="pre">get_param_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ichor.hpc.global_variables.initialize_config"><code class="docutils literal notranslate"><span class="pre">initialize_config()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ichor.hpc.submission_command">ichor.hpc.submission_command module</a><ul>
@@ -96,7 +83,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#ichor.hpc.submission_command.SubmissionCommand.repr"><code class="docutils literal notranslate"><span class="pre">SubmissionCommand.repr()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#ichor.hpc.submission_command.SubmissionError"><code class="docutils literal notranslate"><span class="pre">SubmissionError</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ichor.hpc.uid">ichor.hpc.uid module</a><ul>
@@ -132,7 +118,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="ichor-hpc-package">
 <h1>ichor.hpc package<a class="headerlink" href="#ichor-hpc-package" title="Permalink to this heading"></a></h1>
 <section id="subpackages">
@@ -142,7 +128,6 @@
 <li class="toctree-l1"><a class="reference internal" href="ichor.hpc.batch_system.html">ichor.hpc.batch_system package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.hpc.log.html">ichor.hpc.log package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.hpc.main.html">ichor.hpc.main package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ichor.hpc.modules.html">ichor.hpc.modules package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.hpc.molecular_dynamics.html">ichor.hpc.molecular_dynamics package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.hpc.submission_commands.html">ichor.hpc.submission_commands package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ichor.hpc.submission_script.html">ichor.hpc.submission_script package</a></li>
@@ -155,68 +140,31 @@
 </section>
 <section id="module-ichor.hpc.global_variables">
 <span id="ichor-hpc-global-variables-module"></span><h2>ichor.hpc.global_variables module<a class="headerlink" href="#module-ichor.hpc.global_variables" title="Permalink to this heading"></a></h2>
-</section>
-<section id="module-ichor.hpc.machine">
-<span id="ichor-hpc-machine-module"></span><h2>ichor.hpc.machine module<a class="headerlink" href="#module-ichor.hpc.machine" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.hpc.machine.Machine">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Machine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.machine.Machine" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="../ichor_core/ichor.core.common.types.html#ichor.core.common.types.enum.Enum" title="ichor.core.common.types.enum.Enum"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
-<p>Enum which is used to define any machines that ICHOR is running on.
-This needs to be done because commands and settings change between different machines.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.Machine.csf3">
-<span class="sig-name descname"><span class="pre">csf3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('csf3.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)</span></em><a class="headerlink" href="#ichor.hpc.machine.Machine.csf3" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.Machine.csf4">
-<span class="sig-name descname"><span class="pre">csf4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('csf4.itservices.manchester.ac.uk',</span> <span class="pre">False,</span> <span class="pre">True)</span></em><a class="headerlink" href="#ichor.hpc.machine.Machine.csf4" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.Machine.ffluxlab">
-<span class="sig-name descname"><span class="pre">ffluxlab</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('ffluxlab.mib.manchester.ac.uk',</span> <span class="pre">True,</span> <span class="pre">False)</span></em><a class="headerlink" href="#ichor.hpc.machine.Machine.ffluxlab" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.Machine.local">
-<span class="sig-name descname"><span class="pre">local</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('local',</span> <span class="pre">False,</span> <span class="pre">False)</span></em><a class="headerlink" href="#ichor.hpc.machine.Machine.local" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.Machine.submit_type">
-<span class="sig-name descname"><span class="pre">submit_type</span></span><a class="headerlink" href="#ichor.hpc.machine.Machine.submit_type" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py exception">
-<dt class="sig sig-object py" id="ichor.hpc.machine.MachineNotFound">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MachineNotFound</span></span><a class="headerlink" href="#ichor.hpc.machine.MachineNotFound" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.hpc.global_variables.MissingIchorConfig">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MissingIchorConfig</span></span><a class="headerlink" href="#ichor.hpc.global_variables.MissingIchorConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception for missing ichor config file</p>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.hpc.machine.SubmitType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SubmitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.machine.SubmitType" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="../ichor_core/ichor.core.common.types.html#ichor.core.common.types.enum.Enum" title="ichor.core.common.types.enum.Enum"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
-<p>Enum holding information on various submission systems ichor implements</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.SubmitType.DropCompute">
-<span class="sig-name descname"><span class="pre">DropCompute</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;enum.auto</span> <span class="pre">object&gt;,</span> <span class="pre">True)</span></em><a class="headerlink" href="#ichor.hpc.machine.SubmitType.DropCompute" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.global_variables.get_param_from_config">
+<span class="sig-name descname"><span class="pre">get_param_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ichor_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.global_variables.get_param_from_config" title="Permalink to this definition"></a></dt>
+<dd><p>Given a config and keys, this loops over</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ichor_config</strong> – ichor read in config</p></li>
+<li><p><strong>keys</strong> – positional arguments which to pass to the config</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.SubmitType.HoldQueueWait">
-<span class="sig-name descname"><span class="pre">HoldQueueWait</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;enum.auto</span> <span class="pre">object&gt;,</span> <span class="pre">False)</span></em><a class="headerlink" href="#ichor.hpc.machine.SubmitType.HoldQueueWait" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.hpc.machine.SubmitType.SubmitOnCompute">
-<span class="sig-name descname"><span class="pre">SubmitOnCompute</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;enum.auto</span> <span class="pre">object&gt;,</span> <span class="pre">True)</span></em><a class="headerlink" href="#ichor.hpc.machine.SubmitType.SubmitOnCompute" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.hpc.global_variables.initialize_config">
+<span class="sig-name descname"><span class="pre">initialize_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.hpc.global_variables.initialize_config" title="Permalink to this definition"></a></dt>
+<dd><p>Reads the ichor config file and sets up where to find modules and executables for programs.</p>
 </dd></dl>
 
 </section>
@@ -269,12 +217,6 @@ This needs to be done because commands and settings change between different mac
 
 </dd></dl>
 
-<dl class="py exception">
-<dt class="sig sig-object py" id="ichor.hpc.submission_command.SubmissionError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SubmissionError</span></span><a class="headerlink" href="#ichor.hpc.submission_command.SubmissionError" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-</dd></dl>
-
 </section>
 <section id="module-ichor.hpc.uid">
 <span id="ichor-hpc-uid-module"></span><h2>ichor.hpc.uid module<a class="headerlink" href="#module-ichor.hpc.uid" title="Permalink to this heading"></a></h2>
@@ -291,40 +233,6 @@ nodes on CSF3 (which leads to the complexity of the file handling system).</p>
 </section>
 <section id="module-ichor.hpc">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.hpc" title="Permalink to this heading"></a></h2>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TODO: remove :)
-
-###############################################
-#.####..######..##.....##..#######..########..#
-#..##..##....##.##.....##.##.....##.##.....##.#
-#..##..##.......##.....##.##.....##.##.....##.#
-#..##..##.......#########.##.....##.########..#
-#..##..##.......##.....##.##.....##.##...##...#
-#..##..##....##.##.....##.##.....##.##....##..#
-#.####..######..##.....##..#######..##.....##.#
-###############################################
-
-Authors: Matthew Burn (matthew.burn@postgrad.manchester.ac.uk)
-        Yulian Manchev (yulian.manchev@postgrad.manchester.ac.uk)
-
-ICHOR is a gaussian process regression machine learning pipeline application
-for generating atomistic models for use in molecular dynamics simulations in
-the force field DL_FFLUX. ICHOR interfaces quantum chemical programs such as
-Gaussian, quantum chemical topology programs such as AIMAll and gaussian
-process regression software such as FEREBUS to make the generation of machine
-learning models as simple as possible.
-
-ICHOR has also been designed as a general purpose library for interfacing with
-many complex systems such as interfacing with input and output files from quantum
-chemistry programs, interfacing with the batch system to create and submit
-submission scripts as well as many other extremely common tasks for the computational
-chemist.
-
-Use and abuse all that ICHOR has to offer, there will be bugs but don&#39;t be afraid to
-jump into the code to try and fix it. Thanks to the hard work of Yulian, most of the
-code should be well documented but feel free to ask as many questions as you like
-we will be more than happy to help.
-</pre></div>
-</div>
 </section>
 </section>
 
@@ -345,7 +253,7 @@ we will be more than happy to help.
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -356,7 +264,7 @@ we will be more than happy to help.
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

@@ -12,11 +12,11 @@ Subpackages
    ichor.core.calculators
    ichor.core.common
    ichor.core.daemon
+   ichor.core.database
    ichor.core.files
    ichor.core.models
    ichor.core.molecular_dynamics
    ichor.core.multipoles
-   ichor.core.sql
    ichor.core.useful_functions
 
 Module contents

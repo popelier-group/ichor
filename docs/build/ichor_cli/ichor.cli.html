@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing ichor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ichor_config_setup.html">Setting up ichor_config.yaml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_core_examples_toc.html">Examples for ichor.core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc_examples_toc.html">Examples for ichor.hpc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
@@ -76,6 +77,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ichor.cli.global_menu_variables">ichor.cli.global_menu_variables module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ichor.cli.main_menu">ichor.cli.main_menu module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ichor.cli.main_menu.MainMenuMenuOptions"><code class="docutils literal notranslate"><span class="pre">MainMenuMenuOptions</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ichor.cli.main_menu.MainMenuMenuOptions.check_selected_points_directory_path"><code class="docutils literal notranslate"><span class="pre">MainMenuMenuOptions.check_selected_points_directory_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ichor.cli.main_menu.MainMenuMenuOptions.selected_ichor_config_file"><code class="docutils literal notranslate"><span class="pre">MainMenuMenuOptions.selected_ichor_config_file</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#ichor.cli.main_menu.MainMenuOptions"><code class="docutils literal notranslate"><span class="pre">MainMenuOptions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ichor.cli.main_menu.run_main_menu"><code class="docutils literal notranslate"><span class="pre">run_main_menu()</span></code></a></li>
 </ul>
@@ -232,6 +238,23 @@ have been modified by parent menus.</p>
 </section>
 <section id="module-ichor.cli.main_menu">
 <span id="ichor-cli-main-menu-module"></span><h2>ichor.cli.main_menu module<a class="headerlink" href="#module-ichor.cli.main_menu" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ichor.cli.main_menu.MainMenuMenuOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MainMenuMenuOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_ichor_config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.cli.main_menu.MainMenuMenuOptions" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ichor.cli.menu_options.MenuOptions" title="ichor.cli.menu_options.MenuOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">MenuOptions</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.cli.main_menu.MainMenuMenuOptions.check_selected_points_directory_path">
+<span class="sig-name descname"><span class="pre">check_selected_points_directory_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ichor.cli.main_menu.MainMenuMenuOptions.check_selected_points_directory_path" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether the ichor_config.yaml is present in the user home directory.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.cli.main_menu.MainMenuMenuOptions.selected_ichor_config_file">
+<span class="sig-name descname"><span class="pre">selected_ichor_config_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.cli.main_menu.MainMenuMenuOptions.selected_ichor_config_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="ichor.cli.main_menu.MainMenuOptions">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MainMenuOptions</span></span><a class="headerlink" href="#ichor.cli.main_menu.MainMenuOptions" title="Permalink to this definition"></a></dt>

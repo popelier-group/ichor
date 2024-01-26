@@ -4,7 +4,6 @@ from typing import List, Optional
 import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
-from ichor.hpc.modules import Modules
 from ichor.hpc.submission_command import SubmissionCommand
 
 
@@ -24,7 +23,7 @@ class PythonCommand(SubmissionCommand):
         self.args = args if args is not None else []
 
     @classproperty
-    def modules(self) -> Modules:
+    def modules(self) -> list:
         """Returns the python executable that the current ichor program is running from."""
         return ""
 
@@ -34,7 +33,8 @@ class PythonCommand(SubmissionCommand):
 
     @classproperty
     def command(self) -> str:
-        """For a Python command, this loads in the virtual environment"""
+        """For a Python command, this loads in the virtual environment. The same python environment is going to be used
+        as the one that is used for ichor."""
         # load in environment
         python_env = ichor.hpc.global_variables.CURRENT_PYTHON_ENVIRONMENT_PATH
         if python_env.uses_venv:

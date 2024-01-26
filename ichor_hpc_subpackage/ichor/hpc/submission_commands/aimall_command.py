@@ -8,9 +8,8 @@ from ichor.core.atoms import Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.files import WFN
-from ichor.hpc.machine import Machine
-from ichor.hpc.modules import AIMAllModules, Modules
-from ichor.hpc.submission_command import SubmissionCommand, SubmissionError
+from ichor.hpc.global_variables import get_param_from_config
+from ichor.hpc.submission_command import SubmissionCommand
 
 
 class UseTwoe(Enum):
@@ -145,14 +144,6 @@ class VerifyW(Enum):
     Only = "only"
 
 
-AIMAll_COMMANDS = {
-    Machine.csf3: "~/AIMAll/aimqb.ish",
-    Machine.csf4: "~/AIMAll/aimqb.ish",
-    Machine.ffluxlab: "aimall",
-    Machine.local: "aimall",
-}
-
-
 class AIMAllCommand(SubmissionCommand):
     """
     A class which is used to add AIMALL-related commands to a submission script.
@@ -249,12 +240,18 @@ class AIMAllCommand(SubmissionCommand):
         return [str(self.wfn_file.path.absolute()), str(self.aimall_output.absolute())]
 
     @classproperty
-    def modules(self) -> Modules:
+    def modules(self) -> list:
         """Returns a list of modules to be loaded for AIMAll.
         Note that only ffluxlab has AIMAll as a module.
         For other machines, the AIMAll folder (containing scripts/executables)
         needs to be found in the home directory."""
-        return AIMAllModules
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "aimall",
+            "modules",
+        )
 
     @classproperty
     def command(self) -> str:
@@ -262,13 +259,13 @@ class AIMAllCommand(SubmissionCommand):
         Note that only ffluxlab has AIMAll as a module.
         For other machines, the AIMAll folder (containing scripts/executables)
         needs to be found in the home directory."""
-
-        if ichor.hpc.global_variables.MACHINE not in AIMAll_COMMANDS.keys():
-            raise SubmissionError(
-                f"Command not defined for '{self.__name__}' on '{ichor.hpc.global_variables.MACHINE.name}'"
-            )
-
-        return AIMAll_COMMANDS[ichor.hpc.global_variables.MACHINE]
+        return get_param_from_config(
+            ichor.hpc.global_variables.ICHOR_CONFIG,
+            ichor.hpc.global_variables.MACHINE,
+            "software",
+            "aimall",
+            "executable_path",
+        )
 
     @property
     def arguments(self) -> List[str]:

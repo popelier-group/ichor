@@ -145,13 +145,13 @@ def submit_orca_to_compute(
 
                 number_of_jobs += 1
 
-        ichor.hpc.global_variables.logger.info(
+        ichor.hpc.global_variables.LOGGER.info(
             f"Added {number_of_jobs} / {len(orca_inputs)} ORCA jobs to {submission_script.path}"
         )
 
     # submit on compute node if there are files to submit
     if len(submission_script.grouped_commands) > 0:
-        ichor.hpc.global_variables.logger.info(
+        ichor.hpc.global_variables.LOGGER.info(
             f"Submitting {len(submission_script.grouped_commands)} ORCA jobs"
         )
         return submission_script.submit(hold=hold)

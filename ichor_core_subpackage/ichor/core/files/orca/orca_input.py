@@ -5,7 +5,6 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
 from ichor.core.common.pairwise import pairwise
 
-# from enum import Enum
 from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
@@ -22,7 +21,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
         atoms: Optional[Atoms] = None,
-        **input_blocks: Dict[str, Union[str, List[str]]]
+        input_blocks: Dict[str, Union[str, List[str]]]
     :param charge: The charge of the system
     :param spin_multiplicity: The spin multiplicity of the system
     :param atoms: An Atoms instance that contains the molecular structure

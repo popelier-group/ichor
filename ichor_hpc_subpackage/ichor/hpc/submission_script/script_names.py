@@ -12,8 +12,8 @@ from pathlib import Path
 
 
 class ScriptNames(dict):
-    """A helper class which retruns the full path of a particular script that is used to submit job files
-    for programs like Guassian and AIMALL. All the script files are stored into a directory
+    """A helper class which returns the full path of a particular script that is used to submit job files
+    for programs like Gaussian and AIMAll. All the script files are stored into a directory
     ichor.hpc.global_variables.FILE_STRUCTURE["scripts"].
     These scripts are submitted to compute nodes on CSF3/FFLUXLAB which initiates a job."""
 
@@ -43,7 +43,7 @@ class ScriptNames(dict):
             item
         )  # call dict __getitem__ method to get the script name (the value corresponding to the given key)
         # if an ichor script, you have to do ichor.hpc.global_variables.SCRIPT_NAMES["ichor"]["gaussian"] as
-        # ichor.hpc.global_variables.SCRIPT_NAMES["ichor"] retruns a ScriptNames type object
+        # ichor.hpc.global_variables.SCRIPT_NAMES["ichor"] returns a ScriptNames type object
         # then the second time this object is indexed with ["gaussian"], it will
         # be an instance of "str", so this if statement will be executed
         if isinstance(script, (str, Path)):

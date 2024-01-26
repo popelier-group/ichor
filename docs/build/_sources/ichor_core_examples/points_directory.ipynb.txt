@@ -209,7 +209,7 @@
     "CSV files containing (ALF) features and relevant outputs can be generated from an SQLite3 database like so:\n",
     "\n",
     "```python\n",
-    "from ichor.core.sql.query_database import (\n",
+    "from ichor.core.database.sql.query_database import (\n",
     "    get_alf_from_first_db_geometry,\n",
     "    write_processed_data_for_atoms_parallel,\n",
     "    write_processed_data_for_atoms\n",
