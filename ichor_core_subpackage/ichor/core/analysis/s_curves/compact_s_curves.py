@@ -7,9 +7,10 @@ import numpy as np
 import pandas as pd
 from ichor.core.analysis.predictions import get_true_predicted
 from ichor.core.common.constants import ha_to_kj_mol, multipole_names
-from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.core.common.sorting import ignore_alpha
 from ichor.core.files import PointsDirectory
 from ichor.core.models import Models
+from natsort import natsorted
 
 ascii_uppercase = list(ascii_uppercase)
 

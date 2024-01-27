@@ -4,10 +4,11 @@ from typing import Dict, List, Type, Union
 
 from ichor.core.common.functools import cached_property
 from ichor.core.common.io import mkdir, move
-from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.core.common.sorting import ignore_alpha
 from ichor.core.files.file import File
 from ichor.core.files.optional_content import OptionalContent
 from ichor.core.files.path_object import PathObject
+from natsort import natsorted
 
 
 class Directory(PathObject, ABC):
