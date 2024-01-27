@@ -15,7 +15,7 @@ from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.xyz import XYZ
 
 
-class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
+class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
     """
     A helper class that wraps around ONE directory which contains ONE point (one molecular geometry).
 

@@ -110,7 +110,7 @@ class AnnotatedDirectory(Directory, ABC):
         be set to. These classes are all subclassing from the `File` class.
         For example {'gjf': GJF,  'wfn': WFN}."""
         filetypes = {}
-        for f_name, f_class in self.contents:
+        for f_name, f_class in self.contents.items():
             # GJF and WFN are subclasses of File for example
             if issubclass(f_class, File):
                 filetypes[f_name] = f_class
@@ -123,7 +123,7 @@ class AnnotatedDirectory(Directory, ABC):
         be set to. These classes are all subclassing from the `Directory` class.
         For example {'ints': INTs}."""
         dirtypes = {}
-        for f_name, f_class in self.contents:
+        for f_name, f_class in self.contents.items():
             # GJF and WFN are subclasses of File
             if issubclass(f_class, Directory):
                 dirtypes[f_name] = f_class
@@ -133,21 +133,25 @@ class AnnotatedDirectory(Directory, ABC):
     def files(self) -> List[File]:
         """Return all objects which are contained in the `AnnotatedDirectory`
         instance and that subclass from `File` class."""
-        return [
-            getattr(self, var)
-            for var in vars(self)
-            if isinstance(getattr(self, var), File)
-        ]
+        f = []
+        for v in self.contents.keys():
+            obj_inst = getattr(self, v)
+            if isinstance(obj_inst, File):
+                f.append(obj_inst)
+
+        return f
 
     @property
     def directories(self) -> List[Directory]:
         """Return all objects which are contained in the `AnnotatedDirectory`
         instance and that subclass from `Directory` class."""
-        return [
-            getattr(self, var)
-            for var in vars(self)
-            if isinstance(getattr(self, var), Directory)
-        ]
+        f = []
+        for v in self.contents.keys():
+            obj_inst = getattr(self, v)
+            if isinstance(obj_inst, Directory):
+                f.append(obj_inst)
+
+        return f
 
     @property
     def path_objects(self) -> List[PathObject]:
@@ -164,8 +168,11 @@ class AnnotatedDirectory(Directory, ABC):
         because it needs information from parent directory). For example, an .int file needs access to the parent
         directory because it needs the whole geometry ot calculate the ALF. The same is done for directories.
         """
+
         if not self.exists():
-            return
+            raise FileNotFoundError(
+                f"{self.__class__.__name__} instance with path {self.path} not on disk."
+            )
 
         # set all to OptionalContent by default
         # in case a file/dir is being accessed, but it is not there

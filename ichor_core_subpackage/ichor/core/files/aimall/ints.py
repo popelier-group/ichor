@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Callable, Dict, Union
 
 import numpy as np
-from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.aimall.ab_int import AbInt
 from ichor.core.files.aimall.int import Int
 from ichor.core.files.directory import AnnotatedDirectory
@@ -56,35 +55,6 @@ class IntDirectory(HasData, AnnotatedDirectory):
         """Checks if the given Path instance has _atomicfiles in its name."""
         return path.name.endswith("_atomicfiles")
 
-    def _parse(self) -> None:
-        """Parse an *_atomicfiles directory and look for .int files. This method is
-        ran automatically when INTs is initialized. See Directory class which
-        this class subclasses from.
-
-        .. note::
-            This method does NOT read in information from the INT files (i.e. multipoles
-            and iqa data are not read in here). This method only finds the relevant files.
-            Once information is requested (i.e. multipoles or iqa are needed), the INT class
-            _read_file method reads in the data.
-        """
-        for f in self.iterdir():
-            if Int.check_path(f):
-                self.ints[f.stem.capitalize()] = Int(f)
-
-            elif AbInt.check_path(f):
-                a_atom, b_atom = f.stem.split("_")
-                a = a_atom.capitalize()
-                b = b_atom.capitalize()
-                self.interaction_ints[(a, b)] = AbInt(f)
-
-        # sort dictionary by index
-        self.sort()
-
-    def sort(self):
-        """Sorts keys of self by atom index e.g.
-        {'H2': , 'H3': , 'O1': } -> {'O1': , 'H2': , 'H3': }"""
-        dict.__init__(self, sorted(self.items(), key=lambda x: ignore_alpha(x[0])))
-
     def properties(self, C_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, float]]:
         """
         Returns a dictionary of dictionaries containing atom names as keys an a dictionary
@@ -130,7 +100,8 @@ class IntDirectory(HasData, AnnotatedDirectory):
         yield from self.values()
 
     def __str__(self):
-        return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(self.keys())}"
+        atm_names = [i.atom_name for i in self.ints]
+        return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(atm_names)}"
 
     def __getattr__(self, item):
         return {
