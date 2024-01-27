@@ -19,7 +19,7 @@ from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasData
 
 
-class GaussianOutput(HasAtoms, HasData, ReadFile):
+class GaussianOutput(ReadFile, HasAtoms, HasData):
     """Wraps around a .gau/.log file that is the output of Gaussian.
     This file contains coordinates (in Angstroms),
     forces, as well as molecular multipole moments.
@@ -31,15 +31,17 @@ class GaussianOutput(HasAtoms, HasData, ReadFile):
         self,
         path: Union[Path, str],
     ):
-        self.global_forces = FileContents
-        self.charge = FileContents
-        self.multiplicity = FileContents
-        self.atoms = FileContents
-        self.molecular_dipole = FileContents
-        self.molecular_quadrupole = FileContents
-        self.traceless_molecular_quadrupole = FileContents
-        self.molecular_octapole = FileContents
-        self.molecular_hexadecapole = FileContents
+
+        # TODO: potentially implement global_forces as np.array instead of dict
+        self.global_forces: dict = FileContents
+        self.charge: int = FileContents
+        self.multiplicity: int = FileContents
+        self.atoms: Atoms = FileContents
+        self.molecular_dipole: MolecularDipole = FileContents
+        self.molecular_quadrupole: MolecularDipole = FileContents
+        self.traceless_molecular_quadrupole: TracelessMolecularQuadrupole = FileContents
+        self.molecular_octapole: MolecularOctapole = FileContents
+        self.molecular_hexadecapole: MolecularHexadecapole = FileContents
         super(ReadFile, self).__init__(path)
 
     @classproperty
@@ -105,6 +107,21 @@ class GaussianOutput(HasAtoms, HasData, ReadFile):
             local_forces[atom_name] = AtomForce(*tmp)
 
         return local_forces
+
+    def rotated_forces(self, rotation_matrix: np.ndarray):
+        """Rotates forces gives a rotation_matrix
+
+        :param rotation_matrix: A 3x3 rotation matrix
+        """
+
+        rot_force_dict = {}
+
+        for atom_name, global_force in self.global_forces.items():
+            rot_force_dict[atom_name] = np.matmul(
+                rotation_matrix, np.array(global_force)
+            )
+
+        return rot_force_dict
 
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information.

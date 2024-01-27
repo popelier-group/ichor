@@ -104,13 +104,6 @@ class Int(HasData, ReadFile):
             **self.global_multipole_moments,
         }
 
-        # TODO: implement processing function for int
-        # return {
-        #     **{"iqa": self.iqa},
-        #     **{"integration_error": self.integration_error},
-        #     **self.local_spherical_multipoles(C),
-        # }
-
     @property
     def bond_critical_points(self) -> List[CriticalPoint]:
         """Returns list of bond critical points"""

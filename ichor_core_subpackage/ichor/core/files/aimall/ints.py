@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable, Dict, Union
+from typing import Dict, Union
 
 import numpy as np
 from ichor.core.files.aimall.ab_int import AbInt
@@ -37,18 +37,6 @@ class IntDirectory(HasData, AnnotatedDirectory):
             all_data.update(interactions_dict)
 
         return all_data
-
-    def processed_data(self, processing_func: Callable) -> dict:
-        """Processes all data and returns a dictionary of key: atom_name,
-        value: processed data for that atom from multiple int files.
-
-        At the moment, only A' data (encomp=3) can be processed.
-
-        :param processing_func: callable to be passed to Int file instance
-            which does the processing
-        """
-
-        return {i.atom_name: i.processed_data(processing_func) for i in self.ints}
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
