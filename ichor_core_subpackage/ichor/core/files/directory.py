@@ -69,8 +69,9 @@ class AnnotatedDirectory(Directory, ABC):
     """Abstract method for adding a parser for a Directory that
     has annotated files (such as GJF, INT, WFN). For example, look at the `PointDirectory` class."""
 
+    @property
     @abstractmethod
-    def _contents() -> dict:
+    def contents(self) -> dict:
         """Returns a dictionary, containing key: name of file (which is how one would access as attributes
          using dot  notation in Python), and value: Python class (such as GJF, INT, WFN),
 
@@ -78,6 +79,18 @@ class AnnotatedDirectory(Directory, ABC):
         in the instance.
         """
         ...
+
+    @property
+    def type_to_contents(self) -> dict:
+        """Returns a dictionary containing the class as keys and the attributes as values.
+        Reverses the self.contents attribute
+        """
+        return {v: k for k, v in self.contents}
+
+    @property
+    def _content_types(self) -> list:
+        """Returns a list of the classes which are contained in the AnnotatedDirectory"""
+        return list(self._contents.values())
 
     @cached_property
     def pathtypes(self) -> Dict[str, Type[PathObject]]:
@@ -90,7 +103,7 @@ class AnnotatedDirectory(Directory, ABC):
         be set to. These classes are all subclassing from the `File` class.
         For example {'gjf': GJF,  'wfn': WFN}."""
         filetypes = {}
-        for f_name, f_class in self.contents():
+        for f_name, f_class in self.contents:
             # GJF and WFN are subclasses of File for example
             if issubclass(f_class, File):
                 filetypes[f_name] = f_class
@@ -103,7 +116,7 @@ class AnnotatedDirectory(Directory, ABC):
         be set to. These classes are all subclassing from the `Directory` class.
         For example {'ints': INTs}."""
         dirtypes = {}
-        for f_name, f_class in self.contents():
+        for f_name, f_class in self.contents:
             # GJF and WFN are subclasses of File
             if issubclass(f_class, Directory):
                 dirtypes[f_name] = f_class
@@ -129,10 +142,11 @@ class AnnotatedDirectory(Directory, ABC):
             if isinstance(getattr(self, var), Directory)
         ]
 
+    @property
     def path_objects(self) -> List[PathObject]:
         """Returns a list of PathObjects corresponding to files and directories
         that are in the instance of AnnotatedDirectory."""
-        return self.files() + self.directories()
+        return self.files + self.directories
 
     def _parse(self):
         """

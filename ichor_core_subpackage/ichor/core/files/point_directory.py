@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional, Type, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from ichor.core.atoms import Atoms, AtomsNotFoundError
 from ichor.core.atoms.alf import ALF
@@ -9,7 +9,7 @@ from ichor.core.files import OrcaInput, OrcaOutput
 from ichor.core.files.aimall import AIM, INTs
 from ichor.core.files.directory import AnnotatedDirectory
 
-from ichor.core.files.file_data import HasAtoms, HasData, PointDirectoryProperties
+from ichor.core.files.file_data import HasAtoms, HasData
 from ichor.core.files.gaussian import GaussianOutput, GJF, WFN
 from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.xyz import XYZ
@@ -30,7 +30,8 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
         """Makes sure the path exists and is a directory."""
         return path.exists() and path.is_dir()
 
-    def _contents(self):
+    @property
+    def contents(self):
         """
         Inner contents of the directory. The keys of this dictionary will be accessible as attributes
         and the values (the classes) are going to be used to parse the files.
@@ -50,22 +51,60 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
         }
 
     @property
-    def raw_data(self) -> List[str]:
-        # TODO: implement this so that it returns
-        return INTs.property_names + WFN.property_names
+    def raw_data(self) -> Dict[str]:
+
+        all_data = {}
+
+        for attr_name in self.contents.keys():
+            # all contents which subclass from HasData should have raw_data attribute implemented
+            attr = getattr(self, attr_name)
+            if isinstance(attr, HasData):
+                d = attr.raw_data
+                all_data[attr_name] = d
+
+        return all_data
 
     # TODO: implement processed_data
-    def processed_data(self, params_for_processing: dict):
+    def processed_data(self, processing_instructions: Dict[HasData, Callable]):
         """Pass in a dictionary with keys: Python classes (of files/directories, eg. GJF, INTs)
-          for which processing needs to be done, and values: a dictionary containing
+        and values being functions (could also be lambda functions)
+        which tell how to process the data that is found in the instance of the given class.
 
-        :param params_for_processing: _description_
-        :type params_for_processing: dict
-        :raises FileNotFoundError: _description_
-        :raises AtomsNotFoundError: _description_
-        :return: _description_
-        :rtype: _type_
+        return a dictionary of key: attribute name as a string, and value: a dictionary
+        containing the processed data for that file/directory
         """
+
+        # check that data can actually be obtained for the classes that are given
+        for cls in processing_instructions.keys():
+            if not issubclass(cls, HasData):
+                raise ValueError(f"The class {cls.__name__} does not contain data.")
+
+        all_processed_data = {}
+
+        # inverse the class to str from self.contents
+        cls_to_attr_name_dict = self.type_to_contents
+
+        # loop over the classes we want to get data for
+        # they might only be a few of the many files we have in the directory
+        for cls in processing_instructions.keys():
+            # get the instance of that specific class that is held inside the PointDirectory
+            attr_as_str = cls_to_attr_name_dict.get(cls)
+            # if the attribute does not exist for some reason, maybe the wrong class is given
+            if not attr_as_str:
+                raise ValueError(
+                    f"The type of file is not found in the instance of {self.__class__.__name__}."
+                )
+
+            # we checked all classes have data before, so no need to check again
+            obj_with_data = getattr(self, attr_as_str)
+            # check if the object actually exists, because it might not be present on disk
+            if obj_with_data:
+                processed_data = obj_with_data.processed_data(
+                    processing_instructions[cls]
+                )
+                all_processed_data[attr_as_str] = processed_data
+
+        return all_processed_data
 
     @property
     def atoms(self) -> Atoms:
@@ -81,29 +120,7 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
             f"There is no .xyz file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
         )
 
-        # possibly remove these priorities as XYZ should always exist in the directory.
-        # if .xyz does not exist, then .atoms attribute might not exist as well
-        # so there would be no need to subclass from HasAtoms, but that depends on what you use the code for
-
-        # always try to get atoms from wfn file first because the wfn file contains the final geometry.
-        # you can run into the issue where you did an optimization (so .xyz/gjf are different from wfn)
-        # then predictions - true will be way off because you are predicting on different geometries
-
-        # file_priorities = [XYZ, WFN, GJF]
-
-        # for f in file_priorities:
-        #     for f_inst in self.files():
-        #         if isinstance(f_inst, f):
-        #             return f_inst.atoms
-
-        # # in case file priorities does not have the class
-        # for f in self.files():
-        #     if isinstance(f, HasAtoms):
-        #         return f.atoms
-
-        # raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
-
-    def atoms_from_file(self, file_with_atoms: Type[HasAtoms]) -> Atoms:
+    def atoms_from_file(self, file_with_atoms: HasAtoms) -> Atoms:
         """Given a class (which is in the contents of the directory), obtain
         the Atoms instance from that specific file which is wrapped by the class.
 
@@ -136,15 +153,15 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
             self.xyz = XYZ(self.xyz.path, atms)
 
     # TODO: move to processed_data
-    def properties(
-        self, system_alf: Optional[List[ALF]] = None
-    ) -> PointDirectoryProperties:
+    def properties(self, system_alf: Optional[List[ALF]] = None):
         """Get properties contained in the PointDirectory. IF
         no system alf is passed in, an automatic process to get C matrices is started.
 
         :param system_alf: Optional list of `ALF` instances that can be
             passed in to use a specific alf instead of automatically trying to compute it.
         """
+
+        # TODO: remove this automatic things, everything automatic should be in data_processing package
 
         if not system_alf:
             # TODO: The default alf calculator (the cahn ingold prelog one) should accept
@@ -168,9 +185,8 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
         else:
             gaussian_output_properties = {}
 
-        return PointDirectoryProperties(
-            merge(wfn_properties, ints_properties, gaussian_output_properties)
-        )
+        return merge(wfn_properties, ints_properties, gaussian_output_properties)
 
     def __repr__(self):
-        return str(self.path)
+        """Returns string representation, including class name and path"""
+        return self.__class__.__name__ + f'"{str(self.path)}"'

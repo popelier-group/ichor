@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 from ichor.core.atoms import Atom
 from ichor.core.atoms.alf import ALF
-
-from ichor.core.common.dict import find_in_inner_dicts, unwrap_single_entry
 
 
 class HasAtoms(ABC):
@@ -202,59 +200,28 @@ class HasData(ABC):
 
     @property
     @abstractmethod
+    def raw_data(self) -> dict:
+        """Returns the raw data associated with the current object.
+
+        :return: _description_
+        :rtype: dict
+        """
+        pass
+
+    @property
+    @abstractmethod
     def property_names(self) -> List[str]:
         """Returns a list of strings corresponding to property names that the object should have"""
-        ...
+        pass
 
-    # can be used to make sure either a method or property with name `properties` exists
     @abstractmethod
-    def properties(self) -> Dict[str, Any]:
-        ...
+    def processed_data(self, *args, **kwargs) -> dict:
+        """Processed data is some way, given any arguments and key words arguments,
+        and returns a dictionary of the processed data, with keys
+        """
+        pass
 
-
-class PointDirectoryProperties(dict):
-    """Wraps around a PointDirectory dictionary containing properties (things we plan to machine learn)
-    to be able to index it in a certain way"""
-
-    def __init__(self, data: dict):
-
-        super().__init__(data)
-
-    def __getitem__(self, key: str) -> dict:
-
-        # if in keys, we can directly return it
-        if key in self.keys():
-            return super().__getitem__(key)
-
-        # if not in keys, then recursively search.
-        # cannot use find function because that results in recursion (as find calls this __getitem__)
-        return unwrap_single_entry(find_in_inner_dicts(key, self))
-
-
-class PointsDirectoryProperties(dict):
-    """Wraps around a PointsDirectory dictionary containing properties (things we plan to machine learn)
-    to be able to index it in a certain way"""
-
-    def __init__(self, data: dict):
-
-        super().__init__(data)
-
-    def __getitem__(self, key: str) -> dict:
-
-        # if in keys, we can directly return it
-        # this will be used if key is a directory name in PointsDirectory
-        if key in self.keys():
-            return super().__getitem__(key)
-
-        res = {}
-        for point_dir_name, point_dir_properties in self.items():
-
-            if key in point_dir_properties.keys():
-                res[point_dir_name] = point_dir_properties[key]
-
-            else:
-                res[point_dir_name] = unwrap_single_entry(
-                    find_in_inner_dicts(key, point_dir_properties)
-                )
-
-        return res
+    @abstractmethod
+    def properties(self, *args, **kwargs) -> dict:
+        """Alias for processed data"""
+        return self.processed_data(*args, **kwargs)
