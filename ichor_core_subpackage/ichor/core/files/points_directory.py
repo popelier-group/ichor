@@ -20,7 +20,6 @@ from ichor.core.database.sql import (
 )
 from ichor.core.files import GJF
 from ichor.core.files.directory import Directory
-from ichor.core.files.file_data import PointsDirectoryProperties
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.xyz import Trajectory, XYZ
 
@@ -153,13 +152,13 @@ class PointsDirectory(ListOfAtoms, Directory):
 
     def properties(
         self, system_alf: Optional[List[ALF]] = None, specific_property: str = None
-    ) -> PointsDirectoryProperties:
+    ):
         """Get properties contained in the PointDirectory.
         IF no system alf is passed in, an automatic process to get C matrices is started.
 
         :param system_alf: Optional list of `ALF` instances that can be passed in
             to use a specific alf instead of automatically trying to compute it.
-        :param key: return only a specific key from the returned PointsDirectoryProperties dictionary
+        :param key: return only a specific key from the returned dictionary
         """
 
         if not system_alf:
@@ -171,8 +170,6 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         for point in self:
             points_dir_properties[point.name] = point.properties(system_alf)
-
-        points_dir_properties = PointsDirectoryProperties(points_dir_properties)
 
         if specific_property:
             return points_dir_properties[specific_property]

@@ -15,14 +15,12 @@ class FFLUXDirectory(AnnotatedDirectory):
     :param path: Path to FFLUX Directory
     """
 
-    def _contents() -> dict:
-
-        return {
-            "fflux_file": DlPolyFFLUX,
-            "iqa_energies_file": DlPolyIQAEnergies,
-            "iqa_forces_file": DlPolyIQAForces,
-            "history_file": DlpolyHistory,
-        }
+    contents = {
+        "fflux_file": DlPolyFFLUX,
+        "iqa_energies_file": DlPolyIQAEnergies,
+        "iqa_forces_file": DlPolyIQAForces,
+        "history_file": DlpolyHistory,
+    }
 
     @property
     def iqa_energies(self) -> np.ndarray:

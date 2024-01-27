@@ -6,8 +6,8 @@ from ichor.core.files.pandora.mout import MOUT
 
 
 class MorfiDirectory(AnnotatedDirectory):
-    def _contents() -> dict:
-        return {"mout": MOUT}
+
+    contents = {"mout": MOUT}
 
     @classproperty
     def dirname(self) -> str:

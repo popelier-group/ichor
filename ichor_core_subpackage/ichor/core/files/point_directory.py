@@ -44,7 +44,7 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
         return path.exists() and path.is_dir()
 
     @property
-    def raw_data(self) -> Dict[str]:
+    def raw_data(self) -> dict:
 
         all_data = {}
 

@@ -81,9 +81,7 @@ class AnnotatedDirectory(Directory, ABC):
 
     # from https://stackoverflow.com/a/53769173
     def __init_subclass__(cls, **kwargs):
-        try:
-            getattr(cls, "contents")
-        except TypeError:
+        if not getattr(cls, "contents"):
             raise TypeError(
                 f"Can't instantiate abstract class {cls.__name__} without 'contents' class variable defined."
             )

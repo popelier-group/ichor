@@ -12,8 +12,8 @@ class MorfiWFN(WFN):
 
 
 class PySCFDirectory(AnnotatedDirectory):
-    def _contents():
-        return {"morfi_wfn": MorfiWFN, "aimall_wfn": WFN}
+
+    contents = {"morfi_wfn": MorfiWFN, "aimall_wfn": WFN}
 
     @classproperty
     def dirname(self) -> str:

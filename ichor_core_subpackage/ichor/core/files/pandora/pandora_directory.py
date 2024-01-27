@@ -9,8 +9,8 @@ from ichor.core.files.pandora.pyscf_output import PySCFDirectory
 
 
 class PandoraDirectory(HasAtoms, AnnotatedDirectory):
-    def _contents() -> dict:
-        return {"input": PandoraInput, "pyscf": PySCFDirectory, "morfi": MorfiDirectory}
+
+    contents = {"input": PandoraInput, "pyscf": PySCFDirectory, "morfi": MorfiDirectory}
 
     def write(self):
         if not self.exists():
