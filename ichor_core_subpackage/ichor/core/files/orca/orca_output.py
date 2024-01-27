@@ -16,10 +16,10 @@ from ichor.core.common.types.multipole_moments import (
 
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents, ReadFile
-from ichor.core.files.file_data import HasAtoms, HasProperties
+from ichor.core.files.file_data import HasAtoms, HasData
 
 
-class OrcaOutput(HasAtoms, HasProperties, ReadFile):
+class OrcaOutput(HasAtoms, HasData, ReadFile):
     """Wraps around a .gau/.log file that is the output of Gaussian.
     This file contains coordinates (in Angstroms),
     forces, as well as molecular multipole moments.

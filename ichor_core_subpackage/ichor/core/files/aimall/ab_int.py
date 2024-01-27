@@ -3,13 +3,13 @@ from typing import Dict, Union
 
 from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile
-from ichor.core.files.file_data import HasProperties
+from ichor.core.files.file_data import HasData
 
 
-class ABINT(HasProperties, ReadFile):
+class ABINT(HasData, ReadFile):
     def __init__(self, path: Union[str, Path]):
         ReadFile.__init__(self, path)
-        HasProperties.__init__(self)
+        HasData.__init__(self)
 
         self.a: str = FileContents
         self.b: str = FileContents

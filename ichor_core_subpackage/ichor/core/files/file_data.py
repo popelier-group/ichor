@@ -195,7 +195,7 @@ class HasAtoms(ABC):
         return super().__getitem__(s)
 
 
-class HasProperties(ABC):
+class HasData(ABC):
     """
     Class used to describe a file containing properties/data for a particular geometry
     """

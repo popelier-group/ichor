@@ -6,6 +6,7 @@ from ichor.core.common.functools import cached_property
 from ichor.core.common.io import mkdir, move
 from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
 from ichor.core.files.file import File
+from ichor.core.files.optional_content import OptionalContent
 from ichor.core.files.path_object import PathObject
 
 
@@ -29,6 +30,13 @@ class Directory(PathObject, ABC):
 
         .. note::
             This is not reading the files just finding the paths to the files and setup the directory structure
+        """
+        pass
+
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        """
+        Implement if the path of the directory needs to be checked if it contains something specific
         """
         pass
 
@@ -61,6 +69,16 @@ class AnnotatedDirectory(Directory, ABC):
     """Abstract method for adding a parser for a Directory that
     has annotated files (such as GJF, INT, WFN). For example, look at the `PointDirectory` class."""
 
+    @abstractmethod
+    def _contents() -> dict:
+        """Returns a dictionary, containing key: name of file (which is how one would access as attributes
+         using dot  notation in Python), and value: Python class (such as GJF, INT, WFN),
+
+        :return: dictionary consisting of files/directories and respective classes which are potentially going to be
+        in the instance.
+        """
+        ...
+
     @cached_property
     def pathtypes(self) -> Dict[str, Type[PathObject]]:
         return {**self.filetypes, **self.dirtypes}
@@ -72,16 +90,10 @@ class AnnotatedDirectory(Directory, ABC):
         be set to. These classes are all subclassing from the `File` class.
         For example {'gjf': GJF,  'wfn': WFN}."""
         filetypes = {}
-        if hasattr(self, "__annotations__"):
-            for var, type_ in self.__annotations__.items():
-                if hasattr(
-                    type_, "__args__"
-                ):  # Optional typing contains a list of typings
-                    type_ = type_.__args__[0]
-
-                # GJF and WFN are subclasses of File for example
-                if issubclass(type_, File):
-                    filetypes[var] = type_
+        for f_name, f_class in self.contents():
+            # GJF and WFN are subclasses of File for example
+            if issubclass(f_class, File):
+                filetypes[f_name] = f_class
         return filetypes
 
     @cached_property
@@ -91,18 +103,13 @@ class AnnotatedDirectory(Directory, ABC):
         be set to. These classes are all subclassing from the `Directory` class.
         For example {'ints': INTs}."""
         dirtypes = {}
-        if hasattr(self, "__annotations__"):
-            for var, type_ in self.__annotations__.items():
-                if hasattr(
-                    type_, "__args__"
-                ):  # Optional typing contains a list of typings
-                    type_ = type_.__args__[0]
-
-                # GJF and WFN are subclasses of File
-                if issubclass(type_, Directory):
-                    dirtypes[var] = type_
+        for f_name, f_class in self.contents():
+            # GJF and WFN are subclasses of File
+            if issubclass(f_class, Directory):
+                dirtypes[f_name] = f_class
         return dirtypes
 
+    @property
     def files(self) -> List[File]:
         """Return all objects which are contained in the `AnnotatedDirectory`
         instance and that subclass from `File` class."""
@@ -112,6 +119,7 @@ class AnnotatedDirectory(Directory, ABC):
             if isinstance(getattr(self, var), File)
         ]
 
+    @property
     def directories(self) -> List[Directory]:
         """Return all objects which are contained in the `AnnotatedDirectory`
         instance and that subclass from `Directory` class."""
@@ -138,6 +146,12 @@ class AnnotatedDirectory(Directory, ABC):
         if not self.exists():
             return
 
+        # set all to OptionalContent by default
+        # in case a file/dir is being accessed, but it is not there
+        for var, pathtype in self.pathtypes.items():
+            setattr(self, var, OptionalContent)
+
+        # loop over contents of AnnotatedDirectory and assign attributes depending on file suffixes
         for f in self.path.iterdir():
             # iterate over the filetypes dictionary {"gjf": GJF, "wfn": WFN,......}
             for var, pathtype in self.pathtypes.items():

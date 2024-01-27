@@ -10,7 +10,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.types import VarReprMixin
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import File, FileContents, ReadFile
-from ichor.core.files.file_data import HasAtoms, HasProperties
+from ichor.core.files.file_data import HasAtoms, HasData
 
 Quadrature = namedtuple("Quadrature", ["rad", "theta", "phi"])
 
@@ -314,7 +314,7 @@ def read_ccp(
 
 
 class MOUT(
-    HasAtoms, HasProperties, ReadFile, File
+    HasAtoms, HasData, ReadFile, File
 ):  # GeometryDataFile, AtomicDict, File): # todo sort this
     nnuc: Optional[int]
     nbcp: Optional[int]

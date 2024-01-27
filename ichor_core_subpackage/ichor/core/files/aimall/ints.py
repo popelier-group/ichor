@@ -7,10 +7,10 @@ from ichor.core.common.sorting.natsort import ignore_alpha
 from ichor.core.files.aimall.ab_int import ABINT
 from ichor.core.files.aimall.int import INT
 from ichor.core.files.directory import Directory
-from ichor.core.files.file_data import HasProperties
+from ichor.core.files.file_data import HasData
 
 
-class INTs(HasProperties, dict, Directory):
+class INTs(HasData, dict, Directory):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files

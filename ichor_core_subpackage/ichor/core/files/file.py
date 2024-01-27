@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from ichor.core.common.functools import buildermethod, classproperty
-from ichor.core.common.io import move, remove
+from ichor.core.common.io import move
 from ichor.core.common.types import NoStr
 from ichor.core.files.path_object import PathObject
 
@@ -78,11 +78,6 @@ class File(PathObject, ABC):
             # pathlib's Path class uses / operator to add to the path
             dst /= self.path.name
         move(self.path, dst)
-
-    def remove(self):
-        """Removes file from disk."""
-
-        remove(self.path)
 
     @contextmanager
     def block(self):

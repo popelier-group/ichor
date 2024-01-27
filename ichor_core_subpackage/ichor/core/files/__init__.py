@@ -14,7 +14,7 @@ from ichor.core.files.dl_poly import (
 )
 
 # gaussian files
-from ichor.core.files.gaussian import GaussianOut, GJF, WFN, WFX
+from ichor.core.files.gaussian import GaussianOutput, GJF, WFN, WFX
 
 # md (amber) simulation files
 from ichor.core.files.mol2 import Mol2
@@ -45,7 +45,7 @@ __all__ = [
     "GJF",
     "WFN",
     "WFX",
-    "GaussianOut",
+    "GaussianOutput",
     "OrcaInput",
     "OrcaEngrad",
     "OrcaOutput",

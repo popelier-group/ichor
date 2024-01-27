@@ -8,7 +8,7 @@ from ichor.core.common.itertools import chunker
 from ichor.core.common.str import split_by
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents, FileState, ReadFile, WriteFile
-from ichor.core.files.file_data import HasAtoms, HasProperties
+from ichor.core.files.file_data import HasAtoms, HasData
 
 
 class MolecularOrbital:
@@ -27,7 +27,7 @@ class MolecularOrbital:
         self.primitives = primitives
 
 
-class WFN(HasAtoms, HasProperties, ReadFile, WriteFile):
+class WFN(HasAtoms, HasData, ReadFile, WriteFile):
     """Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
     an output file, so it does not have a write method.
 

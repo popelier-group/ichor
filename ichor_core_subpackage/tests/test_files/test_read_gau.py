@@ -5,7 +5,7 @@ import pytest
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.units import AtomicDistance
 
-from ichor.core.files import GaussianOut
+from ichor.core.files import GaussianOutput
 from ichor.core.files.gaussian.gaussian_out import (
     AtomForce,
     MolecularDipole,
@@ -57,7 +57,7 @@ def _test_read_gau(
 ):
     """Test function for .gau/.log Gaussian output file."""
 
-    gau_file = GaussianOut(gau_path)
+    gau_file = GaussianOutput(gau_path)
 
     _assert_atomic_forces(gau_file.global_forces, forces)
     _assert_val_optional(gau_file.charge, charge)

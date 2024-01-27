@@ -5,111 +5,137 @@ from ichor.core.atoms import Atoms, AtomsNotFoundError
 from ichor.core.atoms.alf import ALF
 from ichor.core.calculators import default_alf_calculator
 from ichor.core.common.dict import merge
-from ichor.core.common.functools import classproperty
-from ichor.core.common.io import remove
 from ichor.core.files import OrcaInput, OrcaOutput
 from ichor.core.files.aimall import AIM, INTs
 from ichor.core.files.directory import AnnotatedDirectory
-from ichor.core.files.file import ReadFile
 
-from ichor.core.files.file_data import HasAtoms, HasProperties, PointDirectoryProperties
-from ichor.core.files.gaussian import GaussianOut, GJF, WFN
-from ichor.core.files.optional_file import OptionalFile, OptionalPath
+from ichor.core.files.file_data import HasAtoms, HasData, PointDirectoryProperties
+from ichor.core.files.gaussian import GaussianOutput, GJF, WFN
 from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.xyz import XYZ
 
 
-class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
+class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
     """
     A helper class that wraps around ONE directory which contains ONE point (one molecular geometry).
 
     :param path: Path to a directory which contains ONE point.
-
-    Attributes:
-        cls.gjf Optional[GJF]: Used when iterating over __annotations__
-        cls.wfn Optional[WFN]: Used when iterating over __annotations__
-        cls.ints Optional[INTs]: Used when iterating over __annotations__
     """
-
-    xyz: OptionalPath[XYZ] = OptionalFile
-    gjf: OptionalPath[GJF] = OptionalFile
-    orca_input: OptionalPath[OrcaInput] = OptionalFile
-    orca_output: OptionalPath[OrcaOutput] = OptionalFile
-    gaussian_out: OptionalPath[GaussianOut] = OptionalFile
-    aim: OptionalPath[AIM] = OptionalFile
-    wfn: OptionalPath[WFN] = OptionalFile
-    ints: OptionalPath[INTs] = OptionalFile
-    pandora_input: OptionalPath[PandoraInput] = OptionalFile
-    pandora: OptionalPath[PandoraDirectory] = OptionalFile
 
     def __init__(self, path: Union[Path, str]):
         AnnotatedDirectory.__init__(self, path)
 
-    def _read_file(self, *args, **kwargs):
-        for f in self.path_objects():
-            if isinstance(f, ReadFile):
-                f.read(*args, **kwargs)
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        """Makes sure the path exists and is a directory."""
+        return path.exists() and path.is_dir()
 
-    def _parse(self):
-        super()._parse()  # call AnnotatedDirectory.parse method
-        if not self.xyz:
-            for f in self.files():
-                if isinstance(f, HasAtoms):
-                    if isinstance(f, WFN):
-                        atoms = f.atoms.to_angstroms()
-                        self.xyz = XYZ(
-                            Path(self.path) / (self.path.name + XYZ.filetype),
-                            atoms=atoms,
-                        )
-                    else:
-                        self.xyz = XYZ(
-                            Path(self.path) / (self.path.name + XYZ.filetype),
-                            atoms=f.atoms,
-                        )
-                    self.xyz.write()
+    def _contents(self):
+        """
+        Inner contents of the directory. The keys of this dictionary will be accessible as attributes
+        and the values (the classes) are going to be used to parse the files.
+        """
 
-    @classproperty
-    def property_names(self) -> List[str]:
+        return {
+            "xyz": XYZ,
+            "gaussian_input": GJF,
+            "gaussian_output": GaussianOutput,
+            "orca_input": OrcaInput,
+            "orca_output": OrcaOutput,
+            "aim": AIM,
+            "wfn": WFN,
+            "ints": INTs,
+            "pandora_input": PandoraInput,
+            "pandora_directory": PandoraDirectory,
+        }
+
+    @property
+    def raw_data(self) -> List[str]:
+        # TODO: implement this so that it returns
         return INTs.property_names + WFN.property_names
+
+    # TODO: implement processed_data
+    def processed_data(self, params_for_processing: dict):
+        """Pass in a dictionary with keys: Python classes (of files/directories, eg. GJF, INTs)
+          for which processing needs to be done, and values: a dictionary containing
+
+        :param params_for_processing: _description_
+        :type params_for_processing: dict
+        :raises FileNotFoundError: _description_
+        :raises AtomsNotFoundError: _description_
+        :return: _description_
+        :rtype: _type_
+        """
 
     @property
     def atoms(self) -> Atoms:
         """Returns the `Atoms` instance which the `PointDirectory` encapsulates."""
+
+        # we should always have an xyz file, so just return the atoms from there
+        # this is likely the best solution, so that we always know what is returned
+        # and will error out if an xyz is not present
+        if self.xyz:
+            return self.xyz.atoms
+
+        raise FileNotFoundError(
+            f"There is no .xyz file in the current {self.__class__.__name__} instance: {self.path.absolute()}"
+        )
+
+        # possibly remove these priorities as XYZ should always exist in the directory.
+        # if .xyz does not exist, then .atoms attribute might not exist as well
+        # so there would be no need to subclass from HasAtoms, but that depends on what you use the code for
+
         # always try to get atoms from wfn file first because the wfn file contains the final geometry.
         # you can run into the issue where you did an optimization (so .xyz/gjf are different from wfn)
         # then predictions - true will be way off because you are predicting on different geometries
 
-        file_priorities = [XYZ, WFN, GJF, OrcaInput]
+        # file_priorities = [XYZ, WFN, GJF]
 
-        for f in file_priorities:
-            for f_inst in self.files():
-                if isinstance(f_inst, f):
-                    return f_inst.atoms
+        # for f in file_priorities:
+        #     for f_inst in self.files():
+        #         if isinstance(f_inst, f):
+        #             return f_inst.atoms
 
-        # in case file priorities does not have the class
-        for f in self.files():
-            if isinstance(f, HasAtoms):
-                return f.atoms
+        # # in case file priorities does not have the class
+        # for f in self.files():
+        #     if isinstance(f, HasAtoms):
+        #         return f.atoms
 
-        raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
+        # raise AtomsNotFoundError(f"'atoms' not found for point '{self.path}'")
 
     def atoms_from_file(self, file_with_atoms: Type[HasAtoms]) -> Atoms:
-        for f in self.files():
+        """Given a class (which is in the contents of the directory), obtain
+        the Atoms instance from that specific file which is wrapped by the class.
+
+        :param file_with_atoms: file class which subclasses from HasAtoms
+            and has a ``.atoms`` attribute
+        :raises AtomsNotFoundError: If file class does not contain atoms
+        :return: _description_
+        :rtype: Atoms
+        """
+        for f in self.files:
+            # try to return atoms
             if isinstance(f, file_with_atoms):
-                return f.atoms
-        raise AtomsNotFoundError(
-            f" {file_with_atoms.__class__.__name__} file does not contain atoms."
-        )
+                try:
+                    return f.atoms
+                # if for some reason the given file does not have atoms attribute
+                except AttributeError:
+                    raise AtomsNotFoundError(
+                        f" {file_with_atoms.__class__.__name__} file does not contain atoms."
+                    )
 
     @atoms.setter
-    def atoms(self, value: Atoms):
-        if value:
+    def atoms(self, atms: Atoms):
+        """Overwrites the current .xyz file with the atoms info that is passed in.
+
+        :param atms: An atoms instance containing geometry information
+        """
+        if atms:
             if not self.xyz.exists():
                 self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
-            self.xyz = XYZ(self.xyz.path, value)
-        else:
-            raise ValueError(f"Cannot set `atoms` to the given value: {value}.")
+            self.xyz = XYZ(self.xyz.path, atms)
 
+    # TODO: move to processed_data
     def properties(
         self, system_alf: Optional[List[ALF]] = None
     ) -> PointDirectoryProperties:
@@ -145,32 +171,6 @@ class PointDirectory(HasAtoms, HasProperties, AnnotatedDirectory):
         return PointDirectoryProperties(
             merge(wfn_properties, ints_properties, gaussian_output_properties)
         )
-
-    # todo: make this more robust, check for any of the files inside
-    @classmethod
-    def check_path(cls, path: Path) -> bool:
-        return path.exists() and path.is_dir()
-
-    @classproperty
-    def ignore_file_stem(self) -> Path:
-        return Path("ignore")
-
-    @property
-    def ignore_file(self) -> Path:
-        return self.path / PointDirectory.ignore_file_stem
-
-    @property
-    def should_ignore(self) -> bool:
-        return self.ignore_file.exists()
-
-    def ignore(self, reason: Optional[str] = None):
-        with open(self.ignore_file, "a") as f:
-            if reason is not None:
-                f.write(reason)
-
-    def stop_ignore(self):
-        if self.ignore_file.exists():
-            remove(self.ignore_file)
 
     def __repr__(self):
         return str(self.path)

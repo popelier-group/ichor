@@ -6,7 +6,6 @@ from ichor.core.files.dl_poly import (
     DlPolyIQAEnergies,
     DlPolyIQAForces,
 )
-from ichor.core.files.optional_file import OptionalFile, OptionalPath
 
 
 class FFLUXDirectory(AnnotatedDirectory):
@@ -16,10 +15,14 @@ class FFLUXDirectory(AnnotatedDirectory):
     :param path: Path to FFLUX Directory
     """
 
-    fflux_file: OptionalPath[DlPolyFFLUX] = OptionalFile
-    iqa_energies_file: OptionalPath[DlPolyIQAEnergies] = OptionalFile
-    iqa_forces_file: OptionalPath[DlPolyIQAForces] = OptionalFile
-    history_file: OptionalPath[DlpolyHistory] = OptionalFile
+    def _contents() -> dict:
+
+        return {
+            "fflux_file": DlPolyFFLUX,
+            "iqa_energies_file": DlPolyIQAEnergies,
+            "iqa_forces_file": DlPolyIQAForces,
+            "history_file": DlpolyHistory,
+        }
 
     @property
     def iqa_energies(self) -> np.ndarray:
