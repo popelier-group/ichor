@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 import numpy as np
 
@@ -44,11 +44,20 @@ class GaussianOutput(HasAtoms, HasData, ReadFile):
 
     @classproperty
     def filetype(self) -> str:
-        return ".gau"
+        return ".gaussianoutput"
 
-    @classproperty
-    def property_names(self) -> List[str]:
-        return ["forces"]
+    @property
+    def raw_data(self) -> dict:
+        return {
+            "global_forces": self.global_forces,
+            "charge": self.charge,
+            "multiplicity": self.multiplicity,
+            "molecular_dipole": self.molecular_dipole,
+            "molecular_quadrupole": self.molecular_quadrupole,
+            "traceless_molecular_quadrupole": self.traceless_molecular_quadrupole,
+            "molecular_octapole": self.molecular_octapole,
+            "molecular_hexadecapole": self.molecular_hexadecapole,
+        }
 
     # TODO: rotation of Gaussian forces not needed in FFLUX, can directly learn Gaussian forces
     # TODO: FFLUX predicts directly in the global frame so IQA forces should be the same as Gaussian forces

@@ -1,5 +1,5 @@
 # aimall files
-from ichor.core.files.aimall import ABINT, AIM, INT, INTs
+from ichor.core.files.aimall import AbInt, Aim, Int, IntDirectory
 
 # dlpoly files
 from ichor.core.files.dl_poly import (
@@ -39,9 +39,10 @@ from ichor.core.files.xyz import Trajectory, XYZ
 
 
 __all__ = [
-    "INT",
-    "INTs",
-    "AIM",
+    "Int",
+    "AbInt",
+    "IntDirectory",
+    "Aim",
     "GJF",
     "WFN",
     "WFX",
@@ -66,5 +67,4 @@ __all__ = [
     "PySCFDirectory",
     "MorfiDirectory",
     "PandoraDirectory",
-    "ABINT",
 ]

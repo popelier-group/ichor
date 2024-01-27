@@ -7,7 +7,7 @@ from ichor.core.common.functools import classproperty
 from ichor.core.common.itertools import chunker
 from ichor.core.common.str import split_by
 from ichor.core.common.units import AtomicDistance
-from ichor.core.files.file import FileContents, FileState, ReadFile, WriteFile
+from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms, HasData
 
 
@@ -29,7 +29,9 @@ class MolecularOrbital:
 
 class WFN(HasAtoms, HasData, ReadFile, WriteFile):
     """Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
-    an output file, so it does not have a write method.
+    an output file, but must also implement a write method because
+    AIMAll needs to know the method used in the WFN calculation, otherwise
+    AIMAll can give the wrong results.
 
     :param path: Path object or string to the .wfn file
     :param atoms: an Atoms instance which is read in from the top of the .wfn file.
@@ -76,6 +78,19 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
         self.molecular_orbitals = FileContents
         self.total_energy = FileContents
         self.virial_ratio = FileContents
+
+    @classproperty
+    def filetype(cls) -> str:
+        """Returns the file extension of a WFN file"""
+        return ".wfn"
+
+    @classproperty
+    def property_names(self) -> List[str]:
+        return ["energy", "wfn"]
+
+    @property
+    def raw_data(self) -> Dict[str, float]:
+        return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
 
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information.
@@ -174,35 +189,6 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
         self.total_energy = self.total_energy or total_energy
         self.virial_ratio = self.virial_ratio or virial_ratio
-
-    @classproperty
-    def filetype(cls) -> str:
-        """Returns the file extension of a WFN file"""
-        return ".wfn"
-
-    @classproperty
-    def property_names(self) -> List[str]:
-        return ["energy", "wfn"]
-
-    @property
-    def properties(self) -> Dict[str, float]:
-        return {"energy": self.total_energy, "virial_ratio": self.virial_ratio}
-
-    def _check_values_before_writing(self):
-        """This check is just here so that the file is read before attempting to write the file.
-        This is to prevent a situation where the original file has not been read yet,
-        but a new file with the same path is being written
-        (so therefore the new file is empty and all the data has been
-        lost and has not been read in into an instance yet).
-
-        ..note::
-            Even though the file could already be read in and some attributes might be modified by the user,
-            reading the file a second time prior to writing will not change any user attributes because of the
-            way the read file is written (i.e. any user-set attributes are kept even after the file is read again).
-        """
-        # TODO: potentially make this the default for WriteFile._check_values_before_writing
-        if self.state == FileState.Unread:
-            self.read()
 
     def _write_file(self, path: Path):
         """Write method needs to be implemented because the correct functional needs to be added to the .wfn file,

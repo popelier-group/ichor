@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 import pytest
 from ichor.core.common.types.itypes import T
-from ichor.core.files import INT, XYZ
+from ichor.core.files import Int, XYZ
 from ichor.core.files.aimall.int import CriticalPoint, CriticalPointType
 
 from tests.path import get_cwd
@@ -60,7 +60,7 @@ def _test_int(
     """Tests original .int file from AIMALL is being read in correctly. No json
     file is generated anymore for .int files, so this is not tested."""
 
-    int_file_instance = INT(int_file_path)
+    int_file_instance = Int(int_file_path)
 
     _assert_val_optional(int_file_instance.atom_name, atom_name)
     _assert_val_optional(int_file_instance.atom_num, atom_num)

@@ -198,6 +198,8 @@ class HasData(ABC):
     Class used to describe a file containing properties/data for a particular geometry
     """
 
+    # TODO: maybe implement a general way for raw_data depending on attributes are set as FileContents,
+    # TODO: however when the file is read, that no longer works, so do not thing that is a good idea.
     @property
     @abstractmethod
     def raw_data(self) -> dict:
@@ -208,20 +210,16 @@ class HasData(ABC):
         """
         pass
 
-    @property
-    @abstractmethod
-    def property_names(self) -> List[str]:
-        """Returns a list of strings corresponding to property names that the object should have"""
-        pass
-
-    @abstractmethod
-    def processed_data(self, *args, **kwargs) -> dict:
+    def processed_data(self, processing_func, *args, **kwargs) -> dict:
         """Processed data is some way, given any arguments and key words arguments,
         and returns a dictionary of the processed data, with keys
         """
-        pass
+        return processing_func(self, *args, **kwargs)
 
-    @abstractmethod
-    def properties(self, *args, **kwargs) -> dict:
-        """Alias for processed data"""
-        return self.processed_data(*args, **kwargs)
+    @property
+    def data_names(self) -> List[str]:
+        """Returns a list of strings corresponding to data names that the object should have.
+        These names can be used as keys in raw_data or processed_data to obtain values.
+        Note that values might be other dictionaries.
+        """
+        return list(self.raw_data.keys())

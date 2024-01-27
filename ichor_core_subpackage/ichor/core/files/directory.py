@@ -67,18 +67,27 @@ class Directory(PathObject, ABC):
 
 class AnnotatedDirectory(Directory, ABC):
     """Abstract method for adding a parser for a Directory that
-    has annotated files (such as GJF, INT, WFN). For example, look at the `PointDirectory` class."""
+    has annotated files (such as GJF, Int, WFN). For example, look at the `PointDirectory` class.
 
-    @property
-    @abstractmethod
-    def contents(self) -> dict:
-        """Returns a dictionary, containing key: name of file (which is how one would access as attributes
-         using dot  notation in Python), and value: Python class (such as GJF, INT, WFN),
+    .. note::
+        If multiple files with the same extensions are found, they will be stored in a list instead,
+        so accessing an attribute might return a list if multiple files are found
+        with the same extension
+    """
 
-        :return: dictionary consisting of files/directories and respective classes which are potentially going to be
-        in the instance.
-        """
-        ...
+    # must returns a dictionary, containing key: name of file (which is how one would access as attributes
+    # using dot  notation in Python), and value: Python class (such as GJF, INT, WFN),
+    contents = None
+
+    # from https://stackoverflow.com/a/53769173
+    def __init_subclass__(cls, **kwargs):
+        try:
+            getattr(cls, "contents")
+        except TypeError:
+            raise TypeError(
+                f"Can't instantiate abstract class {cls.__name__} without 'contents' class variable defined."
+            )
+        return super().__init_subclass__(**kwargs)
 
     @property
     def type_to_contents(self) -> dict:
@@ -165,12 +174,32 @@ class AnnotatedDirectory(Directory, ABC):
         for var, pathtype in self.pathtypes.items():
             setattr(self, var, OptionalContent)
 
-        # loop over contents of AnnotatedDirectory and assign attributes depending on file suffixes
-        for f in self.path.iterdir():
-            # iterate over the filetypes dictionary {"gjf": GJF, "wfn": WFN,......}
-            for var, pathtype in self.pathtypes.items():
+        dir_contents = list(self.path.iterdir())
+
+        # TODO: not sure how much this will slow down, as we are looping over contents
+        # multiple times
+
+        # iterate over the filetypes dictionary {"gjf": GJF, "wfn": WFN,......}
+        for var, pathtype in self.pathtypes.items():
+            # make a list of files/directories that match the same pattern
+            list_with_same_extension = []
+            # loop over contents of the directory and assign attributes depending on file suffixes
+            for f in dir_contents:
                 # if the suffix of the file matches the suffix of the class
                 if pathtype.check_path(f):
-                    # set attributes for the object which wrap around a file (such as .gjf, .wfn, etc.)
-                    setattr(self, var, pathtype(f))
-                    break
+                    # append file object to list
+                    list_with_same_extension.append(pathtype(f))
+
+            # if the list is not empty, then assign attribute
+            # if list is empty, keep as OptionalContent
+            if list_with_same_extension:
+                # if only one element is found, then attribute is going to be an instance
+                if len(list_with_same_extension) == 1:
+                    setattr(self, var, list_with_same_extension[0])
+
+                # if multiple elements in list, then attribute is going to be a list of instances
+                else:
+                    setattr(self, var, list_with_same_extension)
+
+            # set to empty list for next class
+            list_with_same_extension = []

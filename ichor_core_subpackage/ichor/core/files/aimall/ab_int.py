@@ -6,17 +6,24 @@ from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasData
 
 
-class ABINT(HasData, ReadFile):
+class AbInt(HasData, ReadFile):
     def __init__(self, path: Union[str, Path]):
         ReadFile.__init__(self, path)
         HasData.__init__(self)
 
         self.a: str = FileContents
         self.b: str = FileContents
-
         self.iqa_diatomic_contributions: Dict[str, float] = FileContents
-
         self.total_time: int = FileContents
+
+    @property
+    def raw_data(self) -> dict:
+        return {
+            "a": self.a,
+            "b": self.b,
+            "iqa_diatomic_contributions": self.iqa_diatomic_contributions,
+            "total_time": self.total_time,
+        }
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
@@ -25,13 +32,6 @@ class ABINT(HasData, ReadFile):
     @classproperty
     def filetype(self) -> str:
         return ".int"
-
-    @property
-    def properties(self) -> Dict[str, float]:
-        return self.iqa_diatomic_contributions
-
-    def property_names(self):
-        return None
 
     @property
     def e_inter(self):

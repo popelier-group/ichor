@@ -6,7 +6,7 @@ from ichor.core.atoms.alf import ALF
 from ichor.core.calculators import default_alf_calculator
 from ichor.core.common.dict import merge
 from ichor.core.files import OrcaInput, OrcaOutput
-from ichor.core.files.aimall import AIM, INTs
+from ichor.core.files.aimall import Aim, IntDirectory
 from ichor.core.files.directory import AnnotatedDirectory
 
 from ichor.core.files.file_data import HasAtoms, HasData
@@ -22,6 +22,19 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
     :param path: Path to a directory which contains ONE point.
     """
 
+    contents = {
+        "xyz": XYZ,
+        "gaussian_input": GJF,
+        "gaussian_output": GaussianOutput,
+        "orca_input": OrcaInput,
+        "orca_output": OrcaOutput,
+        "aim": Aim,
+        "wfn": WFN,
+        "ints": IntDirectory,
+        "pandora_input": PandoraInput,
+        "pandora_directory": PandoraDirectory,
+    }
+
     def __init__(self, path: Union[Path, str]):
         AnnotatedDirectory.__init__(self, path)
 
@@ -29,26 +42,6 @@ class PointDirectory(HasAtoms, HasData, AnnotatedDirectory):
     def check_path(cls, path: Path) -> bool:
         """Makes sure the path exists and is a directory."""
         return path.exists() and path.is_dir()
-
-    @property
-    def contents(self):
-        """
-        Inner contents of the directory. The keys of this dictionary will be accessible as attributes
-        and the values (the classes) are going to be used to parse the files.
-        """
-
-        return {
-            "xyz": XYZ,
-            "gaussian_input": GJF,
-            "gaussian_output": GaussianOutput,
-            "orca_input": OrcaInput,
-            "orca_output": OrcaOutput,
-            "aim": AIM,
-            "wfn": WFN,
-            "ints": INTs,
-            "pandora_input": PandoraInput,
-            "pandora_directory": PandoraDirectory,
-        }
 
     @property
     def raw_data(self) -> Dict[str]:

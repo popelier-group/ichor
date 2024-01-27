@@ -10,12 +10,12 @@ from ichor.core.common.types.forces import AtomForce
 
 # from enum import Enum
 from ichor.core.files.file import FileContents, ReadFile
-from ichor.core.files.file_data import HasAtoms
+from ichor.core.files.file_data import HasAtoms, HasData
 
 nuclear_charge2type = {int(v): k for k, v in type2nuclear_charge.items()}
 
 
-class OrcaEngrad(ReadFile, HasAtoms):
+class OrcaEngrad(ReadFile, HasAtoms, HasData):
     """
     Reads file containing the gradient calculated by ORCA.
 
@@ -39,6 +39,10 @@ class OrcaEngrad(ReadFile, HasAtoms):
     @classproperty
     def filetype(self) -> str:
         return ".engrad"
+
+    @property
+    def raw_data(self) -> dict:
+        return {"global_forces": self.global_forces, "total_energy": self.total_energy}
 
     @property
     def gradient(self) -> np.ndarray:

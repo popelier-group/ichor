@@ -27,49 +27,33 @@ class AimAtom:
         self.integration_error = integration_error
 
 
-class AIM(ReadFile, dict):
+class Aim(ReadFile, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
     def __init__(
         self,
         path: Path,
-        license_check_succeeded: Optional[bool] = FileContents,
-        version: Version = FileContents,
-        wfn_path: Path = FileContents,
-        extout_path: Optional[Path] = FileContents,
-        mgp_path: Optional[Path] = FileContents,
-        mgpviz_path: Optional[Path] = FileContents,
-        sum_path: Optional[Path] = FileContents,
-        sumviz_path: Optional[Path] = FileContents,
-        nproc: int = FileContents,
-        nacps: int = FileContents,
-        nnacps: int = FileContents,
-        nbcps: int = FileContents,
-        nrcps: int = FileContents,
-        nccps: int = FileContents,
-        output_file: Path = FileContents,
-        cwd: Path = FileContents,
     ):
         super(ReadFile, self).__init__(path)
         dict.__init__(self)
 
-        self.license_check_succeeded = license_check_succeeded
-        self.version = version
-        self.wfn_path = wfn_path
-        self.extout_path = extout_path
-        self.mgp_path = mgp_path
-        self.mgpviz_path = mgpviz_path
-        self.sum_path = sum_path
-        self.sumviz_path = sumviz_path
-        self.nproc = nproc
-        self.nacps = nacps
-        self.nnacps = nnacps
-        self.nbcps = nbcps
-        self.nrcps = nrcps
-        self.nccps = nccps
-        self.output_file = output_file
-        self.cwd = cwd
+        self.license_check_succeeded: Optional[bool] = FileContents
+        self.version: Version = FileContents
+        self.wfn_path: Path = FileContents
+        self.extout_path: Path = FileContents
+        self.mgp_path: Path = FileContents
+        self.mgpviz_path: Path = FileContents
+        self.sum_path: Path = FileContents
+        self.sumviz_path: Path = FileContents
+        self.nproc: int = FileContents
+        self.nacps: int = FileContents
+        self.nnacps: int = FileContents
+        self.nbcps: int = FileContents
+        self.nrcps: int = FileContents
+        self.nccps: int = FileContents
+        self.output_file: Path = FileContents
+        self.cwd: Path = FileContents
 
     @classproperty
     def filetype(self) -> str:
