@@ -119,7 +119,13 @@ class IntDirectory(HasData, AnnotatedDirectory):
 
         # look at int first
         if "_" not in pattern:
-            return self.ints[pattern]
+            for i in self.ints:
+                if i.atom_name == pattern:
+                    return i
 
         # if pattern is not found here as well, it will raise KeyError
-        return self.interaction_ints[pattern]
+        for i in self.interaction_ints:
+            if f"{i.a}_{i.b}" == pattern:
+                return i
+
+        raise KeyError(f"The key {pattern} is the A' int or AB int files.")
