@@ -4,7 +4,7 @@ from typing import List, Optional
 import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
-from ichor.core.files import GaussianOut
+from ichor.core.files import GaussianOutput
 from ichor.hpc.global_variables import get_param_from_config
 
 # from ichor.hpc.submission_script.check_manager import CheckManager
@@ -32,7 +32,7 @@ class GaussianCommand(SubmissionCommand):
     ):
         self.gjf_file = gjf_file
         # .gau file used to store the output from Gaussian
-        self.gjf_output = gjf_output or gjf_file.with_suffix(GaussianOut.filetype)
+        self.gjf_output = gjf_output or gjf_file.with_suffix(GaussianOutput.filetype)
 
     @classproperty
     def modules(self) -> list:

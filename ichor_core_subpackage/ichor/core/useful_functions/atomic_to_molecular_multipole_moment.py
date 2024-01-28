@@ -1,7 +1,7 @@
 import numpy as np
 from ichor.core.atoms import Atoms
 from ichor.core.common.constants import coulombbhrsquared_to_debye, coulombbohr_to_debye
-from ichor.core.files import INTs
+from ichor.core.files import IntDirectory
 from ichor.core.multipoles import (
     atomic_contribution_to_molecular_dipole,
     atomic_contribution_to_molecular_quadrupole,
@@ -12,7 +12,7 @@ from ichor.core.multipoles import (
 
 def recover_molecular_dipole(
     atoms: Atoms,
-    ints_dir: INTs,
+    ints_dir: IntDirectory,
     atoms_in_angstroms=True,
     convert_to_debye=True,
     convert_to_cartesian=True,
@@ -26,7 +26,7 @@ def recover_molecular_dipole(
         Assumes atomic multipole moment units are atomic units (Coulomb Bohr) because this is what AIMAll gives.
 
     :param atoms: an Atoms instance containing the system geometry
-    :param ints_dir: an INTs file instance, which wraps around an AIMAll output directory
+    :param ints_dir: an IntDirectory file instance, which wraps around an AIMAll output directory
     :param atoms_in_angstroms: Whether the Atom instance coordinates are in Bohr or Angstroms
         , defaults to True (meaning coordinates are in Angstroms)
     :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
@@ -71,7 +71,7 @@ def recover_molecular_dipole(
 
 def recover_molecular_quadrupole(
     atoms: Atoms,
-    ints_dir: INTs,
+    ints_dir: IntDirectory,
     atoms_in_angstroms=True,
     convert_to_debye=True,
     convert_to_cartesian=True,
@@ -85,7 +85,7 @@ def recover_molecular_quadrupole(
         Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.
 
     :param atoms: an Atoms instance containing the system geometry
-    :param ints_dir: an INTs file instance, which wraps around an AIMAll output directory
+    :param ints_dir: an IntDirectory file instance, which wraps around an AIMAll output directory
     :param atoms_in_angstroms: Whether the Atom instance coordinates are in Bohr or Angstroms
         , defaults to True (meaning coordinates are in Angstroms)
     :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
