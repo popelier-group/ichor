@@ -18,6 +18,8 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
     :param path: Path to a directory which contains ONE point.
     """
 
+    _suffix = ".pointdirectory"
+
     contents = {
         "xyz": XYZ,
         "gaussian_input": GJF,
@@ -37,7 +39,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
     @classmethod
     def check_path(cls, path: Path) -> bool:
         """Makes sure the path exists and is a directory."""
-        return path.exists() and path.is_dir()
+        return path.exists() and path.is_dir() and path.suffix == ""
 
     @property
     def raw_data(self) -> dict:

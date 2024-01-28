@@ -49,7 +49,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         This path is typically the path to the training set, sample pool, etc.
     :param needs_parsing: By default, every PointsDirectory is parsed when the instance is created to
         create PointDirectory instances of each inner directory (but the contents of the files are not read).
-        If however, a slice of a already created PointsDirectory is made, the conents of the directories
+        If however, a slice of a already created PointsDirectory is made, the contents of the directories
         do not need to be parsed again, so needs_parsing would be false
     """
 
@@ -81,8 +81,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             # a PointDirectory instance and add to self
             if PointDirectory.check_path(f):
                 point = PointDirectory(f)
-                if not point.should_ignore:
-                    self.append(point)
+                self.append(point)
             elif f.is_file() and f.suffix in {XYZ.filetype, GJF.filetype}:
                 new_dir = self.path / f.stem
                 mkdir(new_dir)
