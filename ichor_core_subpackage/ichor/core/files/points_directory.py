@@ -126,6 +126,7 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         return connectivity_calculator(self[0].atoms)
 
+    # TODO: move to processing function
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
         """
         Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
@@ -139,6 +140,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             for atom_instance in self[0].atoms
         ]
 
+    # TODO: move to processing function
     def alf_dict(
         self, alf_calculator: Callable[..., ALF], *args, **kwargs
     ) -> Dict[str, ALF]:
@@ -153,6 +155,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return self[0].alf_dict(alf_calculator, *args)
 
+    # TODO: move to processing function
     def properties(
         self, system_alf: Optional[List[ALF]] = None, specific_property: str = None
     ):
@@ -516,7 +519,9 @@ class PointsDirectory(ListOfAtoms, Directory):
             nfeatures = len(features)
             wfn_energy = point_dir.wfn.total_energy
             b_matrix = form_b_matrix(atoms, alf_list, central_atom_idx)
-            cart_forces = np.array(list(point_dir.gaussian_out.global_forces.values()))
+            cart_forces = np.array(
+                list(point_dir.gaussian_output.global_forces.values())
+            )
             dE_df = convert_to_feature_forces(
                 cart_forces, b_matrix, alf_list, central_atom_idx
             )

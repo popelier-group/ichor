@@ -101,7 +101,7 @@ def add_point_to_database(
     # gaussian output file check
     ###############################
 
-    if not point.gaussian_out:
+    if not point.gaussian_output:
         if print_missing_data:
             print(f"Point {point.path} does not contain a Gaussian output (.gau) file.")
 
@@ -153,9 +153,9 @@ def add_point_to_database(
         # forces are saved directly from gaussian out file, thus they are in
         # global cartesian coordinates. This means these forces need to be rotated later
         # when an ALF is chosen for atoms.
-        if point.gaussian_out:
-            if point.gaussian_out.global_forces:
-                atom_global_forces = point.gaussian_out.global_forces[atom_name]
+        if point.gaussian_output:
+            if point.gaussian_output.global_forces:
+                atom_global_forces = point.gaussian_output.global_forces[atom_name]
                 atom_force_x = atom_global_forces.x
                 atom_force_y = atom_global_forces.y
                 atom_force_z = atom_global_forces.z

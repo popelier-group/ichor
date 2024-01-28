@@ -57,7 +57,7 @@ def get_data_for_point(
     # gaussian output file check
     ###############################
 
-    if not point.gaussian_out:
+    if not point.gaussian_output:
         if print_missing_data:
             print(f"Point {point.path} does not contain a Gaussian output (.gau) file.")
 
@@ -91,10 +91,10 @@ def get_data_for_point(
         # forces are saved directly from gaussian out file, thus they are in
         # global cartesian coordinates. This means these forces need to be rotated later
         # when an ALF is chosen for atoms.
-        if point.gaussian_out:
-            if point.gaussian_out.global_forces:
+        if point.gaussian_output:
+            if point.gaussian_output.global_forces:
                 point_dict_atomic["global_forces"] = list(
-                    point.gaussian_out.global_forces[atom_name]
+                    point.gaussian_output.global_forces[atom_name]
                 )
 
             # in case that the force keyword was not used but gaussian out exists

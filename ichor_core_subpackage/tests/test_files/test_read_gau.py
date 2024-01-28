@@ -8,7 +8,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.units import AtomicDistance
 
 from ichor.core.files import GaussianOutput
-from ichor.core.files.gaussian.gaussian_out import (
+from ichor.core.files.gaussian.gaussian_output import (
     MolecularDipole,
     MolecularHexadecapole,
     MolecularOctapole,
