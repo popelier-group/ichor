@@ -6,8 +6,6 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.constants import type2nuclear_charge
 from ichor.core.common.functools import classproperty
 
-from ichor.core.common.types.forces import AtomForce
-
 # from enum import Enum
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasAtoms, HasData
@@ -102,7 +100,7 @@ class OrcaEngrad(ReadFile, HasAtoms, HasData):
 
             for atom_name, atom_gradient in zip(atoms.atom_names, gradient_array):
                 # the force is -ve of gradient
-                forces[atom_name] = AtomForce(*-atom_gradient)
+                forces[atom_name] = -atom_gradient
 
             self.global_forces = forces
             self.atoms = atoms

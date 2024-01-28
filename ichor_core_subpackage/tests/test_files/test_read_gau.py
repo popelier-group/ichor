@@ -1,13 +1,14 @@
 from pathlib import Path
 from typing import Dict
 
+import numpy as np
+
 import pytest
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.units import AtomicDistance
 
 from ichor.core.files import GaussianOutput
 from ichor.core.files.gaussian.gaussian_out import (
-    AtomForce,
     MolecularDipole,
     MolecularHexadecapole,
     MolecularOctapole,
@@ -23,7 +24,7 @@ example_dir = get_cwd(__file__) / "example_gaus"
 
 
 def _assert_atomic_forces(
-    gau_file_forces: Dict[str, AtomForce], reference_file_forces: Dict[str, AtomForce]
+    gau_file_forces: Dict[str, np.ndarray], reference_file_forces: Dict[str, np.ndarray]
 ):
 
     """Asserts that dictionary of Gaussian calcualted forces is equal to another dictionary of reference forces."""
@@ -45,7 +46,7 @@ def _assert_atomic_forces(
 
 def _test_read_gau(
     gau_path: Path,
-    forces: Dict[str, AtomForce] = None,
+    forces: Dict[str, np.ndarray] = None,
     charge: int = None,
     multiplicity: int = None,
     atoms: Atoms = None,
@@ -136,16 +137,16 @@ def test_water_monomer_gau_file_with_forces():
     gau_file_path = example_dir / "water_monomer_with_forces.gau"
 
     reference_forces = {
-        "O1": AtomForce(0.029102177, 0.087242136, 0.000000000),
-        "H2": AtomForce(-0.026674154, -0.010235375, 0.000000000),
-        "H3": AtomForce(-0.002428023, -0.077006761, 0.000000000),
+        "O1": np.ndarray([0.029102177, 0.087242136, 0.000000000]),
+        "H2": np.ndarray([-0.026674154, -0.010235375, 0.000000000]),
+        "H3": np.ndarray([-0.002428023, -0.077006761, 0.000000000]),
     }
 
     reference_atoms = Atoms(
         [
-            Atom("O", 0.00000000, 0.00000000, 0.00000000),
-            Atom("H", 0.99809000, 0.00000000, 0.00000000),
-            Atom("H", -0.09858000, 1.07846000, 0.00000000),
+            np.ndarray(["O", 0.00000000, 0.00000000, 0.00000000]),
+            np.ndarray(["H", 0.99809000, 0.00000000, 0.00000000]),
+            np.ndarray(["H", -0.09858000, 1.07846000, 0.00000000]),
         ]
     )
 
@@ -199,25 +200,25 @@ def test_glycine_gau_file_with_forces():
     gau_file_path = example_dir / "glycine_with_forces.log"
 
     reference_forces = {
-        "C1": AtomForce(0.009062468, 0.001540764, -0.000442123),
-        "N2": AtomForce(0.002518463, -0.002186601, 0.000724210),
-        "H3": AtomForce(-0.003273520, 0.001261183, 0.003973730),
-        "C4": AtomForce(-0.007520073, 0.003573769, -0.003963447),
-        "H5": AtomForce(-0.004730779, -0.002583407, -0.002678228),
-        "C6": AtomForce(-0.007105918, 0.001819320, 0.000128651),
-        "O7": AtomForce(-0.012033306, -0.009026933, 0.006822045),
-        "N8": AtomForce(0.021877801, -0.006590017, 0.008465048),
-        "C9": AtomForce(-0.004340885, 0.000694133, -0.005218948),
-        "O10": AtomForce(0.000754285, 0.007797299, -0.005064322),
-        "C11": AtomForce(0.005784479, 0.002910005, -0.004232598),
-        "H12": AtomForce(-0.002663509, 0.006881399, -0.001456594),
-        "H13": AtomForce(-0.002090254, -0.004151253, -0.000714653),
-        "H14": AtomForce(0.002609111, 0.001589330, -0.002182237),
-        "H15": AtomForce(0.001017369, -0.001878448, 0.002165297),
-        "H16": AtomForce(-0.000258466, 0.001813343, 0.004116137),
-        "H17": AtomForce(0.000125501, -0.002745813, -0.002485166),
-        "H18": AtomForce(-0.005209573, -0.005096491, 0.002205491),
-        "H19": AtomForce(0.005476806, 0.004378417, -0.000162292),
+        "C1": np.array([0.009062468, 0.001540764, -0.000442123]),
+        "N2": np.array([0.002518463, -0.002186601, 0.000724210]),
+        "H3": np.array([-0.003273520, 0.001261183, 0.003973730]),
+        "C4": np.array([-0.007520073, 0.003573769, -0.003963447]),
+        "H5": np.array([-0.004730779, -0.002583407, -0.002678228]),
+        "C6": np.array([-0.007105918, 0.001819320, 0.000128651]),
+        "O7": np.array([-0.012033306, -0.009026933, 0.006822045]),
+        "N8": np.array([0.021877801, -0.006590017, 0.008465048]),
+        "C9": np.array([-0.004340885, 0.000694133, -0.005218948]),
+        "O10": np.array([0.000754285, 0.007797299, -0.005064322]),
+        "C11": np.array([0.005784479, 0.002910005, -0.004232598]),
+        "H12": np.array([-0.002663509, 0.006881399, -0.001456594]),
+        "H13": np.array([-0.002090254, -0.004151253, -0.000714653]),
+        "H14": np.array([0.002609111, 0.001589330, -0.002182237]),
+        "H15": np.array([0.001017369, -0.001878448, 0.002165297]),
+        "H16": np.array([-0.000258466, 0.001813343, 0.004116137]),
+        "H17": np.array([0.000125501, -0.002745813, -0.002485166]),
+        "H18": np.array([-0.005209573, -0.005096491, 0.002205491]),
+        "H19": np.array([0.005476806, 0.004378417, -0.000162292]),
     }
 
     reference_atoms = Atoms(

@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import Dict, Union
+from typing import Union
 
 import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.functools import classproperty
-from ichor.core.common.types.forces import AtomForce
 from ichor.core.common.types.multipole_moments import (
     MolecularDipole,
     MolecularHexadecapole,
@@ -61,55 +60,9 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
             "molecular_hexadecapole": self.molecular_hexadecapole,
         }
 
-    # TODO: rotation of Gaussian forces not needed in FFLUX, can directly learn Gaussian forces
-    # TODO: FFLUX predicts directly in the global frame so IQA forces should be the same as Gaussian forces
-    def properties(
-        self, C_matrix_dict: Dict[str, np.ndarray]
-    ) -> Dict[str, Dict[str, AtomForce]]:
-        """Returns the machine learning labels which are in this file.
-        The atomic forces need to be rotated by a C matrix
-        (each atom has its own C matrix) prior to machine learning.
-        This method is primarily here to be used by
-        `PointDirectory`/`PointsDirectory` classes.
-
-        :param C_matrix_dict: A dictionary of C matrices for each atom in the system.
-        :type C_matrix_dict: Dict[str, np.ndarray]
-        :return: A dictionary of dictionaries. The inner dictionary
-            has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).
-        :rtype: Dict[str, Dict[str, `AtomForce`]]
-        """
-
-        return {"forces": self.local_forces(C_matrix_dict)}
-
-    def local_forces(
-        self, C_matrix_dict: Dict[str, np.ndarray]
-    ) -> Dict[str, AtomForce]:
-        """
-        Rotates the force vector by the C matrix (which defines a new coordinate frame).
-        The C matrix is dependent on the atomic local frame calculated for each atom.
-        Each atom has its own C rotation matrix, so each atomic force is
-        rotated by the atom's specific C matrix.
-
-        :param C_matrix_dict: A dictionary of C matrices for each atom in the system.
-        :type C_matrix_dict: Dict[str, np.ndarray]
-        :return: A dictionary of dictionaries. The inner dictionary
-            has key: atom_name and value: AtomForce (a namedtuple with rotated forces for that atom).
-        :rtype: Dict[str, float]
-        """
-
-        local_forces = {}
-
-        for atom_name, global_force in self.global_forces.items():
-
-            # multiply the force by C matrix for that specific atom, giving local forces
-            tmp = np.matmul(C_matrix_dict[atom_name], np.array(global_force))
-            # convert to AtomForce type and save to dict
-            local_forces[atom_name] = AtomForce(*tmp)
-
-        return local_forces
-
-    def rotated_forces(self, rotation_matrix: np.ndarray):
-        """Rotates forces gives a rotation_matrix
+    def rotated_forces(self, rotation_matrix: np.ndarray) -> dict:
+        """Rotates forces gives a rotation_matrix, which could be the C matrix
+        to rotate on an ALF axis system with central atom, x-axis atom, and xy-plane atom.
 
         :param rotation_matrix: A 3x3 rotation matrix
         """
@@ -168,8 +121,8 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
 
                     for atom_name in atoms.names:
                         line = next(f).split()
-                        forces[atom_name] = AtomForce(
-                            float(line[2]), float(line[3]), float(line[4])
+                        forces[atom_name] = np.array(
+                            [float(line[2]), float(line[3]), float(line[4])]
                         )
                 elif "Dipole moment (field-independent basis, Debye)" in line:
                     # dipoles are on one line
