@@ -11,6 +11,7 @@ from ichor.core.calculators.features.alf_features_calculator import (
 )
 from ichor.core.common import constants
 from ichor.core.common.io import mkdir
+from ichor.core.common.itertools import chunker
 from ichor.core.database.json import get_data_for_point
 from ichor.core.database.sql import (
     add_atom_names_to_database,
@@ -397,36 +398,54 @@ class PointsDirectory(ListOfAtoms, Directory):
 
     def write_json_database(
         self,
-        json_db_path: Union[str, Path] = None,
+        root_name: str = None,
+        npoints_per_json=500,
         print_missing_data=False,
-        indent=None,
+        indent: int = None,
         separators=(",", ":"),
     ) -> Path:
         """
         Write out important information from a PointsDirectory instance to a json file.
 
-        :param json_db_path: database to write to
+        :param root_name: Name of directory which will contain the json files,
+            there are potentially going to be multiple json files inside
+        :param npoints_per_json: Maximum number of geometries to write to one json file
+            This is done so that the individual files do not become very large.
         :param print_missing_data: Whether to print out any missing data from each PointDirectory contained
             in self, defaults to False
+        :param indent: integer representing number of spaces to indent, defaults to None,
+            so will not indent
+        :param separators: Separators used for each entry, default (",", ":")
         :return: The path to the written json file
         """
 
-        if not json_db_path:
-            json_db_path = Path(f"{self.name_without_suffix}.json")
-        else:
-            json_db_path = Path(json_db_path).with_suffix(".json")
+        if not root_name:
+            root_name = self.name_without_suffix
+
+        root_path = Path(root_name + "_json")
+        mkdir(root_path)
+
+        counter = 0
+        json_file_path = root_path / f"{root_name}{counter}.json"
 
         total_data_list = []
 
-        with open(json_db_path, "w") as json_db:
+        for chunk in chunker(self, npoints_per_json):
 
-            for point in self:
+            for point in chunk:
 
                 total_data_list.append(
                     get_data_for_point(point, print_missing_data=print_missing_data)
                 )
 
-            json.dump(total_data_list, json_db, indent=indent, separators=separators)
+            with open(json_file_path, "w") as json_db:
+                json.dump(
+                    total_data_list, json_db, indent=indent, separators=separators
+                )
+
+                total_data_list = []
+                counter += 1
+                json_file_path = root_path / f"{root_name}{counter}.json"
 
     # TODO: move processing code to processing func
     def features_with_properties_to_csv(
