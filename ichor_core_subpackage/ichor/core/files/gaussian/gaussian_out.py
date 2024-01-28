@@ -4,7 +4,6 @@ from typing import Union
 import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.common.types.multipole_moments import (
     MolecularDipole,
     MolecularHexadecapole,
@@ -26,6 +25,8 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
     :param path: Path object or string to the .gau or .log file that are Gaussian output files
     """
 
+    filetype = ".gaussianoutput"
+
     def __init__(
         self,
         path: Union[Path, str],
@@ -42,10 +43,6 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
         self.molecular_octapole: MolecularOctapole = FileContents
         self.molecular_hexadecapole: MolecularHexadecapole = FileContents
         super(ReadFile, self).__init__(path)
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".gaussianoutput"
 
     @property
     def raw_data(self) -> dict:

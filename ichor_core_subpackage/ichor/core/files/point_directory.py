@@ -39,7 +39,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
     @classmethod
     def check_path(cls, path: Path) -> bool:
         """Makes sure the path exists and is a directory."""
-        return path.exists() and path.is_dir() and path.suffix == ""
+        return path.suffix == cls._suffix
 
     @property
     def raw_data(self) -> dict:

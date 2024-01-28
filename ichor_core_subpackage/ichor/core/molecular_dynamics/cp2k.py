@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
@@ -24,6 +23,8 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
     :param n_molecules: Number of molecules, defaults to 1
     :param box_size: Box size of simulation, defaults to 25.0
     """
+
+    filetype = ".inp"
 
     def __init__(
         self,
@@ -56,10 +57,6 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
         self.solver: str = solver
         self.n_molecules: int = n_molecules
         self.box_size: float = box_size
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".inp"
 
     def _read_file(self):
         self.atoms = Atoms()

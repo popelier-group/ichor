@@ -1,12 +1,14 @@
 from pathlib import Path
 from typing import Dict, Union
 
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile
 from ichor.core.files.file_data import HasData
 
 
 class AbInt(HasData, ReadFile):
+
+    filetype = ".int"
+
     def __init__(self, path: Union[str, Path]):
         ReadFile.__init__(self, path)
         HasData.__init__(self)
@@ -28,10 +30,6 @@ class AbInt(HasData, ReadFile):
     @classmethod
     def check_path(cls, path: Path) -> bool:
         return path.suffix == cls.filetype and "_" in path.name
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".int"
 
     @property
     def e_inter(self):

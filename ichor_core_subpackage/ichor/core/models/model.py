@@ -3,7 +3,6 @@ from typing import Dict, List, Optional
 
 import numpy as np
 from ichor.core.atoms import ALF
-from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
@@ -48,6 +47,8 @@ class Model(ReadFile, WriteFile):
         Another program can be used for the machine learning as
         long as it outputs files of the same format as the FEREBUS outputs.
     """
+
+    filetype = ".model"
 
     def __init__(
         self,
@@ -299,11 +300,6 @@ class Model(ReadFile, WriteFile):
             if self.kernel or not kernel_composition
             else KernelInterpreter(kernel_composition, kernel_dict).interpret()
         )
-
-    @classproperty
-    def filetype(self) -> str:
-        """Returns the suffix associated with GP model files"""
-        return ".model"
 
     @property
     def ialf(self) -> np.ndarray:

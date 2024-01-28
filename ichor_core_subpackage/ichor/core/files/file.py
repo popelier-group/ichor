@@ -4,7 +4,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.core.common.functools import buildermethod, classproperty
+from ichor.core.common.functools import buildermethod
 from ichor.core.common.io import move
 from ichor.core.common.types import NoStr
 from ichor.core.files.path_object import PathObject
@@ -43,23 +43,28 @@ FileContents = FileContentsType()
 class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
 
+    # must returns a dictionary, containing key: name of file (which is how one would access as attributes
+    # using dot  notation in Python), and value: Python class (such as GJF, INT, WFN),
+    filetype = None
+
     def __init__(self, path: Union[Path, str]):
 
         self.state = FileState.Unread
         # need to check if path exists here because if it does, we need to read in file contents
         super().__init__(path)
 
+    # from https://stackoverflow.com/a/53769173
+    def __init_subclass__(cls, **kwargs):
+        if not getattr(cls, "filetype"):
+            raise TypeError(
+                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
+            )
+        return super().__init_subclass__(**kwargs)
+
     @property
     def stem(self):
         """Returns the name of the WFN file (excluding the .wfn extension)"""
         return self.path.stem
-
-    @classproperty
-    @abstractmethod
-    def filetype(self) -> str:
-        """Abstract class property which returns the suffix associated with the filetype.
-        For example, for GJF class, this will return `.gjf`"""
-        pass
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

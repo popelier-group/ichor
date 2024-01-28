@@ -11,7 +11,6 @@ from ichor.core.common.constants import (
     spherical_octupole_labels,
     spherical_quadrupole_labels,
 )
-from ichor.core.common.functools import classproperty
 from ichor.core.common.io import relpath
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Coordinates3D
@@ -88,10 +87,7 @@ class Int(HasData, ReadFile):
         have to be read in differently because the file is strucutred differently."""
         return path.suffix == cls.filetype and "_" not in path.name
 
-    @classproperty
-    def filetype(cls) -> str:
-        """Returns the file extension of AIMALL files which are used"""
-        return ".int"
+    filetype = ".int"
 
     @property
     def raw_data(self):

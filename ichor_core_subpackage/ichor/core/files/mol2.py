@@ -5,7 +5,6 @@ from typing import Any, List, Optional, Tuple, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common import constants
-from ichor.core.common.functools import classproperty
 from ichor.core.common.os import current_user
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import File, WriteFile
@@ -454,6 +453,9 @@ non_metal_atoms = [
 
 # todo?: Would it be useful to be able to read Mol2?
 class Mol2(HasAtoms, WriteFile, File):
+
+    filetype = ".mol2"
+
     def __init__(self, path: Union[Path, str], system_name: str, atoms: Atoms):
 
         super(WriteFile, self).__init__(path)
@@ -467,10 +469,6 @@ class Mol2(HasAtoms, WriteFile, File):
         self.mol_type = None
         self.charge_type = None
         self.sybyl_status = None
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".mol2"
 
     def format(self):
         self.mol_type = MoleculeType.Small

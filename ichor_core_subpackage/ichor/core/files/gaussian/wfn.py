@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.float import from_scientific_double
-from ichor.core.common.functools import classproperty
 from ichor.core.common.itertools import chunker
 from ichor.core.common.str import split_by
 from ichor.core.common.units import AtomicDistance
@@ -57,6 +56,8 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
     """
 
+    filetype = ".wfn"
+
     def __init__(
         self,
         path: Union[Path, str],
@@ -78,15 +79,6 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
         self.molecular_orbitals = FileContents
         self.total_energy = FileContents
         self.virial_ratio = FileContents
-
-    @classproperty
-    def filetype(cls) -> str:
-        """Returns the file extension of a WFN file"""
-        return ".wfn"
-
-    @classproperty
-    def property_names(self) -> List[str]:
-        return ["energy", "wfn"]
 
     @property
     def raw_data(self) -> Dict[str, float]:

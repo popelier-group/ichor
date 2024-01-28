@@ -6,7 +6,6 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.common.types import VarReprMixin
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import File, FileContents, ReadFile
@@ -316,27 +315,21 @@ def read_ccp(
 class MOUT(
     HasAtoms, HasData, ReadFile, File
 ):  # GeometryDataFile, AtomicDict, File): # todo sort this
-    nnuc: Optional[int]
-    nbcp: Optional[int]
-    nrcp: Optional[int]
-    nccp: Optional[int]
 
-    bond_critical_points: Optional[List["BondCriticalPoint"]]
-    ring_critical_points: Optional[List["RingCriticalPoint"]]
-    cage_critical_points: Optional[List["CageCriticalPoint"]]
+    filetype = ".mout"
 
     def __init__(self, path: Path, atoms: Optional[Atoms] = None):
         File.__init__(self, path)
         self.atoms = atoms
 
-        self.nnuc = FileContents
-        self.nbcp = FileContents
-        self.nrcp = FileContents
-        self.nccp = FileContents
+        self.nnuc: int = FileContents
+        self.nbcp: int = FileContents
+        self.nrcp: int = FileContents
+        self.nccp: int = FileContents
 
-        self.bond_critical_points = FileContents
-        self.ring_critical_points = FileContents
-        self.cage_critical_points = FileContents
+        self.bond_critical_points: List["BondCriticalPoint"] = FileContents
+        self.ring_critical_points: List["RingCriticalPoint"] = FileContents
+        self.cage_critical_points: List["CageCriticalPoint"] = FileContents
 
     def _read_file(self):
         with open(self.path, "r") as f:
@@ -689,10 +682,6 @@ class MOUT(
                     if not hasattr(self[atom.name], "cage_critical_points"):
                         self[atom.name].cage_critical_points = []
                     self[atom.name].cage_critical_points.append(ccp)
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".mout"
 
     @property
     def properties(self) -> Dict[str, Dict[str, float]]:

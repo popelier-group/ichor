@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.common.pairwise import pairwise
 
 from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
@@ -48,6 +47,8 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&t=7470&p=32102&hilit=atomic+force#p32102
     """
 
+    filetype = ".orcainput"
+
     def __init__(
         self,
         path: Union[Path, str],
@@ -68,10 +69,6 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
 
         # any other input blocks specified by %
         self.input_blocks = input_blocks or FileContents
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".orcainput"
 
     def _read_file(self):
 

@@ -4,7 +4,6 @@ from typing import Union
 import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.common.types.multipole_moments import (
     MolecularDipole,
     MolecularHexadecapole,
@@ -26,6 +25,8 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
     :param path: Path object or string to the .gau or .log file that are Gaussian output files
     """
 
+    filetype = ".orcaoutput"
+
     def __init__(
         self,
         path: Union[Path, str],
@@ -40,10 +41,6 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
         self.molecular_octapole = FileContents
         self.molecular_hexadecapole = FileContents
         super(ReadFile, self).__init__(path)
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".orcaoutput"
 
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information.

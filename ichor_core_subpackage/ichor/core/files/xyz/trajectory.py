@@ -9,7 +9,6 @@ from ichor.core.atoms import Atom, Atoms, ListOfAtoms
 from ichor.core.atoms.alf import ALF
 from ichor.core.calculators import alf_features_to_coordinates
 from ichor.core.common.constants import bohr2ang
-from ichor.core.common.functools import classproperty
 from ichor.core.common.int import count_digits
 from ichor.core.common.io import mkdir
 from ichor.core.common.itertools import chunker
@@ -27,6 +26,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         Set to None by default as the user can initialize an empty trajectory and built it up
         themselves
     """
+
+    filetype = ".xyz"
 
     def __init__(self, path: Union[Path, str], *args, **kwargs):
         ListOfAtoms.__init__(self, *args, **kwargs)
@@ -59,10 +60,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                     self.add(atoms)
                     # make new Atoms instance where next timestep can be stored
                     atoms = Atoms()
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".xyz"
 
     @property
     def types(self):

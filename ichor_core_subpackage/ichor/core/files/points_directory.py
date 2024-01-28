@@ -83,16 +83,18 @@ class PointsDirectory(ListOfAtoms, Directory):
                 point = PointDirectory(f)
                 self.append(point)
             elif f.is_file() and f.suffix in {XYZ.filetype, GJF.filetype}:
-                new_dir = self.path / f.stem
+                new_dir = self.path / (f.stem + PointDirectory._suffix)
                 mkdir(new_dir)
+                # move the file into the newly made directory
                 f.replace(new_dir / f.name)
-                self.append(
-                    PointDirectory(new_dir)
-                )  # wrap the new directory as a PointDirectory instance and add to self
+                self.append(PointDirectory(new_dir))
+
+        # wrap the new directory as a PointDirectory instance and add to self
         # sort by the names of the directories (by the numbers in their name)
         # since the system name is always the same
         self = self.sort(key=lambda x: x.path.name)
 
+    # TODO: move to processing function
     @property
     def wfn_energy(self) -> np.ndarray:
         """Returns np array of wfn energies of all points
@@ -101,6 +103,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return np.array([point.wfn.total_energy for point in self])
 
+    # TODO: move to processing function
     @property
     def total_energy(self):
         """
@@ -110,6 +113,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return self.wfn_energy
 
+    # TODO: move to processing function
     def connectivity(
         self, connectivity_calculator: Callable[..., np.ndarray]
     ) -> np.ndarray:

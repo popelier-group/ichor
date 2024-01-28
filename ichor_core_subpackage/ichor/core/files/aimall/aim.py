@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.core.common.functools import classproperty
 from ichor.core.common.str import get_digits
 from ichor.core.common.types import Version
 from ichor.core.files.file import FileContents, FileState, ReadFile
@@ -31,6 +30,8 @@ class Aim(ReadFile, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
+    filetype = ".aim"
+
     def __init__(
         self,
         path: Path,
@@ -54,11 +55,6 @@ class Aim(ReadFile, dict):
         self.nccps: int = FileContents
         self.output_file: Path = FileContents
         self.cwd: Path = FileContents
-
-    @classproperty
-    def filetype(self) -> str:
-        """Returns the file suffix associated with AIMAll output files"""
-        return ".aim"
 
     def _read_file(self):
         """Reads in AIMAll output file that contains information about the calculation.

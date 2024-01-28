@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from ichor.core.common.functools import classproperty
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasAtoms
 from ichor.core.files.pandora.morfi_output import MorfiDirectory
@@ -22,9 +21,9 @@ class PandoraDirectory(HasAtoms, AnnotatedDirectory):
         self.input.atoms = self.atoms
         self.input.write()
 
-    @classproperty
-    def dirname(self) -> str:
-        return "pandora"
+    # @classproperty
+    # def dirname(self) -> str:
+    #     return "pandora"
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

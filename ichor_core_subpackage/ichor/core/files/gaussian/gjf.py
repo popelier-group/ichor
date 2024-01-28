@@ -3,7 +3,6 @@ from typing import List, NamedTuple, Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.constants import GAUSSIAN_METHODS
-from ichor.core.common.functools import classproperty
 
 # from enum import Enum
 from ichor.core.common.types.enum import Enum
@@ -80,6 +79,8 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
 
     """
 
+    filetype = ".gjf"
+
     def __init__(
         self,
         path: Union[Path, str],
@@ -109,10 +110,6 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.atoms = atoms or FileContents
 
         self._output_chk: bool = output_chk
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".gjf"
 
     def _find_in_link(self, val: str) -> Optional[int]:
         return next(

@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Union
 
 import numpy as np
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 
 
@@ -60,6 +59,8 @@ class AmberMDIn(WriteFile, ReadFile):
     :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
     """
 
+    filetype = ".in"
+
     def __init__(
         self,
         path: Path,
@@ -88,10 +89,6 @@ class AmberMDIn(WriteFile, ReadFile):
         self.periodic_boundary_condition = periodic_boundary_condition
         self.thermostat = thermostat
         self.ln_gamma = ln_gamma
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".in"
 
     def __set_write_defaults_if_needed(self):
         """
