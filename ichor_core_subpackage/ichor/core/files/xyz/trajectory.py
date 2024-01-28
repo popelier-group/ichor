@@ -1,4 +1,3 @@
-import ast
 import re
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Union
@@ -46,9 +45,12 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                     # It can be empty or contain some useful information that can be stored.
                     line = next(f)
                     # if the comment line properties errors, we can store these
-                    if re.match(r"^\s*?i\s*?=\s*?\d+\s*properties_error", line):
-                        properties_error = line.split("=")[-1].strip()
-                        atoms.properties_error = ast.literal_eval(properties_error)
+
+                    # TODO: do we still need to get properties in trajectory? - if we do, implement without ast
+                    # if re.match(r"^\s*?i\s*?=\s*?\d+\s*properties_error", line):
+                    #     properties_error = line.split("=")[-1].strip()
+                    #     atoms.properties_error = ast.literal_eval(properties_error)
+
                     # the next line after the comment line is where coordinates begin
                     for _ in range(natoms):
                         line = next(f)
