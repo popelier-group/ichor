@@ -43,23 +43,11 @@ FileContents = FileContentsType()
 class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
 
-    # must returns a dictionary, containing key: name of file (which is how one would access as attributes
-    # using dot  notation in Python), and value: Python class (such as GJF, INT, WFN),
-    filetype = None
-
     def __init__(self, path: Union[Path, str]):
 
         self.state = FileState.Unread
         # need to check if path exists here because if it does, we need to read in file contents
         super().__init__(path)
-
-    # from https://stackoverflow.com/a/53769173
-    def __init_subclass__(cls, **kwargs):
-        if not getattr(cls, "filetype"):
-            raise TypeError(
-                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
-            )
-        return super().__init_subclass__(**kwargs)
 
     @property
     def stem(self):
@@ -104,6 +92,17 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
+
+    filetype = None
+
+    # from https://stackoverflow.com/a/53769173
+    def __init_subclass__(cls, **kwargs):
+        if not getattr(cls, "filetype"):
+            raise TypeError(
+                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
+            )
+        return super().__init_subclass__(**kwargs)
+
     def _initialise_contents(self):
         """Initialize contents of a file to default values. This is needed in the case
         a file does not exist on disk yet (so the file cannot be read from). This means
@@ -189,6 +188,17 @@ class FileWriteError(Exception):
 
 
 class WriteFile(File, ABC):
+
+    filetype = None
+
+    # from https://stackoverflow.com/a/53769173
+    def __init_subclass__(cls, **kwargs):
+        if not getattr(cls, "filetype"):
+            raise TypeError(
+                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
+            )
+        return super().__init_subclass__(**kwargs)
+
     def _set_write_defaults_if_needed(self):
         """Set default values for attributes if bool(self.attribute) evaluates to False.
         So if an attribute is still FileContents, an empty string, an empty list, etc.,

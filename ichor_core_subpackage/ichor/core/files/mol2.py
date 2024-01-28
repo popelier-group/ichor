@@ -7,7 +7,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common import constants
 from ichor.core.common.os import current_user
 from ichor.core.common.units import AtomicDistance
-from ichor.core.files.file import File, WriteFile
+from ichor.core.files.file import WriteFile
 from ichor.core.files.file_data import HasAtoms
 
 # TODO: potentially use pytraj or another software for managing AMBER files
@@ -452,7 +452,7 @@ non_metal_atoms = [
 
 
 # todo?: Would it be useful to be able to read Mol2?
-class Mol2(HasAtoms, WriteFile, File):
+class Mol2(HasAtoms, WriteFile):
 
     filetype = ".mol2"
 
