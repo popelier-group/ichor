@@ -266,8 +266,8 @@ class SubmissionScript:
 
         .. note::
             For example, a datafile, which has a random name (which is set by self.uid) contains lines in the form of:
-            WATER0001.gjf,WATER0001.gau
-            WATER0002.gjf,WATER0002.gau
+            WATER0001.gjf,WATER0001.gaussian_output
+            WATER0002.gjf,WATER0002.gaussian_output
             ...
         """
         mkdir(datafile.parent)

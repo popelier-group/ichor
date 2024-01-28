@@ -62,7 +62,7 @@ class OrcaCommand(SubmissionCommand):
 
     @property
     def data(self) -> List[str]:
-        """Return a list of the absolute paths of the ORCA input file (.orcainput) and the output file (.gau).
+        """Return a list of the absolute paths of the ORCA input file (.orcainput) and the output file (.orcaoutput).
         This is the data that is going to be written to the datafile."""
         return [str(self.orca_input.absolute()), str(self.orca_output.absolute())]
 

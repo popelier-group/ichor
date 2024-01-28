@@ -22,7 +22,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
 
     contents = {
         "xyz": XYZ,
-        "gaussian_input": GJF,
+        "gjf": GJF,
         "gaussian_output": GaussianOutput,
         "orca_input": OrcaInput,
         "orca_output": OrcaOutput,

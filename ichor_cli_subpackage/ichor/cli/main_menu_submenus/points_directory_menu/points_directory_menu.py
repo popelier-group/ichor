@@ -17,6 +17,7 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path
+from ichor.core.files import PointsDirectory
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
@@ -33,8 +34,8 @@ class PointsDirectoryMenuOptions(MenuOptions):
     def check_selected_points_directory_path(self) -> Union[str, None]:
         """Checks whether the given PointsDirectory exists or if it is a directory."""
         pd_path = Path(self.selected_points_directory_path)
-        if (not pd_path.exists()) or (not pd_path.is_dir()):
-            return f"Current path: {pd_path} does not exist or is not a directory."
+        if pd_path.suffix != PointsDirectory._suffix:
+            return f"Current path: {pd_path} might not be a PointsDirectory (no {PointsDirectory._suffix} suffix)."
 
 
 # initialize dataclass for storing information for menu

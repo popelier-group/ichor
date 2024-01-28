@@ -18,11 +18,11 @@ from ichor.core.files.file_data import HasAtoms, HasData
 
 
 class GaussianOutput(ReadFile, HasAtoms, HasData):
-    """Wraps around a .gau/.log file that is the output of Gaussian.
+    """Wraps around a .gaussianoutput file that is the output of Gaussian.
     This file contains coordinates (in Angstroms),
     forces, as well as molecular multipole moments.
 
-    :param path: Path object or string to the .gau or .log file that are Gaussian output files
+    :param path: Path object or string to the .gaussianoutput file that are Gaussian output files
     """
 
     filetype = ".gaussianoutput"
