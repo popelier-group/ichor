@@ -8,7 +8,7 @@ from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasData
 
 
-class IntDirectory(HasData, AnnotatedDirectory):
+class IntDirectory(HasData, AnnotatedDirectory, dict):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
@@ -90,12 +90,6 @@ class IntDirectory(HasData, AnnotatedDirectory):
     def __str__(self):
         atm_names = [i.atom_name for i in self.ints]
         return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(atm_names)}"
-
-    def __getattr__(self, item):
-        return {
-            atom_name: getattr(int_file_instance, item)
-            for atom_name, int_file_instance in self.items()
-        }
 
     def __getitem__(self, pattern: str):
         """Used to get particular int or interaction int by atom name or

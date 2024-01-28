@@ -425,6 +425,7 @@ class PointsDirectory(ListOfAtoms, Directory):
 
             json.dump(total_data_list, json_db, indent=indent, separators=separators)
 
+    # TODO: move processing code to processing func
     def features_with_properties_to_csv(
         self,
         system_alf: Dict[str, ALF],
@@ -484,6 +485,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             )
             df.to_csv(fname, index=False)
 
+    # TODO: move processing code to processing function
     def features_with_wfn_energy_and_dE_df_to_csv(
         self,
         alf_list: List[ALF],
