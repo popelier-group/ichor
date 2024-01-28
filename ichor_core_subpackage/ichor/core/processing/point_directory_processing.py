@@ -12,7 +12,7 @@ def fflux_point_directory_processing(
     alf_dict: Dict[str, ALF] = None, central_atom_name: str = None
 ):
 
-    # TODO: commented code was to automatically detect function, did not work well
+    # commented code was to automatically detect function, did not work well
     # processing_dict = {
     #     WFN: no_processing_function,
     #     IntDirectory: fflux_ints_directory_processing_function,
@@ -67,23 +67,6 @@ def fflux_point_directory_processing(
         return all_processed_data
 
     return _processing_func
-
-    # # grab properties from WFN
-    # if self.wfn:
-    #     wfn_properties = self.wfn.properties
-    # else:
-    #     wfn_properties = {}
-    # # grab properties from INTs directory
-    # if self.ints:
-    #     ints_properties = self.ints.properties(c_matrix_dict)
-    # else:
-    #     ints_properties = {}
-    # if self.gaussian_out:
-    #     gaussian_output_properties = self.gaussian_out.properties(c_matrix_dict)
-    # else:
-    #     gaussian_output_properties = {}
-
-    # return merge(wfn_properties, ints_properties, gaussian_output_properties)
 
     # TODO: below code was to automatically determine what function to use for each class
     # TODO: however there isn't a nice way to pass parameters to the functions then.
