@@ -18,7 +18,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
     :param path: Path to a directory which contains ONE point.
     """
 
-    _suffix = ".pointdirectory"
+    _suffix = ".pointdir"
 
     contents = {
         "xyz": XYZ,

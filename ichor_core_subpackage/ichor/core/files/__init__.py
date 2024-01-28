@@ -33,6 +33,7 @@ from ichor.core.files.pandora import (
 # points directory stuff
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.points_directory import PointsDirectory
+from ichor.core.files.points_directory_parent import PointsDirectoryParent
 
 # xyz files
 from ichor.core.files.xyz import Trajectory, XYZ
@@ -62,6 +63,7 @@ __all__ = [
     "PandoraInput",
     "PointDirectory",
     "PointsDirectory",
+    "PointsDirectoryParent",
     "XYZ",
     "Mol2",
     "PySCFDirectory",

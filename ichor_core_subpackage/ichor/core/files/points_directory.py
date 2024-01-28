@@ -53,6 +53,8 @@ class PointsDirectory(ListOfAtoms, Directory):
         do not need to be parsed again, so needs_parsing would be false
     """
 
+    _suffix = ".pointsdir"
+
     def __init__(self, path: Union[Path, str], needs_parsing=True, *args, **kwargs):
         # Initialise `list` parent class of `ListOfAtoms`
         ListOfAtoms.__init__(self, *args, **kwargs)

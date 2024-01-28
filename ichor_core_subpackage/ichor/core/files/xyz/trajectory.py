@@ -1,7 +1,7 @@
 import ast
 import re
 from pathlib import Path
-from typing import Callable, Dict, Iterable, List, Optional, Union
+from typing import Callable, Dict, Iterable, List, Union
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,7 @@ from ichor.core.atoms.alf import ALF
 from ichor.core.calculators import alf_features_to_coordinates
 from ichor.core.common.constants import bohr2ang
 from ichor.core.common.int import count_digits
-from ichor.core.common.io import mkdir
+from ichor.core.common.io import convert_to_path, mkdir
 from ichor.core.common.itertools import chunker
 from ichor.core.files.file import FileState, ReadFile, WriteFile
 
@@ -140,6 +140,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return [ref.rmsd(point) for point in self]
 
+    @convert_to_path
     def to_dir(self, system_name: str, root: Path, every: int = 1, center=False):
         """Writes out every nth timestep to a separate .xyz file to a given directory
 
@@ -151,7 +152,13 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             xyz file should be written. Default is 1. If
             a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
         """
-        from ichor.core.files import XYZ
+        from ichor.core.files import PointsDirectory, XYZ
+
+        default_root_suffix = PointsDirectory._suffix
+
+        # ensure that the PointsDirectory suffix is used
+        if root.suffix != default_root_suffix:
+            root.with_suffix(default_root_suffix)
 
         mkdir(root, empty=True)
         for i, atoms_instance in enumerate(self):
@@ -167,6 +174,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 xyz_file = XYZ(path, atoms_instance)
                 xyz_file.write()
 
+    @convert_to_path
     def to_dirs(
         self,
         system_name: str,
@@ -186,14 +194,22 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             which an xyz file should be written. Default is 1.
             If a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
         """
-        from ichor.core.files import XYZ
+        from ichor.core.files import PointsDirectory, PointsDirectoryParent, XYZ
+
+        default_parent_suffix = PointsDirectoryParent._suffix
+        default_points_dir_suffix = PointsDirectory._suffix
+
+        # ensure that parent suffix is used
+        if root.suffix != default_parent_suffix:
+            root.with_suffix(default_parent_suffix)
 
         # make root directory
         mkdir(root, empty=True)
 
         # make chunk directory
         chunk_idx = 0
-        inner_dir_name = f"{system_name}{chunk_idx}"
+        # this is the PointsDirectory
+        inner_dir_name = f"{system_name}{chunk_idx}{default_points_dir_suffix}"
         mkdir(root / inner_dir_name, empty=True)
 
         # get only the every-th element of the trajectory
@@ -228,10 +244,11 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 if total_geom_counter != len_geoms_to_write:
                     mkdir(root / inner_dir_name, empty=True)
 
+    @convert_to_path
     def to_multiple_parent_dirs(
         self,
         system_name: str,
-        root: Union[str, Path],
+        root_name: str,
         split_size: int,
         nsplits_in_root: int,
         every: int = 1,
@@ -252,10 +269,13 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             which can result in Gaussian failing to write outputs properly, defaults to False
         """
 
-        from ichor.core.files import XYZ
+        from ichor.core.files import PointsDirectory, PointsDirectoryParent, XYZ
 
-        # ensure that root is a path because that will get modified later
-        root_path = Path(root)
+        default_parent_suffix = PointsDirectoryParent._suffix
+        default_points_dir_suffix = PointsDirectory._suffix
+
+        # this variable will get modified
+        root_path = Path(root_name)
 
         # get only the every-th element of the trajectory
         geometries_to_write = self[::every]
@@ -267,11 +287,12 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         chunk_idx = 1
 
         # add index to parent directory, because there will be multiple
-        root_path = root_path.with_name(f"{root}{root_idx}")
+        root_path = root_path.with_name(f"{root_name}{root_idx}{default_parent_suffix}")
         # make initial root directory
         mkdir(root_path, empty=True)
-        # make initial chunk directory
-        inner_dir_name = f"{system_name}{chunk_idx}"
+
+        # make initial chunk directory, this is the PointsDirectory
+        inner_dir_name = f"{system_name}{chunk_idx}{default_points_dir_suffix}"
         mkdir(root_path / inner_dir_name, empty=True)
 
         geoms_in_split_counter = 0
@@ -306,7 +327,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
                     nsplits_counter = 0
                     root_idx += 1
-                    root_path = root_path.with_name(f"{root}{root_idx}")
+                    root_path = root_path.with_name(f"{root_name}{root_idx}")
                     if total_geom_counter != len_geoms_to_write:
                         mkdir(root_path, empty=True)
 
@@ -315,6 +336,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 if total_geom_counter != len_geoms_to_write:
                     mkdir(root_path / inner_dir_name, empty=True)
 
+    @convert_to_path
     def split_traj(self, root_dir: Path, split_size: int):
         """Splits trajectory into sub-trajectories and writes then to a folder.
         Eg. a 10,000 original trajectory can be split into 10 sub-trajectories
@@ -335,10 +357,11 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             new_traj.extend(chunk)
             new_traj.write()
 
+    @convert_to_path
     def coordinates_to_xyz(
         self,
-        fname: Optional[Union[str, Path]] = Path("system_to_xyz.xyz"),
-        step: Optional[int] = 1,
+        fname: Path = Path("system_to_xyz.xyz"),
+        step: int = 1,
     ):
         """write a new .xyz file that contains the timestep i, as well as the coordinates of the atoms
         for that timestep.
@@ -351,8 +374,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     @classmethod
     def features_file_to_trajectory(
         cls,
-        f: Union[str, Path],
-        trajectory_path: Union[str, Path],
+        f: Path,
+        trajectory_path: Path,
         atom_types: List[str],
         header=0,
         index_col=0,
@@ -384,8 +407,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             This is only needed for excel files, not csv files.
         """
 
-        if isinstance(f, str):
-            f = Path(f)
+        f = Path(f)
         if f.suffix == ".xlsx":
             features_array = pd.read_excel(
                 f, sheet_name=sheet_name, header=header, index_col=index_col
@@ -451,7 +473,17 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return trajectory
 
-    def change_atom_ordering(self, new_traj_name: str, new_atom_ordering: List[int]):
+    @convert_to_path
+    def change_atom_ordering(self, new_traj_name: Path, new_atom_ordering: List[int]):
+        """Changes the atom ordering of the trajectory, given a list of how indices should be
+        permuted and writes out a new trajectory file in the specified location.
+
+        :param new_traj_name: Name of new trajectory file
+        :param new_atom_ordering: A list of indices telling how to permute the current trajectory
+        """
+
+        if new_traj_name.suffix != ".xyz":
+            new_traj_name = new_traj_name.with_suffix(".xyz")
 
         new_traj = Trajectory(new_traj_name)
         new_traj.state = FileState.Read
@@ -467,6 +499,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     def split_packmol_trajectory(
         self, atoms_per_molecule: int, trajectory_name="packmol_traj_split.xyz"
     ):
+        """Used to create packmol inputs"""
 
         new_traj = Trajectory(trajectory_name)
 
@@ -478,7 +511,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         new_traj.write()
 
     def _write_file(self, path: Path, every: int = 1, center: bool = False):
-        """Write  a trajectroy file
+        """Write  a trajectory file to a given location.
 
         :param path: Path to trajectory file
         :param every: Write every nth point. Default is 1, so every point is written.
