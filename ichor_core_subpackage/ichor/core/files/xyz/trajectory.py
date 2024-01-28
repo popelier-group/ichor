@@ -174,7 +174,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     def to_dirs(
         self,
         system_name: str,
-        split_size: int,
+        split_size: int = 1000,
         every: int = 1,
         center=False,
     ):
@@ -235,15 +235,16 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 # reset counter and update chunk
                 geom_counter = 0
                 chunk_idx += 1
-                inner_dir_name = f"{system_name}{chunk_idx}"
+                # make a new PointsDirectory-like directory
+                inner_dir_name = f"{system_name}{chunk_idx}{default_points_dir_suffix}"
                 if total_geom_counter != len_geoms_to_write:
                     mkdir(root_path / inner_dir_name, empty=True)
 
     def to_multiple_parent_dirs(
         self,
         system_name: str,
-        split_size: int,
-        nsplits_in_root: int,
+        split_size: int = 1000,
+        nsplits_in_root: int = 5,
         every: int = 1,
         center=False,
     ):
@@ -252,8 +253,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         :param system_name: name of system. This name will be used in the names
             of the files and directories which are made
-        :param split_size: The number of .xyz files that inner PointsDirectory-like directory will contain
-        :param nsplits_in_root: The number of splits that are going to be in one root directory
+        :param split_size: The number of .xyz files that inner PointsDirectory-like directory will contain, default 1000
+        :param nsplits_in_root: The number of splits that are going to be in one root directory, default 5
+            This would mean that there are 5 x 1000 geometries in that root directory.
         :param every:  An integer value that indicates the nth step at
             which an xyz file should be written, defaults to 1
         :param center: whether or not to subtract centroid of geometry before writing
@@ -261,6 +263,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             which can result in Gaussian failing to write outputs properly, defaults to False
         """
 
+        # TODO: simplify this so it uses to_dirs to prevent code duplication
         from ichor.core.files import PointsDirectory, PointsDirectoryParent, XYZ
 
         default_parent_suffix = PointsDirectoryParent._suffix
@@ -288,9 +291,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         nsplits_counter = 0
 
         # loop over geometries and write to respective dir
-        for total_geom_counter, atoms_instance in enumerate(
-            geometries_to_write, start=1
-        ):
+        for total_geom_counter, atoms_instance in enumerate(geometries_to_write):
 
             if center:
                 atoms_instance.centre()
@@ -319,12 +320,14 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                     root_path = root_path.with_name(
                         f"{system_name}{root_idx}{default_parent_suffix}"
                     )
-                    if total_geom_counter != len_geoms_to_write:
+                    # subtract 1 from geometries because otherwise will make an extra directory at the end
+                    if total_geom_counter != len_geoms_to_write - 1:
                         mkdir(root_path, empty=True)
 
                 inner_dir_name = f"{system_name}{chunk_idx}"
                 # do not make a new directory on the last iteration
-                if total_geom_counter != len_geoms_to_write:
+                # need to subtract 1 because otherwise they will be equal
+                if total_geom_counter != len_geoms_to_write - 1:
                     mkdir(root_path / inner_dir_name, empty=True)
 
     @convert_to_path

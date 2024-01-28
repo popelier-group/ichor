@@ -5,6 +5,6 @@ class PointsDirectoryParent:
 
     """
 
-    _suffix = "pointsdirparent"
+    _suffix = ".pointsdirparent"
 
     pass
