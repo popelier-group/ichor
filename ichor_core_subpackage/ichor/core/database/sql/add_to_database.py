@@ -90,7 +90,7 @@ def add_point_to_database(
             date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
             # wfn energy might not exist if Gaussian has not been ran yet (or wfn file does not exist.)
             # add a None for wfn energy if wfn energy is not present
-            name=point.name,
+            name=point.name_without_suffix,
             wfn_energy=None,
         )
         if print_missing_data:

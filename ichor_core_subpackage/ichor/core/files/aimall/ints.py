@@ -8,13 +8,17 @@ from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasData
 
 
-class IntDirectory(HasData, AnnotatedDirectory, dict):
+class IntDirectory(HasData, AnnotatedDirectory):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
     :param parent: An Atoms instance that holds coordinate information for all the atoms in the system.
         Things like XYZ and GJF hold geometry.
     """
+
+    # removed inheritance from dict because we are not using class as dictionary
+    # was causing problems since if inheriting from dict would mean that bool(self)
+    # would evaluate to False, since self was empty
 
     contents = {"ints": Int, "interaction_ints": AbInt}
 
@@ -111,3 +115,14 @@ class IntDirectory(HasData, AnnotatedDirectory, dict):
 
         # if we get to here, raise KeyError
         raise KeyError(f"The key {pattern} is the A' int or AB int files.")
+
+    def get(self, pattern: str, default=None):
+        """Does the same thing as get of a dictionary,
+        returning a default is KeyError
+        """
+
+        try:
+            itm = self[pattern]
+            return itm
+        except KeyError:
+            return default
