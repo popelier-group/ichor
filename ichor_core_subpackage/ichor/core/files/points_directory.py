@@ -61,6 +61,12 @@ class PointsDirectory(ListOfAtoms, Directory):
         if needs_parsing:
             # this will call Directory __init__ method (which then calls self.parse)
             # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
+
+            # TODO: maybe make this a default
+            path = Path(path)
+            if not path.suffix == self._suffix:
+                path = path.with_suffix(self._suffix)
+
             Directory.__init__(self, path)
 
     def _parse(self) -> None:

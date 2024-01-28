@@ -155,6 +155,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         default_root_suffix = PointsDirectory._suffix
 
+        # capitalize system name
+        system_name = system_name.upper()
         root_path = Path(system_name).with_suffix(default_root_suffix)
 
         mkdir(root_path, empty=True)
@@ -195,6 +197,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         default_parent_suffix = PointsDirectoryParent._suffix
         default_points_dir_suffix = PointsDirectory._suffix
+
+        # capitalize system name
+        system_name = system_name.upper()
 
         root_path = Path(system_name).with_suffix(default_parent_suffix)
 
@@ -268,6 +273,9 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         default_parent_suffix = PointsDirectoryParent._suffix
         default_points_dir_suffix = PointsDirectory._suffix
+
+        # capitalize system name
+        system_name = system_name.upper()
 
         # get only the every-th element of the trajectory
         geometries_to_write = self[::every]

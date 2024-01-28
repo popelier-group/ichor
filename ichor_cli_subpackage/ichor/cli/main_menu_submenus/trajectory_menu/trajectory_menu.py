@@ -73,11 +73,8 @@ class TrajectoryFunctions:
 
         traj = Trajectory(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
         system_name = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.stem
-        root = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.with_name(
-            system_name.upper()
-        )
 
-        traj.to_dir(system_name, root, every, to_center)
+        traj.to_dir(system_name, every, to_center)
 
     @staticmethod
     def split_trajectory_into_many_points_directories():
@@ -107,11 +104,8 @@ class TrajectoryFunctions:
         traj = Trajectory(ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH)
 
         system_name = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.stem
-        root = ichor.cli.global_menu_variables.SELECTED_TRAJECTORY_PATH.with_name(
-            system_name + "_PARENT"
-        )
 
-        traj.to_dirs(system_name, root, nsplit, every, to_center)
+        traj.to_dirs(system_name, nsplit, every, to_center)
 
 
 # initialize menu
