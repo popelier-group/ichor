@@ -9,6 +9,8 @@ from ichor.core.files.pandora.pyscf_output import PySCFDirectory
 
 class PandoraDirectory(HasAtoms, AnnotatedDirectory):
 
+    dirname = "pandora"
+
     contents = {"input": PandoraInput, "pyscf": PySCFDirectory, "morfi": MorfiDirectory}
 
     def write(self):
@@ -20,10 +22,6 @@ class PandoraDirectory(HasAtoms, AnnotatedDirectory):
             )
         self.input.atoms = self.atoms
         self.input.write()
-
-    # @classproperty
-    # def dirname(self) -> str:
-    #     return "pandora"
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

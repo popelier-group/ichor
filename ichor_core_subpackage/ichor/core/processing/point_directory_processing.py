@@ -60,7 +60,7 @@ def fflux_point_directory_processing(
         if central_atom_name_given:
             all_processed_data[
                 "gaussian_output"
-            ] = point_directory.gaussian_out.processed_data(
+            ] = point_directory.gaussian_output.processed_data(
                 fflux_gaussian_output_processing_function(central_atom_c_matrix)
             )
 

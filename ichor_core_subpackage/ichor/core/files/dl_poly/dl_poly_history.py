@@ -102,6 +102,8 @@ class DlpolyHistory(Trajectory):
     provided by the HISTORY file
     """
 
+    filetype = "_not_needed"
+
     def __init__(self, path: Optional[Path]):
 
         super().__init__(path)
