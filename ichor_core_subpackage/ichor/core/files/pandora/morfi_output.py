@@ -6,11 +6,8 @@ from ichor.core.files.pandora.mout import MOUT
 
 class MorfiDirectory(AnnotatedDirectory):
 
+    dirname = "morfi-2pdm"
     contents = {"mout": MOUT}
-
-    # @classproperty
-    # def dirname(self) -> str:
-    #     return "morfi-2pdm"
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
