@@ -40,7 +40,7 @@ def submit_make_database(
         )
 
     path_stem = points_dir_path.stem
-    db_name = path_stem + f"_{database_format}.db"
+    db_name = path_stem + f".{database_format}"
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods

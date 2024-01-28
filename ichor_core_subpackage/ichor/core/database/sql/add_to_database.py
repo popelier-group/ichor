@@ -65,10 +65,11 @@ def add_point_to_database(
 
     for _f in point.path.iterdir():
         if _f.suffix == ".sh":
-            print(
-                f"A shell file (.sh) was found in {point.path.absolute()}, so AIMAll probably crashed. Not added to db."
-            )
-            return
+            if print_missing_data:
+                print(
+                    f"A '.sh' was found in {point.path.absolute()}, so AIMAll likely crashed. Not added to db."
+                )
+                return
 
     ###############################
     # wfn information
@@ -79,7 +80,7 @@ def add_point_to_database(
         # ORM for points table
         db_point = Points(
             date_added=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
-            name=point.name,
+            name=point.name_without_suffix,
             wfn_energy=point.wfn.total_energy,
         )
     # if file does not exist, still add to database, but do not contain wfn information
@@ -156,9 +157,9 @@ def add_point_to_database(
         if point.gaussian_output:
             if point.gaussian_output.global_forces:
                 atom_global_forces = point.gaussian_output.global_forces[atom_name]
-                atom_force_x = atom_global_forces.x
-                atom_force_y = atom_global_forces.y
-                atom_force_z = atom_global_forces.z
+                atom_force_x = atom_global_forces[0]
+                atom_force_y = atom_global_forces[1]
+                atom_force_z = atom_global_forces[2]
 
             # in case that the force keyword was not used but gaussian out exists
             else:

@@ -371,9 +371,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
 
         if not db_path:
-            db_path = Path(f"{self.path.name}_sqlite.db")
+            db_path = Path(f"{self.name_without_suffix}.sqlite")
         else:
-            db_path = Path(db_path).with_suffix(".db")
+            db_path = Path(db_path).with_suffix(".sqlite")
 
         # if db exists, then add new points to existing database.
         if db_path.exists():
@@ -412,7 +412,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
 
         if not json_db_path:
-            json_db_path = Path(f"{self.path.name}.json")
+            json_db_path = Path(f"{self.name_without_suffix}.json")
         else:
             json_db_path = Path(json_db_path).with_suffix(".json")
 

@@ -65,6 +65,13 @@ class Directory(PathObject, ABC):
     def name(self):
         return self.path.name
 
+    @property
+    def name_without_suffix(self):
+
+        suff = getattr(self, "_suffix", None)
+        if suff:
+            return self.path.name.replace(suff, "")
+
 
 class AnnotatedDirectory(Directory, ABC):
     """Abstract method for adding a parser for a Directory that
