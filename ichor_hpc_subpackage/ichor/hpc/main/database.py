@@ -4,7 +4,7 @@ from typing import List
 from ichor.cli.useful_functions import single_or_many_points_directories
 
 from ichor.core.atoms import ALF
-from ichor.core.database.sql.query_database import get_alf_from_first_db_geometry
+from ichor.core.database import get_alf_from_first_db_geometry
 from ichor.core.files import PointsDirectory
 from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
@@ -97,7 +97,7 @@ def submit_make_database(
                 text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
             )
 
-        # if only one PointsDirectory to sql on compute
+        # if only one PointsDirectory to db
         else:
 
             text_list = []
@@ -116,6 +116,7 @@ def submit_make_database(
 
 def submit_make_csvs_from_database(
     db_path: Path,
+    db_type: str,
     ncores: int,
     alf: List[ALF] = None,
     float_difference_iqa_wfn: float = 4.184,
@@ -129,6 +130,7 @@ def submit_make_csvs_from_database(
     as the number of atoms in the system is the optimal choice.
 
     :param db_path: pathlib.Path object that holds path to database
+    :param db_type: The type of database, sqlite or json
     :param ncores: Number of cores to run job with
     :param float_difference_iqa_wfn: Absolute tolerance for difference of energy
         between WFN and sum of IQA energies.
@@ -142,19 +144,21 @@ def submit_make_csvs_from_database(
 
     # if no alf is given, then automatically calculate it
     if not alf:
-        alf = get_alf_from_first_db_geometry(db_path)
+        alf = get_alf_from_first_db_geometry(db_path, db_type)
 
     text_list = []
     # make the python command that will be written in the submit script
     # it will get executed as `python -c python_code_to_execute...`
     text_list.append(
-        "from ichor.core.database.sql.query_database import write_processed_data_for_atoms_parallel"
+        "from ichor.core.database import write_processed_data_for_atoms_parallel"
     )
     text_list.append("from pathlib import Path")
     text_list.append("from ichor.core.atoms import ALF")
     text_list.append(f"db_path = Path('{db_path.absolute()}')")
     text_list.append(f"alf = {alf}")
-    str_part1 = f"write_processed_data_for_atoms_parallel(db_path, alf, {ncores},"
+    str_part1 = (
+        f"write_processed_data_for_atoms_parallel(db_path, {db_type}, alf, {ncores},"
+    )
     str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
     str_part3 = f" max_integration_error={float_integration_error},"
     str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
