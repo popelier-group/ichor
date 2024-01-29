@@ -25,7 +25,7 @@ def get_data_for_point(
     # when reading the database
 
     point_dict = {}
-    point_dict["name"] = point.name
+    point_dict["name"] = point.name_without_suffix
 
     for _f in point.path.iterdir():
         if _f.suffix == ".sh":
