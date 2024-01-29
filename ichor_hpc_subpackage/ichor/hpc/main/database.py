@@ -75,52 +75,6 @@ def submit_make_database(
             text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
         )
 
-    # # if we are dealing with sqlite or any other database format
-    # # because that will directly append to an existing database
-    # # TODO: change to else statement if other database formats work directly like this
-    # elif database_format == "sqlite":
-
-    #     # if turning many PointsDirectories into db on compute node
-    #     if is_parent_directory_to_many_points_directories:
-
-    #         text_list = []
-    #         # make the python command that will be written in the submit script
-    #         # it will get executed as `python -c python_code_to_execute...`
-    #         text_list.append("from ichor.core.files import PointsDirectory")
-    #         text_list.append("from pathlib import Path")
-    #         # make the parent directory path in a Path object
-    #         text_list.append(f"parent_dir = Path('{points_dir_path.absolute()}')")
-
-    #         # make a list comprehension that writes each PointsDirectory in the parent dir
-    #         # into the same SQLite database
-    #         # needs to be a list comprehension because for loops do not work with -c flag
-    #         str_part1 = f"[PointsDirectory(d).{str_database_method}('{db_name}', print_missing_data=True)"
-    #         str_part2 = " for d in parent_dir.iterdir()]"
-
-    #         total_str = str_part1 + str_part2
-
-    #         text_list.append(total_str)
-
-    #         return submit_free_flow_python_command_on_compute(
-    #             text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
-    #         )
-
-    #     # if only one PointsDirectory to db
-    #     else:
-
-    #         text_list = []
-    #         # make the python command that will be written in the submit script
-    #         # it will get executed as `python -c python_code_to_execute...`
-    #         text_list.append("from ichor.core.files import PointsDirectory")
-    #         text_list.append(f"pd = PointsDirectory('{points_dir_path.absolute()}')")
-    #         text_list.append(
-    #             f"pd.{str_database_method}('{db_name}', print_missing_data=True)"
-    #         )
-
-    #         return submit_free_flow_python_command_on_compute(
-    #             text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
-    #         )
-
 
 def submit_make_csvs_from_database(
     db_path: Path,
@@ -166,7 +120,7 @@ def submit_make_csvs_from_database(
     text_list.append(f"db_path = Path('{db_path.absolute()}')")
     text_list.append(f"alf = {alf}")
     str_part1 = (
-        f"write_processed_data_for_atoms_parallel(db_path, {db_type}, alf, {ncores},"
+        f"write_processed_data_for_atoms_parallel(db_path, '{db_type}', alf, {ncores},"
     )
     str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
     str_part3 = f" max_integration_error={float_integration_error},"
