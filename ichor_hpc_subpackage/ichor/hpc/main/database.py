@@ -46,7 +46,7 @@ def submit_make_database(
     )
 
     path_stem = points_dir_path.stem
-    db_name = path_stem + f".{database_format}"
+    db_name = path_stem
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods
@@ -62,6 +62,7 @@ def submit_make_database(
 
                 pd = PointsDirectory(d)
                 # write all data to a single database by passing in the same name for every PointsDirectory
+                # get the method and pass in the database path name
                 getattr(pd, str_database_method)(db_name)
 
         else:
