@@ -51,8 +51,10 @@ def submit_make_database(
         text_list.append("from pathlib import Path")
         # needs to be a list comprehension because for loops do not work with -c flag
         # need to write each pointdirectory to a separate json directory
-        text_list.append(f"d = Path('{str(points_dir_path.absolute)}')")
-        text_list.append(f"PointsDirectoryParent(d).{str_database_method}('{db_name}')")
+        text_list.append(f"pd_parent = Path('{str(points_dir_path.absolute)}')")
+        text_list.append(
+            f"PointsDirectoryParent(pd_parent).{str_database_method}('{db_name}')"
+        )
 
         return submit_free_flow_python_command_on_compute(
             text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
@@ -66,6 +68,7 @@ def submit_make_database(
         # it will get executed as `python -c python_code_to_execute...`
         text_list.append("from ichor.core.files import PointsDirectory")
         text_list.append("from pathlib import Path")
+        text_list.append(f"pd = PointsDirectory('{str(points_dir_path.absolute())}')")
         text_list.append(f"pd.{str_database_method}('{db_name}')")
 
         return submit_free_flow_python_command_on_compute(
