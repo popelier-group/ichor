@@ -51,7 +51,7 @@ def submit_make_database(
         text_list.append("from pathlib import Path")
         # needs to be a list comprehension because for loops do not work with -c flag
         # need to write each pointdirectory to a separate json directory
-        text_list.append(f"pd_parent = Path('{str(points_dir_path.absolute)}')")
+        text_list.append(f"pd_parent = Path('{str(points_dir_path.absolute())}')")
         text_list.append(
             f"PointsDirectoryParent(pd_parent).{str_database_method}('{db_name}')"
         )
