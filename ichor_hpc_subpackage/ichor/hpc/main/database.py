@@ -119,6 +119,7 @@ def submit_make_csvs_from_database(
     db_type: str,
     ncores: int,
     alf: List[ALF] = None,
+    submit_on_compute=True,
     float_difference_iqa_wfn: float = 4.184,
     float_integration_error: float = 1e-3,
     rotate_multipole_moments: bool = True,
@@ -134,6 +135,7 @@ def submit_make_csvs_from_database(
     :param ncores: Number of cores to run job with
     :param float_difference_iqa_wfn: Absolute tolerance for difference of energy
         between WFN and sum of IQA energies.
+    :param submit_on_compute: Whether to submit on compute or now
     :param float_integration_error: Absolute tolerance for integration error.
     :param alf: A list of ALF for the whole system. If not given,
         it will be calculated automatically.
@@ -146,26 +148,41 @@ def submit_make_csvs_from_database(
     if not alf:
         alf = get_alf_from_first_db_geometry(db_path, db_type)
 
-    text_list = []
-    # make the python command that will be written in the submit script
-    # it will get executed as `python -c python_code_to_execute...`
-    text_list.append(
-        "from ichor.core.database import write_processed_data_for_atoms_parallel"
-    )
-    text_list.append("from pathlib import Path")
-    text_list.append("from ichor.core.atoms import ALF")
-    text_list.append(f"db_path = Path('{db_path.absolute()}')")
-    text_list.append(f"alf = {alf}")
-    str_part1 = (
-        f"write_processed_data_for_atoms_parallel(db_path, {db_type}, alf, {ncores},"
-    )
-    str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
-    str_part3 = f" max_integration_error={float_integration_error},"
-    str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
-    text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
+    if submit_on_compute:
 
-    return submit_free_flow_python_command_on_compute(
-        text_list=text_list,
-        script_name=SCRIPT_NAMES["calculate_features"],
-        ncores=ncores,
-    )
+        text_list = []
+        # make the python command that will be written in the submit script
+        # it will get executed as `python -c python_code_to_execute...`
+        text_list.append(
+            "from ichor.core.database import write_processed_data_for_atoms_parallel"
+        )
+        text_list.append("from pathlib import Path")
+        text_list.append("from ichor.core.atoms import ALF")
+        text_list.append(f"db_path = Path('{db_path.absolute()}')")
+        text_list.append(f"alf = {alf}")
+        str_part1 = f"write_processed_data_for_atoms_parallel(db_path, {db_type}, alf, {ncores},"
+        str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
+        str_part3 = f" max_integration_error={float_integration_error},"
+        str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
+        text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
+
+        return submit_free_flow_python_command_on_compute(
+            text_list=text_list,
+            script_name=SCRIPT_NAMES["calculate_features"],
+            ncores=ncores,
+        )
+
+    else:
+
+        from ichor.core.database import write_processed_data_for_atoms_parallel
+
+        write_processed_data_for_atoms_parallel(
+            db_path,
+            db_type,
+            alf,
+            ncores,
+            max_diff_iqa_wfn=float_difference_iqa_wfn,
+            max_integration_error=float_integration_error,
+            calc_multipoles=rotate_multipole_moments,
+            calc_forces=calculate_feature_forces,
+        )
