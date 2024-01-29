@@ -414,6 +414,8 @@ class PointsDirectory(ListOfAtoms, Directory):
             which contains multiple directories inside. Each directory inside is one PointsDirectory.
             The reason for implementing like this is if using for multiple PointsDirectory-ies
             at once, so that data for each PointDirectory is written in a separate folder
+        :param datafunction: A function used to get all data for a single point.
+            This data is going to get written to the json file.
         :param npoints_per_json: Maximum number of geometries to write to one json file
             This is done so that the individual files do not become very large.
         :param print_missing_data: Whether to print out any missing data from each PointDirectory contained

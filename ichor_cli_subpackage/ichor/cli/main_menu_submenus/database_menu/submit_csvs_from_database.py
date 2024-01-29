@@ -14,6 +14,7 @@ from ichor.cli.useful_functions import (
     user_input_float,
     user_input_int,
     user_input_path,
+    user_input_restricted,
 )
 
 from ichor.core.database.query_database import (
@@ -22,6 +23,7 @@ from ichor.core.database.query_database import (
 )
 
 from ichor.hpc.main import submit_make_csvs_from_database
+from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS
 
 SUBMIT_CSVS_MENU_DESCRIPTION = MenuDescription(
     "Database Processing Menu",
@@ -30,6 +32,7 @@ SUBMIT_CSVS_MENU_DESCRIPTION = MenuDescription(
 
 # TODO: possibly make this be read from a file
 SUBMIT_CSVS_MENU_DEFAULTS = {
+    "default_database_format": "sqlite",
     "default_rotate_multipole_moments": True,
     "default_calculate_feature_forces": False,
     "default_filter_by_energy": True,
@@ -46,6 +49,7 @@ SUBMIT_CSVS_MENU_DEFAULTS = {
 class SubmitCSVSMenuOptions(MenuOptions):
 
     selected_database_path: Path
+    selected_database_format: str
     selected_rotate_multipole_moments: bool
     selected_calculate_feature_forces: bool
     selected_filter_by_energy: bool
@@ -60,8 +64,6 @@ class SubmitCSVSMenuOptions(MenuOptions):
         db_path = Path(self.selected_database_path)
         if not db_path.exists():
             return f"Current database path: {db_path} does not exist."
-        elif not db_path.is_file():
-            return f"Current database path: {db_path} is not a file."
 
 
 # initialize dataclass for storing information for menu
@@ -84,6 +86,18 @@ class SubmitCSVSFunctions:
         ).absolute()
         submit_csvs_menu_options.selected_database_path = (
             ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH
+        )
+
+    @staticmethod
+    def select_database_format():
+        """Asks user to update the ethod for AIMALL. The method
+        needs to be added to the WFN file so that AIMALL does the correct
+        calculation."""
+
+        submit_csvs_menu_options.selected_database_format = user_input_restricted(
+            AVAILABLE_DATABASE_FORMATS.keys(),
+            "Choose a database format: ",
+            submit_csvs_menu_options.selected_database_format,
         )
 
     @staticmethod
@@ -215,6 +229,7 @@ class SubmitCSVSFunctions:
         """Makes csv files containing features, iqa energies, and rotated multipole moments given a database"""
 
         db_path = ichor.cli.global_menu_variables.SELECTED_DATABASE_PATH
+        db_type = submit_csvs_menu_options.selected_database_format
 
         rotate_multipole_moments = (
             submit_csvs_menu_options.selected_rotate_multipole_moments
@@ -230,9 +245,10 @@ class SubmitCSVSFunctions:
         submit_on_compute = submit_csvs_menu_options.selected_submit_on_compute
 
         if not submit_on_compute:
-            alf = get_alf_from_first_db_geometry(db_path)
+            alf = get_alf_from_first_db_geometry(db_path, db_type)
             write_processed_data_for_atoms_parallel(
                 db_path,
+                db_type,
                 alf,
                 ncores,
                 max_diff_iqa_wfn=float_difference_iqa_wfn,
@@ -246,6 +262,7 @@ class SubmitCSVSFunctions:
 
             submit_make_csvs_from_database(
                 db_path,
+                db_type,
                 ncores=ncores,
                 alf=None,
                 float_difference_iqa_wfn=float_difference_iqa_wfn,
@@ -261,6 +278,10 @@ submit_csvs_menu_items = [
     FunctionItem(
         "Change database path",
         SubmitCSVSFunctions.select_database_path,
+    ),
+    FunctionItem(
+        "Change database format",
+        SubmitCSVSFunctions.select_database_format,
     ),
     FunctionItem(
         "Change rotate multipole moments",
