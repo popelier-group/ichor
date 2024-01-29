@@ -104,7 +104,7 @@ class PointsDirectoryParent(list, Directory):
         if not db_path:
             db_path = Path(f"{self.name_without_suffix}_parent.sqlite")
         else:
-            db_path = Path(db_path).with_suffix(".sqlite")
+            db_path = Path(db_path).with_name(f"{db_path.name}_parent.sqlite")
 
         for pointsdir in self:
 
