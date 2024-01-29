@@ -190,7 +190,7 @@ def write_processed_data_for_atoms_parallel(
     corresponding atomic datasets.
 
     :param db_path: Path to SQLite3 database containing `Points`, `AtomNames`, and `Dataset` tables.
-        or a json database (a directory)
+        or a json database (a directory), potentially containing multiple directories
     :param db_type: The type of database that is given, currently only json or sqlite formats supported.
     :param alf: A list of ALF instances to be used when calculating features
         and calculating C matrices.

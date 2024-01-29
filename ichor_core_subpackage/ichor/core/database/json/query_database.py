@@ -60,18 +60,20 @@ dataframe_cols = [
 ]
 
 
-def get_json_db_info(db_path):
-    """Gets important information from json database (a directory containing
-    multiple json files) and returns point ids, atom names, and full
-    pandas dataframe, which can be processed into atomic csvs
+def get_one_json_dir_info(json_dir: Path, id_counter=1):
+    """_summary_
 
-    :param db_path: path to directory containing json files storing data
+    :param json_dir: _description_
+    :type json_dir: Path
+    :param id_counter: _description_, defaults to 1
+    :type id_counter: int, optional
+    :return: _description_
+    :rtype: _type_
     """
 
-    id_counter = 1
     all_dfs = []
 
-    for d in natsorted(Path(db_path).iterdir(), key=ignore_alpha):
+    for d in natsorted(Path(json_dir).iterdir(), key=ignore_alpha):
 
         with open(d, "r") as f:
 
@@ -130,3 +132,45 @@ def get_json_db_info(db_path):
     total_df = total_df.reset_index(drop=True)
 
     return list(set(total_df["id"])), list(set(total_df["atom_name"])), total_df
+
+
+def get_json_db_info(db_path):
+    """Gets important information from json database (a directory containing
+    multiple json files) and returns point ids, atom names, and full
+    pandas dataframe, which can be processed into atomic csvs
+
+    :param db_path: path to directory containing json files storing data
+        Could be a single directory or a parent directory with multiple dirs inside.
+    """
+
+    contains_many_directories = False
+
+    # quick check if inside there are other directories or json files
+    # there could be many directories (one for each pointsdirecotry in a parentpointsdir)
+    # or just one directory from one pointsdirectory
+
+    for d in Path(db_path).iterdir():
+        if d.is_dir():
+            contains_many_directories = True
+            break
+
+    if contains_many_directories:
+
+        all_dfs = []
+        all_ids = []
+
+        # if there are many inner directories, we need to get the data out from each one
+        # and make a new dataframe and group ids
+        for one_dir in natsorted(Path(db_path).iterdir(), key=ignore_alpha):
+
+            ids, atom_names, partial_df = get_one_json_dir_info(one_dir)
+            all_dfs.append(partial_df)
+            all_ids.extend(ids)
+
+        all_dfs = pd.concat(all_dfs, axis=1)
+
+        return all_ids, atom_names, all_dfs
+
+    else:
+
+        return get_one_json_dir_info(db_path)

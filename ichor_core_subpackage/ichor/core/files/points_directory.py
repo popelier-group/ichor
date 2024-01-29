@@ -401,6 +401,7 @@ class PointsDirectory(ListOfAtoms, Directory):
     def write_to_json_database(
         self,
         root_path: Path = None,
+        datafunction: Callable = get_data_for_point,
         npoints_per_json=500,
         print_missing_data=False,
         indent: int = 2,
@@ -444,7 +445,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             for point in chunk:
 
                 total_data_list.append(
-                    get_data_for_point(point, print_missing_data=print_missing_data)
+                    datafunction(point, print_missing_data=print_missing_data)
                 )
 
             with open(json_file_path, "w") as json_db:

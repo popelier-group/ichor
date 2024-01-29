@@ -67,8 +67,10 @@ class SubmitDatabaseFunctions:
         """Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
         and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies"""
 
-        is_parent_directory_to_many_points_directories = single_or_many_points_directories(
-            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem.lower()
+        is_parent_directory_to_many_points_directories = (
+            single_or_many_points_directories(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+            )
         )
 
         database_format, submit_on_compute = (

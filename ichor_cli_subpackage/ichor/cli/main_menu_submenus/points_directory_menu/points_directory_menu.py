@@ -17,7 +17,7 @@ from ichor.cli.main_menu_submenus.points_directory_menu.points_directory_submenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import user_input_path
-from ichor.core.files import PointsDirectory
+from ichor.core.files import PointsDirectory, PointsDirectoryParent
 
 POINTS_DIRECTORY_MENU_DESCRIPTION = MenuDescription(
     "PointsDirectory Menu",
@@ -31,10 +31,18 @@ class PointsDirectoryMenuOptions(MenuOptions):
     # defaults to the current working directory
     selected_points_directory_path: Path
 
+    def check_path(self):
+
+        pd_path = Path(self.selected_points_directory_path)
+        if not pd_path.is_dir():
+            return "Current path is not a directory."
+
     def check_selected_points_directory_path(self) -> Union[str, None]:
         """Checks whether the given PointsDirectory exists or if it is a directory."""
         pd_path = Path(self.selected_points_directory_path)
-        if pd_path.suffix != PointsDirectory._suffix:
+        if (pd_path.suffix != PointsDirectory._suffix) and (
+            pd_path.suffix != PointsDirectoryParent._suffix
+        ):
             return f"Current path: {pd_path} might not be PointsDirectory-like)."
 
 
