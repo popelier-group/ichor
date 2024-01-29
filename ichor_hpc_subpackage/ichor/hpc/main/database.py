@@ -27,123 +27,96 @@ def submit_make_database(
     the directory
 
     :param points_dir_path: Path to PointsDirectory or parent to PointsDirectory-ies
-    :param database_format: the format, which will get added to the name of the file
-        Currently, only the sqlite format is supported
-    :param submit_on_compute: Whether or not to submit to compute node, defaults to True
+    :param database_format: the format, currently sqlite and json are supported
     :param ncores: number of cores to use on compute node
     """
-
-    db_name = points_dir_path.stem
 
     is_parent_directory_to_many_points_directories = single_or_many_points_directories(
         points_dir_path
     )
 
-    if database_format not in AVAILABLE_DATABASE_FORMATS.keys():
-        raise ValueError(
-            f"The given database format, {database_format} is not in the available formats:",
-            ",".join(AVAILABLE_DATABASE_FORMATS.keys()),
-        )
+    db_name = points_dir_path.stem
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods
     str_database_method = AVAILABLE_DATABASE_FORMATS[database_format]
 
-    # only for json because we have to mess around with directory structure
-    if database_format == "json":
+    # if turning many PointsDirectories into db on compute node
+    if is_parent_directory_to_many_points_directories:
 
-        # if turning many PointsDirectories into db on compute node
-        if is_parent_directory_to_many_points_directories:
+        text_list = []
+        # make the python command that will be written in the submit script
+        # it will get executed as `python -c python_code_to_execute...`
+        text_list.append("from ichor.core.files import PointsDirectoryParent")
+        text_list.append("from pathlib import Path")
+        # needs to be a list comprehension because for loops do not work with -c flag
+        # need to write each pointdirectory to a separate json directory
+        text_list.append(f"d = Path('{str(points_dir_path.absolute)}')")
+        text_list.append(f"PointsDirectoryParent(d).{str_database_method}('{db_name}')")
 
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import PointsDirectory")
-            text_list.append("from pathlib import Path")
-            # make the parent directory path in a Path object
-            text_list.append(f"parent_dir = Path('{points_dir_path.absolute()}')")
-            # make the parent database json folder because there are potentially
-            # going to be multiple json directories inside
-            text_list.append(
-                f"db_parent_dir = Path('{points_dir_path.absolute()}_json')"
-            )
-            text_list.append("db_parent_dir.mkdir(exist_ok=False)")
+        return submit_free_flow_python_command_on_compute(
+            text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+        )
 
-            # needs to be a list comprehension because for loops do not work with -c flag
-            # need to write each pointdirectory to a separate json directory
-            str_part0 = f"[PointsDirectory(d).{str_database_method}(db_parent_dir / '{db_name}{{idx}}'"
-            str_part1 = ", print_missing_data=True)"
-            str_part2 = " for idx, d in enumerate(parent_dir.iterdir())]"
+    # if only one PointsDirectory to db
+    else:
 
-            total_str = str_part0 + str_part1 + str_part2
+        text_list = []
+        # make the python command that will be written in the submit script
+        # it will get executed as `python -c python_code_to_execute...`
+        text_list.append("from ichor.core.files import PointsDirectory")
+        text_list.append("from pathlib import Path")
+        text_list.append(f"pd.{str_database_method}('{db_name}')")
 
-            text_list.append(total_str)
+        return submit_free_flow_python_command_on_compute(
+            text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+        )
 
-            return submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
-            )
+    # # if we are dealing with sqlite or any other database format
+    # # because that will directly append to an existing database
+    # # TODO: change to else statement if other database formats work directly like this
+    # elif database_format == "sqlite":
 
-        # if only one PointsDirectory to db
-        else:
+    #     # if turning many PointsDirectories into db on compute node
+    #     if is_parent_directory_to_many_points_directories:
 
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import PointsDirectory")
-            text_list.append("from pathlib import Path")
-            text_list.append(
-                f"pd.{str_database_method}('{db_name}', print_missing_data=True)"
-            )
+    #         text_list = []
+    #         # make the python command that will be written in the submit script
+    #         # it will get executed as `python -c python_code_to_execute...`
+    #         text_list.append("from ichor.core.files import PointsDirectory")
+    #         text_list.append("from pathlib import Path")
+    #         # make the parent directory path in a Path object
+    #         text_list.append(f"parent_dir = Path('{points_dir_path.absolute()}')")
 
-            return submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
-            )
+    #         # make a list comprehension that writes each PointsDirectory in the parent dir
+    #         # into the same SQLite database
+    #         # needs to be a list comprehension because for loops do not work with -c flag
+    #         str_part1 = f"[PointsDirectory(d).{str_database_method}('{db_name}', print_missing_data=True)"
+    #         str_part2 = " for d in parent_dir.iterdir()]"
 
-    # if we are dealing with sqlite or any other database format
-    # because that will directly append to an existing database
-    # TODO: change to else statement if other database formats work directly like this
-    elif database_format == "sqlite":
+    #         total_str = str_part1 + str_part2
 
-        # if turning many PointsDirectories into db on compute node
-        if is_parent_directory_to_many_points_directories:
+    #         text_list.append(total_str)
 
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import PointsDirectory")
-            text_list.append("from pathlib import Path")
-            # make the parent directory path in a Path object
-            text_list.append(f"parent_dir = Path('{points_dir_path.absolute()}')")
+    #         return submit_free_flow_python_command_on_compute(
+    #             text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+    #         )
 
-            # make a list comprehension that writes each PointsDirectory in the parent dir
-            # into the same SQLite database
-            # needs to be a list comprehension because for loops do not work with -c flag
-            str_part1 = f"[PointsDirectory(d).{str_database_method}('{db_name}', print_missing_data=True)"
-            str_part2 = " for d in parent_dir.iterdir()]"
+    #     # if only one PointsDirectory to db
+    #     else:
 
-            total_str = str_part1 + str_part2
+    #         text_list = []
+    #         # make the python command that will be written in the submit script
+    #         # it will get executed as `python -c python_code_to_execute...`
+    #         text_list.append("from ichor.core.files import PointsDirectory")
+    #         text_list.append(f"pd = PointsDirectory('{points_dir_path.absolute()}')")
+    #         text_list.append(
+    #             f"pd.{str_database_method}('{db_name}', print_missing_data=True)"
+    #         )
 
-            text_list.append(total_str)
-
-            return submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
-            )
-
-        # if only one PointsDirectory to db
-        else:
-
-            text_list = []
-            # make the python command that will be written in the submit script
-            # it will get executed as `python -c python_code_to_execute...`
-            text_list.append("from ichor.core.files import PointsDirectory")
-            text_list.append(f"pd = PointsDirectory('{points_dir_path.absolute()}')")
-            text_list.append(
-                f"pd.{str_database_method}('{db_name}', print_missing_data=True)"
-            )
-
-            return submit_free_flow_python_command_on_compute(
-                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
-            )
+    #         return submit_free_flow_python_command_on_compute(
+    #             text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+    #         )
 
 
 def submit_make_csvs_from_database(

@@ -360,7 +360,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         )
 
     def write_to_sqlite3_database(
-        self, db_path: Union[str, Path] = None, echo=False, print_missing_data=False
+        self, db_path: Union[str, Path] = None, echo=False, print_missing_data=True
     ) -> Path:
         """
         Write out important information from a PointsDirectory instance to an SQLite3 database.
@@ -400,10 +400,10 @@ class PointsDirectory(ListOfAtoms, Directory):
 
     def write_to_json_database(
         self,
-        root_path: Path = None,
+        root_path: Union[str, Path] = None,
         datafunction: Callable = get_data_for_point,
         npoints_per_json=500,
-        print_missing_data=False,
+        print_missing_data=True,
         indent: int = 2,
         separators=(",", ":"),
     ) -> Path:
@@ -424,6 +424,8 @@ class PointsDirectory(ListOfAtoms, Directory):
         :param separators: Separators used for each entry, default (",", ":")
         :return: The path to the written json file
         """
+
+        root_path = Path(root_path)
 
         # if no path is given use pointdirectory without suffix
         if not root_path:
