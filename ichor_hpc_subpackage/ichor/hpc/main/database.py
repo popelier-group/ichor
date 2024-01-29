@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List
 
+from ichor.cli.useful_functions import single_or_many_points_directories
+
 from ichor.core.atoms import ALF
 from ichor.core.database.sql.query_database import get_alf_from_first_db_geometry
 from ichor.core.files import PointsDirectory
@@ -19,14 +21,14 @@ AVAILABLE_DATABASE_FORMATS = {
 def submit_make_database(
     points_dir_path: Path,
     database_format: str = "sqlite",
-    is_parent_directory_to_many_points_directories: bool = False,
     submit_on_compute: bool = True,
     ncores=1,
 ):
     """Method for making a PointsDirectory or parent to PointsDirectory into a database.
+    Infers if it is a PointsDirectory or PointsDirectoryParent based on the suffix of
+    the directory
 
     :param points_dir_path: Path to PointsDirectory or parent to PointsDirectory-ies
-    :param is_parent_directory_to_many_points_directories: whether the path is a parent or PointsDirectory
     :param database_format: the format, which will get added to the name of the file
         Currently, only the sqlite format is supported
     :param submit_on_compute: Whether or not to submit to compute node, defaults to True
@@ -38,6 +40,10 @@ def submit_make_database(
             f"The given database format, {database_format} is not in the available formats:",
             ",".join(AVAILABLE_DATABASE_FORMATS.keys()),
         )
+
+    is_parent_directory_to_many_points_directories = single_or_many_points_directories(
+        points_dir_path
+    )
 
     path_stem = points_dir_path.stem
     db_name = path_stem + f".{database_format}"
