@@ -101,6 +101,9 @@ class PointsDirectoryParent(list, Directory):
         :return: The path to the written SQL database
         """
 
+        # has to be here because we access .name later
+        db_path = Path(db_path)
+
         if not db_path:
             db_path = Path(f"{self.name_without_suffix}_parent.sqlite")
         else:
