@@ -6,11 +6,9 @@ from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
-from ichor.cli.useful_functions import (
-    single_or_many_points_directories,
-    user_input_bool,
-    user_input_restricted,
-)
+from ichor.cli.useful_functions import user_input_bool, user_input_restricted
+from ichor.core.files import PointsDirectory, PointsDirectoryParent
+from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main.database import AVAILABLE_DATABASE_FORMATS, submit_make_database
 
 SUBMIT_DATABASE_MENU_DESCRIPTION = MenuDescription(
@@ -69,8 +67,8 @@ class SubmitDatabaseFunctions:
         """Converts the current given PointsDirectory to a SQLite3 database. Can be submitted on compute
         and works for one `PointsDirectory` or parent directory containing many `PointsDirectory`-ies"""
 
-        is_parent_directory_to_many_points_directories = (
-            single_or_many_points_directories()
+        is_parent_directory_to_many_points_directories = single_or_many_points_directories(
+            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH.stem.lower()
         )
 
         database_format, submit_on_compute = (
@@ -78,12 +76,32 @@ class SubmitDatabaseFunctions:
             submit_database_menu_options.selected_submit_on_compute,
         )
 
-        submit_make_database(
-            ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
-            database_format,
-            is_parent_directory_to_many_points_directories,
-            submit_on_compute,
-        )
+        # this is used to be able to call the respective methods from PointsDirectory
+        # so that the same code below is used with the respective methods
+        str_database_method = AVAILABLE_DATABASE_FORMATS[database_format]
+
+        if submit_on_compute:
+
+            submit_make_database(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH,
+                database_format,
+            )
+
+        else:
+
+            # pointsdirectory parent json on login
+            if is_parent_directory_to_many_points_directories:
+                pointsdirparent = PointsDirectoryParent(
+                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+                )
+                func = getattr(pointsdirparent, str_database_method)
+                func(print_missing_data=True)
+            else:
+                pointdir = PointsDirectory(
+                    ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+                )
+                func = getattr(pointdir, str_database_method)
+                func(print_missing_data=True)
 
 
 # make menu items

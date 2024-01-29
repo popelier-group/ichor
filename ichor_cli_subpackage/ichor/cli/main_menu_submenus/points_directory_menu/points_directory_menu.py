@@ -35,7 +35,7 @@ class PointsDirectoryMenuOptions(MenuOptions):
         """Checks whether the given PointsDirectory exists or if it is a directory."""
         pd_path = Path(self.selected_points_directory_path)
         if pd_path.suffix != PointsDirectory._suffix:
-            return f"Current path: {pd_path} might not be a PointsDirectory (no {PointsDirectory._suffix} suffix)."
+            return f"Current path: {pd_path} might not be PointsDirectory-like)."
 
 
 # initialize dataclass for storing information for menu

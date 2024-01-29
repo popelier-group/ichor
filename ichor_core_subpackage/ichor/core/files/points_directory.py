@@ -65,6 +65,11 @@ class PointsDirectory(ListOfAtoms, Directory):
 
             Directory.__init__(self, path)
 
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        """Makes sure that path is PointsDirectory-like"""
+        return (path.suffix == cls._suffix) and path.is_dir()
+
     def _parse(self) -> None:
         """
         Called from Directory.__init__(self, path)
@@ -362,9 +367,6 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         :param db_path: database to write to
         :param echo: Whether to print out SQL queries from SQL Alchemy
-
-        :param db_path: _description_, defaults to None
-        :type db_path: Union[str, Path], optional
         :param echo: Whether to print out SQL queries from SQL Alchemy, defaults to False
         :param print_missing_data: Whether to print out any missing data from each PointDirectory contained
             in self, defaults to False
@@ -396,37 +398,44 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         return db_path
 
-    def write_json_database(
+    def write_to_json_database(
         self,
-        root_name: str = None,
+        root_path: Path = None,
         npoints_per_json=500,
         print_missing_data=False,
-        indent: int = None,
+        indent: int = 2,
         separators=(",", ":"),
     ) -> Path:
         """
         Write out important information from a PointsDirectory instance to a json file.
 
-        :param root_name: Name of directory which will contain the json files,
-            there are potentially going to be multiple json files inside
+        :param root_path: Name of directory which will the json database. This is a directory,
+            which contains multiple directories inside. Each directory inside is one PointsDirectory.
+            The reason for implementing like this is if using for multiple PointsDirectory-ies
+            at once, so that data for each PointDirectory is written in a separate folder
         :param npoints_per_json: Maximum number of geometries to write to one json file
             This is done so that the individual files do not become very large.
         :param print_missing_data: Whether to print out any missing data from each PointDirectory contained
             in self, defaults to False
-        :param indent: integer representing number of spaces to indent, defaults to None,
-            so will not indent
+        :param indent: integer representing number of spaces to indent, defaults to 2
         :param separators: Separators used for each entry, default (",", ":")
         :return: The path to the written json file
         """
 
-        if not root_name:
-            root_name = self.name_without_suffix
+        # if no path is given use pointdirectory without suffix
+        if not root_path:
+            root_path = Path(self.name_without_suffix)
 
-        root_path = Path(root_name + "_json")
+        # add a _json to the directory
+        root_path = root_path.with_name(root_path.name + "_json")
+
         mkdir(root_path)
 
+        # json file name that will be modified
+        tmp_json_file_name = root_path.stem
+
         counter = 0
-        json_file_path = root_path / f"{root_name}{counter}.json"
+        json_file_path = root_path / f"{tmp_json_file_name}_{counter}.json"
 
         total_data_list = []
 
@@ -445,7 +454,9 @@ class PointsDirectory(ListOfAtoms, Directory):
 
                 total_data_list = []
                 counter += 1
-                json_file_path = root_path / f"{root_name}{counter}.json"
+                json_file_path = root_path / f"{tmp_json_file_name}_{counter}.json"
+
+        return root_path
 
     # TODO: move processing code to processing func
     def features_with_properties_to_csv(

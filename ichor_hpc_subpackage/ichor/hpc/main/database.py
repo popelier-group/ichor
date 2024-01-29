@@ -1,11 +1,10 @@
 from pathlib import Path
 from typing import List
 
-from ichor.cli.useful_functions import single_or_many_points_directories
-
 from ichor.core.atoms import ALF
 from ichor.core.database import get_alf_from_first_db_geometry
-from ichor.core.files import PointsDirectory
+
+from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.global_variables import SCRIPT_NAMES
 from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
     submit_free_flow_python_command_on_compute,
@@ -14,14 +13,13 @@ from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
 # formats from PointsDirectory
 AVAILABLE_DATABASE_FORMATS = {
     "sqlite": "write_to_sqlite3_database",
-    "json": "write_json_database",
+    "json": "write_to_json_database",
 }
 
 
 def submit_make_database(
     points_dir_path: Path,
     database_format: str = "sqlite",
-    submit_on_compute: bool = True,
     ncores=1,
 ):
     """Method for making a PointsDirectory or parent to PointsDirectory into a database.
@@ -35,42 +33,76 @@ def submit_make_database(
     :param ncores: number of cores to use on compute node
     """
 
-    if database_format not in AVAILABLE_DATABASE_FORMATS.keys():
-        print(
-            f"The given database format, {database_format} is not in the available formats:",
-            ",".join(AVAILABLE_DATABASE_FORMATS.keys()),
-        )
+    db_name = points_dir_path.stem
 
     is_parent_directory_to_many_points_directories = single_or_many_points_directories(
         points_dir_path
     )
 
-    path_stem = points_dir_path.stem
-    db_name = path_stem
+    if database_format not in AVAILABLE_DATABASE_FORMATS.keys():
+        raise ValueError(
+            f"The given database format, {database_format} is not in the available formats:",
+            ",".join(AVAILABLE_DATABASE_FORMATS.keys()),
+        )
 
     # this is used to be able to call the respective methods from PointsDirectory
     # so that the same code below is used with the respective methods
     str_database_method = AVAILABLE_DATABASE_FORMATS[database_format]
 
-    # if running on login node, discouraged because takes a long time
-    if not submit_on_compute:
+    # only for json because we have to mess around with directory structure
+    if database_format == "json":
 
-        # if running on a directory containing many PointsDirectories
+        # if turning many PointsDirectories into db on compute node
         if is_parent_directory_to_many_points_directories:
 
-            for d in points_dir_path.iterdir():
+            text_list = []
+            # make the python command that will be written in the submit script
+            # it will get executed as `python -c python_code_to_execute...`
+            text_list.append("from ichor.core.files import PointsDirectory")
+            text_list.append("from pathlib import Path")
+            # make the parent directory path in a Path object
+            text_list.append(f"parent_dir = Path('{points_dir_path.absolute()}')")
+            # make the parent database json folder because there are potentially
+            # going to be multiple json directories inside
+            text_list.append(
+                f"db_parent_dir = Path('{points_dir_path.absolute()}_json')"
+            )
+            text_list.append("db_parent_dir.mkdir(exist_ok=False)")
 
-                pd = PointsDirectory(d)
-                # write all data to a single database by passing in the same name for every PointsDirectory
-                # get the method and pass in the database path name
-                getattr(pd, str_database_method)(db_name)
+            # needs to be a list comprehension because for loops do not work with -c flag
+            # need to write each pointdirectory to a separate json directory
+            str_part0 = f"[PointsDirectory(d).{str_database_method}(db_parent_dir / '{db_name}{{idx}}'"
+            str_part1 = ", print_missing_data=True)"
+            str_part2 = " for idx, d in enumerate(parent_dir.iterdir())]"
 
+            total_str = str_part0 + str_part1 + str_part2
+
+            text_list.append(total_str)
+
+            return submit_free_flow_python_command_on_compute(
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+            )
+
+        # if only one PointsDirectory to db
         else:
-            pd = PointsDirectory(points_dir_path)
-            getattr(pd, str_database_method)(db_name)
 
-    # if running on compute node
-    else:
+            text_list = []
+            # make the python command that will be written in the submit script
+            # it will get executed as `python -c python_code_to_execute...`
+            text_list.append("from ichor.core.files import PointsDirectory")
+            text_list.append("from pathlib import Path")
+            text_list.append(
+                f"pd.{str_database_method}('{db_name}', print_missing_data=True)"
+            )
+
+            return submit_free_flow_python_command_on_compute(
+                text_list, SCRIPT_NAMES["pd_to_database"], ncores=ncores
+            )
+
+    # if we are dealing with sqlite or any other database format
+    # because that will directly append to an existing database
+    # TODO: change to else statement if other database formats work directly like this
+    elif database_format == "sqlite":
 
         # if turning many PointsDirectories into db on compute node
         if is_parent_directory_to_many_points_directories:
@@ -119,7 +151,6 @@ def submit_make_csvs_from_database(
     db_type: str,
     ncores: int,
     alf: List[ALF] = None,
-    submit_on_compute=True,
     float_difference_iqa_wfn: float = 4.184,
     float_integration_error: float = 1e-3,
     rotate_multipole_moments: bool = True,
@@ -148,41 +179,26 @@ def submit_make_csvs_from_database(
     if not alf:
         alf = get_alf_from_first_db_geometry(db_path, db_type)
 
-    if submit_on_compute:
+    text_list = []
+    # make the python command that will be written in the submit script
+    # it will get executed as `python -c python_code_to_execute...`
+    text_list.append(
+        "from ichor.core.database import write_processed_data_for_atoms_parallel"
+    )
+    text_list.append("from pathlib import Path")
+    text_list.append("from ichor.core.atoms import ALF")
+    text_list.append(f"db_path = Path('{db_path.absolute()}')")
+    text_list.append(f"alf = {alf}")
+    str_part1 = (
+        f"write_processed_data_for_atoms_parallel(db_path, {db_type}, alf, {ncores},"
+    )
+    str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
+    str_part3 = f" max_integration_error={float_integration_error},"
+    str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
+    text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
 
-        text_list = []
-        # make the python command that will be written in the submit script
-        # it will get executed as `python -c python_code_to_execute...`
-        text_list.append(
-            "from ichor.core.database import write_processed_data_for_atoms_parallel"
-        )
-        text_list.append("from pathlib import Path")
-        text_list.append("from ichor.core.atoms import ALF")
-        text_list.append(f"db_path = Path('{db_path.absolute()}')")
-        text_list.append(f"alf = {alf}")
-        str_part1 = f"write_processed_data_for_atoms_parallel(db_path, {db_type}, alf, {ncores},"
-        str_part2 = f" max_diff_iqa_wfn={float_difference_iqa_wfn},"
-        str_part3 = f" max_integration_error={float_integration_error},"
-        str_part4 = f" calc_multipoles={rotate_multipole_moments}, calc_forces={calculate_feature_forces})"
-        text_list.append(str_part1 + str_part2 + str_part3 + str_part4)
-
-        return submit_free_flow_python_command_on_compute(
-            text_list=text_list,
-            script_name=SCRIPT_NAMES["calculate_features"],
-            ncores=ncores,
-        )
-
-    else:
-
-        from ichor.core.database import write_processed_data_for_atoms_parallel
-
-        write_processed_data_for_atoms_parallel(
-            db_path,
-            db_type,
-            alf,
-            ncores,
-            max_diff_iqa_wfn=float_difference_iqa_wfn,
-            max_integration_error=float_integration_error,
-            calc_multipoles=rotate_multipole_moments,
-            calc_forces=calculate_feature_forces,
-        )
+    return submit_free_flow_python_command_on_compute(
+        text_list=text_list,
+        script_name=SCRIPT_NAMES["calculate_features"],
+        ncores=ncores,
+    )
