@@ -29,6 +29,8 @@ class TrajectoryAnalysis(ReadFile):
         traj.plot_hr('path/to/figure.png')
     """
 
+    filetype = ".xyz"
+
     def __init__(self, trajectory_path: Union[Path, str]):
         ReadFile.__init__(self, trajectory_path)
         trajectory_path = Path(trajectory_path)

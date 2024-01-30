@@ -9,7 +9,6 @@ from ichor.core.files.directory import Directory
 class PointsDirectoryParent(list, Directory):
     """
     Should wrap around multiple PointsDirectory-ies.
-
     """
 
     _suffix = ".pointsdirparent"
@@ -58,7 +57,7 @@ class PointsDirectoryParent(list, Directory):
         are contained in this PointsDirectoryParent
 
         :param root_name: The name of the database. If not selected, uses the name of the current
-        PointsDirectoryParent, defaults to None
+            PointsDirectoryParent, defaults to None
         :param npoints_per_json: Number of json files in each sub-directory, defaults to 500
         :param print_missing_data: Whether or not to print missing data, defaults to True
         :param indent: json file indent, defaults to 2
@@ -92,7 +91,7 @@ class PointsDirectoryParent(list, Directory):
     ) -> Path:
         """
         Write out important information from a PointsDirectory instance to an SQLite3 database.
-        All PointsDirectory-like directories contained inside will be written to the same database
+        All PointsDirectory-like directories contained inside will be written to the same database.
 
         :param db_path: database to write to
         :param echo: Whether to print out SQL queries from SQL Alchemy, defaults to False
