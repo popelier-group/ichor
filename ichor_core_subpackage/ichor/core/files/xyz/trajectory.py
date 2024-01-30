@@ -142,7 +142,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return [ref.rmsd(point) for point in self]
 
-    def to_dir(self, system_name: str, every: int = 1, center=False):
+    def to_dir(self, system_name: str, every: int = 1, center=False) -> Path:
         """Writes out every nth timestep to a separate .xyz file to a given directory
 
         :param system_name: The name of the system. This will be the name of the
@@ -150,6 +150,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         :param every: An integer value that indicates the nth step at which an
             xyz file should be written. Default is 1. If
             a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
+
+        :returns: The Path object to the made directory
         """
         from ichor.core.files import PointsDirectory, XYZ
 
@@ -173,13 +175,15 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 xyz_file = XYZ(path, atoms_instance)
                 xyz_file.write()
 
+        return root_path
+
     def to_dirs(
         self,
         system_name: str,
         split_size: int = 1000,
         every: int = 1,
         center=False,
-    ):
+    ) -> Path:
         """Writes out every nth timestep to a separate .xyz file. This method differs
         from `to_dir` because it has a structure system_name_root / points_directory / xyz file.
         I.e. there is an additional root directory which encapsulates all the PointsDirectory-like
@@ -192,6 +196,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         :param every: An integer value that indicates the nth step at
             which an xyz file should be written. Default is 1.
             If a value eg. 5 is given, then it will only write out a .xyz file for every 5th timestep.
+
+        :returns: The Path object to the made parent directory
         """
         from ichor.core.files import PointsDirectory, PointsDirectoryParent, XYZ
 
@@ -244,6 +250,8 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 inner_dir_name = f"{system_name}{chunk_idx}{default_points_dir_suffix}"
                 if total_geom_counter != len_geoms_to_write:
                     mkdir(root_path / inner_dir_name, empty=True)
+
+        return root_path
 
     def to_multiple_parent_dirs(
         self,

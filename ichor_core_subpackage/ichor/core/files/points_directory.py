@@ -308,13 +308,18 @@ class PointsDirectory(ListOfAtoms, Directory):
 
     @classmethod
     def from_trajectory(
-        cls, trajectory_path: Union[str, Path], points_dir_name: str = None, center=True
+        cls,
+        trajectory_path: Union[str, Path],
+        system_name: str = None,
+        every=1,
+        center=True,
     ) -> "PointsDirectory":
         """
         Generate a PointsDirectory-type structure directory from a trajectory (.xyz) file
 
         :param trajectory_path: A str or Path to a .xyz file containing geometries
-        :param points_dir_name: How the new folder will be named
+        :param system_name: The name of the chemical system. This is going to be the name of the directory
+            which will be created.
         :param center: Whether to center the geometries on the centroid of the system. This is useful to prevent
             the molecule from translating in 3D space (and prevents issues with WFN files, where a very large x,y,z
             value (over 100) for the coordinates leads to ******** being written in the .wfn file...)
@@ -322,11 +327,11 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         traj = Trajectory(trajectory_path)
 
-        if not points_dir_name:
-            points_dir_name = traj.path.stem
+        if not system_name:
+            system_name = traj.path.stem
 
-        traj.to_dir(points_dir_name, points_dir_name, center=center)
-        return PointsDirectory(points_dir_name)
+        dir_path = traj.to_dir(system_name, every=every, center=center)
+        return PointsDirectory(dir_path)
 
     def __getitem__(self, item: Union[int, str]) -> Union[Atoms, ListOfAtoms]:
         """Used when indexing a Trajectory instance by an integer, string, or slice."""
