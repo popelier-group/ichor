@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import IO
 
 import numpy as np
 
@@ -12,5 +11,8 @@ class Mean(ABC):
         pass
 
     @abstractmethod
-    def write(self, f: IO):
+    def write_str(self) -> str:
+        """
+        Used to write the mean part of a model file
+        """
         pass

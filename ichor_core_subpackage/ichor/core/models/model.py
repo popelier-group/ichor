@@ -406,50 +406,53 @@ class Model(ReadFile, WriteFile):
         if not self.notes:
             self.notes = {}
 
-        with open(path, "w") as f:
-            f.write("# [metadata]\n")
-            f.write(f"# program {self.program}\n")
-            f.write(f"# version {self.program_version}\n")
-            f.write(f"# jitter {self.jitter}\n")
-            f.write(f"# likelihood {self.likelihood}\n")
-            for key, val in self.notes.items():
-                f.write(f"# {key} = {val}\n")
-            f.write("\n")
-            f.write("[system]\n")
-            f.write(f"name {self.system_name}\n")
-            f.write(f"atom {self.atom_name}\n")
-            f.write(f"property {self.prop}\n")
-            f.write(f"ALF {self.alf[0] + 1} {self.alf[1] + 1} {self.alf[2] + 1}\n")
-            f.write("\n")
-            f.write("[dimensions]\n")
-            f.write(f"number_of_atoms {self.natoms}\n")
-            f.write(f"number_of_features {self.nfeats}\n")
-            f.write(f"number_of_training_points {self.ntrain}\n")
-            f.write("\n")
-            self.mean.write(f)
-            f.write("\n")
-            f.write("[kernels]\n")
-            f.write(f"number_of_kernels {self.kernel.nkernel}\n")
-            f.write(f"composition {self.kernel.name}\n")
-            f.write("\n")
-            self.kernel.write(f)
-            f.write("\n")
-            f.write("[training_data]\n")
-            f.write(f"units.x {' '.join(self.input_units)}\n")
-            f.write(f"units.y {self.output_unit}\n")
-            f.write("scaling.x none\n")
-            f.write("scaling.y none\n")
-            f.write("\n")
-            f.write("[training_data.x]\n")
-            for xi in self.x:
-                f.write(f"{' '.join(map(str, xi))}\n")
-            f.write("\n")
-            f.write("[training_data.y]\n")
-            f.write("\n".join(map(str, self.y.flatten())))
-            f.write("\n\n")
-            f.write("[weights]\n")
-            f.write("\n".join(map(str, self.weights.flatten())))
-            f.write("\n")
+        write_str = ""
+
+        write_str += "# [metadata]\n"
+        write_str += f"# program {self.program}\n"
+        write_str += f"# version {self.program_version}\n"
+        write_str += f"# jitter {self.jitter}\n"
+        write_str += f"# likelihood {self.likelihood}\n"
+        for key, val in self.notes.items():
+            write_str += f"# {key} = {val}\n"
+        write_str += "\n"
+        write_str += "[system]\n"
+        write_str += f"name {self.system_name}\n"
+        write_str += f"atom {self.atom_name}\n"
+        write_str += f"property {self.prop}\n"
+        write_str += f"ALF {self.alf[0] + 1} {self.alf[1] + 1} {self.alf[2] + 1}\n"
+        write_str += "\n"
+        write_str += "[dimensions]\n"
+        write_str += f"number_of_atoms {self.natoms}\n"
+        write_str += f"number_of_features {self.nfeats}\n"
+        write_str += f"number_of_training_points {self.ntrain}\n"
+        write_str += "\n"
+        write_str += self.mean.write_str()
+        write_str += "\n"
+        write_str += "[kernels]\n"
+        write_str += f"number_of_kernels {self.kernel.nkernel}\n"
+        write_str += f"composition {self.kernel.name}\n"
+        write_str += "\n"
+        write_str += self.kernel.write_str()
+        write_str += "\n"
+        write_str += "[training_data]\n"
+        write_str += f"units.x {' '.join(self.input_units)}\n"
+        write_str += f"units.y {self.output_unit}\n"
+        write_str += "scaling.x none\n"
+        write_str += "scaling.y none\n"
+        write_str += "\n"
+        write_str += "[training_data.x]\n"
+        for xi in self.x:
+            write_str += f"{' '.join(map(str, xi))}\n"
+        write_str += "\n"
+        write_str += "[training_data.y]\n"
+        write_str += "\n".join(map(str, self.y.flatten()))
+        write_str += "\n\n"
+        write_str += "[weights]\n"
+        write_str += "\n".join(map(str, self.weights.flatten()))
+        write_str += "\n"
+
+        return write_str
 
     def __repr__(self):
         return f"{self.__class__.__name__}(system={self.system_name}, atom={self.atom_name}, type={self.prop})"

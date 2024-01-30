@@ -1,4 +1,4 @@
-from typing import IO, Optional
+from typing import Optional
 
 import numpy as np
 from ichor.core.models.kernels.kernel import Kernel
@@ -101,12 +101,17 @@ class PeriodicKernel(Kernel):
         """helper method to return symmetric square matrix x_train, x_train Periodic covariance matrix K(X, X)"""
         return self.k(x_train, x_train)
 
-    def write(self, f: IO):
-        f.write(f"[kernel.{self.name}]\n")
-        f.write("type periodic\n")
-        f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n")
-        f.write(f"thetas {' '.join(map(str, self._thetas))}\n")
+    def write_str(self) -> str:
+
+        str_to_write = ""
+
+        str_to_write += f"[kernel.{self.name}]\n"
+        str_to_write += "type periodic\n"
+        str_to_write += f"number_of_dimensions {len(self.active_dims)}\n"
+        str_to_write += f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
+        str_to_write += f"thetas {' '.join(map(str, self._thetas))}\n"
+
+        return str_to_write
 
     def __repr__(self):
 

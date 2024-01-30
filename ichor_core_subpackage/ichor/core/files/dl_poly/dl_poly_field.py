@@ -144,28 +144,31 @@ class DlPolyField(WriteFile):
 
         bonds, angles, dihedrals = get_internal_feature_indices(self.atoms)
 
-        with open(path, "w") as f:
-            f.write("DL_FIELD v3.00\n")
-            f.write("Units kJ/mol\n")
-            f.write("Molecular types 1\n")
-            f.write(f"{self.system_name}\n")
-            f.write(f"nummols {self.nummols}\n")
-            f.write(f"atoms {len(self.atoms)}\n")
-            for atom in self.atoms:
-                f.write(
-                    #  Atom Type      Atomic Mass                    Charge Repeats Frozen(0=NotFrozen)
-                    f"{atom.type}\t\t{dlpoly_weights[atom.type]:.7f}     0.0   1   0\n"
-                )
-            f.write(f"BONDS {len(bonds)}\n")
-            for i, j in bonds:
-                f.write(f"harm {i} {j} 0.0 0.0\n")
-            if len(angles) > 0:
-                f.write(f"ANGLES {len(angles)}\n")
-                for i, j, k in angles:
-                    f.write(f"harm {i} {j} {k} 0.0 0.0\n")
-            if len(dihedrals) > 0:
-                f.write(f"DIHEDRALS {len(dihedrals)}\n")
-                for i, j, k, l in dihedrals:
-                    f.write(f"harm {i} {j} {k} {l} 0.0 0.0\n")
-            f.write("finish\n")
-            f.write("close\n")
+        str_to_write = ""
+
+        str_to_write += "DL_FIELD v3.00\n"
+        str_to_write += "Units kJ/mol\n"
+        str_to_write += "Molecular types 1\n"
+        str_to_write += f"{self.system_name}\n"
+        str_to_write += f"nummols {self.nummols}\n"
+        str_to_write += f"atoms {len(self.atoms)}\n"
+        for atom in self.atoms:
+            #  Atom Type      Atomic Mass                    Charge Repeats Frozen(0=NotFrozen)
+            str_to_write += (
+                f"{atom.type}\t\t{dlpoly_weights[atom.type]:.7f}     0.0   1   0\n"
+            )
+        str_to_write += f"BONDS {len(bonds)}\n"
+        for i, j in bonds:
+            str_to_write += f"harm {i} {j} 0.0 0.0\n"
+        if len(angles) > 0:
+            str_to_write += f"ANGLES {len(angles)}\n"
+            for i, j, k in angles:
+                str_to_write += f"harm {i} {j} {k} 0.0 0.0\n"
+        if len(dihedrals) > 0:
+            str_to_write += f"DIHEDRALS {len(dihedrals)}\n"
+            for i, j, k, l in dihedrals:
+                str_to_write += f"harm {i} {j} {k} {l} 0.0 0.0\n"
+        str_to_write += "finish\n"
+        str_to_write += "close\n"
+
+        return str_to_write
