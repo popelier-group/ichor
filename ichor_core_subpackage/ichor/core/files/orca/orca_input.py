@@ -90,24 +90,38 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
                     main_input.append(s)
                 line = next(f)
 
+            # used for cases when there are no options with %
+            _reached_end = False
             input_blocks = {}
             # while we are not at the geometries
             while not line.strip().startswith("*"):
+
                 line = line.lower()
                 one_option = []
                 # now read in optional input with %
+                # the not line.strip().startswith("*") is in case there are no options
                 while "end" not in line.strip():
-                    one_option.append(line)
+                    if not line.strip().startswith("*"):
+                        one_option.append(line)
+                        line = next(f)
+                        line = line.lower()
+                    else:
+                        _reached_end = True
+                        break
+                if not _reached_end:
                     line = next(f)
-                    line = line.lower()
-                line = next(f)
 
-                option_name, *other_options = (
-                    one_option[0].strip().replace("%", "").split()
-                )
-                input_blocks[option_name] = other_options
-                for other_lines in one_option[1:]:
-                    input_blocks[option_name] += other_lines.strip().split()
+                # this will be the option name and all other options
+                # given on lines on or after the option name
+                # until an end statement is reached
+                tmp = one_option[0].strip().replace("%", "").split()
+                # if there are no options, then tmp is an empty list
+                # so this will not get called
+                if tmp:
+                    option_name, *other_options = tmp
+                    input_blocks[option_name] = other_options
+                    for other_lines in one_option[1:]:
+                        input_blocks[option_name] += other_lines.strip().split()
 
             charge, spin_multiplicity = map(int, line.strip().split()[-2:])
             line = next(f)
