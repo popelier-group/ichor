@@ -162,7 +162,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         then default values will be used."""
 
         self.method = self.method or "b3lyp/g"
-        self.basis_set = self.method or "6-31+g(d,p)"
+        self.basis_set = self.basis_set or "6-31+g(d,p)"
 
         # aim for wfn file
         # nousesym to not use symmetry
