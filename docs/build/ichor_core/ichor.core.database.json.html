@@ -58,9 +58,10 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="ichor.core.database.html">ichor.core.database package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.database.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.database.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.database.html#module-ichor.core.database.query_database">ichor.core.database.query_database module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.database.html#module-ichor.core.database">Module contents</a></li>
 </ul>
 </li>
@@ -68,6 +69,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.processing.html">ichor.core.processing package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
 </ul>
 </li>
@@ -133,6 +135,43 @@ the rest the point can still be used in the training set for the other atoms.</p
 </dd></dl>
 
 </section>
+<section id="module-ichor.core.database.json.query_database">
+<span id="ichor-core-database-json-query-database-module"></span><h2>ichor.core.database.json.query_database module<a class="headerlink" href="#module-ichor.core.database.json.query_database" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.database.json.query_database.get_json_db_info">
+<span class="sig-name descname"><span class="pre">get_json_db_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.json.query_database.get_json_db_info" title="Permalink to this definition"></a></dt>
+<dd><p>Gets important information from json database (a directory containing
+multiple json files) and returns point ids, atom names, and full
+pandas dataframe, which can be processed into atomic csvs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>db_path</strong> – path to directory containing json files storing data
+Could be a single directory or a parent directory with multiple dirs inside.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.database.json.query_database.get_one_json_dir_info">
+<span class="sig-name descname"><span class="pre">get_one_json_dir_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.json.query_database.get_one_json_dir_info" title="Permalink to this definition"></a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_dir</strong> (<em>Path</em>) – _description_</p></li>
+<li><p><strong>id_counter</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, defaults to 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-ichor.core.database.json">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.database.json" title="Permalink to this heading"></a></h2>
 <dl class="py function">
@@ -154,6 +193,20 @@ written to the database.</p></li>
 the information for the point will still be added to the database. This is because
 the rest the point can still be used in the training set for the other atoms.</p>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.database.json.get_json_db_info">
+<span class="sig-name descname"><span class="pre">get_json_db_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.json.get_json_db_info" title="Permalink to this definition"></a></dt>
+<dd><p>Gets important information from json database (a directory containing
+multiple json files) and returns point ids, atom names, and full
+pandas dataframe, which can be processed into atomic csvs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>db_path</strong> – path to directory containing json files storing data
+Could be a single directory or a parent directory with multiple dirs inside.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

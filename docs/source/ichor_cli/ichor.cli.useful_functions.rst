@@ -12,14 +12,6 @@ ichor.cli.useful\_functions.bool\_to\_str module
    :undoc-members:
    :show-inheritance:
 
-ichor.cli.useful\_functions.single\_or\_many\_points\_directories module
-------------------------------------------------------------------------
-
-.. automodule:: ichor.cli.useful_functions.single_or_many_points_directories
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ichor.cli.useful\_functions.user\_input module
 ----------------------------------------------
 

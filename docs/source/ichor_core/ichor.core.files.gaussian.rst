@@ -4,10 +4,10 @@ ichor.core.files.gaussian package
 Submodules
 ----------
 
-ichor.core.files.gaussian.gaussian\_out module
-----------------------------------------------
+ichor.core.files.gaussian.gaussian\_output module
+-------------------------------------------------
 
-.. automodule:: ichor.core.files.gaussian.gaussian_out
+.. automodule:: ichor.core.files.gaussian.gaussian_output
    :members:
    :undoc-members:
    :show-inheritance:

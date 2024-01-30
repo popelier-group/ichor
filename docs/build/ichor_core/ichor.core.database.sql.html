@@ -58,9 +58,10 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="ichor.core.database.html">ichor.core.database package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.database.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.database.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.database.html#module-ichor.core.database.query_database">ichor.core.database.query_database module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.database.html#module-ichor.core.database">Module contents</a></li>
 </ul>
 </li>
@@ -68,6 +69,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.processing.html">ichor.core.processing package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
 </ul>
 </li>
@@ -482,22 +484,8 @@ which are used to interact with the SQLite database.</p>
 <section id="module-ichor.core.database.sql.query_database">
 <span id="ichor-core-database-sql-query-database-module"></span><h2>ichor.core.database.sql.query_database module<a class="headerlink" href="#module-ichor.core.database.sql.query_database" title="Permalink to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.atoms_from_point_id">
-<span class="sig-name descname"><span class="pre">atoms_from_point_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.atoms_from_point_id" title="Permalink to this definition"></a></dt>
-<dd><p>Returns an Atoms instance containing geometry for a point id.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>full_df</strong> – see get_df_information function</p></li>
-<li><p><strong>point_id</strong> – The id of the point for which to get the geometry</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.create_db_connection">
-<span class="sig-name descname"><span class="pre">create_db_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Connection</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.create_db_connection" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.create_sqlite_db_connection">
+<span class="sig-name descname"><span class="pre">create_sqlite_db_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Connection</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.create_sqlite_db_connection" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Creates a connection to a SQLite3 database and returns a connection object to be used</dt><dd><p>when executing SQL statements with pandas.</p>
 </dd>
@@ -519,8 +507,8 @@ which are used to interact with the SQLite database.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.create_db_engine">
-<span class="sig-name descname"><span class="pre">create_db_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Engine</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.create_db_engine" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.create_sqlite_db_engine">
+<span class="sig-name descname"><span class="pre">create_sqlite_db_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Engine</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.create_sqlite_db_engine" title="Permalink to this definition"></a></dt>
 <dd><p>Creates an engine to a SQLite3 database and returns the Engine object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -545,30 +533,80 @@ which are used to interact with the SQLite database.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.delete_points_by_id">
-<span class="sig-name descname"><span class="pre">delete_points_by_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.delete_points_by_id" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.delete_sqlite_points_by_id">
+<span class="sig-name descname"><span class="pre">delete_sqlite_points_by_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.delete_sqlite_points_by_id" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_alf_from_first_db_geometry">
-<span class="sig-name descname"><span class="pre">get_alf_from_first_db_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_alf_from_first_db_geometry" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the atomic local frame for every atom from the first point.</p>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_atoms_from_sqlite_point_id">
+<span class="sig-name descname"><span class="pre">get_atoms_from_sqlite_point_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.atoms.Atoms" title="ichor.core.atoms.atoms.Atoms"><span class="pre">Atoms</span></a></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_atoms_from_sqlite_point_id" title="Permalink to this definition"></a></dt>
+<dd><p>Returns an Atoms instance containing geometry for a point id.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL queries, defaults to False</p></li>
+<li><p><strong>full_df</strong> – see get_df_information function</p></li>
+<li><p><strong>point_id</strong> – The id of the point for which to get the geometry</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of ALF instances for every atom in the system.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_db_information">
-<span class="sig-name descname"><span class="pre">get_db_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_db_information" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_full_dataframe_for_all_atoms">
+<span class="sig-name descname"><span class="pre">get_full_dataframe_for_all_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_full_dataframe_for_all_atoms" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a dataframe containing all the data for all atoms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_path</strong> – Path or str to database</p></li>
+<li><p><strong>echo</strong> – Whether to echo SQL statements, defaults to False</p></li>
+<li><p><strong>change_cols</strong> – Removes some unnecessary columns and also renames some columns
+to be more clear.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas dataframe containing information for all atoms</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_list_of_atom_names_from_sqlite_db">
+<span class="sig-name descname"><span class="pre">get_list_of_atom_names_from_sqlite_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_list_of_atom_names_from_sqlite_db" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of all the point names in the database</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_path</strong> – Path or string to database</p></li>
+<li><p><strong>echo</strong> – Whether to echo SQL queries, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of strings of the atom names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_list_of_point_ids_from_sqlite_db">
+<span class="sig-name descname"><span class="pre">get_list_of_point_ids_from_sqlite_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_list_of_point_ids_from_sqlite_db" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of all the point names in the database</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_path</strong> – Path or string to database</p></li>
+<li><p><strong>echo</strong> – Whether to echo SQL queries, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of strings of the point names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_sqlite_db_information">
+<span class="sig-name descname"><span class="pre">get_sqlite_db_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_sqlite_db_information" title="Permalink to this definition"></a></dt>
 <dd><p>Gets relevant information from database needed to post process data and generate datasets
 for machine learning</p>
 <dl class="field-list simple">
@@ -590,59 +628,8 @@ a pd.DataFrame object containing all relevant data needed to construct the datas
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_full_dataframe_for_all_atoms">
-<span class="sig-name descname"><span class="pre">get_full_dataframe_for_all_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_full_dataframe_for_all_atoms" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a dataframe containing all the data for all atoms</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path or str to database</p></li>
-<li><p><strong>echo</strong> – Whether to echo SQL statements, defaults to False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A pandas dataframe containing information for all atoms</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_list_of_atom_names_from_db">
-<span class="sig-name descname"><span class="pre">get_list_of_atom_names_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_list_of_atom_names_from_db" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a list of all the point names in the database</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path or string to database</p></li>
-<li><p><strong>echo</strong> – Whether to echo SQL queries, defaults to False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of strings of the atom names</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.get_list_of_point_ids_from_db">
-<span class="sig-name descname"><span class="pre">get_list_of_point_ids_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.get_list_of_point_ids_from_db" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a list of all the point names in the database</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path or string to database</p></li>
-<li><p><strong>echo</strong> – Whether to echo SQL queries, defaults to False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of strings of the point names</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.raw_one_atom_data_to_df">
-<span class="sig-name descname"><span class="pre">raw_one_atom_data_to_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_irrelevant_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.raw_one_atom_data_to_df" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.raw_one_atom_data_to_df_sqlite">
+<span class="sig-name descname"><span class="pre">raw_one_atom_data_to_df_sqlite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_irrelevant_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ichor.core.database.sql.query_database.raw_one_atom_data_to_df_sqlite" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a pandas DataFrame object containing data for one atom.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -663,120 +650,14 @@ from the DataFrame, defaults to True</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.rotate_multipole_moments">
-<span class="sig-name descname"><span class="pre">rotate_multipole_moments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_with_atom_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.rotate_multipole_moments" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.trajectory_from_database">
-<span class="sig-name descname"><span class="pre">trajectory_from_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'trajectory_from_database.xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.trajectory_from_database" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.trajectory_from_sqlite_database">
+<span class="sig-name descname"><span class="pre">trajectory_from_sqlite_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'trajectory_from_database.xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.trajectory_from_sqlite_database" title="Permalink to this definition"></a></dt>
 <dd><p>Writes our trajectory from geometries in database.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.worker">
-<span class="sig-name descname"><span class="pre">worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.worker" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.worker_init">
-<span class="sig-name descname"><span class="pre">worker_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.worker_init" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.write_processed_data_for_atoms">
-<span class="sig-name descname"><span class="pre">write_processed_data_for_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.write_processed_data_for_atoms" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),</dt><dd><p>iqa energy, and rotated multipoles for every atom in the SQL database.
-Note that only points for which the absolute integration error for the atom of interest
-is below the threshold are added to the
-corresponding atomic datasets.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.</p></li>
-<li><p><strong>alf</strong> – A list of ALF instances to be used when calculating features
-and calculating C matrices.</p></li>
-<li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
-of interest. Having a higher (absolute) integration error for the atom of interest means that
-this point will not be added in the dataset for the atom of interest. However, the same
-point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001</p></li>
-<li><p><strong>write_index_col</strong> – Whether to write the index col in the final .csv file, defaults to False</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL statements, defaults to False</p></li>
-<li><p><strong>atom_names</strong> – A list of atom names for which to write db. If left to None, csv files
-will be written for all atoms.</p></li>
-<li><p><strong>properties</strong> – Which properties to write out to csv files.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.write_processed_data_for_atoms_parallel">
-<span class="sig-name descname"><span class="pre">write_processed_data_for_atoms_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_diff_iqa_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.184</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('processed_csvs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.write_processed_data_for_atoms_parallel" title="Permalink to this definition"></a></dt>
-<dd><p>Function uses the concurrent.futures.ProcessPoolExecutor class to parallelize the calculations
-on multiple cores, so that multiple atom calculations can be done in parallel.</p>
-<p>Writes a csv containing the features, wfn energy, -dE/df (note that these are forces wtr features),
-iqa energy, and rotated multipoles for every atom in the SQL database.
-Note that only points for which the absolute integration error for the atom of interest
-is below the threshold are added to the
-corresponding atomic datasets.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.</p></li>
-<li><p><strong>alf</strong> – A list of ALF instances to be used when calculating features
-and calculating C matrices.</p></li>
-<li><p><strong>ncores</strong> – The number of cores to use for the parallel calculations. Each core will calculate
-the data for an individual atom.</p></li>
-<li><p><strong>max_diff_iqa_wfn</strong> – The maximum difference between the sum of iqa and wfn energy (in kJ mol-1). Any point
-that is above this threshold will be filtered out before doing integration errors.</p></li>
-<li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
-of interest. Having a higher (absolute) integration error for the atom of interest means that
-this point will not be added in the dataset for the atom of interest. However, the same
-point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001</p></li>
-<li><p><strong>write_index_col</strong> – Whether to write the index col in the final .csv file, defaults to False</p></li>
-<li><p><strong>echo</strong> – Whether to echo executed SQL statements, defaults to False</p></li>
-<li><p><strong>atom_names</strong> – A list of atom names for which to write db. If left to None, csv files
-will be written for all atoms.</p></li>
-<li><p><strong>calc_forces</strong> – Whether to calculate -dE/df, default False.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.write_processed_one_atom_data_to_csv">
-<span class="sig-name descname"><span class="pre">write_processed_one_atom_data_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ichor.core.atoms.html#ichor.core.atoms.alf.ALF" title="ichor.core.atoms.alf.ALF"><span class="pre">ALF</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_diff_iqa_wfn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.184</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_index_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_multipoles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('processed_csvs')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.write_processed_one_atom_data_to_csv" title="Permalink to this definition"></a></dt>
-<dd><p>Writes features, iqa energy, as well as rotated multipole moments (given an ALF) to a csv file
-for all points (as long as integration error for the atom of interest is below a threshold integration error).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>full_df</strong> – DataFrame object extracted from SQLite database. This object contains information for
-all points (and all atoms in every point)</p></li>
-<li><p><strong>point_ids</strong> – A list of integers representing the <cite>id</cite> column of the points table of the SQLite database.</p></li>
-<li><p><strong>atom_name</strong> – The atom for which features, local multipole moments,
-as well as local forces are going to be calculated for every point in the dataset</p></li>
-<li><p><strong>alf</strong> – A list of ALF instance to be used when calculating features
-and calculating C matrices</p></li>
-<li><p><strong>max_diff_iqa_wfn</strong> – Maximum difference between sum of IQA and wfn energy (in kJ mol-1).
-If point is above threshold, it will get filtered before doing integration error.</p></li>
-<li><p><strong>max_integration_error</strong> – Maximum integration error that a point needs to have for the atom
-of interest. Having a higher (absolute) integration error for the atom of interest means that
-this point will not be added in the dataset for the atom of interest. However, the same
-point can be added in the dataset for another atom, if the integration error is good, defaults to 0.001</p></li>
-<li><p><strong>calc_forces</strong> – Whether to calculate -dE/df forces (which takes a long time currently), default False.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.write_raw_one_atom_data_to_csv">
-<span class="sig-name descname"><span class="pre">write_raw_one_atom_data_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_irrelevant_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.write_raw_one_atom_data_to_csv" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.database.sql.query_database.write_raw_one_atom_data_to_csv_sqlite">
+<span class="sig-name descname"><span class="pre">write_raw_one_atom_data_to_csv_sqlite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_irrelevant_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.database.sql.query_database.write_raw_one_atom_data_to_csv_sqlite" title="Permalink to this definition"></a></dt>
 <dd><p>Saves the raw data for one atom as stored in the SQLite3 database to a csv file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -853,6 +734,29 @@ which are used to interact with the SQLite database.</p>
 <li><p><strong>database_path</strong> – pathlib.Path object to database</p></li>
 <li><p><strong>echo</strong> – Whether for SQLAlchemy to echo SQL commands used, defaults to False</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ichor.core.database.sql.get_sqlite_db_information">
+<span class="sig-name descname"><span class="pre">get_sqlite_db_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.database.sql.get_sqlite_db_information" title="Permalink to this definition"></a></dt>
+<dd><p>Gets relevant information from database needed to post process data and generate datasets
+for machine learning</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_path</strong> – Path to SQLite3 database containing <cite>Points</cite>, <cite>AtomNames</cite>, and <cite>Dataset</cite> tables.</p></li>
+<li><p><strong>echo</strong> – Whether to echo executed SQL statements, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of: List of point ids (integers) contained in the db,
+List of atom names (str) contained in db,
+a pd.DataFrame object containing all relevant data needed to construct the datasets.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[str], List[str], pd.DataFrame]</p>
 </dd>
 </dl>
 </dd></dl>

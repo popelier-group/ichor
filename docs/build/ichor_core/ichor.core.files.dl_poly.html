@@ -58,7 +58,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.database.html">ichor.core.database package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.files.html#subpackages">Subpackages</a></li>
@@ -67,10 +66,11 @@
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.file">ichor.core.files.file module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.file_data">ichor.core.files.file_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.mol2">ichor.core.files.mol2 module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.optional_file">ichor.core.files.optional_file module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.optional_content">ichor.core.files.optional_content module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.path_object">ichor.core.files.path_object module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.point_directory">ichor.core.files.point_directory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.points_directory">ichor.core.files.points_directory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.points_directory_parent">ichor.core.files.points_directory_parent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.qcp">ichor.core.files.qcp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files">Module contents</a></li>
 </ul>
@@ -78,6 +78,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.processing.html">ichor.core.processing package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
 </ul>
 </li>
@@ -152,6 +153,16 @@ in the CONFIG file.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_config.DlPolyConfig.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_config.DlPolyConfig.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_config.DlPolyConfig.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_config.DlPolyConfig.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -164,6 +175,16 @@ in the CONFIG file.</p>
 <p>Write out a DLPoly CONTROL file. The name of the file needs to be CONTROL,  so DL POLY knows to use it.
 The default Control file is made to be used for geometry optimizations at very low temperatures. Settings must be
 changed to write out a file for water box simulations for example.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_control.DlPolyControl.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_control.DlPolyControl.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_control.DlPolyControl.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_control.DlPolyControl.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -230,6 +251,11 @@ as well as the list of differences for all timesteps</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">electrostatic_energy</span></span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.electrostatic_energy" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.first_index_where_delta_less_than">
 <span class="sig-name descname"><span class="pre">first_index_where_delta_less_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.first_index_where_delta_less_than" title="Permalink to this definition"></a></dt>
@@ -245,6 +271,11 @@ below delta (in kJ mol-1)</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.ntimesteps">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ntimesteps</span></span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.ntimesteps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX.path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -344,6 +375,16 @@ below delta (in kJ mol-1)</p>
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_field.DlPolyField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DlPolyField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nummols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_field.DlPolyField" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_field.DlPolyField.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_field.DlPolyField.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_field.DlPolyField.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_field.DlPolyField.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -365,9 +406,19 @@ provided by the HISTORY file</p>
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory.write_to_trajectory">
-<span class="sig-name descname"><span class="pre">write_to_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory.write_to_trajectory" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_to_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'TRAJECTORY.xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory.write_to_trajectory" title="Permalink to this definition"></a></dt>
 <dd><p>Writes a trajectory .xyz file from the DL POLY HISTORY file.</p>
 </dd></dl>
 
@@ -503,6 +554,16 @@ provided by the HISTORY file</p>
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -553,6 +614,16 @@ useful to check if a geometry is optimized or simulation crashed.</p>
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -569,21 +640,16 @@ and HISTORY file</p>
 <dd class="field-odd"><p><strong>path</strong> – Path to FFLUX Directory</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.contents">
+<span class="sig-name descname"><span class="pre">contents</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'fflux_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX'&gt;,</span> <span class="pre">'history_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory'&gt;,</span> <span class="pre">'iqa_energies_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies'&gt;,</span> <span class="pre">'iqa_forces_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces'&gt;}</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.contents" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.coordinates">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.coordinates" title="Permalink to this definition"></a></dt>
 <dd><p>Returns coordinates as array of shape ntimesteps x natoms x 3</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.fflux_file">
-<span class="sig-name descname"><span class="pre">fflux_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX" title="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX"><span class="pre">DlPolyFFLUX</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.fflux_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.history_file">
-<span class="sig-name descname"><span class="pre">history_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory" title="ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory"><span class="pre">DlpolyHistory</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.history_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.iqa_energies">
@@ -591,21 +657,11 @@ and HISTORY file</p>
 <dd><p>Returns individual atom iqa enegy array of shape ntimesteps x natoms</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.iqa_energies_file">
-<span class="sig-name descname"><span class="pre">iqa_energies_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies" title="ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies"><span class="pre">DlPolyIQAEnergies</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.iqa_energies_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.iqa_forces">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iqa_forces</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.iqa_forces" title="Permalink to this definition"></a></dt>
 <dd><p>Returns iqa forces array of shape ntimesteps x natoms x 3</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.iqa_forces_file">
-<span class="sig-name descname"><span class="pre">iqa_forces_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces" title="ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces"><span class="pre">DlPolyIQAForces</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.iqa_forces_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.fflux_directory.FFLUXDirectory.natoms">
@@ -660,6 +716,16 @@ in the CONFIG file.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyConfig.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyConfig.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyConfig.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyConfig.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -669,6 +735,16 @@ in the CONFIG file.</p>
 <p>Write out a DLPoly CONTROL file. The name of the file needs to be CONTROL,  so DL POLY knows to use it.
 The default Control file is made to be used for geometry optimizations at very low temperatures. Settings must be
 changed to write out a file for water box simulations for example.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyControl.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyControl.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyControl.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyControl.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -732,6 +808,11 @@ as well as the list of differences for all timesteps</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">electrostatic_energy</span></span><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyFFLUX.electrostatic_energy" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyFFLUX.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyFFLUX.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyFFLUX.first_index_where_delta_less_than">
 <span class="sig-name descname"><span class="pre">first_index_where_delta_less_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyFFLUX.first_index_where_delta_less_than" title="Permalink to this definition"></a></dt>
@@ -747,6 +828,11 @@ below delta (in kJ mol-1)</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyFFLUX.ntimesteps">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ntimesteps</span></span><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyFFLUX.ntimesteps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyFFLUX.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyFFLUX.path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -780,6 +866,16 @@ below delta (in kJ mol-1)</p>
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DlPolyField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nummols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyField" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.WriteFile" title="ichor.core.files.file.WriteFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteFile</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyField.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyField.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyField.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyField.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -805,6 +901,16 @@ below delta (in kJ mol-1)</p>
 :param path: A Path object to check
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyIQAEnergies.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyIQAEnergies.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyIQAEnergies.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyIQAEnergies.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -853,6 +959,16 @@ useful to check if a geometry is optimized or simulation crashed.</p>
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyIQAForces.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyIQAForces.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlPolyIQAForces.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlPolyIQAForces.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -871,9 +987,19 @@ provided by the HISTORY file</p>
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlpolyHistory.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'_not_needed'</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlpolyHistory.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlpolyHistory.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.DlpolyHistory.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.DlpolyHistory.write_to_trajectory">
-<span class="sig-name descname"><span class="pre">write_to_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.DlpolyHistory.write_to_trajectory" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_to_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'TRAJECTORY.xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.dl_poly.DlpolyHistory.write_to_trajectory" title="Permalink to this definition"></a></dt>
 <dd><p>Writes a trajectory .xyz file from the DL POLY HISTORY file.</p>
 </dd></dl>
 
@@ -890,21 +1016,16 @@ and HISTORY file</p>
 <dd class="field-odd"><p><strong>path</strong> – Path to FFLUX Directory</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.contents">
+<span class="sig-name descname"><span class="pre">contents</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'fflux_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX'&gt;,</span> <span class="pre">'history_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory'&gt;,</span> <span class="pre">'iqa_energies_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies'&gt;,</span> <span class="pre">'iqa_forces_file':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces'&gt;}</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.FFLUXDirectory.contents" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.coordinates">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.FFLUXDirectory.coordinates" title="Permalink to this definition"></a></dt>
 <dd><p>Returns coordinates as array of shape ntimesteps x natoms x 3</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.fflux_file">
-<span class="sig-name descname"><span class="pre">fflux_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX" title="ichor.core.files.dl_poly.dl_poly_fflux.DlPolyFFLUX"><span class="pre">DlPolyFFLUX</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.FFLUXDirectory.fflux_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.history_file">
-<span class="sig-name descname"><span class="pre">history_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory" title="ichor.core.files.dl_poly.dl_poly_history.DlpolyHistory"><span class="pre">DlpolyHistory</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.FFLUXDirectory.history_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.iqa_energies">
@@ -912,21 +1033,11 @@ and HISTORY file</p>
 <dd><p>Returns individual atom iqa enegy array of shape ntimesteps x natoms</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.iqa_energies_file">
-<span class="sig-name descname"><span class="pre">iqa_energies_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies" title="ichor.core.files.dl_poly.dl_poly_iqa_energies.DlPolyIQAEnergies"><span class="pre">DlPolyIQAEnergies</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.FFLUXDirectory.iqa_energies_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.iqa_forces">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iqa_forces</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.FFLUXDirectory.iqa_forces" title="Permalink to this definition"></a></dt>
 <dd><p>Returns iqa forces array of shape ntimesteps x natoms x 3</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.iqa_forces_file">
-<span class="sig-name descname"><span class="pre">iqa_forces_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces" title="ichor.core.files.dl_poly.dl_poly_iqa_forces.DlPolyIQAForces"><span class="pre">DlPolyIQAForces</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.optional_file.OptionalFileType" title="ichor.core.files.optional_file.OptionalFileType"><span class="pre">OptionalFileType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ichor.core.files.optional_file.OptionalFileType</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#ichor.core.files.dl_poly.FFLUXDirectory.iqa_forces_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ichor.core.files.dl_poly.FFLUXDirectory.natoms">

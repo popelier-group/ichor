@@ -49,10 +49,10 @@ ichor.core.files.mol2 module
    :undoc-members:
    :show-inheritance:
 
-ichor.core.files.optional\_file module
---------------------------------------
+ichor.core.files.optional\_content module
+-----------------------------------------
 
-.. automodule:: ichor.core.files.optional_file
+.. automodule:: ichor.core.files.optional_content
    :members:
    :undoc-members:
    :show-inheritance:
@@ -77,6 +77,14 @@ ichor.core.files.points\_directory module
 -----------------------------------------
 
 .. automodule:: ichor.core.files.points_directory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ichor.core.files.points\_directory\_parent module
+-------------------------------------------------
+
+.. automodule:: ichor.core.files.points_directory_parent
    :members:
    :undoc-members:
    :show-inheritance:

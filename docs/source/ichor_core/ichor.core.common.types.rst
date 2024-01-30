@@ -52,18 +52,18 @@ ichor.core.common.types.file\_tree module
    :undoc-members:
    :show-inheritance:
 
-ichor.core.common.types.forces module
--------------------------------------
-
-.. automodule:: ichor.core.common.types.forces
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ichor.core.common.types.itypes module
 -------------------------------------
 
 .. automodule:: ichor.core.common.types.itypes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ichor.core.common.types.multipole\_moments module
+-------------------------------------------------
+
+.. automodule:: ichor.core.common.types.multipole_moments
    :members:
    :undoc-members:
    :show-inheritance:

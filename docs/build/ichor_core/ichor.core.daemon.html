@@ -20,8 +20,6 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ichor.core.database package" href="ichor.core.database.html" />
-    <link rel="prev" title="ichor.core.common.types package" href="ichor.core.common.types.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,30 +49,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli_examples_toc.html">Examples for ichor.cli</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">full documentation of source code</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="ichor.core.html">ichor.core package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="ichor.core.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.analysis.html">ichor.core.analysis package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">ichor.core.daemon package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.daemon.daemon">ichor.core.daemon.daemon module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ichor.core.daemon">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.database.html">ichor.core.database package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ichor.core.html#module-ichor.core">Module contents</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ichor.core.html">ichor.core package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_hpc/ichor.hpc.html">ichor.hpc package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ichor_cli/ichor.cli.html">ichor.cli package</a></li>
 </ul>
@@ -93,7 +69,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="ichor.core.html">ichor.core package</a></li>
       <li class="breadcrumb-item active">ichor.core.daemon package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/ichor_core/ichor.core.daemon.rst.txt" rel="nofollow"> View page source</a>
@@ -109,134 +84,18 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.daemon.daemon">
-<span id="ichor-core-daemon-daemon-module"></span><h2>ichor.core.daemon.daemon module<a class="headerlink" href="#module-ichor.core.daemon.daemon" title="Permalink to this heading"></a></h2>
-<p>Used to run ICHOR as a deamon, where it is detached from terminal.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Daemon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pidfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/dev/null')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/dev/null')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/dev/null')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pid_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>A generic daemon class.</p>
-<p>Usage: subclass the Daemon class and override the run() method</p>
-<p>Credit: Sander Marechal (<a class="reference external" href="https://bit.ly/3frF5RK">https://bit.ly/3frF5RK</a>)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon.check" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon.daemonize">
-<span class="sig-name descname"><span class="pre">daemonize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon.daemonize" title="Permalink to this definition"></a></dt>
-<dd><p>do the UNIX double-fork magic, see Stevens’ “Advanced
-Programming in the UNIX Environment” for details (ISBN 0201563177)
-<a class="reference external" href="http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16">http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16</a></p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon.delpid">
-<span class="sig-name descname"><span class="pre">delpid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon.delpid" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon.restart">
-<span class="sig-name descname"><span class="pre">restart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon.restart" title="Permalink to this definition"></a></dt>
-<dd><p>Restart the daemon</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon.run">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon.run" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon.start" title="Permalink to this definition"></a></dt>
-<dd><p>Start the daemon</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.Daemon.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.daemon.Daemon.stop" title="Permalink to this definition"></a></dt>
-<dd><p>Stop the daemon</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="ichor.core.daemon.daemon.DaemonRunning">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DaemonRunning</span></span><a class="headerlink" href="#ichor.core.daemon.daemon.DaemonRunning" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-</dd></dl>
-
+<section id="ichor-core-daemon-daemon-module">
+<h2>ichor.core.daemon.daemon module<a class="headerlink" href="#ichor-core-daemon-daemon-module" title="Permalink to this heading"></a></h2>
 </section>
-<section id="module-ichor.core.daemon">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.daemon" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Daemon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pidfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/dev/null')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/dev/null')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stderr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/dev/null')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pid_store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.Daemon" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>A generic daemon class.</p>
-<p>Usage: subclass the Daemon class and override the run() method</p>
-<p>Credit: Sander Marechal (<a class="reference external" href="https://bit.ly/3frF5RK">https://bit.ly/3frF5RK</a>)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.daemon.Daemon.check" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon.daemonize">
-<span class="sig-name descname"><span class="pre">daemonize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.Daemon.daemonize" title="Permalink to this definition"></a></dt>
-<dd><p>do the UNIX double-fork magic, see Stevens’ “Advanced
-Programming in the UNIX Environment” for details (ISBN 0201563177)
-<a class="reference external" href="http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16">http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16</a></p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon.delpid">
-<span class="sig-name descname"><span class="pre">delpid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.Daemon.delpid" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon.restart">
-<span class="sig-name descname"><span class="pre">restart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.Daemon.restart" title="Permalink to this definition"></a></dt>
-<dd><p>Restart the daemon</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon.run">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.Daemon.run" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.Daemon.start" title="Permalink to this definition"></a></dt>
-<dd><p>Start the daemon</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.daemon.Daemon.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.daemon.Daemon.stop" title="Permalink to this definition"></a></dt>
-<dd><p>Stop the daemon</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="ichor.core.daemon.DaemonRunning">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DaemonRunning</span></span><a class="headerlink" href="#ichor.core.daemon.DaemonRunning" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-</dd></dl>
-
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
 </section>
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ichor.core.common.types.html" class="btn btn-neutral float-left" title="ichor.core.common.types package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ichor.core.database.html" class="btn btn-neutral float-right" title="ichor.core.database package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 1
 
    ichor.core.common.functools
-   ichor.core.common.sorting
    ichor.core.common.types
 
 Submodules
@@ -154,6 +153,14 @@ ichor.core.common.search module
 -------------------------------
 
 .. automodule:: ichor.core.common.search
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ichor.core.common.sorting module
+--------------------------------
+
+.. automodule:: ichor.core.common.sorting
    :members:
    :undoc-members:
    :show-inheritance:

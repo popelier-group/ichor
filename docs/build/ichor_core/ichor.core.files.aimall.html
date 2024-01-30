@@ -58,7 +58,6 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.atoms.html">ichor.core.atoms package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.calculators.html">ichor.core.calculators package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.common.html">ichor.core.common package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ichor.core.daemon.html">ichor.core.daemon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.database.html">ichor.core.database package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="ichor.core.files.html">ichor.core.files package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="ichor.core.files.html#subpackages">Subpackages</a></li>
@@ -67,10 +66,11 @@
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.file">ichor.core.files.file module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.file_data">ichor.core.files.file_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.mol2">ichor.core.files.mol2 module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.optional_file">ichor.core.files.optional_file module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.optional_content">ichor.core.files.optional_content module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.path_object">ichor.core.files.path_object module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.point_directory">ichor.core.files.point_directory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.points_directory">ichor.core.files.points_directory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.points_directory_parent">ichor.core.files.points_directory_parent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files.qcp">ichor.core.files.qcp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ichor.core.files.html#module-ichor.core.files">Module contents</a></li>
 </ul>
@@ -78,6 +78,7 @@
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.models.html">ichor.core.models package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.molecular_dynamics.html">ichor.core.molecular_dynamics package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.multipoles.html">ichor.core.multipoles package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ichor.core.processing.html">ichor.core.processing package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ichor.core.useful_functions.html">ichor.core.useful_functions package</a></li>
 </ul>
 </li>
@@ -122,61 +123,64 @@
 <section id="module-ichor.core.files.aimall.ab_int">
 <span id="ichor-core-files-aimall-ab-int-module"></span><h2>ichor.core.files.aimall.ab_int module<a class="headerlink" href="#module-ichor.core.files.aimall.ab_int" title="Permalink to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ABINT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbInt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasData" title="ichor.core.files.file_data.HasData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasData</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.a">
-<span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.a" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.a">
+<span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.a" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.b">
-<span class="sig-name descname"><span class="pre">b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.b" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.b">
+<span class="sig-name descname"><span class="pre">b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.b" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.check_path">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.check_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.check_path">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.check_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks the suffix of the given path matches the filetype associated with class that subclasses from File
 :param path: A Path object to check
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.e_inter">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_inter</span></span><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.e_inter" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.e_inter">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_inter</span></span><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.e_inter" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.filetype" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.filetype" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.iqa_diatomic_contributions">
-<span class="sig-name descname"><span class="pre">iqa_diatomic_contributions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.iqa_diatomic_contributions" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.iqa_diatomic_contributions">
+<span class="sig-name descname"><span class="pre">iqa_diatomic_contributions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.iqa_diatomic_contributions" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.properties">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.properties" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.property_names">
-<span class="sig-name descname"><span class="pre">property_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.property_names" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a list of strings corresponding to property names that the object should have</p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.raw_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.raw_data" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the raw data associated with the current object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.ABINT.total_time">
-<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.ABINT.total_time" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ab_int.AbInt.total_time">
+<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.ab_int.AbInt.total_time" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -185,19 +189,99 @@
 <section id="module-ichor.core.files.aimall.aim">
 <span id="ichor-core-files-aimall-aim-module"></span><h2>ichor.core.files.aimall.aim module<a class="headerlink" href="#module-ichor.core.files.aimall.aim" title="Permalink to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.AIM">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AIM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path:</span> <span class="pre">~pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">license_check_succeeded:</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version:</span> <span class="pre">~ichor.core.common.types.version.Version</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wfn_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extout_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mgp_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mgpviz_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sum_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sumviz_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nproc:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nacps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nnacps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbcps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrcps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nccps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file:</span> <span class="pre">~pathlib.Path</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd:</span> <span class="pre">~pathlib.Path</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.aim.AIM" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Aim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 <p>Class which wraps around an AIMAll output file, where settings and timings are
 written out to. The .int files are parsed separately in the INT/INTs classes.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.AIM.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.aim'</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.AIM.filetype" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.cwd">
+<span class="sig-name descname"><span class="pre">cwd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.cwd" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.AIM.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.AIM.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.extout_path">
+<span class="sig-name descname"><span class="pre">extout_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.extout_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.aim'</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.license_check_succeeded">
+<span class="sig-name descname"><span class="pre">license_check_succeeded</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.license_check_succeeded" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.mgp_path">
+<span class="sig-name descname"><span class="pre">mgp_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.mgp_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.mgpviz_path">
+<span class="sig-name descname"><span class="pre">mgpviz_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.mgpviz_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.nacps">
+<span class="sig-name descname"><span class="pre">nacps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.nacps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.nbcps">
+<span class="sig-name descname"><span class="pre">nbcps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.nbcps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.nccps">
+<span class="sig-name descname"><span class="pre">nccps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.nccps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.nnacps">
+<span class="sig-name descname"><span class="pre">nnacps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.nnacps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.nproc">
+<span class="sig-name descname"><span class="pre">nproc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.nproc" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.nrcps">
+<span class="sig-name descname"><span class="pre">nrcps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.nrcps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.output_file">
+<span class="sig-name descname"><span class="pre">output_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.output_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.sum_path">
+<span class="sig-name descname"><span class="pre">sum_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.sum_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.sumviz_path">
+<span class="sig-name descname"><span class="pre">sumviz_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.sumviz_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.version.Version" title="ichor.core.common.types.version.Version"><span class="pre">Version</span></a></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.version" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.aim.Aim.wfn_path">
+<span class="sig-name descname"><span class="pre">wfn_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.aim.Aim.wfn_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -243,9 +327,9 @@ as well as the integration error are stored.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">INT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.int.INT" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.int.Int" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasData" title="ichor.core.files.file_data.HasData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasData</span></code></a></p>
 <p>Wraps around one .int file which is generated by AIMALL for every atom in the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -259,94 +343,102 @@ rotating of the multipoles can happen.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.atom_name">
-<span class="sig-name descname"><span class="pre">atom_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.atom_name" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.atom_name">
+<span class="sig-name descname"><span class="pre">atom_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.atom_name" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.atom_num">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.atom_num" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.atom_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.atom_num" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the atom index in the system. (atom indices in atom names start at 1)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.basin_integration_results">
-<span class="sig-name descname"><span class="pre">basin_integration_results</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.basin_integration_results" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.basin_integration_results">
+<span class="sig-name descname"><span class="pre">basin_integration_results</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.basin_integration_results" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.bond_critical_points">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bond_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.bond_critical_points" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.bond_critical_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bond_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.bond_critical_points" title="Permalink to this definition"></a></dt>
+<dd><p>Returns list of bond critical points</p>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.cage_critical_points">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cage_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.cage_critical_points" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.cage_critical_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cage_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.cage_critical_points" title="Permalink to this definition"></a></dt>
+<dd><p>Returns list of ring critical points</p>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.check_path">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.int.INT.check_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.check_path">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.int.Int.check_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks the path is the same as for .int file. The _ in the .int file indicates AB interactions, which
 have to be read in differently because the file is strucutred differently.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.critical_points">
-<span class="sig-name descname"><span class="pre">critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.critical_points" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.critical_points">
+<span class="sig-name descname"><span class="pre">critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.critical_points" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.current_directory">
-<span class="sig-name descname"><span class="pre">current_directory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.current_directory" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.current_directory">
+<span class="sig-name descname"><span class="pre">current_directory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.current_directory" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.dft_model">
-<span class="sig-name descname"><span class="pre">dft_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.dft_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.dft_model">
+<span class="sig-name descname"><span class="pre">dft_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.dft_model" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.dipole_mag">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dipole_mag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.dipole_mag" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.dipole_mag">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dipole_mag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.dipole_mag" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the magnitude of the dipole moment of the topological atom.
 The magnitude of the vector is not affected by the rotation of multipoles.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.e_intra">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_intra</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.e_intra" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.e_intra">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_intra</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.e_intra" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.filetype" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.filetype" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.global_multipole_moments">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_multipole_moments</span></span><a class="headerlink" href="#ichor.core.files.aimall.int.INT.global_multipole_moments" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.global_multipole_moments">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_multipole_moments</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.global_multipole_moments" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the spherical multipole moments calculated by AIMAll.
+.. note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">These</span> <span class="n">are</span> <span class="ow">in</span> <span class="n">the</span> <span class="k">global</span> <span class="p">(</span><span class="n">Cartesian</span><span class="p">)</span> <span class="n">frame</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span> <span class="n">they</span> <span class="n">have</span> <span class="n">NOT</span> <span class="n">been</span> <span class="n">rotated</span> <span class="n">using</span> <span class="n">ALF</span><span class="o">.</span>
+<span class="n">Rotation</span> <span class="ow">is</span> <span class="n">done</span> <span class="n">by</span> <span class="n">converting</span> <span class="n">to</span> <span class="n">Cartesian</span><span class="p">,</span> <span class="n">rotating</span><span class="p">,</span> <span class="ow">and</span> <span class="n">then</span> <span class="n">converting</span> <span class="n">back</span> <span class="n">to</span> <span class="n">spherical</span><span class="o">.</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.global_spherical_multipoles">
-<span class="sig-name descname"><span class="pre">global_spherical_multipoles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.global_spherical_multipoles" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.global_spherical_multipoles">
+<span class="sig-name descname"><span class="pre">global_spherical_multipoles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.global_spherical_multipoles" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.i">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">i</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.i" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.i">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">i</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.i" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the atom index in the system. (atom indices in atom names start at 1)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.inp_file_path">
-<span class="sig-name descname"><span class="pre">inp_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.inp_file_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.inp_file_path">
+<span class="sig-name descname"><span class="pre">inp_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.inp_file_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.integration_error">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">integration_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.integration_error" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.integration_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">integration_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.integration_error" title="Permalink to this definition"></a></dt>
 <dd><p>The integration error can tell you if a point has been
 decomposed into topological atoms correctly. A large integration error signals
 that the point might not be suitable for training as the
@@ -354,20 +446,20 @@ AIMALL IQA/multipole moments might be inaccurate.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.iqa">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iqa</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.iqa" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.iqa">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iqa</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.iqa" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the IQA energy of the topological atom that was calculated for
 this topological atom (since 1 .int file is written for each topological atom).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.iqa_energy_components">
-<span class="sig-name descname"><span class="pre">iqa_energy_components</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.iqa_energy_components" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.iqa_energy_components">
+<span class="sig-name descname"><span class="pre">iqa_energy_components</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.iqa_energy_components" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.local_spherical_multipoles">
-<span class="sig-name descname"><span class="pre">local_spherical_multipoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.int.INT.local_spherical_multipoles" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.local_spherical_multipoles">
+<span class="sig-name descname"><span class="pre">local_spherical_multipoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.int.Int.local_spherical_multipoles" title="Permalink to this definition"></a></dt>
 <dd><p>Rotates global spherical multipoles into local spherical multipoles. Optionally
 a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
 (as read in from the int file) will be used (if it exists).</p>
@@ -383,67 +475,58 @@ with the int file does not exist. Then we cannot calculate multipoles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.net_charge">
-<span class="sig-name descname"><span class="pre">net_charge</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.net_charge" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.net_charge">
+<span class="sig-name descname"><span class="pre">net_charge</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.net_charge" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.out_file_path">
-<span class="sig-name descname"><span class="pre">out_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.out_file_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.out_file_path">
+<span class="sig-name descname"><span class="pre">out_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.out_file_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.properties">
-<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.int.INT.properties" title="Permalink to this definition"></a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.q">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.q" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.q00">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q00</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.q00" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.raw_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_data</span></span><a class="headerlink" href="#ichor.core.files.aimall.int.Int.raw_data" title="Permalink to this definition"></a></dt>
 <dd><p>Get properties which we are interested in machine
 learning from the INT file. Rotate multipoles using a given C matrix.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.property_names">
-<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['iqa,</span> <span class="pre">integration_error',</span> <span class="pre">'q00',</span> <span class="pre">'q10',</span> <span class="pre">'q11c',</span> <span class="pre">'q11s',</span> <span class="pre">'q20',</span> <span class="pre">'q21c',</span> <span class="pre">'q21s',</span> <span class="pre">'q22c',</span> <span class="pre">'q22s',</span> <span class="pre">'q30',</span> <span class="pre">'q31c',</span> <span class="pre">'q31s',</span> <span class="pre">'q32c',</span> <span class="pre">'q32s',</span> <span class="pre">'q33c',</span> <span class="pre">'q33s',</span> <span class="pre">'q40',</span> <span class="pre">'q41c',</span> <span class="pre">'q41s',</span> <span class="pre">'q42c',</span> <span class="pre">'q42s',</span> <span class="pre">'q43c',</span> <span class="pre">'q43s',</span> <span class="pre">'q44c',</span> <span class="pre">'q44s']</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.property_names" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.q">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.q" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.ring_critical_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ring_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.ring_critical_points" title="Permalink to this definition"></a></dt>
+<dd><p>Returns list of ring critical points</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.q00">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q00</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.q00" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.ring_critical_points">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ring_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.ring_critical_points" title="Permalink to this definition"></a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.title" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.title">
-<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.title" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.total_time">
+<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.total_time" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.total_time">
-<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.total_time" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.wfn">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wfn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.WFN" title="ichor.core.files.WFN"><span class="pre">WFN</span></a></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.wfn" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.int.INT.wfn_file_path">
-<span class="sig-name descname"><span class="pre">wfn_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.INT.wfn_file_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.int.Int.wfn_file_path">
+<span class="sig-name descname"><span class="pre">wfn_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.int.Int.wfn_file_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -452,9 +535,9 @@ learning from the INT file. Rotate multipoles using a given C matrix.</p>
 <section id="module-ichor.core.files.aimall.ints">
 <span id="ichor-core-files-aimall-ints-module"></span><h2>ichor.core.files.aimall.ints module<a class="headerlink" href="#module-ichor.core.files.aimall.ints" title="Permalink to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.INTs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">INTs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ints.INTs" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.directory.Directory" title="ichor.core.files.directory.Directory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Directory</span></code></a></p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.IntDirectory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntDirectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ints.IntDirectory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasData" title="ichor.core.files.file_data.HasData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasData</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.directory.AnnotatedDirectory" title="ichor.core.files.directory.AnnotatedDirectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedDirectory</span></code></a></p>
 <p>Wraps around a directory which contains all .int files for the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -466,37 +549,31 @@ Things like XYZ and GJF hold geometry.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.INTs.check_path">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ints.INTs.check_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.IntDirectory.check_path">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ints.IntDirectory.check_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if the given Path instance has _atomicfiles in its name.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.INTs.local_spherical_multipoles">
-<span class="sig-name descname"><span class="pre">local_spherical_multipoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ints.INTs.local_spherical_multipoles" title="Permalink to this definition"></a></dt>
-<dd><p>Rotates global spherical multipoles into local spherical multipoles. Optionally
-a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
-(as read in from the int file) will be used (if it exists).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>C_dict</strong> – A dictionary of rotation matrices, each of the atoms.
-This ensures that the correct C matrix is used for each atom.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>FileNotFoundError</strong> – If no <cite>C_matrix</cite> is passed in and the wfn file associated
-with the int file does not exist. Then we cannot calculate multipoles.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.INTs.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ints.INTs.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.IntDirectory.contents">
+<span class="sig-name descname"><span class="pre">contents</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'interaction_ints':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.aimall.ab_int.AbInt'&gt;,</span> <span class="pre">'ints':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.aimall.int.Int'&gt;}</span></em><a class="headerlink" href="#ichor.core.files.aimall.ints.IntDirectory.contents" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.INTs.properties">
-<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ints.INTs.properties" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.IntDirectory.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ints.IntDirectory.get" title="Permalink to this definition"></a></dt>
+<dd><p>Does the same thing as get of a dictionary,
+returning a default is KeyError</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.IntDirectory.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ints.IntDirectory.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.IntDirectory.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ints.IntDirectory.properties" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a dictionary of dictionaries containing atom names as keys an a dictionary
 as value. The value dictionary contains the properties we are interested in machine learning
 as keys and the values of these properties as floats. A list of C matrices needs to be
@@ -512,16 +589,11 @@ with the int file does not exist. Then we cannot calculate multipoles.</p>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.INTs.property_names">
-<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['iqa,</span> <span class="pre">integration_error',</span> <span class="pre">'q00',</span> <span class="pre">'q10',</span> <span class="pre">'q11c',</span> <span class="pre">'q11s',</span> <span class="pre">'q20',</span> <span class="pre">'q21c',</span> <span class="pre">'q21s',</span> <span class="pre">'q22c',</span> <span class="pre">'q22s',</span> <span class="pre">'q30',</span> <span class="pre">'q31c',</span> <span class="pre">'q31s',</span> <span class="pre">'q32c',</span> <span class="pre">'q32s',</span> <span class="pre">'q33c',</span> <span class="pre">'q33s',</span> <span class="pre">'q40',</span> <span class="pre">'q41c',</span> <span class="pre">'q41s',</span> <span class="pre">'q42c',</span> <span class="pre">'q42s',</span> <span class="pre">'q43c',</span> <span class="pre">'q43s',</span> <span class="pre">'q44c',</span> <span class="pre">'q44s']</span></em><a class="headerlink" href="#ichor.core.files.aimall.ints.INTs.property_names" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.INTs.sort">
-<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ints.INTs.sort" title="Permalink to this definition"></a></dt>
-<dd><p>Sorts keys of self by atom index e.g.
-{‘H2’: , ‘H3’: , ‘O1’: } -&gt; {‘O1’: , ‘H2’: , ‘H3’: }</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.ints.IntDirectory.raw_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ichor.core.files.aimall.ints.IntDirectory.raw_data" title="Permalink to this definition"></a></dt>
+<dd><p>Returns data associated with each atom. If interaction ints are present,
+also adds these to the dictionary.</p>
 </dd></dl>
 
 </dd></dl>
@@ -530,87 +602,170 @@ with the int file does not exist. Then we cannot calculate multipoles.</p>
 <section id="module-ichor.core.files.aimall">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ichor.core.files.aimall" title="Permalink to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ABINT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ABINT" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbInt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.AbInt" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasData" title="ichor.core.files.file_data.HasData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasData</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.a">
-<span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ABINT.a" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.a">
+<span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.AbInt.a" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.b">
-<span class="sig-name descname"><span class="pre">b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ABINT.b" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.b">
+<span class="sig-name descname"><span class="pre">b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.AbInt.b" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.check_path">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.ABINT.check_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.check_path">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.AbInt.check_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks the suffix of the given path matches the filetype associated with class that subclasses from File
 :param path: A Path object to check
 :return: True if the Path object has the same suffix as the class filetype, False otherwise</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.e_inter">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_inter</span></span><a class="headerlink" href="#ichor.core.files.aimall.ABINT.e_inter" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.e_inter">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_inter</span></span><a class="headerlink" href="#ichor.core.files.aimall.AbInt.e_inter" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.ABINT.filetype" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.AbInt.filetype" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.iqa_diatomic_contributions">
-<span class="sig-name descname"><span class="pre">iqa_diatomic_contributions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.ABINT.iqa_diatomic_contributions" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.iqa_diatomic_contributions">
+<span class="sig-name descname"><span class="pre">iqa_diatomic_contributions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.AbInt.iqa_diatomic_contributions" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.ABINT.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.AbInt.path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.properties">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.ABINT.properties" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.property_names">
-<span class="sig-name descname"><span class="pre">property_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.ABINT.property_names" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a list of strings corresponding to property names that the object should have</p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.raw_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ichor.core.files.aimall.AbInt.raw_data" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the raw data associated with the current object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.ABINT.total_time">
-<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.ABINT.total_time" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.AbInt.total_time">
+<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.AbInt.total_time" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.AIM">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AIM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path:</span> <span class="pre">~pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">license_check_succeeded:</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version:</span> <span class="pre">~ichor.core.common.types.version.Version</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wfn_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extout_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mgp_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mgpviz_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sum_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sumviz_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nproc:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nacps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nnacps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbcps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrcps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nccps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file:</span> <span class="pre">~pathlib.Path</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd:</span> <span class="pre">~pathlib.Path</span> <span class="pre">=</span> <span class="pre">&lt;ichor.core.files.file.FileContentsType</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.AIM" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Aim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.Aim" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 <p>Class which wraps around an AIMAll output file, where settings and timings are
 written out to. The .int files are parsed separately in the INT/INTs classes.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.AIM.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.aim'</span></em><a class="headerlink" href="#ichor.core.files.aimall.AIM.filetype" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.cwd">
+<span class="sig-name descname"><span class="pre">cwd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.cwd" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.AIM.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.AIM.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.extout_path">
+<span class="sig-name descname"><span class="pre">extout_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.extout_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.aim'</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.filetype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.license_check_succeeded">
+<span class="sig-name descname"><span class="pre">license_check_succeeded</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.license_check_succeeded" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.mgp_path">
+<span class="sig-name descname"><span class="pre">mgp_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.mgp_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.mgpviz_path">
+<span class="sig-name descname"><span class="pre">mgpviz_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.mgpviz_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.nacps">
+<span class="sig-name descname"><span class="pre">nacps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.nacps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.nbcps">
+<span class="sig-name descname"><span class="pre">nbcps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.nbcps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.nccps">
+<span class="sig-name descname"><span class="pre">nccps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.nccps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.nnacps">
+<span class="sig-name descname"><span class="pre">nnacps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.nnacps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.nproc">
+<span class="sig-name descname"><span class="pre">nproc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.nproc" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.nrcps">
+<span class="sig-name descname"><span class="pre">nrcps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.nrcps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.output_file">
+<span class="sig-name descname"><span class="pre">output_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.output_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.sum_path">
+<span class="sig-name descname"><span class="pre">sum_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.sum_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.sumviz_path">
+<span class="sig-name descname"><span class="pre">sumviz_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.sumviz_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.common.types.html#ichor.core.common.types.version.Version" title="ichor.core.common.types.version.Version"><span class="pre">Version</span></a></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.version" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Aim.wfn_path">
+<span class="sig-name descname"><span class="pre">wfn_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Aim.wfn_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">INT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.INT" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a></p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.Int" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file.ReadFile" title="ichor.core.files.file.ReadFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadFile</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasData" title="ichor.core.files.file_data.HasData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasData</span></code></a></p>
 <p>Wraps around one .int file which is generated by AIMALL for every atom in the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -624,94 +779,102 @@ rotating of the multipoles can happen.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.atom_name">
-<span class="sig-name descname"><span class="pre">atom_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.atom_name" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.atom_name">
+<span class="sig-name descname"><span class="pre">atom_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.atom_name" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.atom_num">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.atom_num" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.atom_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">atom_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.atom_num" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the atom index in the system. (atom indices in atom names start at 1)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.basin_integration_results">
-<span class="sig-name descname"><span class="pre">basin_integration_results</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.basin_integration_results" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.basin_integration_results">
+<span class="sig-name descname"><span class="pre">basin_integration_results</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.basin_integration_results" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.bond_critical_points">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bond_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.bond_critical_points" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.bond_critical_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bond_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.bond_critical_points" title="Permalink to this definition"></a></dt>
+<dd><p>Returns list of bond critical points</p>
+</dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.cage_critical_points">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cage_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.cage_critical_points" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.cage_critical_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cage_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.cage_critical_points" title="Permalink to this definition"></a></dt>
+<dd><p>Returns list of ring critical points</p>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.check_path">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.INT.check_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.check_path">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.Int.check_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks the path is the same as for .int file. The _ in the .int file indicates AB interactions, which
 have to be read in differently because the file is strucutred differently.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.critical_points">
-<span class="sig-name descname"><span class="pre">critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.critical_points" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.critical_points">
+<span class="sig-name descname"><span class="pre">critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.critical_points" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.current_directory">
-<span class="sig-name descname"><span class="pre">current_directory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.current_directory" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.current_directory">
+<span class="sig-name descname"><span class="pre">current_directory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.current_directory" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.dft_model">
-<span class="sig-name descname"><span class="pre">dft_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.dft_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.dft_model">
+<span class="sig-name descname"><span class="pre">dft_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.dft_model" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.dipole_mag">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dipole_mag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.dipole_mag" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.dipole_mag">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dipole_mag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.dipole_mag" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the magnitude of the dipole moment of the topological atom.
 The magnitude of the vector is not affected by the rotation of multipoles.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.e_intra">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_intra</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.e_intra" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.e_intra">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_intra</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.e_intra" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.filetype">
-<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.filetype" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.int'</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.filetype" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.global_multipole_moments">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_multipole_moments</span></span><a class="headerlink" href="#ichor.core.files.aimall.INT.global_multipole_moments" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.global_multipole_moments">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_multipole_moments</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.global_multipole_moments" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the spherical multipole moments calculated by AIMAll.
+.. note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">These</span> <span class="n">are</span> <span class="ow">in</span> <span class="n">the</span> <span class="k">global</span> <span class="p">(</span><span class="n">Cartesian</span><span class="p">)</span> <span class="n">frame</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span> <span class="n">they</span> <span class="n">have</span> <span class="n">NOT</span> <span class="n">been</span> <span class="n">rotated</span> <span class="n">using</span> <span class="n">ALF</span><span class="o">.</span>
+<span class="n">Rotation</span> <span class="ow">is</span> <span class="n">done</span> <span class="n">by</span> <span class="n">converting</span> <span class="n">to</span> <span class="n">Cartesian</span><span class="p">,</span> <span class="n">rotating</span><span class="p">,</span> <span class="ow">and</span> <span class="n">then</span> <span class="n">converting</span> <span class="n">back</span> <span class="n">to</span> <span class="n">spherical</span><span class="o">.</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.global_spherical_multipoles">
-<span class="sig-name descname"><span class="pre">global_spherical_multipoles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.global_spherical_multipoles" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.global_spherical_multipoles">
+<span class="sig-name descname"><span class="pre">global_spherical_multipoles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.global_spherical_multipoles" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.i">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">i</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.i" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.i">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">i</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.i" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the atom index in the system. (atom indices in atom names start at 1)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.inp_file_path">
-<span class="sig-name descname"><span class="pre">inp_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.inp_file_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.inp_file_path">
+<span class="sig-name descname"><span class="pre">inp_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.inp_file_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.integration_error">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">integration_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.integration_error" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.integration_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">integration_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.integration_error" title="Permalink to this definition"></a></dt>
 <dd><p>The integration error can tell you if a point has been
 decomposed into topological atoms correctly. A large integration error signals
 that the point might not be suitable for training as the
@@ -719,20 +882,20 @@ AIMALL IQA/multipole moments might be inaccurate.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.iqa">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iqa</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.iqa" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.iqa">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iqa</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.iqa" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the IQA energy of the topological atom that was calculated for
 this topological atom (since 1 .int file is written for each topological atom).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.iqa_energy_components">
-<span class="sig-name descname"><span class="pre">iqa_energy_components</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.iqa_energy_components" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.iqa_energy_components">
+<span class="sig-name descname"><span class="pre">iqa_energy_components</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.iqa_energy_components" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.local_spherical_multipoles">
-<span class="sig-name descname"><span class="pre">local_spherical_multipoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.INT.local_spherical_multipoles" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.local_spherical_multipoles">
+<span class="sig-name descname"><span class="pre">local_spherical_multipoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.Int.local_spherical_multipoles" title="Permalink to this definition"></a></dt>
 <dd><p>Rotates global spherical multipoles into local spherical multipoles. Optionally
 a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
 (as read in from the int file) will be used (if it exists).</p>
@@ -748,75 +911,66 @@ with the int file does not exist. Then we cannot calculate multipoles.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.net_charge">
-<span class="sig-name descname"><span class="pre">net_charge</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.net_charge" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.net_charge">
+<span class="sig-name descname"><span class="pre">net_charge</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.net_charge" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.out_file_path">
-<span class="sig-name descname"><span class="pre">out_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.out_file_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.out_file_path">
+<span class="sig-name descname"><span class="pre">out_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.out_file_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.properties">
-<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.INT.properties" title="Permalink to this definition"></a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.q">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.q" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.q00">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q00</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.q00" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.raw_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_data</span></span><a class="headerlink" href="#ichor.core.files.aimall.Int.raw_data" title="Permalink to this definition"></a></dt>
 <dd><p>Get properties which we are interested in machine
 learning from the INT file. Rotate multipoles using a given C matrix.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.property_names">
-<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['iqa,</span> <span class="pre">integration_error',</span> <span class="pre">'q00',</span> <span class="pre">'q10',</span> <span class="pre">'q11c',</span> <span class="pre">'q11s',</span> <span class="pre">'q20',</span> <span class="pre">'q21c',</span> <span class="pre">'q21s',</span> <span class="pre">'q22c',</span> <span class="pre">'q22s',</span> <span class="pre">'q30',</span> <span class="pre">'q31c',</span> <span class="pre">'q31s',</span> <span class="pre">'q32c',</span> <span class="pre">'q32s',</span> <span class="pre">'q33c',</span> <span class="pre">'q33s',</span> <span class="pre">'q40',</span> <span class="pre">'q41c',</span> <span class="pre">'q41s',</span> <span class="pre">'q42c',</span> <span class="pre">'q42s',</span> <span class="pre">'q43c',</span> <span class="pre">'q43s',</span> <span class="pre">'q44c',</span> <span class="pre">'q44s']</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.property_names" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.q">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.q" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.ring_critical_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ring_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.ring_critical_points" title="Permalink to this definition"></a></dt>
+<dd><p>Returns list of ring critical points</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.q00">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q00</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.q00" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the point charge (monopole moment) of the topological atom.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.ring_critical_points">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ring_critical_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ichor.core.files.aimall.int.CriticalPoint" title="ichor.core.files.aimall.int.CriticalPoint"><span class="pre">CriticalPoint</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.ring_critical_points" title="Permalink to this definition"></a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.title" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.title">
-<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.title" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.total_time">
+<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.total_time" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.total_time">
-<span class="sig-name descname"><span class="pre">total_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.total_time" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.wfn">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wfn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ichor.core.files.html#ichor.core.files.WFN" title="ichor.core.files.WFN"><span class="pre">WFN</span></a></em><a class="headerlink" href="#ichor.core.files.aimall.INT.wfn" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INT.wfn_file_path">
-<span class="sig-name descname"><span class="pre">wfn_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.INT.wfn_file_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.Int.wfn_file_path">
+<span class="sig-name descname"><span class="pre">wfn_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#ichor.core.files.aimall.Int.wfn_file_path" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INTs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">INTs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.INTs" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasProperties" title="ichor.core.files.file_data.HasProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasProperties</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.directory.Directory" title="ichor.core.files.directory.Directory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Directory</span></code></a></p>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.IntDirectory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntDirectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.IntDirectory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ichor.core.files.html#ichor.core.files.file_data.HasData" title="ichor.core.files.file_data.HasData"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasData</span></code></a>, <a class="reference internal" href="ichor.core.files.html#ichor.core.files.directory.AnnotatedDirectory" title="ichor.core.files.directory.AnnotatedDirectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedDirectory</span></code></a></p>
 <p>Wraps around a directory which contains all .int files for the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -828,37 +982,31 @@ Things like XYZ and GJF hold geometry.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INTs.check_path">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.INTs.check_path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.IntDirectory.check_path">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ichor.core.files.aimall.IntDirectory.check_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if the given Path instance has _atomicfiles in its name.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INTs.local_spherical_multipoles">
-<span class="sig-name descname"><span class="pre">local_spherical_multipoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.INTs.local_spherical_multipoles" title="Permalink to this definition"></a></dt>
-<dd><p>Rotates global spherical multipoles into local spherical multipoles. Optionally
-a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
-(as read in from the int file) will be used (if it exists).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>C_dict</strong> – A dictionary of rotation matrices, each of the atoms.
-This ensures that the correct C matrix is used for each atom.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>FileNotFoundError</strong> – If no <cite>C_matrix</cite> is passed in and the wfn file associated
-with the int file does not exist. Then we cannot calculate multipoles.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INTs.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.INTs.path" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.IntDirectory.contents">
+<span class="sig-name descname"><span class="pre">contents</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'interaction_ints':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.aimall.ab_int.AbInt'&gt;,</span> <span class="pre">'ints':</span> <span class="pre">&lt;class</span> <span class="pre">'ichor.core.files.aimall.int.Int'&gt;}</span></em><a class="headerlink" href="#ichor.core.files.aimall.IntDirectory.contents" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INTs.properties">
-<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.INTs.properties" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ichor.core.files.aimall.IntDirectory.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.IntDirectory.get" title="Permalink to this definition"></a></dt>
+<dd><p>Does the same thing as get of a dictionary,
+returning a default is KeyError</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.IntDirectory.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ichor.core.files.aimall.IntDirectory.path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.IntDirectory.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ichor.core.files.aimall.IntDirectory.properties" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a dictionary of dictionaries containing atom names as keys an a dictionary
 as value. The value dictionary contains the properties we are interested in machine learning
 as keys and the values of these properties as floats. A list of C matrices needs to be
@@ -874,16 +1022,11 @@ with the int file does not exist. Then we cannot calculate multipoles.</p>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INTs.property_names">
-<span class="sig-name descname"><span class="pre">property_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['iqa,</span> <span class="pre">integration_error',</span> <span class="pre">'q00',</span> <span class="pre">'q10',</span> <span class="pre">'q11c',</span> <span class="pre">'q11s',</span> <span class="pre">'q20',</span> <span class="pre">'q21c',</span> <span class="pre">'q21s',</span> <span class="pre">'q22c',</span> <span class="pre">'q22s',</span> <span class="pre">'q30',</span> <span class="pre">'q31c',</span> <span class="pre">'q31s',</span> <span class="pre">'q32c',</span> <span class="pre">'q32s',</span> <span class="pre">'q33c',</span> <span class="pre">'q33s',</span> <span class="pre">'q40',</span> <span class="pre">'q41c',</span> <span class="pre">'q41s',</span> <span class="pre">'q42c',</span> <span class="pre">'q42s',</span> <span class="pre">'q43c',</span> <span class="pre">'q43s',</span> <span class="pre">'q44c',</span> <span class="pre">'q44s']</span></em><a class="headerlink" href="#ichor.core.files.aimall.INTs.property_names" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ichor.core.files.aimall.INTs.sort">
-<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ichor.core.files.aimall.INTs.sort" title="Permalink to this definition"></a></dt>
-<dd><p>Sorts keys of self by atom index e.g.
-{‘H2’: , ‘H3’: , ‘O1’: } -&gt; {‘O1’: , ‘H2’: , ‘H3’: }</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ichor.core.files.aimall.IntDirectory.raw_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ichor.core.files.aimall.IntDirectory.raw_data" title="Permalink to this definition"></a></dt>
+<dd><p>Returns data associated with each atom. If interaction ints are present,
+also adds these to the dictionary.</p>
 </dd></dl>
 
 </dd></dl>

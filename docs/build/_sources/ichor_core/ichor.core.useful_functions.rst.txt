@@ -28,6 +28,14 @@ ichor.core.useful\_functions.check\_aimall\_completed module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.useful\_functions.check\_points\_dir\_suffix module
+--------------------------------------------------------------
+
+.. automodule:: ichor.core.useful_functions.check_points_dir_suffix
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ichor.core.useful\_functions.debugging module
 ---------------------------------------------
 

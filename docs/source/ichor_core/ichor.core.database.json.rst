@@ -12,6 +12,14 @@ ichor.core.database.json.add\_to\_database module
    :undoc-members:
    :show-inheritance:
 
+ichor.core.database.json.query\_database module
+-----------------------------------------------
+
+.. automodule:: ichor.core.database.json.query_database
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
