@@ -53,7 +53,7 @@ class WFX(HasAtoms, HasData, ReadFile):
 
     """
 
-    filetype = ".wfx"
+    _filetype = ".wfx"
 
     def __init__(
         self,

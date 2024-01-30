@@ -16,7 +16,7 @@ class PandoraCCSDmod(Enum):
 
 class PandoraInput(HasAtoms, ReadFile, WriteFile):
 
-    filetype = ".pandora"
+    _filetype = ".pandora"
 
     def __init__(
         self,

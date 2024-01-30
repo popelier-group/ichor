@@ -47,7 +47,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         https://orcaforum.kofo.mpg.de/viewtopic.php?f=8&t=7470&p=32102&hilit=atomic+force#p32102
     """
 
-    filetype = ".orcainput"
+    _filetype = ".orcainput"
 
     def __init__(
         self,

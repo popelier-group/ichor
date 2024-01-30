@@ -59,7 +59,7 @@ class AmberMDIn(WriteFile, ReadFile):
     :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
     """
 
-    filetype = ".in"
+    _filetype = ".in"
 
     def __init__(
         self,

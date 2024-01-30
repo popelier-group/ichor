@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple, Union
 
 import ichor.hpc.global_variables
 
-from ichor.core.common.functools import classproperty
 from ichor.core.common.io import mkdir
 from ichor.hpc.batch_system import JobID, NodeType
 from ichor.hpc.submission_script.command_group import CommandGroup
@@ -91,6 +90,8 @@ class SubmissionScript:
 
     """
 
+    filetype = ".sh"
+
     # separator which is used to separate names of files in the datafiles
     # (files with random UID names) which are written by ICHOR.
     SEPARATOR = ","
@@ -132,11 +133,6 @@ class SubmissionScript:
 
         mkdir(self.outputs_dir_path)
         mkdir(self.errors_dir_path)
-
-    @classproperty
-    def filetype(self) -> str:
-        """The extension of the submission script file. Will always be .sh (a shell script)"""
-        return ".sh"
 
     def add_command(self, command):
         """Add a command to the list of commands."""

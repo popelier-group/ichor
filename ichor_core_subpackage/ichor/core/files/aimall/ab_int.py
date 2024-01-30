@@ -7,7 +7,7 @@ from ichor.core.files.file_data import HasData
 
 class AbInt(HasData, ReadFile):
 
-    filetype = ".int"
+    _filetype = ".int"
 
     def __init__(self, path: Union[str, Path]):
         ReadFile.__init__(self, path)

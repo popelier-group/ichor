@@ -25,7 +25,7 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
     :param path: Path object or string to the .gau or .log file that are Gaussian output files
     """
 
-    filetype = ".orcaoutput"
+    _filetype = ".orcaoutput"
 
     def __init__(
         self,

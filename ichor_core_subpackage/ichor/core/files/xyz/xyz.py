@@ -19,7 +19,7 @@ class XYZ(HasAtoms, ReadFile, WriteFile, File):
         with the given Atoms will be written to the given Path.
     """
 
-    filetype = ".xyz"
+    _filetype = ".xyz"
 
     def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
         File.__init__(self, path)

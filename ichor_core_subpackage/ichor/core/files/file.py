@@ -43,16 +43,23 @@ FileContents = FileContentsType()
 class File(PathObject, ABC):
     """Abstract Base Class for any type of file that is used by ICHOR."""
 
+    # default filetype is None
+    # if there is no filetype, can leave as empty string as well
+    _filetype = None
+
+    # from https://stackoverflow.com/a/53769173
+    def __init_subclass__(cls, **kwargs):
+        if getattr(cls, "_filetype") is None:
+            raise TypeError(
+                f"Can't instantiate abstract class {cls.__name__} without '_filetype' class variable defined."
+            )
+        return super().__init_subclass__(**kwargs)
+
     def __init__(self, path: Union[Path, str]):
 
         self.state = FileState.Unread
         # need to check if path exists here because if it does, we need to read in file contents
         super().__init__(path)
-
-    @property
-    def stem(self):
-        """Returns the name of the WFN file (excluding the .wfn extension)"""
-        return self.path.stem
 
     @classmethod
     def check_path(cls, path: Union[str, Path]) -> bool:
@@ -62,25 +69,26 @@ class File(PathObject, ABC):
         """
         path = Path(path)
         # add check if list of possible filetypes is given
-        if isinstance(cls.filetype, list):
-            for ty_ in cls.filetype:
+        if isinstance(cls._filetype, list):
+            for ty_ in cls._filetype:
                 if path.suffix == ty_:
                     return True
             return False
 
-        return cls.filetype == path.suffix
+        return cls._filetype == path.suffix
 
     @classmethod
     def get_filetype(cls) -> str:
-        """Returns a filetype for the particular file
+        """Returns a filetype for the particular kind of file
 
         :return: A string containing the suffix of the file (the filetype)
         """
 
-        if isinstance(cls.filetype, list):
-            return cls.filetype[0]
+        # if multiple filetypes are given
+        if isinstance(cls._filetype, (list, tuple)):
+            return cls._filetype[0]
 
-        return cls.filetype
+        return cls._filetype
 
     def move(self, dst):
         """Move the file to a new destination.
@@ -113,15 +121,7 @@ class File(PathObject, ABC):
 
 class ReadFile(File, ABC):
 
-    filetype = None
-
-    # from https://stackoverflow.com/a/53769173
-    def __init_subclass__(cls, **kwargs):
-        if not getattr(cls, "filetype"):
-            raise TypeError(
-                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
-            )
-        return super().__init_subclass__(**kwargs)
+    # _filetype is not needed here
 
     def _initialise_contents(self):
         """Initialize contents of a file to default values. This is needed in the case
@@ -209,15 +209,7 @@ class FileWriteError(Exception):
 
 class WriteFile(File, ABC):
 
-    filetype = None
-
-    # from https://stackoverflow.com/a/53769173
-    def __init_subclass__(cls, **kwargs):
-        if not getattr(cls, "filetype"):
-            raise TypeError(
-                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
-            )
-        return super().__init_subclass__(**kwargs)
+    # _filetype is not needed here
 
     def _set_write_defaults_if_needed(self):
         """Set default values for attributes if bool(self.attribute) evaluates to False.

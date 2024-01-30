@@ -30,3 +30,8 @@ class PathObject(ABC, object):
     def remove(self):
         """Alias for delete"""
         return self.delete()
+
+    @property
+    def stem(self):
+        """Returns the stem of the file (without suffix, if one is present)"""
+        return self.path.stem

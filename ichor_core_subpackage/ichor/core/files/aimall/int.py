@@ -57,6 +57,8 @@ class Int(ReadFile, HasData):
         rotating of the multipoles can happen.
     """
 
+    _filetype = ".int"
+
     def __init__(self, path: Union[Path, str]):
 
         # calls File.__init__(), which subsequently calls PathObject.__init__()
@@ -86,8 +88,6 @@ class Int(ReadFile, HasData):
         """Checks the path is the same as for .int file. The _ in the .int file indicates AB interactions, which
         have to be read in differently because the file is strucutred differently."""
         return path.suffix == cls.get_filetype() and "_" not in path.name
-
-    filetype = ".int"
 
     @property
     def raw_data(self):

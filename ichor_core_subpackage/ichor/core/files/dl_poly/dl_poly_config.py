@@ -27,7 +27,8 @@ class DlPolyConfig(WriteFile):
             in the CONFIG file.
     """
 
-    filetype = "_not_needed"
+    # there is no suffix
+    _filetype = ""
 
     def __init__(
         self,

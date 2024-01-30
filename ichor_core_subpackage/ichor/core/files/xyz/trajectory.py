@@ -26,7 +26,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         themselves
     """
 
-    filetype = ".xyz"
+    _filetype = ".xyz"
 
     def __init__(self, path: Union[Path, str], *args, **kwargs):
         ListOfAtoms.__init__(self, *args, **kwargs)

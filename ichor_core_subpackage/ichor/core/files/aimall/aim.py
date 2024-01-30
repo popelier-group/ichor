@@ -30,7 +30,7 @@ class Aim(ReadFile, dict):
     """Class which wraps around an AIMAll output file, where settings and timings are
     written out to. The .int files are parsed separately in the INT/INTs classes."""
 
-    filetype = ".aim"
+    _filetype = ".aim"
 
     def __init__(
         self,

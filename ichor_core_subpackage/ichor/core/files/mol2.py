@@ -454,7 +454,7 @@ non_metal_atoms = [
 # todo?: Would it be useful to be able to read Mol2?
 class Mol2(HasAtoms, WriteFile):
 
-    filetype = ".mol2"
+    _filetype = ".mol2"
 
     def __init__(self, path: Union[Path, str], system_name: str, atoms: Atoms):
 

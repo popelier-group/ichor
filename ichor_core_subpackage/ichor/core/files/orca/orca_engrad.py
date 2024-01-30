@@ -14,7 +14,7 @@ nuclear_charge2type = {int(v): k for k, v in type2nuclear_charge.items()}
 
 class OrcaEngrad(ReadFile, HasAtoms, HasData):
 
-    filetype = ".engrad"
+    _filetype = ".engrad"
 
     """
     Reads file containing the gradient calculated by ORCA.

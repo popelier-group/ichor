@@ -48,7 +48,7 @@ class Model(ReadFile, WriteFile):
         long as it outputs files of the same format as the FEREBUS outputs.
     """
 
-    filetype = ".model"
+    _filetype = ".model"
 
     def __init__(
         self,

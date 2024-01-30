@@ -24,7 +24,7 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
     :param box_size: Box size of simulation, defaults to 25.0
     """
 
-    filetype = ".inp"
+    _filetype = ".inp"
 
     def __init__(
         self,
@@ -308,23 +308,3 @@ def write_cp2k_input(
         n_molecules,
         box_size,
     ).write()
-
-
-# def cp2k_to_xyz(
-#     cp2k_input: Path,
-#     xyz: Optional[Path] = None,
-#     temperature: Optional[float] = None,
-# ) -> Path:
-#     if xyz is None:
-#         xyzs = get_files_of_type(Trajectory.filetype, cp2k_input.parent)
-#         if len(xyzs) == 0:
-#             raise FileNotFoundError(f"No trajectory files found in {cp2k_input.parent}")
-#         xyz = xyz[0]
-#     traj = Trajectory(xyz)
-#     if xyz is None:
-#         cp2k_input = CP2KInput(cp2k_input)
-#         temperature = cp2k_input.temperature if temperature is None else temperature
-#         path = f"{cp2k_input.project_name}-cp2k-{temperature}{Trajectory.filetype}"
-#         xyz = Path(path)
-#     traj.write(xyz)
-#     return xyz

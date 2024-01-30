@@ -120,7 +120,7 @@ class ConnectedAtoms(Atoms):
 
 class DlPolyField(WriteFile):
 
-    filetype = "_not_needed"
+    _filetype = ""
 
     def __init__(
         self,

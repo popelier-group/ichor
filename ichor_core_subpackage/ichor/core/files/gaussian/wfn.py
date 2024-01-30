@@ -56,7 +56,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
     """
 
-    filetype = ".wfn"
+    _filetype = ".wfn"
 
     def __init__(
         self,

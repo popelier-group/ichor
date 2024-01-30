@@ -314,7 +314,7 @@ def read_ccp(
 
 class MOUT(HasAtoms, HasData, ReadFile):
 
-    filetype = ".mout"
+    _filetype = ".mout"
 
     def __init__(self, path: Path, atoms: Optional[Atoms] = None):
         ReadFile.__init__(self, path)

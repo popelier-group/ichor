@@ -79,7 +79,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
 
     """
 
-    filetype = ".gjf"
+    _filetype = ".gjf"
 
     def __init__(
         self,
