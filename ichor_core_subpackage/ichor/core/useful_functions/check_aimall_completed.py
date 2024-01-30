@@ -10,7 +10,7 @@ def aimall_completed(wfn: Path) -> bool:
     exist. Note that it assumes that IQA energy is also calculated
     The .aim file as well as if the .int files contain the required information."""
 
-    aim_file = wfn.with_suffix(Aim.filetype)
+    aim_file = wfn.with_suffix(Aim.get_filetype())
     if not aim_file.exists():
         return False
     aim = Aim(aim_file)

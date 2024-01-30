@@ -67,7 +67,9 @@ def write_orca_inputs(
 
     for point_directory in points_directory:
 
-        orca_file_name = point_directory.path.with_suffix("").name + OrcaInput.filetype
+        orca_file_name = (
+            point_directory.path.with_suffix("").name + OrcaInput.get_filetype()
+        )
 
         if overwrite_existing:
             if point_directory.orca_input:

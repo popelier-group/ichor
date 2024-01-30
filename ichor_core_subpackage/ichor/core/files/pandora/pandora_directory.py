@@ -18,7 +18,7 @@ class PandoraDirectory(HasAtoms, AnnotatedDirectory):
             self.mkdir()
         if self.input is None:
             self.input = PandoraInput(
-                self.path / (self.path.name + PandoraInput.filetype)
+                self.path / (self.path.name + PandoraInput.get_filetype())
             )
         self.input.atoms = self.atoms
         self.input.write()

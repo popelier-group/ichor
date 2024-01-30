@@ -32,7 +32,9 @@ class GaussianCommand(SubmissionCommand):
     ):
         self.gjf_file = gjf_file
         # .gau file used to store the output from Gaussian
-        self.gjf_output = gjf_output or gjf_file.with_suffix(GaussianOutput.filetype)
+        self.gjf_output = gjf_output or gjf_file.with_suffix(
+            GaussianOutput.get_filetype()
+        )
 
     @classproperty
     def modules(self) -> list:

@@ -58,7 +58,7 @@ def submit_amber(
     mkdir(ichor.hpc.global_variables.FILE_STRUCTURE["amber"])
     mol2 = Mol2(
         ichor.hpc.global_variables.FILE_STRUCTURE["amber"]
-        / (system_name + Mol2.filetype),
+        / (system_name + Mol2.get_filetype()),
         system_name,
         atoms,
     )

@@ -50,7 +50,7 @@ def get_dlpoly_energies(
         if d.is_dir() and (d / "FFLUX").exists():
             data["ntrain"] += [Models(d / "model_krig").ntrain]
             data["fflux"] += [read_fflux(d / "FFLUX")["e_iqa"][-1]]
-            wfn_files = get_files_of_type(WFN.filetype, d)
+            wfn_files = get_files_of_type(WFN.get_filetype(), d)
             if len(wfn_files) > 0:
                 data["gaussian"] += [read_wfn_energy(wfn_files[0])]
             else:

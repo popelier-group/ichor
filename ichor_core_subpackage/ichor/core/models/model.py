@@ -395,7 +395,7 @@ class Model(ReadFile, WriteFile):
         if path.is_dir():
             path = (
                 path
-                / f"{self.system_name}_{self.prop}_{self.atom_name}{Model.filetype}"
+                / f"{self.system_name}_{self.prop}_{self.atom_name}{Model.get_filetype()}"
             )
 
         # these are so that the writing of models does not crash. They do not affect predictions

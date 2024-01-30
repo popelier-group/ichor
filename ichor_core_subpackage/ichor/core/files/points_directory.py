@@ -91,7 +91,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             if PointDirectory.check_path(f):
                 point = PointDirectory(f)
                 self.append(point)
-            elif f.is_file() and f.suffix in {XYZ.filetype, GJF.filetype}:
+            elif f.is_file() and f.suffix in {XYZ.get_filetype(), GJF.get_filetype()}:
                 new_dir = self.path / (f.stem + PointDirectory._suffix)
                 mkdir(new_dir)
                 # move the file into the newly made directory

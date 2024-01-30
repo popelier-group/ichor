@@ -67,7 +67,7 @@ def write_gjfs(
     for point_directory in points_directory:
 
         # remove the .pointdirectory suffix
-        gjf_fle_name = point_directory.path.with_suffix("").name + GJF.filetype
+        gjf_fle_name = point_directory.path.with_suffix("").name + GJF.get_filetype()
 
         # if overwriting, then delete current gjfs if they exist
         if overwrite_existing:

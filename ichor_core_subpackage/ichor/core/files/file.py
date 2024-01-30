@@ -70,6 +70,18 @@ class File(PathObject, ABC):
 
         return cls.filetype == path.suffix
 
+    @classmethod
+    def get_filetype(cls) -> str:
+        """Returns a filetype for the particular file
+
+        :return: A string containing the suffix of the file (the filetype)
+        """
+
+        if isinstance(cls.filetype, list):
+            return cls.filetype[0]
+
+        return cls.filetype
+
     def move(self, dst):
         """Move the file to a new destination.
 

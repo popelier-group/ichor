@@ -98,7 +98,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         """
         if atms:
             if not self.xyz.exists():
-                self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.filetype}")
+                self.xyz = XYZ(self.path / f"{self.path.name}{XYZ.get_filetype()}")
             self.xyz = XYZ(self.xyz.path, atms)
 
     def __repr__(self):

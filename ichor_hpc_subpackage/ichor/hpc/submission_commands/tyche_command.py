@@ -70,7 +70,7 @@ class TycheCommand(SubmissionCommand):
 
         freq_param = self.freq_param.absolute()
         g09_input = self.g09_input.absolute()
-        gau_output = g09_input.with_suffix(GaussianOutput.filetype)
+        gau_output = g09_input.with_suffix(GaussianOutput.get_filetype())
         cmd = ""
         cmd += f"pushd {g09_input.parent}\n"
         cmd += f"{GaussianCommand(g09_input).repr([str(g09_input), str(gau_output)])}\n"

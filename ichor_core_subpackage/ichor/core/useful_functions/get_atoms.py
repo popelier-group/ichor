@@ -20,7 +20,7 @@ def get_atoms_from_path(path: Path) -> "Atoms":  # noqa F821
     )
 
     if path.is_dir():
-        if len(get_files_of_type(GJF.filetype, path)) == 0:
+        if len(get_files_of_type(GJF.get_filetype(), path)) == 0:
             pd = PointsDirectory(path)[0]
         else:
             pd = PointDirectory(path)

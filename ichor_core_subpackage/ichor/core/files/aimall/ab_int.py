@@ -29,7 +29,7 @@ class AbInt(HasData, ReadFile):
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
-        return path.suffix == cls.filetype and "_" in path.name
+        return path.suffix == cls.get_filetype() and "_" in path.name
 
     @property
     def e_inter(self):
