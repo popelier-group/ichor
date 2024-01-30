@@ -493,24 +493,25 @@ class Mol2(HasAtoms, WriteFile):
         self.format()
         b = bonds(self.atoms)
 
-        with open(path, "w") as f:
-            f.write(f"# Name: {self.system_name}\n")
-            f.write(f"# Created by: {current_user()}\n")
-            f.write(f"# Created on: {datetime.datetime.now()}\n")
-            f.write("\n")
-            f.write("@<TRIPOS>MOLECULE\n")
-            f.write(f"{self.system_name}\n")
-            f.write(f" {len(self.atoms)} {len(b)} 0 0 0\n")
-            f.write(f"{self.mol_type.value}\n")
-            f.write(f"{self.charge_type.value}\n")
-            f.write(f"{self.sybyl_status.value}\n")
-            f.write("\n")
-            f.write("@<TRIPOS>ATOM\n")
-            for atom in self.atoms:
-                f.write(
-                    f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {self.system_name} {gasteigger_charge(atom):6.4f}\n"  # noqa E501
-                )
-            f.write("@<TRIPOS>BOND\n")
-            for i, (bi, bj) in enumerate(b):
-                bond_type = get_bond_type(self.atoms[bi - 1], self.atoms[bj - 1]).value
-                f.write(f"{i+1:7d} {bi:4d} {bj:4d} {bond_type:>4}\n")
+        str_to_write = ""
+
+        str_to_write += f"# Name: {self.system_name}\n"
+        str_to_write += f"# Created by: {current_user()}\n"
+        str_to_write += f"# Created on: {datetime.datetime.now()}\n"
+        str_to_write += "\n"
+        str_to_write += "@<TRIPOS>MOLECULE\n"
+        str_to_write += f"{self.system_name}\n"
+        str_to_write += f" {len(self.atoms)} {len(b)} 0 0 0\n"
+        str_to_write += f"{self.mol_type.value}\n"
+        str_to_write += f"{self.charge_type.value}\n"
+        str_to_write += f"{self.sybyl_status.value}\n"
+        str_to_write += "\n"
+        str_to_write += "@<TRIPOS>ATOM\n"
+        for atom in self.atoms:
+            str_to_write += f"{atom.index:7d} {atom.type} {atom.x:12.7f} {atom.y:12.7f} {atom.z:12.7f} {atom.atom_type.value:<6} 1 {self.system_name} {gasteigger_charge(atom):6.4f}\n"  # noqa E501
+        str_to_write += "@<TRIPOS>BOND\n"
+        for i, (bi, bj) in enumerate(b):
+            bond_type = get_bond_type(self.atoms[bi - 1], self.atoms[bj - 1]).value
+            str_to_write += f"{i+1:7d} {bi:4d} {bj:4d} {bond_type:>4}\n"
+
+        return str_to_write

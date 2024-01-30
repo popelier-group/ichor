@@ -258,7 +258,10 @@ class WriteFile(File, ABC):
                 f"Exception occurred while writing file '{path.absolute()}'. File was not been written/modified."
             ) from e
 
-        # if we got to here, we can safely assume that we got a string which can be written to a file
-        # even if the actual string contains wrong things it it
-        with open(path, "w") as f:
-            f.write(tmp_str)
+        if tmp_str:
+            # if we got to here, we can safely assume that we got a string which can be written to a file
+            # even if the actual string contains wrong things it it
+            with open(path, "w") as f:
+                f.write(tmp_str)
+        else:
+            raise TypeError("The contents type cannot be written to a file.")
