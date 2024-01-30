@@ -47,7 +47,7 @@ class Models(Directory, list):
     def _parse(self) -> None:
         """Parse a directory and add any `.model` files to the `Models` instance"""
         for f in self:
-            if f.suffix == Model.filetype:
+            if Model.check_path(f):
                 self.append(Model(f))
 
     def dirpattern(self, pattern):
@@ -58,7 +58,7 @@ class Models(Directory, list):
     def check_path(cls, path: Path) -> bool:
         if path.exists() and path.is_dir():
             for f in path.iterdir():
-                if f.suffix == Model.filetype:
+                if Model.check_path(f):
                     return True
         return False
 

@@ -30,11 +30,11 @@ def get_atoms_from_path(path: Path) -> "Atoms":  # noqa F821
                 return pd.gjf.atoms
 
     elif path.is_file():
-        if path.suffix == GJF.filetype:
+        if GJF.check_path(path):
             return GJF(path).atoms
-        elif path.suffix == WFN.filetype:
+        elif WFN.check_path(path):
             return WFN(path).atoms
-        elif path.suffix == Trajectory.filetype:
+        elif Trajectory.check_path(path):
             return XYZ(path).atoms
 
     raise AtomsNotFoundError(f"Could not find 'Atoms' instance from {path}")

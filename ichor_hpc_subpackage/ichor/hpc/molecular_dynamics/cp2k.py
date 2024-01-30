@@ -42,9 +42,9 @@ def submit_cp2k(
 
     input_file = Path(input_file)
 
-    if input_file.suffix == XYZ.filetype:
+    if XYZ.check_path(input_file):
         atoms = XYZ(input_file).atoms
-    elif input_file.suffix == GJF.filetype:
+    elif GJF.check_path(input_file):
         atoms = GJF(input_file).atoms
     else:
         raise ValueError(f"Unknown filetype: {input_file}")

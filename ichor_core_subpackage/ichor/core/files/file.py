@@ -55,11 +55,19 @@ class File(PathObject, ABC):
         return self.path.stem
 
     @classmethod
-    def check_path(cls, path: Path) -> bool:
+    def check_path(cls, path: Union[str, Path]) -> bool:
         """Checks the suffix of the given path matches the filetype associated with class that subclasses from File
         :param path: A Path object to check
         :return: True if the Path object has the same suffix as the class filetype, False otherwise
         """
+        path = Path(path)
+        # add check if list of possible filetypes is given
+        if isinstance(cls.filetype, list):
+            for ty_ in cls.filetype:
+                if path.suffix == ty_:
+                    return True
+            return False
+
         return cls.filetype == path.suffix
 
     def move(self, dst):

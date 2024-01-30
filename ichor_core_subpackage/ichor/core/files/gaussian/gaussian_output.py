@@ -25,7 +25,7 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
     :param path: Path object or string to the .gaussianoutput file that are Gaussian output files
     """
 
-    filetype = ".gaussianoutput"
+    filetype = [".gaussianoutput", ".gau"]
 
     def __init__(
         self,
