@@ -123,7 +123,7 @@ class AnalysisFunctions:
                 trajectory_path,
                 central_atom_name,
                 alf_dict,
-                f"{central_atom_name}_centered_trajectory.xyz",
+                xyz_output_path,
             )
 
 
