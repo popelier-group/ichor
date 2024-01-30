@@ -121,7 +121,7 @@ class File(PathObject, ABC):
 
 class ReadFile(File, ABC):
 
-    # _filetype is not needed here
+    _filetype = ""
 
     def _initialise_contents(self):
         """Initialize contents of a file to default values. This is needed in the case
@@ -209,7 +209,7 @@ class FileWriteError(Exception):
 
 class WriteFile(File, ABC):
 
-    # _filetype is not needed here
+    _filetype = ""
 
     def _set_write_defaults_if_needed(self):
         """Set default values for attributes if bool(self.attribute) evaluates to False.
