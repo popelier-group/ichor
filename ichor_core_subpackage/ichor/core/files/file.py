@@ -69,7 +69,7 @@ class File(PathObject, ABC):
         """
         path = Path(path)
         # add check if list of possible filetypes is given
-        if isinstance(cls._filetype, list):
+        if isinstance(cls._filetype, (list, tuple)):
             for ty_ in cls._filetype:
                 if path.suffix == ty_:
                     return True
