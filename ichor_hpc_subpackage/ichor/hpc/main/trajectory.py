@@ -24,6 +24,8 @@ def submit_center_trajectory_on_atom(
     :param ncores: number of cores for job, defaults to 1
     """
 
+    trajectory_path = Path(trajectory_path)
+
     text_list = []
     # make the python command that will be written in the submit script
     # it will get executed as `python -c python_code_to_execute...`
