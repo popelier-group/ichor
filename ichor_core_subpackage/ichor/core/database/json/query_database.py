@@ -131,7 +131,12 @@ def get_one_json_dir_info(json_dir: Path, id_counter=1):
     # drop=True to remove the old index col
     total_df = total_df.reset_index(drop=True)
 
-    return list(set(total_df["id"])), list(set(total_df["atom_name"])), total_df
+    return (
+        list(set(total_df["id"])),
+        list(set(total_df["atom_name"])),
+        total_df,
+        id_counter,
+    )
 
 
 def get_json_db_info(db_path):
@@ -156,21 +161,34 @@ def get_json_db_info(db_path):
 
     if contains_many_directories:
 
-        all_dfs = []
+        dfs_list = []
         all_ids = []
+
+        # id column counter
+        counter = 1
 
         # if there are many inner directories, we need to get the data out from each one
         # and make a new dataframe and group ids
         for one_dir in natsorted(Path(db_path).iterdir(), key=ignore_alpha):
 
-            ids, atom_names, partial_df = get_one_json_dir_info(one_dir)
-            all_dfs.append(partial_df)
+            # modify the counter, so that the next directory does not begin with the same id
+            ids, atom_names, partial_df, counter = get_one_json_dir_info(
+                one_dir, counter
+            )
+            dfs_list.append(partial_df)
             all_ids.extend(ids)
 
-        all_dfs = pd.concat(all_dfs, axis=1)
+        all_dfs = pd.concat(dfs_list)
+        # reset the index column so that it starts at 1
+        # drop=True to remove the old index col
+        all_dfs = all_dfs.reset_index(drop=True)
 
+        # atom names should be the same for all directories
         return all_ids, atom_names, all_dfs
 
     else:
 
-        return get_one_json_dir_info(db_path)
+        # do not need last column
+        all_ids, atom_names, all_dfs, _ = get_one_json_dir_info(db_path)
+
+        return all_ids, atom_names, all_dfs
