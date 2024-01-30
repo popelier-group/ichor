@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 from ichor.core.atoms import ALF
 from ichor.hpc.global_variables import SCRIPT_NAMES
@@ -9,7 +9,7 @@ from ichor.hpc.useful_functions.submit_free_flow_python_on_compute import (
 
 
 def submit_center_trajectory_on_atom(
-    trajectory_path: Path,
+    trajectory_path: Union[str, Path],
     central_atom_name: str,
     alf_dict: Dict[str, ALF],
     xyz_output_path="ALF_centered_trajectory.xyz",
