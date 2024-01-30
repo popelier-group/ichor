@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
@@ -16,6 +15,9 @@ class PandoraCCSDmod(Enum):
 
 
 class PandoraInput(HasAtoms, ReadFile, WriteFile):
+
+    filetype = ".pandora"
+
     def __init__(
         self,
         path: Path,
@@ -38,10 +40,6 @@ class PandoraInput(HasAtoms, ReadFile, WriteFile):
         self.morfi_grid_angular_h: int = morfi_grid_angular_h
         self.method = method
         self.basis_set = basis_set
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".pandora"
 
     def _read_file(self):
         with open(self.path, "r") as f:

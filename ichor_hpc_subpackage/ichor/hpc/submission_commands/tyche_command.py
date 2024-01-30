@@ -4,6 +4,7 @@ from typing import List
 import ichor.hpc.global_variables
 
 from ichor.core.common.functools import classproperty
+from ichor.core.files import GaussianOutput
 from ichor.hpc.global_variables import get_param_from_config
 from ichor.hpc.submission_command import SubmissionCommand
 from ichor.hpc.submission_commands import GaussianCommand
@@ -69,7 +70,7 @@ class TycheCommand(SubmissionCommand):
 
         freq_param = self.freq_param.absolute()
         g09_input = self.g09_input.absolute()
-        gau_output = g09_input.with_suffix(".gau")
+        gau_output = g09_input.with_suffix(GaussianOutput.filetype)
         cmd = ""
         cmd += f"pushd {g09_input.parent}\n"
         cmd += f"{GaussianCommand(g09_input).repr([str(g09_input), str(gau_output)])}\n"

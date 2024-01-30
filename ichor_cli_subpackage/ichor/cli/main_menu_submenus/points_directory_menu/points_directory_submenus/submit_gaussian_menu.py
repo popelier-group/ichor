@@ -7,12 +7,12 @@ from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
 from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    single_or_many_points_directories,
     user_input_bool,
     user_input_free_flow,
     user_input_int,
 )
 from ichor.core.files import PointsDirectory
+from ichor.core.useful_functions import single_or_many_points_directories
 from ichor.hpc.main import submit_points_directory_to_gaussian
 
 SUBMIT_GAUSSIAN_MENU_DESCRIPTION = MenuDescription(
@@ -100,7 +100,9 @@ class SubmitGaussianFunctions:
         )
 
         is_parent_directory_to_many_points_directories = (
-            single_or_many_points_directories()
+            single_or_many_points_directories(
+                ichor.cli.global_menu_variables.SELECTED_POINTS_DIRECTORY_PATH
+            )
         )
 
         # if containing many PointsDirectory

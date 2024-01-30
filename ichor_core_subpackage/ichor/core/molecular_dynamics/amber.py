@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Union
 
 import numpy as np
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 
 
@@ -60,6 +59,8 @@ class AmberMDIn(WriteFile, ReadFile):
     :param ln_gamma: The collision frequency in picoseconds, defaults to 0.5
     """
 
+    filetype = ".in"
+
     def __init__(
         self,
         path: Path,
@@ -88,10 +89,6 @@ class AmberMDIn(WriteFile, ReadFile):
         self.periodic_boundary_condition = periodic_boundary_condition
         self.thermostat = thermostat
         self.ln_gamma = ln_gamma
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".in"
 
     def __set_write_defaults_if_needed(self):
         """
@@ -145,39 +142,41 @@ class AmberMDIn(WriteFile, ReadFile):
                     self.ln_gamma = float(line.split("=")[-1])
 
     def _write_file(self, path: Path):
-        with open(path, "w") as f:
-            f.write("Production\n")
-            f.write(" &cntrl\n")
-            f.write("  imin=0,\n")  # not running minimisation
-            f.write("  ntx=1,\n")  # read input coordinates only
-            f.write("  irest=0,\n")  # not restarting simulation
-            f.write(f"  nstlim={self.nsteps},\n")  # number of time steps
-            f.write(f"  dt={self.dt},\n")  # time step in picoseconds
-            f.write(f"  ntf={self.force_evaluation.value},\n")  # force constraint
-            f.write(f"  ntc={self.bond_constraint.value},\n")  # bond contraint
-            f.write(f"  temp0={self.temperature},\n")  # temperature
-            f.write("  ntpr=1,\n")  # energy info printed to mdout every ntpr steps
-            # coordinate info printed to mdout every ntwx steps
-            f.write(f"  ntwx={self.write_coordinates_every},\n")
-            # velocity info printed to mdout every ntwv steps
-            f.write(f"  ntwv={self.write_velocities_every},\n")
-            # force info printed to mdout every ntwf steps
-            f.write(f"  ntwf={self.write_forces_every},\n")
-            # output formatting, setting to 0 means that a human readable
-            # file is written (not a NETCDF format which is binary)
-            f.write("  ioutfm=0,\n")
-            f.write("  cut=999.0,\n")  # nonbonded cutoff
-            f.write(
-                f"  ntb={self.periodic_boundary_condition.value},\n"
-            )  # periodic boundary conditions
-            f.write("  ntp=0,\n")  # pressure control
-            f.write(f"  ntt={self.thermostat.value},\n")  # thermostat
-            f.write(
-                f"  gamma_ln={self.ln_gamma},\n"
-            )  # ln(gamma) for the langevin thermostat
-            f.write("  tempi=0.0,\n")  # temperature to initialise velocities
-            f.write("  ig=-1\n")  # random seed (-1 randomises seed)
-            f.write(" /\n")
+
+        str_to_write = ""
+
+        str_to_write += "Production\n"
+        str_to_write += " &cntrl\n"
+        str_to_write += "  imin=0,\n"  # not running minimisation
+        str_to_write += "  ntx=1,\n"  # read input coordinates only
+        str_to_write += "  irest=0,\n"  # not restarting simulation
+        str_to_write += f"  nstlim={self.nsteps},\n"  # number of time steps
+        str_to_write += f"  dt={self.dt},\n"  # time step in picoseconds
+        str_to_write += f"  ntf={self.force_evaluation.value},\n"  # force constraint
+        str_to_write += f"  ntc={self.bond_constraint.value},\n"  # bond contraint
+        str_to_write += f"  temp0={self.temperature},\n"  # temperature
+        str_to_write += "  ntpr=1,\n"  # energy info printed to mdout every ntpr steps
+        # coordinate info printed to mdout every ntwx steps
+        str_to_write += f"  ntwx={self.write_coordinates_every},\n"
+        # velocity info printed to mdout every ntwv steps
+        str_to_write += f"  ntwv={self.write_velocities_every},\n"
+        # force info printed to mdout every ntwf steps
+        str_to_write += f"  ntwf={self.write_forces_every},\n"
+        # output formatting, setting to 0 means that a human readable
+        # file is written (not a NETCDF format which is binary)
+        str_to_write += "  ioutfm=0,\n"
+        str_to_write += "  cut=999.0,\n"  # nonbonded cutoff
+        str_to_write += f"  ntb={self.periodic_boundary_condition.value},\n"  # periodic boundary conditions
+        str_to_write += "  ntp=0,\n"  # pressure control
+        str_to_write += f"  ntt={self.thermostat.value},\n"  # thermostat
+        str_to_write += (
+            f"  gamma_ln={self.ln_gamma},\n"  # ln(gamma) for the langevin thermostat
+        )
+        str_to_write += "  tempi=0.0,\n"  # temperature to initialise velocities
+        str_to_write += "  ig=-1\n"  # random seed (-1 randomises seed)
+        str_to_write += " /\n"
+
+        return str_to_write
 
 
 def write_mdin(

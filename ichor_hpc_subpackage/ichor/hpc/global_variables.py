@@ -1,4 +1,5 @@
 import platform
+import warnings
 
 from pathlib import Path
 
@@ -12,7 +13,7 @@ from ichor.hpc.log import setup_logger
 from ichor.hpc.submission_script.script_names import ScriptNames
 from ichor.hpc.useful_functions import get_current_python_environment_path, init_machine
 
-
+# added this so that  sphinx does not execute parts of the code when reading the files
 try:
     __building_docs__ = __sphinx_build__
 except NameError:
@@ -61,8 +62,8 @@ def initialize_config(config_path):
 ICHOR_CONFIG_PATH: Path = Path.home() / "ichor_config.yaml"
 # check that config file exists
 
-if not ICHOR_CONFIG_PATH.exists():
-    if not __building_docs__:
+if not __building_docs__:
+    if not ICHOR_CONFIG_PATH.exists():
         raise MissingIchorConfig(
             "The ichor_config.yaml file is not found in the home directory. Please add it in order to use ichor.hpc"
         )
@@ -73,25 +74,47 @@ else:
     ICHOR_CONFIG = None
 
 # the MACHINE will be a key from the top layer of the config file
+# if it not found, it will be None
 MACHINE: str = init_machine(platform.node(), ICHOR_CONFIG)
-if not MACHINE:
-    if not __building_docs__:
-        raise ValueError("The current machine is not defined in the config file.")
+if not __building_docs__:
+    if not MACHINE:
+        warnings.warn(
+            "The current machine is not defined in the ichor_config.yaml file."
+        )
+
+# do not raise error that machine is not defined here, because it could be running on local
+# if not __building_docs__:
+# if not MACHINE:
+#         raise ValueError("The current machine is not defined in the config file.")
 
 # make parallel environment variables to run jobs on multiple cores
 PARALLEL_ENVIRONMENT = ParallelEnvironment()
 # if you do not specify parallel environments in config, then error out with KeyError
 # make the possible parallel environments for the current machine which ichor is launched on
 if not __building_docs__:
-    try:
-        for p_env_name, values in ICHOR_CONFIG[MACHINE]["hpc"][
-            "parallel_environments"
-        ].items():
-            PARALLEL_ENVIRONMENT[p_env_name] = values
-    except KeyError:
-        raise KeyError(
-            "The parallel environments are not defined for the current machine."
+    if MACHINE:
+        try:
+            for p_env_name, values in ICHOR_CONFIG[MACHINE]["hpc"][
+                "parallel_environments"
+            ].items():
+                PARALLEL_ENVIRONMENT[p_env_name] = values
+        # if parallel_environment is not found, but machine is defined
+        except KeyError:
+            warnings.warn(
+                "The parallel environment variables are not defined in the ichor_config.yaml file."
+            )
+        # if the machine is not defined (and so parallel environment is also not defined)
+        except TypeError:
+            warnings.warn(
+                "The current machine is not defined in the ichor_config.yaml file."
+            )
+    else:
+        warnings.warn(
+            "The current machine is not defined in the ichor_config.yaml file."
         )
+        # raise KeyError(
+        #     "The parallel environments are not defined for the current machine."
+        # )
 
 # default file structure to be used for file handling
 FILE_STRUCTURE = FileTree()

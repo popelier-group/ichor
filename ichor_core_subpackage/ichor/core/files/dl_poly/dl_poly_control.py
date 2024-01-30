@@ -11,6 +11,8 @@ class DlPolyControl(WriteFile):
 
     # https://www.ehu.eus/sgi/ARCHIVOS/dlpoly_man.pdf , section 5.1.1
 
+    filetype = "_not_needed"
+
     def __init__(
         self,
         path: Path,

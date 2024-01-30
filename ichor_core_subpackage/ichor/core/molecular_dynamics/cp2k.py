@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Optional
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
@@ -24,6 +23,8 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
     :param n_molecules: Number of molecules, defaults to 1
     :param box_size: Box size of simulation, defaults to 25.0
     """
+
+    filetype = ".inp"
 
     def __init__(
         self,
@@ -56,10 +57,6 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
         self.solver: str = solver
         self.n_molecules: int = n_molecules
         self.box_size: float = box_size
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".inp"
 
     def _read_file(self):
         self.atoms = Atoms()
@@ -95,211 +92,187 @@ class CP2KInput(ReadFile, WriteFile, HasAtoms):
 
     def _write_file(self, path: Path):
         self.atoms.centre()
-        with open(path, "w") as f:
-            f.write("&GLOBAL\n")
-            f.write(
-                "  ! the project name is made part of most output files... useful to keep order\n"
+
+        write_str = ""
+
+        write_str += "&GLOBAL\n"
+        write_str += "  ! the project name is made part of most output files... useful to keep order\n"
+        write_str += f"  PROJECT {self.project_name}\n"
+        write_str += "  ! various runtypes (energy, geo_opt, etc.) available.\n"
+        write_str += "  RUN_TYPE MD\n"
+        write_str += "\n"
+        write_str += "  IOLEVEL LOW\n"
+        write_str += "&END GLOBAL\n"
+        write_str += "\n"
+        write_str += "&FORCE_EVAL\n"
+        write_str += "  ! the electronic structure part of CP2K is named Quickstep\n"
+        write_str += "  METHOD Quickstep\n"
+        write_str += "  &DFT\n"
+        write_str += (
+            "    ! basis sets and pseudopotential files can be found in cp2k/data\n"
+        )
+        write_str += f"    BASIS_SET_FILE_NAME {self.datafile_location / 'BASIS_SET'}\n"
+        write_str += (
+            f"    POTENTIAL_FILE_NAME {self.datafile_location / 'GTH_POTENTIALS'}\n"
+        )
+        write_str += "\n"
+        write_str += "    ! Charge and multiplicity\n"
+        write_str += f"    CHARGE {self.molecular_charge}\n"
+        write_str += f"    MULTIPLICITY {self.spin_multiplicity}\n"
+        write_str += "\n"
+        write_str += "    &MGRID\n"
+        write_str += "      ! PW cutoff ... depends on the element (basis) too small cutoffs lead to the eggbox effect.\n"  # noqa E501
+        write_str += "      ! certain calculations (e.g. geometry optimization, vibrational frequencies,\n"
+        write_str += "      ! NPT and cell optimizations, need higher cutoffs)\n"
+        write_str += "      CUTOFF [Ry] 400\n"  # TODO: Turn this into variable
+        write_str += "    &END MGRID\n"
+        write_str += "\n"
+        write_str += "    &QS\n"
+        write_str += "      ! use the GPW method (i.e. pseudopotential based calculations with the Gaussian and Plane Waves scheme).\n"  # noqa E501
+        write_str += "      METHOD GPW\n"
+        write_str += "      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n"  # noqa E501
+        write_str += "      ! sets reasonable values for all other thresholds.\n"
+        write_str += "      EPS_DEFAULT 1.0E-10\n"
+        write_str += (
+            "      ! used for MD, the method used to generate the initial guess.\n"
+        )
+        write_str += "      EXTRAPOLATION ASPC\n"
+        write_str += "    &END QS\n"
+        write_str += "\n"
+        write_str += "    &POISSON\n"
+        write_str += "      ! PERIODIC XYZ is the default, gas phase systems should have 'NONE' and a wavelet solver\n"
+        if self.solver == "periodic":
+            write_str += "      PERIODIC XYZ\n"
+        else:
+            write_str += "      PERIODIC NONE\n"
+        write_str += f"      POISSON_SOLVER {self.solver.upper()}\n"
+        write_str += "    &END POISSON\n"
+        write_str += "\n"
+        write_str += "    ! use the OT METHOD for robust and efficient SCF, suitable for all non-metallic systems.\n"
+        write_str += "    &SCF\n"
+        write_str += "      SCF_GUESS ATOMIC ! can be used to RESTART an interrupted calculation\n"
+        write_str += "      MAX_SCF 30\n"
+        write_str += "      EPS_SCF 1.0E-6 ! accuracy of the SCF procedure typically 1.0E-6 - 1.0E-7\n"
+        write_str += "      &OT\n"
+        write_str += (
+            "        ! an accurate preconditioner suitable also for larger systems\n"
+        )
+        write_str += "        PRECONDITIONER FULL_SINGLE_INVERSE\n"
+        write_str += "        ! the most robust choice (DIIS might sometimes be faster, but not as stable).\n"
+        write_str += "        MINIMIZER DIIS\n"
+        write_str += "      &END OT\n"
+        write_str += "      &OUTER_SCF ! repeat the inner SCF cycle 10 times\n"
+        write_str += "        MAX_SCF 10\n"
+        write_str += "        EPS_SCF 1.0E-6 ! must match the above\n"
+        write_str += "      &END\n"
+        write_str += "\n"
+        write_str += "      &PRINT\n"
+        write_str += "        &RESTART OFF\n"  # Turned off for optimisation purposes, may be a good idea to have this as toggleable # noqa E501
+        write_str += "        &END\n"
+        write_str += "      &END PRINT\n"
+        write_str += "    &END SCF\n"
+        write_str += "\n"
+        write_str += "    ! specify the exchange and correlation treatment\n"
+        write_str += "    &XC\n"
+        write_str += f"      &XC_FUNCTIONAL {self.method}\n"
+        write_str += "      &END XC_FUNCTIONAL\n"
+        write_str += (
+            "      ! adding Grimme's D3 correction (by default without C9 terms)\n"
+        )
+        write_str += f"      &VDW_POTENTIAL {'OFF' if self.n_molecules == 1 else ''}\n"
+        write_str += "        POTENTIAL_TYPE PAIR_POTENTIAL\n"
+        write_str += "        &PAIR_POTENTIAL\n"
+        write_str += (
+            f"          PARAMETER_FILE_NAME {self.datafile_location / 'dftd3.dat'}\n"
+        )
+        write_str += "          TYPE DFTD3\n"
+        write_str += f"          REFERENCE_FUNCTIONAL {self.method}\n"
+        write_str += "          R_CUTOFF [angstrom] 16\n"
+        write_str += "        &END PAIR_POTENTIAL\n"
+        write_str += "      &END VDW_POTENTIAL\n"
+        write_str += "    &END XC\n"
+        write_str += "  &END DFT\n"
+        write_str += "\n"
+        write_str += "  ! description of the system\n"
+        write_str += "  &SUBSYS\n"
+        write_str += "    &CELL\n"
+        write_str += (
+            "      ! unit cells that are orthorhombic are more efficient with CP2K\n"
+        )
+        write_str += (
+            f"      ABC [angstrom] {self.box_size} {self.box_size} {self.box_size}\n"
+        )
+        if self.solver == "wavelet":
+            write_str += "      PERIODIC NONE\n"
+        write_str += "    &END CELL\n"
+        write_str += "\n"
+        write_str += "    ! atom coordinates can be in the &COORD section,\n"
+        write_str += "    ! or provided as an external file.\n"
+        write_str += "    &COORD\n"
+        for atom in self.atoms:
+            write_str += (
+                f"      {atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
             )
-            f.write(f"  PROJECT {self.project_name}\n")
-            f.write("  ! various runtypes (energy, geo_opt, etc.) available.\n")
-            f.write("  RUN_TYPE MD\n")
-            f.write("\n")
-            f.write("  IOLEVEL LOW\n")
-            f.write("&END GLOBAL\n")
-            f.write("\n")
-            f.write("&FORCE_EVAL\n")
-            f.write("  ! the electronic structure part of CP2K is named Quickstep\n")
-            f.write("  METHOD Quickstep\n")
-            f.write("  &DFT\n")
-            f.write(
-                "    ! basis sets and pseudopotential files can be found in cp2k/data\n"
-            )
-            f.write(f"    BASIS_SET_FILE_NAME {self.datafile_location / 'BASIS_SET'}\n")
-            f.write(
-                f"    POTENTIAL_FILE_NAME {self.datafile_location / 'GTH_POTENTIALS'}\n"
-            )
-            f.write("\n")
-            f.write("    ! Charge and multiplicity\n")
-            f.write(f"    CHARGE {self.molecular_charge}\n")
-            f.write(f"    MULTIPLICITY {self.spin_multiplicity}\n")
-            f.write("\n")
-            f.write("    &MGRID\n")
-            f.write(
-                "      ! PW cutoff ... depends on the element (basis) too small cutoffs lead to the eggbox effect.\n"
-            )
-            f.write(
-                "      ! certain calculations (e.g. geometry optimization, vibrational frequencies,\n"
-            )
-            f.write("      ! NPT and cell optimizations, need higher cutoffs)\n")
-            f.write("      CUTOFF [Ry] 400\n")  # TODO: Turn this into variable
-            f.write("    &END MGRID\n")
-            f.write("\n")
-            f.write("    &QS\n")
-            f.write(
-                "      ! use the GPW method (i.e. pseudopotential based calculations with the Gaussian and Plane Waves scheme).\n"  # noqa E501
-            )
-            f.write("      METHOD GPW\n")
-            f.write(
-                "      ! default threshold for numerics ~ roughly numerical accuracy of the total energy per electron,\n"  # noqa E501
-            )
-            f.write("      ! sets reasonable values for all other thresholds.\n")
-            f.write("      EPS_DEFAULT 1.0E-10\n")
-            f.write(
-                "      ! used for MD, the method used to generate the initial guess.\n"
-            )
-            f.write("      EXTRAPOLATION ASPC\n")
-            f.write("    &END QS\n")
-            f.write("\n")
-            f.write("    &POISSON\n")
-            f.write(
-                "      ! PERIODIC XYZ is the default, gas phase systems should have 'NONE' and a wavelet solver\n"
-            )
-            if self.solver == "periodic":
-                f.write("      PERIODIC XYZ\n")
-            else:
-                f.write("      PERIODIC NONE\n")
-            f.write(f"      POISSON_SOLVER {self.solver.upper()}\n")
-            f.write("    &END POISSON\n")
-            f.write("\n")
-            f.write(
-                "    ! use the OT METHOD for robust and efficient SCF, suitable for all non-metallic systems.\n"
-            )
-            f.write("    &SCF\n")
-            f.write(
-                "      SCF_GUESS ATOMIC ! can be used to RESTART an interrupted calculation\n"
-            )
-            f.write("      MAX_SCF 30\n")
-            f.write(
-                "      EPS_SCF 1.0E-6 ! accuracy of the SCF procedure typically 1.0E-6 - 1.0E-7\n"
-            )
-            f.write("      &OT\n")
-            f.write(
-                "        ! an accurate preconditioner suitable also for larger systems\n"
-            )
-            f.write("        PRECONDITIONER FULL_SINGLE_INVERSE\n")
-            f.write(
-                "        ! the most robust choice (DIIS might sometimes be faster, but not as stable).\n"
-            )
-            f.write("        MINIMIZER DIIS\n")
-            f.write("      &END OT\n")
-            f.write("      &OUTER_SCF ! repeat the inner SCF cycle 10 times\n")
-            f.write("        MAX_SCF 10\n")
-            f.write("        EPS_SCF 1.0E-6 ! must match the above\n")
-            f.write("      &END\n")
-            f.write("\n")
-            f.write("      &PRINT\n")
-            f.write(
-                "        &RESTART OFF\n"
-            )  # Turned off for optimisation purposes, may be a good idea to have this as toggleable
-            f.write("        &END\n")
-            f.write("      &END PRINT\n")
-            f.write("    &END SCF\n")
-            f.write("\n")
-            f.write("    ! specify the exchange and correlation treatment\n")
-            f.write("    &XC\n")
-            f.write(f"      &XC_FUNCTIONAL {self.method}\n")
-            f.write("      &END XC_FUNCTIONAL\n")
-            f.write(
-                "      ! adding Grimme's D3 correction (by default without C9 terms)\n"
-            )
-            f.write(f"      &VDW_POTENTIAL {'OFF' if self.n_molecules == 1 else ''}\n")
-            f.write("        POTENTIAL_TYPE PAIR_POTENTIAL\n")
-            f.write("        &PAIR_POTENTIAL\n")
-            f.write(
-                f"          PARAMETER_FILE_NAME {self.datafile_location / 'dftd3.dat'}\n"
-            )
-            f.write("          TYPE DFTD3\n")
-            f.write(f"          REFERENCE_FUNCTIONAL {self.method}\n")
-            f.write("          R_CUTOFF [angstrom] 16\n")
-            f.write("        &END PAIR_POTENTIAL\n")
-            f.write("      &END VDW_POTENTIAL\n")
-            f.write("    &END XC\n")
-            f.write("  &END DFT\n")
-            f.write("\n")
-            f.write("  ! description of the system\n")
-            f.write("  &SUBSYS\n")
-            f.write("    &CELL\n")
-            f.write(
-                "      ! unit cells that are orthorhombic are more efficient with CP2K\n"
-            )
-            f.write(
-                f"      ABC [angstrom] {self.box_size} {self.box_size} {self.box_size}\n"
-            )
-            if self.solver == "wavelet":
-                f.write("      PERIODIC NONE\n")
-            f.write("    &END CELL\n")
-            f.write("\n")
-            f.write("    ! atom coordinates can be in the &COORD section,\n")
-            f.write("    ! or provided as an external file.\n")
-            f.write("    &COORD\n")
-            for atom in self.atoms:
-                f.write(
-                    f"      {atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
-                )
-            f.write("    &END COORD\n")
-            f.write("\n")
-            f.write("    ! keep atoms away from box borders,\n")
-            f.write("    ! a requirement for the wavelet Poisson solver\n")
-            f.write("    &TOPOLOGY\n")
-            f.write("      &CENTER_COORDINATES\n")
-            f.write("      &END\n")
-            f.write("    &END TOPOLOGY\n")
-            f.write("\n")
-            for atom in self.atoms:
-                f.write(f"    &KIND {atom.type.upper()}\n")
-                f.write(f"      BASIS_SET {self.basis_set}\n")
-                f.write(f"      POTENTIAL GTH-{self.method}-q{atom.valence}\n")
-                f.write("    &END KIND\n")
-            f.write("  &END SUBSYS\n")
-            f.write("&END FORCE_EVAL\n")
-            f.write("\n")
-            f.write(
-                "! how to propagate the system, selection via RUN_TYPE in the &GLOBAL section\n"
-            )
-            f.write("&MOTION\n")
-            f.write("  &GEO_OPT\n")
-            f.write(
-                "    OPTIMIZER LBFGS ! Good choice for 'small' systems (use LBFGS for large systems)\n"
-            )
-            f.write("    MAX_ITER  100\n")
-            f.write("    MAX_DR    [bohr] 0.003 ! adjust target as needed\n")
-            f.write("    &BFGS\n")
-            f.write("    &END BFGS\n")
-            f.write("  &END GEO_OPT\n")
-            f.write("  &MD\n")
-            f.write(
-                "    ENSEMBLE NVT  ! sampling the canonical ensemble, accurate properties might need NVE\n"
-            )
-            f.write(f"    TEMPERATURE [K] {self.temperature}\n")
-            f.write(
-                "    TIMESTEP [fs] 1.0\n"
-            )  # TODO: Turn this into user defined variable
-            f.write(f"    STEPS {self.nsteps}\n")
-            f.write("    &THERMOSTAT\n")
-            f.write("      TYPE NOSE\n")
-            f.write("      REGION GLOBAL\n")
-            f.write("      &NOSE\n")
-            f.write("        TIMECON 50.\n")
-            f.write("      &END NOSE\n")
-            f.write("    &END THERMOSTAT\n")
-            f.write("  &END MD\n")
-            f.write("\n")
-            f.write("  &PRINT\n")
-            f.write("    &TRAJECTORY\n")
-            f.write("      &EACH\n")
-            f.write("        MD 1\n")
-            f.write("      &END EACH\n")
-            f.write("    &END TRAJECTORY\n")
-            f.write("    &VELOCITIES OFF\n")
-            f.write("    &END VELOCITIES\n")
-            f.write("    &FORCES OFF\n")
-            f.write("    &END FORCES\n")
-            f.write("    &RESTART OFF\n")
-            f.write("    &END RESTART\n")
-            f.write("    &RESTART_HISTORY OFF\n")
-            f.write("    &END RESTART_HISTORY\n")
-            f.write("  &END PRINT\n")
-            f.write("&END MOTION\n")
+        write_str += "    &END COORD\n"
+        write_str += "\n"
+        write_str += "    ! keep atoms away from box borders,\n"
+        write_str += "    ! a requirement for the wavelet Poisson solver\n"
+        write_str += "    &TOPOLOGY\n"
+        write_str += "      &CENTER_COORDINATES\n"
+        write_str += "      &END\n"
+        write_str += "    &END TOPOLOGY\n"
+        write_str += "\n"
+        for atom in self.atoms:
+            write_str += f"    &KIND {atom.type.upper()}\n"
+            write_str += f"      BASIS_SET {self.basis_set}\n"
+            write_str += f"      POTENTIAL GTH-{self.method}-q{atom.valence}\n"
+            write_str += "    &END KIND\n"
+        write_str += "  &END SUBSYS\n"
+        write_str += "&END FORCE_EVAL\n"
+        write_str += "\n"
+        write_str += "! how to propagate the system, selection via RUN_TYPE in the &GLOBAL section\n"
+        write_str += "&MOTION\n"
+        write_str += "  &GEO_OPT\n"
+        write_str += "    OPTIMIZER LBFGS ! Good choice for 'small' systems (use LBFGS for large systems)\n"
+        write_str += "    MAX_ITER  100\n"
+        write_str += "    MAX_DR    [bohr] 0.003 ! adjust target as needed\n"
+        write_str += "    &BFGS\n"
+        write_str += "    &END BFGS\n"
+        write_str += "  &END GEO_OPT\n"
+        write_str += "  &MD\n"
+        write_str += "    ENSEMBLE NVT  ! sampling the canonical ensemble, accurate properties might need NVE\n"
+        write_str += f"    TEMPERATURE [K] {self.temperature}\n"
+        write_str += (
+            "    TIMESTEP [fs] 1.0\n"  # TODO: Turn this into user defined variable
+        )
+        write_str += f"    STEPS {self.nsteps}\n"
+        write_str += "    &THERMOSTAT\n"
+        write_str += "      TYPE NOSE\n"
+        write_str += "      REGION GLOBAL\n"
+        write_str += "      &NOSE\n"
+        write_str += "        TIMECON 50.\n"
+        write_str += "      &END NOSE\n"
+        write_str += "    &END THERMOSTAT\n"
+        write_str += "  &END MD\n"
+        write_str += "\n"
+        write_str += "  &PRINT\n"
+        write_str += "    &TRAJECTORY\n"
+        write_str += "      &EACH\n"
+        write_str += "        MD 1\n"
+        write_str += "      &END EACH\n"
+        write_str += "    &END TRAJECTORY\n"
+        write_str += "    &VELOCITIES OFF\n"
+        write_str += "    &END VELOCITIES\n"
+        write_str += "    &FORCES OFF\n"
+        write_str += "    &END FORCES\n"
+        write_str += "    &RESTART OFF\n"
+        write_str += "    &END RESTART\n"
+        write_str += "    &RESTART_HISTORY OFF\n"
+        write_str += "    &END RESTART_HISTORY\n"
+        write_str += "  &END PRINT\n"
+        write_str += "&END MOTION\n"
+
+        return write_str
 
 
 def write_cp2k_input(

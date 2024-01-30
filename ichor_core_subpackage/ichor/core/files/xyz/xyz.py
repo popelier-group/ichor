@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
@@ -20,13 +19,11 @@ class XYZ(HasAtoms, ReadFile, WriteFile, File):
         with the given Atoms will be written to the given Path.
     """
 
+    filetype = ".xyz"
+
     def __init__(self, path: Union[Path, str], atoms: Optional[Atoms] = None):
         File.__init__(self, path)
         self.atoms = atoms or FileContents
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".xyz"
 
     def _read_file(self):
         """Read a .xyz file and constructs the `self.atoms` attribute which is an instance of `Atoms`"""

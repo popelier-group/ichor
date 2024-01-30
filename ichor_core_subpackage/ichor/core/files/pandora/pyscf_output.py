@@ -1,9 +1,7 @@
 from pathlib import Path
 
-from ichor.core.common.functools import classproperty
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.gaussian import WFN
-from ichor.core.files.optional_file import OptionalFile, OptionalPath
 
 
 class MorfiWFN(WFN):
@@ -13,12 +11,9 @@ class MorfiWFN(WFN):
 
 
 class PySCFDirectory(AnnotatedDirectory):
-    morfi_wfn: OptionalPath[MorfiWFN] = OptionalFile
-    aimall_wfn: OptionalPath[WFN] = OptionalFile
 
-    @classproperty
-    def dirname(self) -> str:
-        return "pyscf"
+    dirname = "pyscf"
+    contents = {"morfi_wfn": MorfiWFN, "aimall_wfn": WFN}
 
     @classmethod
     def check_path(cls, path: Path) -> bool:

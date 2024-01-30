@@ -1,8 +1,11 @@
+from dataclasses import dataclass
+
 from consolemenu.items import FunctionItem
 from ichor.cli.console_menu import add_items_to_menu, ConsoleMenu
 from ichor.cli.menu_description import MenuDescription
+
+from ichor.cli.menu_options import MenuOptions
 from ichor.cli.useful_functions import (
-    bool_to_str,
     user_input_bool,
     user_input_free_flow,
     user_input_path,
@@ -22,6 +25,11 @@ analysis_menu = ConsoleMenu(
     epilogue_text=ANALYSIS_MENU_DESCRIPTION.epilogue_description_text,
     show_exit_option=ANALYSIS_MENU_DESCRIPTION.show_exit_option,
 )
+
+# TODO: possibly make this be read from a file
+ANALYSIS_DATABASE_MENU_DEFAULTS = {
+    "default_submit_on_compute": True,
+}
 
 
 def is_atom_name_in_atom_names(atom_name: str, atom_names: list) -> bool:
@@ -50,6 +58,19 @@ def ask_user_input_for_atom_name(
             return atom_name.upper()
 
 
+# dataclass used to store values for SubmitAIMALLMenu
+@dataclass
+class SubmitDatabaseMenuOptions(MenuOptions):
+
+    selected_submit_on_compute: bool
+
+
+# initialize dataclass for storing information for menu
+analysis_menu_options = SubmitDatabaseMenuOptions(
+    *ANALYSIS_DATABASE_MENU_DEFAULTS.values()
+)
+
+
 class AnalysisFunctions:
     @staticmethod
     def give_xyz_file_and_center_trajectory_on_atom():
@@ -59,8 +80,6 @@ class AnalysisFunctions:
         After that it writes out a new file that is centered
         on the given ALF.
         """
-
-        default_submit_on_compute = False
 
         trajectory_path = user_input_path("Enter path to xyz: ")
 
@@ -83,10 +102,9 @@ class AnalysisFunctions:
         }
 
         submit_on_compute = user_input_bool(
-            f"Submit to compute node (yes/no), default {bool_to_str(default_submit_on_compute)}: "
+            "Submit to compute node (yes/no): ",
+            analysis_menu_options.selected_submit_on_compute,
         )
-        if submit_on_compute is None:
-            submit_on_compute = default_submit_on_compute
 
         xyz_output_path = (
             f"{central_atom_name}_{x_axis_atom_name}_{xy_plane_atom_name}_centered.xyz"
@@ -105,7 +123,7 @@ class AnalysisFunctions:
                 trajectory_path,
                 central_atom_name,
                 alf_dict,
-                f"{central_atom_name}_centered_trajectory.xyz",
+                xyz_output_path,
             )
 
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import IO, Optional
+from typing import Optional
 
 import numpy as np
 
@@ -69,7 +69,7 @@ class Kernel(ABC):
         return KernelProd(self, other)
 
     @abstractmethod
-    def write(self, f: IO):
+    def write_str(self):
         pass
 
 
@@ -86,10 +86,15 @@ class CompositeKernel(Kernel, ABC):
     def nkernel(self) -> int:
         return self.k1.nkernel + self.k2.nkernel
 
-    def write(self, f: IO):
-        self.k1.write(f)
-        f.write("\n")
-        self.k2.write(f)
+    def write_str(self) -> str:
+        """Used to write out kernel info to model file"""
+        str_to_write = ""
+
+        str_to_write += self.k1.write_str()
+        str_to_write += "\n"
+        str_to_write += self.k2.write_str()
+
+        return str_to_write
 
 
 class KernelSum(CompositeKernel):

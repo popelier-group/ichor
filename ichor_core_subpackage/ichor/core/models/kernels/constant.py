@@ -1,4 +1,4 @@
-from typing import IO, Optional
+from typing import Optional
 
 import numpy as np
 from ichor.core.models.kernels.kernel import Kernel
@@ -25,9 +25,14 @@ class ConstantKernel(Kernel):
     def R(self, x):
         return np.full((len(x), len(x)), self.value)
 
-    def write(self, f: IO):
-        f.write(f"[kernel.{self.name}]\n")
-        f.write("type constant\n")
-        f.write(f"number_of_dimensions {len(self.active_dims)}\n")
-        f.write(f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n")
-        f.write(f"value {self.value}\n")
+    def write_str(self) -> str:
+
+        str_to_wrte = ""
+
+        str_to_wrte += f"[kernel.{self.name}]\n"
+        str_to_wrte += "type constant\n"
+        str_to_wrte += f"number_of_dimensions {len(self.active_dims)}\n"
+        str_to_wrte += f"active_dimensions {' '.join(map(str, self.active_dims+1))}\n"
+        str_to_wrte += f"value {self.value}\n"
+
+        return str_to_wrte

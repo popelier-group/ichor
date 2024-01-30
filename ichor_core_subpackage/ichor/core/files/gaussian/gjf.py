@@ -3,11 +3,10 @@ from typing import List, NamedTuple, Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.constants import GAUSSIAN_METHODS
-from ichor.core.common.functools import classproperty
 
 # from enum import Enum
 from ichor.core.common.types.enum import Enum
-from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
+from ichor.core.files.file import FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
 
 
@@ -24,7 +23,7 @@ class RouteCard(NamedTuple):
     keywords: List[str]
 
 
-class GJF(ReadFile, WriteFile, File, HasAtoms):
+class GJF(ReadFile, WriteFile, HasAtoms):
     """
 
     Wraps around a .gjf file that is used as input to Gaussian.
@@ -80,6 +79,8 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
 
     """
 
+    filetype = ".gjf"
+
     def __init__(
         self,
         path: Union[Path, str],
@@ -94,7 +95,7 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         atoms: Optional[Atoms] = None,
         output_chk: bool = False,
     ):
-        File.__init__(self, path)
+        super().__init__(path)
 
         self.link0: List[str] = link0 or FileContents
 
@@ -109,10 +110,6 @@ class GJF(ReadFile, WriteFile, File, HasAtoms):
         self.atoms = atoms or FileContents
 
         self._output_chk: bool = output_chk
-
-    @classproperty
-    def filetype(self) -> str:
-        return ".gjf"
 
     def _find_in_link(self, val: str) -> Optional[int]:
         return next(

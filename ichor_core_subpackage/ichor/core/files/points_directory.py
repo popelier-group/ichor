@@ -11,6 +11,7 @@ from ichor.core.calculators.features.alf_features_calculator import (
 )
 from ichor.core.common import constants
 from ichor.core.common.io import mkdir
+from ichor.core.common.itertools import chunker
 from ichor.core.database.json import get_data_for_point
 from ichor.core.database.sql import (
     add_atom_names_to_database,
@@ -20,7 +21,6 @@ from ichor.core.database.sql import (
 )
 from ichor.core.files import GJF
 from ichor.core.files.directory import Directory
-from ichor.core.files.file_data import PointsDirectoryProperties
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.xyz import Trajectory, XYZ
 
@@ -50,9 +50,11 @@ class PointsDirectory(ListOfAtoms, Directory):
         This path is typically the path to the training set, sample pool, etc.
     :param needs_parsing: By default, every PointsDirectory is parsed when the instance is created to
         create PointDirectory instances of each inner directory (but the contents of the files are not read).
-        If however, a slice of a already created PointsDirectory is made, the conents of the directories
+        If however, a slice of a already created PointsDirectory is made, the contents of the directories
         do not need to be parsed again, so needs_parsing would be false
     """
+
+    _suffix = ".pointsdir"
 
     def __init__(self, path: Union[Path, str], needs_parsing=True, *args, **kwargs):
         # Initialise `list` parent class of `ListOfAtoms`
@@ -60,7 +62,13 @@ class PointsDirectory(ListOfAtoms, Directory):
         if needs_parsing:
             # this will call Directory __init__ method (which then calls self.parse)
             # since PointsDirectory implements a `parse` method, it will be called instead of the Directory parse method
+
             Directory.__init__(self, path)
+
+    @classmethod
+    def check_path(cls, path: Path) -> bool:
+        """Makes sure that path is PointsDirectory-like"""
+        return (path.suffix == cls._suffix) and path.is_dir()
 
     def _parse(self) -> None:
         """
@@ -82,19 +90,20 @@ class PointsDirectory(ListOfAtoms, Directory):
             # a PointDirectory instance and add to self
             if PointDirectory.check_path(f):
                 point = PointDirectory(f)
-                if not point.should_ignore:
-                    self.append(point)
+                self.append(point)
             elif f.is_file() and f.suffix in {XYZ.filetype, GJF.filetype}:
-                new_dir = self.path / f.stem
+                new_dir = self.path / (f.stem + PointDirectory._suffix)
                 mkdir(new_dir)
+                # move the file into the newly made directory
                 f.replace(new_dir / f.name)
-                self.append(
-                    PointDirectory(new_dir)
-                )  # wrap the new directory as a PointDirectory instance and add to self
+                self.append(PointDirectory(new_dir))
+
+        # wrap the new directory as a PointDirectory instance and add to self
         # sort by the names of the directories (by the numbers in their name)
         # since the system name is always the same
         self = self.sort(key=lambda x: x.path.name)
 
+    # TODO: move to processing function
     @property
     def wfn_energy(self) -> np.ndarray:
         """Returns np array of wfn energies of all points
@@ -103,6 +112,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return np.array([point.wfn.total_energy for point in self])
 
+    # TODO: move to processing function
     @property
     def total_energy(self):
         """
@@ -112,6 +122,7 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return self.wfn_energy
 
+    # TODO: move to processing function
     def connectivity(
         self, connectivity_calculator: Callable[..., np.ndarray]
     ) -> np.ndarray:
@@ -124,6 +135,7 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         return connectivity_calculator(self[0].atoms)
 
+    # TODO: move to processing function
     def alf(self, alf_calculator: Callable[..., ALF], *args, **kwargs) -> List[ALF]:
         """
         Returns the Atomic Local Frame (ALF) for all Atom instances that are held in Atoms
@@ -137,6 +149,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             for atom_instance in self[0].atoms
         ]
 
+    # TODO: move to processing function
     def alf_dict(
         self, alf_calculator: Callable[..., ALF], *args, **kwargs
     ) -> Dict[str, ALF]:
@@ -151,15 +164,16 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
         return self[0].alf_dict(alf_calculator, *args)
 
+    # TODO: move to processing function
     def properties(
         self, system_alf: Optional[List[ALF]] = None, specific_property: str = None
-    ) -> PointsDirectoryProperties:
+    ):
         """Get properties contained in the PointDirectory.
         IF no system alf is passed in, an automatic process to get C matrices is started.
 
         :param system_alf: Optional list of `ALF` instances that can be passed in
             to use a specific alf instead of automatically trying to compute it.
-        :param key: return only a specific key from the returned PointsDirectoryProperties dictionary
+        :param key: return only a specific key from the returned dictionary
         """
 
         if not system_alf:
@@ -171,8 +185,6 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         for point in self:
             points_dir_properties[point.name] = point.properties(system_alf)
-
-        points_dir_properties = PointsDirectoryProperties(points_dir_properties)
 
         if specific_property:
             return points_dir_properties[specific_property]
@@ -348,16 +360,13 @@ class PointsDirectory(ListOfAtoms, Directory):
         )
 
     def write_to_sqlite3_database(
-        self, db_path: Union[str, Path] = None, echo=False, print_missing_data=False
+        self, db_path: Union[str, Path] = None, echo=False, print_missing_data=True
     ) -> Path:
         """
         Write out important information from a PointsDirectory instance to an SQLite3 database.
 
         :param db_path: database to write to
         :param echo: Whether to print out SQL queries from SQL Alchemy
-
-        :param db_path: _description_, defaults to None
-        :type db_path: Union[str, Path], optional
         :param echo: Whether to print out SQL queries from SQL Alchemy, defaults to False
         :param print_missing_data: Whether to print out any missing data from each PointDirectory contained
             in self, defaults to False
@@ -365,9 +374,9 @@ class PointsDirectory(ListOfAtoms, Directory):
         """
 
         if not db_path:
-            db_path = Path(f"{self.path.name}_sqlite.db")
+            db_path = Path(f"{self.name_without_suffix}.sqlite")
         else:
-            db_path = Path(db_path).with_suffix(".db")
+            db_path = Path(db_path).with_suffix(".sqlite")
 
         # if db exists, then add new points to existing database.
         if db_path.exists():
@@ -389,39 +398,72 @@ class PointsDirectory(ListOfAtoms, Directory):
 
         return db_path
 
-    def write_json_database(
+    def write_to_json_database(
         self,
-        json_db_path: Union[str, Path] = None,
-        print_missing_data=False,
-        indent=None,
+        root_path: Union[str, Path] = None,
+        datafunction: Callable = get_data_for_point,
+        npoints_per_json=500,
+        print_missing_data=True,
+        indent: int = 2,
         separators=(",", ":"),
     ) -> Path:
         """
         Write out important information from a PointsDirectory instance to a json file.
 
-        :param json_db_path: database to write to
+        :param root_path: Name of directory which will the json database. This is a directory,
+            which contains multiple directories inside. Each directory inside is one PointsDirectory.
+            The reason for implementing like this is if using for multiple PointsDirectory-ies
+            at once, so that data for each PointDirectory is written in a separate folder
+        :param datafunction: A function used to get all data for a single point.
+            This data is going to get written to the json file.
+        :param npoints_per_json: Maximum number of geometries to write to one json file
+            This is done so that the individual files do not become very large.
         :param print_missing_data: Whether to print out any missing data from each PointDirectory contained
             in self, defaults to False
+        :param indent: integer representing number of spaces to indent, defaults to 2
+        :param separators: Separators used for each entry, default (",", ":")
         :return: The path to the written json file
         """
 
-        if not json_db_path:
-            json_db_path = Path(f"{self.path.name}.json")
-        else:
-            json_db_path = Path(json_db_path).with_suffix(".json")
+        root_path = Path(root_path)
+
+        # if no path is given use pointdirectory without suffix
+        if not root_path:
+            root_path = Path(self.name_without_suffix)
+
+        # add a _json to the directory
+        root_path = root_path.with_name(root_path.name + "_json")
+
+        mkdir(root_path)
+
+        # json file name that will be modified
+        tmp_json_file_name = root_path.stem
+
+        counter = 0
+        json_file_path = root_path / f"{tmp_json_file_name}_{counter}.json"
 
         total_data_list = []
 
-        with open(json_db_path, "w") as json_db:
+        for chunk in chunker(self, npoints_per_json):
 
-            for point in self:
+            for point in chunk:
 
                 total_data_list.append(
-                    get_data_for_point(point, print_missing_data=print_missing_data)
+                    datafunction(point, print_missing_data=print_missing_data)
                 )
 
-            json.dump(total_data_list, json_db, indent=indent, separators=separators)
+            with open(json_file_path, "w") as json_db:
+                json.dump(
+                    total_data_list, json_db, indent=indent, separators=separators
+                )
 
+                total_data_list = []
+                counter += 1
+                json_file_path = root_path / f"{tmp_json_file_name}_{counter}.json"
+
+        return root_path
+
+    # TODO: move processing code to processing func
     def features_with_properties_to_csv(
         self,
         system_alf: Dict[str, ALF],
@@ -481,6 +523,7 @@ class PointsDirectory(ListOfAtoms, Directory):
             )
             df.to_csv(fname, index=False)
 
+    # TODO: move processing code to processing function
     def features_with_wfn_energy_and_dE_df_to_csv(
         self,
         alf_list: List[ALF],
@@ -516,7 +559,9 @@ class PointsDirectory(ListOfAtoms, Directory):
             nfeatures = len(features)
             wfn_energy = point_dir.wfn.total_energy
             b_matrix = form_b_matrix(atoms, alf_list, central_atom_idx)
-            cart_forces = np.array(list(point_dir.gaussian_out.global_forces.values()))
+            cart_forces = np.array(
+                list(point_dir.gaussian_output.global_forces.values())
+            )
             dE_df = convert_to_feature_forces(
                 cart_forces, b_matrix, alf_list, central_atom_idx
             )

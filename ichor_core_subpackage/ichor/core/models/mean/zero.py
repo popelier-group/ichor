@@ -1,5 +1,3 @@
-from typing import IO
-
 import numpy as np
 from ichor.core.models.mean.mean import Mean
 
@@ -13,6 +11,11 @@ class ZeroMean(Mean):
         """Return 0 as this is a Zero Mean Gaussian Process"""
         return np.zeros((x.shape[0]))
 
-    def write(self, f: IO):
-        f.write("[mean]\n")
-        f.write("type zero\n")
+    def write_str(self) -> str:
+
+        write_str = ""
+
+        write_str += "[mean]\n"
+        write_str += "type zero\n"
+
+        return write_str

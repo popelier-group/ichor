@@ -8,8 +8,7 @@ from ichor.core.common.units import AtomicDistance
 from ichor.core.files import PointDirectory, XYZ
 from ichor.core.files.aimall.aim import AimAtom
 from ichor.core.files.aimall.int import CriticalPoint, CriticalPointType
-from ichor.core.files.gaussian.gaussian_out import (
-    AtomForce,
+from ichor.core.files.gaussian.gaussian_output import (
     MolecularDipole,
     MolecularHexadecapole,
     MolecularOctapole,
@@ -46,7 +45,7 @@ def _test_point_directory(
     gjf_spin_multiplicity: Optional[int] = None,
     gjf_atoms: Optional[Atoms] = None,
     # .gau/.log Gaussian output file
-    gau_forces: Dict[str, AtomForce] = None,
+    gau_forces: Dict[str, np.ndarray] = None,
     gau_charge: int = None,
     gau_multiplicity: int = None,
     gau_atoms: Atoms = None,
@@ -118,7 +117,7 @@ def _test_point_directory(
     point_dir_inst = PointDirectory(point_dir_path)
 
     gjf_path = point_dir_inst.gjf.path
-    gaussian_out_path = point_dir_inst.gaussian_out.path
+    gaussian_out_path = point_dir_inst.gaussian_output.path
     xyz_inst = point_dir_inst.xyz
     ints_path = point_dir_inst.ints.path
     aim_path = point_dir_inst.aim.path

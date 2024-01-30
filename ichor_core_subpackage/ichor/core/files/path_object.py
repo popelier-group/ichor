@@ -26,3 +26,7 @@ class PathObject(ABC, object):
     def delete(self):
         """Delete the Path object from disk."""
         self.path.unlink()
+
+    def remove(self):
+        """Alias for delete"""
+        return self.delete()

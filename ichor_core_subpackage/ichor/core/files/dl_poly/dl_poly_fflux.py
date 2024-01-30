@@ -21,6 +21,8 @@ class DlPolyFFLUX(ReadFile):
         if there are multiple molecules. Otherwise they will be 0.0
     """
 
+    filetype = "_not_needed"
+
     def __init__(self, path: Union[Path, str]):
 
         super().__init__(path)

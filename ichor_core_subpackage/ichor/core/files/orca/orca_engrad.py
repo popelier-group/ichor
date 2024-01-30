@@ -4,18 +4,18 @@ from typing import Union
 import numpy as np
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.constants import type2nuclear_charge
-from ichor.core.common.functools import classproperty
-
-from ichor.core.common.types.forces import AtomForce
 
 # from enum import Enum
 from ichor.core.files.file import FileContents, ReadFile
-from ichor.core.files.file_data import HasAtoms
+from ichor.core.files.file_data import HasAtoms, HasData
 
 nuclear_charge2type = {int(v): k for k, v in type2nuclear_charge.items()}
 
 
-class OrcaEngrad(ReadFile, HasAtoms):
+class OrcaEngrad(ReadFile, HasAtoms, HasData):
+
+    filetype = ".engrad"
+
     """
     Reads file containing the gradient calculated by ORCA.
 
@@ -36,9 +36,9 @@ class OrcaEngrad(ReadFile, HasAtoms):
         self.total_energy = FileContents
         self.atoms = FileContents
 
-    @classproperty
-    def filetype(self) -> str:
-        return ".engrad"
+    @property
+    def raw_data(self) -> dict:
+        return {"global_forces": self.global_forces, "total_energy": self.total_energy}
 
     @property
     def gradient(self) -> np.ndarray:
@@ -98,7 +98,7 @@ class OrcaEngrad(ReadFile, HasAtoms):
 
             for atom_name, atom_gradient in zip(atoms.atom_names, gradient_array):
                 # the force is -ve of gradient
-                forces[atom_name] = AtomForce(*-atom_gradient)
+                forces[atom_name] = -atom_gradient
 
             self.global_forces = forces
             self.atoms = atoms

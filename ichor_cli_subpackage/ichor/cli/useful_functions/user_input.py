@@ -109,7 +109,7 @@ def user_input_restricted(
     """
 
     available_options = [a.lower() for a in available_options]
-    s = "Available options: " + ",".join(map(str, available_options)) + "\n" + s
+    s = "Available options: " + ", ".join(map(str, available_options)) + "\n" + s
 
     # if pressing ctrl + D, will return to previous menu
     while True:

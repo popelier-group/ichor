@@ -4,8 +4,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Union
 
-from ichor.core.common.functools import buildermethod, classproperty
-from ichor.core.common.io import move, remove
+from ichor.core.common.functools import buildermethod
+from ichor.core.common.io import move
 from ichor.core.common.types import NoStr
 from ichor.core.files.path_object import PathObject
 
@@ -54,13 +54,6 @@ class File(PathObject, ABC):
         """Returns the name of the WFN file (excluding the .wfn extension)"""
         return self.path.stem
 
-    @classproperty
-    @abstractmethod
-    def filetype(self) -> str:
-        """Abstract class property which returns the suffix associated with the filetype.
-        For example, for GJF class, this will return `.gjf`"""
-        pass
-
     @classmethod
     def check_path(cls, path: Path) -> bool:
         """Checks the suffix of the given path matches the filetype associated with class that subclasses from File
@@ -78,11 +71,6 @@ class File(PathObject, ABC):
             # pathlib's Path class uses / operator to add to the path
             dst /= self.path.name
         move(self.path, dst)
-
-    def remove(self):
-        """Removes file from disk."""
-
-        remove(self.path)
 
     @contextmanager
     def block(self):
@@ -104,6 +92,17 @@ class File(PathObject, ABC):
 
 
 class ReadFile(File, ABC):
+
+    filetype = None
+
+    # from https://stackoverflow.com/a/53769173
+    def __init_subclass__(cls, **kwargs):
+        if not getattr(cls, "filetype"):
+            raise TypeError(
+                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
+            )
+        return super().__init_subclass__(**kwargs)
+
     def _initialise_contents(self):
         """Initialize contents of a file to default values. This is needed in the case
         a file does not exist on disk yet (so the file cannot be read from). This means
@@ -189,6 +188,17 @@ class FileWriteError(Exception):
 
 
 class WriteFile(File, ABC):
+
+    filetype = None
+
+    # from https://stackoverflow.com/a/53769173
+    def __init_subclass__(cls, **kwargs):
+        if not getattr(cls, "filetype"):
+            raise TypeError(
+                f"Can't instantiate abstract class {cls.__name__} without 'filetype' class variable defined."
+            )
+        return super().__init_subclass__(**kwargs)
+
     def _set_write_defaults_if_needed(self):
         """Set default values for attributes if bool(self.attribute) evaluates to False.
         So if an attribute is still FileContents, an empty string, an empty list, etc.,
@@ -196,9 +206,21 @@ class WriteFile(File, ABC):
         pass
 
     def _check_values_before_writing(self):
-        """Method used to check the values prior to writing. If the values do not meet
+        """This check is just here so that the file is read before attempting to write the file.
+        This is to prevent a situation where the original file has not been read yet,
+        but a new file with the same path is being written
+        (so therefore the new file is empty and all the data has been
+        lost and has not been read in into an instance yet).
+
+        ..note::
+            Even though the file could already be read in and some attributes might be modified by the user,
+            reading the file a second time prior to writing will not change any user attributes because of the
+            way the read file is written (i.e. any user-set attributes are kept even after the file is read again).
+
+        Can be used to check the values prior to writing. If the values do not meet
         the requirements, an error is thrown out. This is to prevent writing out files
-        that are then going to crash in calculations with other programs."""
+        that are then going to crash in calculations with other programs.
+        """
         pass
 
     @abstractmethod
@@ -236,7 +258,10 @@ class WriteFile(File, ABC):
                 f"Exception occurred while writing file '{path.absolute()}'. File was not been written/modified."
             ) from e
 
-        # if we got to here, we can safely assume that we got a string which can be written to a file
-        # even if the actual string contains wrong things it it
-        with open(path, "w") as f:
-            f.write(tmp_str)
+        if tmp_str:
+            # if we got to here, we can safely assume that we got a string which can be written to a file
+            # even if the actual string contains wrong things it it
+            with open(path, "w") as f:
+                f.write(tmp_str)
+        else:
+            raise TypeError("The contents type cannot be written to a file.")

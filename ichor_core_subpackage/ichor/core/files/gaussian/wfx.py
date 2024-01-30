@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.constants import type2nuclear_charge
-from ichor.core.common.functools import classproperty
 from ichor.core.files.file import FileContents, FileState, ReadFile
-from ichor.core.files.file_data import HasAtoms, HasProperties
+from ichor.core.files.file_data import HasAtoms, HasData
 
 nuclear_charge_to_type = {v: k for k, v in type2nuclear_charge.items()}
 
@@ -26,7 +25,7 @@ class MolecularOrbital:
         self.primitives = primitives
 
 
-class WFX(HasAtoms, HasProperties, ReadFile):
+class WFX(HasAtoms, HasData, ReadFile):
     """Wraps around a .wfn file that is the output of Gaussian. The .wfn file is
     an output file, so it does not have a write method.
 
@@ -53,6 +52,8 @@ class WFX(HasAtoms, HasProperties, ReadFile):
         was used, which might be wrong.
 
     """
+
+    filetype = ".wfx"
 
     def __init__(
         self,
@@ -151,15 +152,6 @@ class WFX(HasAtoms, HasProperties, ReadFile):
 
         self.total_energy = self.total_energy or total_energy
         self.virial_ratio = self.virial_ratio or virial_ratio
-
-    @classproperty
-    def filetype(cls) -> str:
-        """Returns the file extension of a WFN file"""
-        return ".wfx"
-
-    @classproperty
-    def property_names(self) -> List[str]:
-        return ["energy", "wfn"]
 
     @property
     def properties(self) -> Dict[str, float]:

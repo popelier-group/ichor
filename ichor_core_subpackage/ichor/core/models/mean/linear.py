@@ -1,5 +1,3 @@
-from typing import IO
-
 import numpy as np
 from ichor.core.models.mean.mean import Mean
 
@@ -16,9 +14,14 @@ class LinearMean(Mean):
         """Returns the constant mean value."""
         return np.matmul(x - self._xmin, self._beta) + self._ymin
 
-    def write(self, f: IO):
-        f.write("[mean]\n")
-        f.write("type linear\n")
-        f.write(f"beta {' '.join(map(str, self._beta))}\n")
-        f.write(f"x_min {' '.join(map(str, self._xmin))}\n")
-        f.write(f"y_min {self._ymin}\n")
+    def write_str(self) -> str:
+
+        write_str = ""
+
+        write_str += "[mean]\n"
+        write_str += "type linear\n"
+        write_str += f"beta {' '.join(map(str, self._beta))}\n"
+        write_str += f"x_min {' '.join(map(str, self._xmin))}\n"
+        write_str += f"y_min {self._ymin}\n"
+
+        return write_str

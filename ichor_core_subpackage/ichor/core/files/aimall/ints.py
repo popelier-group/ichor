@@ -1,16 +1,14 @@
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 import numpy as np
-from ichor.core.common.functools import classproperty
-from ichor.core.common.sorting.natsort import ignore_alpha
-from ichor.core.files.aimall.ab_int import ABINT
-from ichor.core.files.aimall.int import INT
-from ichor.core.files.directory import Directory
-from ichor.core.files.file_data import HasProperties
+from ichor.core.files.aimall.ab_int import AbInt
+from ichor.core.files.aimall.int import Int
+from ichor.core.files.directory import AnnotatedDirectory
+from ichor.core.files.file_data import HasData
 
 
-class INTs(HasProperties, dict, Directory):
+class IntDirectory(HasData, AnnotatedDirectory):
     """Wraps around a directory which contains all .int files for the system.
 
     :param path: The Path corresponding to a directory holding .int files
@@ -18,53 +16,36 @@ class INTs(HasProperties, dict, Directory):
         Things like XYZ and GJF hold geometry.
     """
 
+    # removed inheritance from dict because we are not using class as dictionary
+    # was causing problems since if inheriting from dict would mean that bool(self)
+    # would evaluate to False, since self was empty
+
+    contents = {"ints": Int, "interaction_ints": AbInt}
+
     def __init__(self, path: Union[Path, str]):
 
-        # need to have this initialized before reading Directory
-        # otherwise self._parse will be called first
-        # which will error out because it will try to access
-        # self.interaction_ints which does not exist already
-        self.interaction_ints = {}
+        AnnotatedDirectory.__init__(self, path)
 
-        Directory.__init__(self, path)
-        dict.__init__(self)
-
-    def _parse(self) -> None:
-        """Parse an *_atomicfiles directory and look for .int files. This method is
-        ran automatically when INTs is initialized. See Directory class which
-        this class subclasses from.
-
-        .. note::
-            This method does NOT read in information from the INT files (i.e. multipoles
-            and iqa data are not read in here). This method only finds the relevant files.
-            Once information is requested (i.e. multipoles or iqa are needed), the INT class
-            _read_file method reads in the data.
+    @property
+    def raw_data(self) -> dict:
+        """Returns data associated with each atom. If interaction ints are present,
+        also adds these to the dictionary.
         """
-        for f in self.iterdir():
-            if INT.check_path(f):
-                self[f.stem.capitalize()] = INT(f)
 
-            elif ABINT.check_path(f):
-                a_atom, b_atom = f.stem.split("_")
-                a = a_atom.capitalize()
-                b = b_atom.capitalize()
-                self.interaction_ints[(a, b)] = ABINT(f)
+        all_data = {i.atom_name: i.raw_data for i in self.ints}
 
-        self.sort()
+        if self.interaction_ints:
+            interactions_dict = {
+                f"{i.a}_{i.b}": i.raw_data for i in self.interaction_ints
+            }
+            all_data.update(interactions_dict)
+
+        return all_data
 
     @classmethod
     def check_path(cls, path: Path) -> bool:
         """Checks if the given Path instance has _atomicfiles in its name."""
         return path.name.endswith("_atomicfiles")
-
-    def sort(self):
-        """Sorts keys of self by atom index e.g.
-        {'H2': , 'H3': , 'O1': } -> {'O1': , 'H2': , 'H3': }"""
-        dict.__init__(self, sorted(self.items(), key=lambda x: ignore_alpha(x[0])))
-
-    @classproperty
-    def property_names(self) -> List[str]:
-        return INT.property_names
 
     def properties(self, C_dict: Dict[str, np.ndarray]) -> Dict[str, Dict[str, float]]:
         """
@@ -83,26 +64,27 @@ class INTs(HasProperties, dict, Directory):
             for atom_name, int_file_instance in self.items()
         }
 
-    def local_spherical_multipoles(
-        self, C_dict: Dict[str, np.ndarray]
-    ) -> Dict[str, Dict[str, float]]:
+    # TODO: remove, add to processing data
+    # def local_spherical_multipoles(
+    #     self, C_dict: Dict[str, np.ndarray]
+    # ) -> Dict[str, Dict[str, float]]:
 
-        """Rotates global spherical multipoles into local spherical multipoles. Optionally
-        a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
-        (as read in from the int file) will be used (if it exists).
+    #     """Rotates global spherical multipoles into local spherical multipoles. Optionally
+    #     a rotation matrix can be passed in. Otherwise, the wfn file associated with this int file
+    #     (as read in from the int file) will be used (if it exists).
 
-        :param C_dict: A dictionary of rotation matrices, each of the atoms.
-            This ensures that the correct C matrix is used for each atom.
-        :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
-            with the int file does not exist. Then we cannot calculate multipoles.
-        """
+    #     :param C_dict: A dictionary of rotation matrices, each of the atoms.
+    #         This ensures that the correct C matrix is used for each atom.
+    #     :raises FileNotFoundError: If no `C_matrix` is passed in and the wfn file associated
+    #         with the int file does not exist. Then we cannot calculate multipoles.
+    #     """
 
-        return {
-            atom_name: int_file_instance.local_spherical_multipoles(
-                C_dict[int_file_instance.atom_name]
-            )
-            for atom_name, int_file_instance in self.items()
-        }
+    #     return {
+    #         atom_name: int_file_instance.local_spherical_multipoles(
+    #             C_dict[int_file_instance.atom_name]
+    #         )
+    #         for atom_name, int_file_instance in self.items()
+    #     }
 
     def __iter__(self):
         """Iterate over all INT instances (wrap around individual .int files)
@@ -110,10 +92,37 @@ class INTs(HasProperties, dict, Directory):
         yield from self.values()
 
     def __str__(self):
-        return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(self.keys())}"
+        atm_names = [i.atom_name for i in self.ints]
+        return f"INTs Directory: {self.path.absolute()}, containing .int for atoms names: {', '.join(atm_names)}"
 
-    def __getattr__(self, item):
-        return {
-            atom_name: getattr(int_file_instance, item)
-            for atom_name, int_file_instance in self.items()
-        }
+    def __getitem__(self, pattern: str):
+        """Used to get particular int or interaction int by atom name or
+
+        :param atom_name: _description_
+        :type atom_name: str
+        """
+        pattern = pattern.capitalize()
+
+        # look at int first
+        if "_" not in pattern:
+            for i in self.ints:
+                if i.atom_name == pattern:
+                    return i
+
+        for i in self.interaction_ints:
+            if f"{i.a}_{i.b}" == pattern:
+                return i
+
+        # if we get to here, raise KeyError
+        raise KeyError(f"The key {pattern} is the A' int or AB int files.")
+
+    def get(self, pattern: str, default=None):
+        """Does the same thing as get of a dictionary,
+        returning a default is KeyError
+        """
+
+        try:
+            itm = self[pattern]
+            return itm
+        except KeyError:
+            return default

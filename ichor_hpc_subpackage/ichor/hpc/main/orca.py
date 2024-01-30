@@ -67,15 +67,14 @@ def write_orca_inputs(
 
     for point_directory in points_directory:
 
+        orca_file_name = point_directory.path.with_suffix("").name + OrcaInput.filetype
+
         if overwrite_existing:
             if point_directory.orca_input:
                 point_directory.orca_input.path.unlink()
 
             point_directory.orca_input = OrcaInput(
-                Path(
-                    point_directory.path
-                    / (point_directory.path.name + OrcaInput.filetype)
-                ),
+                Path(point_directory.path / orca_file_name),
                 **kwargs,
             )
             point_directory.orca_input.atoms = point_directory.xyz.atoms
@@ -84,10 +83,7 @@ def write_orca_inputs(
         elif not point_directory.orca_input:
 
             point_directory.orca_input = OrcaInput(
-                Path(
-                    point_directory.path
-                    / (point_directory.path.name + OrcaInput.filetype)
-                ),
+                Path(point_directory.path / orca_file_name),
                 **kwargs,
             )
             point_directory.orca_input.atoms = point_directory.xyz.atoms

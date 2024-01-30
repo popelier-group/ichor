@@ -6,11 +6,12 @@ from typing import Dict, List, Union
 import numpy as np
 import pandas as pd
 from ichor.core.atoms import ALF, Atoms, ListOfAtoms
-from ichor.core.common.sorting.natsort import ignore_alpha, natsorted
+from ichor.core.common.sorting import ignore_alpha
 from ichor.core.common.types.itypes import F
 from ichor.core.files.directory import Directory
 from ichor.core.files.file_data import HasAtoms
 from ichor.core.models.model import Model
+from natsort import natsorted
 
 
 class DimensionError(ValueError):

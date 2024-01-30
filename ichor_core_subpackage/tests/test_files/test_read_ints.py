@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import numpy as np
 from ichor.core.calculators import calculate_alf_atom_sequence
-from ichor.core.files import GJF, INTs
+from ichor.core.files import GJF, IntDirectory
 from ichor.core.files.aimall.int import CriticalPoint, CriticalPointType
 
 from tests.path import get_cwd
@@ -53,7 +53,7 @@ def _test_ints(
 
     """Test function for INTs directory"""
 
-    int_dir_instance = INTs(int_dir_path)
+    int_dir_instance = IntDirectory(int_dir_path)
 
     _assert_val_optional(int_dir_instance.atom_name, atom_name)
     _assert_val_optional(int_dir_instance.atom_num, atom_num)

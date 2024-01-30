@@ -2,8 +2,7 @@
  Each `Atoms` instance could contain multiple `Atom` instances."""
 
 from ichor.core.atoms.alf import ALF
-from ichor.core.atoms.atom import Atom, AtomWithProperties
-from ichor.core.atoms.atoms import Atoms
+from ichor.core.atoms.atoms import Atom, Atoms
 from ichor.core.atoms.atoms_not_found_exception import AtomNotFound, AtomsNotFoundError
 from ichor.core.atoms.list_of_atoms import ListOfAtoms
 from ichor.core.atoms.list_of_atoms_atom_view import AtomView
@@ -11,7 +10,6 @@ from ichor.core.atoms.list_of_atoms_atom_view import AtomView
 __all__ = [
     "ALF",
     "Atom",
-    "AtomWithProperties",
     "Atoms",
     "AtomNotFound",
     "AtomsNotFoundError",
