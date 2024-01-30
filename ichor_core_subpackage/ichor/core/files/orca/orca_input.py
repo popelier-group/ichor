@@ -16,6 +16,8 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         then there is no file to be read, so the user has to write the file contents. If
         no contents/options are written by user, they are written as the default values in the
         ``write`` method.
+    :param method: The method to use for calculation, defaults to b3lyp/g if not given
+    :param basis_set: The basis set for the calculation, defaults to "6-31+g(d,p)"
     :param main_input: A list of strings which are commands beginning with !
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
@@ -52,6 +54,8 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
     def __init__(
         self,
         path: Union[Path, str],
+        method: Optional[str] = None,
+        basis_set: Optional[str] = None,
         main_input: Optional[List[str]] = None,
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
@@ -60,9 +64,12 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
     ):
         File.__init__(self, path)
 
+        # have the method and basis set separately because they
+        # are the most important bits
+        self.method: str = method or FileContents
+        self.basis_set: str = basis_set or FileContents
         # the main input contains lines starting with !
         self.main_input: List[str] = main_input or FileContents
-
         self.charge: int = charge or FileContents
         self.spin_multiplicity: int = spin_multiplicity or FileContents
         self.atoms = atoms or FileContents
@@ -82,6 +89,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
             main_input = []
             # these are lines that contain things like method and basis set
             # since these can be on multiple lines
+
             while line.strip().startswith("!"):
                 line = line.lower()
                 line = line.strip().replace("!", "")
@@ -89,6 +97,13 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
                 for s in line_splits:
                     main_input.append(s)
                 line = next(f)
+
+            # assume the method is the first line
+            # and the basis set is the second line
+            method, basis_set = main_input[0], main_input[1]
+            # remove the main input first and second elements
+            # which are the method and basis set
+            del main_input[0:2]
 
             # used for cases when there are no options with %
             _reached_end = False
@@ -133,6 +148,8 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
                 except StopIteration:
                     break
 
+        self.method = self.method or method
+        self.basis_set = self.basis_set or basis_set
         self.main_input = self.main_input or main_input
         self.input_blocks = self.input_blocks or input_blocks
         self.charge = self.charge or charge
@@ -144,13 +161,14 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         So if an attribute is still FileContents, an empty string, an empty list, etc.,
         then default values will be used."""
 
+        self.method = self.method or "b3lyp/g"
+        self.basis_set = self.method or "6-31+g(d,p)"
+
         # aim for wfn file
         # nousesym to not use symmetry
         # normalprint for printing out to the outputfile
         # engrad calculate energy and (analytical) gradient
         self.main_input = self.main_input or [
-            "b3lyp/g",
-            "6-31+g(d,p)",
             "nousesym",
             "aim",
             "normalprint",
@@ -178,6 +196,8 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
 
         write_str = ""
 
+        write_str += f"!{self.method}\n"
+        write_str += f"!{self.basis_set}\n"
         for m in self.main_input:
             write_str += f"!{m}\n"
         for k, vals in self.input_blocks.items():
