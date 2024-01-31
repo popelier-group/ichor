@@ -36,7 +36,7 @@ def submit_check_points_directory_for_missing_files(points_dir_path: Union[str, 
     # can use the processed data attribute because any function that works on a single
     # PointDirectory can be passed inside here.
     text_list.append(
-        f"{cls_to_use}({points_dir_path.absolute()}).processed_data(check_gaussian_and_aimall)'"
+        f"{cls_to_use}('{points_dir_path.absolute()}').processed_data(check_gaussian_and_aimall)"
     )
 
     return submit_free_flow_python_command_on_compute(
