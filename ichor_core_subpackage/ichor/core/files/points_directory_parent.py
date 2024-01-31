@@ -45,6 +45,45 @@ class PointsDirectoryParent(list, Directory):
         # since the system name is always the same
         self = self.sort(key=lambda x: x.path.name)
 
+    @property
+    def raw_data(self) -> dict:
+        """Returns all raw data associated with the PointsDirectoryParent instance.
+        The key is the points directory name (of a PointsDirectory instance) and value is
+        another dictionary.
+
+        :returns: A dictionary of raw data.
+            Keys of the dictionary are the stem of each PointsDirectory contained inside
+            this PointsDirectoryParent instance.
+        """
+
+        all_data_dict = {}
+        for p in self:
+            all_data_dict[p.stem] = p.raw_data
+
+        return all_data_dict
+
+    def processed_data(self, processing_func, *args, **kwargs) -> dict:
+        """Processed data is some way, given any arguments and key words arguments,
+        and returns a dictionary of the processed data, with keys
+        Note that processing function can be any callable,
+        i.e. closure, class, etc.
+
+        .. note::
+            The processing function must act on one PointDirectory.
+
+        :param processing_func: Callable which is going to process ONE PointDirectory
+        :param args: Positional arguments to pass to processing func
+        :returns: A dictionary of processed data.
+            Keys of the dictionary are the stem of each PointsDirectory contained inside
+            this PointsDirectoryParent instance.
+        """
+
+        all_data_dict = {}
+        for p in self:
+            all_data_dict[p.stem] = p.processed_data(processing_func, *args, **kwargs)
+
+        return all_data_dict
+
     def write_to_json_database(
         self,
         root_name: str = None,

@@ -21,11 +21,13 @@ from ichor.core.database.sql import (
 )
 from ichor.core.files import GJF
 from ichor.core.files.directory import Directory
+
+from ichor.core.files.file_data import HasData
 from ichor.core.files.point_directory import PointDirectory
 from ichor.core.files.xyz import Trajectory, XYZ
 
 
-class PointsDirectory(ListOfAtoms, Directory):
+class PointsDirectory(ListOfAtoms, Directory, HasData):
     """
     A helper class that wraps around a directory which contains points (molecules with various geometries).
     Calling Directory.__init__(self, path) will call the `parse` method of PointsDirectory instead of Directory
@@ -102,6 +104,45 @@ class PointsDirectory(ListOfAtoms, Directory):
         # sort by the names of the directories (by the numbers in their name)
         # since the system name is always the same
         self = self.sort(key=lambda x: x.path.name)
+
+    @property
+    def raw_data(self) -> dict:
+        """Returns all raw data associated with the PointsDirectory instance.
+        The key is the point name (of a PointDirectory instance) and value
+        is the raw data associated with the one point.
+
+        :returns: A dictionary of raw data.
+            Keys of the dictionary are the stem of each PointsDirectory contained inside
+            this PointsDirectoryParent instance.
+        """
+
+        all_data_dict = {}
+        for p in self:
+            all_data_dict[p.stem] = p.raw_data
+
+        return all_data_dict
+
+    def processed_data(self, processing_func, *args, **kwargs) -> dict:
+        """Processed data is some way, given any arguments and key words arguments,
+        and returns a dictionary of the processed data, with keys
+        Note that processing function can be any callable,
+        i.e. closure, class, etc.
+
+        .. note::
+            The processing function must act on one PointDirectory.
+
+        :param processing_func: Callable which is going to process ONE PointDirectory
+        :param args: Positional arguments to pass to processing func
+        :returns: A dictionary of processed data.
+            Keys of the dictionary are the stem of each PointDirectory contained inside
+            this PointsDirectory instance.
+        """
+
+        all_data_dict = {}
+        for p in self:
+            all_data_dict[p.stem] = p.processed_data(processing_func, *args, **kwargs)
+
+        return all_data_dict
 
     # TODO: move to processing function
     @property
