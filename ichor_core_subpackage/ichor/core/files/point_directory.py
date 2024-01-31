@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Union
 
 from ichor.core.atoms import Atoms, AtomsNotFoundError
+from ichor.core.files import OrcaInput, OrcaOutput
 from ichor.core.files.aimall import Aim, IntDirectory
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasAtoms, HasData
@@ -22,6 +23,8 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         "xyz": XYZ,
         "gjf": GJF,
         "gaussian_output": GaussianOutput,
+        "orca_input": OrcaInput,
+        "orca_output": OrcaOutput,
         "aim": Aim,
         "wfn": WFN,
         "ints": IntDirectory,
@@ -43,6 +46,7 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         for attr_name in self.contents.keys():
             # all contents which subclass from HasData should have raw_data attribute implemented
             attr = getattr(self, attr_name)
+            # this also automatically checks for OptionalContent
             if isinstance(attr, HasData):
                 d = attr.raw_data
                 all_data[attr_name] = d
