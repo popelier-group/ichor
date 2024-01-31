@@ -31,6 +31,8 @@ def submit_check_points_directory_for_missing_files(points_dir_path: Union[str, 
     text_list.append(
         "from ichor.core.processing.check_functions import check_gaussian_and_aimall"
     )
+    # can use the processed data attribute because any function that works on a single
+    # PointDirectory can be passed inside here.
     text_list.append(f"{cls_to_use}.processed_data(check_gaussian_and_aimall)'")
 
     return submit_free_flow_python_command_on_compute(
