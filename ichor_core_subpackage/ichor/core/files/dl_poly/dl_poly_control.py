@@ -15,8 +15,8 @@ class DlPolyControl(WriteFile):
 
     def __init__(
         self,
-        path: Path,
-        system_name: str = None,
+        system_name: str,
+        path: Path = Path("CONTROL"),
         ensemble: str = "nvt",
         thermostat: str = "hoover",
         thermostat_settings: list = [0.04],

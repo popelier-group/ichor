@@ -104,7 +104,7 @@ class DlpolyHistory(Trajectory):
 
     _filetype = ""
 
-    def __init__(self, path: Optional[Path]):
+    def __init__(self, path: Optional[Path] = Path("HISTORY")):
 
         super().__init__(path)
 

@@ -23,7 +23,7 @@ class DlPolyFFLUX(ReadFile):
 
     _filetype = ""
 
-    def __init__(self, path: Union[Path, str]):
+    def __init__(self, path: Union[Path, str] = Path("FFLUX")):
 
         super().__init__(path)
         self.df = FileContents

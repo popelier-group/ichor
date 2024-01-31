@@ -18,7 +18,7 @@ class DlPolyIQAForces(ReadFile):
 
     _filetype = ""
 
-    def __init__(self, path: Union[Path, str]):
+    def __init__(self, path: Union[Path, str] = Path("IQA_FORCES")):
 
         super().__init__(path)
         self.forces = FileContents
