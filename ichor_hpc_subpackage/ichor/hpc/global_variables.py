@@ -205,6 +205,7 @@ LOGGER = setup_logger("ICHOR", "ichor.log")
 # set up script names that are implemented
 SCRIPT_NAMES = ScriptNames(
     {
+        "check_for_missing_data": "check_for_missing_data.sh",
         "pd_to_database": "pd_to_database.sh",
         "calculate_features": "calculate_features.sh",
         "center_trajectory": "center_trajectory.sh",
