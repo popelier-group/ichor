@@ -17,8 +17,11 @@ def check_gaussian_and_aimall(pd_instance: PointDirectory):
         print(f"{abs_path}: GJF file is missing.")
     if not pd_instance.gaussian_output:
         print(f"{abs_path}: GaussianOutput file is missing.")
+
     if not pd_instance.ints:
         print(f"{abs_path}: IntDirectory directory is missing.")
+
+    else:
         nints = len(pd_instance.ints.ints)
         if nints != natoms:
             print(
