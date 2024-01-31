@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Union
 
 from ichor.core.files.file import WriteFile
+from ichor.core.files.xyz.trajectory import Trajectory
 
 
 class DlPolyConfig(WriteFile):
@@ -33,7 +34,7 @@ class DlPolyConfig(WriteFile):
     def __init__(
         self,
         system_name: str,
-        trajectory: "Trajectory",  # noqa F821
+        trajectory: Trajectory,
         path: Union[Path, str] = Path("CONFIG"),
         cell_size: float = 50.0,
         comment_line="Frame :         1\n",
