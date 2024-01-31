@@ -15,6 +15,8 @@ def submit_check_points_directory_for_missing_files(points_dir_path: Union[str, 
     :param points_dir_path: Path or PointsDirectory or PointsDirectoryParent-like directory
     """
 
+    points_dir_path = Path(points_dir_path)
+
     is_parent_directory_to_many_points_directories = single_or_many_points_directories(
         points_dir_path
     )
@@ -33,7 +35,9 @@ def submit_check_points_directory_for_missing_files(points_dir_path: Union[str, 
     )
     # can use the processed data attribute because any function that works on a single
     # PointDirectory can be passed inside here.
-    text_list.append(f"{cls_to_use}.processed_data(check_gaussian_and_aimall)'")
+    text_list.append(
+        f"{cls_to_use}({points_dir_path.absolute()}).processed_data(check_gaussian_and_aimall)'"
+    )
 
     return submit_free_flow_python_command_on_compute(
         text_list, SCRIPT_NAMES["check_for_missing_data"], ncores=1
