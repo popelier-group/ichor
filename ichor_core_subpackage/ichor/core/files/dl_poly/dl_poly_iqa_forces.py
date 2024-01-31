@@ -16,9 +16,7 @@ class DlPolyIQAForces(ReadFile):
     :ivar natoms: Number of atoms in each timestep
     """
 
-    filetype = "_not_needed"
-
-    def __init__(self, path: Union[Path, str]):
+    def __init__(self, path: Union[Path, str] = Path("IQA_FORCES")):
 
         super().__init__(path)
         self.forces = FileContents

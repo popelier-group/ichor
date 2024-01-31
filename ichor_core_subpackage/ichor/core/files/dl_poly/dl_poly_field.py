@@ -119,14 +119,11 @@ class ConnectedAtoms(Atoms):
 
 
 class DlPolyField(WriteFile):
-
-    filetype = "_not_needed"
-
     def __init__(
         self,
-        path: Union[Path, str],
-        atoms,
+        atoms: Atoms,
         system_name: str,
+        path: Union[Path, str] = Path("FIELD"),
         nummols=1,
     ):
 

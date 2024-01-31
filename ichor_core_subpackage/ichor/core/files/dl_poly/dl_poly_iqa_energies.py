@@ -15,9 +15,7 @@ class DlPolyIQAEnergies(ReadFile):
     :ivar energies: Array of shape ntimesteps x natoms for read energies
     """
 
-    filetype = "_not_needed"
-
-    def __init__(self, path: Union[Path, str]):
+    def __init__(self, path: Union[Path, str] = Path("IQA_ENERGIES")):
 
         super().__init__(path)
         self.energies = FileContents

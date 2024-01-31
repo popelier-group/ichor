@@ -11,12 +11,10 @@ class DlPolyControl(WriteFile):
 
     # https://www.ehu.eus/sgi/ARCHIVOS/dlpoly_man.pdf , section 5.1.1
 
-    filetype = "_not_needed"
-
     def __init__(
         self,
-        path: Path,
-        system_name: str = None,
+        system_name: str,
+        path: Path = Path("CONTROL"),
         ensemble: str = "nvt",
         thermostat: str = "hoover",
         thermostat_settings: list = [0.04],
