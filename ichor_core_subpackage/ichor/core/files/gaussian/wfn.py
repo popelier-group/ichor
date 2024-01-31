@@ -87,7 +87,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
         atoms = Atoms()
         with open(self.path, "r") as f:
             # title = next(f).strip() # title differs from program to program which writes wfn files
-
+            next(f)
             header = next(f).split()
             n_orbitals = int(header[1])
             n_primitives = int(header[4])
