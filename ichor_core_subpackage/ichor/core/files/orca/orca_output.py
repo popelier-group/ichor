@@ -4,13 +4,7 @@ from typing import Union
 import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.types.multipole_moments import (
-    MolecularDipole,
-    MolecularHexadecapole,
-    MolecularOctapole,
-    MolecularQuadrupole,
-    TracelessMolecularQuadrupole,
-)
+from ichor.core.common.types.multipole_moments import MolecularDipole
 
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents, ReadFile
@@ -31,16 +25,22 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
         self,
         path: Union[Path, str],
     ):
-        self.global_forces = FileContents
         self.charge = FileContents
         self.multiplicity = FileContents
         self.atoms = FileContents
+        self.center_of_mass = FileContents
         self.molecular_dipole = FileContents
-        self.molecular_quadrupole = FileContents
-        self.traceless_molecular_quadrupole = FileContents
-        self.molecular_octapole = FileContents
-        self.molecular_hexadecapole = FileContents
         super(ReadFile, self).__init__(path)
+
+    # TODO: implement
+    @property
+    def raw_data(self) -> dict:
+        return {
+            "center_of_mass": self.center_of_mass,
+            "charge": self.charge,
+            "multiplicity": self.multiplicity,
+            "molecular_dipole": self.molecular_dipole,
+        }
 
     def _read_file(self):
         """Parse through a .wfn file to look for the relevant information.
@@ -48,17 +48,21 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
         FileState of the file is FileState.Unread"""
 
         atoms = Atoms()
-        forces = {}
 
+        # orca uses the center of mass for the multipole calculations
+        # cclib seems to convert  this, so that the center of mass is 0 0 0
+
+        # cclib does not parse quadrupole moment, so do not use it
+        # also, orca doesn't seem to do higher multipole moments
+
+        # TODO: finish implementation
         with open(self.path, "r") as f:
 
             for line in f:
 
-                if "Charge =" in line:
+                if "CARTESIAN COORDINATES (ANGSTROEM)" in line:
 
-                    self.charge, self.multiplicity = int(line.split()[2]), int(
-                        line.split()[-1]
-                    )
+                    line = next(f)
                     line = next(f)
 
                     while line.strip():
@@ -78,80 +82,27 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
                         )
                         line = next(f)
 
-                elif "Forces (Hartrees/Bohr)" in line:
+                elif "Total Charge" in line:
+                    charge = int(line.strip().split()[-1])
 
-                    #  Number     Number              X              Y              Z
-                    line = next(f)
-                    # -----------------------------------------
-                    line = next(f)
+                elif "Multiplicity" in line:
+                    multiplicity = int(line.strip().split()[-1])
 
-                    for atom_name in atoms.names:
-                        line = next(f).split()
-                        forces[atom_name] = np.array(
-                            [float(line[2]), float(line[3]), float(line[4])]
-                        )
-                elif "Dipole moment (field-independent basis, Debye)" in line:
-                    # dipoles are on one line
-                    dipole_line_split = next(f).split()
-                    # every 2nd value is a dipole component
-                    values = [
-                        float(dipole_line_split[i])
-                        for i in range(len(dipole_line_split))
-                        if i % 2 != 0
-                    ]
-                    self.molecular_dipole = MolecularDipole(*values)
-                elif "Quadrupole moment (field-independent basis, Debye-Ang)" in line:
-                    quadrupole_lines_split = (
-                        (next(f) + next(f)).replace("\n", "   ").split()
-                    )
-                    values = [
-                        float(quadrupole_lines_split[i])
-                        for i in range(len(quadrupole_lines_split))
-                        if i % 2 != 0
-                    ]
-                    self.molecular_quadrupole = MolecularQuadrupole(*values)
+                elif "The origin for moment calculation is the CENTER OF MASS" in line:
 
-                    # this is the line that says Traceless Quadrupole moment,
-                    # the problem is that it contains the same text
-                    # as the other quadrupole line
-                    line = next(f)
+                    ctr_of_mass_list = line.split()[-3:]
+                    ctr_x = float(ctr_of_mass_list[0].replace("(", "").replace(",", ""))
+                    ctr_y = float(ctr_of_mass_list[1])
+                    ctr_z = float(ctr_of_mass_list[2].replace(")", ""))
 
-                    traceless_quadrupole_lines_split = (
-                        (next(f) + next(f)).replace("\n", "   ").split()
-                    )
-                    values = [
-                        float(traceless_quadrupole_lines_split[i])
-                        for i in range(len(traceless_quadrupole_lines_split))
-                        if i % 2 != 0
-                    ]
-                    self.traceless_molecular_quadrupole = TracelessMolecularQuadrupole(
-                        *values
-                    )
-                elif "Octapole moment (field-independent basis, Debye-Ang**2)" in line:
-                    octapole_lines_split = (
-                        (next(f) + next(f) + next(f)).replace("\n", "   ").split()
-                    )
-                    values = [
-                        float(octapole_lines_split[i])
-                        for i in range(len(octapole_lines_split))
-                        if i % 2 != 0
-                    ]
-                    self.molecular_octapole = MolecularOctapole(*values)
-                elif (
-                    "Hexadecapole moment (field-independent basis, Debye-Ang**3)"
-                    in line
-                ):
-                    hexadecapole_lines_split = (
-                        (next(f) + next(f) + next(f) + next(f))
-                        .replace("\n", "   ")
-                        .split()
-                    )
-                    values = [
-                        float(hexadecapole_lines_split[i])
-                        for i in range(len(hexadecapole_lines_split))
-                        if i % 2 != 0
-                    ]
-                    self.molecular_hexadecapole = MolecularHexadecapole(*values)
+                elif "Total Dipole Moment" in line:
 
-        self.global_forces = forces
+                    tmp_dipole_moment = list(map(float, line.split()[-3:]))
+                    dipole_mag = sum([i**2 for i in tmp_dipole_moment]) ** 0.5
+                    dipole_moment = MolecularDipole(*tmp_dipole_moment, dipole_mag)
+
+        self.charge = charge
+        self.multiplicity = multiplicity
         self.atoms = atoms
+        self.center_of_mass = np.array([ctr_x, ctr_y, ctr_z])
+        self.molecular_dipole = dipole_moment
