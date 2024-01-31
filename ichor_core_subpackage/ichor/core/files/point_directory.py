@@ -2,12 +2,10 @@ from pathlib import Path
 from typing import Union
 
 from ichor.core.atoms import Atoms, AtomsNotFoundError
-from ichor.core.files import OrcaInput, OrcaOutput
 from ichor.core.files.aimall import Aim, IntDirectory
 from ichor.core.files.directory import AnnotatedDirectory
 from ichor.core.files.file_data import HasAtoms, HasData
 from ichor.core.files.gaussian import GaussianOutput, GJF, WFN
-from ichor.core.files.pandora import PandoraDirectory, PandoraInput
 from ichor.core.files.xyz import XYZ
 
 
@@ -24,13 +22,9 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
         "xyz": XYZ,
         "gjf": GJF,
         "gaussian_output": GaussianOutput,
-        "orca_input": OrcaInput,
-        "orca_output": OrcaOutput,
         "aim": Aim,
         "wfn": WFN,
         "ints": IntDirectory,
-        "pandora_input": PandoraInput,
-        "pandora_directory": PandoraDirectory,
     }
 
     def __init__(self, path: Union[Path, str]):
