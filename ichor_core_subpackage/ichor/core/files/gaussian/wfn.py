@@ -14,13 +14,11 @@ class MolecularOrbital:
     def __init__(
         self,
         index: int,
-        eigen_value: float,
         occupation_number: float,
         energy: float,
         primitives: list,
     ):
         self.index = index
-        self.eigen_value = eigen_value
         self.occupation_number = occupation_number
         self.energy = energy
         self.primitives = primitives
@@ -68,8 +66,6 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
         self.method = method or FileContents
 
         self.atoms = FileContents
-        self.title = FileContents
-        self.program = FileContents
         self.n_orbitals = FileContents
         self.n_primitives = FileContents
         self.n_nuclei = FileContents
@@ -90,10 +86,9 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
         FileState of the file is FileState.Unread"""
         atoms = Atoms()
         with open(self.path, "r") as f:
-            title = next(f).strip()
+            # title = next(f).strip() # title differs from program to program which writes wfn files
 
             header = next(f).split()
-            program = header[0]
             n_orbitals = int(header[1])
             n_primitives = int(header[4])
             n_nuclei = int(header[6])
@@ -143,9 +138,8 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
             while not line.startswith(r"END DATA"):
                 record = line.split()
                 imo = int(record[1])
-                eigen_value = float(record[3])
-                occupation_number = float(record[7])
-                energy = float(record[11])
+                occupation_number = float(record[-5])
+                energy = float(record[-1])
 
                 primitives = []
                 line = next(f)
@@ -155,7 +149,6 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
                 molecular_orbitals.append(
                     MolecularOrbital(
                         imo,
-                        eigen_value,
                         occupation_number,
                         energy,
                         primitives,
@@ -166,8 +159,6 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
             total_energy = float(record[3])
             virial_ratio = float(record[6])
 
-        self.title = self.title or title
-        self.program = self.program or program
         self.n_orbitals = self.n_orbitals or n_orbitals
         self.n_primitives = self.n_primitives or n_primitives
         self.n_nuclei = self.n_nuclei or n_nuclei
