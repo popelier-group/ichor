@@ -38,6 +38,7 @@ def submit_check_points_directory_for_missing_files(points_dir_path: Union[str, 
     text_list.append(
         f"{cls_to_use}('{points_dir_path.absolute()}').processed_data(check_gaussian_and_aimall)"
     )
+    text_list.append("print('Finished checking.')")
 
     return submit_free_flow_python_command_on_compute(
         text_list, SCRIPT_NAMES["check_for_missing_data"], ncores=1
