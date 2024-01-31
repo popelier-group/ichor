@@ -60,7 +60,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
         atoms: Optional[Atoms] = None,
-        **input_blocks: Dict[str, Union[str, List[str]]],
+        input_blocks: Dict[str, Union[str, List[str]]] = None,
     ):
         File.__init__(self, path)
 
