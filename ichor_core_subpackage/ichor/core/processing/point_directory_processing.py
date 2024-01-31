@@ -10,20 +10,18 @@ from ichor.core.processing.callables import (
 
 def fflux_point_directory_processing(
     alf_dict: Dict[str, ALF] = None, central_atom_name: str = None
-):
+) -> dict:
+    """Does all calculations on a PointDirectory
+    that would be needed for making ML models for FFLUX.
 
-    # commented code was to automatically detect function, did not work well
-    # processing_dict = {
-    #     WFN: no_processing_function,
-    #     IntDirectory: fflux_ints_directory_processing_function,
-    #     GaussianOutput: fflux_gaussian_output_processing_function
-    # }
+    :param alf_dict: A dictionary containing the ALFs of the atoms in
+        the system. If not given, it is automatically created, defaults to None
+    :param central_atom_name: An atom name which to calculate
+        feature forces on. If not given, the first atom (of the .xyz file) will
+        be used, defaults to None
 
-    # check that data can actually be obtained for the classes that are given
-    # for cls in processing_dict.keys():
-    #     if not issubclass(cls, HasData):
-    #         raise ValueError(f"The class {cls.__name__} does not contain data.")
-    # default alf if not given
+    :returns: A dictionary of processed data needed for ML models.
+    """
 
     def _processing_func(point_directory):
 
@@ -67,6 +65,19 @@ def fflux_point_directory_processing(
         return all_processed_data
 
     return _processing_func
+
+    # commented code was to automatically detect function, did not work well
+    # processing_dict = {
+    #     WFN: no_processing_function,
+    #     IntDirectory: fflux_ints_directory_processing_function,
+    #     GaussianOutput: fflux_gaussian_output_processing_function
+    # }
+
+    # check that data can actually be obtained for the classes that are given
+    # for cls in processing_dict.keys():
+    #     if not issubclass(cls, HasData):
+    #         raise ValueError(f"The class {cls.__name__} does not contain data.")
+    # default alf if not given
 
     # TODO: below code was to automatically determine what function to use for each class
     # TODO: however there isn't a nice way to pass parameters to the functions then.
