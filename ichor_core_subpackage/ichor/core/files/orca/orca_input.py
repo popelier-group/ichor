@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.pairwise import pairwise
 
 from ichor.core.files.file import File, FileContents, ReadFile, WriteFile
 from ichor.core.files.file_data import HasAtoms
@@ -60,7 +59,7 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
         charge: Optional[int] = None,
         spin_multiplicity: Optional[int] = None,
         atoms: Optional[Atoms] = None,
-        input_blocks: Dict[str, Union[str, List[str]]] = None,
+        input_blocks: Dict[str, List[tuple]] = None,
     ):
         File.__init__(self, path)
 
@@ -202,10 +201,9 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
             write_str += f"!{m}\n"
         for k, vals in self.input_blocks.items():
             write_str += f"%{k}\n"
-            for v in pairwise(vals):
+            for v in vals:
                 write_str += f"    {v[0]} {v[1]}\n"
             write_str += "end\n"
-        write_str += ""
         write_str += f"* xyz {self.charge} {self.spin_multiplicity}\n"
         for atom in self.atoms:
             write_str += (
