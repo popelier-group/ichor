@@ -156,8 +156,8 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
                 )
 
             record = next(f).split()
-            total_energy = float(record[3])
-            virial_ratio = float(record[6])
+            total_energy = float(record[-4])
+            virial_ratio = float(record[-1])
 
         self.n_orbitals = self.n_orbitals or n_orbitals
         self.n_primitives = self.n_primitives or n_primitives
