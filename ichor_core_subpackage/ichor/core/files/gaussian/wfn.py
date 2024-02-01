@@ -181,7 +181,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
         write_str = ""
 
-        write_str += f"{self.path.stem}"  # don't think title line is read by aimall
+        write_str += f"{self.path.stem}\n"  # don't think title line is read by aimall
         # Gaussian writes GAUSSIAN, orca writes GTO so it should be type of orbitals
         header_line = f"GAUSSIAN {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
         # add method here, so that AIMAll works correctly
