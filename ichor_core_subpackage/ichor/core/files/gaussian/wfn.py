@@ -181,7 +181,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
         write_str = ""
 
-        write_str += f"{self.title}\n"
+        # write_str += f"{self.title}\n"
         header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
         # add method here, so that AIMAll works correctly
         # note that only selected functionals / methods work
