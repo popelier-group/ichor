@@ -966,9 +966,7 @@ def test_water_monomer_point_directory1():
         gau_charge=0,
         gau_multiplicity=1,
         gau_atoms=reference_gau_atoms,
-        gau_molecular_dipole=MolecularDipole(
-            x=0.1426, y=2.3942, z=0.0535, total=2.3991
-        ),
+        gau_molecular_dipole=MolecularDipole(x=0.1426, y=2.3942, z=0.0535),
         gau_molecular_quadrupole=MolecularQuadrupole(
             xx=-6.4806, yy=-7.7366, zz=-6.204, xy=0.0721, xz=-1.6772, yz=-0.0534
         ),

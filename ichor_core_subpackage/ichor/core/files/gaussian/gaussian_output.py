@@ -130,7 +130,7 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
                         for i in range(len(dipole_line_split))
                         if i % 2 != 0
                     ]
-                    self.molecular_dipole = MolecularDipole(*values)
+                    self.molecular_dipole = MolecularDipole(values[:3])
                 elif "Quadrupole moment (field-independent basis, Debye-Ang)" in line:
                     quadrupole_lines_split = (
                         (next(f) + next(f)).replace("\n", "   ").split()

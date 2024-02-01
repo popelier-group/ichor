@@ -93,7 +93,7 @@ def test_water_monomer_gau_file_without_forces():
         charge=0,
         multiplicity=1,
         atoms=reference_atoms,
-        molecular_dipole=MolecularDipole(x=0.1426, y=2.3942, z=0.0535, total=2.3991),
+        molecular_dipole=MolecularDipole(x=0.1426, y=2.3942, z=0.0535),
         molecular_quadrupole=MolecularQuadrupole(
             xx=-6.4806, yy=-7.7366, zz=-6.204, xy=0.0721, xz=-1.6772, yz=-0.0534
         ),
@@ -156,7 +156,7 @@ def test_water_monomer_gau_file_with_forces():
         charge=0,
         multiplicity=1,
         atoms=reference_atoms,
-        molecular_dipole=MolecularDipole(x=1.3362, y=1.5253, z=0.0, total=2.0278),
+        molecular_dipole=MolecularDipole(x=1.3362, y=1.5253, z=0.0),
         molecular_quadrupole=MolecularQuadrupole(
             xx=-5.3112, yy=-5.1244, zz=-7.9601, xy=-0.4487, xz=0.0, yz=0.0
         ),
@@ -251,7 +251,7 @@ def test_glycine_gau_file_with_forces():
         charge=0,
         multiplicity=1,
         atoms=reference_atoms,
-        molecular_dipole=MolecularDipole(x=-2.4751, y=1.687, z=-1.2018, total=3.2275),
+        molecular_dipole=MolecularDipole(x=-2.4751, y=1.687, z=-1.2018),
         molecular_quadrupole=MolecularQuadrupole(
             xx=-36.2654, yy=-60.0278, zz=-58.3936, xy=-7.9603, xz=2.6513, yz=4.9482
         ),

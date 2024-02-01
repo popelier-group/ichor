@@ -98,8 +98,7 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
                 elif "Total Dipole Moment" in line:
 
                     tmp_dipole_moment = list(map(float, line.split()[-3:]))
-                    dipole_mag = sum([i**2 for i in tmp_dipole_moment]) ** 0.5
-                    dipole_moment = MolecularDipole(*tmp_dipole_moment, dipole_mag)
+                    dipole_moment = MolecularDipole(*tmp_dipole_moment)
 
         self.charge = charge
         self.multiplicity = multiplicity
