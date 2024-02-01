@@ -204,8 +204,8 @@ class OrcaInput(ReadFile, WriteFile, File, HasAtoms):
             write_str += f"%{k}\n"
             for v in pairwise(vals):
                 write_str += f"    {v[0]} {v[1]}\n"
-            write_str += "end"
-        write_str += "\n"
+            write_str += "end\n"
+        write_str += ""
         write_str += f"* xyz {self.charge} {self.spin_multiplicity}\n"
         for atom in self.atoms:
             write_str += (
