@@ -4,7 +4,10 @@ from typing import Union
 import numpy as np
 
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.types.multipole_moments import MolecularDipole
+from ichor.core.common.types.multipole_moments import (
+    MolecularDipole,
+    MolecularQuadrupole,
+)
 
 from ichor.core.common.units import AtomicDistance
 from ichor.core.files.file import FileContents, ReadFile
@@ -30,6 +33,7 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
         self.atoms = FileContents
         self.center_of_mass = FileContents
         self.molecular_dipole = FileContents
+        self.molecular_quadrupole = FileContents
         super(ReadFile, self).__init__(path)
 
     # TODO: implement
@@ -40,6 +44,7 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
             "charge": self.charge,
             "multiplicity": self.multiplicity,
             "molecular_dipole": self.molecular_dipole,
+            "molecular_quadrupole": self.molecular_quadrupole,
         }
 
     def _read_file(self):
@@ -100,8 +105,23 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
                     tmp_dipole_moment = list(map(float, line.split()[-3:]))
                     dipole_moment = MolecularDipole(*tmp_dipole_moment)
 
+                # note that this is optional
+                elif "QUADRUPOLE MOMENT (A.U.)" in line:
+
+                    line = next(f)  # ----
+                    line = next(f)  # blank
+                    line = next(f)  # XX YY ..
+                    line = next(f)  # nuc
+                    line = next(f)  # el
+                    # quadrupole line in atomic units
+                    line = next(f)
+                    # quadrupole line in Buckingham, same as Debye Angstrom
+                    line = next(f)
+                    tmp_quadrupole_moment = list(map(float, line.split()[:6]))
+
         self.charge = charge
         self.multiplicity = multiplicity
         self.atoms = atoms
         self.center_of_mass = np.array([ctr_x, ctr_y, ctr_z])
         self.molecular_dipole = dipole_moment
+        self.molecular_quadrupole = MolecularQuadrupole(*tmp_quadrupole_moment)
