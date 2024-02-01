@@ -181,7 +181,6 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
         write_str = ""
 
-        # write_str += f"{self.title}\n"
         header_line = f"{self.program:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
         # add method here, so that AIMAll works correctly
         # note that only selected functionals / methods work
@@ -207,7 +206,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
             write_str += f"EXPONENTS {exponents}\n"
 
         for molecular_orbital in self.molecular_orbitals:
-            write_str += f"MO {molecular_orbital.index:4d}     MO {molecular_orbital.eigen_value:10.8f} OCC NO = {molecular_orbital.occupation_number:12.7f}  ORB. ENERGY ={molecular_orbital.energy:12.6f}\n"  # noqa E501
+            write_str += f"MO {molecular_orbital.index:4d}                     OCC NO = {molecular_orbital.occupation_number:12.7f}  ORB. ENERGY ={molecular_orbital.energy:12.6f}\n"  # noqa E501
             for primitives in chunker(molecular_orbital.primitives, 5):
                 primitives = "".join(map(lambda x: f"{x:16.8E}", primitives)).replace(
                     "E", "D"
