@@ -156,6 +156,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
                 )
 
             record = next(f).split()
+            # parse with -ve numbers because gaussian/orca have slightly different lines here
             total_energy = float(record[-4])
             virial_ratio = float(record[-1])
 
@@ -185,6 +186,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
         write_str += f" {self.path.stem}\n"  # don't think title line is read by aimall
         # Gaussian writes GAUSSIAN, orca writes GTO so it should be type of orbitals
+        # NOTE: the 16s spaces are NECESSARY. otherwise AIMAll will crash
         header_line = f"{orb_type:16s} {self.n_orbitals:6d} MOL ORBITALS {self.n_primitives:6d} PRIMITIVES {self.n_nuclei:8d} NUCLEI"  # noqa E501
         # add method here, so that AIMAll works correctly
         # note that only selected functionals / methods work
@@ -218,6 +220,8 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
                 write_str += f"{primitives}\n"
 
         write_str += "END DATA\n"
+        # gaussian and orca have slightly different energy lines
+        # but spacing/etc is identical for both of them, so aimall can read both
         write_str += f" TOTAL ENERGY ={self.total_energy:22.12f} THE VIRIAL(-V/T)= {self.virial_ratio:12.8f}"
 
         return write_str
