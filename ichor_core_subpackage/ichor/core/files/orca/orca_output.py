@@ -106,6 +106,7 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
                     dipole_moment = MolecularDipole(*tmp_dipole_moment)
 
                 # note that this is optional
+                # might not be in the output file
                 elif "QUADRUPOLE MOMENT (A.U.)" in line:
 
                     line = next(f)  # ----
@@ -118,10 +119,12 @@ class OrcaOutput(HasAtoms, HasData, ReadFile):
                     # quadrupole line in Buckingham, same as Debye Angstrom
                     line = next(f)
                     tmp_quadrupole_moment = list(map(float, line.split()[:6]))
+                    self.molecular_quadrupole = MolecularQuadrupole(
+                        *tmp_quadrupole_moment
+                    )
 
         self.charge = charge
         self.multiplicity = multiplicity
         self.atoms = atoms
         self.center_of_mass = np.array([ctr_x, ctr_y, ctr_z])
         self.molecular_dipole = dipole_moment
-        self.molecular_quadrupole = MolecularQuadrupole(*tmp_quadrupole_moment)
