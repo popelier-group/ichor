@@ -35,6 +35,14 @@ class FileContentsType(NoStr):
         """FileContents instances must evaluate to False (as NoneType)."""
         return False
 
+    def __str__(self):
+        """
+        More readable to print out as FileContents
+        in stdout
+        """
+
+        return "FileContents"
+
 
 # make an instance of FileContentsType which to use everywhere.
 FileContents = FileContentsType()
