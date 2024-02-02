@@ -43,6 +43,14 @@ class FileContentsType(NoStr):
 
         return "FileContents"
 
+    def __repr__(self):
+        """
+        More readable to print out as FileContents
+        in stdout
+        """
+
+        return "FileContents"
+
 
 # make an instance of FileContentsType which to use everywhere.
 FileContents = FileContentsType()
