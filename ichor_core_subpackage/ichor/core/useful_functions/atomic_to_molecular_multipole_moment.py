@@ -1,6 +1,9 @@
 import numpy as np
 from ichor.core.atoms import Atoms
-from ichor.core.common.constants import coulombbhrsquared_to_debye, coulombbohr_to_debye
+from ichor.core.common.constants import (
+    coulombbhrsquared_to_debye_angstrom,
+    coulombbohr_to_debye,
+)
 from ichor.core.files import IntDirectory
 from ichor.core.multipoles import (
     atomic_contribution_to_molecular_dipole,
@@ -73,7 +76,7 @@ def recover_molecular_quadrupole(
     atoms: Atoms,
     ints_dir: IntDirectory,
     atoms_in_angstroms=True,
-    convert_to_debye=True,
+    convert_to_debye_angstrom=True,
     convert_to_cartesian=True,
 ):
     """
@@ -125,8 +128,8 @@ def recover_molecular_quadrupole(
         )
         molecular_quadrupole += atomic_contibution
 
-    if convert_to_debye:
-        molecular_quadrupole *= coulombbhrsquared_to_debye
+    if convert_to_debye_angstrom:
+        molecular_quadrupole *= coulombbhrsquared_to_debye_angstrom
 
     if convert_to_cartesian:
         molecular_quadrupole = quadrupole_spherical_to_cartesian(*molecular_quadrupole)

@@ -840,7 +840,7 @@ multipole_names: List[str] = (
 
 # taken from Anthony Stone Book, The Theory of Intermolecular Forces
 coulombbohr_to_debye = 2.5417464
-coulombbhrsquared_to_debye = 1.3450342
+coulombbhrsquared_to_debye_angstrom = 1.3450342
 
 
 # ha_to_kj_mol = 2625.5
