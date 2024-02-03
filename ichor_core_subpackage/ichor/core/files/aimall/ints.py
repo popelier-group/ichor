@@ -89,7 +89,7 @@ class IntDirectory(HasData, AnnotatedDirectory):
     def __iter__(self):
         """Iterate over all INT instances (wrap around individual .int files)
         which are found in an INTs directory."""
-        yield from self.values()
+        yield from self.ints
 
     def __str__(self):
         atm_names = [i.atom_name for i in self.ints]
