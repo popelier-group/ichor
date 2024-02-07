@@ -246,7 +246,7 @@ def mdcrd_to_xyz(
                 _ = next(f)
                 line = next(f)
                 while "CHARGE" not in line:
-                    atom_names += [get_characters(a).upper() for a in line.split()]
+                    atom_names += [get_characters(a).capitalize() for a in line.split()]
                     line = next(f)
 
     mdin_inst = AmberMDIn(mdin)
