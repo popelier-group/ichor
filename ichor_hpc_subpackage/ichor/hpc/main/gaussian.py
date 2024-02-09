@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 import ichor.hpc.global_variables
 
-from ichor.core.files import GJF, PointsDirectory
+from ichor.core.files import GJF, PointsDirectory, WFN
 from ichor.hpc.batch_system import JobID
 from ichor.hpc.submission_commands import GaussianCommand
 from ichor.hpc.submission_script import SubmissionScript
@@ -140,12 +140,27 @@ def submit_gjfs(
         number_of_jobs = 0
 
         for gjf in gjfs:
+
             # (even if wfn file exits) or a wfn file does not exist
             if force_calculate_wfn or not gjf.with_suffix(".wfn").exists():
                 # make a list of GaussianCommand instances.
                 submission_script.add_command(GaussianCommand(gjf))
 
                 number_of_jobs += 1
+
+            # case where the wfn file exists but does not have total energy
+            # or something else is wrong with the file
+            elif gjf.with_suffix(".wfn").exists():
+                # make a list of GaussianCommand instances.
+                try:
+                    wfn_file = WFN(gjf.with_suffix(".wfn"))
+                    wfn_file.read()  # file is being read here
+                # if file is empty, then stopiteration should be raised
+                # then add to list of files to run Gaussian on
+                except StopIteration:
+
+                    submission_script.add_command(GaussianCommand(gjf))
+                    number_of_jobs += 1
 
         ichor.hpc.global_variables.LOGGER.info(
             f"Added {number_of_jobs} / {len(gjfs)} Gaussian jobs to {submission_script.path}"

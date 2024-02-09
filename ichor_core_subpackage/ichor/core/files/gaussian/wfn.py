@@ -182,7 +182,7 @@ class WFN(HasAtoms, HasData, ReadFile, WriteFile):
 
         write_str = ""
 
-        orb_type = "GAUSIAN"
+        orb_type = "GAUSSIAN"
 
         write_str += f" {self.path.stem}\n"  # don't think title line is read by aimall
         # Gaussian writes GAUSSIAN, orca writes GTO so it should be type of orbitals
