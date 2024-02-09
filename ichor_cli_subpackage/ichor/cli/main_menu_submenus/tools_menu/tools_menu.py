@@ -69,6 +69,7 @@ class ToolsMenuFunctions:
 
 
 tools_menu = ConsoleMenu(
+    this_menu_options=tools_menu_options,
     title=TOOLS_MENU_DESCRIPTION.title,
     subtitle=TOOLS_MENU_DESCRIPTION.subtitle,
     prologue_text=TOOLS_MENU_DESCRIPTION.prologue_description_text,
