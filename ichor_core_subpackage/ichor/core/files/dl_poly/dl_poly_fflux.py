@@ -40,7 +40,13 @@ class DlPolyFFLUX(ReadFile):
             index_col=0,
             header=None,
             sep=r"\s+",
-            names=["step", "E_IQA/Ha", "E_vdW/kJ mol-1", "E_coul/kJ mol-1"],
+            names=[
+                "step",
+                "E_IQA/Ha",
+                "E_vdW/kJ mol-1",
+                "E_coul/kJ mol-1",
+                "E_kin / kJ mol-1",
+            ],
         )
 
     @property
@@ -62,6 +68,10 @@ class DlPolyFFLUX(ReadFile):
     @property
     def electrostatic_energy(self):
         return self.df["E_coul/kJ mol-1"].values
+
+    @property
+    def kinetic_energy(self):
+        return self.df["E_kin / kJ mol-1"].values
 
     @property
     def ntimesteps(self):
