@@ -7,6 +7,7 @@ from ichor.core.common.constants import (
 from ichor.core.files import IntDirectory
 from ichor.core.multipoles import (
     atomic_contribution_to_molecular_dipole,
+    atomic_contribution_to_molecular_octupole,
     atomic_contribution_to_molecular_quadrupole,
     dipole_spherical_to_cartesian,
     quadrupole_spherical_to_cartesian,
@@ -135,3 +136,36 @@ def recover_molecular_quadrupole(
         molecular_quadrupole = quadrupole_spherical_to_cartesian(*molecular_quadrupole)
 
     return molecular_quadrupole
+
+
+def recover_molecular_octupole(atoms, ints_dir, atoms_in_angstroms=True):
+
+    # make sure we are in Bohr
+    if atoms_in_angstroms:
+        atoms = atoms.to_bohr()
+
+    # # spherical representation
+    # molecular_quadrupole = np.zeros(7)
+    q30_tot = 0.0
+
+    for atom in atoms:
+
+        # get necessary data for calculations
+        atom_coords = atom.coordinates
+        global_multipoles = ints_dir[atom.name].global_multipole_moments
+
+        # get the values for a particular atom
+        q00 = global_multipoles["q00"]
+        q10 = global_multipoles["q10"]
+        q11c = global_multipoles["q11c"]
+        q11s = global_multipoles["q11s"]
+        q20 = global_multipoles["q20"]
+        q21c = global_multipoles["q21c"]
+        q21s = global_multipoles["q21s"]
+        q30 = global_multipoles["q30"]
+
+        q30_tot += atomic_contribution_to_molecular_octupole(
+            q30, q10, q21c, q21s, q20, q00, q11c, q11s, atom_coords
+        )
+
+    return q30_tot

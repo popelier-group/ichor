@@ -104,3 +104,24 @@ def unpack_cartesian_octupole(o):
 
 def octupole_rotate_cartesian(o: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,kc,abc->ijk", C, C, C, o)
+
+
+def atomic_contribution_to_molecular_octupole(
+    q30, q10, q21c, q21s, q20, q00, q11c, q11s, atomic_coordinates
+):
+
+    x, y, z = atomic_coordinates
+    norm_sq = np.sum(atomic_coordinates**2)
+
+    q30_prime = (
+        q30
+        + (1.5 * (3 * z**2 - norm_sq) * q10)
+        - (constants.rt3 * x * q21c)
+        - (constants.rt3 * y * q21s)
+        + (3 * z * q20)
+        + ((z / 2.0) * ((5 * z**2) - (3 * norm_sq)) * q00)
+        - (3 * x * z * q11c)
+        - (3 * y * z * q11s)
+    )
+
+    return q30_prime
