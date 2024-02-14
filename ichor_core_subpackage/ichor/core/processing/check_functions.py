@@ -10,7 +10,7 @@ def check_gaussian_and_aimall(pd_instance: PointDirectory):
     :param pd_instance: PointDirectory instance to check
     """
 
-    abs_path = str(pd_instance.path.name)
+    abs_path = str(pd_instance.path.absolute())
     natoms = len(pd_instance.xyz.atoms)
 
     if not pd_instance.gjf:
