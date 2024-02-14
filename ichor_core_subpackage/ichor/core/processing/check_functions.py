@@ -10,14 +10,15 @@ def check_gaussian_and_aimall(pd_instance: PointDirectory):
     :param pd_instance: PointDirectory instance to check
     """
 
-    abs_path = str(pd_instance.path.absolute())
+    abs_path = str(pd_instance.path.name)
     natoms = len(pd_instance.xyz.atoms)
 
     if not pd_instance.gjf:
         print(f"{abs_path}: GJF file is missing.")
     if not pd_instance.gaussian_output:
         print(f"{abs_path}: GaussianOutput file is missing.")
-
+    if not pd_instance.wfn:
+        print(f"{abs_path}: WFN file is missing.")
     if not pd_instance.ints:
         print(f"{abs_path}: IntDirectory directory is missing.")
 
