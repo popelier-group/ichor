@@ -43,7 +43,7 @@ class PythonCommand(SubmissionCommand):
             return f"source {str(activate_script)}"
         elif python_env.uses_conda:
             env_path = python_env.conda_path.absolute()
-            return f"conda activate {str(env_path)}"
+            return f"source activate {str(env_path)}"
 
         raise PythonEnvironmentNotFound(
             "Python environment was not found. Cannot submit Python command."
