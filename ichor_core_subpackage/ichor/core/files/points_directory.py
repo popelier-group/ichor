@@ -624,3 +624,12 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
             dtype=np.float64,
         )
         df.to_csv(fname, index=False)
+
+    def iterdir(self):
+        """alias to __iter__ in case child object overrides __iter__"""
+        return iter(self)
+
+    def __iter__(self):
+        """When code iterates over an instance of a directory, it calls the pathlib iterdir() method which yields
+        path objects to all directory contents."""
+        return self.iterdir()
