@@ -17,8 +17,16 @@ def check_gaussian_and_aimall(pd_instance: PointDirectory):
         print(f"{abs_path}: GJF file is missing.")
     if not pd_instance.gaussian_output:
         print(f"{abs_path}: GaussianOutput file is missing.")
+
     if not pd_instance.wfn:
         print(f"{abs_path}: WFN file is missing.")
+    else:
+        wfn_instance = pd_instance.wfn
+        try:
+            wfn_instance.read()
+        except StopIteration:
+            print(f"{abs_path}: Problem reading the wfn file.")
+
     if not pd_instance.ints:
         print(f"{abs_path}: IntDirectory directory is missing.")
 
