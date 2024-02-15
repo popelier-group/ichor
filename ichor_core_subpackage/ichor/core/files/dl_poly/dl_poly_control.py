@@ -43,7 +43,7 @@ class DlPolyControl(WriteFile):
         self.thermostat = thermostat
         self.thermostat_settings = thermostat_settings
         self.temperature = temperature
-        self.timestep = (timestep,)
+        self.timestep = timestep
         self.steps = steps
         self.scale = scale
         self.cutoff = cutoff
