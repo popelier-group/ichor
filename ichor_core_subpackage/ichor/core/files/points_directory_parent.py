@@ -154,8 +154,3 @@ class PointsDirectoryParent(list, Directory):
             pointsdir.write_to_sqlite3_database(
                 db_path, echo=echo, print_missing_data=print_missing_data
             )
-
-    def __iter__(self):
-        """When code iterates over an instance of a directory, it calls the pathlib iterdir() method which yields
-        path objects to all directory contents."""
-        return iter(self)
