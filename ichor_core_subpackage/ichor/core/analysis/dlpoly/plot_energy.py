@@ -135,7 +135,8 @@ def plot_total_energy(
 
     # get data from somewhere
     if not isinstance(data, list):
-        fflux_files = [data]
+        data = [data]
+
     if isinstance(data[0], DlPolyFFLUX):
         fflux_files = data
     elif isinstance(data[0], FFLUXDirectory):
