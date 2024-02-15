@@ -61,7 +61,7 @@ class DlPolyControl(WriteFile):
     # def _read_file(self):
     #     ...
 
-    def _write_file(self, path, *args, **kwargs):
+    def _write_file(self, *args, **kwargs):
 
         write_str = ""
 
