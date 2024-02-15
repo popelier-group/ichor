@@ -61,7 +61,7 @@ class DlPolyControl(WriteFile):
     # def _read_file(self):
     #     ...
 
-    def _write_file(self, *args, **kwargs):
+    def _write_file(self, path, *args, **kwargs):
 
         write_str = ""
 
@@ -69,7 +69,7 @@ class DlPolyControl(WriteFile):
         write_str += "\n"
         # ensemble nvt hoover f select NVT ensemble, type Nose-Hoover with thermostat
         # relaxation constant f in ps
-        str_thermostat_settings = " ".join([i for i in self.thermostat_settings])
+        str_thermostat_settings = " ".join([str(i) for i in self.thermostat_settings])
         write_str += (
             f"ensemble {self.ensemble} {self.thermostat} {str_thermostat_settings}\n"
         )
