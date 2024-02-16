@@ -234,7 +234,6 @@ def calculate_compact_s_curves_from_files(
     :param kwargs: Key word argument to give to xlsxwriter for customizing plots.
     """
 
-    nfeatures = models[0].x.shape[-1]
     # dicts to read in csv data
     features_dict: Dict[str, np.ndarray] = {}
     true_values_dict: Dict[str, Dict[str, np.ndarray]] = {}
@@ -245,12 +244,19 @@ def calculate_compact_s_curves_from_files(
     else:
         all_props = property_names
 
-    # use this to get features columns from df
-    features_list = [f"f{i}" for i in range(1, nfeatures + 1)]
-
     for csv_file in csv_files_list:
 
         test_set_df = pd.read_csv(csv_file)
+
+        # these are the indices of the columns that surround the feature columns in the csv
+        # if the csvs have been written out by ichor
+        index_of_prev_column = test_set_df.columns.get_loc("point_name")
+        index_of_subsequent_column = test_set_df.columns.get_loc("wfn_energy")
+
+        # get column names that contain features
+        features_list = test_set_df.columns[
+            (index_of_prev_column + 1) : index_of_subsequent_column  # noqa
+        ]
 
         # make sure that the property iqa / iqa_energy has the correct name
         # if "iqa" found, then replace in all_props
