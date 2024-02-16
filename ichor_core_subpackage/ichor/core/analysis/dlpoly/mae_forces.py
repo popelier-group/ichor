@@ -85,4 +85,5 @@ def mae_forces(
     for t in tick_labels:
         t.set_fontweight("bold")
 
+    fig.tight_layout()
     fig.savefig(output_name, dpi=300, pad_inches=0.05)
