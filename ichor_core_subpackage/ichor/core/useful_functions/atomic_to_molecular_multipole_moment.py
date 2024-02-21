@@ -11,6 +11,7 @@ from ichor.core.multipoles import (
     atomic_contribution_to_molecular_quadrupole,
     dipole_spherical_to_cartesian,
     quadrupole_spherical_to_cartesian,
+    unpack_cartesian_quadrupole,
 )
 
 
@@ -79,6 +80,7 @@ def recover_molecular_quadrupole(
     atoms_in_angstroms=True,
     convert_to_debye_angstrom=True,
     convert_to_cartesian=True,
+    unpack=True,
 ):
     """
     Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
@@ -97,6 +99,8 @@ def recover_molecular_quadrupole(
     :param convert_to_cartesian: Whether or not to convert the recovered molecular quadrupole from spherical
         to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
         in Cartesian coordinates, so set to True in case you are comparing against Gaussian.
+    :param unpacked: Whether to unpack the Cartesian quadrupole so it does not have redundancies.
+        Note the returned order is xx, xy, xz, yy, yz, zz
     :returns: A numpy array containing the molecular quadrupole moment.
     """
 
@@ -134,6 +138,11 @@ def recover_molecular_quadrupole(
 
     if convert_to_cartesian:
         molecular_quadrupole = quadrupole_spherical_to_cartesian(*molecular_quadrupole)
+
+        if unpack:
+            molecular_quadrupole = np.array(
+                unpack_cartesian_quadrupole(molecular_quadrupole)
+            )
 
     return molecular_quadrupole
 
