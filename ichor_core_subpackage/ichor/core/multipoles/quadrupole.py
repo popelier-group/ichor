@@ -400,13 +400,15 @@ def molecular_quadrupole_origin_change(
     # get the true quadrupole moment as would be calculated by AIMAll
     # GAUSSIAN and ORCA do not include this prefactor
     # see p21-p22 in See p. 21 of Anthony Stone Theory of Intermolecular forces
+    # we need to include this prefactor for the equations that are in https://doi.org/10.1021/jp067922u
+    # because they are for the "true" quadrupole
     quadrupole_moment = quadrupole_moment / (2 / 3)
 
     # we need the dipole in the quadrupole calculations as well
     q10, q11c, q11s = dipole_cartesian_to_spherical(dipole_moment)
 
     # the packing function uses xx, xy, xz, yy, yz, zz ordering
-    # gives a 3x3 matrix containing the packed representation
+    # gives a 3x3 matrix containing the packed representation with redundancies
     packed_traceless_quadrupole = pack_cartesian_quadrupole(
         quadrupole_moment[0],
         quadrupole_moment[3],
@@ -423,6 +425,8 @@ def molecular_quadrupole_origin_change(
 
     # this is the quadrupole moment in the new origin
     # but it is in spherical
+    # reusing the same code for the atomic contributions
+    # because the concept is exactly the same for molecular quadrupole change of origin
     quadripole_prime = atomic_contribution_to_molecular_quadrupole(
         molecular_charge,
         q10,
@@ -433,18 +437,22 @@ def molecular_quadrupole_origin_change(
         q21s,
         q22c,
         q22s,
-        old_origin - new_origin,
+        old_origin
+        - new_origin,  # has to be old origin - new origin otherwise does not work
     )
+
     # convert back to cartesian
-    quadripole_prime_cartesian = quadrupole_spherical_to_cartesian(*quadripole_prime)
+    quadripole_prime_cartesian_packed = quadrupole_spherical_to_cartesian(
+        *quadripole_prime
+    )
 
     # take into account factor again so that we can directly compare against GAUSSIAN or ORCA
     # note that this will be in atomic unit still so an additional conversion might be needed
-    quadripole_prime_cartesian *= 2 / 3
+    quadripole_prime_cartesian_packed *= 2 / 3
 
     # ordered as xx, xy, xz, yy, yz, zz
     unpacked_shifted_origin_quadrupole = np.array(
-        unpack_cartesian_quadrupole(quadripole_prime_cartesian)
+        unpack_cartesian_quadrupole(quadripole_prime_cartesian_packed)
     )
     # ordered as xx, yy, zz, xy, xz, yz
     unpacked_shifted_origin_quadrupole = unpacked_shifted_origin_quadrupole[
