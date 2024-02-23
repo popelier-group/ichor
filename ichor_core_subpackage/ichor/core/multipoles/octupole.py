@@ -153,7 +153,13 @@ def atomic_contribution_to_molecular_octupole(
 
 
 def recover_molecular_octupole(
-    atoms: "Atoms", ints_dir: "IntsDir", atoms_in_angstroms=True  # noqa
+    atoms: "Atoms",  # noqa
+    ints_dir: "IntDirectory",  # noqa
+    atoms_in_angstroms=True,
+    convert_to_debye_angstrom_squared=True,
+    convert_to_cartesian=True,
+    unpack=True,
+    include_prefactor=True,
 ):
 
     # make sure we are in Bohr
