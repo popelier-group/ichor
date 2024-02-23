@@ -349,3 +349,106 @@ def recover_molecular_quadrupole(
         molecular_quadrupole = (2 / 3) * molecular_quadrupole
 
     return molecular_quadrupole
+
+
+def molecular_quadrupole_origin_change(
+    quadrupole_moment: np.ndarray,
+    dipole_moment: np.ndarray,
+    old_origin: np.ndarray,
+    new_origin: np.ndarray,
+    molecular_charge: int,
+):
+    """Makes an origin change of the quadrupole moment and returns the quadrupole moment from a different origin.
+        Note that the returned quadrupole moment is TRACELESS.
+
+    :param quadrupole_moment: A 1d array containing the quadrupole moment in Cartesian coordinates
+        from the perspective of the old origin
+        HAS TO be ordered as: xx, yy, zz, xy, xz, yz and in atomic units
+        also HAS TO BE TRACELESS
+        Note that the division by a (2/3) prefactor is included in the implementation
+        because the true quadrupole moment is used for the equations.
+    :param dipole_moment: A 1d array containing the dipole moment in Cartesian coordinates
+        from the perspective of the old origin
+        HAS TO be ordered as x, y, z and in atomic units
+    :param old_origin: A numpy array containing the old origin x,y,z coordinates in Bohr
+    :param new_origin: A numpy array containing the new origin x,y,z coordinates in Bohr
+    :param molecular_charge: The charge of the system
+    :returns: A numpy array containing the xx, yy, zz, xy, xz, yz TRACELESS components as seen from the new origin
+
+    .. note::
+
+        See p. 21 of Anthony Stone Theory of Intermolecular forces for a discussion on the traceless / nontraceless
+        as well as a discussion on the prefactors in the multipole moments.
+
+        Also see https://doi.org/10.1021/jp067922u  The Effects of Hydrogen-Bonding Environment
+        on the Polarization and Electronic Properties of Water Molecules
+        for the equations. The equations are the for atomic quadrupole moments, however they
+        are exactly the same for molecular
+
+    .. note::
+        The equations to do the conversion have already been implemented in Spherical coordinates
+        to do the AIMAll recovery from atomic to molecular. Therefore, to reuse the code we
+        must convert the Cartesian moments to spherical ones.
+
+    .. note::
+        To convert to a traceless quadrupole moment, you just subtract take the average of the xx,yy,zz components
+        and subtract that from the diagonal (containing the xx,yy,zz components)
+    """
+
+    from ichor.core.multipoles.dipole import dipole_cartesian_to_spherical
+
+    # get the true quadrupole moment as would be calculated by AIMAll
+    # GAUSSIAN and ORCA do not include this prefactor
+    # see p21-p22 in See p. 21 of Anthony Stone Theory of Intermolecular forces
+    quadrupole_moment = quadrupole_moment / (2 / 3)
+
+    # we need the dipole in the quadrupole calculations as well
+    q10, q11c, q11s = dipole_cartesian_to_spherical(dipole_moment)
+
+    # the packing function uses xx, xy, xz, yy, yz, zz ordering
+    # gives a 3x3 matrix containing the packed representation
+    packed_traceless_quadrupole = pack_cartesian_quadrupole(
+        quadrupole_moment[0],
+        quadrupole_moment[3],
+        quadrupole_moment[4],
+        quadrupole_moment[1],
+        quadrupole_moment[5],
+        quadrupole_moment[2],
+    )
+
+    # convert to spherical because equations we are using are for spherical
+    q20, q21c, q21s, q22c, q22s = quadrupole_cartesian_to_spherical(
+        packed_traceless_quadrupole
+    )
+
+    # this is the quadrupole moment in the new origin
+    # but it is in spherical
+    quadripole_prime = atomic_contribution_to_molecular_quadrupole(
+        molecular_charge,
+        q10,
+        q11c,
+        q11s,
+        q20,
+        q21c,
+        q21s,
+        q22c,
+        q22s,
+        old_origin - new_origin,
+    )
+    # convert back to cartesian
+    quadripole_prime_cartesian = quadrupole_spherical_to_cartesian(*quadripole_prime)
+
+    # take into account factor again so that we can directly compare against GAUSSIAN or ORCA
+    # note that this will be in atomic unit still so an additional conversion might be needed
+    quadripole_prime_cartesian *= 2 / 3
+
+    # ordered as xx, xy, xz, yy, yz, zz
+    unpacked_shifted_origin_quadrupole = np.array(
+        unpack_cartesian_quadrupole(quadripole_prime_cartesian)
+    )
+    # ordered as xx, yy, zz, xy, xz, yz
+    unpacked_shifted_origin_quadrupole = unpacked_shifted_origin_quadrupole[
+        [0, 3, 5, 1, 2, 4]
+    ]
+
+    return unpacked_shifted_origin_quadrupole
