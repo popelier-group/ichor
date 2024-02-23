@@ -374,6 +374,7 @@ def molecular_quadrupole_origin_change(
     :param new_origin: A numpy array containing the new origin x,y,z coordinates in Bohr
     :param molecular_charge: The charge of the system
     :returns: A numpy array containing the xx, yy, zz, xy, xz, yz TRACELESS components as seen from the new origin
+        in atomic units
 
     .. note::
 
