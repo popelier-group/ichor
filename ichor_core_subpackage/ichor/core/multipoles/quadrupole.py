@@ -398,12 +398,14 @@ def molecular_quadrupole_origin_change(
 
     from ichor.core.multipoles.dipole import dipole_cartesian_to_spherical
 
+    prefactor = 2 / 3
+
     # get the true quadrupole moment as would be calculated by AIMAll
     # GAUSSIAN and ORCA do not include this prefactor
     # see p21-p22 in See p. 21 of Anthony Stone Theory of Intermolecular forces
     # we need to include this prefactor for the equations that are in https://doi.org/10.1021/jp067922u
     # because they are for the "true" quadrupole
-    quadrupole_moment = quadrupole_moment / (2 / 3)
+    quadrupole_moment = quadrupole_moment / prefactor
 
     # we need the dipole in the quadrupole calculations as well
     q10, q11c, q11s = dipole_cartesian_to_spherical(dipole_moment)
@@ -449,7 +451,7 @@ def molecular_quadrupole_origin_change(
 
     # take into account factor again so that we can directly compare against GAUSSIAN or ORCA
     # note that this will be in atomic unit still so an additional conversion might be needed
-    quadripole_prime_cartesian_packed *= 2 / 3
+    quadripole_prime_cartesian_packed *= prefactor
 
     # ordered as xx, xy, xz, yy, yz, zz
     unpacked_shifted_origin_quadrupole = np.array(
