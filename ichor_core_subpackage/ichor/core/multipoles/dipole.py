@@ -198,3 +198,35 @@ def recover_molecular_dipole(
         molecular_dipole = dipole_spherical_to_cartesian(*molecular_dipole)
 
     return molecular_dipole
+
+
+def molecular_dipole_origin_change(
+    dipole: np.ndarray,
+    old_origin: np.ndarray,
+    new_origin: np.ndarray,
+    molecular_charge: int,
+) -> np.ndarray:
+    """Changes the origin of the dipole moment and returns the dipole moment in the new origin
+
+    :param dipole: a 1-dimensional np.ndarray containing the x,y,z components
+        note the dipole moment has to be in Cartesian coordinates AND in atomic units.
+    :param old_origin: The old origin with respect to which the given dipole is calculated.
+        1d array containing Cartesian x,y,z coordinates in Bohr.
+    :type old_origin: The new origin with respect to which the new dipole should be given.
+        1d array containing Cartesian x,y,z coordinates in Bohr.
+    :param molecular_charge: The charge of the system (positive or negative)
+    :return: The dipole moment as seen from the new origin, in atomic units
+
+    See David Griffiths Introduction to Electrodynamics, p 157
+
+    .. note::
+        The dipole calculation can be directly converted in Cartesian because it is simple
+    """
+
+    # p_bar = p - Q * a_bar
+    # where p is is the original dipole, Q is the charge of the molecule and a is the displacement amount
+    # the displacement is the new_origin - old_origin
+    # p_bar is the new dipole
+    # if the total charge is 0, then the dipole does not change with the origin change
+
+    return dipole - (molecular_charge * (new_origin - old_origin))
