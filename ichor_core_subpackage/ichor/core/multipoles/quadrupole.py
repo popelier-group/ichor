@@ -344,6 +344,8 @@ def recover_molecular_quadrupole(
             molecular_quadrupole = np.array(
                 unpack_cartesian_quadrupole(molecular_quadrupole)
             )
+            # convert to xx, yy, zz, xy, xz, yz because that is what GAUSSIAN and ORCA use
+            molecular_quadrupole = molecular_quadrupole[[0, 3, 5, 1, 2, 4]]
 
     if include_prefactor:
         molecular_quadrupole = (2 / 3) * molecular_quadrupole
