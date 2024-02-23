@@ -2,6 +2,7 @@ from typing import Tuple
 
 import numpy as np
 from ichor.core.common import constants
+from ichor.core.common.constants import coulombbhrsquared_to_debye_angstrom
 
 
 def rotate_quadrupole(
@@ -264,3 +265,87 @@ def atomic_contribution_to_molecular_quadrupole(
     )
 
     return np.array([q20_pr, q21c_pr, q21s_pr, q22c_pr, q22s_pr])
+
+
+def recover_molecular_quadrupole(
+    atoms: "Atoms",  # noqa
+    ints_dir: "IntDirectory",  # noqa
+    atoms_in_angstroms=True,
+    convert_to_debye_angstrom=True,
+    convert_to_cartesian=True,
+    unpack=True,
+    include_prefactor=True,
+):
+    """
+    Reads in a geometry (atoms) and _atomicfiles directory containing AIMAll output files
+    and calculates the molecular quadrupole moment of the system (in spherical coordinates)
+    from the AIMAll atomic multipole moments.
+
+    .. note::
+        Assumes atomic multipole moment units are atomic units (Coulomb Bohr**2) because this is what AIMAll gives.
+
+    :param atoms: an Atoms instance containing the system geometry
+    :param ints_dir: an IntDirectory file instance, which wraps around an AIMAll output directory
+    :param atoms_in_angstroms: Whether the Atom instance coordinates are in Bohr or Angstroms
+        , defaults to True (meaning coordinates are in Angstroms)
+    :param convert_to_debye: Whether or not to convert the final result to Debye, default to True.
+        This converts from atomic units to Debye.
+    :param convert_to_cartesian: Whether or not to convert the recovered molecular quadrupole from spherical
+        to Cartesian, defaults to True. Note that Gaussian calculates molecular multipole moments
+        in Cartesian coordinates, so set to True in case you are comparing against Gaussian.
+    :param unpacked: Whether to unpack the Cartesian quadrupole so it does not have redundancies.
+        Note the returned order is xx, xy, xz, yy, yz, zz
+    :param prefactor: Include the (3/2) prefactor to directly compare against GAUSSIAN
+    :returns: A numpy array containing the molecular quadrupole moment.
+
+    .. note:
+        There is a factor of (2/3) that must be included which is excluded from
+        GAUSSIAN/ORCA etc. See Anthony Stone Theory of Intermolecular Forces p22-23.
+        AIMAll obtains the true quadrupole moment (and the true molecular one can
+        be recovered), while GAUSSIAN and ORCA do not include that.
+    """
+
+    # make sure we are in Bohr
+    if atoms_in_angstroms:
+        atoms = atoms.to_bohr()
+
+    # spherical representation
+    molecular_quadrupole = np.zeros(5)
+
+    for atom in atoms:
+
+        # get necessary data for calculations
+        atom_coords = atom.coordinates
+        global_multipoles = ints_dir[atom.name].global_multipole_moments
+
+        # get the values for a particular atom
+        q00 = global_multipoles["q00"]
+        q10 = global_multipoles["q10"]
+        q11c = global_multipoles["q11c"]
+        q11s = global_multipoles["q11s"]
+        q20 = global_multipoles["q20"]
+        q21c = global_multipoles["q21c"]
+        q21s = global_multipoles["q21s"]
+        q22c = global_multipoles["q22c"]
+        q22s = global_multipoles["q22s"]
+
+        atomic_contibution = atomic_contribution_to_molecular_quadrupole(
+            q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, atom_coords
+        )
+        molecular_quadrupole += atomic_contibution
+
+    if convert_to_debye_angstrom:
+        molecular_quadrupole *= coulombbhrsquared_to_debye_angstrom
+
+    if convert_to_cartesian:
+        molecular_quadrupole = quadrupole_spherical_to_cartesian(*molecular_quadrupole)
+
+        if unpack:
+            molecular_quadrupole = np.array(
+                unpack_cartesian_quadrupole(molecular_quadrupole)
+            )
+
+    if include_prefactor:
+        molecular_quadrupole = (2 / 3) * molecular_quadrupole
+
+    return molecular_quadrupole

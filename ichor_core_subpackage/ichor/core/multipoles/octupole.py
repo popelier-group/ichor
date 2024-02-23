@@ -106,14 +106,12 @@ def octupole_rotate_cartesian(o: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,kc,abc->ijk", C, C, C, o)
 
 
-def atomic_contribution_to_molecular_octupole(
-    q30, q10, q21c, q21s, q20, q00, q11c, q11s, atomic_coordinates
-):
+def q30_prime(q30, q00, q10, q11c, q11s, q20, q21s, q21c, atomic_coordinates):
 
     x, y, z = atomic_coordinates
     norm_sq = np.sum(atomic_coordinates**2)
 
-    q30_prime = (
+    return (
         q30
         + (1.5 * (3 * z**2 - norm_sq) * q10)
         - (constants.rt3 * x * q21c)
@@ -124,4 +122,71 @@ def atomic_contribution_to_molecular_octupole(
         - (3 * y * z * q11s)
     )
 
-    return q30_prime
+
+def q32s_prime(q32s, q00, q10, q11c, q11s, q21s, q21c, q22s, atomic_coordinates):
+
+    x, y, z = atomic_coordinates
+    norm_sq = np.sum(atomic_coordinates**2)
+
+    return (
+        q32s
+        + (constants.rt_3_5 * ((5 * x * y * z) - norm_sq) * q00)
+        + (constants.rt_3_5 * ((5 * y * z) - 2 * x) * q11c)
+        + (constants.rt_3_5 * ((5 * x * z) - 2 * y) * q11s)
+        + (constants.rt_3_5 * ((5 * x * y) - 2 * z) * q10)
+        + (constants.rt5 * z * q22s)
+        + (constants.rt5 * y * q21c)
+        + (constants.rt5 * x * q21s)
+    )
+
+
+def atomic_contribution_to_molecular_octupole(
+    q00, q10, q11s, q11c, q20, q21c, q21s, q22c, q22s, q30, q32s, atomic_coordinates
+):
+
+    q30_pr = q30_prime(q30, q00, q10, q11s, q11c, q20, q21c, q21s, atomic_coordinates)
+    q32_pr = q32s_prime(
+        q32s, q00, q10, q11c, q11s, q21s, q21c, q22s, atomic_coordinates
+    )
+
+    return np.array([q30_pr, q32_pr])
+
+
+def recover_molecular_octupole(
+    atoms: "Atoms", ints_dir: "IntsDir", atoms_in_angstroms=True  # noqa
+):
+
+    # make sure we are in Bohr
+    if atoms_in_angstroms:
+        atoms = atoms.to_bohr()
+
+    # TODO: implement rest of octupole conversions
+    # spherical representation
+    # molecular_octupole = np.zeros(7)
+
+    tmp_arr = np.zeros(2)
+
+    for atom in atoms:
+
+        # get necessary data for calculations
+        atom_coords = atom.coordinates
+        global_multipoles = ints_dir[atom.name].global_multipole_moments
+
+        # get the values for a particular atom
+        q00 = global_multipoles["q00"]
+        q10 = global_multipoles["q10"]
+        q11c = global_multipoles["q11c"]
+        q11s = global_multipoles["q11s"]
+        q20 = global_multipoles["q20"]
+        q21c = global_multipoles["q21c"]
+        q21s = global_multipoles["q21s"]
+        q22c = global_multipoles["q22c"]
+        q22s = global_multipoles["q22s"]
+        q30 = global_multipoles["q30"]
+        q32s = global_multipoles["q32s"]
+
+        tmp_arr += atomic_contribution_to_molecular_octupole(
+            q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, q30, q32s, atom_coords
+        )
+
+    return tmp_arr
