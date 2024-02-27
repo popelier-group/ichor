@@ -622,7 +622,7 @@ def plot_with_matplotlib(
 
 def plot_with_matplotlib_simple(
     total_dict: dict,
-    x_axis_name: str = "Prediction Error / kJ mol$^-1$",
+    x_axis_name: str = "Prediction Error / kJ mol$^{-1}$",
     y_axis_name: str = "\%",
     title: str = None,
 ):

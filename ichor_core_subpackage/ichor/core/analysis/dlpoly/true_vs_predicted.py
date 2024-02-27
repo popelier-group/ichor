@@ -98,6 +98,8 @@ def plot_true_vs_predicted_from_arrays(
     true_energies_array_hartree: Union[np.ndarray, List[PointsDirectory]],
     absolute_diff: bool = True,
     FIGURE_LABEL_SIZE=48,
+    WIDTH=16,
+    HEIGHT=6,
     X_Y_LABELS_FONTSIZE=48,
     TICKLABELS_FONTSIZE=30,
     LABELPAD=15.0,
@@ -109,6 +111,9 @@ def plot_true_vs_predicted_from_arrays(
     LEGEND_FRAME_WIDTH=2.0,
     COLORBAR_PADDING=5.0,
     PAD_INCHES=0.05,
+    add_fig_letter=False,
+    r2_bbox_anchor=(0.90, 0.23),
+    colorbar_label_fontsize=15,
     filename="output.svg",
 ):
     """Plots true vs predicted energies, as well as calculates R^2 value
@@ -138,8 +143,6 @@ def plot_true_vs_predicted_from_arrays(
     """
 
     nsystems = predicted_energies_array_hartree.shape[0]
-    WIDTH = 19 * nsystems
-    HEIGHT = WIDTH / 4
 
     if isinstance(true_energies_array_hartree[0], PointsDirectory):
         all_true_energies = []
@@ -193,13 +196,14 @@ def plot_true_vs_predicted_from_arrays(
             s=200,
         )
 
-        ax.text(
-            0.1,
-            0.85,
-            rf"$\bf{{{ascii_uppercase[i]}}}$",
-            fontsize=FIGURE_LABEL_SIZE,
-            transform=ax.transAxes,
-        )
+        if add_fig_letter:
+            ax.text(
+                0.1,
+                0.85,
+                rf"$\bf{{{ascii_uppercase[i]}}}$",
+                fontsize=FIGURE_LABEL_SIZE,
+                transform=ax.transAxes,
+            )
 
         p1 = max(
             max(predicted_energies_array_hartree[i]),
@@ -225,7 +229,7 @@ def plot_true_vs_predicted_from_arrays(
         ax.set_xticks(steps)
         ax.set_yticks(steps)
         # convert into str and bold
-        steps_str = [rf"$\bf{{{s:.3f}}}$" for s in steps]
+        steps_str = [rf"$\bf{{{s:.4f}}}$" for s in steps]
         ax.set_xticklabels(steps_str)
         ax.set_yticklabels(steps_str)
 
@@ -273,7 +277,7 @@ def plot_true_vs_predicted_from_arrays(
             borderpad=LEGEND_BORDERPAD,
             edgecolor="black",
             loc="lower right",
-            bbox_to_anchor=(0.85, 0.23),
+            bbox_to_anchor=r2_bbox_anchor,
         )
         # set title as the R^2 value
         leg.set_title(
@@ -287,16 +291,18 @@ def plot_true_vs_predicted_from_arrays(
 
         # colorbar for difference in energies
         cbar = fig.colorbar(scatter_object)
-        # if absolute_diff:
-        #     cbar.set_label(
-        #         "Absolute Difference / kJ mol$^{-1}$", fontsize=54, labelpad=20
-        #     )
-        # else:
-        #     cbar.set_label("Difference / kJ mol$^{-1}$", fontsize=54, labelpad=20)
 
         cbar.ax.set_yticks(diff_linspace)
         diff_linspace_str = [rf"$\bf{{{s:.2f}}}$" for s in diff_linspace]
         cbar.ax.set_yticklabels(diff_linspace_str)
+
+        # colorbar for difference in energies
+        cbar.set_label(
+            "Absolute Error / kJ mol$^{-1}$",
+            fontsize=colorbar_label_fontsize,
+            fontweight="bold",
+            labelpad=15,
+        )
 
         cbar.ax.tick_params(
             axis="both", labelsize=TICKLABELS_FONTSIZE, pad=COLORBAR_PADDING

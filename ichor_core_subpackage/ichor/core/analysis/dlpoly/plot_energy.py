@@ -97,6 +97,8 @@ def plot_total_energy(
     data: Union[DlPolyFFLUX, FFLUXDirectory, List[DlPolyFFLUX], List[FFLUXDirectory]],
     until_converged: bool = True,
     reference: List[float] = None,
+    HEIGHT=6,
+    WIDTH=12,
     FIGURE_LABEL_SIZE=30,
     X_Y_LABELS_FONTSIZE=30,
     TICKLABELS_FONTSIZE=22,
@@ -106,6 +108,7 @@ def plot_total_energy(
     MAJOR_TICK_LENGTH=6.0,
     MINOR_TICK_LENGTH=3.0,
     PAD_INCHES=0.05,
+    add_letter=False,
     filename: str = "total_energy.svg",
 ):
 
@@ -143,8 +146,6 @@ def plot_total_energy(
         fflux_files = [d.fflux_file for d in data]
 
     nplots = len(fflux_files)
-    WIDTH = 12 * nplots
-    HEIGHT = WIDTH / 4
 
     fig, axes = plt.subplots(1, nplots, figsize=(WIDTH, HEIGHT), sharey=True)
 
@@ -154,7 +155,7 @@ def plot_total_energy(
     total_eng_kj_mol = [f.total_energy_kj_mol for f in fflux_files]
 
     if reference:
-        total_eng_kj_mol = [tot - ref for tot, ref in zip(total_eng_kj_mol, reference)]
+        total_eng_kj_mol = [tot - reference for tot in total_eng_kj_mol]
         with open("difference_between_reference_and_fflux.txt", "w") as writef:
             for i, t in enumerate(total_eng_kj_mol):
                 diff_ref_and_fflux = t[idx_where_energy_diff_less_than[i]]
@@ -175,14 +176,15 @@ def plot_total_energy(
             current_idx = idx_where_energy_diff_less_than[i]
             current_total_eng = total_eng_kj_mol[i]
 
-            ax.text(
-                0.9,
-                0.88,
-                f"{ascii_uppercase[i]}",
-                fontsize=FIGURE_LABEL_SIZE,
-                transform=ax.transAxes,
-                fontweight="bold",
-            )
+            if add_letter:
+                ax.text(
+                    0.9,
+                    0.88,
+                    f"{ascii_uppercase[i]}",
+                    fontsize=FIGURE_LABEL_SIZE,
+                    transform=ax.transAxes,
+                    fontweight="bold",
+                )
 
             ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
             ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
@@ -195,13 +197,15 @@ def plot_total_energy(
             current_total_eng = total_eng_kj_mol[i]
             current_fflux_file = fflux_files[i]
 
-            ax.text(
-                0.1,
-                0.85,
-                rf"$\bf{{{ascii_uppercase[i]}}}$",
-                fontsize=FIGURE_LABEL_SIZE,
-                transform=ax.transAxes,
-            )
+            if add_letter:
+                ax.text(
+                    0.9,
+                    0.88,
+                    f"{ascii_uppercase[i]}",
+                    fontsize=FIGURE_LABEL_SIZE,
+                    transform=ax.transAxes,
+                    fontweight="bold",
+                )
 
             ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
             ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(4))
