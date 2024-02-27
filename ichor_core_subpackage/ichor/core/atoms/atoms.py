@@ -200,8 +200,15 @@ class Atoms(list):
         """Returns a list C matrix np array for every atom"""
         return [atom_instance.C(system_alf) for atom_instance in self]
 
+    # the feature calculator needs to be calculated for individual atoms
+    # because we could only want the features for individual atoms
+    # instead of for all atoms
     def features(
-        self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
+        self,
+        feature_calculator: Callable[..., np.ndarray],
+        *args,
+        is_atomic=True,
+        **kwargs,
     ) -> np.ndarray:
         """Returns the features for this Atoms instance,
         corresponding to the features of each Atom instance held in this Atoms isinstance
@@ -209,6 +216,8 @@ class Atoms(list):
 
         The array shape is n_atoms x n_features (3*n_atoms - 6)
 
+        :param is_atomic: whether the feature calculator calculates features
+            for individual atoms or for the whole geometry.
         :param args: positional arguments to pass to feature calculator
         :param kwargs: key word arguments to pass to feature calculator
 
@@ -216,32 +225,42 @@ class Atoms(list):
             :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
                 Return the feature matrix of this Atoms instance
         """
-        return np.array(
-            [
-                atom_instance.features(feature_calculator, *args, **kwargs)
-                for atom_instance in self
-            ]
-        )
+        if is_atomic:
+            return np.array(
+                [
+                    atom_instance.features(feature_calculator, *args, **kwargs)
+                    for atom_instance in self
+                ]
+            )
+        return feature_calculator(self, *args, **kwargs)
 
     def features_dict(
-        self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
+        self,
+        feature_calculator: Callable[..., np.ndarray],
+        *args,
+        is_atomic=True,
+        **kwargs,
     ) -> dict:
         """Returns the features in a dictionary for this Atoms instance,
         corresponding to the features of each Atom instance held in this Atoms isinstance
         Features are calculated in the Atom class and concatenated to a 2d array here.
 
+        :param is_atomic: whether the feature calculator calculates features
+            for per atom or for the whole geometry
         :param args: positional arguments to pass to feature calculator
         :param kwargs: key word arguments to pass to feature calculator
 
         e.g. {"C1": np.array, "H2": np.array}
         """
 
-        return {
-            atom_instance.name: atom_instance.features(
-                feature_calculator, *args, **kwargs
-            )
-            for atom_instance in self
-        }
+        if is_atomic:
+            return {
+                atom_instance.name: atom_instance.features(
+                    feature_calculator, *args, **kwargs
+                )
+                for atom_instance in self
+            }
+        return {"atoms_features": feature_calculator(self, *args, **kwargs)}
 
     def kabsch(self, other: "Atoms") -> np.ndarray:
         H = self.coordinates.T.dot(other.coordinates)

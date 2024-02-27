@@ -78,9 +78,13 @@ class HasAtoms(ABC):
             for atom_instance in self.atoms
         }
 
-    def features(self, feature_calculator: Callable, *args, **kwargs) -> np.ndarray:
+    def features(
+        self, feature_calculator: Callable, *args, is_atomic=True, **kwargs
+    ) -> np.ndarray:
 
-        return self.atoms.features(feature_calculator, *args, **kwargs)
+        return self.atoms.features(
+            feature_calculator, *args, is_atomic=is_atomic, **kwargs
+        )
 
     def features_dict(
         self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs

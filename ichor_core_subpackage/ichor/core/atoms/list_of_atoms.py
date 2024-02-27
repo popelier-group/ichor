@@ -68,7 +68,11 @@ class ListOfAtoms(list, ABC):
         ...
 
     def features(
-        self, feature_calculator: Callable[..., np.ndarray], *args, **kwargs
+        self,
+        feature_calculator: Callable[..., np.ndarray],
+        *args,
+        is_atomic=True,
+        **kwargs,
     ) -> np.ndarray:
         """
         Return the ndarray of features. This is assumed to be either 2D or 3D array.
@@ -76,23 +80,36 @@ class ListOfAtoms(list, ABC):
         (ntimestep, natom, nfeature) array into a (natom, ntimestep, nfeature) array so that
         all features for a single atom are easier to group.
 
+        :param feature_calculator: The calculator function which calculates features
+        :param is_atomic: Whether the calculator calculates features for individual atoms
+            or the whole geometry
+        :param args: Positional arguments to pass to feature calculator function
+        :param kwargs: Key word arguments to pass to feature calculator function
+
         :return:
             If the features for the whole trajectory are returned,
             the array has shape `n_atoms` x `n_timesteps` x `n_features`
             If the trajectory instance is indexed by str, the array has shape `n_timesteps` x `n_features`.
             If the trajectory instance is indexed by int, the array has shape `n_atoms` x `n_features`.
             If the trajectory instance is indexed by slice, the array has shape `n_atoms` x`slice` x `n_features`.
+            If a non-atomic calculator is passed, a `n_timesteps` x features (features could be vector, matrix, etc)
+                is returned.
         """
 
-        features = np.array(
-            [
-                timestep.features(feature_calculator, *args, **kwargs)
-                for timestep in self
-            ]
+        if is_atomic:
+            features = np.array(
+                [
+                    timestep.features(feature_calculator, *args, **kwargs)
+                    for timestep in self
+                ]
+            )
+            if features.ndim == 3:
+                features = np.transpose(features, (1, 0, 2))
+            return features
+
+        return np.array(
+            [feature_calculator(timestep, *args, **kwargs) for timestep in self]
         )
-        if features.ndim == 3:
-            features = np.transpose(features, (1, 0, 2))
-        return features
 
     def get_headings(self):
         """
