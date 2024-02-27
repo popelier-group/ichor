@@ -123,18 +123,26 @@ class TrajectoryAnalysis(ReadFile):
         self,
         nbins: int = 1000,
         max_dist: float = 10.0,
-        save_path: Union[Path, str] = "trajectory_analysis.png",
+        ax=None,
+        label=None,
     ):
         """Helper function which plots a quick graph for visualising the hr distribution.
 
+        :param nbins: The number of bins to use to calculate hr
+        :param max_dist: The maximum pairwise relative distance to plot
         :param save_path: path and name of the file ending in .png
+
+
         """
 
         r = self.r(nbins, max_dist)
 
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(r[:-1], self.hr(nbins=nbins, max_dist=max_dist))
-        fig.savefig(save_path, dpi=300)
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(12, 6))
+
+        ax.plot(r[:-1], self.hr(nbins=nbins, max_dist=max_dist), label=label)
+
+        return ax
 
 
 class Stability(TrajectoryAnalysis):
