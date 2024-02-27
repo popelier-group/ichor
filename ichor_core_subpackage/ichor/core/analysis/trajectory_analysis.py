@@ -39,72 +39,62 @@ class TrajectoryAnalysis(ReadFile):
             if trajectory_path.suffix == ".xyz"
             else DlpolyHistory(trajectory_path)
         )
-        self._distances_matrix = None
+        self.distances_vectors = self._compute_distances_vectors()
         self._bond_lengths_matrix = None
-        self.distributions = []
-        self.r = []
 
     def _read_file(self):
         self.trajectory._read_file()
 
-    @property
-    def distances_matrix(self) -> np.ndarray:
+    def _compute_distances_vectors(self):
         """
-        Returns a distance matrix of all timesteps of a trajectory
-
-        :return: matrix of shape (timesteps, natoms, natoms)
+        Computes the distance between atoms for each timestep and stores.
+        The diagonal is not needed because that contains 0.0 values, additionally
+        only half of the distance matrix is needed because it is symmetric
         """
-        if self._distances_matrix is None:
-            self._compute_distances_matrix()
-        return self._distances_matrix
-
-    @property
-    def distance_hist(self) -> List[float]:
-        """
-        The bins to plot on a histogram
-
-        :return: The bins to plot
-        """
-        return self.distributions
-
-    @property
-    def bins(self) -> List[float]:
-        """
-        bins attribute which returns
-
-        :return: _description_
-        """
-        return self.r
-
-    def _compute_distances_matrix(self):
-        """
-        Computes the distance matrix between atoms for each timestep and stores
-        into the self._distances_matrix attribute for later usage.
-        """
-        self._distances_matrix = np.zeros(
+        d = np.zeros(
             (len(self.trajectory), self.trajectory.natoms, self.trajectory.natoms)
         )
+
         for i, t in enumerate(self.trajectory):
-            self._distances_matrix[i, :, :] = Distance.euclidean_distance(
-                t.coordinates, t.coordinates
-            )
+            d[i] = Distance.euclidean_distance(t.coordinates, t.coordinates)
+
+        # indices of the upper triangular matrix but without the main diagonal
+        # the main diagonal only has 0.0 in it because it is distance of atom from itself
+        # only need to get these once because they remain the same
+        indices = np.triu_indices_from(d[0], k=1)
+
+        # grab the upper triangular part as a vector
+        # store into a ntimesteps x ndistances matrix
+        d2 = np.array([tmp[indices] for tmp in d])
+
+        return d2
 
     def delta_dirac(self, r0: float, r1: float) -> int:
         """
         Computes a modified version of the Dirac delta function.
         In other words this uses the distances_matrix attribute and checks
-        all the distances that are between two int values.
-        This is mainly used to compute the distribution of distances h(r).
+        all the distances that are between two float values.
+        It then returns the number of times the distances in all
+        timesteps is between these two values.
 
         :param r0: lower bound of the interval
         :param r1: higher bound of the interval
         :return: number of values that are within that interval
         """
-        index = (r0 < self.distances_matrix) & (self.distances_matrix < r1)
-        true_vals = len(index[index is True])
+
+        index = (r0 < self.distances_vectors) & (self.distances_vectors < r1)
+        true_vals = len(index[index == True])  # noqa , needs to be == for numpy
+
         return true_vals
 
-    def hr(self, nbins: Optional[int] = 1000, max_dist: Optional[float] = 10.0):
+    def r(self, nbins: int, max_dist: float):
+
+        # start with a very low number to remove 0.0
+        return np.linspace(0.0, max_dist, nbins)
+
+    def hr(
+        self, nbins: Optional[int] = 1000, max_dist: Optional[float] = 10.0
+    ) -> List[float]:
         """
         Computes the distributions of distances of all pair-wise distances
         across a whole trajectory.
@@ -113,24 +103,37 @@ class TrajectoryAnalysis(ReadFile):
         :param nbins: number of bins to consider for the distance range considered, defaults to 1000
         :param max_dist: maximum distance to consider for the distribution, defaults to 10.0
         """
-        self.r = np.linspace(0.0, max_dist, nbins)
-        for pair in pairwise(self.r):
+        distributions_list = []
+
+        r = self.r(nbins, max_dist)
+
+        natoms = self.trajectory.natoms
+        ntimesteps = len(self.trajectory)
+
+        for pair in pairwise(r):
             distribution = self.delta_dirac(pair[0], pair[1])
-            self.distributions.append(
+            distributions_list.append(
                 distribution
-                / (
-                    len(self.trajectory)
-                    * (self.trajectory.natoms * (self.trajectory.natoms - 1))
-                )
+                / (ntimesteps * (natoms * (natoms - 1)))  # this is to average it out
             )
 
-    def plot_hr(self, save_path: Union[Path, str]):
+        return distributions_list
+
+    def plot_hr(
+        self,
+        nbins: int = 1000,
+        max_dist: float = 10.0,
+        save_path: Union[Path, str] = "trajectory_analysis.png",
+    ):
         """Helper function which plots a quick graph for visualising the hr distribution.
 
         :param save_path: path and name of the file ending in .png
         """
+
+        r = self.r(nbins, max_dist)
+
         fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(self.r[:-1], self.distributions)
+        ax.plot(r[:-1], self.hr(nbins=nbins, max_dist=max_dist))
         fig.savefig(save_path, dpi=300)
 
 
