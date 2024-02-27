@@ -471,11 +471,11 @@ class PointsDirectory(ListOfAtoms, Directory, HasData):
         :return: The path to the written json file
         """
 
-        root_path = Path(root_path)
-
         # if no path is given use pointdirectory without suffix
         if not root_path:
             root_path = Path(self.name_without_suffix)
+        else:
+            root_path = Path(root_path)
 
         # add a _json to the directory
         root_path = root_path.with_name(root_path.name + "_json")
