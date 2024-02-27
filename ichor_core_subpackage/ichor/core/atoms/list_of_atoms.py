@@ -95,20 +95,13 @@ class ListOfAtoms(list, ABC):
             If a non-atomic calculator is passed, a `n_timesteps` x features (features could be vector, matrix, etc)
                 is returned.
         """
-
-        if is_atomic:
-            features = np.array(
-                [
-                    timestep.features(feature_calculator, *args, **kwargs)
-                    for timestep in self
-                ]
-            )
-            if features.ndim == 3:
-                features = np.transpose(features, (1, 0, 2))
-            return features
-
         return np.array(
-            [feature_calculator(timestep, *args, **kwargs) for timestep in self]
+            [
+                timestep.features(
+                    feature_calculator, *args, is_atomic=is_atomic, **kwargs
+                )
+                for timestep in self
+            ]
         )
 
     def get_headings(self):

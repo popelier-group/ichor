@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Callable, Union
 
 from ichor.core.atoms import Atoms, AtomsNotFoundError
 from ichor.core.files import OrcaInput, OrcaOutput
@@ -87,6 +87,32 @@ class PointDirectory(AnnotatedDirectory, HasAtoms, HasData):
                     raise AtomsNotFoundError(
                         f" {file_with_atoms.__class__.__name__} file does not contain atoms."
                     )
+
+    def features(
+        self,
+        feature_calculator: Callable,
+        *args,
+        is_atomic=True,
+        **kwargs,
+    ):
+        """Returns the features for this Atoms instance,
+        corresponding to the features of each Atom instance held in this Atoms isinstance
+        Features are calculated in the Atom class and concatenated to a 2d array here.
+
+        The array shape is n_atoms x n_features (3*n_atoms - 6)
+
+        :param is_atomic: whether the feature calculator calculates features
+            for individual atoms or for the whole geometry.
+        :param args: positional arguments to pass to feature calculator
+        :param kwargs: key word arguments to pass to feature calculator
+
+        Returns:
+            :type: `np.ndarray` of shape n_atoms x n_features (3N-6)
+                Return the feature matrix of this Atoms instance
+        """
+        return self.atoms.features(
+            feature_calculator, *args, is_atomic=is_atomic, **kwargs
+        )
 
     @atoms.setter
     def atoms(self, atms: Atoms):
