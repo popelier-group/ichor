@@ -4,6 +4,11 @@ import numpy as np
 from ichor.core.common import constants
 
 
+# Discussion of traceless tensors https://ocw.mit.edu/courses/8-07-electromagnetism-ii-fall-2012/pages/lecture-notes/
+# https://ocw.mit.edu/courses/8-07-electromagnetism-ii-fall-2012/resources/mit8_07f12_ln9/
+# equation 9.39
+
+
 def rotate_octupole(
     q30: float,
     q31c: float,
@@ -102,18 +107,42 @@ def unpack_cartesian_octupole(o):
     )
 
 
+def octupole_element_conversion(octupole_array: np.ndarray, current_ordering):
+    """Converts between the two ways of reporting octupole moments, namely
+
+      0: XXX, YYY, ZZZ, XYY, XXY, XXZ, XZZ, YZZ, YYZ, XYZ
+      and
+      1: XXX, XXY, XXZ, XYY, XYZ, XZZ, YYY, YYZ, YZZ, ZZZ
+
+      where the 0 and 1 indicate the ordering index. The other ordering is going to be returned
+
+    :param octupole_array: 1d unpacked octupole array
+    :type ordering: either 0 or 1
+    """
+
+    if current_ordering == 0:
+        return octupole_array[[0, 4, 5, 3, 9, 6, 1, 8, 7, 2]]
+
+    elif current_ordering == 1:
+        return octupole_array[[0, 6, 9, 3, 1, 2, 5, 8, 7, 4]]
+
+    raise ValueError(
+        f"Current ordering can be either 0 or 1, but it is {current_ordering}"
+    )
+
+
 def octupole_rotate_cartesian(o: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,kc,abc->ijk", C, C, C, o)
 
 
-def q30_prime(q30, q00, q10, q11c, q11s, q20, q21s, q21c, atomic_coordinates):
+def q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates):
 
     x, y, z = atomic_coordinates
     norm_sq = np.sum(atomic_coordinates**2)
 
     return (
         q30
-        + (1.5 * (3 * z**2 - norm_sq) * q10)
+        + (1.5 * ((3 * z**2) - norm_sq) * q10)
         - (constants.rt3 * x * q21c)
         - (constants.rt3 * y * q21s)
         + (3 * z * q20)
@@ -123,7 +152,7 @@ def q30_prime(q30, q00, q10, q11c, q11s, q20, q21s, q21c, atomic_coordinates):
     )
 
 
-def q32s_prime(q32s, q00, q10, q11c, q11s, q21s, q21c, q22s, atomic_coordinates):
+def q32s_prime(q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates):
 
     x, y, z = atomic_coordinates
     norm_sq = np.sum(atomic_coordinates**2)
@@ -131,9 +160,9 @@ def q32s_prime(q32s, q00, q10, q11c, q11s, q21s, q21c, q22s, atomic_coordinates)
     return (
         q32s
         + (constants.rt_3_5 * ((5 * x * y * z) - norm_sq) * q00)
-        + (constants.rt_3_5 * ((5 * y * z) - 2 * x) * q11c)
-        + (constants.rt_3_5 * ((5 * x * z) - 2 * y) * q11s)
-        + (constants.rt_3_5 * ((5 * x * y) - 2 * z) * q10)
+        + (constants.rt_3_5 * ((5 * y * z) - (2 * x)) * q11c)
+        + (constants.rt_3_5 * ((5 * x * z) - (2 * y)) * q11s)
+        + (constants.rt_3_5 * ((5 * x * y) - (2 * z)) * q10)
         + (constants.rt5 * z * q22s)
         + (constants.rt5 * y * q21c)
         + (constants.rt5 * x * q21s)
@@ -141,15 +170,15 @@ def q32s_prime(q32s, q00, q10, q11c, q11s, q21s, q21c, q22s, atomic_coordinates)
 
 
 def atomic_contribution_to_molecular_octupole(
-    q00, q10, q11s, q11c, q20, q21c, q21s, q22c, q22s, q30, q32s, atomic_coordinates
+    q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, q30, q32s, atomic_coordinates
 ):
 
-    q30_pr = q30_prime(q30, q00, q10, q11s, q11c, q20, q21c, q21s, atomic_coordinates)
-    q32_pr = q32s_prime(
-        q32s, q00, q10, q11c, q11s, q21s, q21c, q22s, atomic_coordinates
+    q30_pr = q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates)
+    q32s_pr = q32s_prime(
+        q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates
     )
 
-    return np.array([q30_pr, q32_pr])
+    return np.array([q30_pr, q32s_pr])
 
 
 def recover_molecular_octupole(
@@ -165,6 +194,9 @@ def recover_molecular_octupole(
     # make sure we are in Bohr
     if atoms_in_angstroms:
         atoms = atoms.to_bohr()
+
+    # from anthony stone theory of intermolecular forces p21-22
+    prefactor = 2.5
 
     # TODO: implement rest of octupole conversions
     # spherical representation
@@ -194,5 +226,22 @@ def recover_molecular_octupole(
         tmp_arr += atomic_contribution_to_molecular_octupole(
             q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, q30, q32s, atom_coords
         )
+
+    if convert_to_debye_angstrom_squared:
+        tmp_arr *= constants.coulom_bohr_cubed_to_debye_angstrom_squared
+
+    if convert_to_cartesian:
+        tmp_arr = octupole_spherical_to_cartesian(
+            tmp_arr[0], 0.0, 0.0, 0.0, tmp_arr[1], 0.0, 0.0
+        )
+
+        if unpack:
+            tmp_arr = np.array(unpack_cartesian_octupole(tmp_arr))
+            # convert from XXX, XXY, XXZ, XYY, XYZ, XZZ, YYY, YYZ, YZZ, ZZZ
+            # to XXX, YYY, ZZZ, XYY, XXY, XXZ, XZZ, YZZ, YYZ, XYZ
+            tmp_arr = octupole_element_conversion(tmp_arr, 1)
+
+    if include_prefactor:
+        tmp_arr = prefactor * tmp_arr
 
     return tmp_arr

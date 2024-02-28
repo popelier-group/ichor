@@ -843,6 +843,9 @@ coulombbohr_to_debye = 2.5417464  # for dipole , au to debye
 coulombbhrsquared_to_debye_angstrom = (
     1.3450342  # for quadrupole , au to debye angstrom (same as Buckingham)
 )
+coulom_bohr_cubed_to_debye_angstrom_squared = (
+    0.7117614  # octupole au (ea^3) to debye angstrom squared
+)
 
 
 # ha_to_kj_mol = 2625.5
