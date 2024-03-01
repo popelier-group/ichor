@@ -80,6 +80,27 @@ def quadrupole_element_conversion(quadrupole_array: np.ndarray, current_ordering
     )
 
 
+def calculate_traceless_quadrupole(
+    nontraceless_quadrupole_matrix: np.ndarray,
+) -> np.ndarray:
+    """Subtracts off a constant (the mean of the sum of the trace), which makes
+    the quadrupole moment traceless (i.e. the new sum of the diagonal is 0.0)
+
+    The traceless multipole moments are used by AIMAll.
+
+    :param nontraceless_quadrupole_matrix: A 3x3 matrix containing the (packed) quadrupole moment
+    :return: A 3x3 matrix containing the traceless quadrupole moment
+    """
+
+    cpy = nontraceless_quadrupole_matrix.copy()
+    tr_mean = np.diag(nontraceless_quadrupole_matrix).mean()
+
+    for i in range(3):
+        cpy[i, i] -= tr_mean
+
+    return cpy
+
+
 # equations below come from
 # https://doi.org/10.1021/jp067922u
 # The effects of hydrogen-bonding environment on the polarization and electronic properties of water molecules
