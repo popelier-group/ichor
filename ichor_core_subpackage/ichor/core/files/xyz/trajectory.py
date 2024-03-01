@@ -395,7 +395,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
     ) -> "Trajectory":
 
         """Takes in a csv or excel file containing features and convert it to a `Trajectory` object.
-        It assumes that the features start from the first column
+        It assumes that the features start from the very first column
         (column after the index column, if one exists). Feature files that are written out by ichor
         are in Bohr instead of Angstroms for now.
 
@@ -411,12 +411,19 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
             By default, the 0th sheet of the excel file is read in.
         :param atom_types: A list of strings corresponding to the atom elements (C, O, H, etc.).
             This has to be ordered the same way as atoms corresponding to the features.
-        :param header: Whether the first line of the csv file contains the names of the columns.
+            Note that the central atom (for which features are given in the file)
+            also needs to be present in this list as the very first atom.
+        :param header: The row index (0-indexed) of the line in the csv file which contains the names of the columns.
             Default is set to 0 to use the 0th row.
         :param index_col: Whether a column should be used as the index column.
-            Default is set to 0 to use 0th column.
+            Default is set to 0 to use 0th column. If no index column is present, set to False.
         :param sheet_name: The excel sheet to be used to convert to xyz. Default is 0.
             This is only needed for excel files, not csv files.
+
+        .. note::
+            Ensure that the list of atom names is correct, i.e. that it contains the
+            central atom as the very first atom, and the following atoms are in the ordering
+            that is in the file containing the features.
         """
 
         f = Path(f)
