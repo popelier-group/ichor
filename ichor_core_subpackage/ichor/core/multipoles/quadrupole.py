@@ -400,7 +400,7 @@ def recover_molecular_quadrupole(
     return molecular_quadrupole
 
 
-def molecular_quadrupole_origin_change(
+def quadrupole_origin_change(
     quadrupole_moment: np.ndarray,
     dipole_moment: np.ndarray,
     old_origin: np.ndarray,
@@ -462,12 +462,7 @@ def molecular_quadrupole_origin_change(
     # the packing function uses xx, xy, xz, yy, yz, zz ordering
     # gives a 3x3 matrix containing the packed representation with redundancies
     packed_traceless_quadrupole = pack_cartesian_quadrupole(
-        quadrupole_moment[0],
-        quadrupole_moment[3],
-        quadrupole_moment[4],
-        quadrupole_moment[1],
-        quadrupole_moment[5],
-        quadrupole_moment[2],
+        *quadrupole_element_conversion(quadrupole_moment, 0)
     )
 
     # convert to spherical because equations we are using are for spherical

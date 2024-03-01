@@ -200,7 +200,7 @@ def recover_molecular_dipole(
     return molecular_dipole
 
 
-def molecular_dipole_origin_change(
+def dipole_origin_change(
     dipole: np.ndarray,
     old_origin: np.ndarray,
     new_origin: np.ndarray,
