@@ -56,6 +56,30 @@ def quadrupole_rotate_cartesian(q: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,ab->ij", C, C, q)
 
 
+def quadrupole_element_conversion(quadrupole_array: np.ndarray, current_ordering):
+    """Converts between the two ways of reporting octupole moments, namely
+
+      0: xx, yy, zz, xy, xz, yz    this is the ordering used by GAUSSIAN/ORCA
+      and
+      1: xx, xy, xz, yy, yz, zz
+
+      where the 0 and 1 indicate the ordering index. The other ordering is going to be returned
+
+    :param octupole_array: 1d unpacked octupole array
+    :type ordering: either 0 or 1
+    """
+
+    if current_ordering == 0:
+        return quadrupole_array[[0, 3, 4, 1, 5, 2]]
+
+    elif current_ordering == 1:
+        return quadrupole_array[[0, 3, 5, 1, 2, 4]]
+
+    raise ValueError(
+        f"Current ordering can be either 0 or 1, but it is {current_ordering}"
+    )
+
+
 # equations below come from
 # https://doi.org/10.1021/jp067922u
 # The effects of hydrogen-bonding environment on the polarization and electronic properties of water molecules
@@ -345,7 +369,9 @@ def recover_molecular_quadrupole(
                 unpack_cartesian_quadrupole(molecular_quadrupole)
             )
             # convert to xx, yy, zz, xy, xz, yz because that is what GAUSSIAN and ORCA use
-            molecular_quadrupole = molecular_quadrupole[[0, 3, 5, 1, 2, 4]]
+            molecular_quadrupole = quadrupole_element_conversion(
+                molecular_quadrupole, 1
+            )
 
     if include_prefactor:
         molecular_quadrupole = (2 / 3) * molecular_quadrupole
@@ -460,8 +486,8 @@ def molecular_quadrupole_origin_change(
         unpack_cartesian_quadrupole(quadripole_prime_cartesian_packed)
     )
     # ordered as xx, yy, zz, xy, xz, yz
-    unpacked_shifted_origin_quadrupole = unpacked_shifted_origin_quadrupole[
-        [0, 3, 5, 1, 2, 4]
-    ]
+    unpacked_shifted_origin_quadrupole = quadrupole_element_conversion(
+        unpacked_shifted_origin_quadrupole, 1
+    )
 
     return unpacked_shifted_origin_quadrupole
