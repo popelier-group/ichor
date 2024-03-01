@@ -155,17 +155,12 @@ def q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates):
 def q32s_prime(q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates):
 
     x, y, z = atomic_coordinates
-    norm_sq = np.sum(atomic_coordinates**2)
 
     return (
         q32s
-        + (constants.rt_3_5 * ((5 * x * y * z) - norm_sq) * q00)
-        + (constants.rt_3_5 * ((5 * y * z) - (2 * x)) * q11c)
-        + (constants.rt_3_5 * ((5 * x * z) - (2 * y)) * q11s)
-        + (constants.rt_3_5 * ((5 * x * y) - (2 * z)) * q10)
-        + (constants.rt5 * z * q22s)
-        + (constants.rt5 * y * q21c)
-        + (constants.rt5 * x * q21s)
+        + constants.rt5 * (z * q22s + y * q21c + x * q21s)
+        + constants.rt15 * (z * y * q11c + x * z * q11s + y * x * q10)
+        + constants.rt15 * (x * y * z * q00)
     )
 
 
