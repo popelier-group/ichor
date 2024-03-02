@@ -340,7 +340,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                     if total_geom_counter != len_geoms_to_write - 1:
                         mkdir(root_path, empty=True)
 
-                inner_dir_name = f"{system_name}{chunk_idx}"
+                inner_dir_name = f"{system_name}{chunk_idx}{default_points_dir_suffix}"
                 # do not make a new directory on the last iteration
                 # need to subtract 1 because otherwise they will be equal
                 if total_geom_counter != len_geoms_to_write - 1:
