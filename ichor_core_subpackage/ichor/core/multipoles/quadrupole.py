@@ -340,7 +340,7 @@ def recover_molecular_quadrupole(
         in Cartesian coordinates, so set to True in case you are comparing against Gaussian.
     :param unpacked: Whether to unpack the Cartesian quadrupole so it does not have redundancies.
         Note the returned order is xx, xy, xz, yy, yz, zz
-    :param prefactor: Include the (3/2) prefactor to directly compare against GAUSSIAN
+    :param prefactor: Include the (2/3) prefactor to directly compare against GAUSSIAN
     :returns: A numpy array containing the molecular quadrupole moment.
 
     .. note:

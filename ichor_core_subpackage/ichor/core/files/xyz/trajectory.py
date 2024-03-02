@@ -492,7 +492,6 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
 
         return trajectory
 
-    @convert_to_path
     def change_atom_ordering(self, new_traj_name: Path, new_atom_ordering: List[int]):
         """Changes the atom ordering of the trajectory, given a list of how indices should be
         permuted and writes out a new trajectory file in the specified location.
