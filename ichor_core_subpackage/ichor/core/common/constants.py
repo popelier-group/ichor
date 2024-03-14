@@ -857,6 +857,7 @@ ha_to_kj_mol: float = (
 bohr2ang = 0.529177210903  # Converted from https://physics.nist.gov/cgi-bin/cuu/Value?bohrrada0
 ang2bohr = 1.0 / bohr2ang
 
+rt2: float = np.sqrt(2.0)
 rt3: float = np.sqrt(3.0)
 rt5: float = np.sqrt(5.0)
 rt6: float = np.sqrt(6.0)
@@ -865,6 +866,7 @@ rt15: float = np.sqrt(15.0)
 rt35: float = np.sqrt(35.0)
 rt70: float = np.sqrt(70.0)
 rt1_24: float = np.sqrt(1.0 / 24.0)
+rt1_2: float = np.sqrt(0.5)
 rt_1_5: float = np.sqrt(1.0 / 5.0)
 rt_1_10: float = np.sqrt(1.0 / 10.0)
 rt_1_35: float = np.sqrt(1.0 / 35.0)

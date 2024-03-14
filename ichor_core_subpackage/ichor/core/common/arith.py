@@ -19,3 +19,10 @@ def order_of_magnitude(n: Scalar) -> int:
     :return: order of magnitude of n
     """
     return math.floor(math.log(n, 10))
+
+
+def kronecker_delta(p1, p2):
+
+    if p1 == p2:
+        return 1
+    return 0

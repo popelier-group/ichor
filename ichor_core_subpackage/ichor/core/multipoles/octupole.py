@@ -2,6 +2,7 @@ from typing import Tuple
 
 import numpy as np
 from ichor.core.common import constants
+from ichor.core.common.arith import kronecker_delta
 
 
 # Discussion of traceless tensors https://ocw.mit.edu/courses/8-07-electromagnetism-ii-fall-2012/pages/lecture-notes/
@@ -135,6 +136,44 @@ def octupole_rotate_cartesian(o: np.ndarray, C: np.ndarray) -> np.ndarray:
     return np.einsum("ia,jb,kc,abc->ijk", C, C, C, o)
 
 
+def octupole_nontraceless_to_traceless(
+    octupole_tensor: np.ndarray, include_prefactor=True
+):
+    """Converts a non-traceless octupole to a traceless octupole.
+    GAUSSIAN and ORCA, as well as other computational chemistry software
+    usually only give the non-traceless octupole moments. These must
+    be converted to traceless ones in order to be compared to AIMAll
+    recovered multipole moments.
+
+    :param octupole_tensor: The packed (Cartesian) octupole tensor
+    :param include_prefactor: The prefactor (5/2)
+    :returns: The traceless packed (Cartesian) octupole tensor
+    """
+
+    sh = octupole_tensor.shape[0]
+
+    # make a temporary tensor which will contain the things we need to subtract off from each term
+    tensor_to_subtract = np.zeros_like(octupole_tensor)
+
+    # Equation 156 from  https://doi.org/10.1016/S1380-7323(02)80033-4
+    # Chapter Seven - Post Dirac-Hartree-Fock Methods - Properties by Trond Saue
+
+    for i in range(sh):
+        for j in range(sh):
+            for k in range(sh):
+                tensor_to_subtract[i, j, k] += (
+                    1
+                    / 5
+                    * (
+                        (np.einsum("ll", octupole_tensor[i])) * kronecker_delta(j, k)
+                        + (np.einsum("ll", octupole_tensor[j])) * kronecker_delta(i, k)
+                        + (np.einsum("ll", octupole_tensor[k])) * kronecker_delta(i, j)
+                    )
+                )
+
+    return octupole_tensor - tensor_to_subtract
+
+
 def q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates):
 
     x, y, z = atomic_coordinates
@@ -152,6 +191,23 @@ def q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates):
     )
 
 
+def q31c_prime(q31c, q00, q10, q11c, q11s, q20, q21c, q22s, atomic_coordinates):
+
+    x, y, z = atomic_coordinates
+    norm_sq = np.sum(atomic_coordinates**2)
+
+    return (
+        q31c
+        + (3 * constants.rt3_2 * x * q20)
+        - (constants.rt1_2 * y * q22s)
+        + 2 * constants.rt2 * z * q21c
+        + ((3 / 2) ** 1.5 * (3 * z**2 - norm_sq) * q11c)
+        + (2 * constants.rt2 * constants.rt3 * x * z * q10)
+        - (constants.rt3_2 * x * y * q11s)
+        + ((0.5 * x) * constants.rt3_2 * (5 * x * z**2 - norm_sq) * q00)
+    )
+
+
 def q32s_prime(q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates):
 
     x, y, z = atomic_coordinates
@@ -165,15 +221,30 @@ def q32s_prime(q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates)
 
 
 def atomic_contribution_to_molecular_octupole(
-    q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, q30, q32s, atomic_coordinates
+    q00,
+    q10,
+    q11c,
+    q11s,
+    q20,
+    q21c,
+    q21s,
+    q22c,
+    q22s,
+    q30,
+    q31c,
+    q32s,
+    atomic_coordinates,
 ):
 
     q30_pr = q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates)
+    q31c_pr = q31c_prime(
+        q31c, q00, q10, q11c, q11s, q20, q21c, q22s, atomic_coordinates
+    )
     q32s_pr = q32s_prime(
         q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates
     )
 
-    return np.array([q30_pr, q32s_pr])
+    return np.array([q30_pr, q31c_pr, q32s_pr])
 
 
 def recover_molecular_octupole(
@@ -197,7 +268,7 @@ def recover_molecular_octupole(
     # spherical representation
     # molecular_octupole = np.zeros(7)
 
-    tmp_arr = np.zeros(2)
+    tmp_arr = np.zeros(3)
 
     for atom in atoms:
 
@@ -216,10 +287,23 @@ def recover_molecular_octupole(
         q22c = global_multipoles["q22c"]
         q22s = global_multipoles["q22s"]
         q30 = global_multipoles["q30"]
+        q31c = global_multipoles["q31c"]
         q32s = global_multipoles["q32s"]
 
         tmp_arr += atomic_contribution_to_molecular_octupole(
-            q00, q10, q11c, q11s, q20, q21c, q21s, q22c, q22s, q30, q32s, atom_coords
+            q00,
+            q10,
+            q11c,
+            q11s,
+            q20,
+            q21c,
+            q21s,
+            q22c,
+            q22s,
+            q30,
+            q31c,
+            q32s,
+            atom_coords,
         )
 
     if convert_to_debye_angstrom_squared:
@@ -227,7 +311,7 @@ def recover_molecular_octupole(
 
     if convert_to_cartesian:
         tmp_arr = octupole_spherical_to_cartesian(
-            tmp_arr[0], 0.0, 0.0, 0.0, tmp_arr[1], 0.0, 0.0
+            tmp_arr[0], tmp_arr[1], 0.0, 0.0, tmp_arr[2], 0.0, 0.0
         )
 
         if unpack:
