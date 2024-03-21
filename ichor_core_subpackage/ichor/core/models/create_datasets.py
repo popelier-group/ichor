@@ -72,7 +72,7 @@ def write_csvs_intersection(
         df.to_csv(output_path, index=True, header=True)
 
 
-def write_multiple_incremeting_train_sets_and_one_test_set(
+def write_multiple_train_sets_and_one_test_set(
     ntrain_initial: int,
     ntrain_increment: int,
     nincrements: int,
@@ -196,6 +196,6 @@ def write_random_train_test_sets(
     """
 
     # just call the same function but do not increment training set size
-    write_multiple_incremeting_train_sets_and_one_test_set(
+    write_multiple_train_sets_and_one_test_set(
         ntrain, 0, 0, ntest, processed_csvs_dir, set_path
     )
