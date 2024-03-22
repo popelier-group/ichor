@@ -124,16 +124,16 @@ class DlPolyField(WriteFile):
 
     def __init__(
         self,
-        atoms: Atoms,
         system_name: str,
+        atoms: Atoms,
         path: Union[Path, str] = Path("FIELD"),
         nummols=1,
     ):
 
         super().__init__(path)
 
-        self.atoms = atoms
         self.system_name = system_name
+        self.atoms = atoms
         self.nummols = nummols
 
     # TODO: implement reading for dlpoly field file

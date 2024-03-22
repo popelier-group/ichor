@@ -311,9 +311,11 @@ submit_csvs_menu_items = [
         "Change number of cores, parallelized over number of atoms",
         SubmitCSVSFunctions.select_number_of_cores,
     ),
-    FunctionItem("Submit to compute", SubmitCSVSFunctions.select_submit_on_compute),
     FunctionItem(
-        "Make CSVS from database", SubmitCSVSFunctions.make_csvs_from_database
+        "Change submit to compute", SubmitCSVSFunctions.select_submit_on_compute
+    ),
+    FunctionItem(
+        "Make csvs from database", SubmitCSVSFunctions.make_csvs_from_database
     ),
 ]
 
