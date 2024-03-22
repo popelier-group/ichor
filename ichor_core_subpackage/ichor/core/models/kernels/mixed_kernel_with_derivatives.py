@@ -95,7 +95,6 @@ class MixedKernelWithDerivatives(Kernel):
         lengthscale = self.lengthscale
 
         batch_shape = x1.shape[:-2]
-        n_batch_dims = len(batch_shape)
         n1, d = x1.shape[-2:]
         n2 = x2.shape[-2]
 
@@ -225,7 +224,7 @@ class MixedKernelWithDerivatives(Kernel):
         K[..., n1:, :n2] = -outer2 * np.tile(K[..., :n1, :n2], (d, 1))
 
         # make mask arrays for dxjm_dxin part of matrix.
-        rbf_mask_dxjm_dxin = np.tile(rbf_mask_dx_i_n.repeat, (d, 1)) * np.tile(
+        rbf_mask_dxjm_dxin = np.tile(rbf_mask_dx_i_n, (d, 1)) * np.tile(
             rbf_mask_dx_j_m, (1, d)
         )
         periodic_mask_dxjm_dxin = np.tile(periodic_mask_dx_i_n, (d, 1)) * np.tile(
@@ -238,21 +237,18 @@ class MixedKernelWithDerivatives(Kernel):
         )
         +np.tile(periodic_mask_dx_i_n, (d, 1)) * np.tile(rbf_mask_dx_j_m, (1, d))
 
-        outer3 = outer1.repeat([*([1] * n_batch_dims), d, 1]) * -outer2.repeat(
-            [*([1] * (n_batch_dims + 1)), d]
-        )
+        outer3 = np.tile(outer1, (d, 1)) * np.tile(-outer2, (1, d))
 
         # # 4) Hessian block kronecker for rbf part
         kp_rbf = np.kron(
-            np.eye(d, d, dtype=x1.dtype).repeat(*batch_shape, 1, 1) / self.lengthscale,
-            np.ones(n1, n2, dtype=x1.dtype).repeat(*batch_shape, 1, 1),
+            np.tile(np.eye(d, dtype=x1.dtype), (1, 1)) / self.lengthscale,
+            np.tile(np.ones((n1, n2), dtype=x1.dtype), (1, 1)),
         )
 
         # # 4) Hessian block for periodic part
         kp_periodic = np.kron(
-            np.eye(d, d, dtype=x1.dtype).repeat(*batch_shape, 1, 1)
-            / self.period_length,
-            np.ones(n1, n2, dtype=x1.dtype).repeat(*batch_shape, 1, 1),
+            np.eye(d, dtype=x1.dtype).repeat(*batch_shape, 1, 1) / self.period_length,
+            np.ones((n1, n2), dtype=x1.dtype).repeat(*batch_shape, 1, 1),
         )
 
         periodic_kp_outer3 = diffs * (
@@ -263,34 +259,32 @@ class MixedKernelWithDerivatives(Kernel):
             / np.expand_dims(self.period_length, -2)
             * np.expand_dims(self.lengthscale, -2)
         ) * np.cos(periodic_kp_outer3)
-        periodic_kp_outer3 = np.transpose(periodic_kp_outer3, -1, -2).contiguous()
-        periodic_kp_outer3 = kp_periodic.to_dense() * periodic_kp_outer3.reshape(
-            *batch_shape, n1, n2 * d
-        ).repeat([*([1] * n_batch_dims), d, 1])
+        periodic_kp_outer3 = np.swapaxes(periodic_kp_outer3, -1, -2)
+        periodic_kp_outer3 = kp_periodic * np.tile(
+            periodic_kp_outer3.reshape(*batch_shape, n1, n2 * d), (d, 1)
+        )
 
         # from matplotlib import pyplot as plt
         # plt.matshow(mask_i_P_j_R.detach().numpy())
         # plt.show()
 
         mixed_part3 = outer3 * mask_i_P_j_R
-        mixed_part3.add_((kp_rbf.to_dense() + outer3) * rbf_mask_dxjm_dxin)
-        mixed_part3.add_((periodic_kp_outer3 + outer3) * periodic_mask_dxjm_dxin)
+        mixed_part3 += (kp_rbf + outer3) * rbf_mask_dxjm_dxin
+        mixed_part3 += (periodic_kp_outer3 + outer3) * periodic_mask_dxjm_dxin
 
-        K[..., n1:, n2:] = mixed_part3 * K[..., :n1, :n2].repeat(
-            [*([1] * n_batch_dims), d, d]
-        )
+        K[..., n1:, n2:] = mixed_part3 * np.tile(K[..., :n1, :n2], (d, d))
 
         # Symmetrize for stability
-        if n1 == n2 and np.eq(x1, x2).all():
-            K = 0.5 * (K.transpose(-1, -2) + K)
+        if n1 == n2 and np.equal(x1, x2).all():
+            K = 0.5 * (K.swapaxes(-1, -2) + K)
 
         # do not need to shuffle here like in gpytorch because the ordering in the model files
         # should not need reordering because the weights are split into alpha (energy weights)
         # and beta (gradient weights)
 
         # Apply a perfect shuffle permutation to match the MutiTask ordering
-        # pi1 = np.arange(n1 * (d + 1)).view(d + 1, n1).t().reshape((n1 * (d + 1)))
-        # pi2 = np.arange(n2 * (d + 1)).view(d + 1, n2).t().reshape((n2 * (d + 1)))
+        # pi1 = np.arange(n1 * (d + 1)).reshape(d + 1, n1).T.reshape((n1 * (d + 1)))
+        # pi2 = np.arange(n2 * (d + 1)).reshape(d + 1, n2).T.reshape((n2 * (d + 1)))
         # K = K[..., pi1, :][..., :, pi2]
 
         return K
