@@ -14,6 +14,10 @@ class MixedKernelWithDerivatives(Kernel):
 
     The data is assumed to be uscaled, i.e. the original data. The period length array is set for all
     the dimensions even though it is only used for the periodic dimensions to vectorize the operations.
+
+    .. note::
+        There is a slight noise (1e-8/1e-9) for the periodic dimensions when compared to the torch
+        implementation. Not sure where that comes from.
     """
 
     def __init__(
