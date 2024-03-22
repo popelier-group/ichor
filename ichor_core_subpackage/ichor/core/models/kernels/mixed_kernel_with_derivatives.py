@@ -232,10 +232,9 @@ class MixedKernelWithDerivatives(Kernel):
         )
 
         # make mask for elements where both rbf and periodic derivatives are needed
-        mask_i_P_j_R = np.tile(rbf_mask_dx_i_n, (d, 1)) * np.tile(
-            periodic_mask_dx_j_m, (1, d)
-        )
-        +np.tile(periodic_mask_dx_i_n, (d, 1)) * np.tile(rbf_mask_dx_j_m, (1, d))
+        mask_i_P_j_R = (
+            np.tile(rbf_mask_dx_i_n, (d, 1)) * np.tile(periodic_mask_dx_j_m, (1, d))
+        ) + (np.tile(periodic_mask_dx_i_n, (d, 1)) * np.tile(rbf_mask_dx_j_m, (1, d)))
 
         outer3 = np.tile(outer1, (d, 1)) * np.tile(-outer2, (1, d))
 
