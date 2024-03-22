@@ -155,7 +155,7 @@ class MixedKernelWithDerivatives(Kernel):
         # get n1 x n2 * d tensor
         outer1 = outer1.reshape(*batch_shape, n1, n2 * d)
         # multiply by mask so that periodic dimensions are 0
-        outer1 = outer1 * rbf_mask_dx_i_n
+        outer1 *= rbf_mask_dx_i_n
 
         outer_topright_periodic = diffs * (
             ((2 * math.pi) / np.expand_dims(self.period_length, -2))
@@ -225,10 +225,10 @@ class MixedKernelWithDerivatives(Kernel):
 
         # make mask arrays for dxjm_dxin part of matrix.
         rbf_mask_dxjm_dxin = np.tile(rbf_mask_dx_i_n, (d, 1)) * np.tile(
-            rbf_mask_dx_j_m, (1, d)
+            rbf_mask_dx_j_m, d
         )
         periodic_mask_dxjm_dxin = np.tile(periodic_mask_dx_i_n, (d, 1)) * np.tile(
-            periodic_mask_dx_j_m, (1, d)
+            periodic_mask_dx_j_m, d
         )
 
         # make mask for elements where both rbf and periodic derivatives are needed
@@ -241,23 +241,25 @@ class MixedKernelWithDerivatives(Kernel):
 
         # # 4) Hessian block kronecker for rbf part
         kp_rbf = np.kron(
-            np.tile(np.eye(d, dtype=x1.dtype), (1, 1)) / self.lengthscale,
-            np.tile(np.ones((n1, n2), dtype=x1.dtype), (1, 1)),
+            np.eye(d, dtype=x1.dtype) / self.lengthscale,
+            np.ones((n1, n2), dtype=x1.dtype),
         )
 
         # # 4) Hessian block for periodic part
         kp_periodic = np.kron(
-            np.eye(d, dtype=x1.dtype).repeat(*batch_shape, 1, 1) / self.period_length,
-            np.ones((n1, n2), dtype=x1.dtype).repeat(*batch_shape, 1, 1),
+            np.eye(d, dtype=x1.dtype) / self.period_length,
+            np.ones((n1, n2), dtype=x1.dtype),
         )
 
         periodic_kp_outer3 = diffs * (
-            (2 * math.pi) / np.expand_dims(self.period_length, -2)
+            (2.0 * math.pi) / np.expand_dims(self.period_length, -2)
         )
         periodic_kp_outer3 = (
             (4 * math.pi**2)
-            / np.expand_dims(self.period_length, -2)
-            * np.expand_dims(self.lengthscale, -2)
+            / (
+                np.expand_dims(self.period_length, -2)
+                * np.expand_dims(self.lengthscale, -2)
+            )
         ) * np.cos(periodic_kp_outer3)
         periodic_kp_outer3 = np.swapaxes(periodic_kp_outer3, -1, -2)
         periodic_kp_outer3 = kp_periodic * np.tile(
@@ -275,8 +277,8 @@ class MixedKernelWithDerivatives(Kernel):
         K[..., n1:, n2:] = mixed_part3 * np.tile(K[..., :n1, :n2], (d, d))
 
         # Symmetrize for stability
-        if n1 == n2 and np.equal(x1, x2).all():
-            K = 0.5 * (K.swapaxes(-1, -2) + K)
+        # if n1 == n2 and np.equal(x1, x2).all():
+        #     K = 0.5 * (K.swapaxes(-1, -2) + K)
 
         # do not need to shuffle here like in gpytorch because the ordering in the model files
         # should not need reordering because the weights are split into alpha (energy weights)
