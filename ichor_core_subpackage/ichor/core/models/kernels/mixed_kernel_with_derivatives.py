@@ -36,7 +36,7 @@ class MixedKernelWithDerivatives(Kernel):
         self._rbf_thetas = rbf_thetas
         self._periodic_thetas = periodic_thetas
         # needs to be 1 x ndim to be able to fit with torch implementation
-        self.period_length = (np.ones(ndims) * (2 * np.pi))[np.newaxis, ...]
+        self.period_length = (np.ones(ndims) * (2 * math.pi))[np.newaxis, ...]
 
         self.rbf_dimensions = rbf_dimensions
         self.periodic_dimensions = periodic_dimensions
@@ -258,7 +258,7 @@ class MixedKernelWithDerivatives(Kernel):
             (2.0 * math.pi) / np.expand_dims(self.period_length, -2)
         )
         periodic_kp_outer3 = (
-            (4 * math.pi**2)
+            (4.0 * math.pi**2)
             / (
                 np.expand_dims(self.period_length, -2)
                 * np.expand_dims(self.lengthscale, -2)
