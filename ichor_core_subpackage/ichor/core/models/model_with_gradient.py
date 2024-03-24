@@ -250,7 +250,7 @@ class ModelWithGradients(ReadFile):
         """Returns the covariance matrix and adds a jitter
         to the diagonal for numerical stability. This jitter is a very
         small number on the order of 1e-6 to 1e-10."""
-        return self.kernel.R(self.x) + (self.jitter * np.identity(self.ntrain))
+        return self.kernel.R(self.x)
 
     @property
     def invR(self) -> np.ndarray:
