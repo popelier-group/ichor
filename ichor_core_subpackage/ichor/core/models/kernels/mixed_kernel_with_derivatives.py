@@ -14,10 +14,17 @@ class MixedKernelWithDerivatives(Kernel):
 
     The data is assumed to be uscaled, i.e. the original data. The period length array is set for all
     the dimensions even though it is only used for the periodic dimensions to vectorize the operations.
+    The period length is set to be 2 * math.pi for all dimensions, as this is the optimal value for
+    the ALF phi features.
 
     .. note::
-        There is a slight noise (1e-8/1e-9) for the periodic dimensions when compared to the torch
-        implementation. Not sure where that comes from.
+        Need to use kernel_instance.double() in torch implementation to get the exact same results as this,
+        torch defaults to float32 for some reason.
+
+        Also, unlike the torch version, there is no need to permute the rows and columns of the
+        covariance matrix because the weights vector that is in the .model files with
+        gradient information is written to be in the order of all weights for energies (alpha)
+        followed by all weights for derivatives (beta) instead.
     """
 
     def __init__(
