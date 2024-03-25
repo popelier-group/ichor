@@ -36,8 +36,7 @@ class ModelWithGradients(ReadFile):
         self.program: str = FileContents
         self.program_version: str = FileContents
         self.notes: Dict[str, str] = FileContents
-        self.alpha_weights = FileContents
-        self.beta_weights = FileContents
+        self.weights = FileContents
 
         self.rbf_thetas = FileContents
         self.periodic_thetas = FileContents
@@ -174,9 +173,9 @@ class ModelWithGradients(ReadFile):
                     self.y = self.y or y
                     continue
 
-                if "[weights.alpha]" in line:
+                if "[weights]" in line:
                     line = next(f)
-                    weights = np.empty((self.ntrain, 1))
+                    weights = np.empty((self.ntrain * (self.nfeats + 1), 1))
                     i = 0
                     while line.strip() != "":
                         weights[i, 0] = float(line)
@@ -186,22 +185,7 @@ class ModelWithGradients(ReadFile):
                         except StopIteration:
                             break
 
-                    self.alpha_weights = weights
-                    continue
-
-                if "[weights.beta]" in line:
-                    line = next(f)
-                    weights = np.empty((self.ntrain * self.nfeats, 1))
-                    i = 0
-                    while line.strip() != "":
-                        weights[i, 0] = float(line)
-                        i += 1
-                        try:
-                            line = next(f)
-                        except StopIteration:
-                            break
-
-                    self.beta_weights = weights
+                    self.weights = weights
                     continue
 
         self.kernel = MixedKernelWithDerivatives(
@@ -270,9 +254,7 @@ class ModelWithGradients(ReadFile):
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """Returns an array containing the test point predictions."""
 
-        return self.mean + self.r(x_test).T @ np.concatenate(
-            (self.alpha_weights, self.beta_weights), axis=0
-        )
+        return self.mean + self.r(x_test).T @ self.weights
 
     def variance(self, x_test: np.ndarray) -> np.ndarray:
         """Return the variance for the test data points."""

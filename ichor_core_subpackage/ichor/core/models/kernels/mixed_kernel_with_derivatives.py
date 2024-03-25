@@ -287,17 +287,18 @@ class MixedKernelWithDerivatives(Kernel):
         K[..., n1:, n2:] = mixed_part3 * np.tile(K[..., :n1, :n2], (d, d))
 
         # Symmetrize for stability
-        # if n1 == n2 and np.equal(x1, x2).all():
-        #     K = 0.5 * (K.swapaxes(-1, -2) + K)
+        if n1 == n2 and np.equal(x1, x2).all():
+            K = 0.5 * (K.swapaxes(-1, -2) + K)
 
-        # do not need to shuffle here like in gpytorch because the ordering in the model files
-        # should not need reordering because the weights are split into alpha (energy weights)
-        # and beta (gradient weights)
-
-        # Apply a perfect shuffle permutation to match the MutiTask ordering
-        # pi1 = np.arange(n1 * (d + 1)).reshape(d + 1, n1).T.reshape((n1 * (d + 1)))
-        # pi2 = np.arange(n2 * (d + 1)).reshape(d + 1, n2).T.reshape((n2 * (d + 1)))
-        # K = K[..., pi1, :][..., :, pi2]
+        # Apply a perfect shuffle permutation to match the weights ordering
+        # this orderes as cov(y1, y1) cov(y1, w11) cov(y1, w12) cov(y1, w13) ... cov(y1, wij)
+        # where i is the training index and j is the deriv dimension for each row
+        # without this permutation the ordering is
+        # cov(y1, y1) cov(y1, y2) ... cov(y1, yn) cov(y1, w11) cov(y1, w21) ... cov(y1, wn1) ...
+        # cov(y1, w12) cov(y1, w22) cov(y1, w32) ... .... cov(y1, wND) where N is ntrain and D is dim
+        pi1 = np.arange(n1 * (d + 1)).reshape(d + 1, n1).T.reshape((n1 * (d + 1)))
+        pi2 = np.arange(n2 * (d + 1)).reshape(d + 1, n2).T.reshape((n2 * (d + 1)))
+        K = K[..., pi1, :][..., :, pi2]
 
         return K
 
