@@ -270,10 +270,6 @@ class ModelWithGradients(ReadFile):
     def predict(self, x_test: np.ndarray) -> np.ndarray:
         """Returns an array containing the test point predictions."""
 
-        print(self.mean.shape)
-        print(self.r(x_test).T.shape)
-        print(np.concatenate((self.alpha_weights, self.beta_weights), axis=0).shape)
-
         return self.mean + self.r(x_test).T @ np.concatenate(
             (self.alpha_weights, self.beta_weights), axis=0
         )
