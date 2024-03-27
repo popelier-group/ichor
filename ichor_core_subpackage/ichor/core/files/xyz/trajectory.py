@@ -32,6 +32,13 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
         ListOfAtoms.__init__(self, *args, **kwargs)
         super(ReadFile, self).__init__(path)
 
+        # needs to be here, because calling len for example will read the file again
+        # in cases where atoms are added to trajectory, then trajectory is written
+        # following calling len(trajectory) will result in the file being read
+        # and the trajectory containing twice as many geometries
+        if not self.path.exists():
+            self.state = FileState.Read
+
     def _read_file(self):
 
         with open(self.path, "r") as f:
