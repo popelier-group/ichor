@@ -191,20 +191,20 @@ def q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates):
     )
 
 
-def q31c_prime(q31c, q00, q10, q11c, q11s, q20, q21c, q22s, atomic_coordinates):
+def q31c_prime(q31c, q00, q10, q11c, q11s, q20, q21c, q22c, q22s, atomic_coordinates):
 
     x, y, z = atomic_coordinates
     norm_sq = np.sum(atomic_coordinates**2)
 
     return (
         q31c
-        + (3 * constants.rt3_2 * x * q20)
-        - (constants.rt1_2 * y * q22s)
-        + 2 * constants.rt2 * z * q21c
-        + ((3 / 2) ** 1.5 * (3 * z**2 - norm_sq) * q11c)
-        + (2 * constants.rt2 * constants.rt3 * x * z * q10)
+        + ((0.5 * x) * constants.rt3_2 * (5 * z**2 - norm_sq) * q00)
+        + (0.5 * constants.rt3_2 * ((5 * z**2) - (2 * x**2) - norm_sq) * q11c)
+        + (1.5 * constants.rt3_2 * x * z * q10)
         - (constants.rt3_2 * x * y * q11s)
-        + ((0.5 * x) * constants.rt3_2 * (5 * x * z**2 - norm_sq) * q00)
+        + (2 * constants.rt2 * z * q21c)
+        + ((x / constants.rt2) * ((6 * q20) - (constants.rt3 * q22c)))
+        - (constants.rt1_2 * y * q22s)
     )
 
 
@@ -238,7 +238,7 @@ def atomic_contribution_to_molecular_octupole(
 
     q30_pr = q30_prime(q30, q00, q10, q11c, q11s, q20, q21c, q21s, atomic_coordinates)
     q31c_pr = q31c_prime(
-        q31c, q00, q10, q11c, q11s, q20, q21c, q22s, atomic_coordinates
+        q31c, q00, q10, q11c, q11s, q20, q21c, q22c, q22s, atomic_coordinates
     )
     q32s_pr = q32s_prime(
         q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates
