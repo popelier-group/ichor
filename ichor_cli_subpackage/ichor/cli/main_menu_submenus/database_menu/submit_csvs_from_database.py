@@ -244,6 +244,12 @@ class SubmitCSVSFunctions:
         ncores = submit_csvs_menu_options.selected_number_of_cores
         submit_on_compute = submit_csvs_menu_options.selected_submit_on_compute
 
+        # make into a very large number
+        if float_integration_error == math.inf:
+            float_integration_error = 100000000.0
+        if float_difference_iqa_wfn == math.inf:
+            float_difference_iqa_wfn = 10000000.0
+
         if not submit_on_compute:
             alf = get_alf_from_first_db_geometry(db_path, db_type)
             write_processed_data_for_atoms_parallel(
