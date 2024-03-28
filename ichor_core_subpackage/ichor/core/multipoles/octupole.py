@@ -199,12 +199,12 @@ def q31c_prime(q31c, q00, q10, q11c, q11s, q20, q21c, q22c, q22s, atomic_coordin
     return (
         q31c
         + ((0.5 * x) * constants.rt3_2 * (5 * z**2 - norm_sq) * q00)
-        + (0.5 * constants.rt3_2 * ((5 * z**2) - (2 * x**2) - norm_sq) * q11c)
-        + (1.5 * constants.rt3_2 * x * z * q10)
+        + (0.5 * constants.rt3_2 * ((-3 * x**2) + (4 * z**2) - (y**2)) * q11c)
+        + (2 * np.sqrt(2) * np.sqrt(3) * x * z * q10)
         - (constants.rt3_2 * x * y * q11s)
         + (2 * constants.rt2 * z * q21c)
-        + ((x / constants.rt2) * ((6 * q20) - (constants.rt3 * q22c)))
-        - (constants.rt1_2 * y * q22s)
+        + ((x / (constants.rt2 * constants.rt3)) * ((6 * q20) - (constants.rt3 * q22c)))
+        - (constants.rt2 * y * q22s)
     )
 
 
