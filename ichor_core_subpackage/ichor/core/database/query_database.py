@@ -349,7 +349,7 @@ def write_processed_one_atom_data_to_csv(
         one_point_df = full_df.loc[full_df["id"] == point_id]
 
         # need to check that iqa is populated for all atoms before summing
-        if one_point_df["iqa"].all():
+        if not (one_point_df["iqa"].isnull().all()):
             sum_iqa_energies = one_point_df["iqa"].sum()
             # the wfn energy will be the same for all atoms, since they come from same geometry
             # so just grab first value
@@ -500,7 +500,7 @@ def write_processed_one_atom_data_to_csv(
             atoms = Atoms()
             for row_id, row_data in one_point_df.iterrows():
                 # atoms accepts atom type (but database contains the atom index as well)
-                atom_type = get_characters(row_data.aton_name)
+                atom_type = get_characters(row_data.atom_name)
                 atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
 
             C = atoms[atom_name].C(alf)
