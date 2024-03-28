@@ -220,6 +220,20 @@ def q32s_prime(q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates)
     )
 
 
+def q33c_prime(q33c, q00, q11c, q11s, q22c, q22s, atomic_coordinates):
+
+    x, y, z = atomic_coordinates
+
+    return (
+        q33c
+        + (0.5 * np.sqrt(5 / 2) * x * (x**2 - (3 * y**2)) * q00)
+        + (1.5 * np.sqrt(5 / 2) * (x**2 - y**2) * q11c)
+        - (3 * np.sqrt(5 / 2) * x * y * q11s)
+        - (np.sqrt(5) * constants.rt3_2 * y * q22s)
+        + (np.sqrt(5) * constants.rt3_2 * x * q22c)
+    )
+
+
 def atomic_contribution_to_molecular_octupole(
     q00,
     q10,
@@ -233,6 +247,7 @@ def atomic_contribution_to_molecular_octupole(
     q30,
     q31c,
     q32s,
+    q33c,
     atomic_coordinates,
 ):
 
@@ -243,8 +258,9 @@ def atomic_contribution_to_molecular_octupole(
     q32s_pr = q32s_prime(
         q32s, q00, q10, q11c, q11s, q21c, q21s, q22s, atomic_coordinates
     )
+    q33c_pr = q33c_prime(q33c, q00, q11c, q11s, q22c, q22s, atomic_coordinates)
 
-    return np.array([q30_pr, q31c_pr, q32s_pr])
+    return np.array([q30_pr, q31c_pr, q32s_pr, q33c_pr])
 
 
 def recover_molecular_octupole(
@@ -268,7 +284,7 @@ def recover_molecular_octupole(
     # spherical representation
     # molecular_octupole = np.zeros(7)
 
-    tmp_arr = np.zeros(3)
+    tmp_arr = np.zeros(4)
 
     for atom in atoms:
 
@@ -289,6 +305,7 @@ def recover_molecular_octupole(
         q30 = global_multipoles["q30"]
         q31c = global_multipoles["q31c"]
         q32s = global_multipoles["q32s"]
+        q33c = global_multipoles["q33c"]
 
         tmp_arr += atomic_contribution_to_molecular_octupole(
             q00,
@@ -303,6 +320,7 @@ def recover_molecular_octupole(
             q30,
             q31c,
             q32s,
+            q33c,
             atom_coords,
         )
 
