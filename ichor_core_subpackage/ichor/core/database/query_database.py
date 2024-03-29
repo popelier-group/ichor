@@ -503,6 +503,33 @@ def write_processed_one_atom_data_to_csv(
                 atom_type = get_characters(row_data.atom_name)
                 atoms.append(Atom(atom_type, row_data.x, row_data.y, row_data.z))
 
+                natoms = len(atoms)
+                in_alf_atom_indices = get_atom_alf(atoms[atom_name], alf)
+                not_in_alf_indices = [
+                    i for i in range(natoms) if i not in in_alf_atom_indices
+                ]
+
+                x_axis_name = atoms[in_alf_atom_indices[1]].name
+
+                # if there are only 2 atoms, this will be None
+                check_for_xy_plane_atom = in_alf_atom_indices[2]
+
+                # if not none, then do xy-plane and potentially others
+                if check_for_xy_plane_atom is not None:
+
+                    xy_plane_atom_name = atoms[in_alf_atom_indices[2]].name
+                    val_angle_name = x_axis_name + "-" + xy_plane_atom_name
+
+                    atom_ordering_in_features = [
+                        x_axis_name,
+                        xy_plane_atom_name,
+                        val_angle_name,
+                    ] + [atoms[i].name for i in not_in_alf_indices for _ in range(3)]
+
+                # if it is none, then we only have x-axis feature
+                else:
+                    atom_ordering_in_features = [x_axis_name]
+
             C = atoms[atom_name].C(alf)
             central_atom_index = atoms[atom_name].i  # 0-indexed
             # calculate features for the atom of interest
@@ -525,9 +552,11 @@ def write_processed_one_atom_data_to_csv(
             # add features to dictionary
             total_dict[point_id_str].update(
                 {
-                    f"f{i}": one_atom_feature
-                    for i, one_atom_feature in zip(
-                        range(1, n_features + 1), one_atom_features
+                    f"f{i}_{a}": one_atom_feature
+                    for a, i, one_atom_feature in zip(
+                        atom_ordering_in_features,
+                        range(1, n_features + 1),
+                        one_atom_features,
                     )
                 }
             )
