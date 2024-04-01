@@ -555,7 +555,7 @@ class Trajectory(ReadFile, WriteFile, ListOfAtoms):
                 write_str += f"i = {i}\n"
                 for atom in atoms_instance:
                     write_str += (
-                        f"{atom.type} {atom.x:16.8f} {atom.y:16.8f} {atom.z:16.8f}\n"
+                        f"{atom.type} {atom.x:16.12f} {atom.y:16.12f} {atom.z:16.12f}\n"
                     )
 
         return write_str
