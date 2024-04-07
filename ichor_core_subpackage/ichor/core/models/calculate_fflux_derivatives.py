@@ -360,7 +360,13 @@ def fflux_derivs_rbf_only_one_dimensional(
 
 
 def fflux_derivs_da_df_matrix(jatm_idx, iatm_idx, atoms_instance, system_alf):
-    """Calculates the"""
+    """Calculates columns of the B matrix for one atom (so calculates 3 columns of the B matrix)
+
+    .. note::
+        assumes the atoms instance is in Bohr.
+    """
+
+    # atoms_instance = atoms_instance.to_bohr()
 
     natoms = len(atoms_instance)
 
