@@ -106,6 +106,55 @@ def form_b_matrix(
     return da_df
 
 
+def b_matrix_true_finite_differences(atoms, system_alf, central_atom_idx=0, h=1e-6):
+    """Computes the analytical and finite differences B matrix
+
+    :param atoms: An atoms instance containing the geometry for which
+        to calculate the B matrix
+    :param central_atom_idx: The atom index for which to calculate a B matrix
+        calculates the df_i / dc_j where f is the features of the central atom
+    :param h: The finite difference to add to the Cartesian coordinates
+        before calculating the features, defaults to 1e-6
+
+    returns: A tuple of the analytical and finite differences B matrix
+    """
+    from ichor.core.calculators import default_feature_calculator
+
+    atoms = atoms.to_bohr()
+
+    analytical = form_b_matrix(atoms, system_alf, central_atom_idx)
+    finite_differences = np.zeros_like(analytical)
+    h = 1e-6
+    for i in range(atoms.coordinates.shape[0]):
+        for j in range(3):
+
+            atoms1 = atoms.copy()
+            atoms2 = atoms.copy()
+
+            atoms1[i].coordinates[j] += h
+            atoms2[i].coordinates[j] -= h
+
+            # get features for atoms with added coord
+            features_plus_h = atoms1[central_atom_idx].features(
+                default_feature_calculator, system_alf
+            )
+            # get features for atoms with subtracted coord
+            features_minus_h = atoms2[central_atom_idx].features(
+                default_feature_calculator, system_alf
+            )
+
+            # this should be df_i / dc_j for all features (i.e. should be a column)
+            # of the B matrix
+            numerical_deriv = (features_plus_h - features_minus_h) / (2 * h)
+
+            # write to corresponding column
+            # the i*3 + j gives 0 to (3*natoms) - 1
+            # so writing a column at a time..
+            finite_differences[:, (i * 3) + j] = numerical_deriv
+
+    return analytical, finite_differences
+
+
 def form_g_matrix(b_matrix: np.ndarray):
     """Forms the G matrix as in Gaussian.
 
