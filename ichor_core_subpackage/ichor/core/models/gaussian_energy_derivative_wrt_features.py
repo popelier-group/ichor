@@ -125,7 +125,6 @@ def b_matrix_true_finite_differences(atoms, system_alf, central_atom_idx=0, h=1e
 
     analytical = form_b_matrix(atoms, system_alf, central_atom_idx)
     finite_differences = np.zeros_like(analytical)
-    h = 1e-6
     for i in range(natoms):
         for j in range(3):
 
