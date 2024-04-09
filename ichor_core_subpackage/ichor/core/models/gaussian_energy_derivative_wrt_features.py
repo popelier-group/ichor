@@ -121,11 +121,12 @@ def b_matrix_true_finite_differences(atoms, system_alf, central_atom_idx=0, h=1e
     from ichor.core.calculators import default_feature_calculator
 
     atoms = atoms.to_bohr()
+    natoms = len(atoms)
 
     analytical = form_b_matrix(atoms, system_alf, central_atom_idx)
     finite_differences = np.zeros_like(analytical)
     h = 1e-6
-    for i in range(atoms.coordinates.shape[0]):
+    for i in range(natoms):
         for j in range(3):
 
             atoms1 = atoms.copy()
