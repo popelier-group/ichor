@@ -168,6 +168,8 @@ def form_g_matrix(b_matrix: np.ndarray):
     g_matrix = np.matmul(b_matrix, b_matrix.T)
     # add some noise on the diagonal to ensure that it is positive semidefinite
     # also numerically helps
+    # also make sure that it is symmetrical by adding transpose and dividing by 2
+    g_matrix = (g_matrix + g_matrix.T) / 2.0
     g_matrix += np.diag(1e-07 * g_matrix.shape[0])
     return g_matrix
 
