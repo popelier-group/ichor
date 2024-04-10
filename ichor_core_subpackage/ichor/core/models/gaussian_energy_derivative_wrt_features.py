@@ -155,7 +155,7 @@ def b_matrix_true_finite_differences(atoms, system_alf, central_atom_idx=0, h=1e
     return analytical, finite_differences
 
 
-def form_g_matrix(b_matrix: np.ndarray):
+def form_g_matrix(b_matrix: np.ndarray, noise=1e-7):
     """Forms the G matrix as in Gaussian.
 
     .. note::
@@ -170,7 +170,7 @@ def form_g_matrix(b_matrix: np.ndarray):
     # also numerically helps
     # also make sure that it is symmetrical by adding transpose and dividing by 2
     g_matrix = (g_matrix + g_matrix.T) / 2.0
-    g_matrix += np.diag(1e-07 * np.ones(g_matrix.shape[0]))
+    g_matrix += np.diag(noise * np.ones(g_matrix.shape[0]))
     return g_matrix
 
 
