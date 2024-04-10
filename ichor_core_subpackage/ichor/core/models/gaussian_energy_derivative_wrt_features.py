@@ -166,6 +166,9 @@ def form_g_matrix(b_matrix: np.ndarray):
     """
 
     g_matrix = np.matmul(b_matrix, b_matrix.T)
+    # add some noise on the diagonal to ensure that it is positive semidefinite
+    # also numerically helps
+    g_matrix += np.diag(1e-07 * g_matrix.shape[0])
     return g_matrix
 
 
