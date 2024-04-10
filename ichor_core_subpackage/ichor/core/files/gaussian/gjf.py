@@ -274,6 +274,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
             "force",
             "geom=notest",
             "IOp(1/33=2)",  # verbosity level 2, prints out B matrix, G matrix and G inverse to output file
+            "geom=redundant",  # also needed to print out B and G matrix to output file
         ]
 
         self.title = self.title or str(self.path.stem)
