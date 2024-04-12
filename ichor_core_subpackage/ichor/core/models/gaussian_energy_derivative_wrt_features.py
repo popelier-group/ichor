@@ -155,43 +155,43 @@ def b_matrix_true_finite_differences(atoms, system_alf, central_atom_idx=0, h=1e
     return analytical, finite_differences
 
 
-def form_g_matrix(b_matrix: np.ndarray, noise=1e-7):
-    """Forms the G matrix as in Gaussian.
+# def form_g_matrix(b_matrix: np.ndarray, noise=1e-7):
+#     """Forms the G matrix as in Gaussian.
 
-    .. note::
-        The general inverse of G is NOT used here. Gaussian seems to use
-        the regular inverse (so this is why np.linalg.inv is used,
-        but can use Chloesky or something like this instead because
-        G is a symmetric square (BuB^T, where u is the identity matrix here))
-    """
+#     .. note::
+#         The general inverse of G is NOT used here. Gaussian seems to use
+#         the regular inverse (so this is why np.linalg.inv is used,
+#         but can use Chloesky or something like this instead because
+#         G is a symmetric square (BuB^T, where u is the identity matrix here))
+#     """
 
-    g_matrix = np.matmul(b_matrix, b_matrix.T)
-    # add some noise on the diagonal to ensure that it is positive semidefinite
-    # also numerically helps
-    # also make sure that it is symmetrical by adding transpose and dividing by 2
-    g_matrix = (g_matrix + g_matrix.T) / 2.0
-    g_matrix += np.diag(noise * np.ones(g_matrix.shape[0]))
-    return g_matrix
+#     g_matrix = np.matmul(b_matrix, b_matrix.T)
+#     # add some noise on the diagonal to ensure that it is positive semidefinite
+#     # also numerically helps
+#     # also make sure that it is symmetrical by adding transpose and dividing by 2
+#     g_matrix = (g_matrix + g_matrix.T) / 2.0
+#     g_matrix += np.diag(noise * np.ones(g_matrix.shape[0]))
+#     return g_matrix
 
 
-def form_g_inverse(g_matrix: np.ndarray):
-    """Inverts the G matrix, gives generalized inverse"""
+# def form_g_inverse(g_matrix: np.ndarray):
+#     """Inverts the G matrix, gives generalized inverse"""
 
-    # # w is eigenvalues, v is eigenvectors matrix
-    # w, v = np.linalg.eig(g_matrix)
-    inverse_g = np.linalg.inv(g_matrix)
+#     # # w is eigenvalues, v is eigenvectors matrix
+#     # w, v = np.linalg.eig(g_matrix)
+#     inverse_g = np.linalg.inv(g_matrix)
 
-    # using the generalized inverse seems to mess up results
-    # there is some sort of roundoff error
-    # happening as decomposition of G = V L V^T where L has eigenvalues on diagonal
-    # but doing V L V^T does not give the exact numbers that BB^T=G gives
+#     # using the generalized inverse seems to mess up results
+#     # there is some sort of roundoff error
+#     # happening as decomposition of G = V L V^T where L has eigenvalues on diagonal
+#     # but doing V L V^T does not give the exact numbers that BB^T=G gives
 
-    # Gaussian does not seem to do a generalized inverse
-    # inverse_eigenvalues = w**-1
-    # inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
-    # generalized_g_inverse = np.matmul(v, np.matmul(inverse_eigenvalues_diagonal_matrix, v.T))
+#     # Gaussian does not seem to do a generalized inverse
+#     # inverse_eigenvalues = w**-1
+#     # inverse_eigenvalues_diagonal_matrix = inverse_eigenvalues * np.eye(len(w))
+#     # generalized_g_inverse = np.matmul(v, np.matmul(inverse_eigenvalues_diagonal_matrix, v.T))
 
-    return inverse_g
+#     return inverse_g
 
 
 def convert_to_feature_forces(
@@ -245,15 +245,15 @@ def convert_to_feature_forces(
     ] = copied_forces_array[[original_row_indices, atom_indices_new_order], :]
     copied_forces_array = copied_forces_array.flatten()
 
-    g_matrix = form_g_matrix(b_matrix)
-    # inverse_g = form_g_inverse(g_matrix)
+    # can use pseudo inverse instead of finding G and G inverse
+    # if finding G and G inverse, use SVD
+    #
+    #     U, S, V = np.linalg.svd(g_matrix)
+    # g_inv = V.T @ np.diag(S**-1) @ U.T
 
-    cholesky_g = np.linalg.cholesky(g_matrix)
-    b = np.matmul(b_matrix, copied_forces_array)
-    z = np.linalg.solve(cholesky_g, b)
-    gradient_dE_df = np.linalg.solve(cholesky_g.T, z)
+    bt_pinv = np.linalg.pinv(b_matrix.T)
 
-    # gradient_dE_df = np.matmul(inverse_g, np.matmul(b_matrix, copied_forces_array))
+    gradient_dE_df = bt_pinv @ copied_forces_array
 
     return gradient_dE_df
 
