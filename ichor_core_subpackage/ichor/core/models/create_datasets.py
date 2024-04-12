@@ -157,6 +157,11 @@ def write_multiple_train_sets_and_one_test_set(
     # get initial training set size
     training_indices = random.sample(all_possible_training_set_indices, ntrain_initial)
 
+    # remove the initial indices from the possible training set indices
+    all_possible_training_set_indices = set(all_possible_training_set_indices) - set(
+        training_indices
+    )
+
     # loop over number of increments
     # first loop will not add any points
     # add one so that last increment is included
@@ -166,6 +171,7 @@ def write_multiple_train_sets_and_one_test_set(
         random_points_indices_to_add = random.sample(
             all_possible_training_set_indices, ntrain_increment
         )
+
         # don't add anything on first loop
         if not incr == 0:
             training_indices += random_points_indices_to_add
