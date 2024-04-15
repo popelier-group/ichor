@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import List, NamedTuple, Optional, Union
 
@@ -290,7 +291,7 @@ class GJF(ReadFile, WriteFile, HasAtoms):
         """
 
         if self.method.upper() not in GAUSSIAN_METHODS:
-            raise ValueError(f"{self.method} is not available in Gaussian.")
+            warnings.warn(f"{self.method} might not be available in Gaussian.")
         if self.spin_multiplicity < 1:
             raise ValueError(f"Spin multiplicity cannot be {self.spin_multiplicity}.")
         if len(self.atoms) == 0:
