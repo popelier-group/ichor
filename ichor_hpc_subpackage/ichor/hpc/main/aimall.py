@@ -48,7 +48,7 @@ def submit_points_directory_to_aimall(
 
     # aimall functionals also contains HF, which is the default
     if method not in AIMALL_FUNCTIONALS:
-        raise ValueError("The functional provided is not supported by AIMAll.")
+        warn("The functional provided might not be supported by AIMAll.")
 
     list_of_wfn_paths = add_method_and_get_wfn_paths(points_directory, method)
 
