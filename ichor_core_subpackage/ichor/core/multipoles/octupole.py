@@ -324,7 +324,7 @@ def Bar_func(alpha, beta, gamma, displacement_vector, quadrupole):
     return term1 - term2
 
 
-def octupole_general_expression(
+def octupole_one_term_general_expression(
     alpha: int,
     beta: int,
     gamma: int,
@@ -396,7 +396,7 @@ def displace_octupole_cartesian(
     for i in range(3):
         for j in range(3):
             for k in range(3):
-                res[i, j, k] = octupole_general_expression(
+                res[i, j, k] = octupole_one_term_general_expression(
                     i, j, k, displacement_vector, monopole, dipole, quadrupole, octupole
                 )
 
