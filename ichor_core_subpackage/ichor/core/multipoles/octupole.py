@@ -234,6 +234,175 @@ def q33c_prime(q33c, q00, q11c, q11s, q22c, q22s, atomic_coordinates):
     )
 
 
+def Nu(gamma):
+    if gamma == 0:
+        return 1, 2
+    elif gamma == 1:
+        return 0, 2
+    elif gamma == 2:
+        return 0, 1
+
+
+def Omega_prime(alpha, beta, gamma, displacement_vector: np.ndarray):
+
+    norm = np.linalg.norm(displacement_vector)
+
+    aprime_alpha, aprime_beta, aprime_gamma = (
+        displacement_vector[alpha],
+        displacement_vector[beta],
+        displacement_vector[gamma],
+    )
+
+    k1 = kronecker_delta(beta, gamma)
+    k2 = kronecker_delta(alpha, gamma)
+    k3 = kronecker_delta(alpha, beta)
+
+    return 0.5 * (
+        5 * aprime_alpha * aprime_beta * aprime_gamma.prod()
+        - norm**2 * (aprime_alpha * k1 + aprime_beta * k2 + aprime_gamma * k3)
+    )
+
+
+def Theta_prime(alpha, beta, displacement_vector):
+
+    k = kronecker_delta(alpha, beta)
+    norm = np.linalg.norm(displacement_vector)
+
+    return 0.5 * (
+        3 * displacement_vector[alpha] * displacement_vector[beta] - norm**2 * k
+    )
+
+
+def F_prime(alpha, beta, gamma, displacement_vector):
+
+    if alpha == beta == gamma:
+        return 3 * Theta_prime(alpha, alpha, displacement_vector)
+    elif alpha == beta != gamma:
+        term1 = 5 * Theta_prime(alpha, alpha, displacement_vector)
+        term2 = 2 * Theta_prime(gamma, gamma, displacement_vector)
+        return term1 - term2
+    else:
+        return 5 * Theta_prime(alpha, beta, displacement_vector)
+
+
+def F(alpha, beta, gamma, quadrupole):
+
+    if alpha == beta == gamma:
+        return 3 * quadrupole[alpha, alpha]
+    elif alpha == beta != gamma:
+        return 5 * quadrupole[alpha, alpha] - 2 * quadrupole[gamma, gamma]
+    else:
+        return 5 * quadrupole[alpha, beta]
+
+
+def Box_func(alpha, beta, gamma, displacement_vector, dipole):
+
+    term1 = F_prime(alpha, beta, gamma, displacement_vector) * dipole[gamma]
+
+    nu1, nu2 = Nu(gamma)
+    theta1 = Theta_prime(nu1, gamma, displacement_vector) * dipole[nu1]
+    theta2 = Theta_prime(nu2, gamma, displacement_vector) * dipole[nu2]
+    term2 = 2 * (theta1 * theta2) * kronecker_delta(alpha, beta)
+
+    return term1 - term2
+
+
+def Bar_func(alpha, beta, gamma, displacement_vector, quadrupole):
+
+    term1 = F(alpha, beta, gamma, quadrupole) * displacement_vector[gamma]
+
+    nu1, nu2 = Nu(gamma)
+    term2 = (
+        2
+        * (
+            displacement_vector[nu1] * quadrupole[nu1, gamma]
+            + displacement_vector[nu2] * quadrupole[nu2, gamma]
+        )
+        * kronecker_delta(alpha, beta)
+    )
+
+    return term1 - term2
+
+
+def octupole_general_expression(
+    alpha: int,
+    beta: int,
+    gamma: int,
+    displacement_vector: np.ndarray,
+    monopole: float,
+    dipole: np.ndarray,
+    quadrupole: np.ndarray,
+    octupole: np.ndarray,
+):
+    """
+    Calculates a single component of the displaced octupole tensor
+
+    :param alpha: 0 1 or 2 for x,y, or z direction
+    :param beta: 0 1 or 2 for x,y, or z direction
+    :param gamma: 0 1 or 2 for x,y, or z direction
+    :param displacement vector: displacement vector containing x,y,z displacement
+    :param monopole: Monopole moment, single float
+    :param dipole: Dipole moment vector, needs to be a vector of shape 3
+    :param quadrupole: Quadrupole moment matrix, needs to be 3x3 matrix
+    :param octupole: Octupole moment tensor, needs to be a 3x3x3 tensor
+    :returns: Returns a single element of the Cartesian octupole tensor,
+        Omega_{alpha, beta, gamma} that has been displaced by x y z coordinates
+    """
+
+    omega_pr = Omega_prime(alpha, beta, gamma, displacement_vector)
+
+    box1 = Box_func(alpha, beta, gamma, displacement_vector, dipole)
+    box2 = Box_func(alpha, gamma, beta, displacement_vector, dipole)
+    box3 = Box_func(beta, gamma, alpha, displacement_vector, dipole)
+
+    bar1 = Bar_func(alpha, beta, gamma, displacement_vector, quadrupole)
+    bar2 = Bar_func(alpha, gamma, beta, displacement_vector, quadrupole)
+    bar3 = Bar_func(beta, gamma, alpha, displacement_vector, quadrupole)
+
+    return (
+        octupole[alpha, beta, gamma]
+        + omega_pr * monopole
+        + (1 / 3) * (box1 + box2 + box3 + bar1 + bar2 + bar3)
+    )
+
+
+def displace_octupole_cartesian(
+    displacement_vector: np.array,
+    monopole: float,
+    dipole: np.ndarray,
+    quadrupole: np.ndarray,
+    octupole: np.ndarray,
+):
+    """Calculates a new octupole moment displaced by a displacement vector
+
+    :param displacement_vector: array containing x, y, z components of shape 3,
+    :param monopole: monopole moment (charge), float
+    :param dipole: dipole moment, array of shape 3,
+    :param quadrupole: quadrupole moment, matrix of shape 3,3
+    :param octupole: octupole moment, tensor of shape 3,3,3
+    :return: The displaced octupole moment as array of shape 3,3,3
+    :rtype: _type_
+    """
+
+    assert displacement_vector.shape == (3,)
+    # check that arrays are packed multipole moments
+    assert isinstance(monopole, float)
+    assert dipole.shape == (3,)
+    assert quadrupole.shape == (3, 3)
+    assert octupole.shape == (3, 3, 3)
+
+    res = np.zeros_like(octupole)
+
+    for i in range(3):
+        for j in range(3):
+            for k in range(3):
+                res[i, j, k] = octupole_general_expression(
+                    i, j, k, displacement_vector, monopole, dipole, quadrupole, octupole
+                )
+
+    return res
+
+
 def atomic_contribution_to_molecular_octupole(
     q00,
     q10,
