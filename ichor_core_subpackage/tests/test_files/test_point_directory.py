@@ -11,7 +11,7 @@ from ichor.core.files.aimall.int import CriticalPoint, CriticalPointType
 from ichor.core.files.gaussian.gaussian_output import (
     MolecularDipole,
     MolecularHexadecapole,
-    MolecularOctapole,
+    MolecularOctupole,
     MolecularQuadrupole,
     TracelessMolecularQuadrupole,
 )
@@ -52,7 +52,7 @@ def _test_point_directory(
     gau_molecular_dipole: MolecularDipole = None,
     gau_molecular_quadrupole: MolecularQuadrupole = None,
     gau_traceless_molecular_quadrupole: TracelessMolecularQuadrupole = None,
-    gau_molecular_octapole: MolecularOctapole = None,
+    gau_molecular_octupole: MolecularOctupole = None,
     gau_molecular_hexadecapole: MolecularHexadecapole = None,
     # .wfn Gaussian wavefunction file
     wfn_method: str = None,
@@ -144,7 +144,7 @@ def _test_point_directory(
         molecular_dipole=gau_molecular_dipole,
         molecular_quadrupole=gau_molecular_quadrupole,
         traceless_molecular_quadrupole=gau_traceless_molecular_quadrupole,
-        molecular_octapole=gau_molecular_octapole,
+        molecular_octupole=gau_molecular_octupole,
         molecular_hexadecapole=gau_molecular_hexadecapole,
     )
 
@@ -973,7 +973,7 @@ def test_water_monomer_point_directory1():
         gau_traceless_molecular_quadrupole=TracelessMolecularQuadrupole(
             xx=0.3265, yy=-0.9296, zz=0.6031, xy=0.0721, xz=-1.6772, yz=-0.0534
         ),
-        gau_molecular_octapole=MolecularOctapole(
+        gau_molecular_octupole=MolecularOctupole(
             xxx=0.5715,
             yyy=8.4307,
             zzz=0.1809,

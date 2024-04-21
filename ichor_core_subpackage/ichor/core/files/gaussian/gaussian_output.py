@@ -7,7 +7,7 @@ from ichor.core.atoms import Atom, Atoms
 from ichor.core.common.types.multipole_moments import (
     MolecularDipole,
     MolecularHexadecapole,
-    MolecularOctapole,
+    MolecularOctupole,
     MolecularQuadrupole,
     TracelessMolecularQuadrupole,
 )
@@ -40,7 +40,7 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
         self.molecular_dipole: MolecularDipole = FileContents
         self.molecular_quadrupole: MolecularDipole = FileContents
         self.traceless_molecular_quadrupole: TracelessMolecularQuadrupole = FileContents
-        self.molecular_octapole: MolecularOctapole = FileContents
+        self.molecular_octupole: MolecularOctupole = FileContents
         self.molecular_hexadecapole: MolecularHexadecapole = FileContents
         super(ReadFile, self).__init__(path)
 
@@ -53,7 +53,7 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
             "molecular_dipole": self.molecular_dipole,
             "molecular_quadrupole": self.molecular_quadrupole,
             "traceless_molecular_quadrupole": self.traceless_molecular_quadrupole,
-            "molecular_octapole": self.molecular_octapole,
+            "molecular_octupole": self.molecular_octupole,
             "molecular_hexadecapole": self.molecular_hexadecapole,
         }
 
@@ -158,16 +158,17 @@ class GaussianOutput(ReadFile, HasAtoms, HasData):
                     self.traceless_molecular_quadrupole = TracelessMolecularQuadrupole(
                         *values
                     )
+                # leave as Octapole here because that is how Gaussian writes it
                 elif "Octapole moment (field-independent basis, Debye-Ang**2)" in line:
-                    octapole_lines_split = (
+                    octupole_lines_split = (
                         (next(f) + next(f) + next(f)).replace("\n", "   ").split()
                     )
                     values = [
-                        float(octapole_lines_split[i])
-                        for i in range(len(octapole_lines_split))
+                        float(octupole_lines_split[i])
+                        for i in range(len(octupole_lines_split))
                         if i % 2 != 0
                     ]
-                    self.molecular_octapole = MolecularOctapole(*values)
+                    self.molecular_octupole = MolecularOctupole(*values)
                 elif (
                     "Hexadecapole moment (field-independent basis, Debye-Ang**3)"
                     in line

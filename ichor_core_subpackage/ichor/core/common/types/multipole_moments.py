@@ -5,8 +5,8 @@ MolecularQuadrupole = namedtuple("MolecularQuadrupole", "xx yy zz xy xz yz")
 TracelessMolecularQuadrupole = namedtuple(
     "TracelessMolecularQuadrupole", "xx yy zz xy xz yz"
 )
-MolecularOctapole = namedtuple(
-    "MolecularOctapole", "xxx yyy zzz xyy xxy xxz xzz yzz yyz xyz"
+MolecularOctupole = namedtuple(
+    "MolecularOctupole", "xxx yyy zzz xyy xxy xxz xzz yzz yyz xyz"
 )
 MolecularHexadecapole = namedtuple(
     "MolecularHexadecapole",

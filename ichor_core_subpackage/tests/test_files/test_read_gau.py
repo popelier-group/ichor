@@ -5,16 +5,16 @@ import numpy as np
 
 import pytest
 from ichor.core.atoms import Atom, Atoms
-from ichor.core.common.units import AtomicDistance
-
-from ichor.core.files import GaussianOutput
-from ichor.core.files.gaussian.gaussian_output import (
+from ichor.core.common.types.multipole_moments import (
     MolecularDipole,
     MolecularHexadecapole,
-    MolecularOctapole,
+    MolecularOctupole,
     MolecularQuadrupole,
     TracelessMolecularQuadrupole,
 )
+from ichor.core.common.units import AtomicDistance
+
+from ichor.core.files import GaussianOutput
 
 from tests.path import get_cwd
 from tests.test_atoms import _test_atoms_coords
@@ -53,7 +53,7 @@ def _test_read_gau(
     molecular_dipole: MolecularDipole = None,
     molecular_quadrupole: MolecularQuadrupole = None,
     traceless_molecular_quadrupole: TracelessMolecularQuadrupole = None,
-    molecular_octapole: MolecularOctapole = None,
+    molecular_octupole: MolecularOctupole = None,
     molecular_hexadecapole: MolecularHexadecapole = None,
 ):
     """Test function for .gau/.log Gaussian output file."""
@@ -69,7 +69,7 @@ def _test_read_gau(
     _assert_val_optional(
         gau_file.traceless_molecular_quadrupole, traceless_molecular_quadrupole
     )
-    _assert_val_optional(gau_file.molecular_octapole, molecular_octapole)
+    _assert_val_optional(gau_file.molecular_octupole, molecular_octupole)
     _assert_val_optional(gau_file.molecular_hexadecapole, molecular_hexadecapole)
 
 
@@ -100,7 +100,7 @@ def test_water_monomer_gau_file_without_forces():
         traceless_molecular_quadrupole=TracelessMolecularQuadrupole(
             xx=0.3265, yy=-0.9296, zz=0.6031, xy=0.0721, xz=-1.6772, yz=-0.0534
         ),
-        molecular_octapole=MolecularOctapole(
+        molecular_octupole=MolecularOctupole(
             xxx=0.5715,
             yyy=8.4307,
             zzz=0.1809,
@@ -163,7 +163,7 @@ def test_water_monomer_gau_file_with_forces():
         traceless_molecular_quadrupole=TracelessMolecularQuadrupole(
             xx=0.8207, yy=1.0075, zz=-1.8282, xy=-0.4487, xz=0.0, yz=0.0
         ),
-        molecular_octapole=MolecularOctapole(
+        molecular_octupole=MolecularOctupole(
             xxx=0.3222,
             yyy=0.2308,
             zzz=0.0,
@@ -258,7 +258,7 @@ def test_glycine_gau_file_with_forces():
         traceless_molecular_quadrupole=TracelessMolecularQuadrupole(
             xx=15.2969, yy=-8.4655, zz=-6.8314, xy=-7.9603, xz=2.6513, yz=4.9482
         ),
-        molecular_octapole=MolecularOctapole(
+        molecular_octupole=MolecularOctupole(
             xxx=35.0823,
             yyy=-335.9408,
             zzz=-5.9367,
