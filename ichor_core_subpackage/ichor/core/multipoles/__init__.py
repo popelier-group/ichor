@@ -16,7 +16,6 @@ from ichor.core.multipoles.hexadecapole import (
     unpack_cartesian_hexadecapole,
 )
 from ichor.core.multipoles.octupole import (
-    atomic_contribution_to_molecular_octupole,
     octupole_cartesian_to_spherical,
     octupole_rotate_cartesian,
     octupole_spherical_to_cartesian,
@@ -51,7 +50,6 @@ __all__ = [
     "octupole_cartesian_to_spherical",
     "octupole_rotate_cartesian",
     "octupole_spherical_to_cartesian",
-    "atomic_contribution_to_molecular_octupole",
     "pack_cartesian_octupole",
     "rotate_octupole",
     "unpack_cartesian_octupole",
